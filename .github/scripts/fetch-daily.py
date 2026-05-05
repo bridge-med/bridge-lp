@@ -709,7 +709,11 @@ def generate_daily_quiz(api_key: str, cache: dict) -> dict | None:
 """
     text = call_gemini(prompt, api_key, json_schema=QUIZ_SCHEMA, max_output_tokens=4000)
     if not text:
-        print('[gemini quiz] failed')
+        print('[gemini quiz] failed, retry after 30s')
+        time.sleep(30)
+        text = call_gemini(prompt, api_key, json_schema=QUIZ_SCHEMA, max_output_tokens=4000)
+    if not text:
+        print('[gemini quiz] still failed')
         return None
     try:
         data = json.loads(text)
