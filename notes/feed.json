@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-05T08:17:39+00:00",
+  "updated_at": "2026-05-05T19:28:04+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "GW明けの数字を、焦って詰めない",
+      "url": "https://note.com/prime_duck4944/n/n592ec4c05e99",
+      "guid": "https://note.com/prime_duck4944/n/n592ec4c05e99",
+      "pubDate": "2026-05-05T19:00:00+09:00",
+      "date": "2026-05-05",
+      "excerpt": "連休明けの稼働、どう読みますか?GW、お盆、年末年始。日本の医療機関は年に数回、まとまった休みが入ります。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272771820/rectangle_large_type_2_a9a5178acdd55f0916a975b2bb36f1b4.png?width=800"
+    },
     {
       "title": "100項目から12項目に絞った話 — 担当患者の申し送り設計",
       "url": "https://note.com/prime_duck4944/n/n84ac9aa14c42",
@@ -47,15 +56,6 @@
       "date": "2026-05-03",
       "excerpt": "数字を出した瞬間に、会議の空気が固まる。そういう現場を、何度も見てきました。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272587224/rectangle_large_type_2_a8e717b2482044befcf52fa4ab380d5c.png?width=800"
-    },
-    {
-      "title": "RehaBoard、公開",
-      "url": "https://note.com/prime_duck4944/n/n8cb6d8a2de9c",
-      "guid": "https://note.com/prime_duck4944/n/n8cb6d8a2de9c",
-      "pubDate": "2026-04-29T19:14:05+09:00",
-      "date": "2026-04-29",
-      "excerpt": "リハ部門の数字を、1 つのブラウザの中にまとめた道具を公開します。 RehaBoard / リハ運営ダッシュボード(Web版) ¥1,980(税込・買い切り) 触れます: https://bridge-med.gith…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/271357130/rectangle_large_type_2_3b0ff9ce9d48d3c896a0285102c5021c.png?width=800"
     }
   ]
 }
