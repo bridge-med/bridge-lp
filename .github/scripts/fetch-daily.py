@@ -478,10 +478,22 @@ def save_summary_cache(cache: dict) -> None:
     )
 
 
+# 一時的失敗(過負荷・レート制限)とみなして自動リトライする HTTP コード。
+# 4xx の他のもの(400/401/403/404 等)はクライアント側の問題なのでリトライ不要。
+GEMINI_RETRY_CODES = {429, 500, 502, 503, 504}
+
+# call_gemini の指数バックオフ。試行回数=4(初回+3リトライ)。worst case ≈ 5 分。
+GEMINI_BACKOFF_SECS = [30, 90, 180]
+
+
 def call_gemini(prompt: str, api_key: str, json_schema: dict | None = None,
                 max_output_tokens: int = 8000) -> str | None:
     """Gemini に prompt を投げて応答テキストを返す。失敗時 None。
-    json_schema を渡すと structured output mode で JSON を返す"""
+    json_schema を渡すと structured output mode で JSON を返す。
+
+    503/504/429 等の一時的失敗は GEMINI_BACKOFF_SECS に従って自動でリトライする。
+    400 系の永続エラー(無効リクエスト等)は即座に諦める。
+    """
     gen_cfg: dict = {
         'temperature': 0.2,
         'maxOutputTokens': max_output_tokens,
@@ -493,32 +505,50 @@ def call_gemini(prompt: str, api_key: str, json_schema: dict | None = None,
         'contents': [{'parts': [{'text': prompt}]}],
         'generationConfig': gen_cfg,
     }
-    req = urllib.request.Request(
-        f'{GEMINI_ENDPOINT}?key={api_key}',
-        data=json.dumps(body).encode('utf-8'),
-        headers={
-            'User-Agent': USER_AGENT,
-            'Content-Type': 'application/json',
-        },
-        method='POST',
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            data = json.loads(r.read().decode('utf-8'))
-        candidates = data.get('candidates', [])
-        if not candidates:
+
+    # 初回 + 各バックオフ後の追加試行
+    attempts = [0] + list(GEMINI_BACKOFF_SECS)
+    for i, delay in enumerate(attempts):
+        if delay:
+            print(f'[gemini] retry {i}/{len(attempts)-1} after {delay}s')
+            time.sleep(delay)
+        req = urllib.request.Request(
+            f'{GEMINI_ENDPOINT}?key={api_key}',
+            data=json.dumps(body).encode('utf-8'),
+            headers={
+                'User-Agent': USER_AGENT,
+                'Content-Type': 'application/json',
+            },
+            method='POST',
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                data = json.loads(r.read().decode('utf-8'))
+            candidates = data.get('candidates', [])
+            if not candidates:
+                return None
+            parts = candidates[0].get('content', {}).get('parts', [])
+            if not parts:
+                return None
+            return parts[0].get('text', '').strip()
+        except urllib.error.HTTPError as e:
+            msg = e.read().decode('utf-8', errors='replace') if hasattr(e, 'read') else str(e)
+            print(f'[gemini] HTTP {e.code}: {msg[:200]}')
+            # 永続的なエラーは即諦め(リトライしても無駄)
+            if e.code not in GEMINI_RETRY_CODES:
+                return None
+            # 一時的エラーは次試行へ
+            continue
+        except (urllib.error.URLError, TimeoutError) as e:
+            # ネットワーク系の一時的エラーはリトライ
+            print(f'[gemini] network error: {e}')
+            continue
+        except Exception as e:
+            # その他の予期しないエラーは諦める
+            print(f'[gemini] unexpected error: {e}')
             return None
-        parts = candidates[0].get('content', {}).get('parts', [])
-        if not parts:
-            return None
-        return parts[0].get('text', '').strip()
-    except urllib.error.HTTPError as e:
-        msg = e.read().decode('utf-8', errors='replace') if hasattr(e, 'read') else str(e)
-        print(f'[gemini] HTTP {e.code}: {msg}')
-        return None
-    except Exception as e:
-        print(f'[gemini] {e}')
-        return None
+    print('[gemini] all retries exhausted')
+    return None
 
 
 # バッチ要約: 1リクエストで N件まとめて処理
@@ -611,12 +641,8 @@ def mega_batch_summarize(pending: list[tuple], api_key: str, cache: dict) -> int
             ' 配列の要素は要約文字列のみ。配列長は必ず ' f'{len(pending)} とすること。'
         )
     )
+    # call_gemini が 503/504/429 を内部リトライするため、ここでは追加リトライ不要
     text = call_gemini(full, api_key, json_schema=BATCH_SCHEMA, max_output_tokens=20000)
-    if not text:
-        # 1回だけリトライ(60秒待機)
-        print('[gemini mega batch] failed, retry after 60s')
-        time.sleep(60)
-        text = call_gemini(full, api_key, json_schema=BATCH_SCHEMA, max_output_tokens=20000)
     if not text:
         return 0
     try:
@@ -707,13 +733,10 @@ def generate_daily_quiz(api_key: str, cache: dict) -> dict | None:
 
 返答は schema に従った JSON のみ。
 """
+    # call_gemini が 503/504/429 を内部リトライするため、ここでは追加リトライ不要
     text = call_gemini(prompt, api_key, json_schema=QUIZ_SCHEMA, max_output_tokens=4000)
     if not text:
-        print('[gemini quiz] failed, retry after 30s')
-        time.sleep(30)
-        text = call_gemini(prompt, api_key, json_schema=QUIZ_SCHEMA, max_output_tokens=4000)
-    if not text:
-        print('[gemini quiz] still failed')
+        print('[gemini quiz] failed after retries')
         return None
     try:
         data = json.loads(text)
