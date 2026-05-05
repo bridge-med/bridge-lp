@@ -635,6 +635,92 @@ def mega_batch_summarize(pending: list[tuple], api_key: str, cache: dict) -> int
         return 0
 
 
+# 診療情報管理士のテーマ(日替わりでローテート)
+HIM_THEMES = [
+    '医療概論', '医学・医療用語', '解剖・生理・病理', '主要疾患の医学一般',
+    '診療情報管理', '病院管理・組織', '医療統計・情報処理', 'ICD-10 国際疾病分類',
+    'DPC・包括医療', '医療法規', '医療の質管理',
+]
+
+
+QUIZ_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'him': {
+            'type': 'object',
+            'properties': {
+                'topic':        {'type': 'string'},
+                'question':     {'type': 'string'},
+                'choices':      {'type': 'array', 'items': {'type': 'string'}},
+                'answer_index': {'type': 'integer'},
+                'explanation':  {'type': 'string'},
+            },
+            'required': ['topic', 'question', 'choices', 'answer_index', 'explanation'],
+        },
+        'english': {
+            'type': 'object',
+            'properties': {
+                'phrase_en':   {'type': 'string'},
+                'phrase_jp':   {'type': 'string'},
+                'scenario':    {'type': 'string'},
+                'example_en':  {'type': 'string'},
+                'example_jp':  {'type': 'string'},
+                'note':        {'type': 'string'},
+            },
+            'required': ['phrase_en', 'phrase_jp', 'scenario', 'example_en', 'example_jp'],
+        },
+    },
+    'required': ['him', 'english'],
+}
+
+
+def generate_daily_quiz(api_key: str, cache: dict) -> dict | None:
+    """日付単位でキャッシュ。同日は同じ問題を再表示。"""
+    today_jst = datetime.now(JST).strftime('%Y-%m-%d')
+    cache_key = f'quiz:{today_jst}'
+    if cache_key in cache:
+        return cache[cache_key]
+    if not api_key:
+        return None
+    theme = HIM_THEMES[datetime.now(JST).timetuple().tm_yday % len(HIM_THEMES)]
+    prompt = f"""今日の朝の学習問題を作成してください。出力は JSON。
+
+## 1. 診療情報管理士の問題(4択)
+テーマ: {theme}
+
+要件:
+- 日本の診療情報管理士認定試験で問われそうな形式の4択問題を1問
+- 知識を問う問題で、実務で頻出のもの
+- 選択肢は4つ。そのうち1つだけが正解。明らかにダミーとわかる選択肢は避ける
+- explanation は 100〜180字。なぜ正解か根拠を述べる
+- answer_index は 0〜3 のいずれか(choices の何番目か)
+
+## 2. 医療経営×日常英会話の今日のフレーズ
+場面: 中小医療機関の経営会議・院長との対話・スタッフ面談・患者応対・事業会社での医療経営支援打ち合わせ など。
+
+要件:
+- ネイティブが普通に使う言い回し(教科書英語は避ける)
+- 日常会話レベル(フォーマル過ぎない、カジュアル過ぎない)
+- 1日1フレーズで覚えられる長さ
+- example は実際の会話の流れがわかる短いやりとり
+- note は使い所のニュアンスを 60〜120字 で(任意)
+
+返答は schema に従った JSON のみ。
+"""
+    text = call_gemini(prompt, api_key, json_schema=QUIZ_SCHEMA, max_output_tokens=4000)
+    if not text:
+        print('[gemini quiz] failed')
+        return None
+    try:
+        data = json.loads(text)
+        cache[cache_key] = data
+        print(f'[gemini quiz] generated for {today_jst}')
+        return data
+    except Exception as e:
+        print(f'[gemini quiz] parse failed: {e}')
+        return None
+
+
 def add_consult_ideas(items: list[dict], api_key: str, cache: dict) -> int:
     """papers_mgmt の各論文について「中小医療機関への応用案」を Gemini で生成。
     cache key には 'app:' プレフィックスをつけて summary と区別する。
@@ -793,8 +879,12 @@ def main(out_path: str, archive_dir: str | None = None) -> None:
         time.sleep(8)
         add_consult_ideas(papers_mgmt, api_key, cache)
     else:
-        # cache のみ復元
         add_consult_ideas(papers_mgmt, '', cache)
+
+    # 今日の問い(診療情報管理士 + 医療経営英語)
+    if api_key:
+        time.sleep(8)
+    daily_quiz = generate_daily_quiz(api_key, cache)
 
     if api_key:
         save_summary_cache(cache)
@@ -810,7 +900,9 @@ def main(out_path: str, archive_dir: str | None = None) -> None:
             'arxiv':        'arXiv API (cs.AI / cs.CL / cs.LG, latest)',
             'tech':         'ITmedia News RSS',
             'wiki':         'Wikipedia REST API (Today in History, en)',
+            'quiz':         'Gemini で日次生成: 診療情報管理士 1問 + 医療経営英語 1フレーズ',
         },
+        'quiz':         daily_quiz,
         'news':         news,
         'medical_news': medical_news,
         'papers_mgmt':  papers_mgmt,

@@ -85,6 +85,34 @@ main{padding:0 var(--pad-x) 80px;max-width:var(--max-text);margin:0 auto}
 .item-summary::before{content:'AI 要約';position:absolute;top:-8px;left:14px;background:var(--moegi-deep);color:#fff;font:700 9px/1 var(--sans-en);letter-spacing:0.16em;padding:4px 8px;border-radius:2px}
 .item-application{margin-top:18px;padding:14px 16px;background:rgba(200,85,61,0.06);border-left:3px solid var(--vermilion);border-radius:0 2px 2px 0;font:500 13px/1.95 var(--sans-jp);color:var(--ink-2);position:relative}
 .item-application::before{content:'現場応用案';position:absolute;top:-8px;left:14px;background:var(--vermilion-deep);color:#fff;font:700 9px/1 var(--sans-jp);letter-spacing:0.16em;padding:4px 8px;border-radius:2px}
+
+/* ===== 今日の問い ===== */
+.quiz-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:880px){.quiz-grid{grid-template-columns:1fr}}
+.quiz-card{padding:20px 22px;border:1px solid var(--line-2);background:var(--paper);border-radius:2px;display:flex;flex-direction:column;gap:10px}
+.quiz-card .qz-tag{font:700 9px/1 var(--sans-en);letter-spacing:0.22em;text-transform:uppercase;color:var(--indigo);padding-bottom:8px;border-bottom:1px solid var(--line)}
+.quiz-card .qz-tag .jp{font:700 10px/1 var(--sans-jp);color:var(--ink-2);letter-spacing:0.04em;text-transform:none;margin-left:8px}
+.quiz-topic{font:600 11px/1.4 var(--mono);color:var(--ink-3);letter-spacing:0.04em}
+.quiz-question{font:700 14px/1.85 var(--serif-jp);color:var(--ink);letter-spacing:-0.005em}
+.quiz-choices{list-style:none;padding:0;margin:6px 0;display:flex;flex-direction:column;gap:6px;counter-reset:qc}
+.quiz-choices li{counter-increment:qc;padding:10px 12px 10px 36px;background:var(--paper-2);border:1px solid var(--line);border-radius:2px;font:500 12px/1.6 var(--sans-jp);color:var(--ink-2);position:relative}
+.quiz-choices li::before{content:counter(qc);position:absolute;top:50%;left:12px;transform:translateY(-50%);width:18px;height:18px;border:1px solid var(--ink-3);border-radius:50%;font:700 10px/18px var(--sans-en);text-align:center;color:var(--ink-3)}
+.quiz-toggle{align-self:flex-start;margin-top:6px;font:700 10px/1 var(--sans-en);letter-spacing:0.16em;text-transform:uppercase;color:var(--indigo);background:transparent;border:1px solid var(--indigo);padding:8px 14px;cursor:pointer;border-radius:2px;transition:all .15s}
+.quiz-toggle:hover{background:var(--indigo);color:#fff}
+.quiz-answer{display:none;padding:14px 16px;background:rgba(138,154,91,0.10);border-left:3px solid var(--moegi-deep);border-radius:0 2px 2px 0;margin-top:6px}
+.quiz-answer.open{display:block}
+.quiz-answer .qz-correct{font:700 11px/1.4 var(--sans-jp);color:var(--moegi-deep);margin-bottom:8px}
+.quiz-answer .qz-explain{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
+.quiz-choices li.correct{background:rgba(138,154,91,0.15);border-color:var(--moegi-deep)}
+.quiz-choices li.correct::before{background:var(--moegi-deep);color:#fff;border-color:var(--moegi-deep)}
+
+.phrase-en{font:700 16px/1.5 var(--serif-en);color:var(--indigo-deep);font-style:italic}
+.phrase-jp{font:700 13px/1.5 var(--serif-jp);color:var(--ink)}
+.phrase-scenario{font:500 11px/1.5 var(--sans-jp);color:var(--ink-3);padding:5px 9px;background:var(--paper-2);border-radius:2px;align-self:flex-start}
+.phrase-example{padding:12px 14px;background:var(--paper-2);border-left:3px solid var(--indigo);border-radius:0 2px 2px 0;display:flex;flex-direction:column;gap:6px}
+.phrase-example .ex-en{font:500 12px/1.6 var(--sans-en);color:var(--ink-2)}
+.phrase-example .ex-jp{font:500 11px/1.6 var(--sans-jp);color:var(--ink-3)}
+.phrase-note{font:500 11px/1.7 var(--sans-jp);color:var(--ink-3);margin-top:4px}
 .item-body-orig{margin-top:10px;font:400 11px/1.7 var(--sans-jp);color:var(--ink-3)}
 .item-body-orig.en{font-family:var(--sans-en);font-size:11px;line-height:1.7}
 .item-body-orig::before{content:'原文: ';color:var(--ink-4);font-weight:600}
@@ -141,6 +169,18 @@ main{padding:0 var(--pad-x) 80px;max-width:var(--max-text);margin:0 auto}
 </header>
 
 <main>
+
+  <!-- 今日の問い -->
+  <section class="section" id="sec-quiz">
+    <div class="section-head">
+      <div class="section-h"><span class="num">00</span>今日の問い</div>
+      <span class="section-tag">Daily Drill</span>
+    </div>
+    <p class="section-desc">診療情報管理士の1問と、医療経営×日常英会話の今日のフレーズ。Gemini が日替わりで作成します。</p>
+    <div class="quiz-grid" id="quizGrid">
+      <div class="empty">読込中…</div>
+    </div>
+  </section>
 
   <!-- 政治経済 -->
   <section class="section" id="sec-news">
@@ -312,8 +352,59 @@ function updateUpdatedLabel(data){
   }
 }
 
+function renderQuiz(quiz){
+  const el = document.getElementById('quizGrid');
+  if (!quiz) { el.innerHTML = '<div class="empty">今日の問題は未生成です</div>'; return; }
+  const him = quiz.him;
+  const eng = quiz.english;
+  const himHtml = him ? `
+    <div class="quiz-card" data-quiz="him">
+      <div class="qz-tag">診療情報管理士<span class="jp">${esc(him.topic||'')}</span></div>
+      <div class="quiz-question">${esc(him.question)}</div>
+      <ol class="quiz-choices">
+        ${(him.choices||[]).map((c,i)=>`<li data-idx="${i}">${esc(c)}</li>`).join('')}
+      </ol>
+      <button class="quiz-toggle" type="button">答えを見る</button>
+      <div class="quiz-answer">
+        <div class="qz-correct">正解: ${(him.answer_index!=null && him.choices)?(him.answer_index+1)+'. '+esc(him.choices[him.answer_index]||''):''}</div>
+        <div class="qz-explain">${esc(him.explanation||'')}</div>
+      </div>
+    </div>` : '';
+  const engHtml = eng ? `
+    <div class="quiz-card">
+      <div class="qz-tag">Daily English<span class="jp">医療経営×日常英会話</span></div>
+      <div class="phrase-en" lang="en">${esc(eng.phrase_en)}</div>
+      <div class="phrase-jp">${esc(eng.phrase_jp)}</div>
+      <div class="phrase-scenario">場面: ${esc(eng.scenario||'')}</div>
+      <div class="phrase-example">
+        <span class="ex-en" lang="en">${esc(eng.example_en||'')}</span>
+        <span class="ex-jp">${esc(eng.example_jp||'')}</span>
+      </div>
+      ${eng.note ? `<div class="phrase-note">${esc(eng.note)}</div>` : ''}
+    </div>` : '';
+  el.innerHTML = himHtml + engHtml;
+  // 答えを見るトグル
+  el.querySelectorAll('.quiz-card[data-quiz="him"] .quiz-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.quiz-card');
+      const ans = card.querySelector('.quiz-answer');
+      const open = ans.classList.toggle('open');
+      btn.textContent = open ? '答えを閉じる' : '答えを見る';
+      // 正解の選択肢にマーカー
+      const idx = him && him.answer_index;
+      if (open && idx != null){
+        const correctLi = card.querySelector(`.quiz-choices li[data-idx="${idx}"]`);
+        if (correctLi) correctLi.classList.add('correct');
+      } else {
+        card.querySelectorAll('.quiz-choices li.correct').forEach(li => li.classList.remove('correct'));
+      }
+    });
+  });
+}
+
 function render(data){
   updateUpdatedLabel(data);
+  renderQuiz(data.quiz);
   fillList('newsList',    data.news,         'news');
   fillList('medicalList', data.medical_news, 'medical');
   fillList('pmgrList',    data.papers_mgmt,  'pmgr');
@@ -347,7 +438,7 @@ async function init(){
     render(await loadFeed(FEED_URL));
   } catch (e) {
     document.getElementById('updatedAt').textContent = '読込失敗';
-    ['newsList','medicalList','pmgrList','pmedList','arxivList','techList','wikiList'].forEach(id => {
+    ['quizGrid','newsList','medicalList','pmgrList','pmedList','arxivList','techList','wikiList'].forEach(id => {
       document.getElementById(id).innerHTML = renderEmpty('feed.json を読み込めませんでした');
     });
   }
