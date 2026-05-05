@@ -1013,18 +1013,30 @@ document.querySelectorAll('.products-tab').forEach(tab => {
 // notes/feed.json は GitHub Actions(.github/workflows/refresh-notes.yml)が
 // 6時間ごとに note.com の RSS から再生成して commit する。
 // 取得失敗時は静的なフォールバックカードがそのまま表示される。
+//
+// 中間 CDN(GitHub Pages 側 cache: max-age=600) と ブラウザ HTTP cache を
+// 確実に bypass するために、reload + timestamp パラメタを併用する。
 (async () => {
   const grid = document.getElementById('notesGrid');
   if (!grid) return;
   try {
-    const res = await fetch('notes/feed.json', { cache: 'no-cache' });
-    if (!res.ok) return;
+    const url = 'notes/feed.json?ts=' + Date.now();
+    const res = await fetch(url, { cache: 'reload' });
+    if (!res.ok) {
+      console.warn('[notes] feed.json HTTP', res.status);
+      return;
+    }
     const data = await res.json();
     const items = (data.items || []).slice(0, 3);
-    if (items.length === 0) return;
+    if (items.length === 0) {
+      console.warn('[notes] feed.json items empty');
+      return;
+    }
     const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    // 動的差し込みなので vis クラスを最初から付与しておく(IO の発火タイミングに依存して
+    // opacity:0 のまま残るのを防ぐ)。data-reveal も残しておくのは transition の継続のため。
     grid.innerHTML = items.map((it, i) => `
-      <a class="note-card" href="${esc(it.url)}" target="_blank" rel="noopener" data-reveal${i ? ` data-reveal-delay="${i}"` : ''}>
+      <a class="note-card vis" href="${esc(it.url)}" target="_blank" rel="noopener" data-reveal${i ? ` data-reveal-delay="${i}"` : ''}>
         <div class="note-card-meta">
           <span>${esc(it.date)}</span>
           <span class="note-tag">Note</span>
@@ -1034,8 +1046,6 @@ document.querySelectorAll('.products-tab').forEach(tab => {
         <span class="note-card-link">続きを読む →</span>
       </a>
     `).join('');
-    // 入れ替えた要素を reveal observer に再登録
-    grid.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
   } catch (e) {
     // フォールバック表示のまま
     console.warn('feed.json 読込失敗:', e);
