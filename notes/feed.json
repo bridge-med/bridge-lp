@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-05T19:28:04+00:00",
+  "updated_at": "2026-05-06T03:35:33+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "院長報告は、自動化していい部分と、ダメな部分がある",
+      "url": "https://note.com/prime_duck4944/n/n1eaa2696084f",
+      "guid": "https://note.com/prime_duck4944/n/n1eaa2696084f",
+      "pubDate": "2026-05-06T07:00:00+09:00",
+      "date": "2026-05-06",
+      "excerpt": "PMI のとき、月次院長報告を作る数日が、毎月地獄でした。月初、数字が出揃うのを待ちます。出揃ったら、Excel を開いて、前月比、前年比、年次累計を計算します。グラフを作ります。要因分析の文章を書きます。来月の見込み…",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272772806/rectangle_large_type_2_531464e98729d1b9a132d71935fc35d0.png?width=800"
+    },
     {
       "title": "GW明けの数字を、焦って詰めない",
       "url": "https://note.com/prime_duck4944/n/n592ec4c05e99",
@@ -47,15 +56,6 @@
       "date": "2026-05-03",
       "excerpt": "理学療法士として現場にいた頃、私が見ていた数字は、ほとんど「単位数」だけでした。朝出勤して、今日の予約数を確認する。リハ室に入って、患者さんを順番に受け持つ。1単位、2単位、3単位…と数えながら、リハの枠を埋めていく。…",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272588945/rectangle_large_type_2_ce98f5f414c6d86dd7c8e5bb17193b88.png?width=800"
-    },
-    {
-      "title": "責める数字と、整える数字",
-      "url": "https://note.com/prime_duck4944/n/nee9440f37e11",
-      "guid": "https://note.com/prime_duck4944/n/nee9440f37e11",
-      "pubDate": "2026-05-03T12:14:18+09:00",
-      "date": "2026-05-03",
-      "excerpt": "数字を出した瞬間に、会議の空気が固まる。そういう現場を、何度も見てきました。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272587224/rectangle_large_type_2_a8e717b2482044befcf52fa4ab380d5c.png?width=800"
     }
   ]
 }
