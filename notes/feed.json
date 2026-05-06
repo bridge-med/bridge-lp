@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-06T08:32:48+00:00",
+  "updated_at": "2026-05-06T14:25:01+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "PT が診療情報管理士を勉強している理由",
+      "url": "https://note.com/prime_duck4944/n/n84a80aaff904",
+      "guid": "https://note.com/prime_duck4944/n/n84a80aaff904",
+      "pubDate": "2026-05-06T19:00:00+09:00",
+      "date": "2026-05-06",
+      "excerpt": "診療情報管理士の勉強を続けています。知らない方のために少しだけ説明すると、診療情報管理士は、医療機関の診療記録(カルテ・レセプト・診療報酬請求情報)を専門的に管理する資格です。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272774035/rectangle_large_type_2_adbb320595af4592a73451bf0ffbcf5f.png?width=800"
+    },
     {
       "title": "院長報告は、自動化していい部分と、ダメな部分がある",
       "url": "https://note.com/prime_duck4944/n/n1eaa2696084f",
@@ -47,15 +56,6 @@
       "date": "2026-05-04",
       "excerpt": "「今日の数字、まだ?」院長が朝礼の前に、リハ室を覗き込みながらそう聞きにくる。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272590034/rectangle_large_type_2_58bdec7fdec79421bb63066ce3d189e6.png?width=800"
-    },
-    {
-      "title": "単位数しか見ていなかった私が、経営で最初に握った3つの数字",
-      "url": "https://note.com/prime_duck4944/n/ne9311dfdca28",
-      "guid": "https://note.com/prime_duck4944/n/ne9311dfdca28",
-      "pubDate": "2026-05-03T19:00:00+09:00",
-      "date": "2026-05-03",
-      "excerpt": "理学療法士として現場にいた頃、私が見ていた数字は、ほとんど「単位数」だけでした。朝出勤して、今日の予約数を確認する。リハ室に入って、患者さんを順番に受け持つ。1単位、2単位、3単位…と数えながら、リハの枠を埋めていく。…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272588945/rectangle_large_type_2_ce98f5f414c6d86dd7c8e5bb17193b88.png?width=800"
     }
   ]
 }
