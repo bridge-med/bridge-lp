@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-06T19:51:54+00:00",
+  "updated_at": "2026-05-07T03:35:17+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "19指標を作って、毎月見ているのは3つだけ",
+      "url": "https://note.com/prime_duck4944/n/ne341bfbb1f8b",
+      "guid": "https://note.com/prime_duck4944/n/ne341bfbb1f8b",
+      "pubDate": "2026-05-07T07:00:00+09:00",
+      "date": "2026-05-07",
+      "excerpt": "RehaBoard には、KPI 辞書という機能があります。リハビリ運営に使う代表的な指標を19個、定義と使い方を整理して載せたものです。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272775153/rectangle_large_type_2_e126fdfb56511f384147291290cf36e1.png?width=800"
+    },
     {
       "title": "PT が診療情報管理士を勉強している理由",
       "url": "https://note.com/prime_duck4944/n/n84a80aaff904",
@@ -47,15 +56,6 @@
       "date": "2026-05-04",
       "excerpt": "「事業計画は、いつから作りますか?」PMI の初期、よく聞かれる質問です。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272591174/rectangle_large_type_2_50092fc7b06071465c9444df2dc7ff83.png?width=800"
-    },
-    {
-      "title": "「今日の数字、まだ?」が消えた朝礼の話",
-      "url": "https://note.com/prime_duck4944/n/n91b2d42aa968",
-      "guid": "https://note.com/prime_duck4944/n/n91b2d42aa968",
-      "pubDate": "2026-05-04T07:00:00+09:00",
-      "date": "2026-05-04",
-      "excerpt": "「今日の数字、まだ?」院長が朝礼の前に、リハ室を覗き込みながらそう聞きにくる。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272590034/rectangle_large_type_2_58bdec7fdec79421bb63066ce3d189e6.png?width=800"
     }
   ]
 }
