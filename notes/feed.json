@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-07T08:40:44+00:00",
+  "updated_at": "2026-05-07T14:25:30+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "投資の勉強が、医療経営の見方を変えた話",
+      "url": "https://note.com/prime_duck4944/n/n9326faf3c900",
+      "guid": "https://note.com/prime_duck4944/n/n9326faf3c900",
+      "pubDate": "2026-05-07T19:00:00+09:00",
+      "date": "2026-05-07",
+      "excerpt": "最近、投資の勉強を続けています。知人からは「PT が投資?」と意外がられます。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272776978/rectangle_large_type_2_feffc1e498a4f68a1a6122d4cc56bdd4.png?width=800"
+    },
     {
       "title": "19指標を作って、毎月見ているのは3つだけ",
       "url": "https://note.com/prime_duck4944/n/ne341bfbb1f8b",
@@ -47,15 +56,6 @@
       "date": "2026-05-05",
       "excerpt": "「あの患者さん、最近どう?」朝礼で、誰かが必ず聞きます。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272770665/rectangle_large_type_2_3b6d7cf79d9c68654ccbc166ccfe993c.png?width=800"
-    },
-    {
-      "title": "PMI で最初に作るのは、事業計画じゃない",
-      "url": "https://note.com/prime_duck4944/n/n1fde348bc4b6",
-      "guid": "https://note.com/prime_duck4944/n/n1fde348bc4b6",
-      "pubDate": "2026-05-04T19:00:00+09:00",
-      "date": "2026-05-04",
-      "excerpt": "「事業計画は、いつから作りますか?」PMI の初期、よく聞かれる質問です。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272591174/rectangle_large_type_2_50092fc7b06071465c9444df2dc7ff83.png?width=800"
     }
   ]
 }
