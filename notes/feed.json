@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-08T07:47:51+00:00",
+  "updated_at": "2026-05-08T14:00:08+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "英語が話せない医療経営コンサルが、自分用ツールを作った話",
+      "url": "https://note.com/prime_duck4944/n/nf2d5477a8c2b",
+      "guid": "https://note.com/prime_duck4944/n/nf2d5477a8c2b",
+      "pubDate": "2026-05-08T19:00:00+09:00",
+      "date": "2026-05-08",
+      "excerpt": "英語、続けています。正直に書くと、私は英語が得意ではありません。読むのはそれなりにできますが、話す・書くは怪しいです。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272779300/rectangle_large_type_2_df8fcd7808cf9e191a2b2585ed3528a5.png?width=800"
+    },
     {
       "title": "セラピスト実績を、ランキングにしなかった理由",
       "url": "https://note.com/prime_duck4944/n/n3a23c2f78d62",
@@ -47,15 +56,6 @@
       "date": "2026-05-06",
       "excerpt": "PMI のとき、月次院長報告を作る数日が、毎月地獄でした。月初、数字が出揃うのを待ちます。出揃ったら、Excel を開いて、前月比、前年比、年次累計を計算します。グラフを作ります。要因分析の文章を書きます。来月の見込み…",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272772806/rectangle_large_type_2_531464e98729d1b9a132d71935fc35d0.png?width=800"
-    },
-    {
-      "title": "GW明けの数字を、焦って詰めない",
-      "url": "https://note.com/prime_duck4944/n/n592ec4c05e99",
-      "guid": "https://note.com/prime_duck4944/n/n592ec4c05e99",
-      "pubDate": "2026-05-05T19:00:00+09:00",
-      "date": "2026-05-05",
-      "excerpt": "連休明けの稼働、どう読みますか?GW、お盆、年末年始。日本の医療機関は年に数回、まとまった休みが入ります。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272771820/rectangle_large_type_2_a9a5178acdd55f0916a975b2bb36f1b4.png?width=800"
     }
   ]
 }
