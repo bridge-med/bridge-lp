@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-07T19:46:56+00:00",
+  "updated_at": "2026-05-08T03:30:33+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "セラピスト実績を、ランキングにしなかった理由",
+      "url": "https://note.com/prime_duck4944/n/n3a23c2f78d62",
+      "guid": "https://note.com/prime_duck4944/n/n3a23c2f78d62",
+      "pubDate": "2026-05-08T07:00:00+09:00",
+      "date": "2026-05-08",
+      "excerpt": "「セラピスト実績、ランキング出してないんですか?」RehaBoard を見せた時、たまに聞かれます。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272778390/rectangle_large_type_2_e3abaefb79cbe62cb531792ab005aa7c.png?width=800"
+    },
     {
       "title": "投資の勉強が、医療経営の見方を変えた話",
       "url": "https://note.com/prime_duck4944/n/n9326faf3c900",
@@ -47,15 +56,6 @@
       "date": "2026-05-05",
       "excerpt": "連休明けの稼働、どう読みますか?GW、お盆、年末年始。日本の医療機関は年に数回、まとまった休みが入ります。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272771820/rectangle_large_type_2_a9a5178acdd55f0916a975b2bb36f1b4.png?width=800"
-    },
-    {
-      "title": "100項目から12項目に絞った話 — 担当患者の申し送り設計",
-      "url": "https://note.com/prime_duck4944/n/n84ac9aa14c42",
-      "guid": "https://note.com/prime_duck4944/n/n84ac9aa14c42",
-      "pubDate": "2026-05-05T07:00:00+09:00",
-      "date": "2026-05-05",
-      "excerpt": "「あの患者さん、最近どう?」朝礼で、誰かが必ず聞きます。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272770665/rectangle_large_type_2_3b6d7cf79d9c68654ccbc166ccfe993c.png?width=800"
     }
   ]
 }
