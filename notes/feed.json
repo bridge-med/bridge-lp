@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-08T19:24:59+00:00",
+  "updated_at": "2026-05-09T03:30:01+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "「誰のせいか」を聞かない月次会議",
+      "url": "https://note.com/prime_duck4944/n/n4ac0d7ecc3d9",
+      "guid": "https://note.com/prime_duck4944/n/n4ac0d7ecc3d9",
+      "pubDate": "2026-05-09T07:00:00+09:00",
+      "date": "2026-05-09",
+      "excerpt": "毎月の月次レビュー、どんな進め方をしていますか?たぶん多くの医療機関で、月次レビューはこういう流れです。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272780279/rectangle_large_type_2_7f6c9b2f03eef94e985bfa731da32a1f.png?width=800"
+    },
     {
       "title": "英語が話せない医療経営コンサルが、自分用ツールを作った話",
       "url": "https://note.com/prime_duck4944/n/nf2d5477a8c2b",
@@ -47,15 +56,6 @@
       "date": "2026-05-06",
       "excerpt": "診療情報管理士の勉強を続けています。知らない方のために少しだけ説明すると、診療情報管理士は、医療機関の診療記録(カルテ・レセプト・診療報酬請求情報)を専門的に管理する資格です。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272774035/rectangle_large_type_2_adbb320595af4592a73451bf0ffbcf5f.png?width=800"
-    },
-    {
-      "title": "院長報告は、自動化していい部分と、ダメな部分がある",
-      "url": "https://note.com/prime_duck4944/n/n1eaa2696084f",
-      "guid": "https://note.com/prime_duck4944/n/n1eaa2696084f",
-      "pubDate": "2026-05-06T07:00:00+09:00",
-      "date": "2026-05-06",
-      "excerpt": "PMI のとき、月次院長報告を作る数日が、毎月地獄でした。月初、数字が出揃うのを待ちます。出揃ったら、Excel を開いて、前月比、前年比、年次累計を計算します。グラフを作ります。要因分析の文章を書きます。来月の見込み…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272772806/rectangle_large_type_2_531464e98729d1b9a132d71935fc35d0.png?width=800"
     }
   ]
 }
