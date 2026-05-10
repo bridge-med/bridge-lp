@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-09T19:09:12+00:00",
+  "updated_at": "2026-05-10T03:42:40+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "「自分が最初のユーザー」で作った、8つの道具",
+      "url": "https://note.com/prime_duck4944/n/n0b02d5fc9fb1",
+      "guid": "https://note.com/prime_duck4944/n/n0b02d5fc9fb1",
+      "pubDate": "2026-05-10T07:00:00+09:00",
+      "date": "2026-05-10",
+      "excerpt": "BRIDGE という個人会社をやっています。医療経営コンサルの仕事の傍ら、医療現場で使う小さなツールを、ひとりで作って公開し続けています。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/272786009/rectangle_large_type_2_57e8563fbdd7da9cbec14adca5b176f9.png?width=800"
+    },
     {
       "title": "「現場で使える」を判断基準にして、失敗してきた話",
       "url": "https://note.com/prime_duck4944/n/ncd22f7439721",
@@ -47,15 +56,6 @@
       "date": "2026-05-07",
       "excerpt": "最近、投資の勉強を続けています。知人からは「PT が投資?」と意外がられます。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272776978/rectangle_large_type_2_feffc1e498a4f68a1a6122d4cc56bdd4.png?width=800"
-    },
-    {
-      "title": "19指標を作って、毎月見ているのは3つだけ",
-      "url": "https://note.com/prime_duck4944/n/ne341bfbb1f8b",
-      "guid": "https://note.com/prime_duck4944/n/ne341bfbb1f8b",
-      "pubDate": "2026-05-07T07:00:00+09:00",
-      "date": "2026-05-07",
-      "excerpt": "RehaBoard には、KPI 辞書という機能があります。リハビリ運営に使う代表的な指標を19個、定義と使い方を整理して載せたものです。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272775153/rectangle_large_type_2_e126fdfb56511f384147291290cf36e1.png?width=800"
     }
   ]
 }
