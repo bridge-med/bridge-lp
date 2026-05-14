@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-13T20:01:12+00:00",
+  "updated_at": "2026-05-14T03:48:00+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "「1診と2診、どっちが儲かる?」をシミュレートする道具を作った",
+      "url": "https://note.com/prime_duck4944/n/n6920fc44d313",
+      "guid": "https://note.com/prime_duck4944/n/n6920fc44d313",
+      "pubDate": "2026-05-14T07:00:00+09:00",
+      "date": "2026-05-14",
+      "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第2回は ConsultSim。 「うちの外来、診察を1診から2診にしたら、どれくらい収益が上がりますか?」",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274706692/rectangle_large_type_2_c45e9672e2af10045ce3c71fe66dc140.png?width=800"
+    },
     {
       "title": "PT を採用する前に、整えておくべき5つの導線",
       "url": "https://note.com/prime_duck4944/n/n482b7d51faf8",
@@ -47,15 +56,6 @@
       "date": "2026-05-10",
       "excerpt": "BRIDGE という個人会社をやっています。医療経営コンサルの仕事の傍ら、医療現場で使う小さなツールを、ひとりで作って公開し続けています。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272786009/rectangle_large_type_2_57e8563fbdd7da9cbec14adca5b176f9.png?width=800"
-    },
-    {
-      "title": "「現場で使える」を判断基準にして、失敗してきた話",
-      "url": "https://note.com/prime_duck4944/n/ncd22f7439721",
-      "guid": "https://note.com/prime_duck4944/n/ncd22f7439721",
-      "pubDate": "2026-05-09T19:00:00+09:00",
-      "date": "2026-05-09",
-      "excerpt": "「現場で使える」が、私の判断基準です。医療経営コンサルでも、プロダクトを作るときでも、提案の最後の一押しは、「これ、現場で使えるか?」を自分に問います。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272781162/rectangle_large_type_2_5408b6609092b79b0d91439b54a4b3a3.png?width=800"
     }
   ]
 }
