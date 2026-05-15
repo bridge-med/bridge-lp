@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-14T19:52:00+00:00",
+  "updated_at": "2026-05-15T03:51:59+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "運動器リハ料 (III) のままでいいか、(II) に上げるか",
+      "url": "https://note.com/prime_duck4944/n/nd89ffc98f965",
+      "guid": "https://note.com/prime_duck4944/n/nd89ffc98f965",
+      "pubDate": "2026-05-15T07:00:00+09:00",
+      "date": "2026-05-15",
+      "excerpt": "整形クリニックの加算実務を、現場の運用感込みで整理するシリーズです。第2回は、運動器リハビリテーション料 I/II/III の選び方。 整形クリニックで運動器リハを開始するとき、最初に判断するのが「(I)/(II)/(…",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274707228/rectangle_large_type_2_552e975c83afb3799e4400d973f6de14.png?width=800"
+    },
     {
       "title": "「1診と2診、どっちが儲かる?」をシミュレートする道具を作った",
       "url": "https://note.com/prime_duck4944/n/n6920fc44d313",
@@ -47,15 +56,6 @@
       "date": "2026-05-10",
       "excerpt": "整形外科クリニックを経営されている方、こんなことを考えたことはありませんか? 「うちも、そろそろリハビリ部門を作ろうか」 「物療(電気・温熱・牽引)だけだと、運動器リハの加算が取れない」 「PT を採用すれば、収益が伸…",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/272786291/rectangle_large_type_2_ef8388f0593126c47fb54c2f09e0e8de.png?width=800"
-    },
-    {
-      "title": "「自分が最初のユーザー」で作った、8つの道具",
-      "url": "https://note.com/prime_duck4944/n/n0b02d5fc9fb1",
-      "guid": "https://note.com/prime_duck4944/n/n0b02d5fc9fb1",
-      "pubDate": "2026-05-10T07:00:00+09:00",
-      "date": "2026-05-10",
-      "excerpt": "BRIDGE という個人会社をやっています。医療経営コンサルの仕事の傍ら、医療現場で使う小さなツールを、ひとりで作って公開し続けています。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/272786009/rectangle_large_type_2_57e8563fbdd7da9cbec14adca5b176f9.png?width=800"
     }
   ]
 }
