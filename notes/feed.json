@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-17T19:15:01+00:00",
+  "updated_at": "2026-05-18T04:04:55+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "16シートの採用 Excel を、1画面に集約した話 — HireBoard",
+      "url": "https://note.com/prime_duck4944/n/ndc60e96d2da7",
+      "guid": "https://note.com/prime_duck4944/n/ndc60e96d2da7",
+      "pubDate": "2026-05-18T07:00:00+09:00",
+      "date": "2026-05-18",
+      "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第3回は HireBoard。 ある医療機関の採用 Excel を整理する仕事を受けたとき、開いてみたらシートが 16枚 ありました。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274709371/rectangle_large_type_2_851daac11ce4bcb11040fc28b8922228.png?width=800"
+    },
     {
       "title": "PT 採用初月、稼働を上げないほうがいい理由",
       "url": "https://note.com/prime_duck4944/n/n175dae200239",
@@ -47,15 +56,6 @@
       "date": "2026-05-13",
       "excerpt": "物療オンリーの整形クリニックが運動器リハを始めるためのロードマップを、段階別に整理するシリーズです。第2回は、PT を採用する前に整えておくべき5つの導線。 前回の #1 では、「物療オンリーから運動器リハに踏み出す前…",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274706040/rectangle_large_type_2_f8cf2a860a9aa9ecb8d612e9b86b7617.png?width=800"
-    },
-    {
-      "title": "PT 10年でぶつかる、3つの分岐点",
-      "url": "https://note.com/prime_duck4944/n/n54601d2077b1",
-      "guid": "https://note.com/prime_duck4944/n/n54601d2077b1",
-      "pubDate": "2026-05-12T07:00:00+09:00",
-      "date": "2026-05-12",
-      "excerpt": "PT のキャリアの分岐点や、医療業界での働き方を、自分の経験から整理するシリーズです。第1回は、PT 10年でぶつかる3つの分岐点。 理学療法士として10年やると、たいていの人がぶつかる分岐点があります。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274705402/rectangle_large_type_2_a5131a698ff136c55e60732d15e0669b.png?width=800"
     }
   ]
 }
