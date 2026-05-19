@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-18T19:49:17+00:00",
+  "updated_at": "2026-05-19T03:58:10+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "「リハ150日」の数え方を間違っていませんか — 起算日と算定上限",
+      "url": "https://note.com/prime_duck4944/n/ne4448f902d62",
+      "guid": "https://note.com/prime_duck4944/n/ne4448f902d62",
+      "pubDate": "2026-05-19T07:00:00+09:00",
+      "date": "2026-05-19",
+      "excerpt": "整形クリニックの加算実務を、現場の運用感込みで整理するシリーズです。第3回は、疾患別リハ料の算定上限と起算日の管理。 整形クリニックで運動器リハを始めると、しばらくして必ずぶつかるのが「150日問題」です。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274710844/rectangle_large_type_2_b107456382531f0417ac60184dc3b625.png?width=800"
+    },
     {
       "title": "16シートの採用 Excel を、1画面に集約した話 — HireBoard",
       "url": "https://note.com/prime_duck4944/n/ndc60e96d2da7",
@@ -47,15 +56,6 @@
       "date": "2026-05-14",
       "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第2回は ConsultSim。 「うちの外来、診察を1診から2診にしたら、どれくらい収益が上がりますか?」",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274706692/rectangle_large_type_2_c45e9672e2af10045ce3c71fe66dc140.png?width=800"
-    },
-    {
-      "title": "PT を採用する前に、整えておくべき5つの導線",
-      "url": "https://note.com/prime_duck4944/n/n482b7d51faf8",
-      "guid": "https://note.com/prime_duck4944/n/n482b7d51faf8",
-      "pubDate": "2026-05-13T07:00:00+09:00",
-      "date": "2026-05-13",
-      "excerpt": "物療オンリーの整形クリニックが運動器リハを始めるためのロードマップを、段階別に整理するシリーズです。第2回は、PT を採用する前に整えておくべき5つの導線。 前回の #1 では、「物療オンリーから運動器リハに踏み出す前…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274706040/rectangle_large_type_2_f8cf2a860a9aa9ecb8d612e9b86b7617.png?width=800"
     }
   ]
 }
