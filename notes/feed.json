@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-19T19:56:55+00:00",
+  "updated_at": "2026-05-20T03:58:59+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "PT が学び直すなら、何から始めるか",
+      "url": "https://note.com/prime_duck4944/n/n1175c5b913db",
+      "guid": "https://note.com/prime_duck4944/n/n1175c5b913db",
+      "pubDate": "2026-05-20T07:00:00+09:00",
+      "date": "2026-05-20",
+      "excerpt": "PT のキャリアの分岐点や、医療業界での働き方を、自分の経験から整理するシリーズです。第3回は、学び直しの選び方。 PT として5〜10年やると、ある時から「学び直し」を意識するようになります。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274711740/rectangle_large_type_2_c694fde00771431e8a9eecfff3830f46.png?width=800"
+    },
     {
       "title": "「リハ150日」の数え方を間違っていませんか — 起算日と算定上限",
       "url": "https://note.com/prime_duck4944/n/ne4448f902d62",
@@ -47,15 +56,6 @@
       "date": "2026-05-15",
       "excerpt": "整形クリニックの加算実務を、現場の運用感込みで整理するシリーズです。第2回は、運動器リハビリテーション料 I/II/III の選び方。 整形クリニックで運動器リハを開始するとき、最初に判断するのが「(I)/(II)/(…",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274707228/rectangle_large_type_2_552e975c83afb3799e4400d973f6de14.png?width=800"
-    },
-    {
-      "title": "「1診と2診、どっちが儲かる?」をシミュレートする道具を作った",
-      "url": "https://note.com/prime_duck4944/n/n6920fc44d313",
-      "guid": "https://note.com/prime_duck4944/n/n6920fc44d313",
-      "pubDate": "2026-05-14T07:00:00+09:00",
-      "date": "2026-05-14",
-      "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第2回は ConsultSim。 「うちの外来、診察を1診から2診にしたら、どれくらい収益が上がりますか?」",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274706692/rectangle_large_type_2_c45e9672e2af10045ce3c71fe66dc140.png?width=800"
     }
   ]
 }
