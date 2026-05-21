@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-20T20:22:59+00:00",
+  "updated_at": "2026-05-21T04:08:01+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "リハ実施計画書、毎月更新が崩れる原因と対策",
+      "url": "https://note.com/prime_duck4944/n/n270c9584fedd",
+      "guid": "https://note.com/prime_duck4944/n/n270c9584fedd",
+      "pubDate": "2026-05-21T07:00:00+09:00",
+      "date": "2026-05-21",
+      "excerpt": "物療オンリーの整形クリニックが運動器リハを始めるためのロードマップを、段階別に整理するシリーズです。第4回は、リハ実施計画書・評価・目標設定の運用。 リハを開始したクリニックでよく聞く悩みが、「リハ実施計画書、毎月の更…",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274712379/rectangle_large_type_2_f35914ff4c4d0cbef34bb1a6eb176957.png?width=800"
+    },
     {
       "title": "PT が学び直すなら、何から始めるか",
       "url": "https://note.com/prime_duck4944/n/n1175c5b913db",
@@ -47,15 +56,6 @@
       "date": "2026-05-16",
       "excerpt": "PT のキャリアの分岐点や、医療業界での働き方を、自分の経験から整理するシリーズです。第2回は、PT 時代にやっておいてよかった準備。 私が理学療法士から医療経営コンサルに移れたのは、突然の決断ではなく、PT 時代に積…",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274707842/rectangle_large_type_2_90b36775895569c4cd291111d0f3e7d3.png?width=800"
-    },
-    {
-      "title": "運動器リハ料 (III) のままでいいか、(II) に上げるか",
-      "url": "https://note.com/prime_duck4944/n/nd89ffc98f965",
-      "guid": "https://note.com/prime_duck4944/n/nd89ffc98f965",
-      "pubDate": "2026-05-15T07:00:00+09:00",
-      "date": "2026-05-15",
-      "excerpt": "整形クリニックの加算実務を、現場の運用感込みで整理するシリーズです。第2回は、運動器リハビリテーション料 I/II/III の選び方。 整形クリニックで運動器リハを開始するとき、最初に判断するのが「(I)/(II)/(…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274707228/rectangle_large_type_2_552e975c83afb3799e4400d973f6de14.png?width=800"
     }
   ]
 }
