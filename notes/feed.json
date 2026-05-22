@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-21T19:59:02+00:00",
+  "updated_at": "2026-05-22T04:02:41+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "精密な KPI ダッシュボードを作るのを、途中でやめた話 — MedBoard",
+      "url": "https://note.com/prime_duck4944/n/ne39b66792c88",
+      "guid": "https://note.com/prime_duck4944/n/ne39b66792c88",
+      "pubDate": "2026-05-22T07:00:00+09:00",
+      "date": "2026-05-22",
+      "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第4回は MedBoard。 外来クリニックのダッシュボードを作ろうとして、途中で大きく方針転換した話を書きます。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274713141/rectangle_large_type_2_1ab9ace96336568f2344c53df8be14aa.png?width=800"
+    },
     {
       "title": "リハ実施計画書、毎月更新が崩れる原因と対策",
       "url": "https://note.com/prime_duck4944/n/n270c9584fedd",
@@ -47,15 +56,6 @@
       "date": "2026-05-17",
       "excerpt": "物療オンリーの整形クリニックが運動器リハを始めるためのロードマップを、段階別に整理するシリーズです。第3回は、PT 採用初月の運用立ち上げ。 PT を採用して、最初の月。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274708607/rectangle_large_type_2_9eecc06f2fb30858e5eeb87207d8ebd6.png?width=800"
-    },
-    {
-      "title": "PT 時代にやっておいてよかった、5つの準備",
-      "url": "https://note.com/prime_duck4944/n/n5d7b109fbc0b",
-      "guid": "https://note.com/prime_duck4944/n/n5d7b109fbc0b",
-      "pubDate": "2026-05-16T07:00:00+09:00",
-      "date": "2026-05-16",
-      "excerpt": "PT のキャリアの分岐点や、医療業界での働き方を、自分の経験から整理するシリーズです。第2回は、PT 時代にやっておいてよかった準備。 私が理学療法士から医療経営コンサルに移れたのは、突然の決断ではなく、PT 時代に積…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274707842/rectangle_large_type_2_90b36775895569c4cd291111d0f3e7d3.png?width=800"
     }
   ]
 }
