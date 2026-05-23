@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-22T19:53:30+00:00",
+  "updated_at": "2026-05-23T03:40:03+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "「あそこ行ってください」を、加算にする方法 — 診療情報提供料",
+      "url": "https://note.com/prime_duck4944/n/n60a6d6f27707",
+      "guid": "https://note.com/prime_duck4944/n/n60a6d6f27707",
+      "pubDate": "2026-05-23T07:00:00+09:00",
+      "date": "2026-05-23",
+      "excerpt": "整形クリニックの加算実務を、現場の運用感込みで整理するシリーズです。第4回は、診療情報提供料(紹介料)。 整形クリニックで意外と取り逃しが多いのが、診療情報提供料(紹介料)です。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274714268/rectangle_large_type_2_888176b96a44fa2f3a321983f7ff281c.png?width=800"
+    },
     {
       "title": "精密な KPI ダッシュボードを作るのを、途中でやめた話 — MedBoard",
       "url": "https://note.com/prime_duck4944/n/ne39b66792c88",
@@ -47,15 +56,6 @@
       "date": "2026-05-18",
       "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第3回は HireBoard。 ある医療機関の採用 Excel を整理する仕事を受けたとき、開いてみたらシートが 16枚 ありました。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274709371/rectangle_large_type_2_851daac11ce4bcb11040fc28b8922228.png?width=800"
-    },
-    {
-      "title": "PT 採用初月、稼働を上げないほうがいい理由",
-      "url": "https://note.com/prime_duck4944/n/n175dae200239",
-      "guid": "https://note.com/prime_duck4944/n/n175dae200239",
-      "pubDate": "2026-05-17T07:00:00+09:00",
-      "date": "2026-05-17",
-      "excerpt": "物療オンリーの整形クリニックが運動器リハを始めるためのロードマップを、段階別に整理するシリーズです。第3回は、PT 採用初月の運用立ち上げ。 PT を採用して、最初の月。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274708607/rectangle_large_type_2_9eecc06f2fb30858e5eeb87207d8ebd6.png?width=800"
     }
   ]
 }
