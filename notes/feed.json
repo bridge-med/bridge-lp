@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-05-23T19:17:28+00:00",
+  "updated_at": "2026-05-24T04:01:55+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "PT が医科学修士を選んだ理由 — 理学療法学修士じゃなく",
+      "url": "https://note.com/prime_duck4944/n/nb8857af7dea2",
+      "guid": "https://note.com/prime_duck4944/n/nb8857af7dea2",
+      "pubDate": "2026-05-24T07:00:00+09:00",
+      "date": "2026-05-24",
+      "excerpt": "PT のキャリアの分岐点や、医療業界での働き方を、自分の経験から整理するシリーズです。第4回は、大学院の選び方。 PT 4〜5年目で、大学院進学を考える人が出てきます。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/274715493/rectangle_large_type_2_bc3d8135a6c05654ba55aee733c49a80.png?width=800"
+    },
     {
       "title": "「あそこ行ってください」を、加算にする方法 — 診療情報提供料",
       "url": "https://note.com/prime_duck4944/n/n60a6d6f27707",
@@ -47,15 +56,6 @@
       "date": "2026-05-19",
       "excerpt": "整形クリニックの加算実務を、現場の運用感込みで整理するシリーズです。第3回は、疾患別リハ料の算定上限と起算日の管理。 整形クリニックで運動器リハを始めると、しばらくして必ずぶつかるのが「150日問題」です。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274710844/rectangle_large_type_2_b107456382531f0417ac60184dc3b625.png?width=800"
-    },
-    {
-      "title": "16シートの採用 Excel を、1画面に集約した話 — HireBoard",
-      "url": "https://note.com/prime_duck4944/n/ndc60e96d2da7",
-      "guid": "https://note.com/prime_duck4944/n/ndc60e96d2da7",
-      "pubDate": "2026-05-18T07:00:00+09:00",
-      "date": "2026-05-18",
-      "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第3回は HireBoard。 ある医療機関の採用 Excel を整理する仕事を受けたとき、開いてみたらシートが 16枚 ありました。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274709371/rectangle_large_type_2_851daac11ce4bcb11040fc28b8922228.png?width=800"
     }
   ]
 }
