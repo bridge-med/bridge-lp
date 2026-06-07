@@ -1,0 +1,69 @@
+name: Refresh Worklog
+
+# 仕事日記ダッシュボード /worklog 用。
+# ラベル `worklog` を付けた GitHub Issue(=その日の雑メモ)を取得し、
+# Gemini で整形して worklog/feed.json を更新する。
+# - Issue が作成/編集/開閉/ラベル付けされたら起動(その都度反映)
+# - 取りこぼし防止に 1日2回のスケジュール起動も併用
+
+on:
+  issues:
+    types: [opened, edited, deleted, closed, reopened, labeled, unlabeled]
+  schedule:
+    - cron: '0 22 * * *'   # UTC 22:00 = JST  7:00
+    - cron: '0 13 * * *'   # UTC 13:00 = JST 22:00
+  workflow_dispatch: {}
+
+# 同時実行を抑止(連投時に commit が競合しないよう直列化)
+concurrency:
+  group: refresh-worklog
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: read
+  pages: write
+  id-token: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build worklog/feed.json from issues
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 .github/scripts/fetch-worklog.py worklog/feed.json
+
+      - name: Commit if changed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add worklog/feed.json worklog/summary_cache.json
+          if git diff --staged --quiet; then
+            echo 'no changes'
+          else
+            git commit -m "chore(worklog): refresh feed.json + summaries"
+            git pull --rebase --autostash
+            git push
+          fi
+
+      # GITHUB_TOKEN による push は deploy.yml をトリガーしないので、
+      # ここで Pages デプロイまで完結させる。
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - id: deployment
+        uses: actions/deploy-pages@v4
