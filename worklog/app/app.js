@@ -199,10 +199,19 @@
     ]);
 
     const quick = h('div', { class: 'quick' }, [
-      h('a', { class: 'btn primary', href: '#/daily/new' }, '＋ 日次ログ'),
+      h('a', { class: 'btn primary wide', href: '#/daily/new' }, '＋ 今日のログを書く'),
       h('a', { class: 'btn', href: '#/cases/new' }, '＋ 案件ログ'),
       h('a', { class: 'btn', href: '#/weekly/new' }, '＋ 週次レビュー'),
       h('a', { class: 'btn', href: '#/monthly/new' }, '＋ 月次レビュー'),
+    ]);
+
+    // 指標の用語ヘルプ
+    const help = h('details', { class: 'help' }, [
+      h('summary', null, '「実績候補」「実績化済み」とは？'),
+      h('div', { class: 'help-body' }, [
+        h('p', null, [h('b', null, '実績候補：'), '日次ログの中で、あとから案件ログ・数字成果・職務経歴書に使えそうな記録。']),
+        h('p', null, [h('b', null, '実績化済み：'), '日次ログから案件ログや数字成果に昇格した記録。']),
+      ]),
     ]);
 
     // 次に追うべき数字
@@ -219,9 +228,12 @@
     return page('CxO Roadmap Log', '日々の現場仕事を、CxO候補としての実績ログに変換する。', h('div', null, [
       quick,
       stats,
+      help,
       reviewRow,
       h('section', { class: 'block' }, [
-        h('div', { class: 'block-head' }, ['次に追うべき数字']),
+        h('div', { class: 'block-head' }, ['次に追うべき数字',
+          uncalced.length ? h('a', { class: 'link', href: '#/numbers' }, '未計算 ' + uncalced.length + '件 →') : null]),
+        h('p', { class: 'block-note' }, '数字成果の「未計算」と連動しています。金額換算できると実績の説得力が上がります。'),
         futureList,
       ]),
       h('section', { class: 'block' }, [
@@ -252,8 +264,12 @@
 
   function viewDailyList() {
     const all = DB.dailyLogs.all();
+    const emptyCta = h('div', { class: 'empty empty-cta' }, [
+      h('p', { class: 'empty-msg' }, 'まだ日次ログがありません。今日の仕事を雑に1分だけ残してみましょう。'),
+      h('a', { class: 'btn primary', href: '#/daily/new' }, '＋ 今日のログを書く'),
+    ]);
     return page('日次ログ', 'スマホで雑に入力 → あとから実績ログへ昇格。', h('div', null, [
-      all.length ? h('div', { class: 'list' }, all.map(dailyCard)) : empty('まだ日次ログがありません。右下から追加。'),
+      all.length ? h('div', { class: 'list' }, all.map(dailyCard)) : emptyCta,
     ]), addBtn('#/daily/new', '＋ 追加'));
   }
 
@@ -281,6 +297,7 @@
       location.hash = '#/daily';
     }
     return page(isNew ? '日次ログを追加' : '日次ログを編集', null, h('div', null, [
+      h('div', { class: 'note info' }, 'きれいに書かなくてOK。あとから案件ログや数字成果に整理するためのメモです。'),
       node, convert,
       !isNew ? deleteRow(() => { DB.dailyLogs.remove(data.id); location.hash = '#/daily'; }) : null,
       saveBar('保存', save, () => history.back()),
@@ -389,13 +406,16 @@
   }
 
   function baBlock(before, after, imp, money) {
+    const hasMoney = String(money || '').trim();
     return h('div', { class: 'ba' }, [
       h('div', { class: 'ba-cell b' }, [h('div', { class: 'ba-lbl' }, 'Before'), h('div', { class: 'ba-val' }, before || '—')]),
-      h('div', { class: 'ba-arrow2' }, '→'),
+      h('div', { class: 'ba-arrow2', 'aria-hidden': 'true' }, '→'),
       h('div', { class: 'ba-cell a' }, [h('div', { class: 'ba-lbl' }, 'After'), h('div', { class: 'ba-val' }, after || '—')]),
       imp ? h('div', { class: 'ba-cell up' }, [h('div', { class: 'ba-lbl' }, '改善幅'), h('div', { class: 'ba-val big' }, imp)]) : null,
       h('div', { class: 'ba-cell money' }, [h('div', { class: 'ba-lbl' }, '金額換算'),
-        String(money || '').trim() ? h('div', { class: 'ba-val money-on' }, money) : h('div', { class: 'ba-val uncalc' }, '未計算')]),
+        hasMoney
+          ? h('div', { class: 'ba-val money-on' }, money)
+          : h('div', { class: 'ba-uncalc' }, [h('span', { class: 'ba-val uncalc' }, '未計算'), h('span', { class: 'ba-next' }, '次に計算')])]),
     ]);
   }
 
@@ -678,6 +698,10 @@
     root.innerHTML = '';
     root.appendChild(renderNav(active));
     root.appendChild(h('main', { class: 'main' }, view));
+    // 最重要行動=「今日のログを書く」。一覧/ホームで右下に固定ボタン。
+    if (['', 'daily', 'cases'].indexOf(active) >= 0 && parts.length <= 1) {
+      root.appendChild(h('a', { class: 'fab', href: '#/daily/new', 'aria-label': '今日のログを書く', title: '今日のログを書く' }, '＋'));
+    }
     window.scrollTo(0, 0);
   }
 
