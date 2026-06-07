@@ -104,13 +104,13 @@ CXO.schema = (function () {
         },
         {
           title: '数字', open: false,
-          hint: '金額換算が未済なら空欄でOK。「未計算の数字」「今後追う数字」に書いておく。',
+          hint: '金額換算は任意。医療経営は点数換算が難しいので、基本は改善率(%)で十分です。',
           fields: [
             F('targetMetrics', '追う数字', 'text', { placeholder: '平均単位数, 稼働率, リハ売上 …' }),
             F('before', 'Before', 'text', { placeholder: '例: 平均19単位' }),
             F('after', 'After', 'text', { placeholder: '例: 平均23単位' }),
             F('improvement', '改善幅', 'text', { placeholder: '例: +4単位' }),
-            F('monetary', '金額換算', 'text', { placeholder: '未計算なら空欄' }),
+            F('monetary', '金額換算（任意）', 'text', { placeholder: '出せる場合のみ。難しければ空欄でOK' }),
             F('uncalculated', 'まだ未計算の数字', 'textarea', { placeholder: '金額にできていないが重要な数字', rows: 2 }),
             F('futureMetrics', '今後追うべき数字', 'textarea', { placeholder: '増収額, 費用対効果 …', rows: 2 }),
           ],
@@ -184,13 +184,13 @@ CXO.schema = (function () {
         },
         {
           title: '数値', open: true,
-          hint: '金額換算が未済なら空欄に。自動で「未計算」と表示されます。',
+          hint: '金額換算は任意。Before/Afterを数字で入れると改善率(%)を自動表示します。',
           fields: [
             F('before', 'Before数値', 'text', { placeholder: '例: 19' }),
             F('after', 'After数値', 'text', { placeholder: '例: 23' }),
             F('improvement', '改善幅', 'text', { placeholder: '例: +4' }),
             F('unit', '単位', 'text', { placeholder: '例: 単位 / %' }),
-            F('monetary', '金額換算', 'text', { placeholder: '未計算なら空欄' }),
+            F('monetary', '金額換算（任意）', 'text', { placeholder: '出せる場合のみ。難しければ空欄でOK' }),
             F('monetaryBasis', '金額換算の根拠', 'textarea', { rows: 2 }),
             F('futureMetric', '今後計算すべき数字', 'text', { placeholder: '例: 増収額, 費用対効果' }),
           ],

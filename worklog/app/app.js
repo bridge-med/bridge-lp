@@ -233,7 +233,7 @@
       h('section', { class: 'block' }, [
         h('div', { class: 'block-head' }, ['次に追うべき数字',
           uncalced.length ? h('a', { class: 'link', href: '#/numbers' }, '未計算 ' + uncalced.length + '件 →') : null]),
-        h('p', { class: 'block-note' }, '数字成果の「未計算」と連動しています。金額換算できると実績の説得力が上がります。'),
+        h('p', { class: 'block-note' }, '金額換算は任意です。医療経営では点数換算が難しいので、基本は改善率(%)でOK（Before/Afterから自動計算）。'),
         futureList,
       ]),
       h('section', { class: 'block' }, [
@@ -405,17 +405,39 @@
     ]));
   }
 
+  // 文字列から最初の数値を取り出す（"平均19単位" → 19）
+  function parseNum(s) {
+    const m = String(s || '').replace(/[, ]/g, '').match(/-?\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : null;
+  }
+  // Before/After から改善率(%)を自動計算（医療経営は金額換算が難しいので % を主役に）
+  function pctRate(before, after) {
+    const b = parseNum(before), a = parseNum(after);
+    if (b == null || a == null || b === 0) return null;
+    const r = Math.round((a - b) / Math.abs(b) * 100);
+    return (r > 0 ? '+' : '') + r + '%';
+  }
+
   function baBlock(before, after, imp, money) {
     const hasMoney = String(money || '').trim();
+    const rate = pctRate(before, after);
+    const lbl = t => h('div', { class: 'ba-lbl' }, t);
+    // 最終セル: 金額があれば金額、なければ改善率(%)、どちらも無ければ「金額換算は任意」
+    let lastCell;
+    if (hasMoney) {
+      lastCell = h('div', { class: 'ba-cell money' }, [lbl('金額換算'), h('div', { class: 'ba-val money-on' }, money)]);
+    } else if (rate) {
+      lastCell = h('div', { class: 'ba-cell rate' }, [lbl('改善率'), h('div', { class: 'ba-val big' }, rate)]);
+    } else {
+      lastCell = h('div', { class: 'ba-cell money' }, [lbl('金額換算'),
+        h('div', { class: 'ba-uncalc' }, [h('span', { class: 'ba-val uncalc' }, '任意'), h('span', { class: 'ba-next' }, '%でOK')])]);
+    }
     return h('div', { class: 'ba' }, [
-      h('div', { class: 'ba-cell b' }, [h('div', { class: 'ba-lbl' }, 'Before'), h('div', { class: 'ba-val' }, before || '—')]),
+      h('div', { class: 'ba-cell b' }, [lbl('Before'), h('div', { class: 'ba-val' }, before || '—')]),
       h('div', { class: 'ba-arrow2', 'aria-hidden': 'true' }, '→'),
-      h('div', { class: 'ba-cell a' }, [h('div', { class: 'ba-lbl' }, 'After'), h('div', { class: 'ba-val' }, after || '—')]),
-      imp ? h('div', { class: 'ba-cell up' }, [h('div', { class: 'ba-lbl' }, '改善幅'), h('div', { class: 'ba-val big' }, imp)]) : null,
-      h('div', { class: 'ba-cell money' }, [h('div', { class: 'ba-lbl' }, '金額換算'),
-        hasMoney
-          ? h('div', { class: 'ba-val money-on' }, money)
-          : h('div', { class: 'ba-uncalc' }, [h('span', { class: 'ba-val uncalc' }, '未計算'), h('span', { class: 'ba-next' }, '次に計算')])]),
+      h('div', { class: 'ba-cell a' }, [lbl('After'), h('div', { class: 'ba-val' }, after || '—')]),
+      imp ? h('div', { class: 'ba-cell up' }, [lbl('改善幅'), h('div', { class: 'ba-val big' }, imp)]) : null,
+      lastCell,
     ]);
   }
 
@@ -438,7 +460,7 @@
     const all = DB.numbers.all();
     const uncalced = all.filter(n => !String(n.monetary || '').trim());
     return page('数字成果', 'CxO候補として語れる Before/After を整理。', h('div', null, [
-      uncalced.length ? h('div', { class: 'note warn' }, '未計算の数字: ' + uncalced.length + ' 件 — 金額換算すると実績の説得力が上がります。') : null,
+      h('div', { class: 'note info' }, '金額換算は任意。Before/Afterを数字で入れれば改善率(%)を自動表示します。金額が出せるものだけ入れればOK。'),
       all.length ? h('div', { class: 'cards-num' }, all.map(numberCard)) : empty('まだ数字成果がありません。'),
     ]), addBtn('#/numbers/new', '＋ 追加'));
   }
@@ -708,6 +730,15 @@
   // ---------- 設定(バックアップ) ----------
   function viewSettings() {
     return page('設定', 'データはこの端末のブラウザ(localStorage)に保存されます。', h('div', null, [
+      h('details', { class: 'help' }, [
+        h('summary', null, 'プライバシー（必ず確認）'),
+        h('div', { class: 'help-body' }, [
+          h('p', null, '入力データはこの端末のブラウザ内（localStorage）だけに保存され、サーバや GitHub には送信されません。他人が同じURLを開いても、あなたのデータは見えません。'),
+          h('p', null, [h('b', null, '注意：'), 'localStorageは暗号化なしの平文です。共有PCや紛失に注意し、機種変前にJSONバックアップを。']),
+          h('p', null, [h('b', null, '固有名詞は避ける：'), '病院名・個人名は「A院」等に。具体的な金額・契約条件は入れず、成果は改善率(%)で表現するのが安全です。']),
+          h('p', null, [h('b', null, 'Issues経路は公開：'), '別ページ feed.html 用の GitHub Issues は公開リポジトリです。実名や機密は書かないでください。']),
+        ]),
+      ]),
       h('div', { class: 'block' }, [
         h('div', { class: 'block-head' }, 'バックアップ'),
         h('div', { class: 'quick' }, [
