@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>仕事日記 — BRIDGE</title>
+<meta name="description" content="その日の仕事を雑なメモで打つだけ。AI が業務日誌に整形し、日次・月次の成果として読み返せる、BRIDGE 内製のパーソナル仕事日記。">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --paper:#FAFAF7;--paper-2:#F4F1E8;--paper-3:#EDE8DD;
+  --ink:#0A0A0F;--ink-2:#2A2A35;--ink-3:#6E6E78;--ink-4:#B8B5A8;
+  --line:rgba(10,10,15,0.08);--line-2:rgba(10,10,15,0.16);
+  --vermilion:#C8553D;--vermilion-deep:#A8442F;
+  --indigo:#1B4965;--indigo-deep:#0F2D44;
+  --moegi:#8A9A5B;--moegi-deep:#6B7A4F;
+  --taisha:#8B5A2B;--taisha-deep:#6B4420;
+  /* 仕事日記 = 萌黄(成果・前進)主役モード。LP(朱)/朝の手帖(藍)と区別する */
+  --accent:var(--moegi-deep);--accent-soft:var(--moegi);
+  --serif-jp:'Noto Serif JP',serif;
+  --sans-jp:'Noto Sans JP',sans-serif;
+  --serif-en:'Fraunces',serif;
+  --sans-en:'Inter',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --max-narrow:820px;
+  --pad-x:clamp(20px,5vw,64px);
+}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:var(--sans-jp);background:var(--paper-2);color:var(--ink);line-height:1.75;font-feature-settings:"palt" 1}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0.025;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");mix-blend-mode:multiply}
+.nav,main,.page-head{position:relative;z-index:1}
+a{color:inherit;text-decoration:none}
+
+/* ===== nav ===== */
+.nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:14px var(--pad-x);background:rgba(244,241,232,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line-2)}
+.nav-logo{font:700 14px/1 var(--serif-en);letter-spacing:0.18em;color:var(--ink);display:inline-flex;gap:8px;align-items:baseline}
+.nav-logo .dot{color:var(--accent)}
+.nav-logo .small{font:600 10px/1 var(--sans-jp);color:var(--ink-3);letter-spacing:0.1em}
+.nav-controls{display:flex;align-items:center;gap:14px;font:500 11px/1 var(--mono);color:var(--ink-3)}
+.nav-controls .updated{font-size:10px}
+.nav-write{font:700 11px/1 var(--sans-jp);letter-spacing:0.04em;color:#fff;background:var(--accent);border:1px solid var(--accent);padding:8px 12px;border-radius:2px;transition:background .15s}
+.nav-write:hover{background:var(--moegi-deep)}
+.nav-back{font:600 11px/1 var(--sans-en);letter-spacing:0.1em;color:var(--ink-3);text-transform:uppercase;transition:color .2s}
+.nav-back:hover{color:var(--accent)}
+
+/* ===== head ===== */
+.page-head{padding:48px var(--pad-x) 24px;max-width:var(--max-narrow);margin:0 auto}
+.page-eyebrow{font:700 10px/1 var(--sans-en);letter-spacing:0.22em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:inline-flex;align-items:center;gap:10px}
+.page-eyebrow::before{content:'';width:24px;height:1px;background:var(--accent)}
+.page-h1{font:900 clamp(28px,4vw,42px)/1.25 var(--serif-jp);letter-spacing:-0.02em}
+.page-h1 .em{font-family:var(--serif-en);font-style:italic;color:var(--accent)}
+.page-sub{font:500 12px/1.85 var(--sans-jp);color:var(--ink-3);margin-top:14px}
+
+/* ===== how-to(入力導線) ===== */
+.howto{max-width:var(--max-narrow);margin:8px auto 0;padding:0 var(--pad-x)}
+.howto-inner{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch;padding:18px 20px;background:var(--paper);border:1px solid var(--line);border-radius:2px}
+.howto-step{flex:1 1 180px;display:flex;flex-direction:column;gap:4px}
+.howto-step .n{font:900 italic 13px/1 var(--serif-en);color:var(--accent)}
+.howto-step .t{font:700 12px/1.5 var(--sans-jp);color:var(--ink)}
+.howto-step .d{font:500 11px/1.6 var(--sans-jp);color:var(--ink-3)}
+.howto-cta{align-self:center;margin-left:auto}
+.btn-write{display:inline-block;font:700 12px/1 var(--sans-jp);letter-spacing:0.04em;color:#fff;background:var(--accent);border:1px solid var(--accent);padding:12px 18px;border-radius:2px;white-space:nowrap;transition:background .15s}
+.btn-write:hover{background:var(--moegi-deep)}
+
+/* ===== tabs ===== */
+.tabs{max-width:var(--max-narrow);margin:32px auto 0;padding:0 var(--pad-x);display:flex;gap:8px}
+.tab{font:700 12px/1 var(--sans-jp);letter-spacing:0.08em;color:var(--ink-3);background:transparent;border:1px solid var(--line-2);padding:10px 18px;border-radius:2px;cursor:pointer;transition:all .15s}
+.tab:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ===== main ===== */
+main{padding:0 var(--pad-x) 80px;max-width:var(--max-narrow);margin:0 auto}
+.view{margin-top:28px}
+.view[hidden]{display:none}
+
+/* ===== day block ===== */
+.day{margin-top:40px}
+.day-head{display:flex;align-items:baseline;gap:14px;padding-bottom:12px;margin-bottom:16px;border-bottom:2px solid var(--accent)}
+.day-date{font:900 26px/1 var(--serif-en);color:var(--ink);letter-spacing:-0.01em}
+.day-wd{font:700 13px/1 var(--sans-jp);color:var(--accent);background:var(--paper-3);padding:5px 8px;border-radius:2px}
+.day-count{margin-left:auto;font:600 10px/1 var(--mono);color:var(--ink-3);letter-spacing:0.04em}
+
+.day-summary{margin-bottom:18px;padding:16px 18px 14px;background:var(--paper-3);border-left:3px solid var(--accent);border-radius:0 2px 2px 0;font:500 13px/1.95 var(--sans-jp);color:var(--ink-2);position:relative}
+.day-summary::before{content:'AI 総括';position:absolute;top:-8px;left:14px;background:var(--accent);color:#fff;font:700 9px/1 var(--sans-en);letter-spacing:0.16em;padding:4px 8px;border-radius:2px}
+
+/* ===== entry card ===== */
+.entry{padding:16px 18px;border:1px solid var(--line);background:var(--paper);border-radius:2px;margin-top:10px;transition:border-color .15s}
+.entry:hover{border-color:var(--ink-3)}
+.entry-meta{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font:500 10px/1.4 var(--mono);color:var(--ink-3);letter-spacing:0.04em;margin-bottom:8px}
+.entry-meta .time{color:var(--ink-2);font-weight:600}
+.cat{font:700 9px/1.3 var(--sans-jp);letter-spacing:0.04em;color:#fff;background:var(--accent);padding:3px 8px;border-radius:2px}
+.tag{font:600 9px/1.3 var(--sans-jp);color:var(--ink-2);background:var(--paper-2);border:1px solid var(--line);padding:3px 7px;border-radius:2px}
+.entry-headline{font:700 16px/1.55 var(--serif-jp);color:var(--ink);letter-spacing:-0.005em;margin-bottom:8px}
+.entry-body{font:400 13px/1.9 var(--sans-jp);color:var(--ink-2)}
+.entry-outcomes{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.entry-outcomes li{position:relative;padding-left:22px;font:500 12px/1.7 var(--sans-jp);color:var(--ink-2)}
+.entry-outcomes li::before{content:'✓';position:absolute;left:0;top:0;color:var(--accent);font-weight:900}
+.entry-link{display:inline-block;margin-top:10px;font:600 10px/1 var(--sans-en);letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);transition:color .15s}
+.entry-link:hover{color:var(--accent)}
+.entry-link::after{content:'  ↗'}
+
+/* ===== month block ===== */
+.month{margin-top:36px;padding:22px 24px;border:1px solid var(--line-2);background:var(--paper);border-radius:2px}
+.month-head{display:flex;align-items:baseline;gap:14px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.month-label{font:900 22px/1.2 var(--serif-jp);letter-spacing:-0.01em}
+.month-stats{margin-left:auto;font:600 10px/1.4 var(--mono);color:var(--ink-3);letter-spacing:0.04em}
+.month-report{font:500 13px/2 var(--sans-jp);color:var(--ink-2);white-space:pre-wrap}
+
+/* ===== empty / loading ===== */
+.empty{padding:48px 0;text-align:center;font:500 13px/1.9 var(--sans-jp);color:var(--ink-3)}
+.empty .btn-write{margin-top:18px}
+
+/* ===== footer ===== */
+.foot{padding:32px var(--pad-x) 48px;border-top:1px solid var(--line);text-align:center;font:500 11px/1.6 var(--sans-jp);color:var(--ink-3);max-width:var(--max-narrow);margin:0 auto}
+.foot a{color:var(--accent);border-bottom:1px solid currentColor;padding-bottom:1px;margin:0 6px}
+
+@media(max-width:600px){
+  .page-head{padding-top:32px}
+  .nav-controls{gap:10px}
+  .nav-controls .updated{display:none}
+  .howto-cta{margin-left:0;width:100%}
+  .btn-write{display:block;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="../index.html" class="nav-logo">BRIDGE<span class="dot">.</span><span class="small">仕事日記</span></a>
+  <div class="nav-controls">
+    <span class="updated" id="updatedAt">読込中…</span>
+    <a class="nav-write" id="navWrite" href="#" target="_blank" rel="noopener">+ メモを書く</a>
+    <a href="../index.html" class="nav-back">← BRIDGE</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="page-eyebrow">Work Log</div>
+  <h1 class="page-h1">今日、<span class="em">何をやれたか。</span></h1>
+  <p class="page-sub">その日の仕事を、雑なメモで打つだけ。AI が業務日誌に整形して、日次・月次の成果として読み返せます。メモは GitHub の Issue（ラベル <code>worklog</code>）に投げるだけ。スマホの GitHub アプリからでも10秒で書けます。</p>
+</header>
+
+<section class="howto">
+  <div class="howto-inner">
+    <div class="howto-step">
+      <span class="n">01</span>
+      <span class="t">打つ</span>
+      <span class="d">「+ メモを書く」から Issue にその日の仕事を雑に箇条書き。前日分は本文に「日付: 2026-06-05」と書けばその日に振り分けられます。</span>
+    </div>
+    <div class="howto-step">
+      <span class="n">02</span>
+      <span class="t">整う</span>
+      <span class="d">投稿すると GitHub Actions が起動し、Gemini が見出し・本文・カテゴリ・成果に整形します。</span>
+    </div>
+    <div class="howto-step">
+      <span class="n">03</span>
+      <span class="t">まとまる</span>
+      <span class="d">日次は「今日の総括」、月次は「成果レポート」として自動で積み上がります。</span>
+    </div>
+    <div class="howto-cta">
+      <a class="btn-write" id="howtoWrite" href="#" target="_blank" rel="noopener">+ メモを書く</a>
+    </div>
+  </div>
+</section>
+
+<div class="tabs">
+  <button class="tab active" id="tabDay" type="button">日次</button>
+  <button class="tab" id="tabMonth" type="button">月次</button>
+</div>
+
+<main>
+  <div class="view" id="dayView"><div class="empty">読込中…</div></div>
+  <div class="view" id="monthView" hidden><div class="empty">読込中…</div></div>
+</main>
+
+<footer class="foot">
+  入力: GitHub Issues（label: worklog）· 整形: Gemini
+  · 自動更新は <a href="https://github.com/bridge-med/bridge-lp/actions/workflows/refresh-worklog.yml" target="_blank">GitHub Actions (refresh-worklog)</a>
+  · <a href="../index.html">BRIDGE に戻る</a>
+</footer>
+
+<script>
+const FEED_URL = '../worklog/feed.json';
+const REPO = 'bridge-med/bridge-lp';
+const NEW_MEMO_URL =
+  `https://github.com/${REPO}/issues/new?labels=worklog&template=worklog.md`;
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function setWriteLinks(){
+  document.getElementById('navWrite').href = NEW_MEMO_URL;
+  document.getElementById('howtoWrite').href = NEW_MEMO_URL;
+}
+
+function mmdd(date){
+  // 'YYYY-MM-DD' -> 'MM/DD'
+  const p = (date || '').split('-');
+  return p.length === 3 ? `${p[1]}/${p[2]}` : date;
+}
+
+function renderEntry(e){
+  const tags = (e.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('');
+  const outcomes = (e.outcomes && e.outcomes.length)
+    ? `<ul class="entry-outcomes">${e.outcomes.map(o => `<li>${esc(o)}</li>`).join('')}</ul>` : '';
+  const link = e.url ? `<a class="entry-link" href="${esc(e.url)}" target="_blank" rel="noopener">元メモ #${esc(e.issue)}</a>` : '';
+  return `
+    <div class="entry">
+      <div class="entry-meta">
+        ${e.created_jst ? `<span class="time">${esc(e.created_jst)}</span>` : ''}
+        ${e.category ? `<span class="cat">${esc(e.category)}</span>` : ''}
+        ${tags}
+      </div>
+      <div class="entry-headline">${esc(e.headline)}</div>
+      ${e.body ? `<div class="entry-body">${esc(e.body)}</div>` : ''}
+      ${outcomes}
+      ${link}
+    </div>`;
+}
+
+function renderDay(day){
+  const entries = (day.entries || []).map(renderEntry).join('');
+  const summary = day.summary
+    ? `<div class="day-summary">${esc(day.summary)}</div>` : '';
+  return `
+    <section class="day">
+      <div class="day-head">
+        <span class="day-date">${esc(mmdd(day.date))}</span>
+        ${day.weekday ? `<span class="day-wd">${esc(day.weekday)}</span>` : ''}
+        <span class="day-count">${(day.entries || []).length} 件</span>
+      </div>
+      ${summary}
+      ${entries}
+    </section>`;
+}
+
+function renderMonth(m){
+  return `
+    <section class="month">
+      <div class="month-head">
+        <span class="month-label">${esc(m.label)}</span>
+        <span class="month-stats">${esc(m.day_count)} 日 / ${esc(m.entry_count)} 件</span>
+      </div>
+      ${m.report ? `<div class="month-report">${esc(m.report)}</div>`
+                 : `<div class="empty" style="padding:8px 0;text-align:left">レポートは未生成です</div>`}
+    </section>`;
+}
+
+function emptyState(msg){
+  return `<div class="empty">${esc(msg)}<br>
+    <a class="btn-write" href="${NEW_MEMO_URL}" target="_blank" rel="noopener">+ 最初のメモを書く</a></div>`;
+}
+
+function updateUpdatedLabel(data){
+  const el = document.getElementById('updatedAt');
+  try {
+    const d = new Date(data.updated_at);
+    el.textContent = '更新: ' + d.toLocaleString('ja-JP', {
+      month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Tokyo'
+    }) + ' JST';
+  } catch (_) {
+    el.textContent = '更新: ' + (data.updated_jst || '-');
+  }
+}
+
+function render(data){
+  updateUpdatedLabel(data);
+  const dayView = document.getElementById('dayView');
+  const monthView = document.getElementById('monthView');
+  const days = data.days || [];
+  const months = data.months || [];
+  dayView.innerHTML = days.length
+    ? days.map(renderDay).join('')
+    : emptyState('まだメモがありません。');
+  monthView.innerHTML = months.length
+    ? months.map(renderMonth).join('')
+    : emptyState('まだ月次レポートはありません。');
+}
+
+function setupTabs(){
+  const tabDay = document.getElementById('tabDay');
+  const tabMonth = document.getElementById('tabMonth');
+  const dayView = document.getElementById('dayView');
+  const monthView = document.getElementById('monthView');
+  tabDay.addEventListener('click', () => {
+    tabDay.classList.add('active'); tabMonth.classList.remove('active');
+    dayView.hidden = false; monthView.hidden = true;
+  });
+  tabMonth.addEventListener('click', () => {
+    tabMonth.classList.add('active'); tabDay.classList.remove('active');
+    monthView.hidden = false; dayView.hidden = true;
+  });
+}
+
+async function init(){
+  setWriteLinks();
+  setupTabs();
+  try {
+    const res = await fetch(FEED_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    render(await res.json());
+  } catch (e) {
+    document.getElementById('updatedAt').textContent = '読込失敗';
+    document.getElementById('dayView').innerHTML = emptyState('feed.json を読み込めませんでした。');
+    document.getElementById('monthView').innerHTML = '';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
