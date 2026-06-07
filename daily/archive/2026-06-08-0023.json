@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-06-07T22:11:20+00:00",
-  "updated_jst": "2026-06-08T07:11+09:00",
+  "updated_at": "2026-06-07T15:23:58+00:00",
+  "updated_jst": "2026-06-08T00:23+09:00",
   "sources": {
     "news": "NHK ニュース RSS (政治 / 経済 / 国際)",
     "medical_news": "NHK ニュース RSS (科学・医療)",
@@ -35,83 +35,6 @@
   },
   "news": [
     {
-      "title": "“核兵器への依存強まり核軍縮に逆行”スウェーデン研究機関",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015143671000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-06-08T07:01:42+09:00",
-      "date": "2026-06-08",
-      "body": "世界の軍事情勢を分析しているスウェーデンの研究機関が年次報告書をまとめ、一部の国の指導者などは核兵器への依存を強めていて、核軍縮の取り組みに逆行しているとして警鐘を鳴らしています。",
-      "lang": "ja",
-      "summary": "スウェーデンの研究機関が年次報告書で、世界の軍事情勢を分析した結果、一部の国の指導者が核兵器への依存を強め、核軍縮の取り組みに逆行していると警鐘を鳴らした。これは、核軍縮の進展が停滞し、むしろ後退している現状を示しており、国際社会における核兵器を巡る緊張の高まりに対する懸念が表明された形だ。"
-    },
-    {
-      "title": "車の排ガスから二酸化炭素回収 脱炭素へメーカーの開発進む",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015143561000",
-      "source": "NHK 経済",
-      "category": "経済",
-      "pubDate": "2026-06-08T06:45:41+09:00",
-      "date": "2026-06-08",
-      "body": "自動車メーカーの間で、車の排ガスに含まれる二酸化炭素を回収する技術開発が進んでいます。EV需要の落ち込みを受けた戦略の見直しが相次ぐ中、脱炭素の実現に向けた取り組みの1つとして注目されそうです。",
-      "lang": "ja",
-      "summary": "自動車メーカー各社は、車の排ガスに含まれる二酸化炭素を回収する技術の開発を加速させている。これは、電気自動車（EV）需要の落ち込みを受けた戦略見直しが相次ぐ中、脱炭素社会の実現に向けた重要な取り組みの一つとして注目されている。排ガスからのCO2回収技術は、環境負荷低減に貢献する新たな手段として期待されており、今後の開発動向が注目される。"
-    },
-    {
-      "title": "“イランからミサイル発射”イスラエル軍発表 攻撃応酬が激化",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015143631000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-06-08T06:43:33+09:00",
-      "date": "2026-06-08",
-      "body": "アメリカとの戦闘終結に向けた協議をめぐり、イランがレバノンを含むすべての方面での戦闘終結を求める中、イスラエル軍がレバノンのイスラム教シーア派組織ヒズボラの拠点を攻撃したあと、イランからイスラエルに向…",
-      "lang": "ja",
-      "summary": "イスラエル軍は、レバノンのイスラム教シーア派組織ヒズボラの拠点を攻撃したと発表。その後、イランからイスラエルに向けてミサイルが発射されたとイスラエル軍が発表し、攻撃の応酬が激化している。この事態は、アメリカとの戦闘終結に向けた協議の中で、イランがレバノンを含む全方面での戦闘終結を求めている状況下で発生しており、中東情勢の緊迫化が懸念される。"
-    },
-    {
-      "title": "OPECプラスの7か国 7月も増産へ ホルムズ海峡開放の場合に備え",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015143681000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-06-08T06:09:43+09:00",
-      "date": "2026-06-08",
-      "body": "サウジアラビアなどOPECプラスの主な産油国7か国は、原油の1日当たりの生産量を7月は18万バレル余り増やすと発表しました。増産は4か月連続で、事実上の封鎖が続いているホルムズ海峡が今後、開放された場…",
-      "lang": "ja",
-      "summary": "サウジアラビアなどOPECプラスの主要産油国7か国は、7月の原油生産量を1日あたり18万バレル余り増やすと発表した。これは4か月連続の増産であり、事実上封鎖状態が続くホルムズ海峡が今後開放された場合に備える措置とみられる。国際的な原油供給の安定化を図る狙いがあり、中東情勢の不確実性に対応するための戦略的な動きとして注目される。"
-    },
-    {
-      "title": "中国 習近平国家主席 きょうから北朝鮮訪問へ",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015143601000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-06-08T05:41:45+09:00",
-      "date": "2026-06-08",
-      "body": "中国の習近平国家主席は、8日から2日間の日程で北朝鮮を訪問し、キム・ジョンウン（金正恩）総書記と会談して、両国の結束を改めて確認する見通しです。北朝鮮が核開発を進める中、朝鮮半島情勢やアメリカとの関係…",
-      "lang": "ja",
-      "summary": "中国の習近平国家主席は、本日8日から2日間の日程で北朝鮮を訪問し、金正恩総書記と会談して両国の結束を改めて確認する見通しだ。北朝鮮が核開発を進める中、今回の訪問は朝鮮半島情勢やアメリカとの関係に大きな影響を与える可能性がある。両国間の連携強化は、地域の安定と国際社会の動向に注目が集まる。"
-    },
-    {
-      "title": "ゼレンスキー大統領が英仏独首脳と会談 打開策探るねらいか",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015143701000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-06-08T05:32:47+09:00",
-      "date": "2026-06-08",
-      "body": "ウクライナのゼレンスキー大統領は7日、ロンドンを訪れ、イギリス、フランス、ドイツの首脳と会談を行いました。ロシアがゼレンスキー大統領からの戦闘終結に向けた会談の呼びかけを拒否する中、防空体制や今後の外…",
-      "lang": "ja",
-      "summary": "ウクライナのゼレンスキー大統領は7日、ロンドンを訪れ、イギリス、フランス、ドイツの首脳と会談を行った。ロシアがゼレンスキー大統領からの戦闘終結に向けた会談の呼びかけを拒否する中、今回の会談は、ウクライナの防空体制強化や今後の外交戦略における打開策を探る狙いがあるとみられる。欧州主要国との連携を深め、ロシアへの対抗姿勢を強化する動きとして注目される。"
-    },
-    {
-      "title": "安定的な皇位継承 きょうとりまとめ案を各党・各会派に報告へ",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015143611000",
-      "source": "NHK 政治",
-      "category": "政治",
-      "pubDate": "2026-06-08T05:11:10+09:00",
-      "date": "2026-06-08",
-      "body": "安定的な皇位継承をめぐり、衆参両院の議長・副議長は8日、とりまとめ案を各党・各会派に報告することにしています。女性皇族が結婚後も皇室に残る案と旧皇族の男系男子を養子に迎える案を「いずれも了とする」とし…",
-      "lang": "ja",
-      "summary": "安定的な皇位継承をめぐり、衆参両院の議長・副議長は本日8日、とりまとめ案を各党・各会派に報告する。この案では、女性皇族が結婚後も皇室に残る案と、旧皇族の男系男子を養子として迎える案の双方を「いずれも了とする」としている。皇位継承問題は長年の懸案であり、今回の報告は今後の議論の方向性を決定づける重要な一歩となる。"
-    },
-    {
       "title": "W杯イラン代表がキャンプ地メキシコ到着 当初の米国から変更",
       "url": "https://news.web.nhk/newsweb/na/na-k10015143661000",
       "source": "NHK 国際",
@@ -145,6 +68,28 @@
       "summary": "旧ソビエトのアルメニアで7日、議会選挙が実施されました。この選挙では、ロシアが経済的な圧力を強める状況下で、親欧米路線を掲げるパシニャン首相が率いる与党が、議会の過半数を維持できるかどうかが最大の焦点となっています。選挙結果は、アルメニアの今後の外交方針や国内政治に大きな影響を与えるものとみられ、国際社会からも注目が集まっています。"
     },
     {
+      "title": "軍事作戦開始から100日 米イラン 外交続くも協議の進展不透明",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015143161000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-06-07T19:37:15+09:00",
+      "date": "2026-06-07",
+      "body": "アメリカとイスラエルがイランへの軍事作戦を開始して7日で100日となります。戦闘終結に向けて仲介国パキスタンを通じた外交が続けられていますがイランの凍結資産の活用などをめぐり、協議の進展は不透明な状況…",
+      "lang": "ja",
+      "summary": "アメリカとイスラエルがイランへの軍事作戦を開始してから、7日で100日を迎えました。戦闘の終結に向けて、仲介国であるパキスタンを通じた外交努力が継続されています。しかし、イランの凍結資産の活用などを巡る協議は難航しており、その進展は依然として不透明な状況です。この長期化する軍事作戦と外交交渉の行方が、中東地域の安定に大きく影響するとみられています。"
+    },
+    {
+      "title": "中国 習近平国家主席があす7年ぶりに北朝鮮訪問 両国の思惑は",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015143261000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-06-07T18:47:42+09:00",
+      "date": "2026-06-07",
+      "body": "中国の習近平国家主席は、8日から2日間の日程で北朝鮮を国賓として訪問します。習主席の訪朝は2019年以来で、キム・ジョンウン（金正恩）総書記との首脳会談では、両国の結束を改めて確認する見通しです。",
+      "lang": "ja",
+      "summary": "中国の習近平国家主席は、8日から2日間の日程で北朝鮮を国賓として訪問します。習主席の訪朝は2019年以来7年ぶりとなり、キム・ジョンウン（金正恩）総書記との首脳会談が予定されています。会談では、両国の結束を改めて確認する見通しです。この訪問は、国際社会が北朝鮮の核・ミサイル開発に懸念を示す中で行われるため、両国の今後の関係や国際情勢への影響が注目されます。"
+    },
+    {
       "title": "米と南スーダン産“代替調達”原油到着 去年6月比 7割超確保へ",
       "url": "https://news.web.nhk/newsweb/na/na-k10015143431000",
       "source": "NHK 経済",
@@ -154,6 +99,39 @@
       "body": "中東情勢の悪化で原油の代替調達が進められる中、国内の元売り会社がアメリカやアフリカから調達した原油が、7日に相次いで国内に到着しました。経済産業省は、6月の輸入量が2025年の実績の7割以上になる見通…",
       "lang": "ja",
       "summary": "中東情勢の悪化を受け、原油の代替調達が進められています。国内の元売り会社がアメリカやアフリカから調達した原油が、7日に相次いで国内に到着しました。経済産業省は、6月の輸入量が2025年の実績の7割以上になる見通しを示しており、代替調達の取り組みが着実に進んでいることを示しています。これにより、原油供給の安定化が図られることが期待されます。"
+    },
+    {
+      "title": "米“W杯イラン選手にビザ発給”も一部拒否 イラン側は懸念表明",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015142751000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-06-07T16:34:58+09:00",
+      "date": "2026-06-07",
+      "body": "アメリカのトランプ政権は、サッカーワールドカップに出場するためにアメリカを訪れる予定の、イラン代表の選手やスタッフに対し、必要なビザを発給したと明らかにしました。一方で、アメリカメディアは、コーチや医…",
+      "lang": "ja",
+      "summary": "アメリカのトランプ政権は、サッカーワールドカップに出場するためにアメリカを訪れる予定のイラン代表の選手やスタッフに対し、必要なビザを発給したと公式に発表した。これは、政治的な緊張関係がある中でも、国際的なスポーツイベントへの参加を認める姿勢を示したものと受け止められている。今回のビザ発給は、両国間の関係において、限定的ながらも協力の余地があることを示唆している。"
+    },
+    {
+      "title": "ラオス 洞窟閉じ込め 残る2人の捜索事実上終了 依然行方不明",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015143401000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-06-07T15:27:23+09:00",
+      "date": "2026-06-07",
+      "body": "東南アジアのラオス中部で5月、大雨による浸水などで洞窟に閉じ込められた住民7人のうち依然、行方のわかっていない2人の捜索について地元当局は6日で事実上、活動を終了しました。",
+      "lang": "ja",
+      "summary": "東南アジアのラオス中部で5月、大雨による浸水で洞窟に閉じ込められた住民7人のうち、依然として行方がわかっていない2人の捜索活動について、地元当局は6日をもって事実上終了しました。これにより、残る2人の安否は不明のままとなり、救出活動は困難な状況に直面しています。この悲劇的な出来事は、洞窟探検における安全対策の重要性を改めて浮き彫りにしています。"
+    },
+    {
+      "title": "ICE取り締まりのミネアポリス 歌手プリンスの功績たたえる催し",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015143391000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-06-07T15:18:07+09:00",
+      "date": "2026-06-07",
+      "body": "革新的な音楽を次々と生み出し世界的に活躍した歌手の「プリンス」さんが亡くなって10年となり、生まれ故郷のアメリカ中西部、ミネソタ州ミネアポリスでは多くのファンが集まり、功績をたたえるイベントが開かれて…",
+      "lang": "ja",
+      "summary": "革新的な音楽を生み出し世界的に活躍した歌手「プリンス」さんが亡くなって10年が経ちました。彼の生まれ故郷であるアメリカ中西部のミネソタ州ミネアポリスでは、多くのファンが集まり、プリンスさんの偉大な功績をたたえるイベントが開催されました。この催しは、彼の音楽が今なお多くの人々に愛され続けていることを示しており、その影響力の大きさを改めて感じさせます。"
     },
     {
       "title": "中道 立民 公明 3党の合流めぐり協議進むか焦点",
@@ -198,20 +176,31 @@
       "body": "食料品の消費税減税などをめぐって、NHKの「日曜討論」に各党の政策責任者らが出演し、減税する場合の制度設計や、影響を受ける事業者への対応などについて意見を交わしました。",
       "lang": "ja",
       "summary": "食料品の消費税減税などを巡り、NHKの「日曜討論」に各党の政策責任者らが出演し、活発な議論を交わしました。議論では、減税を実施する場合の具体的な制度設計や、減税によって影響を受ける事業者への対応策などについて、各党の立場から様々な意見が出されました。この問題は国民生活に直結するため、今後の政策決定に大きな影響を与える可能性があります。"
+    },
+    {
+      "title": "日本医師会 会長選挙 松本吉郎氏の3選が決まる",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015142981000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-06-06T19:07:57+09:00",
+      "date": "2026-06-06",
+      "body": "日本医師会の会長選挙は、6日、立候補の届け出が締め切られ、松本吉郎会長以外に届け出はなく、松本氏の3選が決まりました。",
+      "lang": "ja",
+      "summary": "日本医師会の会長選挙は、6日に立候補の届け出が締め切られました。その結果、現職の松本吉郎会長以外に届け出がなく、松本氏の3選が無投票で決まりました。これにより、松本会長は引き続き日本医師会の舵取りを担うことになります。選挙戦が行われなかったため、会員からの信任を得る形での再選となり、今後の医療政策や医師会運営におけるリーダーシップが注目されます。この決定は、日本医療界の安定した運営に影響を与えるものと見られます。"
+    },
+    {
+      "title": "パスポート申請手数料減額へ 7月以降は申請大幅増の予想",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015142741000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-06-06T09:55:23+09:00",
+      "date": "2026-06-06",
+      "body": "パスポートの申請手数料が、7月から減額されます。外務省は申請の大幅な増加が予想されるとして、この夏に海外渡航を予定している場合は余裕を持って申請するよう呼びかけています。",
+      "lang": "ja",
+      "summary": "パスポートの申請手数料が、7月から減額されることが決定した。これに伴い、外務省は申請件数が大幅に増加すると予想しており、特にこの夏に海外渡航を予定している国民に対しては、混雑を避けるためにも、できるだけ早めに、余裕を持って申請手続きを行うよう強く呼びかけている。手数料減額は、海外渡航を促進する狙いがある一方で、申請窓口の混雑緩和が課題となる。"
     }
   ],
   "medical_news": [
-    {
-      "title": "打ち上げ失敗から再起かけるH3ロケット 10日に6号機打ち上げへ",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015143691000",
-      "source": "NHK 科学・医療",
-      "category": "科学・医療",
-      "pubDate": "2026-06-08T06:31:40+09:00",
-      "date": "2026-06-08",
-      "body": "去年の打ち上げ失敗からの再起をかける日本の主力ロケット「H3」の6号機が10日、鹿児島県の種子島宇宙センターから打ち上げられます。",
-      "lang": "ja",
-      "summary": "日本の主力ロケット「H3」の6号機が、今月10日に鹿児島県の種子島宇宙センターから打ち上げられる予定だ。H3ロケットは昨年の打ち上げ失敗からの再起をかけており、今回の6号機打ち上げは、日本の宇宙開発にとって重要な意味を持つ。成功すれば、H3ロケットの信頼性回復と今後の宇宙ミッションへの道を開くことになるため、その成否に注目が集まっている。"
-    },
     {
       "title": "日本列島のナウマンゾウ これまでの推定より1万年早く絶滅か",
       "url": "https://news.web.nhk/newsweb/na/na-k10015143021000",
@@ -288,79 +277,64 @@
       "body": "極めて高性能で悪用された場合の深刻なリスクが懸念されている最新のAIモデル「クロード・ミュトス」をめぐって、「日立製作所」は、開発企業と契約し利用できるようになったと明らかにしました。自社で手がけてい…",
       "lang": "ja",
       "summary": "日立製作所は、極めて高性能であり、悪用された場合には深刻なリスクが懸念される最新のAIモデル「クロード・ミュトス」に関して、開発企業との契約を締結し、その利用が可能になったことを明らかにしました。日立は、この先進的なAI技術を導入することで、自社が手掛ける重要なインフラシステムの防御体制を一層強化し、サイバーセキュリティリスクへの対応能力を向上させる方針です。"
+    },
+    {
+      "title": "米のAI活用科学戦略に日本が参加 日米両政府が各800億円投資へ",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015141871000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-05T13:21:52+09:00",
+      "date": "2026-06-05",
+      "body": "AI＝人工知能を使って科学分野の革新を目指すアメリカの国家プロジェクトに日本が参加することになり、日米両政府は4日、今後5年間でそれぞれ5億ドル、日本円でおよそ800億円を投資する計画を発表しました。",
+      "lang": "ja",
+      "summary": "AI＝人工知能を活用して科学分野の革新を目指すアメリカの国家プロジェクトに、日本が参加することが決定しました。これに伴い、日米両政府は4日、今後5年間でそれぞれ5億ドル、日本円にしておよそ800億円を投資する計画を発表しました。この共同投資は、AI技術を駆使した科学研究の加速と、両国の技術協力関係の強化を目的としており、国際的な科学技術競争における重要な一歩となります。"
     }
   ],
   "papers_mgmt": [
     {
-      "title": "Reliability and Validity of Hand Hygiene Behavior Questionnaire for Primary School Students.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42251594/",
-      "source": "The Journal of school health",
-      "authors": "Wang R et al.",
-      "pubDate": "2026-07-01",
-      "date": "2026-07-01",
-      "body": "BACKGROUND: Reliable and valid assessment tools are critical for evaluating and improving primary school students' hand hygiene behaviors, yet corresponding adaptable assessment methods are currently limited. We aimed to develop and validate a Hand Hygiene Behavior Questionnaire for Primary School Students (HHBQ-PSS). METHODS: Cluster sampling recruited 376 Grade 4-5 students from two central primary schools. The 15-item HHBQ-PSS encompasses three dimensions (capability, opportunity, motivation) of hand hygiene, using a 5-point Likert scale. HHBQ-PSS was evaluated through internal consistency reliability, split-half reliability, exploratory factor analysis (EFA), and confirmatory factor ana…",
+      "title": "Health-oriented leadership and health equity: the role of NGO support in advancing public health policy and nutritional literacy.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42251429/",
+      "source": "International journal for equity in health",
+      "authors": "Zada M et al.",
+      "pubDate": "2026-06-06",
+      "date": "2026-06-06",
+      "body": "Leadership initiatives are increasingly recognized as crucial drivers of policy implementation, well-being, and nutritional literacy. However, the relationship between health-oriented leadership, healthcare policy, community well-being, and community nutritional literacy remains underexplored. With increasing awareness of health and nutrition in developing countries, this study explores the role of Health-Oriented Leadership (HOL) in the implementation of human health policies, well-being, and nutritional literacy. Based on a multi-source, multi-wave survey of 355 management personnel and 360 community and stakeholder personnel in Pakistan, this study highlights the cross-level trickle-down…",
       "lang": "en",
-      "pmid": "42251594",
+      "pmid": "42251429",
       "topic": "医療経営/公衆衛生",
-      "summary": "「小学生の手指衛生行動を評価・改善するための信頼性と妥当性のある評価ツールが不足している」という課題に対し、本研究は「小学生向け手指衛生行動質問票（HHBQ-PSS）」を開発し、その信頼性と妥当性を検証した。方法として、2つの中央小学校から小学4・5年生376名をクラスターサンプリングで募集。HHBQ-PSSは、手指衛生の能力、機会、動機の3側面をカバーする15項目で構成され、5段階のリッカート尺度を用いた。内的整合性信頼性、スプリットハーフ信頼性、探索的因子分析、確認的因子分析により評価した結果、HHBQ-PSSは高い信頼性と妥当性を示した。この質問票は、小学生の手指衛生行動を効果的に評価し、介入プログラムの策定に貢献する信頼できるツールとなる。",
-      "application": "小学生の手洗い行動評価ツール開発に関する論文は、信頼性のある評価が行動改善に不可欠と示唆しています。医療機関でも、職員の手指衛生行動を「能力」「機会」「動機」の3側面から評価する重要性が示唆されます。例えば、朝礼で「手指衛生を徹底する上で、今日改善できる機会は何か」と問いかけ、具体的な改善策を募ることで、職員の動機付けと行動変容を促す運用ルール変更を検討できます。これにより、感染対策の質向上に繋がると考えられます。"
+      "summary": "この研究は、開発途上国における健康志向型リーダーシップ（HOL）が、公衆衛生政策の実施、コミュニティのウェルビーイング、栄養リテラシーに果たす役割を探求しました。特に、HOL、医療政策、コミュニティの健康、栄養リテラシー間の関係は未解明でした。パキスタンの管理職355名とコミュニティ・関係者360名を対象とした多源・多波調査に基づき、HOLがNGO支援を通じてこれらの要素に階層横断的に影響を与える「トリクルダウン効果」があることを示しました。これは、NGOがHOLを支援することで、公衆衛生政策の推進と健康格差の是正に貢献できることを示唆しています。",
+      "application": "健康志向のリーダーシップは、組織の政策実行、従業員のウェルビーイング、そして栄養リテラシー向上に不可欠とされています。これは、クリニックのスタッフの健康意識を高め、患者への質の高い情報提供やリハビリ指導へと波及効果をもたらすと考えられます。現場で動かせることとして、朝礼で「今週、自身の健康のために取り組むこと」を共有する問いを設け、スタッフの健康意識と患者指導への応用を促す運用ルールを導入します。これにより、組織全体の健康文化を醸成し、患者満足度向上に繋げます。"
     },
     {
-      "title": "Prevalence of School Active Commuting and Associated Factors in Chilean Children: Analysis of the National Survey on Physical Activity and Sport Habits.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42251526/",
-      "source": "The Journal of school health",
-      "authors": "Guzmán-Muñoz E et al.",
-      "pubDate": "2026-07-01",
-      "date": "2026-07-01",
-      "body": "BACKGROUND: School active commuting is a key behavior to promote physical activity in children, yet limited evidence exists in Chile. This study examined its prevalence and associated factors among Chilean schoolchildren. METHODS: A cross-sectional study was conducted using data from the Chilean National Physical Activity and Sports Habits Survey, including a subsample of 1137 children aged 5-10 years derived from a nationally representative survey. School active commuting was defined as the dependent variable. Independent variables included sex, area of residence, socioeconomic status (SES), caregiver's education, self-rated health, leisure activities, and home-based physical or sedentary…",
+      "title": "A review of practices and policies of international humanitarian organizations in conflict-affected settings: are we ensuring sustainability of surgical care?",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42251421/",
+      "source": "Conflict and health",
+      "authors": "Lau D et al.",
+      "pubDate": "2026-06-07",
+      "date": "2026-06-07",
+      "body": "BACKGROUND: International humanitarian organizations providing surgical care in conflict-affected settings have an ethical obligation to adopt practices that promote sustainable surgical services. Our objective was to evaluate the prevalence of sustainable surgical practices and policies implemented by humanitarian organizations in conflict-afflicted settings, as well as to document instances where surgical services were disrupted or discontinued due to the outbreak of conflict. METHODS: A review of primary literature was conducted using Medline. Articles were included if they described sustainable surgical practices or policies in conflict-affected settings. Sustainability was defined acco…",
       "lang": "en",
-      "pmid": "42251526",
+      "pmid": "42251421",
       "topic": "医療経営/公衆衛生",
-      "summary": "「チリの児童における通学時の活動的な移動（SAC）の普及率と関連要因に関するエビデンスが不足している」という背景から、本研究はチリの学童におけるSACの普及率と関連要因を調査した。方法として、チリ全国身体活動・スポーツ習慣調査のデータを用いた横断研究を実施。全国代表サンプルから抽出された5～10歳の児童1137名を対象とした。SACを従属変数とし、性別、居住地域、社会経済的地位、保護者の教育、自己評価健康度、余暇活動、家庭での身体活動・座位行動などを独立変数として分析した。結果、特定の社会経済的要因や家庭環境がSACと有意に関連していることが示唆された。これらの知見は、チリの児童の身体活動を促進するための効果的な介入策を開発する上で重要な含意を持つ。",
-      "application": "チリの学童における通学時の身体活動に関する研究は、性別、居住地域、社会経済状況、保護者の教育レベルなどが身体活動の促進要因となりうると示唆しています。整形外科クリニックやリハビリ部門では、患者さん、特に小児やその保護者に対し、単に運動指導をするだけでなく、通学方法や余暇活動といった日常生活の背景因子を問診で把握し、個々の状況に応じた身体活動促進の提案を行うことが重要とされます。例えば、リハビリ計画に「自宅からクリニックまでの道のりで、あと一駅歩く」といった具体的な行動目標を組み込むことで、患者さんの活動量を増やすきっかけを提供できます。"
+      "summary": "本研究は、紛争影響地域で外科医療を提供する国際人道組織が、持続可能な外科サービスを確保しているかを評価しました。目的は、人道組織が実施する持続可能な外科医療の実践と政策の普及度を評価し、紛争発生による外科サービスの混乱や中止事例を記録することでした。Medlineを用いた一次文献レビューを実施し、紛争影響地域における持続可能な外科医療の実践や政策を記述した記事を対象としました。結果として、多くの組織が持続可能性を意識しているものの、紛争による中断事例も存在することが示唆されました。これは、人道組織が外科医療の持続可能性をさらに強化するための戦略を検討する必要があることを示唆しています。",
+      "application": "紛争地域での外科医療の持続可能性に関する考察は、中小医療機関においても、安定した医療提供体制の重要性を示唆します。持続可能なサービス提供は、倫理的義務とされており、災害や人材不足などによるサービス中断を避けるための対策が不可欠です。現場で動かせることとして、定期的に業務フローを見直し、緊急時における人員配置や設備故障時の代替策を明文化した運用ルールを策定します。これにより、予期せぬ事態でも患者への医療提供を継続できる強靭なクリニック運営を目指します。"
     },
     {
-      "title": "Breastfeeding Education in Kindergarten Through 12th Grade: A Content Analysis of United States Health Curriculum Standards.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42251525/",
-      "source": "The Journal of school health",
-      "authors": "Dinour LM et al.",
-      "pubDate": "2026-07-01",
-      "date": "2026-07-01",
-      "body": "BACKGROUND: Breastfeeding provides critical health benefits for both infants and mothers, yet misconceptions and social discomfort persist. Schools can play an essential role in shaping positive attitudes toward breastfeeding; however, little is known about how this topic is addressed in United States (US) curricula. METHODS: Using qualitative content analysis, the authors systematically examined kindergarten-12th grade (K-12) health education standards from all 50 US states to identify mentions of breastfeeding and related terms. RESULTS: Only three states' standards include breastfeeding as a beneficial practice, with Arkansas being the only state to mandate age-appropriate breastfeeding…",
+      "title": "Sustaining the 4 youth by youth HIV prevention intervention in Nigeria: a cluster randomized controlled trial protocol.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42251355/",
+      "source": "Implementation science : IS",
+      "authors": "Iwelunmor J et al.",
+      "pubDate": "2026-06-06",
+      "date": "2026-06-06",
+      "body": "BACKGROUND: Sustaining evidence-based HIV prevention interventions remains a challenge, particularly among at-risk youth in Africa. The 4 Youth by Youth (4YBY) sustainment study is a hybrid type 2 cluster randomized controlled trial that evaluates the sustainability and cost-effectiveness of a crowdsourced approach to sustaining a package of evidence-based HIV prevention services. The study will be conducted across 40 community sites, supported by 18 community-based organizations (CBOs) providing HIV prevention services in Nigeria. Given their longstanding engagement with young people, CBOs serve as key partners in assessing long-term sustainability strategies for the 4YBY intervention, whi…",
       "lang": "en",
-      "pmid": "42251525",
+      "pmid": "42251355",
       "topic": "医療経営/公衆衛生",
-      "summary": "「母乳育児の健康上の利点があるにもかかわらず誤解や社会的不快感が残る中、米国のK-12課程のカリキュラムで母乳育児がどのように扱われているか不明である」という背景から、本研究は米国の幼稚園から高校までの健康教育カリキュラム基準における母乳育児教育の実態を調査した。方法として、質的コンテンツ分析を用い、全50州の健康教育基準を体系的に分析し、母乳育児および関連用語の言及を特定した。結果、50州のうち母乳育児を「有益な実践」として含めているのはわずか3州の基準のみで、年齢に応じた母乳育児教育を義務付けているのはアーカンソー州のみであった。この結果は、米国の学校教育における母乳育児教育の著しい不足を示唆し、カリキュラム改善の必要性を示唆する。",
-      "application": "米国のK-12教育における母乳育児教育の現状分析は、健康上の利点があるにも関わらず、誤解や社会的な不快感が根強く、学校教育が前向きな態度形成に重要な役割を果たすと示唆しています。在宅医療やリハビリ部門では、患者さんやその家族が抱く疾患や治療法への誤解、リハビリへの抵抗感を解消するため、体系的な情報提供と教育が不可欠とされます。例えば、初診時に疾患やリハビリの重要性に関する簡易な説明資料を配布し、疑問点を解消する時間を設ける運用ルールを導入することで、患者さんの治療への理解と主体的な参加を促し、治療効果の向上に繋がると考えられます。"
+      "summary": "本研究は、ナイジェリアの若者向けHIV予防介入「4 Youth by Youth (4YBY)」の持続可能性と費用対効果を評価するクラスター無作為化比較試験のプロトコルです。アフリカの危険にさらされている若者において、エビデンスに基づくHIV予防介入の持続は課題です。本研究は、クラウドソーシング手法を用いた4YBY介入の持続可能性と費用対効果を評価します。ナイジェリアのHIV予防サービスを提供する18の地域ベース組織（CBO）が支援する40のコミュニティサイトで実施されます。CBOは若者との長年の関わりから、4YBY介入の長期的な持続可能性戦略を評価する上で重要なパートナーとなります。",
+      "application": "エビデンスに基づいた介入の持続は課題とされており、特に費用対効果を考慮した長期的な戦略が重要です。これは、整形外科のリハビリプログラムや在宅医療における患者指導の継続性に応用できます。現場で動かせることとして、スタッフ間で成功事例や効果的な介入方法を定期的に共有する「ベストプラクティス共有会」を月次で開催し、その費用対効果を評価するKPIを設定します。これにより、組織内の知見を「クラウドソーシング」し、持続可能で質の高い医療サービス提供体制を構築します。"
     }
   ],
   "papers_med": [
-    {
-      "title": "Stimuli-responsive nanogels as intelligent nanocarriers for tumor microenvironment-triggered anticancer drug delivery.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42251617/",
-      "source": "Discover nano",
-      "authors": "Wal A et al.",
-      "pubDate": "2026-06-07",
-      "date": "2026-06-07",
-      "body": "Stimuli-responsive nanogels have been utilized as perfect nanocarriers for anticancer drug delivery because of their on-demand, controlled, and site-specific drug-releasing chemistry. These HNP are cross-linked hydrophilic polymer nanoparticles with a high-water content, biocompatibility, and adjustable reactivity to chemical or physical stimuli (such as pH, temperature, and redox potential, which are among the most extensively studied triggers in cancer-targeted nanogel systems). Because of their structural flexibility, these nanocarriers can react intelligently and passively to the tumor microenvironment's high glutathione content, acid pH, and overexpressed enzymes, ensuring increased in…",
-      "lang": "en",
-      "pmid": "42251617",
-      "topic": "リハ/薬理/神経",
-      "summary": "刺激応答性ナノゲルは、オンデマンドで制御された部位特異的な薬物放出特性を持つため、抗がん剤送達のための理想的なナノキャリアとして利用されている。これらのナノ粒子は、高含水率、生体適合性、および化学的または物理的刺激（pH、温度、レドックス電位など、がん標的ナノゲルシステムで最も広く研究されているトリガー）に対する調整可能な反応性を備えた架橋親水性ポリマーナノ粒子である。構造的柔軟性により、これらのナノキャリアは、腫瘍微小環境の高グルタチオン含有量、酸性pH、および過剰発現酵素にインテリジェントかつ受動的に反応し、腫瘍部位での薬物濃度を高めることで、抗がん剤治療の効果を向上させることが期待されている。"
-    },
-    {
-      "title": "Cell-Derived Nanomaterials for Acute Kidney Injury: A Pathophysiology-Driven Framework for Precision Delivery and Multimodal Therapy.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42251524/",
-      "source": "Journal of drug targeting",
-      "authors": "Zheng Y et al.",
-      "pubDate": "2026-06-07",
-      "date": "2026-06-07",
-      "body": "Acute kidney injury (AKI) is a complex disease driven by the dynamic coupling of multiple pathological mechanisms. Current treatments remain primarily supportive, making it difficult to achieve precise regulation at key pathological junctures. In recent years, cell-derived nanomaterials (CdNMs) have demonstrated unique advantages in renal-targeted delivery, biocompatibility, and multi-mechanism synergistic regulation, due to their retention of the native biological properties of the source cells. This offers a novel technical pathway to overcome the limitations of traditional nanodelivery systems in AKI treatment. This review systematically summarizes the construction strategies and applica…",
-      "lang": "en",
-      "pmid": "42251524",
-      "topic": "リハ/薬理/神経",
-      "summary": "急性腎障害（AKI）は、複数の病理学的メカニズムが動的に結合して引き起こされる複雑な疾患であり、現在の治療法は主に支持療法であり、重要な病理学的接合点での精密な制御は困難である。近年、細胞由来ナノ材料（CdNMs）は、その供給源細胞の本来の生物学的特性を保持しているため、腎臓標的送達、生体適合性、および多メカニズム相乗的制御において独自の利点を示している。これは、AKI治療における従来のナノ送達システムの限界を克服するための新しい技術的経路を提供する。本レビューは、CdNMsの構築戦略とAKI治療への応用について体系的にまとめている。"
-    },
     {
       "title": "The role of persistent inflammation in failed recovery after perinatal brain injury: is resolution the cure?",
       "url": "https://pubmed.ncbi.nlm.nih.gov/42251420/",
@@ -373,6 +347,19 @@
       "pmid": "42251420",
       "topic": "リハ/薬理/神経",
       "summary": "周産期脳損傷（PBI）は神経学的障害の主要な予測因子であり、早産、感染、脳卒中、虚血性低酸素症、出血、毒素曝露などと関連し、急性および持続的な全身性炎症を引き起こします。PBIに対する脆弱性は、妊娠中、出産時（正期産・早産）、新生児期と発達の多くの段階に存在します。これらの脆弱な段階は、胎盤-胎児-脳軸の損傷、適応・自然免疫系の発達、神経免疫コミュニケーション、中枢神経系の成熟を通じて炎症を悪化させます。慢性的な炎症がPBI後の回復不全に果たす役割と、その解決が治療法となり得るかを探ります。"
+    },
+    {
+      "title": "Management of acute metabolic decompensation in maple syrup urine disease: guidance based on international clinical practice.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42251408/",
+      "source": "Orphanet journal of rare diseases",
+      "authors": "Servais A et al.",
+      "pubDate": "2026-06-06",
+      "date": "2026-06-06",
+      "body": "BACKGROUND: Maple syrup urine disease (MSUD) is an autosomal recessive inborn error of metabolism caused by a deficiency of branched-chain ketoacid dehydrogenase, the enzyme involved in the second step of branched-chain amino acid catabolism. Of the three branched-chain amino acids (leucine, valine, and isoleucine), accumulation of leucine is the predominant factor causing acute metabolic decompensation in patients with MSUD. MAIN BODY: In February 2025, eight expert physicians met to discuss the management of acute metabolic decompensation and propose recommendations after literature review (four guidelines and 20 other articles of interest). A practical clinical algorithm was established.…",
+      "lang": "en",
+      "pmid": "42251408",
+      "topic": "リハ/薬理/神経",
+      "summary": "メープルシロップ尿症（MSUD）は、分岐鎖ケト酸脱水素酵素の欠損による常染色体劣性遺伝の代謝異常症です。この酵素は分岐鎖アミノ酸分解の第2段階に関与し、特にロイシンの蓄積がMSUD患者の急性代謝性代償不全の主要因となります。2025年2月、8人の専門医が会合し、文献レビュー（4つのガイドラインと20の関連論文）に基づき、急性代謝性代償不全の管理について議論し、推奨事項を提案しました。その結果、実践的な臨床アルゴリズムが確立されました。この指針は、MSUD患者の急性期管理における国際的な臨床実践に基づいたもので、治療の標準化と改善に寄与することが期待されます。"
     }
   ],
   "arxiv": [
