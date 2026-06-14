@@ -5,7 +5,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PROFESSIONS, PURPOSES, ROLES } from '../lib/constants';
 import { prefs } from '../lib/prefs';
-import { radius, spacing, type } from '../lib/theme';
+import { colors, fonts, radius, spacing, type } from '../lib/theme';
 import { Chip } from './ui';
 import { Picker } from './Picker';
 import { useColors } from './ThemeProvider';
@@ -25,11 +25,11 @@ export function Onboarding({ visible }: { visible: boolean }) {
     <Modal visible={visible} animationType="slide">
       <View style={[styles.container, { backgroundColor: c.bg, paddingTop: insets.top + spacing.lg }]}>
         <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 100, gap: spacing.xl }}>
-          <View style={{ gap: spacing.xs }}>
-            <Text style={[styles.badge, { color: c.primary }]}>BRIDGE Worklog</Text>
-            <Text style={styles.title}>日々の仕事を、{'\n'}キャリアの資産に。</Text>
-            <Text style={[type.body, { color: c.text2 }]}>
-              毎日の仕事ログ・メモ・気づきを残すだけ。あとで職務経歴書や面接、1on1の材料に変わります。まず少しだけ教えてください。
+          <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
+            <Text style={styles.badge}>BRIDGE WORKLOG</Text>
+            <Text style={styles.title}>日々の仕事が、{'\n'}いつか経歴になる。</Text>
+            <Text style={[type.body, { color: c.text2, marginTop: 4 }]}>
+              毎日の仕事ログ・メモ・気づきを残すだけ。あとで職務経歴書・面接・1on1の材料に変わります。まず、あなたのことを少しだけ。
             </Text>
           </View>
 
@@ -64,7 +64,7 @@ function Group({
 }) {
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text style={type.h2}>{title}</Text>
+      <Text style={type.label}>{title}</Text>
       <View style={styles.chips}>
         {options.map((o) => (
           <Chip key={o} label={o} tone="primary" active={value === o} onPress={() => onSelect(value === o ? '' : o)} />
@@ -76,10 +76,10 @@ function Group({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  badge: { ...type.label, letterSpacing: 1 },
-  title: { fontSize: 26, fontWeight: '800', lineHeight: 34 },
+  badge: { ...type.label, letterSpacing: 3 },
+  title: { fontFamily: fonts.mincho, fontSize: 30, lineHeight: 42, color: colors.text },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: spacing.lg, paddingTop: spacing.md, borderTopWidth: StyleSheet.hairlineWidth },
   btn: { borderRadius: radius.md, paddingVertical: 16, alignItems: 'center' },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  btnText: { color: '#fff', fontSize: 16, fontFamily: fonts.gothicBold },
 });

@@ -6,7 +6,7 @@ import { AdFreeBenefits } from '../components/ProFeatures';
 import { useColors } from '../components/ThemeProvider';
 import { Button } from '../components/ui';
 import { ADFREE, purchaseAdFree, restorePurchases, useAdFree } from '../lib/entitlement';
-import { colors, radius, spacing, type } from '../lib/theme';
+import { colors, fonts, radius, spacing, type } from '../lib/theme';
 
 export default function Paywall() {
   const adFree = useAdFree();
@@ -35,7 +35,7 @@ export default function Paywall() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + spacing.xl, gap: spacing.lg }}>
         <View style={styles.hero}>
-          <Text style={[styles.badge, { color: c.primary }]}>BRIDGE Daily</Text>
+          <Text style={styles.badge}>BRIDGE WORKLOG</Text>
           <Text style={styles.heroTitle}>広告を消す</Text>
           <Text style={[type.body, { color: colors.text2, textAlign: 'center' }]}>
             機能はすべて無料のまま。{'\n'}広告だけをオフにできます。
@@ -77,9 +77,9 @@ export default function Paywall() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  hero: { alignItems: 'center', gap: spacing.xs, paddingTop: spacing.xl },
-  badge: { ...type.label, letterSpacing: 1 },
-  heroTitle: { fontSize: 36, fontWeight: '800', color: colors.text, lineHeight: 42 },
+  hero: { alignItems: 'center', gap: spacing.sm, paddingTop: spacing.xl },
+  badge: { ...type.label, letterSpacing: 3 },
+  heroTitle: { fontFamily: fonts.mincho, fontSize: 38, color: colors.text, lineHeight: 46 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -90,8 +90,8 @@ const styles = StyleSheet.create({
   ownedCard: { backgroundColor: colors.accentWeak, borderColor: colors.accentWeak, alignItems: 'center' },
   ownedText: { ...type.h2, color: colors.good },
   priceRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', gap: spacing.sm },
-  price: { fontSize: 30, fontWeight: '800', color: colors.text },
-  link: { fontSize: 15, fontWeight: '600' },
+  price: { fontFamily: fonts.minchoSemi, fontSize: 32, color: colors.text },
+  link: { fontSize: 15, fontFamily: fonts.gothicMed },
   close: {
     position: 'absolute',
     right: spacing.lg,
