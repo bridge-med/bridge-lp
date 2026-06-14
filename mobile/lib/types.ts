@@ -20,12 +20,14 @@ export interface Task extends BaseRecord {
   priority: Priority;
   due: string | null; // yyyy-mm-dd or null
   doneAt: string | null; // ISO timestamp when completed
+  tags: string[];
 }
 
 export interface Memo extends BaseRecord {
   title: string;
   body: string;
   pinned: boolean;
+  tags: string[];
 }
 
 export type Mood = 1 | 2 | 3 | 4 | 5;

@@ -6,7 +6,7 @@ import { colors, spacing, type } from '../lib/theme';
 export const PRO_FEATURES: { icon: string; title: string; desc: string }[] = [
   { icon: '📊', title: 'ふりかえり', desc: 'ストリーク・気分グラフ・月次サマリーで継続を可視化' },
   { icon: '⏰', title: '複数リマインダー', desc: 'タスクに複数・繰り返しの通知（無料は1件まで）' },
-  { icon: '🏷️', title: 'タグ & 検索', desc: 'メモ・タスクをタグ付けして素早く絞り込み' },
+  { icon: '🏷️', title: 'タグ整理 & フィルタ', desc: 'メモ・タスクにタグを付けてワンタップで絞り込み' },
   { icon: '📤', title: '整形エクスポート', desc: 'Markdown / PDF で読みやすく書き出し' },
   { icon: '🎨', title: 'テーマ & アイコン', desc: '配色・アプリアイコンをカスタマイズ' },
 ];

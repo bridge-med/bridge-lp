@@ -1,27 +1,37 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SearchBar } from '../../components/SearchBar';
 import { Sheet } from '../../components/Sheet';
+import { TagFilter } from '../../components/TagFilter';
+import { TagInput } from '../../components/TagInput';
 import { Button, Card, Chip, EmptyState, Fab, Field } from '../../components/ui';
 import { tasks } from '../../lib/data';
 import { dueLabel, todayKey } from '../../lib/date';
+import { usePro } from '../../lib/entitlement';
+import { tapLight, tapSuccess } from '../../lib/haptics';
 import { useCollection } from '../../lib/store';
+import { collectTags, matchesQuery } from '../../lib/tags';
 import { colors, radius, spacing, type } from '../../lib/theme';
 import type { Priority, Task } from '../../lib/types';
 
-type Filter = 'open' | 'today' | 'all';
-
-const PRIORITY_META: Record<Priority, { label: string; tone: 'neutral' | 'warn' | 'danger' }> = {
-  low: { label: '低', tone: 'neutral' },
-  normal: { label: '中', tone: 'neutral' },
-  high: { label: '高', tone: 'danger' },
+const PRIORITY_META: Record<Priority, { label: string }> = {
+  low: { label: '低' },
+  normal: { label: '中' },
+  high: { label: '高' },
 };
 const PRIORITY_RANK: Record<Priority, number> = { high: 0, normal: 1, low: 2 };
 
+type Section = { key: string; title: string; items: Task[] };
+
 export default function TasksScreen() {
   const all = useCollection(tasks);
+  const isPro = usePro();
   const insets = useSafeAreaInsets();
-  const [filter, setFilter] = useState<Filter>('open');
+  const [query, setQuery] = useState('');
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [showDone, setShowDone] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -29,21 +39,22 @@ export default function TasksScreen() {
   const openCount = all.filter((t) => t.status === 'todo').length;
   const overdue = all.filter((t) => t.status === 'todo' && t.due && t.due < today).length;
   const dueToday = all.filter((t) => t.status === 'todo' && t.due === today).length;
+  const allTags = useMemo(() => collectTags(all), [all]);
 
-  const visible = useMemo(() => {
-    let list = [...all];
-    if (filter === 'open') list = list.filter((t) => t.status === 'todo');
-    else if (filter === 'today')
-      list = list.filter((t) => t.status === 'todo' && t.due && t.due <= today);
-    return list.sort((a, b) => {
-      if (a.status !== b.status) return a.status === 'todo' ? -1 : 1;
-      if (!!a.due !== !!b.due) return a.due ? -1 : 1;
-      if (a.due && b.due && a.due !== b.due) return a.due < b.due ? -1 : 1;
-      if (PRIORITY_RANK[a.priority] !== PRIORITY_RANK[b.priority])
-        return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
-      return b.createdAt < a.createdAt ? -1 : 1;
+  const filtered = useMemo(() => {
+    return all.filter((t) => {
+      if (!matchesQuery(query, [t.title, t.notes, ...(t.tags ?? [])])) return false;
+      if (tagFilter && !(t.tags ?? []).includes(tagFilter)) return false;
+      return true;
     });
-  }, [all, filter, today]);
+  }, [all, query, tagFilter]);
+
+  const sections = useMemo(() => buildSections(filtered, today), [filtered, today]);
+  const doneItems = useMemo(
+    () => filtered.filter((t) => t.status === 'done').sort((a, b) => (b.doneAt ?? '') < (a.doneAt ?? '') ? -1 : 1),
+    [filtered],
+  );
+  const hasOpen = sections.some((s) => s.items.length > 0);
 
   function openNew() {
     setEditing(null);
@@ -54,16 +65,22 @@ export default function TasksScreen() {
     setSheetOpen(true);
   }
   function toggle(t: Task) {
+    const toDone = t.status !== 'done';
+    if (toDone) tapSuccess();
+    else tapLight();
     void tasks.upsert({
       id: t.id,
-      status: t.status === 'done' ? 'todo' : 'done',
-      doneAt: t.status === 'done' ? null : new Date().toISOString(),
+      status: toDone ? 'done' : 'todo',
+      doneAt: toDone ? new Date().toISOString() : null,
     } as Partial<Task>);
   }
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120, gap: spacing.md }}>
+      <ScrollView
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120, gap: spacing.md }}
+        keyboardShouldPersistTaps="handled"
+      >
         <Card style={styles.summary}>
           <Stat value={openCount} label="未完了" />
           <Divider />
@@ -72,34 +89,64 @@ export default function TasksScreen() {
           <Stat value={overdue} label="期限超過" tone={overdue ? 'danger' : 'muted'} />
         </Card>
 
-        <View style={styles.filters}>
-          <Chip label="未完了" active={filter === 'open'} tone="primary" onPress={() => setFilter('open')} />
-          <Chip label="今日まで" active={filter === 'today'} tone="primary" onPress={() => setFilter('today')} />
-          <Chip label="すべて" active={filter === 'all'} tone="primary" onPress={() => setFilter('all')} />
-        </View>
+        <SearchBar value={query} onChangeText={setQuery} placeholder="タスクを検索" />
+        {isPro ? <TagFilter tags={allTags} selected={tagFilter} onSelect={setTagFilter} /> : null}
 
-        {visible.length === 0 ? (
+        {!hasOpen && doneItems.length === 0 ? (
           <EmptyState
             icon="🗒️"
-            title="タスクはありません"
-            hint="右下の＋ボタンから、今日やることを1つ追加してみましょう。"
+            title={query || tagFilter ? '該当するタスクがありません' : 'タスクはありません'}
+            hint={query || tagFilter ? undefined : '右下の＋ボタンから、今日やることを1つ追加してみましょう。'}
           />
-        ) : (
-          visible.map((t) => <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onPress={() => openEdit(t)} />)
+        ) : null}
+
+        {sections.map((s) =>
+          s.items.length === 0 ? null : (
+            <View key={s.key} style={{ gap: spacing.sm }}>
+              <Text style={styles.sectionHead}>
+                {s.title} <Text style={styles.sectionCount}>{s.items.length}</Text>
+              </Text>
+              {s.items.map((t) => (
+                <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onPress={() => openEdit(t)} />
+              ))}
+            </View>
+          ),
         )}
+
+        {doneItems.length > 0 ? (
+          <View style={{ gap: spacing.sm }}>
+            <Pressable onPress={() => setShowDone((v) => !v)} style={styles.doneToggle}>
+              <Text style={styles.sectionHead}>
+                完了済み <Text style={styles.sectionCount}>{doneItems.length}</Text>
+              </Text>
+              <Text style={styles.doneChevron}>{showDone ? '隠す' : '表示'}</Text>
+            </Pressable>
+            {showDone
+              ? doneItems.map((t) => <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onPress={() => openEdit(t)} />)
+              : null}
+          </View>
+        ) : null}
       </ScrollView>
 
       <View style={{ position: 'absolute', right: 0, bottom: insets.bottom }}>
         <Fab onPress={openNew} />
       </View>
 
-      <TaskFormSheet
-        visible={sheetOpen}
-        task={editing}
-        onClose={() => setSheetOpen(false)}
-      />
+      <TaskFormSheet visible={sheetOpen} task={editing} isPro={isPro} onClose={() => setSheetOpen(false)} />
     </View>
   );
+}
+
+function buildSections(items: Task[], today: string): Section[] {
+  const open = items.filter((t) => t.status === 'todo');
+  const byPriority = (a: Task, b: Task) =>
+    PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || (b.createdAt < a.createdAt ? -1 : 1);
+  return [
+    { key: 'overdue', title: '期限切れ', items: open.filter((t) => t.due && t.due < today).sort((a, b) => (a.due! < b.due! ? -1 : 1)) },
+    { key: 'today', title: '今日', items: open.filter((t) => t.due === today).sort(byPriority) },
+    { key: 'upcoming', title: '今後', items: open.filter((t) => t.due && t.due > today).sort((a, b) => (a.due! < b.due! ? -1 : 1)) },
+    { key: 'nodue', title: '期限なし', items: open.filter((t) => !t.due).sort(byPriority) },
+  ];
 }
 
 function Stat({ value, label, tone = 'text' }: { value: number; label: string; tone?: 'text' | 'primary' | 'danger' | 'muted' }) {
@@ -122,6 +169,7 @@ function TaskRow({ task, onToggle, onPress }: { task: Task; onToggle: () => void
   const done = task.status === 'done';
   const dueTone =
     due?.tone === 'overdue' ? 'danger' : due?.tone === 'today' ? 'primary' : due?.tone === 'soon' ? 'warn' : 'neutral';
+  const tags = task.tags ?? [];
   return (
     <Card style={[styles.row, done && styles.rowDone]}>
       <Pressable onPress={onToggle} hitSlop={10} style={[styles.checkbox, done && styles.checkboxOn]}>
@@ -136,23 +184,38 @@ function TaskRow({ task, onToggle, onPress }: { task: Task; onToggle: () => void
             {task.notes}
           </Text>
         ) : null}
-        <View style={styles.rowMeta}>
-          {task.priority === 'high' && !done ? <Chip label="優先度 高" tone="danger" /> : null}
-          {due && !done ? <Chip label={due.text} tone={dueTone} /> : null}
-        </View>
+        {(due && !done) || (task.priority === 'high' && !done) || tags.length > 0 ? (
+          <View style={styles.rowMeta}>
+            {task.priority === 'high' && !done ? <Chip label="優先度 高" tone="danger" /> : null}
+            {due && !done ? <Chip label={due.text} tone={dueTone} /> : null}
+            {tags.map((t) => (
+              <Chip key={t} label={`#${t}`} tone="neutral" />
+            ))}
+          </View>
+        ) : null}
       </Pressable>
     </Card>
   );
 }
 
-function TaskFormSheet({ visible, task, onClose }: { visible: boolean; task: Task | null; onClose: () => void }) {
+function TaskFormSheet({
+  visible,
+  task,
+  isPro,
+  onClose,
+}: {
+  visible: boolean;
+  task: Task | null;
+  isPro: boolean;
+  onClose: () => void;
+}) {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [priority, setPriority] = useState<Priority>('normal');
   const [due, setDue] = useState<string | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
   const [seed, setSeed] = useState<string | null>(null);
 
-  // Re-seed form fields whenever a different record is opened.
   const key = (visible ? 'open' : 'closed') + ':' + (task?.id ?? 'new');
   if (key !== seed && visible) {
     setSeed(key);
@@ -160,6 +223,7 @@ function TaskFormSheet({ visible, task, onClose }: { visible: boolean; task: Tas
     setNotes(task?.notes ?? '');
     setPriority(task?.priority ?? 'normal');
     setDue(task?.due ?? null);
+    setTags(task?.tags ?? []);
   }
 
   function save() {
@@ -171,6 +235,7 @@ function TaskFormSheet({ visible, task, onClose }: { visible: boolean; task: Tas
       notes: notes.trim(),
       priority,
       due,
+      tags,
       status: task?.status ?? 'todo',
       doneAt: task?.doneAt ?? null,
     } as Partial<Task>);
@@ -179,6 +244,10 @@ function TaskFormSheet({ visible, task, onClose }: { visible: boolean; task: Tas
   function del() {
     if (task) void tasks.remove(task.id);
     onClose();
+  }
+  function goPaywall() {
+    onClose();
+    router.push('/paywall');
   }
 
   return (
@@ -202,6 +271,7 @@ function TaskFormSheet({ visible, task, onClose }: { visible: boolean; task: Tas
       </View>
 
       <DuePicker value={due} onChange={setDue} />
+      <TagInput value={tags} onChange={setTags} enabled={isPro} onLocked={goPaywall} />
 
       <Button label={task ? '保存' : '追加'} onPress={save} disabled={!title.trim()} />
       {task ? <Button label="削除" variant="danger" onPress={del} /> : null}
@@ -228,13 +298,7 @@ function DuePicker({ value, onChange }: { value: string | null; onChange: (v: st
       <Text style={type.label}>期限</Text>
       <View style={styles.chipRow}>
         {options.map((o) => (
-          <Chip
-            key={o.label}
-            label={o.label}
-            tone="primary"
-            active={value === o.value}
-            onPress={() => onChange(o.value)}
-          />
+          <Chip key={o.label} label={o.label} tone="primary" active={value === o.value} onPress={() => onChange(o.value)} />
         ))}
       </View>
       <Field
@@ -253,7 +317,10 @@ const styles = StyleSheet.create({
   stat: { alignItems: 'center', gap: 2, flex: 1 },
   statValue: { fontSize: 28, fontWeight: '700' },
   vDivider: { width: StyleSheet.hairlineWidth, height: 36, backgroundColor: colors.line },
-  filters: { flexDirection: 'row', gap: spacing.sm },
+  sectionHead: { ...type.label, color: colors.text2, fontSize: 14 },
+  sectionCount: { color: colors.muted, fontWeight: '600' },
+  doneToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  doneChevron: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, padding: spacing.md },
   rowDone: { backgroundColor: colors.surface2 },
   checkbox: {
