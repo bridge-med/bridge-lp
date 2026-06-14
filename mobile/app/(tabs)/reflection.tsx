@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BannerSlot } from '../../components/BannerSlot';
+import { Hero } from '../../components/Hero';
 import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, EmptyState } from '../../components/ui';
 import { AiError, generateReflection } from '../../lib/ai';
@@ -59,7 +60,9 @@ export default function ReflectionScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110, gap: spacing.md }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 110 }}>
+      <Hero label="REVIEW" title="ふり返り" />
+      <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md }}>
       <Card style={{ gap: spacing.md }}>
         <Text style={type.h2}>振り返りをつくる</Text>
         <Text style={type.muted}>
@@ -83,7 +86,7 @@ export default function ReflectionScreen() {
       </Card>
 
       {sorted.length === 0 ? (
-        <EmptyState icon="📊" title="まだ振り返りがありません" hint="上のボタンで、今週の振り返りをつくってみましょう。" />
+        <EmptyState icon="bar-chart-2" title="まだ振り返りがありません" hint="上のボタンで、今週の振り返りをつくってみましょう。" />
       ) : (
         sorted.map((r) => (
           <Pressable key={r.id} onPress={() => setExpanded(expanded === r.id ? null : r.id)}>
@@ -117,6 +120,7 @@ export default function ReflectionScreen() {
       )}
 
       <BannerSlot />
+      </View>
     </ScrollView>
   );
 }

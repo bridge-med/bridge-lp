@@ -70,7 +70,7 @@ export default function CareerScreen() {
       <View style={{ gap: spacing.sm }}>
         <Text style={type.label}>もとにする仕事ログ（{selected.length}件選択）</Text>
         {sortedLogs.length === 0 ? (
-          <EmptyState icon="📝" title="仕事ログがありません" hint="まずホームから仕事ログを残しましょう。" />
+          <EmptyState icon="file-text" title="仕事ログがありません" hint="まずホームから仕事ログを残しましょう。" />
         ) : (
           sortedLogs.map((l) => (
             <Pressable key={l.id} onPress={() => toggle(l.id)}>

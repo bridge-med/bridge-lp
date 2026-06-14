@@ -18,10 +18,8 @@ export default function TabsLayout() {
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.muted,
         tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.line, height: 58, paddingTop: 6 },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        headerStyle: { backgroundColor: c.surface },
-        headerTitleStyle: { color: c.text, fontWeight: '700', fontSize: 18 },
-        headerShadowVisible: false,
+        tabBarLabelStyle: { fontSize: 10.5, fontFamily: 'ZenKakuGothicNew_500Medium' },
+        headerShown: false,
         sceneStyle: { backgroundColor: c.bg },
       }}
     >

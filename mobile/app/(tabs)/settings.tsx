@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Hero } from '../../components/Hero';
 import { Picker } from '../../components/Picker';
 import { Sheet } from '../../components/Sheet';
 import { ThemePicker } from '../../components/ThemePicker';
@@ -74,7 +75,9 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <Hero label="SETTINGS" title="設定" />
+      <View style={{ paddingHorizontal: spacing.lg, gap: spacing.lg }}>
       <Card style={styles.statRow}>
         <Stat value={logs.length} label="ログ" />
         <Stat value={memos.length} label="メモ" />
@@ -198,6 +201,7 @@ export default function SettingsScreen() {
             <Text style={styles.devLink}>（開発用）広告オフを切り替え: {adFree ? 'ON' : 'OFF'}</Text>
           </Pressable>
         </Card>
+      </View>
       </View>
 
       <Sheet visible={importOpen} title="バックアップを取り込む" onClose={() => setImportOpen(false)}>

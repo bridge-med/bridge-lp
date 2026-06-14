@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AiTaskSheet } from '../../components/AiTaskSheet';
 import { BannerSlot } from '../../components/BannerSlot';
+import { Hero } from '../../components/Hero';
 import { SwipeRow } from '../../components/SwipeRow';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
@@ -49,14 +50,16 @@ export default function TasksScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110, gap: spacing.md }}>
-        <Pressable onPress={() => setAiOpen(true)} style={[styles.aiBtn, { borderColor: c.primary, backgroundColor: c.primaryWeak }]}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 110 }}>
+        <Hero label="TASKS" title="タスク" subtitle={`未完了 ${all.filter((t) => t.status !== 'done').length}・全 ${all.length}`} />
+        <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md }}>
+        <Pressable onPress={() => setAiOpen(true)} style={[styles.aiBtn, { borderColor: c.primary }]}>
           <Feather name="zap" size={15} color={c.primary} />
-          <Text style={[styles.aiBtnText, { color: c.primary }]}>まとめて追加</Text>
+          <Text style={[styles.aiBtnText, { color: c.primary }]}>文章からまとめて追加</Text>
         </Pressable>
 
         {all.length === 0 ? (
-          <EmptyState icon="✓" title="タスクはありません" hint="右下の＋から追加。「まとめて追加」で文章から一括登録もできます。" />
+          <EmptyState icon="check-square" title="タスクはありません" hint="右下の＋から追加。「まとめて追加」で文章から一括登録もできます。" />
         ) : (
           groups.map((g) => (
             <View key={g.status} style={{ gap: spacing.sm }}>
@@ -93,6 +96,7 @@ export default function TasksScreen() {
         )}
 
         <BannerSlot />
+        </View>
       </ScrollView>
 
       <View style={{ position: 'absolute', right: 0, bottom: insets.bottom }}>

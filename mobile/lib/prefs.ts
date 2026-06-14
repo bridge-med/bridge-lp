@@ -23,7 +23,7 @@ export interface Prefs {
 
 const DEFAULT: Prefs = {
   onboardingDone: false,
-  accent: 'blue',
+  accent: 'ai',
   aiProvider: 'gemini',
   geminiApiKey: '',
   openaiApiKey: '',

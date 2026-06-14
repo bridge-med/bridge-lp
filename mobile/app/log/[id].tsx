@@ -35,7 +35,7 @@ export default function LogDetailScreen() {
     return (
       <View style={styles.container}>
         <Stack.Screen options={{ title: '仕事ログ' }} />
-        <EmptyState icon="🗑️" title="ログが見つかりません" />
+        <EmptyState icon="alert-circle" title="ログが見つかりません" />
       </View>
     );
   }
