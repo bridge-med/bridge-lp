@@ -30,28 +30,52 @@ npx expo start
 | **日記** | 日付＋気分(5段階)＋本文。新しい順のタイムライン |
 | **設定** | 件数サマリー、JSON バックアップの書き出し（共有）/取り込み、全削除、アプリ情報 |
 
+## 課金（買い切り Pro）
+
+「無料フル機能 × 買い切り Pro で便利機能を解放」のフリーミアム構成です。
+
+| | 無料 | **Pro（買い切り ¥980）** |
+|---|:--:|:--:|
+| タスク・メモ・日記（無制限） | ✓ | ✓ |
+| JSON バックアップ | ✓ | ✓ |
+| **ふりかえり**（ストリーク・気分グラフ・月次サマリー） | – | ✓ |
+| **Markdown エクスポート** | – | ✓ |
+| 複数リマインダー / タグ・検索 / テーマ（今後） | – | ✓ |
+
+- 課金状態は `lib/entitlement.ts` が単一の真実。`usePro()` で参照し、機能側はこのフラグだけに依存します。
+- 現状 `purchasePro()` は**ローカル解錠のモック**です。本番化は RevenueCat (`react-native-purchases`) に差し替え（このファイルだけ）+ EAS 開発ビルド + ストア商品登録が必要です。
+- 動作確認用に **設定 → このアプリについて → 「（開発用）Pro 状態を切り替え」** で Pro の ON/OFF を切替できます。
+
+> ⚠️ IAP も AdMob も **Expo Go では動かず開発ビルド(EAS)が必須**。実際の販売・審査・課金テストは、あなたの Apple / Google 開発者アカウント＋EAS で行ってください。
+
 ## 設計（拡張しやすさ）
 
 Web 版 `worklog` と同じく、データ層を抽象化して将来のバックエンド移行に備えています。
 
 ```
 lib/
-  types.ts     型定義（フラットなレコード。将来テーブルへ1:1で写せる）
-  storage.ts   永続化（AsyncStorage 実装。ここだけ差し替えれば Supabase 等へ移行可能）
-  store.ts     リアクティブなコレクション（useSyncExternalStore でタブ間同期）
-  data.ts      コレクション実体（tasks / memos / journal）＋ import/export
-  date.ts      日付ユーティリティ（端末ローカルTZ）
-  theme.ts     デザイントークン（Web 版と同じ白ベース／青グレー配色）
+  types.ts        型定義（フラットなレコード。将来テーブルへ1:1で写せる）
+  storage.ts      永続化（AsyncStorage 実装。ここだけ差し替えれば Supabase 等へ移行可能）
+  store.ts        リアクティブなコレクション（useSyncExternalStore でタブ間同期）
+  data.ts         コレクション実体（tasks / memos / journal）＋ import/export
+  entitlement.ts  Pro 課金状態（usePro / purchasePro。RevenueCat に差し替え可能）
+  stats.ts        ふりかえり用の集計（ストリーク・気分分布・月次）
+  markdown.ts     Markdown エクスポート生成
+  date.ts         日付ユーティリティ（端末ローカルTZ）
+  theme.ts        デザイントークン（Web 版と同じ白ベース／青グレー配色）
 components/
-  ui.tsx       共通UI（Card / Button / Field / Chip / Fab / EmptyState …）
-  Sheet.tsx    追加・編集用のボトムシート
+  ui.tsx          共通UI（Card / Button / Field / Chip / Fab / EmptyState …）
+  Sheet.tsx       追加・編集用のボトムシート
+  ProFeatures.tsx Pro 特典リスト（ペイウォール・設定で共有）
 app/
-  _layout.tsx          ルート（SafeArea / 起動時ロード）
+  _layout.tsx          ルート（SafeArea / 起動時ロード / paywall・review 登録）
   (tabs)/_layout.tsx   タブ定義
   (tabs)/index.tsx     タスク
   (tabs)/memo.tsx      メモ
-  (tabs)/journal.tsx   日記
-  (tabs)/settings.tsx  設定
+  (tabs)/journal.tsx   日記（→ ふりかえり導線）
+  (tabs)/settings.tsx  設定（Pro カード / エクスポート）
+  review.tsx           ふりかえり（Pro。未購入はティザー）
+  paywall.tsx          ペイウォール（モーダル）
 ```
 
 ## プライバシー

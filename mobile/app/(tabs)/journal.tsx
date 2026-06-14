@@ -1,8 +1,10 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sheet } from '../../components/Sheet';
 import { Button, Card, EmptyState, Fab, Field } from '../../components/ui';
+import { usePro } from '../../lib/entitlement';
 import { journal } from '../../lib/data';
 import { formatDateJa, todayKey } from '../../lib/date';
 import { useCollection } from '../../lib/store';
@@ -19,6 +21,7 @@ const MOODS: { value: Mood; emoji: string }[] = [
 
 export default function JournalScreen() {
   const all = useCollection(journal);
+  const isPro = usePro();
   const insets = useSafeAreaInsets();
   const [editing, setEditing] = useState<JournalEntry | null>(null);
   const [open, setOpen] = useState(false);
@@ -31,6 +34,17 @@ export default function JournalScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120, gap: spacing.md }}>
+        <Pressable onPress={() => router.push('/review')}>
+          <Card style={styles.reviewRow}>
+            <Text style={{ fontSize: 22 }}>📊</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[type.body, { fontWeight: '700' }]}>ふりかえり</Text>
+              <Text style={type.muted}>ストリーク・気分グラフ・月次サマリー</Text>
+            </View>
+            <Text style={styles.reviewArrow}>{isPro ? '›' : 'PRO'}</Text>
+          </Card>
+        </Pressable>
+
         {sorted.length === 0 ? (
           <EmptyState icon="🌿" title="今日の一日を残そう" hint="気分と、心に残ったことを一言だけでも。続けるほど振り返りが楽しくなります。" />
         ) : (
@@ -133,6 +147,8 @@ function JournalFormSheet({ visible, entry, onClose }: { visible: boolean; entry
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  reviewRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md },
+  reviewArrow: { color: colors.primary, fontSize: 16, fontWeight: '800' },
   entry: { gap: spacing.sm },
   entryHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   entryDate: { ...type.label, color: colors.primary, fontSize: 14 },

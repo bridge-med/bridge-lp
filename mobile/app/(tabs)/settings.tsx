@@ -1,8 +1,11 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Sheet } from '../../components/Sheet';
 import { Button, Card, Field, SectionTitle } from '../../components/ui';
 import { buildExport, clearAll, importBundle, journal, memos, tasks } from '../../lib/data';
+import { devTogglePro, usePro } from '../../lib/entitlement';
+import { toMarkdown } from '../../lib/markdown';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
 
@@ -10,6 +13,7 @@ export default function SettingsScreen() {
   const t = useCollection(tasks);
   const m = useCollection(memos);
   const j = useCollection(journal);
+  const pro = usePro();
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
 
@@ -17,6 +21,19 @@ export default function SettingsScreen() {
     const json = JSON.stringify(buildExport(), null, 2);
     try {
       await Share.share({ message: json, title: 'BRIDGE Daily バックアップ' });
+    } catch {
+      // user cancelled — no-op
+    }
+  }
+
+  async function onExportMarkdown() {
+    if (!pro) {
+      router.push('/paywall');
+      return;
+    }
+    const md = toMarkdown({ tasks: t, memos: m, journal: j });
+    try {
+      await Share.share({ message: md, title: 'BRIDGE Daily (Markdown)' });
     } catch {
       // user cancelled — no-op
     }
@@ -54,13 +71,30 @@ export default function SettingsScreen() {
         <Stat value={j.length} label="日記" />
       </Card>
 
+      <Pressable onPress={() => router.push('/paywall')}>
+        <Card style={[styles.proCard, pro && styles.proCardOwned]}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.proTitle}>{pro ? 'BRIDGE Daily Pro' : 'Pro にアップグレード'}</Text>
+            <Text style={[type.muted, pro && { color: colors.good }]}>
+              {pro ? '✓ すべての機能が利用できます' : 'ふりかえり・エクスポート・テーマなどを解放'}
+            </Text>
+          </View>
+          {!pro ? <Text style={styles.proArrow}>›</Text> : null}
+        </Card>
+      </Pressable>
+
       <View>
         <SectionTitle>バックアップ</SectionTitle>
         <Card style={{ gap: spacing.md }}>
           <Text style={type.muted}>
             データはこの端末内だけに保存されます。機種変更の前に書き出して保管してください。
           </Text>
-          <Button label="バックアップを書き出す（共有）" onPress={onExport} />
+          <Button label="バックアップを書き出す（JSON）" onPress={onExport} />
+          <Button
+            label={pro ? 'Markdownで書き出す' : 'Markdownで書き出す（Pro）'}
+            variant="ghost"
+            onPress={onExportMarkdown}
+          />
           <Button label="バックアップを取り込む" variant="ghost" onPress={() => setImportOpen(true)} />
         </Card>
       </View>
@@ -81,6 +115,9 @@ export default function SettingsScreen() {
             データは端末内（オフライン）に保持します。
           </Text>
           <Text style={[type.muted, { marginTop: spacing.xs }]}>バージョン 1.0.0</Text>
+          <Pressable onPress={() => void devTogglePro()} hitSlop={8} style={{ marginTop: spacing.sm }}>
+            <Text style={styles.devLink}>（開発用）Pro 状態を切り替え: {pro ? 'ON' : 'OFF'}</Text>
+          </Pressable>
         </Card>
       </View>
 
@@ -107,4 +144,10 @@ const styles = StyleSheet.create({
   statRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: spacing.lg },
   stat: { alignItems: 'center', gap: 2 },
   statValue: { fontSize: 26, fontWeight: '700', color: colors.text },
+  proCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.primaryWeak, borderColor: colors.primaryWeak },
+  proCardOwned: { backgroundColor: colors.accentWeak, borderColor: colors.accentWeak },
+  proTitle: { ...type.h2, fontSize: 16, color: colors.primary },
+  proArrow: { color: colors.primary, fontSize: 22, fontWeight: '800' },
+  devLink: { ...type.muted, color: colors.line2 },
 });
+
