@@ -9,13 +9,13 @@ import { Hero } from '../../components/Hero';
 import { SwipeRow } from '../../components/SwipeRow';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
-import { Card, Chip, EmptyState, Fab } from '../../components/ui';
+import { Chip, EmptyState, Fab } from '../../components/ui';
 import { TASK_STATUSES, type TaskStatus } from '../../lib/constants';
 import { tasks } from '../../lib/data';
 import { dueLabel } from '../../lib/date';
 import { tapSuccess } from '../../lib/haptics';
 import { useCollection } from '../../lib/store';
-import { colors, radius, spacing, type } from '../../lib/theme';
+import { colors, fonts, radius, spacing, type } from '../../lib/theme';
 import type { Task } from '../../lib/types';
 
 const ORDER: TaskStatus[] = ['doing', 'todo', 'hold', 'done'];
@@ -72,12 +72,12 @@ export default function TasksScreen() {
                 const dueTone = due?.tone === 'overdue' ? 'danger' : due?.tone === 'today' ? 'primary' : 'warn';
                 return (
                   <SwipeRow key={t.id} onDelete={() => void tasks.remove(t.id)}>
-                    <Card style={styles.row}>
-                      <Pressable onPress={() => quickComplete(t)} hitSlop={8} style={[styles.checkbox, done && { backgroundColor: colors.accent, borderColor: colors.accent }]}>
-                        {done ? <Text style={styles.checkMark}>✓</Text> : null}
+                    <View style={styles.row}>
+                      <Pressable onPress={() => quickComplete(t)} hitSlop={8} style={[styles.checkbox, { borderColor: c.line2 }, done && { backgroundColor: c.primary, borderColor: c.primary }]}>
+                        {done ? <Feather name="check" size={14} color="#fff" /> : null}
                       </Pressable>
                       <Pressable style={{ flex: 1 }} onPress={() => { setEditing(t); setOpen(true); }}>
-                        <Text style={[type.body, { fontWeight: '600' }, done && styles.doneText]} numberOfLines={2}>
+                        <Text style={[type.bodyMed, done && styles.doneText]} numberOfLines={2}>
                           {t.title}
                         </Text>
                         {(due && !done) || t.memo ? (
@@ -87,7 +87,7 @@ export default function TasksScreen() {
                           </View>
                         ) : null}
                       </Pressable>
-                    </Card>
+                    </View>
                   </SwipeRow>
                 );
               })}
@@ -111,13 +111,12 @@ export default function TasksScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  aiBtn: { flexDirection: 'row', gap: 8, borderWidth: 1, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
-  aiBtnText: { fontSize: 15, fontWeight: '700' },
-  sectionHead: { ...type.label, color: colors.text2, fontSize: 14 },
-  count: { color: colors.muted, fontWeight: '600' },
-  row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, padding: spacing.md },
-  checkbox: { width: 26, height: 26, borderRadius: radius.sm, borderWidth: 2, borderColor: colors.line2, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
-  checkMark: { color: colors.white, fontSize: 16, fontWeight: '700' },
+  aiBtn: { flexDirection: 'row', gap: 8, borderWidth: StyleSheet.hairlineWidth, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
+  aiBtnText: { fontSize: 14, fontFamily: fonts.gothicMed },
+  sectionHead: { ...type.label, color: colors.text2 },
+  count: { fontFamily: fonts.minchoReg, color: colors.muted },
+  row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, paddingVertical: 14, backgroundColor: colors.bg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  checkbox: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   doneText: { color: colors.muted, textDecorationLine: 'line-through' },
   meta: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', marginTop: spacing.sm, flexWrap: 'wrap' },
 });

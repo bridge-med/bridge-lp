@@ -3,13 +3,15 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
-import { Button, Card, Chip, EmptyState } from '../../components/ui';
+import { Button, Chip, EmptyState } from '../../components/ui';
 import { tasks, workLogs } from '../../lib/data';
-import { formatDateJa } from '../../lib/date';
+import { parseKey } from '../../lib/date';
 import { TASK_STATUS_LABEL } from '../../lib/constants';
 import { useCollection } from '../../lib/store';
-import { colors, spacing, type } from '../../lib/theme';
+import { colors, fonts, spacing, type } from '../../lib/theme';
 import type { WorkLog } from '../../lib/types';
+
+const WD = ['日', '月', '火', '水', '木', '金', '土'];
 
 const FIELDS: { key: keyof WorkLog; label: string }[] = [
   { key: 'did', label: '今日やったこと' },
@@ -41,50 +43,55 @@ export default function LogDetailScreen() {
   }
 
   const related = allTasks.filter((t) => t.relatedLogId === log.id);
+  const dd = parseKey(log.date);
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: '仕事ログ' }} />
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl }}>
-        <View style={{ gap: 4 }}>
-          <Text style={type.muted}>{formatDateJa(log.date)}</Text>
-          <Text style={styles.title}>{log.title || '無題のログ'}</Text>
+      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xl }}>
+        <View style={styles.hero}>
+          <Text style={[styles.weekday, { color: c.primary }]}>{WD[dd.getDay()]}</Text>
+          <Text style={styles.date}>{dd.getMonth() + 1}月{dd.getDate()}日</Text>
         </View>
-
+        <Text style={styles.title}>{log.title || '無題のログ'}</Text>
         {log.tags.length > 0 ? (
           <View style={styles.tags}>
             {log.tags.map((t) => (
-              <Chip key={t} label={t} tone="primary" />
+              <Chip key={t} label={t} tone="primary" active />
             ))}
           </View>
         ) : null}
+        <View style={styles.rule} />
 
         {FIELDS.filter((f) => (log[f.key] as string)?.trim?.()).map((f) => (
-          <Card key={f.key} style={{ gap: 4 }}>
+          <View key={f.key} style={styles.field}>
             <Text style={[type.label, { color: c.primary }]}>{f.label}</Text>
-            <Text style={type.body}>{log[f.key] as string}</Text>
-          </Card>
+            <Text style={[type.body, { marginTop: 4 }]}>{log[f.key] as string}</Text>
+          </View>
         ))}
 
-        <View style={{ gap: spacing.sm }}>
+        <View style={[styles.field, { paddingTop: spacing.lg }]}>
           <Text style={type.label}>関連タスク</Text>
           {related.length === 0 ? (
-            <Text style={type.muted}>まだありません</Text>
+            <Text style={[type.muted, { marginTop: 4 }]}>まだありません</Text>
           ) : (
             related.map((t) => (
-              <Card key={t.id} style={styles.taskRow}>
+              <View key={t.id} style={styles.taskRow}>
                 <Text style={[type.body, { flex: 1 }]} numberOfLines={1}>
                   {t.title}
                 </Text>
-                <Chip label={TASK_STATUS_LABEL[t.status]} tone={t.status === 'done' ? 'accent' : 'neutral'} />
-              </Card>
+                <Chip label={TASK_STATUS_LABEL[t.status]} tone={t.status === 'done' ? 'accent' : 'neutral'} active />
+              </View>
             ))
           )}
-          <Button label="このログからタスク作成" variant="ghost" onPress={() => setTaskOpen(true)} />
+          <View style={{ marginTop: spacing.md }}>
+            <Button label="このログからタスク作成" variant="ghost" onPress={() => setTaskOpen(true)} />
+          </View>
         </View>
 
-        <View style={{ height: spacing.sm }} />
-        <Button label="編集" onPress={() => router.push({ pathname: '/log-edit', params: { id: log.id } })} />
+        <View style={{ marginTop: spacing.xl }}>
+          <Button label="編集する" onPress={() => router.push({ pathname: '/log-edit', params: { id: log.id } })} />
+        </View>
       </ScrollView>
 
       <TaskSheet visible={taskOpen} defaultLogId={log.id} onClose={() => setTaskOpen(false)} />
@@ -94,7 +101,12 @@ export default function LogDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  title: { fontSize: 22, fontWeight: '800', color: colors.text },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  taskRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  hero: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
+  weekday: { fontFamily: fonts.minchoSemi, fontSize: 22 },
+  date: { fontFamily: fonts.mincho, fontSize: 32, color: colors.text },
+  title: { fontFamily: fonts.gothicBold, fontSize: 22, color: colors.text, lineHeight: 32, marginTop: spacing.sm },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
+  rule: { height: StyleSheet.hairlineWidth, backgroundColor: colors.line, marginTop: spacing.lg },
+  field: { paddingTop: spacing.lg },
+  taskRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm },
 });
