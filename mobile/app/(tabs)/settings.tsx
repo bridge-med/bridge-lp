@@ -5,6 +5,7 @@ import { Sheet } from '../../components/Sheet';
 import { ThemePicker } from '../../components/ThemePicker';
 import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Field, SectionTitle } from '../../components/ui';
+import { AiError, validateApiKey } from '../../lib/ai';
 import { buildExport, clearAll, importBundle, journal, memos, tasks } from '../../lib/data';
 import { devTogglePro, usePro } from '../../lib/entitlement';
 import { toMarkdown } from '../../lib/markdown';
@@ -21,6 +22,21 @@ export default function SettingsScreen() {
   const { geminiApiKey } = usePrefs();
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [verifyMsg, setVerifyMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function onVerifyKey() {
+    setVerifying(true);
+    setVerifyMsg(null);
+    try {
+      await validateApiKey(geminiApiKey);
+      setVerifyMsg({ ok: true, text: '✓ キーは有効です。AI機能を使えます。' });
+    } catch (e) {
+      setVerifyMsg({ ok: false, text: e instanceof AiError ? e.message : '確認に失敗しました。' });
+    } finally {
+      setVerifying(false);
+    }
+  }
 
   async function onExport() {
     const json = JSON.stringify(buildExport(), null, 2);
@@ -103,24 +119,44 @@ export default function SettingsScreen() {
           {pro ? (
             <>
               <Text style={type.muted}>
-                自分の Gemini APIキーを登録すると、AIでタスク整理・メモ整理・日記のふりかえりが使えます（無料枠あり）。
+                自分の Gemini APIキーを登録すると、AIでタスク整理・メモ整理・日記のふりかえりが使えます。無料枠で十分試せます。
               </Text>
+              <View style={styles.steps}>
+                <Text style={type.muted}>1. 下の「APIキーを取得」を開く（Googleアカウントでログイン）</Text>
+                <Text style={type.muted}>2.「APIキーを作成」して、表示されたキー（AIza…）をコピー</Text>
+                <Text style={type.muted}>3. 下の欄に貼り付け →「キーを確認」</Text>
+              </View>
+              <Pressable
+                onPress={() => void Linking.openURL('https://aistudio.google.com/apikey')}
+                style={[styles.linkBtn, { borderColor: c.primary }]}
+              >
+                <Text style={[type.body, { color: c.primary, fontWeight: '700' }]}>APIキーを取得する（Google AI Studio）↗</Text>
+              </Pressable>
               <Field
                 label="APIキー"
                 placeholder="AIza..."
                 value={geminiApiKey}
-                onChangeText={(v) => void prefs.set({ geminiApiKey: v.trim() })}
+                onChangeText={(v) => {
+                  void prefs.set({ geminiApiKey: v.trim() });
+                  setVerifyMsg(null);
+                }}
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <Pressable onPress={() => void Linking.openURL('https://aistudio.google.com/apikey')} hitSlop={6}>
-                <Text style={[type.muted, { color: c.primary }]}>APIキーを取得する（Google AI Studio）↗</Text>
-              </Pressable>
-              <Text style={type.muted}>
-                {geminiApiKey ? '✓ キー設定済み（端末内のみに保存）' : 'キー未設定'}
-              </Text>
-              {geminiApiKey ? <Button label="キーを削除" variant="ghost" onPress={() => void prefs.set({ geminiApiKey: '' })} /> : null}
+              {verifyMsg ? (
+                <Text style={[type.body, { color: verifyMsg.ok ? colors.good : colors.danger }]}>{verifyMsg.text}</Text>
+              ) : (
+                <Text style={type.muted}>{geminiApiKey ? '端末内のみに保存されます' : 'キー未設定'}</Text>
+              )}
+              <Button
+                label={verifying ? '確認中…' : 'キーを確認'}
+                onPress={onVerifyKey}
+                disabled={!geminiApiKey || verifying}
+              />
+              {geminiApiKey ? (
+                <Button label="キーを削除" variant="ghost" onPress={() => { void prefs.set({ geminiApiKey: '' }); setVerifyMsg(null); }} />
+              ) : null}
             </>
           ) : (
             <Pressable onPress={() => router.push('/paywall')} style={styles.aiLocked}>
@@ -199,5 +235,7 @@ const styles = StyleSheet.create({
   devLink: { ...type.muted, color: colors.line2 },
   aiLocked: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   proBadge: { fontWeight: '800', fontSize: 12, letterSpacing: 1 },
+  steps: { gap: 4 },
+  linkBtn: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
 });
 

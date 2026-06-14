@@ -66,6 +66,22 @@ function parseJson<T>(text: string): T {
   }
 }
 
+// --- Key validation ----------------------------------------------------------
+
+/** Lightweight check that the API key works (lists models; doesn't spend generation quota). */
+export async function validateApiKey(apiKey: string): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+  } catch {
+    throw new AiError('ネットワークに接続できませんでした。');
+  }
+  if (!res.ok) {
+    const raw = await res.text().catch(() => '');
+    throw new AiError(friendlyError(res.status, raw));
+  }
+}
+
 // --- Feature: brain-dump -> structured tasks ---------------------------------
 
 export interface DraftTask {
