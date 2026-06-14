@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { normalizeTag } from '../lib/tags';
 import { colors, radius, spacing, type } from '../lib/theme';
+import { useColors } from './ThemeProvider';
 
 // Tag editor used in the add/edit forms. When `enabled` is false (free tier)
 // it renders a locked row that routes to the paywall via `onLocked`.
@@ -16,6 +17,7 @@ export function TagInput({
   enabled: boolean;
   onLocked: () => void;
 }) {
+  const c = useColors();
   const [draft, setDraft] = useState('');
 
   function add() {
@@ -30,7 +32,7 @@ export function TagInput({
         <Text style={type.label}>タグ</Text>
         <Pressable onPress={onLocked} style={styles.locked}>
           <Text style={type.body}>🏷️ タグで整理する</Text>
-          <Text style={styles.proBadge}>PRO</Text>
+          <Text style={[styles.proBadge, { color: c.primary }]}>PRO</Text>
         </Pressable>
       </View>
     );
@@ -42,9 +44,13 @@ export function TagInput({
       {value.length > 0 ? (
         <View style={styles.chips}>
           {value.map((t) => (
-            <Pressable key={t} onPress={() => onChange(value.filter((x) => x !== t))} style={styles.chip}>
-              <Text style={styles.chipText}>#{t}</Text>
-              <Text style={styles.chipX}>✕</Text>
+            <Pressable
+              key={t}
+              onPress={() => onChange(value.filter((x) => x !== t))}
+              style={[styles.chip, { backgroundColor: c.primaryWeak }]}
+            >
+              <Text style={[styles.chipText, { color: c.primary }]}>#{t}</Text>
+              <Text style={[styles.chipX, { color: c.primary }]}>✕</Text>
             </Pressable>
           ))}
         </View>

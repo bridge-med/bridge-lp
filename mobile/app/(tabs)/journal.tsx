@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sheet } from '../../components/Sheet';
+import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, EmptyState, Fab, Field } from '../../components/ui';
 import { usePro } from '../../lib/entitlement';
 import { journal } from '../../lib/data';
@@ -22,6 +23,7 @@ const MOODS: { value: Mood; emoji: string }[] = [
 export default function JournalScreen() {
   const all = useCollection(journal);
   const isPro = usePro();
+  const c = useColors();
   const insets = useSafeAreaInsets();
   const [editing, setEditing] = useState<JournalEntry | null>(null);
   const [open, setOpen] = useState(false);
@@ -41,7 +43,7 @@ export default function JournalScreen() {
               <Text style={[type.body, { fontWeight: '700' }]}>ふりかえり</Text>
               <Text style={type.muted}>ストリーク・気分グラフ・月次サマリー</Text>
             </View>
-            <Text style={styles.reviewArrow}>{isPro ? '›' : 'PRO'}</Text>
+            <Text style={[styles.reviewArrow, { color: c.primary }]}>{isPro ? '›' : 'PRO'}</Text>
           </Card>
         </Pressable>
 
@@ -58,7 +60,7 @@ export default function JournalScreen() {
             >
               <Card style={styles.entry}>
                 <View style={styles.entryHead}>
-                  <Text style={styles.entryDate}>{formatDateJa(e.date)}</Text>
+                  <Text style={[styles.entryDate, { color: c.primary }]}>{formatDateJa(e.date)}</Text>
                   {e.mood ? <Text style={styles.entryMood}>{MOODS.find((m) => m.value === e.mood)?.emoji}</Text> : null}
                 </View>
                 <Text style={[type.body, { color: colors.text2 }]}>{e.body}</Text>

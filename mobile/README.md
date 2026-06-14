@@ -28,9 +28,11 @@ npx expo start
 | **タスク** | 期限切れ/今日/今後/期限なし/完了に自動セクション分け。チェックで完了（触覚フィードバック）、優先度・期限・タグ。検索バー＋件数サマリー |
 | **メモ** | 形式自由のメモ。ピン留めで上部固定、タグ、検索、更新日時 |
 | **日記** | 日付＋気分(5段階)＋本文。新しい順のタイムライン。→ ふりかえり（Pro） |
-| **設定** | 件数サマリー、JSON / Markdown バックアップ、Pro、全削除、アプリ情報 |
+| **設定** | 件数サマリー、テーマ切替、JSON / Markdown バックアップ、Pro、全削除、アプリ情報 |
 
-検索は無料。タグ付け・タグフィルタは Pro。
+- 初回起動時に **3画面のオンボーディング**（スキップ可）。
+- タスク行は **左スワイプで削除**（確認ダイアログ付き）。
+- 検索は無料。タグ付け・タグフィルタ・テーマ切替は Pro。
 
 ## 課金（買い切り Pro）
 
@@ -43,8 +45,9 @@ npx expo start
 | **ふりかえり**（ストリーク・気分グラフ・月次サマリー） | – | ✓ |
 | **Markdown エクスポート** | – | ✓ |
 | **タグ整理 & タグフィルタ** | – | ✓ |
+| **テーマ（アクセントカラー5色）** | – | ✓ |
 | 検索（文字） | ✓ | ✓ |
-| 複数リマインダー / テーマ（今後） | – | ✓ |
+| 複数リマインダー（今後） | – | ✓ |
 
 - 課金状態は `lib/entitlement.ts` が単一の真実。`usePro()` で参照し、機能側はこのフラグだけに依存します。
 - 現状 `purchasePro()` は**ローカル解錠のモック**です。本番化は RevenueCat (`react-native-purchases`) に差し替え（このファイルだけ）+ EAS 開発ビルド + ストア商品登録が必要です。
@@ -63,18 +66,23 @@ lib/
   store.ts        リアクティブなコレクション（useSyncExternalStore でタブ間同期）
   data.ts         コレクション実体（tasks / memos / journal）＋ import/export
   entitlement.ts  Pro 課金状態（usePro / purchasePro。RevenueCat に差し替え可能）
+  prefs.ts        アプリ設定（オンボーディング状態・アクセントテーマ）永続化
   stats.ts        ふりかえり用の集計（ストリーク・気分分布・月次）
   markdown.ts     Markdown エクスポート生成
   tags.ts         タグ収集・テキスト検索のヘルパー
   haptics.ts      触覚フィードバックの薄いラッパー
   date.ts         日付ユーティリティ（端末ローカルTZ）
-  theme.ts        デザイントークン（Web 版と同じ白ベース／青グレー配色）
+  theme.ts        デザイントークン＋アクセントテーマ（paletteFor）
 components/
+  ThemeProvider.tsx 現在のパレットを配信（useColors でアクセント追従）
   ui.tsx          共通UI（Card / Button / Field / Chip / Fab / EmptyState …）
   Sheet.tsx       追加・編集用のボトムシート
+  Onboarding.tsx  初回オンボーディング（3画面）
+  SwipeRow.tsx    左スワイプ削除（Animated + PanResponder、確認付き）
   SearchBar.tsx   検索バー（無料）
   TagInput.tsx    タグ編集（Pro。無料時はロック表示）
   TagFilter.tsx   タグでの絞り込みチップ（Pro）
+  ThemePicker.tsx アクセントカラー選択（Pro）
   ProFeatures.tsx Pro 特典リスト（ペイウォール・設定で共有）
 app/
   _layout.tsx          ルート（SafeArea / 起動時ロード / paywall・review 登録）

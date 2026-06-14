@@ -2,6 +2,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Sheet } from '../../components/Sheet';
+import { ThemePicker } from '../../components/ThemePicker';
+import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Field, SectionTitle } from '../../components/ui';
 import { buildExport, clearAll, importBundle, journal, memos, tasks } from '../../lib/data';
 import { devTogglePro, usePro } from '../../lib/entitlement';
@@ -14,6 +16,7 @@ export default function SettingsScreen() {
   const m = useCollection(memos);
   const j = useCollection(journal);
   const pro = usePro();
+  const c = useColors();
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
 
@@ -72,16 +75,25 @@ export default function SettingsScreen() {
       </Card>
 
       <Pressable onPress={() => router.push('/paywall')}>
-        <Card style={[styles.proCard, pro && styles.proCardOwned]}>
+        <Card style={[styles.proCard, { backgroundColor: pro ? colors.accentWeak : c.primaryWeak, borderColor: pro ? colors.accentWeak : c.primaryWeak }]}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.proTitle}>{pro ? 'BRIDGE Daily Pro' : 'Pro にアップグレード'}</Text>
+            <Text style={[styles.proTitle, { color: pro ? colors.good : c.primary }]}>
+              {pro ? 'BRIDGE Daily Pro' : 'Pro にアップグレード'}
+            </Text>
             <Text style={[type.muted, pro && { color: colors.good }]}>
               {pro ? '✓ すべての機能が利用できます' : 'ふりかえり・エクスポート・テーマなどを解放'}
             </Text>
           </View>
-          {!pro ? <Text style={styles.proArrow}>›</Text> : null}
+          {!pro ? <Text style={[styles.proArrow, { color: c.primary }]}>›</Text> : null}
         </Card>
       </Pressable>
+
+      <View>
+        <SectionTitle>テーマ</SectionTitle>
+        <Card>
+          <ThemePicker isPro={pro} onLocked={() => router.push('/paywall')} />
+        </Card>
+      </View>
 
       <View>
         <SectionTitle>バックアップ</SectionTitle>

@@ -13,6 +13,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { colors, radius, shadow, spacing, type } from '../lib/theme';
+import { useColors } from './ThemeProvider';
 
 export function Card({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
   return <View style={[styles.card, style]}>{children}</View>;
@@ -40,13 +41,14 @@ export function Button({
   variant?: ButtonVariant;
   disabled?: boolean;
 }) {
+  const c = useColors();
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [
         styles.btn,
-        variant === 'primary' && styles.btnPrimary,
+        variant === 'primary' && { backgroundColor: c.primary },
         variant === 'ghost' && styles.btnGhost,
         variant === 'danger' && styles.btnDanger,
         pressed && styles.pressed,
@@ -93,6 +95,7 @@ export function Chip({
   tone?: 'neutral' | 'primary' | 'accent' | 'warn' | 'danger';
   onPress?: () => void;
 }) {
+  const colors = useColors();
   const toneColor = {
     neutral: { bg: colors.surface2, fg: colors.text2, border: colors.line },
     primary: { bg: colors.primaryWeak, fg: colors.primary, border: colors.primaryWeak },
@@ -130,8 +133,9 @@ export function EmptyState({ icon, title, hint }: { icon: string; title: string;
 }
 
 export function Fab({ onPress, label = '＋' }: { onPress: () => void; label?: string }) {
+  const c = useColors();
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.fab, { backgroundColor: c.primary }, pressed && styles.fabPressed]}>
       <Text style={styles.fabLabel}>{label}</Text>
     </Pressable>
   );

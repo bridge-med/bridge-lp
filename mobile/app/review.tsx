@@ -1,6 +1,7 @@
 import { router, Stack } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ProFeatureList } from '../components/ProFeatures';
+import { useColors } from '../components/ThemeProvider';
 import { Button, Card, EmptyState } from '../components/ui';
 import { journal } from '../lib/data';
 import { usePro } from '../lib/entitlement';
@@ -12,6 +13,7 @@ const MOOD_EMOJI = ['😞', '😕', '😐', '🙂', '😄'];
 
 export default function ReviewScreen() {
   const isPro = usePro();
+  const c = useColors();
   const entries = useCollection(journal);
 
   if (!isPro) {
@@ -56,15 +58,15 @@ export default function ReviewScreen() {
 
       <View style={styles.statRow}>
         <Card style={styles.statCard}>
-          <Text style={styles.statValue}>{streak}</Text>
+          <Text style={[styles.statValue, { color: c.primary }]}>{streak}</Text>
           <Text style={type.muted}>連続日数</Text>
         </Card>
         <Card style={styles.statCard}>
-          <Text style={styles.statValue}>{entries.length}</Text>
+          <Text style={[styles.statValue, { color: c.primary }]}>{entries.length}</Text>
           <Text style={type.muted}>総記録数</Text>
         </Card>
         <Card style={styles.statCard}>
-          <Text style={styles.statValue}>{avg ?? '—'}</Text>
+          <Text style={[styles.statValue, { color: c.primary }]}>{avg ?? '—'}</Text>
           <Text style={type.muted}>平均の気分</Text>
         </Card>
       </View>
@@ -76,7 +78,7 @@ export default function ReviewScreen() {
             <View key={i} style={styles.moodCol}>
               <Text style={type.muted}>{count}</Text>
               <View style={styles.barTrack}>
-                <View style={[styles.bar, { height: `${(count / distMax) * 100}%` }]} />
+                <View style={[styles.bar, { height: `${(count / distMax) * 100}%`, backgroundColor: c.primary2 }]} />
               </View>
               <Text style={{ fontSize: 20 }}>{MOOD_EMOJI[i]}</Text>
             </View>
@@ -88,7 +90,10 @@ export default function ReviewScreen() {
         <Text style={type.h2}>直近14日</Text>
         <View style={styles.daysRow}>
           {days.map((d) => (
-            <View key={d.key} style={[styles.dayDot, d.count > 0 && styles.dayDotOn]} />
+            <View
+              key={d.key}
+              style={[styles.dayDot, d.count > 0 && { backgroundColor: c.primary, borderColor: c.primary }]}
+            />
           ))}
         </View>
         <Text style={type.muted}>記録した日が青く表示されます</Text>

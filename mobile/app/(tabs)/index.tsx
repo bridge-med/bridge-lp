@@ -4,8 +4,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SearchBar } from '../../components/SearchBar';
 import { Sheet } from '../../components/Sheet';
+import { SwipeRow } from '../../components/SwipeRow';
 import { TagFilter } from '../../components/TagFilter';
 import { TagInput } from '../../components/TagInput';
+import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Chip, EmptyState, Fab, Field } from '../../components/ui';
 import { tasks } from '../../lib/data';
 import { dueLabel, todayKey } from '../../lib/date';
@@ -28,6 +30,7 @@ type Section = { key: string; title: string; items: Task[] };
 export default function TasksScreen() {
   const all = useCollection(tasks);
   const isPro = usePro();
+  const c = useColors();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [tagFilter, setTagFilter] = useState<string | null>(null);
@@ -107,7 +110,9 @@ export default function TasksScreen() {
                 {s.title} <Text style={styles.sectionCount}>{s.items.length}</Text>
               </Text>
               {s.items.map((t) => (
-                <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onPress={() => openEdit(t)} />
+                <SwipeRow key={t.id} onDelete={() => void tasks.remove(t.id)}>
+                  <TaskRow task={t} onToggle={() => toggle(t)} onPress={() => openEdit(t)} />
+                </SwipeRow>
               ))}
             </View>
           ),
@@ -119,10 +124,14 @@ export default function TasksScreen() {
               <Text style={styles.sectionHead}>
                 完了済み <Text style={styles.sectionCount}>{doneItems.length}</Text>
               </Text>
-              <Text style={styles.doneChevron}>{showDone ? '隠す' : '表示'}</Text>
+              <Text style={[styles.doneChevron, { color: c.primary }]}>{showDone ? '隠す' : '表示'}</Text>
             </Pressable>
             {showDone
-              ? doneItems.map((t) => <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} onPress={() => openEdit(t)} />)
+              ? doneItems.map((t) => (
+                  <SwipeRow key={t.id} onDelete={() => void tasks.remove(t.id)}>
+                    <TaskRow task={t} onToggle={() => toggle(t)} onPress={() => openEdit(t)} />
+                  </SwipeRow>
+                ))
               : null}
           </View>
         ) : null}
@@ -150,8 +159,9 @@ function buildSections(items: Task[], today: string): Section[] {
 }
 
 function Stat({ value, label, tone = 'text' }: { value: number; label: string; tone?: 'text' | 'primary' | 'danger' | 'muted' }) {
+  const c = useColors();
   const color =
-    tone === 'primary' ? colors.primary : tone === 'danger' ? colors.danger : tone === 'muted' ? colors.muted : colors.text;
+    tone === 'primary' ? c.primary : tone === 'danger' ? colors.danger : tone === 'muted' ? colors.muted : colors.text;
   return (
     <View style={styles.stat}>
       <Text style={[styles.statValue, { color }]}>{value}</Text>

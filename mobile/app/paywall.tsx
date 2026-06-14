@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProFeatureList } from '../components/ProFeatures';
+import { useColors } from '../components/ThemeProvider';
 import { Button } from '../components/ui';
 import { PRO, purchasePro, restorePurchases, usePro } from '../lib/entitlement';
 import { colors, radius, spacing, type } from '../lib/theme';
 
 export default function Paywall() {
   const isPro = usePro();
+  const c = useColors();
   const insets = useSafeAreaInsets();
   const [busy, setBusy] = useState(false);
 
@@ -35,7 +37,7 @@ export default function Paywall() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + spacing.xl, gap: spacing.lg }}>
         <View style={styles.hero}>
-          <Text style={styles.badge}>BRIDGE Daily</Text>
+          <Text style={[styles.badge, { color: c.primary }]}>BRIDGE Daily</Text>
           <Text style={styles.heroTitle}>Pro</Text>
           <Text style={[type.body, { color: colors.text2, textAlign: 'center' }]}>
             一度の購入で、ずっと使える。{'\n'}記録を続ける力をひとまとめに。
@@ -58,7 +60,7 @@ export default function Paywall() {
             </View>
             <Button label={busy ? '処理中…' : 'Pro を購入する'} onPress={buy} disabled={busy} />
             <Pressable onPress={restore} hitSlop={8} style={{ alignItems: 'center', paddingVertical: spacing.sm }}>
-              <Text style={styles.link}>購入を復元</Text>
+              <Text style={[styles.link, { color: c.primary }]}>購入を復元</Text>
             </Pressable>
           </View>
         )}

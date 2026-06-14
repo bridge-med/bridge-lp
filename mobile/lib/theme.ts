@@ -24,6 +24,25 @@ export const colors = {
   white: '#ffffff',
 } as const;
 
+export type Colors = { [K in keyof typeof colors]: string };
+
+// Selectable accent themes (Pro). Only the blue "primary" family changes;
+// neutrals and semantic colours (success/warn/danger) stay fixed.
+export type AccentKey = 'blue' | 'teal' | 'violet' | 'rose' | 'amber';
+
+export const ACCENTS: Record<AccentKey, { label: string; primary: string; primary2: string; primaryWeak: string }> = {
+  blue: { label: 'ブルー', primary: '#1f5e8c', primary2: '#2b78b3', primaryWeak: '#e8f1f8' },
+  teal: { label: 'ティール', primary: '#0f766e', primary2: '#0d9488', primaryWeak: '#d9f2ee' },
+  violet: { label: 'バイオレット', primary: '#6d3bbf', primary2: '#8254d6', primaryWeak: '#ece3fb' },
+  rose: { label: 'ローズ', primary: '#b0305f', primary2: '#cf4d7c', primaryWeak: '#fbe4ee' },
+  amber: { label: 'アンバー', primary: '#a35a08', primary2: '#d97706', primaryWeak: '#fdf2e3' },
+};
+
+export function paletteFor(accent: AccentKey): Colors {
+  const a = ACCENTS[accent];
+  return { ...colors, primary: a.primary, primary2: a.primary2, primaryWeak: a.primaryWeak };
+}
+
 export const radius = {
   sm: 8,
   md: 12,
