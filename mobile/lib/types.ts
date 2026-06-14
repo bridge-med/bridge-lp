@@ -82,6 +82,11 @@ export interface CareerOutput extends BaseRecord {
   aiGenerated: boolean;
 }
 
+// Generic record for the config-driven modules (strengths, skills, goals, …).
+export interface GenericRecord extends BaseRecord {
+  [k: string]: unknown;
+}
+
 export interface ExportBundle {
   app: 'bridge-worklog';
   version: 1;
@@ -91,4 +96,5 @@ export interface ExportBundle {
   tasks: Task[];
   reflections: Reflection[];
   careerOutputs: CareerOutput[];
+  modules?: Record<string, GenericRecord[]>;
 }

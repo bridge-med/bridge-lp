@@ -37,6 +37,7 @@ function Navigator() {
         <Stack.Screen name="log-edit" options={{ title: '仕事ログ', headerBackTitle: '戻る' }} />
         <Stack.Screen name="log/[id]" options={{ title: '仕事ログ', headerBackTitle: '戻る' }} />
         <Stack.Screen name="career" options={{ title: 'キャリア変換', headerBackTitle: '戻る' }} />
+        <Stack.Screen name="m/[key]" options={{ title: '', headerBackTitle: '戻る' }} />
         <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
       </Stack>
       <Onboarding visible={showOnboarding} />

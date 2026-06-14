@@ -24,10 +24,11 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'ホーム', tabBarIcon: icon('home') }} />
-      <Tabs.Screen name="timeline" options={{ title: 'タイムライン', tabBarIcon: icon('clock') }} />
+      <Tabs.Screen name="timeline" options={{ title: '記録', tabBarIcon: icon('clock') }} />
       <Tabs.Screen name="tasks" options={{ title: 'タスク', tabBarIcon: icon('check-square') }} />
-      <Tabs.Screen name="reflection" options={{ title: '振り返り', tabBarIcon: icon('bar-chart-2') }} />
+      <Tabs.Screen name="hub" options={{ title: 'キャリア', tabBarIcon: icon('compass') }} />
       <Tabs.Screen name="settings" options={{ title: '設定', tabBarIcon: icon('settings') }} />
+      <Tabs.Screen name="reflection" options={{ href: null }} />
     </Tabs>
   );
 }

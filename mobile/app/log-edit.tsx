@@ -3,6 +3,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CalendarModal } from '../components/DatePicker';
 import { TagPicker } from '../components/TagPicker';
 import { useColors } from '../components/ThemeProvider';
 import { Button } from '../components/ui';
@@ -32,6 +33,7 @@ export default function LogEditScreen() {
   const [nextAction, setNextAction] = useState(existing?.nextAction ?? '');
   const [memo, setMemo] = useState(existing?.memo ?? '');
   const [tags, setTags] = useState<string[]>(existing?.tags ?? []);
+  const [calOpen, setCalOpen] = useState(false);
 
   function save() {
     void workLogs.upsert({
@@ -71,16 +73,15 @@ export default function LogEditScreen() {
           <Text style={type.label}>{existing ? 'EDIT LOG' : 'NEW LOG'}</Text>
         </View>
 
-        {/* notebook hero */}
-        <View style={styles.hero}>
+        {/* notebook hero — tap the date to pick / back-date */}
+        <Pressable style={styles.hero} onPress={() => setCalOpen(true)} hitSlop={8}>
           <Text style={[styles.weekday, { color: c.primary }]}>{WD[dd.getDay()]}</Text>
           <Text style={styles.date}>
             {dd.getMonth() + 1}月{dd.getDate()}日
           </Text>
-          <Pressable onPress={() => setDate(todayKey())} hitSlop={8}>
-            <Text style={[type.muted, { color: c.primary }]}>今日にする</Text>
-          </Pressable>
-        </View>
+          <Feather name="chevron-down" size={20} color={colors.muted} />
+        </Pressable>
+        <CalendarModal visible={calOpen} value={date} onClose={() => setCalOpen(false)} onSelect={setDate} />
 
         <TextInput
           style={styles.titleInput}

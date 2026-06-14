@@ -1,5 +1,6 @@
 // Concrete collections + import/export helpers.
 
+import { clearModules, exportModules, importModules, loadModules } from './modules';
 import { Collection } from './store';
 import type { CareerOutput, ExportBundle, QuickMemo, Reflection, Task, WorkLog } from './types';
 
@@ -16,6 +17,7 @@ export async function loadAll(): Promise<void> {
     tasks.load(),
     reflections.load(),
     careerOutputs.load(),
+    loadModules(),
   ]);
 }
 
@@ -29,6 +31,7 @@ export function buildExport(): ExportBundle {
     tasks: tasks.getSnapshot(),
     reflections: reflections.getSnapshot(),
     careerOutputs: careerOutputs.getSnapshot(),
+    modules: exportModules(),
   };
 }
 
@@ -50,6 +53,7 @@ export async function importBundle(raw: string): Promise<void> {
     tasks.replaceAll(Array.isArray(b.tasks) ? b.tasks : []),
     reflections.replaceAll(Array.isArray(b.reflections) ? b.reflections : []),
     careerOutputs.replaceAll(Array.isArray(b.careerOutputs) ? b.careerOutputs : []),
+    importModules(b.modules),
   ]);
 }
 
@@ -60,5 +64,6 @@ export async function clearAll(): Promise<void> {
     tasks.clear(),
     reflections.clear(),
     careerOutputs.clear(),
+    clearModules(),
   ]);
 }
