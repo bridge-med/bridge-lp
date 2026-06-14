@@ -1,10 +1,14 @@
 import { router, Stack } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ProFeatureList } from '../components/ProFeatures';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card, EmptyState } from '../components/ui';
+import { AiError, reflectJournal } from '../lib/ai';
 import { journal } from '../lib/data';
+import { formatDateJa } from '../lib/date';
 import { usePro } from '../lib/entitlement';
+import { usePrefs } from '../lib/prefs';
 import { useCollection } from '../lib/store';
 import { averageMood, currentStreak, lastNDays, monthlyCounts, moodDistribution } from '../lib/stats';
 import { colors, radius, spacing, type } from '../lib/theme';
@@ -15,6 +19,26 @@ export default function ReviewScreen() {
   const isPro = usePro();
   const c = useColors();
   const entries = useCollection(journal);
+  const { geminiApiKey } = usePrefs();
+  const [reflection, setReflection] = useState<string | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
+
+  async function runReflection() {
+    if (!geminiApiKey) {
+      Alert.alert('APIキーが未設定です', '設定 → AI（Gemini）で Gemini APIキーを登録してください。');
+      return;
+    }
+    const recent = [...entries].sort((a, b) => (b.date < a.date ? -1 : 1)).slice(0, 14);
+    const text = recent.map((e) => `${formatDateJa(e.date)}${e.mood ? ` ${MOOD_EMOJI[e.mood - 1]}` : ''}\n${e.body}`).join('\n\n');
+    setAiBusy(true);
+    try {
+      setReflection(await reflectJournal(text, geminiApiKey));
+    } catch (e) {
+      Alert.alert('ふりかえり生成に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   if (!isPro) {
     return (
@@ -70,6 +94,19 @@ export default function ReviewScreen() {
           <Text style={type.muted}>平均の気分</Text>
         </Card>
       </View>
+
+      <Card style={{ gap: spacing.md }}>
+        <Text style={type.h2}>✨ AIふりかえり</Text>
+        {reflection ? <Text style={[type.body, { color: colors.text2 }]}>{reflection}</Text> : null}
+        {aiBusy ? (
+          <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.sm }}>
+            <ActivityIndicator color={c.primary} />
+            <Text style={type.muted}>AIが最近の日記をふりかえり中…</Text>
+          </View>
+        ) : (
+          <Button label={reflection ? 'もう一度ふりかえる' : '最近の日記をAIでふりかえる'} onPress={runReflection} />
+        )}
+      </Card>
 
       <Card style={{ gap: spacing.md }}>
         <Text style={type.h2}>気分の傾向</Text>

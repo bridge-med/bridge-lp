@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Sheet } from '../../components/Sheet';
 import { ThemePicker } from '../../components/ThemePicker';
 import { useColors } from '../../components/ThemeProvider';
@@ -8,6 +8,7 @@ import { Button, Card, Field, SectionTitle } from '../../components/ui';
 import { buildExport, clearAll, importBundle, journal, memos, tasks } from '../../lib/data';
 import { devTogglePro, usePro } from '../../lib/entitlement';
 import { toMarkdown } from '../../lib/markdown';
+import { prefs, usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
 
@@ -17,6 +18,7 @@ export default function SettingsScreen() {
   const j = useCollection(journal);
   const pro = usePro();
   const c = useColors();
+  const { geminiApiKey } = usePrefs();
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
 
@@ -96,6 +98,40 @@ export default function SettingsScreen() {
       </View>
 
       <View>
+        <SectionTitle>AI（Gemini）</SectionTitle>
+        <Card style={{ gap: spacing.md }}>
+          {pro ? (
+            <>
+              <Text style={type.muted}>
+                自分の Gemini APIキーを登録すると、AIでタスク整理・メモ整理・日記のふりかえりが使えます（無料枠あり）。
+              </Text>
+              <Field
+                label="APIキー"
+                placeholder="AIza..."
+                value={geminiApiKey}
+                onChangeText={(v) => void prefs.set({ geminiApiKey: v.trim() })}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Pressable onPress={() => void Linking.openURL('https://aistudio.google.com/apikey')} hitSlop={6}>
+                <Text style={[type.muted, { color: c.primary }]}>APIキーを取得する（Google AI Studio）↗</Text>
+              </Pressable>
+              <Text style={type.muted}>
+                {geminiApiKey ? '✓ キー設定済み（端末内のみに保存）' : 'キー未設定'}
+              </Text>
+              {geminiApiKey ? <Button label="キーを削除" variant="ghost" onPress={() => void prefs.set({ geminiApiKey: '' })} /> : null}
+            </>
+          ) : (
+            <Pressable onPress={() => router.push('/paywall')} style={styles.aiLocked}>
+              <Text style={type.body}>✨ AI機能（タスク/メモ/日記の自動整理）</Text>
+              <Text style={[styles.proBadge, { color: c.primary }]}>PRO</Text>
+            </Pressable>
+          )}
+        </Card>
+      </View>
+
+      <View>
         <SectionTitle>バックアップ</SectionTitle>
         <Card style={{ gap: spacing.md }}>
           <Text style={type.muted}>
@@ -161,5 +197,7 @@ const styles = StyleSheet.create({
   proTitle: { ...type.h2, fontSize: 16, color: colors.primary },
   proArrow: { color: colors.primary, fontSize: 22, fontWeight: '800' },
   devLink: { ...type.muted, color: colors.line2 },
+  aiLocked: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  proBadge: { fontWeight: '800', fontSize: 12, letterSpacing: 1 },
 });
 

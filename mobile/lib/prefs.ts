@@ -9,9 +9,10 @@ const KEY = 'bridge-daily:prefs';
 export interface Prefs {
   onboardingDone: boolean;
   accent: AccentKey;
+  geminiApiKey: string;
 }
 
-const DEFAULT: Prefs = { onboardingDone: false, accent: 'blue' };
+const DEFAULT: Prefs = { onboardingDone: false, accent: 'blue', geminiApiKey: '' };
 
 type Listener = () => void;
 

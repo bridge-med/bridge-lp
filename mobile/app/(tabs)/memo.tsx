@@ -1,15 +1,18 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SearchBar } from '../../components/SearchBar';
 import { Sheet } from '../../components/Sheet';
 import { TagFilter } from '../../components/TagFilter';
 import { TagInput } from '../../components/TagInput';
+import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Chip, EmptyState, Fab, Field } from '../../components/ui';
+import { AiError, tidyMemo } from '../../lib/ai';
 import { memos } from '../../lib/data';
 import { formatDateJa } from '../../lib/date';
 import { usePro } from '../../lib/entitlement';
+import { usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { collectTags, matchesQuery } from '../../lib/tags';
 import { colors, spacing, type } from '../../lib/theme';
@@ -103,11 +106,37 @@ export default function MemoScreen() {
 }
 
 function MemoFormSheet({ visible, memo, isPro, onClose }: { visible: boolean; memo: Memo | null; isPro: boolean; onClose: () => void }) {
+  const c = useColors();
+  const { geminiApiKey } = usePrefs();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [pinned, setPinned] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [seed, setSeed] = useState<string | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
+
+  async function runAi() {
+    if (!isPro) {
+      goPaywall();
+      return;
+    }
+    if (!geminiApiKey) {
+      Alert.alert('APIキーが未設定です', '設定 → AI（Gemini）で Gemini APIキーを登録してください。');
+      return;
+    }
+    const source = `${title}\n${body}`.trim();
+    if (!source) return;
+    setAiBusy(true);
+    try {
+      const r = await tidyMemo(source, geminiApiKey);
+      if (r.title) setTitle(r.title);
+      if (r.body) setBody(r.body);
+    } catch (e) {
+      Alert.alert('AI整理に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   const key = (visible ? 'open' : 'closed') + ':' + (memo?.id ?? 'new');
   if (key !== seed && visible) {
@@ -145,6 +174,17 @@ function MemoFormSheet({ visible, memo, isPro, onClose }: { visible: boolean; me
     <Sheet visible={visible} title={memo ? 'メモを編集' : '新しいメモ'} onClose={onClose}>
       <Field label="タイトル（任意）" placeholder="メモのタイトル" value={title} onChangeText={setTitle} />
       <Field label="本文" placeholder="内容を入力" value={body} onChangeText={setBody} multiline autoFocus={!memo} />
+      <Pressable
+        onPress={runAi}
+        disabled={aiBusy}
+        style={[styles.aiBtn, { borderColor: c.primary, backgroundColor: c.primaryWeak }]}
+      >
+        {aiBusy ? (
+          <ActivityIndicator color={c.primary} />
+        ) : (
+          <Text style={[styles.aiBtnText, { color: c.primary }]}>✨ AIで整理{isPro ? '' : '（Pro）'}</Text>
+        )}
+      </Pressable>
       <TagInput value={tags} onChange={setTags} enabled={isPro} onLocked={goPaywall} />
       <Pressable onPress={() => setPinned((p) => !p)} style={styles.pinToggle}>
         <View style={[styles.pinBox, pinned && styles.pinBoxOn]}>{pinned ? <Text style={styles.pinMark}>✓</Text> : null}</View>
@@ -162,6 +202,8 @@ const styles = StyleSheet.create({
   cardHead: { flexDirection: 'row', alignItems: 'center' },
   cardTitle: { ...type.h2, fontSize: 16, flex: 1 },
   tagRow: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', marginTop: spacing.xs },
+  aiBtn: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  aiBtnText: { fontSize: 15, fontWeight: '700' },
   pinToggle: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
   pinBox: {
     width: 24,

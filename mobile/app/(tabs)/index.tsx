@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AiTaskSheet } from '../../components/AiTaskSheet';
 import { SearchBar } from '../../components/SearchBar';
 import { Sheet } from '../../components/Sheet';
 import { SwipeRow } from '../../components/SwipeRow';
@@ -37,6 +38,15 @@ export default function TasksScreen() {
   const [showDone, setShowDone] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+
+  function openAi() {
+    if (!isPro) {
+      router.push('/paywall');
+      return;
+    }
+    setAiOpen(true);
+  }
 
   const today = todayKey();
   const openCount = all.filter((t) => t.status === 'todo').length;
@@ -95,6 +105,10 @@ export default function TasksScreen() {
         <SearchBar value={query} onChangeText={setQuery} placeholder="タスクを検索" />
         {isPro ? <TagFilter tags={allTags} selected={tagFilter} onSelect={setTagFilter} /> : null}
 
+        <Pressable onPress={openAi} style={[styles.aiBtn, { borderColor: c.primary, backgroundColor: c.primaryWeak }]}>
+          <Text style={[styles.aiBtnText, { color: c.primary }]}>✨ AIでまとめて追加{isPro ? '' : '（Pro）'}</Text>
+        </Pressable>
+
         {!hasOpen && doneItems.length === 0 ? (
           <EmptyState
             icon="🗒️"
@@ -142,6 +156,7 @@ export default function TasksScreen() {
       </View>
 
       <TaskFormSheet visible={sheetOpen} task={editing} isPro={isPro} onClose={() => setSheetOpen(false)} />
+      <AiTaskSheet visible={aiOpen} onClose={() => setAiOpen(false)} onNeedKey={() => router.push('/settings')} />
     </View>
   );
 }
@@ -349,4 +364,6 @@ const styles = StyleSheet.create({
   rowTitleDone: { color: colors.muted, textDecorationLine: 'line-through' },
   rowMeta: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, flexWrap: 'wrap' },
   chipRow: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
+  aiBtn: { borderWidth: 1, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center' },
+  aiBtnText: { fontSize: 15, fontWeight: '700' },
 });

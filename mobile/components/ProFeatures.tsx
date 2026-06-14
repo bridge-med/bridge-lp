@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { colors, spacing, type } from '../lib/theme';
 
 export const PRO_FEATURES: { icon: string; title: string; desc: string }[] = [
+  { icon: '✨', title: 'AIで自動整理', desc: '走り書き→タスク化、メモ整理、日記のふりかえり（要 Geminiキー）' },
   { icon: '📊', title: 'ふりかえり', desc: 'ストリーク・気分グラフ・月次サマリーで継続を可視化' },
   { icon: '⏰', title: '複数リマインダー', desc: 'タスクに複数・繰り返しの通知（無料は1件まで）' },
   { icon: '🏷️', title: 'タグ整理 & フィルタ', desc: 'メモ・タスクにタグを付けてワンタップで絞り込み' },

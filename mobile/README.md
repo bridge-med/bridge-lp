@@ -42,6 +42,7 @@ npx expo start
 |---|:--:|:--:|
 | タスク・メモ・日記（無制限） | ✓ | ✓ |
 | JSON バックアップ | ✓ | ✓ |
+| **AIで自動整理**（Gemini・走り書き→タスク化／メモ整理／日記ふりかえり） | – | ✓ |
 | **ふりかえり**（ストリーク・気分グラフ・月次サマリー） | – | ✓ |
 | **Markdown エクスポート** | – | ✓ |
 | **タグ整理 & タグフィルタ** | – | ✓ |
@@ -55,6 +56,11 @@ npx expo start
 
 > ⚠️ IAP も AdMob も **Expo Go では動かず開発ビルド(EAS)が必須**。実際の販売・審査・課金テストは、あなたの Apple / Google 開発者アカウント＋EAS で行ってください。
 
+### AI（Gemini）について
+- **BYOK（自分のAPIキー方式）**：ユーザーが自分の Gemini APIキー（無料枠あり）を設定 → 端末から直接 `generativelanguage` API（`gemini-2.5-flash`, structured output）を呼びます。サーバ不要・運営側のAPI費用ゼロなので **買い切り Pro と相性◎**。
+- キーは `lib/prefs.ts` に端末内保存（平文）。ロジックは `lib/ai.ts` に集約。
+- 機能：タスクの「✨ AIでまとめて追加」（走り書き→構造化タスク）、メモの「✨ AIで整理」、ふりかえりの「✨ AIふりかえり」。
+
 ## 設計（拡張しやすさ）
 
 Web 版 `worklog` と同じく、データ層を抽象化して将来のバックエンド移行に備えています。
@@ -66,7 +72,8 @@ lib/
   store.ts        リアクティブなコレクション（useSyncExternalStore でタブ間同期）
   data.ts         コレクション実体（tasks / memos / journal）＋ import/export
   entitlement.ts  Pro 課金状態（usePro / purchasePro。RevenueCat に差し替え可能）
-  prefs.ts        アプリ設定（オンボーディング状態・アクセントテーマ）永続化
+  ai.ts           Gemini クライアント（タスク抽出・メモ整理・日記ふりかえり）
+  prefs.ts        アプリ設定（オンボーディング・アクセント・Geminiキー）永続化
   stats.ts        ふりかえり用の集計（ストリーク・気分分布・月次）
   markdown.ts     Markdown エクスポート生成
   tags.ts         タグ収集・テキスト検索のヘルパー
