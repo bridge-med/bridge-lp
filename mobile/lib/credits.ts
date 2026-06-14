@@ -10,7 +10,7 @@ import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const KEY = 'bridge-daily:coins';
-const STARTER = 5; // free coins on first run
+const STARTER = 3; // free coins on first run (registration bonus to try AI)
 
 export const GEN_COST = 1; // coins per AI generation
 

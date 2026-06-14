@@ -46,25 +46,24 @@ npx expo start          # QR を Expo Go で読む / npm run ios|android
 プロフィール（users 相当）は `lib/prefs.ts` に保持。フラットなレコードなので、
 `lib/storage.ts` の AsyncStorage 実装を Supabase クライアントに差し替えれば移行できます。
 
-## AI — BYOK・無料機能・マルチプロバイダ
+## AI — マネージド（コイン消費）
 
-- **プロバイダを選べる**：Google Gemini (`gemini-2.5-flash`) / OpenAI (`gpt-4o-mini`) / Anthropic Claude (`claude-haiku-4-5`)。設定でプロバイダ＋自分のAPIキーを登録（端末内保存）。
-- 端末から各プロバイダAPIを直接呼ぶ（サーバ不要）。「自分のキーなのに課金」は不自然なので **AIは無料**。
-- **キー未設定でも動作**：`generateReflection()` / `generateCareerOutput()` はモックにフォールバック。
-- ロジックは `lib/ai.ts`（プロバイダ抽象 `complete()`）：`extractTasks`（走り書き→タスク）、`tidyMemo`、`generateReflection`、`generateCareerOutput`、`validateApiKey`。
+- ユーザーはAPIキーを持たず、アプリ内で **コインを購入** → 1生成 = 1コイン消費（`lib/credits.ts`）。
+- 実際の生成は本番でサーバ（開発者キー）に接続する想定。現状はプレビューとして端末内のローカル整形（`localExtractTasks` / `localTidy` / `localWorkStyle` / `generateReflection` / `generateCareerOutput` のモック）で動作。
+- 登録特典として初回に無料コイン（`STARTER`）を付与。
+- ロジックは `lib/ai.ts`。BYOK（自分のキー）と広告は廃止。
 
 ## アイコン / スプラッシュ
 
 `scripts/gen-icons.mjs`（`@resvg/resvg-js`、dev-only）で生成。ブランドの上昇バー・マーク（青グラデ）。再生成は `node scripts/gen-icons.mjs`。
 
-## マネタイズ（全機能無料 + 広告 + 買い切り広告除去）
+## マネタイズ（コインのみ・広告なし）
 
-機能はすべて無料。`components/BannerSlot.tsx` の控えめバナー（タスク/メモ/タイムライン等の一覧、**ログ詳細や日記的画面には出さない**）＋
-買い切り「広告を消す」（`lib/entitlement.ts` の `useAdFree`）。
+広告は無し。AI生成は **コイン消費型**（`lib/credits.ts`：`GEN_COST` / `COIN_PACKS` / `STARTER`）。
+コイン画面（`app/coins.tsx`）でパック購入、各AI機能が1コインずつ消費。
 
-- 広告本番化：AdMob `react-native-google-mobile-ads` に差し替え（EAS 開発ビルド必須）。
-- 課金本番化：RevenueCat `react-native-purchases` に差し替え（`entitlement.ts` のみ）。
-- 動作確認：設定 → このアプリについて → 「（開発用）広告オフを切り替え」。
+- 課金本番化：RevenueCat `react-native-purchases`（消費型IAP）でコイン残高をクレジット。
+- 生成本番化：サーバ（開発者キー）に接続し、`lib/ai.ts` のローカル整形を置き換え。
 
 ## アーキテクチャ
 
@@ -75,24 +74,26 @@ lib/
   storage.ts    永続化（AsyncStorage。Supabase へ差し替える単一点）
   store.ts      リアクティブ Collection（useSyncExternalStore）
   data.ts       コレクション実体 ＋ import/export
-  prefs.ts      プロフィール・テーマ・AIキー・オンボーディング状態
-  entitlement.ts 広告除去の課金状態（useAdFree）
-  ai.ts         Gemini クライアント＋AIヘルパー（モックfallback）
+  prefs.ts      プロフィール・テーマ・オンボーディング状態
+  credits.ts    コイン残高・パック・消費（マネージドAIの土台）
+  ai.ts         AIヘルパー（現状ローカル整形／本番はサーバ生成）
   date.ts / tags.ts / haptics.ts / theme.ts
 components/  ui, Sheet, Onboarding, TagPicker, TaskSheet, QuickMemoSheet,
-             AiTaskSheet, SwipeRow, BannerSlot, ThemeProvider, ThemePicker
+             AiTaskSheet, SwipeRow, BlockHeader, ThemeProvider, ThemePicker
 app/
   _layout.tsx          ルート（起動ロード / オンボーディング / stack 登録）
-  (tabs)/              index(ホーム) / timeline / tasks / reflection / settings
+  (tabs)/              index(ホーム) / timeline / tasks / reflection / hub / settings
   log-edit.tsx         仕事ログ作成・編集
   log/[id].tsx         仕事ログ詳細
   career.tsx           キャリア変換
-  paywall.tsx          広告を消す（モーダル）
+  coins.tsx            コイン購入
+  workstyle.tsx        働き方タイプ分析
+  m/[key].tsx          キャリア/自己理解モジュール
 ```
 
 ## 今後の実装予定
 
 - Supabase 連携（認証・複数端末同期）— `lib/storage.ts` 差し替え
-- AdMob / RevenueCat 結線（EAS 開発ビルド）
+- RevenueCat 結線（消費型IAP→コイン）＋サーバ生成（開発者キー）
 - AI 自動タグ付け、PDF / CSV エクスポート、Notion / カレンダー連携
 - 採用企業向け共有URL、匿名ポートフォリオ共有

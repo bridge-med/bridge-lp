@@ -2,7 +2,6 @@ import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { BannerSlot } from '../../components/BannerSlot';
 import { BlockHeader } from '../../components/BlockHeader';
 import { QuickMemoSheet } from '../../components/QuickMemoSheet';
 import { useColors } from '../../components/ThemeProvider';
@@ -96,10 +95,6 @@ export default function HomeScreen() {
           ) : (
             recent.map((l) => <LogRow key={l.id} log={l} onPress={() => router.push(`/log/${l.id}`)} />)
           )}
-
-          <View style={{ marginTop: spacing.lg }}>
-            <BannerSlot />
-          </View>
         </View>
       </ScrollView>
 

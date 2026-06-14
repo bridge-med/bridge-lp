@@ -2,7 +2,6 @@
 // editable record (singleton). Renders fields by type.
 
 import { Feather } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +10,7 @@ import { moduleCollection, type FieldDef, type ModuleConfig } from '../lib/modul
 import { useCollection } from '../lib/store';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 import type { GenericRecord } from '../lib/types';
+import { BlockHeader } from './BlockHeader';
 import { DateField } from './DatePicker';
 import { Ledger } from './Ledger';
 import { Sheet } from './Sheet';
@@ -48,7 +48,7 @@ export function ModuleScreen({ config }: { config: ModuleConfig }) {
     const rec = items[0] ?? null;
     return (
       <View style={styles.container}>
-        <Stack.Screen options={{ title: config.title }} />
+        <BlockHeader wordmark="ASSET" title={config.title} onBack pad={24} />
         <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + spacing.xl }}>
           <Text style={type.muted}>{config.desc}</Text>
           <View style={{ height: spacing.lg }} />
@@ -69,7 +69,7 @@ export function ModuleScreen({ config }: { config: ModuleConfig }) {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: config.title }} />
+      <BlockHeader wordmark="ASSET" title={config.title} onBack pad={24} />
       <ScrollView contentContainerStyle={{ paddingTop: spacing.lg, paddingBottom: 120 }}>
         <View style={{ paddingHorizontal: spacing.lg }}>
           <Text style={type.muted}>{config.desc}</Text>

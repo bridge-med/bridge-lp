@@ -4,17 +4,17 @@
 残りは「あなたのアカウントで鍵を入れて差し替える」だけです。所要は概ね半日〜1日（審査待ち除く）。
 
 ## いま出来ていること（コード側）
-- アプリ本体（5タブ・全画面）／ローカル保存で完全動作
-- AIは BYOK（鍵があれば Gemini、無ければモック）— `lib/ai.ts`
-- 課金フラグの単一窓口 `lib/entitlement.ts`（`useAdFree`）＋ペイウォール画面
-- 広告枠 `components/BannerSlot.tsx`（プレースホルダ、広告オフで非表示）
+- アプリ本体（全タブ・全画面）／ローカル保存で完全動作
+- AIは **マネージド（コイン消費）**。現状はローカル整形でプレビュー動作 — `lib/ai.ts` / `lib/credits.ts`
+- コイン経済（残高・パック・消費・登録特典）`lib/credits.ts` ＋ コイン画面 `app/coins.tsx`
+- 広告なし・BYOK（自分のキー）なし
 - `eas.json` / `app.config.ts`（env対応）/ `.env.example`
 - Supabase クライアント雛形 `lib/supabase.ts` ＋ スキーマ `supabase/schema.sql`
 - CI: `.github/workflows/eas-build.yml`（手動/タグで EAS ビルド）
 - ストア掲載文・プライバシーポリシー・審査メモ・素材チェックリスト（`store/`）
 
 ## あなたがやること（要アカウント/支払い）
-0. 各アカウント作成：Expo / Apple Developer(年¥約12,000) / Google Play(初回¥約3,500) /（広告なら）AdMob /（課金なら）RevenueCat。Gemini鍵は任意。
+0. 各アカウント作成：Expo / Apple Developer(年¥約12,000) / Google Play(初回¥約3,500) / RevenueCat（消費型IAP）。生成用の開発者AIキー（サーバ側）。
 1. **EAS 初期化**
    ```bash
    cd mobile && npm install --legacy-peer-deps
@@ -25,52 +25,36 @@
    ```bash
    eas build --profile development --platform ios   # または android
    ```
-   ※ Expo Go では IAP/広告は動きません。開発ビルドで確認します。
+   ※ Expo Go では IAP は動きません。開発ビルドで確認します。
 
 ---
 
-## 広告（AdMob）を入れる
-```bash
-npx expo install react-native-google-mobile-ads
-```
-`.env` に：
-```
-ADMOB_ANDROID_APP_ID=ca-app-pub-xxx~xxx
-ADMOB_IOS_APP_ID=ca-app-pub-xxx~xxx
-EXPO_PUBLIC_ADMOB_BANNER_ANDROID=ca-app-pub-xxx/xxx
-EXPO_PUBLIC_ADMOB_BANNER_IOS=ca-app-pub-xxx/xxx
-```
-`app.config.ts` は App ID があれば自動でプラグインを追加します。
-`components/BannerSlot.tsx` の中身を実バナーに差し替え：
-```tsx
-import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
-import { Platform } from 'react-native';
-import { env } from '../lib/env';
-// adFree が false のときだけ表示（既存のガードはそのまま）
-const unitId = Platform.OS === 'ios' ? env.admobBannerIos : env.admobBannerAndroid;
-return <BannerAd unitId={unitId} size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} />;
-```
-iOS は ATT（App Tracking Transparency）対応も検討（`expo-tracking-transparency`）。
-
-## 課金（RevenueCat で「広告を消す」）
+## 課金（RevenueCat で「コイン」消費型IAP）
 ```bash
 npx expo install react-native-purchases
 ```
-RevenueCat ダッシュボードで非消耗型プロダクト `bridge_worklog_adfree`（仮）と
-Entitlement `adfree` を作成。`.env` に `EXPO_PUBLIC_RC_IOS_KEY` / `EXPO_PUBLIC_RC_ANDROID_KEY`。
-`lib/entitlement.ts` の `purchaseAdFree` / `restorePurchases` / `load` を差し替え：
+RevenueCat ダッシュボードで **消費型（consumable）** プロダクトを `lib/credits.ts` の
+`COIN_PACKS`（`coins_10` / `coins_30` / `coins_100`）に合わせて作成。
+`.env` に `EXPO_PUBLIC_RC_IOS_KEY` / `EXPO_PUBLIC_RC_ANDROID_KEY`。
+`app/coins.tsx` の `buy()`（現状はデモで `credits.add`）を差し替え：
 ```ts
 import Purchases from 'react-native-purchases';
 import { Platform } from 'react-native';
-import { env } from './env';
+import { env } from '../lib/env';
 // 起動時に一度:
 Purchases.configure({ apiKey: Platform.OS === 'ios' ? env.revenuecatIosKey : env.revenuecatAndroidKey });
-// load(): const info = await Purchases.getCustomerInfo(); adFree = !!info.entitlements.active['adfree'];
-// purchaseAdFree(): const offerings = await Purchases.getOfferings();
-//   await Purchases.purchasePackage(offerings.current!.availablePackages[0]); then set(true)
-// restorePurchases(): const info = await Purchases.restorePurchases(); return !!info.entitlements.active['adfree'];
+// buy(): const offerings = await Purchases.getOfferings();
+//   const pkg = offerings.current!.availablePackages.find(p => p.identifier === id);
+//   const { customerInfo } = await Purchases.purchasePackage(pkg);
+//   サーバでレシート検証 → 検証OKなら credits.add(pack.coins)
 ```
-アプリ内の他の場所（ペイウォール・設定）は `useAdFree()` を見ているので変更不要です。
+消費型なので「購入完了→残高クレジット」はサーバ検証後に行うのが安全（不正防止）。
+
+## 生成バックエンド（開発者キー）
+コインを消費する各機能（`AiTaskSheet` / `QuickMemoSheet` / `reflection` / `career` / `workstyle`）は
+現状 `lib/ai.ts` のローカル整形（`localExtractTasks` など）でプレビュー動作。
+本番では `lib/ai.ts` のヘルパーを **自前のサーバ関数** 呼び出しに差し替え、
+サーバ側で開発者のAIキー（Gemini等）を使って生成する。クライアントに鍵を置かない。
 
 ## クラウド同期（Supabase・任意）
 1. Supabase プロジェクト作成 → SQL エディタで `supabase/schema.sql` を実行。
@@ -95,11 +79,11 @@ eas submit --platform android  # google-service-account.json を配置後
 ## ストア掲載
 - 文言：`store/listing-ja.md` / `store/listing-en.md`
 - プライバシーポリシー：`store/privacy-policy.md` を公開URL化（例：GitHub Pages に置く）
-- 審査メモ：`store/review-notes.md`（アカウント不要・BYOK・買い切りである旨）
+- 審査メモ：`store/review-notes.md`（アカウント不要・コイン消費型IAPである旨）
 - スクショ/アイコン：`store/assets-checklist.md`
 
 ## 最終チェック
 - [ ] アイコン/スプラッシュを実ブランド画像に（現状はExpo既定）
 - [ ] バージョン/ビルド番号、bundleId(`com.bridgemed.worklog`)確認
-- [ ] iOS: ATT・課金サンドボックステスト / Android: 内部テストトラック
-- [ ] プライバシー表示（AdMob使うなら識別子の申告）
+- [ ] iOS: 課金サンドボックステスト / Android: 内部テストトラック
+- [ ] 消費型IAPのレシート検証（サーバ）→ コイン残高クレジット

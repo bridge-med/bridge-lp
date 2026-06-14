@@ -1,17 +1,14 @@
 import { Feather } from '@expo/vector-icons';
-import { router, Stack } from 'expo-router';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BlockHeader } from '../components/BlockHeader';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card } from '../components/ui';
 import { COIN_PACKS, GEN_COST, credits, useCoins } from '../lib/credits';
-import { activeAiKey, usePrefs } from '../lib/prefs';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 
 export default function CoinsScreen() {
   const c = useColors();
   const coins = useCoins();
-  const prefs = usePrefs();
-  const hasKey = !!activeAiKey(prefs);
 
   function buy(coinsToAdd: number, price: string) {
     // TODO: replace with consumable IAP (RevenueCat) + server-verified credit.
@@ -22,16 +19,16 @@ export default function CoinsScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xl }}>
-      <Stack.Screen options={{ title: 'コイン' }} />
-
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <BlockHeader wordmark="COIN" title="コイン" onBack pad={24} />
+      <View style={{ padding: spacing.lg }}>
       <View style={styles.balance}>
         <Feather name="circle" size={20} color={c.primary} />
         <Text style={styles.balanceNum}>{coins}</Text>
         <Text style={type.muted}>コイン</Text>
       </View>
       <Text style={[type.muted, { textAlign: 'center', marginBottom: spacing.xl }]}>
-        AIでの生成 1回につき {GEN_COST} コイン。キー登録は不要、買ったコインで使えます。
+        AIでの生成 1回につき {GEN_COST} コイン。買ったコインで、タスク化・メモ整理・ふり返り・キャリア変換に使えます。
       </Text>
 
       <Text style={type.label}>コインを買う</Text>
@@ -55,22 +52,16 @@ export default function CoinsScreen() {
       </View>
 
       <View style={styles.note}>
-        <Text style={type.label}>使い方は2通り</Text>
+        <Text style={type.label}>登録特典</Text>
         <Text style={[type.body, { marginTop: spacing.sm }]}>
-          ① コインで使う（かんたん・キー不要）{'\n'}② 自分のAPIキーを登録（無料・上級者向け）
+          はじめての方には無料コインをお渡ししています。まずは気になる機能を試してみてください。
         </Text>
-        {hasKey ? (
-          <Text style={[type.muted, { marginTop: spacing.sm, color: c.good }]}>✓ APIキー登録済み。AIは無料で使えます。</Text>
-        ) : (
-          <View style={{ marginTop: spacing.md }}>
-            <Button label="自分のAPIキーを登録する" variant="ghost" onPress={() => router.push('/settings')} />
-          </View>
-        )}
       </View>
 
       <Text style={[type.muted, { marginTop: spacing.xl, fontSize: 11 }]}>
         ※ 現在はデモ購入です。リリース時はアプリ内課金（消費型）＋サーバ生成に接続します。
       </Text>
+      </View>
     </ScrollView>
   );
 }

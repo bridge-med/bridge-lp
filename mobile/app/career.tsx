@@ -1,13 +1,15 @@
-import { Stack } from 'expo-router';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { BlockHeader } from '../components/BlockHeader';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card, Chip, EmptyState } from '../components/ui';
 import { AiError, generateCareerOutput } from '../lib/ai';
 import { CAREER_OUTPUTS, type CareerOutputType } from '../lib/constants';
+import { credits, GEN_COST, useCoins } from '../lib/credits';
 import { careerOutputs, workLogs } from '../lib/data';
 import { formatDateJa } from '../lib/date';
-import { activeAiKey, usePrefs } from '../lib/prefs';
+import { usePrefs } from '../lib/prefs';
 import { useCollection } from '../lib/store';
 import { colors, spacing, type } from '../lib/theme';
 import type { CareerOutput } from '../lib/types';
@@ -16,9 +18,8 @@ export default function CareerScreen() {
   const c = useColors();
   const logs = useCollection(workLogs);
   const outputs = useCollection(careerOutputs);
-  const prefs = usePrefs();
-  const { profession, role, purpose } = prefs;
-  const apiKey = activeAiKey(prefs);
+  const coins = useCoins();
+  const { profession, role, purpose } = usePrefs();
   const [outputType, setOutputType] = useState<CareerOutputType>('resume');
   const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -36,14 +37,21 @@ export default function CareerScreen() {
       Alert.alert('ログを選択してください', '変換のもとにする仕事ログを1つ以上選んでください。');
       return;
     }
+    if (!(await credits.spend(GEN_COST))) {
+      Alert.alert('コインが足りません', '生成にはコインが必要です。', [
+        { text: '閉じる', style: 'cancel' },
+        { text: 'コインを見る', onPress: () => router.push('/coins') },
+      ]);
+      return;
+    }
     setBusy(true);
     try {
-      const content = await generateCareerOutput(chosen, outputType, { profession, role, purpose }, apiKey ? { provider: prefs.aiProvider, apiKey } : null);
+      const content = await generateCareerOutput(chosen, outputType, { profession, role, purpose }, null);
       await careerOutputs.upsert({
         outputType,
         sourceLogIds: chosen.map((l) => l.id),
         content,
-        aiGenerated: !!apiKey,
+        aiGenerated: true,
       } as Partial<CareerOutput>);
       setSelected([]);
     } catch (e) {
@@ -54,9 +62,9 @@ export default function CareerScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl }}>
-      <Stack.Screen options={{ title: 'キャリア変換' }} />
-
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <BlockHeader wordmark="CAREER" title="キャリア変換" onBack pad={24} />
+      <View style={{ padding: spacing.lg, gap: spacing.md }}>
       <Card style={{ gap: spacing.md }}>
         <Text style={type.h2}>形式を選ぶ</Text>
         <View style={styles.chips}>
@@ -92,9 +100,9 @@ export default function CareerScreen() {
           <Text style={type.muted}>生成しています…</Text>
         </View>
       ) : (
-        <Button label={apiKey ? '生成する' : 'まとめて生成'} onPress={generate} disabled={selected.length === 0} />
+        <Button label="生成する（1コイン）" onPress={generate} disabled={selected.length === 0} />
       )}
-      {!apiKey ? <Text style={type.muted}>※ AIキー未設定のため、選択ログをまとめた下書きを生成します（設定で文章化）。</Text> : null}
+      <Text style={type.muted}>選んだ仕事ログから下書きを生成します。1回1コイン・残り {coins} コイン。</Text>
 
       {sortedOutputs.length > 0 ? (
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
@@ -118,6 +126,7 @@ export default function CareerScreen() {
           ))}
         </View>
       ) : null}
+      </View>
     </ScrollView>
   );
 }

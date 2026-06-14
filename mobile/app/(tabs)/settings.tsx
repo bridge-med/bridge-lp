@@ -1,23 +1,19 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
-import { Hero } from '../../components/Hero';
+import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { BlockHeader } from '../../components/BlockHeader';
 import { Picker } from '../../components/Picker';
 import { Sheet } from '../../components/Sheet';
 import { ThemePicker } from '../../components/ThemePicker';
 import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Chip, Field, SectionTitle } from '../../components/ui';
-import { AiError, validateApiKey } from '../../lib/ai';
-import { AI_PROVIDERS, PROFESSIONS, PURPOSES, ROLES } from '../../lib/constants';
+import { PROFESSIONS, PURPOSES, ROLES } from '../../lib/constants';
 import { useCoins } from '../../lib/credits';
 import { buildExport, careerOutputs, clearAll, importBundle, quickMemos, reflections, tasks, workLogs } from '../../lib/data';
-import { devToggleAdFree, useAdFree } from '../../lib/entitlement';
-import { activeAiKey, prefs, usePrefs, type Prefs } from '../../lib/prefs';
+import { prefs, usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
-
-const AI_KEY_FIELD = { gemini: 'geminiApiKey', openai: 'openaiApiKey', anthropic: 'anthropicApiKey' } as const;
 
 export default function SettingsScreen() {
   const logs = useCollection(workLogs);
@@ -25,32 +21,12 @@ export default function SettingsScreen() {
   const allTasks = useCollection(tasks);
   useCollection(reflections);
   useCollection(careerOutputs);
-  const adFree = useAdFree();
   const coins = useCoins();
   const c = useColors();
-  const prefsValue = usePrefs();
-  const { profession, role, purpose, aiProvider } = prefsValue;
-  const activeProvider = AI_PROVIDERS.find((p) => p.key === aiProvider)!;
-  const activeKey = activeAiKey(prefsValue);
-  const aiKeyField = AI_KEY_FIELD[aiProvider];
+  const { profession, role, purpose } = usePrefs();
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [verifyMsg, setVerifyMsg] = useState<{ ok: boolean; text: string } | null>(null);
-
-  async function onVerifyKey() {
-    setVerifying(true);
-    setVerifyMsg(null);
-    try {
-      await validateApiKey({ provider: aiProvider, apiKey: activeKey });
-      setVerifyMsg({ ok: true, text: '✓ キーは有効です。AI機能を使えます。' });
-    } catch (e) {
-      setVerifyMsg({ ok: false, text: e instanceof AiError ? e.message : '確認に失敗しました。' });
-    } finally {
-      setVerifying(false);
-    }
-  }
 
   async function onExport() {
     try {
@@ -78,32 +54,20 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: spacing.xl }}>
-      <Hero label="SETTINGS" title="設定" />
-      <View style={{ paddingHorizontal: spacing.lg, gap: spacing.lg }}>
+      <BlockHeader wordmark="SETTINGS" title="設定" pad={24} />
+      <View style={{ paddingHorizontal: spacing.lg, gap: spacing.lg, paddingTop: spacing.lg }}>
       <Card style={styles.statRow}>
         <Stat value={logs.length} label="ログ" />
         <Stat value={memos.length} label="メモ" />
         <Stat value={allTasks.length} label="タスク" />
       </Card>
 
-      <Pressable onPress={() => router.push('/paywall')} disabled={adFree}>
-        <Card style={[styles.proCard, { backgroundColor: adFree ? colors.accentWeak : c.primaryWeak, borderColor: adFree ? colors.accentWeak : c.primaryWeak }]}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.proTitle, { color: adFree ? colors.good : c.primary }]}>{adFree ? '広告オフ' : '広告を消す（買い切り）'}</Text>
-            <Text style={[type.muted, adFree && { color: colors.good }]}>
-              {adFree ? '✓ 広告は表示されません' : '機能は全部無料のまま、広告だけ非表示に'}
-            </Text>
-          </View>
-          {!adFree ? <Text style={[styles.arrow, { color: c.primary }]}>›</Text> : null}
-        </Card>
-      </Pressable>
-
       <Pressable onPress={() => router.push('/coins')}>
         <Card style={styles.proCard}>
           <Feather name="circle" size={22} color={c.primary} />
           <View style={{ flex: 1 }}>
             <Text style={styles.proTitle}>コイン {coins}</Text>
-            <Text style={type.muted}>AIをコインで使う（キー登録なら無料）</Text>
+            <Text style={type.muted}>AIによる生成にコインを使います</Text>
           </View>
           <Text style={[styles.arrow, { color: c.primary }]}>›</Text>
         </Card>
@@ -140,53 +104,6 @@ export default function SettingsScreen() {
       </View>
 
       <View>
-        <SectionTitle>AI</SectionTitle>
-        <Card style={{ gap: spacing.md }}>
-          <Text style={type.muted}>
-            好きなAIプロバイダを選び、自分のAPIキーを登録すると、タスク化・メモ整理・振り返り・キャリア変換が高精度になります。
-          </Text>
-          <View style={styles.chips}>
-            {AI_PROVIDERS.map((p) => (
-              <Chip
-                key={p.key}
-                label={p.label}
-                tone="primary"
-                active={aiProvider === p.key}
-                onPress={() => {
-                  void prefs.set({ aiProvider: p.key });
-                  setVerifyMsg(null);
-                }}
-              />
-            ))}
-          </View>
-          <Pressable onPress={() => void Linking.openURL(activeProvider.keyUrl)} style={[styles.linkBtn, { borderColor: c.primary }]}>
-            <Text style={[type.body, { color: c.primary, fontWeight: '700' }]}>{activeProvider.label} のAPIキーを取得 ↗</Text>
-          </Pressable>
-          <Field
-            label={`${activeProvider.label} APIキー`}
-            placeholder={activeProvider.keyHint}
-            value={activeKey}
-            onChangeText={(v) => {
-              void prefs.set({ [aiKeyField]: v.trim() } as Partial<Prefs>);
-              setVerifyMsg(null);
-            }}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-          {verifyMsg ? (
-            <Text style={[type.body, { color: verifyMsg.ok ? colors.good : colors.danger }]}>{verifyMsg.text}</Text>
-          ) : (
-            <Text style={type.muted}>{activeKey ? `モデル: ${activeProvider.model}・端末内のみに保存` : 'キー未設定でもモックで動作します'}</Text>
-          )}
-          <Button label={verifying ? '確認中…' : 'キーを確認'} onPress={onVerifyKey} disabled={!activeKey || verifying} />
-          {activeKey ? (
-            <Button label="キーを削除" variant="ghost" onPress={() => { void prefs.set({ [aiKeyField]: '' } as Partial<Prefs>); setVerifyMsg(null); }} />
-          ) : null}
-        </Card>
-      </View>
-
-      <View>
         <SectionTitle>バックアップ</SectionTitle>
         <Card style={{ gap: spacing.md }}>
           <Text style={type.muted}>データは端末内だけに保存されます。機種変更の前に書き出して保管してください。</Text>
@@ -210,9 +127,6 @@ export default function SettingsScreen() {
             日々の仕事ログ・メモ・タスクを残すと、職務経歴書や面接・1on1の材料になる。データは端末内（オフライン）に保持します。
           </Text>
           <Text style={[type.muted, { marginTop: spacing.xs }]}>バージョン 0.1.0 (MVP)</Text>
-          <Pressable onPress={() => void devToggleAdFree()} hitSlop={8} style={{ marginTop: spacing.sm }}>
-            <Text style={styles.devLink}>（開発用）広告オフを切り替え: {adFree ? 'ON' : 'OFF'}</Text>
-          </Pressable>
         </Card>
       </View>
       </View>
@@ -271,7 +185,5 @@ const styles = StyleSheet.create({
   proTitle: { ...type.h2, fontSize: 16 },
   arrow: { fontSize: 22, fontWeight: '800' },
   linkCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  devLink: { ...type.muted, color: colors.line2 },
-  linkBtn: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 });

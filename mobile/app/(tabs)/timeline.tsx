@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BannerSlot } from '../../components/BannerSlot';
+import { BlockHeader } from '../../components/BlockHeader';
 import { Ledger } from '../../components/Ledger';
 import { QuickMemoSheet } from '../../components/QuickMemoSheet';
 import { useColors } from '../../components/ThemeProvider';
@@ -100,22 +100,19 @@ export default function TimelineScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingTop: 56, paddingBottom: 120 }}>
-        <Ledger divider={false}>
-          <Text style={type.label}>RECORD</Text>
-          <Text style={styles.hero}>記録</Text>
-          <View style={styles.filters}>
-            {(['all', 'log', 'memo', 'task'] as const).map((f) => (
-              <Chip
-                key={f}
-                label={f === 'all' ? 'すべて' : f === 'log' ? 'ログ' : f === 'memo' ? 'メモ' : 'タスク'}
-                tone="primary"
-                active={filter === f}
-                onPress={() => setFilter(f)}
-              />
-            ))}
-          </View>
-        </Ledger>
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+        <BlockHeader wordmark="RECORD" title="記録" pad={20} />
+        <View style={styles.filters}>
+          {(['all', 'log', 'memo', 'task'] as const).map((f) => (
+            <Chip
+              key={f}
+              label={f === 'all' ? 'すべて' : f === 'log' ? 'ログ' : f === 'memo' ? 'メモ' : 'タスク'}
+              tone="primary"
+              active={filter === f}
+              onPress={() => setFilter(f)}
+            />
+          ))}
+        </View>
 
         {visible.length === 0 ? (
           <Ledger>
@@ -141,10 +138,6 @@ export default function TimelineScreen() {
             );
           })
         )}
-
-        <Ledger last>
-          <BannerSlot />
-        </Ledger>
       </ScrollView>
 
       <View style={{ position: 'absolute', right: 0, bottom: insets.bottom }}>
@@ -164,8 +157,7 @@ export default function TimelineScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  hero: { fontFamily: fonts.mincho, fontSize: 36, color: colors.text, lineHeight: 44, marginTop: 2 },
-  filters: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', marginTop: spacing.md },
+  filters: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.sm },
   gdate: { fontFamily: fonts.minchoReg, fontSize: 16 },
   kind: { fontFamily: fonts.gothicMed, fontSize: 11, letterSpacing: 1 },
 });

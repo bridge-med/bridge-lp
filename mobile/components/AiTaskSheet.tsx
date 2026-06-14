@@ -1,12 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { AiError, extractTasks, localExtractTasks, type DraftTask } from '../lib/ai';
+import { AiError, localExtractTasks, type DraftTask } from '../lib/ai';
 import { credits, GEN_COST, useCoins } from '../lib/credits';
 import { tasks } from '../lib/data';
 import { dueLabel } from '../lib/date';
 import { tapSuccess } from '../lib/haptics';
-import { activeAiKey, usePrefs } from '../lib/prefs';
 import { spacing, type } from '../lib/theme';
 import type { Task } from '../lib/types';
 import { Sheet } from './Sheet';
@@ -17,8 +16,6 @@ type Draft = DraftTask & { include: boolean };
 
 export function AiTaskSheet({ visible, onClose }: { visible: boolean; onClose: () => void; onNeedKey?: () => void }) {
   const c = useColors();
-  const prefs = usePrefs();
-  const apiKey = activeAiKey(prefs);
   const coins = useCoins();
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,9 +35,8 @@ export function AiTaskSheet({ visible, onClose }: { visible: boolean; onClose: (
 
   async function run() {
     if (!text.trim()) return;
-    // No key → spend a coin (managed). Out of coins → go buy.
-    if (!apiKey && !(await credits.spend(GEN_COST))) {
-      Alert.alert('コインが足りません', 'AIで使うにはコイン購入か、自分のAPIキー登録が必要です。', [
+    if (!(await credits.spend(GEN_COST))) {
+      Alert.alert('コインが足りません', 'AIで整理するにはコインが必要です。', [
         { text: '閉じる', style: 'cancel' },
         { text: 'コインを見る', onPress: () => { close(); router.push('/coins'); } },
       ]);
@@ -49,7 +45,7 @@ export function AiTaskSheet({ visible, onClose }: { visible: boolean; onClose: (
     setLoading(true);
     setError(null);
     try {
-      const result = apiKey ? await extractTasks(text, { provider: prefs.aiProvider, apiKey }) : localExtractTasks(text);
+      const result = localExtractTasks(text);
       if (result.length === 0) setError('タスクを抽出できませんでした。文章を具体的にしてみてください。');
       else setDrafts(result.map((d) => ({ ...d, include: true })));
     } catch (e) {
@@ -89,8 +85,8 @@ export function AiTaskSheet({ visible, onClose }: { visible: boolean; onClose: (
             </View>
           ) : (
             <>
-              <Button label={apiKey ? '整理する' : `整理する（1コイン）`} onPress={run} disabled={!text.trim()} />
-              {!apiKey ? <Text style={[type.muted, { textAlign: 'center' }]}>残り {coins} コイン・キー登録で無料</Text> : null}
+              <Button label="整理する（1コイン）" onPress={run} disabled={!text.trim()} />
+              <Text style={[type.muted, { textAlign: 'center' }]}>残り {coins} コイン</Text>
             </>
           )}
         </>

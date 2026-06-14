@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { BannerSlot } from '../../components/BannerSlot';
-import { Hero } from '../../components/Hero';
+import { BlockHeader } from '../../components/BlockHeader';
 import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, EmptyState } from '../../components/ui';
+import { router } from 'expo-router';
 import { AiError, generateReflection } from '../../lib/ai';
+import { credits, GEN_COST, useCoins } from '../../lib/credits';
 import { reflections, workLogs } from '../../lib/data';
 import { formatDateJa, monthRangeKeys, startOfWeekKey, todayKey } from '../../lib/date';
-import { activeAiKey, usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
 import type { Reflection, ReflectionContent, ReflectionPeriod } from '../../lib/types';
@@ -26,8 +26,7 @@ export default function ReflectionScreen() {
   const c = useColors();
   const logs = useCollection(workLogs);
   const refs = useCollection(reflections);
-  const prefs = usePrefs();
-  const apiKey = activeAiKey(prefs);
+  const coins = useCoins();
   const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
@@ -41,15 +40,22 @@ export default function ReflectionScreen() {
       Alert.alert('ログがありません', `${period === 'week' ? '今週' : '今月'}の仕事ログがありません。まずログを残しましょう。`);
       return;
     }
+    if (!(await credits.spend(GEN_COST))) {
+      Alert.alert('コインが足りません', 'ふり返りの作成にはコインが必要です。', [
+        { text: '閉じる', style: 'cancel' },
+        { text: 'コインを見る', onPress: () => router.push('/coins') },
+      ]);
+      return;
+    }
     setBusy(true);
     try {
-      const content = await generateReflection(inRange, apiKey ? { provider: prefs.aiProvider, apiKey } : null);
+      const content = await generateReflection(inRange, null);
       const saved = await reflections.upsert({
         periodType: period,
         startDate: start,
         endDate: end,
         content,
-        aiGenerated: !!apiKey,
+        aiGenerated: true,
       } as Partial<Reflection>);
       setExpanded(saved.id);
     } catch (e) {
@@ -61,12 +67,12 @@ export default function ReflectionScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 110 }}>
-      <Hero label="REVIEW" title="ふり返り" />
-      <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md }}>
+      <BlockHeader wordmark="REVIEW" title="ふり返り" pad={24} />
+      <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md, paddingTop: spacing.lg }}>
       <Card style={{ gap: spacing.md }}>
         <Text style={type.h2}>振り返りをつくる</Text>
         <Text style={type.muted}>
-          期間の仕事ログから自動でまとめます。{apiKey ? 'AIで生成します。' : 'AIキー未設定のため、ログを整理して生成します（設定で精度UP）。'}
+          期間の仕事ログから、やったこと・課題・次の一手・実績候補までまとめます。1回1コイン・残り {coins} コイン。
         </Text>
         {busy ? (
           <View style={styles.loading}>
@@ -76,10 +82,10 @@ export default function ReflectionScreen() {
         ) : (
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
             <View style={{ flex: 1 }}>
-              <Button label="今週" onPress={() => generate('week')} />
+              <Button label="今週（1コイン）" onPress={() => generate('week')} />
             </View>
             <View style={{ flex: 1 }}>
-              <Button label="今月" variant="ghost" onPress={() => generate('month')} />
+              <Button label="今月（1コイン）" variant="ghost" onPress={() => generate('month')} />
             </View>
           </View>
         )}
@@ -118,8 +124,6 @@ export default function ReflectionScreen() {
           </Pressable>
         ))
       )}
-
-      <BannerSlot />
       </View>
     </ScrollView>
   );

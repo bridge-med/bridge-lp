@@ -4,8 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AiTaskSheet } from '../../components/AiTaskSheet';
-import { BannerSlot } from '../../components/BannerSlot';
-import { Hero } from '../../components/Hero';
+import { BlockHeader } from '../../components/BlockHeader';
 import { SwipeRow } from '../../components/SwipeRow';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
@@ -51,8 +50,8 @@ export default function TasksScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 110 }}>
-        <Hero label="TASKS" title="タスク" subtitle={`未完了 ${all.filter((t) => t.status !== 'done').length}・全 ${all.length}`} />
-        <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md }}>
+        <BlockHeader wordmark="TASKS" title="タスク" subtitle={`未完了 ${all.filter((t) => t.status !== 'done').length}・全 ${all.length}`} pad={24} />
+        <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md, paddingTop: spacing.lg }}>
         <Pressable onPress={() => setAiOpen(true)} style={[styles.aiBtn, { borderColor: c.primary }]}>
           <Feather name="zap" size={15} color={c.primary} />
           <Text style={[styles.aiBtnText, { color: c.primary }]}>文章からまとめて追加</Text>
@@ -94,8 +93,6 @@ export default function TasksScreen() {
             </View>
           ))
         )}
-
-        <BannerSlot />
         </View>
       </ScrollView>
 

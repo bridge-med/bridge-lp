@@ -2,10 +2,9 @@ import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { AiError, localTidy, tidyMemo } from '../lib/ai';
+import { AiError, localTidy } from '../lib/ai';
 import { credits, GEN_COST } from '../lib/credits';
 import { quickMemos } from '../lib/data';
-import { activeAiKey, usePrefs } from '../lib/prefs';
 import { spacing, type } from '../lib/theme';
 import type { QuickMemo } from '../lib/types';
 import { Sheet } from './Sheet';
@@ -15,8 +14,6 @@ import { Button, Field } from './ui';
 
 export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; memo?: QuickMemo | null; onClose: () => void }) {
   const c = useColors();
-  const prefs = usePrefs();
-  const apiKey = activeAiKey(prefs);
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [seed, setSeed] = useState<string | null>(null);
@@ -31,8 +28,8 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
 
   async function runAi() {
     if (!content.trim()) return;
-    if (!apiKey && !(await credits.spend(GEN_COST))) {
-      Alert.alert('コインが足りません', 'AIで整えるにはコイン購入か、APIキー登録が必要です。', [
+    if (!(await credits.spend(GEN_COST))) {
+      Alert.alert('コインが足りません', 'AIで整えるにはコインが必要です。', [
         { text: '閉じる', style: 'cancel' },
         { text: 'コインを見る', onPress: () => router.push('/coins') },
       ]);
@@ -40,7 +37,7 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
     }
     setAiBusy(true);
     try {
-      setContent(apiKey ? await tidyMemo(content, { provider: prefs.aiProvider, apiKey }) : localTidy(content));
+      setContent(localTidy(content));
     } catch (e) {
       Alert.alert('整理に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
     } finally {
