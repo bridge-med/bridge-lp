@@ -27,39 +27,30 @@ npx expo start
 |---|---|
 | **タスク** | 期限切れ/今日/今後/期限なし/完了に自動セクション分け。チェックで完了（触覚フィードバック）、優先度・期限・タグ。検索バー＋件数サマリー |
 | **メモ** | 形式自由のメモ。ピン留めで上部固定、タグ、検索、更新日時 |
-| **日記** | 日付＋気分(5段階)＋本文。新しい順のタイムライン。→ ふりかえり（Pro） |
-| **設定** | 件数サマリー、テーマ切替、JSON / Markdown バックアップ、Pro、全削除、アプリ情報 |
+| **日記** | 日付＋気分(5段階)＋本文。新しい順のタイムライン。→ ふりかえり |
+| **設定** | 件数サマリー、テーマ切替、AIキー登録、広告を消す、JSON / Markdown バックアップ、全削除、アプリ情報 |
 
 - 初回起動時に **3画面のオンボーディング**（スキップ可）。
 - タスク行は **左スワイプで削除**（確認ダイアログ付き）。
-- 検索は無料。タグ付け・タグフィルタ・テーマ切替は Pro。
+- **機能はすべて無料**。マネタイズは広告のみ（下記）。
 
-## 課金（買い切り Pro）
+## マネタイズ（全機能無料 + 広告 + 買い切りで広告除去）
 
-「無料フル機能 × 買い切り Pro で便利機能を解放」のフリーミアム構成です。
+**機能はすべて無料**（AI整理・ふりかえり・タグ・テーマ・検索・エクスポート）。マネタイズは
+**タスク／メモ一覧の控えめなバナー広告**のみで、**買い切りで広告を消せます**（日記には広告を出さない）。
 
-| | 無料 | **Pro（買い切り ¥980）** |
-|---|:--:|:--:|
-| タスク・メモ・日記（無制限） | ✓ | ✓ |
-| JSON バックアップ | ✓ | ✓ |
-| **AIで自動整理**（Gemini・走り書き→タスク化／メモ整理／日記ふりかえり） | – | ✓ |
-| **ふりかえり**（ストリーク・気分グラフ・月次サマリー） | – | ✓ |
-| **Markdown エクスポート** | – | ✓ |
-| **タグ整理 & タグフィルタ** | – | ✓ |
-| **テーマ（アクセントカラー5色）** | – | ✓ |
-| 検索（文字） | ✓ | ✓ |
-| 複数リマインダー（今後） | – | ✓ |
+- 広告除去の状態は `lib/entitlement.ts` が単一の真実。`useAdFree()` で参照。
+- `purchaseAdFree()` は現状**ローカル解錠のモック**。本番化は RevenueCat (`react-native-purchases`) に差し替え（このファイルだけ）+ EAS 開発ビルド + ストア商品登録。
+- 広告は `components/BannerSlot.tsx`（現状プレースホルダ）。本番は AdMob `react-native-google-mobile-ads` に差し替え（EAS 開発ビルド必須）。
+- 動作確認用に **設定 → このアプリについて → 「（開発用）広告オフを切り替え」**。
 
-- 課金状態は `lib/entitlement.ts` が単一の真実。`usePro()` で参照し、機能側はこのフラグだけに依存します。
-- 現状 `purchasePro()` は**ローカル解錠のモック**です。本番化は RevenueCat (`react-native-purchases`) に差し替え（このファイルだけ）+ EAS 開発ビルド + ストア商品登録が必要です。
-- 動作確認用に **設定 → このアプリについて → 「（開発用）Pro 状態を切り替え」** で Pro の ON/OFF を切替できます。
+> ⚠️ IAP も AdMob も **Expo Go では動かず開発ビルド(EAS)が必須**。販売・審査・広告は、あなたの Apple / Google / AdMob アカウント＋EAS で行ってください。
 
-> ⚠️ IAP も AdMob も **Expo Go では動かず開発ビルド(EAS)が必須**。実際の販売・審査・課金テストは、あなたの Apple / Google 開発者アカウント＋EAS で行ってください。
-
-### AI（Gemini）について
-- **BYOK（自分のAPIキー方式）**：ユーザーが自分の Gemini APIキー（無料枠あり）を設定 → 端末から直接 `generativelanguage` API（`gemini-2.5-flash`, structured output）を呼びます。サーバ不要・運営側のAPI費用ゼロなので **買い切り Pro と相性◎**。
-- キーは `lib/prefs.ts` に端末内保存（平文）。ロジックは `lib/ai.ts` に集約。
-- 機能：タスクの「✨ AIでまとめて追加」（走り書き→構造化タスク）、メモの「✨ AIで整理」、ふりかえりの「✨ AIふりかえり」。
+### AI（Gemini）について — 無料機能・BYOK
+- **BYOK（自分のAPIキー方式）**：ユーザーが自分の Gemini APIキー（無料枠あり）を設定 → 端末から直接 `generativelanguage` API（`gemini-2.5-flash`, structured output）を呼びます。サーバ不要・運営側のAPI費用ゼロ。
+- 「自分のキーなのに課金」は不自然なので **AIは無料**（広告でマネタイズ）。
+- キーは `lib/prefs.ts` に端末内保存（平文）。ロジックは `lib/ai.ts`。設定で「キーを確認」可能。
+- 機能：タスクの「✨ AIでまとめて追加」、メモの「✨ AIで整理」、ふりかえりの「✨ AIふりかえり」。
 
 ## 設計（拡張しやすさ）
 
@@ -71,7 +62,7 @@ lib/
   storage.ts      永続化（AsyncStorage 実装。ここだけ差し替えれば Supabase 等へ移行可能）
   store.ts        リアクティブなコレクション（useSyncExternalStore でタブ間同期）
   data.ts         コレクション実体（tasks / memos / journal）＋ import/export
-  entitlement.ts  Pro 課金状態（usePro / purchasePro。RevenueCat に差し替え可能）
+  entitlement.ts  広告除去の課金状態（useAdFree / purchaseAdFree。RevenueCat に差し替え可能）
   ai.ts           Gemini クライアント（タスク抽出・メモ整理・日記ふりかえり）
   prefs.ts        アプリ設定（オンボーディング・アクセント・Geminiキー）永続化
   stats.ts        ふりかえり用の集計（ストリーク・気分分布・月次）
@@ -86,20 +77,22 @@ components/
   Sheet.tsx       追加・編集用のボトムシート
   Onboarding.tsx  初回オンボーディング（3画面）
   SwipeRow.tsx    左スワイプ削除（Animated + PanResponder、確認付き）
-  SearchBar.tsx   検索バー（無料）
-  TagInput.tsx    タグ編集（Pro。無料時はロック表示）
-  TagFilter.tsx   タグでの絞り込みチップ（Pro）
-  ThemePicker.tsx アクセントカラー選択（Pro）
-  ProFeatures.tsx Pro 特典リスト（ペイウォール・設定で共有）
+  SearchBar.tsx   検索バー
+  TagInput.tsx    タグ編集
+  TagFilter.tsx   タグでの絞り込みチップ
+  ThemePicker.tsx アクセントカラー選択
+  BannerSlot.tsx  バナー広告枠（広告オフ時は非表示。本番は AdMob に差し替え）
+  AiTaskSheet.tsx 走り書き→AIタスク化のシート
+  ProFeatures.tsx 広告除去の価値リスト（ペイウォール用）
 app/
   _layout.tsx          ルート（SafeArea / 起動時ロード / paywall・review 登録）
   (tabs)/_layout.tsx   タブ定義
-  (tabs)/index.tsx     タスク
-  (tabs)/memo.tsx      メモ
-  (tabs)/journal.tsx   日記（→ ふりかえり導線）
-  (tabs)/settings.tsx  設定（Pro カード / エクスポート）
-  review.tsx           ふりかえり（Pro。未購入はティザー）
-  paywall.tsx          ペイウォール（モーダル）
+  (tabs)/index.tsx     タスク（AIまとめ追加 / 広告バナー）
+  (tabs)/memo.tsx      メモ（AI整理 / 広告バナー）
+  (tabs)/journal.tsx   日記（→ ふりかえり導線・広告なし）
+  (tabs)/settings.tsx  設定（広告を消す / テーマ / AIキー）
+  review.tsx           ふりかえり（AIふりかえり含む）
+  paywall.tsx          広告を消す（モーダル）
 ```
 
 ## プライバシー

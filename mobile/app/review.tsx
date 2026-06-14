@@ -1,13 +1,11 @@
-import { router, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ProFeatureList } from '../components/ProFeatures';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card, EmptyState } from '../components/ui';
 import { AiError, reflectJournal } from '../lib/ai';
 import { journal } from '../lib/data';
 import { formatDateJa } from '../lib/date';
-import { usePro } from '../lib/entitlement';
 import { usePrefs } from '../lib/prefs';
 import { useCollection } from '../lib/store';
 import { averageMood, currentStreak, lastNDays, monthlyCounts, moodDistribution } from '../lib/stats';
@@ -16,7 +14,6 @@ import { colors, radius, spacing, type } from '../lib/theme';
 const MOOD_EMOJI = ['😞', '😕', '😐', '🙂', '😄'];
 
 export default function ReviewScreen() {
-  const isPro = usePro();
   const c = useColors();
   const entries = useCollection(journal);
   const { geminiApiKey } = usePrefs();
@@ -38,25 +35,6 @@ export default function ReviewScreen() {
     } finally {
       setAiBusy(false);
     }
-  }
-
-  if (!isPro) {
-    return (
-      <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
-        <Stack.Screen options={{ title: 'ふりかえり' }} />
-        <Card style={{ gap: spacing.md, alignItems: 'center' }}>
-          <Text style={{ fontSize: 40 }}>📊</Text>
-          <Text style={type.h2}>ふりかえりは Pro 機能です</Text>
-          <Text style={[type.muted, { textAlign: 'center' }]}>
-            続けた日数（ストリーク）、気分の傾向、月ごとの記録数を可視化して、習慣化を後押しします。
-          </Text>
-        </Card>
-        <Card>
-          <ProFeatureList />
-        </Card>
-        <Button label="Pro を見る" onPress={() => router.push('/paywall')} />
-      </ScrollView>
-    );
   }
 
   if (entries.length === 0) {

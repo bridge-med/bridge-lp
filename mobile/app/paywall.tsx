@@ -2,14 +2,14 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ProFeatureList } from '../components/ProFeatures';
+import { AdFreeBenefits } from '../components/ProFeatures';
 import { useColors } from '../components/ThemeProvider';
 import { Button } from '../components/ui';
-import { PRO, purchasePro, restorePurchases, usePro } from '../lib/entitlement';
+import { ADFREE, purchaseAdFree, restorePurchases, useAdFree } from '../lib/entitlement';
 import { colors, radius, spacing, type } from '../lib/theme';
 
 export default function Paywall() {
-  const isPro = usePro();
+  const adFree = useAdFree();
   const c = useColors();
   const insets = useSafeAreaInsets();
   const [busy, setBusy] = useState(false);
@@ -17,10 +17,8 @@ export default function Paywall() {
   async function buy() {
     setBusy(true);
     try {
-      await purchasePro();
-      Alert.alert('Proを解放しました', 'すべての機能が使えるようになりました。ありがとうございます！', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      await purchaseAdFree();
+      Alert.alert('ありがとうございます！', '広告を非表示にしました。', [{ text: 'OK', onPress: () => router.back() }]);
     } catch {
       Alert.alert('購入できませんでした', 'もう一度お試しください。');
     } finally {
@@ -30,7 +28,7 @@ export default function Paywall() {
 
   async function restore() {
     const ok = await restorePurchases();
-    Alert.alert(ok ? '復元しました' : '購入が見つかりません', ok ? 'Proが有効です。' : '対象の購入履歴がありませんでした。');
+    Alert.alert(ok ? '復元しました' : '購入が見つかりません', ok ? '広告は表示されません。' : '対象の購入履歴がありませんでした。');
   }
 
   return (
@@ -38,27 +36,27 @@ export default function Paywall() {
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + spacing.xl, gap: spacing.lg }}>
         <View style={styles.hero}>
           <Text style={[styles.badge, { color: c.primary }]}>BRIDGE Daily</Text>
-          <Text style={styles.heroTitle}>Pro</Text>
+          <Text style={styles.heroTitle}>広告を消す</Text>
           <Text style={[type.body, { color: colors.text2, textAlign: 'center' }]}>
-            一度の購入で、ずっと使える。{'\n'}記録を続ける力をひとまとめに。
+            機能はすべて無料のまま。{'\n'}広告だけをオフにできます。
           </Text>
         </View>
 
         <View style={styles.card}>
-          <ProFeatureList />
+          <AdFreeBenefits />
         </View>
 
-        {isPro ? (
+        {adFree ? (
           <View style={[styles.card, styles.ownedCard]}>
-            <Text style={styles.ownedText}>✓ Pro を利用中です</Text>
+            <Text style={styles.ownedText}>✓ 広告は表示されません</Text>
           </View>
         ) : (
           <View style={{ gap: spacing.sm }}>
             <View style={styles.priceRow}>
-              <Text style={styles.price}>{PRO.priceLabel}</Text>
+              <Text style={styles.price}>{ADFREE.priceLabel}</Text>
               <Text style={type.muted}>買い切り・サブスクなし</Text>
             </View>
-            <Button label={busy ? '処理中…' : 'Pro を購入する'} onPress={buy} disabled={busy} />
+            <Button label={busy ? '処理中…' : '広告を消す'} onPress={buy} disabled={busy} />
             <Pressable onPress={restore} hitSlop={8} style={{ alignItems: 'center', paddingVertical: spacing.sm }}>
               <Text style={[styles.link, { color: c.primary }]}>購入を復元</Text>
             </Pressable>
@@ -80,8 +78,8 @@ export default function Paywall() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   hero: { alignItems: 'center', gap: spacing.xs, paddingTop: spacing.xl },
-  badge: { ...type.label, color: colors.primary, letterSpacing: 1 },
-  heroTitle: { fontSize: 44, fontWeight: '800', color: colors.text, lineHeight: 48 },
+  badge: { ...type.label, letterSpacing: 1 },
+  heroTitle: { fontSize: 36, fontWeight: '800', color: colors.text, lineHeight: 42 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -93,7 +91,7 @@ const styles = StyleSheet.create({
   ownedText: { ...type.h2, color: colors.good },
   priceRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', gap: spacing.sm },
   price: { fontSize: 30, fontWeight: '800', color: colors.text },
-  link: { color: colors.primary, fontSize: 15, fontWeight: '600' },
+  link: { fontSize: 15, fontWeight: '600' },
   close: {
     position: 'absolute',
     right: spacing.lg,

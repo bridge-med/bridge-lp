@@ -1,22 +1,20 @@
-// Pro entitlement layer.
+// Ad-free entitlement layer.
 //
-// This is the SINGLE place that knows whether the user owns "BRIDGE Daily Pro".
-// Right now it persists a local flag and `purchasePro()` unlocks it directly
-// (a mock, since real IAP requires a development/EAS build + store accounts).
-//
-// To go live: replace the bodies of purchasePro()/restorePurchases()/load()
-// with RevenueCat (`react-native-purchases`) calls and read the entitlement
-// from the customer info. The rest of the app only depends on `usePro()`.
+// Monetization = all features are free + subtle banner ads, with a one-time
+// "remove ads" purchase. This module is the single source of truth for whether
+// ads are removed. purchaseAdFree() is a local mock for now; swap its body for
+// RevenueCat (react-native-purchases) at ship time. The rest of the app only
+// depends on useAdFree().
 
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const KEY = 'bridge-daily:entitlement:pro';
+const KEY = 'bridge-daily:entitlement:adfree';
 
 type Listener = () => void;
 
 class Entitlement {
-  private pro = false;
+  private adFree = false;
   private loaded = false;
   private listeners = new Set<Listener>();
   private loadPromise: Promise<void> | null = null;
@@ -29,7 +27,7 @@ class Entitlement {
     };
   };
 
-  getSnapshot = (): boolean => this.pro;
+  getSnapshot = (): boolean => this.adFree;
 
   private emit() {
     this.listeners.forEach((l) => l());
@@ -38,7 +36,7 @@ class Entitlement {
   async load(): Promise<void> {
     if (this.loadPromise) return this.loadPromise;
     this.loadPromise = AsyncStorage.getItem(KEY).then((raw) => {
-      this.pro = raw === '1';
+      this.adFree = raw === '1';
       this.loaded = true;
       this.emit();
     });
@@ -46,7 +44,7 @@ class Entitlement {
   }
 
   async set(value: boolean): Promise<void> {
-    this.pro = value;
+    this.adFree = value;
     this.loaded = true;
     await AsyncStorage.setItem(KEY, value ? '1' : '0');
     this.emit();
@@ -55,20 +53,20 @@ class Entitlement {
 
 export const entitlement = new Entitlement();
 
-/** Subscribe a component to the Pro entitlement. */
-export function usePro(): boolean {
+/** True when the user has removed ads. */
+export function useAdFree(): boolean {
   return useSyncExternalStore(entitlement.subscribe, entitlement.getSnapshot, entitlement.getSnapshot);
 }
 
 // --- Store-facing facade (swap for RevenueCat later) ---------------------
 
-export const PRO = {
-  priceLabel: '¥980',
-  productId: 'bridge_daily_pro', // one-time, non-consumable
+export const ADFREE = {
+  priceLabel: '¥480',
+  productId: 'bridge_daily_adfree', // one-time, non-consumable
 } as const;
 
-/** Purchase the one-time Pro unlock. Mock implementation unlocks locally. */
-export async function purchasePro(): Promise<void> {
+/** Purchase the one-time ad removal. Mock implementation unlocks locally. */
+export async function purchaseAdFree(): Promise<void> {
   // TODO: replace with RevenueCat Purchases.purchaseStoreProduct(...)
   await entitlement.set(true);
 }
@@ -79,7 +77,7 @@ export async function restorePurchases(): Promise<boolean> {
   return entitlement.getSnapshot();
 }
 
-/** Dev-only: flip Pro on/off to preview gated UI without a store. */
-export async function devTogglePro(): Promise<void> {
+/** Dev-only: flip the ad-free state to preview both modes without a store. */
+export async function devToggleAdFree(): Promise<void> {
   await entitlement.set(!entitlement.getSnapshot());
 }

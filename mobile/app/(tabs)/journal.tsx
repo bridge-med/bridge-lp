@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sheet } from '../../components/Sheet';
 import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, EmptyState, Fab, Field } from '../../components/ui';
-import { usePro } from '../../lib/entitlement';
 import { journal } from '../../lib/data';
 import { formatDateJa, todayKey } from '../../lib/date';
 import { useCollection } from '../../lib/store';
@@ -22,7 +21,6 @@ const MOODS: { value: Mood; emoji: string }[] = [
 
 export default function JournalScreen() {
   const all = useCollection(journal);
-  const isPro = usePro();
   const c = useColors();
   const insets = useSafeAreaInsets();
   const [editing, setEditing] = useState<JournalEntry | null>(null);
@@ -43,7 +41,7 @@ export default function JournalScreen() {
               <Text style={[type.body, { fontWeight: '700' }]}>ふりかえり</Text>
               <Text style={type.muted}>ストリーク・気分グラフ・月次サマリー</Text>
             </View>
-            <Text style={[styles.reviewArrow, { color: c.primary }]}>{isPro ? '›' : 'PRO'}</Text>
+            <Text style={[styles.reviewArrow, { color: c.primary }]}>›</Text>
           </Card>
         </Pressable>
 

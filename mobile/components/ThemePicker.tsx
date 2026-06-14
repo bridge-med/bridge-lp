@@ -4,34 +4,23 @@ import { ACCENTS, type AccentKey, spacing, type } from '../lib/theme';
 
 const KEYS = Object.keys(ACCENTS) as AccentKey[];
 
-export function ThemePicker({ isPro, onLocked }: { isPro: boolean; onLocked: () => void }) {
+export function ThemePicker() {
   const { accent } = usePrefs();
 
-  function pick(key: AccentKey) {
-    if (!isPro) {
-      onLocked();
-      return;
-    }
-    void prefs.set({ accent: key });
-  }
-
   return (
-    <View style={{ gap: spacing.md }}>
-      <View style={styles.row}>
-        {KEYS.map((key) => {
-          const a = ACCENTS[key];
-          const selected = accent === key;
-          return (
-            <Pressable key={key} onPress={() => pick(key)} style={styles.item}>
-              <View style={[styles.swatch, { backgroundColor: a.primary }, selected && styles.swatchSelected]}>
-                {selected ? <Text style={styles.check}>✓</Text> : null}
-              </View>
-              <Text style={[type.muted, selected && { color: a.primary, fontWeight: '700' }]}>{a.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-      {!isPro ? <Text style={type.muted}>🔒 テーマの変更は Pro 機能です</Text> : null}
+    <View style={styles.row}>
+      {KEYS.map((key) => {
+        const a = ACCENTS[key];
+        const selected = accent === key;
+        return (
+          <Pressable key={key} onPress={() => void prefs.set({ accent: key })} style={styles.item}>
+            <View style={[styles.swatch, { backgroundColor: a.primary }, selected && styles.swatchSelected]}>
+              {selected ? <Text style={styles.check}>✓</Text> : null}
+            </View>
+            <Text style={[type.muted, selected && { color: a.primary, fontWeight: '700' }]}>{a.label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

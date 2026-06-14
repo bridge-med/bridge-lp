@@ -1,7 +1,7 @@
-import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BannerSlot } from '../../components/BannerSlot';
 import { SearchBar } from '../../components/SearchBar';
 import { Sheet } from '../../components/Sheet';
 import { TagFilter } from '../../components/TagFilter';
@@ -11,7 +11,6 @@ import { Button, Card, Chip, EmptyState, Fab, Field } from '../../components/ui'
 import { AiError, tidyMemo } from '../../lib/ai';
 import { memos } from '../../lib/data';
 import { formatDateJa } from '../../lib/date';
-import { usePro } from '../../lib/entitlement';
 import { usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { collectTags, matchesQuery } from '../../lib/tags';
@@ -20,7 +19,6 @@ import type { Memo } from '../../lib/types';
 
 export default function MemoScreen() {
   const all = useCollection(memos);
-  const isPro = usePro();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [tagFilter, setTagFilter] = useState<string | null>(null);
@@ -48,7 +46,7 @@ export default function MemoScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <SearchBar value={query} onChangeText={setQuery} placeholder="メモを検索" />
-        {isPro ? <TagFilter tags={allTags} selected={tagFilter} onSelect={setTagFilter} /> : null}
+        <TagFilter tags={allTags} selected={tagFilter} onSelect={setTagFilter} />
 
         {sorted.length === 0 ? (
           <EmptyState
@@ -89,6 +87,8 @@ export default function MemoScreen() {
             </Pressable>
           ))
         )}
+
+        <BannerSlot />
       </ScrollView>
 
       <View style={{ position: 'absolute', right: 0, bottom: insets.bottom }}>
@@ -100,12 +100,12 @@ export default function MemoScreen() {
         />
       </View>
 
-      <MemoFormSheet visible={open} memo={editing} isPro={isPro} onClose={() => setOpen(false)} />
+      <MemoFormSheet visible={open} memo={editing} onClose={() => setOpen(false)} />
     </View>
   );
 }
 
-function MemoFormSheet({ visible, memo, isPro, onClose }: { visible: boolean; memo: Memo | null; isPro: boolean; onClose: () => void }) {
+function MemoFormSheet({ visible, memo, onClose }: { visible: boolean; memo: Memo | null; onClose: () => void }) {
   const c = useColors();
   const { geminiApiKey } = usePrefs();
   const [title, setTitle] = useState('');
@@ -116,10 +116,6 @@ function MemoFormSheet({ visible, memo, isPro, onClose }: { visible: boolean; me
   const [aiBusy, setAiBusy] = useState(false);
 
   async function runAi() {
-    if (!isPro) {
-      goPaywall();
-      return;
-    }
     if (!geminiApiKey) {
       Alert.alert('APIキーが未設定です', '設定 → AI（Gemini）で Gemini APIキーを登録してください。');
       return;
@@ -165,10 +161,6 @@ function MemoFormSheet({ visible, memo, isPro, onClose }: { visible: boolean; me
     if (memo) void memos.remove(memo.id);
     onClose();
   }
-  function goPaywall() {
-    onClose();
-    router.push('/paywall');
-  }
 
   return (
     <Sheet visible={visible} title={memo ? 'メモを編集' : '新しいメモ'} onClose={onClose}>
@@ -182,10 +174,10 @@ function MemoFormSheet({ visible, memo, isPro, onClose }: { visible: boolean; me
         {aiBusy ? (
           <ActivityIndicator color={c.primary} />
         ) : (
-          <Text style={[styles.aiBtnText, { color: c.primary }]}>✨ AIで整理{isPro ? '' : '（Pro）'}</Text>
+          <Text style={[styles.aiBtnText, { color: c.primary }]}>✨ AIで整理</Text>
         )}
       </Pressable>
-      <TagInput value={tags} onChange={setTags} enabled={isPro} onLocked={goPaywall} />
+      <TagInput value={tags} onChange={setTags} />
       <Pressable onPress={() => setPinned((p) => !p)} style={styles.pinToggle}>
         <View style={[styles.pinBox, pinned && styles.pinBoxOn]}>{pinned ? <Text style={styles.pinMark}>✓</Text> : null}</View>
         <Text style={type.body}>上部に固定する</Text>

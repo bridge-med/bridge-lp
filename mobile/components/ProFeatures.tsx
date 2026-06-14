@@ -1,21 +1,19 @@
-// Shared list of what Pro unlocks. Used by the paywall and settings.
+// What removing ads gives you. Used by the paywall. (All features are free.)
 
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, spacing, type } from '../lib/theme';
 
-export const PRO_FEATURES: { icon: string; title: string; desc: string }[] = [
-  { icon: '✨', title: 'AIで自動整理', desc: '走り書き→タスク化、メモ整理、日記のふりかえり（要 Geminiキー）' },
-  { icon: '📊', title: 'ふりかえり', desc: 'ストリーク・気分グラフ・月次サマリーで継続を可視化' },
-  { icon: '⏰', title: '複数リマインダー', desc: 'タスクに複数・繰り返しの通知（無料は1件まで）' },
-  { icon: '🏷️', title: 'タグ整理 & フィルタ', desc: 'メモ・タスクにタグを付けてワンタップで絞り込み' },
-  { icon: '📤', title: '整形エクスポート', desc: 'Markdown / PDF で読みやすく書き出し' },
-  { icon: '🎨', title: 'テーマ & アイコン', desc: '配色・アプリアイコンをカスタマイズ' },
+const BENEFITS: { icon: string; title: string; desc: string }[] = [
+  { icon: '🚫', title: '広告が消える', desc: 'タスク・メモ一覧のバナーが非表示に' },
+  { icon: '🎯', title: '集中できる', desc: '余計な表示のないすっきりした画面' },
+  { icon: '💛', title: '開発の応援', desc: '個人開発の継続を支えられます' },
+  { icon: '✨', title: '機能はぜんぶ無料のまま', desc: 'AI整理・ふりかえり・タグ・テーマは元から無料' },
 ];
 
-export function ProFeatureList() {
+export function AdFreeBenefits() {
   return (
     <View style={{ gap: spacing.md }}>
-      {PRO_FEATURES.map((f) => (
+      {BENEFITS.map((f) => (
         <View key={f.title} style={styles.row}>
           <Text style={styles.icon}>{f.icon}</Text>
           <View style={{ flex: 1 }}>

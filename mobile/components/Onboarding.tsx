@@ -20,7 +20,7 @@ import { useColors } from './ThemeProvider';
 const SLIDES = [
   { icon: '✓', title: 'やることを、すぐに', body: '思いついたタスクを1タップで追加。期限・優先度・タグで自然に整理されます。' },
   { icon: '✎', title: 'メモも日記も一緒に', body: '走り書きのメモも、今日の気分と一言の日記も、同じ場所に。すべて端末内に保存されます。' },
-  { icon: '📊', title: '続けるほど見えてくる', body: 'ふりかえりで連続日数や気分の傾向を可視化（Pro）。毎日の記録が力になります。' },
+  { icon: '📊', title: '続けるほど見えてくる', body: 'ふりかえりで連続日数や気分の傾向を可視化。AI整理も使えて、毎日の記録が力になります。' },
 ];
 
 export function Onboarding({ visible }: { visible: boolean }) {

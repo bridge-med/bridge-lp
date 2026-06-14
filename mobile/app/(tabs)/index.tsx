@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AiTaskSheet } from '../../components/AiTaskSheet';
+import { BannerSlot } from '../../components/BannerSlot';
 import { SearchBar } from '../../components/SearchBar';
 import { Sheet } from '../../components/Sheet';
 import { SwipeRow } from '../../components/SwipeRow';
@@ -12,7 +13,6 @@ import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Chip, EmptyState, Fab, Field } from '../../components/ui';
 import { tasks } from '../../lib/data';
 import { dueLabel, todayKey } from '../../lib/date';
-import { usePro } from '../../lib/entitlement';
 import { tapLight, tapSuccess } from '../../lib/haptics';
 import { useCollection } from '../../lib/store';
 import { collectTags, matchesQuery } from '../../lib/tags';
@@ -30,7 +30,6 @@ type Section = { key: string; title: string; items: Task[] };
 
 export default function TasksScreen() {
   const all = useCollection(tasks);
-  const isPro = usePro();
   const c = useColors();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
@@ -39,14 +38,6 @@ export default function TasksScreen() {
   const [editing, setEditing] = useState<Task | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
-
-  function openAi() {
-    if (!isPro) {
-      router.push('/paywall');
-      return;
-    }
-    setAiOpen(true);
-  }
 
   const today = todayKey();
   const openCount = all.filter((t) => t.status === 'todo').length;
@@ -103,10 +94,10 @@ export default function TasksScreen() {
         </Card>
 
         <SearchBar value={query} onChangeText={setQuery} placeholder="タスクを検索" />
-        {isPro ? <TagFilter tags={allTags} selected={tagFilter} onSelect={setTagFilter} /> : null}
+        <TagFilter tags={allTags} selected={tagFilter} onSelect={setTagFilter} />
 
-        <Pressable onPress={openAi} style={[styles.aiBtn, { borderColor: c.primary, backgroundColor: c.primaryWeak }]}>
-          <Text style={[styles.aiBtnText, { color: c.primary }]}>✨ AIでまとめて追加{isPro ? '' : '（Pro）'}</Text>
+        <Pressable onPress={() => setAiOpen(true)} style={[styles.aiBtn, { borderColor: c.primary, backgroundColor: c.primaryWeak }]}>
+          <Text style={[styles.aiBtnText, { color: c.primary }]}>✨ AIでまとめて追加</Text>
         </Pressable>
 
         {!hasOpen && doneItems.length === 0 ? (
@@ -149,13 +140,15 @@ export default function TasksScreen() {
               : null}
           </View>
         ) : null}
+
+        <BannerSlot />
       </ScrollView>
 
       <View style={{ position: 'absolute', right: 0, bottom: insets.bottom }}>
         <Fab onPress={openNew} />
       </View>
 
-      <TaskFormSheet visible={sheetOpen} task={editing} isPro={isPro} onClose={() => setSheetOpen(false)} />
+      <TaskFormSheet visible={sheetOpen} task={editing} onClose={() => setSheetOpen(false)} />
       <AiTaskSheet visible={aiOpen} onClose={() => setAiOpen(false)} onNeedKey={() => router.push('/settings')} />
     </View>
   );
@@ -226,12 +219,10 @@ function TaskRow({ task, onToggle, onPress }: { task: Task; onToggle: () => void
 function TaskFormSheet({
   visible,
   task,
-  isPro,
   onClose,
 }: {
   visible: boolean;
   task: Task | null;
-  isPro: boolean;
   onClose: () => void;
 }) {
   const [title, setTitle] = useState('');
@@ -270,10 +261,6 @@ function TaskFormSheet({
     if (task) void tasks.remove(task.id);
     onClose();
   }
-  function goPaywall() {
-    onClose();
-    router.push('/paywall');
-  }
 
   return (
     <Sheet visible={visible} title={task ? 'タスクを編集' : '新しいタスク'} onClose={onClose}>
@@ -296,7 +283,7 @@ function TaskFormSheet({
       </View>
 
       <DuePicker value={due} onChange={setDue} />
-      <TagInput value={tags} onChange={setTags} enabled={isPro} onLocked={goPaywall} />
+      <TagInput value={tags} onChange={setTags} />
 
       <Button label={task ? '保存' : '追加'} onPress={save} disabled={!title.trim()} />
       {task ? <Button label="削除" variant="danger" onPress={del} /> : null}

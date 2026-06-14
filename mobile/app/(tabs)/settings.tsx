@@ -7,7 +7,7 @@ import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Field, SectionTitle } from '../../components/ui';
 import { AiError, validateApiKey } from '../../lib/ai';
 import { buildExport, clearAll, importBundle, journal, memos, tasks } from '../../lib/data';
-import { devTogglePro, usePro } from '../../lib/entitlement';
+import { devToggleAdFree, useAdFree } from '../../lib/entitlement';
 import { toMarkdown } from '../../lib/markdown';
 import { prefs, usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
@@ -17,7 +17,7 @@ export default function SettingsScreen() {
   const t = useCollection(tasks);
   const m = useCollection(memos);
   const j = useCollection(journal);
-  const pro = usePro();
+  const adFree = useAdFree();
   const c = useColors();
   const { geminiApiKey } = usePrefs();
   const [importOpen, setImportOpen] = useState(false);
@@ -48,10 +48,6 @@ export default function SettingsScreen() {
   }
 
   async function onExportMarkdown() {
-    if (!pro) {
-      router.push('/paywall');
-      return;
-    }
     const md = toMarkdown({ tasks: t, memos: m, journal: j });
     try {
       await Share.share({ message: md, title: 'BRIDGE Daily (Markdown)' });
@@ -92,93 +88,86 @@ export default function SettingsScreen() {
         <Stat value={j.length} label="日記" />
       </Card>
 
-      <Pressable onPress={() => router.push('/paywall')}>
-        <Card style={[styles.proCard, { backgroundColor: pro ? colors.accentWeak : c.primaryWeak, borderColor: pro ? colors.accentWeak : c.primaryWeak }]}>
+      <Pressable onPress={() => router.push('/paywall')} disabled={adFree}>
+        <Card
+          style={[
+            styles.proCard,
+            { backgroundColor: adFree ? colors.accentWeak : c.primaryWeak, borderColor: adFree ? colors.accentWeak : c.primaryWeak },
+          ]}
+        >
           <View style={{ flex: 1 }}>
-            <Text style={[styles.proTitle, { color: pro ? colors.good : c.primary }]}>
-              {pro ? 'BRIDGE Daily Pro' : 'Pro にアップグレード'}
+            <Text style={[styles.proTitle, { color: adFree ? colors.good : c.primary }]}>
+              {adFree ? '広告オフ' : '広告を消す（買い切り）'}
             </Text>
-            <Text style={[type.muted, pro && { color: colors.good }]}>
-              {pro ? '✓ すべての機能が利用できます' : 'ふりかえり・エクスポート・テーマなどを解放'}
+            <Text style={[type.muted, adFree && { color: colors.good }]}>
+              {adFree ? '✓ 広告は表示されません' : '機能は全部無料のまま、広告だけ非表示に'}
             </Text>
           </View>
-          {!pro ? <Text style={[styles.proArrow, { color: c.primary }]}>›</Text> : null}
+          {!adFree ? <Text style={[styles.proArrow, { color: c.primary }]}>›</Text> : null}
         </Card>
       </Pressable>
 
       <View>
         <SectionTitle>テーマ</SectionTitle>
         <Card>
-          <ThemePicker isPro={pro} onLocked={() => router.push('/paywall')} />
+          <ThemePicker />
         </Card>
       </View>
 
       <View>
         <SectionTitle>AI（Gemini）</SectionTitle>
         <Card style={{ gap: spacing.md }}>
-          {pro ? (
-            <>
-              <Text style={type.muted}>
-                自分の Gemini APIキーを登録すると、AIでタスク整理・メモ整理・日記のふりかえりが使えます。無料枠で十分試せます。
-              </Text>
-              <View style={styles.steps}>
-                <Text style={type.muted}>1. 下の「APIキーを取得」を開く（Googleアカウントでログイン）</Text>
-                <Text style={type.muted}>2.「APIキーを作成」して、表示されたキー（AIza…）をコピー</Text>
-                <Text style={type.muted}>3. 下の欄に貼り付け →「キーを確認」</Text>
-              </View>
-              <Pressable
-                onPress={() => void Linking.openURL('https://aistudio.google.com/apikey')}
-                style={[styles.linkBtn, { borderColor: c.primary }]}
-              >
-                <Text style={[type.body, { color: c.primary, fontWeight: '700' }]}>APIキーを取得する（Google AI Studio）↗</Text>
-              </Pressable>
-              <Field
-                label="APIキー"
-                placeholder="AIza..."
-                value={geminiApiKey}
-                onChangeText={(v) => {
-                  void prefs.set({ geminiApiKey: v.trim() });
-                  setVerifyMsg(null);
-                }}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              {verifyMsg ? (
-                <Text style={[type.body, { color: verifyMsg.ok ? colors.good : colors.danger }]}>{verifyMsg.text}</Text>
-              ) : (
-                <Text style={type.muted}>{geminiApiKey ? '端末内のみに保存されます' : 'キー未設定'}</Text>
-              )}
-              <Button
-                label={verifying ? '確認中…' : 'キーを確認'}
-                onPress={onVerifyKey}
-                disabled={!geminiApiKey || verifying}
-              />
-              {geminiApiKey ? (
-                <Button label="キーを削除" variant="ghost" onPress={() => { void prefs.set({ geminiApiKey: '' }); setVerifyMsg(null); }} />
-              ) : null}
-            </>
+          <Text style={type.muted}>
+            自分の Gemini APIキーを登録すると、AIでタスク整理・メモ整理・日記のふりかえりが使えます。無料枠で十分試せます。
+          </Text>
+          <View style={styles.steps}>
+            <Text style={type.muted}>1. 下の「APIキーを取得」を開く（Googleアカウントでログイン）</Text>
+            <Text style={type.muted}>2.「APIキーを作成」して、表示されたキー（AIza…）をコピー</Text>
+            <Text style={type.muted}>3. 下の欄に貼り付け →「キーを確認」</Text>
+          </View>
+          <Pressable
+            onPress={() => void Linking.openURL('https://aistudio.google.com/apikey')}
+            style={[styles.linkBtn, { borderColor: c.primary }]}
+          >
+            <Text style={[type.body, { color: c.primary, fontWeight: '700' }]}>APIキーを取得する（Google AI Studio）↗</Text>
+          </Pressable>
+          <Field
+            label="APIキー"
+            placeholder="AIza..."
+            value={geminiApiKey}
+            onChangeText={(v) => {
+              void prefs.set({ geminiApiKey: v.trim() });
+              setVerifyMsg(null);
+            }}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {verifyMsg ? (
+            <Text style={[type.body, { color: verifyMsg.ok ? colors.good : colors.danger }]}>{verifyMsg.text}</Text>
           ) : (
-            <Pressable onPress={() => router.push('/paywall')} style={styles.aiLocked}>
-              <Text style={type.body}>✨ AI機能（タスク/メモ/日記の自動整理）</Text>
-              <Text style={[styles.proBadge, { color: c.primary }]}>PRO</Text>
-            </Pressable>
+            <Text style={type.muted}>{geminiApiKey ? '端末内のみに保存されます' : 'キー未設定'}</Text>
           )}
+          <Button label={verifying ? '確認中…' : 'キーを確認'} onPress={onVerifyKey} disabled={!geminiApiKey || verifying} />
+          {geminiApiKey ? (
+            <Button
+              label="キーを削除"
+              variant="ghost"
+              onPress={() => {
+                void prefs.set({ geminiApiKey: '' });
+                setVerifyMsg(null);
+              }}
+            />
+          ) : null}
         </Card>
       </View>
 
       <View>
         <SectionTitle>バックアップ</SectionTitle>
         <Card style={{ gap: spacing.md }}>
-          <Text style={type.muted}>
-            データはこの端末内だけに保存されます。機種変更の前に書き出して保管してください。
-          </Text>
+          <Text style={type.muted}>データはこの端末内だけに保存されます。機種変更の前に書き出して保管してください。</Text>
           <Button label="バックアップを書き出す（JSON）" onPress={onExport} />
-          <Button
-            label={pro ? 'Markdownで書き出す' : 'Markdownで書き出す（Pro）'}
-            variant="ghost"
-            onPress={onExportMarkdown}
-          />
+          <Button label="Markdownで書き出す" variant="ghost" onPress={onExportMarkdown} />
           <Button label="バックアップを取り込む" variant="ghost" onPress={() => setImportOpen(true)} />
         </Card>
       </View>
@@ -199,8 +188,8 @@ export default function SettingsScreen() {
             データは端末内（オフライン）に保持します。
           </Text>
           <Text style={[type.muted, { marginTop: spacing.xs }]}>バージョン 1.0.0</Text>
-          <Pressable onPress={() => void devTogglePro()} hitSlop={8} style={{ marginTop: spacing.sm }}>
-            <Text style={styles.devLink}>（開発用）Pro 状態を切り替え: {pro ? 'ON' : 'OFF'}</Text>
+          <Pressable onPress={() => void devToggleAdFree()} hitSlop={8} style={{ marginTop: spacing.sm }}>
+            <Text style={styles.devLink}>（開発用）広告オフを切り替え: {adFree ? 'ON' : 'OFF'}</Text>
           </Pressable>
         </Card>
       </View>
@@ -228,14 +217,10 @@ const styles = StyleSheet.create({
   statRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: spacing.lg },
   stat: { alignItems: 'center', gap: 2 },
   statValue: { fontSize: 26, fontWeight: '700', color: colors.text },
-  proCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.primaryWeak, borderColor: colors.primaryWeak },
-  proCardOwned: { backgroundColor: colors.accentWeak, borderColor: colors.accentWeak },
-  proTitle: { ...type.h2, fontSize: 16, color: colors.primary },
-  proArrow: { color: colors.primary, fontSize: 22, fontWeight: '800' },
+  proCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  proTitle: { ...type.h2, fontSize: 16 },
+  proArrow: { fontSize: 22, fontWeight: '800' },
   devLink: { ...type.muted, color: colors.line2 },
-  aiLocked: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  proBadge: { fontWeight: '800', fontSize: 12, letterSpacing: 1 },
   steps: { gap: 4 },
   linkBtn: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
 });
-
