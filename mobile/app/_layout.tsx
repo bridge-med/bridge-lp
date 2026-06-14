@@ -9,6 +9,7 @@ import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Onboarding } from '../components/Onboarding';
 import { ThemeProvider, useColors } from '../components/ThemeProvider';
+import { credits } from '../lib/credits';
 import { loadAll } from '../lib/data';
 import { entitlement } from '../lib/entitlement';
 import { prefs, usePrefs } from '../lib/prefs';
@@ -38,6 +39,8 @@ function Navigator() {
         <Stack.Screen name="log/[id]" options={{ title: '仕事ログ', headerBackTitle: '戻る' }} />
         <Stack.Screen name="career" options={{ title: 'キャリア変換', headerBackTitle: '戻る' }} />
         <Stack.Screen name="m/[key]" options={{ title: '', headerBackTitle: '戻る' }} />
+        <Stack.Screen name="coins" options={{ title: 'コイン', headerBackTitle: '戻る' }} />
+        <Stack.Screen name="workstyle" options={{ title: '働き方タイプ', headerBackTitle: '戻る' }} />
         <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
       </Stack>
       <Onboarding visible={showOnboarding} />
@@ -59,6 +62,7 @@ export default function RootLayout() {
     void loadAll();
     void entitlement.load();
     void prefs.load();
+    void credits.load();
   }, []);
 
   useEffect(() => {

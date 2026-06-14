@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { type ComponentProps } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Hero } from '../../components/Hero';
+import { BlockHeader } from '../../components/BlockHeader';
 import { useColors } from '../../components/ThemeProvider';
 import { colors, spacing, type } from '../../lib/theme';
 
@@ -24,6 +24,7 @@ const SECTIONS: { title: string; items: Item[] }[] = [
       { icon: 'award', label: '強み', desc: '強みと根拠', href: '/m/strengths' },
       { icon: 'target', label: '弱み・課題', desc: '伸びしろと向き合い方', href: '/m/weaknesses' },
       { icon: 'user', label: '自己分析', desc: 'Will/Can/Must・SWOT', href: '/m/self' },
+      { icon: 'cpu', label: '働き方タイプ', desc: 'ログから性格・働き方を分析', href: '/workstyle' },
       { icon: 'compass', label: '価値観', desc: '大事にしたいこと', href: '/m/values' },
       { icon: 'activity', label: 'モチベーション曲線', desc: '時期ごとの浮き沈み', href: '/m/motivation' },
     ],
@@ -43,7 +44,8 @@ export default function HubScreen() {
   const c = useColors();
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 110 }}>
-      <Hero label="CAREER" title="キャリア" subtitle="使うものだけ選んで、育てていく" />
+      <BlockHeader wordmark="CAREER" title="キャリア" subtitle="使うものだけ選んで、育てていく" pad={28} />
+      <View style={{ height: spacing.lg }} />
       {SECTIONS.map((sec) => (
         <View key={sec.title} style={styles.section}>
           <Text style={[type.label, { paddingHorizontal: spacing.lg, marginBottom: spacing.xs }]}>{sec.title}</Text>

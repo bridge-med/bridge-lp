@@ -10,6 +10,7 @@ import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Chip, Field, SectionTitle } from '../../components/ui';
 import { AiError, validateApiKey } from '../../lib/ai';
 import { AI_PROVIDERS, PROFESSIONS, PURPOSES, ROLES } from '../../lib/constants';
+import { useCoins } from '../../lib/credits';
 import { buildExport, careerOutputs, clearAll, importBundle, quickMemos, reflections, tasks, workLogs } from '../../lib/data';
 import { devToggleAdFree, useAdFree } from '../../lib/entitlement';
 import { activeAiKey, prefs, usePrefs, type Prefs } from '../../lib/prefs';
@@ -25,6 +26,7 @@ export default function SettingsScreen() {
   useCollection(reflections);
   useCollection(careerOutputs);
   const adFree = useAdFree();
+  const coins = useCoins();
   const c = useColors();
   const prefsValue = usePrefs();
   const { profession, role, purpose, aiProvider } = prefsValue;
@@ -93,6 +95,17 @@ export default function SettingsScreen() {
             </Text>
           </View>
           {!adFree ? <Text style={[styles.arrow, { color: c.primary }]}>›</Text> : null}
+        </Card>
+      </Pressable>
+
+      <Pressable onPress={() => router.push('/coins')}>
+        <Card style={styles.proCard}>
+          <Feather name="circle" size={22} color={c.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.proTitle}>コイン {coins}</Text>
+            <Text style={type.muted}>AIをコインで使う（キー登録なら無料）</Text>
+          </View>
+          <Text style={[styles.arrow, { color: c.primary }]}>›</Text>
         </Card>
       </Pressable>
 

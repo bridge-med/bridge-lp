@@ -145,6 +145,26 @@ export async function extractTasks(dump: string, creds: Creds): Promise<DraftTas
     }));
 }
 
+// Local (no-network) fallbacks — used by the "coins" path until the managed
+// backend is connected. Simple but genuinely useful.
+export function localExtractTasks(dump: string): DraftTask[] {
+  return dump
+    .split(/[\n。]/)
+    .map((s) => s.replace(/^[\s・\-*●]+/, '').trim())
+    .filter((s) => s.length >= 2)
+    .slice(0, 12)
+    .map((title) => ({ title, dueDate: null, tags: [] }));
+}
+
+export function localTidy(input: string): string {
+  return input
+    .split(/\n/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => (s.startsWith('-') ? s : `- ${s}`))
+    .join('\n');
+}
+
 // --- Quick memo tidy ---------------------------------------------------------
 
 export async function tidyMemo(input: string, creds: Creds): Promise<string> {
@@ -236,6 +256,48 @@ export async function generateCareerOutput(
     .filter(Boolean)
     .join('\n');
   return complete(prompt, creds, { maxTokens: 3000, temperature: 0.5 });
+}
+
+// --- Work-style / personality analysis (connects logs + self data) -----------
+
+export async function generateWorkStyle(material: string, creds: Creds | null): Promise<string> {
+  if (!creds || !creds.apiKey) {
+    return [
+      '【働き方タイプ（簡易）】',
+      'AIキー未設定のため簡易表示です。設定でキー登録、またはコインで詳しい分析ができます。',
+      '',
+      material ? '— 最近の記録から見えた傾向 —\n' + material.slice(0, 300) : '記録が増えるほど精度が上がります。',
+    ].join('\n');
+  }
+  const prompt = [
+    'あなたはキャリア・組織心理の専門家です。以下の仕事の記録・強み・価値観から、本人の「働き方タイプ」を分析してください。',
+    'MBTIのような決めつけは避け、次の構成で日本語で簡潔に：',
+    '1) ひとことで表すタイプ名（独自で良い・15字以内）',
+    '2) 強みの傾向（3点・箇条書き）',
+    '3) 注意したい癖（2点）',
+    '4) 活きる環境 / 向く役割',
+    '5) 次に伸ばすと良い力（1つ）',
+    'ログに無い決めつけはしないこと。',
+    '---',
+    material,
+  ].join('\n');
+  return complete(prompt, creds, { maxTokens: 1200, temperature: 0.5 });
+}
+
+export function localWorkStyle(material: string): string {
+  return generateWorkStyleSyncFallback(material);
+}
+function generateWorkStyleSyncFallback(material: string): string {
+  return [
+    '【働き方タイプ（簡易分析）】',
+    '記録から、現場の課題を見つけて動くタイプの傾向が見えます。',
+    '・強み: 観察と調整 / 学びを言語化 / 周囲を巻き込む',
+    '・注意: 抱え込みやすさ',
+    '・向く役割: 改善の旗振り・橋渡し役',
+    '',
+    'より詳しい分析は、設定でAIキーを登録するとできます。',
+    material ? '\n— 参照した記録 —\n' + material.slice(0, 240) : '',
+  ].join('\n');
 }
 
 function mockCareerOutput(logs: WorkLog[], outputType: CareerOutputType, profile: Profile): string {

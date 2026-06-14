@@ -22,6 +22,9 @@ export const colors = {
   warnWeak: '#F1E7D3',
   danger: '#A2402F',
   dangerWeak: '#EFE0DA',
+  spark: '#C75B39', // terracotta — key figures / primary CTA accent
+  sparkWeak: '#F1E1D9',
+  onAccent: '#F5F2EA', // text/figures on a deep accent block
   white: '#FFFFFF',
 } as const;
 

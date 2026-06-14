@@ -19,6 +19,7 @@ export interface Prefs {
   profession: string;
   role: string;
   purpose: string;
+  workStyleResult: string;
 }
 
 const DEFAULT: Prefs = {
@@ -31,6 +32,7 @@ const DEFAULT: Prefs = {
   profession: '',
   role: '',
   purpose: '',
+  workStyleResult: '',
 };
 
 /** The API key for the currently-selected AI provider. */

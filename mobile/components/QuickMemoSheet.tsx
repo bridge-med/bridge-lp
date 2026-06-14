@@ -1,7 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
-import { AiError, tidyMemo } from '../lib/ai';
+import { router } from 'expo-router';
+import { AiError, localTidy, tidyMemo } from '../lib/ai';
+import { credits, GEN_COST } from '../lib/credits';
 import { quickMemos } from '../lib/data';
 import { activeAiKey, usePrefs } from '../lib/prefs';
 import { spacing, type } from '../lib/theme';
@@ -28,14 +30,17 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
   }
 
   async function runAi() {
-    if (!apiKey) {
-      Alert.alert('APIキーが未設定です', '設定 → AI でプロバイダとキーを登録してください。');
+    if (!content.trim()) return;
+    if (!apiKey && !(await credits.spend(GEN_COST))) {
+      Alert.alert('コインが足りません', 'AIで整えるにはコイン購入か、APIキー登録が必要です。', [
+        { text: '閉じる', style: 'cancel' },
+        { text: 'コインを見る', onPress: () => router.push('/coins') },
+      ]);
       return;
     }
-    if (!content.trim()) return;
     setAiBusy(true);
     try {
-      setContent(await tidyMemo(content, { provider: prefs.aiProvider, apiKey }));
+      setContent(apiKey ? await tidyMemo(content, { provider: prefs.aiProvider, apiKey }) : localTidy(content));
     } catch (e) {
       Alert.alert('整理に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
     } finally {
