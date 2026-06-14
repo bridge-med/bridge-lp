@@ -33,6 +33,27 @@ export function dueLabel(key: string | null): { text: string; tone: 'overdue' | 
   return { text: formatDateJa(key), tone: 'later' };
 }
 
+/** Monday-based start of the current week, as a yyyy-mm-dd key. */
+export function startOfWeekKey(d: Date = new Date()): string {
+  const date = new Date(d);
+  const day = (date.getDay() + 6) % 7; // Mon=0 .. Sun=6
+  date.setDate(date.getDate() - day);
+  return todayKey(date);
+}
+
+/** First/last day of the current month as keys. */
+export function monthRangeKeys(d: Date = new Date()): { start: string; end: string } {
+  const start = new Date(d.getFullYear(), d.getMonth(), 1);
+  const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  return { start: todayKey(start), end: todayKey(end) };
+}
+
+/** "6/14" short label. */
+export function formatShort(key: string): string {
+  const d = parseKey(key);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
 export function formatTimeJa(iso: string): string {
   const d = new Date(iso);
   const h = String(d.getHours()).padStart(2, '0');

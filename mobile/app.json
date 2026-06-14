@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "BRIDGE Daily",
-    "slug": "bridge-daily",
-    "version": "1.0.0",
+    "name": "BRIDGE Worklog",
+    "slug": "bridge-worklog",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "bridgedaily",
+    "scheme": "bridgeworklog",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {

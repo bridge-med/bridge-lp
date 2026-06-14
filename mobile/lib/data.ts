@@ -1,24 +1,34 @@
 // Concrete collections + import/export helpers.
 
 import { Collection } from './store';
-import type { Task, Memo, JournalEntry, ExportBundle } from './types';
+import type { CareerOutput, ExportBundle, QuickMemo, Reflection, Task, WorkLog } from './types';
 
+export const workLogs = new Collection<WorkLog>('work_logs');
+export const quickMemos = new Collection<QuickMemo>('quick_memos');
 export const tasks = new Collection<Task>('tasks');
-export const memos = new Collection<Memo>('memos');
-export const journal = new Collection<JournalEntry>('journal');
+export const reflections = new Collection<Reflection>('reflections');
+export const careerOutputs = new Collection<CareerOutput>('career_outputs');
 
 export async function loadAll(): Promise<void> {
-  await Promise.all([tasks.load(), memos.load(), journal.load()]);
+  await Promise.all([
+    workLogs.load(),
+    quickMemos.load(),
+    tasks.load(),
+    reflections.load(),
+    careerOutputs.load(),
+  ]);
 }
 
 export function buildExport(): ExportBundle {
   return {
-    app: 'bridge-daily',
+    app: 'bridge-worklog',
     version: 1,
     exportedAt: new Date().toISOString(),
+    workLogs: workLogs.getSnapshot(),
+    quickMemos: quickMemos.getSnapshot(),
     tasks: tasks.getSnapshot(),
-    memos: memos.getSnapshot(),
-    journal: journal.getSnapshot(),
+    reflections: reflections.getSnapshot(),
+    careerOutputs: careerOutputs.getSnapshot(),
   };
 }
 
@@ -30,17 +40,25 @@ export async function importBundle(raw: string): Promise<void> {
   } catch {
     throw new Error('JSONとして読み取れませんでした。');
   }
-  const bundle = data as Partial<ExportBundle>;
-  if (!bundle || bundle.app !== 'bridge-daily') {
-    throw new Error('BRIDGE Daily のバックアップファイルではありません。');
+  const b = data as Partial<ExportBundle>;
+  if (!b || b.app !== 'bridge-worklog') {
+    throw new Error('BRIDGE Worklog のバックアップファイルではありません。');
   }
   await Promise.all([
-    tasks.replaceAll(Array.isArray(bundle.tasks) ? bundle.tasks : []),
-    memos.replaceAll(Array.isArray(bundle.memos) ? bundle.memos : []),
-    journal.replaceAll(Array.isArray(bundle.journal) ? bundle.journal : []),
+    workLogs.replaceAll(Array.isArray(b.workLogs) ? b.workLogs : []),
+    quickMemos.replaceAll(Array.isArray(b.quickMemos) ? b.quickMemos : []),
+    tasks.replaceAll(Array.isArray(b.tasks) ? b.tasks : []),
+    reflections.replaceAll(Array.isArray(b.reflections) ? b.reflections : []),
+    careerOutputs.replaceAll(Array.isArray(b.careerOutputs) ? b.careerOutputs : []),
   ]);
 }
 
 export async function clearAll(): Promise<void> {
-  await Promise.all([tasks.clear(), memos.clear(), journal.clear()]);
+  await Promise.all([
+    workLogs.clear(),
+    quickMemos.clear(),
+    tasks.clear(),
+    reflections.clear(),
+    careerOutputs.clear(),
+  ]);
 }

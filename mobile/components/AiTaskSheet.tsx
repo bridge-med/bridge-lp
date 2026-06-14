@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Sheet } from './Sheet';
-import { Chip, Button, Field } from './ui';
-import { useColors } from './ThemeProvider';
-import { extractTasks, AiError, type DraftTask } from '../lib/ai';
+import { AiError, extractTasks, type DraftTask } from '../lib/ai';
 import { tasks } from '../lib/data';
 import { dueLabel } from '../lib/date';
 import { tapSuccess } from '../lib/haptics';
 import { usePrefs } from '../lib/prefs';
 import { spacing, type } from '../lib/theme';
 import type { Task } from '../lib/types';
+import { Sheet } from './Sheet';
+import { useColors } from './ThemeProvider';
+import { Button, Chip, Field } from './ui';
 
 type Draft = DraftTask & { include: boolean };
 
@@ -48,15 +48,14 @@ export function AiTaskSheet({ visible, onClose, onNeedKey }: { visible: boolean;
   }
 
   async function add() {
-    const chosen = (drafts ?? []).filter((d) => d.include);
-    for (const d of chosen) {
+    for (const d of (drafts ?? []).filter((d) => d.include)) {
       await tasks.upsert({
         title: d.title,
-        notes: '',
-        priority: d.priority,
-        due: d.due,
-        tags: d.tags,
+        relatedLogId: null,
+        dueDate: d.dueDate,
         status: 'todo',
+        memo: '',
+        tags: d.tags,
         doneAt: null,
       } as Partial<Task>);
     }
@@ -78,14 +77,8 @@ export function AiTaskSheet({ visible, onClose, onNeedKey }: { visible: boolean;
     <Sheet visible={visible} title="AIでまとめて追加" onClose={close}>
       {drafts === null ? (
         <>
-          <Text style={type.muted}>やること・予定・気になっていることを、思いつくまま書いてください。AIがタスクに整理します。</Text>
-          <Field
-            placeholder={'例) 明日までに請求書送る。来週A院に連絡。資料の見直し優先で。'}
-            value={text}
-            onChangeText={setText}
-            multiline
-            autoFocus
-          />
+          <Text style={type.muted}>やること・予定を思いつくまま書いてください。AIがタスクに整理します。</Text>
+          <Field placeholder={'例) 明日までに請求書送る。来週A院に連絡。資料の見直し。'} value={text} onChangeText={setText} multiline autoFocus />
           {error ? <Text style={[type.body, { color: '#b91c1c' }]}>{error}</Text> : null}
           {loading ? (
             <View style={styles.loading}>
@@ -100,7 +93,7 @@ export function AiTaskSheet({ visible, onClose, onNeedKey }: { visible: boolean;
         <>
           <Text style={type.muted}>追加するタスクを選んでください（{drafts.filter((d) => d.include).length}件）。</Text>
           {drafts.map((d, i) => {
-            const due = dueLabel(d.due);
+            const due = dueLabel(d.dueDate);
             return (
               <Pressable
                 key={i}
@@ -111,7 +104,6 @@ export function AiTaskSheet({ visible, onClose, onNeedKey }: { visible: boolean;
                 <View style={{ flex: 1, gap: 4 }}>
                   <Text style={type.body}>{d.title}</Text>
                   <View style={styles.meta}>
-                    {d.priority === 'high' ? <Chip label="優先度 高" tone="danger" /> : null}
                     {due ? <Chip label={due.text} tone="primary" /> : null}
                     {d.tags.map((t) => (
                       <Chip key={t} label={`#${t}`} tone="neutral" />

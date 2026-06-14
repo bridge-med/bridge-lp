@@ -1,109 +1,93 @@
-# BRIDGE Daily
+# BRIDGE Worklog
 
-タスク・メモ・日記を1つにまとめた、スキマ時間のための個人用**ネイティブアプリ**（iOS / Android）。
-BRIDGE の Web ツール群（`worklog` など）の思想 ―― *スマホで1分入力・データは端末内・将来バックエンドに差し替え可能* ―― をネイティブに移植したものです。
+日々の**仕事ログ・メモ・タスク・気づき**を自然に蓄積し、その履歴が結果的に
+**職務経歴書・自己PR・面接回答・1on1・昇給交渉・副業プロフィール**の材料になる、
+スマホファーストの個人用アプリ（MVP）。
+
+「職務経歴書を作るアプリ」ではなく、*日々の仕事ぶり・思考過程・改善プロセスが残ること*を重視します。
+最初のターゲットは医療職（PT/OT・看護師・医療事務・事務長候補・PMI 等）ですが、設計は汎用です。
 
 - **スタック**: Expo (SDK 56) + React Native + TypeScript + expo-router
-- **保存先**: 端末内 `AsyncStorage`（オフライン・サーバ送信なし）
-- **画面**: タスク / メモ / 日記 / 設定 の4タブ
+- **保存**: 端末内 `AsyncStorage`（オフライン）。**Supabase 未設定でも起動・動作**します（差し替え点は `lib/storage.ts`）。
+- **AI・課金は後付け前提**で分離済み（下記）。
 
 ## 起動方法
 
 ```bash
 cd mobile
 npm install
-npx expo start
+npx expo start          # QR を Expo Go で読む / npm run ios|android
 ```
 
-- 表示される QR コードを **Expo Go**（App Store / Google Play）で読み取ると実機で確認できます。
-- `npm run ios` / `npm run android` でシミュレータ起動（要 Xcode / Android Studio）。
+環境変数は不要（ローカルで完結）。Gemini を使う場合のみ、アプリ内（設定→AI）で**自分のキー**を登録します。
 
-> ⚠️ この環境ではネットワークポリシー上、`npx expo install` のバージョン解決 API（api.expo.dev）に接続できません。
-> 依存を追加するときは `node_modules/expo/bundledNativeModules.json` に記載のバージョンを `npm install <pkg>@<version>` で直接指定してください。
+> ⚠️ この環境ではネットワークポリシー上 `npx expo install` のバージョン解決APIに繋げないため、
+> 依存追加は `node_modules/expo/bundledNativeModules.json` のバージョンを `npm install <pkg>@<ver>` で直接指定してください。
 
-## 機能
+## 画面 / タブ
+
+下部タブ：**ホーム / タイムライン / タスク / 振り返り / 設定**
 
 | 画面 | 役割 |
 |---|---|
-| **タスク** | 期限切れ/今日/今後/期限なし/完了に自動セクション分け。チェックで完了（触覚フィードバック）、優先度・期限・タグ。検索バー＋件数サマリー |
-| **メモ** | 形式自由のメモ。ピン留めで上部固定、タグ、検索、更新日時 |
-| **日記** | 日付＋気分(5段階)＋本文。新しい順のタイムライン。→ ふりかえり |
-| **設定** | 件数サマリー、テーマ切替、AIキー登録、広告を消す、JSON / Markdown バックアップ、全削除、アプリ情報 |
+| Onboarding | 初回に職種・立場・目的を選択（プロフィール） |
+| ホーム | 今日のクイックメモ／仕事ログ作成、未完了タスク数・今週のログ数、振り返り導線、最近のログ |
+| 仕事ログ作成/詳細 | 11項目（やったこと/困った/工夫/判断/関わった人/結果/学び/次/メモ）＋タグ。空欄保存OK |
+| クイックメモ | 1行から保存。AIで整える。後でログ化も可 |
+| タスク | 未着手/進行中/保留/完了で管理、期限、ログ関連付け、AIでまとめて追加、スワイプ削除 |
+| タイムライン | ログ・メモ・タスク完了・振り返りを時系列表示（種別フィルタ） |
+| 振り返り | 週次/月次をログから生成（AIキーありで Gemini、無しでモック） |
+| キャリア変換 | 選択ログから職務経歴書/自己PR/面接/1on1/昇給/副業の文章を生成（AI or モック） |
+| 設定 | プロフィール、テーマ、AIキー、広告を消す、バックアップ、全削除 |
 
-- 初回起動時に **3画面のオンボーディング**（スキップ可）。
-- タスク行は **左スワイプで削除**（確認ダイアログ付き）。
-- **機能はすべて無料**。マネタイズは広告のみ（下記）。
+## データモデル（Supabase テーブルに 1:1）
 
-## マネタイズ（全機能無料 + 広告 + 買い切りで広告除去）
+`lib/types.ts`：`work_logs` / `quick_memos` / `tasks` / `reflections` / `career_outputs`、
+プロフィール（users 相当）は `lib/prefs.ts` に保持。フラットなレコードなので、
+`lib/storage.ts` の AsyncStorage 実装を Supabase クライアントに差し替えれば移行できます。
 
-**機能はすべて無料**（AI整理・ふりかえり・タグ・テーマ・検索・エクスポート）。マネタイズは
-**タスク／メモ一覧の控えめなバナー広告**のみで、**買い切りで広告を消せます**（日記には広告を出さない）。
+## AI（Gemini）— BYOK・無料機能
 
-- 広告除去の状態は `lib/entitlement.ts` が単一の真実。`useAdFree()` で参照。
-- `purchaseAdFree()` は現状**ローカル解錠のモック**。本番化は RevenueCat (`react-native-purchases`) に差し替え（このファイルだけ）+ EAS 開発ビルド + ストア商品登録。
-- 広告は `components/BannerSlot.tsx`（現状プレースホルダ）。本番は AdMob `react-native-google-mobile-ads` に差し替え（EAS 開発ビルド必須）。
-- 動作確認用に **設定 → このアプリについて → 「（開発用）広告オフを切り替え」**。
+- ユーザー自身の Gemini APIキー（無料枠あり）を登録 → 端末から直接 `generativelanguage`（`gemini-2.5-flash`, structured output）を呼びます。サーバ不要。
+- **キー未設定でも動作**：`generateReflection()` / `generateCareerOutput()` はモックにフォールバック。
+- ロジックは `lib/ai.ts` に集約：`extractTasks`（走り書き→タスク）、`tidyMemo`、`generateReflection`、`generateCareerOutput`、`validateApiKey`。
 
-> ⚠️ IAP も AdMob も **Expo Go では動かず開発ビルド(EAS)が必須**。販売・審査・広告は、あなたの Apple / Google / AdMob アカウント＋EAS で行ってください。
+## マネタイズ（全機能無料 + 広告 + 買い切り広告除去）
 
-### AI（Gemini）について — 無料機能・BYOK
-- **BYOK（自分のAPIキー方式）**：ユーザーが自分の Gemini APIキー（無料枠あり）を設定 → 端末から直接 `generativelanguage` API（`gemini-2.5-flash`, structured output）を呼びます。サーバ不要・運営側のAPI費用ゼロ。
-- 「自分のキーなのに課金」は不自然なので **AIは無料**（広告でマネタイズ）。
-- キーは `lib/prefs.ts` に端末内保存（平文）。ロジックは `lib/ai.ts`。設定で「キーを確認」可能。
-- 機能：タスクの「✨ AIでまとめて追加」、メモの「✨ AIで整理」、ふりかえりの「✨ AIふりかえり」。
+機能はすべて無料。`components/BannerSlot.tsx` の控えめバナー（タスク/メモ/タイムライン等の一覧、**ログ詳細や日記的画面には出さない**）＋
+買い切り「広告を消す」（`lib/entitlement.ts` の `useAdFree`）。
 
-## 設計（拡張しやすさ）
+- 広告本番化：AdMob `react-native-google-mobile-ads` に差し替え（EAS 開発ビルド必須）。
+- 課金本番化：RevenueCat `react-native-purchases` に差し替え（`entitlement.ts` のみ）。
+- 動作確認：設定 → このアプリについて → 「（開発用）広告オフを切り替え」。
 
-Web 版 `worklog` と同じく、データ層を抽象化して将来のバックエンド移行に備えています。
+## アーキテクチャ
 
 ```
 lib/
-  types.ts        型定義（フラットなレコード。将来テーブルへ1:1で写せる）
-  storage.ts      永続化（AsyncStorage 実装。ここだけ差し替えれば Supabase 等へ移行可能）
-  store.ts        リアクティブなコレクション（useSyncExternalStore でタブ間同期）
-  data.ts         コレクション実体（tasks / memos / journal）＋ import/export
-  entitlement.ts  広告除去の課金状態（useAdFree / purchaseAdFree。RevenueCat に差し替え可能）
-  ai.ts           Gemini クライアント（タスク抽出・メモ整理・日記ふりかえり）
-  prefs.ts        アプリ設定（オンボーディング・アクセント・Geminiキー）永続化
-  stats.ts        ふりかえり用の集計（ストリーク・気分分布・月次）
-  markdown.ts     Markdown エクスポート生成
-  tags.ts         タグ収集・テキスト検索のヘルパー
-  haptics.ts      触覚フィードバックの薄いラッパー
-  date.ts         日付ユーティリティ（端末ローカルTZ）
-  theme.ts        デザイントークン＋アクセントテーマ（paletteFor）
-components/
-  ThemeProvider.tsx 現在のパレットを配信（useColors でアクセント追従）
-  ui.tsx          共通UI（Card / Button / Field / Chip / Fab / EmptyState …）
-  Sheet.tsx       追加・編集用のボトムシート
-  Onboarding.tsx  初回オンボーディング（3画面）
-  SwipeRow.tsx    左スワイプ削除（Animated + PanResponder、確認付き）
-  SearchBar.tsx   検索バー
-  TagInput.tsx    タグ編集
-  TagFilter.tsx   タグでの絞り込みチップ
-  ThemePicker.tsx アクセントカラー選択
-  BannerSlot.tsx  バナー広告枠（広告オフ時は非表示。本番は AdMob に差し替え）
-  AiTaskSheet.tsx 走り書き→AIタスク化のシート
-  ProFeatures.tsx 広告除去の価値リスト（ペイウォール用）
+  constants.ts  職種/立場/目的/タグ/タスク状態/キャリア変換タイプのマスタ
+  types.ts      型定義（Supabase テーブルに対応）
+  storage.ts    永続化（AsyncStorage。Supabase へ差し替える単一点）
+  store.ts      リアクティブ Collection（useSyncExternalStore）
+  data.ts       コレクション実体 ＋ import/export
+  prefs.ts      プロフィール・テーマ・AIキー・オンボーディング状態
+  entitlement.ts 広告除去の課金状態（useAdFree）
+  ai.ts         Gemini クライアント＋AIヘルパー（モックfallback）
+  date.ts / tags.ts / haptics.ts / theme.ts
+components/  ui, Sheet, Onboarding, TagPicker, TaskSheet, QuickMemoSheet,
+             AiTaskSheet, SwipeRow, BannerSlot, ThemeProvider, ThemePicker
 app/
-  _layout.tsx          ルート（SafeArea / 起動時ロード / paywall・review 登録）
-  (tabs)/_layout.tsx   タブ定義
-  (tabs)/index.tsx     タスク（AIまとめ追加 / 広告バナー）
-  (tabs)/memo.tsx      メモ（AI整理 / 広告バナー）
-  (tabs)/journal.tsx   日記（→ ふりかえり導線・広告なし）
-  (tabs)/settings.tsx  設定（広告を消す / テーマ / AIキー）
-  review.tsx           ふりかえり（AIふりかえり含む）
+  _layout.tsx          ルート（起動ロード / オンボーディング / stack 登録）
+  (tabs)/              index(ホーム) / timeline / tasks / reflection / settings
+  log-edit.tsx         仕事ログ作成・編集
+  log/[id].tsx         仕事ログ詳細
+  career.tsx           キャリア変換
   paywall.tsx          広告を消す（モーダル）
 ```
 
-## プライバシー
+## 今後の実装予定
 
-入力データは端末内（`AsyncStorage`、平文）のみに保存され、サーバには送信されません。
-共有端末・紛失に注意し、機種変更前に設定画面から JSON バックアップを書き出してください。
-
-## 今後の拡張案
-
-- [ ] プッシュ通知（毎朝のタスク／日記リマインド）— `expo-notifications`
-- [ ] バックエンド同期（Supabase 等）— `lib/storage.ts` の差し替えで対応
-- [ ] タスクの繰り返し設定、タグ／検索
-- [ ] 日記の月次サマリー・気分グラフ
-- [ ] ファイル選択での import（`expo-document-picker`）
+- Supabase 連携（認証・複数端末同期）— `lib/storage.ts` 差し替え
+- AdMob / RevenueCat 結線（EAS 開発ビルド）
+- AI 自動タグ付け、PDF / CSV エクスポート、Notion / カレンダー連携
+- 採用企業向け共有URL、匿名ポートフォリオ共有

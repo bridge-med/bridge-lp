@@ -1,11 +1,11 @@
-// Gemini client for on-device AI features (Pro).
-//
-// Bring-your-own-key: the user pastes their own Gemini API key (free tier
-// exists), stored locally. Mirrors the server-side pattern used by the web
-// products (model gemini-2.5-flash, v1beta generateContent, structured output).
+// Gemini client + AI-backed helpers, each with a no-key mock fallback so the
+// MVP works without any API key. Bring-your-own-key: the user supplies their
+// own Gemini key (free tier). Same pattern as the web products
+// (gemini-2.5-flash, v1beta generateContent, structured output).
 
-import { todayKey } from './date';
-import type { Priority } from './types';
+import { CAREER_OUTPUTS, type CareerOutputType } from './constants';
+import { formatDateJa, todayKey } from './date';
+import type { Profile, ReflectionContent, WorkLog } from './types';
 
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
@@ -26,7 +26,7 @@ async function callGemini(
   prompt: string,
   opts: { apiKey: string; schema?: Json; maxOutputTokens?: number; temperature?: number },
 ): Promise<string> {
-  const genCfg: Json = { temperature: opts.temperature ?? 0.3, maxOutputTokens: opts.maxOutputTokens ?? 4000 };
+  const genCfg: Json = { temperature: opts.temperature ?? 0.4, maxOutputTokens: opts.maxOutputTokens ?? 4000 };
   if (opts.schema) {
     genCfg.responseMimeType = 'application/json';
     genCfg.responseSchema = opts.schema;
@@ -47,9 +47,7 @@ async function callGemini(
     const raw = await res.text().catch(() => '');
     throw new AiError(friendlyError(res.status, raw));
   }
-  const data = (await res.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
-  };
+  const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('').trim();
   if (!text) throw new AiError('AIからの応答が空でした。もう一度お試しください。');
   return text;
@@ -59,16 +57,13 @@ function parseJson<T>(text: string): T {
   try {
     return JSON.parse(text) as T;
   } catch {
-    // Strip markdown fences if the model wrapped the JSON.
     const m = text.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (m) return JSON.parse(m[1]) as T;
     throw new AiError('AIの応答を解釈できませんでした。');
   }
 }
 
-// --- Key validation ----------------------------------------------------------
-
-/** Lightweight check that the API key works (lists models; doesn't spend generation quota). */
+/** Lightweight key check (lists models; no generation quota spent). */
 export async function validateApiKey(apiKey: string): Promise<void> {
   let res: Response;
   try {
@@ -82,12 +77,11 @@ export async function validateApiKey(apiKey: string): Promise<void> {
   }
 }
 
-// --- Feature: brain-dump -> structured tasks ---------------------------------
+// --- Brain-dump -> tasks -----------------------------------------------------
 
 export interface DraftTask {
   title: string;
-  priority: Priority;
-  due: string | null;
+  dueDate: string | null;
   tags: string[];
 }
 
@@ -97,7 +91,6 @@ const TASK_SCHEMA: Json = {
     type: 'object',
     properties: {
       title: { type: 'string' },
-      priority: { type: 'string', enum: ['low', 'normal', 'high'] },
       due: { type: 'string' },
       tags: { type: 'array', items: { type: 'string' } },
     },
@@ -108,61 +101,147 @@ const TASK_SCHEMA: Json = {
 export async function extractTasks(dump: string, apiKey: string): Promise<DraftTask[]> {
   const today = todayKey();
   const prompt = [
-    'あなたは優秀なアシスタントです。以下のメモから「実行可能なタスク」を抽出し、JSON配列で返してください。',
+    '以下のメモから「実行可能なタスク」を抽出し、JSON配列で返してください。',
     `今日の日付は ${today}（YYYY-MM-DD）です。`,
-    '各タスク: title=簡潔な日本語の動詞句, priority=low|normal|high(緊急/重要そうなものをhigh),',
-    'due=期限が読み取れる場合のみ YYYY-MM-DD（「明日」「来週」等は今日から計算）。無ければ空文字,',
-    'tags=内容を表す短い日本語タグ（任意, 0〜3個, #は不要）。',
-    '雑談や実行不能な記述はタスク化しないでください。',
+    'title=簡潔な日本語の動詞句。due=期限が読み取れる場合のみ YYYY-MM-DD（「明日」等は今日から計算）、無ければ空文字。',
+    'tags=内容を表す短い日本語タグ（任意, 0〜3個, #不要）。雑談はタスク化しない。',
     '---',
     dump,
   ].join('\n');
-
   const text = await callGemini(prompt, { apiKey, schema: TASK_SCHEMA, maxOutputTokens: 2000 });
-  const raw = parseJson<{ title?: string; priority?: string; due?: string; tags?: string[] }[]>(text);
+  const raw = parseJson<{ title?: string; due?: string; tags?: string[] }[]>(text);
   return raw
     .filter((t) => t.title && t.title.trim())
     .map((t) => ({
       title: t.title!.trim(),
-      priority: (['low', 'normal', 'high'].includes(t.priority ?? '') ? t.priority : 'normal') as Priority,
-      due: t.due && /^\d{4}-\d{2}-\d{2}$/.test(t.due) ? t.due : null,
+      dueDate: t.due && /^\d{4}-\d{2}-\d{2}$/.test(t.due) ? t.due : null,
       tags: Array.isArray(t.tags) ? t.tags.map((x) => String(x).replace(/^#/, '').trim()).filter(Boolean).slice(0, 3) : [],
     }));
 }
 
-// --- Feature: tidy a memo ----------------------------------------------------
+// --- Quick memo tidy ---------------------------------------------------------
 
-const MEMO_SCHEMA: Json = {
-  type: 'object',
-  properties: {
-    title: { type: 'string' },
-    body: { type: 'string' },
-  },
-  required: ['title', 'body'],
-};
-
-export async function tidyMemo(input: string, apiKey: string): Promise<{ title: string; body: string }> {
+export async function tidyMemo(input: string, apiKey: string): Promise<string> {
   const prompt = [
-    '以下の走り書きメモを読みやすく整理してください。',
-    'title: 内容を表す簡潔な日本語の見出し（20字以内）。',
-    'body: 要点を箇条書き（- 始まり）で整理。情報は省かず、重複や言い回しだけ整える。日本語。',
-    'JSONで返してください。',
+    '以下の走り書きメモを、意味を保ったまま簡潔で読みやすい日本語に整えてください。',
+    '箇条書きが適切なら - で。説明や前置きは付けず、整えた本文だけ返してください。',
     '---',
     input,
   ].join('\n');
-  const text = await callGemini(prompt, { apiKey, schema: MEMO_SCHEMA, maxOutputTokens: 2000 });
-  const obj = parseJson<{ title?: string; body?: string }>(text);
-  return { title: (obj.title ?? '').trim(), body: (obj.body ?? '').trim() };
+  return callGemini(prompt, { apiKey, maxOutputTokens: 1500 });
 }
 
-// --- Feature: weekly journal reflection --------------------------------------
+// --- Reflection (week/month) -------------------------------------------------
 
-export async function reflectJournal(entriesText: string, apiKey: string): Promise<string> {
+function logsToText(logs: WorkLog[]): string {
+  return logs
+    .map((l) => {
+      const parts = [
+        `# ${formatDateJa(l.date)} ${l.title}`.trim(),
+        l.did && `やったこと: ${l.did}`,
+        l.problem && `困ったこと: ${l.problem}`,
+        l.devised && `工夫: ${l.devised}`,
+        l.decision && `判断: ${l.decision}`,
+        l.result && `結果: ${l.result}`,
+        l.learning && `学び: ${l.learning}`,
+        l.tags.length ? `タグ: ${l.tags.join(', ')}` : '',
+      ].filter(Boolean);
+      return parts.join('\n');
+    })
+    .join('\n\n');
+}
+
+const REFLECTION_SCHEMA: Json = {
+  type: 'object',
+  properties: {
+    did: { type: 'string' },
+    impressive: { type: 'string' },
+    issues: { type: 'string' },
+    improved: { type: 'string' },
+    next: { type: 'string' },
+    strengths: { type: 'string' },
+    achievements: { type: 'string' },
+  },
+  required: ['did', 'impressive', 'issues', 'improved', 'next', 'strengths', 'achievements'],
+};
+
+/** Generate a reflection. With a key -> Gemini; without -> a deterministic mock. */
+export async function generateReflection(logs: WorkLog[], apiKey: string | null): Promise<ReflectionContent> {
+  if (!apiKey) return mockReflection(logs);
   const prompt = [
-    '以下は最近の日記です。やさしく前向きなトーンで、振り返りを200字程度の日本語でまとめてください。',
-    '良かったこと・気分の傾向・次に活かせそうな点を、説教くさくなく簡潔に。',
+    'あなたはキャリア支援の専門家です。以下の仕事ログから、振り返りをJSONで返してください。',
+    '各項目は日本語で簡潔に。誇張せず、ログに基づいて。',
+    'did=やったこと, impressive=印象に残った出来事, issues=課題, improved=改善したこと,',
+    'next=次にやること, strengths=強みとして見えてきたこと, achievements=職務経歴書に使えそうな実績候補。',
     '---',
-    entriesText,
+    logsToText(logs),
   ].join('\n');
-  return callGemini(prompt, { apiKey, maxOutputTokens: 1000, temperature: 0.6 });
+  const text = await callGemini(prompt, { apiKey, schema: REFLECTION_SCHEMA, maxOutputTokens: 3000 });
+  const obj = parseJson<Partial<ReflectionContent>>(text);
+  return {
+    did: obj.did ?? '',
+    impressive: obj.impressive ?? '',
+    issues: obj.issues ?? '',
+    improved: obj.improved ?? '',
+    next: obj.next ?? '',
+    strengths: obj.strengths ?? '',
+    achievements: obj.achievements ?? '',
+  };
+}
+
+function joinField(logs: WorkLog[], pick: (l: WorkLog) => string): string {
+  return logs.map(pick).map((s) => s.trim()).filter(Boolean).map((s) => `・${s}`).join('\n');
+}
+
+function mockReflection(logs: WorkLog[]): ReflectionContent {
+  const achievementsLogs = logs.filter((l) => l.tags.includes('成果') || l.result);
+  return {
+    did: joinField(logs, (l) => l.did || l.title) || '（記録された仕事ログがありません）',
+    impressive: joinField(logs, (l) => l.devised) || '—',
+    issues: joinField(logs, (l) => l.problem) || '—',
+    improved: joinField(logs, (l) => l.devised) || '—',
+    next: joinField(logs, (l) => l.nextAction) || '—',
+    strengths: [...new Set(logs.flatMap((l) => l.tags))].map((t) => `・${t}`).join('\n') || '—',
+    achievements: joinField(achievementsLogs, (l) => `${l.title}: ${l.result}`.replace(/: $/, '')) || '—',
+  };
+}
+
+// --- Career output -----------------------------------------------------------
+
+export async function generateCareerOutput(
+  logs: WorkLog[],
+  outputType: CareerOutputType,
+  profile: Profile,
+  apiKey: string | null,
+): Promise<string> {
+  if (!apiKey) return mockCareerOutput(logs, outputType, profile);
+  const label = CAREER_OUTPUTS.find((o) => o.key === outputType)?.label ?? '';
+  const prompt = [
+    `あなたはキャリア支援の専門家です。以下の仕事ログをもとに「${label}」の文章を日本語で作成してください。`,
+    profile.profession ? `対象者の職種: ${profile.profession}、立場: ${profile.role}` : '',
+    'ログに無い事実は創作しないこと。簡潔で、そのまま使える形に。',
+    '---',
+    logsToText(logs),
+  ]
+    .filter(Boolean)
+    .join('\n');
+  return callGemini(prompt, { apiKey, maxOutputTokens: 3000, temperature: 0.5 });
+}
+
+function mockCareerOutput(logs: WorkLog[], outputType: CareerOutputType, profile: Profile): string {
+  const label = CAREER_OUTPUTS.find((o) => o.key === outputType)?.label ?? '';
+  const head = `【${label}（下書き）】${profile.profession ? `\n職種: ${profile.profession} / 立場: ${profile.role}` : ''}`;
+  const body = logs
+    .map((l) => {
+      const lines = [
+        `■ ${formatDateJa(l.date)} ${l.title}`.trim(),
+        l.did && `- 取り組み: ${l.did}`,
+        l.decision && `- 判断: ${l.decision}`,
+        l.result && `- 結果: ${l.result}`,
+        l.learning && `- 学び: ${l.learning}`,
+      ].filter(Boolean);
+      return lines.join('\n');
+    })
+    .join('\n\n');
+  return `${head}\n\n${body || '（選択された仕事ログがありません）'}\n\n※これは選択ログをまとめた下書きです。AIキーを登録すると自動で文章化できます。`;
 }

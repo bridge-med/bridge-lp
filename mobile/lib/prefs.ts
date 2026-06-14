@@ -10,9 +10,20 @@ export interface Prefs {
   onboardingDone: boolean;
   accent: AccentKey;
   geminiApiKey: string;
+  // Profile (users table, single local user until Supabase auth)
+  profession: string;
+  role: string;
+  purpose: string;
 }
 
-const DEFAULT: Prefs = { onboardingDone: false, accent: 'blue', geminiApiKey: '' };
+const DEFAULT: Prefs = {
+  onboardingDone: false,
+  accent: 'blue',
+  geminiApiKey: '',
+  profession: '',
+  role: '',
+  purpose: '',
+};
 
 type Listener = () => void;
 

@@ -4,24 +4,27 @@ import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } 
 import { Sheet } from '../../components/Sheet';
 import { ThemePicker } from '../../components/ThemePicker';
 import { useColors } from '../../components/ThemeProvider';
-import { Button, Card, Field, SectionTitle } from '../../components/ui';
+import { Button, Card, Chip, Field, SectionTitle } from '../../components/ui';
 import { AiError, validateApiKey } from '../../lib/ai';
-import { buildExport, clearAll, importBundle, journal, memos, tasks } from '../../lib/data';
+import { PROFESSIONS, PURPOSES, ROLES } from '../../lib/constants';
+import { buildExport, careerOutputs, clearAll, importBundle, quickMemos, reflections, tasks, workLogs } from '../../lib/data';
 import { devToggleAdFree, useAdFree } from '../../lib/entitlement';
-import { toMarkdown } from '../../lib/markdown';
 import { prefs, usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
 
 export default function SettingsScreen() {
-  const t = useCollection(tasks);
-  const m = useCollection(memos);
-  const j = useCollection(journal);
+  const logs = useCollection(workLogs);
+  const memos = useCollection(quickMemos);
+  const allTasks = useCollection(tasks);
+  useCollection(reflections);
+  useCollection(careerOutputs);
   const adFree = useAdFree();
   const c = useColors();
-  const { geminiApiKey } = usePrefs();
+  const { geminiApiKey, profession, role, purpose } = usePrefs();
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
+  const [profileOpen, setProfileOpen] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verifyMsg, setVerifyMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -39,23 +42,12 @@ export default function SettingsScreen() {
   }
 
   async function onExport() {
-    const json = JSON.stringify(buildExport(), null, 2);
     try {
-      await Share.share({ message: json, title: 'BRIDGE Daily バックアップ' });
+      await Share.share({ message: JSON.stringify(buildExport(), null, 2), title: 'BRIDGE Worklog バックアップ' });
     } catch {
-      // user cancelled — no-op
+      // cancelled
     }
   }
-
-  async function onExportMarkdown() {
-    const md = toMarkdown({ tasks: t, memos: m, journal: j });
-    try {
-      await Share.share({ message: md, title: 'BRIDGE Daily (Markdown)' });
-    } catch {
-      // user cancelled — no-op
-    }
-  }
-
   async function onImport() {
     try {
       await importBundle(importText);
@@ -66,46 +58,52 @@ export default function SettingsScreen() {
       Alert.alert('取り込み失敗', e instanceof Error ? e.message : '不明なエラー');
     }
   }
-
   function onClear() {
-    Alert.alert('全データを削除', 'タスク・メモ・日記をすべて削除します。この操作は取り消せません。', [
+    Alert.alert('全データを削除', '仕事ログ・メモ・タスク・振り返りをすべて削除します。取り消せません。', [
       { text: 'キャンセル', style: 'cancel' },
-      {
-        text: '削除する',
-        style: 'destructive',
-        onPress: () => {
-          void clearAll();
-        },
-      },
+      { text: '削除する', style: 'destructive', onPress: () => void clearAll() },
     ]);
   }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
       <Card style={styles.statRow}>
-        <Stat value={t.length} label="タスク" />
-        <Stat value={m.length} label="メモ" />
-        <Stat value={j.length} label="日記" />
+        <Stat value={logs.length} label="ログ" />
+        <Stat value={memos.length} label="メモ" />
+        <Stat value={allTasks.length} label="タスク" />
       </Card>
 
       <Pressable onPress={() => router.push('/paywall')} disabled={adFree}>
-        <Card
-          style={[
-            styles.proCard,
-            { backgroundColor: adFree ? colors.accentWeak : c.primaryWeak, borderColor: adFree ? colors.accentWeak : c.primaryWeak },
-          ]}
-        >
+        <Card style={[styles.proCard, { backgroundColor: adFree ? colors.accentWeak : c.primaryWeak, borderColor: adFree ? colors.accentWeak : c.primaryWeak }]}>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.proTitle, { color: adFree ? colors.good : c.primary }]}>
-              {adFree ? '広告オフ' : '広告を消す（買い切り）'}
-            </Text>
+            <Text style={[styles.proTitle, { color: adFree ? colors.good : c.primary }]}>{adFree ? '広告オフ' : '広告を消す（買い切り）'}</Text>
             <Text style={[type.muted, adFree && { color: colors.good }]}>
               {adFree ? '✓ 広告は表示されません' : '機能は全部無料のまま、広告だけ非表示に'}
             </Text>
           </View>
-          {!adFree ? <Text style={[styles.proArrow, { color: c.primary }]}>›</Text> : null}
+          {!adFree ? <Text style={[styles.arrow, { color: c.primary }]}>›</Text> : null}
         </Card>
       </Pressable>
+
+      <View>
+        <SectionTitle>プロフィール</SectionTitle>
+        <Pressable onPress={() => setProfileOpen(true)}>
+          <Card style={{ gap: 4 }}>
+            <Text style={type.body}>{profession || '職種を設定'}</Text>
+            <Text style={type.muted}>{[role, purpose].filter(Boolean).join(' / ') || '立場・目的を設定'}</Text>
+          </Card>
+        </Pressable>
+      </View>
+
+      <View>
+        <SectionTitle>キャリア変換</SectionTitle>
+        <Pressable onPress={() => router.push('/career')}>
+          <Card style={styles.linkCard}>
+            <Text style={type.body}>📄 ログから職務経歴書・自己PRを作る</Text>
+            <Text style={[styles.arrow, { color: c.primary }]}>›</Text>
+          </Card>
+        </Pressable>
+      </View>
 
       <View>
         <SectionTitle>テーマ</SectionTitle>
@@ -118,27 +116,16 @@ export default function SettingsScreen() {
         <SectionTitle>AI（Gemini）</SectionTitle>
         <Card style={{ gap: spacing.md }}>
           <Text style={type.muted}>
-            自分の Gemini APIキーを登録すると、AIでタスク整理・メモ整理・日記のふりかえりが使えます。無料枠で十分試せます。
+            自分の Gemini APIキーを登録すると、AIでタスク化・メモ整理・振り返り・キャリア変換が高精度になります。無料枠で十分試せます。
           </Text>
-          <View style={styles.steps}>
-            <Text style={type.muted}>1. 下の「APIキーを取得」を開く（Googleアカウントでログイン）</Text>
-            <Text style={type.muted}>2.「APIキーを作成」して、表示されたキー（AIza…）をコピー</Text>
-            <Text style={type.muted}>3. 下の欄に貼り付け →「キーを確認」</Text>
-          </View>
-          <Pressable
-            onPress={() => void Linking.openURL('https://aistudio.google.com/apikey')}
-            style={[styles.linkBtn, { borderColor: c.primary }]}
-          >
+          <Pressable onPress={() => void Linking.openURL('https://aistudio.google.com/apikey')} style={[styles.linkBtn, { borderColor: c.primary }]}>
             <Text style={[type.body, { color: c.primary, fontWeight: '700' }]}>APIキーを取得する（Google AI Studio）↗</Text>
           </Pressable>
           <Field
             label="APIキー"
             placeholder="AIza..."
             value={geminiApiKey}
-            onChangeText={(v) => {
-              void prefs.set({ geminiApiKey: v.trim() });
-              setVerifyMsg(null);
-            }}
+            onChangeText={(v) => { void prefs.set({ geminiApiKey: v.trim() }); setVerifyMsg(null); }}
             secureTextEntry
             autoCapitalize="none"
             autoCorrect={false}
@@ -146,18 +133,11 @@ export default function SettingsScreen() {
           {verifyMsg ? (
             <Text style={[type.body, { color: verifyMsg.ok ? colors.good : colors.danger }]}>{verifyMsg.text}</Text>
           ) : (
-            <Text style={type.muted}>{geminiApiKey ? '端末内のみに保存されます' : 'キー未設定'}</Text>
+            <Text style={type.muted}>{geminiApiKey ? '端末内のみに保存されます' : 'キー未設定でもモックで動作します'}</Text>
           )}
           <Button label={verifying ? '確認中…' : 'キーを確認'} onPress={onVerifyKey} disabled={!geminiApiKey || verifying} />
           {geminiApiKey ? (
-            <Button
-              label="キーを削除"
-              variant="ghost"
-              onPress={() => {
-                void prefs.set({ geminiApiKey: '' });
-                setVerifyMsg(null);
-              }}
-            />
+            <Button label="キーを削除" variant="ghost" onPress={() => { void prefs.set({ geminiApiKey: '' }); setVerifyMsg(null); }} />
           ) : null}
         </Card>
       </View>
@@ -165,9 +145,8 @@ export default function SettingsScreen() {
       <View>
         <SectionTitle>バックアップ</SectionTitle>
         <Card style={{ gap: spacing.md }}>
-          <Text style={type.muted}>データはこの端末内だけに保存されます。機種変更の前に書き出して保管してください。</Text>
+          <Text style={type.muted}>データは端末内だけに保存されます。機種変更の前に書き出して保管してください。</Text>
           <Button label="バックアップを書き出す（JSON）" onPress={onExport} />
-          <Button label="Markdownで書き出す" variant="ghost" onPress={onExportMarkdown} />
           <Button label="バックアップを取り込む" variant="ghost" onPress={() => setImportOpen(true)} />
         </Card>
       </View>
@@ -182,12 +161,11 @@ export default function SettingsScreen() {
       <View>
         <SectionTitle>このアプリについて</SectionTitle>
         <Card style={{ gap: spacing.sm }}>
-          <Text style={type.h2}>BRIDGE Daily</Text>
+          <Text style={type.h2}>BRIDGE Worklog</Text>
           <Text style={type.muted}>
-            タスク・メモ・日記を1つにまとめた、スキマ時間のための個人用アプリ。BRIDGE の現場ツール群の思想を踏襲し、
-            データは端末内（オフライン）に保持します。
+            日々の仕事ログ・メモ・タスクを残すと、職務経歴書や面接・1on1の材料になる。データは端末内（オフライン）に保持します。
           </Text>
-          <Text style={[type.muted, { marginTop: spacing.xs }]}>バージョン 1.0.0</Text>
+          <Text style={[type.muted, { marginTop: spacing.xs }]}>バージョン 0.1.0 (MVP)</Text>
           <Pressable onPress={() => void devToggleAdFree()} hitSlop={8} style={{ marginTop: spacing.sm }}>
             <Text style={styles.devLink}>（開発用）広告オフを切り替え: {adFree ? 'ON' : 'OFF'}</Text>
           </Pressable>
@@ -196,10 +174,37 @@ export default function SettingsScreen() {
 
       <Sheet visible={importOpen} title="バックアップを取り込む" onClose={() => setImportOpen(false)}>
         <Text style={type.muted}>書き出した JSON を貼り付けてください。現在のデータは置き換えられます。</Text>
-        <Field placeholder='{"app":"bridge-daily", ...}' value={importText} onChangeText={setImportText} multiline />
+        <Field placeholder='{"app":"bridge-worklog", ...}' value={importText} onChangeText={setImportText} multiline />
         <Button label="取り込む" onPress={onImport} disabled={!importText.trim()} />
       </Sheet>
+
+      <ProfileSheet visible={profileOpen} onClose={() => setProfileOpen(false)} />
     </ScrollView>
+  );
+}
+
+function ProfileSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { profession, role, purpose } = usePrefs();
+  return (
+    <Sheet visible={visible} title="プロフィール" onClose={onClose}>
+      <Group title="職種" options={PROFESSIONS} value={profession} onSelect={(v) => void prefs.set({ profession: v })} />
+      <Group title="現在の立場" options={ROLES} value={role} onSelect={(v) => void prefs.set({ role: v })} />
+      <Group title="使う目的" options={PURPOSES} value={purpose} onSelect={(v) => void prefs.set({ purpose: v })} />
+      <Button label="閉じる" onPress={onClose} />
+    </Sheet>
+  );
+}
+
+function Group({ title, options, value, onSelect }: { title: string; options: readonly string[]; value: string; onSelect: (v: string) => void }) {
+  return (
+    <View style={{ gap: spacing.sm }}>
+      <Text style={type.label}>{title}</Text>
+      <View style={styles.chips}>
+        {options.map((o) => (
+          <Chip key={o} label={o} tone="primary" active={value === o} onPress={() => onSelect(value === o ? '' : o)} />
+        ))}
+      </View>
+    </View>
   );
 }
 
@@ -219,8 +224,9 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 26, fontWeight: '700', color: colors.text },
   proCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   proTitle: { ...type.h2, fontSize: 16 },
-  proArrow: { fontSize: 22, fontWeight: '800' },
+  arrow: { fontSize: 22, fontWeight: '800' },
+  linkCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   devLink: { ...type.muted, color: colors.line2 },
-  steps: { gap: 4 },
   linkBtn: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 });

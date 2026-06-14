@@ -26,7 +26,9 @@ function Navigator() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="review" options={{ title: 'ふりかえり', headerBackTitle: '戻る' }} />
+        <Stack.Screen name="log-edit" options={{ title: '仕事ログ', headerBackTitle: '戻る' }} />
+        <Stack.Screen name="log/[id]" options={{ title: '仕事ログ', headerBackTitle: '戻る' }} />
+        <Stack.Screen name="career" options={{ title: 'キャリア変換', headerBackTitle: '戻る' }} />
         <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
       </Stack>
       <Onboarding visible={showOnboarding} />
