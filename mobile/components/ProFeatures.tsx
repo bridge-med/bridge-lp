@@ -7,7 +7,7 @@ const BENEFITS: { icon: string; title: string; desc: string }[] = [
   { icon: '🚫', title: '広告が消える', desc: 'タスク・メモ一覧のバナーが非表示に' },
   { icon: '🎯', title: '集中できる', desc: '余計な表示のないすっきりした画面' },
   { icon: '💛', title: '開発の応援', desc: '個人開発の継続を支えられます' },
-  { icon: '✨', title: '機能はぜんぶ無料のまま', desc: 'AI整理・ふりかえり・タグ・テーマは元から無料' },
+  { icon: '🆓', title: '機能はぜんぶ無料のまま', desc: '自動整理・ふりかえり・タグ・テーマは元から無料' },
 ];
 
 export function AdFreeBenefits() {

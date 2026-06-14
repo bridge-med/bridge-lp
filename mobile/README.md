@@ -46,11 +46,16 @@ npx expo start          # QR を Expo Go で読む / npm run ios|android
 プロフィール（users 相当）は `lib/prefs.ts` に保持。フラットなレコードなので、
 `lib/storage.ts` の AsyncStorage 実装を Supabase クライアントに差し替えれば移行できます。
 
-## AI（Gemini）— BYOK・無料機能
+## AI — BYOK・無料機能・マルチプロバイダ
 
-- ユーザー自身の Gemini APIキー（無料枠あり）を登録 → 端末から直接 `generativelanguage`（`gemini-2.5-flash`, structured output）を呼びます。サーバ不要。
+- **プロバイダを選べる**：Google Gemini (`gemini-2.5-flash`) / OpenAI (`gpt-4o-mini`) / Anthropic Claude (`claude-haiku-4-5`)。設定でプロバイダ＋自分のAPIキーを登録（端末内保存）。
+- 端末から各プロバイダAPIを直接呼ぶ（サーバ不要）。「自分のキーなのに課金」は不自然なので **AIは無料**。
 - **キー未設定でも動作**：`generateReflection()` / `generateCareerOutput()` はモックにフォールバック。
-- ロジックは `lib/ai.ts` に集約：`extractTasks`（走り書き→タスク）、`tidyMemo`、`generateReflection`、`generateCareerOutput`、`validateApiKey`。
+- ロジックは `lib/ai.ts`（プロバイダ抽象 `complete()`）：`extractTasks`（走り書き→タスク）、`tidyMemo`、`generateReflection`、`generateCareerOutput`、`validateApiKey`。
+
+## アイコン / スプラッシュ
+
+`scripts/gen-icons.mjs`（`@resvg/resvg-js`、dev-only）で生成。ブランドの上昇バー・マーク（青グラデ）。再生成は `node scripts/gen-icons.mjs`。
 
 ## マネタイズ（全機能無料 + 広告 + 買い切り広告除去）
 

@@ -1,17 +1,21 @@
+import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Picker } from '../../components/Picker';
 import { Sheet } from '../../components/Sheet';
 import { ThemePicker } from '../../components/ThemePicker';
 import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, Chip, Field, SectionTitle } from '../../components/ui';
 import { AiError, validateApiKey } from '../../lib/ai';
-import { PROFESSIONS, PURPOSES, ROLES } from '../../lib/constants';
+import { AI_PROVIDERS, PROFESSIONS, PURPOSES, ROLES } from '../../lib/constants';
 import { buildExport, careerOutputs, clearAll, importBundle, quickMemos, reflections, tasks, workLogs } from '../../lib/data';
 import { devToggleAdFree, useAdFree } from '../../lib/entitlement';
-import { prefs, usePrefs } from '../../lib/prefs';
+import { activeAiKey, prefs, usePrefs, type Prefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
+
+const AI_KEY_FIELD = { gemini: 'geminiApiKey', openai: 'openaiApiKey', anthropic: 'anthropicApiKey' } as const;
 
 export default function SettingsScreen() {
   const logs = useCollection(workLogs);
@@ -21,7 +25,11 @@ export default function SettingsScreen() {
   useCollection(careerOutputs);
   const adFree = useAdFree();
   const c = useColors();
-  const { geminiApiKey, profession, role, purpose } = usePrefs();
+  const prefsValue = usePrefs();
+  const { profession, role, purpose, aiProvider } = prefsValue;
+  const activeProvider = AI_PROVIDERS.find((p) => p.key === aiProvider)!;
+  const activeKey = activeAiKey(prefsValue);
+  const aiKeyField = AI_KEY_FIELD[aiProvider];
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
@@ -32,7 +40,7 @@ export default function SettingsScreen() {
     setVerifying(true);
     setVerifyMsg(null);
     try {
-      await validateApiKey(geminiApiKey);
+      await validateApiKey({ provider: aiProvider, apiKey: activeKey });
       setVerifyMsg({ ok: true, text: '✓ キーは有効です。AI機能を使えます。' });
     } catch (e) {
       setVerifyMsg({ ok: false, text: e instanceof AiError ? e.message : '確認に失敗しました。' });
@@ -99,8 +107,11 @@ export default function SettingsScreen() {
         <SectionTitle>キャリア変換</SectionTitle>
         <Pressable onPress={() => router.push('/career')}>
           <Card style={styles.linkCard}>
-            <Text style={type.body}>📄 ログから職務経歴書・自己PRを作る</Text>
-            <Text style={[styles.arrow, { color: c.primary }]}>›</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 }}>
+              <Feather name="file-text" size={18} color={c.primary} />
+              <Text style={type.body}>ログから職務経歴書・自己PRを作る</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={c.primary} />
           </Card>
         </Pressable>
       </View>
@@ -113,19 +124,36 @@ export default function SettingsScreen() {
       </View>
 
       <View>
-        <SectionTitle>AI（Gemini）</SectionTitle>
+        <SectionTitle>AI</SectionTitle>
         <Card style={{ gap: spacing.md }}>
           <Text style={type.muted}>
-            自分の Gemini APIキーを登録すると、AIでタスク化・メモ整理・振り返り・キャリア変換が高精度になります。無料枠で十分試せます。
+            好きなAIプロバイダを選び、自分のAPIキーを登録すると、タスク化・メモ整理・振り返り・キャリア変換が高精度になります。
           </Text>
-          <Pressable onPress={() => void Linking.openURL('https://aistudio.google.com/apikey')} style={[styles.linkBtn, { borderColor: c.primary }]}>
-            <Text style={[type.body, { color: c.primary, fontWeight: '700' }]}>APIキーを取得する（Google AI Studio）↗</Text>
+          <View style={styles.chips}>
+            {AI_PROVIDERS.map((p) => (
+              <Chip
+                key={p.key}
+                label={p.label}
+                tone="primary"
+                active={aiProvider === p.key}
+                onPress={() => {
+                  void prefs.set({ aiProvider: p.key });
+                  setVerifyMsg(null);
+                }}
+              />
+            ))}
+          </View>
+          <Pressable onPress={() => void Linking.openURL(activeProvider.keyUrl)} style={[styles.linkBtn, { borderColor: c.primary }]}>
+            <Text style={[type.body, { color: c.primary, fontWeight: '700' }]}>{activeProvider.label} のAPIキーを取得 ↗</Text>
           </Pressable>
           <Field
-            label="APIキー"
-            placeholder="AIza..."
-            value={geminiApiKey}
-            onChangeText={(v) => { void prefs.set({ geminiApiKey: v.trim() }); setVerifyMsg(null); }}
+            label={`${activeProvider.label} APIキー`}
+            placeholder={activeProvider.keyHint}
+            value={activeKey}
+            onChangeText={(v) => {
+              void prefs.set({ [aiKeyField]: v.trim() } as Partial<Prefs>);
+              setVerifyMsg(null);
+            }}
             secureTextEntry
             autoCapitalize="none"
             autoCorrect={false}
@@ -133,11 +161,11 @@ export default function SettingsScreen() {
           {verifyMsg ? (
             <Text style={[type.body, { color: verifyMsg.ok ? colors.good : colors.danger }]}>{verifyMsg.text}</Text>
           ) : (
-            <Text style={type.muted}>{geminiApiKey ? '端末内のみに保存されます' : 'キー未設定でもモックで動作します'}</Text>
+            <Text style={type.muted}>{activeKey ? `モデル: ${activeProvider.model}・端末内のみに保存` : 'キー未設定でもモックで動作します'}</Text>
           )}
-          <Button label={verifying ? '確認中…' : 'キーを確認'} onPress={onVerifyKey} disabled={!geminiApiKey || verifying} />
-          {geminiApiKey ? (
-            <Button label="キーを削除" variant="ghost" onPress={() => { void prefs.set({ geminiApiKey: '' }); setVerifyMsg(null); }} />
+          <Button label={verifying ? '確認中…' : 'キーを確認'} onPress={onVerifyKey} disabled={!activeKey || verifying} />
+          {activeKey ? (
+            <Button label="キーを削除" variant="ghost" onPress={() => { void prefs.set({ [aiKeyField]: '' } as Partial<Prefs>); setVerifyMsg(null); }} />
           ) : null}
         </Card>
       </View>
@@ -187,7 +215,7 @@ function ProfileSheet({ visible, onClose }: { visible: boolean; onClose: () => v
   const { profession, role, purpose } = usePrefs();
   return (
     <Sheet visible={visible} title="プロフィール" onClose={onClose}>
-      <Group title="職種" options={PROFESSIONS} value={profession} onSelect={(v) => void prefs.set({ profession: v })} />
+      <Picker label="職種" options={PROFESSIONS} value={profession} onChange={(v) => void prefs.set({ profession: v })} placeholder="職種を選択" />
       <Group title="現在の立場" options={ROLES} value={role} onSelect={(v) => void prefs.set({ role: v })} />
       <Group title="使う目的" options={PURPOSES} value={purpose} onSelect={(v) => void prefs.set({ purpose: v })} />
       <Button label="閉じる" onPress={onClose} />

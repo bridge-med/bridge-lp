@@ -7,7 +7,7 @@ import { AiError, generateCareerOutput } from '../lib/ai';
 import { CAREER_OUTPUTS, type CareerOutputType } from '../lib/constants';
 import { careerOutputs, workLogs } from '../lib/data';
 import { formatDateJa } from '../lib/date';
-import { usePrefs } from '../lib/prefs';
+import { activeAiKey, usePrefs } from '../lib/prefs';
 import { useCollection } from '../lib/store';
 import { colors, spacing, type } from '../lib/theme';
 import type { CareerOutput } from '../lib/types';
@@ -16,7 +16,9 @@ export default function CareerScreen() {
   const c = useColors();
   const logs = useCollection(workLogs);
   const outputs = useCollection(careerOutputs);
-  const { profession, role, purpose, geminiApiKey } = usePrefs();
+  const prefs = usePrefs();
+  const { profession, role, purpose } = prefs;
+  const apiKey = activeAiKey(prefs);
   const [outputType, setOutputType] = useState<CareerOutputType>('resume');
   const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -36,12 +38,12 @@ export default function CareerScreen() {
     }
     setBusy(true);
     try {
-      const content = await generateCareerOutput(chosen, outputType, { profession, role, purpose }, geminiApiKey || null);
+      const content = await generateCareerOutput(chosen, outputType, { profession, role, purpose }, apiKey ? { provider: prefs.aiProvider, apiKey } : null);
       await careerOutputs.upsert({
         outputType,
         sourceLogIds: chosen.map((l) => l.id),
         content,
-        aiGenerated: !!geminiApiKey,
+        aiGenerated: !!apiKey,
       } as Partial<CareerOutput>);
       setSelected([]);
     } catch (e) {
@@ -90,9 +92,9 @@ export default function CareerScreen() {
           <Text style={type.muted}>生成しています…</Text>
         </View>
       ) : (
-        <Button label={geminiApiKey ? 'AIで生成' : 'まとめて生成（モック）'} onPress={generate} disabled={selected.length === 0} />
+        <Button label={apiKey ? '生成する' : 'まとめて生成'} onPress={generate} disabled={selected.length === 0} />
       )}
-      {!geminiApiKey ? <Text style={type.muted}>※ AIキー未設定のため、選択ログをまとめた下書きを生成します（設定で文章化）。</Text> : null}
+      {!apiKey ? <Text style={type.muted}>※ AIキー未設定のため、選択ログをまとめた下書きを生成します（設定で文章化）。</Text> : null}
 
       {sortedOutputs.length > 0 ? (
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>

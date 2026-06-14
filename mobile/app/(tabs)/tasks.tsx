@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -50,11 +51,12 @@ export default function TasksScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110, gap: spacing.md }}>
         <Pressable onPress={() => setAiOpen(true)} style={[styles.aiBtn, { borderColor: c.primary, backgroundColor: c.primaryWeak }]}>
-          <Text style={[styles.aiBtnText, { color: c.primary }]}>✨ AIでまとめて追加</Text>
+          <Feather name="zap" size={15} color={c.primary} />
+          <Text style={[styles.aiBtnText, { color: c.primary }]}>まとめて追加</Text>
         </Pressable>
 
         {all.length === 0 ? (
-          <EmptyState icon="✓" title="タスクはありません" hint="右下の＋から追加。AIでまとめて追加もできます。" />
+          <EmptyState icon="✓" title="タスクはありません" hint="右下の＋から追加。「まとめて追加」で文章から一括登録もできます。" />
         ) : (
           groups.map((g) => (
             <View key={g.status} style={{ gap: spacing.sm }}>
@@ -105,7 +107,7 @@ export default function TasksScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  aiBtn: { borderWidth: 1, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center' },
+  aiBtn: { flexDirection: 'row', gap: 8, borderWidth: 1, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
   aiBtnText: { fontSize: 15, fontWeight: '700' },
   sectionHead: { ...type.label, color: colors.text2, fontSize: 14 },
   count: { color: colors.muted, fontWeight: '600' },

@@ -1,8 +1,9 @@
+import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, Text } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import { AiError, tidyMemo } from '../lib/ai';
 import { quickMemos } from '../lib/data';
-import { usePrefs } from '../lib/prefs';
+import { activeAiKey, usePrefs } from '../lib/prefs';
 import { spacing, type } from '../lib/theme';
 import type { QuickMemo } from '../lib/types';
 import { Sheet } from './Sheet';
@@ -12,7 +13,8 @@ import { Button, Field } from './ui';
 
 export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; memo?: QuickMemo | null; onClose: () => void }) {
   const c = useColors();
-  const { geminiApiKey } = usePrefs();
+  const prefs = usePrefs();
+  const apiKey = activeAiKey(prefs);
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [seed, setSeed] = useState<string | null>(null);
@@ -26,16 +28,16 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
   }
 
   async function runAi() {
-    if (!geminiApiKey) {
-      Alert.alert('APIキーが未設定です', '設定 → AI（Gemini）で Gemini APIキーを登録してください。');
+    if (!apiKey) {
+      Alert.alert('APIキーが未設定です', '設定 → AI でプロバイダとキーを登録してください。');
       return;
     }
     if (!content.trim()) return;
     setAiBusy(true);
     try {
-      setContent(await tidyMemo(content, geminiApiKey));
+      setContent(await tidyMemo(content, { provider: prefs.aiProvider, apiKey }));
     } catch (e) {
-      Alert.alert('AI整理に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
+      Alert.alert('整理に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
     } finally {
       setAiBusy(false);
     }
@@ -69,7 +71,14 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
         autoFocus={!memo}
       />
       <Pressable onPress={runAi} disabled={aiBusy} style={{ alignSelf: 'flex-start' }} hitSlop={6}>
-        {aiBusy ? <ActivityIndicator color={c.primary} /> : <Text style={[type.label, { color: c.primary }]}>✨ AIで整える</Text>}
+        {aiBusy ? (
+          <ActivityIndicator color={c.primary} />
+        ) : (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather name="feather" size={15} color={c.primary} />
+            <Text style={[type.label, { color: c.primary }]}>整える</Text>
+          </View>
+        )}
       </Pressable>
       <TagPicker value={tags} onChange={setTags} />
       <Button label={memo ? '保存' : '保存'} onPress={save} />

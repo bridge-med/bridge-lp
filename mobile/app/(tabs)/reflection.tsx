@@ -6,7 +6,7 @@ import { Button, Card, EmptyState } from '../../components/ui';
 import { AiError, generateReflection } from '../../lib/ai';
 import { reflections, workLogs } from '../../lib/data';
 import { formatDateJa, monthRangeKeys, startOfWeekKey, todayKey } from '../../lib/date';
-import { usePrefs } from '../../lib/prefs';
+import { activeAiKey, usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
 import type { Reflection, ReflectionContent, ReflectionPeriod } from '../../lib/types';
@@ -25,7 +25,8 @@ export default function ReflectionScreen() {
   const c = useColors();
   const logs = useCollection(workLogs);
   const refs = useCollection(reflections);
-  const { geminiApiKey } = usePrefs();
+  const prefs = usePrefs();
+  const apiKey = activeAiKey(prefs);
   const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
@@ -41,13 +42,13 @@ export default function ReflectionScreen() {
     }
     setBusy(true);
     try {
-      const content = await generateReflection(inRange, geminiApiKey || null);
+      const content = await generateReflection(inRange, apiKey ? { provider: prefs.aiProvider, apiKey } : null);
       const saved = await reflections.upsert({
         periodType: period,
         startDate: start,
         endDate: end,
         content,
-        aiGenerated: !!geminiApiKey,
+        aiGenerated: !!apiKey,
       } as Partial<Reflection>);
       setExpanded(saved.id);
     } catch (e) {
@@ -62,7 +63,7 @@ export default function ReflectionScreen() {
       <Card style={{ gap: spacing.md }}>
         <Text style={type.h2}>振り返りをつくる</Text>
         <Text style={type.muted}>
-          期間の仕事ログから自動でまとめます。{geminiApiKey ? 'AI（Gemini）で生成します。' : 'AIキー未設定のため、ログを整理したモックで生成します（設定で精度UP）。'}
+          期間の仕事ログから自動でまとめます。{apiKey ? 'AIで生成します。' : 'AIキー未設定のため、ログを整理して生成します（設定で精度UP）。'}
         </Text>
         {busy ? (
           <View style={styles.loading}>

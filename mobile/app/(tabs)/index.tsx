@@ -1,5 +1,6 @@
+import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { type ComponentProps, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BannerSlot } from '../../components/BannerSlot';
 import { QuickMemoSheet } from '../../components/QuickMemoSheet';
@@ -38,8 +39,8 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.actionRow}>
-          <Action label="今日の一言" sub="クイックメモ" icon="✎" color={c.primary} onPress={() => setMemoOpen(true)} />
-          <Action label="仕事ログ" sub="今日の記録" icon="＋" color={c.primary} onPress={() => router.push('/log-edit')} />
+          <Action label="今日の一言" sub="クイックメモ" icon="edit-3" color={c.primary} onPress={() => setMemoOpen(true)} />
+          <Action label="仕事ログ" sub="今日の記録" icon="plus" color={c.primary} onPress={() => router.push('/log-edit')} />
         </View>
 
         <View style={styles.statRow}>
@@ -59,7 +60,7 @@ export default function HomeScreen() {
 
         <Pressable onPress={() => router.push('/reflection')}>
           <Card style={[styles.reflectCard, { backgroundColor: c.primaryWeak, borderColor: c.primaryWeak }]}>
-            <Text style={{ fontSize: 22 }}>📊</Text>
+            <Feather name="bar-chart-2" size={22} color={c.primary} />
             <View style={{ flex: 1 }}>
               <Text style={[type.body, { fontWeight: '700', color: c.primary }]}>今週の振り返りをつくる</Text>
               <Text style={type.muted}>1週間のログから自動でまとめ</Text>
@@ -85,12 +86,24 @@ export default function HomeScreen() {
   );
 }
 
-function Action({ label, sub, icon, color, onPress }: { label: string; sub: string; icon: string; color: string; onPress: () => void }) {
+function Action({
+  label,
+  sub,
+  icon,
+  color,
+  onPress,
+}: {
+  label: string;
+  sub: string;
+  icon: ComponentProps<typeof Feather>['name'];
+  color: string;
+  onPress: () => void;
+}) {
   return (
     <Pressable style={{ flex: 1 }} onPress={onPress}>
       <Card style={styles.actionCard}>
         <View style={[styles.actionIcon, { backgroundColor: color }]}>
-          <Text style={styles.actionIconText}>{icon}</Text>
+          <Feather name={icon} size={20} color="#fff" />
         </View>
         <Text style={[type.body, { fontWeight: '700' }]}>{label}</Text>
         <Text style={type.muted}>{sub}</Text>

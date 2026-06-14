@@ -10,7 +10,10 @@ const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? '';
 const EAS_OWNER = process.env.EAS_OWNER ?? '';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const plugins: NonNullable<ExpoConfig['plugins']> = ['expo-router'];
+  const plugins: NonNullable<ExpoConfig['plugins']> = [
+    'expo-router',
+    ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 180, backgroundColor: '#1f5e8c' }],
+  ];
 
   // Only add the AdMob native plugin when app ids are provided (production EAS
   // build). Requires `npx expo install react-native-google-mobile-ads` first.

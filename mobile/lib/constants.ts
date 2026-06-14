@@ -1,13 +1,50 @@
 // Master data for onboarding choices, tags, and task statuses.
 // Kept generic so the app can expand beyond medical roles later.
 
+// Comprehensive list of medical / clinic roles (Japanese licenses + common
+// positions). Selected via a searchable picker. Generic enough to extend later.
 export const PROFESSIONS = [
-  '理学療法士',
-  '作業療法士',
+  '医師',
+  '歯科医師',
+  '薬剤師',
   '看護師',
+  '准看護師',
+  '保健師',
+  '助産師',
+  '理学療法士 (PT)',
+  '作業療法士 (OT)',
+  '言語聴覚士 (ST)',
+  '視能訓練士 (ORT)',
+  '義肢装具士',
+  '臨床検査技師',
+  '診療放射線技師',
+  '臨床工学技士',
+  '管理栄養士',
+  '栄養士',
+  '歯科衛生士',
+  '歯科技工士',
+  '救急救命士',
+  '公認心理師',
+  '臨床心理士',
+  '柔道整復師',
+  'あん摩マッサージ指圧師',
+  'はり師・きゅう師',
+  '社会福祉士',
+  '介護福祉士',
+  '精神保健福祉士',
+  '介護支援専門員 (ケアマネ)',
+  '医療ソーシャルワーカー (MSW)',
   '医療事務',
-  '事務長',
-  '医療PMI',
+  '医療クラーク',
+  '診療情報管理士',
+  '登録販売者',
+  '看護助手',
+  '歯科助手',
+  '病院事務・事務長',
+  'クリニック運営',
+  '医療経営・PMI',
+  '治験コーディネーター (CRC)',
+  '医薬情報担当者 (MR)',
   'その他',
 ] as const;
 
@@ -57,6 +94,21 @@ export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
   done: '完了',
   hold: '保留',
 };
+
+// AI providers — bring-your-own-key. Each calls its provider directly.
+export type AiProvider = 'gemini' | 'openai' | 'anthropic';
+
+export const AI_PROVIDERS: {
+  key: AiProvider;
+  label: string;
+  model: string;
+  keyHint: string;
+  keyUrl: string;
+}[] = [
+  { key: 'gemini', label: 'Google Gemini', model: 'gemini-2.5-flash', keyHint: 'AIza…', keyUrl: 'https://aistudio.google.com/apikey' },
+  { key: 'openai', label: 'OpenAI', model: 'gpt-4o-mini', keyHint: 'sk-…', keyUrl: 'https://platform.openai.com/api-keys' },
+  { key: 'anthropic', label: 'Anthropic Claude', model: 'claude-haiku-4-5', keyHint: 'sk-ant-…', keyUrl: 'https://console.anthropic.com/settings/keys' },
+];
 
 export type CareerOutputType =
   | 'resume'

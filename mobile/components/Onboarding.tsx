@@ -7,6 +7,7 @@ import { PROFESSIONS, PURPOSES, ROLES } from '../lib/constants';
 import { prefs } from '../lib/prefs';
 import { radius, spacing, type } from '../lib/theme';
 import { Chip } from './ui';
+import { Picker } from './Picker';
 import { useColors } from './ThemeProvider';
 
 export function Onboarding({ visible }: { visible: boolean }) {
@@ -32,7 +33,7 @@ export function Onboarding({ visible }: { visible: boolean }) {
             </Text>
           </View>
 
-          <Group title="職種" options={PROFESSIONS} value={profession} onSelect={setProfession} />
+          <Picker label="職種" options={PROFESSIONS} value={profession} onChange={setProfession} placeholder="職種を選択" />
           <Group title="現在の立場" options={ROLES} value={role} onSelect={setRole} />
           <Group title="使う目的" options={PURPOSES} value={purpose} onSelect={setPurpose} />
         </ScrollView>

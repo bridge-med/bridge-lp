@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { AiProvider } from './constants';
 import type { AccentKey } from './theme';
 
 const KEY = 'bridge-daily:prefs';
@@ -9,7 +10,11 @@ const KEY = 'bridge-daily:prefs';
 export interface Prefs {
   onboardingDone: boolean;
   accent: AccentKey;
+  // AI: selected provider + a key per provider (bring-your-own-key)
+  aiProvider: AiProvider;
   geminiApiKey: string;
+  openaiApiKey: string;
+  anthropicApiKey: string;
   // Profile (users table, single local user until Supabase auth)
   profession: string;
   role: string;
@@ -19,11 +24,19 @@ export interface Prefs {
 const DEFAULT: Prefs = {
   onboardingDone: false,
   accent: 'blue',
+  aiProvider: 'gemini',
   geminiApiKey: '',
+  openaiApiKey: '',
+  anthropicApiKey: '',
   profession: '',
   role: '',
   purpose: '',
 };
+
+/** The API key for the currently-selected AI provider. */
+export function activeAiKey(p: Prefs): string {
+  return p.aiProvider === 'openai' ? p.openaiApiKey : p.aiProvider === 'anthropic' ? p.anthropicApiKey : p.geminiApiKey;
+}
 
 type Listener = () => void;
 

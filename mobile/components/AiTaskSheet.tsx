@@ -4,7 +4,7 @@ import { AiError, extractTasks, type DraftTask } from '../lib/ai';
 import { tasks } from '../lib/data';
 import { dueLabel } from '../lib/date';
 import { tapSuccess } from '../lib/haptics';
-import { usePrefs } from '../lib/prefs';
+import { activeAiKey, usePrefs } from '../lib/prefs';
 import { spacing, type } from '../lib/theme';
 import type { Task } from '../lib/types';
 import { Sheet } from './Sheet';
@@ -15,7 +15,8 @@ type Draft = DraftTask & { include: boolean };
 
 export function AiTaskSheet({ visible, onClose, onNeedKey }: { visible: boolean; onClose: () => void; onNeedKey: () => void }) {
   const c = useColors();
-  const { geminiApiKey } = usePrefs();
+  const prefs = usePrefs();
+  const apiKey = activeAiKey(prefs);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [drafts, setDrafts] = useState<Draft[] | null>(null);
@@ -37,7 +38,7 @@ export function AiTaskSheet({ visible, onClose, onNeedKey }: { visible: boolean;
     setLoading(true);
     setError(null);
     try {
-      const result = await extractTasks(text, geminiApiKey);
+      const result = await extractTasks(text, { provider: prefs.aiProvider, apiKey });
       if (result.length === 0) setError('タスクを抽出できませんでした。文章を具体的にしてみてください。');
       else setDrafts(result.map((d) => ({ ...d, include: true })));
     } catch (e) {
@@ -63,30 +64,30 @@ export function AiTaskSheet({ visible, onClose, onNeedKey }: { visible: boolean;
     close();
   }
 
-  if (!geminiApiKey) {
+  if (!apiKey) {
     return (
-      <Sheet visible={visible} title="AIでまとめて追加" onClose={close}>
-        <Text style={type.body}>この機能には Gemini APIキーが必要です（無料枠あり）。</Text>
-        <Text style={type.muted}>設定 → AI（Gemini）でキーを登録してください。</Text>
+      <Sheet visible={visible} title="まとめて追加" onClose={close}>
+        <Text style={type.body}>この機能にはAIのAPIキーが必要です。</Text>
+        <Text style={type.muted}>設定 → AI でプロバイダとキーを登録してください。</Text>
         <Button label="設定を開く" onPress={() => { close(); onNeedKey(); }} />
       </Sheet>
     );
   }
 
   return (
-    <Sheet visible={visible} title="AIでまとめて追加" onClose={close}>
+    <Sheet visible={visible} title="まとめて追加" onClose={close}>
       {drafts === null ? (
         <>
-          <Text style={type.muted}>やること・予定を思いつくまま書いてください。AIがタスクに整理します。</Text>
+          <Text style={type.muted}>やること・予定を思いつくまま書いてください。自動でタスクに整理します。</Text>
           <Field placeholder={'例) 明日までに請求書送る。来週A院に連絡。資料の見直し。'} value={text} onChangeText={setText} multiline autoFocus />
           {error ? <Text style={[type.body, { color: '#b91c1c' }]}>{error}</Text> : null}
           {loading ? (
             <View style={styles.loading}>
               <ActivityIndicator color={c.primary} />
-              <Text style={type.muted}>AIが整理しています…</Text>
+              <Text style={type.muted}>整理しています…</Text>
             </View>
           ) : (
-            <Button label="AIで整理" onPress={run} disabled={!text.trim()} />
+            <Button label="整理する" onPress={run} disabled={!text.trim()} />
           )}
         </>
       ) : (
