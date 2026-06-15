@@ -20,6 +20,8 @@ export interface Prefs {
   role: string;
   purpose: string;
   workStyleResult: string;
+  // Companion
+  buddyName: string;
 }
 
 const DEFAULT: Prefs = {
@@ -33,6 +35,7 @@ const DEFAULT: Prefs = {
   role: '',
   purpose: '',
   workStyleResult: '',
+  buddyName: '',
 };
 
 /** The API key for the currently-selected AI provider. */

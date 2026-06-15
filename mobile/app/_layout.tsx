@@ -16,6 +16,7 @@ import { cosmetics } from '../lib/cosmetics';
 import { loadAll } from '../lib/data';
 import { prefs, usePrefs } from '../lib/prefs';
 import { progress } from '../lib/progress';
+import { wordbank } from '../lib/wordbank';
 import { colors, fonts } from '../lib/theme';
 
 void SplashScreen.preventAutoHideAsync();
@@ -46,6 +47,7 @@ function Navigator() {
         <Stack.Screen name="workstyle" options={{ headerShown: false }} />
         <Stack.Screen name="closet" options={{ headerShown: false }} />
         <Stack.Screen name="lang" options={{ headerShown: false }} />
+        <Stack.Screen name="words" options={{ headerShown: false }} />
       </Stack>
       <Onboarding visible={showOnboarding} />
       <RewardModal />
@@ -73,6 +75,7 @@ export default function RootLayout() {
     void credits.load();
     void progress.load();
     void cosmetics.load();
+    void wordbank.load();
   }, []);
 
   useEffect(() => {

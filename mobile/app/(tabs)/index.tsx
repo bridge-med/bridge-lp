@@ -29,7 +29,7 @@ export default function HomeScreen() {
   const coins = useCoins();
   const prog = useProgress();
   const cos = useCosmetics();
-  const { profession } = usePrefs();
+  const { profession, buddyName } = usePrefs();
   const [memoOpen, setMemoOpen] = useState(false);
 
   const d = parseKey(todayKey());
@@ -77,7 +77,7 @@ export default function HomeScreen() {
             <Text style={[styles.bubbleTitle, { color: colors.leaf }]}>
               {next ? `あと少しで「${next.name}」` : `Lv.${info.level} ${stage.name}`}
             </Text>
-            <Text style={styles.bubbleSub}>ログを書くと、相棒が育つよ</Text>
+            <Text style={styles.bubbleSub}>ログを書くと、{buddyName || '相棒'}が育つよ</Text>
           </Pressable>
         </View>
 

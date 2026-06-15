@@ -7,6 +7,7 @@ import { tasks } from '../lib/data';
 import { dueLabel } from '../lib/date';
 import { tapSuccess } from '../lib/haptics';
 import { spacing, type } from '../lib/theme';
+import { wordbank } from '../lib/wordbank';
 import type { Task } from '../lib/types';
 import { Sheet } from './Sheet';
 import { useColors } from './ThemeProvider';
@@ -56,6 +57,7 @@ export function AiTaskSheet({ visible, onClose }: { visible: boolean; onClose: (
   }
 
   async function add() {
+    void wordbank.collectFrom(text);
     for (const d of (drafts ?? []).filter((d) => d.include)) {
       await tasks.upsert({
         title: d.title,

@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import { credits } from './credits';
 
-export type CosmeticCat = 'hat' | 'pot' | 'bg' | 'acc';
+export type CosmeticCat = 'species' | 'hat' | 'pot' | 'bg' | 'acc';
 
 export interface Cosmetic {
   id: string;
@@ -15,15 +15,25 @@ export interface Cosmetic {
 }
 
 export interface Outfit {
+  species: string;
   hat: string;
   pot: string;
   bg: string;
   acc: string;
 }
 
-export const CAT_LABEL: Record<CosmeticCat, string> = { hat: 'ぼうし', pot: 'はち', bg: 'はいけい', acc: 'アクセ' };
+export const CAT_LABEL: Record<CosmeticCat, string> = { species: 'しゅるい', hat: 'ぼうし', pot: 'はち', bg: 'はいけい', acc: 'アクセ' };
 
 export const COSMETICS: Cosmetic[] = [
+  // species — the evolution branch (what flower the buddy becomes)
+  { id: 'species_sprout', cat: 'species', name: 'ふつうの芽', price: 0 },
+  { id: 'species_sunflower', cat: 'species', name: '向日葵', price: 120 },
+  { id: 'species_tulip', cat: 'species', name: 'チューリップ', price: 120 },
+  { id: 'species_cosmos', cat: 'species', name: 'コスモス', price: 130 },
+  { id: 'species_hydrangea', cat: 'species', name: '紫陽花', price: 140 },
+  { id: 'species_lavender', cat: 'species', name: 'ラベンダー', price: 150 },
+  { id: 'species_sakura', cat: 'species', name: '桜', price: 180 },
+  { id: 'species_rose', cat: 'species', name: '薔薇', price: 200 },
   // hats
   { id: 'hat_none', cat: 'hat', name: 'なし', price: 0 },
   { id: 'hat_ribbon', cat: 'hat', name: 'リボン', price: 25 },
@@ -49,8 +59,8 @@ export const COSMETICS: Cosmetic[] = [
   { id: 'acc_scarf', cat: 'acc', name: 'マフラー', price: 40 },
 ];
 
-export const DEFAULT_OUTFIT: Outfit = { hat: 'hat_none', pot: 'pot_coral', bg: 'bg_none', acc: 'acc_none' };
-const FREE_ITEMS = ['hat_none', 'pot_coral', 'bg_none', 'acc_none'];
+export const DEFAULT_OUTFIT: Outfit = { species: 'species_sprout', hat: 'hat_none', pot: 'pot_coral', bg: 'bg_none', acc: 'acc_none' };
+const FREE_ITEMS = ['species_sprout', 'hat_none', 'pot_coral', 'bg_none', 'acc_none'];
 
 const KEY = 'bridge-daily:cosmetics';
 

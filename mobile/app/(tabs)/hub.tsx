@@ -1,14 +1,17 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { BuddySprite } from '../../components/BuddySprite';
+import { Sheet } from '../../components/Sheet';
 import { useColors } from '../../components/ThemeProvider';
+import { Button, Field } from '../../components/ui';
 import { useCoins } from '../../lib/credits';
 import { useCosmetics } from '../../lib/cosmetics';
 import { levelInfo, nextStage, stageForLevel } from '../../lib/leveling';
+import { prefs, usePrefs } from '../../lib/prefs';
 import { BADGES, useProgress } from '../../lib/progress';
 import { colors, fonts, radius, spacing, type } from '../../lib/theme';
 
@@ -76,12 +79,25 @@ export default function GrowthScreen() {
   const prog = useProgress();
   const coins = useCoins();
   const cos = useCosmetics();
+  const { buddyName } = usePrefs();
+  const [nameOpen, setNameOpen] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
   const info = levelInfo(prog.xp);
   const stage = stageForLevel(info.level);
   const next = nextStage(info.level);
   const earned = new Set(prog.badges);
 
+  function openName() {
+    setNameDraft(buddyName);
+    setNameOpen(true);
+  }
+  function saveName() {
+    void prefs.set({ buddyName: nameDraft.trim().slice(0, 12) });
+    setNameOpen(false);
+  }
+
   return (
+    <>
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 110 }}>
       <View style={{ height: insets.top + spacing.md }} />
       {/* header */}
@@ -110,8 +126,13 @@ export default function GrowthScreen() {
               <Text style={styles.lvSub}>{info.atCap ? 'カンスト' : `あと${info.toNext}`}</Text>
             </View>
           </View>
-          <Text style={styles.stageName}>{stage.name}</Text>
-          <Text style={type.muted}>{next ? `次は「${next.name}」へ` : stage.tagline}</Text>
+          <Pressable onPress={openName} style={{ alignItems: 'center', marginTop: spacing.sm }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text style={styles.stageName}>{buddyName || '名前をつける'}</Text>
+              <Feather name="edit-2" size={12} color={colors.muted} />
+            </View>
+            <Text style={type.muted}>{`Lv.${info.level}・${stage.name}${next ? `（次は${next.name}）` : ''}`}</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -128,20 +149,9 @@ export default function GrowthScreen() {
 
       {/* quick actions */}
       <View style={styles.quick}>
-        <Pressable style={[styles.quickCard, { backgroundColor: colors.leafWeak }]} onPress={() => router.push('/lang')}>
-          <Feather name="globe" size={18} color={colors.leaf} />
-          <View style={{ flex: 1 }}>
-            <Text style={type.title}>語学で学ぶ</Text>
-            <Text style={type.muted}>ログを英語・韓国語に</Text>
-          </View>
-        </Pressable>
-        <Pressable style={[styles.quickCard, { backgroundColor: c.primaryWeak }]} onPress={() => router.push('/closet')}>
-          <Feather name="gift" size={18} color={c.primary} />
-          <View style={{ flex: 1 }}>
-            <Text style={type.title}>きせかえ</Text>
-            <Text style={type.muted}>相棒をカスタム</Text>
-          </View>
-        </Pressable>
+        <QuickCard icon="globe" label="語学で学ぶ" tint={colors.leaf} bg={colors.leafWeak} onPress={() => router.push('/lang')} />
+        <QuickCard icon="book-open" label="単語帳" tint={colors.gold} bg={colors.warnWeak} onPress={() => router.push('/words')} />
+        <QuickCard icon="gift" label="きせかえ" tint={c.primary} bg={c.primaryWeak} onPress={() => router.push('/closet')} />
       </View>
 
       {/* badges */}
@@ -182,6 +192,22 @@ export default function GrowthScreen() {
         </View>
       ))}
     </ScrollView>
+
+    <Sheet visible={nameOpen} title="相棒の名前" onClose={() => setNameOpen(false)}>
+      <Text style={type.muted}>あなたの相棒に名前をつけましょう（12文字まで）。</Text>
+      <Field placeholder="例）もりもり、ブリッジくん…" value={nameDraft} onChangeText={setNameDraft} autoFocus />
+      <Button label="決定" onPress={saveName} disabled={!nameDraft.trim()} />
+    </Sheet>
+    </>
+  );
+}
+
+function QuickCard({ icon, label, tint, bg, onPress }: { icon: ComponentProps<typeof Feather>['name']; label: string; tint: string; bg: string; onPress: () => void }) {
+  return (
+    <Pressable style={[styles.quickCard, { backgroundColor: bg }]} onPress={onPress}>
+      <Feather name={icon} size={20} color={tint} />
+      <Text style={styles.quickLabel}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -198,8 +224,9 @@ const styles = StyleSheet.create({
   stageName: { fontFamily: fonts.maru, fontSize: 17, color: colors.text, marginTop: spacing.sm },
   streak: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginHorizontal: spacing.lg, marginTop: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, padding: spacing.md },
   flame: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  quick: { flexDirection: 'row', gap: spacing.md, paddingHorizontal: spacing.lg, marginTop: spacing.md },
-  quickCard: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.lg, padding: spacing.md },
+  quick: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, marginTop: spacing.md },
+  quickCard: { flex: 1, alignItems: 'center', gap: 6, borderRadius: radius.lg, paddingVertical: spacing.md },
+  quickLabel: { fontFamily: fonts.maru, fontSize: 13, color: colors.text },
   secLabel: { paddingHorizontal: spacing.lg, marginTop: spacing.xl, marginBottom: spacing.sm },
   badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.lg - 4, gap: 0 },
   badge: { width: '25%', alignItems: 'center', paddingVertical: spacing.sm },

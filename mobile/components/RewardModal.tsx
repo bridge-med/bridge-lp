@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useCosmetics } from '../lib/cosmetics';
 import { stageForLevel, levelInfo } from '../lib/leveling';
+import { usePrefs } from '../lib/prefs';
 import { progress, useProgress, useRewardHead } from '../lib/progress';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 import { BuddySprite } from './BuddySprite';
@@ -19,6 +20,7 @@ export function RewardModal() {
   const reward = useRewardHead();
   const prog = useProgress();
   const cos = useCosmetics();
+  const { buddyName } = usePrefs();
   const pop = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -35,9 +37,10 @@ export function RewardModal() {
 
   let title = '';
   let sub = '';
+  const who = buddyName || '相棒';
   if (reward.kind === 'levelup') {
-    title = reward.stageChanged ? `「${reward.stageName}」になった！` : `Lv.${reward.level} に上がった！`;
-    sub = reward.stageChanged ? '相棒がひとつ成長したよ' : 'この調子で続けよう';
+    title = reward.stageChanged ? `${who}が「${reward.stageName}」に！` : `${who}が Lv.${reward.level} に！`;
+    sub = reward.stageChanged ? 'ひとつ成長したよ' : 'この調子で続けよう';
   } else if (reward.kind === 'streak') {
     title = `${reward.days}日連続、達成！`;
     sub = 'きょうも記録できました。えらい。';

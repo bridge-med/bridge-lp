@@ -105,6 +105,11 @@ export default function LangScreen() {
           </View>
 
           <Button label="ログを選んで変換する" onPress={() => setPickOpen(true)} />
+          <Pressable onPress={() => router.push('/words')} style={styles.wordsLink}>
+            <Feather name="book-open" size={16} color={c.primary} />
+            <Text style={[type.bodyMed, { color: c.primary }]}>単語帳・暗記モードへ</Text>
+            <Feather name="chevron-right" size={18} color={c.primary} />
+          </Pressable>
 
           {sortedCards.length === 0 ? (
             <EmptyState icon="globe" title="まだ学習カードがありません" hint="仕事ログを英語・韓国語に変換すると、ここに貯まります。" />
@@ -192,4 +197,5 @@ const styles = StyleSheet.create({
   vocabTerm: { fontFamily: fonts.maru, fontSize: 15, color: colors.text, width: 110 },
   vocabTrans: { fontFamily: fonts.gothicMed, fontSize: 15, color: colors.text },
   pickRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  wordsLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, justifyContent: 'center', paddingVertical: spacing.sm },
 });

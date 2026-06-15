@@ -9,14 +9,14 @@ import { levelInfo, stageForLevel } from '../lib/leveling';
 import { useProgress } from '../lib/progress';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 
-const CATS: CosmeticCat[] = ['hat', 'pot', 'bg', 'acc'];
+const CATS: CosmeticCat[] = ['species', 'hat', 'pot', 'bg', 'acc'];
 
 export default function ClosetScreen() {
   const c = useColors();
   const coins = useCoins();
   const cos = useCosmetics();
   const prog = useProgress();
-  const [cat, setCat] = useState<CosmeticCat>('hat');
+  const [cat, setCat] = useState<CosmeticCat>('species');
   const stage = stageForLevel(levelInfo(prog.xp).level);
 
   const items = COSMETICS.filter((i) => i.cat === cat);
@@ -63,7 +63,7 @@ export default function ClosetScreen() {
       </View>
 
       {/* category chips */}
-      <View style={styles.cats}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cats}>
         {CATS.map((k) => {
           const on = k === cat;
           return (
@@ -72,7 +72,7 @@ export default function ClosetScreen() {
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
 
       {/* grid */}
       <View style={styles.grid}>

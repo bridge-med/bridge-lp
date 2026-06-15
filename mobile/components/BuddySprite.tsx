@@ -38,6 +38,7 @@ export function BuddySprite({
   const bodyCy = cy - 16;
   const headTop = bodyCy - bodyR;
   const [potFill, potRim] = POTS[o.pot] ?? POTS.pot_coral;
+  const isSprout = o.species === 'species_sprout';
 
   return (
     <Svg width={size} height={size * 1.15} viewBox="0 0 100 115">
@@ -58,32 +59,40 @@ export function BuddySprite({
         {stage >= 4 && (
           <Path d={`M ${cx - 6} ${bodyCy - 12} Q ${cx - 30} ${bodyCy - 40} ${cx - 16} ${bodyCy - 46} Q ${cx - 6} ${bodyCy - 30} ${cx - 6} ${bodyCy - 12} Z`} fill={LEAF_B} />
         )}
-        {stage <= 4 && <Path d={`M ${cx} ${bodyCy - 12} q -4 -16 6 -22 q 4 10 -6 22 Z`} fill={TIP} />}
-        {stage === 5 && (
+
+        {/* bloom — default sprout progression, or a chosen species flower */}
+        {isSprout ? (
           <G>
-            <Path d={`M ${cx} ${bodyCy - 36} q -7 8 0 18 q 7 -10 0 -18 Z`} fill={colors.spark} />
-            <Rect x={cx - 1.5} y={bodyCy - 20} width={3} height={12} rx={1.5} fill={LEAF_A} />
+            {stage <= 4 && <Path d={`M ${cx} ${bodyCy - 12} q -4 -16 6 -22 q 4 10 -6 22 Z`} fill={TIP} />}
+            {stage === 5 && (
+              <G>
+                <Path d={`M ${cx} ${bodyCy - 36} q -7 8 0 18 q 7 -10 0 -18 Z`} fill={colors.spark} />
+                <Rect x={cx - 1.5} y={bodyCy - 20} width={3} height={12} rx={1.5} fill={LEAF_A} />
+              </G>
+            )}
+            {stage === 6 && (
+              <G>
+                <Rect x={cx - 1.5} y={bodyCy - 22} width={3} height={14} rx={1.5} fill={LEAF_A} />
+                {[0, 72, 144, 216, 288].map((a) => {
+                  const r = (a * Math.PI) / 180;
+                  const px = cx + Math.cos(r) * 7;
+                  const py = bodyCy - 30 + Math.sin(r) * 7;
+                  return <Ellipse key={a} cx={px} cy={py} rx={5} ry={7} fill={colors.spark} transform={`rotate(${a} ${px} ${py})`} />;
+                })}
+                <Circle cx={cx} cy={bodyCy - 30} r={4} fill={colors.gold} />
+              </G>
+            )}
+            {stage >= 7 && (
+              <G>
+                <Path d={`M ${cx} ${bodyCy - 12} Q ${cx + 26} ${bodyCy - 30} ${cx + 30} ${bodyCy - 6} Q ${cx + 12} ${bodyCy - 4} ${cx} ${bodyCy - 12} Z`} fill={LEAF_B} />
+                <Circle cx={cx - 10} cy={bodyCy - 30} r={5} fill={colors.gold} />
+                <Circle cx={cx + 8} cy={bodyCy - 34} r={5} fill={colors.spark} />
+                <Circle cx={cx + 2} cy={bodyCy - 26} r={4.5} fill={colors.gold} />
+              </G>
+            )}
           </G>
-        )}
-        {stage === 6 && (
-          <G>
-            <Rect x={cx - 1.5} y={bodyCy - 22} width={3} height={14} rx={1.5} fill={LEAF_A} />
-            {[0, 72, 144, 216, 288].map((a) => {
-              const r = (a * Math.PI) / 180;
-              const px = cx + Math.cos(r) * 7;
-              const py = bodyCy - 30 + Math.sin(r) * 7;
-              return <Ellipse key={a} cx={px} cy={py} rx={5} ry={7} fill={colors.spark} transform={`rotate(${a} ${px} ${py})`} />;
-            })}
-            <Circle cx={cx} cy={bodyCy - 30} r={4} fill={colors.gold} />
-          </G>
-        )}
-        {stage >= 7 && (
-          <G>
-            <Path d={`M ${cx} ${bodyCy - 12} Q ${cx + 26} ${bodyCy - 30} ${cx + 30} ${bodyCy - 6} Q ${cx + 12} ${bodyCy - 4} ${cx} ${bodyCy - 12} Z`} fill={LEAF_B} />
-            <Circle cx={cx - 10} cy={bodyCy - 30} r={5} fill={colors.gold} />
-            <Circle cx={cx + 8} cy={bodyCy - 34} r={5} fill={colors.spark} />
-            <Circle cx={cx + 2} cy={bodyCy - 26} r={4.5} fill={colors.gold} />
-          </G>
+        ) : (
+          <SpeciesFlower id={o.species} cx={cx} headTop={headTop} stage={stage} />
         )}
       </G>
 
@@ -125,6 +134,101 @@ export function BuddySprite({
       <Rect x={cx - 25} y={cy - 2} width={50} height={9} rx={4.5} fill={potRim} />
     </Svg>
   );
+}
+
+function SpeciesFlower({ id, cx, headTop, stage }: { id: string; cx: number; headTop: number; stage: number }) {
+  const sc = 0.78 + Math.min(stage, 7) * 0.045; // grows a little with level
+  const fy = headTop - 11 - Math.min(stage, 7);
+  const stem = (
+    <Rect x={cx - 1.6} y={fy} width={3.2} height={headTop - fy + 4} rx={1.6} fill="#5E9357" />
+  );
+  return (
+    <G>
+      {stem}
+      <G transform={`translate(${cx} ${fy}) scale(${sc})`}>
+        <Petals id={id} />
+      </G>
+    </G>
+  );
+}
+
+function Petals({ id }: { id: string }) {
+  switch (id) {
+    case 'species_sunflower':
+      return (
+        <G>
+          {ring(12, 9).map(([x, y, a], i) => (
+            <Ellipse key={i} cx={x} cy={y} rx={3} ry={6} fill="#F2B73B" transform={`rotate(${a} ${x} ${y})`} />
+          ))}
+          <Circle cx={0} cy={0} r={5.5} fill="#7A4B25" />
+        </G>
+      );
+    case 'species_cosmos':
+      return (
+        <G>
+          {ring(8, 9).map(([x, y, a], i) => (
+            <Ellipse key={i} cx={x} cy={y} rx={4} ry={6.5} fill="#EE92B6" transform={`rotate(${a} ${x} ${y})`} />
+          ))}
+          <Circle cx={0} cy={0} r={4} fill="#F2C84B" />
+        </G>
+      );
+    case 'species_sakura':
+      return (
+        <G>
+          {ring(5, 8).map(([x, y, a], i) => (
+            <Ellipse key={i} cx={x} cy={y} rx={4.5} ry={6} fill="#F8C5D6" transform={`rotate(${a} ${x} ${y})`} />
+          ))}
+          <Circle cx={0} cy={0} r={3} fill="#E58AAE" />
+        </G>
+      );
+    case 'species_rose':
+      return (
+        <G>
+          <Circle cx={0} cy={0} r={9} fill="#C0344B" />
+          <Circle cx={0} cy={0} r={6} fill="#D8556B" />
+          <Circle cx={0} cy={0} r={3} fill="#E8859A" />
+          <Path d="M -9 2 q -8 4 -12 -2 q 6 -2 12 -2 Z" fill="#6FA86A" />
+        </G>
+      );
+    case 'species_tulip':
+      return (
+        <G>
+          <Path d="M -7 4 Q -8 -10 0 -10 Q 8 -10 7 4 Z" fill="#E0563F" />
+          <Path d="M -7 4 Q -3 -8 0 4 Z" fill="#EC6E58" />
+          <Path d="M 7 4 Q 3 -8 0 4 Z" fill="#EC6E58" />
+        </G>
+      );
+    case 'species_lavender':
+      return (
+        <G>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Ellipse key={i} cx={i % 2 ? 3 : -3} cy={-4 - i * 5} rx={3.5} ry={4} fill="#9E7BC0" />
+          ))}
+          <Ellipse cx={0} cy={-30} rx={3} ry={4} fill="#B295D4" />
+        </G>
+      );
+    case 'species_hydrangea':
+      return (
+        <G>
+          {[[-6, -2], [6, -2], [0, -8], [-6, 6], [6, 6], [0, 2], [0, 12]].map(([x, y], i) => (
+            <Circle key={i} cx={x} cy={y} r={4} fill={i % 2 ? '#8FA8DD' : '#A98FD0'} />
+          ))}
+        </G>
+      );
+    default:
+      return null;
+  }
+}
+
+/** n petals evenly around a circle of radius r → [x, y, angleDeg]. */
+function ring(n: number, r: number): [number, number, number][] {
+  const out: [number, number, number][] = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * 360;
+    const rad = (a * Math.PI) / 180;
+    out.push([Math.cos(rad) * r, Math.sin(rad) * r, a]);
+  }
+  return out;
 }
 
 function Hat({ id, cx, top }: { id: string; cx: number; top: number }) {

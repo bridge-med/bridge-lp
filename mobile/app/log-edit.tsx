@@ -11,6 +11,7 @@ import { workLogs } from '../lib/data';
 import { parseKey, todayKey } from '../lib/date';
 import { tapSuccess } from '../lib/haptics';
 import { progress } from '../lib/progress';
+import { wordbank } from '../lib/wordbank';
 import { colors, fonts, spacing, type } from '../lib/theme';
 import type { WorkLog } from '../lib/types';
 
@@ -54,6 +55,7 @@ export default function LogEditScreen() {
       tags,
     } as Partial<WorkLog>);
     if (!existing) void progress.recordActivity('log', logDate);
+    void wordbank.collectFrom([title, did, problem, devised, decision, people, result, learning, nextAction, memo].join(' '));
     tapSuccess();
     router.back();
   }

@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { TASK_STATUSES, type TaskStatus } from '../lib/constants';
 import { tasks } from '../lib/data';
 import { todayKey } from '../lib/date';
+import { wordbank } from '../lib/wordbank';
 import { spacing, type } from '../lib/theme';
 import type { Task } from '../lib/types';
 import { Sheet } from './Sheet';
@@ -45,6 +46,7 @@ export function TaskSheet({
       relatedLogId: task?.relatedLogId ?? defaultLogId ?? null,
       doneAt: status === 'done' ? task?.doneAt ?? new Date().toISOString() : null,
     } as Partial<Task>);
+    void wordbank.collectFrom(title + ' ' + memo);
     onClose();
   }
   function del() {
