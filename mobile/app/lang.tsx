@@ -55,7 +55,7 @@ export default function LangScreen() {
     }
     setBusy(true);
     try {
-      const { translation, vocab } = await generateLangCard(text, lang, null);
+      const { translation, vocab } = await generateLangCard(text, lang);
       const saved = await langCards.upsert({
         lang,
         sourceText: text,

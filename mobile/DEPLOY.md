@@ -33,28 +33,37 @@
 ```bash
 npx expo install react-native-purchases
 ```
-RevenueCat ダッシュボードで **消費型（consumable）** プロダクトを `lib/credits.ts` の
-`COIN_PACKS`（`coins_10` / `coins_30` / `coins_100`）に合わせて作成。
-`.env` に `EXPO_PUBLIC_RC_IOS_KEY` / `EXPO_PUBLIC_RC_ANDROID_KEY`。
-`app/coins.tsx` の `buy()`（現状はデモで `credits.add`）を差し替え：
-```ts
-import Purchases from 'react-native-purchases';
-import { Platform } from 'react-native';
-import { env } from '../lib/env';
-// 起動時に一度:
-Purchases.configure({ apiKey: Platform.OS === 'ios' ? env.revenuecatIosKey : env.revenuecatAndroidKey });
-// buy(): const offerings = await Purchases.getOfferings();
-//   const pkg = offerings.current!.availablePackages.find(p => p.identifier === id);
-//   const { customerInfo } = await Purchases.purchasePackage(pkg);
-//   サーバでレシート検証 → 検証OKなら credits.add(pack.coins)
-```
-消費型なので「購入完了→残高クレジット」はサーバ検証後に行うのが安全（不正防止）。
+クライアント側は **実装済み**。やることは3つだけ：
+1. `npm i react-native-purchases`（native の `lib/iap.native.ts` が有効化される）
+2. RevenueCat で **消費型（consumable）** プロダクトを `lib/credits.ts` の
+   `COIN_PACKS`（`coins_10` / `coins_30` / `coins_100`）の id に合わせて作成
+3. `.env` に `EXPO_PUBLIC_RC_IOS_KEY` / `EXPO_PUBLIC_RC_ANDROID_KEY`
 
-## 生成バックエンド（開発者キー）
-コインを消費する各機能（`AiTaskSheet` / `QuickMemoSheet` / `reflection` / `career` / `workstyle`）は
-現状 `lib/ai.ts` のローカル整形（`localExtractTasks` など）でプレビュー動作。
-本番では `lib/ai.ts` のヘルパーを **自前のサーバ関数** 呼び出しに差し替え、
-サーバ側で開発者のAIキー（Gemini等）を使って生成する。クライアントに鍵を置かない。
+起動時 `configureIap()`、購入は `app/coins.tsx` の `buy()`→`purchasePack(id)`→成功で
+`credits.add(pack.coins)` まで結線済み。web/Expo Go では自動でデモ購入にフォールバック。
+
+`app/coins.tsx` の `buy()` は **実装済み**：`iapEnabled()` なら `purchasePack(id)`→成功で `credits.add`。
+native の実体は `lib/iap.native.ts`（RevenueCat）。web/プレビューは `lib/iap.ts`（デモ）に自動で切替。
+より厳密にするならサーバでレシート検証→残高クレジット（不正防止）に発展可能。
+
+## 生成バックエンド（開発者キー）— 実装済み・鍵を入れるだけ
+AI生成・翻訳は **Supabase Edge Function `ai`**（`supabase/functions/ai/index.ts`）に実装済み。
+サーバ側で開発者の Gemini キーを使い、クライアントには鍵を置きません。
+
+```bash
+# Supabase プロジェクトに紐付け済みの状態で:
+supabase functions deploy ai --no-verify-jwt
+supabase secrets set GEMINI_API_KEY=xxxx
+# 任意: supabase secrets set GEMINI_MODEL=gemini-2.5-flash
+```
+`.env` に `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` を入れれば、
+クライアント（`lib/backend.ts`）が `${SUPABASE_URL}/functions/v1/ai` を自動で呼びます
+（別ホストなら `EXPO_PUBLIC_AI_BACKEND_URL` を指定）。
+
+- 設定あり → `lib/ai.ts` / `lib/lang.ts` が **本物のAI**（タスク化・メモ整理・ふり返り・
+  キャリア変換・働き方分析・英/韓翻訳）を呼ぶ。
+- 設定なし → そのままオフラインのプレビュー（ローカル整形・グロッサリ訳）で動作。
+- モデル差し替えは `GEMINI_MODEL`（2.5-flash↔3.0系）だけで可。
 
 ## クラウド同期（Supabase・任意）
 1. Supabase プロジェクト作成 → SQL エディタで `supabase/schema.sql` を実行。

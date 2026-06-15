@@ -46,7 +46,7 @@ export default function CareerScreen() {
     }
     setBusy(true);
     try {
-      const content = await generateCareerOutput(chosen, outputType, { profession, role, purpose }, null);
+      const content = await generateCareerOutput(chosen, outputType, { profession, role, purpose });
       await careerOutputs.upsert({
         outputType,
         sourceLogIds: chosen.map((l) => l.id),

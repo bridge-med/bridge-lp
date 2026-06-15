@@ -4,15 +4,27 @@ import { BlockHeader } from '../components/BlockHeader';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card } from '../components/ui';
 import { COIN_PACKS, GEN_COST, credits, useCoins } from '../lib/credits';
+import { iapEnabled, purchasePack } from '../lib/iap';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 
 export default function CoinsScreen() {
   const c = useColors();
   const coins = useCoins();
 
-  function buy(coinsToAdd: number, price: string) {
-    // TODO: replace with consumable IAP (RevenueCat) + server-verified credit.
-    Alert.alert('コインを購入', `${coinsToAdd}コイン（${price}）を購入しますか？`, [
+  function buy(id: string, coinsToAdd: number, price: string) {
+    if (iapEnabled()) {
+      void (async () => {
+        try {
+          const ok = await purchasePack(id);
+          if (ok) await credits.add(coinsToAdd);
+        } catch (e) {
+          Alert.alert('購入に失敗しました', e instanceof Error ? e.message : '時間をおいて再度お試しください。');
+        }
+      })();
+      return;
+    }
+    // Demo path (web preview / before IAP is wired).
+    Alert.alert('コインを購入（デモ）', `${coinsToAdd}コイン（${price}）を購入しますか？`, [
       { text: 'キャンセル', style: 'cancel' },
       { text: '購入（デモ）', onPress: () => void credits.add(coinsToAdd) },
     ]);
@@ -45,7 +57,7 @@ export default function CoinsScreen() {
             </View>
             <View style={{ alignItems: 'flex-end', gap: 6 }}>
               <Text style={styles.price}>{p.price}</Text>
-              <Button label="購入" onPress={() => buy(p.coins, p.price)} />
+              <Button label="購入" onPress={() => buy(p.id, p.coins, p.price)} />
             </View>
           </Card>
         ))}
@@ -59,7 +71,7 @@ export default function CoinsScreen() {
       </View>
 
       <Text style={[type.muted, { marginTop: spacing.xl, fontSize: 11 }]}>
-        ※ 現在はデモ購入です。リリース時はアプリ内課金（消費型）＋サーバ生成に接続します。
+        {iapEnabled() ? '※ アプリ内課金（消費型）で購入します。' : '※ プレビューではデモ購入です。製品版ではアプリ内課金に接続します。'}
       </Text>
       </View>
     </ScrollView>

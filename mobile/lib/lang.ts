@@ -3,6 +3,7 @@
 // (developer key) in production; this module ships a glossary-based PREVIEW so
 // the feature is demonstrable offline. `generateLangCard` is the swap point.
 
+import { aiBackendEnabled, callBackend } from './backend';
 import { DICT, dictTranslation, matchTerms } from './dict';
 import type { LangCode, VocabItem } from './types';
 
@@ -23,16 +24,14 @@ export function localLangCard(text: string, lang: LangCode): { translation: stri
   return { translation, vocab };
 }
 
-export interface LangCreds {
-  apiKey: string;
-}
-
-/** Generate a study card. With backend creds → real translation; else preview. */
-export async function generateLangCard(
-  text: string,
-  lang: LangCode,
-  _creds: LangCreds | null = null,
-): Promise<{ translation: string; vocab: VocabItem[] }> {
-  // TODO: when a backend proxy exists, call it here for a fluent translation.
-  return localLangCard(text, lang);
+/** Generate a study card. With the backend → fluent AI translation + richer
+ *  vocab; otherwise the offline glossary preview. */
+export async function generateLangCard(text: string, lang: LangCode): Promise<{ translation: string; vocab: VocabItem[] }> {
+  if (!aiBackendEnabled()) return localLangCard(text, lang);
+  try {
+    const r = await callBackend<{ translation: string; vocab: VocabItem[] }>('translate', { text, lang });
+    return { translation: r.translation ?? '', vocab: Array.isArray(r.vocab) ? r.vocab : extractVocab(text, lang) };
+  } catch {
+    return localLangCard(text, lang); // study aid — degrade gracefully
+  }
 }

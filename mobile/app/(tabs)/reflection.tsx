@@ -50,7 +50,7 @@ export default function ReflectionScreen() {
     }
     setBusy(true);
     try {
-      const content = await generateReflection(inRange, null);
+      const content = await generateReflection(inRange);
       const saved = await reflections.upsert({
         periodType: period,
         startDate: start,

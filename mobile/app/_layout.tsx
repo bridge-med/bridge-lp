@@ -14,6 +14,7 @@ import { ThemeProvider, useColors } from '../components/ThemeProvider';
 import { credits } from '../lib/credits';
 import { cosmetics } from '../lib/cosmetics';
 import { loadAll } from '../lib/data';
+import { configureIap } from '../lib/iap';
 import { prefs, usePrefs } from '../lib/prefs';
 import { progress } from '../lib/progress';
 import { wordbank } from '../lib/wordbank';
@@ -76,6 +77,7 @@ export default function RootLayout() {
     void progress.load();
     void cosmetics.load();
     void wordbank.load();
+    configureIap();
   }, []);
 
   useEffect(() => {

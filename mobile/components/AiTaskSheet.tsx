@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { AiError, localExtractTasks, type DraftTask } from '../lib/ai';
+import { AiError, extractTasks, type DraftTask } from '../lib/ai';
 import { credits, GEN_COST, useCoins } from '../lib/credits';
 import { tasks } from '../lib/data';
 import { dueLabel } from '../lib/date';
@@ -46,7 +46,7 @@ export function AiTaskSheet({ visible, onClose }: { visible: boolean; onClose: (
     setLoading(true);
     setError(null);
     try {
-      const result = localExtractTasks(text);
+      const result = await extractTasks(text);
       if (result.length === 0) setError('タスクを抽出できませんでした。文章を具体的にしてみてください。');
       else setDrafts(result.map((d) => ({ ...d, include: true })));
     } catch (e) {

@@ -48,10 +48,13 @@ npx expo start          # QR を Expo Go で読む / npm run ios|android
 
 ## AI — マネージド（コイン消費）
 
-- ユーザーはAPIキーを持たず、アプリ内で **コインを購入** → 1生成 = 1コイン消費（`lib/credits.ts`）。
-- 実際の生成は本番でサーバ（開発者キー）に接続する想定。現状はプレビューとして端末内のローカル整形（`localExtractTasks` / `localTidy` / `localWorkStyle` / `generateReflection` / `generateCareerOutput` のモック）で動作。
-- 登録特典として初回に無料コイン（`STARTER`）を付与。
-- ロジックは `lib/ai.ts`。BYOK（自分のキー）と広告は廃止。
+- ユーザーはAPIキーを持たず、アプリ内で **コインを購入** → 生成ごとにコイン消費（軽1／重2／翻訳1）。
+- **バックエンド実装済み**：`supabase/functions/ai/index.ts`（Supabase Edge Function）が開発者の
+  Gemini キー（サーバ secret）で生成。クライアントは `lib/backend.ts` 経由で呼ぶ。鍵はアプリに入らない。
+- **設定があれば本物のAI**（タスク化・メモ整理・ふり返り・キャリア変換・働き方分析・英/韓翻訳）、
+  なければ `lib/ai.ts` / `lib/lang.ts` のオフライン・プレビューに自動フォールバック。
+- 課金は `lib/iap.native.ts`（RevenueCat・消費型IAP）。web/プレビューはデモ購入。
+- 登録特典として初回に無料コイン（`STARTER`）。BYOK・広告は廃止。
 
 ## 成長・相棒・語学（続けたくなる仕掛け）
 

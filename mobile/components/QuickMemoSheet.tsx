@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { AiError, localTidy } from '../lib/ai';
+import { AiError, tidyMemo } from '../lib/ai';
 import { credits, GEN_COST } from '../lib/credits';
 import { quickMemos } from '../lib/data';
 import { progress } from '../lib/progress';
@@ -39,7 +39,7 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
     }
     setAiBusy(true);
     try {
-      setContent(localTidy(content));
+      setContent(await tidyMemo(content));
     } catch (e) {
       Alert.alert('整理に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
     } finally {

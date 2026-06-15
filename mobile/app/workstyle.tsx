@@ -4,7 +4,7 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 're
 import { BlockHeader } from '../components/BlockHeader';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card } from '../components/ui';
-import { AiError, localWorkStyle } from '../lib/ai';
+import { AiError, generateWorkStyle } from '../lib/ai';
 import { credits, GEN_COST_HEAVY, useCoins } from '../lib/credits';
 import { workLogs } from '../lib/data';
 import { moduleCollection } from '../lib/modules';
@@ -48,7 +48,7 @@ export default function WorkStyleScreen() {
     }
     setBusy(true);
     try {
-      const result = localWorkStyle(mat);
+      const result = await generateWorkStyle(mat);
       await prefs.set({ workStyleResult: result });
     } catch (e) {
       Alert.alert('分析に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
