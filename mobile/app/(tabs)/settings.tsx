@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import { BlockHeader } from '../../components/BlockHeader';
 import { Picker } from '../../components/Picker';
 import { Sheet } from '../../components/Sheet';
@@ -11,9 +11,19 @@ import { Button, Card, Chip, Field, SectionTitle } from '../../components/ui';
 import { PROFESSIONS, PURPOSES, ROLES } from '../../lib/constants';
 import { useCoins } from '../../lib/credits';
 import { buildExport, careerOutputs, clearAll, importBundle, quickMemos, reflections, tasks, workLogs } from '../../lib/data';
+import { cancelDaily, isNotifSupported, requestPermission, scheduleDaily } from '../../lib/notifications';
 import { prefs, usePrefs } from '../../lib/prefs';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
+
+const REMINDER_TIMES: [number, number][] = [
+  [8, 0],
+  [12, 0],
+  [18, 0],
+  [21, 0],
+  [22, 30],
+];
+const fmtTime = (h: number, m: number) => `${h}:${String(m).padStart(2, '0')}`;
 
 export default function SettingsScreen() {
   const logs = useCollection(workLogs);
@@ -23,10 +33,29 @@ export default function SettingsScreen() {
   useCollection(careerOutputs);
   const coins = useCoins();
   const c = useColors();
-  const { profession, role, purpose } = usePrefs();
+  const { profession, role, purpose, reminderEnabled, reminderHour, reminderMinute } = usePrefs();
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
+
+  async function toggleReminder(on: boolean) {
+    if (on) {
+      const ok = await requestPermission();
+      if (!ok) {
+        Alert.alert('通知が許可されていません', '端末の設定から通知を許可すると、毎日のリマインダーを受け取れます。');
+        return;
+      }
+      await scheduleDaily(reminderHour, reminderMinute);
+      await prefs.set({ reminderEnabled: true });
+    } else {
+      await cancelDaily();
+      await prefs.set({ reminderEnabled: false });
+    }
+  }
+  async function setReminderTime(h: number, m: number) {
+    await prefs.set({ reminderHour: h, reminderMinute: m });
+    if (reminderEnabled) await scheduleDaily(h, m);
+  }
 
   async function onExport() {
     try {
@@ -94,6 +123,43 @@ export default function SettingsScreen() {
             <Feather name="chevron-right" size={20} color={c.primary} />
           </Card>
         </Pressable>
+      </View>
+
+      <View>
+        <SectionTitle>毎日のリマインダー</SectionTitle>
+        <Card style={{ gap: spacing.md }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={type.title}>記録のリマインド</Text>
+              <Text style={type.muted}>
+                {isNotifSupported() ? '毎日この時間に「書こう」と相棒がそっと通知します。' : 'プレビュー（web）では通知は使えません。実機アプリで有効です。'}
+              </Text>
+            </View>
+            <Switch
+              value={reminderEnabled}
+              onValueChange={(v) => void toggleReminder(v)}
+              disabled={!isNotifSupported()}
+              trackColor={{ true: c.primary, false: colors.line2 }}
+              thumbColor="#fff"
+            />
+          </View>
+          {reminderEnabled ? (
+            <View style={{ gap: spacing.sm }}>
+              <Text style={type.label}>時間</Text>
+              <View style={styles.chips}>
+                {REMINDER_TIMES.map(([h, m]) => (
+                  <Chip
+                    key={fmtTime(h, m)}
+                    label={fmtTime(h, m)}
+                    tone="primary"
+                    active={reminderHour === h && reminderMinute === m}
+                    onPress={() => void setReminderTime(h, m)}
+                  />
+                ))}
+              </View>
+            </View>
+          ) : null}
+        </Card>
       </View>
 
       <View>

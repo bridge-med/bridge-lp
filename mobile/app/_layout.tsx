@@ -16,6 +16,7 @@ import { credits } from '../lib/credits';
 import { cosmetics } from '../lib/cosmetics';
 import { loadAll } from '../lib/data';
 import { configureIap } from '../lib/iap';
+import { scheduleDaily } from '../lib/notifications';
 import { prefs, usePrefs } from '../lib/prefs';
 import { progress } from '../lib/progress';
 import { wordbank } from '../lib/wordbank';
@@ -76,7 +77,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     void loadAll();
-    void prefs.load();
+    void prefs.load().then(() => {
+      const p = prefs.getSnapshot();
+      if (p.reminderEnabled) void scheduleDaily(p.reminderHour, p.reminderMinute);
+    });
     void credits.load();
     void progress.load();
     void cosmetics.load();

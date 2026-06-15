@@ -22,6 +22,10 @@ export interface Prefs {
   workStyleResult: string;
   // Companion
   buddyName: string;
+  // Daily reminder notification
+  reminderEnabled: boolean;
+  reminderHour: number;
+  reminderMinute: number;
 }
 
 const DEFAULT: Prefs = {
@@ -36,6 +40,9 @@ const DEFAULT: Prefs = {
   purpose: '',
   workStyleResult: '',
   buddyName: '',
+  reminderEnabled: false,
+  reminderHour: 21,
+  reminderMinute: 0,
 };
 
 /** The API key for the currently-selected AI provider. */

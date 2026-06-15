@@ -13,6 +13,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const plugins: NonNullable<ExpoConfig['plugins']> = [
     'expo-router',
     ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 200, backgroundColor: '#FBF3E8' }],
+    'expo-notifications',
   ];
 
   // Only add the AdMob native plugin when app ids are provided (production EAS
