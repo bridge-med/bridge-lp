@@ -1,6 +1,7 @@
 import { ShipporiMincho_400Regular, ShipporiMincho_600SemiBold, ShipporiMincho_800ExtraBold } from '@expo-google-fonts/shippori-mincho';
 import { ZenKakuGothicNew_400Regular, ZenKakuGothicNew_500Medium, ZenKakuGothicNew_700Bold } from '@expo-google-fonts/zen-kaku-gothic-new';
 import { ZenMaruGothic_400Regular, ZenMaruGothic_500Medium, ZenMaruGothic_700Bold, ZenMaruGothic_900Black } from '@expo-google-fonts/zen-maru-gothic';
+import { Feather } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -68,6 +69,9 @@ export default function RootLayout() {
     ZenMaruGothic_500Medium,
     ZenMaruGothic_700Bold,
     ZenMaruGothic_900Black,
+    // Preload the icon font through the asset pipeline so it resolves under a
+    // subpath deploy (e.g. GitHub Pages /bridge-lp/daily-app/) on web too.
+    ...Feather.font,
   });
 
   useEffect(() => {
