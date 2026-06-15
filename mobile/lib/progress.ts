@@ -23,13 +23,14 @@ export const XP = {
   career: 18,
   workstyle: 18,
   module: 8,
+  study: 10, // completing a vocabulary study session
   dailyBonus: 15, // first activity of a real "today"
 } as const;
 
 export type Activity = keyof typeof XP;
 
 // Per-day XP-earning caps (anti-farming) for the cheap, repeatable actions.
-const DAY_CAP: Partial<Record<Activity, number>> = { memo: 3, task: 4, module: 3 };
+const DAY_CAP: Partial<Record<Activity, number>> = { memo: 3, task: 4, module: 3, study: 4 };
 
 export type Reward =
   | { kind: 'levelup'; level: number; stageName: string; stageChanged: boolean; coins: number }

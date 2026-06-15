@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BlockHeader } from '../components/BlockHeader';
@@ -67,6 +68,15 @@ export default function WordsScreen() {
           </View>
 
           <Button label="暗記モードをはじめる" onPress={() => setStudy(true)} disabled={words.length === 0} />
+
+          <Pressable onPress={() => router.push('/vocab')} style={[styles.courseLink, { backgroundColor: c.primaryWeak }]}>
+            <Feather name="award" size={18} color={c.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={[type.title, { color: c.primary }]}>英単語コース</Text>
+              <Text style={type.muted}>中学〜高校・TOEIC、約7,500語をレベル別に</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={c.primary} />
+          </Pressable>
 
           {sorted.length === 0 ? (
             <EmptyState icon="book-open" title="まだ単語がありません" hint="ログ・メモ・タスクに出てきた言葉が、自動でここに貯まります。" />
@@ -193,6 +203,7 @@ const styles = StyleSheet.create({
   langToggle: { flexDirection: 'row', gap: 4, paddingHorizontal: spacing.md },
   langChip: { paddingHorizontal: 12, height: 30, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2 },
   langText: { fontFamily: fonts.gothicBold, fontSize: 11, letterSpacing: 1 },
+  courseLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderRadius: radius.lg, padding: spacing.md },
   wotd: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderRadius: radius.lg, padding: spacing.md },
   wotdTerm: { fontFamily: fonts.maru, fontSize: 22, color: colors.text, marginVertical: 2 },
   wotdBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },

@@ -193,6 +193,9 @@ export default function SettingsScreen() {
             日々の仕事ログ・メモ・タスクを残すと、職務経歴書や面接・1on1の材料になる。データは端末内（オフライン）に保持します。
           </Text>
           <Text style={[type.muted, { marginTop: spacing.xs }]}>バージョン 0.1.0 (MVP)</Text>
+          <Text style={[type.muted, { marginTop: spacing.xs, fontSize: 11 }]}>
+            英単語データは公開コーパスをもとに生成（CEFR-J / octanove・CC BY-SA 4.0、EJDict-hand・Public Domain、FrequencyWords・CC BY-SA 4.0）。生成データは CC BY-SA 4.0 で配布します。
+          </Text>
         </Card>
       </View>
       </View>

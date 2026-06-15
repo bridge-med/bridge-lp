@@ -51,6 +51,7 @@ function Navigator() {
         <Stack.Screen name="closet" options={{ headerShown: false }} />
         <Stack.Screen name="lang" options={{ headerShown: false }} />
         <Stack.Screen name="words" options={{ headerShown: false }} />
+        <Stack.Screen name="vocab" options={{ headerShown: false }} />
       </Stack>
       <Onboarding visible={showOnboarding} />
       <RewardModal />
