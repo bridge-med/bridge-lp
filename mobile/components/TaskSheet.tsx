@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
-import { TASK_STATUSES, type TaskStatus } from '../lib/constants';
+import { TASK_REPEATS, TASK_STATUSES, type TaskRepeat, type TaskStatus } from '../lib/constants';
 import { tasks } from '../lib/data';
 import { todayKey } from '../lib/date';
 import { wordbank } from '../lib/wordbank';
@@ -23,6 +23,7 @@ export function TaskSheet({
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState<TaskStatus>('todo');
   const [due, setDue] = useState<string | null>(null);
+  const [repeat, setRepeat] = useState<TaskRepeat>('none');
   const [memo, setMemo] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
 
@@ -32,6 +33,7 @@ export function TaskSheet({
     setTitle(task?.title ?? '');
     setStatus(task?.status ?? 'todo');
     setDue(task?.dueDate ?? null);
+    setRepeat(task?.repeat ?? 'none');
     setMemo(task?.memo ?? '');
   }
 
@@ -42,6 +44,7 @@ export function TaskSheet({
       title: title.trim(),
       status,
       dueDate: due,
+      repeat,
       memo: memo.trim(),
       relatedLogId: task?.relatedLogId ?? defaultLogId ?? null,
       doneAt: status === 'done' ? task?.doneAt ?? new Date().toISOString() : null,
@@ -68,6 +71,19 @@ export function TaskSheet({
       </View>
 
       <DuePicker value={due} onChange={setDue} />
+
+      <View style={{ gap: spacing.xs }}>
+        <Text style={type.label}>繰り返し</Text>
+        <View style={styles.row}>
+          {TASK_REPEATS.map((r) => (
+            <Chip key={r.key} label={r.label} tone="primary" active={repeat === r.key} onPress={() => setRepeat(r.key)} />
+          ))}
+        </View>
+        {repeat !== 'none' ? (
+          <Text style={type.muted}>完了すると、次の{repeat === 'daily' ? '日' : repeat === 'weekly' ? '週' : '月'}のタスクが自動で作られます。</Text>
+        ) : null}
+      </View>
+
       <Field label="メモ（任意）" placeholder="補足" value={memo} onChangeText={setMemo} multiline />
 
       <Button label={task ? '保存' : '追加'} onPress={save} disabled={!title.trim()} />

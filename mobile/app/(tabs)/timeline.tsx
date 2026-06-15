@@ -1,6 +1,7 @@
+import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlockHeader } from '../../components/BlockHeader';
 import { Ledger } from '../../components/Ledger';
@@ -21,6 +22,7 @@ type Item = {
   dateKey: string;
   title: string;
   body: string;
+  search: string; // lowercased haystack
   onPress: () => void;
 };
 
@@ -39,6 +41,7 @@ export default function TimelineScreen() {
   const allTasks = useCollection(tasks);
   const refs = useCollection(reflections);
   const [filter, setFilter] = useState<Kind | 'all'>('all');
+  const [query, setQuery] = useState('');
   const [memoOpen, setMemoOpen] = useState(false);
   const [editMemo, setEditMemo] = useState<QuickMemo | null>(null);
 
@@ -52,6 +55,7 @@ export default function TimelineScreen() {
         dateKey: l.date,
         title: l.title || '無題のlog',
         body: l.did,
+        search: [l.title, l.did, l.problem, l.devised, l.decision, l.people, l.result, l.learning, l.nextAction, l.memo, l.tags.join(' ')].join(' ').toLowerCase(),
         onPress: () => router.push(`/log/${l.id}`),
       });
     }
@@ -63,6 +67,7 @@ export default function TimelineScreen() {
         dateKey: m.createdAt.slice(0, 10),
         title: m.content.split('\n')[0].slice(0, 40) || 'メモ',
         body: '',
+        search: (m.content + ' ' + m.tags.join(' ')).toLowerCase(),
         onPress: () => {
           setEditMemo(m);
           setMemoOpen(true);
@@ -78,6 +83,7 @@ export default function TimelineScreen() {
           dateKey: t.doneAt.slice(0, 10),
           title: t.title,
           body: '',
+          search: (t.title + ' ' + t.memo).toLowerCase(),
           onPress: () => router.push('/tasks'),
         });
       }
@@ -90,18 +96,42 @@ export default function TimelineScreen() {
         dateKey: r.createdAt.slice(0, 10),
         title: r.periodType === 'week' ? '週次の振り返り' : '月次の振り返り',
         body: r.content.did,
+        search: Object.values(r.content).join(' ').toLowerCase(),
         onPress: () => router.push('/reflection'),
       });
     }
     return out.sort((a, b) => (a.ts < b.ts ? 1 : -1));
   }, [logs, memos, allTasks, refs]);
 
-  const visible = filter === 'all' ? items : items.filter((i) => i.kind === filter);
+  const q = query.trim().toLowerCase();
+  const byKind = filter === 'all' ? items : items.filter((i) => i.kind === filter);
+  const visible = q ? byKind.filter((i) => i.search.includes(q)) : byKind;
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <BlockHeader wordmark="RECORD" title="記録" pad={20} />
+
+        <View style={styles.searchWrap}>
+          <View style={styles.searchBar}>
+            <Feather name="search" size={16} color={colors.muted} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="ログ・メモ・タグを検索"
+              placeholderTextColor={colors.muted}
+              style={styles.searchInput}
+              autoCapitalize="none"
+              returnKeyType="search"
+            />
+            {query ? (
+              <Pressable onPress={() => setQuery('')} hitSlop={8}>
+                <Feather name="x" size={16} color={colors.muted} />
+              </Pressable>
+            ) : null}
+          </View>
+        </View>
+
         <View style={styles.filters}>
           {(['all', 'log', 'memo', 'task'] as const).map((f) => (
             <Chip
@@ -116,7 +146,11 @@ export default function TimelineScreen() {
 
         {visible.length === 0 ? (
           <Ledger>
-            <EmptyState icon="clock" title="まだ履歴がありません" hint="仕事ログやメモを残すと、ここに時系列で積み上がります。" />
+            {q ? (
+              <EmptyState icon="search" title="見つかりませんでした" hint={`「${query}」に一致する記録はありません。`} />
+            ) : (
+              <EmptyState icon="clock" title="まだ履歴がありません" hint="仕事ログやメモを残すと、ここに時系列で積み上がります。" />
+            )}
           </Ledger>
         ) : (
           visible.map((it) => {
@@ -157,7 +191,10 @@ export default function TimelineScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  filters: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.sm },
+  searchWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+  searchBar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: colors.surface, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, paddingHorizontal: spacing.md, height: 44 },
+  searchInput: { flex: 1, fontFamily: fonts.gothic, fontSize: 15, color: colors.text, padding: 0 },
+  filters: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
   gdate: { fontFamily: fonts.maruMed, fontSize: 16 },
   kind: { fontFamily: fonts.gothicMed, fontSize: 11, letterSpacing: 1 },
 });

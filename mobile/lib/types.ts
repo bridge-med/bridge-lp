@@ -2,10 +2,10 @@
 // Records are flat objects with a user_id so they map ~1:1 onto Supabase tables
 // (the storage layer can be swapped from AsyncStorage to Supabase in one place).
 
-import type { CareerOutputType, TaskStatus } from './constants';
+import type { CareerOutputType, TaskStatus, TaskRepeat } from './constants';
 
 export type ID = string;
-export type { TaskStatus, CareerOutputType };
+export type { TaskStatus, TaskRepeat, CareerOutputType };
 
 export interface BaseRecord {
   id: ID;
@@ -51,6 +51,7 @@ export interface Task extends BaseRecord {
   status: TaskStatus;
   memo: string;
   doneAt: string | null;
+  repeat?: TaskRepeat; // undefined treated as 'none' (back-compat)
 }
 
 export type ReflectionPeriod = 'week' | 'month';

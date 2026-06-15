@@ -95,6 +95,16 @@ export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
   hold: '保留',
 };
 
+// Recurring tasks: completing one spawns the next occurrence.
+export type TaskRepeat = 'none' | 'daily' | 'weekly' | 'monthly';
+
+export const TASK_REPEATS: { key: TaskRepeat; label: string }[] = [
+  { key: 'none', label: 'なし' },
+  { key: 'daily', label: '毎日' },
+  { key: 'weekly', label: '毎週' },
+  { key: 'monthly', label: '毎月' },
+];
+
 // AI providers — bring-your-own-key. Each calls its provider directly.
 export type AiProvider = 'gemini' | 'openai' | 'anthropic';
 

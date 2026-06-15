@@ -7,25 +7,25 @@ import { CalendarModal } from '../components/DatePicker';
 import { TagPicker } from '../components/TagPicker';
 import { useColors } from '../components/ThemeProvider';
 import { Button } from '../components/ui';
-import { workLogs } from '../lib/data';
+import { quickMemos, workLogs } from '../lib/data';
 import { parseKey, todayKey } from '../lib/date';
 import { tapSuccess } from '../lib/haptics';
 import { progress } from '../lib/progress';
 import { wordbank } from '../lib/wordbank';
 import { colors, fonts, spacing, type } from '../lib/theme';
-import type { WorkLog } from '../lib/types';
+import type { QuickMemo, WorkLog } from '../lib/types';
 
 const WD = ['日', '月', '火', '水', '木', '金', '土'];
 
 export default function LogEditScreen() {
   const insets = useSafeAreaInsets();
   const c = useColors();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, seed, memoId } = useLocalSearchParams<{ id?: string; seed?: string; memoId?: string }>();
   const existing = id ? workLogs.getSnapshot().find((l) => l.id === id) ?? null : null;
 
   const [date, setDate] = useState(existing?.date ?? todayKey());
   const [title, setTitle] = useState(existing?.title ?? '');
-  const [did, setDid] = useState(existing?.did ?? '');
+  const [did, setDid] = useState(existing?.did ?? seed ?? '');
   const [problem, setProblem] = useState(existing?.problem ?? '');
   const [devised, setDevised] = useState(existing?.devised ?? '');
   const [decision, setDecision] = useState(existing?.decision ?? '');
@@ -37,9 +37,9 @@ export default function LogEditScreen() {
   const [tags, setTags] = useState<string[]>(existing?.tags ?? []);
   const [calOpen, setCalOpen] = useState(false);
 
-  function save() {
+  async function save() {
     const logDate = date.trim() || todayKey();
-    void workLogs.upsert({
+    const saved = await workLogs.upsert({
       id: existing?.id,
       date: logDate,
       title: title.trim(),
@@ -55,6 +55,8 @@ export default function LogEditScreen() {
       tags,
     } as Partial<WorkLog>);
     if (!existing) void progress.recordActivity('log', logDate);
+    // Link the source memo when promoted from a quick memo.
+    if (memoId) void quickMemos.upsert({ id: memoId, convertedToLogId: saved.id } as Partial<QuickMemo>);
     void wordbank.collectFrom([title, did, problem, devised, decision, people, result, learning, nextAction, memo].join(' '));
     tapSuccess();
     router.back();

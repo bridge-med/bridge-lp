@@ -33,6 +33,15 @@ export function dueLabel(key: string | null): { text: string; tone: 'overdue' | 
   return { text: formatDateJa(key), tone: 'later' };
 }
 
+/** Advance a date key by one repeat period. */
+export function addPeriod(key: string, repeat: 'daily' | 'weekly' | 'monthly'): string {
+  const d = parseKey(key);
+  if (repeat === 'daily') d.setDate(d.getDate() + 1);
+  else if (repeat === 'weekly') d.setDate(d.getDate() + 7);
+  else d.setMonth(d.getMonth() + 1);
+  return todayKey(d);
+}
+
 /** Monday-based start of the current week, as a yyyy-mm-dd key. */
 export function startOfWeekKey(d: Date = new Date()): string {
   const date = new Date(d);

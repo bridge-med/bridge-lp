@@ -1,14 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { AiError, tidyMemo } from '../lib/ai';
 import { credits, GEN_COST } from '../lib/credits';
-import { quickMemos } from '../lib/data';
+import { quickMemos, tasks } from '../lib/data';
 import { progress } from '../lib/progress';
 import { wordbank } from '../lib/wordbank';
 import { spacing, type } from '../lib/theme';
-import type { QuickMemo } from '../lib/types';
+import type { QuickMemo, Task } from '../lib/types';
 import { Sheet } from './Sheet';
 import { TagPicker } from './TagPicker';
 import { useColors } from './ThemeProvider';
@@ -67,6 +67,37 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
     onClose();
   }
 
+  // Turn this memo into a task (first line = title, rest = memo).
+  function toTask() {
+    if (!content.trim()) return;
+    const lines = content.trim().split('\n');
+    void tasks.upsert({
+      title: lines[0].slice(0, 80),
+      memo: lines.slice(1).join('\n').trim(),
+      status: 'todo',
+      dueDate: null,
+      repeat: 'none',
+      relatedLogId: null,
+      doneAt: null,
+    } as Partial<Task>);
+    void progress.recordActivity('task');
+    onClose();
+    Alert.alert('タスクにしました', '「タスク」タブで期限などを設定できます。');
+  }
+
+  // Promote this memo into a full work log (prefilled in the log editor).
+  async function toLog() {
+    if (!content.trim()) return;
+    let memoId = memo?.id;
+    if (!memoId) {
+      const saved = await quickMemos.upsert({ content: content.trim(), tags, convertedToLogId: null } as Partial<QuickMemo>);
+      memoId = saved.id;
+      void progress.recordActivity('memo');
+    }
+    onClose();
+    router.push({ pathname: '/log-edit', params: { seed: content.trim(), memoId } });
+  }
+
   return (
     <Sheet visible={visible} title={memo ? 'メモを編集' : 'クイックメモ'} onClose={onClose}>
       <Field
@@ -87,8 +118,35 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
         )}
       </Pressable>
       <TagPicker value={tags} onChange={setTags} />
-      <Button label={memo ? '保存' : '保存'} onPress={save} />
+
+      {content.trim() ? (
+        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+          <Pressable onPress={toTask} style={[styles.route, { borderColor: c.primary }]}>
+            <Feather name="check-square" size={15} color={c.primary} />
+            <Text style={[type.label, { color: c.primary }]}>タスクにする</Text>
+          </Pressable>
+          <Pressable onPress={() => void toLog()} style={[styles.route, { borderColor: c.primary }]}>
+            <Feather name="file-text" size={15} color={c.primary} />
+            <Text style={[type.label, { color: c.primary }]}>ログにする</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
+      <Button label="保存" onPress={save} />
       {memo ? <Button label="削除" variant="danger" onPress={del} /> : null}
     </Sheet>
   );
 }
+
+const styles = StyleSheet.create({
+  route: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 12,
+    paddingVertical: 12,
+  },
+});

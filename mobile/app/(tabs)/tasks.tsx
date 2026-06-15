@@ -9,9 +9,9 @@ import { SwipeRow } from '../../components/SwipeRow';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
 import { Chip, EmptyState, Fab } from '../../components/ui';
-import { TASK_STATUSES, type TaskStatus } from '../../lib/constants';
+import { TASK_REPEATS, TASK_STATUSES, type TaskStatus } from '../../lib/constants';
 import { tasks } from '../../lib/data';
-import { dueLabel } from '../../lib/date';
+import { addPeriod, dueLabel, todayKey } from '../../lib/date';
 import { tapSuccess } from '../../lib/haptics';
 import { progress } from '../../lib/progress';
 import { useCollection } from '../../lib/store';
@@ -47,6 +47,21 @@ export default function TasksScreen() {
     if (toDone) {
       tapSuccess();
       void progress.recordActivity('task');
+      const rep = t.repeat ?? 'none';
+      if (rep !== 'none') {
+        // Spawn the next occurrence; the completed one stays as history.
+        const today = todayKey();
+        const base = t.dueDate && t.dueDate >= today ? t.dueDate : today;
+        void tasks.upsert({
+          title: t.title,
+          memo: t.memo,
+          status: 'todo',
+          dueDate: addPeriod(base, rep),
+          repeat: rep,
+          relatedLogId: t.relatedLogId,
+          doneAt: null,
+        } as Partial<Task>);
+      }
     }
     void tasks.upsert({ id: t.id, status: toDone ? 'done' : 'todo', doneAt: toDone ? new Date().toISOString() : null } as Partial<Task>);
   }
@@ -73,6 +88,8 @@ export default function TasksScreen() {
                 const due = dueLabel(t.dueDate);
                 const done = t.status === 'done';
                 const dueTone = due?.tone === 'overdue' ? 'danger' : due?.tone === 'today' ? 'primary' : 'warn';
+                const rep = t.repeat ?? 'none';
+                const repLabel = rep !== 'none' ? TASK_REPEATS.find((r) => r.key === rep)?.label : null;
                 return (
                   <SwipeRow key={t.id} onDelete={() => void tasks.remove(t.id)}>
                     <View style={styles.row}>
@@ -83,9 +100,15 @@ export default function TasksScreen() {
                         <Text style={[type.bodyMed, done && styles.doneText]} numberOfLines={2}>
                           {t.title}
                         </Text>
-                        {(due && !done) || t.memo ? (
+                        {(due && !done) || repLabel || t.memo ? (
                           <View style={styles.meta}>
                             {due && !done ? <Chip label={due.text} tone={dueTone} /> : null}
+                            {repLabel ? (
+                              <View style={styles.repeat}>
+                                <Feather name="repeat" size={11} color={c.primary} />
+                                <Text style={[type.muted, { color: c.primary }]}>{repLabel}</Text>
+                              </View>
+                            ) : null}
                             {t.memo ? <Text style={type.muted} numberOfLines={1}>{t.memo}</Text> : null}
                           </View>
                         ) : null}
@@ -120,4 +143,5 @@ const styles = StyleSheet.create({
   checkbox: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   doneText: { color: colors.muted, textDecorationLine: 'line-through' },
   meta: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', marginTop: spacing.sm, flexWrap: 'wrap' },
+  repeat: { flexDirection: 'row', alignItems: 'center', gap: 3 },
 });
