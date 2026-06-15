@@ -12,7 +12,7 @@ const EAS_OWNER = process.env.EAS_OWNER ?? '';
 export default ({ config }: ConfigContext): ExpoConfig => {
   const plugins: NonNullable<ExpoConfig['plugins']> = [
     'expo-router',
-    ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 180, backgroundColor: '#1f5e8c' }],
+    ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 200, backgroundColor: '#FBF3E8' }],
   ];
 
   // Only add the AdMob native plugin when app ids are provided (production EAS
@@ -44,7 +44,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       package: 'com.bridgemed.worklog',
       adaptiveIcon: {
-        backgroundColor: '#E8F1F8',
+        backgroundColor: '#E27D34',
         foregroundImage: './assets/android-icon-foreground.png',
         backgroundImage: './assets/android-icon-background.png',
         monochromeImage: './assets/android-icon-monochrome.png',
