@@ -6,7 +6,7 @@ import { useColors } from '../components/ThemeProvider';
 import { Button, Card, Chip, EmptyState } from '../components/ui';
 import { AiError, generateCareerOutput } from '../lib/ai';
 import { CAREER_OUTPUTS, type CareerOutputType } from '../lib/constants';
-import { credits, GEN_COST, useCoins } from '../lib/credits';
+import { credits, GEN_COST_HEAVY, useCoins } from '../lib/credits';
 import { careerOutputs, workLogs } from '../lib/data';
 import { formatDateJa } from '../lib/date';
 import { usePrefs } from '../lib/prefs';
@@ -37,8 +37,8 @@ export default function CareerScreen() {
       Alert.alert('ログを選択してください', '変換のもとにする仕事ログを1つ以上選んでください。');
       return;
     }
-    if (!(await credits.spend(GEN_COST))) {
-      Alert.alert('コインが足りません', '生成にはコインが必要です。', [
+    if (!(await credits.spend(GEN_COST_HEAVY))) {
+      Alert.alert('コインが足りません', '生成には2コイン必要です。', [
         { text: '閉じる', style: 'cancel' },
         { text: 'コインを見る', onPress: () => router.push('/coins') },
       ]);
@@ -100,9 +100,9 @@ export default function CareerScreen() {
           <Text style={type.muted}>生成しています…</Text>
         </View>
       ) : (
-        <Button label="生成する（1コイン）" onPress={generate} disabled={selected.length === 0} />
+        <Button label="生成する（2コイン）" onPress={generate} disabled={selected.length === 0} />
       )}
-      <Text style={type.muted}>選んだ仕事ログから下書きを生成します。1回1コイン・残り {coins} コイン。</Text>
+      <Text style={type.muted}>選んだ仕事ログから下書きを生成します。1回2コイン・残り {coins} コイン。</Text>
 
       {sortedOutputs.length > 0 ? (
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>

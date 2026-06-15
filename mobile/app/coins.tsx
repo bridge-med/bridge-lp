@@ -28,7 +28,7 @@ export default function CoinsScreen() {
         <Text style={type.muted}>コイン</Text>
       </View>
       <Text style={[type.muted, { textAlign: 'center', marginBottom: spacing.xl }]}>
-        AIでの生成 1回につき {GEN_COST} コイン。買ったコインで、タスク化・メモ整理・ふり返り・キャリア変換に使えます。
+        AIでの生成は内容により {GEN_COST}〜2コイン（タスク化・メモ整理=1／ふり返り・キャリア変換・分析=2）。記録を続けるとボーナスでも貯まります。
       </Text>
 
       <Text style={type.label}>コインを買う</Text>

@@ -5,7 +5,7 @@ import { useColors } from '../../components/ThemeProvider';
 import { Button, Card, EmptyState } from '../../components/ui';
 import { router } from 'expo-router';
 import { AiError, generateReflection } from '../../lib/ai';
-import { credits, GEN_COST, useCoins } from '../../lib/credits';
+import { credits, GEN_COST_HEAVY, useCoins } from '../../lib/credits';
 import { reflections, workLogs } from '../../lib/data';
 import { progress } from '../../lib/progress';
 import { formatDateJa, monthRangeKeys, startOfWeekKey, todayKey } from '../../lib/date';
@@ -41,8 +41,8 @@ export default function ReflectionScreen() {
       Alert.alert('ログがありません', `${period === 'week' ? '今週' : '今月'}の仕事ログがありません。まずログを残しましょう。`);
       return;
     }
-    if (!(await credits.spend(GEN_COST))) {
-      Alert.alert('コインが足りません', 'ふり返りの作成にはコインが必要です。', [
+    if (!(await credits.spend(GEN_COST_HEAVY))) {
+      Alert.alert('コインが足りません', 'ふり返りの作成には2コイン必要です。', [
         { text: '閉じる', style: 'cancel' },
         { text: 'コインを見る', onPress: () => router.push('/coins') },
       ]);
@@ -74,7 +74,7 @@ export default function ReflectionScreen() {
       <Card style={{ gap: spacing.md }}>
         <Text style={type.h2}>振り返りをつくる</Text>
         <Text style={type.muted}>
-          期間の仕事ログから、やったこと・課題・次の一手・実績候補までまとめます。1回1コイン・残り {coins} コイン。
+          期間の仕事ログから、やったこと・課題・次の一手・実績候補までまとめます。1回2コイン・残り {coins} コイン。
         </Text>
         {busy ? (
           <View style={styles.loading}>
@@ -84,10 +84,10 @@ export default function ReflectionScreen() {
         ) : (
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
             <View style={{ flex: 1 }}>
-              <Button label="今週（1コイン）" onPress={() => generate('week')} />
+              <Button label="今週（2コイン）" onPress={() => generate('week')} />
             </View>
             <View style={{ flex: 1 }}>
-              <Button label="今月（1コイン）" variant="ghost" onPress={() => generate('month')} />
+              <Button label="今月（2コイン）" variant="ghost" onPress={() => generate('month')} />
             </View>
           </View>
         )}

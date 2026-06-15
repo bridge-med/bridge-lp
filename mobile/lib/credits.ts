@@ -12,7 +12,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const KEY = 'bridge-daily:coins';
 const STARTER = 3; // free coins on first run (registration bonus to try AI)
 
-export const GEN_COST = 1; // coins per AI generation
+export const GEN_COST = 1; // light generation: タスク化・メモ整理
+export const GEN_COST_HEAVY = 2; // heavy generation: ふりかえり・キャリア変換・働き方分析
 
 export const COIN_PACKS: { id: string; coins: number; price: string; perGen: string; best?: boolean }[] = [
   { id: 'coins_10', coins: 10, price: '¥240', perGen: '24円/回' },

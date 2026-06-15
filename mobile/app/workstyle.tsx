@@ -5,7 +5,7 @@ import { BlockHeader } from '../components/BlockHeader';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card } from '../components/ui';
 import { AiError, localWorkStyle } from '../lib/ai';
-import { credits, GEN_COST, useCoins } from '../lib/credits';
+import { credits, GEN_COST_HEAVY, useCoins } from '../lib/credits';
 import { workLogs } from '../lib/data';
 import { moduleCollection } from '../lib/modules';
 import { prefs, usePrefs } from '../lib/prefs';
@@ -39,8 +39,8 @@ export default function WorkStyleScreen() {
       Alert.alert('材料が足りません', '仕事ログや強みを少し記録すると、精度が上がります。');
       return;
     }
-    if (!(await credits.spend(GEN_COST))) {
-      Alert.alert('コインが足りません', '分析にはコインが必要です。', [
+    if (!(await credits.spend(GEN_COST_HEAVY))) {
+      Alert.alert('コインが足りません', '分析には2コイン必要です。', [
         { text: '閉じる', style: 'cancel' },
         { text: 'コインを見る', onPress: () => router.push('/coins') },
       ]);
@@ -63,7 +63,7 @@ export default function WorkStyleScreen() {
         <BlockHeader wordmark="ANALYSIS" title="働き方タイプ" onBack pad={24} />
         <View style={{ padding: spacing.lg, gap: spacing.lg }}>
           <Text style={type.muted}>
-            日々の仕事ログ・強み・価値観から、あなたの「働き方タイプ」をまとめます。記録が増えるほど深まります。1回1コイン・残り {coins} コイン。
+            日々の仕事ログ・強み・価値観から、あなたの「働き方タイプ」をまとめます。記録が増えるほど深まります。1回2コイン・残り {coins} コイン。
           </Text>
 
           {p.workStyleResult ? (
@@ -78,7 +78,7 @@ export default function WorkStyleScreen() {
               <Text style={type.muted}>分析しています…</Text>
             </View>
           ) : (
-            <Button label={p.workStyleResult ? '分析し直す（1コイン）' : '分析する（1コイン）'} onPress={analyze} />
+            <Button label={p.workStyleResult ? '分析し直す（2コイン）' : '分析する（2コイン）'} onPress={analyze} />
           )}
         </View>
       </ScrollView>
