@@ -12,6 +12,7 @@ import { Onboarding } from '../components/Onboarding';
 import { RewardModal } from '../components/RewardModal';
 import { ThemeProvider, useColors } from '../components/ThemeProvider';
 import { credits } from '../lib/credits';
+import { cosmetics } from '../lib/cosmetics';
 import { loadAll } from '../lib/data';
 import { prefs, usePrefs } from '../lib/prefs';
 import { progress } from '../lib/progress';
@@ -43,6 +44,8 @@ function Navigator() {
         <Stack.Screen name="m/[key]" options={{ headerShown: false }} />
         <Stack.Screen name="coins" options={{ headerShown: false }} />
         <Stack.Screen name="workstyle" options={{ headerShown: false }} />
+        <Stack.Screen name="closet" options={{ headerShown: false }} />
+        <Stack.Screen name="lang" options={{ headerShown: false }} />
       </Stack>
       <Onboarding visible={showOnboarding} />
       <RewardModal />
@@ -69,6 +72,7 @@ export default function RootLayout() {
     void prefs.load();
     void credits.load();
     void progress.load();
+    void cosmetics.load();
   }, []);
 
   useEffect(() => {

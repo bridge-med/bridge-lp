@@ -3,6 +3,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCosmetics } from '../lib/cosmetics';
 import { stageForLevel, levelInfo } from '../lib/leveling';
 import { progress, useProgress, useRewardHead } from '../lib/progress';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
@@ -17,6 +18,7 @@ const CONFETTI = [
 export function RewardModal() {
   const reward = useRewardHead();
   const prog = useProgress();
+  const cos = useCosmetics();
   const pop = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export function RewardModal() {
         <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
           <View style={styles.sparkleRow}>
             <Text style={[styles.sparkle, { color: colors.gold }]}>✦</Text>
-            <BuddySprite stage={stage.art} size={120} />
+            <BuddySprite stage={stage.art} size={120} outfit={cos.equipped} />
             <Text style={[styles.sparkle, { color: colors.primary }]}>✦</Text>
           </View>
           <Text style={styles.title}>{title}</Text>

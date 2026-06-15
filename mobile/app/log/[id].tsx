@@ -89,7 +89,8 @@ export default function LogDetailScreen() {
           </View>
         </View>
 
-        <View style={{ marginTop: spacing.xl }}>
+        <View style={{ marginTop: spacing.xl, gap: spacing.sm }}>
+          <Button label="このログを語学で学ぶ" variant="ghost" onPress={() => router.push({ pathname: '/lang', params: { logId: log.id } })} />
           <Button label="編集する" onPress={() => router.push({ pathname: '/log-edit', params: { id: log.id } })} />
         </View>
       </ScrollView>

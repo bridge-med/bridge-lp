@@ -87,6 +87,23 @@ export interface GenericRecord extends BaseRecord {
   [k: string]: unknown;
 }
 
+export type LangCode = 'en' | 'ko';
+
+export interface VocabItem {
+  term: string; // original (Japanese)
+  translation: string; // target language
+  reading?: string; // pronunciation hint
+}
+
+// lang_cards — a work log/memo turned into a language-study card.
+export interface LangCard extends BaseRecord {
+  lang: LangCode;
+  sourceText: string; // original Japanese
+  translation: string; // full translation
+  vocab: VocabItem[];
+  sourceLogId: ID | null;
+}
+
 export interface ExportBundle {
   app: 'bridge-worklog';
   version: 1;
@@ -96,5 +113,6 @@ export interface ExportBundle {
   tasks: Task[];
   reflections: Reflection[];
   careerOutputs: CareerOutput[];
+  langCards?: LangCard[];
   modules?: Record<string, GenericRecord[]>;
 }

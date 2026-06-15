@@ -2,13 +2,14 @@
 
 import { clearModules, exportModules, importModules, loadModules } from './modules';
 import { Collection } from './store';
-import type { CareerOutput, ExportBundle, QuickMemo, Reflection, Task, WorkLog } from './types';
+import type { CareerOutput, ExportBundle, LangCard, QuickMemo, Reflection, Task, WorkLog } from './types';
 
 export const workLogs = new Collection<WorkLog>('work_logs');
 export const quickMemos = new Collection<QuickMemo>('quick_memos');
 export const tasks = new Collection<Task>('tasks');
 export const reflections = new Collection<Reflection>('reflections');
 export const careerOutputs = new Collection<CareerOutput>('career_outputs');
+export const langCards = new Collection<LangCard>('lang_cards');
 
 export async function loadAll(): Promise<void> {
   await Promise.all([
@@ -17,6 +18,7 @@ export async function loadAll(): Promise<void> {
     tasks.load(),
     reflections.load(),
     careerOutputs.load(),
+    langCards.load(),
     loadModules(),
   ]);
 }
@@ -31,6 +33,7 @@ export function buildExport(): ExportBundle {
     tasks: tasks.getSnapshot(),
     reflections: reflections.getSnapshot(),
     careerOutputs: careerOutputs.getSnapshot(),
+    langCards: langCards.getSnapshot(),
     modules: exportModules(),
   };
 }
@@ -53,6 +56,7 @@ export async function importBundle(raw: string): Promise<void> {
     tasks.replaceAll(Array.isArray(b.tasks) ? b.tasks : []),
     reflections.replaceAll(Array.isArray(b.reflections) ? b.reflections : []),
     careerOutputs.replaceAll(Array.isArray(b.careerOutputs) ? b.careerOutputs : []),
+    langCards.replaceAll(Array.isArray(b.langCards) ? b.langCards : []),
     importModules(b.modules),
   ]);
 }
@@ -64,6 +68,7 @@ export async function clearAll(): Promise<void> {
     tasks.clear(),
     reflections.clear(),
     careerOutputs.clear(),
+    langCards.clear(),
     clearModules(),
   ]);
 }

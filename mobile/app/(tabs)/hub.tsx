@@ -7,6 +7,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { BuddySprite } from '../../components/BuddySprite';
 import { useColors } from '../../components/ThemeProvider';
 import { useCoins } from '../../lib/credits';
+import { useCosmetics } from '../../lib/cosmetics';
 import { levelInfo, nextStage, stageForLevel } from '../../lib/leveling';
 import { BADGES, useProgress } from '../../lib/progress';
 import { colors, fonts, radius, spacing, type } from '../../lib/theme';
@@ -74,6 +75,7 @@ export default function GrowthScreen() {
   const insets = useSafeAreaInsets();
   const prog = useProgress();
   const coins = useCoins();
+  const cos = useCosmetics();
   const info = levelInfo(prog.xp);
   const stage = stageForLevel(info.level);
   const next = nextStage(info.level);
@@ -96,9 +98,10 @@ export default function GrowthScreen() {
 
       {/* hero — buddy + level */}
       <View style={[styles.hero, { backgroundColor: c.primaryWeak }]}>
-        <View style={{ alignItems: 'center', width: 130 }}>
-          <BuddySprite stage={stage.art} size={116} />
-        </View>
+        <Pressable style={{ alignItems: 'center', width: 130 }} onPress={() => router.push('/closet')}>
+          <BuddySprite stage={stage.art} size={116} outfit={cos.equipped} />
+          <Text style={[type.muted, { color: c.primary, marginTop: -2 }]}>きせかえ →</Text>
+        </Pressable>
         <View style={{ flex: 1, alignItems: 'center' }}>
           <View style={{ width: 96, height: 96, alignItems: 'center', justifyContent: 'center' }}>
             <Ring progress={info.progress} />
@@ -121,6 +124,24 @@ export default function GrowthScreen() {
           <Text style={type.title}>{prog.streak}日連続</Text>
           <Text style={type.muted}>最高記録 {prog.bestStreak}日 ・ きょうも記録してつなげよう</Text>
         </View>
+      </View>
+
+      {/* quick actions */}
+      <View style={styles.quick}>
+        <Pressable style={[styles.quickCard, { backgroundColor: colors.leafWeak }]} onPress={() => router.push('/lang')}>
+          <Feather name="globe" size={18} color={colors.leaf} />
+          <View style={{ flex: 1 }}>
+            <Text style={type.title}>語学で学ぶ</Text>
+            <Text style={type.muted}>ログを英語・韓国語に</Text>
+          </View>
+        </Pressable>
+        <Pressable style={[styles.quickCard, { backgroundColor: c.primaryWeak }]} onPress={() => router.push('/closet')}>
+          <Feather name="gift" size={18} color={c.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={type.title}>きせかえ</Text>
+            <Text style={type.muted}>相棒をカスタム</Text>
+          </View>
+        </Pressable>
       </View>
 
       {/* badges */}
@@ -177,6 +198,8 @@ const styles = StyleSheet.create({
   stageName: { fontFamily: fonts.maru, fontSize: 17, color: colors.text, marginTop: spacing.sm },
   streak: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginHorizontal: spacing.lg, marginTop: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, padding: spacing.md },
   flame: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  quick: { flexDirection: 'row', gap: spacing.md, paddingHorizontal: spacing.lg, marginTop: spacing.md },
+  quickCard: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderRadius: radius.lg, padding: spacing.md },
   secLabel: { paddingHorizontal: spacing.lg, marginTop: spacing.xl, marginBottom: spacing.sm },
   badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.lg - 4, gap: 0 },
   badge: { width: '25%', alignItems: 'center', paddingVertical: spacing.sm },

@@ -53,6 +53,16 @@ npx expo start          # QR を Expo Go で読む / npm run ios|android
 - 登録特典として初回に無料コイン（`STARTER`）を付与。
 - ロジックは `lib/ai.ts`。BYOK（自分のキー）と広告は廃止。
 
+## 成長・相棒・語学（続けたくなる仕掛け）
+
+- **相棒（育つ芽）** `components/BuddySprite.tsx`：レベルで7段階に姿が変化。着せ替え対応。
+- **レベル制** `lib/leveling.ts`：Lv1–50、後半ほど必要EXP増。100日フル入力で≈Lv50。
+- **進捗** `lib/progress.ts`：XP・連続記録・称号。記録すると加点、毎日でデイリー＋連続ボーナス。節目でコイン進呈。
+- **ごほうび演出** `components/RewardModal.tsx`：レベルアップ／連続／称号で紙吹雪のお祝い。
+- **きせかえ** `lib/cosmetics.ts` ＋ `app/closet.tsx`：コインで帽子・鉢・背景・アクセを購入＆装着（コインの出口）。
+- **語学カード** `lib/lang.ts` ＋ `app/lang.tsx`：仕事ログを英語・韓国語の学習カード（訳＋単語帳）に変換（1回1コイン）。現状はグロッサリでプレビュー、本番はサーバ翻訳に差し替え。
+- 「そだち」タブ＝成長ダッシュボード＋キャリア/自己理解モジュール。
+
 ## アイコン / スプラッシュ
 
 `scripts/gen-icons.mjs`（`@resvg/resvg-js`、dev-only）で生成。ブランドの上昇バー・マーク（青グラデ）。再生成は `node scripts/gen-icons.mjs`。

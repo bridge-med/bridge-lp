@@ -7,6 +7,7 @@ import { BuddySprite } from '../../components/BuddySprite';
 import { QuickMemoSheet } from '../../components/QuickMemoSheet';
 import { useColors } from '../../components/ThemeProvider';
 import { useCoins } from '../../lib/credits';
+import { useCosmetics } from '../../lib/cosmetics';
 import { quickMemos, tasks, workLogs } from '../../lib/data';
 import { parseKey, startOfWeekKey, todayKey } from '../../lib/date';
 import { levelInfo, nextStage, stageForLevel } from '../../lib/leveling';
@@ -27,6 +28,7 @@ export default function HomeScreen() {
   useCollection(quickMemos);
   const coins = useCoins();
   const prog = useProgress();
+  const cos = useCosmetics();
   const { profession } = usePrefs();
   const [memoOpen, setMemoOpen] = useState(false);
 
@@ -66,9 +68,9 @@ export default function HomeScreen() {
                 {d.getMonth() + 1}月{d.getDate()}日 {WD[d.getDay()]}曜 — {profession ? `${profession}のきょう` : 'きょうもおつかれさま'}
               </Text>
             </View>
-            <View style={styles.buddyWrap}>
-              <BuddySprite stage={stage.art} size={92} />
-            </View>
+            <Pressable style={styles.buddyWrap} onPress={() => router.push('/closet')}>
+              <BuddySprite stage={stage.art} size={92} outfit={cos.equipped} />
+            </Pressable>
           </View>
           {/* speech bubble */}
           <Pressable onPress={() => router.push('/hub')} style={styles.bubble}>
