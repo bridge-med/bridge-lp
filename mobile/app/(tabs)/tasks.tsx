@@ -13,6 +13,7 @@ import { TASK_STATUSES, type TaskStatus } from '../../lib/constants';
 import { tasks } from '../../lib/data';
 import { dueLabel } from '../../lib/date';
 import { tapSuccess } from '../../lib/haptics';
+import { progress } from '../../lib/progress';
 import { useCollection } from '../../lib/store';
 import { colors, fonts, radius, spacing, type } from '../../lib/theme';
 import type { Task } from '../../lib/types';
@@ -43,7 +44,10 @@ export default function TasksScreen() {
 
   function quickComplete(t: Task) {
     const toDone = t.status !== 'done';
-    if (toDone) tapSuccess();
+    if (toDone) {
+      tapSuccess();
+      void progress.recordActivity('task');
+    }
     void tasks.upsert({ id: t.id, status: toDone ? 'done' : 'todo', doneAt: toDone ? new Date().toISOString() : null } as Partial<Task>);
   }
 
@@ -111,7 +115,7 @@ const styles = StyleSheet.create({
   aiBtn: { flexDirection: 'row', gap: 8, borderWidth: StyleSheet.hairlineWidth, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
   aiBtnText: { fontSize: 14, fontFamily: fonts.gothicMed },
   sectionHead: { ...type.label, color: colors.text2 },
-  count: { fontFamily: fonts.minchoReg, color: colors.muted },
+  count: { fontFamily: fonts.maruMed, color: colors.muted },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, paddingVertical: 14, backgroundColor: colors.bg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   checkbox: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   doneText: { color: colors.muted, textDecorationLine: 'line-through' },

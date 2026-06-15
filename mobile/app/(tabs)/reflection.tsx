@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { AiError, generateReflection } from '../../lib/ai';
 import { credits, GEN_COST, useCoins } from '../../lib/credits';
 import { reflections, workLogs } from '../../lib/data';
+import { progress } from '../../lib/progress';
 import { formatDateJa, monthRangeKeys, startOfWeekKey, todayKey } from '../../lib/date';
 import { useCollection } from '../../lib/store';
 import { colors, spacing, type } from '../../lib/theme';
@@ -57,6 +58,7 @@ export default function ReflectionScreen() {
         content,
         aiGenerated: true,
       } as Partial<Reflection>);
+      void progress.recordActivity('reflection');
       setExpanded(saved.id);
     } catch (e) {
       Alert.alert('生成に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');

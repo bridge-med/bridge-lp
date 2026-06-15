@@ -158,6 +158,6 @@ export default function TimelineScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   filters: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.sm },
-  gdate: { fontFamily: fonts.minchoReg, fontSize: 16 },
+  gdate: { fontFamily: fonts.maruMed, fontSize: 16 },
   kind: { fontFamily: fonts.gothicMed, fontSize: 11, letterSpacing: 1 },
 });

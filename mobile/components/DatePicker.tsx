@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   wrap: { flex: 1, justifyContent: 'flex-end', paddingHorizontal: spacing.md },
   sheet: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, padding: spacing.lg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md },
-  month: { fontFamily: fonts.minchoSemi, fontSize: 20, color: colors.text },
+  month: { fontFamily: fonts.maru, fontSize: 20, color: colors.text },
   weekRow: { flexDirection: 'row' },
   wd: { flex: 1, textAlign: 'center', fontFamily: fonts.gothicMed, fontSize: 11, color: colors.muted, paddingBottom: spacing.sm },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },

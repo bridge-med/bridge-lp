@@ -2,9 +2,14 @@ import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { type ComponentProps } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { BlockHeader } from '../../components/BlockHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
+import { BuddySprite } from '../../components/BuddySprite';
 import { useColors } from '../../components/ThemeProvider';
-import { colors, spacing, type } from '../../lib/theme';
+import { useCoins } from '../../lib/credits';
+import { levelInfo, nextStage, stageForLevel } from '../../lib/leveling';
+import { BADGES, useProgress } from '../../lib/progress';
+import { colors, fonts, radius, spacing, type } from '../../lib/theme';
 
 type Item = { icon: ComponentProps<typeof Feather>['name']; label: string; desc: string; href: string };
 
@@ -40,12 +45,104 @@ const SECTIONS: { title: string; items: Item[] }[] = [
   },
 ];
 
-export default function HubScreen() {
+function Ring({ progress, size = 96 }: { progress: number; size?: number }) {
   const c = useColors();
+  const sw = 9;
+  const r = (size - sw) / 2;
+  const circ = 2 * Math.PI * r;
+  return (
+    <Svg width={size} height={size}>
+      <Circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(59,48,38,0.10)" strokeWidth={sw} fill="none" />
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        stroke={c.primary}
+        strokeWidth={sw}
+        fill="none"
+        strokeLinecap="round"
+        strokeDasharray={circ}
+        strokeDashoffset={circ * (1 - Math.max(0.02, progress))}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+    </Svg>
+  );
+}
+
+export default function GrowthScreen() {
+  const c = useColors();
+  const insets = useSafeAreaInsets();
+  const prog = useProgress();
+  const coins = useCoins();
+  const info = levelInfo(prog.xp);
+  const stage = stageForLevel(info.level);
+  const next = nextStage(info.level);
+  const earned = new Set(prog.badges);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 110 }}>
-      <BlockHeader wordmark="CAREER" title="キャリア" subtitle="使うものだけ選んで、育てていく" pad={28} />
-      <View style={{ height: spacing.lg }} />
+      <View style={{ height: insets.top + spacing.md }} />
+      {/* header */}
+      <View style={styles.head}>
+        <View style={{ flex: 1 }}>
+          <Text style={type.h1}>そだち</Text>
+          <Text style={[type.muted, { marginTop: 2 }]}>記録が、相棒とキャリアを育てる</Text>
+        </View>
+        <Pressable onPress={() => router.push('/coins')} style={[styles.coinPill, { backgroundColor: c.primaryWeak }]}>
+          <View style={styles.coin} />
+          <Text style={styles.coinNum}>{coins}</Text>
+        </Pressable>
+      </View>
+
+      {/* hero — buddy + level */}
+      <View style={[styles.hero, { backgroundColor: c.primaryWeak }]}>
+        <View style={{ alignItems: 'center', width: 130 }}>
+          <BuddySprite stage={stage.art} size={116} />
+        </View>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <View style={{ width: 96, height: 96, alignItems: 'center', justifyContent: 'center' }}>
+            <Ring progress={info.progress} />
+            <View style={styles.ringCenter}>
+              <Text style={styles.lvNum}>Lv.{info.level}</Text>
+              <Text style={styles.lvSub}>{info.atCap ? 'カンスト' : `あと${info.toNext}`}</Text>
+            </View>
+          </View>
+          <Text style={styles.stageName}>{stage.name}</Text>
+          <Text style={type.muted}>{next ? `次は「${next.name}」へ` : stage.tagline}</Text>
+        </View>
+      </View>
+
+      {/* streak strip */}
+      <View style={styles.streak}>
+        <View style={[styles.flame, { backgroundColor: c.sparkWeak }]}>
+          <Feather name="zap" size={16} color={colors.spark} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={type.title}>{prog.streak}日連続</Text>
+          <Text style={type.muted}>最高記録 {prog.bestStreak}日 ・ きょうも記録してつなげよう</Text>
+        </View>
+      </View>
+
+      {/* badges */}
+      <Text style={[type.label, styles.secLabel]}>獲得した称号 {earned.size}/{BADGES.length}</Text>
+      <View style={styles.badgeGrid}>
+        {BADGES.map((b) => {
+          const got = earned.has(b.id);
+          return (
+            <View key={b.id} style={styles.badge}>
+              <View style={[styles.badgeIcon, { backgroundColor: got ? c.primary : colors.surface2 }]}>
+                <Feather name={got ? 'star' : 'lock'} size={18} color={got ? '#fff' : colors.line2} />
+              </View>
+              <Text style={[styles.badgeLabel, { color: got ? colors.text : colors.muted }]} numberOfLines={1}>
+                {got ? b.label : '???'}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+
+      {/* career / self modules */}
+      <View style={{ height: spacing.md }} />
       {SECTIONS.map((sec) => (
         <View key={sec.title} style={styles.section}>
           <Text style={[type.label, { paddingHorizontal: spacing.lg, marginBottom: spacing.xs }]}>{sec.title}</Text>
@@ -69,6 +166,22 @@ export default function HubScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  head: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg, marginBottom: spacing.md },
+  coinPill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 32, borderRadius: radius.pill },
+  coin: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.gold },
+  coinNum: { fontFamily: fonts.maru, fontSize: 14, color: colors.text },
+  hero: { flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.lg, borderRadius: radius.xl + 4, padding: spacing.md, gap: spacing.sm },
+  ringCenter: { position: 'absolute', alignItems: 'center' },
+  lvNum: { fontFamily: fonts.maru, fontSize: 22, color: colors.text },
+  lvSub: { fontFamily: fonts.gothic, fontSize: 10, color: colors.muted },
+  stageName: { fontFamily: fonts.maru, fontSize: 17, color: colors.text, marginTop: spacing.sm },
+  streak: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginHorizontal: spacing.lg, marginTop: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, padding: spacing.md },
+  flame: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  secLabel: { paddingHorizontal: spacing.lg, marginTop: spacing.xl, marginBottom: spacing.sm },
+  badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.lg - 4, gap: 0 },
+  badge: { width: '25%', alignItems: 'center', paddingVertical: spacing.sm },
+  badgeIcon: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  badgeLabel: { fontFamily: fonts.gothicMed, fontSize: 10, marginTop: 6, textAlign: 'center' },
   section: { marginBottom: spacing.lg },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.md,

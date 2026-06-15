@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { AiError, localTidy } from '../lib/ai';
 import { credits, GEN_COST } from '../lib/credits';
 import { quickMemos } from '../lib/data';
+import { progress } from '../lib/progress';
 import { spacing, type } from '../lib/theme';
 import type { QuickMemo } from '../lib/types';
 import { Sheet } from './Sheet';
@@ -56,6 +57,7 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
       tags,
       convertedToLogId: memo?.convertedToLogId ?? null,
     } as Partial<QuickMemo>);
+    if (!memo) void progress.recordActivity('memo');
     onClose();
   }
   function del() {

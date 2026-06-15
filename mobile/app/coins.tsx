@@ -69,10 +69,10 @@ export default function CoinsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   balance: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', gap: spacing.sm, paddingTop: spacing.lg },
-  balanceNum: { fontFamily: fonts.mincho, fontSize: 56, color: colors.text, lineHeight: 60 },
+  balanceNum: { fontFamily: fonts.maruBlack, fontSize: 56, color: colors.text, lineHeight: 60 },
   pack: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  packCoins: { fontFamily: fonts.minchoSemi, fontSize: 28, color: colors.text },
+  packCoins: { fontFamily: fonts.maru, fontSize: 28, color: colors.text },
   badge: { fontFamily: fonts.gothicBold, fontSize: 10, borderWidth: StyleSheet.hairlineWidth, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2 },
-  price: { fontFamily: fonts.minchoSemi, fontSize: 20, color: colors.text },
+  price: { fontFamily: fonts.maru, fontSize: 20, color: colors.text },
   note: { marginTop: spacing.xl, padding: spacing.lg, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line },
 });

@@ -10,6 +10,7 @@ import { Button } from '../components/ui';
 import { workLogs } from '../lib/data';
 import { parseKey, todayKey } from '../lib/date';
 import { tapSuccess } from '../lib/haptics';
+import { progress } from '../lib/progress';
 import { colors, fonts, spacing, type } from '../lib/theme';
 import type { WorkLog } from '../lib/types';
 
@@ -36,9 +37,10 @@ export default function LogEditScreen() {
   const [calOpen, setCalOpen] = useState(false);
 
   function save() {
+    const logDate = date.trim() || todayKey();
     void workLogs.upsert({
       id: existing?.id,
-      date: date.trim() || todayKey(),
+      date: logDate,
       title: title.trim(),
       did: did.trim(),
       problem: problem.trim(),
@@ -51,6 +53,7 @@ export default function LogEditScreen() {
       memo: memo.trim(),
       tags,
     } as Partial<WorkLog>);
+    if (!existing) void progress.recordActivity('log', logDate);
     tapSuccess();
     router.back();
   }
@@ -153,8 +156,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   bar: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
   hero: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, flexDirection: 'row', alignItems: 'baseline', gap: spacing.md },
-  weekday: { fontFamily: fonts.minchoSemi, fontSize: 26 },
-  date: { fontFamily: fonts.mincho, fontSize: 40, color: colors.text },
+  weekday: { fontFamily: fonts.maruMed, fontSize: 24 },
+  date: { fontFamily: fonts.maruBlack, fontSize: 38, color: colors.text },
   titleInput: {
     fontFamily: fonts.gothicBold,
     fontSize: 22,

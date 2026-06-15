@@ -1,5 +1,6 @@
 import { ShipporiMincho_400Regular, ShipporiMincho_600SemiBold, ShipporiMincho_800ExtraBold } from '@expo-google-fonts/shippori-mincho';
 import { ZenKakuGothicNew_400Regular, ZenKakuGothicNew_500Medium, ZenKakuGothicNew_700Bold } from '@expo-google-fonts/zen-kaku-gothic-new';
+import { ZenMaruGothic_400Regular, ZenMaruGothic_500Medium, ZenMaruGothic_700Bold, ZenMaruGothic_900Black } from '@expo-google-fonts/zen-maru-gothic';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -8,10 +9,12 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Onboarding } from '../components/Onboarding';
+import { RewardModal } from '../components/RewardModal';
 import { ThemeProvider, useColors } from '../components/ThemeProvider';
 import { credits } from '../lib/credits';
 import { loadAll } from '../lib/data';
 import { prefs, usePrefs } from '../lib/prefs';
+import { progress } from '../lib/progress';
 import { colors, fonts } from '../lib/theme';
 
 void SplashScreen.preventAutoHideAsync();
@@ -42,6 +45,7 @@ function Navigator() {
         <Stack.Screen name="workstyle" options={{ headerShown: false }} />
       </Stack>
       <Onboarding visible={showOnboarding} />
+      <RewardModal />
     </>
   );
 }
@@ -54,12 +58,17 @@ export default function RootLayout() {
     ZenKakuGothicNew_400Regular,
     ZenKakuGothicNew_500Medium,
     ZenKakuGothicNew_700Bold,
+    ZenMaruGothic_400Regular,
+    ZenMaruGothic_500Medium,
+    ZenMaruGothic_700Bold,
+    ZenMaruGothic_900Black,
   });
 
   useEffect(() => {
     void loadAll();
     void prefs.load();
     void credits.load();
+    void progress.load();
   }, []);
 
   useEffect(() => {

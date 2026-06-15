@@ -102,8 +102,8 @@ export default function LogDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   hero: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
-  weekday: { fontFamily: fonts.minchoSemi, fontSize: 22 },
-  date: { fontFamily: fonts.mincho, fontSize: 32, color: colors.text },
+  weekday: { fontFamily: fonts.maruMed, fontSize: 22 },
+  date: { fontFamily: fonts.maruBlack, fontSize: 32, color: colors.text },
   title: { fontFamily: fonts.gothicBold, fontSize: 22, color: colors.text, lineHeight: 32, marginTop: spacing.sm },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
   rule: { height: StyleSheet.hairlineWidth, backgroundColor: colors.line, marginTop: spacing.lg },

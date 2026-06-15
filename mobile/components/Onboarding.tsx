@@ -77,7 +77,7 @@ function Group({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   badge: { ...type.label, letterSpacing: 3 },
-  title: { fontFamily: fonts.mincho, fontSize: 30, lineHeight: 42, color: colors.text },
+  title: { fontFamily: fonts.maru, fontSize: 28, lineHeight: 40, color: colors.text },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: spacing.lg, paddingTop: spacing.md, borderTopWidth: StyleSheet.hairlineWidth },
   btn: { borderRadius: radius.md, paddingVertical: 16, alignItems: 'center' },

@@ -231,8 +231,8 @@ function FieldInput({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   field: { paddingTop: spacing.lg },
-  index: { fontFamily: fonts.minchoReg, fontSize: 14, color: colors.muted },
-  gdate: { fontFamily: fonts.minchoReg, fontSize: 16 },
+  index: { fontFamily: fonts.maruMed, fontSize: 14, color: colors.muted },
+  gdate: { fontFamily: fonts.maruMed, fontSize: 16 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   dot: { width: 26, height: 26, borderRadius: 13, borderWidth: 1.5 },
   fab: {
