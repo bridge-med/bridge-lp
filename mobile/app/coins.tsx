@@ -4,7 +4,7 @@ import { BlockHeader } from '../components/BlockHeader';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card } from '../components/ui';
 import { COIN_PACKS, GEN_COST, credits, useCoins } from '../lib/credits';
-import { iapEnabled, purchasePack } from '../lib/iap';
+import { iapEnabled, purchasePack, restorePurchases } from '../lib/iap';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 
 export default function CoinsScreen() {
@@ -28,6 +28,17 @@ export default function CoinsScreen() {
       { text: 'キャンセル', style: 'cancel' },
       { text: '購入（デモ）', onPress: () => void credits.add(coinsToAdd) },
     ]);
+  }
+
+  function restore() {
+    void (async () => {
+      try {
+        await restorePurchases();
+        Alert.alert('購入を復元しました', '反映されない場合は時間をおいて再度お試しください。');
+      } catch {
+        Alert.alert('復元に失敗しました', '時間をおいて再度お試しください。');
+      }
+    })();
   }
 
   return (
@@ -70,8 +81,12 @@ export default function CoinsScreen() {
         </Text>
       </View>
 
+      {iapEnabled() ? (
+        <Button label="購入を復元" variant="ghost" onPress={restore} />
+      ) : null}
+
       <Text style={[type.muted, { marginTop: spacing.xl, fontSize: 11 }]}>
-        {iapEnabled() ? '※ アプリ内課金（消費型）で購入します。' : '※ プレビューではデモ購入です。製品版ではアプリ内課金に接続します。'}
+        {iapEnabled() ? '※ アプリ内課金（消費型）で購入します。価格は地域により異なります。' : '※ プレビューではデモ購入です。製品版ではアプリ内課金に接続します。'}
       </Text>
       </View>
     </ScrollView>

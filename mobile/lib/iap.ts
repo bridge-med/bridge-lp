@@ -18,3 +18,7 @@ export function configureIap(): void {
 export async function purchasePack(_productId: string): Promise<boolean> {
   return false;
 }
+
+export async function restorePurchases(): Promise<void> {
+  // no-op on web / preview
+}

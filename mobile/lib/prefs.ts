@@ -3,9 +3,14 @@
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { AiProvider } from './constants';
+import { secureGet, secureSet } from './secure';
 import type { AccentKey } from './theme';
 
 const KEY = 'bridge-daily:prefs';
+
+// Secret fields kept out of the AsyncStorage blob and stored in the OS keystore.
+const SECRET_FIELDS = ['geminiApiKey', 'openaiApiKey', 'anthropicApiKey'] as const;
+type SecretField = (typeof SECRET_FIELDS)[number];
 
 export interface Prefs {
   onboardingDone: boolean;
@@ -78,24 +83,54 @@ class PrefsStore {
 
   async load(): Promise<void> {
     if (this.loadPromise) return this.loadPromise;
-    this.loadPromise = AsyncStorage.getItem(KEY).then((raw) => {
+    this.loadPromise = (async () => {
+      const raw = await AsyncStorage.getItem(KEY);
+      let parsed: Partial<Prefs> = {};
       if (raw) {
         try {
-          this.value = { ...DEFAULT, ...(JSON.parse(raw) as Partial<Prefs>) };
+          parsed = JSON.parse(raw) as Partial<Prefs>;
         } catch {
-          this.value = DEFAULT;
+          parsed = {};
         }
       }
+      // Legacy keys may still live in the blob — migrate them to the keystore.
+      const legacy: Partial<Record<SecretField, string>> = {};
+      for (const f of SECRET_FIELDS) {
+        if (parsed[f]) legacy[f] = parsed[f] as string;
+      }
+      // Read secrets from secure storage (falling back to any legacy value).
+      const secrets = {} as Record<SecretField, string>;
+      for (const f of SECRET_FIELDS) {
+        secrets[f] = (await secureGet(f)) ?? legacy[f] ?? '';
+      }
+      this.value = { ...DEFAULT, ...parsed, ...secrets };
       this.loaded = true;
       this.emit();
-    });
+
+      if (Object.keys(legacy).length > 0) {
+        for (const f of SECRET_FIELDS) {
+          if (legacy[f]) await secureSet(f, legacy[f] as string);
+        }
+        await this.persistBlob(); // rewrite the blob without secrets
+      }
+    })();
     return this.loadPromise;
+  }
+
+  // Persist only non-secret fields to AsyncStorage.
+  private async persistBlob(): Promise<void> {
+    const blob: Record<string, unknown> = { ...this.value };
+    for (const f of SECRET_FIELDS) delete blob[f];
+    await AsyncStorage.setItem(KEY, JSON.stringify(blob));
   }
 
   async set(patch: Partial<Prefs>): Promise<void> {
     this.value = { ...this.value, ...patch };
     this.loaded = true;
-    await AsyncStorage.setItem(KEY, JSON.stringify(this.value));
+    for (const f of SECRET_FIELDS) {
+      if (f in patch) await secureSet(f, (patch[f] as string) ?? '');
+    }
+    await this.persistBlob();
     this.emit();
   }
 }

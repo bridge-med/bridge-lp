@@ -44,3 +44,10 @@ export async function purchasePack(productId: string): Promise<boolean> {
     throw e;
   }
 }
+
+/** Restore previous purchases (Apple requires a restore affordance). */
+export async function restorePurchases(): Promise<void> {
+  if (!iapEnabled()) return;
+  configureIap();
+  await Purchases.restorePurchases();
+}

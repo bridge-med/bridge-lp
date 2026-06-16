@@ -30,21 +30,18 @@
 ---
 
 ## 課金（RevenueCat で「コイン」消費型IAP）
-```bash
-npx expo install react-native-purchases
-```
-クライアント側は **実装済み**。やることは3つだけ：
-1. `npm i react-native-purchases`（native の `lib/iap.native.ts` が有効化される）
-2. RevenueCat で **消費型（consumable）** プロダクトを `lib/credits.ts` の
-   `COIN_PACKS`（`coins_10` / `coins_30` / `coins_100`）の id に合わせて作成
-3. `.env` に `EXPO_PUBLIC_RC_IOS_KEY` / `EXPO_PUBLIC_RC_ANDROID_KEY`
+`react-native-purchases` は **導入済み**（package.json）。残りはダッシュボード設定だけ：
+1. App Store Connect / Google Play で **消費型（consumable）** アプリ内課金を作成：
+   `coins_10` / `coins_30` / `coins_100`（`lib/credits.ts` の `COIN_PACKS` の id と一致）
+2. RevenueCat に同 id のプロダクト＋ Offering（current）を作成
+3. `.env`（EAS secrets）に `EXPO_PUBLIC_RC_IOS_KEY` / `EXPO_PUBLIC_RC_ANDROID_KEY`
 
 起動時 `configureIap()`、購入は `app/coins.tsx` の `buy()`→`purchasePack(id)`→成功で
-`credits.add(pack.coins)` まで結線済み。web/Expo Go では自動でデモ購入にフォールバック。
-
-`app/coins.tsx` の `buy()` は **実装済み**：`iapEnabled()` なら `purchasePack(id)`→成功で `credits.add`。
-native の実体は `lib/iap.native.ts`（RevenueCat）。web/プレビューは `lib/iap.ts`（デモ）に自動で切替。
-より厳密にするならサーバでレシート検証→残高クレジット（不正防止）に発展可能。
+`credits.add(pack.coins)` まで結線済み（「購入を復元」ボタンもあり）。web/Expo Go では
+自動でデモ購入にフォールバック。native の実体は `lib/iap.native.ts`（RevenueCat）、
+web/プレビューは `lib/iap.ts`（デモ）に自動で切替。
+RevenueCat がストア側でレシート検証を行うため、成功応答での付与で実用上は十分。
+さらに厳密にするなら RC Webhook→自前バックエンドの残高台帳に発展可能（不正防止）。
 
 ## 生成バックエンド（開発者キー）— 実装済み・鍵を入れるだけ
 AI生成・翻訳は **Supabase Edge Function `ai`**（`supabase/functions/ai/index.ts`）に実装済み。

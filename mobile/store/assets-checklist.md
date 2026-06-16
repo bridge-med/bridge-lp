@@ -23,12 +23,14 @@ Suggested screens to show: Home, Work-log entry, Timeline, Reflection, Career ou
 - [ ] Name, subtitle/short description, full description (see listing-ja.md / listing-en.md)
 - [ ] Keywords (App Store)
 - [ ] Support URL + Marketing URL
-- [ ] Privacy policy URL (host store/privacy-policy.md, e.g. on GitHub Pages)
+- [x] Privacy policy URL — hosted at https://bridge-med.github.io/bridge-lp/legal/privacy.html
 
 ## Compliance
-- [ ] App Store: Privacy "Nutrition Label" — data collected by AdMob (identifiers)
-      if ads enabled; otherwise "not collected".
-- [ ] iOS App Tracking Transparency prompt if AdMob personalized ads are used.
-- [ ] Google Play Data safety form.
+- [x] No ads / no tracking SDK → App Store Privacy: "Data not collected"
+      (content is on-device; AI is opt-in bring-your-own-key).
+- [ ] Google Play Data safety form → declare "no data collected/shared"
+      (note: with your own AI key, text goes directly to that provider).
+- [ ] In-app purchase products created: coins_10 / coins_30 / coins_100
+      (consumable) in App Store Connect, Google Play, and RevenueCat.
 - [ ] Age rating questionnaire.
 - [ ] Export compliance (uses standard encryption only).

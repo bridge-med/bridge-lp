@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Onboarding } from '../components/Onboarding';
 import { RewardModal } from '../components/RewardModal';
 import { ThemeProvider, useColors } from '../components/ThemeProvider';
@@ -77,7 +78,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    void loadAll();
+    void loadAll().catch((e) => console.warn('loadAll failed', e?.message));
     void prefs.load().then(() => {
       const p = prefs.getSnapshot();
       if (p.reminderEnabled) void scheduleDaily(p.reminderHour, p.reminderMinute);
@@ -96,10 +97,12 @@ export default function RootLayout() {
   if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <Navigator />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <Navigator />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
