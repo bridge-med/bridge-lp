@@ -102,7 +102,8 @@ export default function TasksScreen() {
         <Pressable onPress={() => quickComplete(t)} hitSlop={6} style={[styles.mcheck, { borderColor: c.line2 }]} />
         <Pressable style={{ flex: 1 }} onPress={() => edit(t)}>
           <Text style={styles.mtitle} numberOfLines={2}>{t.title}</Text>
-          {due ? <Text style={[styles.mdue, { color: dueColor }]}>{due.text}</Text> : null}
+          {t.memo ? <Text style={styles.mmemo} numberOfLines={2}>{t.memo}</Text> : null}
+          {due ? <Text style={[styles.mdue, { color: dueColor }]}>🕒 {due.text}</Text> : null}
         </Pressable>
       </View>
     );
@@ -178,7 +179,7 @@ export default function TasksScreen() {
           </View>
         ) : (
           <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
-            <Text style={[type.muted, { marginBottom: spacing.sm }]}>緊急度 × 重要度で整理。各タスクを開くと設定できます。</Text>
+            <Text style={[type.muted, { marginBottom: spacing.sm }]}>重要度を設定すると自動で振り分け（緊急度は期限から自動判定／手動指定も可）。</Text>
             <View style={styles.grid}>
               {QUADRANTS.map((q) => {
                 const items = matrix.byQ[q.key];
@@ -208,7 +209,7 @@ export default function TasksScreen() {
                 <Text style={styles.sectionHead}>
                   未分類 <Text style={styles.count}>{matrix.unclassified.length}</Text>
                 </Text>
-                <Text style={[type.muted, { fontSize: 11 }]}>タップして重要度・緊急度を設定すると、上の表に並びます。</Text>
+                <Text style={[type.muted, { fontSize: 11 }]}>タップして「重要度」を設定すると、上の表に自動で並びます。</Text>
                 {matrix.unclassified.map((t) => (
                   <Pressable key={t.id} onPress={() => edit(t)} style={styles.uRow}>
                     <Feather name="circle" size={14} color={colors.line2} />
@@ -260,7 +261,8 @@ const styles = StyleSheet.create({
   cellBody: { padding: spacing.sm, gap: 2 },
   mrow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, paddingVertical: 6 },
   mcheck: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, marginTop: 1 },
-  mtitle: { fontFamily: fonts.gothic, fontSize: 13, color: colors.text },
+  mtitle: { fontFamily: fonts.gothicMed, fontSize: 13, color: colors.text },
+  mmemo: { fontFamily: fonts.gothic, fontSize: 11, color: colors.text2, marginTop: 1, lineHeight: 15 },
   mdue: { fontFamily: fonts.gothicMed, fontSize: 10, marginTop: 2 },
   cellEmpty: { fontFamily: fonts.gothic, fontSize: 12, color: colors.muted, paddingVertical: spacing.sm, textAlign: 'center' },
   uRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },

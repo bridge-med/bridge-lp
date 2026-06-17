@@ -82,6 +82,9 @@ export function TaskSheet({
         <AxisPicker label="重要度" value={importance} onChange={setImportance} />
         <AxisPicker label="緊急度" value={urgency} onChange={setUrgency} />
       </View>
+      <Text style={type.muted}>
+        重要度を入れるとマトリクス（A〜D）に自動で並びます。緊急度は未指定なら期限から自動判定（今日・明日・期限切れ＝高）。
+      </Text>
 
       <View style={{ gap: spacing.xs }}>
         <Text style={type.label}>繰り返し</Text>
