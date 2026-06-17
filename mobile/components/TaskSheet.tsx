@@ -24,6 +24,8 @@ export function TaskSheet({
   const [status, setStatus] = useState<TaskStatus>('todo');
   const [due, setDue] = useState<string | null>(null);
   const [repeat, setRepeat] = useState<TaskRepeat>('none');
+  const [importance, setImportance] = useState<'high' | 'low' | undefined>(undefined);
+  const [urgency, setUrgency] = useState<'high' | 'low' | undefined>(undefined);
   const [memo, setMemo] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
 
@@ -34,6 +36,8 @@ export function TaskSheet({
     setStatus(task?.status ?? 'todo');
     setDue(task?.dueDate ?? null);
     setRepeat(task?.repeat ?? 'none');
+    setImportance(task?.importance);
+    setUrgency(task?.urgency);
     setMemo(task?.memo ?? '');
   }
 
@@ -45,6 +49,8 @@ export function TaskSheet({
       status,
       dueDate: due,
       repeat,
+      importance,
+      urgency,
       memo: memo.trim(),
       relatedLogId: task?.relatedLogId ?? defaultLogId ?? null,
       doneAt: status === 'done' ? task?.doneAt ?? new Date().toISOString() : null,
@@ -72,6 +78,11 @@ export function TaskSheet({
 
       <DuePicker value={due} onChange={setDue} />
 
+      <View style={{ flexDirection: 'row', gap: spacing.md }}>
+        <AxisPicker label="重要度" value={importance} onChange={setImportance} />
+        <AxisPicker label="緊急度" value={urgency} onChange={setUrgency} />
+      </View>
+
       <View style={{ gap: spacing.xs }}>
         <Text style={type.label}>繰り返し</Text>
         <View style={styles.row}>
@@ -89,6 +100,27 @@ export function TaskSheet({
       <Button label={task ? '保存' : '追加'} onPress={save} disabled={!title.trim()} />
       {task ? <Button label="削除" variant="danger" onPress={del} /> : null}
     </Sheet>
+  );
+}
+
+function AxisPicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: 'high' | 'low' | undefined;
+  onChange: (v: 'high' | 'low' | undefined) => void;
+}) {
+  const toggle = (v: 'high' | 'low') => onChange(value === v ? undefined : v);
+  return (
+    <View style={{ flex: 1, gap: spacing.xs }}>
+      <Text style={type.label}>{label}</Text>
+      <View style={styles.row}>
+        <Chip label="高" tone="primary" active={value === 'high'} onPress={() => toggle('high')} />
+        <Chip label="低" tone="neutral" active={value === 'low'} onPress={() => toggle('low')} />
+      </View>
+    </View>
   );
 }
 

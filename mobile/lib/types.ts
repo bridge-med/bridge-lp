@@ -52,6 +52,8 @@ export interface Task extends BaseRecord {
   memo: string;
   doneAt: string | null;
   repeat?: TaskRepeat; // undefined treated as 'none' (back-compat)
+  importance?: 'high' | 'low'; // 重要度 (Eisenhower matrix axis)
+  urgency?: 'high' | 'low'; // 緊急度 (Eisenhower matrix axis)
 }
 
 export type ReflectionPeriod = 'week' | 'month';
