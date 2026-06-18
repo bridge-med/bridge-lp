@@ -1,6 +1,6 @@
 import { CourseScreen } from '../components/CourseScreen';
 import { COURSES } from '../lib/courses';
 
-export default function VocabScreen() {
-  return <CourseScreen course={COURSES.en} />;
+export default function VocabKoScreen() {
+  return <CourseScreen course={COURSES.ko} />;
 }

@@ -1,11 +1,11 @@
-// Spaced-repetition progress for the English study decks. Each word carries a
-// Leitner "box" (0=new .. 5=mastered); the box also sets the review interval, so
-// well-known words resurface less often. Progress is keyed by headword and kept
-// local (AsyncStorage), separate from the log-derived wordbank.
+// Spaced-repetition progress for the study decks (English / Korean courses).
+// Each word carries a Leitner "box" (0=new .. 5=mastered); the box also sets the
+// review interval, so well-known words resurface less often. Progress is keyed by
+// `${course}:${word}` and kept local (AsyncStorage), separate from the wordbank.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
-import { deckWords, type VocabWord } from './vocab';
+import type { VocabWord } from './vocab';
 
 const KEY = 'bridge-daily:vocabdeck';
 export const MAX_BOX = 5;
@@ -21,6 +21,8 @@ interface WordProg {
 
 type Data = Record<string, WordProg>;
 type Listener = () => void;
+
+const vkey = (course: string, word: string) => `${course}:${word}`;
 
 class VocabDeck {
   private data: Data = {};
@@ -44,7 +46,13 @@ class VocabDeck {
     this.loadPromise = AsyncStorage.getItem(KEY).then((raw) => {
       if (raw) {
         try {
-          this.data = JSON.parse(raw) as Data;
+          const parsed = JSON.parse(raw) as Data;
+          // Migrate legacy English keys (plain word -> "en:word").
+          const migrated: Data = {};
+          for (const [k, v] of Object.entries(parsed)) {
+            migrated[k.includes(':') ? k : vkey('en', k)] = v;
+          }
+          this.data = migrated;
         } catch {
           this.data = {};
         }
@@ -60,15 +68,16 @@ class VocabDeck {
     this.emit();
   }
 
-  boxOf(word: string): number {
-    return this.data[word]?.box ?? 0;
+  boxOf(course: string, word: string): number {
+    return this.data[vkey(course, word)]?.box ?? 0;
   }
 
   /** Grade a card: known advances a box, unknown resets to 0. */
-  async review(word: string, known: boolean): Promise<void> {
-    const cur = this.data[word]?.box ?? 0;
+  async review(course: string, word: string, known: boolean): Promise<void> {
+    const k = vkey(course, word);
+    const cur = this.data[k]?.box ?? 0;
     const box = known ? Math.min(MAX_BOX, cur + 1) : 0;
-    this.data = { ...this.data, [word]: { box, last: Date.now() } };
+    this.data = { ...this.data, [k]: { box, last: Date.now() } };
     await this.persist();
   }
 }
@@ -88,12 +97,11 @@ export interface DeckStats {
   due: number; // due right now (incl. brand-new)
 }
 
-export function deckStats(deckId: string, data: Data): DeckStats {
-  const words = deckWords(deckId);
+export function deckStats(words: VocabWord[], course: string, data: Data): DeckStats {
   const now = Date.now();
   let mastered = 0, learning = 0, due = 0;
   for (const e of words) {
-    const p = data[e.w];
+    const p = data[vkey(course, e.w)];
     if (p && p.box >= MAX_BOX) mastered++;
     else if (p) learning++;
     if (isDue(p, now)) due++;
@@ -101,11 +109,15 @@ export function deckStats(deckId: string, data: Data): DeckStats {
   return { total: words.length, mastered, learning, due };
 }
 
+export function masteredCount(words: VocabWord[], course: string, data: Data): number {
+  return words.filter((e) => (data[vkey(course, e.w)]?.box ?? 0) >= MAX_BOX).length;
+}
+
 /** Build a study session: due words first (least-known, most-frequent), capped. */
-export function buildSession(deckId: string, data: Data, limit = 20): VocabWord[] {
+export function buildSession(words: VocabWord[], course: string, data: Data, limit = 20): VocabWord[] {
   const now = Date.now();
-  const due = deckWords(deckId).filter((e) => isDue(data[e.w], now));
-  due.sort((a, b) => (data[a.w]?.box ?? 0) - (data[b.w]?.box ?? 0) || a.r - b.r);
+  const due = words.filter((e) => isDue(data[vkey(course, e.w)], now));
+  due.sort((a, b) => (data[vkey(course, a.w)]?.box ?? 0) - (data[vkey(course, b.w)]?.box ?? 0) || a.r - b.r);
   return due.slice(0, limit);
 }
 

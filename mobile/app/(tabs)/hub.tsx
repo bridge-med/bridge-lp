@@ -150,10 +150,13 @@ export default function GrowthScreen() {
       {/* quick actions */}
       <View style={styles.quick}>
         <QuickCard icon="award" label="英単語コース" tint={colors.leaf} bg={colors.leafWeak} onPress={() => router.push('/vocab')} />
-        <QuickCard icon="book-open" label="単語帳" tint={colors.gold} bg={colors.warnWeak} onPress={() => router.push('/words')} />
+        <QuickCard icon="award" label="韓国語コース" tint={c.primary} bg={c.primaryWeak} onPress={() => router.push('/vocab-ko')} />
       </View>
       <View style={styles.quick}>
+        <QuickCard icon="book-open" label="単語帳" tint={colors.gold} bg={colors.warnWeak} onPress={() => router.push('/words')} />
         <QuickCard icon="globe" label="語学で学ぶ" tint={colors.leaf} bg={colors.leafWeak} onPress={() => router.push('/lang')} />
+      </View>
+      <View style={styles.quick}>
         <QuickCard icon="gift" label="きせかえ" tint={c.primary} bg={c.primaryWeak} onPress={() => router.push('/closet')} />
       </View>
 

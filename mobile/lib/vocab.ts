@@ -10,12 +10,13 @@ import raw from '../assets/vocab.json';
 export type CEFR = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
 
 export interface VocabWord {
-  w: string; // English headword
+  w: string; // headword (English / Hangul)
   j: string; // Japanese gloss
   p: string; // part of speech (名/動/形…)
-  l: CEFR; // CEFR level
-  r: number; // frequency rank (lower = more common)
-  b?: 1; // TOEIC / business tag
+  l: string; // level (CEFR A1.. for EN; 초급/중급 for KO)
+  r: number; // order / frequency rank (lower = earlier)
+  b?: 1; // TOEIC / business tag (English)
+  rom?: string; // romanization (Korean)
 }
 
 export const VOCAB = raw as VocabWord[];
