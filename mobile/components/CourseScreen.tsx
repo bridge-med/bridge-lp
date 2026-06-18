@@ -1,12 +1,12 @@
 import { Feather } from '@expo/vector-icons';
-import * as Speech from 'expo-speech';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BlockHeader } from './BlockHeader';
 import { useColors } from './ThemeProvider';
 import { Button } from './ui';
 import { deckWordsFor, type Course } from '../lib/courses';
 import { progress } from '../lib/progress';
+import { hasVoiceFor, speak as ttsSpeak } from '../lib/speech';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 import type { VocabWord } from '../lib/vocab';
 import { buildSession, deckStats, masteredCount, MAX_BOX, useVocabDeck, vocabDeck } from '../lib/vocabdeck';
@@ -17,16 +17,13 @@ export function CourseScreen({ course }: { course: Course }) {
   const c = useColors();
   const data = useVocabDeck();
   const [deckId, setDeckId] = useState<string | null>(null);
+  const [voiceOk, setVoiceOk] = useState(true);
 
-  function speak(word: string) {
-    if (!word) return;
-    try {
-      Speech.stop();
-      Speech.speak(word, { language: course.tts, rate: 0.9 });
-    } catch {
-      // TTS unavailable on this platform — ignore.
-    }
-  }
+  useEffect(() => {
+    void hasVoiceFor(course.tts).then(setVoiceOk);
+  }, [course.tts]);
+
+  const speak = (word: string) => ttsSpeak(word, course.tts);
 
   const totalMastered = useMemo(() => masteredCount(course.words, course.id, data), [course, data]);
 
@@ -49,6 +46,11 @@ export function CourseScreen({ course }: { course: Course }) {
           </View>
 
           <Text style={type.muted}>{course.intro}</Text>
+          {!voiceOk ? (
+            <Text style={[type.muted, { fontSize: 11 }]}>
+              ※ この端末に{course.id === 'ko' ? '韓国語' : '英語'}の音声が見つかりません。実機（iOS/Android）や音声を追加すると🔊がきれいに鳴ります。
+            </Text>
+          ) : null}
 
           {course.decks.map((d) => {
             const words = deckWordsFor(course, d.id);

@@ -1,24 +1,18 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import * as Speech from 'expo-speech';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BlockHeader } from '../components/BlockHeader';
 import { useColors } from '../components/ThemeProvider';
 import { Button, EmptyState } from '../components/ui';
 import { DICT, dictTranslation } from '../lib/dict';
+import { speak as ttsSpeak } from '../lib/speech';
 import { MAX_BOX, studyDeck, useWordbank, wordbank, wordOfTheDay, type SavedWord } from '../lib/wordbank';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 import type { LangCode } from '../lib/types';
 
 function speak(text: string, lang: LangCode) {
-  if (!text) return;
-  try {
-    Speech.stop();
-    Speech.speak(text, { language: lang === 'ko' ? 'ko-KR' : 'en-US', rate: 0.9 });
-  } catch {
-    // TTS unavailable on this platform — ignore.
-  }
+  ttsSpeak(text, lang === 'ko' ? 'ko-KR' : 'en-US');
 }
 
 function SpeakBtn({ text, lang, c }: { text: string; lang: LangCode; c: ReturnType<typeof useColors> }) {
