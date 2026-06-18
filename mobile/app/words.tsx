@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BlockHeader } from '../components/BlockHeader';
@@ -9,6 +10,24 @@ import { DICT, dictTranslation } from '../lib/dict';
 import { MAX_BOX, studyDeck, useWordbank, wordbank, wordOfTheDay, type SavedWord } from '../lib/wordbank';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 import type { LangCode } from '../lib/types';
+
+function speak(text: string, lang: LangCode) {
+  if (!text) return;
+  try {
+    Speech.stop();
+    Speech.speak(text, { language: lang === 'ko' ? 'ko-KR' : 'en-US', rate: 0.9 });
+  } catch {
+    // TTS unavailable on this platform — ignore.
+  }
+}
+
+function SpeakBtn({ text, lang, c }: { text: string; lang: LangCode; c: ReturnType<typeof useColors> }) {
+  return (
+    <Pressable onPress={() => speak(text, lang)} hitSlop={8} style={[styles.speak, { backgroundColor: c.primaryWeak }]}>
+      <Feather name="volume-2" size={16} color={c.primary} />
+    </Pressable>
+  );
+}
 
 export default function WordsScreen() {
   const c = useColors();
@@ -58,6 +77,7 @@ export default function WordsScreen() {
                 {tr(wotd).reading ? <Text style={type.muted}>　{tr(wotd).reading}</Text> : null}
               </Text>
             </View>
+            <SpeakBtn text={tr(wotd).translation} lang={lang} c={c} />
             <Pressable
               onPress={() => void wordbank.add(wotd)}
               disabled={wotdSaved}
@@ -90,6 +110,7 @@ export default function WordsScreen() {
                     {tr(w.term).reading ? `　${tr(w.term).reading}` : ''}
                   </Text>
                 </View>
+                <SpeakBtn text={tr(w.term).translation} lang={lang} c={c} />
                 <Boxes box={w.box} c={c} />
                 <Pressable onPress={() => void wordbank.remove(w.term)} hitSlop={8} style={{ marginLeft: spacing.sm }}>
                   <Feather name="x" size={16} color={colors.line2} />
@@ -166,6 +187,7 @@ function FlashcardModal({ visible, lang, onClose }: { visible: boolean; lang: La
                   <>
                     <Text style={[styles.flashAnswer, { color: c.primary }]}>{tr!.translation}</Text>
                     {tr!.reading ? <Text style={type.body}>{tr!.reading}</Text> : null}
+                    <SpeakBtn text={tr!.translation} lang={lang} c={c} />
                     <Text style={[type.muted, { marginTop: spacing.sm }]}>{card.term}</Text>
                   </>
                 )}
@@ -204,6 +226,7 @@ const styles = StyleSheet.create({
   langChip: { paddingHorizontal: 12, height: 30, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2 },
   langText: { fontFamily: fonts.gothicBold, fontSize: 11, letterSpacing: 1 },
   courseLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderRadius: radius.lg, padding: spacing.md },
+  speak: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   wotd: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderRadius: radius.lg, padding: spacing.md },
   wotdTerm: { fontFamily: fonts.maru, fontSize: 22, color: colors.text, marginVertical: 2 },
   wotdBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
