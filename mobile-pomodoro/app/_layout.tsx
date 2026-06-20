@@ -34,6 +34,7 @@ function Navigator() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="immerse" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }} />
       </Stack>
     </>
   );

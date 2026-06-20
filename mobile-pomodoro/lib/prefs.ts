@@ -19,6 +19,7 @@ export interface Prefs {
   soundEnabled: boolean;
   soundName: SoundName;
   vibrationEnabled: boolean;
+  immerseOnStart: boolean; // jump to the full-screen calm view when starting
   // appearance
   theme: ThemeMode;
   // the work item currently selected on the Focus screen (remembered)
@@ -36,6 +37,7 @@ const DEFAULT: Prefs = {
   soundEnabled: true,
   soundName: 'bell',
   vibrationEnabled: true,
+  immerseOnStart: false,
   theme: 'system',
   currentWorkItemId: null,
   seeded: false,
