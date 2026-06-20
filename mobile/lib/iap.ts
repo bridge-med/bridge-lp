@@ -22,3 +22,7 @@ export async function purchasePack(_productId: string): Promise<boolean> {
 export async function restorePurchases(): Promise<void> {
   // no-op on web / preview
 }
+
+export async function getOfferingPrices(): Promise<Record<string, string>> {
+  return {};
+}

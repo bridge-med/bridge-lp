@@ -1,15 +1,21 @@
 import { Feather } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BlockHeader } from '../components/BlockHeader';
 import { useColors } from '../components/ThemeProvider';
 import { Button, Card } from '../components/ui';
 import { COIN_PACKS, GEN_COST, credits, useCoins } from '../lib/credits';
-import { iapEnabled, purchasePack, restorePurchases } from '../lib/iap';
+import { getOfferingPrices, iapEnabled, purchasePack, restorePurchases } from '../lib/iap';
 import { colors, fonts, radius, spacing, type } from '../lib/theme';
 
 export default function CoinsScreen() {
   const c = useColors();
   const coins = useCoins();
+  const [prices, setPrices] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (iapEnabled()) void getOfferingPrices().then(setPrices);
+  }, []);
 
   function buy(id: string, coinsToAdd: number, price: string) {
     if (iapEnabled()) {
@@ -56,22 +62,25 @@ export default function CoinsScreen() {
 
       <Text style={type.label}>コインを買う</Text>
       <View style={{ gap: spacing.md, marginTop: spacing.sm }}>
-        {COIN_PACKS.map((p) => (
-          <Card key={p.id} style={[styles.pack, p.best && { borderColor: c.primary, borderWidth: 1.2 }]}>
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Text style={styles.packCoins}>{p.coins}</Text>
-                <Text style={type.muted}>コイン</Text>
-                {p.best ? <Text style={[styles.badge, { color: c.primary, borderColor: c.primary }]}>おすすめ</Text> : null}
+        {COIN_PACKS.map((p) => {
+          const price = prices[p.id] ?? p.price;
+          return (
+            <Card key={p.id} style={[styles.pack, p.best && { borderColor: c.primary, borderWidth: 1.2 }]}>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text style={styles.packCoins}>{p.coins}</Text>
+                  <Text style={type.muted}>コイン</Text>
+                  {p.best ? <Text style={[styles.badge, { color: c.primary, borderColor: c.primary }]}>おすすめ</Text> : null}
+                </View>
+                <Text style={type.muted}>{p.perGen}</Text>
               </View>
-              <Text style={type.muted}>{p.perGen}</Text>
-            </View>
-            <View style={{ alignItems: 'flex-end', gap: 6 }}>
-              <Text style={styles.price}>{p.price}</Text>
-              <Button label="購入" onPress={() => buy(p.id, p.coins, p.price)} />
-            </View>
-          </Card>
-        ))}
+              <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                <Text style={styles.price}>{price}</Text>
+                <Button label="購入" onPress={() => buy(p.id, p.coins, price)} />
+              </View>
+            </Card>
+          );
+        })}
       </View>
 
       <View style={styles.note}>

@@ -51,3 +51,23 @@ export async function restorePurchases(): Promise<void> {
   configureIap();
   await Purchases.restorePurchases();
 }
+
+/** Localized store prices keyed by product id (so the UI matches what Apple/
+ *  Google actually charge). Empty on failure — caller falls back to defaults. */
+export async function getOfferingPrices(): Promise<Record<string, string>> {
+  if (!iapEnabled()) return {};
+  configureIap();
+  try {
+    const offerings = await Purchases.getOfferings();
+    const pkgs = offerings?.current?.availablePackages ?? [];
+    const out: Record<string, string> = {};
+    for (const p of pkgs as { identifier: string; product?: { identifier: string; priceString?: string } }[]) {
+      const id = p.product?.identifier ?? p.identifier;
+      const price = p.product?.priceString;
+      if (id && price) out[id] = price;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
