@@ -45,6 +45,19 @@
   }
   function categoryIcon(cat) { return Store.CATEGORY_ICONS[cat] || '🎁'; }
 
+  /** http/https のみ許可してURLを正規化（javascript: 等を弾く） */
+  function safeUrl(u) {
+    if (!u) return '';
+    try {
+      var p = new URL(String(u).trim());
+      return (p.protocol === 'http:' || p.protocol === 'https:') ? p.href : '';
+    } catch (e) { return ''; }
+  }
+  /** 表示用にドメインだけ取り出す */
+  function urlHost(u) {
+    try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; }
+  }
+
   /** サムネイル：写真があれば画像、なければカテゴリー絵文字 */
   function thumb(d, cls) {
     var inner = d.image ? '<img src="' + d.image + '" alt="">' : categoryIcon(d.category);
@@ -297,6 +310,9 @@
           return '<button type="button" data-period="' + p.key + '" class="' + (draft.coolingPeriod === p.key ? 'active' : '') + '">' + p.label + '</button>';
         }).join('') + '</div></div>' +
 
+      '<div class="field"><label for="f-url">商品ページのURL（任意）</label>' +
+        '<input id="f-url" class="input" type="url" inputmode="url" autocapitalize="off" placeholder="https://… 貼っておくと後で開けます" value="' + esc(draft.url) + '"></div>' +
+
       '<div class="field"><label for="f-memo">メモ（任意）</label>' +
         '<textarea id="f-memo" class="textarea" placeholder="どこで見つけた？なぜ気になった？">' + esc(draft.memo) + '</textarea></div>' +
 
@@ -307,6 +323,7 @@
     wrap.querySelector('#f-name').addEventListener('input', function (e) { draft.name = e.target.value; });
     wrap.querySelector('#f-price').addEventListener('input', function (e) { draft.price = e.target.value; });
     wrap.querySelector('#f-memo').addEventListener('input', function (e) { draft.memo = e.target.value; });
+    wrap.querySelector('#f-url').addEventListener('input', function (e) { draft.url = e.target.value; });
     segHandler(wrap.querySelector('#seg-cat'), 'cat', function (v) { draft.category = v; });
     segHandler(wrap.querySelector('#seg-reason'), 'reason', function (v) { draft.reason = v; });
     segHandler(wrap.querySelector('#seg-period'), 'period', function (v) { draft.coolingPeriod = v; });
@@ -393,7 +410,10 @@
         kv('判断予定日', fmtDateTime(d.reviewAt)) +
         kv(decided ? '状態' : '残り', decided ? STATUS_LABEL[d.status] + (d.raw.decidedAt ? '（' + fmtDate(d.raw.decidedAt) + '）' : '') : remainingText(d.remainingMs)) +
         (d.memo ? kv('メモ', esc(d.memo)) : '') +
-      '</div>';
+      '</div>' +
+      (safeUrl(d.url)
+        ? '<a class="btn btn-ghost" style="margin-top:14px" href="' + esc(safeUrl(d.url)) + '" target="_blank" rel="noopener noreferrer">🔗 商品ページを開く（' + esc(urlHost(safeUrl(d.url))) + '）</a>'
+        : '');
 
     if (!decided) {
       wrap.innerHTML +=
