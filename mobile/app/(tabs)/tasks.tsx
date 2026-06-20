@@ -9,7 +9,7 @@ import { SwipeRow } from '../../components/SwipeRow';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
 import { Chip, EmptyState, Fab } from '../../components/ui';
-import { TASK_CATEGORIES, TASK_REPEATS, TASK_STATUSES, type TaskStatus } from '../../lib/constants';
+import { TASK_REPEATS, TASK_STATUSES, type TaskStatus } from '../../lib/constants';
 import { tasks } from '../../lib/data';
 import { addPeriod, dueLabel, todayKey } from '../../lib/date';
 import { tapSuccess } from '../../lib/haptics';
@@ -63,9 +63,9 @@ export default function TasksScreen() {
     }
     (Object.keys(byQ) as Quadrant[]).forEach((k) => byQ[k].sort(byDue));
     unclassified.sort(byDue);
-    const catRows = TASK_CATEGORIES
-      .filter((cc) => cat[cc.key])
-      .map((cc) => ({ key: cc.key, label: cc.label, counts: cat[cc.key], total: cat[cc.key].A + cat[cc.key].B + cat[cc.key].C + cat[cc.key].D }));
+    const catRows = Object.keys(cat)
+      .map((k) => ({ key: k, label: k, counts: cat[k], total: cat[k].A + cat[k].B + cat[k].C + cat[k].D }))
+      .sort((a, b) => b.total - a.total);
     return { byQ, unclassified, catRows, maxCell };
   }, [all]);
 

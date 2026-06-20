@@ -2,10 +2,10 @@
 // Records are flat objects with a user_id so they map ~1:1 onto Supabase tables
 // (the storage layer can be swapped from AsyncStorage to Supabase in one place).
 
-import type { CareerOutputType, TaskStatus, TaskRepeat, TaskCategory } from './constants';
+import type { CareerOutputType, TaskStatus, TaskRepeat } from './constants';
 
 export type ID = string;
-export type { TaskStatus, TaskRepeat, TaskCategory, CareerOutputType };
+export type { TaskStatus, TaskRepeat, CareerOutputType };
 
 export interface BaseRecord {
   id: ID;
@@ -54,7 +54,7 @@ export interface Task extends BaseRecord {
   repeat?: TaskRepeat; // undefined treated as 'none' (back-compat)
   importance?: 'high' | 'low'; // 重要度 (Eisenhower matrix axis)
   urgency?: 'high' | 'low'; // 緊急度 (Eisenhower matrix axis)
-  category?: TaskCategory; // 分類 (work kind)
+  category?: string; // 分類 (free text; user-defined)
 }
 
 export type ReflectionPeriod = 'week' | 'month';

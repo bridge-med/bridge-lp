@@ -185,13 +185,15 @@ export default function TimelineScreen() {
       </ScrollView>
 
       <View style={{ position: 'absolute', right: 0, bottom: insets.bottom }}>
-        <Fab
-          icon="edit-3"
-          onPress={() => {
-            setEditMemo(null);
-            setMemoOpen(true);
-          }}
-        />
+        {items.length > 0 ? (
+          <Fab
+            icon="edit-3"
+            onPress={() => {
+              setEditMemo(null);
+              setMemoOpen(true);
+            }}
+          />
+        ) : null}
       </View>
 
       <QuickMemoSheet visible={memoOpen} memo={editMemo} onClose={() => setMemoOpen(false)} />

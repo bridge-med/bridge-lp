@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
-import { TASK_CATEGORIES, TASK_REPEATS, TASK_STATUSES, type TaskCategory, type TaskRepeat, type TaskStatus } from '../lib/constants';
+import { TASK_REPEATS, TASK_STATUSES, type TaskRepeat, type TaskStatus } from '../lib/constants';
 import { tasks } from '../lib/data';
 import { todayKey } from '../lib/date';
+import { prefs, usePrefs } from '../lib/prefs';
 import { wordbank } from '../lib/wordbank';
 import { spacing, type } from '../lib/theme';
 import type { Task } from '../lib/types';
@@ -26,9 +27,19 @@ export function TaskSheet({
   const [repeat, setRepeat] = useState<TaskRepeat>('none');
   const [importance, setImportance] = useState<'high' | 'low' | undefined>(undefined);
   const [urgency, setUrgency] = useState<'high' | 'low' | undefined>(undefined);
-  const [category, setCategory] = useState<TaskCategory | undefined>(undefined);
+  const [category, setCategory] = useState<string | undefined>(undefined);
+  const [catDraft, setCatDraft] = useState('');
   const [memo, setMemo] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
+  const { taskCategories } = usePrefs();
+
+  function addCategory() {
+    const t = catDraft.trim().slice(0, 12);
+    if (!t) return;
+    if (!taskCategories.includes(t)) void prefs.set({ taskCategories: [...taskCategories, t] });
+    setCategory(t);
+    setCatDraft('');
+  }
 
   const key = (visible ? 'open' : 'closed') + ':' + (task?.id ?? 'new');
   if (key !== seed && visible) {
@@ -102,17 +113,23 @@ export function TaskSheet({
       </View>
 
       <View style={{ gap: spacing.xs }}>
-        <Text style={type.label}>分類</Text>
+        <Text style={type.label}>分類（自由に追加できます）</Text>
         <View style={styles.row}>
-          {TASK_CATEGORIES.map((cat) => (
+          {taskCategories.map((cat) => (
             <Chip
-              key={cat.key}
-              label={cat.label}
+              key={cat}
+              label={cat}
               tone="accent"
-              active={category === cat.key}
-              onPress={() => setCategory(category === cat.key ? undefined : cat.key)}
+              active={category === cat}
+              onPress={() => setCategory(category === cat ? undefined : cat)}
             />
           ))}
+        </View>
+        <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
+          <View style={{ flex: 1 }}>
+            <Field placeholder="分類を追加（例：委員会）" value={catDraft} onChangeText={setCatDraft} onSubmitEditing={addCategory} autoCapitalize="none" />
+          </View>
+          <Button label="追加" variant="ghost" onPress={addCategory} disabled={!catDraft.trim()} />
         </View>
       </View>
 

@@ -4,6 +4,7 @@
 
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DEFAULT_TASK_CATEGORIES } from './constants';
 import type { AccentKey } from './theme';
 
 const KEY = 'bridge-daily:prefs';
@@ -19,6 +20,8 @@ export interface Prefs {
   workStyleResult: string;
   // Companion
   buddyName: string;
+  // Task categories (user-editable)
+  taskCategories: string[];
   // Daily reminder notification
   reminderEnabled: boolean;
   reminderHour: number;
@@ -34,6 +37,7 @@ const DEFAULT: Prefs = {
   purpose: '',
   workStyleResult: '',
   buddyName: '',
+  taskCategories: DEFAULT_TASK_CATEGORIES,
   reminderEnabled: false,
   reminderHour: 21,
   reminderMinute: 0,
