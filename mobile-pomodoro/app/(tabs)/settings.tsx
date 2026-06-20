@@ -37,6 +37,15 @@ export default function SettingsScreen() {
           <Stepper label="Long break every" value={p.longEvery} min={2} max={8} step={1} unit="本" onChange={(v) => prefs.set({ longEvery: v })} last />
         </Section>
 
+        <Section label="Focus">
+          <Toggle
+            label="STARTで没入モードに入る"
+            value={p.immerseOnStart}
+            onChange={(v) => prefs.set({ immerseOnStart: v })}
+            last
+          />
+        </Section>
+
         <Section label="Notification">
           <Toggle label="Sound" value={p.soundEnabled} onChange={(v) => prefs.set({ soundEnabled: v })} />
           {p.soundEnabled

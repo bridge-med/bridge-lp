@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -77,6 +78,16 @@ export default function FocusScreen() {
         <Text style={[styles.date, { color: c.muted }]}>{formatDateJa(todayKey())}</Text>
         <Text style={[styles.heading, { color: c.text }]}>Today Focus</Text>
       </View>
+      <Pressable
+        onPress={() => {
+          tapLight();
+          router.push('/immerse');
+        }}
+        hitSlop={10}
+        style={styles.immerseBtn}
+      >
+        <Feather name="maximize" size={20} color={c.muted} />
+      </Pressable>
 
       {/* mode segment */}
       <View style={[styles.modes, { backgroundColor: c.surface2 }]}>
@@ -157,7 +168,9 @@ export default function FocusScreen() {
           disabled={!!t.pending}
           onPress={() => {
             tapLight();
+            const wasRunning = t.running;
             timer.toggle();
+            if (!wasRunning && p.immerseOnStart) router.push('/immerse');
           }}
           style={({ pressed }) => [
             styles.start,
@@ -356,6 +369,7 @@ function CompletionSheet({
 const styles = StyleSheet.create({
   safe: { flex: 1, alignItems: 'center', paddingHorizontal: spacing.lg },
   header: { alignItems: 'center', paddingTop: spacing.sm, gap: 2 },
+  immerseBtn: { position: 'absolute', top: spacing.sm, right: 2, width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   date: { fontFamily: fonts.gothicMed, fontSize: 12, letterSpacing: 0.5 },
   heading: { fontFamily: fonts.maru, fontSize: 20, letterSpacing: 0.5 },
   modes: { flexDirection: 'row', borderRadius: radius.pill, padding: 4, marginTop: spacing.md },
