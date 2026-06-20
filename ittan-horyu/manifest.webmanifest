@@ -1,0 +1,15 @@
+{
+  "name": "いったん保留",
+  "short_name": "いったん保留",
+  "description": "買う前に、少しだけ寝かせる。衝動買いをやさしくクールダウンするアプリ。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFBF5",
+  "theme_color": "#FF9A52",
+  "icons": [
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
