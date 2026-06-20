@@ -21,6 +21,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.bridgemed.focus',
+      // Uses only standard encryption → skip the export-compliance prompt each submit.
+      config: { usesNonExemptEncryption: false },
     },
     android: {
       package: 'com.bridgemed.focus',
