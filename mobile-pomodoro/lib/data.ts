@@ -50,6 +50,32 @@ function isoMinutesAgo(min: number): string {
   return new Date(Date.now() - min * 60_000).toISOString();
 }
 
+// Titles used by the very first sample set (before sample tagging existed).
+const LEGACY_SAMPLE_TITLES = ['PRP価格表作成', '求人票修正', 'メール返信', '行政WBS整理'];
+
+/**
+ * If the stored data is still an *untouched* sample set (either the legacy one,
+ * recognised by its titles, or a tagged one), wipe it and re-seed so updated
+ * sample content shows up. Real user data is never an exact sample match, so it
+ * is left alone.
+ */
+export async function refreshStaleSample(): Promise<boolean> {
+  await loadAll();
+  const items = workItems.getSnapshot();
+  const sess = focusSessions.getSnapshot();
+  if (items.length === 0) return false;
+
+  const allTagged = items.every((w) => w.sourceId === 'sample');
+  const allLegacy = items.length <= LEGACY_SAMPLE_TITLES.length && items.every((w) => LEGACY_SAMPLE_TITLES.includes(w.title));
+  const sessionsLookSample = sess.every((s) => s.status === 'completed' && s.note === '' && s.duration === 25 * 60);
+
+  if ((allTagged || allLegacy) && sessionsLookSample) {
+    await clearAll();
+    return true; // caller should re-seed
+  }
+  return false;
+}
+
 /** Insert a few work items + today's sessions if the app is empty. */
 export async function seedSampleData(): Promise<void> {
   await loadAll();
@@ -63,7 +89,8 @@ export async function seedSampleData(): Promise<void> {
   ];
   const items: WorkItem[] = [];
   for (const s of seeds) {
-    items.push(await workItems.upsert({ title: s.title, category: s.category, source: 'manual', sourceId: null }));
+    // Tag with sourceId 'sample' so it can be recognised + refreshed later.
+    items.push(await workItems.upsert({ title: s.title, category: s.category, source: 'manual', sourceId: 'sample' }));
   }
 
   // Today's history: PRP×2, 求人票×1, メール×1, 行政×1 (25min each).

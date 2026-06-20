@@ -23,8 +23,9 @@ export interface Prefs {
   theme: ThemeMode;
   // the work item currently selected on the Focus screen (remembered)
   currentWorkItemId: ID | null;
-  // first-run sample data marker
+  // first-run sample data marker + which sample version was seeded
   seeded: boolean;
+  sampleVersion: number;
 }
 
 const DEFAULT: Prefs = {
@@ -38,6 +39,7 @@ const DEFAULT: Prefs = {
   theme: 'system',
   currentWorkItemId: null,
   seeded: false,
+  sampleVersion: 0,
 };
 
 type Listener = () => void;
