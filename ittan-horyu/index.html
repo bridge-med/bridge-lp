@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>いったん保留 — 買う前に、少しだけ寝かせる。</title>
+<meta name="description" content="衝動買いを、やさしくクールダウンするアプリ。欲しいものを一旦保留して、24時間・3日・7日おいてから冷静に判断します。">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FF9A52">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="いったん保留">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="app/icon.svg">
+<link rel="icon" type="image/svg+xml" href="app/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/styles.css">
+</head>
+<body>
+<div class="phone">
+  <main id="screen" class="screen"></main>
+  <nav id="tabbar" class="tabbar" aria-label="メインナビゲーション"></nav>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="confetti" class="confetti" aria-hidden="true"></div>
+<script src="app/store.js"></script>
+<script src="app/app.js"></script>
+</body>
+</html>
