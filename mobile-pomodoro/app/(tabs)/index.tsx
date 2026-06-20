@@ -15,7 +15,7 @@ import { fonts, radius, spacing } from '../../lib/theme';
 import { mmss, timer, useTimer } from '../../lib/timer';
 import type { SessionKind, SessionStatus, WorkItem } from '../../lib/types';
 
-const RING = 280;
+const RING = 256;
 const STROKE = 12;
 const R = (RING - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
@@ -101,13 +101,27 @@ export default function FocusScreen() {
                 tapLight();
                 timer.setKind(m.key);
               }}
-              style={[styles.modeBtn, on && { backgroundColor: c.surface }]}
+              style={[styles.modeBtn, on && { backgroundColor: c.text }]}
             >
-              <Text style={[styles.modeLabel, { color: on ? c.text : c.muted }]}>{m.label}</Text>
+              <Text style={[styles.modeLabel, { color: on ? c.bg : c.muted }]}>{m.label}</Text>
             </Pressable>
           );
         })}
       </View>
+
+      {/* current work (tap to choose) */}
+      <Pressable
+        onPress={() => {
+          tapLight();
+          setPickOpen(true);
+        }}
+        style={styles.workChip}
+      >
+        <Feather name="bookmark" size={15} color={current ? c.primary : c.muted} />
+        <Text style={[styles.workChipText, { color: current ? c.text : c.muted }]} numberOfLines={1}>
+          {current ? current.title : '作業なし'}
+        </Text>
+      </Pressable>
 
       {/* dial */}
       <View style={styles.dialWrap}>
@@ -137,65 +151,60 @@ export default function FocusScreen() {
         </View>
       </View>
 
-      {/* work item */}
+      {/* choose / change work */}
       <Pressable
         onPress={() => {
           tapLight();
           setPickOpen(true);
         }}
-        style={[styles.work, { backgroundColor: c.surface, borderColor: c.line }]}
+        style={({ pressed }) => [styles.chooseBtn, { borderColor: c.line2 }, pressed && styles.pressed]}
       >
-        <Feather name="bookmark" size={16} color={current ? c.primary : c.muted} />
-        <Text style={[styles.workTitle, { color: current ? c.text : c.muted }]} numberOfLines={1}>
-          {current ? current.title : '作業を選択（任意）'}
-        </Text>
-        <Feather name="chevron-right" size={18} color={c.muted} />
+        <Feather name="bookmark" size={14} color={c.text2} />
+        <Text style={[styles.chooseLabel, { color: c.text2 }]}>この作業を選ぶ / 変更</Text>
       </Pressable>
 
-      {/* controls */}
-      <View style={styles.controls}>
+      {/* START */}
+      <Pressable
+        disabled={!!t.pending}
+        onPress={() => {
+          tapLight();
+          const wasRunning = t.running;
+          timer.toggle();
+          if (!wasRunning && p.immerseOnStart) router.push('/immerse');
+        }}
+        style={({ pressed }) => [
+          styles.start,
+          { backgroundColor: t.running ? c.text2 : c.text },
+          pressed && styles.pressed,
+          !!t.pending && { opacity: 0.4 },
+        ]}
+      >
+        <Text style={[styles.startLabel, { color: c.bg }]}>{t.running ? 'STOP' : 'START'}</Text>
+      </Pressable>
+
+      {/* secondary controls */}
+      <View style={styles.secondary}>
         <Pressable
           onPress={() => {
             tapLight();
             timer.reset();
           }}
-          style={({ pressed }) => [styles.ctl, { backgroundColor: c.surface2 }, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.secBtn, pressed && styles.pressed]}
         >
-          <Feather name="rotate-ccw" size={20} color={c.text2} />
+          <Feather name="rotate-ccw" size={15} color={c.muted} />
+          <Text style={[styles.secLabel, { color: c.muted }]}>やり直す</Text>
         </Pressable>
-
-        <Pressable
-          disabled={!!t.pending}
-          onPress={() => {
-            tapLight();
-            const wasRunning = t.running;
-            timer.toggle();
-            if (!wasRunning && p.immerseOnStart) router.push('/immerse');
-          }}
-          style={({ pressed }) => [
-            styles.start,
-            { backgroundColor: t.running ? c.text2 : c.primary },
-            pressed && styles.pressed,
-            !!t.pending && { opacity: 0.4 },
-          ]}
-        >
-          <Text style={styles.startLabel}>{t.running ? 'STOP' : 'START'}</Text>
-        </Pressable>
-
+        <View style={[styles.secDivider, { backgroundColor: c.line2 }]} />
         <Pressable
           disabled={!t.running}
           onPress={() => {
             tapLight();
             timer.skip();
           }}
-          style={({ pressed }) => [
-            styles.ctl,
-            { backgroundColor: c.surface2 },
-            pressed && styles.pressed,
-            !t.running && { opacity: 0.4 },
-          ]}
+          style={({ pressed }) => [styles.secBtn, pressed && styles.pressed, !t.running && { opacity: 0.35 }]}
         >
-          <Feather name="skip-forward" size={20} color={c.text2} />
+          <Feather name="skip-forward" size={15} color={c.muted} />
+          <Text style={[styles.secLabel, { color: c.muted }]}>スキップ</Text>
         </Pressable>
       </View>
 
@@ -380,29 +389,22 @@ const styles = StyleSheet.create({
   phase: { fontFamily: fonts.gothicBold, fontSize: 12, letterSpacing: 2 },
   time: { fontFamily: fonts.maruBlack, fontSize: 68, fontVariant: ['tabular-nums'], letterSpacing: 1 },
   round: { fontFamily: fonts.gothicMed, fontSize: 12 },
-  work: {
+  workChip: { flexDirection: 'row', alignItems: 'center', gap: 7, maxWidth: '90%', marginTop: spacing.md },
+  workChipText: { fontFamily: fonts.gothicMed, fontSize: 15, letterSpacing: 0.2 },
+  chooseBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    alignSelf: 'stretch',
-    borderWidth: StyleSheet.hairlineWidth,
+    gap: 7,
+    paddingVertical: 9,
+    paddingHorizontal: 16,
     borderRadius: radius.pill,
-    paddingVertical: 13,
-    paddingHorizontal: spacing.lg,
+    borderWidth: StyleSheet.hairlineWidth,
     marginBottom: spacing.lg,
-    shadowColor: '#16203A',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 1,
   },
-  workTitle: { flex: 1, fontFamily: fonts.gothicMed, fontSize: 15 },
-  controls: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, marginBottom: spacing.md },
-  ctl: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
+  chooseLabel: { fontFamily: fonts.gothicMed, fontSize: 12.5, letterSpacing: 0.2 },
   start: {
-    minWidth: 168,
-    height: 58,
-    paddingHorizontal: 30,
+    alignSelf: 'stretch',
+    height: 60,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
@@ -412,9 +414,13 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 5,
   },
-  startLabel: { color: '#fff', fontFamily: fonts.gothicBold, fontSize: 16, letterSpacing: 2 },
+  startLabel: { fontFamily: fonts.gothicBold, fontSize: 16, letterSpacing: 3 },
+  secondary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.lg, marginTop: spacing.md },
+  secBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 8 },
+  secLabel: { fontFamily: fonts.gothicMed, fontSize: 12.5 },
+  secDivider: { width: StyleSheet.hairlineWidth, height: 16 },
   pressed: { opacity: 0.7, transform: [{ scale: 0.97 }] },
-  today: { fontFamily: fonts.gothicMed, fontSize: 13, marginBottom: spacing.lg },
+  today: { fontFamily: fonts.gothicMed, fontSize: 13, marginTop: spacing.md, marginBottom: spacing.lg },
   // picker
   addRow: { flexDirection: 'row', gap: spacing.sm },
   input: { flex: 1, borderWidth: StyleSheet.hairlineWidth, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 12, fontFamily: fonts.gothic, fontSize: 15 },
