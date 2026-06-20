@@ -49,7 +49,7 @@ export function Onboarding({ visible }: { visible: boolean }) {
       <View style={[styles.container, { backgroundColor: c.bg, paddingTop: insets.top }]}>
         {!isSetup ? (
           <View style={styles.slide}>
-            <Text style={styles.badge}>BRIDGE WORKLOG</Text>
+            <Text style={styles.badge}>しごとログ</Text>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.lg }}>
               <View style={[styles.emojiWrap, { backgroundColor: c.primaryWeak }]}>
                 <Text style={styles.emoji}>{SLIDES[step].emoji}</Text>
