@@ -7,17 +7,21 @@ What you need to upload (sizes as of 2026; verify in the consoles).
 - [x] Android adaptive icon foreground/background — `assets/android-icon-*.png`
 - [ ] Confirm the icon has no alpha for App Store (Expo flattens on build).
 
-## Screenshots (capture from a real build or simulator)
+## Screenshots
+Draft screenshots rendered from the web build at iOS 6.7" size (1290×2796) are in
+`store/screenshots/` (focus / log / settings / immerse, light & dark). They are
+usable as-is for App Store, or as references for real device captures.
+
 iOS (App Store Connect):
-- [ ] 6.7" (1290×2796) — at least 3, up to 10
-- [ ] 6.5" (1242×2688) — optional but recommended
-- [ ] iPad 12.9" only if you keep `supportsTablet` and want iPad listing
+- [x] 6.7" (1290×2796) drafts in store/screenshots/ — at least 3, up to 10
+- [ ] (optional) recapture on a real device / simulator for final polish
 
 Android (Play Console):
-- [ ] Phone screenshots 1080×1920 (or similar 9:16) — at least 2, up to 8
+- [ ] Phone screenshots 1080×1920 (9:16) — the 6.7" drafts are slightly too tall
+      for Play's ratio limit; re-render at 1080×1920 (ask, or run scripts).
 - [ ] Feature graphic 1024×500 PNG/JPG
 
-Suggested screens to show: Focus, Immersive mode, the wrap-up sheet, Log.
+Shown: Focus, Log, Settings, Immersive mode. (Wrap-up sheet can be added.)
 
 ## Text
 - [ ] Name, subtitle/short description, full description (see listing-ja.md / listing-en.md)
