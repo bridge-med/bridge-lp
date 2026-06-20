@@ -9,6 +9,7 @@ import { progress } from '../lib/progress';
 import { wordbank } from '../lib/wordbank';
 import { spacing, type } from '../lib/theme';
 import type { QuickMemo, Task } from '../lib/types';
+import { CategoryPicker } from './CategoryPicker';
 import { Sheet } from './Sheet';
 import { TagPicker } from './TagPicker';
 import { useColors } from './ThemeProvider';
@@ -18,6 +19,7 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
   const c = useColors();
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [category, setCategory] = useState<string | undefined>(undefined);
   const [seed, setSeed] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
 
@@ -26,6 +28,7 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
     setSeed(key);
     setContent(memo?.content ?? '');
     setTags(memo?.tags ?? []);
+    setCategory(memo?.category);
   }
 
   async function runAi() {
@@ -56,6 +59,7 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
       id: memo?.id,
       content: content.trim(),
       tags,
+      category,
       convertedToLogId: memo?.convertedToLogId ?? null,
     } as Partial<QuickMemo>);
     if (!memo) void progress.recordActivity('memo');
@@ -117,6 +121,7 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
           </View>
         )}
       </Pressable>
+      <CategoryPicker value={category} onChange={setCategory} />
       <TagPicker value={tags} onChange={setTags} />
 
       {content.trim() ? (

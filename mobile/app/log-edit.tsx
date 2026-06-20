@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarModal } from '../components/DatePicker';
+import { CategoryPicker } from '../components/CategoryPicker';
 import { TagPicker } from '../components/TagPicker';
 import { useColors } from '../components/ThemeProvider';
 import { Button } from '../components/ui';
@@ -35,6 +36,7 @@ export default function LogEditScreen() {
   const [nextAction, setNextAction] = useState(existing?.nextAction ?? '');
   const [memo, setMemo] = useState(existing?.memo ?? '');
   const [tags, setTags] = useState<string[]>(existing?.tags ?? []);
+  const [category, setCategory] = useState<string | undefined>(existing?.category);
   const [calOpen, setCalOpen] = useState(false);
 
   async function save() {
@@ -53,6 +55,7 @@ export default function LogEditScreen() {
       nextAction: nextAction.trim(),
       memo: memo.trim(),
       tags,
+      category,
     } as Partial<WorkLog>);
     if (!existing) void progress.recordActivity('log', logDate);
     // Link the source memo when promoted from a quick memo.
@@ -111,6 +114,7 @@ export default function LogEditScreen() {
         <Note label="自由メモ" value={memo} onChangeText={setMemo} c={c} />
 
         <View style={styles.tagWrap}>
+          <CategoryPicker value={category} onChange={setCategory} />
           <TagPicker value={tags} onChange={setTags} />
         </View>
 

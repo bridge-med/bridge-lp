@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import { BlockHeader } from '../../components/BlockHeader';
+import { CategoryEditSheet } from '../../components/CategoryPicker';
 import { Picker } from '../../components/Picker';
 import { Sheet } from '../../components/Sheet';
 import { ThemePicker } from '../../components/ThemePicker';
@@ -37,6 +38,7 @@ export default function SettingsScreen() {
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [catEditOpen, setCatEditOpen] = useState(false);
 
   async function toggleReminder(on: boolean) {
     if (on) {
@@ -162,6 +164,19 @@ export default function SettingsScreen() {
       </View>
 
       <View>
+        <SectionTitle>分類（色ラベル）</SectionTitle>
+        <Pressable onPress={() => setCatEditOpen(true)}>
+          <Card style={styles.linkCard}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 }}>
+              <Feather name="tag" size={18} color={c.primary} />
+              <Text style={type.body}>ラベルA〜Hの名前を編集</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={c.primary} />
+          </Card>
+        </Pressable>
+      </View>
+
+      <View>
         <SectionTitle>テーマ</SectionTitle>
         <Card>
           <ThemePicker />
@@ -206,6 +221,7 @@ export default function SettingsScreen() {
       </Sheet>
 
       <ProfileSheet visible={profileOpen} onClose={() => setProfileOpen(false)} />
+      <CategoryEditSheet visible={catEditOpen} onClose={() => setCatEditOpen(false)} />
     </ScrollView>
   );
 }

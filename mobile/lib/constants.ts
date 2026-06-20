@@ -105,19 +105,6 @@ export const TASK_REPEATS: { key: TaskRepeat; label: string }[] = [
   { key: 'monthly', label: '毎月' },
 ];
 
-// Task categories (work "kinds") — used for the category × quadrant breakdown.
-// Users can add their own; these are just the starting suggestions.
-export const DEFAULT_TASK_CATEGORIES: string[] = [
-  '連絡・調整',
-  '書類・記録',
-  '会議・打合せ',
-  '対応・ケア',
-  '学習・準備',
-  '改善・企画',
-  '事務',
-  'その他',
-];
-
 // AI providers — bring-your-own-key. Each calls its provider directly.
 export type AiProvider = 'gemini' | 'openai' | 'anthropic';
 

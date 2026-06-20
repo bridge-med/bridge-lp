@@ -34,6 +34,7 @@ export interface WorkLog extends BaseRecord {
   nextAction: string; // 次にやること
   memo: string; // 自由メモ
   tags: string[];
+  category?: string; // colour label slot id (A..H)
 }
 
 // quick_memos
@@ -41,6 +42,7 @@ export interface QuickMemo extends BaseRecord {
   content: string;
   tags: string[];
   convertedToLogId: ID | null; // set when promoted to a work log
+  category?: string; // colour label slot id (A..H)
 }
 
 // tasks

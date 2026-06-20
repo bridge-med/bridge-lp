@@ -9,6 +9,7 @@ import { SwipeRow } from '../../components/SwipeRow';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
 import { Chip, EmptyState, Fab } from '../../components/ui';
+import { useCategoryMap } from '../../lib/categories';
 import { TASK_REPEATS, TASK_STATUSES, type TaskStatus } from '../../lib/constants';
 import { tasks } from '../../lib/data';
 import { addPeriod, dueLabel, todayKey } from '../../lib/date';
@@ -35,6 +36,19 @@ export default function TasksScreen() {
   const [open, setOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [view, setView] = useState<'list' | 'matrix'>('list');
+  const catMap = useCategoryMap();
+
+  const usedCats = (() => {
+    const seen = new Set<string>();
+    const out: { id: string; name: string; color: string }[] = [];
+    for (const t of all) {
+      if (t.status !== 'done' && t.category && catMap[t.category] && !seen.has(t.category)) {
+        seen.add(t.category);
+        out.push(catMap[t.category]);
+      }
+    }
+    return out;
+  })();
 
   const groups = useMemo(() => {
     return ORDER.map((status) => ({
@@ -99,18 +113,14 @@ export default function TasksScreen() {
     setOpen(true);
   }
 
-  const toneColor = (tone: (typeof QUADRANTS)[number]['tone']) =>
-    tone === 'danger' ? { tint: c.danger, weak: c.dangerWeak }
-    : tone === 'primary' ? { tint: c.primary, weak: c.primaryWeak }
-    : tone === 'warn' ? { tint: c.warn, weak: c.warnWeak }
-    : { tint: c.muted, weak: c.surface2 };
-
   function CompactRow({ t }: { t: Task }) {
     const due = dueLabel(t.dueDate);
     const dueColor = due?.tone === 'overdue' ? c.danger : due?.tone === 'today' ? c.primary : c.muted;
+    const col = t.category ? catMap[t.category]?.color : null;
     return (
       <View style={styles.mrow}>
-        <Pressable onPress={() => quickComplete(t)} hitSlop={6} style={[styles.mcheck, { borderColor: c.line2 }]} />
+        <View style={[styles.mbar, { backgroundColor: col ?? colors.line2 }]} />
+        <Pressable onPress={() => quickComplete(t)} hitSlop={6} style={[styles.mcheck, { borderColor: col ?? c.line2 }]} />
         <Pressable style={{ flex: 1 }} onPress={() => edit(t)}>
           <Text style={styles.mtitle} numberOfLines={2}>{t.title}</Text>
           {t.memo ? <Text style={styles.mmemo} numberOfLines={2}>{t.memo}</Text> : null}
@@ -160,10 +170,11 @@ export default function TasksScreen() {
                     const dueTone = due?.tone === 'overdue' ? 'danger' : due?.tone === 'today' ? 'primary' : 'warn';
                     const rep = t.repeat ?? 'none';
                     const repLabel = rep !== 'none' ? TASK_REPEATS.find((r) => r.key === rep)?.label : null;
+                    const col = t.category ? catMap[t.category]?.color : null;
                     return (
                       <SwipeRow key={t.id} onDelete={() => void tasks.remove(t.id)}>
                         <View style={styles.row}>
-                          <Pressable onPress={() => quickComplete(t)} hitSlop={8} style={[styles.checkbox, { borderColor: c.line2 }, done && { backgroundColor: c.primary, borderColor: c.primary }]}>
+                          <Pressable onPress={() => quickComplete(t)} hitSlop={8} style={[styles.checkbox, { borderColor: col ?? c.line2 }, done && { backgroundColor: c.primary, borderColor: c.primary }]}>
                             {done ? <Feather name="check" size={14} color="#fff" /> : null}
                           </Pressable>
                           <Pressable style={{ flex: 1 }} onPress={() => edit(t)}>
@@ -193,22 +204,33 @@ export default function TasksScreen() {
           </View>
         ) : (
           <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
-            <Text style={[type.muted, { marginBottom: spacing.sm }]}>重要度を設定すると自動で振り分け（緊急度は期限から自動判定／手動指定も可）。</Text>
+            <Text style={[type.muted, { marginBottom: spacing.sm }]}>重要度を設定すると自動で振り分け。色は「分類」を表します。</Text>
+
+            {usedCats.length ? (
+              <View style={styles.legend}>
+                {usedCats.map((cc) => (
+                  <View key={cc.id} style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: cc.color }]} />
+                    <Text style={styles.legendTxt} numberOfLines={1}>{cc.name}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+
             <View style={styles.grid}>
               {QUADRANTS.map((q) => {
                 const items = matrix.byQ[q.key];
-                const { tint, weak } = toneColor(q.tone);
                 return (
-                  <View key={q.key} style={[styles.cell, { borderColor: tint }]}>
-                    <View style={[styles.cellHead, { backgroundColor: weak }]}>
-                      <View style={[styles.qBadge, { backgroundColor: tint }]}>
+                  <View key={q.key} style={styles.cell}>
+                    <View style={styles.cellHead}>
+                      <View style={styles.qBadge}>
                         <Text style={styles.qLetter}>{q.key}</Text>
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={[styles.qLabel, { color: tint }]}>{q.label}</Text>
+                        <Text style={styles.qLabel}>{q.label}</Text>
                         <Text style={[type.muted, { fontSize: 10 }]}>{q.sub}</Text>
                       </View>
-                      <Text style={[styles.qCount, { color: tint }]}>{items.length}</Text>
+                      <Text style={styles.qCount}>{items.length}</Text>
                     </View>
                     <View style={styles.cellBody}>
                       {items.length ? items.map((t) => <CompactRow key={t.id} t={t} />) : <Text style={styles.cellEmpty}>なし</Text>}
@@ -217,45 +239,6 @@ export default function TasksScreen() {
                 );
               })}
             </View>
-
-            {matrix.catRows.length ? (
-              <View style={{ marginTop: spacing.lg }}>
-                <Text style={styles.sectionHead}>分類 × 緊急・重要のかたより</Text>
-                <Text style={[type.muted, { fontSize: 11, marginBottom: spacing.sm }]}>
-                  分類ごとに、どの象限(A〜D)に多いか。色が濃いほど多い。
-                </Text>
-                <View style={styles.heat}>
-                  <View style={styles.heatRow}>
-                    <View style={styles.heatLabel} />
-                    {QUADRANTS.map((q) => {
-                      const { tint } = toneColor(q.tone);
-                      return (
-                        <View key={q.key} style={styles.heatCell}>
-                          <Text style={[styles.heatColH, { color: tint }]}>{q.key}</Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                  {matrix.catRows.map((row) => (
-                    <View key={row.key} style={styles.heatRow}>
-                      <Text style={styles.heatLabel} numberOfLines={1}>{row.label}</Text>
-                      {QUADRANTS.map((q) => {
-                        const n = row.counts[q.key];
-                        const { tint } = toneColor(q.tone);
-                        const op = n === 0 ? 0 : 0.18 + 0.82 * (n / Math.max(1, matrix.maxCell));
-                        return (
-                          <View key={q.key} style={styles.heatCell}>
-                            <View style={[StyleSheet.absoluteFill, { margin: 2, backgroundColor: tint, opacity: op, borderRadius: 7 }]} />
-                            <Text style={[styles.heatNum, { color: n === 0 ? colors.line2 : op > 0.55 ? '#fff' : colors.text }]}>{n || ''}</Text>
-                          </View>
-                        );
-                      })}
-                    </View>
-                  ))}
-                </View>
-                <Text style={[type.muted, { fontSize: 10, marginTop: 6 }]}>A:今すぐ / B:予定に / C:人に頼む / D:やらない</Text>
-              </View>
-            ) : null}
 
             {matrix.unclassified.length ? (
               <View style={{ marginTop: spacing.lg, gap: spacing.sm }}>
@@ -305,16 +288,21 @@ const styles = StyleSheet.create({
   meta: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', marginTop: spacing.sm, flexWrap: 'wrap' },
   repeat: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   // matrix
+  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  legendDot: { width: 10, height: 10, borderRadius: 5 },
+  legendTxt: { fontFamily: fonts.gothicMed, fontSize: 11.5, color: colors.text2, maxWidth: 90 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  cell: { width: '48%', flexGrow: 1, borderWidth: StyleSheet.hairlineWidth, borderRadius: radius.md, overflow: 'hidden', minHeight: 120 },
-  cellHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.sm },
-  qBadge: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  qLetter: { fontFamily: fonts.maruBlack, fontSize: 15, color: '#fff' },
-  qLabel: { fontFamily: fonts.maru, fontSize: 13 },
-  qCount: { fontFamily: fonts.maruBlack, fontSize: 16 },
+  cell: { width: '48%', flexGrow: 1, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line2, borderRadius: radius.md, overflow: 'hidden', minHeight: 120, backgroundColor: colors.surface },
+  cellHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.sm, backgroundColor: colors.surface2 },
+  qBadge: { width: 24, height: 24, borderRadius: 7, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.text2 },
+  qLetter: { fontFamily: fonts.maruBlack, fontSize: 14, color: '#fff' },
+  qLabel: { fontFamily: fonts.maru, fontSize: 13, color: colors.text },
+  qCount: { fontFamily: fonts.maruBlack, fontSize: 16, color: colors.text },
   cellBody: { padding: spacing.sm, gap: 2 },
-  mrow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, paddingVertical: 6 },
-  mcheck: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, marginTop: 1 },
+  mrow: { flexDirection: 'row', alignItems: 'flex-start', gap: 7, paddingVertical: 6 },
+  mbar: { width: 3, alignSelf: 'stretch', borderRadius: 2, minHeight: 18 },
+  mcheck: { width: 16, height: 16, borderRadius: 8, borderWidth: 2, marginTop: 1 },
   mtitle: { fontFamily: fonts.gothicMed, fontSize: 13, color: colors.text },
   mmemo: { fontFamily: fonts.gothic, fontSize: 11, color: colors.text2, marginTop: 1, lineHeight: 15 },
   mdue: { fontFamily: fonts.gothicMed, fontSize: 10, marginTop: 2 },

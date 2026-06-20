@@ -8,6 +8,7 @@ import { Ledger } from '../../components/Ledger';
 import { QuickMemoSheet } from '../../components/QuickMemoSheet';
 import { useColors } from '../../components/ThemeProvider';
 import { Button, Chip, EmptyState, Fab } from '../../components/ui';
+import { useCategoryMap } from '../../lib/categories';
 import { quickMemos, reflections, tasks, workLogs } from '../../lib/data';
 import { parseKey } from '../../lib/date';
 import { useCollection } from '../../lib/store';
@@ -22,6 +23,7 @@ type Item = {
   dateKey: string;
   title: string;
   body: string;
+  category?: string;
   search: string; // lowercased haystack
   onPress: () => void;
 };
@@ -41,8 +43,10 @@ export default function TimelineScreen() {
   const allTasks = useCollection(tasks);
   const refs = useCollection(reflections);
   const [filter, setFilter] = useState<Kind | 'all'>('all');
+  const [catFilter, setCatFilter] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [memoOpen, setMemoOpen] = useState(false);
+  const catMap = useCategoryMap();
   const [editMemo, setEditMemo] = useState<QuickMemo | null>(null);
 
   const items = useMemo<Item[]>(() => {
@@ -55,6 +59,7 @@ export default function TimelineScreen() {
         dateKey: l.date,
         title: l.title || '無題のlog',
         body: l.did,
+        category: l.category,
         search: [l.title, l.did, l.problem, l.devised, l.decision, l.people, l.result, l.learning, l.nextAction, l.memo, l.tags.join(' ')].join(' ').toLowerCase(),
         onPress: () => router.push(`/log/${l.id}`),
       });
@@ -67,6 +72,7 @@ export default function TimelineScreen() {
         dateKey: m.createdAt.slice(0, 10),
         title: m.content.split('\n')[0].slice(0, 40) || 'メモ',
         body: '',
+        category: m.category,
         search: (m.content + ' ' + m.tags.join(' ')).toLowerCase(),
         onPress: () => {
           setEditMemo(m);
@@ -83,6 +89,7 @@ export default function TimelineScreen() {
           dateKey: t.doneAt.slice(0, 10),
           title: t.title,
           body: '',
+          category: t.category,
           search: (t.title + ' ' + t.memo).toLowerCase(),
           onPress: () => router.push('/tasks'),
         });
@@ -104,8 +111,22 @@ export default function TimelineScreen() {
   }, [logs, memos, allTasks, refs]);
 
   const q = query.trim().toLowerCase();
-  const byKind = filter === 'all' ? items : items.filter((i) => i.kind === filter);
-  const visible = q ? byKind.filter((i) => i.search.includes(q)) : byKind;
+  let visible = filter === 'all' ? items : items.filter((i) => i.kind === filter);
+  if (catFilter) visible = visible.filter((i) => i.category === catFilter);
+  if (q) visible = visible.filter((i) => i.search.includes(q));
+
+  // categories actually in use (for the filter row)
+  const usedCats = (() => {
+    const seen = new Set<string>();
+    const out: { id: string; name: string; color: string }[] = [];
+    for (const i of items) {
+      if (i.category && catMap[i.category] && !seen.has(i.category)) {
+        seen.add(i.category);
+        out.push(catMap[i.category]);
+      }
+    }
+    return out;
+  })();
 
   return (
     <View style={styles.container}>
@@ -144,6 +165,23 @@ export default function TimelineScreen() {
           ))}
         </View>
 
+        {usedCats.length ? (
+          <View style={styles.catFilters}>
+            <Pressable onPress={() => setCatFilter(null)} style={[styles.catChip, { borderColor: !catFilter ? c.primary : colors.line2 }]}>
+              <Text style={styles.catChipTxt}>すべての分類</Text>
+            </Pressable>
+            {usedCats.map((cc) => {
+              const on = catFilter === cc.id;
+              return (
+                <Pressable key={cc.id} onPress={() => setCatFilter(on ? null : cc.id)} style={[styles.catChip, { borderColor: on ? cc.color : colors.line2, backgroundColor: on ? cc.color + '22' : 'transparent' }]}>
+                  <View style={[styles.catDot, { backgroundColor: cc.color }]} />
+                  <Text style={styles.catChipTxt} numberOfLines={1}>{cc.name}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
+
         {visible.length === 0 ? (
           <Ledger>
             {q ? (
@@ -169,7 +207,10 @@ export default function TimelineScreen() {
             const tint = m.tone === 'primary' ? c.primary : m.tone === 'accent' ? c.good : m.tone === 'warn' ? c.warn : c.muted;
             return (
               <Ledger key={it.id} onPress={it.onPress} gutter={<Text style={[styles.gdate, { color: tint }]}>{`${dd.getMonth() + 1}.${dd.getDate()}`}</Text>}>
-                <Text style={[styles.kind, { color: tint }]}>{m.label}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  {it.category && catMap[it.category] ? <View style={[styles.catDot, { backgroundColor: catMap[it.category].color }]} /> : null}
+                  <Text style={[styles.kind, { color: tint }]}>{m.label}</Text>
+                </View>
                 <Text style={[type.title, { marginTop: 2 }]} numberOfLines={1}>
                   {it.title}
                 </Text>
@@ -207,6 +248,10 @@ const styles = StyleSheet.create({
   searchBar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: colors.surface, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, paddingHorizontal: spacing.md, height: 44 },
   searchInput: { flex: 1, fontFamily: fonts.gothic, fontSize: 15, color: colors.text, padding: 0 },
   filters: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
+  catFilters: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
+  catChip: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 11, paddingVertical: 5 },
+  catChipTxt: { fontFamily: fonts.gothicMed, fontSize: 12, color: colors.text2, maxWidth: 110 },
+  catDot: { width: 9, height: 9, borderRadius: 5 },
   gdate: { fontFamily: fonts.maruMed, fontSize: 16 },
   kind: { fontFamily: fonts.gothicMed, fontSize: 11, letterSpacing: 1 },
 });
