@@ -11,6 +11,7 @@ import { tapSuccess } from './haptics';
 import { nowIso } from './id';
 import { cancelAlarm, scheduleAlarm } from './notifications';
 import { durationFor, prefs } from './prefs';
+import { playSound } from './sound';
 import type { ID, SessionKind } from './types';
 
 export interface PendingCompletion {
@@ -170,7 +171,9 @@ class Timer {
   }
 
   private ringAndBuzz() {
-    if (prefs.getSnapshot().vibrationEnabled) tapSuccess();
+    const p = prefs.getSnapshot();
+    if (p.soundEnabled) playSound(p.soundName);
+    if (p.vibrationEnabled) tapSuccess();
   }
 
   private complete() {

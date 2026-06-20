@@ -56,10 +56,10 @@ export async function seedSampleData(): Promise<void> {
   if (workItems.getSnapshot().length > 0 || focusSessions.getSnapshot().length > 0) return;
 
   const seeds: { title: string; category: string }[] = [
-    { title: 'PRP価格表作成', category: '営業' },
-    { title: '求人票修正', category: '採用' },
-    { title: 'メール返信', category: '事務' },
-    { title: '行政WBS整理', category: 'PM' },
+    { title: '資料づくり', category: '仕事' },
+    { title: '読書・インプット', category: '学習' },
+    { title: 'メール対応', category: '仕事' },
+    { title: '考えごと・企画', category: '仕事' },
   ];
   const items: WorkItem[] = [];
   for (const s of seeds) {

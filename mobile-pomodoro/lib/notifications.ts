@@ -12,13 +12,15 @@ const TIMER_CHANNEL = 'timer';
 const REMINDER_CHANNEL = 'daily-reminder';
 const DAILY_ID = 'daily-reminder';
 
-// Show notifications (with sound) even when the app is foregrounded.
+// Show notifications when foregrounded, but stay silent: the app plays the
+// user's chosen chime in-app (see lib/sound), so we avoid a double sound.
+// Background completions still use the notification's own sound.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldShowBanner: true,
     shouldShowList: true,
-    shouldPlaySound: true,
+    shouldPlaySound: false,
     shouldSetBadge: false,
   }),
 });

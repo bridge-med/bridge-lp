@@ -3,6 +3,7 @@
 
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { SoundName } from './sound';
 import type { ThemeMode } from './theme';
 import type { ID } from './types';
 
@@ -16,6 +17,7 @@ export interface Prefs {
   longEvery: number; // a long break after this many focus sessions
   // behavior
   soundEnabled: boolean;
+  soundName: SoundName;
   vibrationEnabled: boolean;
   // appearance
   theme: ThemeMode;
@@ -31,6 +33,7 @@ const DEFAULT: Prefs = {
   longMinutes: 15,
   longEvery: 4,
   soundEnabled: true,
+  soundName: 'bell',
   vibrationEnabled: true,
   theme: 'system',
   currentWorkItemId: null,

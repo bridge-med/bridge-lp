@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColors } from '../../components/ThemeProvider';
 import { clearAll } from '../../lib/data';
 import { prefs, usePrefs } from '../../lib/prefs';
+import { SOUND_OPTIONS, playSound } from '../../lib/sound';
 import { fonts, radius, spacing, type as ty, type ThemeMode } from '../../lib/theme';
 
 const THEMES: { key: ThemeMode; label: string }[] = [
@@ -38,6 +39,19 @@ export default function SettingsScreen() {
 
         <Section label="Notification">
           <Toggle label="Sound" value={p.soundEnabled} onChange={(v) => prefs.set({ soundEnabled: v })} />
+          {p.soundEnabled
+            ? SOUND_OPTIONS.map((o) => (
+                <SoundRow
+                  key={o.key}
+                  label={o.label}
+                  selected={p.soundName === o.key}
+                  onPress={() => {
+                    void prefs.set({ soundName: o.key });
+                    playSound(o.key);
+                  }}
+                />
+              ))
+            : null}
           <Toggle label="Vibration" value={p.vibrationEnabled} onChange={(v) => prefs.set({ vibrationEnabled: v })} last />
         </Section>
 
@@ -121,6 +135,19 @@ function Stepper({
   );
 }
 
+function SoundRow({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  const c = useColors();
+  return (
+    <Pressable onPress={onPress} style={[styles.row, styles.soundRow, { borderBottomColor: c.line }]}>
+      <View style={styles.soundLeft}>
+        <Feather name={selected ? 'volume-2' : 'circle'} size={16} color={selected ? c.primary : c.muted} />
+        <Text style={[styles.rowLabel, { color: selected ? c.text : c.text2 }]}>{label}</Text>
+      </View>
+      {selected ? <Feather name="check" size={18} color={c.primary} /> : <Feather name="play" size={14} color={c.muted} />}
+    </Pressable>
+  );
+}
+
 function Toggle({ label, value, onChange, last }: { label: string; value: boolean; onChange: (v: boolean) => void; last?: boolean }) {
   const c = useColors();
   return (
@@ -141,6 +168,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth },
   rowLast: { borderBottomWidth: 0 },
   rowLabel: { fontFamily: fonts.gothicMed, fontSize: 14, flexShrink: 1, paddingRight: spacing.sm },
+  soundRow: { paddingLeft: spacing.md },
+  soundLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   stepper: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.pill, padding: 3, gap: 2 },
   stepBtn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   stepVal: { fontFamily: fonts.maru, fontSize: 15, minWidth: 52, textAlign: 'center' },
