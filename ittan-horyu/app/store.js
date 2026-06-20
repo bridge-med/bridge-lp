@@ -150,6 +150,8 @@
       createdAt: item.createdAt,
       reviewAt: item.reviewAt,
       memo: item.memo || '',
+      image: item.image || '',
+      url: item.url || '',
       status: effectiveStatus(item, nowMs),
       storedStatus: item.status,
       remainingMs: remaining,
@@ -242,6 +244,8 @@
       status: 'holding'
     };
     if (input.memo) item.memo = String(input.memo).trim();
+    if (input.image) item.image = input.image;          // 縮小済みデータURL（任意）
+    if (input.url) item.url = String(input.url).trim();  // 商品ページURL（任意）
     state.items.unshift(item);
     save();
     emit();
@@ -288,7 +292,8 @@
 
   // ---- 初期化 --------------------------------------------------------------
   function init() {
-    if (!load()) seed();
+    // 初回は空からスタート（サンプルは「ふりかえり」画面から任意で投入できる）
+    if (!load()) state.items = [];
   }
 
   // ---- 公開API -------------------------------------------------------------

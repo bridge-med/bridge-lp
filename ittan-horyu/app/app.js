@@ -17,7 +17,7 @@
   var listFilter = 'all';            // 保留中リストのフィルター
   var monthOffset = 0;               // 月次画面の表示月オフセット(0=今月)
   // 追加フォームの一時状態
-  var draft = { name: '', price: '', category: 'ガジェット', reason: '欲しい', coolingPeriod: '3d', memo: '' };
+  var draft = { name: '', price: '', category: 'ガジェット', reason: '欲しい', coolingPeriod: '3d', memo: '', image: '', url: '' };
 
   // =========================================================================
   // ヘルパー
@@ -44,6 +44,30 @@
     return fmtDate(iso) + ' ' + h + ':' + ('0' + d.getMinutes()).slice(-2);
   }
   function categoryIcon(cat) { return Store.CATEGORY_ICONS[cat] || '🎁'; }
+
+  /** サムネイル：写真があれば画像、なければカテゴリー絵文字 */
+  function thumb(d, cls) {
+    var inner = d.image ? '<img src="' + d.image + '" alt="">' : categoryIcon(d.category);
+    return '<div class="' + (cls || 'thumb') + '">' + inner + '</div>';
+  }
+
+  /** 画像ファイルを縮小して JPEG データURL に変換（localStorage 節約のため最大長辺900px） */
+  function readImageScaled(file, cb) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      var max = 900;
+      var scale = Math.min(1, max / Math.max(img.width, img.height));
+      var cw = Math.round(img.width * scale), ch = Math.round(img.height * scale);
+      var c = document.createElement('canvas');
+      c.width = cw; c.height = ch;
+      c.getContext('2d').drawImage(img, 0, 0, cw, ch);
+      URL.revokeObjectURL(url);
+      try { cb(c.toDataURL('image/jpeg', 0.72)); } catch (e) { cb(null); }
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); cb(null); };
+    img.src = url;
+  }
 
   /** 残り時間を人にやさしい文言にする（端数は切り上げ：「残3日」になるように） */
   function remainingText(ms) {
@@ -145,7 +169,7 @@
   function featureCard(d) {
     var cd = d.isReady ? 'ready' : 'holding';
     return '<button class="item feature" data-go="detail" data-id="' + d.id + '">' +
-      '<div class="thumb">' + categoryIcon(d.category) + '</div>' +
+      thumb(d, 'thumb') +
       '<div class="body"><div class="name">' + esc(d.name) + '</div>' +
         '<div class="meta"><span>' + esc(d.category) + '</span><span>追加 ' + fmtDate(d.createdAt) + '</span></div>' +
         '<div class="meta"><span class="countdown ' + cd + '">' + remainingText(d.remainingMs) + '</span>' + statusBadge(d) + '</div>' +
@@ -165,7 +189,7 @@
       ? '<div class="countdown ' + cd + '" style="font-size:12px">' + remainingText(d.remainingMs) + '</div>'
       : statusBadge(d);
     return '<button class="item" data-go="detail" data-id="' + d.id + '">' +
-      '<div class="thumb">' + categoryIcon(d.category) + '</div>' +
+      thumb(d, 'thumb') +
       '<div class="body"><div class="name">' + esc(d.name) + '</div>' +
         '<div class="meta"><span>' + esc(d.category) + '</span><span>' + fmtDate(d.createdAt) + '追加</span></div></div>' +
       '<div class="right"><div class="price">¥' + yen(d.price) + '</div>' + right + '</div>' +
@@ -223,7 +247,7 @@
   function listRow(d) {
     var cd = d.isReady ? 'ready' : 'holding';
     return el('<button class="item" data-go="detail" data-id="' + d.id + '">' +
-      '<div class="thumb">' + categoryIcon(d.category) + '</div>' +
+      thumb(d, 'thumb') +
       '<div class="body"><div class="name">' + esc(d.name) + '</div>' +
         '<div class="meta"><span>' + esc(d.category) + '</span><span>' + Store.periodLabel(d.coolingPeriod) + 'コース</span></div>' +
         '<div class="meta"><span>追加 ' + fmtDate(d.createdAt) + '</span><span>判断日 ' + fmtDate(d.reviewAt) + '</span></div>' +
@@ -248,6 +272,14 @@
 
       '<div class="field"><label for="f-price">価格</label>' +
         '<div class="price-input"><input id="f-price" class="input" type="number" inputmode="numeric" placeholder="0" value="' + esc(draft.price) + '" min="0"></div></div>' +
+
+      '<div class="field"><label>写真・スクショ（任意）</label>' +
+        '<div class="photo-add">' +
+          '<div class="preview" id="photo-preview">' + (draft.image ? '<img src="' + draft.image + '" alt="">' : '🖼️') + '</div>' +
+          '<button type="button" class="btn-photo" id="photo-btn">' + (draft.image ? '写真を変える' : '📷 写真を選ぶ / 撮る') + '</button>' +
+          (draft.image ? '<button type="button" class="btn-clear" id="photo-clear">削除</button>' : '') +
+          '<input type="file" id="photo-input" accept="image/*" hidden>' +
+        '</div></div>' +
 
       '<div class="field"><label>カテゴリー</label><div class="seg" id="seg-cat">' +
         Store.CATEGORIES.map(function (c) {
@@ -279,13 +311,28 @@
     segHandler(wrap.querySelector('#seg-reason'), 'reason', function (v) { draft.reason = v; });
     segHandler(wrap.querySelector('#seg-period'), 'period', function (v) { draft.coolingPeriod = v; });
 
+    // 写真添付：選択した画像を縮小してdraftに保持し、プレビュー＆フォームを更新
+    var photoInput = wrap.querySelector('#photo-input');
+    wrap.querySelector('#photo-btn').addEventListener('click', function () { photoInput.click(); });
+    photoInput.addEventListener('change', function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      readImageScaled(file, function (dataUrl) {
+        if (!dataUrl) { toast('画像を読み込めませんでした'); return; }
+        draft.image = dataUrl;
+        render(); // フォームを再描画（入力中の値はdraftに保持済み）
+      });
+    });
+    var photoClear = wrap.querySelector('#photo-clear');
+    if (photoClear) photoClear.addEventListener('click', function () { draft.image = ''; render(); });
+
     wrap.querySelector('#submit-add').addEventListener('click', function () {
       var name = (draft.name || '').trim();
       var price = Number(draft.price);
       if (!name) { toast('アイテム名を入れてね'); wrap.querySelector('#f-name').focus(); return; }
       if (!(price > 0)) { toast('価格を入れてね'); wrap.querySelector('#f-price').focus(); return; }
       Store.addItem(draft);
-      draft = { name: '', price: '', category: 'ガジェット', reason: '欲しい', coolingPeriod: '3d', memo: '' };
+      draft = { name: '', price: '', category: 'ガジェット', reason: '欲しい', coolingPeriod: '3d', memo: '', image: '', url: '' };
       toast('保留しました。' + (price ? 'ひとまず¥' + yen(price) + 'は寝かせ中。' : ''));
       navigate('list');
     });
@@ -334,7 +381,7 @@
     wrap.innerHTML =
       '<div class="detail-top"><button class="back" data-back="1">‹ もどる</button></div>' +
       '<div class="detail-hero">' +
-        '<div class="thumb-lg">' + categoryIcon(d.category) + '</div>' +
+        thumb(d, 'thumb-lg') +
         '<div class="name">' + esc(d.name) + '</div>' +
         '<div class="price">¥' + yen(d.price) + '</div>' +
         '<div class="sub">' + statusBadge(d) + '　' + esc(d.category) + '・' + esc(d.reason) + '</div>' +
@@ -453,7 +500,7 @@
       '<div class="card">' +
         '<div class="btn-row">' +
           '<button class="btn btn-ghost" id="data-clear">🧹 全部消して空にする</button>' +
-          '<button class="btn btn-ghost" id="data-reset">↩️ サンプルに戻す</button>' +
+          '<button class="btn btn-ghost" id="data-reset">🧪 サンプルを入れる</button>' +
         '</div>' +
         '<p class="center faint" style="margin-top:10px;font-size:12px">この端末のデータだけが変わります。元には戻せません。</p>' +
       '</div>';
@@ -474,9 +521,9 @@
       }
     });
     wrap.querySelector('#data-reset').addEventListener('click', function () {
-      if (confirm('いまのデータを消して、サンプルデータに戻します。よろしいですか？')) {
+      if (confirm('お試し用のサンプルデータを入れます（いまのデータは置き換わります）。よろしいですか？')) {
         Store.resetAll();
-        toast('サンプルに戻したよ。');
+        toast('サンプルを入れたよ。');
         render();
       }
     });
