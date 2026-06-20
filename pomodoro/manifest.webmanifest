@@ -1,0 +1,16 @@
+{
+  "name": "Pomodoro — BRIDGE",
+  "short_name": "Pomodoro",
+  "description": "ログイン不要・オフライン動作のシンプルなポモドーロタイマー。集中と休憩のリズムをつくる。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAFAF7",
+  "theme_color": "#C8553D",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

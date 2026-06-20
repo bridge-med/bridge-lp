@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#FAFAF7"/>
+  <circle cx="256" cy="268" r="150" fill="none" stroke="rgba(10,10,15,0.08)" stroke-width="22"/>
+  <circle cx="256" cy="268" r="150" fill="none" stroke="#C8553D" stroke-width="22" stroke-linecap="round"
+          stroke-dasharray="942" stroke-dashoffset="300" transform="rotate(-90 256 268)"/>
+  <path d="M222 96 q34 -30 68 0" fill="none" stroke="#6B7A4F" stroke-width="20" stroke-linecap="round"/>
+  <rect x="236" y="74" width="40" height="34" rx="10" fill="#6B7A4F"/>
+  <text x="256" y="300" font-family="Fraunces, Georgia, serif" font-size="118" font-weight="900" font-style="italic"
+        text-anchor="middle" fill="#0A0A0F">P</text>
+</svg>
