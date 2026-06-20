@@ -268,6 +268,13 @@
     emit();
   }
 
+  // すべてのアイテムを削除して空にする（サンプルを一掃したいとき用）
+  function clearAll() {
+    state.items = [];
+    save();
+    emit();
+  }
+
   // ---- 購読 ----------------------------------------------------------------
   function subscribe(fn) {
     listeners.push(fn);
@@ -297,6 +304,7 @@
     decide: decide,
     removeItem: removeItem,
     resetAll: resetAll,
+    clearAll: clearAll,
     monthlySummary: monthlySummary,
     totalSaved: totalSaved,
     periodLabel: periodLabel,
