@@ -3,7 +3,7 @@
 このリポジトリの `mobile/` を「型（テンプレート）」として、**同じ作り方でスマホアプリを量産する**ための手順書。
 Claude Code（web/CLI）はこの `mobile/` をクローンした状態で読み、各セクションに沿って進められる。
 
-> 関連ドキュメント：`README.md`(全体像) / `DEPLOY.md`(配信) / `RELEASE-RUNBOOK.md`(提出手順) / `AGENTS.md`(AIへの指示)
+> 関連ドキュメント：`README.md`(全体像) / `DEPLOY.md`(配信) / `RELEASE-RUNBOOK.md`(提出手順) / `WEB-PREVIEW.md`(Web公開) / `AGENTS.md`(AIへの指示)
 
 ---
 
@@ -80,10 +80,10 @@ npm install --legacy-peer-deps
 npm run typecheck                 # tsc --noEmit（必ず通す）
 npx expo export --platform web --output-dir /tmp/webexport   # web書き出しが通るか
 ```
-**プレビュー公開**（GitHub Pages, `baseUrl`は`app.config.ts`の`experiments.baseUrl`）：
-`master` の `daily-app/` に `webexport` を入れて push（`+not-found.html`→`404.html`もコピー）。
-→ `https://<owner>.github.io/<repo>/daily-app/` で実機前に確認。
-- フォント等の`assets/node_modules`は`-f`で**強制add**（.gitignore対策）。
+**プレビュー公開** → 詳細は `WEB-PREVIEW.md`。量産は**GitHub Actions自動公開（方式A）**が推奨：
+`.github-templates/deploy-web.yml` をリポジトリroot `.github/workflows/` にコピー → `app.config.ts`
+の `experiments.baseUrl='/<repo>'` → Settings→Pages→Source=GitHub Actions → push で
+`https://<owner>.github.io/<repo>/` に自動公開（フォント問題もCIビルドで自動解決）。
 
 ---
 
