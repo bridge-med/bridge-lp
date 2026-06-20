@@ -9,9 +9,12 @@ import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { ThemeProvider, useColors, useIsDark } from '../components/ThemeProvider';
-import { seedSampleData } from '../lib/data';
+import { refreshStaleSample, seedSampleData } from '../lib/data';
 import { prefs } from '../lib/prefs';
 import { colors, fonts } from '../lib/theme';
+
+// Bump when the built-in sample content changes; untouched old samples refresh.
+const SAMPLE_VERSION = 2;
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -49,9 +52,15 @@ export default function RootLayout() {
   useEffect(() => {
     void (async () => {
       await prefs.load();
-      if (!prefs.getSnapshot().seeded) {
+      const p = prefs.getSnapshot();
+      if (!p.seeded) {
         await seedSampleData();
-        await prefs.set({ seeded: true });
+        await prefs.set({ seeded: true, sampleVersion: SAMPLE_VERSION });
+      } else if (p.sampleVersion < SAMPLE_VERSION) {
+        // One-time refresh of an untouched older sample set.
+        const cleared = await refreshStaleSample();
+        if (cleared) await seedSampleData();
+        await prefs.set({ sampleVersion: SAMPLE_VERSION });
       }
     })().catch((e) => console.warn('init failed', e?.message));
   }, []);
