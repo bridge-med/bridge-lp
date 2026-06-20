@@ -447,7 +447,16 @@
               '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(4, Math.round(x.v / maxCat * 100)) + '%"></div></div>' +
               '<span class="amt">¥' + yen(x.v) + '</span></div>';
           }).join('') + '</div></div>'
-        : '<div class="card center muted" style="padding:24px;font-size:13.5px">この月の見送りはまだないよ。</div>');
+        : '<div class="card center muted" style="padding:24px;font-size:13.5px">この月の見送りはまだないよ。</div>') +
+
+      '<h2 class="section">データ<span class="hint">サンプルの片付け・初期化</span></h2>' +
+      '<div class="card">' +
+        '<div class="btn-row">' +
+          '<button class="btn btn-ghost" id="data-clear">🧹 全部消して空にする</button>' +
+          '<button class="btn btn-ghost" id="data-reset">↩️ サンプルに戻す</button>' +
+        '</div>' +
+        '<p class="center faint" style="margin-top:10px;font-size:12px">この端末のデータだけが変わります。元には戻せません。</p>' +
+      '</div>';
 
     wrap.querySelectorAll('[data-month]').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -456,6 +465,20 @@
         if (monthOffset > 0) monthOffset = 0;
         render();
       });
+    });
+    wrap.querySelector('#data-clear').addEventListener('click', function () {
+      if (confirm('保留中・履歴をすべて削除して空にします。よろしいですか？')) {
+        Store.clearAll();
+        toast('まっさらにしたよ。「＋」から始めよう。');
+        navigate('home');
+      }
+    });
+    wrap.querySelector('#data-reset').addEventListener('click', function () {
+      if (confirm('いまのデータを消して、サンプルデータに戻します。よろしいですか？')) {
+        Store.resetAll();
+        toast('サンプルに戻したよ。');
+        render();
+      }
     });
     return wrap;
   }
