@@ -9,7 +9,7 @@ import { SwipeRow } from '../../components/SwipeRow';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
 import { Chip, EmptyState, Fab } from '../../components/ui';
-import { TASK_REPEATS, TASK_STATUSES, type TaskStatus } from '../../lib/constants';
+import { TASK_CATEGORIES, TASK_REPEATS, TASK_STATUSES, type TaskStatus } from '../../lib/constants';
 import { tasks } from '../../lib/data';
 import { addPeriod, dueLabel, todayKey } from '../../lib/date';
 import { tapSuccess } from '../../lib/haptics';
@@ -47,15 +47,26 @@ export default function TasksScreen() {
   const matrix = useMemo(() => {
     const byQ: Record<Quadrant, Task[]> = { A: [], B: [], C: [], D: [] };
     const unclassified: Task[] = [];
+    // category -> quadrant counts
+    const cat: Record<string, Record<Quadrant, number>> = {};
+    let maxCell = 0;
     for (const t of all) {
       if (t.status === 'done') continue;
       const q = quadrantOf(t);
       if (q) byQ[q].push(t);
       else unclassified.push(t);
+      if (t.category && q) {
+        const row = (cat[t.category] ??= { A: 0, B: 0, C: 0, D: 0 });
+        row[q] += 1;
+        if (row[q] > maxCell) maxCell = row[q];
+      }
     }
     (Object.keys(byQ) as Quadrant[]).forEach((k) => byQ[k].sort(byDue));
     unclassified.sort(byDue);
-    return { byQ, unclassified };
+    const catRows = TASK_CATEGORIES
+      .filter((cc) => cat[cc.key])
+      .map((cc) => ({ key: cc.key, label: cc.label, counts: cat[cc.key], total: cat[cc.key].A + cat[cc.key].B + cat[cc.key].C + cat[cc.key].D }));
+    return { byQ, unclassified, catRows, maxCell };
   }, [all]);
 
   function quickComplete(t: Task) {
@@ -207,6 +218,45 @@ export default function TasksScreen() {
               })}
             </View>
 
+            {matrix.catRows.length ? (
+              <View style={{ marginTop: spacing.lg }}>
+                <Text style={styles.sectionHead}>分類 × 緊急・重要のかたより</Text>
+                <Text style={[type.muted, { fontSize: 11, marginBottom: spacing.sm }]}>
+                  分類ごとに、どの象限(A〜D)に多いか。色が濃いほど多い。
+                </Text>
+                <View style={styles.heat}>
+                  <View style={styles.heatRow}>
+                    <View style={styles.heatLabel} />
+                    {QUADRANTS.map((q) => {
+                      const { tint } = toneColor(q.tone);
+                      return (
+                        <View key={q.key} style={styles.heatCell}>
+                          <Text style={[styles.heatColH, { color: tint }]}>{q.key}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                  {matrix.catRows.map((row) => (
+                    <View key={row.key} style={styles.heatRow}>
+                      <Text style={styles.heatLabel} numberOfLines={1}>{row.label}</Text>
+                      {QUADRANTS.map((q) => {
+                        const n = row.counts[q.key];
+                        const { tint } = toneColor(q.tone);
+                        const op = n === 0 ? 0 : 0.18 + 0.82 * (n / Math.max(1, matrix.maxCell));
+                        return (
+                          <View key={q.key} style={styles.heatCell}>
+                            <View style={[StyleSheet.absoluteFill, { margin: 2, backgroundColor: tint, opacity: op, borderRadius: 7 }]} />
+                            <Text style={[styles.heatNum, { color: n === 0 ? colors.line2 : op > 0.55 ? '#fff' : colors.text }]}>{n || ''}</Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  ))}
+                </View>
+                <Text style={[type.muted, { fontSize: 10, marginTop: 6 }]}>A:今すぐ / B:予定に / C:人に頼む / D:やらない</Text>
+              </View>
+            ) : null}
+
             {matrix.unclassified.length ? (
               <View style={{ marginTop: spacing.lg, gap: spacing.sm }}>
                 <Text style={styles.sectionHead}>
@@ -270,4 +320,10 @@ const styles = StyleSheet.create({
   mdue: { fontFamily: fonts.gothicMed, fontSize: 10, marginTop: 2 },
   cellEmpty: { fontFamily: fonts.gothic, fontSize: 12, color: colors.muted, paddingVertical: spacing.sm, textAlign: 'center' },
   uRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  heat: { backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, padding: spacing.sm },
+  heatRow: { flexDirection: 'row', alignItems: 'center', height: 34 },
+  heatLabel: { width: 86, fontFamily: fonts.gothicMed, fontSize: 12, color: colors.text2, paddingRight: 6 },
+  heatCell: { flex: 1, height: 30, alignItems: 'center', justifyContent: 'center' },
+  heatColH: { fontFamily: fonts.maruBlack, fontSize: 13 },
+  heatNum: { fontFamily: fonts.maruMed, fontSize: 13 },
 });

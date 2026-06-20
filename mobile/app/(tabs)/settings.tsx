@@ -119,7 +119,7 @@ export default function SettingsScreen() {
             <Text style={[type.title, { color: c.good }]}>安心して使えます</Text>
           </View>
           <Text style={[type.body, { color: colors.text2, marginTop: spacing.xs }]}>
-            アカウント不要 / 広告なし / 端末内保存。オフラインでも利用できます。AIは任意で、自分のAPIキーを使えます。
+            アカウント不要 / 広告なし / 端末内保存。オフラインでも利用できます。AIはアプリ内で完結し、面倒な設定は不要です。
           </Text>
         </Card>
       </View>

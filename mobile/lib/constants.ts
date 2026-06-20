@@ -105,6 +105,20 @@ export const TASK_REPEATS: { key: TaskRepeat; label: string }[] = [
   { key: 'monthly', label: '毎月' },
 ];
 
+// Task categories (work "kinds") — used for the category × quadrant breakdown.
+export type TaskCategory = 'renraku' | 'shorui' | 'kaigi' | 'taiou' | 'gakushu' | 'kaizen' | 'jimu' | 'other';
+
+export const TASK_CATEGORIES: { key: TaskCategory; label: string }[] = [
+  { key: 'renraku', label: '連絡・調整' },
+  { key: 'shorui', label: '書類・記録' },
+  { key: 'kaigi', label: '会議・打合せ' },
+  { key: 'taiou', label: '対応・ケア' },
+  { key: 'gakushu', label: '学習・準備' },
+  { key: 'kaizen', label: '改善・企画' },
+  { key: 'jimu', label: '事務' },
+  { key: 'other', label: 'その他' },
+];
+
 // AI providers — bring-your-own-key. Each calls its provider directly.
 export type AiProvider = 'gemini' | 'openai' | 'anthropic';
 

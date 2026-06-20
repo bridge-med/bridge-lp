@@ -32,7 +32,7 @@
 
 <h3>第三者へのデータ送信（任意機能を使う場合のみ）</h3>
 <ul>
-  <li><b>AI機能（任意・自分のAPIキー）</b>：あなたが Google Gemini / OpenAI / Anthropic のいずれかのAPIキーを登録してAI機能を使った場合に限り、対象のテキストが処理のため当該事業者へ送信されます。各社の規約が適用されます。<b>APIキーは端末の安全な保管領域（iOS Keychain / Android Keystore）に保存</b>され、開発者のサーバーには送信されません。</li>
+  <li><b>AI機能（任意）</b>：あなたがAI機能（ふりかえり・キャリア変換等の生成）を使った場合に限り、対象のテキストが処理のため、当アプリのバックエンドを経由してAI事業者へ送信されます。<b>ユーザーがAPIキーを登録・入力する必要はありません。</b>送信は生成を実行したときのみです。</li>
   <li><b>アプリ内課金（コイン）</b>：購入は Apple App Store / Google Play を通じて処理され、課金の検証に RevenueCat を利用します。本アプリが課金情報（カード番号等）を取得・保存することはありません。</li>
   <li><b>クラウド同期（任意・将来）</b>：あなたが有効化した場合に限り、データは Supabase 上のあなたのアカウントに保存されます。</li>
 </ul>
@@ -53,7 +53,7 @@
 </ul>
 <h3>Third parties (only when you opt in)</h3>
 <ul>
-  <li><b>AI (optional, your own key):</b> If you add your own Google Gemini / OpenAI / Anthropic API key and use AI features, the relevant text is sent to that provider for processing, under their terms. <b>Your API key is stored in the device's secure store (iOS Keychain / Android Keystore)</b> and is never sent to our servers.</li>
+  <li><b>AI (optional):</b> If you use AI features, the relevant text is sent — only when you run a generation — to an AI provider via our backend for processing. <b>You do not need to provide or enter any API key.</b></li>
   <li><b>In-app purchases (coins):</b> Purchases are processed by the Apple App Store / Google Play, with validation via RevenueCat; the app never receives or stores your payment details.</li>
   <li><b>Cloud sync (optional, future):</b> If you enable it, data is stored in your Supabase account.</li>
 </ul>

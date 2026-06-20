@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
-import { TASK_REPEATS, TASK_STATUSES, type TaskRepeat, type TaskStatus } from '../lib/constants';
+import { TASK_CATEGORIES, TASK_REPEATS, TASK_STATUSES, type TaskCategory, type TaskRepeat, type TaskStatus } from '../lib/constants';
 import { tasks } from '../lib/data';
 import { todayKey } from '../lib/date';
 import { wordbank } from '../lib/wordbank';
@@ -26,6 +26,7 @@ export function TaskSheet({
   const [repeat, setRepeat] = useState<TaskRepeat>('none');
   const [importance, setImportance] = useState<'high' | 'low' | undefined>(undefined);
   const [urgency, setUrgency] = useState<'high' | 'low' | undefined>(undefined);
+  const [category, setCategory] = useState<TaskCategory | undefined>(undefined);
   const [memo, setMemo] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
 
@@ -38,6 +39,7 @@ export function TaskSheet({
     setRepeat(task?.repeat ?? 'none');
     setImportance(task?.importance);
     setUrgency(task?.urgency);
+    setCategory(task?.category);
     setMemo(task?.memo ?? '');
   }
 
@@ -51,6 +53,7 @@ export function TaskSheet({
       repeat,
       importance,
       urgency,
+      category,
       memo: memo.trim(),
       relatedLogId: task?.relatedLogId ?? defaultLogId ?? null,
       doneAt: status === 'done' ? task?.doneAt ?? new Date().toISOString() : null,
@@ -96,6 +99,21 @@ export function TaskSheet({
         {repeat !== 'none' ? (
           <Text style={type.muted}>完了すると、次の{repeat === 'daily' ? '日' : repeat === 'weekly' ? '週' : '月'}のタスクが自動で作られます。</Text>
         ) : null}
+      </View>
+
+      <View style={{ gap: spacing.xs }}>
+        <Text style={type.label}>分類</Text>
+        <View style={styles.row}>
+          {TASK_CATEGORIES.map((cat) => (
+            <Chip
+              key={cat.key}
+              label={cat.label}
+              tone="accent"
+              active={category === cat.key}
+              onPress={() => setCategory(category === cat.key ? undefined : cat.key)}
+            />
+          ))}
+        </View>
       </View>
 
       <Field label="メモ（任意）" placeholder="補足" value={memo} onChangeText={setMemo} multiline />

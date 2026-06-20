@@ -3,11 +3,11 @@
 - **No account / login required.** The app works fully offline on first launch.
 - **No sign-up to test any feature.** Just complete the short onboarding
   (profession / role / purpose — all skippable) and you reach the home screen.
-- **AI features are optional and bring-your-own-key.** They only work if the
-  user pastes their own Gemini / OpenAI / Anthropic API key in Settings → AI.
-  Without a key, reflection/career features fall back to a local mock (no
-  network). So no test credentials are needed; AI can be left untested. Keys are
-  stored in the device secure store (Keychain/Keystore), never on our servers.
+- **AI features are optional and server-side (developer-managed).** Generations
+  (reflection/career/etc.) call our own backend, which uses the developer's API
+  key server-side. Users never enter any API key. Without a backend configured
+  the features fall back to a local mock (no network), so no test credentials are
+  needed; AI can be left untested.
 - **In-app purchase:** consumable "coins" (coins_10 / coins_30 / coins_100) used
   to run AI generations. No subscription, no auto-renew. All non-AI features are
   free, and new users receive free coins, so purchases are not required to test.

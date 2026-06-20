@@ -29,7 +29,7 @@ export default function HomeScreen() {
   const coins = useCoins();
   const prog = useProgress();
   const cos = useCosmetics();
-  const { profession, buddyName } = usePrefs();
+  const { userName, buddyName } = usePrefs();
   const [memoOpen, setMemoOpen] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
 
@@ -70,7 +70,7 @@ export default function HomeScreen() {
               <Text style={styles.coinText}>{coins}</Text>
             </Pressable>
           </View>
-          <Text style={styles.greeting}>おかえりなさい！</Text>
+          <Text style={styles.greeting}>おかえりなさい{userName ? `、${userName}さん` : ''}！</Text>
           <Text style={styles.subtle}>
             {d.getMonth() + 1}月{d.getDate()}日 {WD[d.getDay()]}曜 — 今日も一歩ずつ、いっしょに
           </Text>
