@@ -1,0 +1,15 @@
+{
+  "name": "やわ返",
+  "short_name": "やわ返",
+  "description": "送る前に、ひと呼吸。角の立たない返信をつくるアプリ。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F8F7",
+  "theme_color": "#3FA796",
+  "icons": [
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
