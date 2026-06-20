@@ -125,7 +125,11 @@
     var len = req.length || '普通';
     var orig = (req.originalMessage || '').trim();
 
+    // 敬語レベル（keigo）は関係・チャネルで決める
     var formal = rel === '取引先' || rel === '上司' || ch === 'メール';
+    // あいさつ口調は「チャネル」基準：メール/取引先のみメール挨拶、
+    // Slack/LINE/DM など社内チャットは「おつかれさまです。」が自然。
+    var emailStyle = ch === 'メール' || rel === '取引先';
     var casual = (rel === '友人' || rel === '家族') && ch !== 'メール';
     var neutral = has(tones, '感情を抜く');
 
@@ -133,10 +137,11 @@
     var body = composeBody(req.userIntent, kind);
     var lenBias = len === '短め' ? -1 : (len === '丁寧に長め' ? 1 : 0);
 
+    var base = { soft: false, formal: formal, emailStyle: emailStyle, casual: casual, neutral: neutral, kind: kind, body: body, orig: orig, ch: ch };
     // 3つの案：やわらかめ / ちょうどいい / 短め
-    var soft = buildVariant({ rich: 2 + lenBias, soft: true, formal: formal, casual: casual, neutral: neutral, kind: kind, body: body, orig: orig, ch: ch });
-    var mid = buildVariant({ rich: 1 + lenBias, soft: false, formal: formal, casual: casual, neutral: neutral, kind: kind, body: body, orig: orig, ch: ch });
-    var shortV = buildVariant({ rich: 0, soft: false, formal: formal, casual: casual, neutral: neutral, kind: kind, body: body, orig: orig, ch: ch, terse: true });
+    var soft = buildVariant(assign({}, base, { rich: 2 + lenBias, soft: true }));
+    var mid = buildVariant(assign({}, base, { rich: 1 + lenBias }));
+    var shortV = buildVariant(assign({}, base, { rich: 0, terse: true }));
 
     return [
       { label: 'やわらかめ', text: soft, note: noteFor('soft', kind) },
@@ -152,7 +157,7 @@
 
     // あいさつ
     if (!o.terse && rich >= 2) {
-      var g = greeting(o.formal, o.casual, o.neutral);
+      var g = greeting(o.emailStyle, o.casual);
       if (g) lines.push(g);
     }
     // 相手の文への受け止め（お礼など）
@@ -182,10 +187,10 @@
     return lines.join('\n');
   }
 
-  function greeting(formal, casual, neutral) {
+  // メール/取引先のみメール挨拶。社内チャット(Slack/LINE/DM)は「おつかれさまです。」。
+  function greeting(emailStyle, casual) {
     if (casual) return '';
-    if (neutral) return formal ? 'お世話になっております。' : 'おつかれさまです。';
-    return formal ? 'お世話になっております。' : 'おつかれさまです。';
+    return emailStyle ? 'お世話になっております。' : 'おつかれさまです。';
   }
 
   function acknowledge(kind, neutral) {
@@ -239,8 +244,9 @@
       if (kind === 'remind') return '先日の件、その後いかがでしょうか。';
       return 'ご連絡いたします。';
     }
-    // 末尾のメタ表現を除去（例：「〜と伝えたい」「〜を伝えたいです」）
-    s = s.replace(/(、|。)?\s*(という旨を?|旨を?|ことを|と|か|を)?\s*(伝えたい|伝えたいです|返したい|返信したい|言いたい|話したい|連絡したい|お願いしたい|確認したい|相談したい|知りたい|聞きたい)(です|と思います|と思う)?\s*[。.!！]?$/u, '');
+    // 末尾の「返信する行為」を表すメタ表現だけを除去する（例：「〜と伝えたい」）。
+    // 「確認したい」「知りたい」などは“内容そのもの”なので残し、politeTail でていねい化する。
+    s = s.replace(/(、|。)?\s*(という旨を?|旨を?|ことを|と|を)?\s*(伝えたい|伝えたいです|返したい|返信したい|言いたい|話したい|連絡したい|謝りたい|詫びたい|お詫びしたい)(です|と思います|と思う)?\s*[。.!！]?$/u, '');
     s = s.replace(/[。.\s]+$/u, '');
     if (!s) return 'ご連絡いたします。';
     // 文末の言い切り（辞書形）を、ていねいな「ます/です」調へ寄せる（安全な範囲のみ）
@@ -251,7 +257,8 @@
 
   // よくある言い切りだけを控えめにていねい化する。該当しなければそのまま。
   function politeTail(s) {
-    // 注: 否定形(〜ない)の活用は誤変換しやすいため、あえて変換しない（安全側）。
+    // 否定形(〜ない)・すでにていねいな形は、誤変換を避けてそのまま返す。
+    if (/(ない|ません|です|ます|ください|でしょうか)$/u.test(s)) return s;
     var rules = [
       [/できる$/u, 'できます'],
       [/可能$/u, '可能です'],
@@ -264,6 +271,9 @@
     for (var i = 0; i < rules.length; i++) {
       if (rules[i][0].test(s)) return s.replace(rules[i][0], rules[i][1]);
     }
+    // い形容詞の言い切り（難しい・厳しい 等）は「です」を添える。
+    // 注: 辞書形の動詞は「う段」で終わるため、ここに来る「〜い」はほぼ形容詞。
+    if (/[ぁ-んァ-ヶ一-龠]い$/u.test(s)) return s + 'です';
     return s;
   }
 
@@ -323,6 +333,13 @@
   function uniq(arr) { var o = []; arr.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; }
   function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
   function find(arr, fn) { for (var i = 0; i < arr.length; i++) if (fn(arr[i])) return arr[i]; return null; }
+  function assign(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var s = arguments[i]; if (!s) continue;
+      for (var k in s) if (Object.prototype.hasOwnProperty.call(s, k)) target[k] = s[k];
+    }
+    return target;
+  }
   function cloneRequest(r) {
     return {
       originalMessage: r.originalMessage, userIntent: r.userIntent, relationship: r.relationship,
