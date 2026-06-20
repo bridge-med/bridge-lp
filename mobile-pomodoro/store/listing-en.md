@@ -1,36 +1,41 @@
-# Store listing (English) — BRIDGE Worklog
+# Store listing (English) — BRIDGE Focus
 
 ## App name
-BRIDGE Worklog
+BRIDGE Focus
 
 ## Subtitle (App Store, <=30 chars)
-Turn daily work into career
+Focus on the work in front
 
 ## Short description (Google Play, <=80 chars)
-Log your work in a minute. Build resume, interview & 1on1 material over time.
+A Pomodoro timer for focusing. Focus time stacks up per task. No ads.
 
 ## Description
-BRIDGE Worklog turns your everyday work into a record that pays off later.
+BRIDGE Focus is not a task manager — it's an app for focusing on the work in front of you.
 
-Writing a resume from scratch is hard. With BRIDGE Worklog you just jot down, in about a minute, what you did, what was hard, what you tried, your decisions, results and learnings. Over time these become the raw material for your resume, self-PR, interview answers, 1on1s, raise negotiations and side-job profiles.
+Leave task management and notes to the apps you already use. This app is only about execution. Pick the work you want to focus on (or just type a line), hit START, focus for 25 minutes, then wrap up with one tap: Done / One more / Stop. No heavy logging required.
 
-Who it's for: healthcare professionals (PT/OT, nurses, medical admin, clinic managers, PMI) and anyone aiming for leadership, a job change, or side work. The design is generic enough for any field.
+Your focus time stacks up per task, so you can glance back at how much you actually focused today.
+
+Who it's for
+- People who get distracted and just want to focus on one thing
+- People who keep tasks in another app and want a dedicated tool for execution
+- People who want a calm, simple timer that fits a work setting
 
 Features
-- Work log: quick structured entry (all fields optional)
-- Quick memo: capture a single line, convert to a log later
-- Tasks: todo / in-progress / on-hold / done, linked to logs
-- Timeline: see your work history build up
-- Reflection: weekly / monthly summaries
-- Career output: generate resume / self-PR / interview answers from selected logs
-- Tags, themes, offline-first storage
+- Pomodoro timer (focus / short break / long break, adjustable)
+- Big remaining-time display with a circular progress ring
+- Choose a work item to focus on (or none)
+- One-tap wrap-up after each session, with an optional one-line note
+- Immersive mode: full-screen, dimmed, a gently breathing ring — so you put the phone down
+- Focus log: today's total, count, per-task time, recent history
+- 5 chimes to choose from, vibration, dark mode
 
-AI (optional): add your own Google Gemini API key (free tier available) for higher-quality organizing, reflection and conversion. The key stays on your device; the app also works without it.
+On purpose, there is no calendar, no priorities, no project management. The experience is built around one thing: "focus on this, now."
 
-Privacy: your data stays on your device by default. No account required.
+Privacy: all data stays on your device. No account, no ads, no tracking.
 
 ## Keywords (App Store, comma separated, <=100 chars)
-work log,journal,career,resume,reflection,tasks,notes,1on1,interview,healthcare,nursing,productivity
+focus,pomodoro,timer,deep work,productivity,concentration,study,work,time,habit
 
 ## What's New (first release)
-Initial release: work logs, quick memos, tasks, timeline, reflection, and career conversion.
+Initial release: focus timer, per-task focus time, focus log, and immersive mode.

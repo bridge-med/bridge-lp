@@ -130,7 +130,7 @@ export default function ImmerseScreen() {
             </View>
           </Animated.View>
 
-          <Text style={styles.hint}>{t.running ? '集中中' : '一時停止中'}</Text>
+          <Text style={styles.hint}>{t.running ? 'FOCUS' : 'PAUSED'}</Text>
         </View>
 
         {showControls ? (

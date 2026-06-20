@@ -1,25 +1,23 @@
-# Reviewer notes (App Store / Google Play)
+# Reviewer notes (App Store / Google Play) — BRIDGE Focus
 
-- **No account / login required.** The app works fully offline on first launch.
-- **No sign-up to test any feature.** Just complete the short onboarding
-  (profession / role / purpose — all skippable) and you reach the home screen.
-- **AI features are optional and bring-your-own-key.** They only work if the
-  user pastes their own Gemini / OpenAI / Anthropic API key in Settings → AI.
-  Without a key, reflection/career features fall back to a local mock (no
-  network). So no test credentials are needed; AI can be left untested. Keys are
-  stored in the device secure store (Keychain/Keystore), never on our servers.
-- **In-app purchase:** consumable "coins" (coins_10 / coins_30 / coins_100) used
-  to run AI generations. No subscription, no auto-renew. All non-AI features are
-  free, and new users receive free coins, so purchases are not required to test.
-  A "Restore purchases" affordance is on the Coins screen.
-- **No ads.** The app shows no advertising and uses no ad SDK or tracking.
-- **Data & privacy:** all user content is stored locally (AsyncStorage) by
-  default and is not sent to our servers. See store/privacy-policy.md.
-- **Account deletion / data deletion:** Settings → Delete all data.
+- **No account / login required.** The app works fully offline from first launch.
+  Sample data is seeded on first run so every screen is populated.
+- **No sign-up to test any feature.** Launch and you land on the Focus screen.
+- **No in-app purchases. No subscription. Everything is free.**
+- **No ads.** No advertising, no ad SDK, no tracking/analytics SDK.
+- **Notifications (optional):** a local notification fires when a timer ends (so
+  the chime works when backgrounded). Local-only — no push, no server.
+- **Data & privacy:** all content (work items, focus sessions, settings) is
+  stored locally via AsyncStorage and is not sent to any server. See
+  store/privacy-policy.md.
+- **Account / data deletion:** Settings → "記録をすべて削除".
 
 ## How to test core flow
-1. Launch → finish onboarding (or skip).
-2. Home → "仕事ログ" → fill a couple of fields → save.
-3. Tasks → add a task, mark done.
-4. Reflection → "今週" → a summary is generated from logs (mock without a key).
-5. Coins screen → tap a pack to see the in-app purchase flow (sandbox).
+1. Launch → Focus tab.
+2. Tap the work pill → choose a sample work item (or type a new one).
+3. Tap START → (optional) it enters the full-screen immersive mode if enabled in
+   Settings → Focus.
+4. Tap the skip (▶|) control to fast-forward to the end → the wrap-up sheet
+   appears → choose 完了 / もう1セット続ける / 中断, optionally add a note.
+5. Log tab → see today's total, per-task breakdown and recent sessions.
+6. Settings → change durations, pick a chime (tap to preview), toggle theme.
