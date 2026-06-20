@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>やわ返 — 送る前に、ひと呼吸。</title>
+<meta name="description" content="角の立たない返信をつくるアプリ。相手の文と返したい内容を貼って、トーンを選ぶと、やわらかい返信案が3つできます。">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#3FA796">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="やわ返">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="app/icon.svg">
+<link rel="icon" type="image/svg+xml" href="app/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/styles.css">
+</head>
+<body>
+<div class="phone">
+  <main id="screen" class="screen"></main>
+  <nav id="tabbar" class="tabbar" aria-label="メインナビゲーション"></nav>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="app/store.js"></script>
+<script src="app/replyService.js"></script>
+<script src="app/app.js"></script>
+</body>
+</html>
