@@ -188,7 +188,28 @@ h2.section .hint { font-weight: 500; color: var(--ink-faint); font-size: 12px; m
 .thumb {
   flex: 0 0 auto; width: 52px; height: 52px; border-radius: 14px;
   display: grid; place-items: center; font-size: 26px;
-  background: var(--orange-soft);
+  background: var(--orange-soft); overflow: hidden;
+}
+.thumb img, .thumb-lg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* 追加画面：写真添付 */
+.photo-add {
+  display: flex; gap: 12px; align-items: center;
+}
+.photo-add .preview {
+  flex: 0 0 auto; width: 64px; height: 64px; border-radius: var(--radius-sm);
+  background: var(--orange-soft); overflow: hidden; display: grid; place-items: center;
+  font-size: 26px; border: 1px solid var(--line);
+}
+.photo-add .preview img { width: 100%; height: 100%; object-fit: cover; }
+.photo-add .btn-photo {
+  flex: 1; border: 1.5px dashed var(--line-strong); background: var(--card); color: var(--ink-soft);
+  border-radius: var(--radius-sm); padding: 13px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+.photo-add .btn-clear {
+  flex: 0 0 auto; border: none; background: transparent; color: var(--ink-faint);
+  font-size: 13px; cursor: pointer; font-family: inherit; text-decoration: underline;
 }
 .item .body { flex: 1; min-width: 0; }
 .item .name { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
