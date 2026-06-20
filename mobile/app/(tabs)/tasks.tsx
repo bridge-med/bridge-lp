@@ -128,12 +128,15 @@ export default function TasksScreen() {
         {view === 'list' ? (
           <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md, paddingTop: spacing.md }}>
             <Pressable onPress={() => setAiOpen(true)} style={[styles.aiBtn, { borderColor: c.primary }]}>
-              <Feather name="zap" size={15} color={c.primary} />
-              <Text style={[styles.aiBtnText, { color: c.primary }]}>文章からまとめて追加</Text>
+              <Feather name="zap" size={16} color={c.primary} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.aiBtnText, { color: c.primary }]}>ログからタスク化</Text>
+                <Text style={styles.aiBtnSub}>ログ・文章の中から「次にやること」を抽出</Text>
+              </View>
             </Pressable>
 
             {all.length === 0 ? (
-              <EmptyState icon="check-square" title="タスクはありません" hint="右下の＋から追加。「まとめて追加」で文章から一括登録もできます。" />
+              <EmptyState icon="check-square" title="タスクはまだありません" hint={'ログの中に出てきた\n「次にやること」をここにためていけます。'} />
             ) : (
               groups.map((g) => (
                 <View key={g.status} style={{ gap: spacing.sm }}>
@@ -241,8 +244,9 @@ const styles = StyleSheet.create({
   seg: { flexDirection: 'row', backgroundColor: colors.surface2, borderRadius: radius.pill, padding: 3, gap: 3 },
   segBtn: { flex: 1, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center', height: 36, borderRadius: radius.pill },
   segText: { fontFamily: fonts.gothicMed, fontSize: 13 },
-  aiBtn: { flexDirection: 'row', gap: 8, borderWidth: StyleSheet.hairlineWidth, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
-  aiBtnText: { fontSize: 14, fontFamily: fonts.gothicMed },
+  aiBtn: { flexDirection: 'row', gap: 10, borderWidth: 1, borderStyle: 'dashed', borderRadius: radius.md, padding: 14, alignItems: 'center' },
+  aiBtnText: { fontSize: 14.5, fontFamily: fonts.maru },
+  aiBtnSub: { fontSize: 11.5, fontFamily: fonts.gothic, color: colors.text2, marginTop: 2 },
   sectionHead: { ...type.label, color: colors.text2 },
   count: { fontFamily: fonts.maruMed, color: colors.muted },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, paddingVertical: 14, backgroundColor: colors.bg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },

@@ -113,16 +113,15 @@ export default function SettingsScreen() {
       </View>
 
       <View>
-        <SectionTitle>キャリア変換</SectionTitle>
-        <Pressable onPress={() => router.push('/career')}>
-          <Card style={styles.linkCard}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 }}>
-              <Feather name="file-text" size={18} color={c.primary} />
-              <Text style={type.body}>ログから職務経歴書・自己PRを作る</Text>
-            </View>
-            <Feather name="chevron-right" size={20} color={c.primary} />
-          </Card>
-        </Pressable>
+        <Card style={[styles.safe, { backgroundColor: c.accentWeak }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Feather name="shield" size={18} color={c.good} />
+            <Text style={[type.title, { color: c.good }]}>安心して使えます</Text>
+          </View>
+          <Text style={[type.body, { color: colors.text2, marginTop: spacing.xs }]}>
+            アカウント不要 / 広告なし / 端末内保存。オフラインでも利用できます。AIは任意で、自分のAPIキーを使えます。
+          </Text>
+        </Card>
       </View>
 
       <View>
@@ -254,5 +253,6 @@ const styles = StyleSheet.create({
   proTitle: { ...type.h2, fontSize: 16 },
   arrow: { fontSize: 22, fontWeight: '800' },
   linkCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  safe: { gap: 2, borderWidth: 0 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 });

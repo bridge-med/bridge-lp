@@ -14,10 +14,10 @@ export const QUADRANTS: {
   sub: string;
   tone: 'danger' | 'primary' | 'warn' | 'neutral';
 }[] = [
-  { key: 'A', label: 'すぐやる', sub: '緊急 高・重要 高', tone: 'danger' },
-  { key: 'B', label: '計画する', sub: '緊急 低・重要 高', tone: 'primary' },
-  { key: 'C', label: 'さっと片付け', sub: '緊急 高・重要 低', tone: 'warn' },
-  { key: 'D', label: 'あとで・見直し', sub: '緊急 低・重要 低', tone: 'neutral' },
+  { key: 'A', label: '今すぐやる', sub: '緊急 高・重要 高', tone: 'danger' },
+  { key: 'B', label: '予定に入れる', sub: '緊急 低・重要 高', tone: 'primary' },
+  { key: 'C', label: '人に頼む・短時間で', sub: '緊急 高・重要 低', tone: 'warn' },
+  { key: 'D', label: 'やらない・保留', sub: '緊急 低・重要 低', tone: 'neutral' },
 ];
 
 /** Urgency: manual value wins; otherwise derived from the due date

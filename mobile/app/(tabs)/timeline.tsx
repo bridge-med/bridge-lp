@@ -7,7 +7,7 @@ import { BlockHeader } from '../../components/BlockHeader';
 import { Ledger } from '../../components/Ledger';
 import { QuickMemoSheet } from '../../components/QuickMemoSheet';
 import { useColors } from '../../components/ThemeProvider';
-import { Chip, EmptyState, Fab } from '../../components/ui';
+import { Button, Chip, EmptyState, Fab } from '../../components/ui';
 import { quickMemos, reflections, tasks, workLogs } from '../../lib/data';
 import { parseKey } from '../../lib/date';
 import { useCollection } from '../../lib/store';
@@ -149,7 +149,17 @@ export default function TimelineScreen() {
             {q ? (
               <EmptyState icon="search" title="見つかりませんでした" hint={`「${query}」に一致する記録はありません。`} />
             ) : (
-              <EmptyState icon="clock" title="まだ履歴がありません" hint="仕事ログやメモを残すと、ここに時系列で積み上がります。" />
+              <View style={{ alignItems: 'center', paddingVertical: spacing.lg }}>
+                <EmptyState
+                  icon="book-open"
+                  title="まだ記録がありません"
+                  hint={'最初は1行だけで大丈夫。\n今日の「やったこと」を残すと、\nあとで職務経歴書・1on1・面接の材料になります。'}
+                />
+                <View style={{ alignSelf: 'stretch', paddingHorizontal: spacing.lg, gap: spacing.sm, marginTop: spacing.md }}>
+                  <Button label="今日のログを書く" onPress={() => router.push('/log-edit')} />
+                  <Button label="さっとメモする" variant="ghost" onPress={() => { setEditMemo(null); setMemoOpen(true); }} />
+                </View>
+              </View>
             )}
           </Ledger>
         ) : (
