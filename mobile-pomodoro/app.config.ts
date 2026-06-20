@@ -10,22 +10,22 @@ const EAS_OWNER = process.env.EAS_OWNER ?? '';
 export default ({ config }: ConfigContext): ExpoConfig => {
   const result = {
     ...config,
-    name: 'BRIDGE Pomodoro',
-    slug: 'bridge-pomodoro',
+    name: 'BRIDGE Focus',
+    slug: 'bridge-focus',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
-    scheme: 'bridgepomodoro',
-    userInterfaceStyle: 'light',
+    scheme: 'bridgefocus',
+    userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.bridgemed.pomodoro',
+      bundleIdentifier: 'com.bridgemed.focus',
     },
     android: {
-      package: 'com.bridgemed.pomodoro',
+      package: 'com.bridgemed.focus',
       adaptiveIcon: {
-        backgroundColor: '#FBF3E8',
+        backgroundColor: '#F6F7F9',
         foregroundImage: './assets/android-icon-foreground.png',
         backgroundImage: './assets/android-icon-background.png',
         monochromeImage: './assets/android-icon-monochrome.png',
@@ -40,7 +40,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     plugins: [
       'expo-router',
-      ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 200, backgroundColor: '#FBF3E8' }],
+      ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 200, backgroundColor: '#F6F7F9' }],
       'expo-notifications',
     ],
     experiments: {

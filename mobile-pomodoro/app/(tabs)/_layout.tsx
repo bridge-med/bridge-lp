@@ -23,9 +23,9 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: c.bg },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'タイマー', tabBarIcon: icon('clock') }} />
-      <Tabs.Screen name="stats" options={{ title: '記録', tabBarIcon: icon('bar-chart-2') }} />
-      <Tabs.Screen name="settings" options={{ title: '設定', tabBarIcon: icon('settings') }} />
+      <Tabs.Screen name="index" options={{ title: 'Focus', tabBarIcon: icon('target') }} />
+      <Tabs.Screen name="log" options={{ title: 'Log', tabBarIcon: icon('bar-chart-2') }} />
+      <Tabs.Screen name="settings" options={{ title: 'Settings', tabBarIcon: icon('settings') }} />
     </Tabs>
   );
 }

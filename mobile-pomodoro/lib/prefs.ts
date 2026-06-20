@@ -1,11 +1,12 @@
-// App preferences (timer durations, behavior, accent theme), persisted & reactive.
-// Pomodoro holds no secrets, so everything lives in a single AsyncStorage blob.
+// App preferences (timer durations, behavior, theme), persisted & reactive.
+// No secrets, so everything lives in a single AsyncStorage blob.
 
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { AccentKey } from './theme';
+import type { ThemeMode } from './theme';
+import type { ID } from './types';
 
-const KEY = 'bridge-pomodoro:prefs';
+const KEY = 'bridge-focus:prefs';
 
 export interface Prefs {
   // durations (minutes)
@@ -14,16 +15,14 @@ export interface Prefs {
   longMinutes: number;
   longEvery: number; // a long break after this many focus sessions
   // behavior
-  autoStartBreaks: boolean;
-  autoStartFocus: boolean;
   soundEnabled: boolean;
-  keepAwake: boolean;
+  vibrationEnabled: boolean;
   // appearance
-  accent: AccentKey;
-  // daily reminder notification
-  reminderEnabled: boolean;
-  reminderHour: number;
-  reminderMinute: number;
+  theme: ThemeMode;
+  // the work item currently selected on the Focus screen (remembered)
+  currentWorkItemId: ID | null;
+  // first-run sample data marker
+  seeded: boolean;
 }
 
 const DEFAULT: Prefs = {
@@ -31,14 +30,11 @@ const DEFAULT: Prefs = {
   shortMinutes: 5,
   longMinutes: 15,
   longEvery: 4,
-  autoStartBreaks: false,
-  autoStartFocus: false,
   soundEnabled: true,
-  keepAwake: true,
-  accent: 'ai',
-  reminderEnabled: false,
-  reminderHour: 21,
-  reminderMinute: 0,
+  vibrationEnabled: true,
+  theme: 'system',
+  currentWorkItemId: null,
+  seeded: false,
 };
 
 type Listener = () => void;

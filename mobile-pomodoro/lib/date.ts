@@ -69,3 +69,12 @@ export function formatTimeJa(iso: string): string {
   const m = String(d.getMinutes()).padStart(2, '0');
   return `${h}:${m}`;
 }
+
+/** Seconds → "1h 15m" / "25m" / "0m". */
+export function formatDuration(totalSec: number): string {
+  const totalMin = Math.round(totalSec / 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+  return `${m}m`;
+}

@@ -1,5 +1,5 @@
 {
-  "name": "bridge-pomodoro",
+  "name": "bridge-focus",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {

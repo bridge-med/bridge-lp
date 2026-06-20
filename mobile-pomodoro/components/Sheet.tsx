@@ -1,4 +1,4 @@
-// Simple bottom-sheet style modal used by the add/edit forms.
+// Simple bottom-sheet style modal used by the work picker and completion flow.
 
 import React from 'react';
 import {
@@ -12,7 +12,8 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, radius, spacing, type } from '../lib/theme';
+import { fonts, radius, spacing } from '../lib/theme';
+import { useColors } from './ThemeProvider';
 
 export function Sheet({
   visible,
@@ -26,6 +27,7 @@ export function Sheet({
   children: React.ReactNode;
 }) {
   const insets = useSafeAreaInsets();
+  const c = useColors();
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
@@ -34,17 +36,17 @@ export function Sheet({
         style={styles.wrap}
         pointerEvents="box-none"
       >
-        <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }]}>
-          <View style={styles.handle} />
+        <View style={[styles.sheet, { backgroundColor: c.bg, paddingBottom: insets.bottom + spacing.lg }]}>
+          <View style={[styles.handle, { backgroundColor: c.line2 }]} />
           <View style={styles.header}>
-            <Text style={type.h2}>{title}</Text>
+            <Text style={[styles.title, { color: c.text }]}>{title}</Text>
             <Pressable onPress={onClose} hitSlop={12}>
-              <Text style={styles.close}>閉じる</Text>
+              <Text style={[styles.close, { color: c.primary }]}>閉じる</Text>
             </Pressable>
           </View>
           <ScrollView
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ gap: spacing.lg, paddingTop: spacing.md }}
+            contentContainerStyle={{ gap: spacing.md, paddingTop: spacing.md }}
           >
             {children}
           </ScrollView>
@@ -55,24 +57,17 @@ export function Sheet({
 }
 
 const styles = StyleSheet.create({
-  backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(20,41,61,0.35)' },
+  backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(10,14,22,0.45)' },
   wrap: { flex: 1, justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: colors.bg,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     maxHeight: '88%',
   },
-  handle: {
-    alignSelf: 'center',
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.line2,
-    marginBottom: spacing.sm,
-  },
+  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, marginBottom: spacing.sm },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  close: { color: colors.primary, fontSize: 15, fontWeight: '600' },
+  title: { fontFamily: fonts.maru, fontSize: 18 },
+  close: { fontFamily: fonts.gothicMed, fontSize: 15 },
 });

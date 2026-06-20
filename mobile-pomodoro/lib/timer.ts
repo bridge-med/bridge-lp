@@ -1,38 +1,43 @@
-// The Pomodoro engine — a small reactive store driving the timer.
+// The focus engine — a small reactive store driving the timer.
 //
 // Countdown is timestamp-based (we store the absolute end time, not a decrementing
 // counter), so it stays accurate across re-renders, tab switches and the screen
-// turning off. A lightweight interval only nudges subscribers to re-render; the
-// truth is `endAt - Date.now()`. A one-shot local notification is scheduled for
-// the end time so the bell still fires when backgrounded.
+// turning off. A lightweight interval only nudges subscribers to re-render. When a
+// focus interval ends it raises a `pending` completion that the Focus screen turns
+// into a FocusSession (完了 / 継続 / 中断 + note) attached to the current work item.
 
 import { useSyncExternalStore } from 'react';
 import { tapSuccess } from './haptics';
 import { nowIso } from './id';
-import { todayKey } from './date';
-import { sessions } from './data';
 import { cancelAlarm, scheduleAlarm } from './notifications';
 import { durationFor, prefs } from './prefs';
-import type { SessionKind } from './types';
+import type { ID, SessionKind } from './types';
+
+export interface PendingCompletion {
+  workItemId: ID | null;
+  startTime: string;
+  endTime: string;
+  durationSec: number;
+}
 
 export interface TimerState {
   kind: SessionKind;
   running: boolean;
-  totalSec: number; // length of the current interval
-  remainingSec: number; // live remaining (ceil)
-  completedFocus: number; // focus sessions finished in the current set
+  totalSec: number;
+  remainingSec: number;
+  completedFocus: number;
+  pending: PendingCompletion | null;
 }
 
 const LABEL: Record<SessionKind, string> = {
-  focus: '集中しよう',
-  short: 'ひと息つこう',
-  long: 'しっかり休もう',
+  focus: 'FOCUS',
+  short: 'SHORT BREAK',
+  long: 'LONG BREAK',
 };
 
-const NEXT_MSG: Record<SessionKind, { title: string; body: string }> = {
-  focus: { title: '集中おつかれさま🍅', body: 'ひと息つこう。休憩タイマーを開始できます。' },
-  short: { title: '休憩おわり☕️', body: 'つぎの集中をはじめよう。' },
-  long: { title: '休憩おわり🌿', body: 'よく休めた。つぎの集中へ。' },
+const BREAK_MSG: Record<'short' | 'long', { title: string; body: string }> = {
+  short: { title: '集中おつかれさま', body: 'ひと息つこう。' },
+  long: { title: '集中おつかれさま', body: 'しっかり休もう。' },
 };
 
 type Listener = () => void;
@@ -41,10 +46,11 @@ class Timer {
   private kind: SessionKind = 'focus';
   private running = false;
   private totalSec = durationFor(prefs.getSnapshot(), 'focus');
-  private endAt = 0; // ms timestamp while running
-  private remainMs = this.totalSec * 1000; // remaining while paused
+  private endAt = 0;
+  private remainMs = this.totalSec * 1000;
   private completedFocus = 0;
   private startedAtIso = '';
+  private pending: PendingCompletion | null = null;
   private alarmId: string | null = null;
 
   private tickHandle: ReturnType<typeof setInterval> | null = null;
@@ -73,6 +79,7 @@ class Timer {
       totalSec: this.totalSec,
       remainingSec: Math.max(0, Math.ceil(this.remainingMs() / 1000)),
       completedFocus: this.completedFocus,
+      pending: this.pending,
     };
   }
 
@@ -96,17 +103,26 @@ class Timer {
     }
   }
 
-  /** Switch mode while stopped (resets the clock to that mode's length). */
+  /** Refresh the current (stopped) interval to match the latest duration prefs. */
+  syncDuration() {
+    if (this.running || this.pending) return;
+    this.totalSec = durationFor(prefs.getSnapshot(), this.kind);
+    this.remainMs = this.totalSec * 1000;
+    this.emit();
+  }
+
   setKind(kind: SessionKind) {
     this.pause();
     this.kind = kind;
     this.totalSec = durationFor(prefs.getSnapshot(), kind);
     this.remainMs = this.totalSec * 1000;
+    this.pending = null;
+    this.startedAtIso = '';
     this.emit();
   }
 
   start() {
-    if (this.running) return;
+    if (this.running || this.pending) return;
     if (this.remainMs <= 0) this.remainMs = this.totalSec * 1000;
     this.running = true;
     this.endAt = Date.now() + this.remainMs;
@@ -130,7 +146,6 @@ class Timer {
     this.running ? this.pause() : this.start();
   }
 
-  /** Reset the current interval back to full. */
   reset() {
     this.pause();
     this.remainMs = this.totalSec * 1000;
@@ -138,8 +153,10 @@ class Timer {
     this.emit();
   }
 
-  /** Skip to the end of the current interval (counts as completed). */
+  /** Skip to the end (counts as a completion). */
   skip() {
+    if (this.pending) return;
+    if (!this.startedAtIso) this.startedAtIso = nowIso();
     this.complete();
   }
 
@@ -147,8 +164,13 @@ class Timer {
     if (!prefs.getSnapshot().soundEnabled) return;
     await cancelAlarm(this.alarmId);
     const secs = Math.round(this.remainingMs() / 1000);
-    const msg = NEXT_MSG[this.kind];
-    this.alarmId = await scheduleAlarm(secs, msg.title, msg.body);
+    const title = this.kind === 'focus' ? '集中おつかれさま' : 'BREAK おわり';
+    const body = this.kind === 'focus' ? '完了 / 継続 / 中断 を選べます。' : 'つぎの集中へ。';
+    this.alarmId = await scheduleAlarm(secs, title, body);
+  }
+
+  private ringAndBuzz() {
+    if (prefs.getSnapshot().vibrationEnabled) tapSuccess();
   }
 
   private complete() {
@@ -157,39 +179,48 @@ class Timer {
     this.stopTicking();
     void cancelAlarm(this.alarmId);
     this.alarmId = null;
-    tapSuccess();
+    this.ringAndBuzz();
 
     if (finished === 'focus') {
-      void this.recordFocus();
-      this.completedFocus += 1;
-      const p = prefs.getSnapshot();
-      const goLong = p.longEvery > 0 && this.completedFocus % p.longEvery === 0;
-      this.switchTo(goLong ? 'long' : 'short', p.autoStartBreaks);
+      // Hand off to the Focus screen via `pending`; it records the session.
+      this.pending = {
+        workItemId: prefs.getSnapshot().currentWorkItemId,
+        startTime: this.startedAtIso || nowIso(),
+        endTime: nowIso(),
+        durationSec: this.totalSec,
+      };
+      this.emit();
     } else {
-      const p = prefs.getSnapshot();
-      this.switchTo('focus', p.autoStartFocus);
+      // Breaks aren't logged — drop back to a ready focus interval.
+      this.kind = 'focus';
+      this.totalSec = durationFor(prefs.getSnapshot(), 'focus');
+      this.remainMs = this.totalSec * 1000;
+      this.startedAtIso = '';
+      this.emit();
     }
   }
 
-  private switchTo(kind: SessionKind, autoStart: boolean) {
-    this.kind = kind;
-    this.totalSec = durationFor(prefs.getSnapshot(), kind);
-    this.remainMs = this.totalSec * 1000;
-    this.startedAtIso = '';
-    this.emit();
-    if (autoStart) this.start();
+  /** Which break follows the just-finished focus session. */
+  nextBreakKind(): 'short' | 'long' {
+    const p = prefs.getSnapshot();
+    const n = this.completedFocus + 1;
+    return p.longEvery > 0 && n % p.longEvery === 0 ? 'long' : 'short';
   }
 
-  private async recordFocus() {
-    const completedAt = nowIso();
-    await sessions.upsert({
-      kind: 'focus',
-      date: todayKey(),
-      minutes: Math.round(this.totalSec / 60),
-      startedAt: this.startedAtIso || completedAt,
-      completedAt,
-      note: '',
-    });
+  /** Resolve a pending focus completion. The session record is written by the caller. */
+  finishToBreak() {
+    this.completedFocus += 1;
+    this.setKind(this.nextBreakKind());
+  }
+
+  continueFocus() {
+    this.completedFocus += 1;
+    this.setKind('focus');
+    this.start();
+  }
+
+  abortToFocus() {
+    this.setKind('focus');
   }
 }
 
