@@ -64,7 +64,7 @@ export default function HomeScreen() {
         {/* greeting header */}
         <View style={[styles.header, { backgroundColor: c.primaryWeak, paddingTop: insets.top + spacing.lg }]}>
           <View style={styles.headTop}>
-            <Text style={styles.wordmark}>しごとログ</Text>
+            <Text style={styles.wordmark}>キャリアログ</Text>
             <Pressable onPress={() => router.push('/coins')} style={styles.coinPill}>
               <View style={styles.coin} />
               <Text style={styles.coinText}>{coins}</Text>

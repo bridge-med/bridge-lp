@@ -13,9 +13,9 @@ import { Picker } from './Picker';
 import { useColors } from './ThemeProvider';
 
 const SLIDES = [
-  { emoji: '📝', title: '毎日の仕事ログを、\n未来のキャリア資産に。', body: 'やったこと・工夫・学びを、1日3分で残せます。' },
-  { emoji: '🌱', title: 'ログを書くと、\n相棒が育ちます。', body: '小さな記録が、XP・称号・連続記録になります。' },
-  { emoji: '💼', title: '必要なときに、職務経歴書・\n面接・1on1の材料へ。', body: 'AIはアプリ内で完結。データは端末内に保存されます。' },
+  { emoji: '📝', title: '毎日のメモとタスクを、\n1分で。', body: 'やったこと・気づき・次にやることをサッと記録。続くほど“あなたの仕事”が貯まります。' },
+  { emoji: '🌱', title: '続くと、相棒が育つ。', body: '記録するたびにXP・連続記録・称号。楽しく続く仕組み。貯めた言葉は英語・韓国語の学習にも。' },
+  { emoji: '💼', title: 'その記録が、\n“等身大”の職務経歴書に。', body: 'AIに丸投げした経歴書は盛れてしまう作り物。キャリアログは毎日の記録から作るから、ウソのない・面接で話せる職務経歴書になります。' },
 ];
 
 export function Onboarding({ visible }: { visible: boolean }) {
@@ -49,7 +49,7 @@ export function Onboarding({ visible }: { visible: boolean }) {
       <View style={[styles.container, { backgroundColor: c.bg, paddingTop: insets.top }]}>
         {!isSetup ? (
           <View style={styles.slide}>
-            <Text style={styles.badge}>しごとログ</Text>
+            <Text style={styles.badge}>キャリアログ</Text>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.lg }}>
               <View style={[styles.emojiWrap, { backgroundColor: c.primaryWeak }]}>
                 <Text style={styles.emoji}>{SLIDES[step].emoji}</Text>

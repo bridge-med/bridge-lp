@@ -1,10 +1,10 @@
-# Store listing (English) — BRIDGE Worklog
+# Store listing (English) — CareerLog
 
 ## App name
-BRIDGE Worklog
+CareerLog — memos into a real résumé
 
 ## Subtitle (App Store, <=30 chars)
-Turn daily work into career
+Daily notes → an honest résumé
 
 ## Short description (Google Play, <=80 chars)
 Log your work in a minute. Build resume, interview & 1on1 material over time.

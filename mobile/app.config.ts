@@ -30,7 +30,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 
   const result = {
     ...config,
-    name: 'しごとログ',
+    name: 'キャリアログ',
     slug: 'bridge-worklog',
     version: '1.0.0',
     orientation: 'portrait',
