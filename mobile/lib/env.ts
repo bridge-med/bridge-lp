@@ -9,8 +9,10 @@ function clean(v: string | undefined): string {
 }
 
 export const env = {
-  supabaseUrl: clean(process.env.EXPO_PUBLIC_SUPABASE_URL),
-  supabaseAnonKey: clean(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY),
+  // Public client config (safe to ship). Defaults baked in so no .env is needed;
+  // override via EXPO_PUBLIC_* if you fork to another project.
+  supabaseUrl: clean(process.env.EXPO_PUBLIC_SUPABASE_URL) || 'https://qkeyxxrznpuksbqtkoor.supabase.co',
+  supabaseAnonKey: clean(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) || 'sb_publishable_uv5Q0aDMIst013SUZ5Bvzw_aMmPHvId',
   aiBackendUrl: clean(process.env.EXPO_PUBLIC_AI_BACKEND_URL),
   appToken: clean(process.env.EXPO_PUBLIC_APP_TOKEN),
   revenuecatIosKey: clean(process.env.EXPO_PUBLIC_RC_IOS_KEY),
