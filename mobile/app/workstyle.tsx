@@ -51,6 +51,7 @@ export default function WorkStyleScreen() {
       const result = await generateWorkStyle(mat);
       await prefs.set({ workStyleResult: result });
     } catch (e) {
+      void credits.add(GEN_COST_HEAVY); // refund on failure
       Alert.alert('分析に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
     } finally {
       setBusy(false);

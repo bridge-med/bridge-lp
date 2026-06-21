@@ -44,6 +44,7 @@ export function QuickMemoSheet({ visible, memo, onClose }: { visible: boolean; m
     try {
       setContent(await tidyMemo(content));
     } catch (e) {
+      void credits.add(GEN_COST); // refund on failure
       Alert.alert('整理に失敗', e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
     } finally {
       setAiBusy(false);

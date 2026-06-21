@@ -50,6 +50,7 @@ export function AiTaskSheet({ visible, onClose }: { visible: boolean; onClose: (
       if (result.length === 0) setError('タスクを抽出できませんでした。文章を具体的にしてみてください。');
       else setDrafts(result.map((d) => ({ ...d, include: true })));
     } catch (e) {
+      void credits.add(GEN_COST); // refund on failure
       setError(e instanceof AiError ? e.message : '予期しないエラーが発生しました。');
     } finally {
       setLoading(false);

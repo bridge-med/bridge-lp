@@ -65,6 +65,9 @@ export default function LangScreen() {
       } as Partial<LangCard>);
       setPickOpen(false);
       setExpanded(saved.id);
+    } catch (e) {
+      void credits.add(LANG_COST); // refund on failure
+      Alert.alert('変換に失敗', e instanceof Error ? e.message : '時間をおいて再度お試しください。');
     } finally {
       setBusy(false);
     }
