@@ -28,6 +28,9 @@ export async function callBackend<T>(kind: string, input: unknown): Promise<T> {
     headers.Authorization = `Bearer ${env.supabaseAnonKey}`;
     headers.apikey = env.supabaseAnonKey;
   }
+  // Shared-secret to deter direct abuse of the (no-JWT) function. Obfuscation,
+  // not strong auth — the real gate is the server checking APP_SHARED_SECRET.
+  if (env.appToken) headers['x-app-token'] = env.appToken;
 
   let res: Response;
   try {

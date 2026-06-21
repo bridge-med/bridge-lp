@@ -50,17 +50,22 @@ AI生成・翻訳は **Supabase Edge Function `ai`**（`supabase/functions/ai/in
 ```bash
 # Supabase プロジェクトに紐付け済みの状態で:
 supabase functions deploy ai --no-verify-jwt
-supabase secrets set GEMINI_API_KEY=xxxx
-# 任意: supabase secrets set GEMINI_MODEL=gemini-2.5-flash
+supabase secrets set GEMINI_API_KEY=xxxx          # ★Paid-tier（Billing有効）キーを使う
+supabase secrets set APP_SHARED_SECRET=xxxx        # 濫用対策：EXPO_PUBLIC_APP_TOKEN と一致させる
+# 任意（モデル上書き）:
+# supabase secrets set GEMINI_MODEL_LITE=gemini-2.5-flash-lite \
+#   GEMINI_MODEL_FLASH=gemini-2.5-flash GEMINI_MODEL_PRO=gemini-2.5-pro
 ```
-`.env` に `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` を入れれば、
+`.env` に `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` ＋
+`EXPO_PUBLIC_APP_TOKEN`（上の APP_SHARED_SECRET と同値）を入れれば、
 クライアント（`lib/backend.ts`）が `${SUPABASE_URL}/functions/v1/ai` を自動で呼びます
-（別ホストなら `EXPO_PUBLIC_AI_BACKEND_URL` を指定）。
+（別ホストなら `EXPO_PUBLIC_AI_BACKEND_URL`）。
 
 - 設定あり → `lib/ai.ts` / `lib/lang.ts` が **本物のAI**（タスク化・メモ整理・ふり返り・
-  キャリア変換・働き方分析・英/韓翻訳）を呼ぶ。
-- 設定なし → そのままオフラインのプレビュー（ローカル整形・グロッサリ訳）で動作。
-- モデル差し替えは `GEMINI_MODEL`（2.5-flash↔3.0系）だけで可。
+  キャリア変換・働き方分析・英/韓翻訳）を呼ぶ。設定なし → オフラインのプレビューで動作。
+- **モデルはkind別に自動振り分け**（軽=flash-lite / 中=flash / 重=pro）。`supabase/functions/ai/index.ts` の `KIND_MODEL` で調整。
+- **必ずPaid-tierキー**を使う：無料枠は入力/出力がGoogleの製品改善に使われ得るため、実データ・業務情報には不適切。
+- 濫用対策：`x-app-token` 共有シークレット＋入力長上限（関数内 `MAX_TEXT`/`MAX_BODY`）。共有シークレットはバンドルに入るため**難読化レベル**。本格運用は将来 Supabase 認証(JWT)や App Check、DBレート制限の追加を推奨。
 
 ## クラウド同期（Supabase・任意）
 1. Supabase プロジェクト作成 → SQL エディタで `supabase/schema.sql` を実行。

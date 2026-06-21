@@ -12,6 +12,7 @@ export const env = {
   supabaseUrl: clean(process.env.EXPO_PUBLIC_SUPABASE_URL),
   supabaseAnonKey: clean(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY),
   aiBackendUrl: clean(process.env.EXPO_PUBLIC_AI_BACKEND_URL),
+  appToken: clean(process.env.EXPO_PUBLIC_APP_TOKEN),
   revenuecatIosKey: clean(process.env.EXPO_PUBLIC_RC_IOS_KEY),
   revenuecatAndroidKey: clean(process.env.EXPO_PUBLIC_RC_ANDROID_KEY),
   admobBannerIos: clean(process.env.EXPO_PUBLIC_ADMOB_BANNER_IOS),

@@ -105,21 +105,6 @@ export const TASK_REPEATS: { key: TaskRepeat; label: string }[] = [
   { key: 'monthly', label: '毎月' },
 ];
 
-// AI providers — bring-your-own-key. Each calls its provider directly.
-export type AiProvider = 'gemini' | 'openai' | 'anthropic';
-
-export const AI_PROVIDERS: {
-  key: AiProvider;
-  label: string;
-  model: string;
-  keyHint: string;
-  keyUrl: string;
-}[] = [
-  { key: 'gemini', label: 'Google Gemini', model: 'gemini-2.5-flash', keyHint: 'AIza…', keyUrl: 'https://aistudio.google.com/apikey' },
-  { key: 'openai', label: 'OpenAI', model: 'gpt-4o-mini', keyHint: 'sk-…', keyUrl: 'https://platform.openai.com/api-keys' },
-  { key: 'anthropic', label: 'Anthropic Claude', model: 'claude-haiku-4-5', keyHint: 'sk-ant-…', keyUrl: 'https://console.anthropic.com/settings/keys' },
-];
-
 export type CareerOutputType =
   | 'resume'
   | 'self_pr'
