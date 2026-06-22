@@ -1,5 +1,5 @@
 /* やわ返 — Service Worker (簡易オフラインキャッシュ / PWA) */
-var CACHE = 'yawagaeshi-v1';
+var CACHE = 'yawagaeshi-v2';
 var ASSETS = [
   './',
   './index.html',
