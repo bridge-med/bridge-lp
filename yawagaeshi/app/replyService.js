@@ -5,24 +5,41 @@
  *   generateReplies(request): Promise<ReplyGenerateResult>
  *   regenerate(request, label, mode): Promise<ReplySuggestion>   // もっと丁寧に / もっと短く
  *
- * 将来、OpenAI / Claude / Gemini などの API へ差し替えられるよう、
- * プロバイダを切り替え式にしている。初期は "mock"。
+ * プロバイダ切り替え式（APIキーはフロントに置かない）：
+ *     スマホアプリ → 自前API(Cloudflare Worker) → Gemini API
+ *   provider が 'remote' かつ endpoint が設定されていれば自前APIを叩く。
+ *   未設定／失敗時は必ずモック生成にフォールバックするので、体験は止まらない。
  *
- * ▼ 本番想定の構成（APIキーはフロントに置かない）
- *     スマホアプリ → 自前API / Edge Function → OpenAI / Claude / Gemini
- *   provider を "openai" 等に変え、callRemote() で自前APIを叩く実装に差し替える。
+ * ▼ 連携を有効にする手順
+ *   1) yawagaeshi/worker を Cloudflare にデプロイ（worker/README 参照）
+ *   2) 下の REPLY_ENDPOINT に Worker の URL を設定し、REPLY_PROVIDER='remote'
+ *      （コードを触らずに端末だけで切り替える場合は localStorage:
+ *         localStorage['yawagaeshi:endpoint'] = 'https://....workers.dev'
+ *         localStorage['yawagaeshi:provider'] = 'remote'   ）
  * ========================================================================= */
 (function (global) {
   'use strict';
 
-  // 初期は mock。将来的に "openai" | "claude" | "gemini" を想定。
+  // 'mock'（既定・外部API不要） | 'remote'（自前API経由で Gemini）
   var REPLY_PROVIDER = 'mock';
 
-  // 自前API(サーバーレス等)のエンドポイント。差し替え時にここを使う。
-  var REPLY_ENDPOINT = '/api/replies';
+  // 自前API(Cloudflare Worker)のURL。デプロイ後にここへ貼る。例:
+  //   'https://yawagaeshi-api.example.workers.dev'
+  var REPLY_ENDPOINT = '';
 
   // 利用回数制限の土台（将来：無料3回/日 など）。今は無制限。
   var DAILY_LIMIT = 0; // 0 = 制限なし
+
+  // 実行時オーバーライド（localStorage）。コードを触らず切り替えられる。
+  function provider() {
+    try { return global.localStorage.getItem('yawagaeshi:provider') || REPLY_PROVIDER; }
+    catch (e) { return REPLY_PROVIDER; }
+  }
+  function endpoint() {
+    try { return global.localStorage.getItem('yawagaeshi:endpoint') || REPLY_ENDPOINT; }
+    catch (e) { return REPLY_ENDPOINT; }
+  }
+  function useRemote() { return provider() === 'remote' && !!endpoint(); }
 
   // 将来 AI API に投げる想定のプロンプト雛形（mock では未使用）。
   var SYSTEM_PROMPT =
@@ -51,16 +68,14 @@
    * @returns {Promise<{suggestions:Array, riskCheck:object}>}
    */
   function generateReplies(request) {
-    if (REPLY_PROVIDER === 'mock') {
-      // 体感のため、わずかな遅延を入れて「生成中」を見せる
-      return delay(420).then(function () {
-        return {
-          suggestions: generateMockReplies(request),
-          riskCheck: assessRisk(request)
-        };
-      });
-    }
-    return callRemote(request);
+    if (useRemote()) return callRemote(request);
+    // モック：体感のため、わずかな遅延を入れて「生成中」を見せる
+    return delay(420).then(function () {
+      return {
+        suggestions: generateMockReplies(request),
+        riskCheck: assessRisk(request)
+      };
+    });
   }
 
   /**
@@ -80,36 +95,39 @@
       tweaked.tones = uniq((tweaked.tones || []).concat(['短く']));
       tweaked.length = '短め';
     }
-    return delay(320).then(function () {
-      var list = generateMockReplies(tweaked);
-      var picked = find(list, function (s) { return s.label === label; }) || list[mode === 'short' ? 2 : 0];
+    // generateReplies 経由なので remote 有効時は自動で Gemini を使う
+    return generateReplies(tweaked).then(function (res) {
+      var list = res.suggestions || [];
+      var picked = find(list, function (s) { return s.label === label; }) || list[mode === 'short' ? 2 : 0] || list[0];
       return {
         label: label,
-        text: picked.text,
+        text: (picked && picked.text) || '',
         note: mode === 'polite' ? 'もう少し丁寧に整えました。' : '今回は少し短めに整えました。'
       };
     });
   }
 
   // =========================================================================
-  // フェーズ2用：自前API呼び出しの口（初期はモックにフォールバック）
+  // 自前API(Cloudflare Worker)呼び出し。失敗時はモックにフォールバック。
   // =========================================================================
   function callRemote(request) {
-    var body = {
-      provider: REPLY_PROVIDER,
-      system: SYSTEM_PROMPT,
-      prompt: buildUserPrompt(request),
-      request: request
-    };
-    return fetch(REPLY_ENDPOINT, {
+    function fallback() {
+      return { suggestions: generateMockReplies(request), riskCheck: assessRisk(request) };
+    }
+    return fetch(endpoint(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ request: request })
     })
-      .then(function (r) { if (!r.ok) throw new Error('bad status'); return r.json(); })
+      .then(function (r) { if (!r.ok) throw new Error('bad status ' + r.status); return r.json(); })
+      .then(function (data) {
+        // 期待形でなければモックで補う
+        if (!data || !Array.isArray(data.suggestions) || !data.suggestions.length) return fallback();
+        return data;
+      })
       .catch(function () {
-        // ネットワーク不通やAPI未実装時は、体験を止めずモックで代替
-        return { suggestions: generateMockReplies(request), riskCheck: assessRisk(request) };
+        // ネットワーク不通・API未設定・プロバイダ障害でも体験を止めない
+        return fallback();
       });
   }
 
@@ -350,7 +368,9 @@
 
   // ---- 公開 ---------------------------------------------------------------
   global.ReplyService = {
-    provider: REPLY_PROVIDER,
+    get provider() { return provider(); },
+    get endpoint() { return endpoint(); },
+    get usingRemote() { return useRemote(); },
     dailyLimit: DAILY_LIMIT,
     generateReplies: generateReplies,
     regenerate: regenerate,
