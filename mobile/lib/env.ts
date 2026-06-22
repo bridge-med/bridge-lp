@@ -14,7 +14,7 @@ export const env = {
   supabaseUrl: clean(process.env.EXPO_PUBLIC_SUPABASE_URL) || 'https://qkeyxxrznpuksbqtkoor.supabase.co',
   supabaseAnonKey: clean(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) || 'sb_publishable_uv5Q0aDMIst013SUZ5Bvzw_aMmPHvId',
   aiBackendUrl: clean(process.env.EXPO_PUBLIC_AI_BACKEND_URL),
-  appToken: clean(process.env.EXPO_PUBLIC_APP_TOKEN),
+  appToken: clean(process.env.EXPO_PUBLIC_APP_TOKEN) || 'w2DfKPbXSrA7PtPOksK4i8WVgbFvo9wo',
   revenuecatIosKey: clean(process.env.EXPO_PUBLIC_RC_IOS_KEY),
   revenuecatAndroidKey: clean(process.env.EXPO_PUBLIC_RC_ANDROID_KEY),
   admobBannerIos: clean(process.env.EXPO_PUBLIC_ADMOB_BANNER_IOS),
