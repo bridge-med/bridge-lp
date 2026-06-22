@@ -70,10 +70,11 @@ async function gemini(model: string, prompt: string, opts: GenOpts = {}): Promis
   };
   if (opts.json) generationConfig.responseMimeType = 'application/json';
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(API_KEY)}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // Pass the key as a header so both legacy (AIza…) and new (AQ.…) keys work.
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': API_KEY },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig }),
     },
   );
