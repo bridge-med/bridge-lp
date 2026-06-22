@@ -13,7 +13,7 @@ import { useCategoryMap } from '../../lib/categories';
 import { TASK_REPEATS, TASK_STATUSES, type TaskStatus } from '../../lib/constants';
 import { tasks } from '../../lib/data';
 import { addPeriod, dueLabel, todayKey } from '../../lib/date';
-import { tapSuccess } from '../../lib/haptics';
+import { tapLight, tapSuccess } from '../../lib/haptics';
 import { QUADRANTS, quadrantOf, type Quadrant } from '../../lib/matrix';
 import { progress } from '../../lib/progress';
 import { useCollection } from '../../lib/store';
@@ -21,6 +21,14 @@ import { colors, fonts, radius, spacing, type } from '../../lib/theme';
 import type { Task } from '../../lib/types';
 
 const ORDER: TaskStatus[] = ['doing', 'todo', 'hold', 'done'];
+
+// Tap a quadrant's + to add a task pre-classified into it.
+const QUAD_DEFAULT: Record<Quadrant, { importance: 'high' | 'low'; urgency: 'high' | 'low' }> = {
+  A: { importance: 'high', urgency: 'high' },
+  B: { importance: 'high', urgency: 'low' },
+  C: { importance: 'low', urgency: 'high' },
+  D: { importance: 'low', urgency: 'low' },
+};
 
 const byDue = (a: Task, b: Task) => {
   if (!!a.dueDate !== !!b.dueDate) return a.dueDate ? -1 : 1;
@@ -36,7 +44,15 @@ export default function TasksScreen() {
   const [open, setOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [view, setView] = useState<'list' | 'matrix'>('list');
+  const [addQuad, setAddQuad] = useState<Quadrant | null>(null);
   const catMap = useCategoryMap();
+
+  function addToQuad(q: Quadrant) {
+    tapLight();
+    setEditing(null);
+    setAddQuad(q);
+    setOpen(true);
+  }
 
   const usedCats = (() => {
     const seen = new Set<string>();
@@ -138,7 +154,7 @@ export default function TasksScreen() {
         <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.lg }}>
           <View style={styles.seg}>
             {(['list', 'matrix'] as const).map((m) => (
-              <Pressable key={m} onPress={() => setView(m)} style={[styles.segBtn, view === m && { backgroundColor: c.primary }]}>
+              <Pressable key={m} onPress={() => { tapLight(); setView(m); }} style={[styles.segBtn, view === m && { backgroundColor: c.primary }]}>
                 <Feather name={m === 'list' ? 'list' : 'grid'} size={14} color={view === m ? '#fff' : colors.text2} />
                 <Text style={[styles.segText, { color: view === m ? '#fff' : colors.text2 }]}>{m === 'list' ? 'リスト' : 'マトリクス'}</Text>
               </Pressable>
@@ -231,9 +247,16 @@ export default function TasksScreen() {
                         <Text style={[type.muted, { fontSize: 10 }]}>{q.sub}</Text>
                       </View>
                       <Text style={styles.qCount}>{items.length}</Text>
+                      <Pressable onPress={() => addToQuad(q.key)} hitSlop={8} style={styles.qAdd}>
+                        <Feather name="plus" size={15} color={colors.text2} />
+                      </Pressable>
                     </View>
                     <View style={styles.cellBody}>
-                      {items.length ? items.map((t) => <CompactRow key={t.id} t={t} />) : <Text style={styles.cellEmpty}>なし</Text>}
+                      {items.map((t) => <CompactRow key={t.id} t={t} />)}
+                      <Pressable onPress={() => addToQuad(q.key)} style={styles.cellAdd}>
+                        <Feather name="plus" size={12} color={colors.muted} />
+                        <Text style={styles.cellAddTxt}>ここに追加</Text>
+                      </Pressable>
                     </View>
                   </View>
                 );
@@ -266,7 +289,13 @@ export default function TasksScreen() {
         <Fab onPress={() => { setEditing(null); setOpen(true); }} />
       </View>
 
-      <TaskSheet visible={open} task={editing} onClose={() => setOpen(false)} />
+      <TaskSheet
+        visible={open}
+        task={editing}
+        defaultImportance={addQuad ? QUAD_DEFAULT[addQuad].importance : undefined}
+        defaultUrgency={addQuad ? QUAD_DEFAULT[addQuad].urgency : undefined}
+        onClose={() => { setOpen(false); setAddQuad(null); }}
+      />
       <AiTaskSheet visible={aiOpen} onClose={() => setAiOpen(false)} onNeedKey={() => router.push('/settings')} />
     </View>
   );
@@ -299,7 +328,10 @@ const styles = StyleSheet.create({
   qLetter: { fontFamily: fonts.maruBlack, fontSize: 14, color: '#fff' },
   qLabel: { fontFamily: fonts.maru, fontSize: 13, color: colors.text },
   qCount: { fontFamily: fonts.maruBlack, fontSize: 16, color: colors.text },
+  qAdd: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2, marginLeft: 4 },
   cellBody: { padding: spacing.sm, gap: 2 },
+  cellAdd: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, marginTop: 2, borderRadius: radius.sm, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, borderStyle: 'dashed' },
+  cellAddTxt: { fontFamily: fonts.gothic, fontSize: 11, color: colors.muted },
   mrow: { flexDirection: 'row', alignItems: 'flex-start', gap: 7, paddingVertical: 6 },
   mbar: { width: 3, alignSelf: 'stretch', borderRadius: 2, minHeight: 18 },
   mcheck: { width: 16, height: 16, borderRadius: 8, borderWidth: 2, marginTop: 1 },

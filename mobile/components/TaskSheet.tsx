@@ -14,11 +14,15 @@ export function TaskSheet({
   visible,
   task,
   defaultLogId,
+  defaultImportance,
+  defaultUrgency,
   onClose,
 }: {
   visible: boolean;
   task?: Task | null;
   defaultLogId?: string | null;
+  defaultImportance?: 'high' | 'low';
+  defaultUrgency?: 'high' | 'low';
   onClose: () => void;
 }) {
   const [title, setTitle] = useState('');
@@ -31,15 +35,16 @@ export function TaskSheet({
   const [memo, setMemo] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
 
-  const key = (visible ? 'open' : 'closed') + ':' + (task?.id ?? 'new');
+  // Key includes the defaults so opening "add to A" then "add to B" re-seeds.
+  const key = (visible ? 'open' : 'closed') + ':' + (task?.id ?? 'new') + ':' + (defaultImportance ?? '') + (defaultUrgency ?? '');
   if (key !== seed && visible) {
     setSeed(key);
     setTitle(task?.title ?? '');
     setStatus(task?.status ?? 'todo');
     setDue(task?.dueDate ?? null);
     setRepeat(task?.repeat ?? 'none');
-    setImportance(task?.importance);
-    setUrgency(task?.urgency);
+    setImportance(task?.importance ?? defaultImportance);
+    setUrgency(task?.urgency ?? defaultUrgency);
     setCategory(task?.category);
     setMemo(task?.memo ?? '');
   }
