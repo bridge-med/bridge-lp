@@ -101,6 +101,8 @@ function parseJson<T>(text: string): T {
 }
 
 type Input = Record<string, unknown>;
+// Tell the model to avoid Markdown so output reads like natural Japanese.
+const NO_MD = 'Markdown記号（*、**、#、- など）は使わないでください。箇条書きが必要なときは「・」を使い、プレーンな日本語で書いてください。';
 // Clamp text fields so a huge/abusive payload can't run up cost.
 const s = (v: unknown, max = 8000) => (typeof v === 'string' ? v.slice(0, max) : '');
 
@@ -120,7 +122,8 @@ async function handle(kind: string, input: Input): Promise<unknown> {
     case 'memo': {
       const prompt = [
         '以下の走り書きメモを、意味を保ったまま簡潔で読みやすい日本語に整えてください。',
-        '箇条書きが適切なら - で。説明や前置きは付けず、整えた本文だけ返してください。',
+        '説明や前置きは付けず、整えた本文だけ返してください。',
+        NO_MD,
         '---',
         s(input.input, MAX_TEXT),
       ].join('\n');
@@ -142,6 +145,7 @@ async function handle(kind: string, input: Input): Promise<unknown> {
         `あなたはキャリア支援の専門家です。以下の仕事ログをもとに「${s(input.label, 40)}」の文章を日本語で作成してください。`,
         profile.profession ? `対象者の職種: ${s(profile.profession, 40)}、立場: ${s(profile.role, 40)}` : '',
         'ログに無い事実は創作しないこと。簡潔で、そのまま使える形に。',
+        NO_MD,
         '---',
         s(input.logsText, MAX_TEXT),
       ].filter(Boolean).join('\n');
@@ -153,6 +157,7 @@ async function handle(kind: string, input: Input): Promise<unknown> {
         'MBTIのような決めつけは避け、次の構成で日本語で簡潔に：',
         '1) ひとことで表すタイプ名（独自で良い・15字以内） 2) 強みの傾向（3点） 3) 注意したい癖（2点） 4) 活きる環境/向く役割 5) 次に伸ばすと良い力（1つ）。',
         'ログに無い決めつけはしないこと。',
+        NO_MD,
         '---',
         s(input.material, MAX_TEXT),
       ].join('\n');

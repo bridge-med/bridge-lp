@@ -14,6 +14,18 @@ function wrap(e: unknown): AiError {
   return new AiError(e instanceof Error ? e.message : '予期しないエラーが発生しました。');
 }
 
+/** Strip Markdown so AI output reads like plain Japanese (no **bold**, * bullets, # …). */
+export function cleanText(s: string): string {
+  return (s ?? '')
+    .replace(/\*\*(.*?)\*\*/g, '$1') // **bold** -> bold
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/`([^`]*)`/g, '$1') // `code` -> code
+    .replace(/(^|\n)\s{0,3}#{1,6}\s*/g, '$1') // # heading -> remove marker
+    .replace(/(^|\n)\s*[*\-•]\s+/g, '$1・') // * / - bullets -> ・
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 // --- Brain-dump -> tasks -----------------------------------------------------
 
 export interface DraftTask {
@@ -51,7 +63,7 @@ export async function tidyMemo(input: string): Promise<string> {
   if (!aiBackendEnabled()) return localTidy(input);
   try {
     const { text } = await callBackend<{ text: string }>('memo', { input });
-    return text?.trim() || localTidy(input);
+    return cleanText(text?.trim() || localTidy(input));
   } catch (e) {
     throw wrap(e);
   }
@@ -92,13 +104,13 @@ export async function generateReflection(logs: WorkLog[]): Promise<ReflectionCon
   try {
     const { content } = await callBackend<{ content: Partial<ReflectionContent> }>('reflection', { logsText: logsToText(logs) });
     return {
-      did: content.did ?? '',
-      impressive: content.impressive ?? '',
-      issues: content.issues ?? '',
-      improved: content.improved ?? '',
-      next: content.next ?? '',
-      strengths: content.strengths ?? '',
-      achievements: content.achievements ?? '',
+      did: cleanText(content.did ?? ''),
+      impressive: cleanText(content.impressive ?? ''),
+      issues: cleanText(content.issues ?? ''),
+      improved: cleanText(content.improved ?? ''),
+      next: cleanText(content.next ?? ''),
+      strengths: cleanText(content.strengths ?? ''),
+      achievements: cleanText(content.achievements ?? ''),
     };
   } catch (e) {
     throw wrap(e);
@@ -129,7 +141,7 @@ export async function generateCareerOutput(logs: WorkLog[], outputType: CareerOu
   const label = CAREER_OUTPUTS.find((o) => o.key === outputType)?.label ?? '';
   try {
     const { text } = await callBackend<{ text: string }>('career', { label, profile, logsText: logsToText(logs) });
-    return text?.trim() || mockCareerOutput(logs, outputType, profile);
+    return cleanText(text?.trim() || mockCareerOutput(logs, outputType, profile));
   } catch (e) {
     throw wrap(e);
   }
@@ -160,7 +172,7 @@ export async function generateWorkStyle(material: string): Promise<string> {
   if (!aiBackendEnabled()) return localWorkStyle(material);
   try {
     const { text } = await callBackend<{ text: string }>('workstyle', { material });
-    return text?.trim() || localWorkStyle(material);
+    return cleanText(text?.trim() || localWorkStyle(material));
   } catch (e) {
     throw wrap(e);
   }
