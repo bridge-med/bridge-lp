@@ -10,13 +10,14 @@ import { useColors } from '../../components/ThemeProvider';
 import { useCoins } from '../../lib/credits';
 import { useCosmetics } from '../../lib/cosmetics';
 import { quickMemos, tasks, workLogs } from '../../lib/data';
-import { parseKey, startOfWeekKey, todayKey } from '../../lib/date';
+import { dueLabel, parseKey, startOfWeekKey, todayKey } from '../../lib/date';
+import { tapLight, tapSuccess } from '../../lib/haptics';
 import { levelInfo, stageForLevel } from '../../lib/leveling';
 import { usePrefs } from '../../lib/prefs';
-import { useProgress } from '../../lib/progress';
+import { progress, useProgress } from '../../lib/progress';
 import { useCollection } from '../../lib/store';
 import { colors, fonts, radius, shadow, spacing, type } from '../../lib/theme';
-import type { WorkLog } from '../../lib/types';
+import type { Task, WorkLog } from '../../lib/types';
 
 const WD = ['日', '月', '火', '水', '木', '金', '土'];
 
@@ -46,6 +47,16 @@ export default function HomeScreen() {
     [allTasks, weekStart],
   );
   const loggedToday = useMemo(() => logs.some((l) => l.date === today), [logs, today]);
+  const dueTasks = useMemo(
+    () => allTasks.filter((t) => t.status !== 'done' && t.dueDate && t.dueDate <= today).sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : 1)).slice(0, 4),
+    [allTasks, today],
+  );
+
+  function completeTask(t: Task) {
+    tapSuccess();
+    void progress.recordActivity('task');
+    void tasks.upsert({ id: t.id, status: 'done', doneAt: new Date().toISOString() } as Partial<Task>);
+  }
   const recent = useMemo(
     () => [...logs].sort((a, b) => (b.date < a.date ? -1 : b.date > a.date ? 1 : b.createdAt < a.createdAt ? -1 : 1)).slice(0, 3),
     [logs],
@@ -102,7 +113,7 @@ export default function HomeScreen() {
           </Pressable>
 
           {/* BIG CTA */}
-          <Pressable onPress={() => router.push('/log-edit')} style={({ pressed }) => [styles.cta, { backgroundColor: c.primary }, pressed && { opacity: 0.92 }]}>
+          <Pressable onPress={() => { tapLight(); router.push('/log-edit'); }} style={({ pressed }) => [styles.cta, { backgroundColor: c.primary }, pressed && { opacity: 0.92, transform: [{ scale: 0.99 }] }]}>
             <View style={styles.ctaIcon}>
               <Feather name="edit-3" size={24} color="#fff" />
             </View>
@@ -132,6 +143,33 @@ export default function HomeScreen() {
             <Tally num={coins} label="コイン" tint={colors.gold} />
           </View>
 
+          {/* today's tasks */}
+          {dueTasks.length > 0 ? (
+            <>
+              <View style={styles.recentHead}>
+                <Text style={type.title}>今日のタスク</Text>
+                <Pressable onPress={() => router.push('/tasks')} hitSlop={8}>
+                  <Text style={[type.muted, { color: c.primary }]}>すべて →</Text>
+                </Pressable>
+              </View>
+              <View style={styles.todoCard}>
+                {dueTasks.map((t, i) => {
+                  const due = dueLabel(t.dueDate);
+                  const overdue = due?.tone === 'overdue';
+                  return (
+                    <View key={t.id} style={[styles.todoRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line }]}>
+                      <Pressable onPress={() => completeTask(t)} hitSlop={8} style={[styles.todoCheck, { borderColor: c.line2 }]} />
+                      <Pressable style={{ flex: 1 }} onPress={() => router.push('/tasks')}>
+                        <Text style={type.bodyMed} numberOfLines={1}>{t.title}</Text>
+                      </Pressable>
+                      {due ? <Text style={[styles.todoDue, { color: overdue ? c.danger : c.primary }]}>{due.text}</Text> : null}
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          ) : null}
+
           {/* recent */}
           <View style={styles.recentHead}>
             <Text style={type.title}>最近のログ</Text>
@@ -157,7 +195,7 @@ export default function HomeScreen() {
 
 function Tile({ icon, label, sub, tint, bg, onPress }: { icon: React.ComponentProps<typeof Feather>['name']; label: string; sub: string; tint: string; bg: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.tile, { backgroundColor: bg }, pressed && { opacity: 0.7 }]}>
+    <Pressable onPress={() => { tapLight(); onPress(); }} style={({ pressed }) => [styles.tile, { backgroundColor: bg }, pressed && { opacity: 0.85, transform: [{ scale: 0.97 }] }]}>
       <View style={styles.tileIcon}>
         <Feather name={icon} size={16} color={tint} />
       </View>
@@ -226,6 +264,10 @@ const styles = StyleSheet.create({
   tallyNum: { fontFamily: fonts.maruBlack, fontSize: 24, color: colors.text },
   tallyLbl: { fontFamily: fonts.gothic, fontSize: 11, color: colors.text2 },
   tDiv: { width: StyleSheet.hairlineWidth, height: 30, backgroundColor: colors.line },
+  todoCard: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, paddingHorizontal: spacing.md },
+  todoRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: 13 },
+  todoCheck: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5 },
+  todoDue: { fontFamily: fonts.gothicMed, fontSize: 12 },
   recentHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.xl, marginBottom: spacing.sm },
   logCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, padding: spacing.md, marginBottom: spacing.sm, overflow: 'hidden' },
   logEdge: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 5 },

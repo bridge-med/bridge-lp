@@ -74,6 +74,7 @@ export function Field({ label, ...props }: { label?: string } & TextInputProps) 
       {label ? <Text style={type.label}>{label}</Text> : null}
       <TextInput
         placeholderTextColor={colors.muted}
+        returnKeyType={props.multiline ? 'default' : 'done'}
         {...props}
         style={[styles.input, props.multiline && styles.inputMultiline, props.style]}
       />

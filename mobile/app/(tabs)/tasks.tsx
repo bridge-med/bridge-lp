@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AiTaskSheet } from '../../components/AiTaskSheet';
@@ -8,7 +8,7 @@ import { BlockHeader } from '../../components/BlockHeader';
 import { SwipeRow } from '../../components/SwipeRow';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
-import { Chip, EmptyState, Fab } from '../../components/ui';
+import { Button, Chip, EmptyState, Fab } from '../../components/ui';
 import { useCategoryMap } from '../../lib/categories';
 import { TASK_REPEATS, TASK_STATUSES, type TaskStatus } from '../../lib/constants';
 import { tasks } from '../../lib/data';
@@ -45,7 +45,20 @@ export default function TasksScreen() {
   const [aiOpen, setAiOpen] = useState(false);
   const [view, setView] = useState<'list' | 'matrix'>('list');
   const [addQuad, setAddQuad] = useState<Quadrant | null>(null);
+  const [toast, setToast] = useState<{ msg: string; undo: () => void } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const catMap = useCategoryMap();
+
+  function showToast(msg: string, undo: () => void) {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ msg, undo });
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
+  }
+
+  function removeWithUndo(t: Task) {
+    void tasks.remove(t.id);
+    showToast('削除しました', () => void tasks.upsert(t));
+  }
 
   function addToQuad(q: Quadrant) {
     tapLight();
@@ -122,6 +135,7 @@ export default function TasksScreen() {
       }
     }
     void tasks.upsert({ id: t.id, status: toDone ? 'done' : 'todo', doneAt: toDone ? new Date().toISOString() : null } as Partial<Task>);
+    if (toDone) showToast('完了にしました', () => void tasks.upsert({ id: t.id, status: t.status, doneAt: t.doneAt } as Partial<Task>));
   }
 
   function edit(t: Task) {
@@ -173,7 +187,12 @@ export default function TasksScreen() {
             </Pressable>
 
             {all.length === 0 ? (
-              <EmptyState icon="check-square" title="タスクはまだありません" hint={'ログの中に出てきた\n「次にやること」をここにためていけます。'} />
+              <View style={{ alignItems: 'center' }}>
+                <EmptyState icon="check-square" title="タスクはまだありません" hint={'ログの中に出てきた\n「次にやること」をここにためていけます。'} />
+                <View style={{ alignSelf: 'stretch', paddingHorizontal: spacing.lg, marginTop: spacing.sm }}>
+                  <Button label="最初のタスクを追加" onPress={() => { setEditing(null); setOpen(true); }} />
+                </View>
+              </View>
             ) : (
               groups.map((g) => (
                 <View key={g.status} style={{ gap: spacing.sm }}>
@@ -187,8 +206,9 @@ export default function TasksScreen() {
                     const rep = t.repeat ?? 'none';
                     const repLabel = rep !== 'none' ? TASK_REPEATS.find((r) => r.key === rep)?.label : null;
                     const col = t.category ? catMap[t.category]?.color : null;
+                    const catName = t.category ? catMap[t.category]?.name : null;
                     return (
-                      <SwipeRow key={t.id} onDelete={() => void tasks.remove(t.id)}>
+                      <SwipeRow key={t.id} onDelete={() => removeWithUndo(t)}>
                         <View style={styles.row}>
                           <Pressable onPress={() => quickComplete(t)} hitSlop={8} style={[styles.checkbox, { borderColor: col ?? c.line2 }, done && { backgroundColor: c.primary, borderColor: c.primary }]}>
                             {done ? <Feather name="check" size={14} color="#fff" /> : null}
@@ -197,8 +217,14 @@ export default function TasksScreen() {
                             <Text style={[type.bodyMed, done && styles.doneText]} numberOfLines={2}>
                               {t.title}
                             </Text>
-                            {(due && !done) || repLabel || t.memo ? (
+                            {(due && !done) || repLabel || t.memo || catName ? (
                               <View style={styles.meta}>
+                                {catName && col ? (
+                                  <View style={styles.catTag}>
+                                    <View style={[styles.catTagDot, { backgroundColor: col }]} />
+                                    <Text style={[type.muted, { fontSize: 11 }]}>{catName}</Text>
+                                  </View>
+                                ) : null}
                                 {due && !done ? <Chip label={due.text} tone={dueTone} /> : null}
                                 {repLabel ? (
                                   <View style={styles.repeat}>
@@ -285,6 +311,15 @@ export default function TasksScreen() {
         )}
       </ScrollView>
 
+      {toast ? (
+        <View style={[styles.toast, { bottom: insets.bottom + 84 }]}>
+          <Text style={styles.toastMsg}>{toast.msg}</Text>
+          <Pressable onPress={() => { toast.undo(); if (toastTimer.current) clearTimeout(toastTimer.current); setToast(null); }} hitSlop={8}>
+            <Text style={styles.toastUndo}>取り消す</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
       <View style={{ position: 'absolute', right: 0, bottom: insets.bottom }}>
         <Fab onPress={() => { setEditing(null); setOpen(true); }} />
       </View>
@@ -316,6 +351,11 @@ const styles = StyleSheet.create({
   doneText: { color: colors.muted, textDecorationLine: 'line-through' },
   meta: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', marginTop: spacing.sm, flexWrap: 'wrap' },
   repeat: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  catTag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  catTagDot: { width: 9, height: 9, borderRadius: 5 },
+  toast: { position: 'absolute', left: spacing.lg, right: spacing.lg, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.text, borderRadius: radius.md, paddingHorizontal: spacing.lg, paddingVertical: 14 },
+  toastMsg: { fontFamily: fonts.gothicMed, fontSize: 14, color: '#fff' },
+  toastUndo: { fontFamily: fonts.maru, fontSize: 14, color: colors.gold },
   // matrix
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
