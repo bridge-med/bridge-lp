@@ -8,13 +8,15 @@ name: Refresh Daily watch
 #                              healthcare management / public health, last 30 days)
 # 1日2回、朝(JST 7:00) と 夜(JST 19:00) に走らせる。
 
+# /morning(朝の手帖)は休止中。定期実行は停止し、手動実行のみ残す。
+# 再開する場合は下の schedule のコメントを外す。
 on:
-  schedule:
-    - cron: '0 21 * * *'   # UTC 21:00 = JST  6:00
-    - cron: '0  3 * * *'   # UTC  3:00 = JST 12:00
-    - cron: '0  9 * * *'   # UTC  9:00 = JST 18:00
-    - cron: '0 14 * * *'   # UTC 14:00 = JST 23:00
-  workflow_dispatch: {}     # 手動実行も許可
+  # schedule:
+  #   - cron: '0 21 * * *'   # UTC 21:00 = JST  6:00
+  #   - cron: '0  3 * * *'   # UTC  3:00 = JST 12:00
+  #   - cron: '0  9 * * *'   # UTC  9:00 = JST 18:00
+  #   - cron: '0 14 * * *'   # UTC 14:00 = JST 23:00
+  workflow_dispatch: {}     # 手動実行のみ許可
 
 permissions:
   contents: write
