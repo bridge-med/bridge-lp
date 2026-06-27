@@ -43,6 +43,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.bridgemed.worklog',
+      infoPlist: {
+        // Only standard encryption (HTTPS) — exempt from export compliance.
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     android: {
       package: 'com.bridgemed.worklog',
