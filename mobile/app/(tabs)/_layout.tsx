@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
 import type { ColorValue } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '../../components/ThemeProvider';
 
 type FeatherName = ComponentProps<typeof Feather>['name'];
@@ -12,12 +13,14 @@ function icon(name: FeatherName) {
 
 export default function TabsLayout() {
   const c = useColors();
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.muted,
-        tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.line, height: 58, paddingTop: 6 },
+        // Add the bottom safe-area (home indicator) so labels aren't clipped.
+        tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.line, height: 58 + insets.bottom, paddingTop: 6, paddingBottom: insets.bottom },
         tabBarLabelStyle: { fontSize: 10.5, fontFamily: 'ZenKakuGothicNew_500Medium' },
         headerShown: false,
         sceneStyle: { backgroundColor: c.bg },
