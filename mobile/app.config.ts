@@ -6,7 +6,7 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 const ADMOB_ANDROID_APP_ID = process.env.ADMOB_ANDROID_APP_ID ?? '';
 const ADMOB_IOS_APP_ID = process.env.ADMOB_IOS_APP_ID ?? '';
-const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? '3372e2dc-f81b-4bc4-9046-70c2dfa842d5';
+const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? '';
 const EAS_OWNER = process.env.EAS_OWNER ?? 'wataru1531s-team';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
