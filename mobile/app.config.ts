@@ -38,6 +38,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     scheme: 'bridgeworklog',
     userInterfaceStyle: 'light',
     newArchEnabled: true,
+    updates: { url: 'https://u.expo.dev/c05ffae5-4415-417a-ae5c-053edb27acc4' },
+    runtimeVersion: { policy: 'appVersion' },
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.bridgemed.worklog',
