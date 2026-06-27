@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-06-27T03:51:32+00:00",
+  "updated_at": "2026-06-27T08:41:14+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "医療職のキャリアは、専門性だけでは広がりにくい。",
+      "url": "https://note.com/prime_duck4944/n/nc7bc3d021b2f",
+      "guid": "https://note.com/prime_duck4944/n/nc7bc3d021b2f",
+      "pubDate": "2026-06-27T16:03:26+09:00",
+      "date": "2026-06-27",
+      "excerpt": "現場経験に「何を掛け合わせるか」で、選択肢は変わる医療職として働いていると、キャリアの中心にはいつも「専門性」があります。疾患の知識。評価や治療の技術。患者さんへの説明。多職種連携。現場での判断力。後輩指導。チームの中…",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/289225336/rectangle_large_type_2_3b95c4823d2febef1c2f4449ca7eb939.png?width=800"
+    },
     {
       "title": "「頑張ってきたのに評価されない」医療職が、現場経験をキャリアに変える方法",
       "url": "https://note.com/prime_duck4944/n/n38d7543844d2",
@@ -47,15 +56,6 @@
       "date": "2026-05-22",
       "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第4回は MedBoard。 外来クリニックのダッシュボードを作ろうとして、途中で大きく方針転換した話を書きます。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274713141/rectangle_large_type_2_1ab9ace96336568f2344c53df8be14aa.png?width=800"
-    },
-    {
-      "title": "リハ実施計画書、毎月更新が崩れる原因と対策",
-      "url": "https://note.com/prime_duck4944/n/n270c9584fedd",
-      "guid": "https://note.com/prime_duck4944/n/n270c9584fedd",
-      "pubDate": "2026-05-21T07:00:00+09:00",
-      "date": "2026-05-21",
-      "excerpt": "物療オンリーの整形クリニックが運動器リハを始めるためのロードマップを、段階別に整理するシリーズです。第4回は、リハ実施計画書・評価・目標設定の運用。 リハを開始したクリニックでよく聞く悩みが、「リハ実施計画書、毎月の更…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274712379/rectangle_large_type_2_f35914ff4c4d0cbef34bb1a6eb176957.png?width=800"
     }
   ]
 }
