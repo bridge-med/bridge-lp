@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-06-28T13:56:30+00:00",
+  "updated_at": "2026-06-28T19:26:53+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "「BtoBって何？」から始まった、事業会社1年目の用語メモ",
+      "url": "https://note.com/prime_duck4944/n/n5286c2b37784",
+      "guid": "https://note.com/prime_duck4944/n/n5286c2b37784",
+      "pubDate": "2026-06-28T23:10:09+09:00",
+      "date": "2026-06-28",
+      "excerpt": "2026年1月から、医療職から事業会社へ転職しました。正直に言うと、最初に困ったのは仕事内容そのものよりも、会議やチャットで当たり前のように出てくる“ビジネス用語”でした。たとえば、BtoB。今でこそ普通に使っています…",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/289673485/rectangle_large_type_2_42a71fc96f0902c8b2166c89eb72b4ef.png?width=800"
+    },
     {
       "title": "医療職のキャリアは、専門性だけでは広がりにくい。",
       "url": "https://note.com/prime_duck4944/n/nc7bc3d021b2f",
@@ -47,15 +56,6 @@
       "date": "2026-05-23",
       "excerpt": "整形クリニックの加算実務を、現場の運用感込みで整理するシリーズです。第4回は、診療情報提供料(紹介料)。 整形クリニックで意外と取り逃しが多いのが、診療情報提供料(紹介料)です。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/274714268/rectangle_large_type_2_888176b96a44fa2f3a321983f7ff281c.png?width=800"
-    },
-    {
-      "title": "精密な KPI ダッシュボードを作るのを、途中でやめた話 — MedBoard",
-      "url": "https://note.com/prime_duck4944/n/ne39b66792c88",
-      "guid": "https://note.com/prime_duck4944/n/ne39b66792c88",
-      "pubDate": "2026-05-22T07:00:00+09:00",
-      "date": "2026-05-22",
-      "excerpt": "BRIDGE が公開している医療系ツールを、なぜ作ったかと一緒に紹介するシリーズです。第4回は MedBoard。 外来クリニックのダッシュボードを作ろうとして、途中で大きく方針転換した話を書きます。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/274713141/rectangle_large_type_2_1ab9ace96336568f2344c53df8be14aa.png?width=800"
     }
   ]
 }
