@@ -486,6 +486,7 @@ img{display:block;max-width:100%}
       <button class="showcase-tab" data-product="3">ConsultSim</button>
       <button class="showcase-tab" data-product="4">RehaBoard</button>
       <button class="showcase-tab" data-product="5">HIM Quiz</button>
+      <button class="showcase-tab" data-product="6">モヤモヤ診断</button>
     </div>
   </div>
   <div class="showcase-stage">
@@ -509,12 +510,12 @@ img{display:block;max-width:100%}
     <div class="eyebrow kicker" data-reveal>Products</div>
     <h2 data-reveal data-reveal-delay="1"><span class="nowrap">毎日の業務から、</span><span class="em nowrap">道具が生まれる。</span></h2>
     <p data-reveal data-reveal-delay="2">
-      BRIDGEのプロダクトはすべて、橋本の日常業務・学習・課題から生まれています。<span class="nowrap">全10本、公開中です。</span>
+      BRIDGEのプロダクトはすべて、橋本の日常業務・学習・課題から生まれています。<span class="nowrap">全11本、公開中です。</span>
     </p>
     <div class="products-tabs" data-reveal data-reveal-delay="3" id="productsTabs">
-      <button class="products-tab on" data-cat="all">すべて<span class="count" data-count-all>10</span></button>
+      <button class="products-tab on" data-cat="all">すべて<span class="count" data-count-all>11</span></button>
       <button class="products-tab" data-cat="management">経営の視点<span class="count" data-count-management>7</span></button>
-      <button class="products-tab" data-cat="medical">医療の視点<span class="count" data-count-medical>6</span></button>
+      <button class="products-tab" data-cat="medical">医療の視点<span class="count" data-count-medical>7</span></button>
       <button class="products-tab" data-cat="learning">学習の視点<span class="count" data-count-learning>3</span></button>
     </div>
   </div>
@@ -609,8 +610,18 @@ img{display:block;max-width:100%}
         <span class="product-card-link">受け取る →</span>
       </div>
     </a>
+    <a class="product-card" href="./moyamoya/index.html" target="_blank" data-reveal data-cat="medical">
+      <div class="product-card-thumb"><img src="images/products/moyamoya.png" alt="職場モヤモヤ診断 トップ画面" loading="lazy"></div>
+      <div class="product-card-body">
+        <div class="product-card-num">PRODUCT 10</div>
+        <div class="product-card-name">Moyamoya Check<span class="jp">職場モヤモヤ診断</span></div>
+        <div class="product-card-tagline">そのしんどさ、どこから来ている? 職場の“なんとなくしんどい”を10問で言語化する診断。</div>
+        <div class="product-card-tags"><span>10問・約3分</span><span>6タイプ診断</span><span>登録不要</span></div>
+        <span class="product-card-link">診断してみる →</span>
+      </div>
+    </a>
     <a class="product-card no-thumb" href="https://bridge-med.github.io/bridge-lp/" target="_blank" data-reveal data-cat="management">
-      <div class="product-card-num">PRODUCT 10</div>
+      <div class="product-card-num">PRODUCT 11</div>
       <div class="product-card-name">BRIDGE LP<span class="jp">この場所</span></div>
       <div class="product-card-tagline">会社紹介ページ。あなたが今いる場所も、BRIDGEのプロダクトの1つです。</div>
       <div class="product-card-tags"><span>単一HTML</span><span>GitHub Pages</span><span>ノーフレームワーク</span></div>
@@ -975,6 +986,7 @@ const SHOWCASE = [
   {n:'06', name:'ConsultSim', jp:'コンサルトシム', url:'https://bridge-med.github.io/consult-simulator/', desc:'診察オペレーション設計シミュレーター。1診/2診体制 × 曜日ごとの診察時間カスタム × グループ同期で、院長の「こう回したい」を数字で見える化。', tags:['1診/2診','曜日カスタム','需給サマリー']},
   {n:'01', name:'RehaBoard', jp:'リハボード', url:'https://bridge-med.github.io/rehaboard-demo/', desc:'リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。PT別実績、朝礼サマリーまで。中小規模医療機関に「導入会議が要らない軽さ」で。', tags:['ダッシュボード','PT別実績','朝礼サマリー']},
   {n:'03', name:'HIM Quiz', jp:'診療情報管理士 模試', url:'https://bridge-med.github.io/him-quiz/', desc:'全12章・360問。模擬試験モード・章別正答率・間違い蓄積で復習。橋本本人が学習中の診療情報管理士の試験対策として、自分のために作った。', tags:['360問','模擬試験','復習機能']},
+  {n:'10', name:'Moyamoya Check', jp:'職場モヤモヤ診断', url:'https://bridge-med.github.io/bridge-lp/moyamoya/', desc:'頑張っているのに報われない。上司に振り回される。成長できている気がしない。そんな職場の“なんとなくしんどい”を、10問・約3分の診断で言語化。評価・振り回され・成長・人間関係・忙しさ・意味の6タイプで、モヤモヤの正体を整理する。', tags:['10問・約3分','6タイプ診断','登録不要']},
 ];
 
 // ===== Tab switching =====
