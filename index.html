@@ -259,11 +259,56 @@ section[id]{scroll-margin-top:90px}
 /* 落款(はんこ) */
 .hanko{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--vermilion);color:#fff;font:700 15px/1 var(--serif-jp);border-radius:4px;transform:rotate(-4deg);box-shadow:0 1px 4px rgba(200,85,61,0.35);letter-spacing:0;vertical-align:middle;margin-left:10px}
 
+/* ===== v2.0 — ページ間トランジション ===== */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-out .22s ease both}
+::view-transition-new(root){animation:vt-in .3s ease both}
+@keyframes vt-out{to{opacity:0;transform:translateY(-10px)}}
+@keyframes vt-in{from{opacity:0;transform:translateY(12px)}}
+
+/* ===== v2.0 — 見出しに朱のマーカーがすっと引かれる ===== */
+.hero-h .marker{background-image:linear-gradient(104deg,rgba(200,85,61,0.16) 1%,rgba(200,85,61,0.26) 96%);background-repeat:no-repeat;background-size:0% 40%;background-position:0 82%;animation:sweep .9s cubic-bezier(0.2,0.7,0.2,1) 1.15s forwards}
+@keyframes sweep{to{background-size:100% 40%}}
+
+/* ===== v2.0 — 現場と経営に、橋が架かる ===== */
+.hero-bridge{display:flex;align-items:flex-end;gap:18px;max-width:620px;margin-bottom:44px}
+.hb-svg{flex:1;min-width:0;height:74px;overflow:visible}
+.hb-svg path{stroke:var(--ink-4);stroke-linecap:round;fill:none}
+.hb-arc{stroke:var(--vermilion);stroke-width:2.5;stroke-dasharray:780;stroke-dashoffset:780;animation:hbdraw 1.5s cubic-bezier(0.4,0,0.2,1) 0.9s forwards}
+.hb-p1,.hb-p2,.hb-p3{stroke-width:1.5;opacity:0;animation:hbfade .5s ease forwards}
+.hb-p1{animation-delay:1.45s}.hb-p2{animation-delay:1.65s}.hb-p3{animation-delay:1.85s}
+.hb-deck{stroke-width:1.5}
+@keyframes hbdraw{to{stroke-dashoffset:0}}
+@keyframes hbfade{to{opacity:0.9}}
+.hb-side{display:flex;flex-direction:column;gap:5px;align-items:center;flex-shrink:0}
+.hb-jp{font:900 15px/1 var(--serif-jp);color:var(--ink-2)}
+.hb-en{font:600 8px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ===== v2.0 — 流れる看板(マーキー) ===== */
+.marquee{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper);padding:16px 0;position:relative;z-index:2}
+.marquee-track{display:flex;width:max-content;animation:marq 36s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-set{display:flex;align-items:center;gap:44px;padding-right:44px;font:700 13px/1 var(--serif-jp);color:var(--ink-3);white-space:nowrap}
+.marquee-set i{font:italic 700 12px/1 var(--serif-en);color:var(--vermilion);letter-spacing:0.04em}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* ===== v2.0 — カルテ用紙(方眼)と処方箋モチーフ ===== */
+.foryou,.manifesto{background-image:linear-gradient(rgba(27,73,101,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(27,73,101,0.045) 1px,transparent 1px);background-size:24px 24px}
+.product-card-num{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px dashed var(--line-w)}
+.product-card-num::after{content:'✚ BRIDGE';font:800 8px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-4)}
+.product-card::after{content:'効';position:absolute;top:14px;right:14px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--vermilion);color:#fff;font:700 21px/1 var(--serif-jp);border-radius:6px;transform:rotate(14deg) scale(0);opacity:0;transition:transform .3s cubic-bezier(0.34,1.56,0.64,1),opacity .18s;z-index:3;box-shadow:0 2px 10px rgba(200,85,61,0.4);pointer-events:none}
+.product-card:hover::after{transform:rotate(-5deg) scale(1);opacity:0.94}
+
 /* motion に配慮 */
 @media(prefers-reduced-motion:reduce){
   [data-reveal]{opacity:1;transform:none;transition:none}
   html{scroll-behavior:auto}
   .scroll-hint{animation:none}
+  .hero-h .marker{animation:none;background-size:100% 40%}
+  .hb-arc{animation:none;stroke-dashoffset:0}
+  .hb-p1,.hb-p2,.hb-p3{animation:none;opacity:0.9}
+  .marquee-track{animation:none}
+  .product-card::after{transition:none}
 }
 
 </style>
@@ -292,12 +337,23 @@ section[id]{scroll-margin-top:90px}
   <div class="hero-inner">
     <div class="hero-eyebrow" data-reveal>BRIDGE — A Small Medical Studio</div>
     <h1 class="hero-h" data-reveal data-reveal-delay="1">
-      現場の<span class="em quote nowrap">面倒くさい</span>を<span class="nowrap">自分ごと</span>として<span class="em nowrap">解く</span>。
+      現場の<span class="em quote nowrap marker">面倒くさい</span>を<span class="nowrap">自分ごと</span>として<span class="em nowrap">解く</span>。
     </h1>
     <p class="hero-sub" data-reveal data-reveal-delay="2">
       理学療法士がひとりで作る、医療の道具屋です。現場の小さな課題から、軽いプロダクトを毎日つくっています。触った現場のためだけに設計します。
     </p>
-    <div class="hero-meta" data-reveal data-reveal-delay="3">
+    <div class="hero-bridge" data-reveal data-reveal-delay="3" aria-hidden="true">
+      <div class="hb-side"><span class="hb-jp">現場</span><span class="hb-en">Clinical Field</span></div>
+      <svg class="hb-svg" viewBox="0 0 520 84" preserveAspectRatio="none">
+        <path class="hb-deck" d="M6 78 H514"/>
+        <path class="hb-p1" d="M133 78 V37"/>
+        <path class="hb-p2" d="M260 78 V23"/>
+        <path class="hb-p3" d="M387 78 V37"/>
+        <path class="hb-arc" d="M6 78 Q260 -34 514 78"/>
+      </svg>
+      <div class="hb-side"><span class="hb-jp">経営</span><span class="hb-en">Management</span></div>
+    </div>
+    <div class="hero-meta" data-reveal data-reveal-delay="4">
       <span>Established 2026</span>
       <span>Tokyo / Remote</span>
       <span>Solo Studio</span>
@@ -305,6 +361,14 @@ section[id]{scroll-margin-top:90px}
   </div>
   <div class="scroll-hint">SCROLL</div>
 </section>
+
+<!-- ============ 流れる看板 ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-set">現場の「面倒くさい」を、自分ごととして解く。<i>BRIDGE — A Small Medical Studio</i>机上の空論は作らない。<i>12 Tools &amp; Counting</i>数字は、対話のためにある。<i>Built by hand. No frameworks.</i>「軽さ」は正義である。<i>Tokyo / Remote</i></span>
+    <span class="marquee-set">現場の「面倒くさい」を、自分ごととして解く。<i>BRIDGE — A Small Medical Studio</i>机上の空論は作らない。<i>12 Tools &amp; Counting</i>数字は、対話のためにある。<i>Built by hand. No frameworks.</i>「軽さ」は正義である。<i>Tokyo / Remote</i></span>
+  </div>
+</div>
 
 <!-- ============ FOR YOU(立場選択) ============ -->
 <section class="foryou">
@@ -357,7 +421,7 @@ section[id]{scroll-margin-top:90px}
         <div class="product-card-name">RehaBoard<span class="jp">リハボード</span></div>
         <div class="product-card-tagline">リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。</div>
         <div class="product-card-tags"><span>ダッシュボード</span><span>PT別実績</span><span>朝礼サマリー</span></div>
-        <span class="product-card-link">詳しく見る →</span>
+        <span class="product-card-link">詳しく見る</span>
       </div>
     </a>
     <a class="product-card" href="./medboard/index.html" target="_blank" data-reveal>
@@ -367,7 +431,7 @@ section[id]{scroll-margin-top:90px}
         <div class="product-card-name">MedBoard<span class="jp">メドボード</span></div>
         <div class="product-card-tagline">外来クリニックの患者フローを、2施設横並びで。「異変に気づく」のが目的。</div>
         <div class="product-card-tags"><span>2施設比較</span><span>入力6項目</span><span>異変アラート</span></div>
-        <span class="product-card-link">詳しく見る →</span>
+        <span class="product-card-link">詳しく見る</span>
       </div>
     </a>
     <a class="product-card" href="./him-quiz/index.html" target="_blank" data-reveal>
@@ -377,7 +441,7 @@ section[id]{scroll-margin-top:90px}
         <div class="product-card-name">HIM Quiz<span class="jp">診療情報管理士 模試</span></div>
         <div class="product-card-tagline">全12章・360問。模擬試験モード・章別正答率・間違い蓄積まで。</div>
         <div class="product-card-tags"><span>360問</span><span>模擬試験</span><span>復習機能</span></div>
-        <span class="product-card-link">詳しく見る →</span>
+        <span class="product-card-link">詳しく見る</span>
       </div>
     </a>
     <a class="product-card" href="./moyamoya/index.html" target="_blank" data-reveal>
@@ -387,7 +451,7 @@ section[id]{scroll-margin-top:90px}
         <div class="product-card-name">Moyamoya Check<span class="jp">職場モヤモヤ診断</span></div>
         <div class="product-card-tagline">そのしんどさ、どこから来ている? 職場の“なんとなくしんどい”を10問で言語化する診断。</div>
         <div class="product-card-tags"><span>10問・約3分</span><span>6タイプ診断</span><span>登録不要</span></div>
-        <span class="product-card-link">診断してみる →</span>
+        <span class="product-card-link">診断してみる</span>
       </div>
     </a>
   </div>
@@ -533,6 +597,17 @@ window.addEventListener('scroll',()=>{
   const h=document.documentElement.scrollHeight-window.innerHeight;
   prog.style.width=(window.scrollY/h*100)+'%';
 });
+
+// ===== Magnetic buttons(マウス環境のみ・reduced-motion 尊重) =====
+if(matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  document.querySelectorAll('.cta-btn,.foryou-btn,.notes-cta').forEach(b=>{
+    b.addEventListener('mousemove',e=>{
+      const r=b.getBoundingClientRect();
+      b.style.transform=`translate(${((e.clientX-r.left-r.width/2)*0.12).toFixed(1)}px,${((e.clientY-r.top-r.height/2)*0.3).toFixed(1)}px)`;
+    });
+    b.addEventListener('mouseleave',()=>{b.style.transform=''});
+  });
+}
 
 </script>
 

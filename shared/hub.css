@@ -159,3 +159,39 @@ section[id]{scroll-margin-top:90px}
   [data-reveal]{opacity:1;transform:none;transition:none}
   html{scroll-behavior:auto}
 }
+
+/* ===== INNOVATION PASS — v2.0 ===== */
+/* ページ間トランジション(対応ブラウザのみ・MPA View Transitions) */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-out .22s ease both}
+::view-transition-new(root){animation:vt-in .3s ease both}
+@keyframes vt-out{to{opacity:0;transform:translateY(-10px)}}
+@keyframes vt-in{from{opacity:0;transform:translateY(12px)}}
+
+/* カルテ用紙(方眼)— alt セクションに敷く */
+section.alt{background-image:linear-gradient(rgba(27,73,101,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(27,73,101,0.05) 1px,transparent 1px);background-size:24px 24px}
+
+/* セクション番号は塗りから輪郭線に(製図・カルテの気配) */
+.s-num-ghost{color:transparent;-webkit-text-stroke:1.5px rgba(10,10,15,0.13);opacity:1}
+
+/* 流れる看板(マーキー) */
+.marquee{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper);padding:16px 0;position:relative;z-index:2}
+.marquee-track{display:flex;width:max-content;animation:marq 36s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-set{display:flex;align-items:center;gap:44px;padding-right:44px;font:700 13px/1 var(--serif-jp);color:var(--ink-3);white-space:nowrap}
+.marquee-set i{font:italic 700 12px/1 var(--serif-en);color:var(--vermilion);letter-spacing:0.04em}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* 処方箋モチーフ:カードの頭に破線罫と小さな朱の十字 */
+.product-card-num{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px dashed var(--line-w)}
+.product-card-num::after{content:'✚ BRIDGE';font:800 8px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-4)}
+
+/* ホバーで朱印が押される(道具カード=「効」/ 読み物カード=「読」) */
+.product-card::after,.note-card::after{content:'効';position:absolute;top:14px;right:14px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--vermilion);color:#fff;font:700 21px/1 var(--serif-jp);border-radius:6px;transform:rotate(14deg) scale(0);opacity:0;transition:transform .3s cubic-bezier(0.34,1.56,0.64,1),opacity .18s;z-index:3;box-shadow:0 2px 10px rgba(200,85,61,0.4);pointer-events:none}
+.note-card::after{content:'読'}
+.product-card:hover::after,.note-card:hover::after{transform:rotate(-5deg) scale(1);opacity:0.94}
+
+@media(prefers-reduced-motion:reduce){
+  .marquee-track{animation:none}
+  .product-card::after,.note-card::after{transition:none}
+}
