@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/subpage.css">
 <link rel="stylesheet" href="../shared/hub.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8553D'/%3E%3Ctext x='33' y='46' font-family='Georgia,serif' font-size='40' font-style='italic' font-weight='700' text-anchor='middle' fill='%23FAFAF7'%3EB%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 
@@ -22,7 +23,7 @@
 <nav class="nav" id="nav">
   <a href="../index.html" class="nav-logo">BRIDGE<span class="dot">.</span></a>
   <div class="nav-links">
-    <a href="./index.html" class="on">Tools</a>
+    <a href="./index.html" class="on" aria-current="page">Tools</a>
     <a href="../starter-kits/index.html">Kits</a>
     <a href="../journal/index.html">Journal</a>
     <a href="../about/index.html">Founder</a>
@@ -32,6 +33,8 @@
 
 <!-- HERO -->
 <section class="hero">
+  <div class="hero-mark" aria-hidden="true">Tools</div>
+  <div class="hero-vertical" aria-hidden="true">道具は、現場から。</div>
   <div class="hero-inner">
     <div class="hero-eyebrow" data-reveal>Tools — All Products</div>
     <h1 class="hero-h" data-reveal>毎日の業務から、<span class="em">道具</span>が生まれる。</h1>
@@ -43,14 +46,22 @@
       <span>4 Categories</span>
       <span>Browser Only</span>
     </div>
+    <div class="jump-row" data-reveal>
+      <a class="jump-chip" href="#management"><span class="n">01</span>経営・運営系<span class="c">5</span></a>
+      <a class="jump-chip" href="#learning"><span class="n">02</span>学習系<span class="c">3</span></a>
+      <a class="jump-chip" href="#casual"><span class="n">03</span>診断・ライト系<span class="c">3</span></a>
+      <a class="jump-chip" href="#free"><span class="n">04</span>無料配布・テンプレ<span class="c">1</span></a>
+      <a class="jump-chip" href="#live"><span class="n">05</span>その場で触る<span class="c">Live</span></a>
+    </div>
   </div>
 </section>
 
 <!-- ============ 経営・運営系 ============ -->
 <section id="management">
   <div class="s-inner">
+    <div class="s-num-ghost" aria-hidden="true">01</div>
     <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>01 — Management &amp; Operations</div>
+      <div class="eyebrow kicker" data-reveal>01 — Management &amp; Operations · 5 Tools</div>
       <h2 data-reveal><span class="nowrap">経営・</span><span class="em nowrap">運営系。</span></h2>
       <p data-reveal>リハ部門・外来クリニックの運営、採用、面接、診察オペレーション。「数字で詰めない、数字で対話する」ための道具たち。</p>
     </div>
@@ -61,7 +72,7 @@
           <div class="product-card-num">PRODUCT 01</div>
           <div class="product-card-name">RehaBoard<span class="jp">リハボード</span></div>
           <div class="product-card-tagline">リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。</div>
-          <div class="product-card-tags"><span>ダッシュボード</span><span>PT別実績</span><span>朝礼サマリー</span></div>
+          <div class="product-card-tags"><span class="hot">買い切り ¥1,980</span><span>ダッシュボード</span><span>PT別実績</span><span>朝礼サマリー</span></div>
           <span class="product-card-link">詳しく見る →</span>
         </div>
       </a>
@@ -112,8 +123,9 @@
 <!-- ============ 学習系 ============ -->
 <section class="alt" id="learning">
   <div class="s-inner">
+    <div class="s-num-ghost" aria-hidden="true">02</div>
     <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>02 — Learning</div>
+      <div class="eyebrow kicker" data-reveal>02 — Learning · 3 Tools</div>
       <h2 data-reveal><span class="em nowrap">学習系。</span></h2>
       <p data-reveal>橋本本人が学習中のテーマから生まれた道具。まず自分が毎日使う、が前提です。</p>
     </div>
@@ -155,8 +167,9 @@
 <!-- ============ 診断・ライトコンテンツ系 ============ -->
 <section id="casual">
   <div class="s-inner">
+    <div class="s-num-ghost" aria-hidden="true">03</div>
     <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>03 — Quick Checks &amp; Light Contents</div>
+      <div class="eyebrow kicker" data-reveal>03 — Quick Checks &amp; Light Contents · 3 Tools</div>
       <h2 data-reveal><span class="nowrap">診断・</span><span class="em nowrap">ライトコンテンツ系。</span></h2>
       <p data-reveal>登録不要・数分で触れる、小さなコンテンツ。まずはここから遊んでみるのが、いちばん軽い入口です。</p>
     </div>
@@ -192,8 +205,9 @@
 <!-- ============ 無料配布・テンプレ系 ============ -->
 <section class="alt" id="free">
   <div class="s-inner">
+    <div class="s-num-ghost" aria-hidden="true">04</div>
     <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>04 — Free Templates</div>
+      <div class="eyebrow kicker" data-reveal>04 — Free Templates · 1 Kit</div>
       <h2 data-reveal><span class="nowrap">無料配布・</span><span class="em nowrap">テンプレ系。</span></h2>
       <p data-reveal>そのまま現場で使える形に整えた配布物。買い切りキットとあわせて、Starter Kits にもまとめています。</p>
     </div>
@@ -204,7 +218,7 @@
           <div class="product-card-num">PRODUCT 09 · 無料配布</div>
           <div class="product-card-name">Reha Checklist<span class="jp">リハ部門 KPI チェックリスト</span></div>
           <div class="product-card-tagline">整形外科クリニック向け 外来リハ KPI 見える化スターターキット。PDF + スプレッドシート雛形を無料配布。</div>
-          <div class="product-card-tags"><span>無料配布</span><span>KPI 18項目</span><span>1週間で試せる</span></div>
+          <div class="product-card-tags"><span class="free">無料配布</span><span>KPI 18項目</span><span>1週間で試せる</span></div>
           <span class="product-card-link">受け取る →</span>
         </div>
       </a>

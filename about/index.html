@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/subpage.css">
 <link rel="stylesheet" href="../shared/hub.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8553D'/%3E%3Ctext x='33' y='46' font-family='Georgia,serif' font-size='40' font-style='italic' font-weight='700' text-anchor='middle' fill='%23FAFAF7'%3EB%3C/text%3E%3C/svg%3E">
 <style>
 /* ===== FOUNDER(LPから移設) ===== */
 .founder{padding:120px var(--pad-x);background:var(--paper-2);position:relative;overflow:hidden}
@@ -117,13 +118,15 @@
     <a href="../products/index.html">Tools</a>
     <a href="../starter-kits/index.html">Kits</a>
     <a href="../journal/index.html">Journal</a>
-    <a href="./index.html" class="on">Founder</a>
+    <a href="./index.html" class="on" aria-current="page">Founder</a>
     <a href="../index.html#contact">Contact</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
+  <div class="hero-mark" aria-hidden="true">About</div>
+  <div class="hero-vertical" aria-hidden="true">机上の空論は、作らない。</div>
   <div class="hero-inner">
     <div class="hero-eyebrow" data-reveal>About / Founder</div>
     <h1 class="hero-h" data-reveal><span class="nowrap">臨床</span><span class="em">×</span><span class="nowrap">研究</span><span class="em">×</span><span class="nowrap">経営、</span><br class="br-sp"><span class="em nowrap">そして道具づくり。</span></h1>
@@ -165,7 +168,7 @@
 
     <div class="founder-quote-box" data-reveal>
       <q><span class="nowrap">医療を持続可能にするには、</span><span class="nowrap">経営の視点が要る。</span><br class="br-pc"><span class="nowrap">そう気づいた理学療法士が、</span><span class="nowrap">いま道具を作っている。</span></q>
-      <span class="cite">— Wataru Hashimoto</span>
+      <span class="cite">— Wataru Hashimoto<span class="hanko" aria-hidden="true">橋</span></span>
     </div>
 
     <div class="founder-timeline">

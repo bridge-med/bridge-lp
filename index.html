@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8553D'/%3E%3Ctext x='33' y='46' font-family='Georgia,serif' font-size='40' font-style='italic' font-weight='700' text-anchor='middle' fill='%23FAFAF7'%3EB%3C/text%3E%3C/svg%3E">
 
 <style>
 /* ===== BASE ===== */
@@ -255,6 +256,16 @@ section[id]{scroll-margin-top:90px}
 /* progress bar */
 .progress{position:fixed;top:0;left:0;height:2px;background:var(--vermilion);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px rgba(200,85,61,0.5)}
 
+/* 落款(はんこ) */
+.hanko{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--vermilion);color:#fff;font:700 15px/1 var(--serif-jp);border-radius:4px;transform:rotate(-4deg);box-shadow:0 1px 4px rgba(200,85,61,0.35);letter-spacing:0;vertical-align:middle;margin-left:10px}
+
+/* motion に配慮 */
+@media(prefers-reduced-motion:reduce){
+  [data-reveal]{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+  .scroll-hint{animation:none}
+}
+
 </style>
 </head>
 <body>
@@ -322,7 +333,7 @@ section[id]{scroll-margin-top:90px}
     <p class="manifesto-body" data-reveal data-reveal-delay="2">
       BRIDGEは、自分が最初のユーザーになる小さな道具屋です。現場で動いた人間が、自分のために作り、自分で使う。その過程をそのまま発信する。重厚なSaaSではなく、明日から使える軽いものを、ひとつずつ。
     </p>
-    <div class="manifesto-sig" data-reveal data-reveal-delay="3">— Hashimoto Wataru / Founder</div>
+    <div class="manifesto-sig" data-reveal data-reveal-delay="3">— Hashimoto Wataru / Founder<span class="hanko" aria-hidden="true">橋</span></div>
     <div data-reveal data-reveal-delay="4">
       <a href="./about/index.html" class="note-link">この思想の続きと制作スタンスは、Founder ページに</a>
     </div>
@@ -442,7 +453,7 @@ section[id]{scroll-margin-top:90px}
 
     <div class="founder-quote" data-reveal>
       <q><span class="nowrap">医療を持続可能にするには、</span><span class="nowrap">経営の視点が要る。</span><br class="br-pc"><span class="nowrap">そう気づいた理学療法士が、</span><span class="nowrap">いま道具を作っている。</span></q>
-      <span class="cite">— Wataru Hashimoto</span>
+      <span class="cite">— Wataru Hashimoto<span class="hanko" aria-hidden="true">橋</span></span>
     </div>
 
     <div class="founder-foot" data-reveal>
