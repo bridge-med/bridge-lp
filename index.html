@@ -270,19 +270,36 @@ section[id]{scroll-margin-top:90px}
 .hero-h .marker{background-image:linear-gradient(104deg,rgba(200,85,61,0.16) 1%,rgba(200,85,61,0.26) 96%);background-repeat:no-repeat;background-size:0% 40%;background-position:0 82%;animation:sweep .9s cubic-bezier(0.2,0.7,0.2,1) 1.15s forwards}
 @keyframes sweep{to{background-size:100% 40%}}
 
-/* ===== v2.0 — 現場と経営に、橋が架かる ===== */
-.hero-bridge{display:flex;align-items:flex-end;gap:18px;max-width:620px;margin-bottom:44px}
-.hb-svg{flex:1;min-width:0;height:74px;overflow:visible}
-.hb-svg path{stroke:var(--ink-4);stroke-linecap:round;fill:none}
-.hb-arc{stroke:var(--vermilion);stroke-width:2.5;stroke-dasharray:780;stroke-dashoffset:780;animation:hbdraw 1.5s cubic-bezier(0.4,0,0.2,1) 0.9s forwards}
-.hb-p1,.hb-p2,.hb-p3{stroke-width:1.5;opacity:0;animation:hbfade .5s ease forwards}
-.hb-p1{animation-delay:1.45s}.hb-p2{animation-delay:1.65s}.hb-p3{animation-delay:1.85s}
-.hb-deck{stroke-width:1.5}
-@keyframes hbdraw{to{stroke-dashoffset:0}}
-@keyframes hbfade{to{opacity:0.9}}
+/* ===== v3.0 — 現場と経営を、心電図が繋ぐ ===== */
+.hero-bridge{display:flex;align-items:center;gap:18px;max-width:640px;margin-bottom:44px}
+.hb-canvas{flex:1;min-width:0;height:72px;display:block}
 .hb-side{display:flex;flex-direction:column;gap:5px;align-items:center;flex-shrink:0}
 .hb-jp{font:900 15px/1 var(--serif-jp);color:var(--ink-2)}
 .hb-en{font:600 8px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ===== v3.0 — 心電図の区切り線(スクロールで描画) ===== */
+.ecg-divider{padding:46px var(--pad-x) 0;background:var(--paper)}
+.ecg-divider svg{display:block;max-width:var(--max);margin:0 auto;width:100%;height:64px;overflow:visible}
+.ecg-divider path{fill:none;stroke:var(--vermilion);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:0.55;stroke-dasharray:1600;stroke-dashoffset:1600}
+.ecg-divider.vis path{animation:ecgdraw 2s cubic-bezier(0.3,0,0.2,1) forwards}
+@keyframes ecgdraw{to{stroke-dashoffset:0}}
+
+/* ===== v3.0 — 目次(スクロールスパイ) ===== */
+.toc{position:fixed;right:clamp(14px,2.2vw,34px);top:50%;transform:translateY(-50%);z-index:95;display:flex;flex-direction:column;gap:15px}
+.toc a{display:flex;align-items:center;justify-content:flex-end;gap:9px}
+.toc .lbl{font:700 10px/1 var(--sans-jp);color:var(--ink-2);opacity:0;transform:translateX(6px);transition:opacity .25s,transform .25s;letter-spacing:0.04em}
+.toc .num{font:800 9px/1 var(--sans-en);color:var(--ink-4);letter-spacing:0.08em;transition:color .2s}
+.toc .bar{width:16px;height:1px;background:var(--ink-4);transition:width .25s,background .25s}
+.toc a:hover .lbl{opacity:1;transform:none}
+.toc a:hover .num{color:var(--ink)}
+.toc a.on .num{color:var(--vermilion)}
+.toc a.on .bar{width:32px;background:var(--vermilion)}
+.toc a.on .lbl{opacity:1;transform:none;color:var(--ink)}
+@media(max-width:1100px){.toc{display:none}}
+
+/* ===== v3.0 — 語単位リビール(Manifesto) ===== */
+[data-words] .w{display:inline-block;opacity:0.07;transform:translateY(0.3em);transition:opacity .7s cubic-bezier(0.2,0.7,0.2,1),transform .7s cubic-bezier(0.2,0.7,0.2,1)}
+[data-words].vis .w{opacity:1;transform:none}
 
 /* ===== v2.0 — 流れる看板(マーキー) ===== */
 .marquee{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper);padding:16px 0;position:relative;z-index:2}
@@ -305,8 +322,8 @@ section[id]{scroll-margin-top:90px}
   html{scroll-behavior:auto}
   .scroll-hint{animation:none}
   .hero-h .marker{animation:none;background-size:100% 40%}
-  .hb-arc{animation:none;stroke-dashoffset:0}
-  .hb-p1,.hb-p2,.hb-p3{animation:none;opacity:0.9}
+  .ecg-divider path{animation:none;stroke-dashoffset:0}
+  [data-words] .w{opacity:1;transform:none;transition:none}
   .marquee-track{animation:none}
   .product-card::after{transition:none}
 }
@@ -316,6 +333,17 @@ section[id]{scroll-margin-top:90px}
 <body>
 
 <div class="progress" id="prog"></div>
+
+<!-- ============ 目次(スクロールスパイ) ============ -->
+<nav class="toc" id="toc" aria-label="ページ内目次">
+  <a href="#top"><span class="lbl">はじめに</span><span class="num">00</span><span class="bar"></span></a>
+  <a href="#manifesto"><span class="lbl">思想</span><span class="num">01</span><span class="bar"></span></a>
+  <a href="#products"><span class="lbl">道具</span><span class="num">02</span><span class="bar"></span></a>
+  <a href="#starter-kits"><span class="lbl">キット</span><span class="num">03</span><span class="bar"></span></a>
+  <a href="#journal"><span class="lbl">手記</span><span class="num">04</span><span class="bar"></span></a>
+  <a href="#founder"><span class="lbl">店主</span><span class="num">05</span><span class="bar"></span></a>
+  <a href="#contact"><span class="lbl">相談</span><span class="num">06</span><span class="bar"></span></a>
+</nav>
 
 <!-- ============ NAV ============ -->
 <nav class="nav" id="nav">
@@ -340,17 +368,11 @@ section[id]{scroll-margin-top:90px}
       現場の<span class="em quote nowrap marker">面倒くさい</span>を<span class="nowrap">自分ごと</span>として<span class="em nowrap">解く</span>。
     </h1>
     <p class="hero-sub" data-reveal data-reveal-delay="2">
-      理学療法士がひとりで作る、医療の道具屋です。現場の小さな課題から、軽いプロダクトを毎日つくっています。触った現場のためだけに設計します。
+      理学療法士がひとりで作る、医療の道具屋。現場の小さな課題から、明日使える軽い道具を。
     </p>
     <div class="hero-bridge" data-reveal data-reveal-delay="3" aria-hidden="true">
       <div class="hb-side"><span class="hb-jp">現場</span><span class="hb-en">Clinical Field</span></div>
-      <svg class="hb-svg" viewBox="0 0 520 84" preserveAspectRatio="none">
-        <path class="hb-deck" d="M6 78 H514"/>
-        <path class="hb-p1" d="M133 78 V37"/>
-        <path class="hb-p2" d="M260 78 V23"/>
-        <path class="hb-p3" d="M387 78 V37"/>
-        <path class="hb-arc" d="M6 78 Q260 -34 514 78"/>
-      </svg>
+      <canvas class="hb-canvas" id="ecgBridge" width="560" height="108"></canvas>
       <div class="hb-side"><span class="hb-jp">経営</span><span class="hb-en">Management</span></div>
     </div>
     <div class="hero-meta" data-reveal data-reveal-delay="4">
@@ -385,24 +407,27 @@ section[id]{scroll-margin-top:90px}
 </section>
 
 <!-- ============ MANIFESTO ============ -->
-<section class="manifesto">
+<section class="manifesto" id="manifesto">
   <div class="manifesto-inner">
     <div class="eyebrow kicker manifesto-eyebrow" data-reveal>Manifesto</div>
-    <p class="manifesto-q" data-reveal data-reveal-delay="1">
-      <span class="em">机上の空論は作らない。</span><br>
-      <span class="nowrap">触ったことのない現場に、</span><span class="nowrap">プロダクトは作れない。</span><br>
-      <span class="nowrap">数字は縛るためでなく、</span><span class="nowrap">対話のためにある。</span><br>
-      そして<span class="em">「軽さ」は正義である。</span>
+    <p class="manifesto-q" data-words>
+      <span class="em">机上の空論は 作らない。</span><br>
+      数字は 縛るためでなく、 <span class="nowrap">対話のためにある。</span><br>
+      そして <span class="em">「軽さ」は正義である。</span>
     </p>
     <p class="manifesto-body" data-reveal data-reveal-delay="2">
-      BRIDGEは、自分が最初のユーザーになる小さな道具屋です。現場で動いた人間が、自分のために作り、自分で使う。その過程をそのまま発信する。重厚なSaaSではなく、明日から使える軽いものを、ひとつずつ。
+      自分が最初のユーザーになる、小さな道具屋。重厚なSaaSではなく、明日から使える軽いものを、ひとつずつ。
     </p>
     <div class="manifesto-sig" data-reveal data-reveal-delay="3">— Hashimoto Wataru / Founder<span class="hanko" aria-hidden="true">橋</span></div>
     <div data-reveal data-reveal-delay="4">
-      <a href="./about/index.html" class="note-link">この思想の続きと制作スタンスは、Founder ページに</a>
+      <a href="./about/index.html" class="note-link">思想の続きは、Founder ページに</a>
     </div>
   </div>
 </section>
+
+<div class="ecg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 64" preserveAspectRatio="none"><path d="M0 36 H340 L360 36 L372 10 L386 56 L398 24 L412 36 H700 L716 36 L726 18 L738 50 L748 30 L760 36 H1200"/></svg>
+</div>
 
 <!-- ============ FEATURED TOOLS ============ -->
 <section class="products" id="products">
@@ -410,7 +435,7 @@ section[id]{scroll-margin-top:90px}
     <div class="eyebrow kicker" data-reveal>Featured Tools</div>
     <h2 data-reveal data-reveal-delay="1"><span class="nowrap">毎日の業務から、</span><span class="em nowrap">道具が生まれる。</span></h2>
     <p data-reveal data-reveal-delay="2">
-      BRIDGEのプロダクトはすべて、橋本の日常業務・学習・課題から生まれています。<span class="nowrap">まずは代表的な4本を。</span>全プロダクトの一覧は Tools ページにまとめました。
+      すべて、日常業務から生まれた道具。<span class="nowrap">まずは代表の4本を。</span>
     </p>
   </div>
   <div class="products-grid" id="productsGrid">
@@ -466,7 +491,7 @@ section[id]{scroll-margin-top:90px}
     <div class="eyebrow kicker" data-reveal>Starter Kits</div>
     <h2 data-reveal data-reveal-delay="1"><span class="nowrap">明日から使える、</span><span class="em nowrap">小さな道具屋。</span></h2>
     <p data-reveal data-reveal-delay="2">
-      買い切りの RehaBoard(¥1,980)と、無料配布のリハ部門 KPI チェックリスト。日々の業務で生まれた道具のうち、現場で再利用しやすい形に整えたものを、Starter Kits にまとめています。<span class="nowrap">重厚なシステム導入の前に、まず軽く始められる形で。</span>
+      買い切りの RehaBoard(¥1,980)と、無料のKPIチェックリスト。<span class="nowrap">導入会議の要らない軽さで。</span>
     </p>
   </div>
   <div class="toolbox-teaser" data-reveal data-reveal-delay="3">
@@ -481,7 +506,7 @@ section[id]{scroll-margin-top:90px}
     <div class="eyebrow kicker" data-reveal>Journal</div>
     <h2 data-reveal data-reveal-delay="1"><span class="nowrap">日々の手記と、</span><span class="em nowrap">実験室。</span></h2>
     <p data-reveal data-reveal-delay="2">
-      note の記事、朝の手帖、仕事日記、診断やゲームのような実験的なコンテンツ。<span class="nowrap">プロダクトの背景は、ここを読むと一番伝わります。</span>
+      note・朝の手帖・仕事日記・実験室。<span class="nowrap">道具になる前の「途中」も、そのまま。</span>
     </p>
   </div>
   <div class="notes-actions" data-reveal data-reveal-delay="3">
@@ -510,7 +535,7 @@ section[id]{scroll-margin-top:90px}
         </h2>
         <span class="role-tag" data-reveal data-reveal-delay="2">PT × Consultant × Builder</span>
         <p class="founder-intro" data-reveal data-reveal-delay="3">
-          現場で患者を診て、大学院で論文を書き、事業会社で医療経営の数字に責任を持ち、いまBRIDGEで道具を作る。<span class="nowrap">「臨床×研究×経営」</span>を一人で繋ぐことが、設計の出発点です。
+          現場で診て、大学院で書き、経営の数字に責任を持ち、いま道具を作る。<span class="nowrap">「臨床×研究×経営」</span>を、一人で繋ぐ。
         </p>
       </div>
     </div>
@@ -539,6 +564,10 @@ section[id]{scroll-margin-top:90px}
   </div>
 </section>
 
+<div class="ecg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 64" preserveAspectRatio="none"><path d="M0 36 H480 L496 36 L508 8 L522 58 L534 22 L548 36 H1200"/></svg>
+</div>
+
 <!-- ============ CTA ============ -->
 <section class="cta-section" id="contact">
   <div class="cta-inner">
@@ -547,7 +576,7 @@ section[id]{scroll-margin-top:90px}
       現場の<span class="em quote nowrap">面倒くさい</span>が<span class="nowrap">あれば</span>、<span class="nowrap">教えてください。</span>
     </h2>
     <p class="cta-sub" data-reveal data-reveal-delay="2">
-      受託・SaaS導入・業務分析・コンテンツ寄稿、何でも。まずは話を聞かせてください。<span class="nowrap">返信はできるだけ早く。</span>
+      受託・導入・業務分析、何でも。<span class="nowrap">返信はできるだけ早く。</span>
     </p>
     <div class="cta-actions" data-reveal data-reveal-delay="3">
       <a href="mailto:h.w19961013@gmail.com" class="cta-btn primary">メールで相談</a>
@@ -585,9 +614,90 @@ section[id]{scroll-margin-top:90px}
 </footer>
 
 <script>
-// ===== Reveal on scroll =====
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ===== Reveal on scroll(区切り線・語リビールも同じ観測で) =====
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target)}})},{threshold:0.12});
-document.querySelectorAll('[data-reveal]').forEach(el=>io.observe(el));
+document.querySelectorAll('[data-reveal],.ecg-divider,[data-words]').forEach(el=>io.observe(el));
+
+// ===== Manifesto: 語単位リビール =====
+document.querySelectorAll('[data-words]').forEach(el=>{
+  const frag=document.createDocumentFragment();
+  [...el.childNodes].forEach(node=>{
+    if(node.nodeType===3){
+      node.textContent.split(/\s+/).filter(Boolean).forEach(w=>{
+        const s=document.createElement('span');s.className='w';s.textContent=w;frag.appendChild(s);
+      });
+    }else if(node.nodeType===1){
+      if(node.tagName!=='BR')node.classList.add('w');
+      frag.appendChild(node);
+    }
+  });
+  el.textContent='';el.appendChild(frag);
+  el.querySelectorAll('.w').forEach((s,i)=>{s.style.transitionDelay=(i*90)+'ms'});
+});
+
+// ===== 現場と経営を繋ぐ心電図(朱) =====
+const cv=document.getElementById('ecgBridge');
+if(cv){
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,base=H*0.58;
+  const wave=t=>{
+    const p=t%190;
+    if(p<10)return -8*Math.sin(p/10*Math.PI);
+    if(p<20)return 0;
+    if(p<24)return 13*(p-20)/4;
+    if(p<30)return 13-70*(p-24)/6;
+    if(p<36)return -57+74*(p-30)/6;
+    if(p<46)return 17-17*(p-36)/10;
+    if(p<76)return -11*Math.sin((p-46)/30*Math.PI);
+    return 0;
+  };
+  const buf=new Float32Array(W).fill(base);
+  let head=0,t=0;
+  const GAP=16,SPEED=3;
+  const draw=()=>{
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#C8553D';
+    ctx.lineWidth=2;
+    ctx.shadowColor='rgba(200,85,61,0.55)';
+    ctx.shadowBlur=6;
+    ctx.beginPath();
+    let pen=false;
+    for(let x=0;x<W;x++){
+      const ahead=(x-head+W)%W;
+      if(ahead>0&&ahead<GAP){pen=false;continue}
+      if(!pen){ctx.moveTo(x,buf[x]);pen=true}
+      else ctx.lineTo(x,buf[x]);
+    }
+    ctx.stroke();
+    ctx.fillStyle='#E8836B';
+    ctx.shadowBlur=12;
+    ctx.beginPath();ctx.arc(head,buf[head],2.6,0,Math.PI*2);ctx.fill();
+  };
+  if(REDUCED){
+    for(let x=0;x<W;x++)buf[x]=base+wave(x);
+    draw();
+  }else{
+    (function tick(){
+      for(let i=0;i<SPEED;i++){buf[head]=base+wave(t);head=(head+1)%W;t++}
+      draw();
+      requestAnimationFrame(tick);
+    })();
+  }
+}
+
+// ===== 目次:スクロールスパイ =====
+const tocLinks=[...document.querySelectorAll('#toc a')];
+const secIds=tocLinks.map(a=>a.getAttribute('href').slice(1));
+const spy=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const id=e.target.id;
+    tocLinks.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+id));
+  });
+},{rootMargin:'-42% 0px -52% 0px'});
+secIds.forEach(id=>{const el=document.getElementById(id);if(el)spy.observe(el)});
 
 // ===== Nav scroll state =====
 const nav=document.getElementById('nav');
