@@ -14,6 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     'expo-router',
     ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 200, backgroundColor: '#FBF3E8' }],
     'expo-notifications',
+    '@bacons/apple-targets', // iOS home-screen widget (targets/widget)
   ];
 
   // Only add the AdMob native plugin when app ids are provided (production EAS
@@ -32,7 +33,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ...config,
     name: 'キャリアログ',
     slug: 'bridge-worklog',
-    version: '1.0.0',
+    version: '1.0.1',
     orientation: 'portrait',
     icon: './assets/icon.png',
     scheme: 'bridgeworklog',
@@ -46,6 +47,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       infoPlist: {
         // Only standard encryption (HTTPS) — exempt from export compliance.
         ITSAppUsesNonExemptEncryption: false,
+      },
+      // Shared container with the widget extension.
+      entitlements: {
+        'com.apple.security.application-groups': ['group.com.bridgemed.worklog'],
       },
     },
     android: {

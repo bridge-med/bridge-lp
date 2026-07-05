@@ -15,8 +15,9 @@ import { RewardModal } from '../components/RewardModal';
 import { ThemeProvider, useColors } from '../components/ThemeProvider';
 import { credits } from '../lib/credits';
 import { cosmetics } from '../lib/cosmetics';
-import { loadAll } from '../lib/data';
+import { loadAll, tasks } from '../lib/data';
 import { configureIap } from '../lib/iap';
+import { updateTaskWidget } from '../lib/widget';
 import { scheduleDaily } from '../lib/notifications';
 import { prefs, usePrefs } from '../lib/prefs';
 import { progress } from '../lib/progress';
@@ -79,7 +80,10 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    void loadAll().catch((e) => console.warn('loadAll failed', e?.message));
+    void loadAll()
+      .then(() => updateTaskWidget(tasks.getSnapshot()))
+      .catch((e) => console.warn('loadAll failed', e?.message));
+    const unsubWidget = tasks.subscribe(() => updateTaskWidget(tasks.getSnapshot()));
     void prefs.load().then(() => {
       const p = prefs.getSnapshot();
       if (p.reminderEnabled) void scheduleDaily(p.reminderHour, p.reminderMinute);
@@ -89,6 +93,7 @@ export default function RootLayout() {
     void cosmetics.load();
     void wordbank.load();
     configureIap();
+    return () => unsubWidget();
   }, []);
 
   useEffect(() => {
