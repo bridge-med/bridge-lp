@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KARTE — 現場のカルテ / Concept Model 04 / BRIDGE</title>
+<meta name="description" content="今日は、あなたの職場を診察します。立場を選ぶと、職場の“しんどさ”がカルテ(SOAP形式)に書き起こされ、処方箋には実在する道具が並ぶ。BRIDGEの実験的コンテンツ、Concept Model 04。">
+<meta property="og:title" content="KARTE — 現場のカルテ / BRIDGE">
+<meta property="og:description" content="今日は、あなたの職場を診察します。本カルテはフィクションですが、処方箋は実在します。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/karte/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700;900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FCFAF3'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23C8553D' stroke-width='3'/%3E%3Ctext x='32' y='42' font-family='serif' font-size='26' font-weight='700' text-anchor='middle' fill='%23C8553D'%3E診%3C/text%3E%3C/svg%3E">
+
+<style>
+/* ============================================================
+   BRIDGE — CONCEPT MODEL 04 “KARTE”
+   今日は、あなたの職場を診察します。
+   様式: 診療録(2号用紙風)。雑誌でもモニターでもなく、書類。
+   ============================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --desk:#EFEAD9;            /* 事務机の上 */
+  --sheet:#FCFAF3;           /* カルテ用紙 */
+  --sheet-2:#F6F2E6;
+  --rule:rgba(27,73,101,0.13);      /* 罫線(薄い藍) */
+  --rule-strong:rgba(27,73,101,0.30);
+  --ink:#22262E;             /* 印字の黒 */
+  --ink-2:#5A5F6B;
+  --ink-3:#9A978B;
+  --pen:#2B4A8B;             /* 記入のペン(藍) */
+  --stamp:#C8553D;           /* 朱肉 — 本家LPの朱をそのまま */
+  --stamp-deep:#A8442F;
+  --line:rgba(34,38,46,0.12);
+  --serif:'Noto Serif JP',serif;
+  --sans:'Noto Sans JP',sans-serif;
+  --hand:'Klee One','Noto Sans JP',cursive;
+  --mono:'IBM Plex Mono',monospace;
+  --max:880px;
+  --pad:clamp(18px,4.5vw,56px);
+}
+html{scroll-behavior:smooth}
+body{background:var(--desk);color:var(--ink);font-family:var(--sans);line-height:1.8;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-feature-settings:"palt" 1}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0.03;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");mix-blend-mode:multiply}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--stamp);color:#fff}
+.nowrap{white-space:nowrap}
+h1,h2,h3{text-wrap:balance;word-break:auto-phrase;overflow-wrap:break-word}
+p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px var(--pad);transition:all .3s}
+.nav.scrolled{background:rgba(239,234,217,0.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-logo{font:700 15px/1 var(--serif);letter-spacing:0.2em}
+.nav-logo .dot{color:var(--stamp)}
+.nav-r{display:flex;gap:18px;font:600 10px/1 var(--mono);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-2)}
+.nav-r a{padding:6px 0;transition:color .15s}
+.nav-r a:hover{color:var(--stamp)}
+
+/* ===== COVER(表紙)===== */
+.cover{min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:110px var(--pad) 70px;position:relative}
+.cover-eyebrow{font:600 10px/1 var(--mono);letter-spacing:0.3em;text-transform:uppercase;color:var(--ink-2);margin-bottom:34px;display:inline-flex;align-items:center;gap:12px}
+.cover-eyebrow::before,.cover-eyebrow::after{content:'';width:28px;height:1px;background:var(--ink-3)}
+.cover-h{font:900 clamp(64px,15vw,150px)/1.1 var(--serif);letter-spacing:0.14em;margin-bottom:8px;color:var(--ink)}
+.cover-en{font:500 clamp(9px,1.6vw,12px)/1 var(--mono);letter-spacing:0.42em;text-transform:uppercase;color:var(--ink-2);margin-bottom:44px}
+.cover-sub{font:600 clamp(15px,2.6vw,20px)/2 var(--hand);color:var(--pen);max-width:520px;margin-bottom:14px}
+.cover-note{font:500 11.5px/2 var(--sans);color:var(--ink-2);max-width:460px}
+.cover-note em{font-style:normal;color:var(--stamp);font-weight:700}
+/* 受付印 */
+.stamp-uke{position:absolute;top:clamp(84px,14vh,130px);right:clamp(18px,9vw,120px);width:104px;height:104px;border:2.5px solid var(--stamp);border-radius:50%;color:var(--stamp);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;transform:rotate(7deg);opacity:0;font-family:var(--serif)}
+.stamp-uke .t{font-size:13px;font-weight:700;letter-spacing:0.3em;border-bottom:1.5px solid var(--stamp);padding:0 6px 3px;margin-bottom:3px}
+.stamp-uke .d{font:600 11px/1.3 var(--mono);letter-spacing:0.04em}
+.stamp-uke .b{font-size:9px;font-weight:600;letter-spacing:0.22em;border-top:1.5px solid var(--stamp);padding:3px 6px 0;margin-top:3px}
+.stamp-uke.on{animation:stampin .45s cubic-bezier(0.34,1.4,0.64,1) forwards}
+@keyframes stampin{0%{opacity:0;transform:rotate(7deg) scale(1.7)}55%{opacity:1;transform:rotate(7deg) scale(0.94)}100%{opacity:0.88;transform:rotate(7deg) scale(1)}}
+.scroll-cue{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font:600 9px/1 var(--mono);letter-spacing:0.32em;color:var(--ink-2);text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:9px}
+.scroll-cue::after{content:'';width:1px;height:32px;background:linear-gradient(var(--ink-3),transparent);animation:cue 2s ease-in-out infinite}
+@keyframes cue{0%,100%{transform:scaleY(0.4);opacity:.4}50%{transform:scaleY(1);opacity:1}}
+
+/* ===== 用紙(共通)===== */
+.paper{max-width:var(--max);margin:0 auto;background:var(--sheet);border:1px solid var(--line);border-radius:3px;box-shadow:0 1px 3px rgba(34,38,46,0.06),0 14px 44px rgba(34,38,46,0.09);position:relative}
+.paper::before{content:'';position:absolute;top:0;bottom:0;left:clamp(30px,6vw,52px);width:1px;background:rgba(200,85,61,0.32);pointer-events:none}
+.paper .holes{position:absolute;left:9px;top:0;bottom:0;width:14px;display:flex;flex-direction:column;justify-content:center;gap:110px;pointer-events:none}
+.paper .holes i{width:13px;height:13px;border-radius:50%;background:var(--desk);border:1px solid rgba(34,38,46,0.14);box-shadow:inset 0 1px 2px rgba(34,38,46,0.18)}
+.sec{padding:0 var(--pad)}
+
+/* ===== 問診票(立場選択)===== */
+.intake{padding:30px var(--pad) 10px}
+.intake .paper{padding:clamp(28px,5vw,48px) clamp(24px,7vw,72px)}
+.intake-tag{font:600 9.5px/1 var(--mono);letter-spacing:0.26em;text-transform:uppercase;color:var(--ink-2);margin-bottom:16px}
+.intake-h{font:700 clamp(19px,3.4vw,27px)/1.6 var(--serif);letter-spacing:0.01em;margin-bottom:6px}
+.intake-h .em{color:var(--stamp)}
+.intake-lead{font:500 12.5px/2 var(--sans);color:var(--ink-2);margin-bottom:26px}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.roles{grid-template-columns:1fr}}
+.role-btn{display:flex;align-items:flex-start;gap:13px;text-align:left;padding:16px 18px;background:var(--sheet);border:1px solid var(--line);border-radius:3px;cursor:pointer;font-family:var(--sans);transition:border-color .2s,background .2s;position:relative}
+.role-btn:hover{border-color:var(--ink-2)}
+.role-btn .box{flex-shrink:0;width:17px;height:17px;border:1.5px solid var(--ink-3);border-radius:2px;margin-top:3px;position:relative;transition:border-color .2s}
+.role-btn .box::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 13px/1 var(--hand);color:var(--stamp);opacity:0;transform:scale(1.6) rotate(-8deg);transition:all .2s}
+.role-btn.on{border-color:var(--stamp);background:rgba(200,85,61,0.04)}
+.role-btn.on .box{border-color:var(--stamp)}
+.role-btn.on .box::after{opacity:1;transform:scale(1) rotate(-4deg)}
+.role-btn .r-name{font:700 14px/1.5 var(--sans);color:var(--ink);display:block;margin-bottom:3px}
+.role-btn .r-desc{font:600 11.5px/1.7 var(--hand);color:var(--pen);display:block;opacity:.85}
+
+/* ===== カルテ本体 ===== */
+.chart{padding:26px var(--pad) 10px}
+.chart .paper{padding-bottom:clamp(30px,5vw,50px)}
+.chart-head{display:grid;grid-template-columns:1.5fr 1fr 1fr;border-bottom:2px solid var(--rule-strong)}
+@media(max-width:640px){.chart-head{grid-template-columns:1fr 1fr}}
+.ch-cell{padding:13px 16px 11px clamp(24px,7vw,64px);border-right:1px solid var(--rule);min-width:0}
+.ch-cell:not(:first-child){padding-left:16px}
+.ch-cell:last-child{border-right:0}
+@media(max-width:640px){.ch-cell{border-bottom:1px solid var(--rule)}.ch-cell.wide{grid-column:1/-1}}
+.ch-k{font:600 8.5px/1 var(--mono);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.ch-v{font:600 13.5px/1.5 var(--hand);color:var(--pen)}
+.ch-v.print{font:700 14px/1.4 var(--serif);color:var(--ink)}
+.chart-title{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:20px clamp(24px,7vw,64px) 4px;flex-wrap:wrap}
+.chart-title h2{font:900 clamp(20px,3.6vw,28px)/1.4 var(--serif);letter-spacing:0.06em}
+.chart-title .no{font:500 10px/1 var(--mono);letter-spacing:0.2em;color:var(--ink-3);text-transform:uppercase}
+
+/* SOAP セクション */
+.soap{padding:22px clamp(24px,7vw,64px) 6px;position:relative}
+.soap+.soap{border-top:1px dashed var(--rule-strong);margin-top:14px}
+.soap-tag{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.soap-tag .letter{font:600 30px/1 var(--mono);color:var(--stamp)}
+.soap-tag .name{font:700 13px/1.4 var(--serif);letter-spacing:0.14em;color:var(--ink)}
+.soap-tag .en{font:500 9px/1 var(--mono);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3)}
+/* 記入行 — 罫線の上に手書き */
+.lines{display:flex;flex-direction:column}
+.line{font:600 clamp(14px,2.2vw,16.5px)/1.7 var(--hand);color:var(--pen);padding:7px 0 9px;border-bottom:1px solid var(--rule);position:relative}
+.line .w::before{content:'「';color:var(--ink-3);margin-right:1px}
+.line .w::after{content:'」';color:var(--ink-3)}
+.line.plain .w::before,.line.plain .w::after{content:''}
+/* 所見行(ラベル+点線+値) */
+.o-row{display:flex;align-items:baseline;gap:10px;padding:8px 0 9px;border-bottom:1px solid var(--rule)}
+.o-k{font:600 12px/1.6 var(--sans);color:var(--ink-2);flex-shrink:0}
+.o-dots{flex:1;border-bottom:2px dotted rgba(34,38,46,0.22);transform:translateY(-4px);min-width:24px}
+.o-v{font:600 clamp(13px,2vw,15px)/1.6 var(--hand);color:var(--pen);text-align:right}
+.o-v small{font:500 10.5px/1 var(--sans);color:var(--ink-3)}
+/* 評価 */
+.dx{margin:4px 0 16px;position:relative;padding:18px 20px 16px;border:1px solid var(--rule-strong);background:var(--sheet-2);border-radius:2px}
+.dx-label{font:600 8.5px/1 var(--mono);letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.dx-name{font:600 clamp(19px,3.4vw,26px)/1.5 var(--hand);color:var(--pen);text-decoration:underline wavy rgba(200,85,61,0.5) 1.5px;text-underline-offset:7px}
+.dx-en{font:italic 400 10.5px/1 var(--mono);color:var(--ink-3);margin-top:10px;letter-spacing:0.06em}
+.dx-stamp{position:absolute;top:-13px;right:14px;padding:7px 10px;border:2px solid var(--stamp);color:var(--stamp);font:700 12px/1 var(--serif);letter-spacing:0.24em;transform:rotate(-5deg);background:var(--sheet);border-radius:2px;opacity:0.9}
+.a-note{font:600 clamp(13.5px,2vw,15.5px)/1.9 var(--hand);color:var(--pen);padding:6px 0 8px;border-bottom:1px solid var(--rule)}
+.a-note b{color:var(--stamp-deep);font-weight:600}
+.prog{margin-top:12px;font:500 12px/1.9 var(--sans);color:var(--ink-2)}
+.prog b{color:var(--ink);font-weight:700}
+
+/* 処方箋 Rp */
+.plan-line{font:600 clamp(14px,2.2vw,16px)/1.9 var(--hand);color:var(--pen);margin-bottom:18px}
+.rp{border:1.5px solid var(--rule-strong);border-radius:2px;background:var(--sheet);overflow:hidden}
+.rp-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1.5px solid var(--rule-strong);background:var(--sheet-2)}
+.rp-head .rx{font:italic 600 22px/1 var(--serif);color:var(--stamp)}
+.rp-head .t{font:600 9.5px/1 var(--mono);letter-spacing:0.24em;text-transform:uppercase;color:var(--ink-2)}
+.rp-item{display:block;padding:16px 18px 15px;border-bottom:1px solid var(--rule);transition:background .2s;position:relative}
+.rp-item:last-child{border-bottom:0}
+.rp-item:hover{background:rgba(200,85,61,0.035)}
+.rp-item .r1{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:5px}
+.rp-item .num{font:600 11px/1 var(--mono);color:var(--stamp);letter-spacing:0.04em}
+.rp-item .name{font:700 15.5px/1.4 var(--serif);color:var(--ink)}
+.rp-item .jp{font:500 11px/1.4 var(--sans);color:var(--ink-2)}
+.rp-item .dose{font:600 12.5px/1.8 var(--hand);color:var(--pen);display:block}
+.rp-item .go{position:absolute;right:16px;top:50%;transform:translateY(-50%);font:600 13px/1 var(--mono);color:var(--ink-3);transition:transform .2s,color .2s}
+.rp-item:hover .go{color:var(--stamp);transform:translateY(-50%) translateX(3px)}
+.rp-foot{padding:10px 18px;font:500 10.5px/1.8 var(--sans);color:var(--ink-3);border-top:1.5px solid var(--rule-strong);background:var(--sheet-2)}
+
+/* 署名 */
+.sign{display:flex;justify-content:flex-end;align-items:center;gap:16px;padding:26px clamp(24px,7vw,64px) 0}
+.sign .who{text-align:right}
+.sign .who .a{font:600 9px/1 var(--mono);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.sign .who .b{font:600 14px/1.5 var(--hand);color:var(--pen)}
+.hanko{width:44px;height:44px;border:2.5px solid var(--stamp);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 20px/1 var(--serif);color:var(--stamp);transform:rotate(4deg);opacity:0.88;flex-shrink:0}
+
+/* ===== 経過記録 ===== */
+.keika{padding:34px var(--pad) 10px}
+.keika .paper{padding:clamp(28px,5vw,46px) clamp(24px,7vw,64px)}
+.keika-h{font:900 clamp(19px,3.2vw,25px)/1.5 var(--serif);letter-spacing:0.08em;margin-bottom:4px}
+.keika-sub{font:500 11.5px/1.9 var(--sans);color:var(--ink-2);margin-bottom:22px}
+.k-row{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:13px 0 14px;border-bottom:1px solid var(--rule)}
+@media(max-width:560px){.k-row{grid-template-columns:1fr;gap:4px;padding:12px 0}}
+.k-date{font:600 10.5px/2 var(--mono);color:var(--ink-3);letter-spacing:0.06em;text-transform:uppercase}
+.k-body{font:600 clamp(13px,2vw,14.5px)/1.9 var(--hand);color:var(--pen)}
+.k-body b{color:var(--ink);font-family:var(--serif);font-weight:700;margin-right:8px}
+.k-row.today .k-date,.k-row.today .k-body b{color:var(--stamp)}
+
+/* ===== OUTRO ===== */
+.outro{padding:56px var(--pad) 90px;text-align:center}
+.outro-note{font:500 12px/2.1 var(--sans);color:var(--ink-2);max-width:480px;margin:0 auto 10px}
+.outro-h{font:900 clamp(20px,3.6vw,30px)/1.7 var(--serif);margin:6px auto 30px;max-width:640px}
+.outro-h .em{color:var(--stamp)}
+.outro-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.o-btn{display:inline-flex;align-items:center;gap:9px;padding:14px 24px;border:1px solid var(--ink);border-radius:2px;font:700 12.5px/1 var(--sans);color:var(--ink);transition:all .2s;background:transparent;cursor:pointer;font-family:var(--sans)}
+.o-btn:hover{background:var(--ink);color:var(--sheet)}
+.o-btn.fill{background:var(--stamp);border-color:var(--stamp);color:#fff}
+.o-btn.fill:hover{background:var(--stamp-deep);border-color:var(--stamp-deep)}
+.o-btn .arr{font-family:var(--mono)}
+
+/* ===== FOOTER ===== */
+.foot{padding:34px var(--pad) 44px;border-top:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.foot-brand{font:700 15px/1 var(--serif);letter-spacing:0.2em}
+.foot-brand .dot{color:var(--stamp)}
+.foot-links{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font:600 10px/1 var(--mono);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-2)}
+.foot-links a:hover{color:var(--stamp)}
+.foot-tag{font:500 10px/1.8 var(--sans);color:var(--ink-3)}
+
+/* ===== リビール(書き込まれる感じ)=====
+   注意: 観察対象([data-w]/[data-r])自体には clip-path を使わない。
+   Chromium は交差判定にターゲット自身の clip-path を適用するため、
+   幅ゼロにクリップした要素は IntersectionObserver が永遠に発火しない。
+   → 外側は opacity、書字アニメは内側の .w に適用する。 */
+[data-w]{opacity:0;transition:opacity .25s}
+[data-w].on{opacity:1}
+[data-w] .w{display:inline-block;clip-path:inset(-25% 100% -25% 0)}
+[data-w].on .w{clip-path:inset(-25% -8% -25% 0);transition:clip-path .7s cubic-bezier(0.4,0,0.2,1)}
+[data-r]{opacity:0;transform:translateY(12px);transition:opacity .6s,transform .6s cubic-bezier(0.2,0.7,0.2,1)}
+[data-r].on{opacity:1;transform:none}
+.rewriting .soap-body{opacity:0;transition:opacity .18s}
+.soap-body{transition:opacity .25s}
+@media(prefers-reduced-motion:reduce){
+  [data-w],[data-r]{opacity:1!important;transform:none!important;transition:none!important}
+  [data-w] .w{clip-path:none!important;transition:none!important}
+  .stamp-uke{opacity:0.88;animation:none!important}
+  html{scroll-behavior:auto}
+}
+
+/* ===== PRINT(処方箋は印刷できます)===== */
+@media print{
+  body{background:#fff}
+  body::before,.nav,.cover,.intake,.outro,.foot,.scroll-cue{display:none!important}
+  .paper{box-shadow:none;border-color:#bbb;max-width:100%}
+  [data-w],[data-r]{opacity:1!important;clip-path:none!important;transform:none!important}
+  .chart,.keika{padding:8mm 0}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <a href="../index.html" class="nav-logo">BRIDGE<span class="dot">.</span></a>
+  <div class="nav-r">
+    <a href="../journal/index.html">← Lab</a>
+    <a href="../products/index.html">Tools</a>
+    <a href="../index.html">Home</a>
+  </div>
+</nav>
+
+<!-- ============ 表紙 ============ -->
+<header class="cover">
+  <div class="stamp-uke" id="ukeStamp" aria-hidden="true">
+    <span class="t">受付</span>
+    <span class="d" id="ukeDate">令和8年—月—日</span>
+    <span class="b">BRIDGE</span>
+  </div>
+  <div class="cover-eyebrow">BRIDGE LAB — Concept Model 04</div>
+  <h1 class="cover-h">診療録</h1>
+  <div class="cover-en">Medical Record for Your Workplace</div>
+  <p class="cover-sub">今日は、あなたの職場を診察します。</p>
+  <p class="cover-note">
+    医療現場の道具屋 BRIDGE による、実験的コンテンツ。<br>
+    本カルテはフィクションです。ただし、<em>処方箋は実在します</em>。
+  </p>
+  <div class="scroll-cue">問診へ</div>
+</header>
+
+<!-- ============ 問診票 ============ -->
+<section class="intake" id="intake">
+  <div class="paper">
+    <div class="holes" aria-hidden="true"><i></i><i></i></div>
+    <div class="intake-tag">Intake Sheet — 問診票</div>
+    <h2 class="intake-h">まず、あなたの<span class="em">立場</span>を教えてください。</h2>
+    <p class="intake-lead">職場の“しんどさ”は、立場によって出る場所が違います。近いものをひとつ。</p>
+    <div class="roles" id="roleBtns" role="group" aria-label="立場の選択"></div>
+  </div>
+</section>
+
+<!-- ============ カルテ本体 ============ -->
+<main class="chart" id="chart">
+  <div class="paper">
+    <div class="holes" aria-hidden="true"><i></i><i></i></div>
+
+    <div class="chart-head">
+      <div class="ch-cell wide">
+        <div class="ch-k">患者氏名 / Patient</div>
+        <div class="ch-v">あなたの職場 様</div>
+      </div>
+      <div class="ch-cell">
+        <div class="ch-k">診療科 / Dept.</div>
+        <div class="ch-v print">業務改善科</div>
+      </div>
+      <div class="ch-cell">
+        <div class="ch-k">初診日 / Date</div>
+        <div class="ch-v" id="chartDate">—</div>
+      </div>
+      <div class="ch-cell wide">
+        <div class="ch-k">主訴(受付メモ)</div>
+        <div class="ch-v" id="chiefNote">—</div>
+      </div>
+      <div class="ch-cell">
+        <div class="ch-k">保険 / Insurance</div>
+        <div class="ch-v">適用外(処方は ¥0〜)</div>
+      </div>
+      <div class="ch-cell">
+        <div class="ch-k">カルテ No.</div>
+        <div class="ch-v print">04</div>
+      </div>
+    </div>
+
+    <div class="chart-title">
+      <h2>診療録(SOAP)</h2>
+      <span class="no" id="roleLabel">—</span>
+    </div>
+
+    <section class="soap">
+      <div class="soap-tag"><span class="letter">S</span><span class="name">主訴・訴え</span><span class="en">Subjective</span></div>
+      <div class="soap-body lines" id="sBody"></div>
+    </section>
+
+    <section class="soap">
+      <div class="soap-tag"><span class="letter">O</span><span class="name">所見</span><span class="en">Objective</span></div>
+      <div class="soap-body" id="oBody"></div>
+    </section>
+
+    <section class="soap">
+      <div class="soap-tag"><span class="letter">A</span><span class="name">評価</span><span class="en">Assessment</span></div>
+      <div class="soap-body" id="aBody"></div>
+    </section>
+
+    <section class="soap">
+      <div class="soap-tag"><span class="letter">P</span><span class="name">方針・処方</span><span class="en">Plan</span></div>
+      <div class="soap-body" id="pBody"></div>
+    </section>
+
+    <div class="sign">
+      <div class="who">
+        <div class="a">記載者 / Signed</div>
+        <div class="b">BRIDGE 業務改善科 — 橋本 渉(PT)</div>
+      </div>
+      <div class="hanko" aria-hidden="true">橋</div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ 経過記録(道具屋自身のカルテ)============ -->
+<section class="keika">
+  <div class="paper">
+    <div class="holes" aria-hidden="true"><i></i><i></i></div>
+    <h2 class="keika-h" data-r>経過記録</h2>
+    <p class="keika-sub" data-r>ちなみに、処方する側にもカルテがあります。BRIDGE 自身の経過。</p>
+    <div class="k-row" data-r>
+      <div class="k-date">Clinical</div>
+      <div class="k-body"><b>臨床</b>理学療法士として現場に立つ。「もっとできるのに」を、ここで知る。</div>
+    </div>
+    <div class="k-row" data-r>
+      <div class="k-date">Research</div>
+      <div class="k-body"><b>研究</b>大学院で「評価の客観性」と格闘。データと現場の距離を、身をもって測る。</div>
+    </div>
+    <div class="k-row" data-r>
+      <div class="k-date">Management</div>
+      <div class="k-body"><b>経営</b>医療経営の数字に責任を持つ。「医療を持続可能にする」が言語化される。</div>
+    </div>
+    <div class="k-row" data-r>
+      <div class="k-date">Builder</div>
+      <div class="k-body"><b>開業</b>BRIDGE を開始。RehaBoard、MedBoard、RoundNote——軽い道具を、ひとつずつ。</div>
+    </div>
+    <div class="k-row today" data-r>
+      <div class="k-date" id="todayRow">Today</div>
+      <div class="k-body"><b>本日</b>あなたの職場のカルテを起票。処方が効くかどうかは、現場で確かめてください。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OUTRO ============ -->
+<section class="outro">
+  <p class="outro-note" data-r>※ 本カルテはフィクションです。診断名は実在しません。<br>ただし——</p>
+  <h2 class="outro-h" data-r>処方箋は、<span class="em">すべて実在します。</span><br>今日から使えます。</h2>
+  <div class="outro-btns" data-r>
+    <a class="o-btn fill" href="../products/index.html">処方された道具を見る<span class="arr">→</span></a>
+    <a class="o-btn" href="../index.html#contact">相談する(セカンドオピニオン)<span class="arr">→</span></a>
+    <button class="o-btn" onclick="window.print()">このカルテを印刷する<span class="arr">⎙</span></button>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="foot-brand">BRIDGE<span class="dot">.</span></div>
+  <div class="foot-links">
+    <a href="../index.html">Home</a>
+    <a href="../products/index.html">Tools</a>
+    <a href="../starter-kits/index.html">Kits</a>
+    <a href="../journal/index.html">Journal</a>
+    <a href="../about/index.html">Founder</a>
+  </div>
+  <div class="foot-tag">Concept Model 04 “KARTE” — 現場の「面倒くさい」を、自分ごととして解く。</div>
+</footer>
+
+<noscript><style>.roles::after{content:'※ このページの問診には JavaScript が必要です。';font:500 12px/1.8 sans-serif;color:#A8442F}</style></noscript>
+
+<script>
+/* ============ 診療データ ============ */
+const ROLES = {
+  director: {
+    tab: '院長・経営層',
+    hook: '数字は見たい。でも、数字を作る時間がない。',
+    chief: '「経営の数字が、月末にならないと見えない」',
+    s: [
+      '経営数字を見たいが、集計が月末にしか上がってこない',
+      '会議のたびに、Excel のバージョンが違う',
+      '現場の空気が、報告書からは読めない',
+    ],
+    o: [
+      ['稼働率・単価の把握', '“感覚” による'],
+      ['KPI レビュー頻度', '月1回<small>(数字が届くのは翌月10日)</small>'],
+      ['管理帳票', 'Excel 14本<small>(作成者は退職済みを含む)</small>'],
+      ['巡回時の申し送り', '口頭+付箋'],
+    ],
+    dx: '慢性的データ遅延症候群',
+    dxEn: 'Chronic Data-Lag Syndrome',
+    a: [
+      '数字が意思決定に<b>間に合っていない</b>。原因は能力ではなく、道具。',
+      '判断力は保たれている(むしろ良好)。届く数字が遅いだけ。',
+    ],
+    prog: '<b>予後:</b>軽量な道具の導入で改善見込み良好。重厚なSaaSの一括導入は侵襲が大きく、本症例には過剰医療のおそれ。',
+    plan: '手術(大規模システム導入)ではなく、運動療法(軽い道具)から始めます。',
+    rp: [
+      { name: 'RehaBoard', jp: 'リハ運営ダッシュボード', dose: '1日1回、朝礼前に3分。部門KPIが1枚で見える。', href: '../rehaboard/index.html' },
+      { name: 'MedBoard', jp: '外来クリニック患者フローDB', dose: '週1回、経営会議の前に。患者フローを見える化。', href: '../medboard/index.html' },
+      { name: 'RoundNote', jp: '本部長の巡回手帖', dose: '巡回のたび、1施設3分。気づきを口頭から記録へ。', href: '../round-note/index.html' },
+      { name: 'ConsultSim', jp: '診察オペ設計シミュレーター', dose: '導入検討時に15分。診察オペを触って設計する。', href: '../consult-simulator/index.html' },
+    ],
+  },
+  leader: {
+    tab: 'リハ科長・現場リーダー',
+    hook: 'プレイヤーとマネジャーの二刀流に、疲れてきた。',
+    chief: '「臨床の時間が、管理業務に削られていく」',
+    s: [
+      '単位数の集計、また手で Excel に転記した',
+      '面談・シフト・書類で、臨床の時間が削れていく',
+      '部下の “なんとなく元気がない” に、根拠を持って踏み込めない',
+    ],
+    o: [
+      ['業務配分(建前)', '臨床7割+管理3割'],
+      ['業務配分(体感)', '臨床5割+管理5割'],
+      ['KPI 集計', '手作業<small>(月末に約2時間)</small>'],
+      ['面談の記録', '個人のノートに分散'],
+    ],
+    dx: '二刀流性過負荷',
+    dxEn: 'Player-Manager Overload',
+    a: [
+      '管理業務が「片手間」の設計のまま、量だけ増えている。',
+      '現在は本人の頑張りで補填中——これは<b>持続可能ではない</b>。',
+    ],
+    prog: '<b>予後:</b>集計と記録を道具に移管できれば良好。「頑張りで回す」期間が長引くほど、臨床への意欲から先に削れていく点に注意。',
+    plan: '「頑張る」を減らし、「仕組みに任せる」へ。まず集計から。',
+    rp: [
+      { name: 'RehaBoard', jp: 'リハ運営ダッシュボード', dose: '単位・稼働の集計を自動に。月末2時間→10分。', href: '../rehaboard/index.html' },
+      { name: 'InterviewKit', jp: '面接官の手帖', dose: '面談前に5分。観点を持って人と向き合う。', href: '../interview-kit/index.html' },
+      { name: 'Moyamoya Check', jp: '職場モヤモヤ診断', dose: '部下にそっと渡す。“なんとなく” が言語化される。', href: '../moyamoya/index.html' },
+      { name: 'RoundNote', jp: '巡回手帖', dose: '気づきをためて、上と話すときの材料に。', href: '../round-note/index.html' },
+    ],
+  },
+  admin: {
+    tab: '事務長・バックオフィス',
+    hook: '気づけば「何でも屋」になっている。',
+    chief: '「“事務長やっといて” の範囲が、年々広がる」',
+    s: [
+      '採用の応募者管理が、メールと Excel と記憶',
+      '面接のたびに、聞くことがバラバラ',
+      '総務も経理も人事も情シスも、結局ぜんぶこっちに来る',
+    ],
+    o: [
+      ['担当領域', '総務+経理+人事+情シス+庶務<small>(計1名)</small>'],
+      ['応募者の管理台帳', '受信トレイ'],
+      ['面接評価の基準書', 'なし<small>(面接官の主観)</small>'],
+      ['院長への報告資料', '毎回ゼロから作成'],
+    ],
+    dx: '何でも屋性肥大',
+    dxEn: 'Back-Office Hypertrophy',
+    a: [
+      '組織の結合組織が、実質この1名。<b>断裂すると全体が止まる</b>。',
+      '本人の器用さが、かえって業務集中を招いている(有能税)。',
+    ],
+    prog: '<b>予後:</b>道具による荷重分散で改善可能。「自分がやったほうが早い」は急性期の対処であり、長期処方には向かない。',
+    plan: '全部を手放すのではなく、まず「探す時間」と「毎回ゼロから」を道具に。',
+    rp: [
+      { name: 'HireBoard', jp: '採用管理ボード', dose: '応募者管理をボードに。受信トレイ捜索の時間が消える。', href: '../hire-board/index.html' },
+      { name: 'InterviewKit', jp: '面接官の手帖', dose: '質問と評価軸を標準化。面接が「人による」から卒業。', href: '../interview-kit/index.html' },
+      { name: 'MedBoard', jp: '患者フローDB', dose: '院長への報告が「作る」から「出す」に変わる。', href: '../medboard/index.html' },
+    ],
+  },
+  staff: {
+    tab: '現場ではたらく人',
+    hook: '悪くないはずなのに、なんとなくしんどい。',
+    chief: '「大きな不満はない。でも、なんとなくしんどい」',
+    s: [
+      '不満を聞かれても、うまく言葉にできない',
+      '送信ボタンを押す前の文面に、毎回悩む',
+      '疲れている日ほど、変な買い物をしてしまう',
+    ],
+    o: [
+      ['しんどさの原因', '特定できず<small>(本人談「たぶん全部」)</small>'],
+      ['ストレス対処', '衝動買い・夜更かし<small>(効果は一時的)</small>'],
+      ['メール・チャットの下書き時間', '本文より長い日がある'],
+      ['学び直しの計画', '意欲はある。管理する場所がない'],
+    ],
+    dx: '原因不明性モヤモヤ',
+    dxEn: 'Idiopathic Moyamoya (Workplace Type)',
+    a: [
+      '“なんとなく” は、原因がないのではなく<b>解像度の問題</b>。',
+      '名前がつけば、対処できる。つくまでは、ぜんぶ自分のせいに見える。',
+    ],
+    prog: '<b>予後:</b>良好。まず言語化から。しんどさに名前がつくだけで、荷物は半分になる。',
+    plan: '大きな決断の前に、小さな道具から。ぜんぶ登録不要・数分です。',
+    rp: [
+      { name: 'Moyamoya Check', jp: '職場モヤモヤ診断', dose: '10問・約3分。しんどさの出どころを言語化する。', href: '../moyamoya/index.html' },
+      { name: 'やわ返', jp: '送る前に、ひと呼吸', dose: '送信前に1回。文面がすこし、やわらかくなる。', href: '../yawagaeshi/index.html' },
+      { name: 'いったん保留', jp: '衝動買いクールダウン', dose: '買う前に、24時間〜7日だけ寝かせる。', href: '../ittan-horyu/index.html' },
+      { name: 'StudyBoard', jp: '学習ダッシュボード', dose: '学び直しを1枚のボードに。意欲の置き場所を作る。', href: '../study-board/index.html' },
+    ],
+  },
+};
+
+/* ============ 描画 ============ */
+const $ = (id) => document.getElementById(id);
+let writeObserver;
+
+function setupObserver() {
+  writeObserver = new IntersectionObserver((es) => {
+    es.forEach((e) => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        setTimeout(() => el.classList.add('on'), (+el.dataset.d || 0) * 110);
+        writeObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('[data-r]').forEach((el) => writeObserver.observe(el));
+}
+function watch(scope) {
+  scope.querySelectorAll('[data-w]:not(.on),[data-r]:not(.on)').forEach((el) => writeObserver.observe(el));
+}
+
+function render(key, { scroll = false } = {}) {
+  const r = ROLES[key];
+  if (!r) return;
+
+  document.querySelectorAll('.role-btn').forEach((b) => {
+    const on = b.dataset.key === key;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+
+  const chart = $('chart');
+  chart.classList.add('rewriting');
+
+  setTimeout(() => {
+    $('roleLabel').textContent = 'Case — ' + r.tab;
+    $('chiefNote').textContent = r.chief;
+
+    $('sBody').innerHTML = r.s.map((t, i) => `<div class="line" data-w data-d="${i}"><span class="w">${t}</span></div>`).join('');
+
+    $('oBody').innerHTML = r.o.map(([k, v], i) =>
+      `<div class="o-row" data-w data-d="${i}"><span class="o-k">${k}</span><span class="o-dots"></span><span class="o-v w">${v}</span></div>`
+    ).join('');
+
+    $('aBody').innerHTML = `
+      <div class="dx" data-r>
+        <div class="dx-stamp">要経過観察</div>
+        <div class="dx-label">診断名 / Impression</div>
+        <div class="dx-name">${r.dx}</div>
+        <div class="dx-en">${r.dxEn}</div>
+      </div>
+      ${r.a.map((t, i) => `<div class="a-note" data-w data-d="${i + 1}"><span class="w">${t}</span></div>`).join('')}
+      <p class="prog" data-r data-d="${r.a.length + 1}">${r.prog}</p>`;
+
+    $('pBody').innerHTML = `
+      <p class="plan-line" data-w><span class="w">${r.plan}</span></p>
+      <div class="rp" data-r data-d="1">
+        <div class="rp-head"><span class="rx">Rp.</span><span class="t">Prescription — 処方</span></div>
+        ${r.rp.map((p, i) => `
+          <a class="rp-item" href="${p.href}" target="_blank" rel="noopener">
+            <span class="r1"><span class="num">${i + 1})</span><span class="name">${p.name}</span><span class="jp">${p.jp}</span></span>
+            <span class="dose">${p.dose}</span>
+            <span class="go">→</span>
+          </a>`).join('')}
+        <div class="rp-foot">後発品(類似SaaS)への変更:可 — ただし当院の処方はぜんぶ軽くて、だいたい安いです。</div>
+      </div>`;
+
+    chart.classList.remove('rewriting');
+    watch(chart);
+    if (scroll) chart.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 190);
+}
+
+/* 問診ボタン生成 */
+$('roleBtns').innerHTML = Object.entries(ROLES).map(([k, r]) => `
+  <button class="role-btn" data-key="${k}" aria-pressed="false">
+    <span class="box" aria-hidden="true"></span>
+    <span><span class="r-name">${r.tab}</span><span class="r-desc">${r.hook}</span></span>
+  </button>`).join('');
+document.querySelectorAll('.role-btn').forEach((b) => {
+  b.addEventListener('click', () => render(b.dataset.key, { scroll: true }));
+});
+
+/* 日付(和暦の受付印) */
+(() => {
+  const d = new Date();
+  const wareki = `令和${d.getFullYear() - 2018}年${d.getMonth() + 1}月${d.getDate()}日`;
+  $('ukeDate').textContent = wareki;
+  $('chartDate').textContent = wareki;
+  $('todayRow').textContent = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+})();
+
+/* NAV / 受付印 / 初期表示 */
+addEventListener('scroll', () => $('nav').classList.toggle('scrolled', scrollY > 40), { passive: true });
+setTimeout(() => $('ukeStamp').classList.add('on'), 650);
+setupObserver();
+render('director');
+</script>
+</body>
+</html>
