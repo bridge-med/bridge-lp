@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>クリニックフロー3D — 外来の導線を、ながめて遊ぶ</title>
+<meta name="description" content="SimCity風の見下ろし3Dビューで、外来クリニックの患者導線を観察するシミュレーター。来院ペース・診察時間・1診/2診・処置率をいじると、待合の混雑とボトルネックがリアルタイムに変わる。導線ヒートマップつき・登録不要。">
+<meta property="og:title" content="クリニックフロー3D — 外来の導線を、ながめて遊ぶ">
+<meta property="og:description" content="患者さんが受付→待合→診察→処置/リハ→会計と院内を歩き回る。導線が赤く染まるヒートマップで、外来のボトルネックが目に見える。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/clinic-flow-3d/">
+<meta name="theme-color" content="#EAF4F8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/styles.css">
+</head>
+<body>
+
+<header class="head">
+  <div class="head-inner">
+    <div>
+      <p class="eyebrow">CLINIC FLOW 3D</p>
+      <h1 class="title">クリニックフロー3D</h1>
+      <p class="sub">外来の導線を、ながめて遊ぶ。</p>
+    </div>
+    <div class="clock-box">
+      <span class="clock" id="clock">9:00</span>
+      <span class="clock-label">院内 <b id="inCount">0</b> 人</span>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="stage-wrap">
+    <canvas id="stage"></canvas>
+    <div class="stage-overlay">
+      <div class="speed-group" role="group" aria-label="再生速度">
+        <button class="speed-btn" data-speed="0">⏸</button>
+        <button class="speed-btn on" data-speed="1">×1</button>
+        <button class="speed-btn" data-speed="2">×2</button>
+        <button class="speed-btn" data-speed="4">×4</button>
+      </div>
+      <div class="view-group">
+        <button class="view-btn" id="heatBtn">🔥 導線ヒートマップ</button>
+        <button class="view-btn" id="lineBtn">〰 導線ライン</button>
+      </div>
+    </div>
+    <div class="panic" id="panic" hidden>🚨 待合パンク! 立って待っている患者さんがいます</div>
+  </div>
+
+  <section class="kpis">
+    <div class="kpi"><span class="kpi-label">来院</span><span class="kpi-val" id="kArrived">0<small>人</small></span></div>
+    <div class="kpi"><span class="kpi-label">お会計まで完了</span><span class="kpi-val" id="kDone">0<small>人</small></span></div>
+    <div class="kpi"><span class="kpi-label">診察待ち 平均</span><span class="kpi-val" id="kWait">–<small>分</small></span></div>
+    <div class="kpi"><span class="kpi-label">院内滞在 平均</span><span class="kpi-val" id="kStay">–<small>分</small></span></div>
+    <div class="kpi kpi-wide"><span class="kpi-label">いまのボトルネック</span><span class="kpi-val kpi-bottleneck" id="kBottleneck">–</span></div>
+  </section>
+
+  <section class="controls card">
+    <h2 class="controls-title">🎛 オペレーションをいじる</h2>
+    <div class="ctrl-grid">
+      <label class="ctrl">
+        <span class="ctrl-head">来院ペース <b id="vArrival">12人/時</b></span>
+        <input type="range" id="arrival" min="4" max="30" step="1" value="12">
+      </label>
+      <label class="ctrl">
+        <span class="ctrl-head">診察時間(平均) <b id="vExam">6分</b></span>
+        <input type="range" id="exam" min="3" max="12" step="1" value="6">
+      </label>
+      <div class="ctrl">
+        <span class="ctrl-head">診察体制</span>
+        <div class="seg" role="group">
+          <button class="seg-btn on" data-docs="1">1診</button>
+          <button class="seg-btn" data-docs="2">2診</button>
+        </div>
+      </div>
+      <label class="ctrl">
+        <span class="ctrl-head">処置に回る割合 <b id="vTreat">20%</b></span>
+        <input type="range" id="treat" min="0" max="60" step="5" value="20">
+      </label>
+      <label class="ctrl">
+        <span class="ctrl-head">リハに回る割合 <b id="vReha">30%</b></span>
+        <input type="range" id="reha" min="0" max="60" step="5" value="30">
+      </label>
+      <div class="ctrl">
+        <span class="ctrl-head">リセット</span>
+        <button class="seg-btn reset-btn" id="resetBtn">はじめから</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#C98A2D"></i>受付・会計待ち</span>
+      <span><i style="background:#3E7CA6"></i>診察待ち/診察中</span>
+      <span><i style="background:#C4574E"></i>処置</span>
+      <span><i style="background:#4FA98C"></i>リハビリ</span>
+      <span><i style="background:#8C7BC4"></i>会計中</span>
+      <span><i style="background:#9AA7B0"></i>移動中</span>
+    </div>
+  </section>
+
+  <p class="note">※ 待ち行列と所要時間は乱数を含む簡易モデルです。実際の外来設計は <a href="https://bridge-med.github.io/consult-simulator/" target="_blank" rel="noopener">ConsultSim</a> で数字からどうぞ。</p>
+
+</main>
+
+<script src="app/app.js"></script>
+
+</body>
+</html>
