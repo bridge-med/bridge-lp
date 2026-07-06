@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <rect width="120" height="120" rx="28" fill="#FAF1E3"/>
-  <rect x="34" y="62" width="52" height="40" rx="10" fill="#F59B54"/>
-  <rect x="34" y="62" width="52" height="9" fill="#E8813A"/>
-  <circle cx="60" cy="82" r="8" fill="#FBEED9"/>
-  <rect x="56.5" y="78.5" width="7" height="7" rx="2" fill="#E8813A"/>
-  <circle cx="60" cy="40" r="24" fill="#FDF6EC" stroke="#E8CDA8" stroke-width="2.5"/>
-  <circle cx="52" cy="36" r="7.5" fill="#9FC7A8"/>
-  <circle cx="67" cy="33" r="7.5" fill="#F2B8C6"/>
-  <circle cx="63" cy="47" r="7.5" fill="#A8CFE0"/>
-  <circle cx="50" cy="49" r="6.5" fill="#F5C34B"/>
-  <rect x="53" y="10" width="14" height="7" rx="3" fill="#E8813A"/>
+  <rect width="120" height="120" rx="28" fill="#F5EDDC"/>
+  <rect x="34" y="62" width="52" height="40" rx="10" fill="#D96038"/>
+  <rect x="34" y="62" width="52" height="9" fill="#BC4E2A"/>
+  <circle cx="60" cy="82" r="8" fill="#F8ECD7"/>
+  <rect x="56.5" y="78.5" width="7" height="7" rx="2" fill="#BC4E2A"/>
+  <circle cx="60" cy="40" r="24" fill="#FBF5E7" stroke="#D6C4A0" stroke-width="2.5"/>
+  <circle cx="52" cy="36" r="7.5" fill="#7E9977"/>
+  <circle cx="67" cy="33" r="7.5" fill="#EFB08C"/>
+  <circle cx="63" cy="47" r="7.5" fill="#7C99AE"/>
+  <circle cx="50" cy="49" r="6.5" fill="#E9C46A"/>
+  <rect x="53" y="10" width="14" height="7" rx="3" fill="#BC4E2A"/>
 </svg>
