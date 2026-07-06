@@ -26,6 +26,7 @@
       favorites: [],
       discovered: [],
       recent: [],
+      lastRunAt: null, // 最後に「やってみた」した日時(ISO)
       settings: { notifyEnabled: false, notifyTime: '21:00', showPote: true, sound: true }
     };
   }
@@ -43,8 +44,11 @@
         favorites: Array.isArray(parsed.favorites) ? parsed.favorites.filter(validCardId) : d.favorites,
         discovered: Array.isArray(parsed.discovered) ? parsed.discovered.filter(validCardId) : d.discovered,
         recent: Array.isArray(parsed.recent) ? parsed.recent.filter(validCardId).slice(0, RECENT_MAX) : d.recent,
+        lastRunAt: typeof parsed.lastRunAt === 'string' ? parsed.lastRunAt : null,
         settings: Object.assign(d.settings, parsed.settings || {})
       };
+      // 旧バージョンのデータには lastRunAt がないので履歴から補完する
+      if (!state.lastRunAt && state.history.length > 0) state.lastRunAt = state.history[0].at;
     } catch (e) {
       state = defaults(); // 壊れたデータは初期化にフォールバック
     }
@@ -81,9 +85,10 @@
 
   /**
    * カードを1枚抽選する。
-   * @param {Object} opts { stateId?: string, excludeCategory?: string }
+   * @param {Object} opts { stateId?, excludeCardId?, excludeCategory? }
    *   stateId         … 選択された状態(合うカードを優先)
-   *   excludeCategory … 「今は違う」時に直前カードのカテゴリを除外
+   *   excludeCardId   … 「今はちがう」時に直前のカード自体を除外
+   *   excludeCategory … 候補が少ないときのフォールバックでカテゴリごと除外
    */
   function draw(opts) {
     opts = opts || {};
@@ -93,7 +98,17 @@
       var suited = pool.filter(function (c) { return c.suitedStates.indexOf(opts.stateId) >= 0; });
       if (suited.length > 0) pool = suited; // 合うカードがなければ全カードから
     }
-    if (opts.excludeCategory) {
+    if (opts.excludeCardId) {
+      var without = pool.filter(function (c) { return c.id !== opts.excludeCardId; });
+      if (without.length > 0) pool = without;
+      // 同じ状態に合う候補がほぼ残らない場合は、同カテゴリ以外の全カードへ広げる
+      if (pool.length < 2 && opts.excludeCategory) {
+        var widened = D.CARDS.filter(function (c) {
+          return c.category !== opts.excludeCategory && c.id !== opts.excludeCardId;
+        });
+        if (widened.length > 0) pool = widened;
+      }
+    } else if (opts.excludeCategory) {
       var other = pool.filter(function (c) { return c.category !== opts.excludeCategory; });
       if (other.length > 0) pool = other;
     }
@@ -116,9 +131,20 @@
     if (!validCardId(cardId)) return null;
     var entry = { id: uid(), cardId: cardId, stateId: stateId || null, at: new Date().toISOString() };
     state.history.unshift(entry);
+    state.lastRunAt = entry.at;
     save();
     emit();
     return entry;
+  }
+
+  /** 最後に実行してから何日経ったか(未実行なら null) */
+  function daysSinceLastRun() {
+    if (!state.lastRunAt) return null;
+    var last = new Date(state.lastRunAt);
+    var lastDay = new Date(last.getFullYear(), last.getMonth(), last.getDate());
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((today - lastDay) / (24 * 60 * 60 * 1000));
   }
 
   function removeHistory(entryId) {
@@ -173,6 +199,33 @@
     return counts;
   }
 
+  /** カード別の累計実行回数 */
+  function cardRunCounts() {
+    var counts = {};
+    state.history.forEach(function (e) {
+      counts[e.cardId] = (counts[e.cardId] || 0) + 1;
+    });
+    return counts;
+  }
+
+  /** 直近7日間でいちばんよく引いたカテゴリ({ categoryId, count } | null) */
+  function topCategory7d() {
+    var limit = new Date();
+    limit.setDate(limit.getDate() - 6);
+    limit.setHours(0, 0, 0, 0);
+    var counts = {};
+    state.history.forEach(function (e) {
+      if (new Date(e.at) < limit) return;
+      var card = D.CARDS.find(function (c) { return c.id === e.cardId; });
+      if (card) counts[card.category] = (counts[card.category] || 0) + 1;
+    });
+    var top = null;
+    Object.keys(counts).forEach(function (catId) {
+      if (!top || counts[catId] > top.count) top = { categoryId: catId, count: counts[catId] };
+    });
+    return top;
+  }
+
   /* ---- お気に入り ----------------------------------------------------------- */
   function isFavorite(cardId) { return state.favorites.indexOf(cardId) >= 0; }
 
@@ -186,10 +239,13 @@
     return i < 0; // 追加したら true
   }
 
+  /** お気に入りカード一覧(よく実行しているものが先頭) */
   function favoriteCards() {
+    var runs = cardRunCounts();
     return state.favorites
       .map(function (id) { return D.CARDS.find(function (c) { return c.id === id; }); })
-      .filter(Boolean);
+      .filter(Boolean)
+      .sort(function (a, b) { return (runs[b.id] || 0) - (runs[a.id] || 0); });
   }
 
   function drawFromFavorites() {
@@ -207,6 +263,18 @@
   /* ---- 図鑑 ---------------------------------------------------------------- */
   function isDiscovered(cardId) { return state.discovered.indexOf(cardId) >= 0; }
   function discoveredCount() { return state.discovered.length; }
+
+  /** カテゴリごとの発見数({ catId: { found, total } }) */
+  function dexCategoryCounts() {
+    var out = {};
+    D.CATEGORIES.forEach(function (cat) { out[cat.id] = { found: 0, total: 0 }; });
+    D.CARDS.forEach(function (c) {
+      if (!out[c.category]) return;
+      out[c.category].total += 1;
+      if (isDiscovered(c.id)) out[c.category].found += 1;
+    });
+    return out;
+  }
 
   /* ---- 設定 ---------------------------------------------------------------- */
   function updateSettings(patch) {
@@ -242,8 +310,12 @@
     history: function () { return state.history.slice(); },
     todayCount: todayCount,
     streakDays: streakDays,
+    daysSinceLastRun: daysSinceLastRun,
     last7Days: last7Days,
     categoryCounts: categoryCounts,
+    cardRunCounts: cardRunCounts,
+    topCategory7d: topCategory7d,
+    dexCategoryCounts: dexCategoryCounts,
     isFavorite: isFavorite,
     toggleFavorite: toggleFavorite,
     favoriteCards: favoriteCards,
