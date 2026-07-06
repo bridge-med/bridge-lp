@@ -27,7 +27,7 @@
       discovered: [],
       recent: [],
       lastRunAt: null, // 最後に「やってみた」した日時(ISO)
-      settings: { notifyEnabled: false, notifyTime: '21:00', showPote: true, sound: true }
+      settings: { notifyEnabled: false, notifyTime: '21:00', showPote: true, sound: true, seasonal: true }
     };
   }
 
@@ -83,6 +83,41 @@
     return list[Math.floor(Math.random() * list.length)];
   }
 
+  /** その状態で実行したことのあるカードの回数({ cardId: count }) */
+  function stateAffinity(stateId) {
+    var counts = {};
+    state.history.forEach(function (e) {
+      if (e.stateId === stateId) counts[e.cardId] = (counts[e.cardId] || 0) + 1;
+    });
+    return counts;
+  }
+
+  /** このカードをこの状態で何回実行したか */
+  function runsForCardInState(cardId, stateId) {
+    if (!stateId) return 0;
+    return stateAffinity(stateId)[cardId] || 0;
+  }
+
+  /**
+   * 重み付きランダム抽選。
+   * 状態選択時、その状態で実行実績のあるカードを少しだけ出やすくする
+   * (基礎1 + 実行回数、最大3)。学習は控えめにして偏りすぎを防ぐ。
+   */
+  function pickWeighted(list, stateId) {
+    if (!stateId) return pickRandom(list);
+    var affinity = stateAffinity(stateId);
+    var weights = list.map(function (c) {
+      return Math.min(3, 1 + (affinity[c.id] || 0));
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < list.length; i++) {
+      r -= weights[i];
+      if (r < 0) return list[i];
+    }
+    return list[list.length - 1];
+  }
+
   /**
    * カードを1枚抽選する。
    * @param {Object} opts { stateId?, excludeCardId?, excludeCategory? }
@@ -116,7 +151,8 @@
     var fresh = pool.filter(function (c) { return state.recent.indexOf(c.id) < 0; });
     if (fresh.length > 0) pool = fresh;
 
-    var card = pickRandom(pool);
+    // 状態選択時は「その状態で効いた実績のあるカード」を少しだけ優先する
+    var card = pickWeighted(pool, opts.stateId);
 
     // 出現したカードは図鑑で発見済みにし、直近リストへ積む
     if (state.discovered.indexOf(card.id) < 0) state.discovered.push(card.id);
@@ -206,6 +242,44 @@
       counts[e.cardId] = (counts[e.cardId] || 0) + 1;
     });
     return counts;
+  }
+
+  /** 今週(直近7日間)のまとめ。「今週の足あと」カードに使う */
+  function weeklySummary() {
+    var to = new Date();
+    var from = new Date();
+    from.setDate(from.getDate() - 6);
+    from.setHours(0, 0, 0, 0);
+
+    var catCounts = {};
+    var cardCounts = {};
+    var days = {};
+    var count = 0;
+    state.history.forEach(function (e) {
+      if (new Date(e.at) < from) return;
+      var card = D.CARDS.find(function (c) { return c.id === e.cardId; });
+      if (!card) return;
+      count += 1;
+      days[dayKey(e.at)] = true;
+      catCounts[card.category] = (catCounts[card.category] || 0) + 1;
+      cardCounts[card.id] = (cardCounts[card.id] || 0) + 1;
+    });
+
+    function topOf(counts) {
+      var top = null;
+      Object.keys(counts).forEach(function (k) {
+        if (!top || counts[k] > top.count) top = { id: k, count: counts[k] };
+      });
+      return top;
+    }
+    return {
+      from: from,
+      to: to,
+      count: count,
+      activeDays: Object.keys(days).length,
+      topCategory: topOf(catCounts),
+      topCard: topOf(cardCounts)
+    };
   }
 
   /** 直近7日間でいちばんよく引いたカテゴリ({ categoryId, count } | null) */
@@ -315,6 +389,8 @@
     categoryCounts: categoryCounts,
     cardRunCounts: cardRunCounts,
     topCategory7d: topCategory7d,
+    weeklySummary: weeklySummary,
+    runsForCardInState: runsForCardInState,
     dexCategoryCounts: dexCategoryCounts,
     isFavorite: isFavorite,
     toggleFavorite: toggleFavorite,

@@ -150,6 +150,33 @@
 
   /* ---------- SVGパーツ ---------- */
 
+  // 季節の小物(月で自動的に衣替え。設定でOFF可)
+  function seasonAccessory() {
+    if (!Store.settings().seasonal) return '';
+    var m = new Date().getMonth() + 1;
+    if (m >= 3 && m <= 5) {
+      // 春: 舞う桜の花びら
+      return '<ellipse cx="16" cy="18" rx="4" ry="2.6" fill="#EFB8C8" transform="rotate(-25 16 18)"/>' +
+        '<ellipse cx="96" cy="30" rx="3.4" ry="2.2" fill="#EFB8C8" transform="rotate(20 96 30)"/>' +
+        '<ellipse cx="88" cy="12" rx="3" ry="2" fill="#F5CDD9" transform="rotate(-10 88 12)"/>';
+    }
+    if (m >= 6 && m <= 8) {
+      // 夏: 頭の上に小さな若葉
+      return '<path d="M55 12 q-1 -7 -7 -9 q7 -1 9 6" fill="#7E9977"/>' +
+        '<path d="M57 9 q3 -6 9 -6 q-3 6 -8 8" fill="#9BB394"/>' +
+        '<path d="M55 15 q1 -4 2 -6" stroke="#5D7757" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
+    }
+    if (m >= 9 && m <= 11) {
+      // 秋: 足元に落ち葉
+      return '<ellipse cx="15" cy="90" rx="5" ry="3" fill="#D98E4A" transform="rotate(-30 15 90)"/>' +
+        '<ellipse cx="97" cy="93" rx="4" ry="2.5" fill="#C97B3D" transform="rotate(25 97 93)"/>';
+    }
+    // 冬: あたたかいマフラー(垂れは左側・マグと重ねない)
+    return '<path d="M33 57 q22 10 44 0 l-1 7 q-21 9 -42 0 Z" fill="#C0574A"/>' +
+      '<rect x="30" y="60" width="8" height="16" rx="3" fill="#C0574A"/>' +
+      '<path d="M31 66 h6 M31 71 h6" stroke="#A94537" stroke-width="1.4"/>';
+  }
+
   // ぽて(柴犬風のゆるい回復係)。mood: 'normal' | 'happy' | 'sleepy'
   function poteSvg(mood) {
     if (!Store.settings().showPote) return '';
@@ -191,6 +218,7 @@
       '<path d="M64 66 q6 2 0 8" stroke="#7E9977" stroke-width="3" fill="none"/>' +
       '<circle cx="53" cy="69" r="1.7" fill="#F8ECD7"/><circle cx="57" cy="69" r="1.7" fill="#F8ECD7"/><circle cx="55" cy="72" r="1.7" fill="#F8ECD7"/>' +
       '<path d="M51 59 q1 -3 0 -5 M57 59 q1 -3 0 -5" stroke="#C9B08A" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+      seasonAccessory() +
       '</svg>';
   }
 
@@ -417,7 +445,11 @@
       '<span class="tape t-' + cat.tone + '"></span>' +
       '<div class="result-top">' +
       '<div class="emoji t-' + cat.tone + '">' + c.emoji + '</div>' +
-      '<h2>' + esc(c.title) + '</h2>' +
+      '<div><h2>' + esc(c.title) + '</h2>' +
+      // 履歴からの控えめな学習: 同じ状態で2回以上実行していたら添える
+      (Store.runsForCardInState(c.id, state.stateId) >= 2
+        ? '<span class="tag t-' + cat.tone + ' aff-tag">♥ この状態でよく効いています</span>' : '') +
+      '</div>' +
       '</div>' +
       '<hr class="result-divider">' +
       '<div class="meta-grid">' +
@@ -481,17 +513,31 @@
   function renderHistory() {
     var history = Store.history();
     var week = Store.last7Days();
-    var weekTotal = week.reduce(function (sum, d) { return sum + d.count; }, 0);
     var maxCount = Math.max(1, Math.max.apply(null, week.map(function (d) { return d.count; })));
     var todayKey = Store.dayKey(new Date());
-    var top = Store.topCategory7d();
-    var topCat = top ? D.categoryById[top.categoryId] : null;
 
+    // 今週の足あと(週1でふり返るまとめカード)
+    var w = Store.weeklySummary();
+    var topCat = w.topCategory ? D.categoryById[w.topCategory.id] : null;
+    var topCard = w.topCard ? findCard(w.topCard.id) : null;
+    function md(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
     var summary = '' +
-      '<div class="paper week-summary">' +
-      '<div class="cell n1"><div class="k">🍃 回復</div><div class="v">' + weekTotal + '<small>回</small></div></div>' +
-      '<div class="cell n2"><div class="k">よく引くカテゴリ</div><div class="v"><span class="underline">' + (topCat ? esc(topCat.label) : 'まだこれから') + '</span></div></div>' +
-      '<div class="cell n3"><div class="k">📅 連続</div><div class="v">' + Store.streakDays() + '<small>日</small></div></div>' +
+      '<div class="paper week-card">' +
+      '<span class="tape t-butter tilt-r"></span>' +
+      '<div class="week-card-head"><span class="ttl">🍂 今週の足あと</span><span class="range">' + md(w.from) + ' 〜 ' + md(w.to) + '</span></div>' +
+      '<div class="week-card-grid">' +
+      '<div class="cell n1"><div class="k">回復</div><div class="v">' + w.count + '<small>回</small></div></div>' +
+      '<div class="cell n1"><div class="k">動いた日</div><div class="v">' + w.activeDays + '<small>日</small></div></div>' +
+      '<div class="cell n3"><div class="k">連続</div><div class="v">' + Store.streakDays() + '<small>日</small></div></div>' +
+      '</div>' +
+      (w.count === 0
+        ? '<p class="week-card-row empty">今週はこれからです。1枚戻れたら十分です。</p>'
+        : '<div class="week-card-row"><span class="k">よく引いたカテゴリ</span>' + (topCat ? categoryTag(topCat.id) : '') + '</div>' +
+          (topCard
+            ? '<div class="week-card-row"><span class="k">いちばん頼ったカード</span><span class="v-card">' + topCard.emoji + ' ' + esc(topCard.title) + ' <small>(' + w.topCard.count + '回)</small></span></div>'
+            : '') +
+          '<div class="share-line"><button class="btn btn-ghost quiet" data-action="copy-week">⤴ 今週のまとめをコピー</button></div>'
+      ) +
       '</div>';
 
     var chart = '' +
@@ -707,6 +753,7 @@
       '<div class="eyebrow">🎨 表示・サウンド</div>' +
       '<div class="paper setting-group">' +
       '<div class="setting-row"><span class="ic">🐕</span><span class="lbl">ぽてを表示する</span>' + toggle('showPote', s.showPote) + '</div>' +
+      '<div class="setting-row"><span class="ic">🍂</span><span class="lbl">季節の小物<small>ぽてが月ごとに小さく衣替えします</small></span>' + toggle('seasonal', s.seasonal) + '</div>' +
       '<div class="setting-row"><span class="ic">🔈</span><span class="lbl">効果音</span>' + toggle('sound', s.sound) + '</div>' +
       '</div>' +
 
@@ -837,6 +884,21 @@
         var added = Store.toggleFavorite(state.card.id);
         showToast(added ? 'お気に入りに追加しました' : 'お気に入りを解除しました');
         render();
+        break;
+      }
+
+      case 'copy-week': {
+        var ws = Store.weeklySummary();
+        var wsCat = ws.topCategory ? D.categoryById[ws.topCategory.id] : null;
+        var wsCard = ws.topCard ? findCard(ws.topCard.id) : null;
+        var lines = ['今週のごきげん回復:' + ws.count + '回'];
+        if (wsCat) lines.push('よく引いたカテゴリ:' + wsCat.label);
+        if (wsCard) lines.push('いちばん頼ったカード:' + wsCard.title);
+        lines.push('');
+        lines.push('少し戻るだけでも、ちゃんと前進です。');
+        copyText(lines.join('\n'))
+          .then(function () { showToast('今週のまとめをコピーしました'); })
+          .catch(function () { showToast('コピーできませんでした'); });
         break;
       }
 

@@ -589,18 +589,37 @@ button:active { transform: scale(0.985); }
 /* =========================================================================
  * 履歴 = 回復の足あと
  * ========================================================================= */
-.week-summary { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; padding: 15px 14px; align-items: center; }
-.week-summary .cell { text-align: center; padding: 0 10px; }
-.week-summary .cell + .cell { border-left: 1.5px dotted var(--soft-border-strong); }
-.week-summary .k { font-size: var(--fs-xs); color: var(--cocoa-soft); font-weight: 700; }
-.week-summary .v { font-family: var(--font-display); font-weight: 900; font-size: 1.3rem; line-height: 1.3; }
-.week-summary .v small { font-size: 0.72rem; font-weight: 700; }
-.week-summary .cell.n1 .v { color: var(--sage-deep); }
-.week-summary .cell.n2 .v { color: var(--dusty-blue-deep); font-size: 1.02rem; }
-.week-summary .cell.n3 .v { color: var(--persimmon); }
-.week-summary .v .underline {
-  background-image: linear-gradient(transparent 68%, var(--butter-soft) 68%);
+/* 今週の足あと(週まとめのポストカード) */
+.week-card { padding: 20px 16px 12px; }
+.week-card-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.week-card-head .ttl { font-family: var(--font-display); font-weight: 900; font-size: var(--fs-lg); }
+.week-card-head .range { margin-left: auto; font-size: var(--fs-xs); color: var(--cocoa-soft); font-weight: 700; }
+.week-card-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  padding: 8px 0;
+  border-top: 1.5px dashed var(--soft-border-strong);
+  border-bottom: 1.5px dashed var(--soft-border-strong);
 }
+.week-card-grid .cell { text-align: center; }
+.week-card-grid .cell + .cell { border-left: 1.5px dotted var(--soft-border-strong); }
+.week-card-grid .k { font-size: var(--fs-xs); color: var(--cocoa-soft); font-weight: 700; }
+.week-card-grid .v { font-family: var(--font-display); font-weight: 900; font-size: 1.3rem; line-height: 1.3; }
+.week-card-grid .v small { font-size: 0.72rem; font-weight: 700; }
+.week-card-grid .cell.n1 .v { color: var(--sage-deep); }
+.week-card-grid .cell.n3 .v { color: var(--persimmon); }
+.week-card-row {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 2px 0;
+  font-size: var(--fs-sm);
+}
+.week-card-row .k { color: var(--cocoa-soft); font-weight: 700; font-size: var(--fs-xs); }
+.week-card-row .v-card { font-weight: 700; }
+.week-card-row .v-card small { color: var(--cocoa-soft); font-weight: 500; }
+.week-card-row.empty { color: var(--cocoa-soft); padding-bottom: 8px; }
+.week-card .share-line { margin-top: 2px; }
+
+/* 「この状態でよく効いています」バッジ */
+.aff-tag { margin-top: 5px; }
 
 .week-chart { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; padding: 14px 14px 10px; margin-top: var(--sp-3); }
 .week-col { text-align: center; }
