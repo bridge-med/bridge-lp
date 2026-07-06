@@ -1,0 +1,13 @@
+{
+  "name": "ごきげん回復ガチャ",
+  "short_name": "回復ガチャ",
+  "description": "疲れたときに押すだけ。今の自分にちょうどいい回復行動が出てくる。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF1E3",
+  "theme_color": "#FAF1E3",
+  "icons": [
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
