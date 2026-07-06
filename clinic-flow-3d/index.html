@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>クリニックフロー3D — 外来の導線を、ながめて遊ぶ</title>
-<meta name="description" content="SimCity風の見下ろし3Dビューで、外来クリニックの患者導線を観察するシミュレーター。来院ペース・診察時間・1診/2診・処置率をいじると、待合の混雑とボトルネックがリアルタイムに変わる。導線ヒートマップつき・登録不要。">
-<meta property="og:title" content="クリニックフロー3D — 外来の導線を、ながめて遊ぶ">
-<meta property="og:description" content="患者さんが受付→待合→診察→処置/リハ→会計と院内を歩き回る。導線が赤く染まるヒートマップで、外来のボトルネックが目に見える。">
+<title>クリニックタウン3D — 外来経営を、まちごと育てる</title>
+<meta name="description" content="SimCity風の3Dビューで外来クリニックを経営するシミュレーションゲーム。院内の導線・スタッフ・設備から、街での広告・地域連携営業まで全部いじれる。「売上=患者数×単価」を体で覚える経営教育ゲーム。登録不要。">
+<meta property="og:title" content="クリニックタウン3D — 外来経営を、まちごと育てる">
+<meta property="og:description" content="院内は導線シミュレーション、街に出れば商圏と営業。外来クリニックがどう収益を上げるのか、根本から体感できる経営ゲーム。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/clinic-flow-3d/">
 <meta name="theme-color" content="#EAF4F8">
@@ -17,93 +17,180 @@
 </head>
 <body>
 
+<!-- ===== ヘッダー(経営ダッシュボード) ===== -->
 <header class="head">
   <div class="head-inner">
-    <div>
-      <p class="eyebrow">CLINIC FLOW 3D</p>
-      <h1 class="title">クリニックフロー3D</h1>
-      <p class="sub">外来の導線を、ながめて遊ぶ。</p>
+    <div class="brand">
+      <p class="eyebrow">CLINIC TOWN 3D</p>
+      <h1 class="title">クリニックタウン3D</h1>
     </div>
-    <div class="clock-box">
-      <span class="clock" id="clock">9:00</span>
-      <span class="clock-label">院内 <b id="inCount">0</b> 人</span>
+    <div class="head-btns">
+      <button class="icon-btn" id="helpBtn" title="チュートリアル">❓</button>
+      <button class="icon-btn" id="resetBtn" title="はじめから">🔄</button>
     </div>
   </div>
+  <div class="hud">
+    <div class="hud-item"><span class="hud-label">資金</span><b class="hud-val" id="hMoney">¥0</b></div>
+    <div class="hud-item"><span class="hud-label">本日売上</span><b class="hud-val" id="hToday">¥0</b></div>
+    <div class="hud-item"><span class="hud-label">評判</span><b class="hud-val" id="hRep">55</b></div>
+    <div class="hud-item"><span class="hud-label">認知</span><b class="hud-val" id="hAw">35%</b></div>
+    <div class="hud-item hud-time"><b id="hDay">Day 1</b><span id="hClock">9:00</span></div>
+    <div class="speed-group" role="group" aria-label="再生速度">
+      <button class="speed-btn" data-speed="0">⏸</button>
+      <button class="speed-btn on" data-speed="1">×1</button>
+      <button class="speed-btn" data-speed="2">×2</button>
+      <button class="speed-btn" data-speed="4">×4</button>
+    </div>
+  </div>
+  <div class="mission-bar" id="missionBar">🎯 <span id="missionText"></span></div>
 </header>
+
+<!-- ===== タブ ===== -->
+<nav class="tabs">
+  <button class="tab-btn on" data-tab="clinic">🏥 院内</button>
+  <button class="tab-btn" data-tab="town">🗺 タウン</button>
+  <button class="tab-btn" data-tab="mgmt">📊 経営</button>
+</nav>
 
 <main class="main">
 
-  <div class="stage-wrap">
-    <canvas id="stage"></canvas>
-    <div class="stage-overlay">
-      <div class="speed-group" role="group" aria-label="再生速度">
-        <button class="speed-btn" data-speed="0">⏸</button>
-        <button class="speed-btn on" data-speed="1">×1</button>
-        <button class="speed-btn" data-speed="2">×2</button>
-        <button class="speed-btn" data-speed="4">×4</button>
-      </div>
-      <div class="view-group">
-        <button class="view-btn" id="heatBtn">🔥 導線ヒートマップ</button>
-        <button class="view-btn" id="lineBtn">〰 導線ライン</button>
-      </div>
-    </div>
-    <div class="panic" id="panic" hidden>🚨 待合パンク! 立って待っている患者さんがいます</div>
-  </div>
-
-  <section class="kpis">
-    <div class="kpi"><span class="kpi-label">来院</span><span class="kpi-val" id="kArrived">0<small>人</small></span></div>
-    <div class="kpi"><span class="kpi-label">お会計まで完了</span><span class="kpi-val" id="kDone">0<small>人</small></span></div>
-    <div class="kpi"><span class="kpi-label">診察待ち 平均</span><span class="kpi-val" id="kWait">–<small>分</small></span></div>
-    <div class="kpi"><span class="kpi-label">院内滞在 平均</span><span class="kpi-val" id="kStay">–<small>分</small></span></div>
-    <div class="kpi kpi-wide"><span class="kpi-label">いまのボトルネック</span><span class="kpi-val kpi-bottleneck" id="kBottleneck">–</span></div>
-  </section>
-
-  <section class="controls card">
-    <h2 class="controls-title">🎛 オペレーションをいじる</h2>
-    <div class="ctrl-grid">
-      <label class="ctrl">
-        <span class="ctrl-head">来院ペース <b id="vArrival">12人/時</b></span>
-        <input type="range" id="arrival" min="4" max="30" step="1" value="12">
-      </label>
-      <label class="ctrl">
-        <span class="ctrl-head">診察時間(平均) <b id="vExam">6分</b></span>
-        <input type="range" id="exam" min="3" max="12" step="1" value="6">
-      </label>
-      <div class="ctrl">
-        <span class="ctrl-head">診察体制</span>
-        <div class="seg" role="group">
-          <button class="seg-btn on" data-docs="1">1診</button>
-          <button class="seg-btn" data-docs="2">2診</button>
+  <!-- ===== 院内タブ ===== -->
+  <section class="tab-panel show" id="tab-clinic">
+    <div class="stage-wrap">
+      <canvas id="clinicStage"></canvas>
+      <div class="stage-overlay">
+        <div class="stage-badges">
+          <span class="badge" id="bottleneck">ボトルネック: なし 😌</span>
+          <span class="badge">院内 <b id="cIn">0</b>人 / 平均待ち <b id="cWait">–</b></span>
+        </div>
+        <div class="view-group">
+          <button class="view-btn" id="heatBtn">🔥 導線ヒート</button>
+          <button class="view-btn" id="lineBtn">〰 導線ライン</button>
         </div>
       </div>
-      <label class="ctrl">
-        <span class="ctrl-head">処置に回る割合 <b id="vTreat">20%</b></span>
-        <input type="range" id="treat" min="0" max="60" step="5" value="20">
-      </label>
-      <label class="ctrl">
-        <span class="ctrl-head">リハに回る割合 <b id="vReha">30%</b></span>
-        <input type="range" id="reha" min="0" max="60" step="5" value="30">
-      </label>
-      <div class="ctrl">
-        <span class="ctrl-head">リセット</span>
-        <button class="seg-btn reset-btn" id="resetBtn">はじめから</button>
-      </div>
+      <div class="panic" id="panic" hidden>🚨 待合パンク! 椅子が足りていません</div>
     </div>
-    <div class="legend">
-      <span><i style="background:#C98A2D"></i>受付・会計待ち</span>
-      <span><i style="background:#3E7CA6"></i>診察待ち/診察中</span>
-      <span><i style="background:#C4574E"></i>処置</span>
-      <span><i style="background:#4FA98C"></i>リハビリ</span>
-      <span><i style="background:#8C7BC4"></i>会計中</span>
-      <span><i style="background:#9AA7B0"></i>移動中</span>
+
+    <div class="card" id="shopCard">
+      <h2 class="card-title">🧰 スタッフ &amp; 設備 <small>— 全部自由にいじれます。人件費は毎日かかります</small></h2>
+      <div id="shopList"></div>
+      <div class="op-row">
+        <button class="op-btn" id="opReserve">📅 予約制 <small>¥50,000</small></button>
+        <button class="op-btn" id="opKiosk">🏧 自動精算機 <small>¥300,000</small></button>
+        <button class="op-btn" id="opReview">💬 クチコミ返信</button>
+      </div>
+      <div class="ctrl-grid">
+        <label class="ctrl">
+          <span class="ctrl-head">診察時間(平均) <b id="vExamMean">6分</b></span>
+          <input type="range" id="examMean" min="3" max="12" step="1" value="6">
+          <small class="ctrl-note">短い=回転UP・満足度リスク / 長い=丁寧・待ち時間リスク</small>
+        </label>
+        <label class="ctrl">
+          <span class="ctrl-head">処置の実施方針 <b id="vPTreat">25%</b></span>
+          <input type="range" id="pTreat" min="0" max="60" step="5" value="25">
+          <small class="ctrl-note">医学的必要性が前提。看護師とベッドが要る</small>
+        </label>
+        <label class="ctrl">
+          <span class="ctrl-head">リハ提案方針 <b id="vPReha">35%</b></span>
+          <input type="range" id="pReha" min="0" max="70" step="5" value="35">
+          <small class="ctrl-note">施設基準の届出後に有効。整形外来の生命線</small>
+        </label>
+      </div>
     </div>
   </section>
 
-  <p class="note">※ 待ち行列と所要時間は乱数を含む簡易モデルです。実際の外来設計は <a href="https://bridge-med.github.io/consult-simulator/" target="_blank" rel="noopener">ConsultSim</a> で数字からどうぞ。</p>
+  <!-- ===== タウンタブ ===== -->
+  <section class="tab-panel" id="tab-town">
+    <div class="stage-wrap">
+      <canvas id="townStage"></canvas>
+      <div class="stage-overlay">
+        <div class="stage-badges"><span class="badge">🏢 建物をタップすると営業アクション</span></div>
+      </div>
+    </div>
+
+    <div class="card" id="marketingCard">
+      <h2 class="card-title">📣 マーケティング <small>— 認知(✓のついた家)を広げる</small></h2>
+      <label class="ctrl">
+        <span class="ctrl-head">リスティング広告 <b id="vListing">なし</b></span>
+        <input type="range" id="listing" min="0" max="20000" step="5000" value="0">
+        <small class="ctrl-note">「◯◯町 整形外科」の検索に出す。認知は増えるが、止めると効果も止まる「蛇口型」の集患</small>
+      </label>
+      <div class="town-guide">
+        <div class="tg-row"><span>🏥 市民総合病院</span>連携すると退院後の紹介患者(処置・リハ率高)が毎日来る</div>
+        <div class="tg-row"><span>🧑‍💼 ケアマネ事業所</span>リハ体制が整うとリハ紹介が来る(体制が先!)</div>
+        <div class="tg-row"><span>🚚 運送会社</span>健診契約で保険外の安定収入(1件¥8,000)</div>
+        <div class="tg-row"><span>🚉 駅</span>看板を出すと駅利用者の新患+認知が広がる</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 経営タブ ===== -->
+  <section class="tab-panel" id="tab-mgmt">
+    <div class="card formula" id="formulaCard">
+      <h2 class="card-title">🧭 外来経営の基本式</h2>
+      <div class="formula-line">売上 <span>=</span> 患者数 <span>×</span> 診療単価</div>
+      <div class="formula-sub">
+        <div>患者数 = <b>新患</b>(認知×評判×競合) + <b>再診</b>(治療計画×患者体験)</div>
+        <div>単価 = 初再診料 + <b>処置</b> + <b>リハ</b>(施設基準で変わる) + 健診</div>
+        <div>利益 = 売上 − <b>固定費</b>(人件費・家賃) − 変動費 − 広告費</div>
+      </div>
+    </div>
+
+    <div class="card" id="pnlCard">
+      <h2 class="card-title">📊 本日のP&amp;L <small>— 月商(直近30日): <b id="pnlMonth">¥0</b></small></h2>
+      <div id="pnlToday"></div>
+      <h3 class="sub-title">損益の推移(直近14日)</h3>
+      <div class="pnl-chart" id="pnlChart"></div>
+    </div>
+
+    <div class="card" id="kijunCard">
+      <h2 class="card-title">📋 施設基準(リハビリ) <small>— 単価を決める「届出」</small></h2>
+      <div id="kijunBody"></div>
+    </div>
+
+    <div class="card" id="missionCard">
+      <h2 class="card-title">🎯 ミッション <small>— 経営のカリキュラム</small></h2>
+      <div id="missionList"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">📖 外来経営のキホン 8箇条</h2>
+      <div id="textbook"></div>
+    </div>
+
+    <p class="note">※ 金額・制度は教育用に簡略化したフィクションです。実際の診療報酬・施設基準は最新の告示をご確認ください。<br>まじめな外来設計は <a href="https://bridge-med.github.io/consult-simulator/" target="_blank" rel="noopener">ConsultSim</a>、経営判断の12週は <a href="../turnaround12/" target="_blank" rel="noopener">ターンアラウンド12</a> へ。</p>
+  </section>
 
 </main>
 
-<script src="app/app.js"></script>
+<!-- ===== バナー / トースト / モーダル ===== -->
+<div class="banner" id="banner"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal-wrap" id="modal">
+  <div class="modal">
+    <h3 id="modalTitle"></h3>
+    <div id="modalBody"></div>
+    <button class="btn-cta ghost" id="modalBtn">OK</button>
+  </div>
+</div>
+
+<!-- ===== チュートリアル ===== -->
+<div class="tutorial" id="tutorial">
+  <div class="tut-box">
+    <div class="tut-head"><span class="tut-chara">🧑‍⚕️</span><span class="tut-step" id="tutStep">1 / 9</span></div>
+    <p class="tut-text" id="tutText"></p>
+    <div class="tut-btns">
+      <button class="tut-skip" id="tutSkip">スキップ</button>
+      <button class="btn-cta" id="tutNext">次へ →</button>
+    </div>
+  </div>
+</div>
+
+<script src="app/iso.js"></script>
+<script src="app/clinic.js"></script>
+<script src="app/town.js"></script>
+<script src="app/game.js"></script>
 
 </body>
 </html>
