@@ -1,0 +1,472 @@
+{
+  "updated_at": "2026-07-03T06:45:50+00:00",
+  "updated_jst": "2026-07-03T15:45+09:00",
+  "sources": {
+    "news": "NHK ニュース RSS (政治 / 経済 / 国際)",
+    "medical_news": "NHK ニュース RSS (科学・医療)",
+    "papers_mgmt": "PubMed efetch (Healthcare Management / Health Policy / Public Health, last 60d)",
+    "papers_med": "PubMed efetch (rehabilitation / pharmacology / neurology, last 60d)",
+    "arxiv": "arXiv API (cs.AI / cs.CL / cs.LG, latest)",
+    "tech": "ITmedia News RSS",
+    "wiki": "Wikipedia REST API (Today in History, en)",
+    "quiz": "Gemini で日次生成: 診療情報管理士 1問 + 医療経営英語 1フレーズ"
+  },
+  "quiz": {
+    "him": {
+      "topic": "DPC・包括医療",
+      "question": "DPC/PDPSにおける包括評価の対象とならない医療行為や費用として、最も適切なものはどれか。",
+      "choices": [
+        "入院基本料",
+        "投薬（包括範囲内の薬剤）",
+        "検査（包括範囲内の検査）",
+        "放射線治療"
+      ],
+      "answer_index": 3,
+      "explanation": "放射線治療は、DPC/PDPSにおいて包括評価の対象外とされており、出来高払い方式で算定されます。これは、治療内容や回数が患者の状態によって大きく異なるため、包括評価になじまないためです。入院基本料、包括範囲内の投薬や検査は包括評価の対象となります。"
+    },
+    "english": {
+      "phrase_en": "Let's get on the same page.",
+      "phrase_jp": "認識を合わせましょう / 共通理解を持ちましょう",
+      "scenario": "新しい患者受け入れプロセスについて話し合う会議で",
+      "example_en": "A: \"Before we finalize the new patient intake process, I want to make sure we're all on the same page regarding the responsibilities.\" B: \"Good idea. Let's review each step.\"",
+      "example_jp": "A: 「新しい患者受け入れプロセスを最終決定する前に、責任分担について全員が共通認識を持っているか確認したいです。」 B: 「いいですね。各ステップを確認しましょう。」",
+      "note": "チームや関係者間で、特定のトピックや計画について認識のずれがないか確認し、共通理解を築く際に使います。誤解を防ぎ、スムーズな進行を促すのに役立ちます。"
+    }
+  },
+  "news": [
+    {
+      "title": "野党 高市首相の集中審議出席など政府に要求 参院議運委理事会",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168031000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-03T14:35:38+09:00",
+      "date": "2026-07-03",
+      "body": "参議院議院運営委員会の理事会で、野党側は政府に対し、高市総理大臣も出席して予算委員会の集中審議などを開催するよう重ねて求め、政府側は国会で日程が決まれば対応したいと応じました。",
+      "lang": "ja"
+    },
+    {
+      "title": "ブルボン 菓子2万袋余を自主回収 アレルギー物質「えび」混入",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168041000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T14:31:49+09:00",
+      "date": "2026-07-03",
+      "body": "菓子メーカーの「ブルボン」は、スナック菓子の原料に、本来は使用していない、アレルギー物質である「えび」が混入していたとして、2万袋余りを自主回収すると発表しました。",
+      "lang": "ja"
+    },
+    {
+      "title": "在留外国人の学習プログラム創設に向け検討課題まとめる 政府",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167931000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-03T14:23:41+09:00",
+      "date": "2026-07-03",
+      "body": "政府は在留外国人が日本語や日本のルールを学習するプログラムの創設に向けた検討課題をまとめました。中長期の在留を目的とする外国人を幅広く受講対象とし、入国前を含めICTを活用した学習環境を整備するとして…",
+      "lang": "ja"
+    },
+    {
+      "title": "皇室典範改正案 与党 衆院議運委で審議提案 野党“聞き置く”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168001000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-03T14:00:09+09:00",
+      "date": "2026-07-03",
+      "body": "国会で与野党の対立が続く中、衆議院議院運営委員会の与野党の筆頭理事が会談し、与党側は皇族数の確保に向けた皇室典範改正案を議院運営委員会で速やかに審議入りさせたいと提案しました。これに対し、野党側は「聞…",
+      "lang": "ja"
+    },
+    {
+      "title": "小泉防衛相 トルコ訪問しNATOの関連行事に出席へ",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168011000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-03T13:23:02+09:00",
+      "date": "2026-07-03",
+      "body": "小泉防衛大臣は、来週、トルコを訪れ、NATO＝北大西洋条約機構の首脳会議の関連行事に出席することになりました。参加国の国防相との個別の会談を調整し、関係強化を図りたい考えです。",
+      "lang": "ja"
+    },
+    {
+      "title": "ペルシャ湾内の日本関係船舶 新たに1隻がホルムズ海峡通過",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168021000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T13:05:30+09:00",
+      "date": "2026-07-03",
+      "body": "金子国土交通大臣は、3日の閣議のあとの会見で、ペルシャ湾内にとどまっていた日本関係の船舶のうち、新たに1隻がホルムズ海峡を通過したと明らかにしました。いずれも乗組員の健康状態に問題はなく、船体に異常は…",
+      "lang": "ja"
+    },
+    {
+      "title": "ペルシャ湾内の日本関係船舶 新たに1隻がホルムズ海峡通過",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168021000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T13:05:30+09:00",
+      "date": "2026-07-03",
+      "body": "金子国土交通大臣は、3日の閣議のあとの会見で、ペルシャ湾内にとどまっていた日本関係の船舶のうち、新たに1隻がホルムズ海峡を通過したと明らかにしました。いずれも乗組員の健康状態に問題はなく、船体に異常は…",
+      "lang": "ja"
+    },
+    {
+      "title": "円相場 3日も神経質な取り引き続く 2日に急速に円高進む場面",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167911000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T12:46:49+09:00",
+      "date": "2026-07-03",
+      "body": "歴史的な円安水準が続く中、外国為替市場では、2日、短時間で急速に円高が進む場面がありました。3日の東京市場でも、政府・日銀による市場介入への警戒から1ドル＝161円を挟んだ神経質な取り引きが続いていま…",
+      "lang": "ja"
+    },
+    {
+      "title": "きょうのおはBiz 7月3日(金) アメリカ雇用統計 市場予想下回る",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167831000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T12:28:28+09:00",
+      "date": "2026-07-03",
+      "body": "NHKニュース「おはよう日本」で平日朝に放送している経済ニュースコーナー「おはBiz」。最新のビジネストレンドや働き方、お役立ちサービスやスタートアップ企業の情報など、ギュギュっとコンパクトにお届けし…",
+      "lang": "ja"
+    },
+    {
+      "title": "外国人の在留許可手数料 引き上げ案を公表 政府",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167921000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-03T12:28:02+09:00",
+      "date": "2026-07-03",
+      "body": "政府は、外国人の在留許可に関する手数料を引き上げる案を公表しました。現在1万円の永住許可の手数料は20万円とし、ことし10月から実施したいとしています。",
+      "lang": "ja"
+    },
+    {
+      "title": "ベネズエラ地震 発生8日目に“奇跡”の救助 死者は2500人超に",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167841000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T12:26:13+09:00",
+      "date": "2026-07-03",
+      "body": "南米ベネズエラで先月発生したマグニチュード7を超える地震で、ベネズエラ政府が発表した死者の数は、これまでに2500人を超えました。現地では今も救助活動が続けられ、2日には、建物の地下に閉じ込められてい…",
+      "lang": "ja"
+    },
+    {
+      "title": "株価 一時1000円超値下がり AI関連など買い戻す動きも",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167961000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T12:25:03+09:00",
+      "date": "2026-07-03",
+      "body": "3日の東京株式市場、日経平均株価は一時、1000円以上値下がりしましたが、その後は、AIや半導体関連を中心に値下がりした銘柄を買い戻す動きも出て、株価は上昇に転じています。",
+      "lang": "ja"
+    },
+    {
+      "title": "中部電力 浜岡原発めぐる不正 赤澤経産相“厳正に対処”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167941000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T11:39:49+09:00",
+      "date": "2026-07-03",
+      "body": "中部電力が、浜岡原子力発電所の審査で原子力規制委員会から説明を求められたあとも不正なデータの操作を行っていたことについて、赤澤経済産業大臣は「誠に遺憾で極めて重く受け止めている」と述べ、会社側からの報…",
+      "lang": "ja"
+    },
+    {
+      "title": "長期金利 約29年ぶり一時2.81％に上昇 インフレ加速観測などで",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167801000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T11:21:37+09:00",
+      "date": "2026-07-03",
+      "body": "3日の債券市場で、長期金利が一時、およそ29年ぶりの高い水準となる2.81％まで上昇しました。今後、日銀の利上げのペースが遅くなり、インフレが加速するという観測などから国債を売る動きが強まっています。",
+      "lang": "ja"
+    },
+    {
+      "title": "覆面作家・雨穴さんの「変な絵」 ダガー賞翻訳部門 受賞逃す",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167871000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T11:05:16+09:00",
+      "date": "2026-07-03",
+      "body": "優れた推理小説に贈られる英国推理作家協会賞＝「ダガー賞」の受賞作品が発表され、翻訳部門で最終候補に残っていたユーチューバーで覆面の日本人作家、雨穴さんの「変な絵」は受賞を逃しました。",
+      "lang": "ja"
+    }
+  ],
+  "medical_news": [
+    {
+      "title": "村上春樹さん 3年ぶり新作長編小説発売 書店にファン集まる",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167631000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-03T05:01:29+09:00",
+      "date": "2026-07-03",
+      "body": "世界的に高く評価されている作家、村上春樹さんの3年ぶりとなる長編小説が発売され、午前0時から都内の書店で行われた販売のイベントには熱心なファンが集まりました。",
+      "lang": "ja",
+      "summary": "世界的に高く評価されている作家、村上春樹さんの3年ぶりとなる長編小説が発売され、都内の書店では午前0時から販売イベントが開催されました。このイベントには、新作を待ち望んでいた熱心なファンが多数集まり、発売を祝いました。村上作品は、その独特の世界観と深いテーマ性で世界中の読者を魅了しており、今回の新作も大きな注目を集めています。ファンは、新たな物語に触れる喜びを分かち合い、文学界に新たな話題を提供しました。"
+    },
+    {
+      "title": "福島第一原発 核燃料デブリ 3回目の試験的取り出しへ",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167451000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-02T21:26:44+09:00",
+      "date": "2026-07-02",
+      "body": "東京電力は、福島第一原子力発電所2号機で、ロボットアームを使った「核燃料デブリ」の試験的な取り出しに向けた作業を早ければ今月から始めると発表しました。3か月ほどかけて準備作業などを行ったあと、試験的な…",
+      "lang": "ja",
+      "summary": "東京電力は、福島第一原子力発電所2号機において、ロボットアームを用いた「核燃料デブリ」の試験的な取り出しに向けた作業を、早ければ今月から開始すると発表しました。約3か月間の準備作業を経て、その後、実際の試験的取り出しが行われる予定です。これは、廃炉作業における重要な一歩であり、デブリの性状把握と取り出し技術の確立を目指すものです。安全確保を最優先に進められます。"
+    },
+    {
+      "title": "世界で最も細い直径約4ミリの胃カメラ開発 大阪大発ベンチャー",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166561000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-02T05:06:05+09:00",
+      "date": "2026-07-02",
+      "body": "胃がんの検診に使う胃カメラの構造をシンプルにすることで、世界で最も細い直径4ミリほどのモデルを開発したと大阪大学発のベンチャー企業が発表しました。再来年にも国に承認申請を行うとしています。",
+      "lang": "ja",
+      "summary": "大阪大学発のベンチャー企業が、胃がん検診に用いられる胃カメラの構造を簡素化することで、世界で最も細いとされる直径約4ミリのモデルを開発したと発表しました。この画期的な開発により、患者の負担が大幅に軽減されることが期待されます。同社は、再来年にもこの新型胃カメラの国への承認申請を行う計画であり、実用化されれば、より多くの人々が苦痛なく胃がん検診を受けられるようになる可能性があります。"
+    },
+    {
+      "title": "将棋「棋聖戦」 藤井聡太六冠 3連勝でタイトル防衛 7連覇",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166231000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T21:45:52+09:00",
+      "date": "2026-07-01",
+      "body": "将棋の八大タイトルの1つ、「棋聖戦」五番勝負の第3局が7月1日に静岡県沼津市で行われ、藤井聡太六冠が、挑戦者の服部慎一郎七段に勝ってタイトルを防衛し、7連覇を果たしました。",
+      "lang": "ja",
+      "summary": "将棋の八大タイトルの一つである「棋聖戦」五番勝負の第3局が、7月1日に静岡県沼津市で開催されました。この対局で、藤井聡太六冠は挑戦者の服部慎一郎七段に勝利し、3連勝で棋聖のタイトルを防衛しました。これにより、藤井六冠は棋聖戦での7連覇を達成し、その圧倒的な強さを示しました。この偉業は、将棋界における藤井六冠の地位をさらに確固たるものにし、今後の活躍にも大きな期待が寄せられています。"
+    },
+    {
+      "title": "浜岡原発データ不正問題 中部電力が規制委指摘後もデータ操作",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166151000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T21:41:03+09:00",
+      "date": "2026-07-01",
+      "body": "中部電力が、静岡県にある浜岡原子力発電所の審査で不正なデータ処理を行っていた問題で、原子力規制委員会から説明を求められた去年5月以降もデータの操作を行っていたことが分かりました。規制委員会は、中部電力…",
+      "lang": "ja",
+      "summary": "中部電力が静岡県の浜岡原子力発電所の審査において不正なデータ処理を行っていた問題で、原子力規制委員会が説明を求めた昨年5月以降も、データの操作を継続していたことが判明しました。この事態は、中部電力のコンプライアンス体制の不備を改めて浮き彫りにし、原子力施設の安全性に対する信頼を揺るがすものです。規制委員会は、この問題に対し厳正な対応を求めるとともに、中部電力の組織的な改善を強く促す方針です。"
+    },
+    {
+      "title": "ミュトス提供再開 “情報収集進める”国内金融機関",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165431000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T13:58:53+09:00",
+      "date": "2026-07-01",
+      "body": "アメリカのAI新興企業「アンソロピック」は6月30日、最新のAIモデルの「クロード・ミュトス5」や、同等の性能を持つ「フェイブル5」について、アメリカ政府の輸出規制が解除されたことを受けて、提供を再開…",
+      "lang": "ja",
+      "summary": "アメリカのAI新興企業「アンソロピック」は6月30日、最新のAIモデル「クロード・ミュトス5」および同等の性能を持つ「フェイブル5」の提供を再開しました。これは、アメリカ政府による輸出規制が解除されたことを受けたものです。この高性能AIモデルの提供再開に対し、国内の金融機関は、その機能や潜在的な活用可能性について情報収集を進めており、今後の業務への導入を検討する動きが見られます。"
+    },
+    {
+      "title": "「キャプテン翼」高橋陽一さん“4年後は翼くんの夢W杯優勝を”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165111000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-30T21:16:09+09:00",
+      "date": "2026-06-30",
+      "body": "サッカーワールドカップ北中米大会で日本が惜しくもブラジルに敗れたことについて、世界的な人気を誇るサッカー漫画「キャプテン翼」の作者、高橋陽一さんは「サッカー王国ブラジルとも互角に戦えるんだと示す試合だ…",
+      "lang": "ja",
+      "summary": "サッカーワールドカップ北中米大会で、日本が惜しくもブラジルに敗れたことについて、世界的な人気を誇るサッカー漫画「キャプテン翼」の作者である高橋陽一さんがコメントしました。高橋さんは、この試合を「サッカー王国ブラジルとも互角に戦えるんだと示す試合だ」と評価し、日本代表の健闘を称えました。そして、4年後のワールドカップでは、主人公の翼くんの夢である優勝を期待する言葉を述べました。"
+    },
+    {
+      "title": "落語協会 新会長に林家正蔵さん就任 “若手の育成などに対処”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165211000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-30T20:58:48+09:00",
+      "date": "2026-06-30",
+      "body": "人気落語家の林家正蔵さんが東京の落語家などで作る団体「落語協会」の新しい会長に就任し、「若手の育成などの問題に一つ一つ対処していきたい」などと抱負を述べました。",
+      "lang": "ja",
+      "summary": "人気落語家の林家正蔵さんが、東京の落語家などで作る団体「落語協会」の新しい会長に就任しました。林家正蔵さんは、会長就任にあたり、「若手の育成などの問題に一つ一つ対処していきたい」と抱負を述べました。落語協会は、落語の普及と発展、そして落語家の活動を支援する重要な団体であり、新会長として林家正蔵さんがその舵取りを担うことになります。"
+    }
+  ],
+  "papers_mgmt": [
+    {
+      "title": "Pentoxifylline and cardiorenal outcomes in advanced CKD with untreated dyslipidemia: a longitudinal cohort study.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42393494/",
+      "source": "Renal failure",
+      "authors": "Lin YC et al.",
+      "pubDate": "2026-12-01",
+      "date": "2026-12-01",
+      "body": "BACKGROUND: Patients with advanced chronic kidney disease (CKD) and dyslipidemia are at high risk of kidney failure and cardiovascular events, yet many do not receive lipid-lowering therapy. Pentoxifylline (PTX) has anti-inflammatory and antifibrotic properties, but its association with hard cardiorenal outcomes remains uncertain. METHODS: We conducted a retrospective cohort study of adults with stage 3b-5 CKD and dyslipidemia enrolled in a pre-end-stage renal disease program from 2007 to 2018. Patients receiving lipid-lowering therapy were excluded. PTX initiators were matched 1:1 to nonusers using propensity score matching. The primary outcome was progression to end-stage kidney disease (…",
+      "lang": "en",
+      "pmid": "42393494",
+      "topic": "医療経営/公衆衛生",
+      "application": "進行した慢性腎臓病患者における脂質異常症の未治療は、腎不全や心血管イベントのリスクを高めるとされており、多疾患併存患者の全体像把握の重要性が示唆されます。整形外科やリハビリ部門でも、患者の基礎疾患や併存疾患の治療状況を把握することで、より安全で効果的な介入が可能となります。現場では、初診時問診票に「現在、脂質異常症の治療を受けていますか？」といった項目を追加し、必要に応じて主治医への情報提供や受診勧奨を行う運用ルールを検討できます。"
+    },
+    {
+      "title": "Risk factors and temporal trends of early urological complications after kidney transplantation: a 15-year single-center cohort study.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42393492/",
+      "source": "Renal failure",
+      "authors": "Kırımker EO et al.",
+      "pubDate": "2026-12-01",
+      "date": "2026-12-01",
+      "body": "BACKGROUND: Urological complications remain a significant source of morbidity following kidney transplantation, often leading to re-intervention and graft dysfunction. Although advances in surgical technique and perioperative care have reduced incidence rates, controversy persists regarding risk predictors and the prophylactic role of double-J ureteral stenting. METHODS: We retrospectively analyzed 425 adult kidney transplant recipients at a single tertiary center between January 2008 and December 2023. Patient demographics, donor characteristics, surgical variables, and postoperative outcomes were reviewed. Complications were defined as urinary leak, ureteral stricture, or anastomotic obst…",
+      "lang": "en",
+      "pmid": "42393492",
+      "topic": "医療経営/公衆衛生",
+      "application": "腎移植後の泌尿器系合併症は再介入や移植臓器機能不全につながるとされており、術後の患者管理の重要性が示唆されます。整形外科やリハビリ部門、在宅医療においても、主要な手術歴を持つ患者さんに対しては、術後の潜在的な合併症リスクを常に意識したケアが求められます。現場では、術後患者のリハビリ計画や訪問看護計画を立てる際、主治医からの術後経過や合併症に関する情報共有が十分かを確認するチェック項目を設け、情報収集の徹底をKPIの一つとすることができます。"
+    },
+    {
+      "title": "Circulating Adipokines as Diagnostic and Prognostic Markers in Idiopathic Pulmonary Fibrosis.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42393475/",
+      "source": "Lung",
+      "authors": "Oh JH et al.",
+      "pubDate": "2026-07-03",
+      "date": "2026-07-03",
+      "body": "PURPOSE: Dysregulation of lipid metabolism has been implicated in the pathogenesis of idiopathic pulmonary fibrosis (IPF). We aimed to evaluated the predictive value of adipokines in IPF diagnosis and prognosis. METHODS: Clinical data of patients with IPF (n = 100) and healthy controls (n = 64) were retrospectively analysed. Plasma adipokine levels including leptin and adiponectin were measured using enzyme-linked immunosorbent assay. RESULTS: The mean age of patients with IPF was 68.4 years and 83.0% were male; they were older than controls. The plasma leptin levels were higher in patients with IPF than those in controls and were independently associated with IPF presence (odds ratio: 1.00…",
+      "lang": "en",
+      "pmid": "42393475",
+      "topic": "医療経営/公衆衛生",
+      "application": "特発性肺線維症の病態に脂質代謝異常が関与し、血中レプチン値が診断と関連するとされており、全身の代謝状態が様々な疾患に影響を与える可能性が示唆されます。整形外科やリハビリ部門、在宅医療においても、患者の体重管理や食生活といった生活習慣が、症状や予後に影響を与えるという視点を持つことが重要です。現場では、朝礼の問いとして「患者さんの症状改善のために、運動療法だけでなく、体重や食生活といった生活習慣へのアプローチをどう提案できるか？」を共有し、多角的な視点でのケアを促すことができます。"
+    }
+  ],
+  "papers_med": [
+    {
+      "title": "3D-Printing in Neurosurgical Training: Hands-On Practice, Patient-Specific Planning and Simulation.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42393455/",
+      "source": "Advances and technical standards in neurosurgery",
+      "authors": "Coelho G et al.",
+      "pubDate": "2026-01-01",
+      "date": "2026-01-01",
+      "body": "Training in neurosurgery is increasingly challenged by the complexity of cranial anatomy, the rarity of certain pathologies, ethical constraints on cadaveric dissection, and limited operative exposure. Advances in three-dimensional (3D) printing have enabled the development of patient-specific anatomical models derived from computed tomography and magnetic resonance imaging, offering realistic, reproducible platforms for surgical training and preoperative planning. This chapter reviews contemporary applications of 3D-printed, hybrid, and multimodal simulation models in neurosurgical education, with particular emphasis on complex craniofacial and encephalocele procedures. Through illustrativ…",
+      "lang": "en",
+      "pmid": "42393455",
+      "topic": "リハ/薬理/神経"
+    },
+    {
+      "title": "Efficacy and safety of extended-interval dosing of natalizumab in multiple sclerosis: a systematic review and meta-analysis with subgroup evaluation.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42393408/",
+      "source": "Neurological sciences : official journal of the Italian Neurological Society and of the Italian Society of Clinical Neurophysiology",
+      "authors": "Hammadeh BM et al.",
+      "pubDate": "2026-07-03",
+      "date": "2026-07-03",
+      "body": "BACKGROUND: Natalizumab is effective for relapsing-remitting multiple sclerosis (RRMS) but increases the risk of progressive multifocal leukoencephalopathy (PML). Extended-interval dosing (EID) may lessen this risk by reducing drug exposure, though its efficacy and safety compared with standard-interval dosing (SID) remain unclear. This review and meta-analysis evaluates both regimens across clinical and MRI outcomes. METHODS: Following PRISMA guidelines, we systematically searched PubMed, Scopus, Web of Science, Cochrane Library, and ScienceDirect from inception to July 2025. Eligible studies compared extended- (5-12 weeks) and standard-interval (4 weeks) natalizumab dosing in MS. Meta-ana…",
+      "lang": "en",
+      "pmid": "42393408",
+      "topic": "リハ/薬理/神経"
+    },
+    {
+      "title": "The Protective Effects of Selenium Nanoparticles Against Metal Toxicity.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42393350/",
+      "source": "Biological trace element research",
+      "authors": "Skalny AV et al.",
+      "pubDate": "2026-07-03",
+      "date": "2026-07-03",
+      "body": "The objective of the present review is to discuss the protective effects of SeNPs against metal toxicity with special emphasis on the underlying mechanisms and efficacy of SeNPs in comparison to other Se species. In vivo and in vitro studies show that SeNPs mitigate the adverse effects of metal(loid)s (cadmium, lead, arsenic, aluminum, etc.), metal nanoparticles (silver, cobalt), as well as platinum-based agent cisplatin in brain, liver, kidneys, heart, intestine, and gonads. SeNPs substantially reduce toxic metal accumulation in the organism, thus attenuating their toxicity. In metal-exposed animals, SeNPs enhance the biosynthesis of selenoproteins (including GPX4) and up-regulate Nrf2 sig…",
+      "lang": "en",
+      "pmid": "42393350",
+      "topic": "リハ/薬理/神経"
+    }
+  ],
+  "arxiv": [
+    {
+      "title": "Distributed Attacks in Persistent-State AI Control",
+      "url": "https://arxiv.org/abs/2607.02514v1",
+      "source": "arXiv cs.AI",
+      "authors": "Josh Hills et al.",
+      "pubDate": "2026-07-02T17:59:56+00:00",
+      "date": "2026-07-02",
+      "body": "As AI coding agents become more autonomous, they increasingly ship code iteratively, with the codebase persisting across sessions. This persistence creates a new attack surface: a misaligned or prompt-injected agent can distribute attacks across pull requests (PRs) and time its payload for the PR with the best natural cover. To study the resulting dynamics, we introduce Iterative VibeCoding, a setting for AI control, the study of safely deploying capable but potentially untrusted AI. In Iterative VibeCoding, a coding agent builds software over a sequence of PRs in a persistent codebase while pursuing a covert side task. Our benchmark includes two task families: CLI tools and Flask web servi…",
+      "lang": "en",
+      "topic": "cs.AI"
+    },
+    {
+      "title": "LACUNA: A Testbed for Evaluating Localization Precision for LLM Unlearning",
+      "url": "https://arxiv.org/abs/2607.02513v1",
+      "source": "arXiv cs.CL",
+      "authors": "Matteo Boglioni et al.",
+      "pubDate": "2026-07-02T17:59:52+00:00",
+      "date": "2026-07-02",
+      "body": "LLMs memorize sensitive training data, including personally identifiable information (PII), creating a pressing need for reliable post hoc removal methods. Unlearning has emerged as a promising solution, with state-of-the-art(SOTA) methods often following a localize-first, unlearn-second paradigm that targets specific model parameters. However, existing benchmarks evaluate unlearning solely at the output level, leaving open the question of whether unlearning truly erases knowledge from a model's parameters or merely obfuscates it, a concern reinforced by the success of resurfacing attacks. To bridge this gap, we introduce LACUNA: the first unlearning testbed with ground-truth parameter-leve…",
+      "lang": "en",
+      "topic": "cs.CL"
+    },
+    {
+      "title": "Program-as-Weights: A Programming Paradigm for Fuzzy Functions",
+      "url": "https://arxiv.org/abs/2607.02512v1",
+      "source": "arXiv cs.LG",
+      "authors": "Wentao Zhang et al.",
+      "pubDate": "2026-07-02T17:59:50+00:00",
+      "date": "2026-07-02",
+      "body": "Many everyday programming tasks resist clean rule-based implementation, such as alerting on important log lines, repairing malformed JSON, or ranking search results by intent, and are increasingly outsourced to large language model APIs at the cost of locality, reproducibility, and price. We propose fuzzy-function programming: compiling such a function from a natural-language specification into a compact, locally-executable neural artifact. We instantiate this paradigm with Program-as-Weights (PAW), in which a 4B compiler trained on FuzzyBench, a 10M-example dataset we release, emits parameter-efficient adapters for a frozen, lightweight interpreter. A 0.6B Qwen3 interpreter executing PAW p…",
+      "lang": "en",
+      "topic": "cs.LG"
+    }
+  ],
+  "tech": [
+    {
+      "title": "Anthropic、Samsungと独自AIチップで協議か　報道受けNVIDIAなど半導体関連株が下落",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/03/news101.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-03T13:36:00+09:00",
+      "date": "2026-07-03",
+      "body": "米メディア「The Information」は7月2日（現地時間）、AI開発の米Anthropicが独自のAIチップの製造委託先として韓国Samsung Electronicsと協議していると報じた。報道を受け、同日の米株式市場ではNVIDIAなど半導体関連株が下落した。",
+      "lang": "ja"
+    },
+    {
+      "title": "CDを生んだソニーが、ゲームの“円盤”に終わりを告げる事情　プレステとディスクの30年史",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/03/news098.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-03T12:57:00+09:00",
+      "date": "2026-07-03",
+      "body": "ソニー・インタラクティブエンタテインメントは、PlayStationコンソール向けの新作ゲームのディスク生産を2028年1月に終了する。ゲームの流通手段としての光学ディスクは40年近い歴史を持つが、いよいよ終わりが見えてきた。",
+      "lang": "ja"
+    },
+    {
+      "title": "Cloudflare、AIクローラー制御を全顧客に開放──「検索」「エージェント」「学習」の3分類で管理可能に",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/03/news087.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-03T10:55:00+09:00",
+      "date": "2026-07-03",
+      "body": "Cloudflareは、Webサイト運営者がAI関連のクローラーを「検索」「エージェント」「学習」の用途別に管理できる新機能を発表した。従来の単純な一括ブロックに代わり、挙動ベースでの制御を可能にする。また、AIの回答にコンテンツが使われた回数に応じて課金する仕組み「Pay Per Use」の実証実験なども発表した。",
+      "lang": "ja"
+    },
+    {
+      "title": "Amazonの衛星ブロードバンド「Leo」、打ち上げ300基突破で世界3位の規模に",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/03/news083.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-03T10:29:00+09:00",
+      "date": "2026-07-03",
+      "body": "Amazonは、低軌道衛星ブロードバンド事業「Amazon Leo」の公式ブログを更新し、300基以上の衛星を打ち上げて軌道上世界3位の規模になったと発表した。今後は打ち上げ頻度をさらに引き上げる方針だ。一方、競合のSpaceXが展開する「Starlink」は、約9600基の衛星を運用し契約者数は約1030万人に達している。",
+      "lang": "ja"
+    }
+  ],
+  "wiki": [
+    {
+      "title": "2013: President of Egypt Mohamed Morsi is removed from office by the military after fo",
+      "url": "https://en.wikipedia.org/wiki/President_of_Egypt",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "President of Egypt Mohamed Morsi is removed from office by the military after four days of protests all over the country calling for his resignation, to which he did not respond. The president of the Supreme Constitutional Court of Egypt, Adly Mansour, is declared acting president until further elections are held.  —  The president of the Arab Republic of Egypt is the head of state of Egypt. Under the various iterations of the Constitution of Egypt following the Egyptian revolution of 1952, the…",
+      "lang": "en",
+      "year": 2013,
+      "summary": "2013年、エジプトでは、辞任を求める全国的な抗議活動が4日間続いたにもかかわらず、これに応じなかった当時の大統領モハメド・モルシ（エジプトの元大統領）が軍によって解任されました。その後、最高憲法裁判所長官のアドリ・マンスール（最高憲法裁判所長官）が、次期選挙が実施されるまでの暫定大統領に就任しました。この出来事は、エジプトの政治情勢に大きな転換点をもたらしました。"
+    },
+    {
+      "title": "2006: The Valencia Metro derailment kills 41 people.",
+      "url": "https://en.wikipedia.org/wiki/Valencia_Metro_derailment",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "The Valencia Metro derailment kills 41 people.  —  The Valencia Metro derailment occurred in Valencia, Spain's third largest city, on 3 July 2006 at 1 p.m. CEST between Jesús and Plaça d'Espanya stations on the Line 1 of the Metrovalencia mass transit system. At least 43 people were killed and more than ten were seriously injured.",
+      "lang": "en",
+      "year": 2006,
+      "summary": "2006年7月3日、スペイン第三の都市であるバレンシア（スペインの都市）で、バレンシア地下鉄の脱線事故が発生しました。この事故は、メトロバレンシアの1号線、ヘスス駅とプラサ・デ・エスパーニャ駅の間で発生し、少なくとも41人が死亡、10人以上が重傷を負いました。この悲劇は、スペイン国内に大きな衝撃を与え、公共交通機関の安全対策について再考を促すきっかけとなりました。"
+    },
+    {
+      "title": "1996: British Prime Minister John Major announced the Stone of Scone would be returned",
+      "url": "https://en.wikipedia.org/wiki/John_Major",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "British Prime Minister John Major announced the Stone of Scone would be returned to Scotland.  —  Sir John Major is a British politician who served as Prime Minister of the United Kingdom and Leader of the Conservative Party from 1990 to 1997. He previously held various Cabinet positions under Margaret Thatcher. Major was the Member of Parliament (MP) for Huntingdon, formerly Huntingdonshire, from 1979 to 2001. Since stepping down, Major has focused on writing and his business, sporting, and ch…",
+      "lang": "en",
+      "year": 1996,
+      "summary": "1996年、当時のイギリス首相ジョン・メージャー（イギリスの首相）は、スコットランドの象徴的な遺物である「スクーンの石」（スコットランド王の戴冠式に使われた石）をスコットランドに返還すると発表しました。この石は、長らくイングランドに保管されていましたが、この決定により、スコットランドの歴史的・文化的アイデンティティの尊重が示されました。返還は、スコットランドの自治権拡大に向けた動きの一環とも見なされました。"
+    },
+    {
+      "title": "1988: United States Navy warship USS Vincennes shoots down Iran Air Flight 655 over th",
+      "url": "https://en.wikipedia.org/wiki/United_States_Navy",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "United States Navy warship USS Vincennes shoots down Iran Air Flight 655 over the Persian Gulf, killing all 290 people aboard.  —  The United States Navy (USN) is the maritime service branch of the United States Armed Forces and is designated as the navy of the United States in the Constitution. With 290 combat vessels, it is the world's second largest navy, behind the People's Liberation Army Navy, and by far the largest by displacement, at 4.5 million tons in 2021. It has the world's largest…",
+      "lang": "en",
+      "year": 1988,
+      "summary": "1988年、アメリカ海軍の軍艦USSヴィンセンス（アメリカ海軍の軍艦）が、ペルシャ湾上空でイラン航空655便（イランの民間航空機）を誤って撃墜しました。この悲劇により、乗員乗客290人全員が死亡しました。アメリカ側は、民間機を攻撃機と誤認したと主張しましたが、この事件は国際社会に大きな衝撃を与え、両国間の緊張を一層高める結果となりました。"
+    }
+  ]
+}

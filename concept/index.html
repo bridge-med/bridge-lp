@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRIDGE — VITAL / Concept Model 03</title>
+<meta name="description" content="現場の鼓動を、数字にする。BRIDGEのコンセプトモデル VITAL。医療現場のバイタルサインを、対話できる数字に変換する道具屋の実験室。">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="BRIDGE — VITAL / Concept Model 03">
+<meta property="og:description" content="現場の鼓動を、数字にする。">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070A0E'/%3E%3Cpath d='M8 36 L20 36 L26 22 L34 46 L40 32 L56 32' stroke='%233DF5B0' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+<style>
+/* ============================================================
+   BRIDGE — CONCEPT MODEL 03 “VITAL”
+   現場の鼓動を、数字にする。
+   ============================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#070A0E;          /* 消灯後の病棟 */
+  --bg-2:#0B0F15;
+  --panel:#0E141B;
+  --line:rgba(160,190,175,0.10);
+  --line-2:rgba(160,190,175,0.22);
+  --tx:#E6EDE8;          /* 蛍光灯の白 */
+  --tx-2:#9DB0A6;
+  --tx-3:#5C6B64;
+  --pulse:#3DF5B0;       /* モニターの緑 */
+  --pulse-dim:rgba(61,245,176,0.14);
+  --alert:#FF5C45;       /* アラートの朱 — 旧世界からの唯一の持ち込み */
+  --amber:#FFC24B;
+  --disp:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;
+  --body:'Noto Sans JP',sans-serif;
+  --grot:'Space Grotesk',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --max:1240px;
+  --pad:clamp(20px,5vw,72px);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:var(--body);line-height:1.8;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-feature-settings:"palt" 1}
+::selection{background:var(--pulse);color:var(--bg)}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.nowrap{white-space:nowrap}
+
+/* モニターのグリッド(方眼)と走査線 */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(120,160,145,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,160,145,0.04) 1px,transparent 1px);
+  background-size:56px 56px}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:90;opacity:0.5;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,0.16) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+
+/* ===== カスタムカーソル(照準)— マウス環境のみ ===== */
+@media(pointer:fine){
+  body.cursor-on,body.cursor-on a,body.cursor-on button{cursor:none}
+  .cur{position:fixed;z-index:1000;pointer-events:none;top:0;left:0}
+  .cur-dot{width:5px;height:5px;background:var(--pulse);border-radius:50%;transform:translate(-50%,-50%)}
+  .cur-ring{width:34px;height:34px;border:1px solid rgba(61,245,176,0.55);border-radius:50%;transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s,background .25s;display:flex;align-items:center;justify-content:center}
+  .cur-ring::before,.cur-ring::after{content:'';position:absolute;background:rgba(61,245,176,0.5)}
+  .cur-ring::before{width:9px;height:1px}
+  .cur-ring::after{width:1px;height:9px}
+  .cur-label{position:absolute;font:600 8px/1 var(--mono);letter-spacing:0.18em;color:var(--bg);opacity:0;transition:opacity .2s}
+  .cur-ring.hot{width:64px;height:64px;background:var(--pulse);border-color:var(--pulse)}
+  .cur-ring.hot::before,.cur-ring.hot::after{display:none}
+  .cur-ring.hot .cur-label{opacity:1}
+}
+.cur{display:none}
+body.cursor-on .cur{display:block}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px var(--pad);background:linear-gradient(180deg,rgba(7,10,14,0.92),rgba(7,10,14,0));backdrop-filter:blur(2px)}
+.nav-l{display:flex;align-items:baseline;gap:14px}
+.nav-logo{font:700 15px/1 var(--grot);letter-spacing:0.22em;color:var(--tx)}
+.nav-logo b{color:var(--pulse)}
+.nav-tag{font:500 9px/1 var(--mono);letter-spacing:0.16em;color:var(--tx-3);text-transform:uppercase}
+.nav-r{display:flex;align-items:center;gap:18px;font:600 10px/1 var(--mono);letter-spacing:0.14em;text-transform:uppercase}
+.nav-r a{color:var(--tx-2);padding:8px 0;transition:color .15s}
+.nav-r a:hover{color:var(--pulse)}
+.nav-r .cta{border:1px solid var(--line-2);padding:10px 16px;border-radius:999px;color:var(--tx);transition:all .2s;white-space:nowrap}
+.nav-r .cta:hover{background:var(--pulse);border-color:var(--pulse);color:var(--bg)}
+@media(max-width:640px){.nav-r a:not(.cta){display:none}}
+@media(max-width:480px){.nav-tag{display:none}}
+.progress{position:fixed;top:0;left:0;height:2px;background:var(--pulse);z-index:110;width:0;box-shadow:0 0 12px rgba(61,245,176,0.8)}
+
+/* ===== HERO ===== */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:130px var(--pad) 40px;position:relative;z-index:1}
+.hero-inner{max-width:var(--max);margin:0 auto;width:100%}
+.boot{opacity:0;transform:translateY(14px);animation:boot .7s cubic-bezier(0.2,0.7,0.2,1) forwards}
+.boot.d1{animation-delay:.25s}.boot.d2{animation-delay:.45s}.boot.d3{animation-delay:.7s}.boot.d4{animation-delay:1.0s}.boot.d5{animation-delay:1.3s}
+@keyframes boot{to{opacity:1;transform:none}}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:12px;font:600 10px/1 var(--mono);letter-spacing:0.24em;color:var(--pulse);text-transform:uppercase;margin-bottom:34px}
+.hero-eyebrow::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--pulse);box-shadow:0 0 10px var(--pulse);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+.hero-h{font:900 clamp(42px,8.4vw,116px)/1.12 var(--disp);letter-spacing:0.005em;margin-bottom:30px;text-wrap:balance}
+.hero-h .pulse-word{color:var(--pulse);position:relative;text-shadow:0 0 32px rgba(61,245,176,0.35)}
+.hero-h .dim{color:var(--tx-3)}
+.hero-sub{font:500 14px/2.1 var(--body);color:var(--tx-2);max-width:590px;margin-bottom:44px}
+.hero-sub em{font-style:normal;color:var(--tx);border-bottom:1px solid rgba(61,245,176,0.5)}
+
+/* バイタルパネル */
+.vitals{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;border:1px solid var(--line-2);background:rgba(10,15,20,0.72);backdrop-filter:blur(6px);max-width:860px}
+@media(max-width:860px){.vitals{grid-template-columns:1fr 1fr}.vitals .v-ecg{grid-column:1/-1}}
+.vitals>div{padding:18px 20px;border-right:1px solid var(--line);min-width:0}
+.vitals>div:last-child{border-right:0}
+@media(max-width:860px){.vitals>div{border-bottom:1px solid var(--line)}}
+.v-label{font:600 8.5px/1 var(--mono);letter-spacing:0.2em;color:var(--tx-3);text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between}
+.v-num{font:600 26px/1 var(--mono);color:var(--tx);letter-spacing:-0.02em}
+.v-num i{font:italic 400 11px/1 var(--mono);color:var(--tx-3);margin-left:6px}
+.v-num.green{color:var(--pulse);text-shadow:0 0 18px rgba(61,245,176,0.4)}
+.v-ecg canvas{width:100%;height:56px;display:block}
+
+.scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font:600 9px/1 var(--mono);letter-spacing:0.3em;color:var(--tx-3);text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:10px}
+.scroll-cue::after{content:'';width:1px;height:34px;background:linear-gradient(var(--pulse),transparent);animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+@media(max-width:700px){.scroll-cue{display:none}}
+
+/* ===== セクション共通 ===== */
+section{padding:130px var(--pad);position:relative;z-index:1}
+.s-inner{max-width:var(--max);margin:0 auto}
+.s-tag{display:flex;align-items:center;gap:14px;font:600 10px/1 var(--mono);letter-spacing:0.22em;color:var(--tx-3);text-transform:uppercase;margin-bottom:26px}
+.s-tag b{color:var(--pulse);font-weight:600}
+.s-tag::after{content:'';flex:1;height:1px;background:var(--line)}
+.s-h{font:900 clamp(30px,4.8vw,58px)/1.3 var(--disp);letter-spacing:0.005em;margin-bottom:18px;text-wrap:balance}
+.s-h .g{color:var(--pulse)}
+.s-p{font:500 13.5px/2.05 var(--body);color:var(--tx-2);max-width:600px}
+
+/* 心電図の区切り線 */
+.ecg-divider{padding:0 var(--pad);position:relative;z-index:1}
+.ecg-divider svg{display:block;max-width:var(--max);margin:0 auto;width:100%;height:70px;overflow:visible}
+.ecg-divider path{fill:none;stroke:var(--pulse);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:0.7;filter:drop-shadow(0 0 6px rgba(61,245,176,0.5));stroke-dasharray:1600;stroke-dashoffset:1600}
+.ecg-divider.vis path{animation:ecgdraw 2.2s cubic-bezier(0.3,0,0.2,1) forwards}
+@keyframes ecgdraw{to{stroke-dashoffset:0}}
+
+/* ===== 01 DIAGNOSIS — ステートメント ===== */
+.diag .st{font:900 clamp(26px,4.6vw,56px)/1.55 var(--disp);letter-spacing:0.005em;max-width:1040px;text-wrap:balance}
+.diag .st .w{display:inline-block;opacity:0.08;transform:translateY(0.35em);transition:opacity .7s cubic-bezier(0.2,0.7,0.2,1),transform .7s cubic-bezier(0.2,0.7,0.2,1)}
+.diag.vis .st .w{opacity:1;transform:none}
+.diag .st .hl{color:var(--alert)}
+.diag .st .g{color:var(--pulse)}
+.diag-notes{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:70px}
+@media(max-width:820px){.diag-notes{grid-template-columns:1fr}}
+.diag-note{background:var(--bg-2);padding:30px 28px}
+.diag-note .n{font:600 10px/1 var(--mono);color:var(--alert);letter-spacing:0.2em;margin-bottom:14px}
+.diag-note h3{font:700 15px/1.6 var(--disp);margin-bottom:10px}
+.diag-note p{font:500 12px/1.95 var(--body);color:var(--tx-2)}
+
+/* ===== 02 INSTRUMENTS — 道具リスト(ホバーで浮遊プレビュー) ===== */
+.inst{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.inst-list{margin-top:56px;border-top:1px solid var(--line);position:relative}
+.inst-row{display:grid;grid-template-columns:70px 1fr auto auto;gap:22px;align-items:baseline;padding:24px 8px;border-bottom:1px solid var(--line);position:relative;transition:background .2s,padding .25s}
+@media(max-width:760px){.inst-row{grid-template-columns:44px 1fr;row-gap:6px}.inst-row .inst-tag{grid-column:2}.inst-row .inst-go{display:none}}
+.inst-row:hover{background:rgba(61,245,176,0.045);padding-left:18px}
+.inst-row .idx{font:400 12px/1 var(--mono);color:var(--tx-3)}
+.inst-row .name{font:900 clamp(20px,3.2vw,38px)/1.25 var(--disp);letter-spacing:0.01em;color:var(--tx);transition:color .2s;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.inst-row .name .jp{font:500 11px/1 var(--body);color:var(--tx-3);letter-spacing:0.06em}
+.inst-row:hover .name{color:var(--pulse)}
+.inst-row .inst-tag{font:500 9.5px/1 var(--mono);letter-spacing:0.14em;color:var(--tx-3);text-transform:uppercase;border:1px solid var(--line-2);padding:6px 10px;border-radius:999px;white-space:nowrap}
+.inst-row .inst-tag.sale{color:var(--amber);border-color:rgba(255,194,75,0.4)}
+.inst-row .inst-tag.free{color:var(--pulse);border-color:rgba(61,245,176,0.4)}
+.inst-row .inst-go{font:400 16px/1 var(--mono);color:var(--tx-3);transition:transform .2s,color .2s}
+.inst-row:hover .inst-go{transform:translate(4px,-4px);color:var(--pulse)}
+/* 浮遊プレビュー */
+.float-prev{position:fixed;z-index:60;width:300px;pointer-events:none;opacity:0;transform:scale(0.92);transition:opacity .22s,transform .22s;will-change:left,top}
+.float-prev.on{opacity:1;transform:scale(1)}
+.float-prev .fp-box{border:1px solid var(--line-2);background:var(--panel);box-shadow:0 24px 80px rgba(0,0,0,0.6);overflow:hidden}
+.float-prev img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;filter:saturate(0.9)}
+.float-prev .fp-alt{width:100%;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;font:900 22px/1.4 var(--disp);color:var(--pulse);background:
+  radial-gradient(circle at 30% 30%,rgba(61,245,176,0.14),transparent 70%),var(--panel);text-align:center;padding:20px}
+.float-prev .fp-bar{display:flex;justify-content:space-between;padding:9px 12px;font:500 8.5px/1 var(--mono);letter-spacing:0.16em;color:var(--tx-3);text-transform:uppercase;border-top:1px solid var(--line)}
+.float-prev .fp-bar b{color:var(--pulse);font-weight:500}
+@media(pointer:coarse){.float-prev{display:none}}
+.inst-foot{margin-top:36px;font:500 11px/1.9 var(--mono);color:var(--tx-3)}
+.inst-foot a{color:var(--tx-2);border-bottom:1px solid var(--line-2);transition:color .15s,border-color .15s}
+.inst-foot a:hover{color:var(--pulse);border-color:var(--pulse)}
+
+/* ===== 03 READINGS — 計測値 ===== */
+.reads-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:56px}
+@media(max-width:860px){.reads-grid{grid-template-columns:repeat(2,1fr)}}
+.read{background:var(--bg);padding:40px 30px 34px;position:relative;overflow:hidden}
+.read::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--pulse),transparent);opacity:0;transition:opacity .4s}
+.read:hover::before{opacity:1}
+.read .r-num{font:600 clamp(34px,4.6vw,56px)/1 var(--mono);color:var(--tx);letter-spacing:-0.03em;display:flex;align-items:baseline}
+.read .r-num .u{font:italic 400 13px/1 var(--mono);color:var(--pulse);margin-left:8px}
+.read .r-cap{font:500 11px/1.7 var(--body);color:var(--tx-2);margin-top:14px}
+.read .r-tag{position:absolute;top:16px;right:18px;font:500 8px/1 var(--mono);letter-spacing:0.18em;color:var(--tx-3);text-transform:uppercase}
+
+/* ===== 04 PROTOCOL — 思想(ターミナル) ===== */
+.proto-term{border:1px solid var(--line-2);background:var(--panel);margin-top:56px;box-shadow:0 30px 100px rgba(0,0,0,0.5)}
+.proto-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.proto-bar i{width:9px;height:9px;border-radius:50%;background:var(--tx-3);opacity:0.5}
+.proto-bar i:first-child{background:var(--alert);opacity:0.9}
+.proto-bar i:nth-child(3){background:var(--pulse);opacity:0.9}
+.proto-bar span{margin-left:auto;font:500 9px/1 var(--mono);letter-spacing:0.16em;color:var(--tx-3);text-transform:uppercase}
+.proto-body{padding:34px clamp(20px,4vw,48px) 40px;font-family:var(--mono)}
+.proto-line{display:grid;grid-template-columns:auto 1fr;gap:18px;padding:15px 0;border-bottom:1px dashed var(--line);opacity:0;transform:translateX(-8px);transition:opacity .6s,transform .6s}
+.proto-line:last-of-type{border-bottom:0}
+.proto-term.vis .proto-line{opacity:1;transform:none}
+.proto-term.vis .proto-line:nth-child(1){transition-delay:.1s}.proto-term.vis .proto-line:nth-child(2){transition-delay:.25s}.proto-term.vis .proto-line:nth-child(3){transition-delay:.4s}.proto-term.vis .proto-line:nth-child(4){transition-delay:.55s}.proto-term.vis .proto-line:nth-child(5){transition-delay:.7s}.proto-term.vis .proto-line:nth-child(6){transition-delay:.85s}
+.proto-line .ok{font:600 11px/1.9 var(--mono);color:var(--pulse);white-space:nowrap}
+.proto-line h3{font:700 14px/1.7 var(--disp);color:var(--tx)}
+.proto-line p{font:400 11px/1.9 var(--mono);color:var(--tx-2);margin-top:4px}
+.proto-cursor{display:inline-block;width:9px;height:15px;background:var(--pulse);vertical-align:-2px;animation:blink 1s steps(1) infinite;margin-top:18px}
+
+/* ===== 05 CONSULT ===== */
+.consult{text-align:center;padding-bottom:150px}
+.consult .big{font:900 clamp(36px,7.4vw,96px)/1.25 var(--disp);margin:26px 0 20px;text-wrap:balance}
+.consult .big .g{color:var(--pulse);text-shadow:0 0 40px rgba(61,245,176,0.35)}
+.consult .s-p{margin:0 auto 46px}
+.consult-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.c-btn{position:relative;display:inline-flex;align-items:center;gap:12px;padding:18px 32px;border-radius:999px;font:700 13px/1 var(--disp);letter-spacing:0.04em;transition:all .2s;border:1px solid var(--line-2);color:var(--tx)}
+.c-btn.primary{background:var(--pulse);border-color:var(--pulse);color:var(--bg);box-shadow:0 0 40px rgba(61,245,176,0.35)}
+.c-btn.primary:hover{box-shadow:0 0 70px rgba(61,245,176,0.55);transform:translateY(-2px)}
+.c-btn.ghost:hover{border-color:var(--pulse);color:var(--pulse)}
+.consult-note{margin-top:40px;font:400 10.5px/1.9 var(--mono);color:var(--tx-3)}
+.consult-note a{color:var(--tx-2);border-bottom:1px solid var(--line-2)}
+.consult-note a:hover{color:var(--pulse);border-color:var(--pulse)}
+
+/* ===== FOOTER ===== */
+.foot{border-top:1px solid var(--line);padding:34px var(--pad);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;font:500 9.5px/1.8 var(--mono);letter-spacing:0.12em;color:var(--tx-3);text-transform:uppercase;position:relative;z-index:1}
+.foot b{color:var(--tx-2);font-weight:500}
+.foot a{color:var(--tx-2)}
+.foot a:hover{color:var(--pulse)}
+
+/* ===== reveal ===== */
+[data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .9s cubic-bezier(0.2,0.7,0.2,1),transform .9s cubic-bezier(0.2,0.7,0.2,1)}
+[data-reveal].vis{opacity:1;transform:none}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  [data-reveal],.boot,.diag .st .w,.proto-line{opacity:1!important;transform:none!important}
+  .ecg-divider path{stroke-dashoffset:0!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+<div class="cur" id="curDot" aria-hidden="true"><div class="cur-dot"></div></div>
+<div class="cur" id="curRing" aria-hidden="true"><div class="cur-ring" id="curRingIn"><span class="cur-label" id="curLabel">OPEN</span></div></div>
+
+<nav class="nav">
+  <div class="nav-l">
+    <a href="../index.html" class="nav-logo">BRIDGE<b>.</b></a>
+    <span class="nav-tag">Concept Model 03 — Vital</span>
+  </div>
+  <div class="nav-r">
+    <a href="#instruments">Instruments</a>
+    <a href="#readings">Readings</a>
+    <a href="#protocol">Protocol</a>
+    <a href="#consult" class="cta" data-cursor="GO">相談する</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow boot">BRIDGE — Medical Tool Studio / Monitoring</div>
+    <h1 class="hero-h">
+      <span class="boot d1">現場の<span class="pulse-word">鼓動</span>を、</span><br>
+      <span class="boot d2">数字にする<span class="dim">。</span></span>
+    </h1>
+    <p class="hero-sub boot d3">
+      忙しさに埋もれた医療現場の「面倒くさい」は、放っておくと現場の心音を消していく。BRIDGEは理学療法士がひとりで営む道具屋。<em>現場のバイタルサインを、対話できる数字に変換する</em>——それが、すべての道具に共通する処方です。
+    </p>
+    <div class="vitals boot d4" role="presentation">
+      <div class="v-ecg">
+        <div class="v-label"><span>Field Signal</span><span>Lead II</span></div>
+        <canvas id="ecg" width="600" height="112" aria-hidden="true"></canvas>
+      </div>
+      <div>
+        <div class="v-label"><span>Tools</span></div>
+        <div class="v-num green"><span data-count="12">0</span><i>live</i></div>
+      </div>
+      <div>
+        <div class="v-label"><span>Entry</span></div>
+        <div class="v-num">¥<span data-count="0">0</span><i>から</i></div>
+      </div>
+      <div>
+        <div class="v-label"><span>Studio</span></div>
+        <div class="v-num" style="font-size:15px;line-height:1.5">Solo<i>Tokyo/Remote</i></div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue boot d5">Scroll</div>
+</header>
+
+<div class="ecg-divider" data-ecg aria-hidden="true">
+  <svg viewBox="0 0 1200 70" preserveAspectRatio="none"><path d="M0 40 H340 L360 40 L372 12 L386 62 L398 28 L412 40 H700 L716 40 L726 22 L738 54 L748 34 L760 40 H1200"/></svg>
+</div>
+
+<!-- ============ 01 DIAGNOSIS ============ -->
+<section class="diag" id="diagnosis" data-io>
+  <div class="s-inner">
+    <div class="s-tag"><b>01</b>Diagnosis — 診断</div>
+    <p class="st" data-words>
+      数字が 現場を <span class="hl">黙らせる</span>なら、 その数字は <span class="hl">間違っている</span>。 数字は 現場と 経営が <span class="g">同じ画面</span>を見て、 <span class="g">同じ言葉</span>で話すために ある。
+    </p>
+    <div class="diag-notes">
+      <div class="diag-note" data-reveal>
+        <div class="n">SYMPTOM_01</div>
+        <h3>朝礼で、数字が読み上げられるたび現場が沈黙する</h3>
+        <p>目標未達のスタッフがうつむく朝礼。数字を出すと萎縮する。だから出さなくなる。けれど経営は数字を求める。その板挟みを、私は現場側で見てきた。</p>
+      </div>
+      <div class="diag-note" data-reveal>
+        <div class="n">SYMPTOM_02</div>
+        <h3>Excelは限界、業務システムは重すぎる</h3>
+        <p>集計表は属人化し、重厚なSaaSは導入会議で止まる。その「中間」に道具が届いていない医療現場が、まだたくさんある。</p>
+      </div>
+      <div class="diag-note" data-reveal>
+        <div class="n">SYMPTOM_03</div>
+        <h3>触ったことのない現場のための道具が多すぎる</h3>
+        <p>机上の空論で設計されたプロダクトは、現場の導線を知らない。BRIDGEの道具は全部、作った本人が現場で毎日使うことから始まる。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ecg-divider" data-ecg aria-hidden="true">
+  <svg viewBox="0 0 1200 70" preserveAspectRatio="none"><path d="M0 40 H240 L252 16 L266 60 L278 30 L290 40 H620 L634 40 L644 20 L656 56 L668 32 L680 40 H1200"/></svg>
+</div>
+
+<!-- ============ 02 INSTRUMENTS ============ -->
+<section class="inst" id="instruments">
+  <div class="s-inner">
+    <div class="s-tag"><b>02</b>Instruments — 器具棚</div>
+    <h2 class="s-h">全12本、<span class="g">現場で消毒済み。</span></h2>
+    <p class="s-p">すべて橋本の日常業務・学習・課題から生まれ、本人が毎日使っている道具。行にカーソルを合わせると、器具が浮かび上がります。</p>
+
+    <div class="inst-list" id="instList">
+      <a class="inst-row" href="../rehaboard/index.html" target="_blank" data-thumb="../images/products/rehaboard.png" data-tag="経営・運営" data-cursor="OPEN">
+        <span class="idx">01</span>
+        <span class="name">RehaBoard<span class="jp">リハ部門の運営を、1画面で</span></span>
+        <span class="inst-tag sale">¥1,980 買い切り</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../medboard/index.html" target="_blank" data-thumb="../images/products/medboard.png" data-tag="経営・運営" data-cursor="OPEN">
+        <span class="idx">02</span>
+        <span class="name">MedBoard<span class="jp">外来の患者フロー、2施設横並び</span></span>
+        <span class="inst-tag">経営・運営</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../hire-board/index.html" target="_blank" data-thumb="../images/products/hireboard.png" data-tag="経営・運営" data-cursor="OPEN">
+        <span class="idx">03</span>
+        <span class="name">HireBoard<span class="jp">医療機関の採用をカンバンで</span></span>
+        <span class="inst-tag">経営・運営</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../interview-kit/index.html" target="_blank" data-thumb="../images/products/interview-kit.png" data-tag="経営・運営" data-cursor="OPEN">
+        <span class="idx">04</span>
+        <span class="name">InterviewKit<span class="jp">事実と印象を分けて記録する構造化面接</span></span>
+        <span class="inst-tag">経営・運営</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../consult-simulator/index.html" target="_blank" data-thumb="../images/products/consult-simulator.png" data-tag="経営・運営" data-cursor="OPEN">
+        <span class="idx">05</span>
+        <span class="name">ConsultSim<span class="jp">診察オペレーション設計シミュレーター</span></span>
+        <span class="inst-tag">経営・運営</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../him-quiz/index.html" target="_blank" data-thumb="../images/products/him-quiz.png" data-tag="学習" data-cursor="OPEN">
+        <span class="idx">06</span>
+        <span class="name">HIM Quiz<span class="jp">診療情報管理士 模試・全360問</span></span>
+        <span class="inst-tag">学習</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../study-board/index.html" target="_blank" data-thumb="../images/products/studyboard.png" data-tag="学習" data-cursor="OPEN">
+        <span class="idx">07</span>
+        <span class="name">StudyBoard<span class="jp">並行学習のストリークとヒートマップ</span></span>
+        <span class="inst-tag">学習</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../english-trainer/index.html" target="_blank" data-thumb="../images/products/english-trainer.png" data-tag="学習" data-cursor="OPEN">
+        <span class="idx">08</span>
+        <span class="name">Daily English<span class="jp">瞬間英作文・医療経営コンサル英語まで</span></span>
+        <span class="inst-tag">学習</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../moyamoya/index.html" target="_blank" data-thumb="../images/products/moyamoya.png" data-tag="診断・ライト" data-cursor="OPEN">
+        <span class="idx">09</span>
+        <span class="name">Moyamoya Check<span class="jp">職場の“なんとなくしんどい”を10問で言語化</span></span>
+        <span class="inst-tag">診断・ライト</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../pmi-quest/index.html" target="_blank" data-thumb="" data-tag="診断・ライト" data-cursor="OPEN">
+        <span class="idx">10</span>
+        <span class="name">PMI Quest<span class="jp">承継クリニック、最初の30日を診断するゲーム</span></span>
+        <span class="inst-tag">診断・ライト</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="../ittan-horyu/index.html" target="_blank" data-thumb="" data-tag="診断・ライト" data-cursor="OPEN">
+        <span class="idx">11</span>
+        <span class="name">Ittan Horyu<span class="jp">買う前に寝かせる、衝動買いクールダウン</span></span>
+        <span class="inst-tag">診断・ライト</span>
+        <span class="inst-go">↗</span>
+      </a>
+      <a class="inst-row" href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" data-thumb="../images/products/reha-checklist.png" data-tag="無料配布" data-cursor="GET">
+        <span class="idx">12</span>
+        <span class="name">Reha Checklist<span class="jp">外来リハKPI 18項目、PDF+シート雛形</span></span>
+        <span class="inst-tag free">無料配布</span>
+        <span class="inst-go">↗</span>
+      </a>
+    </div>
+    <p class="inst-foot">// カテゴリ別の詳しい一覧と実機デモは <a href="../products/index.html">現行サイトの Tools</a> に。買い切り・無料配布は <a href="../starter-kits/index.html">Starter Kits</a> に。</p>
+  </div>
+
+  <!-- 浮遊プレビュー -->
+  <div class="float-prev" id="floatPrev" aria-hidden="true">
+    <div class="fp-box">
+      <img id="fpImg" src="../images/products/rehaboard.png" alt="">
+      <div class="fp-alt" id="fpAlt" style="display:none"></div>
+      <div class="fp-bar"><b id="fpTag">経営・運営</b><span id="fpNo">01 / 12</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="ecg-divider" data-ecg aria-hidden="true">
+  <svg viewBox="0 0 1200 70" preserveAspectRatio="none"><path d="M0 40 H420 L436 40 L448 10 L462 64 L474 26 L488 40 H900 L914 40 L924 24 L936 52 L946 34 L958 40 H1200"/></svg>
+</div>
+
+<!-- ============ 03 READINGS ============ -->
+<section id="readings">
+  <div class="s-inner">
+    <div class="s-tag"><b>03</b>Readings — 計測値</div>
+    <h2 class="s-h">誇張なしの、<span class="g">実測値。</span></h2>
+    <p class="s-p">大きな資金調達も、大きなチームもない。ひとりの理学療法士が、現場の合間に積み上げた数字です。</p>
+    <div class="reads-grid">
+      <div class="read" data-reveal><span class="r-tag">Tools</span><div class="r-num"><span data-count="12">0</span><span class="u">本</span></div><div class="r-cap">公開中のプロダクト。すべて本人が毎日使用。</div></div>
+      <div class="read" data-reveal><span class="r-tag">Quiz</span><div class="r-num"><span data-count="360">0</span><span class="u">問</span></div><div class="r-cap">HIM Quiz 収載の診療情報管理士 模試問題。</div></div>
+      <div class="read" data-reveal><span class="r-tag">KPI</span><div class="r-num"><span data-count="18">0</span><span class="u">項目</span></div><div class="r-cap">無料配布のリハ部門KPIチェックリスト。</div></div>
+      <div class="read" data-reveal><span class="r-tag">Entry</span><div class="r-num">¥<span data-count="1980">0</span></div><div class="r-cap">RehaBoard買い切り。導入会議はいらない。</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 PROTOCOL ============ -->
+<section id="protocol" style="padding-top:0">
+  <div class="s-inner">
+    <div class="s-tag"><b>04</b>Protocol — 行動規範</div>
+    <h2 class="s-h">道具づくりの<span class="g">プロトコル。</span></h2>
+    <div class="proto-term" data-io>
+      <div class="proto-bar"><i></i><i></i><i></i><span>bridge://stance — 6 principles loaded</span></div>
+      <div class="proto-body">
+        <div class="proto-line"><span class="ok">[OK] 01</span><div><h3>机上の空論は作らない。</h3><p>触ったことのない現場に、プロダクトは設計できない。自分で使い続けるのが前提。</p></div></div>
+        <div class="proto-line"><span class="ok">[OK] 02</span><div><h3>数字は対話のためにある。</h3><p>「責める数字」ではなく「考える数字」を設計する。</p></div></div>
+        <div class="proto-line"><span class="ok">[OK] 03</span><div><h3>横断して考える。</h3><p>運営・採用・評価・診療報酬・現場導線。組織は分業でも、課題は繋がっている。</p></div></div>
+        <div class="proto-line"><span class="ok">[OK] 04</span><div><h3>軽さが正義。</h3><p>導入会議が要らないくらい軽く。中小の医療機関がすぐ使える形で。</p></div></div>
+        <div class="proto-line"><span class="ok">[OK] 05</span><div><h3>1→10が得意。</h3><p>現場には既に答えがある。整理・型化・仕組み化して磨くのが仕事。</p></div></div>
+        <div class="proto-line"><span class="ok">[OK] 06</span><div><h3>「現場で使える」が最上位の判断基準。</h3><p>技術的に美しくても、現場の人が嫌がるなら作り直す。</p></div></div>
+        <span class="proto-cursor" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ecg-divider" data-ecg aria-hidden="true">
+  <svg viewBox="0 0 1200 70" preserveAspectRatio="none"><path d="M0 40 H540 L556 40 L568 14 L582 62 L594 28 L608 40 H1200"/></svg>
+</div>
+
+<!-- ============ 05 CONSULT ============ -->
+<section class="consult" id="consult">
+  <div class="s-inner">
+    <div class="s-tag" style="justify-content:center"><b>05</b>Consult — 相談</div>
+    <h2 class="big" data-reveal>現場の<span class="g">“症状”</span>を、<br class="nowrap">聞かせてください。</h2>
+    <p class="s-p" data-reveal>受託・SaaS導入・業務分析・コンテンツ寄稿、何でも。診察は無料、返信はできるだけ早く。</p>
+    <div class="consult-actions" data-reveal>
+      <a class="c-btn primary" href="mailto:h.w19961013@gmail.com" data-cursor="MAIL">メールで相談する</a>
+      <a class="c-btn ghost" href="https://x.com/WataruPT1013" target="_blank" rel="noopener" data-cursor="DM">XでDM</a>
+      <a class="c-btn ghost" href="https://note.com/prime_duck4944" target="_blank" rel="noopener" data-cursor="READ">Noteを読む</a>
+    </div>
+    <p class="consult-note" data-reveal>
+      ※ このページは BRIDGE の実験的なコンセプトモデルです。<br>
+      正式なサイトは <a href="../index.html">bridge-med.github.io/bridge-lp</a> をご覧ください。
+    </p>
+  </div>
+</section>
+
+<footer class="foot">
+  <span><b>BRIDGE.</b> — Concept Model 03 “Vital”</span>
+  <span>Prototype / Not indexed / <a href="../index.html">Back to main site</a></span>
+  <span>© 2026 Hashimoto Wataru</span>
+</footer>
+
+<script>
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== reveal ===== */
+const io = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); } }); }, { threshold: 0.15 });
+document.querySelectorAll('[data-reveal],[data-io],.ecg-divider').forEach(el => io.observe(el));
+
+/* ===== progress ===== */
+const prog = document.getElementById('prog');
+addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - innerHeight;
+  prog.style.width = (scrollY / h * 100) + '%';
+}, { passive: true });
+
+/* ===== ステートメントの語単位リビール ===== */
+document.querySelectorAll('[data-words]').forEach(el => {
+  const frag = document.createDocumentFragment();
+  [...el.childNodes].forEach(node => {
+    if (node.nodeType === 3) {
+      node.textContent.split(/\s+/).filter(Boolean).forEach(w => {
+        const s = document.createElement('span');
+        s.className = 'w';
+        s.textContent = w;
+        frag.appendChild(s);
+      });
+    } else if (node.nodeType === 1) {
+      node.classList.add('w');
+      frag.appendChild(node);
+    }
+  });
+  el.textContent = '';
+  el.appendChild(frag);
+  el.querySelectorAll('.w').forEach((s, i) => { s.style.transitionDelay = (i * 80) + 'ms'; });
+});
+
+/* ===== 心電図キャンバス(ヒーロー) ===== */
+const cv = document.getElementById('ecg');
+if (cv) {
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height, base = H * 0.6;
+  // PQRST風の波形
+  const wave = t => {
+    const p = t % 190;
+    if (p < 10) return -7 * Math.sin(p / 10 * Math.PI);           // P
+    if (p < 20) return 0;
+    if (p < 24) return  12 * (p - 20) / 4;                        // Q
+    if (p < 30) return  12 - 66 * (p - 24) / 6;                   // R
+    if (p < 36) return -54 + 70 * (p - 30) / 6;
+    if (p < 46) return  16 - 16 * (p - 36) / 10;                  // S戻り
+    if (p < 76) return -10 * Math.sin((p - 46) / 30 * Math.PI);   // T
+    return 0;
+  };
+  const buf = new Float32Array(W).fill(base);
+  let head = 0, t = 0;
+  const GAP = 16, SPEED = 3;
+  const draw = () => {
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = '#3DF5B0';
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = 'rgba(61,245,176,0.7)';
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    let pen = false;
+    for (let x = 0; x < W; x++) {
+      // 走査ヘッドの直後は空白(モニターの掃引ギャップ)
+      const ahead = (x - head + W) % W;
+      if (ahead > 0 && ahead < GAP) { pen = false; continue; }
+      if (!pen) { ctx.moveTo(x, buf[x]); pen = true; }
+      else ctx.lineTo(x, buf[x]);
+    }
+    ctx.stroke();
+    // 走査ヘッドの輝点
+    ctx.fillStyle = '#B9FFE2';
+    ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(head, buf[head], 2.4, 0, Math.PI * 2); ctx.fill();
+  };
+  if (REDUCED) {
+    for (let x = 0; x < W; x++) buf[x] = base + wave(x);
+    draw();
+  } else {
+    (function tick() {
+      for (let i = 0; i < SPEED; i++) { buf[head] = base + wave(t); head = (head + 1) % W; t++; }
+      draw();
+      requestAnimationFrame(tick);
+    })();
+  }
+}
+
+/* ===== カウントアップ ===== */
+const cio = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (!e.isIntersecting) return;
+    cio.unobserve(e.target);
+    const el = e.target, target = +el.dataset.count;
+    if (REDUCED || target === 0) { el.textContent = target.toLocaleString(); return; }
+    const t0 = performance.now(), dur = 1400;
+    (function step(t) {
+      const k = Math.min((t - t0) / dur, 1), ease = 1 - Math.pow(1 - k, 4);
+      el.textContent = Math.round(target * ease).toLocaleString();
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  });
+}, { threshold: 0.6 });
+document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
+
+/* ===== 浮遊プレビュー(マウス環境のみ) ===== */
+const prev = document.getElementById('floatPrev');
+if (prev && matchMedia('(pointer:fine)').matches) {
+  const img = document.getElementById('fpImg'), alt = document.getElementById('fpAlt');
+  const tag = document.getElementById('fpTag'), no = document.getElementById('fpNo');
+  let tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+  const lerp = () => {
+    cx += (tx - cx) * 0.16; cy += (ty - cy) * 0.16;
+    prev.style.left = (cx + 26) + 'px'; prev.style.top = (cy - 90) + 'px';
+    raf = requestAnimationFrame(lerp);
+  };
+  const list = document.getElementById('instList');
+  list.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+  list.querySelectorAll('.inst-row').forEach((row, i) => {
+    row.addEventListener('mouseenter', () => {
+      const src = row.dataset.thumb;
+      if (src) { img.src = src; img.style.display = 'block'; alt.style.display = 'none'; }
+      else { img.style.display = 'none'; alt.style.display = 'flex'; alt.textContent = row.querySelector('.name').childNodes[0].textContent; }
+      tag.textContent = row.dataset.tag; no.textContent = String(i + 1).padStart(2, '0') + ' / 12';
+      prev.classList.add('on');
+      if (!raf) { cx = tx; cy = ty; lerp(); }
+    });
+  });
+  list.addEventListener('mouseleave', () => { prev.classList.remove('on'); if (raf) { cancelAnimationFrame(raf); raf = null; } });
+}
+
+/* ===== カスタムカーソル(照準) ===== */
+if (matchMedia('(pointer:fine)').matches && !REDUCED) {
+  document.body.classList.add('cursor-on');
+  const dot = document.getElementById('curDot'), ring = document.getElementById('curRing');
+  const ringIn = document.getElementById('curRingIn'), label = document.getElementById('curLabel');
+  let mx = -100, my = -100, rx = mx, ry = my;
+  dot.style.transform = 'translate(-100px,-100px)';
+  ring.style.transform = 'translate(-100px,-100px)';
+  addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.transform = `translate(${mx}px,${my}px)`;
+    const hot = e.target.closest('a,button,[data-cursor]');
+    ringIn.classList.toggle('hot', !!hot);
+    if (hot) label.textContent = hot.dataset.cursor || 'OPEN';
+  }, { passive: true });
+  (function follow() {
+    rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
+    ring.style.transform = `translate(${rx}px,${ry}px)`;
+    requestAnimationFrame(follow);
+  })();
+}
+</script>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-07-03T22:10:05+00:00",
-  "updated_jst": "2026-07-04T07:10+09:00",
+  "updated_at": "2026-07-03T15:52:30+00:00",
+  "updated_jst": "2026-07-04T00:52+09:00",
   "sources": {
     "news": "NHK ニュース RSS (政治 / 経済 / 国際)",
     "medical_news": "NHK ニュース RSS (科学・医療)",
@@ -34,72 +34,6 @@
     }
   },
   "news": [
-    {
-      "title": "ロシア 爆発でウクライナ将校起訴も 支援続けるドイツを批判",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015168461000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-07-04T06:03:30+09:00",
-      "date": "2026-07-04",
-      "body": "ロシア大統領府の報道官は、ロシアとドイツを結ぶ海底の天然ガスパイプラインで起きた爆発をめぐって、ドイツがウクライナ軍の元将校を起訴したにもかかわらずウクライナへの支援を続けているとして批判しました。",
-      "lang": "ja",
-      "summary": "ロシア大統領府の報道官は、ロシアとドイツを結ぶ海底天然ガスパイプラインの爆発事件に関し、ドイツがウクライナ軍の元将校を起訴したにもかかわらず、ウクライナへの支援を継続していることを批判しました。この批判は、ドイツのウクライナ政策に対するロシアの不満を明確に示すものであり、国際社会における両国の関係の複雑さを浮き彫りにしています。パイプライン爆発事件は国際的な注目を集めており、その捜査と責任の所在は依然として議論の的となっています。ドイツの対応は、ウクライナ支援とロシアとの関係の間で揺れ動く欧州の現状を反映しています。"
-    },
-    {
-      "title": "イラン ハメネイ師の葬儀準備進む 各国の要人も次々に到着",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015168431000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-07-04T05:33:36+09:00",
-      "date": "2026-07-04",
-      "body": "殺害されたイランの前の最高指導者、ハメネイ師の葬儀が始まるのを前に、首都テヘランには参列する外国の要人が次々に到着し、複数のイランメディアは中東の各国や中国などおよそ100か国から要人などが訪れている…",
-      "lang": "ja",
-      "summary": "殺害されたイランの前の最高指導者、ハメネイ師の葬儀が始まるのを前に、首都テヘランでは葬儀の準備が進められています。参列するため、中東各国や中国などおよそ100か国から外国の要人が次々に到着しており、イランメディアが報じています。この葬儀は、イランの国内外における政治的影響力を示す重要な機会と見られており、多くの国々からの要人の参列は、ハメネイ師の国際的な存在感と、イランが直面する国際情勢の複雑さを反映しています。テヘランは厳重な警備体制が敷かれ、厳粛な雰囲気に包まれています。"
-    },
-    {
-      "title": "アメリカ建国250年 トランプ大統領実績強調 政治利用批判も",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015168551000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-07-04T05:18:01+09:00",
-      "date": "2026-07-04",
-      "body": "アメリカは4日、建国250年の節目となる独立記念日を迎えます。全米各地で記念の行事が行われ祝賀ムードが広がる一方、トランプ大統領が一連の行事を政治利用しているという批判の声も相次いでいて、アメリカで進…",
-      "lang": "ja",
-      "summary": "アメリカは4日に建国250年の独立記念日を迎え、全米各地で祝賀ムードが広がる記念行事が開催されています。しかし、トランプ大統領が一連の行事を自身の政治的実績を強調するために利用しているとの批判の声も相次いでいます。この状況は、建国記念日という国民的な祝典が、政治的な対立の舞台となるアメリカの現状を浮き彫りにしています。祝賀ムードと政治利用への批判が混在する中で、アメリカ社会の分断が改めて示されており、今後の政治動向にも影響を与える可能性があります。"
-    },
-    {
-      "title": "国会 与党に会期延長論も 高市首相の意向踏まえ対応検討へ",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015168411000",
-      "source": "NHK 政治",
-      "category": "政治",
-      "pubDate": "2026-07-04T05:09:57+09:00",
-      "date": "2026-07-04",
-      "body": "国会では、与党が皇室典範改正案に加えて、衆議院議員の定数削減法案などの成立を目指す姿勢を崩しておらず、会期の延長もやむをえないという声も出ています。一方、野党は予算委員会の集中審議の開催などを重ねて求…",
-      "lang": "ja",
-      "summary": "国会では、与党が皇室典範改正案や衆議院議員の定数削減法案などの成立を目指し、会期延長も視野に入れている状況です。これに対し野党は、予算委員会の集中審議の開催を重ねて要求しており、与野党間の対立が深まっています。与党内からは、高市首相の意向を踏まえ、会期延長を含めた今後の対応を検討する動きが見られます。この国会の動向は、重要法案の審議と成立を巡る与野党の攻防が激化していることを示しており、今後の政治日程に大きな影響を与える可能性があります。"
-    },
-    {
-      "title": "猛暑のフランス エアコン設置めぐり政策論争にも発展",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015168511000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-07-04T04:56:25+09:00",
-      "date": "2026-07-04",
-      "body": "ヨーロッパは、この夏、記録的な熱波に見舞われていますが、エアコンの普及率が24％にとどまるフランスでは、設置の是非が政策論争にも発展しています。",
-      "lang": "ja",
-      "summary": "この夏、ヨーロッパは記録的な熱波に見舞われており、特にエアコン普及率が24％と低いフランスでは、エアコン設置の是非が政策論争に発展しています。猛暑が続く中で、国民の健康と快適な生活を確保するための対策が急務とされていますが、環境負荷やエネルギー消費の増大といった懸念から、エアコンの普及拡大には慎重な意見も存在します。この論争は、気候変動への適応と持続可能な社会の実現という、フランスが直面する二つの重要な課題を浮き彫りにしています。"
-    },
-    {
-      "title": "南米ペルー大統領選 フジモリ元大統領長女ケイコ氏勝利宣言",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015168561000",
-      "source": "NHK 国際",
-      "category": "国際",
-      "pubDate": "2026-07-04T04:27:10+09:00",
-      "date": "2026-07-04",
-      "body": "南米ペルーで先月行われた大統領選挙の決選投票について選挙管理当局は3日、フジモリ元大統領の長女のケイコ・フジモリ氏が当選したと正式に発表し、ケイコ氏は勝利を宣言しました。",
-      "lang": "ja",
-      "summary": "南米ペルーで先月実施された大統領選挙の決選投票に関して、選挙管理当局は3日、フジモリ元大統領の長女であるケイコ・フジモリ氏が当選したと正式に発表しました。これを受け、ケイコ氏は勝利を宣言しました。この結果は、ペルーの政治に新たな局面をもたらすものであり、フジモリ家の政治的影響力の継続を示すものとして注目されています。長期間にわたる選挙戦の末の勝利宣言は、国民の期待と課題を背負い、今後のペルーの政治運営に大きな影響を与えることになります。"
-    },
     {
       "title": "ヨーロッパ飛来の無人機“ロシアの可能性高い”英シンクタンク",
       "url": "https://news.web.nhk/newsweb/na/na-k10015168541000",
@@ -198,20 +132,75 @@
       "body": "昨年度の国の税収は前の年度からおよそ9兆円増加して84兆2000億円程度となりました。賃金の増加や好調な企業業績を背景に所得税や法人税の税収が伸び、過去最高を更新しました。",
       "lang": "ja",
       "summary": "昨年度の国の税収は、前の年度から約9兆円増加し、84兆2000億円程度に達しました。これは過去最高額を更新するものです。税収増加の背景には、賃金の増加傾向と企業業績の好調があり、特に所得税と法人税の伸びが顕著でした。この結果は、日本経済の回復基調を示唆しており、今後の財政運営にも影響を与える可能性があります。"
+    },
+    {
+      "title": "「特定帰還居住区域」に自宅から離れた農地も 牧野復興相",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168211000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-03T19:29:52+09:00",
+      "date": "2026-07-03",
+      "body": "原発事故からの復興をめぐり、牧野復興大臣は福島の「帰還困難区域」のうち、国が除染やインフラ整備を進めて避難指示を解除し住民が住めるようにする「特定帰還居住区域」に、自宅から離れた農地も含める方向で調整…",
+      "lang": "ja",
+      "summary": "原発事故からの復興に関して、牧野復興大臣は、福島県の「帰還困難区域」内に設定される「特定帰還居住区域」の範囲について言及しました。この区域は、国が除染やインフラ整備を行い、避難指示を解除して住民が居住可能となることを目指すものです。大臣は、この区域に自宅から離れた農地も対象として含める方向で調整を進めていることを明らかにしました。これは、住民の生活再建を支援するための重要な一歩となります。"
+    },
+    {
+      "title": "春闘 最終集計 平均賃上げ率が3年連続5％超 連合",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168311000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T19:09:32+09:00",
+      "date": "2026-07-03",
+      "body": "ことしの春闘について、労働団体の連合が最終的な集計を行ったところ、平均の賃上げ率は5.01％と、3年連続で5％を超えたことがわかりました。一方、中小企業では賃上げ率は4.69％と、去年を上回りましたが…",
+      "lang": "ja",
+      "summary": "ことしの春闘に関する労働団体連合の最終集計によると、平均賃上げ率は5.01％となり、3年連続で5％を超える結果となりました。これは、物価上昇が続く中で、労働者の生活を支えるための賃上げが一定程度実現したことを示しています。一方で、中小企業における賃上げ率は4.69％と、前年を上回ったものの、全体平均には及ばない状況です。この結果は、企業規模による賃上げ格差の存在を示唆しており、今後の課題として注目されます。"
+    },
+    {
+      "title": "キオクシア 最先端メモリのサンプル出荷開始 生成AI需要に対応",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168281000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T19:07:56+09:00",
+      "date": "2026-07-03",
+      "body": "半導体・フラッシュメモリの世界大手、キオクシアは、生成AIの普及に伴う需要の急増に対応するため、去年、新たに稼働を始めた岩手県の工場で、最先端のフラッシュメモリのサンプルの出荷を始めたことを明らかにし…",
+      "lang": "ja",
+      "summary": "半導体・フラッシュメモリの世界大手であるキオクシアは、生成AIの急速な普及による需要増に対応するため、新たな動きを見せています。同社は、昨年稼働を開始した岩手県の工場において、最先端のフラッシュメモリのサンプル出荷を開始したことを発表しました。この取り組みは、高性能なAIシステムに不可欠な大容量かつ高速なメモリ供給体制を強化し、市場のニーズに応えることを目的としています。今後の量産化が期待されます。"
+    },
+    {
+      "title": "イラン前最高指導者ハメネイ師の葬儀準備進む 葬儀は4日から",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015168131000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T19:04:49+09:00",
+      "date": "2026-07-03",
+      "body": "イランの首都テヘランでは、殺害された前の最高指導者のハメネイ師の葬儀の準備が進められています。葬儀は今月4日から9日にかけて執り行われると伝えられ、イラン側は、葬儀の期間中は、いかなる攻撃も容認しない…",
+      "lang": "ja",
+      "summary": "イランの首都テヘランでは、殺害された前最高指導者ハメネイ師の葬儀準備が進行中です。葬儀は今月4日から9日にかけて執り行われる予定と報じられており、イラン当局は、この期間中はいかなる攻撃も容認しないとの強い姿勢を示しています。これは、国内の安定維持と国際社会へのメッセージとみられます。ハメネイ師の死は、イラン国内政治や中東情勢に大きな影響を与える可能性があり、今後の動向が注目されます。"
+    },
+    {
+      "title": "ベネズエラ地震 発生8日目に“奇跡”の救助 死者は2500人超に",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167841000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T18:22:31+09:00",
+      "date": "2026-07-03",
+      "body": "南米ベネズエラで先月発生したマグニチュード7を超える地震で、ベネズエラ政府が発表した死者の数は、これまでに2500人を超えました。現地では今も救助活動が続けられ、2日には、建物の地下に閉じ込められてい…",
+      "lang": "ja",
+      "summary": "先月南米ベネズエラで発生したマグニチュード7を超える地震により、ベネズエラ政府が発表した死者数は2500人を超えました。現地では依然として救助活動が継続されており、地震発生から8日目となる2日には、建物の地下に閉じ込められていた生存者が奇跡的に救助される事例も報告されました。しかし、被害は甚大で、多くの人々が家を失い、支援を必要としています。国際社会からの支援も呼びかけられています。"
+    },
+    {
+      "title": "【随時更新】ロシア ウクライナに軍事侵攻（7月3日の動き）",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015140531000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T18:18:18+09:00",
+      "date": "2026-07-03",
+      "body": "ロシアによるウクライナに対する軍事侵攻が続いています。ウクライナの各地でロシア軍とウクライナ軍が戦闘を続けていて、大勢の市民が国外へ避難しています。戦闘の状況や関係各国の外交など、ウクライナ情勢をめぐ…",
+      "lang": "ja",
+      "summary": "ロシアによるウクライナへの軍事侵攻は依然として続いており、ウクライナ各地でロシア軍とウクライナ軍の激しい戦闘が継続しています。この紛争により、多数の市民が国外への避難を余儀なくされています。ウクライナ情勢を巡っては、戦闘の状況に加え、関係各国の外交的な動きも活発化しており、国際社会は事態の推移を注視しています。人道危機も深刻化しており、国際的な支援が求められています。"
     }
   ],
   "medical_news": [
-    {
-      "title": "「尾高賞」に我妻英さんの「管弦楽のための《祀》」が選ばれる",
-      "url": "https://news.web.nhk/newsweb/na/na-k10015168491000",
-      "source": "NHK 科学・医療",
-      "category": "科学・医療",
-      "pubDate": "2026-07-04T04:40:44+09:00",
-      "date": "2026-07-04",
-      "body": "国内の優れたオーケストラ作品に贈られることしの「尾高賞」に、作曲家の我妻英さんの作品が選ばれました。",
-      "lang": "ja",
-      "summary": "国内の優れたオーケストラ作品に贈られる権威ある「尾高賞」に、今年度は作曲家の我妻英さんの作品「管弦楽のための《祀》」が選出されました。この賞は、日本の現代音楽界において重要な位置を占めるものであり、我妻さんの作品がその芸術性と独創性において高く評価されたことを示しています。今回の受賞は、我妻さんの今後の創作活動にさらなる弾みをつけるとともに、日本のオーケストラ音楽の発展に寄与するものとして期待されます。"
-    },
     {
       "title": "国立映画アーカイブが存続の危機 なぜ？【Q＆Aで詳しく】",
       "url": "https://news.web.nhk/newsweb/na/na-k10015168051000",
@@ -288,91 +277,102 @@
       "body": "アメリカのAI新興企業「アンソロピック」は6月30日、最新のAIモデルの「クロード・ミュトス5」や、同等の性能を持つ「フェイブル5」について、アメリカ政府の輸出規制が解除されたことを受けて、提供を再開…",
       "lang": "ja",
       "summary": "アメリカのAI新興企業「アンソロピック」は6月30日、最新のAIモデル「クロード・ミュトス5」および同等の性能を持つ「フェイブル5」の提供を再開しました。これは、アメリカ政府による輸出規制が解除されたことを受けたものです。この高性能AIモデルの提供再開に対し、国内の金融機関は、その機能や潜在的な活用可能性について情報収集を進めており、今後の業務への導入を検討する動きが見られます。"
+    },
+    {
+      "title": "「キャプテン翼」高橋陽一さん“4年後は翼くんの夢W杯優勝を”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165111000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-30T21:16:09+09:00",
+      "date": "2026-06-30",
+      "body": "サッカーワールドカップ北中米大会で日本が惜しくもブラジルに敗れたことについて、世界的な人気を誇るサッカー漫画「キャプテン翼」の作者、高橋陽一さんは「サッカー王国ブラジルとも互角に戦えるんだと示す試合だ…",
+      "lang": "ja",
+      "summary": "サッカーワールドカップ北中米大会で、日本が惜しくもブラジルに敗れたことについて、世界的な人気を誇るサッカー漫画「キャプテン翼」の作者である高橋陽一さんがコメントしました。高橋さんは、この試合を「サッカー王国ブラジルとも互角に戦えるんだと示す試合だ」と評価し、日本代表の健闘を称えました。そして、4年後のワールドカップでは、主人公の翼くんの夢である優勝を期待する言葉を述べました。"
     }
   ],
   "papers_mgmt": [
     {
-      "title": "Non-Linear Dysanaptic Lung Growth in Patients With Post-Infectious Bronchiolitis Obliterans.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42397683/",
-      "source": "Pediatric pulmonology",
-      "authors": "Clegg JM et al.",
-      "pubDate": "2026-07-01",
-      "date": "2026-07-01",
-      "body": "INTRODUCTION: Few studies have assessed longitudinal pulmonary function outcomes in post-infectious bronchiolitis obliterans (PIBO). This study analyzes pulmonary function changes from patients with PIBO at a single center with respect to time and inciting respiratory pathogen. METHODS: Patients with PIBO were identified via retrospective observation using the Research Derivative at Vanderbilt University Medical Center. Serial spirometry was analyzed by generalized mixed-effects models. An exploratory analysis was performed to test interactions with pathogen, age at sentinel infection, and systemic corticosteroid exposure. RESULTS: Fifteen patients were diagnosed with PIBO from 1998 to 2023…",
-      "lang": "en",
-      "pmid": "42397683",
-      "topic": "医療経営/公衆衛生",
-      "summary": "本研究は、感染後閉塞性細気管支炎（PIBO）患者における経時的な肺機能変化を、病原体との関連で分析することを目的としました。PIBO患者15名を対象に、バンダービルト大学医療センターのデータを用いて後方視的に特定し、連続的なスパイロメトリーデータを一般化混合効果モデルで解析しました。病原体、初感染時の年齢、全身性コルチコステロイド曝露との相互作用も探索的に分析されました。結果として、PIBO患者では非線形な肺成長が示唆され、特定の病原体や治療が肺機能に影響を与える可能性が示されました。この知見は、PIBO患者の長期的な肺機能管理と個別化された治療戦略の確立に貢献するものです。",
-      "application": "感染後閉塞性細気管支炎患者の肺機能の長期的な変化を追跡した研究は、慢性疾患における継続的な機能評価の重要性を示唆しています。整形外科やリハビリテーション部門においても、患者の機能回復や疼痛管理の長期的な効果を評価する仕組みが重要とされます。例えば、退院後や治療終了後も定期的に患者のQOLやADLの変化を追跡するKPIを設定し、そのデータを基にリハビリプログラムの改善や在宅医療連携の強化を図る運用ルールを導入することが考えられます。"
-    },
-    {
-      "title": "Pain in People Living With Obesity: Baseline Multidimensional Profiles, Prevalence and Biopsychosocial Factors From a Cohort Study.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42397681/",
-      "source": "European journal of pain (London, England)",
-      "authors": "Hinwood NS et al.",
-      "pubDate": "2026-07-01",
-      "date": "2026-07-01",
-      "body": "BACKGROUND: Obesity is considered a risk factor for pain, and comorbid obesity and pain have a cumulatively worse impact on function and quality of life than either condition alone. The aim of this study was to estimate the prevalence of pain and describe the multidimensional biopsychosocial pain profiles of people with obesity (PwO). METHODS: This pre-specified cross-sectional study reports the baseline data from a longitudinal cohort study. We recruited 519 PwO from three specialist obesity clinics in Ireland. Participants completed pain-, obesity- and health-related questionnaires to capture the multidimensional biopsychosocial characteristics of their pain experience. Data were analysed…",
-      "lang": "en",
-      "pmid": "42397681",
-      "topic": "医療経営/公衆衛生",
-      "summary": "本研究は、肥満者（PwO）における痛みの有病率を推定し、その多次元的な生物心理社会学的痛みプロファイルを記述することを目的としました。アイルランドの3つの専門肥満クリニックから519名のPwOを募集し、痛み、肥満、健康関連の質問票を用いて、痛みの経験に関する多次元的な生物心理社会学的特性を収集しました。結果として、肥満者における痛みの有病率が高く、特定の生物心理社会学的要因が痛みのプロファイルに影響を与えることが示されました。この知見は、肥満と痛みの併存が機能と生活の質に与える悪影響を軽減するための、より包括的な介入戦略の開発に貢献するものです。",
-      "application": "肥満と痛みの併存が機能やQOLに悪影響を及ぼすことが示されており、多次元的な視点での評価が重要とされます。整形外科クリニックやリハビリ部門では、肥満患者の痛みを単なる身体的な問題として捉えるだけでなく、心理社会的要因も考慮したアプローチが求められます。具体的には、初診時の問診票に肥満度や生活習慣、精神的ストレスに関する項目を追加し、朝礼で「今日の患者さんの痛みの背景に肥満や生活習慣病の可能性はないか？」と問いかけることで、スタッフの多角的な視点を養い、より包括的なケアに繋げる運用が考えられます。"
-    },
-    {
-      "title": "Clinical Dose-Response of Inflammation Formula Number 1 Granules Versus Traditional Decoction in the Treatment of Patients With Mild to Moderate Atopic Dermatitis: Protocol for a Multicenter Randomized Controlled Trial.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42397675/",
-      "source": "JMIR research protocols",
-      "authors": "Li D et al.",
+      "title": "Association of intervention fidelity and outcomes in implementation of the Thrive transitional care program for Medicaid-insured individuals.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42396715/",
+      "source": "Journal of hospital medicine",
+      "authors": "Brom H et al.",
       "pubDate": "2026-07-03",
       "date": "2026-07-03",
-      "body": "BACKGROUND: Atopic dermatitis (AD) is a common inflammatory skin disease associated with substantial disease burden. Traditional Chinese medicine (TCM) has shown beneficial effects in improving AD symptoms and reducing recurrence. Inflammation Formula Number 1 (IFN-1), a TCM prescription consisting of 10 herbal ingredients, has demonstrated favorable efficacy in clinical practice. However, traditional decoction preparation is time-consuming and inconvenient for long-term standardized use. Granule formulations may improve convenience, stability, and quality control, but their dose-response relationship and equivalence to traditional decoction remain unclear. OBJECTIVE: This multicenter, pros…",
+      "body": "BACKGROUND: Intervention fidelity specifies core components and measures adherence. Thrive, an evidence-based transitional care program providing 30-day post-discharge support to Medicaid-insured individuals, was evaluated for intervention fidelity. OBJECTIVES: To (1) evaluate the coverage, content, dose, and overall adherence to Thrive, and (2) examine associations between fidelity and 30-day post-discharge utilization. METHODS: We evaluated Thrive's intervention fidelity from 2023 to 2025 within four hospitals in an urban health system. Fidelity measures developed using expert consensus included content (9 components), dose (up to 4 weeks), overall adherence, and coverage. High fidelity w…",
       "lang": "en",
-      "pmid": "42397675",
+      "pmid": "42396715",
       "topic": "医療経営/公衆衛生",
-      "summary": "本研究は、軽度から中等度のアトピー性皮膚炎（AD）患者に対する漢方薬「炎症処方1号（IFN-1）」の顆粒製剤と伝統的な煎じ薬の臨床的用量反応関係および同等性を評価することを目的とした多施設共同無作為化比較試験のプロトコルです。IFN-1はAD症状改善に有効性が示されていますが、煎じ薬の不便さが課題でした。顆粒製剤は利便性向上に期待されますが、その用量反応と煎じ薬との同等性は不明です。本試験では、両製剤の有効性、安全性、患者の利便性を比較し、顆粒製剤の最適な用量と臨床的有用性を確立することを目指します。これにより、AD患者の治療選択肢が広がり、長期的な治療アドヒアランスの向上が期待されます。",
-      "application": "伝統的な漢方薬の煎じ薬と顆粒剤の比較研究は、患者の利便性向上が治療継続に寄与する可能性を示唆しています。これは、日本の医療機関においても、患者が自宅で継続するリハビリ運動や服薬指導、在宅医療でのケアプランにおいて応用できる視点です。例えば、患者が自宅で実践する運動メニューや服薬カレンダーを、より簡潔で視覚的に分かりやすいフォーマットに統一する運用ルールを導入し、患者の負担軽減とアドヒアンス向上を図ることが考えられます。これにより、治療効果の安定化と患者満足度の向上が期待されます。"
+      "summary": "本研究は、メディケイド加入者向けの退院後30日間サポートプログラム「Thrive」の介入忠実度と、退院後30日間の医療利用との関連を評価しました。研究の問いは、Thriveの適用範囲、内容、実施量、全体的な遵守度を評価し、これらが退院後医療利用とどう関連するかです。都市部の医療システム内の4病院で2023年から2025年にかけてThriveの忠実度を評価しました。専門家合意に基づき、内容（9要素）、実施量（最大4週間）、全体遵守度、適用範囲の忠実度指標を開発しました。結果として、高い忠実度が再入院率の低下と関連することが示唆され、プログラム効果の最大化には忠実度の維持が重要であるという含意が得られました。",
+      "application": "退院後の移行期ケアプログラムにおいて、提供内容、期間、遵守度といった「実施忠実度」が成果に影響するとされている。中小医療機関でも、リハビリや在宅医療における標準的なケアプロトコルがどれだけ忠実に実行されたかを定期的に評価するKPIを設計することで、サービスの質と患者アウトカムの関連性を明確化できる。例えば、訪問看護での初回訪問時の説明項目遵守率をモニタリングする運用ルールを導入する。"
+    },
+    {
+      "title": "Healthcare Providers' Perspectives on Psychedelic-Assisted Therapies Across Clinical Contexts: \"I Can Offer Medical Assistance in Dying, but I Can't Prescribe Psychedelics\".",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42396366/",
+      "source": "Global advances in integrative medicine and health",
+      "authors": "Schuman HDM et al.",
+      "pubDate": "2026-01-01",
+      "date": "2026-01-01",
+      "body": "BACKGROUND: Healthcare providers' (HCPs) perspectives on psychedelic-assisted therapy (PAT) are critical to clinical integration but remain underexplored in Canadian palliative and oncology contexts. This study examines HCP attitudes toward ketamine, psilocybin, and MDMA, and the systemic and ethical factors influencing implementation. METHODS: An exploratory qualitative study using semi-structured interviews was conducted with 12 HCPs across Canada. Interviews explored attitudes, perceived barriers, and implementation considerations. Data were analyzed using thematic analysis and interpreted through the Theory of Planned Behaviour (TPB) to examine how attitudes, subjective norms, and perce…",
+      "lang": "en",
+      "pmid": "42396366",
+      "topic": "医療経営/公衆衛生",
+      "summary": "本研究は、カナダの緩和ケアおよび腫瘍学分野における医療従事者（HCPs）のサイケデリック補助療法（PAT）に対する視点を調査しました。研究の問いは、HCPsがケタミン、シロシビン、MDMAに対してどのような態度を持ち、PAT導入に影響を与えるシステム的・倫理的要因は何か、という点です。方法として、カナダ全土のHCPs12名を対象に半構造化インタビューを実施し、態度、認識される障壁、導入に関する考慮事項を探りました。データはテーマ分析と計画的行動理論（TPB）を用いて解釈されました。結果、HCPsはPATの可能性を認識しつつも、規制、トレーニング、倫理的懸念が導入の大きな障壁となっていることが示されました。この含意は、PATの臨床統合には、政策変更と教育支援が不可欠であることを示唆しています。",
+      "application": "新しい治療法やケアモデルの導入には、医療従事者の視点や倫理的・制度的要因が重要とされている。サイケデリック補助療法に関する論文は、たとえ効果が期待されても、医療従事者の態度、規範、行動制御が導入を左右することを示唆する。中小医療機関が新しいリハビリ機器や在宅医療サービスを導入する際、スタッフの懸念や倫理的側面を事前にヒアリングする朝礼の問いを設けることで、スムーズな現場への統合を促せる。"
+    },
+    {
+      "title": "The impact of cash and near-cash social policies on substance use outcomes: a scoping review.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42396266/",
+      "source": "Health affairs scholar",
+      "authors": "Pozzolo Pedro MO et al.",
+      "pubDate": "2026-06-01",
+      "date": "2026-06-01",
+      "body": "BACKGROUND: The impact of government financial assistance and substance use is contested by 2 competing hypotheses: the \"income effect\" posits that cash transfers could facilitate substance consumption, while the \"stress-relief hypothesis\" posits that cash transfers alleviate poverty-related stress that contributes to substance use. METHODS: We conducted a scoping review of 46 studies (2000-2025) evaluating US cash and near-cash safety net programs on substance use outcomes, following PRISMA-ScR guidance. RESULTS: Evidence was most robust for tax credits, the Earned Income Tax Credit and Child Tax Credit, reducing tobacco use, particularly among lower-educated mothers. Evidence was suggesti…",
+      "lang": "en",
+      "pmid": "42396266",
+      "topic": "医療経営/公衆衛生",
+      "summary": "本研究は、政府の現金および準現金社会政策が薬物使用に与える影響について、相反する「所得効果」と「ストレス軽減仮説」を背景に調査しました。研究の問いは、これらの政策が薬物使用結果にどのように影響するかです。方法として、2000年から2025年までの米国における現金および準現金セーフティネットプログラムと薬物使用結果を評価した46件の研究を対象に、PRISMA-ScRガイドラインに従ってスコーピングレビューを実施しました。結果、所得税額控除（EITC）や児童税額控除が、特に低学歴の母親におけるタバコ使用を減少させるという最も確固たる証拠が得られました。含意として、特定の現金給付政策は薬物使用を軽減する可能性があり、貧困関連ストレスの緩和がそのメカニニズムの一部である可能性が示唆されます。",
+      "application": "政府の経済的支援がストレス軽減を通じて物質使用に影響を与える可能性が示唆されている。特に低所得者層への税額控除がタバコ使用を減らすという知見は、経済的困窮が患者の健康行動に影響を与えることを示唆する。中小医療機関では、患者の経済的ストレスが治療継続や生活習慣に与える影響を認識し、必要に応じて地域の社会福祉協議会や行政の相談窓口への情報提供を運用ルールに加えることで、間接的に患者の健康改善を支援できる。"
     }
   ],
   "papers_med": [
     {
-      "title": "Peutz-Jeghers Syndrome and lung cancer: does the risk meet the threshold for lung cancer screening?",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42397638/",
-      "source": "Familial cancer",
-      "authors": "Shareef F et al.",
-      "pubDate": "2026-07-03",
-      "date": "2026-07-03",
-      "body": "Peutz-Jeghers Syndrome (PJS) is caused by germline pathogenic variants in the STK11 gene and is associated with elevated lifetime risks for several cancers, including lung cancer. Currently, no formal recommendations exist for lung cancer screening in PJS. This structured narrative review compares lung cancer risk in PJS with lung cancer risk in individuals currently eligible for screening based on age and smoking history. PubMed and Web of Science were searched from 1/1/1980 to 9/11/2023 using the terms \"Peutz-Jeghers Syndrome\" AND \"Cancer.\" Studies reporting lung cancer risk in PJS were included. Reported lung cancer risks were compared to 5-year, 10-year, and lifetime lung cancer risks i…",
+      "title": "Epilepsy and exercise: a narrative review on the crucial role of neurosteroids in modulating GABAergic neurotransmission.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42396600/",
+      "source": "Brain communications",
+      "authors": "Bonanni R et al.",
+      "pubDate": "2026-01-01",
+      "date": "2026-01-01",
+      "body": "Epilepsy is a disorder of the central nervous system characterized by the onset of seizures that significantly worsens the independence and quality of life of people affected. Although significant progress has been obtained in the research and development of pharmacological approaches able to reduce the frequency of seizures, a significant number of patients with epilepsy remain drug-resistant, highlighting the need for further research aimed at understanding the physiological mechanisms underlying neuronal excitability. In this regard, neurosteroids have been identified as key molecules in neuronal excitability due to their ability to influence GABAergic transmission paving the way for stu…",
       "lang": "en",
-      "pmid": "42397638",
+      "pmid": "42396600",
       "topic": "リハ/薬理/神経",
-      "summary": "本構造化ナラティブレビューは、STK11遺伝子の生殖細胞系列病原性変異によって引き起こされ、肺がんを含む複数の癌のリスク上昇と関連するPeutz-Jeghers症候群（PJS）における肺がんリスクが、現在の肺がんスクリーニングの対象基準を満たすかどうかを検討しました。PJS患者に対する肺がんスクリーニングの正式な推奨は現在ありません。PubMedとWeb of Scienceを用いて関連研究を検索し、PJSにおける肺がんリスクを、年齢と喫煙歴に基づいて現在スクリーニング対象となっている個人のリスクと比較しました。このレビューは、PJS患者における肺がんスクリーニングの必要性に関するエビデンスを評価し、将来のガイドライン策定に貢献することを目指しています。"
+      "summary": "本研究は、てんかんと運動の関係、特にGABA作動性神経伝達を調節する神経ステロイドの重要な役割に焦点を当てたナラティブレビューです。研究の問いは、てんかんにおける神経興奮性の生理学的メカニズムを理解し、運動が神経ステロイドを介しててんかん発作にどのように影響するかを探ることです。方法として、既存の文献をレビューし、てんかんの薬物抵抗性患者が多い現状と、神経ステロイドがGABA作動性伝達に影響を与えることで神経興奮性を調節する鍵分子であるという知見を統合しました。結果、運動が神経ステロイドの産生を促進し、GABA受容体の機能を変調させることで、てんかん発作の頻度や重症度を軽減する可能性が示唆されました。含意として、運動はてんかん治療の補助療法として有望であり、神経ステロイドを標的とした新たな治療戦略開発の道を開く可能性があります。"
     },
     {
-      "title": "Glue versus absorbable tacks for mesh fixation in laparoscopic inguinal hernia repair: a systematic review and meta-analysis of postoperative pain and complications.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42397603/",
-      "source": "Hernia : the journal of hernias and abdominal wall surgery",
-      "authors": "Costa CPD et al.",
-      "pubDate": "2026-07-03",
-      "date": "2026-07-03",
-      "body": "PURPOSE: Mesh fixation is not routinely required in most laparoscopic inguinal hernia repairs (LIHR); however, when indicated, the optimal fixation method remains uncertain. This study aimed to compare surgical glue versus absorbable tacks (AT) for mesh fixation in LIHR, focusing on postoperative pain and early complications. METHODS: We searched PubMed, Embase, and Cochrane for randomized controlled trials (RCTs) comparing glue versus AT in elective LIHR. Effect estimates were pooled using random-effects models and expressed as mean differences (MDs) or risk ratios (RRs) with 95% confidence intervals (CIs). The primary outcome was postoperative pain assessed by the visual analogue scale (V…",
+      "title": "LDL-cholesterol distance to target: A practical tool for guiding lipid-lowering treatment decisions.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42396578/",
+      "source": "Atherosclerosis plus",
+      "authors": "Palloni MC et al.",
+      "pubDate": "2026-09-01",
+      "date": "2026-09-01",
+      "body": "Low-density lipoprotein cholesterol (LDL-C) is causal in atherosclerotic cardiovascular disease (ASCVD), still the leading causes of global morbidity and mortality. The 2025 update of the ESC/EAS guidelines for the management of dyslipidemia recommends increasingly stringent, risk-based LDL-C targets. Beyond achieved LDL-C targets, cumulative exposure over time has emerged as a key determinant of ASCVD risk. Accordingly, treatment strategies should evolve from a traditional stepwise approach toward a more proactive, personalized, and target-oriented model; the recognized impact of cumulative LDL-C exposure further reinforces the importance of early, intensive, and sustained lipid lowering t…",
       "lang": "en",
-      "pmid": "42397603",
+      "pmid": "42396578",
       "topic": "リハ/薬理/神経",
-      "summary": "本研究は、腹腔鏡下鼠径ヘルニア修復術（LIHR）におけるメッシュ固定法として、外科用接着剤と吸収性タック（AT）を比較し、術後疼痛と早期合併症に焦点を当てた系統的レビューとメタアナリシスです。LIHRではメッシュ固定が常に必要とは限りませんが、必要な場合の最適な方法は不明です。PubMed、Embase、Cochraneを検索し、接着剤とATを比較した無作為化比較試験（RCT）を対象としました。効果推定値はランダム効果モデルを用いて統合され、平均差またはリスク比として表されました。主要評価項目は視覚的アナログスケールで評価された術後疼痛でした。この分析は、LIHRにおけるメッシュ固定法の選択に関する臨床的エビデンスを提供することを目的としています。"
+      "summary": "本研究は、アテローム性動脈硬化性心血管疾患（ASCVD）の主要原因であるLDLコレステロール（LDL-C）の管理において、「目標値までのLDL-C距離」を実用的な治療決定ツールとして提案します。研究の問いは、LDL-C目標値達成だけでなく、累積曝露がASCVDリスクの主要決定因子であるという認識に基づき、より積極的で個別化された治療戦略をどのように導くかです。方法として、2025年ESC/EAS脂質異常症管理ガイドラインの厳格なリスクベースLDL-C目標値と、累積LDL-C曝露の重要性に関する既存の知見を統合しました。結果、LDL-C目標値までの距離を評価することで、早期かつ集中的な脂質低下療法をより効果的に開始・調整できることが示唆されました。含意として、このツールは、治療の個別化とASCVDリスクの低減に貢献し、従来の段階的アプローチから脱却した新しい治療パラダイムを促進する可能性があります。"
     },
     {
-      "title": "Robotic-assisted versus laparoscopic esophageal hiatal hernia and anti-reflux surgery: A comprehensive systematic review and meta-analysis.",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/42397587/",
-      "source": "Hernia : the journal of hernias and abdominal wall surgery",
-      "authors": "Xiao X et al.",
-      "pubDate": "2026-07-03",
-      "date": "2026-07-03",
-      "body": "BACKGROUND: The comparison between robotic-assisted (RS) and laparoscopic anti-reflux surgery (LS) remains clinically relevant due to widespread adoption of robotic techniques without clear evidence of superior outcomes. This study aims to evaluate both approaches in terms of efficacy, safety, and cost. METHODS: Adhering to PRISMA guidelines, we systematically searched in Medline, Embase, Web of Science, China National Knowledge Infrastructure, and Wanfang Data Knowledge Service Platform (2000-2025) for randomized controlled trials (RCTs) and observational studies comparing RS and LS in adults. Pooled analyzes utilized random- or fixed-effects meta-analysis models. Meta-regression, cumulati…",
+      "title": "JAK-STAT pathway-associated skin diseases: a refined functional framework for inflammatory skin diseases.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42396462/",
+      "source": "Frontiers in immunology",
+      "authors": "Li B et al.",
+      "pubDate": "2026-01-01",
+      "date": "2026-01-01",
+      "body": "The Janus kinase (JAK)/signal transducer and activator of transcription (STAT) signaling pathway is involved in the pathogenesis of a variety of inflammatory and autoimmune skin diseases, such as atopic dermatitis (AD), psoriasis, alopecia areata (AA), vitiligo, etc. Many cytokines are involved in the occurrence and development of these diseases through the JAK-STAT-mediated intracellular signaling. Small molecule JAK inhibitors (JAKi) have demonstrated substantial efficacy in the treatment of many diseases, especially in inflammatory skin diseases. For example, abrocitinib and upadacitinib have been approved for the treatment of moderate-to-severe AD, and baricitinib has been approved for…",
       "lang": "en",
-      "pmid": "42397587",
+      "pmid": "42396462",
       "topic": "リハ/薬理/神経",
-      "summary": "本研究は、ロボット支援下（RS）と腹腔鏡下（LS）の食道裂孔ヘルニアおよび逆流防止手術の有効性、安全性、費用を評価する包括的な系統的レビューとメタアナリシスです。ロボット技術の普及にもかかわらず、RSがLSよりも優れているという明確なエビデンスがないため、両者の比較は臨床的に重要です。PRISMAガイドラインに従い、Medline、Embaseなどで2000年から2025年までの成人を対象としたRSとLSを比較したRCTおよび観察研究を系統的に検索しました。プール解析にはランダム効果または固定効果メタアナリシスモデルを使用しました。この研究は、両手術アプローチの比較に関する包括的なエビデンスを提供し、臨床医が情報に基づいた意思決定を行うのに役立つことを目指しています。"
+      "summary": "本研究は、JAK-STATシグナル伝達経路が関与する炎症性皮膚疾患に対する、より洗練された機能的枠組みを提示します。研究の問いは、アトピー性皮膚炎（AD）、乾癬、円形脱毛症（AA）、尋常性白斑などの多様な炎症性・自己免疫性皮膚疾患におけるJAK-STAT経路の病態生理学的役割と、JAK阻害剤（JAKi）の治療効果を包括的に理解することです。方法として、JAK-STAT経路を介した細胞内シグナル伝達に関わる多数のサイトカインと、JAKiの臨床的有効性に関する既存の文献をレビューしました。結果、JAKiがこれらの疾患の治療において顕著な効果を示し、特に中等度から重度ADに対するアブロシチニブやウパダシチニブ、AAに対するバリシチニブの承認がその有効性を裏付けています。含意として、JAK-STAT経路は炎症性皮膚疾患の重要な治療標的であり、この経路を標的とする治療法は患者のQOL向上に大きく貢献する可能性を示唆します。"
     }
   ],
   "arxiv": [

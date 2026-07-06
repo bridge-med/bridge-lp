@@ -1,0 +1,500 @@
+{
+  "updated_at": "2026-07-02T16:07:04+00:00",
+  "updated_jst": "2026-07-03T01:07+09:00",
+  "sources": {
+    "news": "NHK ニュース RSS (政治 / 経済 / 国際)",
+    "medical_news": "NHK ニュース RSS (科学・医療)",
+    "papers_mgmt": "PubMed efetch (Healthcare Management / Health Policy / Public Health, last 60d)",
+    "papers_med": "PubMed efetch (rehabilitation / pharmacology / neurology, last 60d)",
+    "arxiv": "arXiv API (cs.AI / cs.CL / cs.LG, latest)",
+    "tech": "ITmedia News RSS",
+    "wiki": "Wikipedia REST API (Today in History, en)",
+    "quiz": "Gemini で日次生成: 診療情報管理士 1問 + 医療経営英語 1フレーズ"
+  },
+  "quiz": {
+    "him": {
+      "topic": "DPC・包括医療",
+      "question": "DPC/PDPSにおける包括評価の対象とならない医療行為や費用として、最も適切なものはどれか。",
+      "choices": [
+        "入院基本料",
+        "投薬（包括範囲内の薬剤）",
+        "検査（包括範囲内の検査）",
+        "放射線治療"
+      ],
+      "answer_index": 3,
+      "explanation": "放射線治療は、DPC/PDPSにおいて包括評価の対象外とされており、出来高払い方式で算定されます。これは、治療内容や回数が患者の状態によって大きく異なるため、包括評価になじまないためです。入院基本料、包括範囲内の投薬や検査は包括評価の対象となります。"
+    },
+    "english": {
+      "phrase_en": "Let's get on the same page.",
+      "phrase_jp": "認識を合わせましょう / 共通理解を持ちましょう",
+      "scenario": "新しい患者受け入れプロセスについて話し合う会議で",
+      "example_en": "A: \"Before we finalize the new patient intake process, I want to make sure we're all on the same page regarding the responsibilities.\" B: \"Good idea. Let's review each step.\"",
+      "example_jp": "A: 「新しい患者受け入れプロセスを最終決定する前に、責任分担について全員が共通認識を持っているか確認したいです。」 B: 「いいですね。各ステップを確認しましょう。」",
+      "note": "チームや関係者間で、特定のトピックや計画について認識のずれがないか確認し、共通理解を築く際に使います。誤解を防ぎ、スムーズな進行を促すのに役立ちます。"
+    }
+  },
+  "news": [
+    {
+      "title": "ウクライナ侵攻でロシア軍死傷者140万人 米シンクタンク分析",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167551000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T00:00:11+09:00",
+      "date": "2026-07-03",
+      "body": "アメリカのシンクタンクはウクライナへ侵攻したロシア軍の死傷者がこれまでに140万人に上るとの分析結果を公表しました。ウクライナ側の死傷者1人に対するロシア側の死傷者の数がことしに入り大幅に増えていると…",
+      "lang": "ja",
+      "summary": "アメリカのシンクタンクは、ウクライナ侵攻におけるロシア軍の死傷者がこれまでに140万人に上るとの分析結果を公表しました。この分析では、ウクライナ側の死傷者1人に対するロシア側の死傷者の数が今年に入って大幅に増加していることが指摘されています。これは、ロシア軍がウクライナ侵攻で被った人的被害の深刻さを示しており、戦況の変化を反映している可能性があります。シンクタンクは、この数字が今後の軍事戦略や国際情勢に与える影響についても言及しており、国際社会の注目を集めています。"
+    },
+    {
+      "title": "北京 高層ビルに小型機衝突 地元当局「個人的理由による事件」",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167561000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-02T22:40:05+09:00",
+      "date": "2026-07-02",
+      "body": "中国の首都 北京の高層ビルに先月、小型機が衝突して操縦士1人が死亡したことについて、地元当局は2日、操縦していたのは北京に住む66歳の男性で、「個人的な理由による事件と認定した」と発表しました。",
+      "lang": "ja",
+      "summary": "中国の首都北京で先月、高層ビルに小型機が衝突し、操縦士1人が死亡する事件が発生しました。これについて地元当局は2日、操縦していたのは北京に住む66歳の男性であり、この事件を「個人的な理由によるもの」と認定したと発表しました。当局は、事件の背景にある具体的な個人的理由については詳細を明らかにしていませんが、テロなどの組織的な犯行ではないとの見方を示唆しています。この発表は、事件の真相解明に向けた一歩となります。"
+    },
+    {
+      "title": "中東情勢受け 「ナフサ」由来の石油製品など備蓄検討 業界団体",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167531000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-02T22:30:58+09:00",
+      "date": "2026-07-02",
+      "body": "中東情勢の悪化に伴い、石油化学製品のもとになる「ナフサ」の調達に影響が出たことから、化学メーカーでつくる石油化学工業協会は、今後の対策としてナフサ由来の石油製品などの備蓄を検討していくことになりました…",
+      "lang": "ja",
+      "summary": "中東情勢の悪化により、石油化学製品の主要原料である「ナフサ」の調達に影響が生じています。これを受け、化学メーカーで構成される石油化学工業協会は、今後の対策として、ナフサ由来の石油製品などの備蓄を検討していく方針を固めました。この動きは、サプライチェーンの安定化を図り、将来的な供給リスクに備えるためのものです。協会は、具体的な備蓄計画や実施方法について、今後詳細を詰めていくとしています。"
+    },
+    {
+      "title": "中東情勢受け 「ナフサ」由来の石油製品など備蓄検討 業界団体",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167531000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-02T22:30:58+09:00",
+      "date": "2026-07-02",
+      "body": "中東情勢の悪化に伴い、石油化学製品のもとになる「ナフサ」の調達に影響が出たことから、化学メーカーでつくる石油化学工業協会は、今後の対策としてナフサ由来の石油製品などの備蓄を検討していくことになりました…",
+      "lang": "ja",
+      "summary": "中東情勢の悪化に伴い、石油化学製品の主要な原料である「ナフサ」の調達に影響が出ている状況です。これを受け、化学メーカーで構成される石油化学工業協会は、将来的な供給リスクに備えるため、ナフサ由来の石油製品などの備蓄を検討していく方針を決定しました。この対策は、サプライチェーンの安定化を図り、産業活動への影響を最小限に抑えることを目的としています。協会は、具体的な備蓄計画の策定を進めるとしています。"
+    },
+    {
+      "title": "日印首脳会談 戦略的協力関係深めることで合意 2兆円投資も",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166401000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-02T22:23:02+09:00",
+      "date": "2026-07-02",
+      "body": "インドを訪問中の高市総理大臣はモディ首相と会談し、「自由で開かれたインド太平洋」など、共通の目標の実現に向けて両国の戦略的協力関係を深めることで合意しました。また2兆円規模の投資を含むおよそ130件の…",
+      "lang": "ja",
+      "summary": "インドを訪問中の高市総理大臣は、本日2日にモディ首相との首脳会談に臨む予定です。この会談では、経済安全保障分野を中心に、インドとの具体的な協力関係のさらなる進展を図ることが主要な目的とされています。両国は、共同声明の発表に加え、経済安全保障とAI（人工知能）の分野における成果文書の調整も進めています。これは、日印両国が戦略的パートナーシップを強化し、多岐にわたる分野での連携を深める意向を示しています。"
+    },
+    {
+      "title": "日印首脳会談 戦略的協力関係深めることで合意 2兆円投資も",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166401000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-02T22:23:02+09:00",
+      "date": "2026-07-02",
+      "body": "インドを訪問中の高市総理大臣はモディ首相と会談し、「自由で開かれたインド太平洋」など、共通の目標の実現に向けて両国の戦略的協力関係を深めることで合意しました。また2兆円規模の投資を含むおよそ130件の…",
+      "lang": "ja",
+      "summary": "インドを訪問中の高市総理大臣は、本日2日にモディ首相との首脳会談に臨む予定です。この会談では、経済安全保障分野を中心に、インドとの具体的な協力関係のさらなる進展を図ることが主要な目的とされています。両国は、共同声明の発表に加え、経済安全保障とAI（人工知能）の分野における成果文書の調整も進めています。これは、日印両国が戦略的パートナーシップを強化し、多岐にわたる分野での連携を深める意向を示しています。"
+    },
+    {
+      "title": "アメリカ 6月の就業者数 前月比増加続くも市場予想を下回る",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167521000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-02T22:18:00+09:00",
+      "date": "2026-07-02",
+      "body": "円相場や株価に影響を及ぼすアメリカの雇用統計が2日公表され、6月の農業分野以外の就業者は、前の月から5万7000人増加しました。市場の予想では、11万3000人程度の増加が見込まれていましたが、これを…",
+      "lang": "ja",
+      "summary": "円相場や株価に影響を与えるアメリカの雇用統計が2日に公表されました。それによると、6月の農業分野以外の就業者数は、前の月から5万7000人増加したことが明らかになりました。しかし、これは市場が事前に見込んでいた11万3000人程度の増加を大幅に下回る結果となりました。この数字は、アメリカ経済の雇用回復ペースが鈍化している可能性を示唆しており、今後の金融政策や経済動向に影響を与えるものとして注目されています。"
+    },
+    {
+      "title": "日本とインドが蓄電池供給網の強化で協力 覚書に署名",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167491000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-02T22:03:41+09:00",
+      "date": "2026-07-02",
+      "body": "日本とインド、両政府は蓄電池のサプライチェーンを強化するため、協力を進める覚書を交わしました。EV＝電気自動車の需要が拡大するインド市場に日本企業が進出するのを後押しするねらいです。",
+      "lang": "ja",
+      "summary": "日本とインドの両政府は、蓄電池のサプライチェーンを強化するため、協力に関する覚書を交わしました。この覚書は、電気自動車（EV）の需要が拡大しているインド市場への日本企業の進出を後押しすることを主な目的としています。両国は、蓄電池の安定供給と技術開発における連携を深め、持続可能なモビリティ社会の実現に貢献することを目指します。これにより、経済安全保障の強化にも繋がると期待されています。"
+    },
+    {
+      "title": "日本とインドが蓄電池供給網の強化で協力 覚書に署名",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167491000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-02T22:03:41+09:00",
+      "date": "2026-07-02",
+      "body": "日本とインド、両政府は蓄電池のサプライチェーンを強化するため、協力を進める覚書を交わしました。EV＝電気自動車の需要が拡大するインド市場に日本企業が進出するのを後押しするねらいです。",
+      "lang": "ja",
+      "summary": "日本とインドの両政府は、蓄電池のサプライチェーンを強化するため、協力に関する覚書に署名しました。この覚書は、電気自動車（EV）の需要が急速に拡大しているインド市場において、日本企業の進出を支援し、その競争力を高めることを主な狙いとしています。両国は、蓄電池の安定的な供給体制の構築や、関連技術の開発・普及に向けた連携を強化していく方針です。"
+    },
+    {
+      "title": "ヨーロッパ司法裁判所 グーグルへの巨額制裁金を支持する判決",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167471000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-02T21:33:38+09:00",
+      "date": "2026-07-02",
+      "body": "IT大手のグーグルがスマートフォン向けの基本ソフトとアプリをセットで提供したことなどについて、ヨーロッパ委員会が競争法に違反するとして40億ユーロ余りの制裁金を科した決定をめぐり、ヨーロッパ司法裁判所…",
+      "lang": "ja",
+      "summary": "IT大手グーグルがスマートフォン向け基本ソフトとアプリをセットで提供したことなどが競争法に違反するとして、ヨーロッパ委員会が40億ユーロ余りの制裁金を科した決定について、ヨーロッパ司法裁判所はこれを支持する判決を下しました。この判決は、グーグルの市場支配的な地位の乱用を認定し、公正な競争環境の維持を重視するヨーロッパの姿勢を示すものです。IT業界全体に大きな影響を与える可能性があります。"
+    },
+    {
+      "title": "日中関係悪化の中 北京で日本食の魅力を発信する催し",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167431000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-02T20:44:54+09:00",
+      "date": "2026-07-02",
+      "body": "日中関係が悪化する中、中国・北京の日本大使館で日本食の魅力を発信する催しが開かれ、中国の食品関係の業者などが参加しました。",
+      "lang": "ja",
+      "summary": "日中関係が悪化している状況下で、中国の首都北京にある日本大使館において、日本食の魅力を発信する催しが開催されました。このイベントには、中国の食品関係の業者などが多数参加し、日本食に対する関心の高さを示しました。政治的な緊張が続く中でも、文化交流を通じて相互理解を深め、両国間の関係改善に向けた民間レベルでの努力が続けられていることを示唆するものです。"
+    },
+    {
+      "title": "日サウジ外相 “ホルムズ海峡 通航料なしの安全航行回復を”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167421000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-02T20:43:40+09:00",
+      "date": "2026-07-02",
+      "body": "茂木外務大臣は、サウジアラビアのファイサル外相と電話で会談し、ホルムズ海峡の自由で安全な航行は、通航料などが徴収されない形で回復することが重要だという認識で一致しました。",
+      "lang": "ja",
+      "summary": "茂木外務大臣は、サウジアラビアのファイサル外相と電話会談を行い、ホルムズ海峡における自由で安全な航行が、通航料などが徴収されない形で回復することが極めて重要であるとの認識で一致しました。両外相は、中東地域の安定と国際的なエネルギー供給の確保のため、この海峡の安全な航行が不可欠であるとの共通理解を示しました。これは、地域の緊張緩和に向けた外交努力の一環と見られます。"
+    },
+    {
+      "title": "自民 “皇室典範の優先審議を” 中道 “定数削減など撤回を”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166971000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-02T20:31:24+09:00",
+      "date": "2026-07-02",
+      "body": "国会で与野党の対立が続く中、自民党と中道改革連合の幹事長が会談し、自民党は森衆議院議長の要請も踏まえ、皇族数の確保に向けた皇室典範改正案の成立を最優先に審議を進めたいと提案しました。これに対し、中道は…",
+      "lang": "ja",
+      "summary": "国会での与野党対立が続く中、自民党と中道改革連合の幹事長が会談しました。自民党は、森衆議院議長の要請も踏まえ、皇族数確保のための皇室典範改正案の成立を最優先で審議するよう提案しました。これに対し、中道改革連合は、定数削減などの撤回を求めており、両党間の意見の隔たりが浮き彫りになっています。皇室典範改正案の優先審議を求める自民党と、定数削減撤回を主張する中道改革連合の対立は、今後の国会運営に影響を与える可能性があります。"
+    },
+    {
+      "title": "自民和歌山県連 世耕氏の復党に「賛成」「容認」が多数と報告",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167391000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-02T20:01:03+09:00",
+      "date": "2026-07-02",
+      "body": "世耕元経済産業大臣の自民党への復党願をめぐり、党和歌山県連は役員を対象に意向調査を行った結果、復党に「賛成」と「容認」が多数を占めたと党本部に報告しました。",
+      "lang": "ja",
+      "summary": "世耕元経済産業大臣の自民党への復党願に関して、自民党和歌山県連は役員を対象に意向調査を実施しました。その結果、復党に対して「賛成」と「容認」の意見が多数を占めたと、県連は党本部に報告しました。この調査結果は、世耕氏の復党に向けた動きに一定の後押しを与えるものと見られます。党本部はこの報告を受け、今後の復党の是非について検討を進めることになります。和歌山県連の意向が、党全体の決定にどう影響するかが注目されます。"
+    },
+    {
+      "title": "海外勢の株式買い越し 上半期9兆7000億円で過去最高",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167331000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-02T19:03:16+09:00",
+      "date": "2026-07-02",
+      "body": "東京株式市場などの先月までの半年間の海外投資家による株式の売買は、買った額が売った額を9兆7000億円余り上回り、半年間の買い越し額としては2013年のいわゆるアベノミクス相場を超え、過去最高となりま…",
+      "lang": "ja",
+      "summary": "東京株式市場などにおける先月までの半年間、海外投資家による株式の売買では、買い越し額が9兆7000億円余りに達しました。これは、半年間の買い越し額としては過去最高を記録し、2013年のアベノミクス相場時の水準をも上回る結果となりました。海外勢による大規模な買い越しは、日本株市場への強い関心と期待を示しており、市場全体の活性化に寄与していると考えられます。この傾向が今後も続くか注目されます。"
+    }
+  ],
+  "medical_news": [
+    {
+      "title": "福島第一原発 核燃料デブリ 3回目の試験的取り出しへ",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167451000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-02T21:26:44+09:00",
+      "date": "2026-07-02",
+      "body": "東京電力は、福島第一原子力発電所2号機で、ロボットアームを使った「核燃料デブリ」の試験的な取り出しに向けた作業を早ければ今月から始めると発表しました。3か月ほどかけて準備作業などを行ったあと、試験的な…",
+      "lang": "ja",
+      "summary": "東京電力は、福島第一原子力発電所2号機において、ロボットアームを用いた「核燃料デブリ」の試験的な取り出しに向けた作業を、早ければ今月から開始すると発表しました。約3か月間の準備作業を経て、その後、実際の試験的取り出しが行われる予定です。これは、廃炉作業における重要な一歩であり、デブリの性状把握と取り出し技術の確立を目指すものです。安全確保を最優先に進められます。"
+    },
+    {
+      "title": "世界で最も細い直径約4ミリの胃カメラ開発 大阪大発ベンチャー",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166561000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-02T05:06:05+09:00",
+      "date": "2026-07-02",
+      "body": "胃がんの検診に使う胃カメラの構造をシンプルにすることで、世界で最も細い直径4ミリほどのモデルを開発したと大阪大学発のベンチャー企業が発表しました。再来年にも国に承認申請を行うとしています。",
+      "lang": "ja",
+      "summary": "大阪大学発のベンチャー企業が、胃がん検診に用いられる胃カメラの構造を簡素化することで、世界で最も細いとされる直径約4ミリのモデルを開発したと発表しました。この画期的な開発により、患者の負担が大幅に軽減されることが期待されます。同社は、再来年にもこの新型胃カメラの国への承認申請を行う計画であり、実用化されれば、より多くの人々が苦痛なく胃がん検診を受けられるようになる可能性があります。"
+    },
+    {
+      "title": "将棋「棋聖戦」 藤井聡太六冠 3連勝でタイトル防衛 7連覇",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166231000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T21:45:52+09:00",
+      "date": "2026-07-01",
+      "body": "将棋の八大タイトルの1つ、「棋聖戦」五番勝負の第3局が7月1日に静岡県沼津市で行われ、藤井聡太六冠が、挑戦者の服部慎一郎七段に勝ってタイトルを防衛し、7連覇を果たしました。",
+      "lang": "ja",
+      "summary": "将棋の八大タイトルの一つである「棋聖戦」五番勝負の第3局が、7月1日に静岡県沼津市で開催されました。この対局で、藤井聡太六冠は挑戦者の服部慎一郎七段に勝利し、3連勝で棋聖のタイトルを防衛しました。これにより、藤井六冠は棋聖戦での7連覇を達成し、その圧倒的な強さを示しました。この偉業は、将棋界における藤井六冠の地位をさらに確固たるものにし、今後の活躍にも大きな期待が寄せられています。"
+    },
+    {
+      "title": "浜岡原発データ不正問題 中部電力が規制委指摘後もデータ操作",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166151000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T21:41:03+09:00",
+      "date": "2026-07-01",
+      "body": "中部電力が、静岡県にある浜岡原子力発電所の審査で不正なデータ処理を行っていた問題で、原子力規制委員会から説明を求められた去年5月以降もデータの操作を行っていたことが分かりました。規制委員会は、中部電力…",
+      "lang": "ja",
+      "summary": "中部電力が静岡県の浜岡原子力発電所の審査において不正なデータ処理を行っていた問題で、原子力規制委員会が説明を求めた昨年5月以降も、データの操作を継続していたことが判明しました。この事態は、中部電力のコンプライアンス体制の不備を改めて浮き彫りにし、原子力施設の安全性に対する信頼を揺るがすものです。規制委員会は、この問題に対し厳正な対応を求めるとともに、中部電力の組織的な改善を強く促す方針です。"
+    },
+    {
+      "title": "ミュトス提供再開 “情報収集進める”国内金融機関",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165431000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T13:58:53+09:00",
+      "date": "2026-07-01",
+      "body": "アメリカのAI新興企業「アンソロピック」は6月30日、最新のAIモデルの「クロード・ミュトス5」や、同等の性能を持つ「フェイブル5」について、アメリカ政府の輸出規制が解除されたことを受けて、提供を再開…",
+      "lang": "ja",
+      "summary": "アメリカのAI新興企業「アンソロピック」は6月30日、最新のAIモデル「クロード・ミュトス5」および同等の性能を持つ「フェイブル5」の提供を再開しました。これは、アメリカ政府による輸出規制が解除されたことを受けたものです。この高性能AIモデルの提供再開に対し、国内の金融機関は、その機能や潜在的な活用可能性について情報収集を進めており、今後の業務への導入を検討する動きが見られます。"
+    },
+    {
+      "title": "「キャプテン翼」高橋陽一さん“4年後は翼くんの夢W杯優勝を”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165111000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-30T21:16:09+09:00",
+      "date": "2026-06-30",
+      "body": "サッカーワールドカップ北中米大会で日本が惜しくもブラジルに敗れたことについて、世界的な人気を誇るサッカー漫画「キャプテン翼」の作者、高橋陽一さんは「サッカー王国ブラジルとも互角に戦えるんだと示す試合だ…",
+      "lang": "ja",
+      "summary": "サッカーワールドカップ北中米大会で、日本が惜しくもブラジルに敗れたことについて、世界的な人気を誇るサッカー漫画「キャプテン翼」の作者である高橋陽一さんがコメントしました。高橋さんは、この試合を「サッカー王国ブラジルとも互角に戦えるんだと示す試合だ」と評価し、日本代表の健闘を称えました。そして、4年後のワールドカップでは、主人公の翼くんの夢である優勝を期待する言葉を述べました。"
+    },
+    {
+      "title": "落語協会 新会長に林家正蔵さん就任 “若手の育成などに対処”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165211000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-30T20:58:48+09:00",
+      "date": "2026-06-30",
+      "body": "人気落語家の林家正蔵さんが東京の落語家などで作る団体「落語協会」の新しい会長に就任し、「若手の育成などの問題に一つ一つ対処していきたい」などと抱負を述べました。",
+      "lang": "ja",
+      "summary": "人気落語家の林家正蔵さんが、東京の落語家などで作る団体「落語協会」の新しい会長に就任しました。林家正蔵さんは、会長就任にあたり、「若手の育成などの問題に一つ一つ対処していきたい」と抱負を述べました。落語協会は、落語の普及と発展、そして落語家の活動を支援する重要な団体であり、新会長として林家正蔵さんがその舵取りを担うことになります。"
+    },
+    {
+      "title": "AI活用歩行型ロボの実証実験推進を 規制改革推進会議 答申決定",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015163811000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-29T17:15:32+09:00",
+      "date": "2026-06-29",
+      "body": "政府の規制改革推進会議は、「フィジカルAI」を活用した歩行型ロボットの法律上の扱いを明確にし、公道での実証実験を推進することなどを盛り込んだ答申を決定しました。",
+      "lang": "ja",
+      "summary": "政府の規制改革推進会議は、「フィジカルAI」を活用した歩行型ロボットの法律上の扱いを明確にし、公道での実証実験を推進することなどを盛り込んだ答申を決定しました。この答申は、AI技術を搭載した歩行型ロボットの社会実装を加速させるための重要な一歩となります。規制の明確化と実証実験の推進により、次世代ロボット技術の発展と普及が期待されます。"
+    }
+  ],
+  "papers_mgmt": [
+    {
+      "title": "Evaluating A Patient-Led Health Literacy Program for People Living With Metastatic Breast Cancer.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42389868/",
+      "source": "Cancer control : journal of the Moffitt Cancer Center",
+      "authors": "Taffe BD et al.",
+      "pubDate": "2026-01-01",
+      "date": "2026-01-01",
+      "body": "IntroductionLow cancer health literacy undermines patients' ability to interpret complex information and participate in shared decision making, and is associated with worse outcomes. Evidence for effective health literacy interventions in metastatic breast cancer (MBC) remains limited. We evaluated a patient-led, virtual health literacy program designed to strengthen MBC-specific knowledge and self-efficacy.MethodsWe conducted a mixed-methods, pre-post evaluation across two program iterations (Fall 2023; Spring 2024) delivered by a national, patient-led-MBC organization, Project Life. The five-week synchronous course called Spinning Science covered breast cancer subtyping, genetic/genomic t…",
+      "lang": "en",
+      "pmid": "42389868",
+      "topic": "医療経営/公衆衛生",
+      "summary": "研究の問い: 転移性乳がん（MBC）患者のヘルスリテラシー不足が複雑な情報解釈や共同意思決定を阻害し、予後悪化と関連する中、効果的な介入が限られているため、患者主導型仮想ヘルスリテラシープログラムの有効性を評価する。方法: 全国的な患者主導型MBC団体「Project Life」が提供する5週間の同期型コース「Spinning Science」の2回（2023年秋、2024年春）の実施において、混合研究法を用いた前後比較評価を実施した。結果: 本プログラムはMBC特有の知識と自己効力感を強化するよう設計されており、その効果を評価した。抽象の範囲では具体的な結果は示されていないが、プログラムの目的達成に向けた評価が行われた。含意: 本研究は、転移性乳がん患者のヘルスリテラシー向上と自己効力感強化に資する患者主導型プログラムの可能性を探り、限られたエビデンスに貢献することで、患者の予後改善に繋がる介入の基礎を築く。",
+      "application": "患者主導のヘルスリテラシー向上プログラムは、患者の知識と自己効力感を高め、治療成果に繋がるとされている。当院でも、リハビリを終えた患者が自身の経験を語る「患者体験共有会」を定期的に開催し、新規患者の治療理解とモチベーション向上を図る運用ルールを導入することで、患者の主体的な治療参加を促せるだろう。"
+    },
+    {
+      "title": "UGT1A1 genotype testing for irinotecan: A guideline developed by the UK Centre of Excellence in Regulatory Science and Innovation in Pharmacogenomics (CERSI-PGx).",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42389808/",
+      "source": "British journal of clinical pharmacology",
+      "authors": "Chauhan D et al.",
+      "pubDate": "2026-07-02",
+      "date": "2026-07-02",
+      "body": "Irinotecan, a topoisomerase I inhibitor, is available as both non-pegylated and pegylated formulations. The non-pegylated formulation is licensed for use in advanced colorectal cancer either in combination with other agents or as monotherapy. However, it is also used off-label across a range of gastrointestinal malignancies and in rare malignancies such as glioblastoma and sarcomas. The pegylated formulation is licensed for use as combination therapy in adult patients with metastatic pancreatic adenocarcinoma. Irinotecan is hydrolysed to its active metabolite, SN-38, which is predominantly inactivated by the enzyme uridine diphosphate glucuronosyltransferase UGT1A1. UGT1A1 is encoded by the…",
+      "lang": "en",
+      "pmid": "42389808",
+      "topic": "医療経営/公衆衛生",
+      "summary": "研究の問い: イリノテカンはUGT1A1酵素によって不活性化されるが、UGT1A1遺伝子型検査の臨床的有用性に関するガイドラインが不足しているため、その必要性を検討し、ガイドラインを開発する。方法: 英国薬理ゲノミクス規制科学・イノベーションセンター（CERSI-PGx）が、イリノテカン代謝におけるUGT1A1の役割と、非ペグ化およびペグ化製剤の臨床使用に関する既存のエビデンスをレビューし、UGT1A1遺伝子型検査のガイドラインを策定した。結果: イリノテカンの活性代謝物SN-38は主にUGT1A1によって不活性化されることが確認され、UGT1A1遺伝子型が薬物動態と毒性に影響を与えることが示唆された。含意: 本ガイドラインは、イリノテカン治療におけるUGT1A1遺伝子型検査の実施を推奨し、患者の安全性向上と個別化医療の推進に貢献する。これにより、副作用リスクの低減と治療効果の最適化が期待される。",
+      "application": "特定の遺伝子型検査が、薬剤の代謝と副作用リスクを予測し、個別化医療に貢献するとされている。中小医療機関では遺伝子検査は難しいが、患者個々の体質や既往歴、生活習慣を詳細に把握し、薬剤や治療への反応をきめ細かく観察する重要性を示唆する。朝礼で「今日の患者さんで、薬の効き方や副作用に特に注意すべき方はいますか？」と問いかけることで、個別化された医療提供への意識を高められるだろう。"
+    },
+    {
+      "title": "Clinical and mechanistic effects of GLP-1 receptor agonists in hidradenitis suppurativa and comorbidities.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42389771/",
+      "source": "Science progress",
+      "authors": "Brogaard E et al.",
+      "pubDate": "2026-01-01",
+      "date": "2026-01-01",
+      "body": "Hidradenitis suppurativa (HS) is a painful inflammatory skin disease within the pilosebaceous unit associated with numerous comorbidities, including obesity type-2-diabetes (T2DM), and a general meta-inflammatory state. This narrative review explores the therapeutic potential of GLP-1-receptor-agonists (GLP-1RAs) in treating HS by analyzing mechanisms of action and clinical outcomes. Based on a literature search, encompassing 12 cohorts and 4 case-based reports, current evidence demonstrates significant improvements in both clinical and patient-reported outcomes in patients with HS treated with GLP-1RAs. Treatment consistently resulted in reduced body mass index (BMI) and disease activity,…",
+      "lang": "en",
+      "pmid": "42389771",
+      "topic": "医療経営/公衆衛生",
+      "summary": "研究の問い: 化膿性汗腺炎（HS）は肥満や2型糖尿病などの併存疾患を伴う炎症性皮膚疾患であり、GLP-1受容体作動薬（GLP-1RAs）がHS治療に持つ治療可能性と作用機序、臨床効果を探る。方法: 12のコホート研究と4つの症例報告を含む文献検索に基づき、GLP-1RAsの作用機序とHS患者における臨床的アウトカムを分析するナラティブレビューを実施した。結果: GLP-1RAsで治療されたHS患者において、臨床的および患者報告アウトカムの両方で有意な改善が示された。治療により、一貫してBMIと疾患活動性の低下が認められた。含意: GLP-1RAsは、化膿性汗腺炎とその併存疾患に対する有望な治療選択肢となる可能性があり、炎症性皮膚疾患の新たな治療戦略としてさらなる研究が期待される。",
+      "application": "GLP-1受容体作動薬が、皮膚疾患だけでなく肥満や糖尿病といった併存疾患にも効果を示し、全身の炎症状態を改善するとされている。整形外科やリハビリテーションの現場でも、患者の肥満や糖尿病などの併存疾患が治療効果に影響を与える可能性を認識し、BMI測定と簡単な生活習慣指導をルーティン化する運用ルールを導入することで、患者の包括的な健康改善に貢献できるだろう。"
+    }
+  ],
+  "papers_med": [
+    {
+      "title": "Management of Patients at Risk of Ischemic Stroke With Left Ventricular Systolic Dysfunction in the Absence of Intracardiac Thrombus: A Scientific Statement From the American Heart Association.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42389837/",
+      "source": "Stroke",
+      "authors": "Sharma R et al.",
+      "pubDate": "2026-07-02",
+      "date": "2026-07-02",
+      "body": "Left ventricular (LV) systolic dysfunction, defined here as reduced LV ejection fraction ≤40% or left wall motion abnormality, is commonly found in patients with ischemic stroke. Although there is an increased risk of incident and recurrent embolic stroke among patients with LV dysfunction without thrombus detected, the data supporting anticoagulation in these patients are limited. In this scientific statement, we summarize the latest evidence regarding the risk of incident and recurrent stroke in patients with LV dysfunction as well as best practice recommendations regarding the management of this population after stroke. We provide a narrative summary and meta-analysis of secondary analys…",
+      "lang": "en",
+      "pmid": "42389837",
+      "topic": "リハ/薬理/神経",
+      "summary": "研究の問い: 心内血栓がない左室収縮機能不全（駆出率≤40%または左壁運動異常）を伴う虚血性脳卒中患者において、新規および再発塞栓性脳卒中のリスクは高いが、抗凝固療法の支持データが限られているため、その管理に関する最新のエビデンスと推奨を提示する。方法: 左室機能不全患者における新規および再発脳卒中リスクに関する最新のエビデンスを要約し、脳卒中後のこの集団の管理に関するベストプラクティス推奨を提供する。二次解析のナラティブサマリーとメタアナリシスを実施。結果: 抽象には具体的な結果の記述がないが、左室機能不全患者における脳卒中リスクの増加と、抗凝固療法のデータが限られている現状が示された。含意: 本声明は、心内血栓のない左室収縮機能不全を伴う虚血性脳卒中患者の管理に関する指針を提供し、今後の臨床実践と研究の方向性を示すことで、患者ケアの改善に貢献する。"
+    },
+    {
+      "title": "Update on Rehabilitation After Stroke: Global Changes and the Continued Importance of Therapy Intensity, Dose, and Timing.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42389795/",
+      "source": "Stroke",
+      "authors": "Teasell R et al.",
+      "pubDate": "2026-07-02",
+      "date": "2026-07-02",
+      "body": "Stroke rehabilitation research has seen an unprecedented expansion in the volume of randomized controlled trials. This sets the stage for conducting meta-analyses and network meta-analyses, which help compensate for the large number of smaller phase 2 studies. Over half of randomized controlled trials are conducted in the chronic phase when neuroplasticity is reduced, and the timing of the intervention is not directly generalizable to clinical care. Meanwhile, research productivity has plateaued in high-income countries over the past decade. Therapy intensity and dosage are regarded as important to improving recovery, but the optimal intensity and dose are still uncertain. However, timing a…",
+      "lang": "en",
+      "pmid": "42389795",
+      "topic": "リハ/薬理/神経",
+      "summary": "研究の問い: 脳卒中リハビリテーション研究におけるランダム化比較試験の増加と、治療強度、用量、タイミングの重要性が認識される一方で、最適な介入時期や用量が不明確である現状を更新し、課題を提示する。方法: 脳卒中リハビリテーションに関するランダム化比較試験の動向を分析し、メタアナリシスやネットワークメタアナリシスの必要性を強調。慢性期研究の多さや高所得国での研究生産性の停滞といった課題を検討した。結果: ランダム化比較試験の半数以上が神経可塑性が低下する慢性期に実施されており、介入のタイミングが臨床ケアに直接適用できないことが示された。最適な治療強度と用量は依然として不確実である。含意: 脳卒中リハビリテーション研究は、治療強度、用量、タイミングの最適化に焦点を当て、特に急性期介入の重要性を再認識し、臨床実践に直結するエビデンス創出の必要性を示唆する。"
+    },
+    {
+      "title": "The myofascial rheostat: hyaluronan molecular weight dynamics and purinergic signalling as a physiological feedback system.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42389755/",
+      "source": "Frontiers in physiology",
+      "authors": "Kirkness KB et al.",
+      "pubDate": "2026-01-01",
+      "date": "2026-01-01",
+      "body": "Fascia, the connective tissue network enveloping muscles, organs, and viscera, functions as a hyaluronan (HA)-rich adaptive interface that senses and responds to inflammatory cues. This narrative review synthesizes ECM literature across niches to examine the calcium-hyaluronan (CHA) axis, a feedback loop linking Ca²+ signaling to HA synthesis via HAS2 and molecular weight-dependent signaling through CD44 and RHAMM receptors. We propose that the CHA axis is constrained further by ATP/NAD+-mediated feedback and functions as a rheostat regulated by four distinct constraint types (1): Mechanical loading and shear regulate HA turnover, hydration, and viscosity via YAP/TAZ and integrin mechanosen…",
+      "lang": "en",
+      "pmid": "42389755",
+      "topic": "リハ/薬理/神経",
+      "summary": "研究の問い: 筋膜がヒアルロン酸（HA）に富む適応性インターフェースとして炎症シグナルに応答する仕組みを解明し、HA分子量動態とプリン作動性シグナル伝達がどのように生理学的フィードバックシステムとして機能するかを探る。方法: 細胞外マトリックス（ECM）に関する文献を統合し、Ca²+シグナル伝達とHAS2を介したHA合成、CD44およびRHAMM受容体を介した分子量依存性シグナル伝達を結びつけるカルシウム-ヒアルロン酸（CHA）軸を検討するナラティブレビューを実施。結果: CHA軸はATP/NAD+を介したフィードバックによってさらに制約され、4つの異なる制約タイプによって調節されるレオスタットとして機能することが提案された。機械的負荷とせん断がHAの代謝回転、水和、粘度を調節する。含意: 本レビューは、筋膜の機能におけるHA動態とプリン作動性シグナル伝達の重要性を強調し、炎症応答や組織適応における新たな治療標的の可能性を示唆する。"
+    }
+  ],
+  "arxiv": [
+    {
+      "title": "Measuring the Gap Between Human and LLM Research Ideas",
+      "url": "https://arxiv.org/abs/2607.01233v1",
+      "source": "arXiv cs.CL",
+      "authors": "Ziyu Chen et al.",
+      "pubDate": "2026-07-01T17:59:56+00:00",
+      "date": "2026-07-01",
+      "body": "LLMs are increasingly used to brainstorm research ideas, but existing evaluations mostly judge individual ideas by novelty, feasibility, or expert preference. We instead ask: how far are current LLM-generated ideas from human researchers? To characterize this gap, we build a large-scale evaluation framework for ideation from high-quality human research papers. For each paper, we reverse-engineer a small set of closely related prior works that likely inspired its core idea. LLMs are then prompted to generate a new idea from the set of paper titles and summaries. We introduce a two-axis research-taste taxonomy to profile each idea by its opportunity pattern and research paradigm, and use it t…",
+      "lang": "en",
+      "topic": "cs.CL",
+      "summary": "研究の問い: 大規模言語モデル（LLM）が研究アイデアのブレインストーミングに利用される中、既存の評価が個々のアイデアの新規性や実現可能性に偏るため、LLM生成アイデアと人間研究者のアイデアとの乖離を定量的に測定する。方法: 高品質な人間による研究論文からアイデア生成の大規模評価フレームワークを構築。各論文について、その核心アイデアの着想源となった先行研究を逆算し、LLMに論文タイトルと要約から新しいアイデアを生成させた。機会パターンと研究パラダイムに基づく二軸の研究テイスト分類法を導入し、各アイデアをプロファイリングした。結果: 抽象には具体的な結果の記述がないが、LLM生成アイデアと人間研究者のアイデアの乖離を特徴づけるための評価手法が確立された。含意: 本研究は、LLMのアイデア生成能力の限界と、人間との創造性のギャップを理解するための新たな視点を提供し、より人間らしい研究アイデアを生成するLLMの開発に貢献する。"
+    },
+    {
+      "title": "Is One Layer Enough? Training A Single Transformer Layer Can Match Full-Parameter RL Training",
+      "url": "https://arxiv.org/abs/2607.01232v1",
+      "source": "arXiv cs.LG",
+      "authors": "Zijian Zhang et al.",
+      "pubDate": "2026-07-01T17:59:54+00:00",
+      "date": "2026-07-01",
+      "body": "Reinforcement learning (RL) has become a central component of post-training large language models (LLMs), yet little is understood about how RL adaptation is distributed across transformer layers. Existing approaches typically update all model parameters uniformly, implicitly assuming that every layer contributes similarly to the gains obtained during RL post-training. In this work, we challenge this assumption through a systematic layer-wise study of RL training. Surprisingly, we find that training a single transformer layer can recover most of the gains achieved by full-parameter RL training, and in some cases even surpass it. To quantify this phenomenon, we introduce the quantity layer c…",
+      "lang": "en",
+      "topic": "cs.LG",
+      "summary": "研究の問い: 大規模言語モデル（LLM）の強化学習（RL）後学習において、RL適応がトランスフォーマー層間でどのように分散されるか不明なため、全パラメータ更新が各層に均等に貢献するという既存の仮定に異議を唱え、層ごとのRL訓練の効果を体系的に調査する。方法: RL訓練の層ごとの体系的な研究を実施。単一のトランスフォーマー層のみを訓練した場合と、全パラメータを訓練した場合の性能を比較した。この現象を定量化するため、「層貢献度」という概念を導入した。結果: 驚くべきことに、単一のトランスフォーマー層を訓練するだけで、全パラメータRL訓練で得られる性能向上の大部分を回復でき、場合によってはそれを上回ることも判明した。含意: 本研究は、LLMのRL訓練における効率的なパラメータ更新戦略の可能性を示唆し、計算資源の削減やモデルの最適化に貢献する。"
+    },
+    {
+      "title": "Language-Critique Imitation Learning from Suboptimal Demonstrations",
+      "url": "https://arxiv.org/abs/2607.01225v1",
+      "source": "arXiv cs.LG",
+      "authors": "Chih-Han Yang et al.",
+      "pubDate": "2026-07-01T17:57:22+00:00",
+      "date": "2026-07-01",
+      "body": "Prior work on imitation learning from suboptimal demonstrations typically relies on compressed supervision signals such as confidence estimates, discriminator scores, or importance weights. These scalar signals are inherently limited, as they cannot explicitly express intermediate reasoning about task progress, failure modes, or corrective actions. We propose a language-critique framework for imitation learning from suboptimal demonstrations that instead leverages natural language as a structured supervision signal, avoiding the collapse of expressive feedback into scalars. Our method first constructs language labels from demonstrations that explicitly describe current progress, identify su…",
+      "lang": "en",
+      "topic": "cs.LG",
+      "summary": "研究の問い: 不完全なデモンストレーションからの模倣学習において、既存手法が信頼度や識別器スコアなどの圧縮されたスカラー信号に依存し、タスク進行、失敗モード、修正行動に関する中間推論を明示的に表現できないため、より表現力豊かなフィードバックを活用する手法を開発する。方法: 表現力豊かなフィードバックがスカラーに集約されるのを避け、自然言語を構造化された教師信号として利用する言語批評フレームワークを提案。本手法は、まずデモンストレーションから現在の進行状況、失敗の原因、修正行動を明示的に記述する言語ラベルを構築する。結果: 抽象には具体的な結果の記述がないが、言語批評フレームワークが不完全なデモンストレーションからの模倣学習において、より詳細なフィードバックを提供できる可能性が示唆された。含意: 本研究は、不完全なデモンストレーションからの模倣学習の効率と頑健性を向上させ、より複雑なタスクにおけるAIエージェントの学習能力を高める新たなアプローチを提供する。"
+    }
+  ],
+  "tech": [
+    {
+      "title": "LINEに「プレミアムブロック」登場　相手の友だち一覧から自分を“そっと消せる”　今秋から有料提供へ",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/02/news110.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-02T19:39:00+09:00",
+      "date": "2026-07-02",
+      "body": "",
+      "lang": "ja",
+      "summary": "コミュニケーションアプリ「LINE」は、今秋から新たな有料機能の提供を開始します。その目玉となるのは、相手の友だち一覧から自分を消すことができる特別なブロック機能です。これにより、よりプライバシーを保護したいユーザーのニーズに応えます。さらに、メッセージの予約送信機能や通話録音機能も追加される予定で、ユーザーの利便性が向上すると期待されています。これらの新機能は、LINEの利用体験をさらに豊かにし、多様なニーズに対応することを目指しています。"
+    },
+    {
+      "title": "日本生命、スペースX投資で莫大利益は本当か　総代会で質疑白熱　「未公開株」に積極姿勢",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/02/news106.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-02T18:38:00+09:00",
+      "date": "2026-07-02",
+      "body": "日本生命保険が、株主総会にあたる定時総代会を大阪市内で開催した。社員（保険契約者）代表の総代からは、同社が話題の米Space Xに投資していたとの一部報道について質問があった。同社側は運用の個別銘柄については明言を避けたが、「海外のベンチャー（新興企業）投資は、長期運用という本社の特性が生きる資産だ」とし、今後も未公開株を含めた投資に注力する考えを示した。",
+      "lang": "ja",
+      "summary": "日本生命保険の定時総代会で、米SpaceXへの投資による莫大な利益に関する報道について質問が集中しました。同社は個別銘柄への言及は避けつつも、「海外のベンチャー投資は、長期運用という日本生命の特性を活かせる資産である」と説明しました。今後も未公開株を含むベンチャー投資に積極的に注力していく方針を示し、新たな成長機会を追求する姿勢を強調しました。この方針は、保険契約者の資産運用戦略に大きな影響を与える可能性があります。"
+    },
+    {
+      "title": "キャンメイクの“高クオリティ”「AI社員」、SNSで評価割れる「実物に近づけたAIと実物の写真は違う」",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/02/news094.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-02T16:55:00+09:00",
+      "date": "2026-07-02",
+      "body": "「キャンメイク」を展開する井田ラボラトリーズが始めた「キャンメイクAI社員」が、SNSで評価が割れている。精度の高さを好意的に捉える声がある一方、化粧品の使用感をAIで伝えることに懸念を示す声もみられた。",
+      "lang": "ja",
+      "summary": "化粧品ブランド「キャンメイク」を展開する井田ラボラトリーズが導入した「キャンメイクAI社員」が、SNS上で賛否両論を呼んでいます。AIの精度の高さを評価し、好意的に受け止める声がある一方で、「実物に近づけたAIと実物の写真は違う」といった意見や、化粧品の使用感をAIで表現することへの懸念も示されています。このAI社員は、デジタルマーケティングの新たな試みとして注目されていますが、消費者のリアルな体験との乖離が課題となっています。"
+    },
+    {
+      "title": "復活した「Fable 5」　米政府からのオーダーに対して、Anthropicはどう対策したのか",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/02/news095.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-02T16:40:00+09:00",
+      "date": "2026-07-02",
+      "body": "米AnthropicのAIモデル「Claude Fable 5」が世界的にサービスを再開した。Anthropicは復活に向けてどういった経緯と対策を行ったのか、モデル再開にあわせて詳細を公開した。",
+      "lang": "ja",
+      "summary": "米AnthropicのAIモデル「Claude Fable 5」が、世界的にサービスを再開しました。Anthropicは、モデルの復活に至るまでの経緯と、米政府からのオーダーに対応するための対策について詳細を公開しました。この再開は、AIの安全性と信頼性に関する懸念が高まる中で、企業がどのように対応していくかを示す重要な事例となります。Anthropicは、透明性を高めることで、ユーザーや規制当局からの信頼回復を目指しています。"
+    }
+  ],
+  "wiki": [
+    {
+      "title": "2013: President of Egypt Mohamed Morsi is removed from office by the military after fo",
+      "url": "https://en.wikipedia.org/wiki/President_of_Egypt",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "President of Egypt Mohamed Morsi is removed from office by the military after four days of protests all over the country calling for his resignation, to which he did not respond. The president of the Supreme Constitutional Court of Egypt, Adly Mansour, is declared acting president until further elections are held.  —  The president of the Arab Republic of Egypt is the head of state of Egypt. Under the various iterations of the Constitution of Egypt following the Egyptian revolution of 1952, the…",
+      "lang": "en",
+      "year": 2013,
+      "summary": "2013年、エジプトでは、辞任を求める全国的な抗議活動が4日間続いたにもかかわらず、これに応じなかった当時の大統領モハメド・モルシ（エジプトの元大統領）が軍によって解任されました。その後、最高憲法裁判所長官のアドリ・マンスール（最高憲法裁判所長官）が、次期選挙が実施されるまでの暫定大統領に就任しました。この出来事は、エジプトの政治情勢に大きな転換点をもたらしました。"
+    },
+    {
+      "title": "2006: The Valencia Metro derailment kills 41 people.",
+      "url": "https://en.wikipedia.org/wiki/Valencia_Metro_derailment",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "The Valencia Metro derailment kills 41 people.  —  The Valencia Metro derailment occurred in Valencia, Spain's third largest city, on 3 July 2006 at 1 p.m. CEST between Jesús and Plaça d'Espanya stations on the Line 1 of the Metrovalencia mass transit system. At least 43 people were killed and more than ten were seriously injured.",
+      "lang": "en",
+      "year": 2006,
+      "summary": "2006年7月3日、スペイン第三の都市であるバレンシア（スペインの都市）で、バレンシア地下鉄の脱線事故が発生しました。この事故は、メトロバレンシアの1号線、ヘスス駅とプラサ・デ・エスパーニャ駅の間で発生し、少なくとも41人が死亡、10人以上が重傷を負いました。この悲劇は、スペイン国内に大きな衝撃を与え、公共交通機関の安全対策について再考を促すきっかけとなりました。"
+    },
+    {
+      "title": "1996: British Prime Minister John Major announced the Stone of Scone would be returned",
+      "url": "https://en.wikipedia.org/wiki/John_Major",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "British Prime Minister John Major announced the Stone of Scone would be returned to Scotland.  —  Sir John Major is a British politician who served as Prime Minister of the United Kingdom and Leader of the Conservative Party from 1990 to 1997. He previously held various Cabinet positions under Margaret Thatcher. Major was the Member of Parliament (MP) for Huntingdon, formerly Huntingdonshire, from 1979 to 2001. Since stepping down, Major has focused on writing and his business, sporting, and ch…",
+      "lang": "en",
+      "year": 1996,
+      "summary": "1996年、当時のイギリス首相ジョン・メージャー（イギリスの首相）は、スコットランドの象徴的な遺物である「スクーンの石」（スコットランド王の戴冠式に使われた石）をスコットランドに返還すると発表しました。この石は、長らくイングランドに保管されていましたが、この決定により、スコットランドの歴史的・文化的アイデンティティの尊重が示されました。返還は、スコットランドの自治権拡大に向けた動きの一環とも見なされました。"
+    },
+    {
+      "title": "1988: United States Navy warship USS Vincennes shoots down Iran Air Flight 655 over th",
+      "url": "https://en.wikipedia.org/wiki/United_States_Navy",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "United States Navy warship USS Vincennes shoots down Iran Air Flight 655 over the Persian Gulf, killing all 290 people aboard.  —  The United States Navy (USN) is the maritime service branch of the United States Armed Forces and is designated as the navy of the United States in the Constitution. With 290 combat vessels, it is the world's second largest navy, behind the People's Liberation Army Navy, and by far the largest by displacement, at 4.5 million tons in 2021. It has the world's largest…",
+      "lang": "en",
+      "year": 1988,
+      "summary": "1988年、アメリカ海軍の軍艦USSヴィンセンス（アメリカ海軍の軍艦）が、ペルシャ湾上空でイラン航空655便（イランの民間航空機）を誤って撃墜しました。この悲劇により、乗員乗客290人全員が死亡しました。アメリカ側は、民間機を攻撃機と誤認したと主張しましたが、この事件は国際社会に大きな衝撃を与え、両国間の緊張を一層高める結果となりました。"
+    }
+  ]
+}

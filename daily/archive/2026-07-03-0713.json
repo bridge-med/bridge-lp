@@ -1,0 +1,486 @@
+{
+  "updated_at": "2026-07-02T22:13:43+00:00",
+  "updated_jst": "2026-07-03T07:13+09:00",
+  "sources": {
+    "news": "NHK ニュース RSS (政治 / 経済 / 国際)",
+    "medical_news": "NHK ニュース RSS (科学・医療)",
+    "papers_mgmt": "PubMed efetch (Healthcare Management / Health Policy / Public Health, last 60d)",
+    "papers_med": "PubMed efetch (rehabilitation / pharmacology / neurology, last 60d)",
+    "arxiv": "arXiv API (cs.AI / cs.CL / cs.LG, latest)",
+    "tech": "ITmedia News RSS",
+    "wiki": "Wikipedia REST API (Today in History, en)",
+    "quiz": "Gemini で日次生成: 診療情報管理士 1問 + 医療経営英語 1フレーズ"
+  },
+  "quiz": {
+    "him": {
+      "topic": "DPC・包括医療",
+      "question": "DPC/PDPSにおける包括評価の対象とならない医療行為や費用として、最も適切なものはどれか。",
+      "choices": [
+        "入院基本料",
+        "投薬（包括範囲内の薬剤）",
+        "検査（包括範囲内の検査）",
+        "放射線治療"
+      ],
+      "answer_index": 3,
+      "explanation": "放射線治療は、DPC/PDPSにおいて包括評価の対象外とされており、出来高払い方式で算定されます。これは、治療内容や回数が患者の状態によって大きく異なるため、包括評価になじまないためです。入院基本料、包括範囲内の投薬や検査は包括評価の対象となります。"
+    },
+    "english": {
+      "phrase_en": "Let's get on the same page.",
+      "phrase_jp": "認識を合わせましょう / 共通理解を持ちましょう",
+      "scenario": "新しい患者受け入れプロセスについて話し合う会議で",
+      "example_en": "A: \"Before we finalize the new patient intake process, I want to make sure we're all on the same page regarding the responsibilities.\" B: \"Good idea. Let's review each step.\"",
+      "example_jp": "A: 「新しい患者受け入れプロセスを最終決定する前に、責任分担について全員が共通認識を持っているか確認したいです。」 B: 「いいですね。各ステップを確認しましょう。」",
+      "note": "チームや関係者間で、特定のトピックや計画について認識のずれがないか確認し、共通理解を築く際に使います。誤解を防ぎ、スムーズな進行を促すのに役立ちます。"
+    }
+  },
+  "news": [
+    {
+      "title": "パワー半導体最大手 ドイツ東部に新工場完成 生産能力倍増",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167651000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T07:09:56+09:00",
+      "date": "2026-07-03",
+      "body": "EV＝電気自動車やデータセンターなどに使われるパワー半導体で最大手のドイツのメーカーが国内に新たな工場を完成させ、生産能力を強化することにしています。",
+      "lang": "ja",
+      "summary": "EV＝電気自動車やデータセンターなどに使われるパワー半導体で最大手のドイツのメーカーが、国内のドイツ東部に新たな工場を完成させ、生産能力を強化する方針です。この新工場は、需要が拡大するEVやデータセンター向けのパワー半導体の供給体制を拡充し、市場での競争力を一層高めることを目指しています。同社は、今回の工場完成により、パワー半導体の生産能力を倍増させ、今後のEV市場の成長やデータセンターの需要増に対応するための基盤を固めることになります。"
+    },
+    {
+      "title": "テスラ 欧州や中国で需要回復か ガソリン価格高騰も追い風に",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167681000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T06:55:34+09:00",
+      "date": "2026-07-03",
+      "body": "アメリカのEV＝電気自動車メーカー「テスラ」は、先月までの3か月間の世界での新車販売台数を発表し、前の年の同じ時期より24.9％増えました。中東情勢によるガソリン価格の高騰などがEVの需要の拡大につな…",
+      "lang": "ja",
+      "summary": "アメリカのEVメーカー「テスラ」は、先月までの3か月間の世界での新車販売台数を発表し、前の年の同じ時期より24.9％増加しました。中東情勢によるガソリン価格の高騰がEVの需要拡大につながっており、テスラは欧州や中国市場で需要が回復している可能性があります。この販売台数の増加は、EV市場全体の成長と、ガソリン価格の変動が消費者の購買行動に与える影響を示唆しています。テスラは、引き続きEV市場のリーダーとしての地位を強化していくと見られます。"
+    },
+    {
+      "title": "テスラ 欧州や中国で需要回復か ガソリン価格高騰も追い風に",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167681000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T06:55:34+09:00",
+      "date": "2026-07-03",
+      "body": "アメリカのEV＝電気自動車メーカー「テスラ」は、先月までの3か月間の世界での新車販売台数を発表し、前の年の同じ時期より24.9％増えました。中東情勢によるガソリン価格の高騰などがEVの需要の拡大につな…",
+      "lang": "ja",
+      "summary": "アメリカのEVメーカー「テスラ」は、先月までの3か月間の世界での新車販売台数を発表し、前の年の同じ時期より24.9％増加しました。中東情勢によるガソリン価格の高騰がEVの需要拡大につながっており、テスラは欧州や中国市場で需要が回復している可能性があります。この販売台数の増加は、EV市場全体の成長と、ガソリン価格の変動が消費者の購買行動に与える影響を示唆しています。テスラは、引き続きEV市場のリーダーとしての地位を強化していくと見られます。"
+    },
+    {
+      "title": "ダウ平均株価 最高値を更新 FRBの利上げ観測後退で",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167731000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T06:09:57+09:00",
+      "date": "2026-07-03",
+      "body": "2日のニューヨーク株式市場ではアメリカのFRB＝連邦準備制度理事会が早期の利上げに踏み切るとの観測が後退したことで買い注文が広がり、ダウ平均株価は前日から600ドル近く値上がりして最高値を更新しました…",
+      "lang": "ja",
+      "summary": "2日のニューヨーク株式市場では、アメリカのFRB＝連邦準備制度理事会が早期の利上げに踏み切るとの観測が後退したことで、買い注文が広がり、ダウ平均株価は前日から600ドル近く値上がりして最高値を更新しました。この動きは、市場がFRBの金融政策の方向性に対して楽観的な見方を示していることを反映しています。利上げペースの鈍化や停止への期待が、投資家のリスク選好度を高め、株式市場全体を押し上げる要因となっています。"
+    },
+    {
+      "title": "ダウ平均株価 最高値を更新 FRBの利上げ観測後退で",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167731000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T06:09:57+09:00",
+      "date": "2026-07-03",
+      "body": "2日のニューヨーク株式市場ではアメリカのFRB＝連邦準備制度理事会が早期の利上げに踏み切るとの観測が後退したことで買い注文が広がり、ダウ平均株価は前日から600ドル近く値上がりして最高値を更新しました…",
+      "lang": "ja",
+      "summary": "2日のニューヨーク株式市場では、アメリカのFRB＝連邦準備制度理事会が早期の利上げに踏み切るとの観測が後退したことで、買い注文が広がり、ダウ平均株価は前日から600ドル近く値上がりして最高値を更新しました。この動きは、市場がFRBの金融政策の方向性に対して楽観的な見方を示していることを反映しています。利上げペースの鈍化や停止への期待が、投資家のリスク選好度を高め、株式市場全体を押し上げる要因となっています。"
+    },
+    {
+      "title": "アルバニア リゾート建設計画の抗議デモ拡大 首相辞任も求める",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167241000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T06:04:44+09:00",
+      "date": "2026-07-03",
+      "body": "バルカン半島の国アルバニアで、アメリカのトランプ大統領の娘の夫、クシュナー氏が関わる高級リゾートの建設計画への懸念から始まった大規模な抗議デモが1か月以上にわたって続いています。抗議デモの訴えは、政治…",
+      "lang": "ja",
+      "summary": "バルカン半島の国アルバニアでは、アメリカのトランプ大統領の娘の夫、クシュナー氏が関わる高級リゾートの建設計画への懸念から始まった大規模な抗議デモが1か月以上にわたって続いています。このデモは当初、環境や土地利用に関する懸念が中心でしたが、現在は首相の辞任を求める政治的な要求へと拡大しています。国民の不満が長期化する中で、政府の対応が注目されており、今後の政情に大きな影響を与える可能性があります。"
+    },
+    {
+      "title": "日印首脳会談で2兆円規模の投資発表 国内経済活性化の狙い",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167611000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-03T05:50:01+09:00",
+      "date": "2026-07-03",
+      "body": "インドを訪れている高市総理大臣は2日、モディ首相と会談し、日本企業による2兆円規模の投資を含め、およそ130件の企業間の協力文書を発表しました。巨大市場と見込まれるインドへの投資を促すことで、日本経済…",
+      "lang": "ja",
+      "summary": "インドを訪れている高市総理大臣は2日、モディ首相と会談し、日本企業による2兆円規模の投資を含め、およそ130件の企業間の協力文書を発表しました。これは、巨大市場と見込まれるインドへの投資を促すことで、日本経済の活性化を図る狙いがあります。両国間の経済連携を強化し、サプライチェーンの多様化や新たなビジネス機会の創出を通じて、双方の経済成長に貢献することが期待されています。"
+    },
+    {
+      "title": "日印首脳会談で2兆円規模の投資発表 国内経済活性化の狙い",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167611000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T05:50:01+09:00",
+      "date": "2026-07-03",
+      "body": "インドを訪れている高市総理大臣は2日、モディ首相と会談し、日本企業による2兆円規模の投資を含め、およそ130件の企業間の協力文書を発表しました。巨大市場と見込まれるインドへの投資を促すことで、日本経済…",
+      "lang": "ja",
+      "summary": "インドを訪れている高市総理大臣は2日、モディ首相と会談し、日本企業による2兆円規模の投資を含め、およそ130件の企業間の協力文書を発表しました。これは、巨大市場と見込まれるインドへの投資を促すことで、日本経済の活性化を図る狙いがあります。両国間の経済連携を強化し、サプライチェーンの多様化や新たなビジネス機会の創出を通じて、双方の経済成長に貢献することが期待されています。"
+    },
+    {
+      "title": "与党 皇室典範改正案審議入りを 野党 定数削減法案断念を",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167621000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-03T05:48:23+09:00",
+      "date": "2026-07-03",
+      "body": "国会の会期末まで2週間となる中、与党は皇族数の確保に向けた皇室典範改正案を優先して成立させたいとしています。これに対して野党は、衆議院議員の定数削減法案などの成立を断念することや、予算委員会の集中審議…",
+      "lang": "ja",
+      "summary": "国会の会期末まで2週間となる中、与党は皇族数の確保に向けた皇室典範改正案を優先して成立させたい考えです。これに対し野党は、衆議院議員の定数削減法案などの成立を断念することや、予算委員会の集中審議を要求しており、与野党間の攻防が激化しています。重要法案の審議を巡る対立は、会期末に向けてさらに深まることが予想され、今後の国会運営に大きな影響を与える可能性があります。"
+    },
+    {
+      "title": "ウクライナ政府 ロシア軍の攻撃 被害の深刻さを各国大使に訴え",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167671000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T05:11:30+09:00",
+      "date": "2026-07-03",
+      "body": "ウクライナ政府は、ロシア軍による大規模な攻撃で首都キーウで20人以上が死亡したことを受けて、各国の外交官などに対し、現場で被害の深刻さを訴えました。",
+      "lang": "ja",
+      "summary": "ウクライナ政府は、ロシア軍による大規模な攻撃で首都キーウにおいて20人以上が死亡したことを受け、各国の外交官などに対し、攻撃現場で被害の深刻さを訴えました。この行動は、国際社会にロシアの侵攻による人道危機の実態を直接伝え、さらなる支援とロシアへの圧力を求める狙いがあります。ウクライナは、このような外交努力を通じて、国際的な連帯を強化し、戦争の早期終結に向けた国際社会の関与を促しています。"
+    },
+    {
+      "title": "WHO クルーズ船でのハンタウイルス集団感染の収束を宣言",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167711000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T05:08:53+09:00",
+      "date": "2026-07-03",
+      "body": "WHO＝世界保健機関のテドロス事務局長は、クルーズ船で確認されたハンタウイルスの集団感染について、収束したと宣言しました。",
+      "lang": "ja",
+      "summary": "WHO＝世界保健機関のテドロス事務局長は、クルーズ船で確認されたハンタウイルスの集団感染について、収束したと宣言しました。この宣言は、感染拡大の終息と、公衆衛生上の脅威が一段落したことを意味します。WHOは、感染症の監視と対応において重要な役割を担っており、今回の収束宣言は、国際的な協力体制と迅速な対応が功を奏した結果と言えるでしょう。これにより、クルーズ船業界への影響も緩和され、今後の感染症対策の教訓となるでしょう。"
+    },
+    {
+      "title": "中国当局に拘束された香港の書店の元店長 台湾で死去",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167701000",
+      "source": "NHK 国際",
+      "category": "国際",
+      "pubDate": "2026-07-03T05:06:47+09:00",
+      "date": "2026-07-03",
+      "body": "香港で中国共産党に批判的な本を販売する書店の店長を務め、中国当局に長期間、拘束された林栄基さんが拠点を移した台湾で亡くなりました。台湾の頼清徳総統はSNSに「林さんが残した勇気は消えることはない」と投…",
+      "lang": "ja",
+      "summary": "香港で中国共産党に批判的な本を販売する書店の店長を務め、中国当局に長期間拘束された林栄基さんが、拠点を移した台湾で亡くなりました。林さんは、言論の自由を求める活動家として知られ、その死は多くの人々に衝撃を与えています。台湾の頼清徳総統はSNSに「林さんが残した勇気は消えることはない」と投稿し、その功績を称えました。彼の生涯は、民主主義と自由の重要性を改めて問いかけるものとなりました。"
+    },
+    {
+      "title": "アメリカ 6月の就業者数 前月比増加続くも市場予想を下回る",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167521000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-03T03:43:20+09:00",
+      "date": "2026-07-03",
+      "body": "円相場や株価に影響を及ぼすアメリカの雇用統計が2日公表され、6月の農業分野以外の就業者は、5月から5万7000人増加したものの市場の予想を下回りました。アメリカ経済が堅調だという見方などを背景にこのと…",
+      "lang": "ja",
+      "summary": "円相場や株価に影響を与えるアメリカの雇用統計が2日に公表されました。それによると、6月の農業分野以外の就業者数は、前の月から5万7000人増加したことが明らかになりました。しかし、これは市場が事前に見込んでいた11万3000人程度の増加を大幅に下回る結果となりました。この数字は、アメリカ経済の雇用回復ペースが鈍化している可能性を示唆しており、今後の金融政策や経済動向に影響を与えるものとして注目されています。"
+    },
+    {
+      "title": "中東情勢受け 「ナフサ」由来の石油製品など備蓄検討 業界団体",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167531000",
+      "source": "NHK 経済",
+      "category": "経済",
+      "pubDate": "2026-07-02T22:30:58+09:00",
+      "date": "2026-07-02",
+      "body": "中東情勢の悪化に伴い、石油化学製品のもとになる「ナフサ」の調達に影響が出たことから、化学メーカーでつくる石油化学工業協会は、今後の対策としてナフサ由来の石油製品などの備蓄を検討していくことになりました…",
+      "lang": "ja",
+      "summary": "中東情勢の悪化に伴い、石油化学製品の主要な原料である「ナフサ」の調達に影響が出ている状況です。これを受け、化学メーカーで構成される石油化学工業協会は、将来的な供給リスクに備えるため、ナフサ由来の石油製品などの備蓄を検討していく方針を決定しました。この対策は、サプライチェーンの安定化を図り、産業活動への影響を最小限に抑えることを目的としています。協会は、具体的な備蓄計画の策定を進めるとしています。"
+    },
+    {
+      "title": "日印首脳会談 戦略的協力関係深めることで合意 2兆円投資も",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166401000",
+      "source": "NHK 政治",
+      "category": "政治",
+      "pubDate": "2026-07-02T22:23:02+09:00",
+      "date": "2026-07-02",
+      "body": "インドを訪問中の高市総理大臣はモディ首相と会談し、「自由で開かれたインド太平洋」など、共通の目標の実現に向けて両国の戦略的協力関係を深めることで合意しました。また2兆円規模の投資を含むおよそ130件の…",
+      "lang": "ja",
+      "summary": "インドを訪問中の高市総理大臣は、本日2日にモディ首相との首脳会談に臨む予定です。この会談では、経済安全保障分野を中心に、インドとの具体的な協力関係のさらなる進展を図ることが主要な目的とされています。両国は、共同声明の発表に加え、経済安全保障とAI（人工知能）の分野における成果文書の調整も進めています。これは、日印両国が戦略的パートナーシップを強化し、多岐にわたる分野での連携を深める意向を示しています。"
+    }
+  ],
+  "medical_news": [
+    {
+      "title": "村上春樹さん 3年ぶり新作長編小説発売 書店にファン集まる",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167631000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-03T05:01:29+09:00",
+      "date": "2026-07-03",
+      "body": "世界的に高く評価されている作家、村上春樹さんの3年ぶりとなる長編小説が発売され、午前0時から都内の書店で行われた販売のイベントには熱心なファンが集まりました。",
+      "lang": "ja",
+      "summary": "世界的に高く評価されている作家、村上春樹さんの3年ぶりとなる長編小説が発売され、都内の書店では午前0時から販売イベントが開催されました。このイベントには、新作を待ち望んでいた熱心なファンが多数集まり、発売を祝いました。村上作品は、その独特の世界観と深いテーマ性で世界中の読者を魅了しており、今回の新作も大きな注目を集めています。ファンは、新たな物語に触れる喜びを分かち合い、文学界に新たな話題を提供しました。"
+    },
+    {
+      "title": "福島第一原発 核燃料デブリ 3回目の試験的取り出しへ",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015167451000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-02T21:26:44+09:00",
+      "date": "2026-07-02",
+      "body": "東京電力は、福島第一原子力発電所2号機で、ロボットアームを使った「核燃料デブリ」の試験的な取り出しに向けた作業を早ければ今月から始めると発表しました。3か月ほどかけて準備作業などを行ったあと、試験的な…",
+      "lang": "ja",
+      "summary": "東京電力は、福島第一原子力発電所2号機において、ロボットアームを用いた「核燃料デブリ」の試験的な取り出しに向けた作業を、早ければ今月から開始すると発表しました。約3か月間の準備作業を経て、その後、実際の試験的取り出しが行われる予定です。これは、廃炉作業における重要な一歩であり、デブリの性状把握と取り出し技術の確立を目指すものです。安全確保を最優先に進められます。"
+    },
+    {
+      "title": "世界で最も細い直径約4ミリの胃カメラ開発 大阪大発ベンチャー",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166561000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-02T05:06:05+09:00",
+      "date": "2026-07-02",
+      "body": "胃がんの検診に使う胃カメラの構造をシンプルにすることで、世界で最も細い直径4ミリほどのモデルを開発したと大阪大学発のベンチャー企業が発表しました。再来年にも国に承認申請を行うとしています。",
+      "lang": "ja",
+      "summary": "大阪大学発のベンチャー企業が、胃がん検診に用いられる胃カメラの構造を簡素化することで、世界で最も細いとされる直径約4ミリのモデルを開発したと発表しました。この画期的な開発により、患者の負担が大幅に軽減されることが期待されます。同社は、再来年にもこの新型胃カメラの国への承認申請を行う計画であり、実用化されれば、より多くの人々が苦痛なく胃がん検診を受けられるようになる可能性があります。"
+    },
+    {
+      "title": "将棋「棋聖戦」 藤井聡太六冠 3連勝でタイトル防衛 7連覇",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166231000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T21:45:52+09:00",
+      "date": "2026-07-01",
+      "body": "将棋の八大タイトルの1つ、「棋聖戦」五番勝負の第3局が7月1日に静岡県沼津市で行われ、藤井聡太六冠が、挑戦者の服部慎一郎七段に勝ってタイトルを防衛し、7連覇を果たしました。",
+      "lang": "ja",
+      "summary": "将棋の八大タイトルの一つである「棋聖戦」五番勝負の第3局が、7月1日に静岡県沼津市で開催されました。この対局で、藤井聡太六冠は挑戦者の服部慎一郎七段に勝利し、3連勝で棋聖のタイトルを防衛しました。これにより、藤井六冠は棋聖戦での7連覇を達成し、その圧倒的な強さを示しました。この偉業は、将棋界における藤井六冠の地位をさらに確固たるものにし、今後の活躍にも大きな期待が寄せられています。"
+    },
+    {
+      "title": "浜岡原発データ不正問題 中部電力が規制委指摘後もデータ操作",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015166151000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T21:41:03+09:00",
+      "date": "2026-07-01",
+      "body": "中部電力が、静岡県にある浜岡原子力発電所の審査で不正なデータ処理を行っていた問題で、原子力規制委員会から説明を求められた去年5月以降もデータの操作を行っていたことが分かりました。規制委員会は、中部電力…",
+      "lang": "ja",
+      "summary": "中部電力が静岡県の浜岡原子力発電所の審査において不正なデータ処理を行っていた問題で、原子力規制委員会が説明を求めた昨年5月以降も、データの操作を継続していたことが判明しました。この事態は、中部電力のコンプライアンス体制の不備を改めて浮き彫りにし、原子力施設の安全性に対する信頼を揺るがすものです。規制委員会は、この問題に対し厳正な対応を求めるとともに、中部電力の組織的な改善を強く促す方針です。"
+    },
+    {
+      "title": "ミュトス提供再開 “情報収集進める”国内金融機関",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165431000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-07-01T13:58:53+09:00",
+      "date": "2026-07-01",
+      "body": "アメリカのAI新興企業「アンソロピック」は6月30日、最新のAIモデルの「クロード・ミュトス5」や、同等の性能を持つ「フェイブル5」について、アメリカ政府の輸出規制が解除されたことを受けて、提供を再開…",
+      "lang": "ja",
+      "summary": "アメリカのAI新興企業「アンソロピック」は6月30日、最新のAIモデル「クロード・ミュトス5」および同等の性能を持つ「フェイブル5」の提供を再開しました。これは、アメリカ政府による輸出規制が解除されたことを受けたものです。この高性能AIモデルの提供再開に対し、国内の金融機関は、その機能や潜在的な活用可能性について情報収集を進めており、今後の業務への導入を検討する動きが見られます。"
+    },
+    {
+      "title": "「キャプテン翼」高橋陽一さん“4年後は翼くんの夢W杯優勝を”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165111000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-30T21:16:09+09:00",
+      "date": "2026-06-30",
+      "body": "サッカーワールドカップ北中米大会で日本が惜しくもブラジルに敗れたことについて、世界的な人気を誇るサッカー漫画「キャプテン翼」の作者、高橋陽一さんは「サッカー王国ブラジルとも互角に戦えるんだと示す試合だ…",
+      "lang": "ja",
+      "summary": "サッカーワールドカップ北中米大会で、日本が惜しくもブラジルに敗れたことについて、世界的な人気を誇るサッカー漫画「キャプテン翼」の作者である高橋陽一さんがコメントしました。高橋さんは、この試合を「サッカー王国ブラジルとも互角に戦えるんだと示す試合だ」と評価し、日本代表の健闘を称えました。そして、4年後のワールドカップでは、主人公の翼くんの夢である優勝を期待する言葉を述べました。"
+    },
+    {
+      "title": "落語協会 新会長に林家正蔵さん就任 “若手の育成などに対処”",
+      "url": "https://news.web.nhk/newsweb/na/na-k10015165211000",
+      "source": "NHK 科学・医療",
+      "category": "科学・医療",
+      "pubDate": "2026-06-30T20:58:48+09:00",
+      "date": "2026-06-30",
+      "body": "人気落語家の林家正蔵さんが東京の落語家などで作る団体「落語協会」の新しい会長に就任し、「若手の育成などの問題に一つ一つ対処していきたい」などと抱負を述べました。",
+      "lang": "ja",
+      "summary": "人気落語家の林家正蔵さんが、東京の落語家などで作る団体「落語協会」の新しい会長に就任しました。林家正蔵さんは、会長就任にあたり、「若手の育成などの問題に一つ一つ対処していきたい」と抱負を述べました。落語協会は、落語の普及と発展、そして落語家の活動を支援する重要な団体であり、新会長として林家正蔵さんがその舵取りを担うことになります。"
+    }
+  ],
+  "papers_mgmt": [
+    {
+      "title": "Urbanicity, Neighborhood Conditions, and Dementia Mortality.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42390865/",
+      "source": "JAMA network open",
+      "authors": "Chen S et al.",
+      "pubDate": "2026-07-01",
+      "date": "2026-07-01",
+      "body": "IMPORTANCE: As populations age and cities become more densely populated, urbanicity is transforming neighborhood environments that influence healthy aging. However, how dementia mortality varies across the urbanicity gradient and how neighborhood conditions contribute to this pattern remain unknown. OBJECTIVE: To examine dose-response associations of urbanicity with dementia mortality, quantify the extent to which neighborhood socioeconomic and environmental factors attenuate this pattern, and estimate potential deaths averted under feasible improvements in modifiable conditions. DESIGN, SETTING, AND PARTICIPANTS: This prospective cohort study used person-level mortality data linked to the…",
+      "lang": "en",
+      "pmid": "42390865",
+      "topic": "医療経営/公衆衛生",
+      "summary": "本研究は、都市化の度合いと認知症死亡率の関連性、および近隣の社会経済的・環境的要因がこのパターンにどう影響するかという未解明な問いに取り組んだ。目的は、都市化と認知症死亡率の用量反応関係を検討し、近隣要因がこの関連性をどの程度緩和するかを定量化し、改善可能な条件の下で回避できる死亡数を推定することである。方法として、個人レベルの死亡データを用いた前向きコホート研究が実施された。結果は本文に詳細があるが、都市環境の改善が認知症死亡率の低減に寄与する可能性を示唆し、健康的な高齢化を促進するための都市計画や政策立案に重要な含意を持つ。",
+      "application": "都市化と地域環境が認知症死亡率に影響し、特に社会経済的・環境的要因がそのパターンを減衰させるとされている。これは、在宅医療やリハビリテーションにおいて、患者の居住環境が健康寿命や認知症リスクに大きく関わることを示唆する。現場では、初診時や訪問時に患者の居住地域の特性（緑地の有無、交通量、近隣交流の機会など）を把握するチェックリストを導入し、それを基に個別化したケアプランや地域資源の活用を提案する運用ルールを設けることで、予防的介入を強化できる。"
+    },
+    {
+      "title": "Limbic System Microstructure in Neonates With Antenatal Opioid Exposure.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42390863/",
+      "source": "JAMA network open",
+      "authors": "Mora Álvarez MG et al.",
+      "pubDate": "2026-07-01",
+      "date": "2026-07-01",
+      "body": "IMPORTANCE: There is limited research examining the association of antenatal opioid exposure with neonatal brain microstructure, particularly within the limbic system, which contains high concentrations of opioid receptors. Prior studies investigating microstructural changes in major white matter tracts were underpowered and lacked matched controls. OBJECTIVE: To compare limbic system microstructure between neonates who were opioid exposed and unexposed. DESIGN, SETTING, AND PARTICIPANTS: This case-control study assessed diffusion tensor imaging of neonates enrolled in the Outcomes of Babies With Opioid Exposure (OBOE) study and scanned between August 2020 and December 2023 at 4 US sites. P…",
+      "lang": "en",
+      "pmid": "42390863",
+      "topic": "医療経営/公衆衛生",
+      "summary": "本研究は、出生前のオピオイド曝露が新生児の脳微細構造、特にオピオイド受容体が多い辺縁系に与える影響に関する限定的な研究状況に対応する。先行研究の検出力不足と対照群の欠如を克服するため、オピオイド曝露新生児と非曝露新生児の辺縁系微細構造を比較することを目的とした。方法として、OBOE研究に登録された新生児を対象に、2020年8月から2023年12月にかけて米国4施設で拡散テンソル画像法を用いた症例対照研究を実施した。結果は本文に詳細があるが、出生前オピオイド曝露が新生児の脳発達に与える影響を解明し、早期介入戦略の開発に重要な含意を持つ。",
+      "application": "新生児の胎内オピオイド曝露が脳の辺縁系微細構造に影響を与えるという研究は、特定の薬物曝露が重要な身体システムに長期的な影響を及ぼす可能性を示唆しているとされている。整形外科やリハビリ部門では、成人の慢性疼痛管理において、患者の過去の薬物使用歴や精神状態（辺縁系機能に関連）をより詳細に把握する問診項目を追加することが考えられる。例えば、問診票に「過去の鎮痛剤使用期間」や「精神的なストレス状況」に関する項目を設け、多角的なアプローチを検討する朝礼の問いかけを行う。"
+    }
+  ],
+  "papers_med": [
+    {
+      "title": "Decoding PARP roles in breast cancer therapy resistance.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42390770/",
+      "source": "Molecular biology reports",
+      "authors": "Abohassan M et al.",
+      "pubDate": "2026-07-02",
+      "date": "2026-07-02",
+      "body": "Poly(ADP-ribose) polymerase (PARP) inhibitors have made significant advances in the treatment of breast cancer, especially in tumors with homologous recombination deficiency such as BRCA1/2-mutated cancers. Nevertheless, intrinsic and acquired resistance restrict their clinical usefulness in the long term. This review synthesizes existing evidence about the biological roles of PARPs and the molecular aspects of resistance to PARP inhibition in breast cancer. The major mechanisms of resistance are restoration of homologous recombination, loss of 53BP1, stabilization of replication forks, increased drug efflux, loss of PARG and epigenetic changes. We also discuss the interaction of PARP signa…",
+      "lang": "en",
+      "pmid": "42390770",
+      "topic": "リハ/薬理/神経",
+      "summary": "PARP阻害剤は、BRCA1/2変異がんなど相同組換え欠損を伴う乳がん治療に大きな進歩をもたらしたが、内在性および獲得性抵抗性が長期的な臨床有用性を制限している。本レビューは、PARPの生物学的役割と、乳がんにおけるPARP阻害に対する抵抗性の分子メカニズムに関する既存の知見を統合する。主要な抵抗性メカニズムとして、相同組換えの回復、53BP1の喪失、複製フォークの安定化、薬剤排出の増加、PARGの喪失、エピジェネティックな変化が挙げられる。また、PARPシグナル伝達の相互作用についても議論し、今後の治療戦略開発に貢献する。"
+    },
+    {
+      "title": "Nrf2 Activators in Parkinson's Disease: Modulating Mitophagy and Regulating Cuproptosis.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42390723/",
+      "source": "Molecular neurobiology",
+      "authors": "Xu J et al.",
+      "pubDate": "2026-07-02",
+      "date": "2026-07-02",
+      "body": "Parkinson's disease (PD), one of the most prevalent age-related neurodegenerative disorders, is neuropathologically defined by the progressive degeneration and massive loss of dopaminergic neurons within the substantia nigra pars compacta of the midbrain. Multiple pathological cascades, which include excessive oxidative stress, persistent neuroinflammation, aberrant cuproptosis, and mitochondrial dysfunction, converge to drive PD pathogenesis and aggravate its progression. Nuclear factor erythroid 2-related factor 2 (Nrf2), a pivotal transcription factor governing antioxidant defense and cellular stress responses, is markedly downregulated and functionally compromised within the pathologica…",
+      "lang": "en",
+      "pmid": "42390723",
+      "topic": "リハ/薬理/神経",
+      "summary": "パーキンソン病（PD）は、中脳黒質緻密部のドーパミン作動性ニューロンの進行性変性と喪失を特徴とする神経変性疾患である。過剰な酸化ストレス、持続的な神経炎症、異常なクプロプトーシス、ミトコンドリア機能不全など、複数の病理学的経路がPDの病態形成と進行を悪化させる。抗酸化防御と細胞ストレス応答を制御する重要な転写因子であるNrf2は、PDの病理学的状況下で著しく下方制御され、機能が損なわれている。本研究は、Nrf2活性化因子がPDにおいてミトファジーを調節し、クプロプトーシスを制御する可能性を探ることで、新たな治療戦略開発への含意を提供する。"
+    },
+    {
+      "title": "Ficus virens in neurotherapeutics: bridging ethnomedicinal evidence with Nrf2/Keap1 and neuroinflammatory mechanisms.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42390689/",
+      "source": "Molecular biology reports",
+      "authors": "Chauhan D et al.",
+      "pubDate": "2026-07-02",
+      "date": "2026-07-02",
+      "body": "Neurodegenerative diseases include Alzheimer's and Parkinson's disease which are progressive loss of neurons due to oxidative stress, mitochondrial dysfunction and long-term neuroinflammation. The approach of attacking these intertwined pathological processes has emerged as a major approach in identifying effective neurotherapeutics. In that regard, the use of ethnomedicine has immense potential. Ficus virens is a medicinal plant that is traditionally used and has drawn attention because of its wide range of pharmacological activities and high phytochemical composition. This review is an overall summary of botanical properties, ethnomedicinal properties, phytochemical composition and pharma…",
+      "lang": "en",
+      "pmid": "42390689",
+      "topic": "リハ/薬理/神経",
+      "summary": "神経変性疾患は、酸化ストレス、ミトコンドリア機能不全、長期的な神経炎症によるニューロン喪失を伴う。これらの病理学的プロセスを標的とするアプローチが、効果的な神経治療薬の特定に重要視されている。民族薬理学は大きな可能性を秘めており、伝統的に使用される薬用植物Ficus virensは、その幅広い薬理活性と豊富な植物化学組成で注目される。本レビューは、Ficus virensの植物学的・民族薬理学的特性、植物化学組成、薬理学的特性を包括的に要約する。特に、Nrf2/Keap1経路と神経炎症メカニズムとの関連性を探り、神経治療薬としての可能性を評価する。"
+    }
+  ],
+  "arxiv": [
+    {
+      "title": "Measuring the Gap Between Human and LLM Research Ideas",
+      "url": "https://arxiv.org/abs/2607.01233v1",
+      "source": "arXiv cs.CL",
+      "authors": "Ziyu Chen et al.",
+      "pubDate": "2026-07-01T17:59:56+00:00",
+      "date": "2026-07-01",
+      "body": "LLMs are increasingly used to brainstorm research ideas, but existing evaluations mostly judge individual ideas by novelty, feasibility, or expert preference. We instead ask: how far are current LLM-generated ideas from human researchers? To characterize this gap, we build a large-scale evaluation framework for ideation from high-quality human research papers. For each paper, we reverse-engineer a small set of closely related prior works that likely inspired its core idea. LLMs are then prompted to generate a new idea from the set of paper titles and summaries. We introduce a two-axis research-taste taxonomy to profile each idea by its opportunity pattern and research paradigm, and use it t…",
+      "lang": "en",
+      "topic": "cs.CL",
+      "summary": "研究の問い: 大規模言語モデル（LLM）が研究アイデアのブレインストーミングに利用される中、既存の評価が個々のアイデアの新規性や実現可能性に偏るため、LLM生成アイデアと人間研究者のアイデアとの乖離を定量的に測定する。方法: 高品質な人間による研究論文からアイデア生成の大規模評価フレームワークを構築。各論文について、その核心アイデアの着想源となった先行研究を逆算し、LLMに論文タイトルと要約から新しいアイデアを生成させた。機会パターンと研究パラダイムに基づく二軸の研究テイスト分類法を導入し、各アイデアをプロファイリングした。結果: 抽象には具体的な結果の記述がないが、LLM生成アイデアと人間研究者のアイデアの乖離を特徴づけるための評価手法が確立された。含意: 本研究は、LLMのアイデア生成能力の限界と、人間との創造性のギャップを理解するための新たな視点を提供し、より人間らしい研究アイデアを生成するLLMの開発に貢献する。"
+    },
+    {
+      "title": "Is One Layer Enough? Training A Single Transformer Layer Can Match Full-Parameter RL Training",
+      "url": "https://arxiv.org/abs/2607.01232v1",
+      "source": "arXiv cs.LG",
+      "authors": "Zijian Zhang et al.",
+      "pubDate": "2026-07-01T17:59:54+00:00",
+      "date": "2026-07-01",
+      "body": "Reinforcement learning (RL) has become a central component of post-training large language models (LLMs), yet little is understood about how RL adaptation is distributed across transformer layers. Existing approaches typically update all model parameters uniformly, implicitly assuming that every layer contributes similarly to the gains obtained during RL post-training. In this work, we challenge this assumption through a systematic layer-wise study of RL training. Surprisingly, we find that training a single transformer layer can recover most of the gains achieved by full-parameter RL training, and in some cases even surpass it. To quantify this phenomenon, we introduce the quantity layer c…",
+      "lang": "en",
+      "topic": "cs.LG",
+      "summary": "研究の問い: 大規模言語モデル（LLM）の強化学習（RL）後学習において、RL適応がトランスフォーマー層間でどのように分散されるか不明なため、全パラメータ更新が各層に均等に貢献するという既存の仮定に異議を唱え、層ごとのRL訓練の効果を体系的に調査する。方法: RL訓練の層ごとの体系的な研究を実施。単一のトランスフォーマー層のみを訓練した場合と、全パラメータを訓練した場合の性能を比較した。この現象を定量化するため、「層貢献度」という概念を導入した。結果: 驚くべきことに、単一のトランスフォーマー層を訓練するだけで、全パラメータRL訓練で得られる性能向上の大部分を回復でき、場合によってはそれを上回ることも判明した。含意: 本研究は、LLMのRL訓練における効率的なパラメータ更新戦略の可能性を示唆し、計算資源の削減やモデルの最適化に貢献する。"
+    },
+    {
+      "title": "Language-Critique Imitation Learning from Suboptimal Demonstrations",
+      "url": "https://arxiv.org/abs/2607.01225v1",
+      "source": "arXiv cs.LG",
+      "authors": "Chih-Han Yang et al.",
+      "pubDate": "2026-07-01T17:57:22+00:00",
+      "date": "2026-07-01",
+      "body": "Prior work on imitation learning from suboptimal demonstrations typically relies on compressed supervision signals such as confidence estimates, discriminator scores, or importance weights. These scalar signals are inherently limited, as they cannot explicitly express intermediate reasoning about task progress, failure modes, or corrective actions. We propose a language-critique framework for imitation learning from suboptimal demonstrations that instead leverages natural language as a structured supervision signal, avoiding the collapse of expressive feedback into scalars. Our method first constructs language labels from demonstrations that explicitly describe current progress, identify su…",
+      "lang": "en",
+      "topic": "cs.LG",
+      "summary": "研究の問い: 不完全なデモンストレーションからの模倣学習において、既存手法が信頼度や識別器スコアなどの圧縮されたスカラー信号に依存し、タスク進行、失敗モード、修正行動に関する中間推論を明示的に表現できないため、より表現力豊かなフィードバックを活用する手法を開発する。方法: 表現力豊かなフィードバックがスカラーに集約されるのを避け、自然言語を構造化された教師信号として利用する言語批評フレームワークを提案。本手法は、まずデモンストレーションから現在の進行状況、失敗の原因、修正行動を明示的に記述する言語ラベルを構築する。結果: 抽象には具体的な結果の記述がないが、言語批評フレームワークが不完全なデモンストレーションからの模倣学習において、より詳細なフィードバックを提供できる可能性が示唆された。含意: 本研究は、不完全なデモンストレーションからの模倣学習の効率と頑健性を向上させ、より複雑なタスクにおけるAIエージェントの学習能力を高める新たなアプローチを提供する。"
+    }
+  ],
+  "tech": [
+    {
+      "title": "“開かずの基幹システム”、450人月→実質2カ月で解読　創業100年のカクヤス、生成AIで挑む「転生」",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/03/news050.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-03T06:45:00+09:00",
+      "date": "2026-07-03",
+      "body": "設計書はなく、ソースコードの一部も紛失。30年動き続けた基幹システムは、誰も中身の分からないブラックボックスと化していた。創業100年の酒類卸カクヤスは、これを生成AIでどう解き明かしたのか。親会社ひとまいるの担当者が「AWS Summit Japan 2026」で語った。",
+      "lang": "ja",
+      "summary": "創業100年の酒類卸カクヤスは、設計書がなくソースコードの一部も紛失し、30年間稼働し続けた「開かずの基幹システム」を、生成AIを活用して解読しました。通常450人月かかるとされる作業を実質2カ月で完了させ、ブラックボックスと化したシステムの「転生」に成功。親会社ひとまいるの担当者が「AWS Summit Japan 2026」でその詳細を語り、生成AIがレガシーシステムの課題解決に貢献する可能性を示しました。"
+    },
+    {
+      "title": "Microsoft、AI導入支援組織「Microsoft Frontier Company」設立　6000人体制で顧客企業を支援",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/03/news067.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-03T06:37:00+09:00",
+      "date": "2026-07-03",
+      "body": "Microsoftは、顧客企業にAIエンジニアを常駐させて導入を支援する新組織「Microsoft Frontier Company」の設立を発表した。投資額は25億ドルで、約6000人規模の体制とする。同様のAI導入支援を巡っては、OpenAIやAmazon傘下のAWSも専門組織の新設を発表しており、顧客獲得競争が激化している。",
+      "lang": "ja",
+      "summary": "Microsoftは、顧客企業へのAI導入を支援するため、新組織「Microsoft Frontier Company」の設立を発表しました。この組織は、約6000人規模のAIエンジニアを顧客企業に常駐させ、導入をサポートするもので、25億ドルを投資します。同様のAI導入支援組織はOpenAIやAmazon傘下のAWSも新設しており、AI市場における顧客獲得競争が激化しています。Microsoftは、この取り組みを通じて、AI技術の普及と企業変革を加速させる狙いです。"
+    },
+    {
+      "title": "LINEに「プレミアムブロック」登場　相手の友だち一覧から自分を“そっと消せる”　今秋から有料提供へ",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/02/news110.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-02T19:39:00+09:00",
+      "date": "2026-07-02",
+      "body": "",
+      "lang": "ja",
+      "summary": "コミュニケーションアプリ「LINE」は、今秋から新たな有料機能の提供を開始します。その目玉となるのは、相手の友だち一覧から自分を消すことができる特別なブロック機能です。これにより、よりプライバシーを保護したいユーザーのニーズに応えます。さらに、メッセージの予約送信機能や通話録音機能も追加される予定で、ユーザーの利便性が向上すると期待されています。これらの新機能は、LINEの利用体験をさらに豊かにし、多様なニーズに対応することを目指しています。"
+    },
+    {
+      "title": "日本生命、スペースX投資で莫大利益は本当か　総代会で質疑白熱　「未公開株」に積極姿勢",
+      "url": "https://www.itmedia.co.jp/news/articles/2607/02/news106.html",
+      "source": "ITmedia NEWS",
+      "pubDate": "2026-07-02T18:38:00+09:00",
+      "date": "2026-07-02",
+      "body": "日本生命保険が、株主総会にあたる定時総代会を大阪市内で開催した。社員（保険契約者）代表の総代からは、同社が話題の米Space Xに投資していたとの一部報道について質問があった。同社側は運用の個別銘柄については明言を避けたが、「海外のベンチャー（新興企業）投資は、長期運用という本社の特性が生きる資産だ」とし、今後も未公開株を含めた投資に注力する考えを示した。",
+      "lang": "ja",
+      "summary": "日本生命保険の定時総代会で、米SpaceXへの投資による莫大な利益に関する報道について質問が集中しました。同社は個別銘柄への言及は避けつつも、「海外のベンチャー投資は、長期運用という日本生命の特性を活かせる資産である」と説明しました。今後も未公開株を含むベンチャー投資に積極的に注力していく方針を示し、新たな成長機会を追求する姿勢を強調しました。この方針は、保険契約者の資産運用戦略に大きな影響を与える可能性があります。"
+    }
+  ],
+  "wiki": [
+    {
+      "title": "2013: President of Egypt Mohamed Morsi is removed from office by the military after fo",
+      "url": "https://en.wikipedia.org/wiki/President_of_Egypt",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "President of Egypt Mohamed Morsi is removed from office by the military after four days of protests all over the country calling for his resignation, to which he did not respond. The president of the Supreme Constitutional Court of Egypt, Adly Mansour, is declared acting president until further elections are held.  —  The president of the Arab Republic of Egypt is the head of state of Egypt. Under the various iterations of the Constitution of Egypt following the Egyptian revolution of 1952, the…",
+      "lang": "en",
+      "year": 2013,
+      "summary": "2013年、エジプトでは、辞任を求める全国的な抗議活動が4日間続いたにもかかわらず、これに応じなかった当時の大統領モハメド・モルシ（エジプトの元大統領）が軍によって解任されました。その後、最高憲法裁判所長官のアドリ・マンスール（最高憲法裁判所長官）が、次期選挙が実施されるまでの暫定大統領に就任しました。この出来事は、エジプトの政治情勢に大きな転換点をもたらしました。"
+    },
+    {
+      "title": "2006: The Valencia Metro derailment kills 41 people.",
+      "url": "https://en.wikipedia.org/wiki/Valencia_Metro_derailment",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "The Valencia Metro derailment kills 41 people.  —  The Valencia Metro derailment occurred in Valencia, Spain's third largest city, on 3 July 2006 at 1 p.m. CEST between Jesús and Plaça d'Espanya stations on the Line 1 of the Metrovalencia mass transit system. At least 43 people were killed and more than ten were seriously injured.",
+      "lang": "en",
+      "year": 2006,
+      "summary": "2006年7月3日、スペイン第三の都市であるバレンシア（スペインの都市）で、バレンシア地下鉄の脱線事故が発生しました。この事故は、メトロバレンシアの1号線、ヘスス駅とプラサ・デ・エスパーニャ駅の間で発生し、少なくとも41人が死亡、10人以上が重傷を負いました。この悲劇は、スペイン国内に大きな衝撃を与え、公共交通機関の安全対策について再考を促すきっかけとなりました。"
+    },
+    {
+      "title": "1996: British Prime Minister John Major announced the Stone of Scone would be returned",
+      "url": "https://en.wikipedia.org/wiki/John_Major",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "British Prime Minister John Major announced the Stone of Scone would be returned to Scotland.  —  Sir John Major is a British politician who served as Prime Minister of the United Kingdom and Leader of the Conservative Party from 1990 to 1997. He previously held various Cabinet positions under Margaret Thatcher. Major was the Member of Parliament (MP) for Huntingdon, formerly Huntingdonshire, from 1979 to 2001. Since stepping down, Major has focused on writing and his business, sporting, and ch…",
+      "lang": "en",
+      "year": 1996,
+      "summary": "1996年、当時のイギリス首相ジョン・メージャー（イギリスの首相）は、スコットランドの象徴的な遺物である「スクーンの石」（スコットランド王の戴冠式に使われた石）をスコットランドに返還すると発表しました。この石は、長らくイングランドに保管されていましたが、この決定により、スコットランドの歴史的・文化的アイデンティティの尊重が示されました。返還は、スコットランドの自治権拡大に向けた動きの一環とも見なされました。"
+    },
+    {
+      "title": "1988: United States Navy warship USS Vincennes shoots down Iran Air Flight 655 over th",
+      "url": "https://en.wikipedia.org/wiki/United_States_Navy",
+      "source": "Wikipedia (Today in History)",
+      "date": "2026-07-03",
+      "body": "United States Navy warship USS Vincennes shoots down Iran Air Flight 655 over the Persian Gulf, killing all 290 people aboard.  —  The United States Navy (USN) is the maritime service branch of the United States Armed Forces and is designated as the navy of the United States in the Constitution. With 290 combat vessels, it is the world's second largest navy, behind the People's Liberation Army Navy, and by far the largest by displacement, at 4.5 million tons in 2021. It has the world's largest…",
+      "lang": "en",
+      "year": 1988,
+      "summary": "1988年、アメリカ海軍の軍艦USSヴィンセンス（アメリカ海軍の軍艦）が、ペルシャ湾上空でイラン航空655便（イランの民間航空機）を誤って撃墜しました。この悲劇により、乗員乗客290人全員が死亡しました。アメリカ側は、民間機を攻撃機と誤認したと主張しましたが、この事件は国際社会に大きな衝撃を与え、両国間の緊張を一層高める結果となりました。"
+    }
+  ]
+}

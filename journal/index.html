@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journal — 日々の手記と実験室 / BRIDGE</title>
+<meta name="description" content="BRIDGEのJournal。noteの記事、朝の手帖、仕事日記、診断やゲームのような実験的な制作物をまとめています。完成した道具になる前の「途中」も、そのまま公開。">
+<meta property="og:title" content="Journal — 日々の手記と実験室 / BRIDGE">
+<meta property="og:description" content="開発の過程・現場で気づいたこと・実験的な制作物。プロダクトの背景は、ここを読むと一番伝わります。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/journal/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/subpage.css">
+<link rel="stylesheet" href="../shared/hub.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8553D'/%3E%3Ctext x='33' y='46' font-family='Georgia,serif' font-size='40' font-style='italic' font-weight='700' text-anchor='middle' fill='%23FAFAF7'%3EB%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+
+<nav class="nav" id="nav">
+  <a href="../index.html" class="nav-logo">BRIDGE<span class="dot">.</span></a>
+  <div class="nav-links">
+    <a href="../products/index.html">Tools</a>
+    <a href="../starter-kits/index.html">Kits</a>
+    <a href="./index.html" class="on" aria-current="page">Journal</a>
+    <a href="../about/index.html">Founder</a>
+    <a href="../index.html#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-mark" aria-hidden="true" data-plx="0.08">Journal</div>
+  <div class="hero-vertical" aria-hidden="true">途中のものも、そのまま。</div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow" data-reveal>Journal / Lab</div>
+    <h1 class="hero-h" data-reveal><span class="nowrap">日々の手記と、</span><span class="em nowrap">実験室。</span></h1>
+    <p class="hero-sub" data-reveal>
+      完成した道具は Tools に。ここには、note の記事・朝の手帖・仕事日記と、診断やゲームのような実験的な制作物をまとめています。道具になる前の「途中」も、そのまま公開しています。
+    </p>
+    <div class="hero-meta" data-reveal>
+      <span>Notes</span>
+      <span>Daily Logs</span>
+      <span>Experiments</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NOTES ============ -->
+<section id="notes">
+  <div class="s-inner">
+    <div class="s-num-ghost" aria-hidden="true" data-plx="0.06">01</div>
+    <div class="s-head">
+      <div class="eyebrow kicker" data-reveal>01 — Notes</div>
+      <h2 data-reveal><span class="nowrap">日々の手記、</span><span class="em nowrap">Note に。</span></h2>
+      <p data-reveal>開発の過程・現場で気づいたこと・思考の軌跡を、note に書き残しています。プロダクトの背景は、ここを読むと一番伝わります。</p>
+    </div>
+    <!-- フォールバック: feed.json が取得できない時の表示。JS で上書きされる -->
+    <div class="notes-grid" id="notesGrid">
+      <a class="note-card" href="https://note.com/prime_duck4944" target="_blank" data-reveal>
+        <div class="note-card-meta">
+          <span>2026-04-26</span>
+          <span class="note-tag">プロダクト</span>
+        </div>
+        <h3 class="note-card-h">MedBoardを作った理由 — 外来クリニックの数字を「金額」ではなく「流れ」で見るDB</h3>
+        <p class="note-card-excerpt">外来クリニックの経営は、月次の売上だけ見ていては異変に気づけない。患者の「流れ」をシンプルな6項目で記録するだけで、数字管理が始まる、という話。</p>
+        <span class="note-card-link">続きを読む →</span>
+      </a>
+      <a class="note-card" href="https://note.com/prime_duck4944" target="_blank" data-reveal data-reveal-delay="1">
+        <div class="note-card-meta">
+          <span>2026-04-20</span>
+          <span class="note-tag">プロダクト</span>
+        </div>
+        <h3 class="note-card-h">RehaBoardを作った理由 — リハ部門の「数字が見えない」問題</h3>
+        <p class="note-card-excerpt">総単位数だけでは、新患→2回目→継続の流れは見えない。「数字で詰めない、数字で対話する」運用を、軽い道具で実現したい。リハ運営に関わってきた立場からの言語化。</p>
+        <span class="note-card-link">続きを読む →</span>
+      </a>
+      <a class="note-card" href="https://note.com/prime_duck4944" target="_blank" data-reveal data-reveal-delay="2">
+        <div class="note-card-meta">
+          <span>2026-04-18</span>
+          <span class="note-tag">開発記</span>
+        </div>
+        <h3 class="note-card-h">理学療法士が、AIで医療現場の業務ツールを3日で6本作った話</h3>
+        <p class="note-card-excerpt">PTがコードを書く時代の実践録。臨床経験 × AIで、現場の「面倒くさい」を3日で6つ解いた具体的な軌跡。BRIDGEの出発点になった日々の記録。</p>
+        <span class="note-card-link">続きを読む →</span>
+      </a>
+    </div>
+    <div class="notes-foot" data-reveal>
+      <a href="https://note.com/prime_duck4944" target="_blank" class="notes-cta">Note ですべての記事を読む →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 読み物・記録 ============ -->
+<section class="alt" id="daily">
+  <div class="s-inner">
+    <div class="s-num-ghost" aria-hidden="true" data-plx="0.06">02</div>
+    <div class="s-head">
+      <div class="eyebrow kicker" data-reveal>02 — Daily</div>
+      <h2 data-reveal><span class="nowrap">毎日の読み物と、</span><span class="em nowrap">記録。</span></h2>
+      <p data-reveal>自分のために毎日更新している、内製の読み物とログ。BRIDGEの「日々」は、だいたいここに残ります。</p>
+    </div>
+    <div class="products-grid">
+      <a class="product-card no-thumb" href="../morning/index.html" data-reveal>
+        <div class="product-card-num">DAILY 01</div>
+        <div class="product-card-name">Morning<span class="jp">朝の手帖</span></div>
+        <div class="product-card-tagline">政治経済・医療政策・論文(医療経営/リハ/AI)・テック・今日のできごとを毎朝まとめて読む、BRIDGE 内製のパーソナルダッシュボード。</div>
+        <div class="product-card-tags"><span>毎日更新</span><span>内製ダッシュボード</span></div>
+        <span class="product-card-link">読んでみる</span>
+      </a>
+      <a class="product-card no-thumb" href="../worklog/index.html" data-reveal data-reveal-delay="1">
+        <div class="product-card-num">DAILY 02</div>
+        <div class="product-card-name">Worklog<span class="jp">仕事日記(CxO Roadmap Log)</span></div>
+        <div class="product-card-tagline">日々の現場仕事・数字成果・組織改善を、将来のCxO候補としての実績ログに変換する個人用アプリ。</div>
+        <div class="product-card-tags"><span>実績ログ</span><span>個人用</span></div>
+        <span class="product-card-link">のぞいてみる</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 実験室 ============ -->
+<section id="lab">
+  <div class="s-inner">
+    <div class="s-num-ghost" aria-hidden="true" data-plx="0.06">03</div>
+    <div class="s-head">
+      <div class="eyebrow kicker" data-reveal>03 — Lab</div>
+      <h2 data-reveal><span class="nowrap">実験室。</span><span class="em nowrap">遊びながら、試す。</span></h2>
+      <p data-reveal>診断やゲームのような、登録不要・数分で触れる実験的なコンテンツ。ここから次の道具が生まれることもあります。</p>
+    </div>
+    <div class="products-grid">
+      <a class="product-card" href="../moyamoya/index.html" target="_blank" data-reveal>
+        <div class="product-card-thumb"><img src="../images/products/moyamoya.png" alt="職場モヤモヤ診断 トップ画面" loading="lazy"></div>
+        <div class="product-card-body">
+          <div class="product-card-num">LAB 01</div>
+          <div class="product-card-name">Moyamoya Check<span class="jp">職場モヤモヤ診断</span></div>
+          <div class="product-card-tagline">そのしんどさ、どこから来ている? 職場の“なんとなくしんどい”を10問で言語化する診断。</div>
+          <div class="product-card-tags"><span>10問・約3分</span><span>6タイプ診断</span><span>登録不要</span></div>
+          <span class="product-card-link">診断してみる</span>
+        </div>
+      </a>
+      <a class="product-card no-thumb" href="../pmi-quest/index.html" target="_blank" data-reveal data-reveal-delay="1">
+        <div class="product-card-num">LAB 02</div>
+        <div class="product-card-name">PMI Quest<span class="jp">クリニックPMIクエスト</span></div>
+        <div class="product-card-tagline">承継直後のクリニックに着任した新任事務長として、最初の30日の課題に向き合う診断型ゲーム。あなたの医療経営スタイルがわかる。</div>
+        <div class="product-card-tags"><span>10問・約3分</span><span>診断型ゲーム</span><span>登録不要</span></div>
+        <span class="product-card-link">遊んでみる</span>
+      </a>
+      <a class="product-card no-thumb" href="../ittan-horyu/index.html" target="_blank" data-reveal data-reveal-delay="2">
+        <div class="product-card-num">LAB 03</div>
+        <div class="product-card-name">Ittan Horyu<span class="jp">いったん保留</span></div>
+        <div class="product-card-tagline">買う前に、少しだけ寝かせる。欲しいものを一旦保留して、24時間・3日・7日おいてから冷静に判断する、衝動買いクールダウンアプリ。</div>
+        <div class="product-card-tags"><span>24時間/3日/7日</span><span>PWA</span><span>登録不要</span></div>
+        <span class="product-card-link">使ってみる</span>
+      </a>
+      <a class="product-card no-thumb" href="../karte/index.html" target="_blank" data-reveal data-reveal-delay="3">
+        <div class="product-card-num">LAB 04</div>
+        <div class="product-card-name">KARTE<span class="jp">現場のカルテ</span></div>
+        <div class="product-card-tagline">今日は、あなたの職場を診察します。立場を選ぶと、職場の“しんどさ”がカルテ(SOAP形式)に書き起こされ、処方箋(Rp.)には実在する道具が並ぶ、診察型コンセプトページ。</div>
+        <div class="product-card-tags"><span>約2分</span><span>処方箋つき</span><span>登録不要</span></div>
+        <span class="product-card-link">診察を受ける</span>
+      </a>
+    </div>
+    <div class="notes-foot" data-reveal>
+      <a href="../products/index.html" class="notes-cta">完成した道具の一覧は Tools へ →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="foot-brand">BRIDGE<span class="dot">.</span></div>
+  <div class="foot-tag">A small medical studio. Tokyo / Remote.</div>
+  <div class="foot-links">
+    <a href="../index.html">Home</a>
+    <a href="../products/index.html">Tools</a>
+    <a href="../starter-kits/index.html">Kits</a>
+    <a href="./index.html">Journal</a>
+    <a href="../about/index.html">Founder</a>
+    <a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">Note</a>
+    <a href="https://x.com/WataruPT1013" target="_blank" rel="noopener">X</a>
+  </div>
+</footer>
+
+<script>
+// ===== Notes: 動的フィード読み込み(LPから移設) =====
+// ../notes/feed.json は GitHub Actions が note.com の RSS から再生成して commit する。
+// 取得失敗時は静的なフォールバックカードがそのまま表示される。
+(async () => {
+  const grid = document.getElementById('notesGrid');
+  if (!grid) return;
+  try {
+    const url = '../notes/feed.json?ts=' + Date.now();
+    const res = await fetch(url, { cache: 'reload' });
+    if (!res.ok) {
+      console.warn('[notes] feed.json HTTP', res.status);
+      return;
+    }
+    const data = await res.json();
+    const items = (data.items || []).slice(0, 3);
+    if (items.length === 0) {
+      console.warn('[notes] feed.json items empty');
+      return;
+    }
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    grid.innerHTML = items.map((it, i) => `
+      <a class="note-card vis" href="${esc(it.url)}" target="_blank" rel="noopener" data-reveal${i ? ` data-reveal-delay="${i}"` : ''}>
+        <div class="note-card-meta">
+          <span>${esc(it.date)}</span>
+          <span class="note-tag">Note</span>
+        </div>
+        <h3 class="note-card-h">${esc(it.title)}</h3>
+        <p class="note-card-excerpt">${esc(it.excerpt)}</p>
+        <span class="note-card-link">続きを読む →</span>
+      </a>
+    `).join('');
+  } catch (e) {
+    console.warn('feed.json 読込失敗:', e);
+  }
+})();
+</script>
+<script src="../shared/subpage.js"></script>
+
+</body>
+</html>
