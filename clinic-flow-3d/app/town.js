@@ -73,12 +73,27 @@ const TOWN = (() => {
     return best;
   }
 
+  // 分院の建設地(siteId → 位置)
+  const BRANCH_SPOTS = {
+    kita: { x: 12, y: 11, w: 2, d: 2, h: 1.3, label: '北口クリニック' },
+    minami: { x: 2, y: 16, w: 2, d: 2, h: 1.3, label: '南町クリニック' },
+    tonari: { x: 20, y: 16, w: 2, d: 2, h: 1.5, label: '隣駅クリニック' }
+  };
+
   class TownSim {
     constructor(hooks) {
-      this.hooks = hooks; // { onPatientArrive(type) }
-      this.walkers = [];  // {x,y,path,color,kind,type,onArrive}
+      this.hooks = hooks; // { onPatientArrive(walker) }
+      this.walkers = [];  // {x,y,path,color,kind,type,refer}
       this.ambientTimer = 0;
       this.rivalTimer = 3;
+      this.branchBuildings = [];
+    }
+
+    setBranches(siteIds) {
+      this.branchBuildings = (siteIds || []).filter((id) => BRANCH_SPOTS[id]).map((id) => {
+        const sp = BRANCH_SPOTS[id];
+        return { id: 'br_' + id, label: sp.label, x: sp.x, y: sp.y, w: sp.w, d: sp.d, h: sp.h, wall: '#FFFFFF', roof: '#4FA98C', mine: true, action: true };
+      });
     }
 
     // 患者トリップ: source: 'house' | 'station' | 'hospital' | 'caremane'
@@ -167,7 +182,7 @@ const TOWN = (() => {
 
     buildingAt(tile) {
       const withDoor = (b) => tile.x >= b.x - 1 && tile.x <= b.x + b.w && tile.y >= b.y - 1 && tile.y <= b.y + b.d;
-      return BUILDINGS.find((b) => (b.action || b.mine) && withDoor(b)) || null;
+      return this.branchBuildings.find(withDoor) || BUILDINGS.find((b) => (b.action || b.mine) && withDoor(b)) || null;
     }
 
     draw(iso, state) {
@@ -193,8 +208,8 @@ const TOWN = (() => {
 
       const items = [];
 
-      // 建物
-      for (const b of BUILDINGS) {
+      // 建物(本院・施設・分院)
+      for (const b of [...BUILDINGS, ...this.branchBuildings]) {
         items.push({
           depth: b.x + b.w / 2 + b.y + b.d / 2,
           draw: () => {
@@ -269,7 +284,7 @@ const TOWN = (() => {
       items.forEach((it) => it.draw());
 
       // ラベル(主要施設のみ)
-      for (const b of BUILDINGS) {
+      for (const b of [...BUILDINGS, ...this.branchBuildings]) {
         if (!b.label) continue;
         const tie = (b.id === 'hospital' && state.hospitalTie) || (b.id === 'caremane' && state.caremaneTie) || (b.id === 'company' && state.companyTie);
         iso.label(b.x + b.w / 2, b.y + b.d / 2 + 0.4, (tie ? '🤝 ' : '') + b.label, {
