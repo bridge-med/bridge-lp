@@ -501,6 +501,76 @@ input[type="range"]::-moz-range-thumb {
 
 .note { font: 500 11px/1.9 var(--sans); color: var(--ink-3); text-align: center; }
 
+/* ---------- 広告(キーワード入札) ---------- */
+
+.ad-kw {
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ad-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.ad-name { font: 700 13px/1.5 var(--sans); color: var(--ink); }
+.ad-name small { font: 600 10.5px/1 var(--en); color: var(--ink-3); margin-left: 4px; }
+.ad-up { color: var(--red); font-size: 10px; }
+.ad-budget { font: 800 13px/1 var(--en); color: var(--blue-deep); white-space: nowrap; }
+.ad-stats { display: flex; flex-direction: column; gap: 2px; font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); }
+.ad-result { font-weight: 700; color: var(--green-deep); }
+.ad-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--bg-deep);
+  border-radius: 10px;
+  font: 500 11.5px/1.7 var(--sans);
+  color: var(--ink-2);
+}
+.ad-summary b { color: var(--blue-deep); }
+.ad-warn { color: var(--red); font-weight: 700; }
+
+/* ---------- 法人・分院 ---------- */
+
+.corp-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 10px 12px;
+  background: var(--bg-deep);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font: 600 12px/1.5 var(--sans);
+  color: var(--ink-2);
+}
+.corp-summary b { font-family: var(--en); color: var(--blue-deep); }
+.pos-t { color: var(--green-deep) !important; }
+.neg-t { color: var(--red) !important; }
+
+.branch-card {
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #FBFDFE;
+}
+.branch-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+.branch-head b { font: 800 14px/1.5 var(--sans); color: var(--green-deep); }
+.branch-stat { font: 600 11px/1.5 var(--sans); color: var(--ink-3); }
+.branch-pnl {
+  font: 600 11.5px/1.7 var(--sans);
+  color: var(--ink-2);
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.branch-staff { padding: 4px 0; }
+.branch-kijun { font: 600 11px/1.9 var(--sans); color: var(--ink-2); padding-top: 8px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+
+.expand-row { background: var(--green-pale); border-radius: 12px; padding: 10px 12px !important; border-bottom: none !important; margin-top: 8px; }
+.expand-row.done { background: var(--bg-deep); }
+.shop-max { font: 600 10px/1 var(--sans); color: var(--ink-3); }
+
 /* ---------- バナー / トースト ---------- */
 
 .banner {
