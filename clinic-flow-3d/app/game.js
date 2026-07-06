@@ -89,6 +89,7 @@
     today: null, history: [],
     missionIdx: 0, missionDone: [],
     tutorialDone: false,
+    plan: null,             // 事業計画 {revenue, patientsPerDay, rehaPerDay, staff:{...}, startDay}
     monthRevenue: () => G.history.slice(-30).reduce((a, d) => a + d.revenue, 0) + (G.today ? G.today.revenue : 0)
   };
 
@@ -107,7 +108,8 @@
           listing: G.listing, billboard: G.billboard,
           hospitalTie: G.hospitalTie, caremaneTie: G.caremaneTie, companyTie: G.companyTie,
           loans: G.loans, schedule: G.schedule, history: G.history.slice(-40),
-          missionIdx: G.missionIdx, missionDone: G.missionDone, tutorialDone: G.tutorialDone
+          missionIdx: G.missionIdx, missionDone: G.missionDone, tutorialDone: G.tutorialDone,
+          plan: G.plan
         }
       }));
     } catch (e) { /* noop */ }
@@ -297,6 +299,7 @@
     planDay();
     save();
     renderPnl();
+    renderPlanner();
     updateHeader();
   }
 
@@ -386,7 +389,7 @@
     document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('show', p.id === `tab-${tab}`));
     if (tab === 'clinic') clinicIso.resize();
     if (tab === 'town') townIso.resize();
-    if (tab === 'mgmt') { renderPnl(); renderMissions(); }
+    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); }
   }
 
   /* ================= UI: 院内パネル ================= */
@@ -548,6 +551,7 @@
       <div class="pnl-row"><span>変動費(材料ほか)</span><b>−${yen(T.patients * COSTS.perPatient)}</b></div>
       ${G.loans ? `<div class="pnl-row"><span>借入利息(${G.loans}件)</span><b>−${yen(G.loans * COSTS.loanInterest)}</b></div>` : ''}
       <div class="pnl-row total ${T.revenue - cost >= 0 ? 'pos' : 'neg'}"><span>本日の見込み損益</span><b>${T.revenue - cost >= 0 ? '+' : ''}${yen(T.revenue - cost)}</b></div>
+      <div class="pnl-note">人件費率(本日): ${T.revenue > 0 ? Math.round(staffCostOf(settings) / T.revenue * 100) + '%' : '–'}(目安 45〜55%)</div>
     `;
     $('pnlMonth').textContent = yen(G.monthRevenue());
 
@@ -576,6 +580,148 @@
     if (kI) kI.addEventListener('click', () => { settings.rehaLevel = 2; toast('✅ 運動器リハ(I)! リハ単価が¥4,900に上がりました'); renderPnl(); save(); });
   }
 
+  /* ================= 事業計画(人員計画・予実管理) ================= */
+
+  const PLAN_ROLES = [
+    ['doctors', '医師', COSTS.doctorDay, 1, 3, '※院長1人分の人件費は利益から'],
+    ['nurses', '看護師', COSTS.nurseDay, 0, 3, ''],
+    ['pts', 'PT', COSTS.ptDay, 0, 6, ''],
+    ['receptionists', '受付', COSTS.recepDay, 1, 2, '']
+  ];
+  let planEditing = false;
+  let draft = null;
+
+  function newDraft() {
+    return {
+      revenue: G.plan ? G.plan.revenue : 4000000,
+      patientsPerDay: G.plan ? G.plan.patientsPerDay : 30,
+      rehaPerDay: G.plan ? G.plan.rehaPerDay : 10,
+      staff: G.plan ? Object.assign({}, G.plan.staff) : {
+        doctors: settings.doctors, nurses: settings.nurses, pts: settings.pts, receptionists: settings.receptionists
+      }
+    };
+  }
+
+  function avgUnitPrice() {
+    const h = G.history.slice(-7);
+    const rev = h.reduce((a, d) => a + d.revenue, 0);
+    const pt = h.reduce((a, d) => a + d.patients, 0);
+    return pt >= 10 ? rev / pt : 2800;
+  }
+
+  function staffCostOf(st) {
+    return (st.doctors - 1) * COSTS.doctorDay + st.nurses * COSTS.nurseDay + st.pts * COSTS.ptDay + st.receptionists * COSTS.recepDay;
+  }
+
+  function planDiagnosis(d) {
+    const unit = avgUnitPrice();
+    const fixed = staffCostOf(d.staff) + COSTS.rent + COSTS.base + G.listing + (G.billboard ? COSTS.billboardDay : 0);
+    const bep = Math.ceil(fixed / Math.max(500, unit - COSTS.perPatient));
+    const examCap = Math.floor(d.staff.doctors * (480 / (settings.examMean + 1.5)) * 0.72);
+    const rehaCap = Math.min(settings.machines, d.staff.pts * 2) * Math.floor(480 / 15);
+    const laborRate = d.revenue > 0 ? (staffCostOf(d.staff) * 30) / d.revenue : 1;
+    const planProfit = Math.round((d.patientsPerDay * (unit - COSTS.perPatient) - fixed) * 30);
+    const msgs = [];
+    msgs.push({ lv: 'info', text: `想定単価 ${yen(unit)}/人(直近実績) → 損益分岐点は <b>1日${bep}人</b>` });
+    if (d.patientsPerDay < bep) msgs.push({ lv: 'bad', text: `⚠️ 目標${d.patientsPerDay}人/日 < 損益分岐${bep}人/日 — <b>この計画は構造的に赤字</b>。人員を削るか、目標(集患・単価)を上げる` });
+    else msgs.push({ lv: 'good', text: `✅ 目標達成時の計画利益: <b>${planProfit >= 0 ? '+' : ''}${yen(planProfit)}/月</b>` });
+    if (d.patientsPerDay > examCap) msgs.push({ lv: 'bad', text: `⚠️ 診察キャパ不足 — 医師${d.staff.doctors}人では約${examCap}人/日が限界。医師を増やすか診察時間を見直す` });
+    if (d.rehaPerDay > rehaCap) msgs.push({ lv: 'bad', text: `⚠️ リハキャパ不足 — PT${d.staff.pts}人×機器${settings.machines}台では約${rehaCap}件/日が限界` });
+    if (laborRate > 0.60) msgs.push({ lv: 'bad', text: `⚠️ 計画人件費率 ${(laborRate * 100).toFixed(0)}% — 目安(45〜55%)を大きく超過。売上目標に対して人が多すぎる` });
+    else if (laborRate > 0.55) msgs.push({ lv: 'warn', text: `計画人件費率 ${(laborRate * 100).toFixed(0)}% — やや高め(目安45〜55%)` });
+    else msgs.push({ lv: 'good', text: `計画人件費率 ${(laborRate * 100).toFixed(0)}% — 健全圏(目安45〜55%)` });
+    return msgs;
+  }
+
+  function renderPlanner() {
+    const el = $('plannerBody');
+    if (!el) return;
+    if (!G.plan || planEditing) {
+      if (!draft) draft = newDraft();
+      const diag = planDiagnosis(draft);
+      el.innerHTML = `
+        <p class="plan-lead">目標と人員をセットで決めます。<b>計画は当てるためではなく、ズレに早く気づくため</b>のもの。</p>
+        <div class="plan-form">
+          <label class="ctrl">
+            <span class="ctrl-head">目標月商(30日) <b>${yen(draft.revenue)}</b></span>
+            <input type="range" id="planRev" min="2000000" max="15000000" step="500000" value="${draft.revenue}">
+          </label>
+          <div class="plan-steppers">
+            <div class="plan-step"><span>目標患者数/日</span><div><button class="mini-btn" data-pd="patientsPerDay" data-d="-5">−</button><b>${draft.patientsPerDay}人</b><button class="mini-btn plus" data-pd="patientsPerDay" data-d="5">＋</button></div></div>
+            <div class="plan-step"><span>目標リハ件数/日</span><div><button class="mini-btn" data-pd="rehaPerDay" data-d="-5">−</button><b>${draft.rehaPerDay}件</b><button class="mini-btn plus" data-pd="rehaPerDay" data-d="5">＋</button></div></div>
+            ${PLAN_ROLES.map(([key, label, cost, min, max, note]) => `
+              <div class="plan-step"><span>${label}の計画 <small>${yen(cost)}/日${note}</small></span>
+                <div><button class="mini-btn" data-ps="${key}" data-d="-1">−</button><b>${draft.staff[key]}人</b><button class="mini-btn plus" data-ps="${key}" data-d="1">＋</button></div>
+              </div>`).join('')}
+          </div>
+          <div class="plan-diag">${diag.map((m) => `<p class="diag ${m.lv}">${m.text}</p>`).join('')}</div>
+          <button class="btn-cta" id="planCommit">${G.plan ? 'この内容で計画を更新する' : 'この計画で行く(策定)'}</button>
+          ${G.plan ? '<button class="btn-cta ghost" id="planCancel">見直しをやめる</button>' : ''}
+        </div>`;
+      $('planRev').addEventListener('input', (e) => { draft.revenue = Number(e.target.value); renderPlanner(); });
+      el.querySelectorAll('[data-pd]').forEach((b) => b.addEventListener('click', () => {
+        const k = b.dataset.pd;
+        draft[k] = Math.max(0, Math.min(150, draft[k] + Number(b.dataset.d)));
+        renderPlanner();
+      }));
+      el.querySelectorAll('[data-ps]').forEach((b) => b.addEventListener('click', () => {
+        const k = b.dataset.ps;
+        const role = PLAN_ROLES.find((r) => r[0] === k);
+        draft.staff[k] = Math.max(role[3], Math.min(role[4], draft.staff[k] + Number(b.dataset.d)));
+        renderPlanner();
+      }));
+      $('planCommit').addEventListener('click', () => {
+        G.plan = { revenue: draft.revenue, patientsPerDay: draft.patientsPerDay, rehaPerDay: draft.rehaPerDay, staff: Object.assign({}, draft.staff), startDay: G.day };
+        planEditing = false;
+        draft = null;
+        toast('📝 事業計画を策定しました。予実のズレを毎日チェックしましょう');
+        renderPlanner();
+        save();
+      });
+      const pc = $('planCancel');
+      if (pc) pc.addEventListener('click', () => { planEditing = false; draft = null; renderPlanner(); });
+      return;
+    }
+
+    // ===== 予実管理ビュー =====
+    const plan = G.plan;
+    const cur = G.monthRevenue();
+    const pct = Math.min(100, cur / plan.revenue * 100);
+    const h7 = G.history.slice(-7);
+    const ptAvg = h7.length ? h7.reduce((a, d) => a + d.patients, 0) / h7.length : 0;
+    const rehaAvg = h7.length ? h7.reduce((a, d) => a + d.rehaCount, 0) / h7.length : 0;
+    const rev7 = h7.reduce((a, d) => a + d.revenue, 0);
+    const laborNow = staffCostOf(settings) * h7.length;
+    const laborRate = rev7 > 0 ? laborNow / rev7 : 0;
+    const staffRows = PLAN_ROLES.map(([key, label]) => {
+      const now = key === 'doctors' ? settings.doctors : key === 'nurses' ? settings.nurses : key === 'pts' ? settings.pts : settings.receptionists;
+      const diff = now - plan.staff[key];
+      return `<span class="staff-chip ${diff === 0 ? 'ok' : diff < 0 ? 'under' : 'over'}">${label} ${now}/${plan.staff[key]}人${diff === 0 ? '' : diff < 0 ? `(計画まであと${-diff})` : `(計画+${diff})`}</span>`;
+    }).join('');
+    const bar = (label, now, target, unit) => {
+      const p = Math.min(100, target > 0 ? now / target * 100 : 0);
+      return `<div class="pv-row"><span class="pv-label">${label}</span>
+        <div class="pv-track"><i style="width:${p.toFixed(1)}%" class="${p >= 100 ? 'full' : p >= 70 ? 'mid' : 'low'}"></i></div>
+        <span class="pv-num">${now}${unit} / ${target}${unit}</span></div>`;
+    };
+    el.innerHTML = `
+      <div class="pv-head">
+        <div class="pv-rev">
+          <span>月商目標 ${yen(plan.revenue)} に対して</span>
+          <b>${yen(cur)} <small>(${pct.toFixed(0)}%)</small></b>
+          <div class="pv-track big"><i style="width:${pct.toFixed(1)}%" class="${pct >= 100 ? 'full' : pct >= 70 ? 'mid' : 'low'}"></i></div>
+        </div>
+      </div>
+      ${bar('患者数/日(7日平均)', Math.round(ptAvg), plan.patientsPerDay, '人')}
+      ${bar('リハ件数/日(7日平均)', Math.round(rehaAvg), plan.rehaPerDay, '件')}
+      <div class="pv-staff"><span class="pv-label">人員(現在/計画)</span>${staffRows}</div>
+      <div class="pv-row"><span class="pv-label">人件費率(直近7日)</span>
+        <b class="pv-rate ${laborRate > 0.6 ? 'bad' : laborRate > 0.55 ? 'warn' : 'good'}">${rev7 > 0 ? (laborRate * 100).toFixed(0) + '%' : '–'}</b>
+        <small>目安 45〜55%</small></div>
+      <button class="btn-cta ghost" id="planEdit">計画を見直す</button>`;
+    $('planEdit').addEventListener('click', () => { planEditing = true; draft = newDraft(); renderPlanner(); });
+  }
+
   function renderMissions() {
     $('missionList').innerHTML = MISSIONS.map((m, i) => {
       const st = i < G.missionIdx ? 'done' : i === G.missionIdx ? 'now' : 'locked';
@@ -598,6 +744,7 @@
     { tab: 'town', sel: '#townStage', text: 'そしてこれが商圏。<b>✓が付いた家 = あなたを知っている家</b>。知られていなければ、どんな名医でも患者は来ません。病院・ケアマネ・企業・駅 — 建物をタップすると営業アクションが打てます。' },
     { tab: 'town', sel: '#marketingCard', text: 'リスティング広告はここ。お金で認知を買えますが、<b>広告は蛇口 — 止めると止まる</b>。紹介や評判という「資産型」の集患と組み合わせるのがコツです。' },
     { tab: 'mgmt', sel: '#pnlCard', text: '毎日17時に決算。売上の中身(初再診・処置・リハ・健診)と費用の構造がここに出ます。<b>リハの積み上げが整形外来の生命線</b>だと、数字が教えてくれるはず。' },
+    { tab: 'mgmt', sel: '#plannerCard', text: 'そして<b>事業計画</b>。目標月商と人員計画をセットで立てると、損益分岐点・キャパ・人件費率を自動診断し、以後は<b>予実のズレ</b>を毎日追いかけられます。計画は当てるためではなく、ズレに早く気づくためのもの。' },
     { tab: 'mgmt', sel: '#missionCard', text: 'ミッションが経営のカリキュラムです。<b>①黒字化 → ②待ち時間 → ③認知 → ④リハ → ⑤連携 → ⑥評判 → ⑦月商800万</b>。まずは「1日を黒字で終える」から。健闘を祈ります!' }
   ];
   let tutIdx = -1;
