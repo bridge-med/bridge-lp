@@ -133,7 +133,7 @@
 
   function confetti() {
     try {
-      var colors = ['#D96038', '#7E9977', '#7C99AE', '#E9C46A', '#EFB08C'];
+      var colors = ['#A85D7C', '#7FA396', '#8894BC', '#D9A94B', '#D999A9'];
       for (var i = 0; i < 14; i++) {
         var dot = document.createElement('div');
         dot.className = 'confetti-dot';
@@ -164,9 +164,9 @@
     }
     if (m >= 6 && m <= 8) {
       // 夏: 頭の上に小さな若葉
-      return '<path d="M55 12 q-1 -7 -7 -9 q7 -1 9 6" fill="#7E9977"/>' +
-        '<path d="M57 9 q3 -6 9 -6 q-3 6 -8 8" fill="#9BB394"/>' +
-        '<path d="M55 15 q1 -4 2 -6" stroke="#5D7757" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
+      return '<path d="M55 12 q-1 -7 -7 -9 q7 -1 9 6" fill="#7FA396"/>' +
+        '<path d="M57 9 q3 -6 9 -6 q-3 6 -8 8" fill="#A3C2B5"/>' +
+        '<path d="M55 15 q1 -4 2 -6" stroke="#587F71" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
     }
     if (m >= 9 && m <= 11) {
       // 秋: 足元に落ち葉
@@ -195,7 +195,7 @@
     return '' +
       '<svg viewBox="0 0 110 102" role="img" aria-label="ぽて">' +
       // 小さなラグ
-      '<ellipse cx="55" cy="94" rx="40" ry="6" fill="#7E9977" opacity="0.28"/>' +
+      '<ellipse cx="55" cy="94" rx="40" ry="6" fill="#7FA396" opacity="0.28"/>' +
       // 体
       '<ellipse cx="55" cy="72" rx="27" ry="22" fill="#E8B478"/>' +
       '<ellipse cx="55" cy="78" rx="17" ry="13" fill="#F8ECD7"/>' +
@@ -216,8 +216,8 @@
       '<circle cx="35" cy="52" r="4" fill="#EFB8AC" opacity="0.8"/>' +
       '<circle cx="75" cy="52" r="4" fill="#EFB8AC" opacity="0.8"/>' +
       // マグカップ(クローバー入り)
-      '<rect x="46" y="63" width="18" height="14" rx="4" fill="#7E9977"/>' +
-      '<path d="M64 66 q6 2 0 8" stroke="#7E9977" stroke-width="3" fill="none"/>' +
+      '<rect x="46" y="63" width="18" height="14" rx="4" fill="#7FA396"/>' +
+      '<path d="M64 66 q6 2 0 8" stroke="#7FA396" stroke-width="3" fill="none"/>' +
       '<circle cx="53" cy="69" r="1.7" fill="#F8ECD7"/><circle cx="57" cy="69" r="1.7" fill="#F8ECD7"/><circle cx="55" cy="72" r="1.7" fill="#F8ECD7"/>' +
       '<path d="M51 59 q1 -3 0 -5 M57 59 q1 -3 0 -5" stroke="#C9B08A" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
       seasonAccessory() +
@@ -228,8 +228,8 @@
   function plantSvg() {
     return '' +
       '<svg viewBox="0 0 30 42" aria-hidden="true">' +
-      '<path d="M15 24 q-1 -10 -8 -13 q8 0 10 9 q2 -12 11 -14 q-7 6 -9 18" fill="none" stroke="#7E9977" stroke-width="2.2" stroke-linecap="round"/>' +
-      '<circle cx="7" cy="11" r="2.4" fill="#7E9977"/><circle cx="28" cy="6" r="2.4" fill="#9BB394"/>' +
+      '<path d="M15 24 q-1 -10 -8 -13 q8 0 10 9 q2 -12 11 -14 q-7 6 -9 18" fill="none" stroke="#7FA396" stroke-width="2.2" stroke-linecap="round"/>' +
+      '<circle cx="7" cy="11" r="2.4" fill="#7FA396"/><circle cx="28" cy="6" r="2.4" fill="#A3C2B5"/>' +
       '<path d="M8 26 h14 l-2 13 h-10 Z" fill="#C9A87F"/>' +
       '<rect x="7" y="24" width="16" height="4" rx="2" fill="#B8916A"/>' +
       '</svg>';
@@ -239,16 +239,16 @@
   function machineSvg() {
     return '' +
       '<svg viewBox="0 0 90 112" role="img" aria-label="ガチャマシン">' +
-      '<rect x="16" y="58" width="58" height="44" rx="10" fill="#D96038"/>' +
-      '<rect x="16" y="58" width="58" height="10" fill="#BC4E2A"/>' +
-      '<circle cx="45" cy="80" r="9" fill="#F8ECD7"/><rect x="41" y="76" width="8" height="8" rx="2" fill="#BC4E2A"/>' +
-      '<rect x="30" y="94" width="30" height="8" rx="4" fill="#96401F"/>' +
-      '<circle cx="45" cy="34" r="26" fill="#FBF5E7" stroke="#D6C4A0" stroke-width="2.5"/>' +
-      '<circle cx="36" cy="30" r="8" fill="#7E9977"/>' +
-      '<circle cx="52" cy="26" r="8" fill="#EFB08C"/>' +
-      '<circle cx="48" cy="42" r="8" fill="#7C99AE"/>' +
-      '<circle cx="34" cy="44" r="7" fill="#E9C46A"/>' +
-      '<rect x="38" y="2" width="14" height="8" rx="3" fill="#BC4E2A"/>' +
+      '<rect x="16" y="58" width="58" height="44" rx="10" fill="#A85D7C"/>' +
+      '<rect x="16" y="58" width="58" height="10" fill="#8E4A66"/>' +
+      '<circle cx="45" cy="80" r="9" fill="#F8ECD7"/><rect x="41" y="76" width="8" height="8" rx="2" fill="#8E4A66"/>' +
+      '<rect x="30" y="94" width="30" height="8" rx="4" fill="#6E3850"/>' +
+      '<circle cx="45" cy="34" r="26" fill="#FBF9FA" stroke="#CFC0CD" stroke-width="2.5"/>' +
+      '<circle cx="36" cy="30" r="8" fill="#7FA396"/>' +
+      '<circle cx="52" cy="26" r="8" fill="#D999A9"/>' +
+      '<circle cx="48" cy="42" r="8" fill="#8894BC"/>' +
+      '<circle cx="34" cy="44" r="7" fill="#D9A94B"/>' +
+      '<rect x="38" y="2" width="14" height="8" rx="3" fill="#8E4A66"/>' +
       '</svg>';
   }
 
@@ -256,8 +256,8 @@
   function capsuleSvg() {
     return '' +
       '<svg viewBox="0 0 60 60" role="img" aria-label="カプセル">' +
-      '<path d="M6 30 a24 24 0 0 1 48 0 Z" fill="#FBF5E7" stroke="#D6C4A0" stroke-width="2"/>' +
-      '<path d="M6 30 a24 24 0 0 0 48 0 Z" fill="#D96038"/>' +
+      '<path d="M6 30 a24 24 0 0 1 48 0 Z" fill="#FBF9FA" stroke="#CFC0CD" stroke-width="2"/>' +
+      '<path d="M6 30 a24 24 0 0 0 48 0 Z" fill="#A85D7C"/>' +
       '<circle cx="22" cy="20" r="5" fill="#FFF" opacity="0.6"/>' +
       '</svg>';
   }
@@ -305,19 +305,24 @@
   function capsuleMeter() {
     var count = Store.capsuleCount();
     var per = Store.CAPSULES_PER_DAY;
+    var freeAvail = Store.dailyFreeAvailable();
     var slots = Math.max(per, count);
-    var dots = '';
+    // 先頭は「今日の1枚」(カプセルなしで引ける)の星スロット
+    var dots = '<span class="cap-star' + (freeAvail ? ' on' : '') + '" aria-hidden="true">★</span>';
     for (var i = 0; i < slots; i++) {
       dots += '<span class="cap-dot' + (i < count ? ' on' : '') + (i >= per ? ' bonus' : '') + '" aria-hidden="true"></span>';
     }
-    return '<div class="capsule-meter" role="status" aria-label="今日のカプセル 残り' + count + '個">' +
+    var note = freeAvail ? '★は今日の1枚。カプセルなしで引けます'
+      : count === 0 ? 'あしたの朝に補充されます'
+      : esc(D.POTE.capsuleNote);
+    return '<div class="capsule-meter" role="status" aria-label="今日のカプセル 残り' + count + '個' + (freeAvail ? '、今日の1枚あり' : '') + '">' +
       '<span class="cap-label">きょうのカプセル</span>' +
       '<span class="cap-dots">' + dots + '</span>' +
-      '<span class="cap-note">' + (count === 0 ? 'あしたの朝に補充されます' : esc(D.POTE.capsuleNote)) + '</span>' +
+      '<span class="cap-note">' + note + '</span>' +
       '</div>';
   }
 
-  function capsulesLeft() { return Store.capsuleCount() > 0; }
+  function capsulesLeft() { return Store.canDraw(); }
 
   /* ---------- レンダリング ---------- */
 
