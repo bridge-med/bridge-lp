@@ -341,8 +341,8 @@ const CLINIC = (() => {
           if (p && this.atSpot(p, L.RECEP.service[w]) && !this.recBusy.includes(p)) {
             this.recBusy[w] = p;
             p.phase = 'recep';
-            // Web問診・事前受付を導入すると受付が大幅短縮
-            p.busyUntil = this.t + (s.webIntake ? triRand(0.35, 1.0) : triRand(0.6, 1.8));
+            // Web問診・事前受付を導入すると受付が大幅短縮(イベントで疲労時は低下)
+            p.busyUntil = this.t + (s.webIntake ? triRand(0.35, 1.0) : triRand(0.6, 1.8)) * (s.evRecepSlow ? 1.4 : 1);
           }
         }
       }
@@ -365,7 +365,7 @@ const CLINIC = (() => {
             p.phase = 'exam';
             p.busyUntil = Infinity;
             this.walkTo(p, L.EXAM[d].spot, (pp) => {
-              const mean = pp.type === 'checkup' ? 3 : s.examMean * (pp.type === 'first' ? 1.25 : 0.85);
+              const mean = pp.type === 'checkup' ? 3 : (s.examMean + (s.evExamDelta || 0)) * (pp.type === 'first' ? 1.25 : 0.85);
               let extra = 0;
               // 診察室内の注射(関節注・トリガー/ブロック)。実施方針に従う
               if (pp.type !== 'checkup') {

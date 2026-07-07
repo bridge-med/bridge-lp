@@ -181,6 +181,7 @@
     kpiPins: ['visits', 'newp', 'unit', 'mix'],
     targetSeg: 'balance',
     cum: { revenue: 0, profit: 0 }, annualDone: false,
+    voiceLog: [], voiceFeed: [],
     schedule: {}, arrivals: [], nextArrivalIdx: 0,
     today: null, history: [],
     branches: [],
@@ -227,7 +228,7 @@
           billboard: G.billboard, relations: G.relations,
           loans: G.loans, ads: G.ads, adPressure: G.adPressure,
           osteoPool: G.osteoPool, agaPool: G.agaPool, kpiPins: G.kpiPins,
-          targetSeg: G.targetSeg, cum: G.cum, annualDone: G.annualDone,
+          targetSeg: G.targetSeg, cum: G.cum, annualDone: G.annualDone, voiceLog: G.voiceLog,
           schedule: G.schedule, history: G.history.slice(-40),
           branches: G.branches, missionIdx: G.missionIdx, missionDone: G.missionDone,
           tutorialDone: G.tutorialDone, plan: G.plan
@@ -293,8 +294,8 @@
         }
       }
 
-      // 物療(消炎鎮痛等処置): 機器があれば高回転で回る
-      if (settings.physio > 0 && report.type !== 'checkup' && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio) {
+      // 物療(消炎鎮痛等処置): 機器があれば高回転で回る(故障イベント時は停止)
+      if (settings.physio > 0 && !G.evPhysioDown && report.type !== 'checkup' && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio) {
         revenue += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; didProcedure = true;
       }
 
@@ -391,6 +392,23 @@
     G.today = newToday();
     G.adSpendToday = 0;
 
+    // 現場イベント(当日限りの効果をリセット→低確率で発生)
+    G.evArrivalMul = 1; G.evExamDelta = 0; G.evRecepSlow = false; G.evPhysioDown = false; G.evExtraRefer = 0;
+    settings.evExamDelta = 0; settings.evRecepSlow = false;
+    // 前日の振り返りコメントは残し、古い報告だけ流す
+    G.voiceFeed = (G.voiceFeed || []).filter((v) => v.kind === 'daily').slice(-1);
+    if (spec.kind !== 'closed' && G.day > 3 && typeof STAFF_UI !== 'undefined') {
+      const pool = STAFF_UI.STAFF_EVENTS.filter((ev) => (!ev.cond || ev.cond(G, settings)) && Math.random() < ev.p);
+      if (pool.length) {
+        const ev = pool[Math.floor(Math.random() * pool.length)];
+        ev.apply(G, settings);
+        settings.evExamDelta = G.evExamDelta || 0;
+        settings.evRecepSlow = !!G.evRecepSlow;
+        pushVoice(ev.char, ev.text, 'event');
+        banner(`💬 ${STAFF_UI.STAFF[ev.char].name}「${ev.text}」`);
+      }
+    }
+
     if (spec.kind === 'closed') {
       const due = G.schedule[G.day];
       if (due) {
@@ -418,9 +436,9 @@
     const push = (type, source, refer, seg) => arrivals.push({ t: 0, type, source, refer: !!refer, seg: seg || pickMix(baseMix) });
     const sundayBoost = weekdayOf(G.day) === 6 ? 1.3 : 1; // 日曜開院は競合が休み
 
-    // 自然新患
+    // 自然新患(雨・流行イベントで増減)
     const share = G.rep / (G.rep + RIVAL_REP);
-    const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost + (Math.random() * 4 - 2)));
+    const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost * (G.evArrivalMul || 1) + (Math.random() * 4 - 2)));
     for (let i = 0; i < nNew; i++) push('first', 'house');
 
     // リスティング広告
@@ -444,6 +462,7 @@
     if (G.billboard) for (let i = 0; i < 1 + Math.round(Math.random()); i++) push('first', 'station', false, Math.random() < 0.6 ? 'worker' : 'senior');
 
     // 営業関係からの紹介(関係レベル依存・チャネルごとに客層が違う)
+    for (let i = 0; i < (G.evExtraRefer || 0); i++) push('first', 'hospital', true, 'senior');
     for (let i = 0; i < relLv('hospital'); i++) push('first', 'hospital', true, Math.random() < 0.7 ? 'senior' : 'worker');
     if (settings.rehaLevel > 0) {
       for (let i = 0; i < frac(relLv('caremane') * 0.7); i++) push('first', 'caremane', true, 'senior');
@@ -455,7 +474,7 @@
 
     // 再診・リハ(予約済み)
     const due = G.schedule[G.day] || { revisit: 0, rehab: 0 };
-    const showRate = 0.75 + 0.2 * (G.rep / 100) + (settings.reserve ? 0.05 : 0);
+    const showRate = (0.75 + 0.2 * (G.rep / 100) + (settings.reserve ? 0.05 : 0)) * Math.min(1.1, G.evArrivalMul || 1);
     for (let i = 0; i < due.revisit; i++) if (Math.random() < showRate) push('revisit', 'house');
     for (let i = 0; i < due.rehab; i++) if (Math.random() < showRate) push('rehab', 'house');
     delete G.schedule[G.day];
@@ -657,6 +676,7 @@
     }
 
     G.rep = clamp(G.rep, 15, 97);
+    dailyVoice();
     checkMission(T);
 
     if (G.day % 7 === 0 && G.history.length >= 8 && spec.kind !== 'closed') weeklyDigest();
@@ -691,8 +711,77 @@
     }
     planDay();
     save();
-    renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip();
+    renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip(); renderStaffStrip();
     updateHeader();
+  }
+
+  /* ================= 現場スタッフ(キャラクター) ================= */
+
+  function pushVoice(charKey, text, kind) {
+    G.voiceFeed = (G.voiceFeed || []).slice(-1);
+    G.voiceFeed.push({ char: charKey, text, kind });
+    renderVoice();
+  }
+
+  function staffCtx() {
+    const opens = G.history.filter((h) => h.kind !== 'closed');
+    const h = opens[opens.length - 1] || null;
+    const examCapDay = Math.max(10, settings.doctors * (480 / (settings.examMean + 1.5)) * 0.72);
+    return {
+      h, s: settings, G,
+      wait: h ? h.avgWait : 0,
+      load: h ? h.patients / examCapDay : 0,
+      standing: clinic.standingCount(),
+      rehaUtil: h && clinic.rehaCap() > 0 ? h.rehaCount / clinic.rehaCap() : 0,
+      labor: h && h.revenue > 0 ? (h.staffCost || 0) / h.revenue : 0,
+      profit: h ? h.profit + (h.brProfit || 0) : 0
+    };
+  }
+
+  function renderStaffStrip() {
+    const el = $('staffStrip');
+    if (!el || typeof STAFF_UI === 'undefined') return;
+    const c = staffCtx();
+    el.innerHTML = Object.entries(STAFF_UI.STAFF).map(([k, st]) => {
+      const mood = st.mood(c);
+      return `<span class="staff-chip mood-${mood}" title="${st.title} ${st.name}">${STAFF_UI.faceSVG(k, mood, 34)}<span class="staff-meta"><small>${st.title}</small><b>${st.name}・${STAFF_UI.MOOD_LABEL[mood]}</b></span></span>`;
+    }).join('');
+  }
+
+  function dailyVoice() {
+    if (typeof STAFF_UI === 'undefined') return;
+    const c = staffCtx();
+    if (!c.h || c.h.patients === 0) return;
+    if (!G.voiceLog) G.voiceLog = [];
+    const recent = new Set(G.voiceLog.filter((v) => v.day > G.day - 5).map((v) => v.id));
+    let best = null;
+    for (const [k, st] of Object.entries(STAFF_UI.STAFF)) {
+      for (const cm of st.comments) {
+        if (recent.has(cm.id)) continue;
+        let ok = false;
+        try { ok = cm.cond(c); } catch (e) { ok = false; }
+        if (!ok) continue;
+        if (!best || cm.prio > best.cm.prio) best = { k, cm };
+      }
+    }
+    if (best) {
+      G.voiceLog.push({ id: best.cm.id, day: G.day });
+      if (G.voiceLog.length > 30) G.voiceLog.shift();
+      pushVoice(best.k, best.cm.text(c), 'daily');
+    }
+  }
+
+  function renderVoice() {
+    const card = $('voiceCard');
+    if (!card || typeof STAFF_UI === 'undefined') return;
+    const feed = G.voiceFeed || [];
+    card.hidden = feed.length === 0;
+    const c = staffCtx();
+    $('voiceBody').innerHTML = feed.map((v) => {
+      const st = STAFF_UI.STAFF[v.char];
+      const mood = v.kind === 'event' ? 'idea' : st.mood(c);
+      return `<div class="voice-row">${STAFF_UI.faceSVG(v.char, mood, 44)}<div class="voice-txt"><small>${st.title} ${st.name}${v.kind === 'event' ? ' — 現場から報告' : ' — 今日の振り返り'}</small><p>${v.text}</p></div></div>`;
+    }).join('');
   }
 
   /* ================= 週次・月次レビュー ================= */
@@ -848,7 +937,7 @@
     activeTab = tab;
     document.querySelectorAll('.tab-btn').forEach((x) => x.classList.toggle('on', x.dataset.tab === tab));
     document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('show', p.id === `tab-${tab}`));
-    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); }
+    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
     if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); }
@@ -923,15 +1012,20 @@
     renderShop(); save();
   }
 
+  const SHOP_VOICE = { doctor: 'nurse', nurse: 'nurse', beds: 'nurse', pt: 'reha', machines: 'reha', physio: 'reha', rehaAide: 'reha', recep: 'front', chairs: 'front' };
+
   function renderShop() {
     const rows = Object.entries(SHOP).map(([key, item]) => {
       const cur = settingValue(key);
       const max = shopMax(key);
+      const vc = SHOP_VOICE[key];
+      const vt = vc && typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[vc].invest[key] : null;
       return `
       <div class="shop-row">
         <div class="shop-info">
           <span class="shop-name">${item.label} <b class="shop-count">${cur}${item.day ? '人' : ''}</b> <small class="shop-max">/ 最大${max}</small></span>
           <span class="shop-hint">${item.hint}</span>
+          ${vt ? `<span class="shop-voice">${STAFF_UI.faceSVG(vc, 'normal', 17)} ${STAFF_UI.STAFF[vc].name}「${vt}」</span>` : ''}
         </div>
         <div class="shop-btns">
           <button class="mini-btn" data-fire="${key}">−</button>
@@ -943,7 +1037,8 @@
     const bigTicket = `
       <div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
-        <span class="shop-hint">MRI検査 1件¥16,000(1日最大8件)。維持費¥12,000/日。回収期間を計算してから</span></div>
+        <span class="shop-hint">MRI検査 1件¥16,000(1日最大8件)。維持費¥12,000/日</span>
+        ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('advisor', 'normal', 17)} 白瀬「${STAFF_UI.STAFF.advisor.invest.mri}」</span>` : ''}</div>
         ${settings.mri ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="mriBtn">🧲 ${yen(MRI_COST)}</button></div>`}
       </div>
       <div class="shop-row ${settings.dexa ? 'expand-row done' : 'expand-row'}">
@@ -1794,10 +1889,11 @@
     $('cIn').textContent = clinic.patients.length;
   }
 
-  let lastTs = 0;
+  let lastTs = 0, frameN = 0;
   function loop(ts) {
     clinicIso.time = ts;
     townIso.time = ts;
+    if (activeTab === 'clinic' && ++frameN % 150 === 0) renderStaffStrip();
     const dtReal = Math.min(0.1, (ts - lastTs) / 1000);
     lastTs = ts;
     if (G.speed > 0 && tutIdx < 0) {
@@ -1863,7 +1959,7 @@
       const arr = G.arrivals.slice(G.nextArrivalIdx);
       G.nextArrivalIdx = G.arrivals.length;
       let rehaAvail = Math.min(clinic.usableMachines() * 26, clinic.rehaCap());
-      const examCapDay = Math.max(10, settings.doctors * (spec.min / (settings.examMean + 1.5)) * 0.72);
+      const examCapDay = Math.max(10, settings.doctors * (spec.min / (settings.examMean + (G.evExamDelta || 0) + 1.5)) * 0.72);
       let examServed = 0, turnedAway = 0;
       for (const a of arr) {
         // 診察キャパを超えた患者は診られない(機会損失+評判低下)
@@ -1884,7 +1980,7 @@
         if (a.type !== 'checkup') {
           if (Math.random() < settings.pInj) { rev += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; proc = true; }
           if (Math.random() < settings.pTrig) { rev += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; proc = true; }
-          if (settings.physio > 0 && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; }
+          if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; }
           const segMul = { senior: 1.2, sports: 1.45, worker: 0.75 }[seg] || 1;
           const wantReha = a.type === 'rehab' || (settings.rehaLevel > 0 && (a.refer || Math.random() < settings.pReha * segMul));
           if (wantReha && settings.rehaLevel > 0 && rehaAvail >= 1) {
@@ -1961,6 +2057,8 @@
   renderAds();
   renderKpiPicker();
   renderKpiStrip();
+  renderStaffStrip();
+  renderVoice();
   updateMissionBar();
   updateHeader();
   $('vExamMean').textContent = `${settings.examMean}分`;

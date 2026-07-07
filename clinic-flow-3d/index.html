@@ -71,7 +71,12 @@
           <button class="view-btn" id="lineBtn">〰 導線ライン</button>
         </div>
       </div>
-      <div class="panic" id="panic" hidden>🚨 待合パンク! 椅子が足りていません</div>
+      <div class="panic" id="panic" hidden>🚨 待合パンク! 立ち待ち発生 — 椅子と「回転(受付・診察)」を見直して</div>
+    </div>
+
+    <div class="staff-strip" id="staffStrip"></div>
+    <div class="card voice-card" id="voiceCard" hidden>
+      <div id="voiceBody"></div>
     </div>
 
     <div class="kpi-strip" id="kpiStrip"></div>
@@ -246,6 +251,7 @@
 <script src="app/iso.js"></script>
 <script src="app/clinic.js"></script>
 <script src="app/town.js"></script>
+<script src="app/staff.js"></script>
 <script src="app/game.js"></script>
 
 </body>

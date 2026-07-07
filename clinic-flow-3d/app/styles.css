@@ -572,6 +572,58 @@ input[type="range"]::-moz-range-thumb {
 .expand-row.done { background: var(--bg-deep); }
 .shop-max { font: 600 10px/1 var(--sans); color: var(--ink-3); }
 
+/* ---------- 現場スタッフ(キャラクター) ---------- */
+
+.staff-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.staff-chip {
+  flex: 1 1 auto;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 6px 10px;
+}
+.staff-chip svg { flex: 0 0 auto; border-radius: 50%; background: var(--bg-deep); }
+.staff-meta { display: flex; flex-direction: column; line-height: 1.3; min-width: 0; }
+.staff-meta small { font: 600 9px/1.3 var(--sans); color: var(--ink-3); }
+.staff-meta b { font: 700 11.5px/1.35 var(--sans); color: var(--ink); white-space: nowrap; }
+.staff-chip.mood-warn { border-color: rgba(196, 87, 78, 0.5); background: #FDF6F5; }
+.staff-chip.mood-warn .staff-meta b { color: var(--red); }
+.staff-chip.mood-tired { border-color: rgba(201, 138, 45, 0.45); background: #FDFAF2; }
+.staff-chip.mood-tired .staff-meta b, .staff-chip.mood-busy .staff-meta b { color: var(--amber); }
+.staff-chip.mood-good .staff-meta b { color: var(--green-deep); }
+.staff-chip.mood-idea { border-color: rgba(201, 138, 45, 0.4); }
+
+.voice-card { padding: 12px 14px !important; }
+.voice-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 6px 0;
+}
+.voice-row + .voice-row { border-top: 1px dashed var(--line); }
+.voice-row svg { flex: 0 0 auto; border-radius: 50%; background: var(--bg-deep); }
+.voice-txt small { font: 700 10px/1.5 var(--sans); color: var(--ink-3); display: block; }
+.voice-txt p { font: 500 12.5px/1.8 var(--sans); color: var(--ink); }
+
+.shop-voice {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font: 500 10.5px/1.5 var(--sans);
+  color: var(--blue-deep);
+  margin-top: 3px;
+}
+.shop-voice svg { border-radius: 50%; background: var(--bg-deep); flex: 0 0 auto; }
+
 /* ---------- 診療時間 ---------- */
 
 .sch-row { display: flex; gap: 6px; flex-wrap: wrap; }
