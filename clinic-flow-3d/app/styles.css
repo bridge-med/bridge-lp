@@ -1012,6 +1012,12 @@ input[type="range"]::-moz-range-thumb {
 .daily-streak b { color: var(--amber); font-size: 17px; }
 #prestigeCard { border-top: 4px solid transparent; border-image: linear-gradient(90deg, var(--amber), var(--blue)) 1; }
 
+/* ---------- v9: コイン・倍速解放・キャラ依頼 ---------- */
+
+.speed-btn.locked { opacity: 0.6; background: var(--bg-deep); color: var(--ink-3); border-style: dashed; }
+.daily-req { display: flex; flex-direction: column; gap: 4px; }
+.daily-req svg, .todo-row p svg { vertical-align: -5px; margin-right: 2px; }
+
 /* ---------- v6: スマホは下部ナビ(親指ファースト) ---------- */
 
 @media (max-width: 719px) {
