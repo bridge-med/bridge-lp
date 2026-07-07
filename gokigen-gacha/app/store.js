@@ -32,6 +32,7 @@
       recent: [],
       lastRunAt: null, // 最後に「やってみた」した日時(ISO)
       capsules: { day: '', count: CAPSULES_PER_DAY },
+      dailyFree: { day: '', used: false }, // 今日の1枚(1日1回、カプセル消費なしの抽選)
       settings: { notifyEnabled: false, notifyTime: '21:00', showPote: true, sound: true, seasonal: true }
     };
   }
@@ -53,6 +54,9 @@
         capsules: (parsed.capsules && typeof parsed.capsules.count === 'number' && typeof parsed.capsules.day === 'string')
           ? { day: parsed.capsules.day, count: Math.max(0, Math.min(CAPSULES_MAX, Math.round(parsed.capsules.count))) }
           : d.capsules,
+        dailyFree: (parsed.dailyFree && typeof parsed.dailyFree.day === 'string')
+          ? { day: parsed.dailyFree.day, used: !!parsed.dailyFree.used }
+          : d.dailyFree,
         settings: Object.assign(d.settings, parsed.settings || {})
       };
       // 旧バージョンのデータには lastRunAt がないので履歴から補完する
@@ -90,10 +94,28 @@
   // 日付が変わっていたら今日ぶんに補充する
   function ensureDailyCapsules() {
     var today = dayKey(new Date());
+    var changed = false;
     if (state.capsules.day !== today) {
       state.capsules = { day: today, count: CAPSULES_PER_DAY };
-      save();
+      changed = true;
     }
+    if (state.dailyFree.day !== today) {
+      state.dailyFree = { day: today, used: false };
+      changed = true;
+    }
+    if (changed) save();
+  }
+
+  /** 今日の1枚(カプセルなしの抽選)がまだ残っているか */
+  function dailyFreeAvailable() {
+    ensureDailyCapsules();
+    return !state.dailyFree.used;
+  }
+
+  /** 今日まだガチャを引けるか(今日の1枚 or カプセル残あり) */
+  function canDraw() {
+    ensureDailyCapsules();
+    return !state.dailyFree.used || state.capsules.count > 0;
   }
 
   function capsuleCount() {
@@ -163,7 +185,9 @@
   function draw(opts) {
     opts = opts || {};
     ensureDailyCapsules();
-    if (!opts.free && state.capsules.count <= 0) return null; // 今日のカプセル切れ
+    // 今日最初の1回は「今日の1枚」としてカプセルを使わない
+    var useFree = !opts.free && !state.dailyFree.used;
+    if (!opts.free && !useFree && state.capsules.count <= 0) return null; // 今日のカプセル切れ
     var pool = D.CARDS.slice();
 
     if (opts.stateId) {
@@ -191,7 +215,8 @@
     // 状態選択時は「その状態で効いた実績のあるカード」を少しだけ優先する
     var card = pickWeighted(pool, opts.stateId);
 
-    if (!opts.free) state.capsules.count -= 1; // カプセルを1個使う
+    if (useFree) state.dailyFree.used = true;      // 今日の1枚を使う
+    else if (!opts.free) state.capsules.count -= 1; // カプセルを1個使う
     // 出現したカードは図鑑で発見済みにし、直近リストへ積む
     if (state.discovered.indexOf(card.id) < 0) state.discovered.push(card.id);
     state.recent = [card.id].concat(state.recent.filter(function (id) { return id !== card.id; })).slice(0, RECENT_MAX);
@@ -435,6 +460,8 @@
     weeklySummary: weeklySummary,
     runsForCardInState: runsForCardInState,
     capsuleCount: capsuleCount,
+    dailyFreeAvailable: dailyFreeAvailable,
+    canDraw: canDraw,
     CAPSULES_PER_DAY: CAPSULES_PER_DAY,
     CAPSULES_MAX: CAPSULES_MAX,
     dexCategoryCounts: dexCategoryCounts,
