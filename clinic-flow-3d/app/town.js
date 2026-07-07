@@ -110,7 +110,7 @@ const TOWN = (() => {
     }
 
     // 患者トリップ: source: 'house' | 'station' | 'hospital' | 'caremane'
-    requestVisit(type, source, refer) {
+    requestVisit(type, source, refer, seg) {
       let from;
       if (source === 'station') from = STATION_EXIT;
       else if (source === 'hospital') from = HOSPITAL_EXIT;
@@ -124,7 +124,7 @@ const TOWN = (() => {
         x: from.x, y: from.y,
         path: astarGrid(W, H, NOT_ROAD, from, CLINIC_ENTRANCE),
         color: refer ? '#8C7BC4' : (colorByType[type] || '#3E7CA6'),
-        kind: 'patient', type, refer: !!refer
+        kind: 'patient', type, refer: !!refer, seg
       });
     }
 

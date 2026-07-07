@@ -113,6 +113,7 @@ a { color: var(--blue-deep); }
   padding: 7px 10px;
 }
 .speed-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
+.speed-btn.skip { background: var(--amber-pale); border-color: rgba(201,138,45,0.4); color: var(--amber); font-weight: 800; }
 
 .mission-bar {
   max-width: 920px;

@@ -186,7 +186,8 @@ const CLINIC = (() => {
     }
 
     usableBeds() { return Math.min(this.s.beds, this.s.nurses); }
-    usableMachines() { return Math.min(this.s.machines, this.s.pts * 2); }
+    usableMachines() { return Math.min(this.s.machines, this.s.pts * 2 + (this.s.rehaAides || 0)); }
+    rehaCap() { return this.s.pts * 12 + (this.s.rehaAides || 0) * 4; } // 助手が準備を担い回転UP
 
     /* ---------- 患者投入 ---------- */
 
@@ -200,7 +201,8 @@ const CLINIC = (() => {
         phase: 'recepQ',
         arrivedAt: this.t, waitTotal: 0,
         busyUntil: 0, seat: -1, stand: -1,
-        items: [], didReha: false, refer: !!(opts && opts.refer)
+        items: [], didReha: false, refer: !!(opts && opts.refer),
+        seg: (opts && opts.seg) || 'senior'
       };
       this.patients.push(p);
       this.recQueue.push(p);
@@ -277,10 +279,12 @@ const CLINIC = (() => {
         this.seatInWaiting(p, 'waitTreat');
         return;
       }
+      // 客層でリハ必要性が変わる(高齢者・スポーツは高い)
+      const segMul = { senior: 1.2, sports: 1.45, worker: 0.75 }[p.seg] || 1;
       if (r < s.pTreat && this.usableBeds() > 0) {
         this.treatQueue.push(p);
         this.seatInWaiting(p, 'waitTreat');
-      } else if (rehaOk && r < s.pTreat + s.pReha) {
+      } else if (rehaOk && r < s.pTreat + s.pReha * segMul) {
         this.rehaQueue.push(p);
         this.seatInWaiting(p, 'waitReha');
       } else {
@@ -337,7 +341,8 @@ const CLINIC = (() => {
           if (p && this.atSpot(p, L.RECEP.service[w]) && !this.recBusy.includes(p)) {
             this.recBusy[w] = p;
             p.phase = 'recep';
-            p.busyUntil = this.t + triRand(0.6, 1.8);
+            // Web問診・事前受付を導入すると受付が大幅短縮
+            p.busyUntil = this.t + (s.webIntake ? triRand(0.35, 1.0) : triRand(0.6, 1.8));
           }
         }
       }
@@ -394,8 +399,8 @@ const CLINIC = (() => {
         }
       }
 
-      // リハ: PT単位上限(1人1日24単位=12回)に達したら待ちの患者は次回振替
-      if (this.rehaToday >= s.pts * 12 && this.rehaQueue.length) {
+      // リハ: PT単位上限(1人1日24単位=12回、助手で+4単位/人)に達したら次回振替
+      if (this.rehaToday >= this.rehaCap() && this.rehaQueue.length) {
         const waiting = this.rehaQueue.filter((q) => q.phase === 'waitReha');
         for (const p of waiting) {
           this.rehaQueue.splice(this.rehaQueue.indexOf(p), 1);
@@ -412,7 +417,7 @@ const CLINIC = (() => {
           cur.didReha = true;
           this.toCashier(cur);
         }
-        if (!this.machineUsed[i] && this.rehaToday < this.s.pts * 12) { // 1人1日24単位(12回)まで
+        if (!this.machineUsed[i] && this.rehaToday < this.rehaCap()) {
           const idx = this.rehaQueue.findIndex((q) => q.phase === 'waitReha');
           if (idx >= 0) {
             const p = this.rehaQueue.splice(idx, 1)[0];
@@ -453,7 +458,7 @@ const CLINIC = (() => {
         this.patients.splice(this.patients.indexOf(pp), 1);
       });
       const stay = this.t - p.arrivedAt;
-      const report = { type: p.type, items: p.items, didReha: p.didReha, wait: p.waitTotal, stay, viaKiosk };
+      const report = { type: p.type, items: p.items, didReha: p.didReha, wait: p.waitTotal, stay, viaKiosk, seg: p.seg };
       if (this.hooks.onDischarge) {
         const revenue = this.hooks.onDischarge(p, report);
         if (revenue > 0) this.floats.push({ x: p.x, y: p.y, text: `+¥${revenue.toLocaleString()}`, t: 0 });

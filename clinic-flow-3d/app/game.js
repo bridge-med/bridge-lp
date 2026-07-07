@@ -25,11 +25,13 @@
     closed: { label: '休診', min: 0, intake: 0, pay: 0, arr: 0 }
   };
 
+  // 実態準拠の算定構造: 再診料に「何もしなければ外来管理加算」「処方箋料」が付随する
   const FEES = {
-    first: 2900, revisit: 1300, rehab: 1300, checkup: 8000,
+    first: 3000, revisit: 900, kanri: 520, presc: 680, rehab: 900, checkup: 8000,
     treat: 1500, inj: 1800, trig: 1200, physio: 350, xray: 1500, mri: 16000,
     osteo: 3800, goods: 3500, goodsCogs: 2100, prpCogs: 12000
   };
+  const SEG_NAMES = { senior: '高齢者', worker: '勤労者', sports: 'スポーツ' };
   // 運動器リハ: 1回=2単位で計算。(III)85点/(II)170点/(I)185点 ×2単位×10円
   const REHA_FEE = [0, 1700, 3400, 3700];
   const REHA_NAMES = ['未届出', '運動器リハ(III)', '運動器リハ(II)', '運動器リハ(I)'];
@@ -54,8 +56,9 @@
     recep:   { label: '受付を増員', costs: [60000, 60000, 80000], day: COSTS.recepDay, hint: '受付窓口が増える(日給¥10,000)' },
     chairs:  { label: '待合椅子を+2脚', costs: null, flat: 40000, step: 2, hint: '立ち待ちはクレームと離反のもと' },
     beds:    { label: '処置ベッドを増設', costs: null, flat: 150000, hint: '処置(創傷・固定等)1件+¥1,500。看護師とセット' },
-    machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2)。面積要件は増築で' },
-    physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置(1件¥350)。PT不要・高回転。1台35件/日' }
+    machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2+助手)。面積要件は増築で' },
+    physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置(1件¥350)。PT不要・高回転。1台35件/日' },
+    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000], day: 10000, hint: 'リハ室の回転対策: PT単位上限+4/人・機器稼働+1(日給¥10,000)' }
   };
 
   const EXPAND_COST = 5000000;
@@ -128,7 +131,9 @@
     { t: '⑫ 設備投資は回収期間で決める', b: 'MRI¥1,800万は1日3件×¥16,000=¥48,000の増収なら維持費を引いて回収約1.5年。「欲しい」ではなく「何日で返ってくるか」で判断する。' },
     { t: '⑬ KPIは絞って毎日見る', b: '指標を20個並べたダッシュボードは誰も見ない。日次は3〜4個(来院数・新患・単価・実施率など)に絞り、週次で構造(単価分解・継続率)、月次で計画差異を見る。' },
     { t: '⑭ 診療時間は採算で決める', b: '日曜開院は手当1.4倍でも競合が閉まっている分だけ新患が増える。半日診療は人件費6割。1コマごとの採算を見て開けるコマを決める。' },
-    { t: '⑮ 自費は価値設計から', b: 'PRPもAGAも「保険でできないこと」への対価。価格は原価ではなく価値と価格弾力性で決める。評判が低いうちは売れない — 保険診療の信頼が自費の土台。' }
+    { t: '⑮ 自費は価値設計から', b: 'PRPもAGAも「保険でできないこと」への対価。価格は原価ではなく価値と価格弾力性で決める。評判が低いうちは売れない — 保険診療の信頼が自費の土台。' },
+    { t: '⑯ 外来管理加算のトレードオフ', b: '再診で処置・注射・リハ・物療を何もしなければ外来管理加算(52点)が付く。注射をすれば加算は消えるが注射料+薬剤が入る — 「何もしない」にも値段が付いている構造を理解して、医学的必要性で選ぶ。' },
+    { t: '⑰ 客層(セグメント)から逆算する', b: '高齢者=リハ・骨粗鬆症・定着率◎。勤労者=健診・AGA・土日夜間。スポーツ=外傷・MRI・PRP・単価◎。チャネル(ケアマネ/企業/クラブ/学校)ごとに来る客層は違う — 「誰に来てほしいか」から営業先と広告を選ぶ。' }
   ];
 
   // KPI定義(選んでピン留めできる)
@@ -153,9 +158,9 @@
 
   const settings = {
     floorLv: 1,
-    doctors: 1, nurses: 1, pts: 0, receptionists: 1,
+    doctors: 1, nurses: 1, pts: 0, receptionists: 1, rehaAides: 0,
     chairs: 6, beds: 1, machines: 0, physio: 0,
-    kiosk: false, reserve: false, reviewCare: false,
+    kiosk: false, reserve: false, reviewCare: false, webIntake: false,
     mri: false, dexa: false,
     rehaLevel: 0,
     examMean: 6, pTreat: 0.15, pReha: 0.35, pInj: 0.2, pTrig: 0.12, pPhysio: 0.35,
@@ -174,6 +179,8 @@
     adPressure: 0, adReport: null, adSpendToday: 0,
     osteoPool: 0, agaPool: 0,
     kpiPins: ['visits', 'newp', 'unit', 'mix'],
+    targetSeg: 'balance',
+    cum: { revenue: 0, profit: 0 }, annualDone: false,
     schedule: {}, arrivals: [], nextArrivalIdx: 0,
     today: null, history: [],
     branches: [],
@@ -203,7 +210,8 @@
     return {
       revenue: 0, cost: 0, profit: 0, patients: 0, waitSum: 0, waitN: 0,
       rehaCount: 0, goodsCogs: 0, jihiCogs: 0,
-      newCount: 0, injCount: 0, trigCount: 0, physioCount: 0, xrayCount: 0, mriCount: 0, prpCount: 0, osteoVisits: 0, treatCount: 0,
+      newCount: 0, injCount: 0, trigCount: 0, physioCount: 0, xrayCount: 0, mriCount: 0, prpCount: 0, osteoVisits: 0, treatCount: 0, kanriCount: 0,
+      segCounts: { senior: 0, worker: 0, sports: 0 },
       rev: { consult: 0, inj: 0, treat: 0, physio: 0, img: 0, reha: 0, osteo: 0, checkup: 0, jihi: 0 },
       brRevenue: 0, brProfit: 0
     };
@@ -219,6 +227,7 @@
           billboard: G.billboard, relations: G.relations,
           loans: G.loans, ads: G.ads, adPressure: G.adPressure,
           osteoPool: G.osteoPool, agaPool: G.agaPool, kpiPins: G.kpiPins,
+          targetSeg: G.targetSeg, cum: G.cum, annualDone: G.annualDone,
           schedule: G.schedule, history: G.history.slice(-40),
           branches: G.branches, missionIdx: G.missionIdx, missionDone: G.missionDone,
           tutorialDone: G.tutorialDone, plan: G.plan
@@ -235,6 +244,15 @@
       Object.assign(settings, d.settings);
       Object.assign(G, d.g);
       Object.keys(REL_DEF).forEach((k) => { if (!G.relations[k]) G.relations[k] = { lv: 0, last: 0 }; });
+      if (!G.cum) G.cum = { revenue: 0, profit: 0 };
+      // 旧セーブの分院にv4フィールドを補完
+      for (const br of G.branches) {
+        if (br.floorLv === undefined) br.floorLv = 1;
+        if (br.physio === undefined) br.physio = 0;
+        if (br.pInj === undefined) br.pInj = 0.2;
+        if (br.pReha === undefined) br.pReha = 0.35;
+        if (br.mri === undefined) br.mri = false;
+      }
       return true;
     } catch (e) { return false; }
   }
@@ -257,32 +275,49 @@
     onDischarge(p, report) {
       let revenue = 0;
       const T = G.today;
+      const seg = report.seg || 'senior';
+      T.segCounts[seg] = (T.segCounts[seg] || 0) + 1;
+      let didProcedure = false; // 処置・注射・リハ・物療のいずれかを実施したか(外来管理加算の判定)
+
       if (report.type === 'first') { revenue += FEES.first; T.rev.consult += FEES.first; T.newCount++; }
       if (report.type === 'revisit' || report.type === 'rehab') { revenue += FEES.revisit; T.rev.consult += FEES.revisit; }
       if (report.type === 'checkup') { revenue += FEES.checkup; T.rev.checkup += FEES.checkup; }
 
       for (const it of report.items) {
-        if (it === 'treat') { revenue += FEES.treat; T.rev.treat += FEES.treat; T.treatCount++; }
-        if (it === 'inj') { revenue += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; }
-        if (it === 'trig') { revenue += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; }
+        if (it === 'treat') { revenue += FEES.treat; T.rev.treat += FEES.treat; T.treatCount++; didProcedure = true; }
+        if (it === 'inj') { revenue += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; didProcedure = true; }
+        if (it === 'trig') { revenue += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; didProcedure = true; }
         if (it === 'reha') {
           const f = REHA_FEE[settings.rehaLevel];
-          revenue += f; T.rev.reha += f; T.rehaCount++;
+          revenue += f; T.rev.reha += f; T.rehaCount++; didProcedure = true;
         }
       }
 
-      // 画像(X線は初診中心、MRIは装置があれば)
-      if (report.type === 'first' && Math.random() < 0.7) { revenue += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
-      else if (report.type === 'revisit' && Math.random() < 0.08) { revenue += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
-      if (settings.mri && T.mriCount < 8 && (report.type === 'first' || p.refer) && Math.random() < 0.3) {
-        revenue += FEES.mri; T.rev.img += FEES.mri; T.mriCount++;
-      }
       // 物療(消炎鎮痛等処置): 機器があれば高回転で回る
       if (settings.physio > 0 && report.type !== 'checkup' && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio) {
-        revenue += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++;
+        revenue += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; didProcedure = true;
       }
-      // 骨粗鬆症プログラム(DEXA): 初診の一部が継続診療に乗る
-      if (settings.dexa && report.type === 'first' && Math.random() < 0.15) G.osteoPool++;
+
+      // 外来管理加算: 再診で処置・注射・リハ・物療を「何もしなかった」場合のみ算定
+      if ((report.type === 'revisit' || report.type === 'rehab') && !didProcedure) {
+        revenue += FEES.kanri; T.rev.consult += FEES.kanri; T.kanriCount++;
+      }
+      // 処方箋料(処方が出る患者)
+      if ((report.type === 'first' || report.type === 'revisit') && Math.random() < 0.55) {
+        revenue += FEES.presc; T.rev.consult += FEES.presc;
+      } else if (report.type === 'rehab' && Math.random() < 0.15) {
+        revenue += FEES.presc; T.rev.consult += FEES.presc;
+      }
+
+      // 画像(X線は初診中心、MRIは装置があれば。スポーツ層は精査率が高い)
+      if (report.type === 'first' && Math.random() < 0.7) { revenue += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
+      else if (report.type === 'revisit' && Math.random() < 0.08) { revenue += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
+      const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
+      if (settings.mri && T.mriCount < 8 && (report.type === 'first' || p.refer) && Math.random() < 0.3 * mriMul) {
+        revenue += FEES.mri; T.rev.img += FEES.mri; T.mriCount++;
+      }
+      // 骨粗鬆症プログラム(DEXA): 高齢初診の一部が継続診療に乗る
+      if (settings.dexa && report.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
 
       let sat = clamp(1.25 - report.wait / 40, 0, 1);
       if (report.didReha) sat = Math.min(1, sat + 0.1);
@@ -305,7 +340,8 @@
       G.rep += (sat * 100 - G.rep) * 0.01;
 
       const showBoost = settings.reserve ? 0.05 : 0;
-      if ((report.type === 'first' || report.type === 'revisit') && !report.didReha && Math.random() < 0.45 * sat + showBoost) {
+      const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45; // 客層で再診定着が違う
+      if ((report.type === 'first' || report.type === 'revisit') && !report.didReha && Math.random() < loyalty * sat + showBoost) {
         addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
       }
       if (report.didReha && report.type !== 'rehab') {
@@ -320,7 +356,7 @@
   clinicIso.W = clinic.L.W; clinicIso.H = clinic.L.H;
 
   const town = new TOWN.TownSim({
-    onPatientArrive(wk) { clinic.spawn(wk.type, { refer: wk.refer }); }
+    onPatientArrive(wk) { clinic.spawn(wk.type, { refer: wk.refer, seg: wk.seg }); }
   });
 
   /* ================= 1日の計画 ================= */
@@ -366,8 +402,20 @@
       return;
     }
 
+    // 客層ミックス(ターゲット方針で商圏の獲得層が寄る)
+    const baseMix = { senior: 0.55, worker: 0.33, sports: 0.12 };
+    if (G.targetSeg !== 'balance') {
+      baseMix[G.targetSeg] += 0.22;
+      const tot = baseMix.senior + baseMix.worker + baseMix.sports;
+      Object.keys(baseMix).forEach((k) => { baseMix[k] /= tot; });
+    }
+    const pickMix = (mix) => {
+      const r = Math.random();
+      return r < mix.senior ? 'senior' : r < mix.senior + mix.worker ? 'worker' : 'sports';
+    };
+
     const arrivals = [];
-    const push = (type, source, refer) => arrivals.push({ t: 0, type, source, refer: !!refer });
+    const push = (type, source, refer, seg) => arrivals.push({ t: 0, type, source, refer: !!refer, seg: seg || pickMix(baseMix) });
     const sundayBoost = weekdayOf(G.day) === 6 ? 1.3 : 1; // 日曜開院は競合が休み
 
     // 自然新患
@@ -388,21 +436,22 @@
       const spend = clicks * cpcEff;
       G.adSpendToday += spend;
       report[kw.id] = { spend, clicks, pats, cpcEff };
-      for (let i = 0; i < pats; i++) push('first', kw.source, !!kw.reha);
+      const adSeg = kw.id === 'sports' ? 'sports' : kw.id === 'pain' ? (Math.random() < 0.55 ? 'worker' : 'senior') : null;
+      for (let i = 0; i < pats; i++) push('first', kw.source, !!kw.reha, adSeg);
     }
     G.adReport = report;
 
-    if (G.billboard) for (let i = 0; i < 1 + Math.round(Math.random()); i++) push('first', 'station');
+    if (G.billboard) for (let i = 0; i < 1 + Math.round(Math.random()); i++) push('first', 'station', false, Math.random() < 0.6 ? 'worker' : 'senior');
 
-    // 営業関係からの紹介(関係レベル依存)
-    for (let i = 0; i < relLv('hospital'); i++) push('first', 'hospital', true);
+    // 営業関係からの紹介(関係レベル依存・チャネルごとに客層が違う)
+    for (let i = 0; i < relLv('hospital'); i++) push('first', 'hospital', true, Math.random() < 0.7 ? 'senior' : 'worker');
     if (settings.rehaLevel > 0) {
-      for (let i = 0; i < frac(relLv('caremane') * 0.7); i++) push('first', 'caremane', true);
-      for (let i = 0; i < frac(relLv('rouken') * 0.7); i++) push('first', 'caremane', true);
+      for (let i = 0; i < frac(relLv('caremane') * 0.7); i++) push('first', 'caremane', true, 'senior');
+      for (let i = 0; i < frac(relLv('rouken') * 0.7); i++) push('first', 'caremane', true, 'senior');
     }
-    for (let i = 0; i < frac(relLv('company') * 1.5); i++) push('checkup', 'station');
-    for (let i = 0; i < frac(relLv('sports') * 0.6); i++) push('first', 'station', true);
-    for (let i = 0; i < frac(relLv('school') * 0.5); i++) push('first', 'station');
+    for (let i = 0; i < frac(relLv('company') * 1.5); i++) push('checkup', 'station', false, 'worker');
+    for (let i = 0; i < frac(relLv('sports') * 0.6); i++) push('first', 'station', true, 'sports');
+    for (let i = 0; i < frac(relLv('school') * 0.5); i++) push('first', 'station', false, 'sports');
 
     // 再診・リハ(予約済み)
     const due = G.schedule[G.day] || { revisit: 0, rehab: 0 };
@@ -426,18 +475,26 @@
     return st.doctors * COSTS.doctorDay + st.nurses * COSTS.nurseDay + st.pts * COSTS.ptDay + st.receptionists * COSTS.recepDay;
   }
 
+  // マップ上の3拠点以降は「郊外N号院」(マップ外・無制限)
+  function siteOf(br) {
+    return SITES.find((s) => s.id === br.siteId) || { id: br.siteId, name: br.name, rivalRep: 64, bigger: 1.05, rehaBias: 1.1 };
+  }
+
   function branchKijunCheck(br) {
-    if (br.rehaLevel === 3) br.rehaLevel = 2;
+    const ok3 = br.staff.pts >= 4 && (br.floorLv || 1) >= 2;
+    if (br.rehaLevel === 3 && !ok3) { br.rehaLevel = br.staff.pts >= 2 ? 2 : br.staff.pts >= 1 ? 1 : 0; return true; }
     if (br.rehaLevel === 2 && br.staff.pts < 2) { br.rehaLevel = br.staff.pts >= 1 ? 1 : 0; return true; }
     if (br.rehaLevel === 1 && br.staff.pts < 1) { br.rehaLevel = 0; return true; }
     return false;
   }
 
+  function branchRent(br) { return (br.floorLv || 1) >= 2 ? 50000 : COSTS.branchRent; }
+
   function branchDay(br, spec) {
-    const site = SITES.find((s) => s.id === br.siteId);
-    if (branchKijunCheck(br)) toast(`⚠️ ${br.name}: 専従PTが要件を割り、施設基準が降格しました`);
+    const site = siteOf(br);
+    if (branchKijunCheck(br)) toast(`⚠️ ${br.name}: 施設基準の要件割れで降格しました(専従PT・面積)`);
     if (spec.kind === 'closed') {
-      const cost = COSTS.branchRent + COSTS.branchBase;
+      const cost = branchRent(br) + COSTS.branchBase + (br.mri ? COSTS.mriMaint : 0);
       br.last = { revenue: 0, cost, profit: -cost, visits: 0, reha: 0 };
       br.profit7.push(-cost);
       if (br.profit7.length > 7) br.profit7.shift();
@@ -451,19 +508,26 @@
     const visitsExam = Math.min(nNewRaw + revisRaw, examCap);
     const scale = (nNewRaw + revisRaw) > 0 ? visitsExam / (nNewRaw + revisRaw) : 0;
     const nNew = nNewRaw * scale, revis = revisRaw * scale;
-    const rehaCap = Math.min(br.machines, br.staff.pts * 2) * 26 * f;
+    // リハ: 機器×PT稼働と、PT単位上限(1人24単位=12回)の両方でキャップ
+    const rehaCap = Math.min(Math.min(br.machines, br.staff.pts * 2) * 26, br.staff.pts * 12) * f;
     const rehaVisits = Math.min(br.rehabPool, rehaCap);
     const rehaFee = REHA_FEE[br.rehaLevel];
-    const starts = br.rehaLevel > 0 ? Math.min(visitsExam * 0.35 * site.rehaBias, Math.max(0, rehaCap - rehaVisits)) : 0;
-    // 分院も注射・物療で稼ぐ(本院の方針を踏襲)
-    const injRev = visitsExam * (settings.pInj * FEES.inj + settings.pTrig * FEES.trig) * 0.8;
+    const starts = br.rehaLevel > 0 ? Math.min(visitsExam * (br.pReha || 0.35) * site.rehaBias, Math.max(0, rehaCap - rehaVisits)) : 0;
+    // 分院ごとの診療方針(注射・物療)
+    const injRev = visitsExam * (br.pInj || 0.2) * 2000;
+    const physioN = Math.min(visitsExam * 0.45, (br.physio || 0) * 30 * f);
     const treats = visitsExam * 0.12 * Math.min(1, br.staff.nurses);
+    const mriN = br.mri ? Math.min(nNew * 0.3, 6 * f) : 0;
     const load = visitsExam / Math.max(1, examCap);
     const sat = clamp(1.2 - load * 0.55, 0.35, 1);
 
-    const revenue = Math.round(nNew * (FEES.first + FEES.xray * 0.6) + revis * FEES.revisit + rehaVisits * (FEES.rehab + rehaFee) + treats * FEES.treat + injRev);
+    const revenue = Math.round(
+      nNew * (FEES.first + FEES.xray * 0.6) + revis * 1500 +
+      rehaVisits * (FEES.rehab + rehaFee) + treats * FEES.treat + injRev +
+      physioN * FEES.physio + mriN * FEES.mri
+    );
     const visits = Math.round(visitsExam + rehaVisits);
-    const cost = Math.round(branchStaffCost(br.staff) * spec.pay + COSTS.branchRent + COSTS.branchBase + visits * COSTS.perPatient);
+    const cost = Math.round(branchStaffCost(br.staff) * spec.pay + branchRent(br) + COSTS.branchBase + (br.mri ? COSTS.mriMaint : 0) + visits * COSTS.perPatient);
     const profit = revenue - cost;
 
     br.revisitPool = br.revisitPool * 0.55 + visitsExam * 0.45 * sat;
@@ -485,7 +549,7 @@
   /* ================= 日次決算 ================= */
 
   function mainStaffCost() {
-    return (settings.doctors - 1) * COSTS.doctorDay + settings.nurses * COSTS.nurseDay + settings.pts * COSTS.ptDay + settings.receptionists * COSTS.recepDay;
+    return (settings.doctors - 1) * COSTS.doctorDay + settings.nurses * COSTS.nurseDay + settings.pts * COSTS.ptDay + settings.receptionists * COSTS.recepDay + (settings.rehaAides || 0) * 10000;
   }
 
   function loanInterestDay() {
@@ -552,12 +616,15 @@
     }
 
     G.money += T.profit + T.brProfit;
+    G.cum.revenue += T.revenue + T.brRevenue;
+    G.cum.profit += T.profit + T.brProfit;
     G.history.push({
       day: G.day, wd: weekdayOf(G.day), kind: spec.kind,
       revenue: T.revenue, cost: T.cost, profit: T.profit,
       patients: T.patients, avgWait: T.avgWait, rehaCount: T.rehaCount,
       newCount: T.newCount, injCount: T.injCount, trigCount: T.trigCount,
-      physioCount: T.physioCount, mriCount: T.mriCount,
+      physioCount: T.physioCount, mriCount: T.mriCount, kanriCount: T.kanriCount,
+      segS: T.segCounts.senior, segW: T.segCounts.worker, segP: T.segCounts.sports,
       jihi: T.rev.jihi, staffCost: Math.round(mainStaffCost() * spec.pay), pts: settings.pts,
       brRevenue: T.brRevenue, brProfit: T.brProfit
     });
@@ -589,6 +656,7 @@
       toast(`⚠️ 施設基準の要件割れ! ${REHA_NAMES[settings.rehaLevel]}に降格しました`);
     }
 
+    G.rep = clamp(G.rep, 15, 97);
     checkMission(T);
 
     if (G.day % 7 === 0 && G.history.length >= 8 && spec.kind !== 'closed') weeklyDigest();
@@ -609,6 +677,18 @@
     G.day++;
     G.t = 0;
     clinic.rehaToday = 0;
+    if (G.day === 366 && !G.annualDone) {
+      G.annualDone = true;
+      const title = G.cum.revenue >= 250000000 ? '👑 地域医療の帝王(殿堂入り)'
+        : G.cum.revenue >= 150000000 ? '🏆 名経営者'
+        : G.cum.revenue >= 80000000 ? '🛡️ 堅実経営者' : '🎗️ 一年を生き抜いた経営者';
+      showModal('🎊 Day 365 到達 — 年次決算', `
+        <div class="pnl-row"><span>年商(法人・365日)</span><b>${yen(G.cum.revenue)}</b></div>
+        <div class="pnl-row"><span>年間損益</span><b>${G.cum.profit >= 0 ? '+' : ''}${yen(G.cum.profit)}</b></div>
+        <div class="pnl-row"><span>拠点数</span><b>${1 + G.branches.length}</b></div>
+        <div class="pnl-row"><span>法人スタッフ</span><b>医師${corpStaff().doctors}・PT${corpStaff().pts}ほか</b></div>
+        <div class="lesson-box"><b>称号: ${title}</b><p>1年間の意思決定、おつかれさまでした。2年目はさらなる高みへ — 経営は続く。</p></div>`, '2年目へ');
+    }
     planDay();
     save();
     renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip();
@@ -807,16 +887,17 @@
   }
   function shopMax(key) {
     const M = clinic.L.MAX;
-    return { doctor: M.doctors, nurse: M.nurses, pt: M.pts, recep: M.receptionists, chairs: M.chairs, beds: M.beds, machines: M.machines, physio: 8 }[key];
+    return { doctor: M.doctors, nurse: M.nurses, pt: M.pts, recep: M.receptionists, chairs: M.chairs, beds: M.beds, machines: M.machines, physio: 8, rehaAide: 4 }[key];
   }
   function settingValue(key) {
-    return { doctor: settings.doctors, nurse: settings.nurses, pt: settings.pts, recep: settings.receptionists, chairs: settings.chairs, beds: settings.beds, machines: settings.machines, physio: settings.physio }[key];
+    return { doctor: settings.doctors, nurse: settings.nurses, pt: settings.pts, recep: settings.receptionists, chairs: settings.chairs, beds: settings.beds, machines: settings.machines, physio: settings.physio, rehaAide: settings.rehaAides }[key];
   }
   function setSettingValue(key, v) {
     if (key === 'doctor') settings.doctors = v;
     else if (key === 'nurse') settings.nurses = v;
     else if (key === 'pt') settings.pts = v;
     else if (key === 'recep') settings.receptionists = v;
+    else if (key === 'rehaAide') settings.rehaAides = v;
     else settings[key] = v;
   }
 
@@ -834,7 +915,7 @@
   }
   function fire(key) {
     const cur = settingValue(key);
-    const min = { doctor: 1, nurse: 0, pt: 0, recep: 1, chairs: 2, beds: 0, machines: 0, physio: 0 }[key];
+    const min = { doctor: 1, nurse: 0, pt: 0, recep: 1, chairs: 2, beds: 0, machines: 0, physio: 0, rehaAide: 0 }[key];
     const step = SHOP[key].step || 1;
     if (cur - step < min) { toast('これ以上は減らせません'); return; }
     setSettingValue(key, cur - step);
@@ -910,6 +991,7 @@
     $('opReserve').classList.toggle('on', settings.reserve);
     $('opKiosk').classList.toggle('on', settings.kiosk);
     $('opReview').classList.toggle('on', settings.reviewCare);
+    $('opWeb').classList.toggle('on', settings.webIntake);
     renderJihi();
   }
 
@@ -982,6 +1064,15 @@
     toast(settings.reviewCare ? 'クチコミに丁寧に返信する方針にしました' : 'クチコミ返信をやめました');
     renderShop(); save();
   });
+  $('opWeb').addEventListener('click', () => {
+    if (!settings.webIntake) {
+      if (G.money < 200000) { toast('資金が足りません(¥200,000)'); return; }
+      G.money -= 200000;
+      settings.webIntake = true;
+      toast('📱 Web問診・事前受付を導入! 受付時間が約45%短縮されます(受付ボトルネック対策)');
+    } else { settings.webIntake = false; }
+    renderShop(); updateHeader(); save();
+  });
 
   [['examMean', 'vExamMean', (v) => `${v}分`, (v) => v],
    ['pTreat', 'vPTreat', (v) => `${v}%`, (v) => v / 100],
@@ -1037,6 +1128,19 @@
   /* ================= UI: タウン(広告・営業) ================= */
 
   function renderAds() {
+    const tEl = $('adTarget');
+    if (tEl) {
+      const segLabel = { balance: '🎯 バランス', senior: '👴 高齢者重視', worker: '💼 勤労者重視', sports: '🏃 スポーツ重視' };
+      const lastH = G.history.filter((h) => h.kind !== 'closed').slice(-1)[0];
+      tEl.innerHTML = `
+        <div class="op-row">${Object.entries(segLabel).map(([k, v]) => `<button class="op-btn ${G.targetSeg === k ? 'on' : ''}" data-tseg="${k}">${v}</button>`).join('')}</div>
+        <p class="ctrl-note">高齢者=リハ・骨粗鬆症・定着◎ / 勤労者=健診・AGA・定着△ / スポーツ=MRI・PRP・単価◎${lastH && lastH.segS !== undefined ? ` — 昨日の客層: 高齢${lastH.segS}・勤労${lastH.segW}・スポーツ${lastH.segP}人` : ''}</p>`;
+      tEl.querySelectorAll('[data-tseg]').forEach((b) => b.addEventListener('click', () => {
+        G.targetSeg = b.dataset.tseg;
+        toast(`🎯 ターゲット方針: ${segLabel[G.targetSeg]}(商圏からの新患の客層が寄ります)`);
+        renderAds(); save();
+      }));
+    }
     const el = $('adsList');
     if (!el) return;
     el.innerHTML = KEYWORDS.map((kw) => {
@@ -1157,7 +1261,8 @@
 
   /* ================= UI: 法人(分院) ================= */
 
-  const BR_ROLES = [['doctors', '医師', 1, 2], ['nurses', '看護師', 0, 2], ['pts', 'PT', 0, 8], ['receptionists', '受付', 1, 2]];
+  const BR_ROLES = [['doctors', '医師', 1, 3], ['nurses', '看護師', 0, 3], ['pts', 'PT', 0, 10], ['receptionists', '受付', 1, 2]];
+  const BR_EXPAND_COST = 4000000;
 
   function branchHireCost(role, cur) {
     if (role === 'doctors') return 800000;
@@ -1182,16 +1287,17 @@
       </div>`;
 
     const brCards = G.branches.map((br, bi) => {
-      const kijunBtns = KIJUN.filter((k) => k.lv <= 2).map((k) => {
+      const machineMax = (br.floorLv || 1) >= 2 ? 12 : 6;
+      const kijunBtns = KIJUN.map((k) => {
         if (br.rehaLevel === k.lv) return `<span class="kijun-badge">${k.name} 届出済</span>`;
-        const ok = k.ok(br.staff.pts, 1);
+        const ok = k.lv === 3 ? (br.staff.pts >= 4 && (br.floorLv || 1) >= 2) : k.ok(br.staff.pts, 1);
         return `<button class="mini-btn ${ok ? 'plus' : ''}" data-brkijun="${bi}:${k.lv}" ${ok ? '' : 'disabled'}>${k.name}</button>`;
       }).join(' ');
       const p7 = br.profit7.reduce((a, x) => a + x, 0);
       return `
       <div class="branch-card">
         <div class="branch-head">
-          <b>🏥 ${br.name}</b>
+          <b>🏥 ${br.name}${(br.floorLv || 1) >= 2 ? ' <small>🏗100㎡</small>' : ''}${br.mri ? ' <small>🧲MRI</small>' : ''}</b>
           <span class="branch-stat">評判 ${Math.round(br.rep)} / 認知 ${Math.round(br.aw * 100)}% / ${REHA_NAMES[br.rehaLevel]}</span>
         </div>
         ${br.last ? `<div class="branch-pnl">昨日: 患者${br.last.visits}人(リハ${br.last.reha}) 売上${yen(br.last.revenue)} 損益 <b class="${br.last.profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(br.last.profit)}</b> / 直近7日計 <b class="${p7 >= 0 ? 'pos-t' : 'neg-t'}">${yen(p7)}</b></div>` : '<div class="branch-pnl">開院準備中 — 明日から診療開始</div>'}
@@ -1200,39 +1306,57 @@
             <div class="plan-step"><span>${label} <small>最大${max}</small></span>
               <div><button class="mini-btn" data-brfire="${bi}:${key}">−</button><b>${br.staff[key]}</b><button class="mini-btn plus" data-brhire="${bi}:${key}">＋ ${yen(branchHireCost(key, br.staff[key]))}</button></div>
             </div>`).join('')}
-          <div class="plan-step"><span>リハ機器 <small>最大8・稼働=min(機器,PT×2)</small></span>
+          <div class="plan-step"><span>リハ機器 <small>最大${machineMax}・稼働=min(機器,PT×2)</small></span>
             <div><button class="mini-btn" data-brmfire="${bi}">−</button><b>${br.machines}</b><button class="mini-btn plus" data-brmachine="${bi}">＋ ${yen(300000)}</button></div>
           </div>
+          <div class="plan-step"><span>物療機器 <small>最大6・1台30件/日</small></span>
+            <div><button class="mini-btn" data-brpfire="${bi}">−</button><b>${br.physio || 0}</b><button class="mini-btn plus" data-brphysio="${bi}">＋ ${yen(80000)}</button></div>
+          </div>
         </div>
-        <div class="branch-kijun">施設基準(分院は45㎡想定 → 最大II・<b>専従はこの分院のPTのみ</b>): ${kijunBtns}</div>
+        <div class="ctrl-grid">
+          <label class="ctrl"><span class="ctrl-head">注射方針 <b>${Math.round((br.pInj || 0.2) * 100)}%</b></span>
+            <input type="range" data-brpinj="${bi}" min="0" max="50" step="5" value="${Math.round((br.pInj || 0.2) * 100)}"></label>
+          <label class="ctrl"><span class="ctrl-head">リハ提案方針 <b>${Math.round((br.pReha || 0.35) * 100)}%</b></span>
+            <input type="range" data-brpreha="${bi}" min="0" max="70" step="5" value="${Math.round((br.pReha || 0.35) * 100)}"></label>
+        </div>
+        <div class="op-row">
+          ${(br.floorLv || 1) < 2 ? `<button class="op-btn" data-brexpand="${bi}">🏗 増築100㎡ <small>${yen(BR_EXPAND_COST)}</small></button>` : ''}
+          ${!br.mri ? `<button class="op-btn" data-brmri="${bi}">🧲 MRI導入 <small>${yen(MRI_COST)}</small></button>` : ''}
+          <button class="op-btn" data-brsales="${bi}">📣 地域営業 <small>¥30,000(認知+1.5%)</small></button>
+        </div>
+        <div class="branch-kijun">施設基準(<b>専従はこの分院のPTのみ</b>。(I)は増築100㎡+PT4名): ${kijunBtns}</div>
       </div>`;
     }).join('');
 
-    const openable = SITES.filter((s) => !G.branches.some((b) => b.siteId === s.id));
-    const openSection = openable.length ? `
+    const exCount = G.branches.filter((b) => b.siteId.startsWith('ex')).length;
+    const generic = { id: 'ex' + (exCount + 1), name: `郊外${exCount + 1}号院`, cost: 12000000 + exCount * 2000000, desc: '隣町の新興住宅地。マップ外だが商圏は良好。分院数に上限はありません。' };
+    const openable = [...SITES.filter((s) => !G.branches.some((b) => b.siteId === s.id)), generic];
+    const openSection = `
       <h3 class="sub-title">🏗 新しい分院を開設する</h3>
       <p class="plan-lead">条件: <b>事業計画の策定 ${G.plan ? '✅' : '❌'}</b> / <b>本院評判70以上 ${G.rep >= 70 ? '✅' : `❌(現在${Math.round(G.rep)})`}</b> / 開設資金</p>
       ${openable.map((s) => {
         const can = G.plan && G.rep >= 70 && G.money >= s.cost;
         return `<div class="shop-row">
           <div class="shop-info"><span class="shop-name">${s.name} <small class="shop-max">${yen(s.cost)}</small></span><span class="shop-hint">${s.desc}</span></div>
-          <div class="shop-btns"><button class="mini-btn ${can ? 'plus' : ''}" data-open="${s.id}" ${can ? '' : 'disabled'}>開設する</button></div>
+          <div class="shop-btns"><button class="mini-btn ${can ? 'plus' : ''}" data-open="${s.id}" data-opencost="${s.cost}" data-openname="${s.name}" ${can ? '' : 'disabled'}>開設する</button></div>
         </div>`;
-      }).join('')}` : '<p class="plan-lead">🏆 全拠点を開設済みです。</p>';
+      }).join('')}`;
 
     el.innerHTML = summary + (brCards || '<p class="plan-lead">まだ分院はありません。本院を軌道に乗せてから(評判70+事業計画+資金)。<b>施設基準の専従要件は分院ごと</b> — PT採用が本当の壁です。</p>') + openSection;
 
     el.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => {
-      const site = SITES.find((s) => s.id === b.dataset.open);
-      if (G.money < site.cost) { toast('資金が足りません'); return; }
-      G.money -= site.cost;
+      const cost = Number(b.dataset.opencost);
+      const name = b.dataset.openname;
+      if (G.money < cost) { toast('資金が足りません'); return; }
+      G.money -= cost;
       G.branches.push({
-        siteId: site.id, name: site.name, openedDay: G.day,
+        siteId: b.dataset.open, name, openedDay: G.day,
         staff: { doctors: 1, nurses: 1, pts: 0, receptionists: 1 },
-        machines: 0, rehaLevel: 0, aw: 0.12, rep: 52, revisitPool: 4, rehabPool: 0, profit7: [], last: null
+        machines: 0, physio: 0, floorLv: 1, mri: false, pInj: 0.2, pReha: 0.35,
+        rehaLevel: 0, aw: 0.12, rep: 52, revisitPool: 4, rehabPool: 0, profit7: [], last: null
       });
       town.setBranches(G.branches.map((x) => x.siteId));
-      toast(`🎉 ${site.name} を開設しました! タウンマップにも建ちました`);
+      toast(`🎉 ${name} を開設しました!`);
       renderCorp(); updateHeader(); save();
     }));
     el.querySelectorAll('[data-brhire]').forEach((b) => b.addEventListener('click', () => {
@@ -1257,7 +1381,8 @@
     }));
     el.querySelectorAll('[data-brmachine]').forEach((b) => b.addEventListener('click', () => {
       const br = G.branches[Number(b.dataset.brmachine)];
-      if (br.machines >= 8) { toast('これ以上は入りません'); return; }
+      const max = (br.floorLv || 1) >= 2 ? 12 : 6;
+      if (br.machines >= max) { toast('これ以上は入りません(増築で上限UP)'); return; }
       if (G.money < 300000) { toast('資金が足りません'); return; }
       G.money -= 300000;
       br.machines++;
@@ -1268,6 +1393,52 @@
       if (br.machines <= 0) return;
       br.machines--;
       renderCorp(); save();
+    }));
+    el.querySelectorAll('[data-brphysio]').forEach((b) => b.addEventListener('click', () => {
+      const br = G.branches[Number(b.dataset.brphysio)];
+      if ((br.physio || 0) >= 6) { toast('これ以上は入りません'); return; }
+      if (G.money < 80000) { toast('資金が足りません'); return; }
+      G.money -= 80000;
+      br.physio = (br.physio || 0) + 1;
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-brpfire]').forEach((b) => b.addEventListener('click', () => {
+      const br = G.branches[Number(b.dataset.brpfire)];
+      if ((br.physio || 0) <= 0) return;
+      br.physio--;
+      renderCorp(); save();
+    }));
+    el.querySelectorAll('[data-brexpand]').forEach((b) => b.addEventListener('click', () => {
+      const br = G.branches[Number(b.dataset.brexpand)];
+      if (G.money < BR_EXPAND_COST) { toast(`資金が足りません(${yen(BR_EXPAND_COST)})`); return; }
+      G.money -= BR_EXPAND_COST;
+      br.floorLv = 2;
+      toast(`🏗 ${br.name} を増築(100㎡)! 機器12台・運動器リハ(I)の面積要件を満たしました`);
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-brmri]').forEach((b) => b.addEventListener('click', () => {
+      const br = G.branches[Number(b.dataset.brmri)];
+      if (G.money < MRI_COST) { toast(`資金が足りません(${yen(MRI_COST)})`); return; }
+      G.money -= MRI_COST;
+      br.mri = true;
+      toast(`🧲 ${br.name} にMRIを導入しました(維持費¥12,000/日)`);
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-brsales]').forEach((b) => b.addEventListener('click', () => {
+      const br = G.branches[Number(b.dataset.brsales)];
+      if (G.money < 30000) { toast('資金が足りません'); return; }
+      G.money -= 30000;
+      br.aw = clamp(br.aw + 0.015, 0.05, 0.9);
+      toast(`📣 ${br.name}: 地域営業! 認知が ${Math.round(br.aw * 100)}% になりました`);
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-brpinj]').forEach((s) => s.addEventListener('input', (e) => {
+      G.branches[Number(e.target.dataset.brpinj)].pInj = Number(e.target.value) / 100;
+      save();
+    }));
+    el.querySelectorAll('[data-brpreha]').forEach((s) => s.addEventListener('input', (e) => {
+      G.branches[Number(e.target.dataset.brpreha)].pReha = Number(e.target.value) / 100;
+      save();
     }));
     el.querySelectorAll('[data-brkijun]').forEach((b) => b.addEventListener('click', () => {
       const [bi, lv] = b.dataset.brkijun.split(':').map(Number);
@@ -1286,7 +1457,7 @@
     const spec = G.daySpec || specOf(G.day);
     const staffCost = Math.round(mainStaffCost() * spec.pay);
     $('pnlToday').innerHTML = `
-      <div class="pnl-row"><span>外来収益(初再診料)</span><b>${yen(T.rev.consult)}</b></div>
+      <div class="pnl-row"><span>外来収益(初再診・外来管理${T.kanriCount}件・処方箋)</span><b>${yen(T.rev.consult)}</b></div>
       <div class="pnl-row"><span>注射(関節注・トリガー等 ${T.injCount + T.trigCount}件)</span><b>${yen(T.rev.inj)}</b></div>
       <div class="pnl-row"><span>処置(${T.treatCount}件)・物療(${T.physioCount}件)</span><b>${yen(T.rev.treat + T.rev.physio)}</b></div>
       <div class="pnl-row"><span>画像(X線${T.xrayCount}・MRI${T.mriCount})</span><b>${yen(T.rev.img)}</b></div>
@@ -1663,7 +1834,7 @@
     G.t += dt;
     while (G.nextArrivalIdx < G.arrivals.length && G.arrivals[G.nextArrivalIdx].t <= G.t) {
       const a = G.arrivals[G.nextArrivalIdx];
-      town.requestVisit(a.type, a.source, a.refer);
+      town.requestVisit(a.type, a.source, a.refer, a.seg);
       G.nextArrivalIdx++;
     }
     clinic.tick(dt);
@@ -1676,12 +1847,97 @@
     }
   }
 
+  /* ================= 1日スキップ(自動運営・期待値ベース) ================= */
+
+  function autoDay() {
+    if (tutIdx >= 0) return;
+    const spec = G.daySpec || specOf(G.day);
+    const T = G.today;
+    if (spec.kind !== 'closed') {
+      // 在院・移動中の患者は簡易精算
+      let inflight = clinic.patients.length + town.walkers.filter((w) => w.kind === 'patient').length;
+      town.walkers = town.walkers.filter((w) => w.kind !== 'patient');
+      clinic.reset();
+      while (inflight-- > 0) { T.patients++; T.revenue += 1500; T.rev.consult += 1500; }
+      // 未到着の来院を期待値で処理
+      const arr = G.arrivals.slice(G.nextArrivalIdx);
+      G.nextArrivalIdx = G.arrivals.length;
+      let rehaAvail = Math.min(clinic.usableMachines() * 26, clinic.rehaCap());
+      const examCapDay = Math.max(10, settings.doctors * (spec.min / (settings.examMean + 1.5)) * 0.72);
+      let examServed = 0, turnedAway = 0;
+      for (const a of arr) {
+        // 診察キャパを超えた患者は診られない(機会損失+評判低下)
+        if (a.type !== 'rehab') {
+          if (examServed >= examCapDay) { turnedAway++; continue; }
+          examServed++;
+        } else if (rehaAvail < 1) {
+          if (Math.random() < 0.7) addSchedule(G.day + 1, 'rehab'); // 3割は離脱
+          continue;
+        }
+        const seg = a.seg || 'senior';
+        T.segCounts[seg] = (T.segCounts[seg] || 0) + 1;
+        T.patients++;
+        let rev = 0, proc = false, didReha = false;
+        if (a.type === 'checkup') { rev += FEES.checkup; T.rev.checkup += FEES.checkup; }
+        else if (a.type === 'first') { rev += FEES.first; T.rev.consult += FEES.first; T.newCount++; }
+        else { rev += FEES.revisit; T.rev.consult += FEES.revisit; }
+        if (a.type !== 'checkup') {
+          if (Math.random() < settings.pInj) { rev += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; proc = true; }
+          if (Math.random() < settings.pTrig) { rev += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; proc = true; }
+          if (settings.physio > 0 && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; }
+          const segMul = { senior: 1.2, sports: 1.45, worker: 0.75 }[seg] || 1;
+          const wantReha = a.type === 'rehab' || (settings.rehaLevel > 0 && (a.refer || Math.random() < settings.pReha * segMul));
+          if (wantReha && settings.rehaLevel > 0 && rehaAvail >= 1) {
+            rehaAvail--; didReha = true; proc = true;
+            const fr = REHA_FEE[settings.rehaLevel];
+            rev += fr; T.rev.reha += fr; T.rehaCount++;
+          } else if (clinic.usableBeds() > 0 && Math.random() < settings.pTreat) {
+            rev += FEES.treat; T.rev.treat += FEES.treat; T.treatCount++; proc = true;
+          }
+        }
+        if ((a.type === 'revisit' || a.type === 'rehab') && !proc) { rev += FEES.kanri; T.rev.consult += FEES.kanri; T.kanriCount++; }
+        if ((a.type === 'first' || a.type === 'revisit') && Math.random() < 0.55) { rev += FEES.presc; T.rev.consult += FEES.presc; }
+        if (a.type === 'first' && Math.random() < 0.7) { rev += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
+        const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
+        if (settings.mri && T.mriCount < 8 && (a.type === 'first' || a.refer) && Math.random() < 0.3 * mriMul) { rev += FEES.mri; T.rev.img += FEES.mri; T.mriCount++; }
+        if (settings.dexa && a.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
+        if (didReha && settings.selfReha) {
+          const pJ = clamp((G.rep - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
+          if (Math.random() < pJ) { rev += settings.selfRehaPrice; T.rev.jihi += settings.selfRehaPrice; }
+        }
+        if (settings.goods && proc && Math.random() < 0.12 * clamp(G.rep / 70, 0.6, 1.3)) { rev += FEES.goods; T.rev.jihi += FEES.goods; T.goodsCogs += FEES.goodsCogs; }
+        T.revenue += rev;
+        const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45;
+        if ((a.type === 'first' || a.type === 'revisit') && !didReha && Math.random() < loyalty * 0.85) addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
+        if (didReha && a.type !== 'rehab') for (let k = 1; k <= 8; k++) addSchedule(G.day + Math.ceil(k * 2.5), 'rehab');
+        if (a.type === 'rehab' && !didReha) addSchedule(G.day + 1, 'rehab');
+      }
+      const n = T.patients;
+      if (n > 0) {
+        const load = examServed / examCapDay;
+        const wait = clamp(7 + load * 26, 5, 45);
+        T.waitSum = wait * n; T.waitN = n;
+        const sat = clamp(1.25 - wait / 40, 0, 1);
+        G.rep += (sat * 100 - G.rep) * Math.min(0.3, 0.01 * n);
+      }
+      // 断られた患者は評判を下げ、街の噂になる
+      if (turnedAway > 0) G.rep = Math.max(20, G.rep - Math.min(4, turnedAway * 0.08));
+    }
+    endDay();
+    renderKpiStrip();
+  }
+
   /* ================= デバッグフック(検証用) ================= */
 
   window.GAME = {
-    G, settings, clinic, town, KIJUN, REHA_FEE, KPIS, REL_DEF,
+    G, settings, clinic, town, KIJUN, REHA_FEE, KPIS, REL_DEF, autoDay,
     grant: (n) => { G.money += n; updateHeader(); }
   };
+  $('skipBtn').addEventListener('click', () => {
+    if (tutIdx >= 0) return;
+    autoDay();
+    banner(`⏩ Day ${G.day - 1} を自動運営でスキップしました`);
+  });
 
   /* ================= 起動 ================= */
 

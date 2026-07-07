@@ -40,6 +40,8 @@
       <button class="speed-btn on" data-speed="1">×1</button>
       <button class="speed-btn" data-speed="2">×2</button>
       <button class="speed-btn" data-speed="4">×4</button>
+      <button class="speed-btn" data-speed="8">×8</button>
+      <button class="speed-btn skip" id="skipBtn" title="1日を自動運営でスキップ">⏩1日</button>
     </div>
   </div>
   <div class="mission-bar" id="missionBar">🎯 <span id="missionText"></span></div>
@@ -86,6 +88,7 @@
       <div class="op-row">
         <button class="op-btn" id="opReserve">📅 予約制 <small>¥50,000</small></button>
         <button class="op-btn" id="opKiosk">🏧 自動精算機 <small>¥300,000</small></button>
+        <button class="op-btn" id="opWeb">📱 Web問診・事前受付 <small>¥200,000・受付▲45%</small></button>
         <button class="op-btn" id="opReview">💬 クチコミ返信</button>
       </div>
     </div>
@@ -142,7 +145,8 @@
     </div>
 
     <div class="card" id="marketingCard">
-      <h2 class="card-title">📣 リスティング広告(キーワード入札) <small>— CPAをLTVと比べて判断する</small></h2>
+      <h2 class="card-title">📣 集患戦略 <small>— ターゲット客層×キーワード入札。CPAをLTVと比べる</small></h2>
+      <div id="adTarget"></div>
       <div id="adsList"></div>
       <div class="ad-summary" id="adSummary"></div>
     </div>
