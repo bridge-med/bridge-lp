@@ -13,9 +13,11 @@ const STAFF_UI = (() => {
   // mood: normal | good | busy | tired | warn | idea
 
   const LOOKS = {
+    doctor:  { skin: '#F2CFAE', hair: '#8B8580', hairStyle: 'part', top: '#FFFFFF', collar: '#3E7CA6', acc: 'stetho' },
     front:   { skin: '#F6D7B8', hair: '#4A3B33', hairStyle: 'bob', top: '#E8EEF4', collar: '#3E7CA6', acc: 'intercom' },
     nurse:   { skin: '#F2CFAE', hair: '#2E2A33', hairStyle: 'tied', top: '#37597A', collar: '#274460', acc: 'none' },
     reha:    { skin: '#F0C9A2', hair: '#54401F', hairStyle: 'short', top: '#4FA98C', collar: '#3A8A70', acc: 'lanyard' },
+    billing: { skin: '#F6D7B8', hair: '#3E3730', hairStyle: 'bob', top: '#C7B8D6', collar: '#8C7BC4', acc: 'glasses' },
     advisor: { skin: '#F6D7B8', hair: '#6E6A66', hairStyle: 'part', top: '#41454D', collar: '#FFFFFF', acc: 'glasses' }
   };
 
@@ -59,6 +61,7 @@ const STAFF_UI = (() => {
       intercom: '<path d="M17 28 Q14 33 17 37" stroke="#4A5D68" stroke-width="1.8" fill="none"/><circle cx="18" cy="37.5" r="2" fill="#4A5D68"/>',
       glasses: '<rect x="21" y="26.5" width="10" height="7.5" rx="3.2" fill="none" stroke="#5B5751" stroke-width="1.6"/><rect x="33" y="26.5" width="10" height="7.5" rx="3.2" fill="none" stroke="#5B5751" stroke-width="1.6"/><path d="M31 30 H33" stroke="#5B5751" stroke-width="1.6"/>',
       lanyard: '<path d="M26 50 L29 57 M38 50 L35 57" stroke="#2C5F82" stroke-width="1.8"/><rect x="29.5" y="56" width="5.5" height="7" rx="1" fill="#fff" stroke="#2C5F82" stroke-width="1"/>',
+      stetho: '<path d="M25 49 Q25 58 32 58 Q39 58 39 49" stroke="#4A5D68" stroke-width="1.9" fill="none"/><circle cx="32" cy="59.5" r="2.6" fill="#4A5D68"/>',
       none: ''
     }[L.acc] || '';
 
@@ -77,6 +80,26 @@ const STAFF_UI = (() => {
   const MOOD_LABEL = { normal: '通常', good: '順調', busy: '混雑', tired: '疲労', warn: '警告', idea: '提案' };
 
   const STAFF = {
+    doctor: {
+      name: '剣持', title: '院長',
+      mood(c) {
+        if (c.load >= 0.95) return 'tired';
+        if (c.load >= 0.78) return 'busy';
+        if (c.load <= 0.5 && c.h && c.h.patients >= 10) return 'good';
+        return 'normal';
+      },
+      comments: [
+        { id: 'd_long', prio: 86, cond: (c) => c.load >= 0.9,
+          text: () => `今日は途中から説明を短くせざるを得なかった。診療の質を守るなら、医師を増やすか予約でならしてほしい。` },
+        { id: 'd_quality', prio: 64, cond: (c) => c.s.examMean <= 4 && c.h && c.h.patients >= 15,
+          text: () => `診察1人4分はさすがに駆け足だ。回転は上がるが、聞き逃しは再診離れにつながる。少し戻さないか。` },
+        { id: 'd_inj', prio: 58, cond: (c) => c.s.pInj >= 0.2 && c.s.pInj <= 0.4 && c.h && (c.h.injCount + c.h.trigCount) / Math.max(1, c.h.patients) >= 0.2,
+          text: (c) => `注射は適応をきちんと診て打てている。この実施率(${Math.round((c.h.injCount + c.h.trigCount) / c.h.patients * 100)}%)は医学的にも妥当な範囲だ。` },
+        { id: 'd_calm', prio: 16, cond: (c) => c.load <= 0.5 && c.h && c.h.patients >= 10,
+          text: () => `今日は一人ひとりに時間を使えた。こういう診療を続けたい。` }
+      ],
+      invest: { doctor: '任せられる先生が来るなら心強い。ただ、診察が本当に詰まってからでいい。' }
+    },
     front: {
       name: '松岡', title: '受付リーダー',
       mood(c) {
@@ -148,6 +171,25 @@ const STAFF_UI = (() => {
       invest: { pt: 'リハ枠を広げるなら採用だけでなく、予約枠の設計もセットで考えたいです。', machines: '機器はPT×2まで稼働します。人と機器のバランスを。', rehaAide: '準備を助手に任せられると、PTは単位に集中できます。回転がかなり違います。', physio: '物療は継続の入口です。案内方針も一緒に上げましょう。' }
     },
 
+    billing: {
+      name: '佐伯', title: '医事課(レセプト)',
+      mood(c) {
+        if (c.h && c.h.kanriCount >= 10) return 'idea';
+        if (c.h && c.h.patients > 0 && c.h.revenue / c.h.patients >= 4500) return 'good';
+        return 'normal';
+      },
+      comments: [
+        { id: 'b_kanri', prio: 60, cond: (c) => c.h && c.h.kanriCount >= 8,
+          text: (c) => `外来管理加算が${c.h.kanriCount}件。裏を返せば“何もしていない再診”がそれだけあります。注射や物療の適応、先生と確認しませんか。` },
+        { id: 'b_kijun2', prio: 74, cond: (c) => c.s.rehaLevel === 1 && c.s.pts >= 2,
+          text: () => `PTが2名になっています。運動器(II)へ届出を上げればリハ1回+¥1,700。書類はこちらで整えます。` },
+        { id: 'b_kijun1', prio: 76, cond: (c) => c.s.rehaLevel === 2 && c.s.pts >= 4 && c.s.floorLv >= 2,
+          text: () => `PT4名と100㎡、(I)の要件が揃いました。届出を上げましょう。リハ1回+¥300は年間で効いてきます。` },
+        { id: 'b_unit', prio: 22, cond: (c) => c.h && c.h.patients >= 15 && c.h.revenue / c.h.patients >= 4500,
+          text: (c) => `本日単価¥${Math.round(c.h.revenue / c.h.patients).toLocaleString()}。診療の中身が厚くなってきました。算定漏れもありません。` }
+      ],
+      invest: {}
+    },
     advisor: {
       name: '白瀬', title: '経営アドバイザー(本部)',
       mood(c) {
@@ -163,8 +205,8 @@ const STAFF_UI = (() => {
           text: (c) => `赤字の主因は人件費率${Math.round(c.labor * 100)}%です。人を増やす前に、今の人員で単価を上げる打ち手(注射・リハ・基準)を。` },
         { id: 'a_unit', prio: 68, cond: (c) => c.h && c.h.patients >= 25 && c.h.revenue / c.h.patients < 3000,
           text: (c) => `患者数は付いてきました。単価${Math.round(c.h.revenue / c.h.patients).toLocaleString()}円は伸びしろです。次は“数を増やす投資”より“単価を上げる投資”を。` },
-        { id: 'a_kanri', prio: 50, cond: (c) => c.h && c.h.kanriCount >= 8,
-          text: (c) => `外来管理加算が${c.h.kanriCount}件。裏を返せば“何もしていない再診”がそれだけあるということ。医学的必要性の範囲で診療の中身を見直しては。` },
+        { id: 'a_newlow', prio: 58, cond: (c) => c.h && c.h.newCount <= 3 && c.G.aw < 0.45,
+          text: (c) => `新患${c.h.newCount}人は少ないですね。認知${Math.round(c.G.aw * 100)}%が原因です。広告か看板、または商店街への顔出しを。` },
         { id: 'a_black', prio: 24, cond: (c) => c.profit > 150000,
           text: (c) => `本日+${Math.round(c.profit / 1000)}千円。良い数字ですが、単月の黒字と構造の黒字は別物です。人件費率と再診の定着を見続けてください。` }
       ],
