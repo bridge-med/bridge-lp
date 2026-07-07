@@ -996,6 +996,22 @@ input[type="range"]::-moz-range-thumb {
 }
 .ach-chip.done b { color: var(--amber); }
 
+/* ---------- v8: デイリー・殿堂 ---------- */
+
+.todo-tag.daily { color: var(--green-deep); background: var(--green-pale); }
+.daily-done { color: var(--green-deep); }
+.daily-streak {
+  font: 700 15px/1.7 var(--sans);
+  color: var(--ink);
+  background: var(--amber-pale);
+  border-radius: 12px;
+  padding: 10px 14px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.daily-streak b { color: var(--amber); font-size: 17px; }
+#prestigeCard { border-top: 4px solid transparent; border-image: linear-gradient(90deg, var(--amber), var(--blue)) 1; }
+
 /* ---------- v6: スマホは下部ナビ(親指ファースト) ---------- */
 
 @media (max-width: 719px) {

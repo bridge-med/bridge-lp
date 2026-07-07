@@ -239,7 +239,9 @@
     lastStage: 1, blackStreak: 0,
     medals: 2, boosts: {}, deco: {}, achDone: [],
     stats: { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: 0 },
-    clinicName: 'あなたのクリニック'
+    clinicName: 'あなたのクリニック',
+    daily: { last: '', streak: 0, chDone: '' },
+    prestige: { count: 0, legacy: null }
   };
   Object.keys(REL_DEF).forEach((k) => { G.relations[k] = { lv: 0, last: 0 }; });
 
@@ -287,7 +289,8 @@
           tutorialDone: G.tutorialDone, plan: G.plan,
           lastStage: G.lastStage, blackStreak: G.blackStreak,
           medals: G.medals, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
-          stats: G.stats, clinicName: G.clinicName
+          stats: G.stats, clinicName: G.clinicName,
+          daily: G.daily, prestige: G.prestige
         }
       }));
     } catch (e) { /* noop */ }
@@ -316,6 +319,9 @@
       if (!G.achDone) G.achDone = [];
       if (d.g.stats === undefined) G.stats = { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: G.cum.revenue || 0 };
       if (!G.clinicName) G.clinicName = 'あなたのクリニック';
+      // v8: デイリー・殿堂フィールドの補完
+      if (!G.daily) G.daily = { last: '', streak: 0, chDone: '' };
+      if (!G.prestige) G.prestige = { count: 0, legacy: null };
       // 旧セーブの分院にv4フィールドを補完
       for (const br of G.branches) {
         if (br.floorLv === undefined) br.floorLv = 1;
@@ -780,6 +786,7 @@
     dailyVoice();
     checkMission(T);
     checkAchievements();
+    checkDailyChallenge(T);
 
     if (G.day % 7 === 0 && G.history.length >= 8 && spec.kind !== 'closed') weeklyDigest();
     if (G.plan && G.day % 30 === 0) reviewPlan();
@@ -916,6 +923,7 @@
     vis('adTarget', 2);
     vis('itemCard', 2);
     vis('achCard', 2);
+    vis('prestigeCard', 3);
     ['kpiCard', 'plannerCard', 'bankCard', 'pnlCard', 'kijunCard'].forEach((id) => vis(id, 3));
     const lock = $('mgmtLock');
     if (lock) lock.hidden = stage >= 3;
@@ -1040,8 +1048,11 @@
     if (!el) return;
     const m = MISSIONS[G.missionIdx];
     const bn = bottleneckInfo();
+    const ch = pickChallenge(todayKey());
+    const chDone = G.daily && G.daily.chDone === todayKey();
     el.innerHTML = `
       ${m ? `<div class="todo-row"><span class="todo-tag mission">🎯 ミッション</span><p>${m.title}</p></div>` : ''}
+      <div class="todo-row"><span class="todo-tag daily">📅 デイリー</span><p>今日のお題: ${ch.text}(💎+1)${chDone ? ' — <b class="daily-done">✅ クリア済み</b>' : ''}</p></div>
       <div class="todo-row"><span class="todo-tag">🔍 いまの詰まり</span><p>${bn.text}</p></div>
       ${bn.fixes.length ? `<div class="fix-row">${bn.fixes.map((f) => `<button class="fix-chip" data-goto="${f.tab}|${f.sel}">${f.label} →</button>`).join('')}</div>` : ''}`;
     bindGoto(el);
@@ -1185,6 +1196,151 @@
     if (el) el.innerHTML = `🏥 ${escapeHtml(G.clinicName)} <small class="name-edit">✏️ 改名</small>`;
   }
 
+  /* ================= 📅 デイリー(ログインボーナス・日替わりお題) ================= */
+
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  function yesterdayKey() {
+    const d = new Date(Date.now() - 86400000);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  const DAILY_BASIC = [
+    { id: 'black', text: '黒字で1日を終える(法人)', cond: (T) => T.profit + T.brProfit > 0 },
+    { id: 'new6', text: '新患6人以上の日をつくる', cond: (T) => T.newCount >= 6 },
+    { id: 'wait25', text: '平均待ち25分未満(来院8人以上)', cond: (T) => T.patients >= 8 && T.avgWait < 25 },
+    { id: 'rev80k', text: '1日の売上¥80,000を超える', cond: (T) => T.revenue >= 80000 },
+    { id: 'physio8', text: '物療を8件実施する', cond: (T) => T.physioCount >= 8 }
+  ];
+  const DAILY_ADV = DAILY_BASIC.concat([
+    { id: 'reha15', text: 'リハを15件実施する', cond: (T) => T.rehaCount >= 15 },
+    { id: 'mri3', text: 'MRIを3件実施する', cond: (T) => T.mriCount >= 3 },
+    { id: 'jihi10k', text: '自費売上¥10,000を超える', cond: (T) => T.rev.jihi >= 10000 },
+    { id: 'inj25', text: '注射実施率25%(来院20人以上)', cond: (T) => T.patients >= 20 && (T.injCount + T.trigCount) / T.patients >= 0.25 }
+  ]);
+
+  function pickChallenge(dateStr) {
+    const pool = unlockStage() >= 3 ? DAILY_ADV : DAILY_BASIC;
+    let h = 0;
+    for (let i = 0; i < dateStr.length; i++) h = (h * 31 + dateStr.charCodeAt(i)) % 9973;
+    return pool[h % pool.length];
+  }
+
+  function checkDailyLogin() {
+    const today = todayKey();
+    if (G.daily.last === today) return;
+    const consecutive = G.daily.last === yesterdayKey();
+    G.daily.streak = consecutive ? (G.daily.streak || 0) + 1 : 1;
+    const firstEver = !G.daily.last;
+    G.daily.last = today;
+    if (firstEver) { save(); return; } // 初回起動はスターターメダルがあるので静かに記録だけ
+    const r = G.daily.streak >= 7 ? 3 : G.daily.streak >= 3 ? 2 : 1;
+    G.medals += r;
+    save();
+    const ch = pickChallenge(today);
+    showModal('🎁 デイリーボーナス', `
+      <p class="daily-streak">連続ログイン <b>${G.daily.streak}日目</b> → <b>💎メダル+${r}</b></p>
+      <div class="pnl-row"><span>連続3日以上</span><b>毎日💎+2</b></div>
+      <div class="pnl-row"><span>連続7日以上</span><b>毎日💎+3</b></div>
+      <div class="rs-bottle">📅 <b>今日のお題:</b> ${ch.text}(達成で💎+1)</div>
+      <p class="modal-note">💎メダルはブースト・プレミアム施設に使えます(院内タブ)。</p>`,
+      '今日も経営する');
+    updateHeader();
+  }
+
+  function checkDailyChallenge(T) {
+    if (!G.daily || G.daily.chDone === todayKey()) return;
+    const spec = G.daySpec || specOf(G.day);
+    if (spec.kind === 'closed') return;
+    const ch = pickChallenge(todayKey());
+    let ok = false;
+    try { ok = ch.cond(T); } catch (e) { ok = false; }
+    if (!ok) return;
+    G.daily.chDone = todayKey();
+    G.medals += 1;
+    banner(`🎁 今日のお題クリア: ${ch.text} → 💎+1`);
+    renderTodo();
+    updateHeader();
+  }
+
+  /* ================= 🏛 殿堂(プレステージ) — 実績を引き継いで2周目へ ================= */
+
+  const PRESTIGE_KEY = 'clinicTown_prestige';
+
+  function nextLegacy() {
+    const n = G.achDone.length;
+    const medalTotal = ACHIEVEMENTS.filter((a) => G.achDone.includes(a.id)).reduce((s, a) => s + a.medal, 0);
+    return {
+      money: 2000000 + n * 200000,
+      rep: Math.min(70, 55 + Math.floor(n / 3)),
+      aw: Math.min(0.5, 0.30 + n * 0.005),
+      medals: 2 + 3 * ((G.prestige ? G.prestige.count : 0) + 1) + Math.floor(medalTotal / 10)
+    };
+  }
+
+  function prestigeUnlocked() {
+    return G.annualDone || G.missionDone.includes('corp');
+  }
+
+  function prestigeNow() {
+    const legacy = nextLegacy();
+    try {
+      localStorage.setItem(PRESTIGE_KEY, JSON.stringify({
+        count: (G.prestige ? G.prestige.count : 0) + 1,
+        legacy,
+        achDone: G.achDone, stats: G.stats, deco: G.deco, clinicName: G.clinicName,
+        daily: G.daily
+      }));
+      localStorage.removeItem(SAVE_KEY);
+    } catch (e) { /* noop */ }
+    location.reload();
+  }
+
+  function loadPrestige() {
+    try {
+      const raw = localStorage.getItem(PRESTIGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function renderPrestige() {
+    const el = $('prestigeBody');
+    if (!el) return;
+    const lap = (G.prestige ? G.prestige.count : 0) + 1;
+    const lg = nextLegacy();
+    const unlocked = prestigeUnlocked();
+    const applied = G.prestige && G.prestige.legacy
+      ? `<div class="rs-bottle">🏛 現在 <b>${lap}周目</b> — 適用中の殿堂ボーナス: 開始資金${yen(G.prestige.legacy.money)} / 初期評判${G.prestige.legacy.rep} / 初期認知${Math.round(G.prestige.legacy.aw * 100)}% / 開始💎${G.prestige.legacy.medals}</div>`
+      : `<p class="plan-lead">現在 <b>${lap}周目</b>。殿堂入りすると経営はDay 1からやり直しですが、<b>実績に応じて開始条件が強くなります</b>。</p>`;
+    el.innerHTML = `
+      ${applied}
+      <div class="pnl-row"><span>引き継ぐもの</span><b>実績(${G.achDone.length}/${ACHIEVEMENTS.length})・累計スタッツ・プレミアム施設・院名</b></div>
+      <div class="pnl-row"><span>リセットされるもの</span><b>資金・評判・日数・スタッフ・分院・ミッション(再挑戦で報酬も再獲得)</b></div>
+      <h3 class="sub-title">次に殿堂入りした場合の開始ボーナス(実績${G.achDone.length}個 連動)</h3>
+      <div class="pnl-row"><span>開始資金(実績1つ+¥200,000)</span><b>${yen(lg.money)}</b></div>
+      <div class="pnl-row"><span>初期評判(実績3つで+1)</span><b>${lg.rep}</b></div>
+      <div class="pnl-row"><span>初期認知(実績1つ+0.5%)</span><b>${Math.round(lg.aw * 100)}%</b></div>
+      <div class="pnl-row"><span>開始メダル(周回+実績メダル連動)</span><b>💎 ${lg.medals}</b></div>
+      ${unlocked
+        ? `<button class="btn-cta" id="prestigeGo">🏛 殿堂入りして ${lap + 1}周目を始める</button>`
+        : `<p class="mgmt-lock">🔒 解放条件: <b>Day 365の年次決算</b> または <b>最終ミッション(法人月商¥2,500万)達成</b></p>`}`;
+    const btn = $('prestigeGo');
+    if (btn) btn.addEventListener('click', () => {
+      showModal('🏛 殿堂入りの確認', `
+        <p><b>${lap + 1}周目</b>を開始します。経営はDay 1に戻りますが、以下を引き継ぎます:</p>
+        <div class="pnl-row"><span>開始資金</span><b>${yen(lg.money)}</b></div>
+        <div class="pnl-row"><span>初期評判 / 初期認知</span><b>${lg.rep} / ${Math.round(lg.aw * 100)}%</b></div>
+        <div class="pnl-row"><span>開始メダル</span><b>💎 ${lg.medals}</b></div>
+        <div class="pnl-row"><span>実績・累計スタッツ・施設・院名</span><b>そのまま引き継ぎ</b></div>
+        <p class="modal-note">⚠️ 現在の経営(資金・分院・スタッフ)は殿堂に記録され、リセットされます。</p>
+        <div class="modal-actions"><button class="btn-cta danger" id="prestigeConfirm">殿堂入りする</button></div>`,
+        'やめておく');
+      $('prestigeConfirm').addEventListener('click', prestigeNow);
+    });
+  }
+
   /* ================= 週次・月次レビュー ================= */
 
   function kpiWeekAgg(hist) {
@@ -1308,7 +1464,8 @@
 
   function updateMissionBar() {
     const m = MISSIONS[G.missionIdx];
-    $('missionText').textContent = m ? `MISSION ${G.missionIdx + 1}/${MISSIONS.length}: ${m.title}` : '🏆 全ミッション制覇! 街いちばんの医療法人だ';
+    const lap = G.prestige && G.prestige.count > 0 ? `🏛${G.prestige.count + 1}周目 ` : '';
+    $('missionText').textContent = lap + (m ? `MISSION ${G.missionIdx + 1}/${MISSIONS.length}: ${m.title}` : '🏆 全ミッション制覇! 街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
   }
 
   let bannerTimer = null;
@@ -1349,7 +1506,7 @@
     if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
-    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); }
+    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); }
   }
 
   /* ================= UI: 診療時間 ================= */
@@ -2461,7 +2618,24 @@
   /* ================= 起動 ================= */
 
   const hasSave = load();
+  let prestigeApplied = null;
   if (!hasSave) {
+    // 殿堂入り直後(セーブなし+殿堂記録あり)なら、実績連動ボーナスを適用して2周目開始
+    const pr = loadPrestige();
+    if (pr && pr.legacy) {
+      prestigeApplied = pr;
+      G.prestige = { count: pr.count, legacy: pr.legacy };
+      G.money = pr.legacy.money;
+      G.rep = pr.legacy.rep;
+      G.aw = pr.legacy.aw;
+      G.medals = pr.legacy.medals;
+      G.achDone = pr.achDone || [];
+      G.stats = pr.stats || G.stats;
+      G.deco = pr.deco || {};
+      G.clinicName = pr.clinicName || G.clinicName;
+      G.daily = pr.daily || G.daily;
+      G.tutorialDone = true; // 2周目はチュートリアル不要
+    }
     [8, 7, 7, 6, 6, 5, 5, 4, 4, 3].forEach((n, i) => {
       for (let k = 0; k < n; k++) addSchedule(i + 1, 'revisit');
     });
@@ -2522,8 +2696,21 @@
   window.addEventListener('resize', () => { clinicIso.resize(); townIso.resize(); });
 
   switchTab('clinic');
-  if (!G.tutorialDone) startTutorial();
+  if (prestigeApplied) {
+    save();
+    const lg = prestigeApplied.legacy;
+    showModal(`🏛 ${prestigeApplied.count + 1}周目スタート!`, `
+      <p>殿堂入りおめでとうございます。実績連動ボーナスを適用して、新しい経営を始めます。</p>
+      <div class="pnl-row"><span>開始資金</span><b>${yen(lg.money)}</b></div>
+      <div class="pnl-row"><span>初期評判 / 初期認知</span><b>${lg.rep} / ${Math.round(lg.aw * 100)}%</b></div>
+      <div class="pnl-row"><span>開始メダル</span><b>💎 ${lg.medals}</b></div>
+      <div class="pnl-row"><span>実績・累計・施設・院名</span><b>引き継ぎ済み</b></div>
+      <p class="modal-note">📖 2周目のテーマは「再現性」。前回うまくいった打ち手が、初期条件が違っても通用するか — それが経営の腕です。</p>`,
+      `${prestigeApplied.count + 1}周目の経営へ`);
+  } else if (!G.tutorialDone) startTutorial();
   else if (hasSave) banner(`おかえりなさい — Day ${G.day} から再開します`);
+  if (G.tutorialDone && !$('modal').classList.contains('show')) checkDailyLogin();
+  renderPrestige();
 
   requestAnimationFrame((ts) => { lastTs = ts; requestAnimationFrame(loop); });
 })();
