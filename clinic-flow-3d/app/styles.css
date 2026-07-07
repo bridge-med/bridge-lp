@@ -1058,3 +1058,21 @@ input[type="range"]::-moz-range-thumb {
   .hud-val { font-size: 17px; }
   .card { padding: 20px 24px; }
 }
+
+/* ---------- v10: 倍速パス・キャラ信頼度・依頼の受諾 ---------- */
+
+.bond-hearts { font-style: normal; color: #E05C7A; font-size: 10px; letter-spacing: 1px; margin-left: 2px; }
+.chain-tag {
+  font: 800 10px/1.4 var(--sans);
+  color: var(--blue-deep);
+  background: var(--blue-pale);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin: 0 4px 0 2px;
+}
+.req-body { flex: 1; }
+.req-body p { font: 500 12.5px/1.75 var(--sans); color: var(--ink-2); }
+.req-on { color: var(--blue-deep); }
+.req-passed { color: var(--ink-3); }
+.req-note { display: block; font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); margin-top: 2px; }
+.fix-chip.ghost { background: var(--card); color: var(--ink-3); border-color: var(--line); }
