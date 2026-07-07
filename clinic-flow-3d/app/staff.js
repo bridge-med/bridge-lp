@@ -109,6 +109,8 @@ const STAFF_UI = (() => {
         return 'normal';
       },
       comments: [
+        { id: 'f_balk', prio: 98, cond: (c) => c.h && (c.h.balked || 0) >= 3,
+          text: (c) => `今日は${c.h.balked}人、混雑を見て入口で帰ってしまいました…。売上の前に「入れる器」です。椅子と回転(受付・診察)、どちらかを今すぐ。` },
         { id: 'f_stand', prio: 96, cond: (c) => c.standing > 0,
           text: (c) => `待合で立っている患者さんが出ています。椅子を足すのも手ですが、根本は回転です — 受付短縮(Web問診)か診察キャパを先に。` },
         { id: 'f_wait40', prio: 92, cond: (c) => c.wait >= 35,
