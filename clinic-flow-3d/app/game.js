@@ -240,9 +240,10 @@
     coins: 2, boosts: {}, deco: {}, achDone: [],
     stats: { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: 0 },
     clinicName: 'あなたのクリニック',
-    daily: { last: '', streak: 0, chDone: '' },
+    daily: { last: '', streak: 0, chDone: '', chState: '', chDay: '', lastClearChar: '', chain: 0 },
     prestige: { count: 0, legacy: null },
-    speedUnlocked: {}
+    speedPass: { tier: 0, until: 0 },
+    bonds: { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 }
   };
   Object.keys(REL_DEF).forEach((k) => { G.relations[k] = { lv: 0, last: 0 }; });
 
@@ -291,7 +292,7 @@
           lastStage: G.lastStage, blackStreak: G.blackStreak,
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
           stats: G.stats, clinicName: G.clinicName,
-          daily: G.daily, prestige: G.prestige, speedUnlocked: G.speedUnlocked
+          daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds
         }
       }));
     } catch (e) { /* noop */ }
@@ -323,8 +324,17 @@
       // v8: デイリー・殿堂フィールドの補完
       if (!G.daily) G.daily = { last: '', streak: 0, chDone: '' };
       if (!G.prestige) G.prestige = { count: 0, legacy: null };
-      // v9: 倍速解放の補完
-      if (!G.speedUnlocked) G.speedUnlocked = {};
+      // v10: 倍速パス・信頼度の補完(v9の買い切りはコインで返金)
+      if (!G.speedPass) G.speedPass = { tier: 0, until: 0 };
+      if (!G.bonds) G.bonds = { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 };
+      if (G.daily.chState === undefined) Object.assign(G.daily, { chState: '', chDay: '', lastClearChar: '', chain: 0 });
+      if (d.g.speedUnlocked) {
+        const OLD_PRICE = { 8: 12, 16: 25, 32: 50 };
+        let refund = 0;
+        Object.keys(d.g.speedUnlocked).forEach((k) => { if (d.g.speedUnlocked[k]) refund += OLD_PRICE[k] || 0; });
+        if (refund > 0) { G.coins += refund; G.speedRefund = refund; }
+        delete G.speedUnlocked;
+      }
       // 旧セーブの分院にv4フィールドを補完
       for (const br of G.branches) {
         if (br.floorLv === undefined) br.floorLv = 1;
@@ -374,7 +384,7 @@
       }
 
       // 物療(消炎鎮痛等処置): 機器があれば高回転で回る(故障イベント時は停止)
-      if (settings.physio > 0 && !G.evPhysioDown && report.type !== 'checkup' && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio) {
+      if (settings.physio > 0 && !G.evPhysioDown && report.type !== 'checkup' && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) {
         revenue += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; didProcedure = true;
       }
 
@@ -400,7 +410,7 @@
       if (settings.dexa && report.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
 
       // サイネージは体感待ち時間を削り、カフェは待ちの不満をやわらげる
-      let sat = clamp(1.25 - report.wait * (G.deco.signage ? 0.85 : 1) / 40, 0, 1);
+      let sat = clamp(1.25 - report.wait * waitFeel() / 40, 0, 1);
       if (G.deco.cafe) sat = Math.min(1, sat + 0.05);
       if (report.didReha) sat = Math.min(1, sat + 0.1);
 
@@ -430,7 +440,7 @@
         for (let k = 1; k <= 8; k++) addSchedule(G.day + Math.ceil(k * 2.5), 'rehab');
       }
       if (report.type === 'rehab' && !report.didReha) addSchedule(G.day + 1, 'rehab'); // 満枠振替
-      else if (report.type === 'rehab' && Math.random() < 0.12 * (1 - sat)) removeSchedule('rehab');
+      else if (report.type === 'rehab' && Math.random() < 0.12 * (1 - sat) * (1 - 0.15 * bondLv('reha'))) removeSchedule('rehab');
       updateHeader();
       return revenue;
     }
@@ -491,11 +501,10 @@
       }
     }
 
-    // ブースト: 業務改善コンサル(診察回転UP)
-    if (boostActive('ops')) {
-      G.evExamDelta = (G.evExamDelta || 0) - 1.2;
-      settings.evExamDelta = G.evExamDelta;
-    }
+    // ブースト: 業務改善コンサル(診察回転UP)+ 院長(剣持)との信頼(診察が手際よく)
+    if (boostActive('ops')) G.evExamDelta = (G.evExamDelta || 0) - 1.2;
+    if (bondLv('doctor') > 0) G.evExamDelta = (G.evExamDelta || 0) - 0.15 * bondLv('doctor');
+    settings.evExamDelta = G.evExamDelta || 0;
 
     if (spec.kind === 'closed') {
       const due = G.schedule[G.day];
@@ -535,7 +544,7 @@
     const w7 = wait7();
     for (const kw of KEYWORDS) {
       const budget = G.ads[kw.id] || 0;
-      const cpcEff = Math.round(kw.cpc * (1 + G.adPressure));
+      const cpcEff = Math.round(kw.cpc * (1 + G.adPressure) * (1 - 0.02 * bondLv('advisor')));
       const clicks = budget > 0 ? Math.min(kw.vol, Math.floor(budget / cpcEff)) : 0;
       const cvrEff = kw.cvr * clamp(G.rep / 65, 0.5, 1.35) * (w7 > 25 ? 0.7 : 1);
       let pats = 0;
@@ -567,7 +576,7 @@
 
     // 再診・リハ(予約済み)
     const due = G.schedule[G.day] || { revisit: 0, rehab: 0 };
-    const showRate = (0.75 + 0.2 * (G.rep / 100) + (settings.reserve ? 0.05 : 0) + (G.deco.bus ? 0.04 : 0)) * Math.min(1.1, G.evArrivalMul || 1);
+    const showRate = (0.75 + 0.2 * (G.rep / 100) + (settings.reserve ? 0.05 : 0) + (G.deco.bus ? 0.04 : 0) + 0.01 * bondLv('front')) * Math.min(1.1, G.evArrivalMul || 1);
     for (let i = 0; i < due.revisit; i++) if (Math.random() < showRate) push('revisit', 'house');
     for (let i = 0; i < due.rehab; i++) if (Math.random() < showRate) push('rehab', 'house');
     delete G.schedule[G.day];
@@ -720,6 +729,11 @@
     const repStart = G.repDayStart !== undefined ? G.repDayStart : G.rep;
     const prevOpen = G.history.filter((h) => h.kind !== 'closed').slice(-1)[0] || null;
     accrueDailyPrograms();
+    // 医事課(佐伯)との信頼: 算定の取りこぼしを拾う(売上+0.3%/Lv)
+    if (spec.kind !== 'closed' && bondLv('billing') > 0) {
+      const pick = Math.round(T.revenue * 0.003 * bondLv('billing'));
+      T.revenue += pick; T.rev.consult += pick;
+    }
     T.cost = dayCost();
     T.profit = T.revenue - T.cost;
     T.avgWait = T.waitN ? T.waitSum / T.waitN : 0;
@@ -871,7 +885,9 @@
     const c = staffCtx();
     el.innerHTML = Object.entries(STAFF_UI.STAFF).map(([k, st]) => {
       const mood = st.mood(c);
-      return `<span class="staff-chip mood-${mood}" title="${st.title} ${st.name}">${STAFF_UI.faceSVG(k, mood, 34)}<span class="staff-meta"><small>${st.title}</small><b>${st.name}・${STAFF_UI.MOOD_LABEL[mood]}</b></span></span>`;
+      const lv = bondLv(k);
+      const pts = (G.bonds && G.bonds[k]) || 0;
+      return `<span class="staff-chip mood-${mood}" title="${st.title} ${st.name} / 信頼${pts}pt(Lv${lv}) ${BOND_FX[k] || ''}">${STAFF_UI.faceSVG(k, mood, 34)}<span class="staff-meta"><small>${st.title}</small><b>${st.name}・${STAFF_UI.MOOD_LABEL[mood]}${lv ? ` <i class="bond-hearts">${'♥'.repeat(lv)}</i>` : ''}</b></span></span>`;
     }).join('');
   }
 
@@ -1051,14 +1067,33 @@
     if (!el) return;
     const m = MISSIONS[G.missionIdx];
     const bn = bottleneckInfo();
-    const ch = pickChallenge(todayKey());
-    const chDone = G.daily && G.daily.chDone === todayKey();
+    const today = todayKey();
+    const ch = pickChallenge(today);
+    const chDone = G.daily && G.daily.chDone === today;
+    const chState = G.daily && G.daily.chDay === today ? G.daily.chState : '';
+    let reqRow;
+    if (chDone) {
+      reqRow = `<p>${requestHtml(ch, 20)} — <b class="daily-done">✅ クリア済み</b></p>`;
+    } else if (chState === 'ok') {
+      reqRow = `<p>${requestHtml(ch, 20)} — <b class="req-on">📋 受注中(今日の診療で達成を)</b></p>`;
+    } else if (chState === 'pass') {
+      reqRow = `<p class="req-passed">今日はパスしました。${typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : ''}「わかりました、また明日相談しますね」</p>`;
+    } else {
+      reqRow = `<p>${requestHtml(ch, 20)}</p><div class="fix-row"><button class="fix-chip" data-chact="ok">受ける</button><button class="fix-chip ghost" data-chact="pass">今日はパス</button></div>`;
+    }
     el.innerHTML = `
       ${m ? `<div class="todo-row"><span class="todo-tag mission">🎯 ミッション</span><p>${m.title}</p></div>` : ''}
-      <div class="todo-row"><span class="todo-tag daily">📅 依頼</span><p>${requestHtml(ch, 20)}${chDone ? ' — <b class="daily-done">✅ クリア済み</b>' : ''}</p></div>
+      <div class="todo-row"><span class="todo-tag daily">📅 依頼</span><div class="req-body">${reqRow}</div></div>
       <div class="todo-row"><span class="todo-tag">🔍 いまの詰まり</span><p>${bn.text}</p></div>
       ${bn.fixes.length ? `<div class="fix-row">${bn.fixes.map((f) => `<button class="fix-chip" data-goto="${f.tab}|${f.sel}">${f.label} →</button>`).join('')}</div>` : ''}`;
     bindGoto(el);
+    el.querySelectorAll('[data-chact]').forEach((b) => b.addEventListener('click', () => {
+      G.daily.chDay = today;
+      G.daily.chState = b.dataset.chact;
+      const name = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : 'スタッフ';
+      toast(b.dataset.chact === 'ok' ? `📋 ${name}「ありがとうございます! お願いします!」` : `💬 ${name}「了解です、無理は禁物ですから」`);
+      renderTodo(); save();
+    }));
   }
 
   /* ================= 1日の結果画面 ================= */
@@ -1100,6 +1135,27 @@
   const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   function boostActive(id) { return !!(G.boosts && G.boosts[id] && G.day <= G.boosts[id]); }
+
+  /* --- キャラとの信頼度(依頼クリアで上がり、職掌に応じた恒常効果) --- */
+
+  const BOND_FX = {
+    front: '受付の段取り上手 — 体感待ち-2%/Lv・再診来院率+1%/Lv',
+    doctor: '診察の手際 — 診察時間-0.15分/Lv',
+    nurse: '物療への声かけ上手 — 物療案内+2%/Lv',
+    reha: 'リハ継続支援 — 満枠時の離脱減/Lv',
+    billing: '算定精度 — 売上の取りこぼし回収+0.3%/Lv',
+    advisor: '広告運用の腕 — CPC-2%/Lv'
+  };
+
+  function bondLv(char) {
+    const p = (G.bonds && G.bonds[char]) || 0;
+    return p >= 30 ? 3 : p >= 14 ? 2 : p >= 6 ? 1 : 0;
+  }
+
+  // 体感待ち時間の補正(サイネージ×受付リーダーとの信頼)
+  function waitFeel() {
+    return (G.deco.signage ? 0.85 : 1) * (1 - 0.02 * bondLv('front'));
+  }
 
   function checkAchievements() {
     if (!G.achDone) return;
@@ -1242,16 +1298,27 @@
     { id: 'a_repblack', char: 'advisor', text: '評判60以上をキープしたまま黒字で締める — 攻守両立の日に', cond: (T) => G.rep >= 60 && T.profit + T.brProfit > 0, coin: 1 },
     { id: 'a_new10', char: 'advisor', text: '新患10人。認知・評判・紹介、どの蛇口を開けますか?', cond: (T) => T.newCount >= 10, coin: 2, stage: 2 },
     { id: 'a_sales', char: 'advisor', text: '今日はどこか1件、営業訪問を。関係は放置すると冷めますから', cond: (T) => Object.values(G.relations).some((r) => r.lv > 0 && r.last === G.day), coin: 1, stage: 2 },
-    { id: 'a_mri2', char: 'advisor', text: 'MRIの回収計画、今日は2件が目安です', cond: (T) => T.mriCount >= 2, coin: 1, needsMri: true }
+    { id: 'a_mri2', char: 'advisor', text: 'MRIの回収計画、今日は2件が目安です', cond: (T) => T.mriCount >= 2, coin: 1, needsMri: true },
+    // 季節の依頼(実際の月に連動)
+    { id: 's_spring_f', char: 'front', months: [3, 4, 5], text: '春は引っ越しシーズン。新しく越してきた方が7人来てくれたら嬉しいです', cond: (T) => T.newCount >= 7, coin: 1 },
+    { id: 's_spring_n', char: 'nurse', months: [3, 4, 5], text: '新年度の健診シーズンです。今日は健診3件、段取りします', cond: (T) => T.rev.checkup >= 24000, coin: 2, stage: 2 },
+    { id: 's_summer_d', char: 'doctor', months: [6, 7, 8], text: '夏の大会前で部活の外傷が増える。X線12件でも精査は妥協しない', cond: (T) => T.xrayCount >= 12, coin: 2, stage: 2 },
+    { id: 's_summer_r', char: 'reha', months: [6, 7, 8], text: '暑さでリハ中断が増える季節です。今日は12件、灯を絶やさずに', cond: (T) => T.rehaCount >= 12, coin: 1, needsReha: true },
+    { id: 's_autumn_a', char: 'advisor', months: [9, 10, 11], text: 'スポーツの秋。運動会帰りの新患12人、獲りにいきましょう', cond: (T) => T.newCount >= 12, coin: 2, stage: 2 },
+    { id: 's_autumn_b', char: 'billing', months: [9, 10, 11], text: '行楽シーズンは再診が乱れがち。それでも売上¥150,000は守りたい', cond: (T) => T.revenue >= 150000, coin: 1, stage: 2 },
+    { id: 's_winter_f', char: 'front', months: [12, 1, 2], text: '路面凍結で転倒の患者さんが急増します。来院30人でも待ち35分未満で', cond: (T) => T.patients >= 30 && T.avgWait < 35, coin: 2, stage: 2 },
+    { id: 's_winter_n', char: 'nurse', months: [12, 1, 2], text: '転倒・骨折の処置が増える季節。今日は処置7件、備えます', cond: (T) => T.treatCount >= 7, coin: 2, stage: 2 }
   ];
 
   function dailyPool() {
     const stage = unlockStage();
+    const month = new Date().getMonth() + 1;
     const pool = DAILY_REQUESTS.filter((r) => {
       if (r.stage && stage < r.stage) return false;
       if (r.needsReha && settings.rehaLevel === 0) return false;
       if (r.needsMri && !settings.mri) return false;
       if (r.needsPhysio && settings.physio === 0) return false;
+      if (r.months && !r.months.includes(month)) return false;
       return true;
     });
     return pool.length ? pool : DAILY_REQUESTS.slice(0, 4);
@@ -1261,13 +1328,19 @@
     const pool = dailyPool();
     let h = 0;
     for (let i = 0; i < dateStr.length; i++) h = (h * 31 + dateStr.charCodeAt(i)) % 9973;
+    // 連続依頼: 前日にクリアした相手から、50%で「昨日の続き」が来る(報酬+1)
+    if (G.daily && G.daily.lastClearChar && h % 2 === 0) {
+      const same = pool.filter((r) => r.char === G.daily.lastClearChar);
+      if (same.length) return Object.assign({}, same[h % same.length], { chain: true });
+    }
     return pool[h % pool.length];
   }
 
   function requestHtml(ch, size) {
-    if (typeof STAFF_UI === 'undefined') return `今日の依頼: ${ch.text}(🪙+${ch.coin})`;
+    const reward = ch.coin + (ch.chain ? 1 : 0);
+    if (typeof STAFF_UI === 'undefined') return `今日の依頼: ${ch.text}(🪙+${reward})`;
     const st = STAFF_UI.STAFF[ch.char];
-    return `${STAFF_UI.faceSVG(ch.char, 'idea', size || 20)} <b>${st.name}</b>「${ch.text}」(🪙+${ch.coin})`;
+    return `${STAFF_UI.faceSVG(ch.char, 'idea', size || 20)} <b>${st.name}</b>${ch.chain ? '<span class="chain-tag">🔗連続依頼</span>' : ''}「${ch.text}」(🪙+${reward}・信頼+${2 + (ch.chain ? 1 : 0)})`;
   }
 
   function checkDailyLogin() {
@@ -1275,6 +1348,8 @@
     if (G.daily.last === today) return;
     const consecutive = G.daily.last === yesterdayKey();
     G.daily.streak = consecutive ? (G.daily.streak || 0) + 1 : 1;
+    // 昨日依頼をクリアしていなければ連続依頼は途切れる
+    if (G.daily.chDone !== yesterdayKey()) { G.daily.lastClearChar = ''; G.daily.chain = 0; }
     const firstEver = !G.daily.last;
     G.daily.last = today;
     if (firstEver) { save(); return; } // 初回起動はスターターコインがあるので静かに記録だけ
@@ -1286,25 +1361,32 @@
       <p class="daily-streak">連続ログイン <b>${G.daily.streak}日目</b> → <b>🪙コイン+${r}</b></p>
       <div class="pnl-row"><span>連続3日以上</span><b>毎日🪙+2</b></div>
       <div class="pnl-row"><span>連続7日以上</span><b>毎日🪙+3</b></div>
-      <div class="rs-bottle daily-req">📅 <b>今日の依頼:</b><br>${requestHtml(ch, 26)}</div>
-      <p class="modal-note">🪙コインはブースト・プレミアム施設・<b>倍速の解放(×8/×16/×32)</b>に使えます。</p>`,
+      <div class="rs-bottle daily-req">📅 <b>今日の依頼:</b><br>${requestHtml(ch, 26)}<small class="req-note">院内タブの「今日やること」で受けられます</small></div>
+      <p class="modal-note">🪙コインはブースト・プレミアム施設・<b>倍速パス(×8/×16/×32)</b>に使えます。</p>`,
       '今日も経営する');
     updateHeader();
   }
 
   function checkDailyChallenge(T) {
-    if (!G.daily || G.daily.chDone === todayKey()) return;
+    const today = todayKey();
+    if (!G.daily || G.daily.chDone === today) return;
+    if (G.daily.chDay !== today || G.daily.chState !== 'ok') return; // 「受ける」を押した依頼だけカウント
     const spec = G.daySpec || specOf(G.day);
     if (spec.kind === 'closed') return;
-    const ch = pickChallenge(todayKey());
+    const ch = pickChallenge(today);
     let ok = false;
     try { ok = ch.cond(T); } catch (e) { ok = false; }
     if (!ok) return;
-    G.daily.chDone = todayKey();
-    G.coins += ch.coin;
+    const bonus = ch.chain ? 1 : 0;
+    G.daily.chDone = today;
+    G.daily.lastClearChar = ch.char;
+    G.daily.chain = (G.daily.chain || 0) + 1;
+    G.coins += ch.coin + bonus;
+    G.bonds[ch.char] = (G.bonds[ch.char] || 0) + 2 + bonus;
     const name = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : 'スタッフ';
-    banner(`🎁 ${name}の依頼クリア:「${ch.text}」→ 🪙+${ch.coin}`);
+    banner(`🎁 ${name}の依頼クリア${ch.chain ? '(🔗連続依頼!)' : ''} → 🪙+${ch.coin + bonus}・${name}の信頼+${2 + bonus}${G.daily.chain >= 2 ? `(${G.daily.chain}日連続)` : ''}`);
     renderTodo();
+    renderStaffStrip();
     updateHeader();
   }
 
@@ -1334,7 +1416,7 @@
         count: (G.prestige ? G.prestige.count : 0) + 1,
         legacy,
         achDone: G.achDone, stats: G.stats, deco: G.deco, clinicName: G.clinicName,
-        daily: G.daily, speedUnlocked: G.speedUnlocked
+        daily: G.daily, speedPass: G.speedPass, bonds: G.bonds
       }));
       localStorage.removeItem(SAVE_KEY);
     } catch (e) { /* noop */ }
@@ -1359,7 +1441,7 @@
       : `<p class="plan-lead">現在 <b>${lap}周目</b>。殿堂入りすると経営はDay 1からやり直しですが、<b>実績に応じて開始条件が強くなります</b>。</p>`;
     el.innerHTML = `
       ${applied}
-      <div class="pnl-row"><span>引き継ぐもの</span><b>実績(${G.achDone.length}/${ACHIEVEMENTS.length})・累計スタッツ・プレミアム施設・倍速解放・院名</b></div>
+      <div class="pnl-row"><span>引き継ぐもの</span><b>実績(${G.achDone.length}/${ACHIEVEMENTS.length})・累計スタッツ・プレミアム施設・倍速パス・キャラとの信頼・院名</b></div>
       <div class="pnl-row"><span>リセットされるもの</span><b>資金・評判・日数・スタッフ・分院・ミッション(再挑戦で報酬も再獲得)</b></div>
       <h3 class="sub-title">次に殿堂入りした場合の開始ボーナス(実績${G.achDone.length}個 連動)</h3>
       <div class="pnl-row"><span>開始資金(実績1つ+¥200,000)</span><b>${yen(lg.money)}</b></div>
@@ -1493,6 +1575,7 @@
   }
 
   function updateHeader() {
+    if (typeof enforceSpeedPass === 'function' && G.speed > 4) enforceSpeedPass();
     $('hMoney').textContent = yen(G.money);
     $('hMoney').classList.toggle('neg', G.money < 0);
     const hm = $('hMedal');
@@ -1866,7 +1949,7 @@
     if (!el) return;
     el.innerHTML = KEYWORDS.map((kw) => {
       const r = G.adReport ? G.adReport[kw.id] : null;
-      const cpcEff = Math.round(kw.cpc * (1 + G.adPressure));
+      const cpcEff = Math.round(kw.cpc * (1 + G.adPressure) * (1 - 0.02 * bondLv('advisor')));
       return `
       <div class="ad-kw">
         <div class="ad-head">
@@ -2487,21 +2570,30 @@
 
   /* ================= 速度・表示 ================= */
 
-  // 倍速の解放(買い切り・周回引き継ぎ)。×4まではデフォルト、×8/×16/×32はコインで解放
-  const SPEED_TIERS = { 8: 12, 16: 25, 32: 50 };
+  // 倍速パス(時間制): ×4まではデフォルト無料。×8/×16/×32は24時間パスをコインで購入。
+  // パスは上位を買えば下位も使え、有効中に買い足すと残り時間に+24hされる。殿堂(周回)後も残り時間は有効。
+  const SPEED_PASS_PRICE = { 8: 4, 16: 8, 32: 15 };
+  const PASS_MS = 24 * 3600 * 1000;
 
-  function speedLocked(v) {
-    return SPEED_TIERS[v] !== undefined && !(G.speedUnlocked && G.speedUnlocked[v]);
+  function passActive() { return !!(G.speedPass && G.speedPass.until > Date.now()); }
+  function passAllowed() { return passActive() ? G.speedPass.tier : 4; }
+  function speedLocked(v) { return SPEED_PASS_PRICE[v] !== undefined && v > passAllowed(); }
+  function passRemainText() {
+    if (!passActive()) return '';
+    const min = Math.max(1, Math.round((G.speedPass.until - Date.now()) / 60000));
+    return min >= 60 ? `残り${Math.floor(min / 60)}時間${min % 60 ? min % 60 + '分' : ''}` : `残り${min}分`;
   }
 
   function updateSpeedButtons() {
     document.querySelectorAll('.speed-btn[data-speed]').forEach((b) => {
       const v = Number(b.dataset.speed);
-      if (SPEED_TIERS[v] === undefined) return;
+      if (SPEED_PASS_PRICE[v] === undefined) return;
       const locked = speedLocked(v);
       b.classList.toggle('locked', locked);
       b.textContent = locked ? `🔒×${v}` : `×${v}`;
-      b.title = locked ? `🪙${SPEED_TIERS[v]}で解放(買い切り・殿堂後も維持)` : '';
+      b.title = locked
+        ? `24時間パス 🪙${SPEED_PASS_PRICE[v]}(上位パスなら下位も使用可)`
+        : `⏳ パス${passRemainText()}`;
     });
   }
 
@@ -2510,28 +2602,42 @@
     document.querySelectorAll('.speed-btn').forEach((x) => x.classList.toggle('on', x === btn));
   }
 
+  // パス失効の監視: 失効したら×4に自動で戻す
+  function enforceSpeedPass() {
+    if (G.speed > 4 && speedLocked(G.speed)) {
+      const b4 = document.querySelector('.speed-btn[data-speed="4"]');
+      setSpeed(4, b4);
+      updateSpeedButtons();
+      toast('⏳ 倍速パスの時間が終了しました(×4に戻ります)');
+      save();
+    }
+  }
+
   document.querySelectorAll('.speed-btn[data-speed]').forEach((b) => {
     b.addEventListener('click', () => {
       const v = Number(b.dataset.speed);
       if (!speedLocked(v)) { setSpeed(v, b); return; }
-      const cost = SPEED_TIERS[v];
-      showModal(`⏩ 倍速×${v} を解放する`, `
-        <p>営業時間の進みが <b>×${v}</b> になります(いつでも切替可)。</p>
-        <div class="pnl-row"><span>価格</span><b>🪙 ${cost}(買い切り)</b></div>
-        <div class="pnl-row"><span>殿堂入り(周回)後</span><b>解放は維持されます</b></div>
+      const cost = SPEED_PASS_PRICE[v];
+      const active = passActive();
+      showModal(`⏩ 倍速×${v} の24時間パス`, `
+        <p>これから<b>24時間(実時間)</b>、営業の進みを <b>×${v}</b> まで上げられます(×${v}以下はすべて使用可・いつでも切替可)。</p>
+        <div class="pnl-row"><span>価格</span><b>🪙 ${cost} / 24時間</b></div>
+        ${active ? `<div class="pnl-row"><span>現在のパス(×${G.speedPass.tier})</span><b>${passRemainText()} — 購入で+24時間&上位に切替</b></div>` : ''}
+        <div class="pnl-row"><span>殿堂入り(周回)後</span><b>残り時間はそのまま有効</b></div>
         <div class="pnl-row"><span>所持コイン</span><b>🪙 ${G.coins}</b></div>
         ${G.coins >= cost
-          ? `<div class="modal-actions"><button class="btn-cta" id="speedBuy">🪙${cost}で解放する</button></div>`
+          ? `<div class="modal-actions"><button class="btn-cta" id="speedBuy">🪙${cost}で24時間パスを買う</button></div>`
           : `<p class="modal-note">コインが足りません。ミッション・実績・デイリー依頼で貯まります。</p>`}`,
         'やめておく');
       const buy = $('speedBuy');
       if (buy) buy.addEventListener('click', () => {
         G.coins -= cost;
-        G.speedUnlocked[v] = true;
+        const base = passActive() ? G.speedPass.until : Date.now();
+        G.speedPass = { tier: Math.max(v, passActive() ? G.speedPass.tier : 0), until: base + PASS_MS };
         updateSpeedButtons();
         setSpeed(v, b);
         $('modal').classList.remove('show');
-        toast(`⏩ 倍速×${v} を解放しました!(殿堂入り後も維持されます)`);
+        toast(`⏳ 倍速×${G.speedPass.tier}パス発動! ${passRemainText()}`);
         updateHeader(); save();
       });
     });
@@ -2632,7 +2738,7 @@
           if (examServed >= examCapDay) { turnedAway++; continue; }
           examServed++;
         } else if (rehaAvail < 1) {
-          if (Math.random() < 0.7) addSchedule(G.day + 1, 'rehab'); // 3割は離脱
+          if (Math.random() < Math.min(0.9, 0.7 + 0.05 * bondLv('reha'))) addSchedule(G.day + 1, 'rehab'); // 離脱(信頼で減)
           continue;
         }
         const seg = a.seg || 'senior';
@@ -2645,7 +2751,7 @@
         if (a.type !== 'checkup') {
           if (Math.random() < settings.pInj) { rev += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; proc = true; }
           if (Math.random() < settings.pTrig) { rev += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; proc = true; }
-          if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; }
+          if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; }
           const segMul = { senior: 1.2, sports: 1.45, worker: 0.75 }[seg] || 1;
           const wantReha = a.type === 'rehab' || (settings.rehaLevel > 0 && (a.refer || Math.random() < settings.pReha * segMul));
           if (wantReha && settings.rehaLevel > 0 && rehaAvail >= 1) {
@@ -2678,7 +2784,7 @@
         const load = examServed / examCapDay;
         const wait = clamp(7 + load * 26, 5, 45);
         T.waitSum = wait * n; T.waitN = n;
-        let sat = clamp(1.25 - wait * (G.deco.signage ? 0.85 : 1) / 40, 0, 1);
+        let sat = clamp(1.25 - wait * waitFeel() / 40, 0, 1);
         if (G.deco.cafe) sat = Math.min(1, sat + 0.05);
         G.rep += (sat * 100 - G.rep) * Math.min(0.3, 0.01 * n);
       }
@@ -2720,7 +2826,12 @@
       G.deco = pr.deco || {};
       G.clinicName = pr.clinicName || G.clinicName;
       G.daily = pr.daily || G.daily;
-      G.speedUnlocked = pr.speedUnlocked || {};
+      G.speedPass = pr.speedPass || { tier: 0, until: 0 };
+      G.bonds = pr.bonds || G.bonds;
+      if (pr.speedUnlocked) {
+        const OLD_PRICE = { 8: 12, 16: 25, 32: 50 };
+        Object.keys(pr.speedUnlocked).forEach((k) => { if (pr.speedUnlocked[k]) G.coins += OLD_PRICE[k] || 0; });
+      }
       G.tutorialDone = true; // 2周目はチュートリアル不要
     }
     [8, 7, 7, 6, 6, 5, 5, 4, 4, 3].forEach((n, i) => {
@@ -2799,6 +2910,11 @@
   if (G.tutorialDone && !$('modal').classList.contains('show')) checkDailyLogin();
   renderPrestige();
   updateSpeedButtons();
+  if (G.speedRefund) {
+    banner(`⏩ 倍速が時間制パスになりました — 旧・買い切り分は 🪙${G.speedRefund} を返金済みです`);
+    delete G.speedRefund;
+    save();
+  }
 
   requestAnimationFrame((ts) => { lastTs = ts; requestAnimationFrame(loop); });
 })();
