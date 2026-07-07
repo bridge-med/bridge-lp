@@ -61,6 +61,12 @@ const CLINIC = (() => {
       },
       NURSE_ROW: (n) => ({ x: 17 + (n % 2), y: 0.4 + Math.floor(n / 2) * 0.0 }),
       PT_ROW: (n) => ({ x: 13 + n * 1.1, y: 10.4 }),
+      DECO: {
+        cafe: { x: 1, y: 7, w: 2, label: '☕ カフェ' },
+        kids: { x: 5, y: 11, w: 2, label: '🧸 キッズ' },
+        signage: { x: 0, y: 7, w: 1, label: '📺' },
+        bus: { x: 0, y: 13, w: 2, label: '🚌 送迎バス' }
+      },
       MAX: { doctors: 3, chairs: 12, beds: 3, machines: 6, receptionists: 2, nurses: 3, pts: 6 }
     };
   }
@@ -123,6 +129,12 @@ const CLINIC = (() => {
       },
       NURSE_ROW: (n) => ({ x: 22 + (n % 3) * 1.2, y: 0.4 }),
       PT_ROW: (n) => ({ x: 15 + (n % 10) * 1.05, y: 10.5 + Math.floor(n / 10) * 0.0 }),
+      DECO: {
+        cafe: { x: 1, y: 7, w: 2, label: '☕ カフェ' },
+        kids: { x: 5, y: 11, w: 2, label: '🧸 キッズ' },
+        signage: { x: 0, y: 12, w: 1, label: '📺' },
+        bus: { x: 0, y: 15, w: 2, label: '🚌 送迎バス' }
+      },
       MAX: { doctors: 4, chairs: 20, beds: 4, machines: 12, receptionists: 3, nurses: 4, pts: 12 }
     };
   }
@@ -531,6 +543,16 @@ const CLINIC = (() => {
       boxItem(L.CASH.counter.x, L.CASH.counter.y, L.CASH.counter.w, L.CASH.counter.d, 0.7, '#9C8FCB');
       if (s.kiosk) boxItem(L.CASH.kiosk.x, L.CASH.kiosk.y, 1, 1, 0.9, '#8FA8B8');
 
+      // プレミアム施設(見た目のみ・導線には干渉しない)
+      const deco = this.deco || {};
+      const DECO_COLOR = { cafe: '#B98A5A', kids: '#F0A9A0', signage: '#8FA8B8', bus: '#7FB08A' };
+      const DECO_H = { cafe: 0.65, kids: 0.35, signage: 1.0, bus: 0.8 };
+      for (const key of Object.keys(L.DECO || {})) {
+        if (!deco[key]) continue;
+        const d = L.DECO[key];
+        boxItem(d.x, d.y, d.w, 1, DECO_H[key], DECO_COLOR[key]);
+      }
+
       for (let w = 0; w < this.recepWindows(); w++) {
         const sp = L.RECEP.staff[w];
         items.push({ depth: sp.x + sp.y, draw: () => iso.figure(sp.x, sp.y, '#FFFFFF', { coat: true, dot: this.recBusy[w] ? '#3E7CA6' : '#4FA98C' }) });
@@ -562,6 +584,11 @@ const CLINIC = (() => {
         iso.label((z.x0 + z.x1 + 1) / 2, (z.y0 + z.y1 + 1) / 2, z.label);
       }
       iso.label(L.DOOR.x + 1, L.DOOR.y + 0.5, '入口/出口');
+      for (const key of Object.keys(L.DECO || {})) {
+        if (!deco[key]) continue;
+        const d = L.DECO[key];
+        iso.label(d.x + d.w / 2, d.y + 0.5, d.label);
+      }
 
       for (let i = this.floats.length - 1; i >= 0; i--) {
         const f = this.floats[i];

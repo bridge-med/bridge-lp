@@ -950,6 +950,52 @@ input[type="range"]::-moz-range-thumb {
 .rs-next { font: 600 12.5px/1.7 var(--sans); color: var(--ink-2); margin-top: 8px; }
 .rs-next b { color: var(--blue-deep); }
 
+/* ---------- v7: メダル経済・実績・改名 ---------- */
+
+.hud-val.medal { color: var(--amber); }
+
+.badge-btn { cursor: pointer; pointer-events: auto; }
+.badge-btn:active { transform: scale(0.97); }
+.name-edit { color: var(--ink-3); font-weight: 600; }
+.name-input {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 13px;
+  font: 700 15px/1.4 var(--sans);
+  color: var(--ink);
+  margin: 8px 0;
+  background: var(--bg);
+}
+.name-input:focus { outline: 2px solid var(--blue); }
+
+.boost-on {
+  font: 800 10px/1.4 var(--sans);
+  color: var(--green-deep);
+  background: var(--green-pale);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-left: 4px;
+}
+
+.ach-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+.ach-chip {
+  font: 600 11px/1.5 var(--sans);
+  color: var(--ink-3);
+  background: var(--bg-deep);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 11px;
+}
+.ach-chip b { color: var(--ink-3); font-weight: 700; margin-left: 2px; }
+.ach-chip.done {
+  color: var(--amber);
+  background: var(--amber-pale);
+  border-color: rgba(201,138,45,0.4);
+  font-weight: 700;
+}
+.ach-chip.done b { color: var(--amber); }
+
 /* ---------- v6: スマホは下部ナビ(親指ファースト) ---------- */
 
 @media (max-width: 719px) {

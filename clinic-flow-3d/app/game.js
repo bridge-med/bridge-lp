@@ -122,6 +122,49 @@
       lesson: '経営者の仕事は「自分がいなくても回る仕組み」を作ること。ここまで来たら、次は現実のクリニックで。' }
   ];
 
+  /* ================= プレミアム(メダル)経済 — アプリ版の課金設計をゲーム内で体験 ================= */
+
+  const ITEMS = {
+    campaign: { label: '📣 集患キャンペーン', medal: 3, days: 3, hint: '明日から3日間、自然新患+50%。認知が育つ前のブースト向き' },
+    ops: { label: '⚡ 業務改善コンサル', medal: 3, days: 3, hint: '明日から3日間、診察の回転UP(診察時間-1.2分相当)' },
+    training: { label: '🎓 接遇研修(即時)', medal: 2, days: 0, hint: 'その場で評判+3。体験改善のショートカット' },
+    lucky: { label: '🍀 ラッキー看板', medal: 2, days: 7, hint: '明日から7日間、認知+0.7%/日。看板・広告と重ねがけ可' },
+    skip7: { label: '⏩ 7日パック(自動運営)', medal: 2, days: 0, hint: '7日ぶんを一括で自動運営。結果はP&L・週次サマリーで確認' }
+  };
+
+  const FACILITIES = {
+    cafe: { label: '☕ 院内カフェ', medal: 6, hint: '待ち時間の不満をやわらげる(患者体験+5%)。待合に常設表示' },
+    kids: { label: '🧸 キッズスペース', medal: 5, hint: '子連れ・勤労世帯の新患+1〜2人/日' },
+    bus: { label: '🚌 送迎バス', medal: 8, hint: '高齢の新患+1〜2人/日、リハ・再診の来院率UP' },
+    signage: { label: '📺 待合サイネージ', medal: 4, hint: '体感待ち時間-15% — 「待たされ感」を情報で削る' }
+  };
+
+  const ACHIEVEMENTS = [
+    { id: 'p100', name: '来院 累計100人', medal: 1, cond: (st) => st.patients >= 100 },
+    { id: 'p1000', name: '来院 累計1,000人', medal: 2, cond: (st) => st.patients >= 1000 },
+    { id: 'p10000', name: '来院 累計10,000人', medal: 5, cond: (st) => st.patients >= 10000 },
+    { id: 'new300', name: '新患 累計300人', medal: 2, cond: (st) => st.newp >= 300 },
+    { id: 'reha1000', name: 'リハ 累計1,000件', medal: 2, cond: (st) => st.reha >= 1000 },
+    { id: 'reha10000', name: 'リハ 累計10,000件', medal: 5, cond: (st) => st.reha >= 10000 },
+    { id: 'inj500', name: '注射 累計500件', medal: 2, cond: (st) => st.inj >= 500 },
+    { id: 'mri100', name: 'MRI 累計100件', medal: 2, cond: (st) => st.mri >= 100 },
+    { id: 'rev50m', name: '累計売上 ¥5,000万', medal: 2, cond: (st) => st.revenue >= 50000000 },
+    { id: 'rev300m', name: '累計売上 ¥3億', medal: 4, cond: (st) => st.revenue >= 300000000 },
+    { id: 'rev1b', name: '累計売上 ¥10億', medal: 8, cond: (st) => st.revenue >= 1000000000 },
+    { id: 'rep90', name: '評判90到達', medal: 3, cond: () => G.rep >= 90 },
+    { id: 'aw80', name: '認知80%到達', medal: 3, cond: () => G.aw >= 0.8 },
+    { id: 'black7', name: '7日連続黒字', medal: 2, cond: () => (G.blackStreak || 0) >= 7 },
+    { id: 'black30', name: '30日連続黒字', medal: 5, cond: () => (G.blackStreak || 0) >= 30 },
+    { id: 'relAll', name: '全営業先と関係Lv1+', medal: 3, cond: () => Object.values(G.relations).every((r) => r.lv >= 1) },
+    { id: 'relMax', name: 'どこかの営業先を最大Lvに', medal: 2, cond: () => Object.entries(G.relations).some(([k, r]) => r.lv >= REL_DEF[k].max) },
+    { id: 'branch3', name: '分院3院', medal: 4, cond: () => G.branches.length >= 3 },
+    { id: 'branch5', name: '分院5院', medal: 6, cond: () => G.branches.length >= 5 },
+    { id: 'pt10', name: '法人PT10人', medal: 3, cond: () => corpStaff().pts >= 10 },
+    { id: 'debtFree10m', name: '無借金で月商¥1,000万', medal: 4, cond: () => G.loans.length === 0 && monthRevenueAll() >= 10000000 },
+    { id: 'day100', name: 'Day 100到達', medal: 2, cond: () => G.day >= 100 },
+    { id: 'day365', name: 'Day 365到達', medal: 5, cond: () => G.day >= 365 }
+  ];
+
   const TEXTBOOK = [
     { t: '① 売上 = 患者数 × 単価', b: 'すべての打ち手はこのどちらか(または両方)を動かす。「今日やったことはどちらを動かしたか?」を毎日問う。' },
     { t: '② 患者数 = 新患 + 再診', b: '新患は「認知×評判×アクセス×紹介」。再診は「治療計画×患者体験」。新患獲得コストは再診維持の5倍以上。' },
@@ -193,7 +236,10 @@
     branches: [],
     missionIdx: 0, missionDone: [],
     tutorialDone: false, plan: null,
-    lastStage: 1, blackStreak: 0
+    lastStage: 1, blackStreak: 0,
+    medals: 2, boosts: {}, deco: {}, achDone: [],
+    stats: { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: 0 },
+    clinicName: 'あなたのクリニック'
   };
   Object.keys(REL_DEF).forEach((k) => { G.relations[k] = { lv: 0, last: 0 }; });
 
@@ -239,7 +285,9 @@
           schedule: G.schedule, history: G.history.slice(-40),
           branches: G.branches, missionIdx: G.missionIdx, missionDone: G.missionDone,
           tutorialDone: G.tutorialDone, plan: G.plan,
-          lastStage: G.lastStage, blackStreak: G.blackStreak
+          lastStage: G.lastStage, blackStreak: G.blackStreak,
+          medals: G.medals, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
+          stats: G.stats, clinicName: G.clinicName
         }
       }));
     } catch (e) { /* noop */ }
@@ -261,6 +309,13 @@
       if (G.missionDone.length && !G.missionDone.some((id) => MISSIONS.some((m) => m.id === id))) {
         G.missionIdx = Math.min(G.missionDone.length, MISSIONS.length);
       }
+      // v7: メダル経済のフィールド補完(旧セーブは達成済みミッション分のメダルを付与)
+      if (d.g.medals === undefined) G.medals = 2 + G.missionIdx;
+      if (!G.boosts) G.boosts = {};
+      if (!G.deco) G.deco = {};
+      if (!G.achDone) G.achDone = [];
+      if (d.g.stats === undefined) G.stats = { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: G.cum.revenue || 0 };
+      if (!G.clinicName) G.clinicName = 'あなたのクリニック';
       // 旧セーブの分院にv4フィールドを補完
       for (const br of G.branches) {
         if (br.floorLv === undefined) br.floorLv = 1;
@@ -335,7 +390,9 @@
       // 骨粗鬆症プログラム(DEXA): 高齢初診の一部が継続診療に乗る
       if (settings.dexa && report.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
 
-      let sat = clamp(1.25 - report.wait / 40, 0, 1);
+      // サイネージは体感待ち時間を削り、カフェは待ちの不満をやわらげる
+      let sat = clamp(1.25 - report.wait * (G.deco.signage ? 0.85 : 1) / 40, 0, 1);
+      if (G.deco.cafe) sat = Math.min(1, sat + 0.05);
       if (report.didReha) sat = Math.min(1, sat + 0.1);
 
       // 自費リハ延長(価格弾力性)
@@ -425,6 +482,12 @@
       }
     }
 
+    // ブースト: 業務改善コンサル(診察回転UP)
+    if (boostActive('ops')) {
+      G.evExamDelta = (G.evExamDelta || 0) - 1.2;
+      settings.evExamDelta = G.evExamDelta;
+    }
+
     if (spec.kind === 'closed') {
       const due = G.schedule[G.day];
       if (due) {
@@ -454,7 +517,8 @@
 
     // 自然新患(雨・流行イベントで増減)
     const share = G.rep / (G.rep + RIVAL_REP);
-    const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost * (G.evArrivalMul || 1) + (Math.random() * 4 - 2)));
+    const campMul = boostActive('campaign') ? 1.5 : 1;
+    const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost * (G.evArrivalMul || 1) * campMul + (Math.random() * 4 - 2)));
     for (let i = 0; i < nNew; i++) push('first', 'house');
 
     // リスティング広告
@@ -477,6 +541,10 @@
 
     if (G.billboard) for (let i = 0; i < 1 + Math.round(Math.random()); i++) push('first', 'station', false, Math.random() < 0.6 ? 'worker' : 'senior');
 
+    // プレミアム施設: キッズスペース(勤労・スポーツ世帯)・送迎バス(高齢者)
+    if (G.deco.kids) for (let i = 0; i < 1 + frac(0.6); i++) push('first', 'house', false, Math.random() < 0.6 ? 'worker' : 'sports');
+    if (G.deco.bus) for (let i = 0; i < 1 + frac(0.6); i++) push('first', 'house', false, 'senior');
+
     // 営業関係からの紹介(関係レベル依存・チャネルごとに客層が違う)
     for (let i = 0; i < (G.evExtraRefer || 0); i++) push('first', 'hospital', true, 'senior');
     for (let i = 0; i < relLv('hospital'); i++) push('first', 'hospital', true, Math.random() < 0.7 ? 'senior' : 'worker');
@@ -490,7 +558,7 @@
 
     // 再診・リハ(予約済み)
     const due = G.schedule[G.day] || { revisit: 0, rehab: 0 };
-    const showRate = (0.75 + 0.2 * (G.rep / 100) + (settings.reserve ? 0.05 : 0)) * Math.min(1.1, G.evArrivalMul || 1);
+    const showRate = (0.75 + 0.2 * (G.rep / 100) + (settings.reserve ? 0.05 : 0) + (G.deco.bus ? 0.04 : 0)) * Math.min(1.1, G.evArrivalMul || 1);
     for (let i = 0; i < due.revisit; i++) if (Math.random() < showRate) push('revisit', 'house');
     for (let i = 0; i < due.rehab; i++) if (Math.random() < showRate) push('rehab', 'house');
     delete G.schedule[G.day];
@@ -673,6 +741,7 @@
       if (G.rep >= 70) dAw += 0.006; else if (G.rep >= 60) dAw += 0.003;
       if (settings.reviewCare) dAw += 0.003;
       dAw += 0.001 * relLv('shoutengai');
+      if (boostActive('lucky')) dAw += 0.007;
       G.aw = clamp(G.aw + dAw, 0.05, 0.95);
       if (settings.reviewCare) G.rep = Math.min(100, G.rep + 0.15);
       const totalAds = Object.values(G.ads).reduce((a, b) => a + b, 0);
@@ -696,8 +765,21 @@
 
     G.rep = clamp(G.rep, 15, 97);
     if (spec.kind !== 'closed') G.blackStreak = (T.profit + T.brProfit) > 0 ? (G.blackStreak || 0) + 1 : 0;
+
+    // 累計スタッツ(実績システムの土台)
+    if (spec.kind !== 'closed') {
+      const st = G.stats;
+      st.patients += T.patients;
+      st.newp += T.newCount;
+      st.reha += T.rehaCount;
+      st.inj += T.injCount + T.trigCount;
+      st.mri += T.mriCount;
+    }
+    G.stats.revenue += T.revenue + T.brRevenue;
+
     dailyVoice();
     checkMission(T);
+    checkAchievements();
 
     if (G.day % 7 === 0 && G.history.length >= 8 && spec.kind !== 'closed') weeklyDigest();
     if (G.plan && G.day % 30 === 0) reviewPlan();
@@ -719,10 +801,12 @@
     clinic.rehaToday = 0;
     if (G.day === 366 && !G.annualDone) {
       G.annualDone = true;
+      G.medals += 10;
       const title = G.cum.revenue >= 250000000 ? '👑 地域医療の帝王(殿堂入り)'
         : G.cum.revenue >= 150000000 ? '🏆 名経営者'
         : G.cum.revenue >= 80000000 ? '🛡️ 堅実経営者' : '🎗️ 一年を生き抜いた経営者';
       showModal('🎊 Day 365 到達 — 年次決算', `
+        <p class="modal-note">🎁 年次ボーナス: 💎メダル+10</p>
         <div class="pnl-row"><span>年商(法人・365日)</span><b>${yen(G.cum.revenue)}</b></div>
         <div class="pnl-row"><span>年間損益</span><b>${G.cum.profit >= 0 ? '+' : ''}${yen(G.cum.profit)}</b></div>
         <div class="pnl-row"><span>拠点数</span><b>${1 + G.branches.length}</b></div>
@@ -744,7 +828,7 @@
     }
 
     save();
-    renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip(); renderStaffStrip(); renderTodo();
+    renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip(); renderStaffStrip(); renderTodo(); renderItems();
     updateHeader();
   }
 
@@ -830,6 +914,8 @@
     vis('jihiCard', 3);
     vis('salesCard', 2);
     vis('adTarget', 2);
+    vis('itemCard', 2);
+    vis('achCard', 2);
     ['kpiCard', 'plannerCard', 'bankCard', 'pnlCard', 'kijunCard'].forEach((id) => vis(id, 3));
     const lock = $('mgmtLock');
     if (lock) lock.hidden = stage >= 3;
@@ -849,6 +935,7 @@
            <li>💉 <b>診療方針</b>(注射・物療・処置)— 単価はここで作る</li>
            <li>📱 <b>Web問診・自動精算機・クチコミ返信</b> — 受付の詰まり対策</li>
            <li>🤝 <b>営業まわり・ターゲット客層</b>(タウン)</li>
+           <li>💎 <b>アイテム・プレミアム施設・実績</b> — メダルはミッションと実績で獲得</li>
          </ul>
          <p class="modal-note">📖 打ち手は「詰まっている所」に打つのが原則。院内タブの「今日やること」が案内します。</p>`
       : `<p>Day 8 — ここからが経営の本番です。</p>
@@ -994,6 +1081,110 @@
     bindGoto($('modalBody'));
   }
 
+  /* ================= 💎メダル経済: アイテム・実績・自由度 ================= */
+
+  const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  function boostActive(id) { return !!(G.boosts && G.boosts[id] && G.day <= G.boosts[id]); }
+
+  function checkAchievements() {
+    if (!G.achDone) return;
+    const got = [];
+    for (const a of ACHIEVEMENTS) {
+      if (G.achDone.includes(a.id)) continue;
+      let ok = false;
+      try { ok = a.cond(G.stats); } catch (e) { ok = false; }
+      if (!ok) continue;
+      G.achDone.push(a.id);
+      G.medals += a.medal;
+      got.push(a);
+    }
+    if (got.length) {
+      banner(`🏅 実績解除: ${got.map((a) => `${a.name}(💎+${a.medal})`).join(' / ')}`);
+      renderAch();
+      renderItems();
+      updateHeader();
+    }
+  }
+
+  function buyItem(id) {
+    const item = ITEMS[id];
+    if (G.medals < item.medal) { toast(`💎メダルが足りません(必要${item.medal}・ミッションと実績で貯まります)`); return; }
+    if (item.days > 0 && boostActive(id)) { toast('このブーストは実施中です'); return; }
+    if (id === 'skip7' && tutIdx >= 0) return;
+    G.medals -= item.medal;
+    if (id === 'training') {
+      G.rep = clamp(G.rep + 3, 15, 97);
+      toast('🎓 接遇研修を実施! 評判+3');
+    } else if (id === 'skip7') {
+      const sp = G.speed;
+      G.speed = 8; // 一括実行中は日次結果モーダルを抑制
+      for (let i = 0; i < 7; i++) autoDay();
+      G.speed = sp;
+      banner(`⏩ 7日間を自動運営しました(現在 Day ${G.day})。P&L・週次サマリーで振り返りを`);
+    } else {
+      G.boosts[id] = G.day + item.days;
+      toast(`${item.label} 開始! 明日から${item.days}日間有効`);
+    }
+    renderItems(); updateHeader(); save();
+  }
+
+  function buyFacility(id) {
+    const f = FACILITIES[id];
+    if (G.deco[id]) return;
+    if (G.medals < f.medal) { toast(`💎メダルが足りません(必要${f.medal}・ミッションと実績で貯まります)`); return; }
+    G.medals -= f.medal;
+    G.deco[id] = true;
+    clinic.deco = G.deco;
+    toast(`${f.label} を設置しました! 院内ビューにも表示されます`);
+    renderItems(); updateHeader(); save();
+  }
+
+  function renderItems() {
+    const el = $('itemList');
+    if (!el) return;
+    const boostRows = Object.entries(ITEMS).map(([id, item]) => {
+      const act = item.days > 0 && boostActive(id);
+      return `
+      <div class="shop-row">
+        <div class="shop-info">
+          <span class="shop-name">${item.label}${act ? ` <span class="boost-on">実施中(Day ${G.boosts[id]}まで)</span>` : ''}</span>
+          <span class="shop-hint">${item.hint}</span>
+        </div>
+        <div class="shop-btns"><button class="mini-btn ${G.medals >= item.medal && !act ? 'plus' : ''}" data-item="${id}" ${act ? 'disabled' : ''}>💎 ${item.medal}</button></div>
+      </div>`;
+    }).join('');
+    const facRows = Object.entries(FACILITIES).map(([id, f]) => `
+      <div class="shop-row ${G.deco[id] ? 'expand-row done' : ''}">
+        <div class="shop-info">
+          <span class="shop-name">${f.label}${G.deco[id] ? ' <small>設置済み</small>' : ''}</span>
+          <span class="shop-hint">${f.hint}</span>
+        </div>
+        ${G.deco[id] ? '' : `<div class="shop-btns"><button class="mini-btn ${G.medals >= f.medal ? 'plus' : ''}" data-fac="${id}">💎 ${f.medal}</button></div>`}
+      </div>`).join('');
+    el.innerHTML = `
+      <p class="plan-lead">💎メダルは<b>ミッション・実績・年次決算</b>で獲得(現在 <b>💎 ${G.medals}</b>)。アプリ版なら課金ポイントになる部分を、ゲーム内通貨で体験する設計です。</p>
+      <h3 class="sub-title">⚡ ブースト(期間限定)</h3>${boostRows}
+      <h3 class="sub-title">🏛 プレミアム施設(買い切り・院内ビューに表示)</h3>${facRows}`;
+    el.querySelectorAll('[data-item]').forEach((b) => b.addEventListener('click', () => buyItem(b.dataset.item)));
+    el.querySelectorAll('[data-fac]').forEach((b) => b.addEventListener('click', () => buyFacility(b.dataset.fac)));
+  }
+
+  function renderAch() {
+    const el = $('achList');
+    if (!el) return;
+    el.innerHTML = `<p class="plan-lead">解除 <b>${G.achDone.length}/${ACHIEVEMENTS.length}</b> — どの実績から狙うかも経営判断。解除で💎メダル獲得。</p>
+      <div class="ach-grid">` + ACHIEVEMENTS.map((a) => {
+      const done = G.achDone.includes(a.id);
+      return `<span class="ach-chip ${done ? 'done' : ''}">${done ? '🏅' : '🔒'} ${a.name} <b>💎${a.medal}</b></span>`;
+    }).join('') + '</div>';
+  }
+
+  function updateNameBadge() {
+    const el = $('nameBadge');
+    if (el) el.innerHTML = `🏥 ${escapeHtml(G.clinicName)} <small class="name-edit">✏️ 改名</small>`;
+  }
+
   /* ================= 週次・月次レビュー ================= */
 
   function kpiWeekAgg(hist) {
@@ -1081,9 +1272,11 @@
     }
     if (done) {
       G.money += m.reward;
+      const md = 1 + Math.floor(G.missionIdx / 5);
+      G.medals += md;
       G.missionDone.push(m.id);
       showModal(`🎉 ミッション達成: ${m.title}`,
-        `<p>達成ボーナス <b>${yen(m.reward)}</b> を獲得しました。</p><div class="lesson-box"><b>📖 経営の学び</b><p>${m.lesson}</p></div>`,
+        `<p>達成ボーナス <b>${yen(m.reward)}</b> + <b>💎メダル×${md}</b> を獲得しました。</p><div class="lesson-box"><b>📖 経営の学び</b><p>${m.lesson}</p></div>`,
         G.missionIdx + 1 < MISSIONS.length ? '次のミッションへ' : 'クリニックタウンの覇者だ');
       G.missionIdx++;
       renderMissions();
@@ -1103,6 +1296,8 @@
   function updateHeader() {
     $('hMoney').textContent = yen(G.money);
     $('hMoney').classList.toggle('neg', G.money < 0);
+    const hm = $('hMedal');
+    if (hm) hm.textContent = `💎 ${G.medals || 0}`;
     const spec = G.daySpec || specOf(G.day);
     $('hDay').textContent = `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}${spec.kind === 'am' ? '·午前' : spec.kind === 'closed' ? '·休診' : ''})`;
     $('hClock').textContent = spec.kind === 'closed' ? '—' : fmtClock(G.t);
@@ -1154,7 +1349,7 @@
     if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
-    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); }
+    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); }
   }
 
   /* ================= UI: 診療時間 ================= */
@@ -1565,7 +1760,7 @@
       return;
     }
     if (b.id === 'clinic') {
-      showModal('あなたのクリニック(本院)', `<p>現在: 医師${settings.doctors}人 / PT${settings.pts}人 / ${REHA_NAMES[settings.rehaLevel]} / 評判${Math.round(G.rep)} / 認知${Math.round(G.aw * 100)}%</p>`, '閉じる');
+      showModal(`${G.clinicName}(本院)`, `<p>現在: 医師${settings.doctors}人 / PT${settings.pts}人 / ${REHA_NAMES[settings.rehaLevel]} / 評判${Math.round(G.rep)} / 認知${Math.round(G.aw * 100)}%</p>`, '閉じる');
       return;
     }
     const def = REL_DEF[b.id];
@@ -2240,7 +2435,8 @@
         const load = examServed / examCapDay;
         const wait = clamp(7 + load * 26, 5, 45);
         T.waitSum = wait * n; T.waitN = n;
-        const sat = clamp(1.25 - wait / 40, 0, 1);
+        let sat = clamp(1.25 - wait * (G.deco.signage ? 0.85 : 1) / 40, 0, 1);
+        if (G.deco.cafe) sat = Math.min(1, sat + 0.05);
         G.rep += (sat * 100 - G.rep) * Math.min(0.3, 0.01 * n);
       }
       // 断られた患者は評判を下げ、街の噂になる
@@ -2273,11 +2469,29 @@
   clinic.applySettings();
   clinicIso.W = clinic.L.W; clinicIso.H = clinic.L.H;
   town.setBranches(G.branches.map((x) => x.siteId));
+  clinic.deco = G.deco;
   planDay();
   applyUnlocks();
   renderSchedule();
   renderShop();
   renderTodo();
+  renderItems();
+  renderAch();
+  updateNameBadge();
+  const nb = $('nameBadge');
+  if (nb) nb.addEventListener('click', () => {
+    showModal('🏥 クリニック名を変更', `
+      <p>院名は自由に決められます(タウン・院内表示に反映)。</p>
+      <input id="nameInput" class="name-input" maxlength="14" value="${escapeHtml(G.clinicName)}">
+      <div class="modal-actions"><button class="btn-cta" id="nameGo">この名前にする</button></div>`, 'やめておく');
+    $('nameGo').addEventListener('click', () => {
+      const v = $('nameInput').value.trim();
+      if (v) G.clinicName = v.slice(0, 14);
+      $('modal').classList.remove('show');
+      updateNameBadge(); save();
+      toast(`🏥 「${G.clinicName}」に改名しました`);
+    });
+  });
   renderPnl();
   renderMissions();
   renderPlanner();

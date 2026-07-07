@@ -34,6 +34,7 @@
     <div class="hud-item"><span class="hud-label">本日売上(本院)</span><b class="hud-val" id="hToday">¥0</b></div>
     <div class="hud-item"><span class="hud-label">評判</span><b class="hud-val" id="hRep">55</b></div>
     <div class="hud-item"><span class="hud-label">認知</span><b class="hud-val" id="hAw">30%</b></div>
+    <div class="hud-item"><span class="hud-label">メダル</span><b class="hud-val medal" id="hMedal">💎 0</b></div>
     <div class="hud-item hud-time"><b id="hDay">Day 1</b><span id="hClock">9:00</span></div>
     <div class="speed-group" role="group" aria-label="再生速度">
       <button class="speed-btn" data-speed="0">⏸</button>
@@ -63,6 +64,7 @@
       <canvas id="clinicStage"></canvas>
       <div class="stage-overlay">
         <div class="stage-badges">
+          <span class="badge badge-btn" id="nameBadge">🏥 あなたのクリニック</span>
           <span class="badge" id="bottleneck">ボトルネック: なし 😌</span>
           <span class="badge">院内 <b id="cIn">0</b>人 / 平均待ち <b id="cWait">–</b></span>
         </div>
@@ -140,8 +142,13 @@
     </div>
 
     <div class="card" id="jihiCard">
-      <h2 class="card-title">💎 自費メニュー <small>— 唯一「価格」を自分で決められる領域(価格弾力性あり)</small></h2>
+      <h2 class="card-title">💰 自費メニュー <small>— 唯一「価格」を自分で決められる領域(価格弾力性あり)</small></h2>
       <div id="jihiList"></div>
+    </div>
+
+    <div class="card" id="itemCard">
+      <h2 class="card-title">💎 アイテム &amp; プレミアム施設 <small>— アプリ版の課金設計をメダルで体験</small></h2>
+      <div id="itemList"></div>
     </div>
   </section>
 
@@ -219,6 +226,11 @@
     <div class="card" id="missionCard">
       <h2 class="card-title">🎯 ミッション <small>— 経営のカリキュラム(全15)。順番に進めば型が身につく</small></h2>
       <div id="missionList"></div>
+    </div>
+
+    <div class="card" id="achCard">
+      <h2 class="card-title">🏅 実績 <small>— やり込みの記録。解除で💎メダル獲得</small></h2>
+      <div id="achList"></div>
     </div>
 
     <div class="card">
