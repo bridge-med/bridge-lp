@@ -1076,3 +1076,8 @@ input[type="range"]::-moz-range-thumb {
 .req-passed { color: var(--ink-3); }
 .req-note { display: block; font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); margin-top: 2px; }
 .fix-chip.ghost { background: var(--card); color: var(--ink-3); border-color: var(--line); }
+
+/* ---------- v11: 混雑離脱・スペシャル・月間決算 ---------- */
+
+.rs-bottle.rs-balk { background: var(--red-pale); color: var(--red); font-weight: 700; }
+.sp-star { font-style: normal; color: var(--amber); font-size: 11px; margin-left: 2px; }

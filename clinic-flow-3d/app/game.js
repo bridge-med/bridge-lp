@@ -243,7 +243,9 @@
     daily: { last: '', streak: 0, chDone: '', chState: '', chDay: '', lastClearChar: '', chain: 0 },
     prestige: { count: 0, legacy: null },
     speedPass: { tier: 0, until: 0 },
-    bonds: { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 }
+    bonds: { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 },
+    specialDone: [],
+    season: { bestProfit: null, bestMonth: 0, months: 0 }
   };
   Object.keys(REL_DEF).forEach((k) => { G.relations[k] = { lv: 0, last: 0 }; });
 
@@ -271,6 +273,7 @@
       newCount: 0, injCount: 0, trigCount: 0, physioCount: 0, xrayCount: 0, mriCount: 0, prpCount: 0, osteoVisits: 0, treatCount: 0, kanriCount: 0,
       segCounts: { senior: 0, worker: 0, sports: 0 },
       rev: { consult: 0, inj: 0, treat: 0, physio: 0, img: 0, reha: 0, osteo: 0, checkup: 0, jihi: 0 },
+      balked: 0,
       brRevenue: 0, brProfit: 0
     };
   }
@@ -292,7 +295,8 @@
           lastStage: G.lastStage, blackStreak: G.blackStreak,
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
           stats: G.stats, clinicName: G.clinicName,
-          daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds
+          daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
+          specialDone: G.specialDone, season: G.season
         }
       }));
     } catch (e) { /* noop */ }
@@ -324,6 +328,9 @@
       // v8: デイリー・殿堂フィールドの補完
       if (!G.daily) G.daily = { last: '', streak: 0, chDone: '' };
       if (!G.prestige) G.prestige = { count: 0, legacy: null };
+      // v11: スペシャル依頼・月間決算の補完
+      if (!G.specialDone) G.specialDone = [];
+      if (!G.season) G.season = { bestProfit: null, bestMonth: 0, months: 0 };
       // v10: 倍速パス・信頼度の補完(v9の買い切りはコインで返金)
       if (!G.speedPass) G.speedPass = { tier: 0, until: 0 };
       if (!G.bonds) G.bonds = { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 };
@@ -356,6 +363,11 @@
 
   const clinicIso = new Iso($('clinicStage'), 20, 14, { maxTileW: 58 });
   const townIso = new Iso($('townStage'), TOWN.W, TOWN.H, { maxTileW: 46, topPad: 1.6 });
+
+  // 評判は1日に-3までしか下がらない(悪循環の防止)。上げ幅は従来どおり
+  function repDailyFloor() {
+    return Math.max(15, (G.repDayStart !== undefined ? G.repDayStart : G.rep) - 3);
+  }
 
   const clinic = new CLINIC.ClinicSim(settings, {
     onRelayout(L) {
@@ -430,6 +442,7 @@
       T.patients++;
       T.waitSum += report.wait; T.waitN++;
       G.rep += (sat * 100 - G.rep) * 0.01;
+      G.rep = Math.max(G.rep, repDailyFloor());
 
       const showBoost = settings.reserve ? 0.05 : 0;
       const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45; // 客層で再診定着が違う
@@ -443,6 +456,13 @@
       else if (report.type === 'rehab' && Math.random() < 0.12 * (1 - sat) * (1 - 0.15 * bondLv('reha'))) removeSchedule('rehab');
       updateHeader();
       return revenue;
+    },
+    // 混雑離脱: 待合が飽和して入口で引き返した患者(機会損失+評判に小ダメージ)
+    onBalk() {
+      const T = G.today;
+      if (!T) return;
+      T.balked++;
+      G.rep = Math.max(repDailyFloor(), G.rep - 0.06);
     }
   });
   clinicIso.W = clinic.L.W; clinicIso.H = clinic.L.H;
@@ -753,7 +773,7 @@
       patients: T.patients, avgWait: T.avgWait, rehaCount: T.rehaCount,
       newCount: T.newCount, injCount: T.injCount, trigCount: T.trigCount,
       physioCount: T.physioCount, mriCount: T.mriCount, kanriCount: T.kanriCount,
-      segS: T.segCounts.senior, segW: T.segCounts.worker, segP: T.segCounts.sports,
+      segS: T.segCounts.senior, segW: T.segCounts.worker, segP: T.segCounts.sports, balked: T.balked || 0,
       jihi: T.rev.jihi, staffCost: Math.round(mainStaffCost() * spec.pay), pts: settings.pts,
       brRevenue: T.brRevenue, brProfit: T.brProfit
     });
@@ -786,7 +806,7 @@
       toast(`⚠️ 施設基準の要件割れ! ${REHA_NAMES[settings.rehaLevel]}に降格しました`);
     }
 
-    G.rep = clamp(G.rep, 15, 97);
+    G.rep = clamp(G.rep, Math.max(15, repStart - 3), 97);
     if (spec.kind !== 'closed') G.blackStreak = (T.profit + T.brProfit) > 0 ? (G.blackStreak || 0) + 1 : 0;
 
     // 累計スタッツ(実績システムの土台)
@@ -806,7 +826,7 @@
     checkDailyChallenge(T);
 
     if (G.day % 7 === 0 && G.history.length >= 8 && spec.kind !== 'closed') weeklyDigest();
-    if (G.plan && G.day % 30 === 0) reviewPlan();
+    if (G.day % 30 === 0 && G.history.length >= 25) monthlyClose();
 
     if (G.money < -300000) {
       G.money += 1000000;
@@ -887,7 +907,7 @@
       const mood = st.mood(c);
       const lv = bondLv(k);
       const pts = (G.bonds && G.bonds[k]) || 0;
-      return `<span class="staff-chip mood-${mood}" title="${st.title} ${st.name} / 信頼${pts}pt(Lv${lv}) ${BOND_FX[k] || ''}">${STAFF_UI.faceSVG(k, mood, 34)}<span class="staff-meta"><small>${st.title}</small><b>${st.name}・${STAFF_UI.MOOD_LABEL[mood]}${lv ? ` <i class="bond-hearts">${'♥'.repeat(lv)}</i>` : ''}</b></span></span>`;
+      return `<span class="staff-chip mood-${mood}" title="${st.title} ${st.name} / 信頼${pts}pt(Lv${lv}) ${BOND_FX[k] || ''}">${STAFF_UI.faceSVG(k, mood, 34)}<span class="staff-meta"><small>${st.title}</small><b>${st.name}・${STAFF_UI.MOOD_LABEL[mood]}${lv ? ` <i class="bond-hearts">${'♥'.repeat(lv)}</i>` : ''}${(G.specialDone || []).includes(k) ? '<i class="sp-star">★</i>' : ''}</b></span></span>`;
     }).join('');
   }
 
@@ -993,6 +1013,17 @@
     const examCapDay = Math.max(10, settings.doctors * (480 / (settings.examMean + 1.5)) * 0.72);
     const load = h.patients / examCapDay;
     const rehaUtil = clinic.rehaCap() > 0 ? h.rehaCount / clinic.rehaCap() : 0;
+    if ((h.balked || 0) >= 3) {
+      return {
+        text: `待合がパンクして${h.balked}人が帰りました。容量(椅子)と回転(受付・診察)の両面で受け皿を`,
+        fixes: [
+          F('待合椅子を増やす', 'clinic', '#shopCard'),
+          stage >= 2 ? F('Web問診で受付を短縮', 'clinic', '#shopCard') : F('受付を増員する', 'clinic', '#shopCard'),
+          F('予約制で来院を平準化', 'clinic', '#shopCard'),
+          stage >= 2 ? F('医師を採用(診察の回転)', 'clinic', '#shopCard') : null
+        ].filter(Boolean)
+      };
+    }
     if (load >= 0.88) {
       return {
         text: `診察が詰まっています(医師キャパの${Math.round(load * 100)}%稼働)。待ち時間の主因はここ`,
@@ -1121,6 +1152,7 @@
         <div class="rs-item"><small>評判</small><b>${Math.round(G.rep)}</b><small class="rs-delta ${repDelta >= 0 ? 'up' : 'down'}">${repDelta >= 0 ? '+' : ''}${repDelta}</small></div>
         <div class="rs-item"><small>新患</small><b>${T.newCount}人</b>${delta(T.newCount, prev ? prev.newCount || 0 : 0, false, true)}</div>
       </div>
+      ${T.balked ? `<div class="rs-bottle rs-balk">🚪 混雑で <b>${T.balked}人</b> が入口で帰ってしまいました(機会損失 約${yen(T.balked * 3500)}) — 椅子か回転(受付・診察)を</div>` : ''}
       <div class="rs-bottle">🔍 ${bn.text}</div>
       ${st ? `<div class="voice-row rs-voice">${STAFF_UI.faceSVG(dv.char, 'normal', 40)}<div class="voice-txt"><small>${st.title} ${st.name}</small><p>${dv.text}</p></div></div>` : ''}
       ${bn.fixes.length
@@ -1383,6 +1415,7 @@
     G.daily.chain = (G.daily.chain || 0) + 1;
     G.coins += ch.coin + bonus;
     G.bonds[ch.char] = (G.bonds[ch.char] || 0) + 2 + bonus;
+    if (bondLv(ch.char) >= 3 && !(G.specialDone || []).includes(ch.char)) specialRequest(ch.char);
     const name = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : 'スタッフ';
     banner(`🎁 ${name}の依頼クリア${ch.chain ? '(🔗連続依頼!)' : ''} → 🪙+${ch.coin + bonus}・${name}の信頼+${2 + bonus}${G.daily.chain >= 2 ? `(${G.daily.chain}日連続)` : ''}`);
     renderTodo();
@@ -1416,7 +1449,8 @@
         count: (G.prestige ? G.prestige.count : 0) + 1,
         legacy,
         achDone: G.achDone, stats: G.stats, deco: G.deco, clinicName: G.clinicName,
-        daily: G.daily, speedPass: G.speedPass, bonds: G.bonds
+        daily: G.daily, speedPass: G.speedPass, bonds: G.bonds,
+        specialDone: G.specialDone, season: G.season
       }));
       localStorage.removeItem(SAVE_KEY);
     } catch (e) { /* noop */ }
@@ -1464,6 +1498,71 @@
         'やめておく');
       $('prestigeConfirm').addEventListener('click', prestigeNow);
     });
+  }
+
+  /* ================= 💫 スペシャル依頼(信頼Lv3・キャラごとに1回) ================= */
+
+  const SPECIALS = {
+    front: { title: '受付マニュアル、完成しました',
+      text: '新人向けの受付マニュアル、ついに完成しました。この院の受付は、もう誰が入っても回ります。ここまで任せてもらえたおかげです。……次は後輩を育てる番ですね。',
+      note: '📖 業務の「属人化」を外すのは経営の仕事。マニュアルは辞めない仕組みでもある。' },
+    doctor: { title: '学会で症例報告をしてきた',
+      text: '先週の学会で、うちの保存療法の症例をまとめて報告してきた。座長に「いい外来ですね」と言われたよ。……経営が安定しているから、診療に集中できる。君のおかげだ。',
+      note: '📖 医師が学び続けられる環境は、採用力にも診療の質にも効く長期投資。' },
+    nurse: { title: '新人ナースが「ここで働きたい」と',
+      text: '看護学生の実習生が2人、「卒業したらここで働きたい」と言ってくれました。現場の空気は、ちゃんと外に伝わるんですよ。人が人を呼ぶ職場になってきました。',
+      note: '📖 採用コストが最も安いのは「働きたいと思われる職場」を作ること。' },
+    reha: { title: 'リハ室が「地域の居場所」になってきた',
+      text: '卒業した患者さんが、町内会の体操教室にうちのメニューを持ち込んでくれたんです。「あそこのリハは違う」って。リハ室が地域の健康の入口になってきました!',
+      note: '📖 リハのLTVは院内で完結しない — 地域に出た患者が次の患者を連れてくる。' },
+    billing: { title: 'レセプト返戻ゼロ、3か月続きました',
+      text: '返戻・査定ゼロを3か月続けました。派手さはないですが、取りこぼしゼロは「診療の証明」がきちんとできている証拠です。この院の裏側は、私が守ります。',
+      note: '📖 医事の精度は利益率に直結する。バックオフィスへの信頼は隠れた競争力。' },
+    advisor: { title: '本部があなたをモデルケースに',
+      text: '本部会議であなたの院の数字を紹介したら、「モデルケースとして横展開したい」と。……私が言うのも変ですが、ここまでの経営、本物です。次のステージに行きましょう。',
+      note: '📖 再現性のある経営だけが「仕組み」として横展開できる。' }
+  };
+
+  function specialRequest(char) {
+    if (!G.specialDone) G.specialDone = [];
+    G.specialDone.push(char);
+    const sp = SPECIALS[char];
+    if (!sp) return;
+    G.coins += 10;
+    G.money += 300000;
+    const st = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[char] : { name: 'スタッフ', title: '' };
+    showModal(`💫 ${sp.title}`, `
+      <div class="voice-row rs-voice">${typeof STAFF_UI !== 'undefined' ? STAFF_UI.faceSVG(char, 'good', 56) : ''}<div class="voice-txt"><small>${st.title} ${st.name} — 信頼Lv3 スペシャル</small><p>${sp.text}</p></div></div>
+      <div class="pnl-row"><span>スペシャル報酬</span><b>💰${yen(300000)} + 🪙10</b></div>
+      <p class="modal-note">${sp.note}</p>`,
+      'ありがとう');
+    renderStaffStrip();
+    updateHeader();
+  }
+
+  /* ================= 📆 月間決算(30日ごと・自己ベスト更新) ================= */
+
+  function monthlyClose() {
+    const profit = G.history.slice(-30).reduce((a, h) => a + h.profit + (h.brProfit || 0), 0);
+    if (!G.season) G.season = { bestProfit: null, bestMonth: 0, months: 0 };
+    G.season.months++;
+    const isBest = G.season.bestProfit === null || profit > G.season.bestProfit;
+    if (isBest) { G.season.bestProfit = profit; G.season.bestMonth = G.season.months; }
+    const grade = profit >= 3000000 ? 'S' : profit >= 1000000 ? 'A' : profit > 0 ? 'B' : 'C';
+    const coin = { S: 5, A: 3, B: 1, C: 0 }[grade];
+    G.coins += coin;
+    let planHtml = '';
+    if (G.plan) {
+      const rate = monthRevenueAll() / G.plan.revenue;
+      planHtml = `<div class="pnl-row"><span>事業計画 達成率</span><b>${(rate * 100).toFixed(0)}%${rate >= 1 ? ' ✅' : ''}</b></div>`;
+    }
+    showModal(`📆 月間決算(第${G.season.months}期) — 評価 ${grade}`, `
+      <div class="pnl-row"><span>今月の利益(直近30日・法人)</span><b class="${profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(profit)}</b></div>
+      <div class="pnl-row"><span>自己ベスト</span><b>${yen(G.season.bestProfit)}(第${G.season.bestMonth}期)${isBest && G.season.months > 1 ? ' 🏆 記録更新!' : ''}</b></div>
+      ${planHtml}
+      <div class="pnl-row"><span>成績ボーナス</span><b>${coin ? `🪙+${coin}` : 'なし(黒字着地で🪙+1〜)'}</b></div>
+      <p class="modal-note">📖 評価: S=月間利益300万 / A=100万 / B=黒字。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>`,
+      '来月へ');
   }
 
   /* ================= 週次・月次レビュー ================= */
@@ -2787,9 +2886,13 @@
         let sat = clamp(1.25 - wait * waitFeel() / 40, 0, 1);
         if (G.deco.cafe) sat = Math.min(1, sat + 0.05);
         G.rep += (sat * 100 - G.rep) * Math.min(0.3, 0.01 * n);
+        G.rep = Math.max(G.rep, repDailyFloor());
       }
       // 断られた患者は評判を下げ、街の噂になる
-      if (turnedAway > 0) G.rep = Math.max(20, G.rep - Math.min(4, turnedAway * 0.08));
+      if (turnedAway > 0) {
+        T.balked += turnedAway;
+        G.rep = Math.max(repDailyFloor(), G.rep - Math.min(3, turnedAway * 0.08));
+      }
     }
     endDay();
     renderKpiStrip();
@@ -2799,6 +2902,7 @@
 
   window.GAME = {
     G, settings, clinic, town, KIJUN, REHA_FEE, KPIS, REL_DEF, autoDay,
+    pickChallenge, specialRequest, monthlyClose, todayKey,
     grant: (n) => { G.money += n; updateHeader(); }
   };
   $('skipBtn').addEventListener('click', () => {
@@ -2828,6 +2932,8 @@
       G.daily = pr.daily || G.daily;
       G.speedPass = pr.speedPass || { tier: 0, until: 0 };
       G.bonds = pr.bonds || G.bonds;
+      G.specialDone = pr.specialDone || [];
+      G.season = pr.season || G.season;
       if (pr.speedUnlocked) {
         const OLD_PRICE = { 8: 12, 16: 25, 32: 50 };
         Object.keys(pr.speedUnlocked).forEach((k) => { if (pr.speedUnlocked[k]) G.coins += OLD_PRICE[k] || 0; });

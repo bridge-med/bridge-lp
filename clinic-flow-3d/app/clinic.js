@@ -203,9 +203,22 @@ const CLINIC = (() => {
 
     /* ---------- 患者投入 ---------- */
 
+    // 待合の飽和度(椅子+立ちスペースに対する待機人数)
+    waitingLoad() {
+      const cap = Math.min(this.s.chairs, this.L.CHAIRS.length) + this.L.STANDS.length;
+      const n = this.recQueue.length + this.examQueue.length + this.treatQueue.length + this.rehaQueue.length;
+      return { n, cap };
+    }
+
     // type: 'first' | 'revisit' | 'rehab' | 'checkup' / opts.refer: 紹介・リハ必要性高
     spawn(type, opts) {
       if (this.patients.length >= 90) return false;
+      // 混雑離脱(balking): 待合が飽和していると、入口で引き返す患者が出る
+      const wl = this.waitingLoad();
+      if (wl.n >= wl.cap) {
+        if (this.hooks.onBalk) this.hooks.onBalk(type, opts);
+        return false;
+      }
       const L = this.L;
       const p = {
         id: this.idSeq++, type,
