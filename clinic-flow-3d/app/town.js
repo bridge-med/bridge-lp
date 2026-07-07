@@ -6,16 +6,19 @@
 'use strict';
 
 const TOWN = (() => {
-  const W = 24, H = 18;
+  const W = 30, H = 20;
 
   // 道路(タイル集合)
   const ROADS = new Set();
   const addRoad = (x0, y0, x1, y1) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) ROADS.add(`${x},${y}`); };
-  addRoad(0, 8, 23, 9);    // メインストリート
+  addRoad(0, 8, 29, 9);    // メインストリート
   addRoad(11, 0, 12, 8);   // 駅前通り
-  addRoad(0, 14, 23, 14);  // 住宅街の通り
+  addRoad(0, 14, 29, 14);  // 住宅街の通り
   addRoad(4, 9, 4, 14);    // 西の連絡路
   addRoad(19, 9, 19, 14);  // 東の連絡路
+  addRoad(25, 2, 25, 8);   // 東の新市街通り
+  addRoad(0, 16, 29, 16);  // 南の住宅街の通り
+  addRoad(11, 14, 11, 16); // 南の連絡路
 
   const CLINIC_ENTRANCE = { x: 8, y: 9 };
   const RIVAL_ENTRANCE = { x: 20, y: 8 };
@@ -34,7 +37,11 @@ const TOWN = (() => {
     { id: 'shop1', label: '', x: 6, y: 6, w: 2, d: 1, h: 1.1, wall: '#F6EFE2', roof: '#A9927B' },
     { id: 'shop2', label: '', x: 3, y: 6, w: 2, d: 1, h: 1.2, wall: '#EFE7DC', roof: '#8B9DA8' },
     { id: 'shop3', label: '', x: 14, y: 6, w: 2, d: 1, h: 1.1, wall: '#F2EBDE', roof: '#B08A5A' },
-    { id: 'shop4', label: '', x: 0, y: 6, w: 2, d: 1, h: 1.0, wall: '#F6EFE2', roof: '#7B8A94' }
+    { id: 'shop4', label: '', x: 0, y: 6, w: 2, d: 1, h: 1.0, wall: '#F6EFE2', roof: '#7B8A94' },
+    { id: 'shoutengai', label: '商店街組合', x: 9, y: 6, w: 2, d: 1, h: 1.15, wall: '#FBF4E4', roof: '#C98A2D', action: true },
+    { id: 'school', label: '高校', x: 26, y: 0, w: 4, d: 3, h: 2.2, wall: '#F0EDE6', roof: '#8B9DA8', action: true },
+    { id: 'sports', label: 'スポーツクラブ', x: 26, y: 5, w: 3, d: 3, h: 1.8, wall: '#E8F0EC', roof: '#4FA98C', action: true },
+    { id: 'rouken', label: '老健施設', x: 26, y: 11, w: 4, d: 3, h: 1.9, wall: '#FBF7EE', roof: '#B08A5A', action: true }
   ];
 
   // 住宅(認知が広がる対象)。weight = 世帯数の重み
@@ -45,16 +52,22 @@ const TOWN = (() => {
     { x: 22, y: 15, weight: 1 },
     { x: 15, y: 15, weight: 6, mansion: true },   // マンション
     { x: 21, y: 5, weight: 1 }, { x: 21, y: 3, weight: 1 },
-    { x: 6, y: 3, weight: 1 }, { x: 6, y: 5, weight: 1 }, { x: 14, y: 3, weight: 1 }
+    { x: 6, y: 3, weight: 1 }, { x: 6, y: 5, weight: 1 }, { x: 14, y: 3, weight: 1 },
+    // 南の新しい住宅街
+    { x: 1, y: 17, weight: 1 }, { x: 3, y: 17, weight: 1 }, { x: 8, y: 17, weight: 1 },
+    { x: 10, y: 17, weight: 1 }, { x: 13, y: 17, weight: 1 }, { x: 15, y: 17, weight: 1 },
+    { x: 17, y: 17, weight: 1 }, { x: 21, y: 17, weight: 1 },
+    { x: 27, y: 17, weight: 6, mansion: true }    // 東のマンション
   ];
   // 認知が広がる順(固定シャッフル)
-  const AWARE_ORDER = [10, 3, 7, 0, 13, 5, 11, 1, 8, 15, 2, 9, 14, 4, 12, 6];
-  const TOTAL_HOUSEHOLDS = HOUSES.reduce((a, h) => a + h.weight, 0); // 21
+  const AWARE_ORDER = [10, 3, 7, 0, 24, 13, 5, 18, 11, 1, 21, 8, 15, 16, 2, 9, 23, 14, 4, 19, 12, 6, 22, 17, 20];
+  const TOTAL_HOUSEHOLDS = HOUSES.reduce((a, h) => a + h.weight, 0); // 35
 
   const TREES = [
-    { x: 5, y: 1 }, { x: 13, y: 1 }, { x: 22, y: 1 }, { x: 9, y: 6 }, { x: 17, y: 7 },
-    { x: 2, y: 12 }, { x: 10, y: 12 }, { x: 14, y: 11 }, { x: 17, y: 12 }, { x: 0, y: 16 },
-    { x: 16, y: 17 }, { x: 23, y: 16 }, { x: 6, y: 17 }, { x: 23, y: 5 }
+    { x: 5, y: 1 }, { x: 13, y: 1 }, { x: 22, y: 1 }, { x: 17, y: 7 },
+    { x: 2, y: 12 }, { x: 10, y: 12 }, { x: 14, y: 11 }, { x: 17, y: 12 },
+    { x: 16, y: 17 }, { x: 23, y: 5 }, { x: 24, y: 12 }, { x: 29, y: 18 },
+    { x: 5, y: 19 }, { x: 12, y: 18 }, { x: 18, y: 19 }, { x: 24, y: 4 }, { x: 22, y: 19 }
   ];
 
   const BILLBOARD = { x: 13, y: 4 }; // 駅前看板(購入後に出現)
@@ -76,8 +89,8 @@ const TOWN = (() => {
   // 分院の建設地(siteId → 位置)
   const BRANCH_SPOTS = {
     kita: { x: 12, y: 11, w: 2, d: 2, h: 1.3, label: '北口クリニック' },
-    minami: { x: 2, y: 16, w: 2, d: 2, h: 1.3, label: '南町クリニック' },
-    tonari: { x: 20, y: 16, w: 2, d: 2, h: 1.5, label: '隣駅クリニック' }
+    minami: { x: 5, y: 17, w: 2, d: 2, h: 1.3, label: '南町クリニック' },
+    tonari: { x: 24, y: 17, w: 2, d: 2, h: 1.5, label: '隣駅クリニック' }
   };
 
   class TownSim {

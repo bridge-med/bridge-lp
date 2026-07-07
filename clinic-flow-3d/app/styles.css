@@ -571,6 +571,106 @@ input[type="range"]::-moz-range-thumb {
 .expand-row.done { background: var(--bg-deep); }
 .shop-max { font: 600 10px/1 var(--sans); color: var(--ink-3); }
 
+/* ---------- 診療時間 ---------- */
+
+.sch-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.sch-btn {
+  flex: 1;
+  min-width: 42px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--card);
+}
+.sch-btn .sch-day { font: 800 13px/1 var(--sans); color: var(--ink); }
+.sch-btn .sch-kind { font: 600 10px/1 var(--sans); color: var(--ink-3); }
+.sch-btn.full { background: var(--green-pale); border-color: rgba(79,169,140,0.4); }
+.sch-btn.full .sch-kind { color: var(--green-deep); }
+.sch-btn.am { background: var(--amber-pale); border-color: rgba(201,138,45,0.35); }
+.sch-btn.am .sch-kind { color: var(--amber); }
+.sch-btn.closed { opacity: 0.6; }
+
+/* ---------- KPI ---------- */
+
+.kpi-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.kpi-tile {
+  flex: 1 1 auto;
+  min-width: 100px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+  position: relative;
+}
+.kpi-tile small { font: 600 9.5px/1.4 var(--sans); color: var(--ink-3); }
+.kpi-tile b { font: 800 16px/1.2 var(--en); color: var(--blue-deep); }
+.kpi-tile .tr { position: absolute; right: 10px; bottom: 8px; font-style: normal; font-size: 11px; color: var(--ink-3); }
+.kpi-tile .tr.up { color: var(--green-deep); }
+.kpi-tile .tr.down { color: var(--red); }
+.kpi-tile.empty { font: 500 11px/1.6 var(--sans); color: var(--ink-3); }
+
+.kpi-chip {
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink-2);
+  font: 700 11.5px/1 var(--sans);
+  border-radius: 999px;
+  padding: 8px 12px;
+  margin: 0 6px 6px 0;
+}
+.kpi-chip.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
+.kpi-why { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.kpi-why p { font: 500 11px/1.7 var(--sans); color: var(--ink-3); }
+.kpi-why b { color: var(--blue-deep); }
+
+.wk-table { display: flex; flex-direction: column; gap: 2px; }
+.wk-row {
+  display: grid;
+  grid-template-columns: 10em 1fr 7em 1.4em;
+  gap: 8px;
+  align-items: baseline;
+  font: 500 12px/1.8 var(--sans);
+  color: var(--ink-2);
+  border-bottom: 1px dashed var(--line);
+  padding: 3px 0;
+}
+.wk-row b { font-family: var(--en); font-weight: 700; color: var(--ink); }
+.wk-row small { color: var(--ink-3); }
+.wk-row .up { color: var(--green-deep); }
+.wk-row .down { color: var(--red); }
+
+/* ---------- 営業関係 ---------- */
+
+.rel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.rel-info { display: flex; flex-direction: column; min-width: 0; font: 700 12.5px/1.5 var(--sans); color: var(--ink); }
+.rel-info small { font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); font-weight: 500; }
+.rel-stars { color: var(--amber); letter-spacing: 0.1em; font-size: 12px; }
+
+/* ---------- 自費メニュー ---------- */
+
+.jihi-item { padding: 10px 0; border-bottom: 1px dashed var(--line); display: flex; flex-direction: column; gap: 8px; }
+.jihi-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.jihi-stat { font: 600 10.5px/1.5 var(--sans); color: var(--ink-3); }
+
 /* ---------- バナー / トースト ---------- */
 
 .banner {

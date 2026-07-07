@@ -162,6 +162,7 @@ const CLINIC = (() => {
       this.heat = new Float32Array(this.L.W * this.L.H);
       this.floats = [];
       this.t = 0;
+      this.rehaToday = 0; // PT1人1日24単位(=12回)の上限管理
     }
 
     applySettings() {
@@ -360,7 +361,13 @@ const CLINIC = (() => {
             p.busyUntil = Infinity;
             this.walkTo(p, L.EXAM[d].spot, (pp) => {
               const mean = pp.type === 'checkup' ? 3 : s.examMean * (pp.type === 'first' ? 1.25 : 0.85);
-              pp.busyUntil = this.t + Math.max(1.5, triRand(mean * 0.55, mean * 1.6));
+              let extra = 0;
+              // 診察室内の注射(関節注・トリガー/ブロック)。実施方針に従う
+              if (pp.type !== 'checkup') {
+                if (Math.random() < (s.pInj || 0)) { pp.items.push('inj'); extra += 0.9; }
+                if (Math.random() < (s.pTrig || 0)) { pp.items.push('trig'); extra += 0.8; }
+              }
+              pp.busyUntil = this.t + Math.max(1.5, triRand(mean * 0.55, mean * 1.6)) + extra;
             });
           }
         }
@@ -387,6 +394,15 @@ const CLINIC = (() => {
         }
       }
 
+      // リハ: PT単位上限(1人1日24単位=12回)に達したら待ちの患者は次回振替
+      if (this.rehaToday >= s.pts * 12 && this.rehaQueue.length) {
+        const waiting = this.rehaQueue.filter((q) => q.phase === 'waitReha');
+        for (const p of waiting) {
+          this.rehaQueue.splice(this.rehaQueue.indexOf(p), 1);
+          this.freeSeat(p);
+          this.toCashier(p);
+        }
+      }
       // リハ
       for (let i = 0; i < Math.min(this.usableMachines(), L.MACHINES.length); i++) {
         const cur = this.machineUsed[i];
@@ -396,11 +412,12 @@ const CLINIC = (() => {
           cur.didReha = true;
           this.toCashier(cur);
         }
-        if (!this.machineUsed[i]) {
+        if (!this.machineUsed[i] && this.rehaToday < this.s.pts * 12) { // 1人1日24単位(12回)まで
           const idx = this.rehaQueue.findIndex((q) => q.phase === 'waitReha');
           if (idx >= 0) {
             const p = this.rehaQueue.splice(idx, 1)[0];
             this.machineUsed[i] = p;
+            this.rehaToday++;
             this.freeSeat(p);
             p.phase = 'reha';
             p.busyUntil = Infinity;
