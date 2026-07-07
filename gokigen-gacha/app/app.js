@@ -29,7 +29,8 @@
     historyFilter: 'all',
     favFilter: 'all',
     lastPraise: '',
-    lastWord: ''
+    lastWord: '',
+    capsuleRefilled: false // 直前の「やってみた」でカプセルが戻ったか
   };
 
   /* ---------- ユーティリティ ---------- */
@@ -90,6 +91,7 @@
   }
 
   function homePoteMessage() {
+    if (Store.capsuleCount() === 0) return pick(D.POTE.capsuleEmpty); // 今日のカプセル切れ
     var since = Store.daysSinceLastRun();
     if (since !== null && since >= 3) return pick(D.POTE.comeback);   // 久しぶり
     if (Store.todayCount() > 0) return pick(D.POTE.doneToday);        // 今日すでに回復済み
@@ -298,6 +300,25 @@
       avatar + '<div class="pote-bubble">' + html + '</div>' + shelf + '</div>';
   }
 
+  /* ---------- カプセル(1日の抽選回数)UI ---------- */
+
+  function capsuleMeter() {
+    var count = Store.capsuleCount();
+    var per = Store.CAPSULES_PER_DAY;
+    var slots = Math.max(per, count);
+    var dots = '';
+    for (var i = 0; i < slots; i++) {
+      dots += '<span class="cap-dot' + (i < count ? ' on' : '') + (i >= per ? ' bonus' : '') + '" aria-hidden="true"></span>';
+    }
+    return '<div class="capsule-meter" role="status" aria-label="今日のカプセル 残り' + count + '個">' +
+      '<span class="cap-label">きょうのカプセル</span>' +
+      '<span class="cap-dots">' + dots + '</span>' +
+      '<span class="cap-note">' + (count === 0 ? 'あしたの朝に補充されます' : esc(D.POTE.capsuleNote)) + '</span>' +
+      '</div>';
+  }
+
+  function capsulesLeft() { return Store.capsuleCount() > 0; }
+
   /* ---------- レンダリング ---------- */
 
   var TABS = [
@@ -375,8 +396,9 @@
       '</div>' +
       '<p class="status-note">' + esc(streakNote()) + '</p>' +
       '</div>' +
-      '<button class="btn btn-primary" data-action="go-select">今の状態を選ぶ</button>' +
-      '<button class="btn btn-secondary" data-action="spin-now">そのまま回す</button>' +
+      capsuleMeter() +
+      '<button class="btn btn-primary" data-action="go-select"' + (capsulesLeft() ? '' : ' disabled') + '>今の状態を選ぶ</button>' +
+      '<button class="btn btn-secondary" data-action="spin-now"' + (capsulesLeft() ? '' : ' disabled') + '>そのまま回す</button>' +
       favHtml +
       '<button class="paper today-strip" data-action="tab" data-tab="history">' +
       '<span>🗂️</span><span class="ttl">今日実行したカード</span>' +
@@ -407,9 +429,9 @@
       }).join('') +
       '</div>' +
       '<div class="select-footer">' +
-      '<button class="btn btn-primary" data-action="spin-with-state"' + (state.stateId ? '' : ' disabled') + '>' + esc(ctaLabel) + '</button>' +
-      '<button class="btn btn-ghost" data-action="spin-now">選ばずに回す</button>' +
-      '<p class="select-note">' + esc(D.POTE.selectNote) + '</p>' +
+      '<button class="btn btn-primary" data-action="spin-with-state"' + (state.stateId && capsulesLeft() ? '' : ' disabled') + '>' + esc(ctaLabel) + '</button>' +
+      '<button class="btn btn-ghost" data-action="spin-now"' + (capsulesLeft() ? '' : ' disabled') + '>選ばずに回す</button>' +
+      '<p class="select-note">' + esc(capsulesLeft() ? D.POTE.selectNote : pick(D.POTE.capsuleEmpty)) + '</p>' +
       '</div>';
   }
 
@@ -469,11 +491,12 @@
       '</div>' +
       '<div class="result-actions">' +
       '<button class="btn btn-primary" data-action="did-it">やってみた</button>' +
-      '<button class="btn btn-outline" data-action="not-now">今はちがう</button>' +
+      '<button class="btn btn-outline" data-action="not-now"' + (capsulesLeft() ? '' : ' disabled') + '>今はちがう</button>' +
       '<div class="btn-row">' +
       '<button class="btn btn-outline btn-sm' + (fav ? ' isfav' : '') + '" data-action="toggle-fav" aria-pressed="' + fav + '">' + heart(fav) + ' お気に入り' + (fav ? '済み' : '') + '</button>' +
-      '<button class="btn btn-outline btn-sm" data-action="respin">もう一回まわす</button>' +
+      '<button class="btn btn-outline btn-sm" data-action="respin"' + (capsulesLeft() ? '' : ' disabled') + '>もう一回まわす</button>' +
       '</div>' +
+      (capsulesLeft() ? '' : '<p class="select-note">' + esc(pick(D.POTE.capsuleEmpty)) + '</p>') +
       '<div class="share-line"><button class="btn btn-ghost quiet" data-action="copy-share">⤴ シェア文をコピー</button>' +
       (navigator.share ? '<button class="btn btn-ghost quiet" data-action="webshare">共有する</button>' : '') +
       '</div>' +
@@ -500,8 +523,9 @@
       '<div class="ic">📎</div>' +
       '<div><div class="k">今日のひとこと</div><p>' + esc(state.lastWord) + '</p></div>' +
       '</div>' +
+      (state.capsuleRefilled ? '<p class="capsule-back">💊 カプセルが1個もどってきました</p>' : '') +
       '<div class="result-actions">' +
-      '<button class="btn btn-primary" data-action="spin-again">もう1枚引く</button>' +
+      '<button class="btn btn-primary" data-action="spin-again"' + (capsulesLeft() ? '' : ' disabled') + '>もう1枚引く</button>' +
       '<button class="btn btn-secondary" data-action="go-home">ホームに戻る</button>' +
       (c && !fav ? '<button class="btn btn-ghost" data-action="toggle-fav">♡ お気に入りに追加</button>' : '') +
       '<div class="share-line"><button class="btn btn-ghost quiet" data-action="copy-share">⤴ シェア文をコピー</button></div>' +
@@ -782,9 +806,10 @@
     spinTimer = setTimeout(function () {
       var card = drawFn();
       if (!card) {
+        // カプセル切れなどで引けなかったときは、責めずにホームへ戻す
         state.screen = 'home';
         render();
-        showToast('カードを引けませんでした');
+        showToast(Store.capsuleCount() === 0 ? '今日のカプセルはおしまいです' : 'カードを引けませんでした');
         return;
       }
       state.card = card;
@@ -864,9 +889,10 @@
         break;
       }
 
-      case 'did-it':
+      case 'did-it': {
         if (!state.card) return;
-        Store.addHistory(state.card.id, state.stateId);
+        var entry = Store.addHistory(state.card.id, state.stateId);
+        state.capsuleRefilled = !!(entry && entry.capsuleRefilled);
         state.lastPraise = pick(D.POTE.praise);
         // 褒め言葉と「今日のひとこと」が同じ文にならないようにする
         var words = D.POTE.todayWord.filter(function (w) {
@@ -878,6 +904,7 @@
         playPop(880);
         confetti();
         break;
+      }
 
       case 'toggle-fav': {
         if (!state.card) return;
@@ -993,7 +1020,8 @@
           Store.resetAll();
           state = {
             screen: 'settings', stateId: null, card: null, resultContext: 'gacha',
-            dexFilter: 'all', historyFilter: 'all', favFilter: 'all', lastPraise: '', lastWord: ''
+            dexFilter: 'all', historyFilter: 'all', favFilter: 'all',
+            lastPraise: '', lastWord: '', capsuleRefilled: false
           };
           render();
           showToast('データをリセットしました');

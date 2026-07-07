@@ -15,6 +15,10 @@
 
   var STORAGE_KEY = 'gokigenGacha:v1';
   var RECENT_MAX = 3;
+  // カプセル制: 1日ぶんの抽選回数。乱発でのコンプリートを防ぎ、
+  // 「引く」より「やってみる」に価値を置くためのゆるい制限。
+  var CAPSULES_PER_DAY = 5;  // 毎朝この数まで補充
+  var CAPSULES_MAX = 8;      // 「やってみた」で戻る分の上限
   var D = global.GACHA_DATA;
 
   var state = defaults();
@@ -27,6 +31,7 @@
       discovered: [],
       recent: [],
       lastRunAt: null, // 最後に「やってみた」した日時(ISO)
+      capsules: { day: '', count: CAPSULES_PER_DAY },
       settings: { notifyEnabled: false, notifyTime: '21:00', showPote: true, sound: true, seasonal: true }
     };
   }
@@ -45,6 +50,9 @@
         discovered: Array.isArray(parsed.discovered) ? parsed.discovered.filter(validCardId) : d.discovered,
         recent: Array.isArray(parsed.recent) ? parsed.recent.filter(validCardId).slice(0, RECENT_MAX) : d.recent,
         lastRunAt: typeof parsed.lastRunAt === 'string' ? parsed.lastRunAt : null,
+        capsules: (parsed.capsules && typeof parsed.capsules.count === 'number' && typeof parsed.capsules.day === 'string')
+          ? { day: parsed.capsules.day, count: Math.max(0, Math.min(CAPSULES_MAX, Math.round(parsed.capsules.count))) }
+          : d.capsules,
         settings: Object.assign(d.settings, parsed.settings || {})
       };
       // 旧バージョンのデータには lastRunAt がないので履歴から補完する
@@ -76,6 +84,32 @@
     var d = date instanceof Date ? date : new Date(date);
     var m = d.getMonth() + 1, day = d.getDate();
     return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
+  }
+
+  /* ---- カプセル(1日ぶんの抽選回数) --------------------------------------- */
+  // 日付が変わっていたら今日ぶんに補充する
+  function ensureDailyCapsules() {
+    var today = dayKey(new Date());
+    if (state.capsules.day !== today) {
+      state.capsules = { day: today, count: CAPSULES_PER_DAY };
+      save();
+    }
+  }
+
+  function capsuleCount() {
+    ensureDailyCapsules();
+    return state.capsules.count;
+  }
+
+  // 「やってみた」のごほうびとして1個戻す(上限あり)
+  function refillCapsule() {
+    ensureDailyCapsules();
+    if (state.capsules.count < CAPSULES_MAX) {
+      state.capsules.count += 1;
+      save();
+      return true;
+    }
+    return false;
   }
 
   /* ---- ガチャ抽選 ---------------------------------------------------------- */
@@ -119,14 +153,17 @@
   }
 
   /**
-   * カードを1枚抽選する。
-   * @param {Object} opts { stateId?, excludeCardId?, excludeCategory? }
+   * カードを1枚抽選する。カプセルが尽きていたら null を返す。
+   * @param {Object} opts { stateId?, excludeCardId?, excludeCategory?, free? }
    *   stateId         … 選択された状態(合うカードを優先)
    *   excludeCardId   … 「今はちがう」時に直前のカード自体を除外
    *   excludeCategory … 候補が少ないときのフォールバックでカテゴリごと除外
+   *   free            … カプセルを消費しない(お気に入りからの抽選など)
    */
   function draw(opts) {
     opts = opts || {};
+    ensureDailyCapsules();
+    if (!opts.free && state.capsules.count <= 0) return null; // 今日のカプセル切れ
     var pool = D.CARDS.slice();
 
     if (opts.stateId) {
@@ -154,6 +191,7 @@
     // 状態選択時は「その状態で効いた実績のあるカード」を少しだけ優先する
     var card = pickWeighted(pool, opts.stateId);
 
+    if (!opts.free) state.capsules.count -= 1; // カプセルを1個使う
     // 出現したカードは図鑑で発見済みにし、直近リストへ積む
     if (state.discovered.indexOf(card.id) < 0) state.discovered.push(card.id);
     state.recent = [card.id].concat(state.recent.filter(function (id) { return id !== card.id; })).slice(0, RECENT_MAX);
@@ -168,8 +206,13 @@
     var entry = { id: uid(), cardId: cardId, stateId: stateId || null, at: new Date().toISOString() };
     state.history.unshift(entry);
     state.lastRunAt = entry.at;
+    // やってみたごほうび: カプセルを1個戻す(上限あり)
+    ensureDailyCapsules();
+    var refilled = state.capsules.count < CAPSULES_MAX;
+    if (refilled) state.capsules.count += 1;
     save();
     emit();
+    entry.capsuleRefilled = refilled;
     return entry;
   }
 
@@ -391,6 +434,9 @@
     topCategory7d: topCategory7d,
     weeklySummary: weeklySummary,
     runsForCardInState: runsForCardInState,
+    capsuleCount: capsuleCount,
+    CAPSULES_PER_DAY: CAPSULES_PER_DAY,
+    CAPSULES_MAX: CAPSULES_MAX,
     dexCategoryCounts: dexCategoryCounts,
     isFavorite: isFavorite,
     toggleFavorite: toggleFavorite,
