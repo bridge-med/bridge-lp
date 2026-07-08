@@ -18,6 +18,8 @@
   /* ================= 定数 ================= */
 
   const RIVAL_REP = 65;
+  // ライバルも成長する(難易度): 本院の競合評判は日数で上がる(上限+10)
+  function rivalRepNow() { return RIVAL_REP + Math.min(10, G.day * 0.02); }
   const WEEKDAYS = ['月', '火', '水', '木', '金', '土', '日'];
   const DAY_SPECS = {
     full: { label: '終日', min: 480, intake: 420, pay: 1, arr: 1 },
@@ -44,24 +46,25 @@
 
   const COSTS = {
     doctorDay: 80000, nurseDay: 18000, ptDay: 16000, recepDay: 10000,
-    rent: [0, 25000, 55000], base: [0, 8000, 14000],
+    rent: [0, 25000, 55000, 120000], base: [0, 8000, 14000, 30000],
     perPatient: 300, billboardDay: 3000, mriMaint: 12000,
     branchRent: 35000, branchBase: 6000
   };
 
   const SHOP = {
-    doctor:  { label: '医師を採用', costs: [0, 500000, 800000, 1200000], day: COSTS.doctorDay, hint: '診察室が1室増える(日給¥80,000)。採用費は人数とともに高騰' },
-    nurse:   { label: '看護師を採用', costs: [120000, 120000, 150000, 180000], day: COSTS.nurseDay, hint: '処置ベッドの稼働数=看護師数(日給¥18,000)' },
-    pt:      { label: 'PTを採用', costs: [150000, 150000, 180000, 180000, 220000, 220000, 250000, 250000, 300000, 300000, 350000, 350000], day: COSTS.ptDay, hint: '施設基準の要件・リハ稼働の源泉(日給¥16,000)' },
-    recep:   { label: '受付を増員', costs: [60000, 60000, 80000], day: COSTS.recepDay, hint: '受付窓口が増える(日給¥10,000)' },
+    doctor:  { label: '医師を採用', costs: [0, 500000, 800000, 1200000, 2000000, 3000000], day: COSTS.doctorDay, hint: '診察室が1室増える(日給¥80,000)。採用費は人数とともに高騰' },
+    nurse:   { label: '看護師を採用', costs: [120000, 120000, 150000, 180000, 220000, 260000], day: COSTS.nurseDay, hint: '処置ベッドの稼働数=看護師数(日給¥18,000)' },
+    pt:      { label: 'PTを採用', costs: [150000, 150000, 180000, 180000, 220000, 220000, 250000, 250000, 300000, 300000, 350000, 350000, 400000, 400000, 450000, 450000, 500000, 550000, 600000, 650000], day: COSTS.ptDay, hint: '施設基準の要件・リハ稼働の源泉(日給¥16,000)' },
+    recep:   { label: '受付を増員', costs: [60000, 60000, 80000, 100000], day: COSTS.recepDay, hint: '受付窓口が増える(日給¥10,000)' },
     chairs:  { label: '待合椅子を+2脚', costs: null, flat: 40000, step: 2, hint: '立ち待ちはクレームと離反のもと' },
     beds:    { label: '処置ベッドを増設', costs: null, flat: 150000, hint: '処置(創傷・固定等)1件+¥1,500。看護師とセット' },
     machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2+助手)。面積要件は増築で' },
     physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置(1件¥350)。PT不要・高回転。1台35件/日' },
-    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000], day: 10000, hint: 'リハ室の回転対策: PT単位上限+4/人・機器稼働+1(日給¥10,000)' }
+    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000, 100000, 100000, 110000, 110000], day: 10000, hint: 'リハ室の回転対策: PT単位上限+4/人・機器稼働+1(日給¥10,000)' }
   };
 
   const EXPAND_COST = 5000000;
+  const EXPAND2_COST = 20000000;
   const MRI_COST = 18000000;
   const DEXA_COST = 2500000;
   const PRP_CERT_COST = 500000;
@@ -88,6 +91,22 @@
     { id: 'minami', name: '南町クリニック', cost: 9000000, rivalRep: 60, bigger: 0.95, rehaBias: 1.35, desc: '高齢者が多くリハ需要が高い。PTを厚く。' },
     { id: 'tonari', name: '隣駅クリニック', cost: 12000000, rivalRep: 70, bigger: 1.4, rehaBias: 1.0, desc: '商圏は大きいが競合も強い。評判勝負。' }
   ];
+
+  /* ================= 🏆 地域リーグ(町→市→県→地方→全国) ================= */
+  // 架空のNPC医療法人。目標は法人月商(直近30日)。ライバルの月商も日々成長する
+  const LEAGUE = [
+    { name: 'ひまわり整形外科', tier: '町', rev: 8000000 },
+    { name: '中央せぼねクリニック', tier: '市', rev: 15000000 },
+    { name: 'みなと関節クリニック', tier: '市', rev: 25000000 },
+    { name: '医療法人 桜台会', tier: '市', rev: 40000000, title: '🥇 市でいちばんの整形外科グループ!', reward: 2000000, coin: 5 },
+    { name: '大和田整形グループ', tier: '県', rev: 60000000 },
+    { name: '医療法人 青葉会', tier: '県', rev: 90000000 },
+    { name: '医療法人 白鳳会', tier: '県', rev: 130000000, title: '🏅 県でいちばんの医療法人!', reward: 5000000, coin: 8 },
+    { name: '広域医療 コスモス会', tier: '地方', rev: 180000000 },
+    { name: '医療法人 大樹会', tier: '地方', rev: 250000000, title: '👑 地方でいちばんの医療グループ!', reward: 10000000, coin: 12 },
+    { name: '全国チェーン アルカ会', tier: '全国', rev: 350000000, title: '🌟 全国いちばんの医療法人!!', reward: 30000000, coin: 20 }
+  ];
+  function leagueRev(i) { return Math.round(LEAGUE[i].rev * (1 + G.day * 0.0006)); }
 
   const MISSIONS = [
     { id: 'firstday', title: '初日の診療を完了する', reward: 50000,
@@ -119,24 +138,32 @@
     { id: 'branchProfit', title: '分院の直近7日を黒字にする', reward: 500000,
       lesson: '分院経営は「見えない現場」のマネジメント。数字(稼働・評判・人件費率)で異変に気づく仕組みがないと、分院は静かに沈む。' },
     { id: 'corp', title: '法人月商(全拠点・直近30日)¥25,000,000', reward: 1000000,
-      lesson: '経営者の仕事は「自分がいなくても回る仕組み」を作ること。ここまで来たら、次は現実のクリニックで。' }
+      lesson: '経営者の仕事は「自分がいなくても回る仕組み」を作ること。ここからは地域リーグ — 市・県・地方・全国の頂点を目指す。' },
+    { id: 'cityTop', title: '市でいちばんの整形外科グループになる', reward: 1000000,
+      lesson: '規模の拡大は「同じ質を保てる範囲」でしか意味がない。シェアは 評判×拠点数×単価 の総合点で決まる。' },
+    { id: 'prefTop', title: '県でいちばんの医療法人になる', reward: 2000000,
+      lesson: '県レベルの競争は採用力の勝負。診療の質は「人が辞めない仕組み」でしか維持できない。' },
+    { id: 'regionTop', title: '地方でいちばんの医療グループになる', reward: 3000000,
+      lesson: 'ここまで来ると経営は「資本配分」の仕事。どの拠点に投資し、どこを守り、どこを畳むか。' },
+    { id: 'nationTop', title: '全国いちばんの医療法人になる', reward: 5000000,
+      lesson: '頂点の景色。患者に選ばれ続ける組織だけがこの位置に立てる — 次は現実で。' }
   ];
 
   /* ================= プレミアム(コイン)経済 — アプリ版の課金設計をゲーム内で体験 ================= */
 
   const ITEMS = {
-    campaign: { label: '📣 集患キャンペーン', coin: 3, days: 3, hint: '明日から3日間、自然新患+50%。認知が育つ前のブースト向き' },
-    ops: { label: '⚡ 業務改善コンサル', coin: 3, days: 3, hint: '明日から3日間、診察の回転UP(診察時間-1.2分相当)' },
-    training: { label: '🎓 接遇研修(即時)', coin: 2, days: 0, hint: 'その場で評判+3。体験改善のショートカット' },
-    lucky: { label: '🍀 ラッキー看板', coin: 2, days: 7, hint: '明日から7日間、認知+0.7%/日。看板・広告と重ねがけ可' },
-    skip7: { label: '⏩ 7日パック(自動運営)', coin: 2, days: 0, hint: '7日ぶんを一括で自動運営。結果はP&L・週次サマリーで確認' }
+    campaign: { label: '📣 集患キャンペーン', coin: 4, days: 3, hint: '明日から3日間、自然新患+50%。認知が育つ前のブースト向き' },
+    ops: { label: '⚡ 業務改善コンサル', coin: 4, days: 3, hint: '明日から3日間、診察の回転UP(診察時間-1.2分相当)' },
+    training: { label: '🎓 接遇研修(即時)', coin: 3, days: 0, hint: 'その場で評判+3。体験改善のショートカット' },
+    lucky: { label: '🍀 ラッキー看板', coin: 3, days: 7, hint: '明日から7日間、認知+0.7%/日。看板・広告と重ねがけ可' },
+    skip7: { label: '⏩ 7日パック(自動運営)', coin: 3, days: 0, hint: '7日ぶんを一括で自動運営。結果はP&L・週次サマリーで確認' }
   };
 
   const FACILITIES = {
-    cafe: { label: '☕ 院内カフェ', coin: 6, hint: '待ち時間の不満をやわらげる(患者体験+5%)。待合に常設表示' },
-    kids: { label: '🧸 キッズスペース', coin: 5, hint: '子連れ・勤労世帯の新患+1〜2人/日' },
-    bus: { label: '🚌 送迎バス', coin: 8, hint: '高齢の新患+1〜2人/日、リハ・再診の来院率UP' },
-    signage: { label: '📺 待合サイネージ', coin: 4, hint: '体感待ち時間-15% — 「待たされ感」を情報で削る' }
+    cafe: { label: '☕ 院内カフェ', coin: 8, hint: '待ち時間の不満をやわらげる(患者体験+5%)。待合に常設表示' },
+    kids: { label: '🧸 キッズスペース', coin: 7, hint: '子連れ・勤労世帯の新患+1〜2人/日' },
+    bus: { label: '🚌 送迎バス', coin: 10, hint: '高齢の新患+1〜2人/日、リハ・再診の来院率UP' },
+    signage: { label: '📺 待合サイネージ', coin: 6, hint: '体感待ち時間-15% — 「待たされ感」を情報で削る' }
   };
 
   const ACHIEVEMENTS = [
@@ -162,7 +189,11 @@
     { id: 'pt10', name: '法人PT10人', coin: 3, cond: () => corpStaff().pts >= 10 },
     { id: 'debtFree10m', name: '無借金で月商¥1,000万', coin: 4, cond: () => G.loans.length === 0 && monthRevenueAll() >= 10000000 },
     { id: 'day100', name: 'Day 100到達', coin: 2, cond: () => G.day >= 100 },
-    { id: 'day365', name: 'Day 365到達', coin: 5, cond: () => G.day >= 365 }
+    { id: 'day365', name: 'Day 365到達', coin: 5, cond: () => G.day >= 365 },
+    { id: 'lg_city', name: '市いちばん', coin: 4, cond: () => (G.league ? G.league.beaten : 0) >= 4 },
+    { id: 'lg_pref', name: '県いちばん', coin: 6, cond: () => (G.league ? G.league.beaten : 0) >= 7 },
+    { id: 'lg_region', name: '地方いちばん', coin: 8, cond: () => (G.league ? G.league.beaten : 0) >= 9 },
+    { id: 'lg_nation', name: '全国いちばん', coin: 12, cond: () => (G.league ? G.league.beaten : 0) >= 10 }
   ];
 
   const TEXTBOOK = [
@@ -245,7 +276,8 @@
     speedPass: { tier: 0, until: 0 },
     bonds: { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 },
     specialDone: [],
-    season: { bestProfit: null, bestMonth: 0, months: 0 }
+    season: { bestProfit: null, bestMonth: 0, months: 0 },
+    league: { beaten: 0 }
   };
   Object.keys(REL_DEF).forEach((k) => { G.relations[k] = { lv: 0, last: 0 }; });
 
@@ -296,7 +328,7 @@
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
-          specialDone: G.specialDone, season: G.season
+          specialDone: G.specialDone, season: G.season, league: G.league
         }
       }));
     } catch (e) { /* noop */ }
@@ -328,7 +360,8 @@
       // v8: デイリー・殿堂フィールドの補完
       if (!G.daily) G.daily = { last: '', streak: 0, chDone: '' };
       if (!G.prestige) G.prestige = { count: 0, legacy: null };
-      // v11: スペシャル依頼・月間決算の補完
+      // v11-12: スペシャル依頼・月間決算・地域リーグの補完
+      if (!G.league) G.league = { beaten: 0 };
       if (!G.specialDone) G.specialDone = [];
       if (!G.season) G.season = { bestProfit: null, bestMonth: 0, months: 0 };
       // v10: 倍速パス・信頼度の補完(v9の買い切りはコインで返金)
@@ -554,7 +587,7 @@
     const sundayBoost = weekdayOf(G.day) === 6 ? 1.3 : 1; // 日曜開院は競合が休み
 
     // 自然新患(雨・流行イベントで増減)
-    const share = G.rep / (G.rep + RIVAL_REP);
+    const share = G.rep / (G.rep + rivalRepNow());
     const campMul = boostActive('campaign') ? 1.5 : 1;
     const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost * (G.evArrivalMul || 1) * campMul + (Math.random() * 4 - 2)));
     for (let i = 0; i < nNew; i++) push('first', 'house');
@@ -629,7 +662,7 @@
     return false;
   }
 
-  function branchRent(br) { return (br.floorLv || 1) >= 2 ? 50000 : COSTS.branchRent; }
+  function branchRent(br) { const lv = br.floorLv || 1; return lv >= 3 ? 90000 : lv >= 2 ? 50000 : COSTS.branchRent; }
 
   function branchDay(br, spec) {
     const site = siteOf(br);
@@ -643,7 +676,8 @@
     }
     const f = spec.arr;
     const examCap = br.staff.doctors * 48 * f;
-    const share = br.rep / (br.rep + site.rivalRep);
+    const rivalNow = site.rivalRep + Math.min(10, Math.max(0, G.day - (br.openedDay || 0)) * 0.02);
+    const share = br.rep / (br.rep + rivalNow);
     const nNewRaw = 42 * site.bigger * br.aw * share * f * (0.85 + Math.random() * 0.3);
     const revisRaw = br.revisitPool * f * (0.8 + Math.random() * 0.3);
     const visitsExam = Math.min(nNewRaw + revisRaw, examCap);
@@ -674,7 +708,7 @@
     br.revisitPool = br.revisitPool * 0.55 + visitsExam * 0.45 * sat;
     br.rehabPool = Math.max(0, br.rehabPool - rehaVisits + starts * 7);
     br.rep = clamp(br.rep + (sat * 100 - br.rep) * 0.025, 20, 95);
-    br.aw = clamp(br.aw + (br.rep >= 70 ? 0.006 : 0.0025) - 0.0045, 0.05, 0.9);
+    br.aw = clamp(br.aw + (br.rep >= 70 ? 0.006 : 0.0025) - 0.0045, 0.05, 0.95);
     br.last = { revenue, cost, profit, visits, reha: Math.round(rehaVisits) };
     br.profit7.push(profit);
     if (br.profit7.length > 7) br.profit7.shift();
@@ -821,6 +855,7 @@
     G.stats.revenue += T.revenue + T.brRevenue;
 
     dailyVoice();
+    if (spec.kind !== 'closed') checkLeague();
     checkMission(T);
     checkAchievements();
     checkDailyChallenge(T);
@@ -963,6 +998,7 @@
     vis('itemCard', 2);
     vis('achCard', 2);
     vis('prestigeCard', 3);
+    vis('leagueCard', 3);
     ['kpiCard', 'plannerCard', 'bankCard', 'pnlCard', 'kijunCard'].forEach((id) => vis(id, 3));
     const lock = $('mgmtLock');
     if (lock) lock.hidden = stage >= 3;
@@ -1549,7 +1585,7 @@
     const isBest = G.season.bestProfit === null || profit > G.season.bestProfit;
     if (isBest) { G.season.bestProfit = profit; G.season.bestMonth = G.season.months; }
     const grade = profit >= 3000000 ? 'S' : profit >= 1000000 ? 'A' : profit > 0 ? 'B' : 'C';
-    const coin = { S: 5, A: 3, B: 1, C: 0 }[grade];
+    const coin = { S: 3, A: 2, B: 1, C: 0 }[grade];
     G.coins += coin;
     let planHtml = '';
     if (G.plan) {
@@ -1563,6 +1599,71 @@
       <div class="pnl-row"><span>成績ボーナス</span><b>${coin ? `🪙+${coin}` : 'なし(黒字着地で🪙+1〜)'}</b></div>
       <p class="modal-note">📖 評価: S=月間利益300万 / A=100万 / B=黒字。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>`,
       '来月へ');
+  }
+
+  /* ================= 🏆 地域リーグ判定・表示 ================= */
+
+  function checkLeague() {
+    if (!G.league) G.league = { beaten: 0 };
+    const my = monthRevenueAll();
+    let n = 0;
+    while (n < LEAGUE.length && my >= leagueRev(n)) n++;
+    if (n <= G.league.beaten) return;
+    for (let i = G.league.beaten; i < n; i++) {
+      const L = LEAGUE[i];
+      if (L.title) {
+        G.money += L.reward;
+        G.coins += L.coin;
+        showModal(`🏆 ${L.title}`, `
+          <p><b>${L.name}</b>(月商 ${yen(leagueRev(i))})を追い抜き、<b>${L.tier}の頂点</b>に立ちました。</p>
+          <div class="pnl-row"><span>あなたの法人月商</span><b>${yen(my)}</b></div>
+          <div class="pnl-row"><span>制覇ボーナス</span><b>💰${yen(L.reward)} + 🪙${L.coin}</b></div>
+          <p class="modal-note">📖 上には上がいる — ライバルの月商も成長し続けます。次のステージへ。</p>`,
+          '次の頂点へ');
+      } else {
+        banner(`🏆 ${L.name}(${L.tier})を追い抜きました! 法人月商 ${yen(my)}`);
+      }
+    }
+    G.league.beaten = n;
+    renderLeague();
+    updateMissionBar();
+  }
+
+  function renderLeague() {
+    const el = $('leagueBody');
+    if (!el) return;
+    if (!G.league) G.league = { beaten: 0 };
+    const my = monthRevenueAll();
+    let pos = 0;
+    while (pos < LEAGUE.length && my >= leagueRev(pos)) pos++;
+    const rank = LEAGUE.length - pos + 1;
+    const next = G.league.beaten < LEAGUE.length ? LEAGUE[G.league.beaten] : null;
+    const nextRev = next ? leagueRev(G.league.beaten) : 0;
+    const pct = next ? Math.min(100, my / nextRev * 100) : 100;
+    const rows = [];
+    for (let i = LEAGUE.length - 1; i >= 0; i--) {
+      if (i === pos - 1 || (pos === 0 && i === 0)) { /* noop marker */ }
+      rows.push(`<div class="lg-row ${i < G.league.beaten ? 'beaten' : ''}">
+        <span class="lg-tier t-${LEAGUE[i].tier}">${LEAGUE[i].tier}</span>
+        <b class="lg-name">${LEAGUE[i].name}</b>
+        <span class="lg-rev">${yen(leagueRev(i))}/月</span>
+        ${i < G.league.beaten ? '<i class="lg-check">✓ 制覇</i>' : ''}
+      </div>`);
+      if (i === pos) rows.push(`<div class="lg-row you">
+        <span class="lg-tier t-you">YOU</span><b class="lg-name">${escapeHtml(G.clinicName)} グループ</b>
+        <span class="lg-rev">${yen(my)}/月</span><i class="lg-check">現在 ${rank}位</i></div>`);
+    }
+    if (pos === 0) rows.push(`<div class="lg-row you">
+      <span class="lg-tier t-you">YOU</span><b class="lg-name">${escapeHtml(G.clinicName)} グループ</b>
+      <span class="lg-rev">${yen(my)}/月</span><i class="lg-check">現在 ${rank}位</i></div>`);
+    el.innerHTML = `
+      ${next
+        ? `<p class="plan-lead">次の目標: <b>${next.name}</b>(${next.tier}) — 月商 <b>${yen(nextRev)}</b>
+           <span class="lg-gap">あと ${yen(Math.max(0, nextRev - my))}</span></p>
+           <div class="pv-track big"><i style="width:${pct.toFixed(1)}%" class="${pct >= 100 ? 'full' : pct >= 70 ? 'mid' : 'low'}"></i></div>`
+        : '<p class="plan-lead">🌟 <b>全国制覇済み</b> — あなたの上には誰もいません。殿堂入りで伝説を刻みましょう。</p>'}
+      <div class="lg-table">${rows.join('')}</div>
+      <p class="pnl-note">ライバル法人の月商は成長し続けます(+約22%/年)。抜いた順位は維持されます。</p>`;
   }
 
   /* ================= 週次・月次レビュー ================= */
@@ -1649,6 +1750,10 @@
       case 'branch': done = G.branches.length >= 1; break;
       case 'branchProfit': done = G.branches.some((b) => b.profit7.length >= 7 && b.profit7.reduce((a, x) => a + x, 0) > 0); break;
       case 'corp': done = monthRevenueAll() >= 25000000; break;
+      case 'cityTop': done = (G.league ? G.league.beaten : 0) >= 4; break;
+      case 'prefTop': done = (G.league ? G.league.beaten : 0) >= 7; break;
+      case 'regionTop': done = (G.league ? G.league.beaten : 0) >= 9; break;
+      case 'nationTop': done = (G.league ? G.league.beaten : 0) >= 10; break;
     }
     if (done) {
       G.money += m.reward;
@@ -1731,7 +1836,7 @@
     if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
-    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); }
+    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); }
   }
 
   /* ================= UI: 診療時間 ================= */
@@ -1767,7 +1872,7 @@
   }
   function shopMax(key) {
     const M = clinic.L.MAX;
-    return { doctor: M.doctors, nurse: M.nurses, pt: M.pts, recep: M.receptionists, chairs: M.chairs, beds: M.beds, machines: M.machines, physio: 8, rehaAide: 4 }[key];
+    return { doctor: M.doctors, nurse: M.nurses, pt: M.pts, recep: M.receptionists, chairs: M.chairs, beds: M.beds, machines: M.machines, physio: settings.floorLv >= 3 ? 12 : 8, rehaAide: 8 }[key];
   }
   function settingValue(key) {
     return { doctor: settings.doctors, nurse: settings.nurses, pt: settings.pts, recep: settings.receptionists, chairs: settings.chairs, beds: settings.beds, machines: settings.machines, physio: settings.physio, rehaAide: settings.rehaAides }[key];
@@ -1856,11 +1961,17 @@
       </div>
       ${settings.floorLv === 1
         ? `<div class="shop-row expand-row">
-            <div class="shop-info"><span class="shop-name">🏗 院を増築する</span>
+            <div class="shop-info"><span class="shop-name">🏗 院を増築する(Lv2)</span>
             <span class="shop-hint">フロア26×16へ。診察室4・リハ室100㎡(機器12台)・椅子20脚に上限UP。運動器リハ(I)の面積要件</span></div>
             <div class="shop-btns"><button class="mini-btn plus" id="expandBtn">🏗 ${yen(EXPAND_COST)}</button></div>
           </div>`
-        : `<div class="shop-row expand-row done"><div class="shop-info"><span class="shop-name">🏗 増築済み(リハ室100㎡)</span></div></div>`}`;
+        : settings.floorLv === 2
+          ? `<div class="shop-row expand-row">
+              <div class="shop-info"><span class="shop-name">🏙 別館を建てる(Lv3)</span>
+              <span class="shop-hint">フロア32×20へ。診察室6・リハ室150㎡(機器18)・椅子28・受付4窓口・ベッド6・PT20名。ただし家賃¥120,000/日 — 埋める算段が先</span></div>
+              <div class="shop-btns"><button class="mini-btn plus" id="expand2Btn">🏙 ${yen(EXPAND2_COST)}</button></div>
+            </div>`
+          : `<div class="shop-row expand-row done"><div class="shop-info"><span class="shop-name">🏙 別館まで増築済み(診察室6・リハ室150㎡)</span></div></div>`}`;
 
     $('shopList').innerHTML = rows + bigTicket;
     $('shopList').querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
@@ -1872,6 +1983,15 @@
       settings.floorLv = 2;
       clinic.applySettings();
       toast('🏗 増築完了! リハ室100㎡・診察室4室体制');
+      renderShop(); renderPnl(); updateHeader(); save();
+    });
+    const ex2 = $('expand2Btn');
+    if (ex2) ex2.addEventListener('click', () => {
+      if (G.money < EXPAND2_COST) { toast(`資金が足りません(${yen(EXPAND2_COST)})`); return; }
+      G.money -= EXPAND2_COST;
+      settings.floorLv = 3;
+      clinic.applySettings();
+      toast('🏙 別館完成! 診察室6・リハ室150㎡(機器18)・椅子28の大型体制へ');
       renderShop(); renderPnl(); updateHeader(); save();
     });
     const mriB = $('mriBtn');
@@ -2138,7 +2258,7 @@
       return;
     }
     if (b.id === 'rival') {
-      showModal('ライバル整形外科', `<p>開業15年、評判 ${RIVAL_REP}。新患は評判の比で分け合っています。リスティングを出しすぎると入札を強めてきます。</p><p class="modal-note">📖 相手を下げる手はない。自院の評判・認知・提供価値を上げるだけ。</p>`, '閉じる');
+      showModal('ライバル整形外科', `<p>開業15年、評判 ${Math.round(rivalRepNow())}(年々力をつけています)。新患は評判の比で分け合っています。リスティングを出しすぎると入札を強めてきます。</p><p class="modal-note">📖 相手を下げる手はない。自院の評判・認知・提供価値を上げるだけ。</p>`, '閉じる');
       return;
     }
     if (b.id === 'clinic') {
@@ -2164,8 +2284,9 @@
 
   /* ================= UI: 法人(分院) ================= */
 
-  const BR_ROLES = [['doctors', '医師', 1, 3], ['nurses', '看護師', 0, 3], ['pts', 'PT', 0, 10], ['receptionists', '受付', 1, 2]];
+  const BR_ROLES = [['doctors', '医師', 1, 6], ['nurses', '看護師', 0, 6], ['pts', 'PT', 0, 20], ['receptionists', '受付', 1, 4]];
   const BR_EXPAND_COST = 4000000;
+  const BR_EXPAND2_COST = 12000000;
 
   function branchHireCost(role, cur) {
     if (role === 'doctors') return 800000;
@@ -2190,7 +2311,7 @@
       </div>`;
 
     const brCards = G.branches.map((br, bi) => {
-      const machineMax = (br.floorLv || 1) >= 2 ? 12 : 6;
+      const machineMax = (br.floorLv || 1) >= 3 ? 18 : (br.floorLv || 1) >= 2 ? 12 : 6;
       const kijunBtns = KIJUN.map((k) => {
         if (br.rehaLevel === k.lv) return `<span class="kijun-badge">${k.name} 届出済</span>`;
         const ok = k.lv === 3 ? (br.staff.pts >= 4 && (br.floorLv || 1) >= 2) : k.ok(br.staff.pts, 1);
@@ -2200,7 +2321,7 @@
       return `
       <div class="branch-card">
         <div class="branch-head">
-          <b>🏥 ${br.name}${(br.floorLv || 1) >= 2 ? ' <small>🏗100㎡</small>' : ''}${br.mri ? ' <small>🧲MRI</small>' : ''}</b>
+          <b>🏥 ${br.name}${(br.floorLv || 1) >= 3 ? ' <small>🏙150㎡</small>' : (br.floorLv || 1) >= 2 ? ' <small>🏗100㎡</small>' : ''}${br.mri ? ' <small>🧲MRI</small>' : ''}</b>
           <span class="branch-stat">評判 ${Math.round(br.rep)} / 認知 ${Math.round(br.aw * 100)}% / ${REHA_NAMES[br.rehaLevel]}</span>
         </div>
         ${br.last ? `<div class="branch-pnl">昨日: 患者${br.last.visits}人(リハ${br.last.reha}) 売上${yen(br.last.revenue)} 損益 <b class="${br.last.profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(br.last.profit)}</b> / 直近7日計 <b class="${p7 >= 0 ? 'pos-t' : 'neg-t'}">${yen(p7)}</b></div>` : '<div class="branch-pnl">開院準備中 — 明日から診療開始</div>'}
@@ -2224,6 +2345,7 @@
         </div>
         <div class="op-row">
           ${(br.floorLv || 1) < 2 ? `<button class="op-btn" data-brexpand="${bi}">🏗 増築100㎡ <small>${yen(BR_EXPAND_COST)}</small></button>` : ''}
+          ${(br.floorLv || 1) === 2 ? `<button class="op-btn" data-brexpand2="${bi}">🏙 別館150㎡ <small>${yen(BR_EXPAND2_COST)}</small></button>` : ''}
           ${!br.mri ? `<button class="op-btn" data-brmri="${bi}">🧲 MRI導入 <small>${yen(MRI_COST)}</small></button>` : ''}
           <button class="op-btn" data-brsales="${bi}">📣 地域営業 <small>¥30,000(認知+1.5%)</small></button>
         </div>
@@ -2284,7 +2406,7 @@
     }));
     el.querySelectorAll('[data-brmachine]').forEach((b) => b.addEventListener('click', () => {
       const br = G.branches[Number(b.dataset.brmachine)];
-      const max = (br.floorLv || 1) >= 2 ? 12 : 6;
+      const max = (br.floorLv || 1) >= 3 ? 18 : (br.floorLv || 1) >= 2 ? 12 : 6;
       if (br.machines >= max) { toast('これ以上は入りません(増築で上限UP)'); return; }
       if (G.money < 300000) { toast('資金が足りません'); return; }
       G.money -= 300000;
@@ -2317,6 +2439,14 @@
       G.money -= BR_EXPAND_COST;
       br.floorLv = 2;
       toast(`🏗 ${br.name} を増築(100㎡)! 機器12台・運動器リハ(I)の面積要件を満たしました`);
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-brexpand2]').forEach((b) => b.addEventListener('click', () => {
+      const br = G.branches[Number(b.dataset.brexpand2)];
+      if (G.money < BR_EXPAND2_COST) { toast(`資金が足りません(${yen(BR_EXPAND2_COST)})`); return; }
+      G.money -= BR_EXPAND2_COST;
+      br.floorLv = 3;
+      toast(`🏙 ${br.name} に別館(150㎡)! 機器18台体制になりました(家賃¥90,000/日)`);
       renderCorp(); updateHeader(); save();
     }));
     el.querySelectorAll('[data-brmri]').forEach((b) => b.addEventListener('click', () => {
@@ -2629,7 +2759,7 @@
     { tab: 'clinic', sel: '#scheduleCard', text: '<b>診療時間は自由に設計</b>。タップで「終日→午前→休診」。半日は人件費6割、日曜開院は手当1.4倍だが競合が休みで新患1.3倍 — コマごとの採算で決める。' },
     { tab: 'clinic', sel: '#shopCard', text: 'スタッフと設備。最初に触れるのは<b>受付と椅子</b>だけ — 経営が進むと(Day 4、Day 8)採用・リハ・大型投資が順次解放されます。まずは目の前の回転づくりから。' },
     { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式。<b>売上 = 患者数 × 単価</b>。すべての打ち手はどちらか(または両方)を動かします。「今日の一手はどちらを動かしたか?」を毎日問う。' },
-    { tab: 'mgmt', sel: '#missionCard', text: 'ミッションが経営カリキュラム(全15)。順番に進めるだけで外来経営の型が身につきます。まずは<b>「初日の診療を完了する」</b>から。健闘を祈ります!' }
+    { tab: 'mgmt', sel: '#missionCard', text: 'ミッションが経営カリキュラム(全19)。市→県→地方→全国の「地域リーグ」制覇まで続きます。まずは<b>「初日の診療を完了する」</b>から。健闘を祈ります!' }
   ];
   let tutIdx = -1;
 
@@ -2671,7 +2801,7 @@
 
   // 倍速パス(時間制): ×4まではデフォルト無料。×8/×16/×32は24時間パスをコインで購入。
   // パスは上位を買えば下位も使え、有効中に買い足すと残り時間に+24hされる。殿堂(周回)後も残り時間は有効。
-  const SPEED_PASS_PRICE = { 8: 4, 16: 8, 32: 15 };
+  const SPEED_PASS_PRICE = { 8: 6, 16: 12, 32: 22 };
   const PASS_MS = 24 * 3600 * 1000;
 
   function passActive() { return !!(G.speedPass && G.speedPass.until > Date.now()); }

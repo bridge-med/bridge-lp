@@ -1081,3 +1081,33 @@ input[type="range"]::-moz-range-thumb {
 
 .rs-bottle.rs-balk { background: var(--red-pale); color: var(--red); font-weight: 700; }
 .sp-star { font-style: normal; color: var(--amber); font-size: 11px; margin-left: 2px; }
+
+/* ---------- v12: 地域リーグ ---------- */
+
+.lg-table { display: flex; flex-direction: column; margin-top: 10px; }
+.lg-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 4px;
+  border-bottom: 1px dashed var(--line);
+  font: 500 12px/1.5 var(--sans);
+  color: var(--ink-3);
+}
+.lg-row b.lg-name { font-weight: 700; color: var(--ink-2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-row.beaten { opacity: 0.55; }
+.lg-row.beaten .lg-name { text-decoration: line-through; }
+.lg-row.you { background: var(--amber-pale); border-radius: 10px; border-bottom: none; padding: 9px 8px; }
+.lg-row.you .lg-name { color: var(--amber); }
+.lg-tier {
+  flex: 0 0 auto;
+  font: 800 9.5px/1.4 var(--sans);
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: var(--bg-deep);
+  color: var(--ink-3);
+}
+.lg-tier.t-you { background: var(--amber); color: #fff; }
+.lg-rev { font: 700 11px/1.4 var(--en); color: var(--ink-2); white-space: nowrap; }
+.lg-check { font: 700 10.5px/1.4 var(--sans); color: var(--green-deep); font-style: normal; white-space: nowrap; }
+.lg-gap { font: 800 11px/1.4 var(--sans); color: var(--amber); margin-left: 6px; }

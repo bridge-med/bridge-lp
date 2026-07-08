@@ -139,7 +139,88 @@ const CLINIC = (() => {
     };
   }
 
-  const LAYOUTS = { 1: layoutLv1, 2: layoutLv2 };
+  function layoutLv3() {
+    return {
+      W: 32, H: 20,
+      DOOR: { x: 15, y: 19 },
+      CORRIDOR: [4, 5],
+      ZONES: [
+        { key: 'exam1', label: '診察室1', x0: 1, y0: 0, x1: 4, y1: 3, tint: '#DCEDF6', need: (s) => true },
+        { key: 'exam2', label: '診察室2', x0: 6, y0: 0, x1: 9, y1: 3, tint: '#DCEDF6', need: (s) => s.doctors >= 2 },
+        { key: 'exam3', label: '診察室3', x0: 11, y0: 0, x1: 14, y1: 3, tint: '#DCEDF6', need: (s) => s.doctors >= 3 },
+        { key: 'exam4', label: '診察室4', x0: 16, y0: 0, x1: 19, y1: 3, tint: '#DCEDF6', need: (s) => s.doctors >= 4 },
+        { key: 'exam5', label: '診察室5', x0: 21, y0: 0, x1: 24, y1: 3, tint: '#DCEDF6', need: (s) => s.doctors >= 5 },
+        { key: 'exam6', label: '診察室6', x0: 26, y0: 0, x1: 29, y1: 3, tint: '#DCEDF6', need: (s) => s.doctors >= 6 },
+        { key: 'reha', label: 'リハ室(150㎡)', x0: 17, y0: 7, x1: 31, y1: 13, tint: '#DFF2EA', need: (s) => true },
+        { key: 'treat', label: '処置室', x0: 26, y0: 15, x1: 31, y1: 18, tint: '#FAE7E5', need: (s) => true },
+        { key: 'wait', label: '待合', x0: 0, y0: 7, x1: 8, y1: 14, tint: '#FBF0DC', need: (s) => true },
+        { key: 'recep', label: '受付', x0: 10, y0: 7, x1: 15, y1: 9, tint: '#EAF1F6', need: (s) => true },
+        { key: 'cash', label: '会計', x0: 9, y0: 15, x1: 16, y1: 18, tint: '#EDEAF6', need: (s) => true }
+      ],
+      CHAIRS: [
+        { x: 1, y: 8 }, { x: 2, y: 8 }, { x: 3, y: 8 }, { x: 4, y: 8 }, { x: 5, y: 8 }, { x: 6, y: 8 }, { x: 7, y: 8 },
+        { x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }, { x: 4, y: 10 }, { x: 5, y: 10 }, { x: 6, y: 10 }, { x: 7, y: 10 },
+        { x: 1, y: 12 }, { x: 2, y: 12 }, { x: 3, y: 12 }, { x: 4, y: 12 }, { x: 5, y: 12 }, { x: 6, y: 12 }, { x: 7, y: 12 },
+        { x: 1, y: 14 }, { x: 2, y: 14 }, { x: 3, y: 14 }, { x: 4, y: 14 }, { x: 5, y: 14 }, { x: 6, y: 14 }, { x: 7, y: 14 }
+      ],
+      STANDS: [
+        { x: 0, y: 8 }, { x: 0, y: 9 }, { x: 0, y: 10 }, { x: 0, y: 11 }, { x: 0, y: 12 }, { x: 0, y: 13 },
+        { x: 8, y: 8 }, { x: 8, y: 10 }, { x: 8, y: 12 }, { x: 2, y: 13 }, { x: 4, y: 13 }, { x: 6, y: 13 }
+      ],
+      BEDS: [
+        { bed: { x: 27, y: 15 }, spot: { x: 27, y: 16 } },
+        { bed: { x: 29, y: 15 }, spot: { x: 29, y: 16 } },
+        { bed: { x: 31, y: 15 }, spot: { x: 31, y: 16 } },
+        { bed: { x: 27, y: 17 }, spot: { x: 27, y: 18 } },
+        { bed: { x: 29, y: 17 }, spot: { x: 29, y: 18 } },
+        { bed: { x: 31, y: 17 }, spot: { x: 31, y: 18 } }
+      ],
+      MACHINES: [
+        { m: { x: 17, y: 7 }, spot: { x: 17, y: 8 } }, { m: { x: 19, y: 7 }, spot: { x: 19, y: 8 } },
+        { m: { x: 21, y: 7 }, spot: { x: 21, y: 8 } }, { m: { x: 23, y: 7 }, spot: { x: 23, y: 8 } },
+        { m: { x: 25, y: 7 }, spot: { x: 25, y: 8 } }, { m: { x: 27, y: 7 }, spot: { x: 27, y: 8 } },
+        { m: { x: 29, y: 7 }, spot: { x: 29, y: 8 } }, { m: { x: 31, y: 7 }, spot: { x: 31, y: 8 } },
+        { m: { x: 17, y: 9 }, spot: { x: 17, y: 10 } }, { m: { x: 19, y: 9 }, spot: { x: 19, y: 10 } },
+        { m: { x: 21, y: 9 }, spot: { x: 21, y: 10 } }, { m: { x: 23, y: 9 }, spot: { x: 23, y: 10 } },
+        { m: { x: 25, y: 9 }, spot: { x: 25, y: 10 } }, { m: { x: 27, y: 9 }, spot: { x: 27, y: 10 } },
+        { m: { x: 29, y: 9 }, spot: { x: 29, y: 10 } }, { m: { x: 31, y: 9 }, spot: { x: 31, y: 10 } },
+        { m: { x: 17, y: 11 }, spot: { x: 17, y: 12 } }, { m: { x: 19, y: 11 }, spot: { x: 19, y: 12 } }
+      ],
+      EXAM: [
+        { desk: { x: 2, y: 2, w: 2, d: 1 }, doctor: { x: 2.5, y: 1.3 }, spot: { x: 3, y: 3 } },
+        { desk: { x: 7, y: 2, w: 2, d: 1 }, doctor: { x: 7.5, y: 1.3 }, spot: { x: 8, y: 3 } },
+        { desk: { x: 12, y: 2, w: 2, d: 1 }, doctor: { x: 12.5, y: 1.3 }, spot: { x: 13, y: 3 } },
+        { desk: { x: 17, y: 2, w: 2, d: 1 }, doctor: { x: 17.5, y: 1.3 }, spot: { x: 18, y: 3 } },
+        { desk: { x: 22, y: 2, w: 2, d: 1 }, doctor: { x: 22.5, y: 1.3 }, spot: { x: 23, y: 3 } },
+        { desk: { x: 27, y: 2, w: 2, d: 1 }, doctor: { x: 27.5, y: 1.3 }, spot: { x: 28, y: 3 } }
+      ],
+      RECEP: {
+        counter: { x: 10, y: 8, w: 5, d: 1 },
+        staff: [{ x: 10.5, y: 7.45 }, { x: 11.7, y: 7.45 }, { x: 12.9, y: 7.45 }, { x: 14.1, y: 7.45 }],
+        service: [{ x: 11, y: 9 }, { x: 12, y: 9 }, { x: 13, y: 9 }, { x: 14, y: 9 }],
+        queue: [{ x: 15, y: 10 }, { x: 14, y: 10 }, { x: 13, y: 10 }, { x: 12, y: 10 }, { x: 11, y: 10 }, { x: 15, y: 11 }, { x: 14, y: 11 }, { x: 13, y: 11 }]
+      },
+      CASH: {
+        counter: { x: 11, y: 16, w: 4, d: 1 },
+        staff: { x: 12.5, y: 15.45 },
+        kiosk: { x: 16, y: 16 },
+        service: [{ x: 11, y: 17 }, { x: 16, y: 17 }],
+        queue: [{ x: 10, y: 17 }, { x: 9, y: 17 }, { x: 9, y: 16 }, { x: 10, y: 18 }, { x: 9, y: 18 }]
+      },
+      NURSE_ROW: (n) => ({ x: 26.5 + (n % 3) * 1.5, y: 14.4 }),
+      PT_ROW: (n) => ({ x: 17 + (n % 14) * 1.02, y: 13.4 }),
+      PT_VIS: 14,
+      DECO: {
+        cafe: { x: 1, y: 7, w: 2, label: '☕ カフェ' },
+        kids: { x: 5, y: 15, w: 2, label: '🧸 キッズ' },
+        signage: { x: 0, y: 7, w: 1, label: '📺' },
+        bus: { x: 0, y: 19, w: 2, label: '🚌 送迎バス' }
+      },
+      MAX: { doctors: 6, chairs: 28, beds: 6, machines: 18, receptionists: 4, nurses: 6, pts: 20 }
+    };
+  }
+
+  const LAYOUTS = { 1: layoutLv1, 2: layoutLv2, 3: layoutLv3 };
 
   const PHASE_COLORS = {
     walk: '#9AA7B0', recepQ: '#C98A2D', recep: '#C98A2D',
@@ -164,13 +245,13 @@ const CLINIC = (() => {
       this.patients = [];
       this.idSeq = 1;
       this.recQueue = []; this.examQueue = []; this.treatQueue = []; this.rehaQueue = []; this.cashQueue = [];
-      this.recBusy = [null, null, null];
+      this.recBusy = [null, null, null, null];
       this.cashBusy = [null, null];
-      this.doctors = [{ patient: null }, { patient: null }, { patient: null }, { patient: null }];
-      this.bedUsed = [null, null, null, null];
-      this.machineUsed = new Array(12).fill(null);
-      this.seatUsed = new Array(20).fill(null);
-      this.standUsed = new Array(10).fill(null);
+      this.doctors = [{ patient: null }, { patient: null }, { patient: null }, { patient: null }, { patient: null }, { patient: null }];
+      this.bedUsed = [null, null, null, null, null, null];
+      this.machineUsed = new Array(18).fill(null);
+      this.seatUsed = new Array(28).fill(null);
+      this.standUsed = new Array(12).fill(null);
       this.heat = new Float32Array(this.L.W * this.L.H);
       this.floats = [];
       this.t = 0;
@@ -575,11 +656,11 @@ const CLINIC = (() => {
         const sp = L.EXAM[d].doctor;
         items.push({ depth: sp.x + sp.y, draw: () => iso.figure(sp.x, sp.y, '#FFFFFF', { coat: true, dot: this.doctors[d].patient ? '#3E7CA6' : '#4FA98C' }) });
       }
-      for (let n = 0; n < Math.min(s.nurses, 4); n++) {
+      for (let n = 0; n < Math.min(s.nurses, 6); n++) {
         const sp = L.NURSE_ROW(n);
         items.push({ depth: sp.x + sp.y, draw: () => iso.figure(sp.x, sp.y, '#F4C8D4', { dot: this.bedUsed[n] ? '#3E7CA6' : '#4FA98C' }) });
       }
-      for (let n = 0; n < Math.min(s.pts, 12); n++) {
+      for (let n = 0; n < Math.min(s.pts, this.L.PT_VIS || 12); n++) {
         const sp = L.PT_ROW(n);
         if (sp.x > L.W - 1) break;
         items.push({ depth: sp.x + sp.y, draw: () => iso.figure(sp.x, sp.y, '#BFE0D2', { dot: '#4FA98C' }) });
