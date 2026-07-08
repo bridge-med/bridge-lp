@@ -181,6 +181,8 @@ const STAFF_UI = (() => {
         return 'normal';
       },
       comments: [
+        { id: 'b_kasan', prio: 88, cond: (c) => c.h && c.h.patients >= 12 && !c.s.kasanMeisai,
+          text: () => `明細書発行体制等加算(再診+1点)、まだ届け出ていません。1点=10円でも月1,000再診なら1万円 — 「届出だけで取れる加算」から埋めるのが医事の鉄則です。経営タブの施設基準・届出からどうぞ。` },
         { id: 'b_kanri', prio: 60, cond: (c) => c.h && c.h.kanriCount >= 8,
           text: (c) => `外来管理加算が${c.h.kanriCount}件。裏を返せば“何もしていない再診”がそれだけあります。注射や物療の適応、先生と確認しませんか。` },
         { id: 'b_kijun2', prio: 74, cond: (c) => c.s.rehaLevel === 1 && c.s.pts >= 2,

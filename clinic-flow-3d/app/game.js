@@ -84,9 +84,10 @@
     closed: { label: '休診', min: 0, intake: 0, pay: 0, arr: 0 }
   };
 
-  // 実態準拠の算定構造: 再診料に「何もしなければ外来管理加算」「処方箋料」が付随する
+  // 実態準拠の算定構造(1点=10円): 初診料291点・再診料75点・外来管理加算52点・処方箋料60点。
+  // 金額は主要項目の概算(教育用に簡略化)。「何もしない再診」には外来管理加算が付く
   const FEES = {
-    first: 3000, revisit: 900, kanri: 520, presc: 680, rehab: 900, checkup: 8000,
+    first: 2910, revisit: 750, kanri: 520, presc: 600, rehab: 900, checkup: 8000,
     treat: 1500, inj: 1800, trig: 1200, physio: 350, xray: 1500, mri: 16000,
     osteo: 3800, goods: 3500, goodsCogs: 2100, prpCogs: 12000
   };
@@ -270,7 +271,8 @@
     { t: '⑭ 診療時間は採算で決める', b: '日曜開院は手当1.4倍でも競合が閉まっている分だけ新患が増える。半日診療は人件費6割。1コマごとの採算を見て開けるコマを決める。' },
     { t: '⑮ 自費は価値設計から', b: 'PRPもAGAも「保険でできないこと」への対価。価格は原価ではなく価値と価格弾力性で決める。評判が低いうちは売れない — 保険診療の信頼が自費の土台。' },
     { t: '⑯ 外来管理加算のトレードオフ', b: '再診で処置・注射・リハ・物療を何もしなければ外来管理加算(52点)が付く。注射をすれば加算は消えるが注射料+薬剤が入る — 「何もしない」にも値段が付いている構造を理解して、医学的必要性で選ぶ。' },
-    { t: '⑰ 客層(セグメント)から逆算する', b: '高齢者=リハ・骨粗鬆症・定着率◎。勤労者=健診・AGA・土日夜間。スポーツ=外傷・MRI・PRP・単価◎。チャネル(ケアマネ/企業/クラブ/学校)ごとに来る客層は違う — 「誰に来てほしいか」から営業先と広告を選ぶ。' }
+    { t: '⑰ 客層(セグメント)から逆算する', b: '高齢者=リハ・骨粗鬆症・定着率◎。勤労者=健診・AGA・土日夜間。スポーツ=外傷・MRI・PRP・単価◎。チャネル(ケアマネ/企業/クラブ/学校)ごとに来る客層は違う — 「誰に来てほしいか」から営業先と広告を選ぶ。' },
+    { t: '⑱ 1点=10円、加算は「仕組み」で積む', b: '保険診療の価格は点数制(1点=10円)で全国一律 — だから勝負は「何を適切に算定できる体制か」。明細書発行体制等加算(1点)・時間外対応加算(1〜5点)・外来後発医薬品使用体制加算(8点)は、届出と体制づくりだけで再診や処方のたびに積み上がる。月1,000再診なら1点=月1万円。' }
   ];
 
   // KPI定義(選んでピン留めできる)
@@ -298,6 +300,7 @@
     doctors: 1, nurses: 1, pts: 0, receptionists: 1, rehaAides: 0,
     chairs: 6, beds: 1, machines: 0, physio: 0,
     kiosk: false, reserve: false, reviewCare: false, webIntake: false,
+    kasanMeisai: false, kasanJikangai: 0, kasanKohatsu: false,
     mri: false, dexa: false,
     rehaLevel: 0,
     examMean: 6, pTreat: 0.15, pReha: 0.35, pInj: 0.2, pTrig: 0.12, pPhysio: 0.35,
@@ -472,43 +475,61 @@
       const seg = report.seg || 'senior';
       T.segCounts[seg] = (T.segCounts[seg] || 0) + 1;
       let didProcedure = false; // 処置・注射・リハ・物療のいずれかを実施したか(外来管理加算の判定)
+      const rc = []; // レセプト(算定内訳・点数)
 
-      if (report.type === 'first') { revenue += FEES.first; T.rev.consult += FEES.first; T.newCount++; }
-      if (report.type === 'revisit' || report.type === 'rehab') { revenue += FEES.revisit; T.rev.consult += FEES.revisit; }
-      if (report.type === 'checkup') { revenue += FEES.checkup; T.rev.checkup += FEES.checkup; }
+      if (report.type === 'first') { revenue += FEES.first; T.rev.consult += FEES.first; T.newCount++; rc.push({ n: '初診料', t: 291 }); }
+      if (report.type === 'revisit' || report.type === 'rehab') { revenue += FEES.revisit; T.rev.consult += FEES.revisit; rc.push({ n: '再診料', t: 75 }); }
+      if (report.type === 'checkup') { revenue += FEES.checkup; T.rev.checkup += FEES.checkup; rc.push({ n: '健康診断(保険外)', y: FEES.checkup }); }
 
       for (const it of report.items) {
-        if (it === 'treat') { revenue += FEES.treat; T.rev.treat += FEES.treat; T.treatCount++; didProcedure = true; }
-        if (it === 'inj') { revenue += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; didProcedure = true; }
-        if (it === 'trig') { revenue += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; didProcedure = true; }
+        if (it === 'treat') { revenue += FEES.treat; T.rev.treat += FEES.treat; T.treatCount++; didProcedure = true; rc.push({ n: '処置(創傷・固定等)', t: 150 }); }
+        if (it === 'inj') { revenue += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; didProcedure = true; rc.push({ n: '関節腔内注射+薬剤', t: 180 }); }
+        if (it === 'trig') { revenue += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; didProcedure = true; rc.push({ n: 'トリガーポイント注射+薬剤', t: 120 }); }
         if (it === 'reha') {
           const f = REHA_FEE[settings.rehaLevel];
           revenue += f; T.rev.reha += f; T.rehaCount++; didProcedure = true;
+          rc.push({ n: `${REHA_NAMES[settings.rehaLevel]} ${[0, 85, 170, 185][settings.rehaLevel]}点×2単位`, t: f / 10 });
         }
       }
 
       // 物療(消炎鎮痛等処置): 機器があれば高回転で回る(故障イベント時は停止)
       if (settings.physio > 0 && !G.evPhysioDown && report.type !== 'checkup' && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) {
         revenue += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; didProcedure = true;
+        rc.push({ n: '消炎鎮痛等処置(器具等)', t: 35 });
       }
 
       // 外来管理加算: 再診で処置・注射・リハ・物療を「何もしなかった」場合のみ算定
       if ((report.type === 'revisit' || report.type === 'rehab') && !didProcedure) {
         revenue += FEES.kanri; T.rev.consult += FEES.kanri; T.kanriCount++;
+        rc.push({ n: '外来管理加算', t: 52 });
       }
-      // 処方箋料(処方が出る患者)
-      if ((report.type === 'first' || report.type === 'revisit') && Math.random() < 0.55) {
+      // 届出済み加算(再診料への加算): 明細書発行体制等・時間外対応
+      if (report.type === 'revisit' || report.type === 'rehab') {
+        let add = 0;
+        if (settings.kasanMeisai) { add += 10; rc.push({ n: '明細書発行体制等加算', t: 1 }); }
+        if (settings.kasanJikangai === 2) { add += 50; rc.push({ n: '時間外対応加算1', t: 5 }); }
+        else if (settings.kasanJikangai === 1) { add += 10; rc.push({ n: '時間外対応加算3', t: 1 }); }
+        if (add) { revenue += add; T.rev.consult += add; }
+      }
+      // 処方箋料(処方が出る患者)+ 外来後発医薬品使用体制加算
+      const prescribed = (report.type === 'first' || report.type === 'revisit')
+        ? Math.random() < 0.55
+        : (report.type === 'rehab' && Math.random() < 0.15);
+      if (prescribed) {
         revenue += FEES.presc; T.rev.consult += FEES.presc;
-      } else if (report.type === 'rehab' && Math.random() < 0.15) {
-        revenue += FEES.presc; T.rev.consult += FEES.presc;
+        rc.push({ n: '処方箋料', t: 60 });
+        if (settings.kasanKohatsu) { revenue += 80; T.rev.consult += 80; rc.push({ n: '外来後発医薬品使用体制加算1', t: 8 }); }
       }
 
       // 画像(X線は初診中心、MRIは装置があれば。スポーツ層は精査率が高い)
-      if (report.type === 'first' && Math.random() < 0.7) { revenue += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
-      else if (report.type === 'revisit' && Math.random() < 0.08) { revenue += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
+      if ((report.type === 'first' && Math.random() < 0.7) || (report.type === 'revisit' && Math.random() < 0.08)) {
+        revenue += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++;
+        rc.push({ n: '単純X線撮影+画像診断', t: 150 });
+      }
       const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
       if (settings.mri && T.mriCount < 8 && (report.type === 'first' || p.refer) && Math.random() < 0.3 * mriMul) {
         revenue += FEES.mri; T.rev.img += FEES.mri; T.mriCount++;
+        rc.push({ n: 'MRI撮影(1.5T)+コンピュータ断層診断', t: 1600 });
       }
       // 骨粗鬆症プログラム(DEXA): 高齢初診の一部が継続診療に乗る
       if (settings.dexa && report.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
@@ -521,14 +542,24 @@
       // 自費リハ延長(価格弾力性)
       if (report.didReha && settings.selfReha) {
         const pJihi = clamp((G.rep - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
-        if (Math.random() < pJihi) { revenue += settings.selfRehaPrice; T.rev.jihi += settings.selfRehaPrice; }
+        if (Math.random() < pJihi) { revenue += settings.selfRehaPrice; T.rev.jihi += settings.selfRehaPrice; rc.push({ n: '自費リハ延長(保険外)', y: settings.selfRehaPrice }); }
       }
       // 物販(原価60%)
       if (settings.goods && (report.items.includes('treat') || report.items.includes('reha'))) {
         if (Math.random() < 0.12 * clamp(G.rep / 70, 0.6, 1.3)) {
           revenue += FEES.goods; T.rev.jihi += FEES.goods; T.goodsCogs += FEES.goodsCogs;
+          rc.push({ n: '物販: サポーター等(保険外)', y: FEES.goods });
         }
       }
+
+      // 🧾 直近の会計(点数の学び): 最後の患者の算定内訳を保存
+      G.lastReceipt = {
+        type: report.type, seg,
+        rc,
+        ten: rc.reduce((a, r) => a + (r.t || 0), 0),
+        yen: revenue
+      };
+      if (activeTab === 'clinic' && G.speed <= 4) renderReceipt();
 
       if (G.speed <= 2 && revenue > 0) SND.cash();
       T.revenue += revenue;
@@ -1046,6 +1077,40 @@
     }).join('');
   }
 
+  /* ================= 🧾 レセプト表示・加算届出(算定の学び) ================= */
+
+  const TYPE_NAMES = { first: '初診', revisit: '再診', rehab: 'リハ再診', checkup: '健診' };
+
+  function renderReceipt() {
+    const card = $('receiptCard');
+    const el = $('receiptBody');
+    if (!card || !el) return;
+    const r = G.lastReceipt;
+    if (!r) { card.hidden = true; return; }
+    card.hidden = false;
+    el.innerHTML = `
+      <div class="rcpt-head"><b>${TYPE_NAMES[r.type] || r.type}</b> <small>${SEG_NAMES[r.seg] || ''}の患者さん</small></div>
+      ${r.rc.map((x) => `<div class="rcpt-row"><span>${x.n}</span><b>${x.t ? `${x.t.toLocaleString()}点` : yen(x.y)}</b></div>`).join('')}
+      <div class="rcpt-row total"><span>合計${r.ten ? `(${r.ten.toLocaleString()}点)` : ''}</span><b>${yen(r.yen)}</b></div>
+      <p class="rcpt-note">1点=10円・全国一律の公定価格。点数は主要項目の概算(教育用に簡略化)</p>`;
+  }
+
+  // 施設基準・届出(運動器リハ以外の加算): 小さな点数も「仕組み」で積み上がる
+  const KASAN = [
+    { id: 'meisai', name: '明細書発行体制等加算', ten: '再診ごと+1点', cost: 0,
+      req: '明細書の無料発行体制(届出のみ)', hint: '月1,000再診なら+1万円。届出だけで取れる加算の代表',
+      done: () => settings.kasanMeisai, ok: () => true, apply: () => { settings.kasanMeisai = true; } },
+    { id: 'jikangai3', name: '時間外対応加算3', ten: '再診ごと+1点', cost: 50000,
+      req: '準夜帯の電話対応体制の整備', hint: 'かかりつけ機能の入口。患者の安心=再診の定着にも効く',
+      done: () => settings.kasanJikangai >= 1, ok: () => settings.kasanJikangai === 0, apply: () => { settings.kasanJikangai = 1; } },
+    { id: 'jikangai1', name: '時間外対応加算1', ten: '再診ごと+5点', cost: 150000,
+      req: '受付2名以上+常時対応体制(加算3から段階を上げる)', hint: '体制強化で同じ再診から5倍の加算に',
+      done: () => settings.kasanJikangai === 2, ok: () => settings.kasanJikangai === 1 && settings.receptionists >= 2, apply: () => { settings.kasanJikangai = 2; } },
+    { id: 'kohatsu', name: '外来後発医薬品使用体制加算1', ten: '処方箋ごと+8点', cost: 0,
+      req: '後発医薬品の使用率90%以上(処方方針)', hint: '方針を決めて届け出るだけ。医療費全体の適正化にも貢献',
+      done: () => settings.kasanKohatsu, ok: () => true, apply: () => { settings.kasanKohatsu = true; } }
+  ];
+
   /* ================= 段階解放(Day1-3 / 4-7 / 8+) ================= */
 
   function unlockStage() { return G.day >= 8 ? 3 : G.day >= 4 ? 2 : 1; }
@@ -1258,6 +1323,7 @@
       ${bn.fixes.length
         ? `<p class="rs-next"><b>明日のおすすめ:</b></p><div class="fix-row">${bn.fixes.map((f) => `<button class="fix-chip" data-goto="${f.tab}|${f.sel}">${f.label} →</button>`).join('')}</div>`
         : m ? `<p class="rs-next"><b>明日のおすすめ:</b> 🎯 ${m.title}</p>` : ''}
+      <div class="rs-learn">📖 <b>今日の学び</b> ${TEXTBOOK[(dayNum - 1) % TEXTBOOK.length].t}<br><small>${TEXTBOOK[(dayNum - 1) % TEXTBOOK.length].b}</small></div>
     `, '明日へ →');
     bindGoto($('modalBody'));
   }
@@ -1905,7 +1971,7 @@
     activeTab = tab;
     document.querySelectorAll('.tab-btn').forEach((x) => x.classList.toggle('on', x.dataset.tab === tab));
     document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('show', p.id === `tab-${tab}`));
-    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); }
+    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); renderReceipt(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
     if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); }
@@ -2597,11 +2663,32 @@
         <div><b>${k.name}</b> — リハ1回(2単位) ${yen(k.fee)}<br><small>要件: ${k.reqText} ${ok ? '✅' : '❌'}</small></div>
         ${active ? '<span class="kijun-badge">届出済</span>' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
-    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。</p>`;
+    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。</p>`
+      + `<h3 class="sub-title">📮 その他の届出・加算 <small>— 1点=10円。小さくても「仕組み」で毎回積み上がる</small></h3>`
+      + KASAN.map((k) => {
+        const done = k.done();
+        const can = !done && k.ok();
+        return `<div class="kijun-row ${done ? 'ok' : ''}">
+          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}<br>${k.hint}</small></div>
+          ${done ? '<span class="kijun-badge">届出済</span>' : `<button class="mini-btn ${can ? 'plus' : ''}" data-kasan="${k.id}" ${can ? '' : 'disabled'}>届け出る${k.cost ? ` ${yen(k.cost)}` : '(無料)'}</button>`}
+        </div>`;
+      }).join('');
     $('kijunBody').querySelectorAll('[data-kijun]').forEach((b) => b.addEventListener('click', () => {
       settings.rehaLevel = Number(b.dataset.kijun);
       toast(`✅ ${REHA_NAMES[settings.rehaLevel]}を届け出ました(リハ1回 ${yen(REHA_FEE[settings.rehaLevel])})`);
       renderPnl(); save();
+    }));
+    $('kijunBody').querySelectorAll('[data-kasan]').forEach((b) => b.addEventListener('click', () => {
+      const k = KASAN.find((x) => x.id === b.dataset.kasan);
+      if (!k || k.done() || !k.ok()) return;
+      if (k.cost > 0) {
+        if (G.money < k.cost) { toast(`資金が足りません(${yen(k.cost)})`); return; }
+        G.money -= k.cost;
+      }
+      k.apply();
+      SND.coin();
+      toast(`📮 ${k.name} を届け出ました(${k.ten})`);
+      renderPnl(); updateHeader(); save();
     }));
   }
 
@@ -3061,7 +3148,14 @@
           }
         }
         if ((a.type === 'revisit' || a.type === 'rehab') && !proc) { rev += FEES.kanri; T.rev.consult += FEES.kanri; T.kanriCount++; }
-        if ((a.type === 'first' || a.type === 'revisit') && Math.random() < 0.55) { rev += FEES.presc; T.rev.consult += FEES.presc; }
+        if (a.type === 'revisit' || a.type === 'rehab') {
+          const add = (settings.kasanMeisai ? 10 : 0) + (settings.kasanJikangai === 2 ? 50 : settings.kasanJikangai === 1 ? 10 : 0);
+          if (add) { rev += add; T.rev.consult += add; }
+        }
+        if ((a.type === 'first' || a.type === 'revisit') && Math.random() < 0.55) {
+          rev += FEES.presc; T.rev.consult += FEES.presc;
+          if (settings.kasanKohatsu) { rev += 80; T.rev.consult += 80; }
+        }
         if (a.type === 'first' && Math.random() < 0.7) { rev += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
         const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
         if (settings.mri && T.mriCount < 8 && (a.type === 'first' || a.refer) && Math.random() < 0.3 * mriMul) { rev += FEES.mri; T.rev.img += FEES.mri; T.mriCount++; }

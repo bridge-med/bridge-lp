@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>クリニックタウン3D — 外来経営を、まちごと育てる</title>
-<meta name="description" content="SimCity風の3Dビューで医療法人を経営するシミュレーションゲーム。院内の導線・増築・施設基準から、キーワード広告入札・地域連携営業・自費メニュー・分院展開まで。「売上=患者数×単価」を体で覚える経営教育ゲーム。登録不要。">
+<meta name="description" content="遊ぶだけで外来経営が身につくSimCity風シミュレーション。会計のたびに実際の算定項目と保険点数(再診料75点・外来管理加算52点・運動器リハ185点/単位…)が見える。施設基準・加算届出・KPI・分院展開から全国いちばんの医療法人へ。登録不要・ホーム画面に追加でアプリに。">
 <meta property="og:title" content="クリニックタウン3D — 外来経営を、まちごと育てる">
-<meta property="og:description" content="医師4名・PT30名・分院3拠点の医療法人を目指す。施設基準・広告入札・事業計画・銀行融資まで、外来経営の全部が詰まった経営ゲーム。">
+<meta property="og:description" content="会計のたびに保険点数が見える経営教育ゲーム。施設基準・加算届出・KPI・分院展開 — 市→県→全国いちばんの医療法人を目指す。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/clinic-flow-3d/">
 <meta name="theme-color" content="#EAF4F8">
@@ -90,6 +90,11 @@
       <div id="voiceBody"></div>
     </div>
 
+    <div class="card receipt-card" id="receiptCard" hidden>
+      <h2 class="card-title">🧾 直近の会計 <small>— いま何を算定した? 保険点数つきで見える</small></h2>
+      <div id="receiptBody"></div>
+    </div>
+
     <div class="kpi-strip" id="kpiStrip"></div>
 
     <div class="card todo-card" id="todoCard">
@@ -125,27 +130,27 @@
         <label class="ctrl">
           <span class="ctrl-head">関節注・ハイドロ方針 <b id="vPInj">20%</b></span>
           <input type="range" id="pInj" min="0" max="50" step="5" value="20">
-          <small class="ctrl-note">1件+¥1,800(薬剤込)。診察が少し延びる</small>
+          <small class="ctrl-note">関節腔内注射80点+薬剤 ≈180点(¥1,800)。診察が少し延びる</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">トリガー/ブロック方針 <b id="vPTrig">12%</b></span>
           <input type="range" id="pTrig" min="0" max="40" step="4" value="12">
-          <small class="ctrl-note">1件+¥1,200。腰・肩の痛みへの一手</small>
+          <small class="ctrl-note">トリガーポイント注射70点+薬剤 ≈120点(¥1,200)</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">物療の案内方針 <b id="vPPhysio">35%</b></span>
           <input type="range" id="pPhysio" min="0" max="70" step="5" value="35">
-          <small class="ctrl-note">1件+¥350×高回転。物療機器が必要</small>
+          <small class="ctrl-note">消炎鎮痛等処置35点(¥350)×高回転。物療機器が必要</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">処置の実施方針 <b id="vPTreat">15%</b></span>
           <input type="range" id="pTreat" min="0" max="50" step="5" value="15">
-          <small class="ctrl-note">創傷・固定など(+¥1,500)。看護師とベッド</small>
+          <small class="ctrl-note">創傷処置・ギプス等 ≈150点(¥1,500)。看護師とベッド</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">リハ提案方針 <b id="vPReha">35%</b></span>
           <input type="range" id="pReha" min="0" max="70" step="5" value="35">
-          <small class="ctrl-note">施設基準の届出後に有効。整形外来の柱</small>
+          <small class="ctrl-note">運動器リハ(III)85点〜(I)185点/単位。届出後に有効</small>
         </label>
       </div>
     </div>
@@ -228,7 +233,7 @@
     </div>
 
     <div class="card" id="kijunCard">
-      <h2 class="card-title">📋 施設基準(運動器リハ) <small>— 専従PT数と面積で単価が決まる</small></h2>
+      <h2 class="card-title">📋 施設基準・届出 <small>— 運動器リハ+加算。算定の土台は「体制」と「届出」</small></h2>
       <div id="kijunBody"></div>
     </div>
 
@@ -253,7 +258,7 @@
     </div>
 
     <div class="card">
-      <h2 class="card-title">📖 外来経営のキホン 15箇条</h2>
+      <h2 class="card-title">📖 外来経営のキホン集(全18条)</h2>
       <div id="textbook"></div>
     </div>
 

@@ -1115,3 +1115,31 @@ input[type="range"]::-moz-range-thumb {
 /* ---------- v13: シェア ---------- */
 
 .share-btn { width: 100%; margin-top: 10px; }
+
+/* ---------- v14: レセプト(算定の学び) ---------- */
+
+.receipt-card { border-left: 4px solid var(--blue); }
+.rcpt-head { font: 700 12.5px/1.5 var(--sans); color: var(--ink); margin-bottom: 4px; }
+.rcpt-head small { color: var(--ink-3); font-weight: 500; }
+.rcpt-row {
+  display: flex;
+  justify-content: space-between;
+  font: 500 12px/1.7 var(--sans);
+  color: var(--ink-2);
+  padding: 1.5px 0;
+  border-bottom: 1px dotted var(--line);
+}
+.rcpt-row b { font-family: var(--en); font-weight: 700; color: var(--blue-deep); }
+.rcpt-row.total { border-top: 1.5px solid var(--line); border-bottom: none; margin-top: 3px; padding-top: 5px; font-weight: 800; color: var(--ink); }
+.rcpt-row.total b { color: var(--green-deep); font-size: 14px; }
+.rcpt-note { font: 500 10px/1.6 var(--sans); color: var(--ink-3); margin-top: 6px; }
+.kasan-ten { color: var(--green-deep); }
+.rs-learn {
+  background: var(--blue-pale);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: 600 12.5px/1.6 var(--sans);
+  color: var(--ink-2);
+  margin-top: 8px;
+}
+.rs-learn small { font-weight: 500; color: var(--ink-3); }
