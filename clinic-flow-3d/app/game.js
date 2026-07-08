@@ -15,6 +15,63 @@
   // 期待値xを整数化(端数は確率で切り上げ)
   const frac = (x) => Math.floor(x) + (Math.random() < x % 1 ? 1 : 0);
 
+  /* ================= 効果音(WebAudio合成・ミュート可) ================= */
+
+  const SND = (() => {
+    let ctx = null;
+    function ac() {
+      if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ctx = null; } }
+      return ctx;
+    }
+    document.addEventListener('pointerdown', () => { const c = ac(); if (c && c.state === 'suspended') c.resume(); });
+    function tone(freq, dur, type, gain, delay) {
+      if (!G.sound) return;
+      const c = ac();
+      if (!c || c.state === 'suspended') return;
+      const t0 = c.currentTime + (delay || 0);
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = type || 'sine';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(gain || 0.04, t0);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g).connect(c.destination);
+      o.start(t0);
+      o.stop(t0 + dur + 0.02);
+    }
+    return {
+      cash() { tone(880, 0.09, 'triangle', 0.035); tone(1318, 0.12, 'triangle', 0.028, 0.05); },
+      coin() { tone(988, 0.08, 'triangle', 0.05); tone(1480, 0.14, 'triangle', 0.045, 0.07); },
+      fanfare() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.22, 'triangle', 0.055, i * 0.09)); },
+      day() { tone(392, 0.22, 'sine', 0.045); tone(523, 0.3, 'sine', 0.04, 0.12); },
+      click() { tone(520, 0.05, 'square', 0.02); }
+    };
+  })();
+
+  /* ================= シェア(スコア自慢) ================= */
+
+  function shareScore(text) {
+    const payload = `${text}\n#クリニックタウン3D ${location.href}`;
+    if (navigator.share) {
+      navigator.share({ title: 'クリニックタウン3D', text: payload }).catch(() => {});
+      return;
+    }
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = payload;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast('📋 コピーしました! SNSに貼り付けて自慢してください');
+    } catch (e) { toast('コピーに失敗しました'); }
+  }
+  function shareBtnHtml() { return `<button class="btn-cta ghost share-btn" id="shareBtn">📤 スコアを自慢する</button>`; }
+  function bindShare(text) {
+    const b = $('shareBtn');
+    if (b) b.addEventListener('click', () => shareScore(text));
+  }
+
   /* ================= 定数 ================= */
 
   const RIVAL_REP = 65;
@@ -251,7 +308,7 @@
 
   const G = {
     money: 2000000, rep: 55, aw: 0.30,
-    day: 1, t: 0, speed: 1,
+    day: 1, t: 0, speed: 2,
     billboard: false,
     relations: {}, // key -> {lv, last}
     loans: [],
@@ -277,7 +334,8 @@
     bonds: { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 },
     specialDone: [],
     season: { bestProfit: null, bestMonth: 0, months: 0 },
-    league: { beaten: 0 }
+    league: { beaten: 0 },
+    sound: true
   };
   Object.keys(REL_DEF).forEach((k) => { G.relations[k] = { lv: 0, last: 0 }; });
 
@@ -328,7 +386,7 @@
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
-          specialDone: G.specialDone, season: G.season, league: G.league
+          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound
         }
       }));
     } catch (e) { /* noop */ }
@@ -360,6 +418,7 @@
       // v8: デイリー・殿堂フィールドの補完
       if (!G.daily) G.daily = { last: '', streak: 0, chDone: '' };
       if (!G.prestige) G.prestige = { count: 0, legacy: null };
+      if (d.g.sound === undefined) G.sound = true;
       // v11-12: スペシャル依頼・月間決算・地域リーグの補完
       if (!G.league) G.league = { beaten: 0 };
       if (!G.specialDone) G.specialDone = [];
@@ -471,6 +530,7 @@
         }
       }
 
+      if (G.speed <= 2 && revenue > 0) SND.cash();
       T.revenue += revenue;
       T.patients++;
       T.waitSum += report.wait; T.waitN++;
@@ -855,10 +915,11 @@
     G.stats.revenue += T.revenue + T.brRevenue;
 
     dailyVoice();
-    if (spec.kind !== 'closed') checkLeague();
     checkMission(T);
     checkAchievements();
     checkDailyChallenge(T);
+    // リーグ称号はミッションより後(同日ならより大きな瞬間を前面に)
+    if (spec.kind !== 'closed') checkLeague();
 
     if (G.day % 7 === 0 && G.history.length >= 8 && spec.kind !== 'closed') weeklyDigest();
     if (G.day % 30 === 0 && G.history.length >= 25) monthlyClose();
@@ -870,6 +931,7 @@
     }
 
     const corpProfit = T.profit + T.brProfit;
+    if (spec.kind !== 'closed' && G.speed <= 2) SND.day();
     const wdName = WEEKDAYS[weekdayOf(G.day)];
     banner(spec.kind === 'closed'
       ? `Day ${G.day}(${wdName}) — 🌙 休診日(固定費 ${yen(Math.abs(corpProfit))})`
@@ -890,7 +952,9 @@
         <div class="pnl-row"><span>年間損益</span><b>${G.cum.profit >= 0 ? '+' : ''}${yen(G.cum.profit)}</b></div>
         <div class="pnl-row"><span>拠点数</span><b>${1 + G.branches.length}</b></div>
         <div class="pnl-row"><span>法人スタッフ</span><b>医師${corpStaff().doctors}・PT${corpStaff().pts}ほか</b></div>
-        <div class="lesson-box"><b>称号: ${title}</b><p>1年間の意思決定、おつかれさまでした。2年目はさらなる高みへ — 経営は続く。</p></div>`, '2年目へ');
+        <div class="lesson-box"><b>称号: ${title}</b><p>1年間の意思決定、おつかれさまでした。2年目はさらなる高みへ — 経営は続く。</p></div>
+        ${shareBtnHtml()}`, '2年目へ');
+      bindShare(`🎊 ${title} 「${G.clinicName}」Day365決算: 年商${yen(G.cum.revenue)}・拠点${1 + G.branches.length}`);
     }
     planDay();
 
@@ -1239,6 +1303,7 @@
       got.push(a);
     }
     if (got.length) {
+      SND.fanfare();
       banner(`🏅 実績解除: ${got.map((a) => `${a.name}(💰${yen(a.coin * 100000)}+🪙${a.coin})`).join(' / ')}`);
       renderAch();
       renderItems();
@@ -1452,6 +1517,7 @@
     G.coins += ch.coin + bonus;
     G.bonds[ch.char] = (G.bonds[ch.char] || 0) + 2 + bonus;
     if (bondLv(ch.char) >= 3 && !(G.specialDone || []).includes(ch.char)) specialRequest(ch.char);
+    SND.coin();
     const name = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : 'スタッフ';
     banner(`🎁 ${name}の依頼クリア${ch.chain ? '(🔗連続依頼!)' : ''} → 🪙+${ch.coin + bonus}・${name}の信頼+${2 + bonus}${G.daily.chain >= 2 ? `(${G.daily.chain}日連続)` : ''}`);
     renderTodo();
@@ -1597,8 +1663,10 @@
       <div class="pnl-row"><span>自己ベスト</span><b>${yen(G.season.bestProfit)}(第${G.season.bestMonth}期)${isBest && G.season.months > 1 ? ' 🏆 記録更新!' : ''}</b></div>
       ${planHtml}
       <div class="pnl-row"><span>成績ボーナス</span><b>${coin ? `🪙+${coin}` : 'なし(黒字着地で🪙+1〜)'}</b></div>
-      <p class="modal-note">📖 評価: S=月間利益300万 / A=100万 / B=黒字。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>`,
+      <p class="modal-note">📖 評価: S=月間利益300万 / A=100万 / B=黒字。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>
+      ${isBest && G.season.months > 1 ? shareBtnHtml() : ''}`,
       '来月へ');
+    if (isBest && G.season.months > 1) bindShare(`📆 「${G.clinicName}」月間利益の自己ベスト更新! ${yen(profit)}(第${G.season.months}期・評価${grade})`);
   }
 
   /* ================= 🏆 地域リーグ判定・表示 ================= */
@@ -1614,12 +1682,15 @@
       if (L.title) {
         G.money += L.reward;
         G.coins += L.coin;
+        SND.fanfare();
         showModal(`🏆 ${L.title}`, `
           <p><b>${L.name}</b>(月商 ${yen(leagueRev(i))})を追い抜き、<b>${L.tier}の頂点</b>に立ちました。</p>
           <div class="pnl-row"><span>あなたの法人月商</span><b>${yen(my)}</b></div>
           <div class="pnl-row"><span>制覇ボーナス</span><b>💰${yen(L.reward)} + 🪙${L.coin}</b></div>
-          <p class="modal-note">📖 上には上がいる — ライバルの月商も成長し続けます。次のステージへ。</p>`,
+          <p class="modal-note">📖 上には上がいる — ライバルの月商も成長し続けます。次のステージへ。</p>
+          ${shareBtnHtml()}`,
           '次の頂点へ');
+        bindShare(`🏆 ${L.title} 「${G.clinicName}」が${L.tier}の頂点に!(Day ${G.day}・法人月商 ${yen(my)})`);
       } else {
         banner(`🏆 ${L.name}(${L.tier})を追い抜きました! 法人月商 ${yen(my)}`);
       }
@@ -1756,6 +1827,7 @@
       case 'nationTop': done = (G.league ? G.league.beaten : 0) >= 10; break;
     }
     if (done) {
+      SND.fanfare();
       G.money += m.reward;
       const md = 1 + Math.floor(G.missionIdx / 5);
       G.coins += md;
@@ -1894,6 +1966,7 @@
     const cost = shopCost(key);
     if (G.money < cost) { toast('資金が足りません'); return; }
     G.money -= cost;
+    SND.click();
     setSettingValue(key, cur + step);
     clinic.applySettings();
     renderShop(); updateHeader(); save();
@@ -2751,15 +2824,11 @@
   /* ================= チュートリアル ================= */
 
   const TUTORIAL = [
-    { tab: null, sel: null, text: 'ようこそ、クリニックタウンへ。あなたはこの街の整形外科クリニックを承継した新オーナーです。<b>目指すは医師4名・PT30名(分院含む)の医療法人</b>。何もしなければ前院長の患者さんは先細りです。' },
-    { tab: null, sel: null, text: 'このゲームの回し方はシンプル。<b>① 1日進める → ② 結果を見る → ③ スタッフの声を聞く → ④ 1つ改善する</b>。1日の終わりに結果画面が出るので、数字の変化を見ながらもう1日 — の繰り返しです。' },
-    { tab: null, sel: '.hud', text: '経営ダッシュボード。<b>資金・評判・認知</b>が経営の体温計。右の<b>⏩1日</b>ボタンで、1日まるごと自動運営スキップもできます。' },
-    { tab: 'clinic', sel: '#clinicStage', text: '院内。患者さんが<b>受付→待合→診察→会計</b>と流れます。どこかが詰まると待ち時間が伸びて評判が下がる — <b>詰まりを見つけて潰す</b>のがあなたの仕事。' },
-    { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。「今日やること」に、いまのミッション・詰まっている場所・打ち手の候補を常に表示します。ボタンを押せばその画面へ飛べます。' },
-    { tab: 'clinic', sel: '#scheduleCard', text: '<b>診療時間は自由に設計</b>。タップで「終日→午前→休診」。半日は人件費6割、日曜開院は手当1.4倍だが競合が休みで新患1.3倍 — コマごとの採算で決める。' },
-    { tab: 'clinic', sel: '#shopCard', text: 'スタッフと設備。最初に触れるのは<b>受付と椅子</b>だけ — 経営が進むと(Day 4、Day 8)採用・リハ・大型投資が順次解放されます。まずは目の前の回転づくりから。' },
-    { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式。<b>売上 = 患者数 × 単価</b>。すべての打ち手はどちらか(または両方)を動かします。「今日の一手はどちらを動かしたか?」を毎日問う。' },
-    { tab: 'mgmt', sel: '#missionCard', text: 'ミッションが経営カリキュラム(全19)。市→県→地方→全国の「地域リーグ」制覇まで続きます。まずは<b>「初日の診療を完了する」</b>から。健闘を祈ります!' }
+    { tab: null, sel: null, text: 'ようこそ! あなたは整形外科クリニックの新オーナー。<b>①1日進める → ②結果を見る → ③1つ改善する</b> — これだけで街いちばん、やがて<b>全国いちばんの医療法人</b>を目指せます。' },
+    { tab: null, sel: '.hud', text: '<b>資金・評判・認知</b>が経営の体温計。右の <b>⏩1日</b> で1日まるごとスキップもOK。まずは今日1日、患者さんの流れを眺めてみましょう。' },
+    { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。「今日やること」にミッション・スタッフからの依頼・詰まりの診断と打ち手が常に出ています。ボタンでその画面へ飛べます。' },
+    { tab: 'clinic', sel: '#shopCard', text: '最初に触れるのは<b>受付と椅子</b>。Day 4、Day 8と進むごとに採用・リハ・大型投資・分院…と打ち手がどんどん解放されます。' },
+    { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。それでは初日の診療、スタートです!' }
   ];
   let tutIdx = -1;
 
@@ -3146,6 +3215,12 @@
   if (G.tutorialDone && !$('modal').classList.contains('show')) checkDailyLogin();
   renderPrestige();
   updateSpeedButtons();
+  const sb = $('soundBtn');
+  if (sb) {
+    const paint = () => { sb.textContent = G.sound ? '🔊' : '🔇'; sb.title = G.sound ? '効果音ON' : '効果音OFF'; };
+    paint();
+    sb.addEventListener('click', () => { G.sound = !G.sound; paint(); if (G.sound) SND.coin(); save(); });
+  }
   if (G.speedRefund) {
     banner(`⏩ 倍速が時間制パスになりました — 旧・買い切り分は 🪙${G.speedRefund} を返金済みです`);
     delete G.speedRefund;

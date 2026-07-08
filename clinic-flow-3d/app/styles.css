@@ -1111,3 +1111,7 @@ input[type="range"]::-moz-range-thumb {
 .lg-rev { font: 700 11px/1.4 var(--en); color: var(--ink-2); white-space: nowrap; }
 .lg-check { font: 700 10.5px/1.4 var(--sans); color: var(--green-deep); font-style: normal; white-space: nowrap; }
 .lg-gap { font: 800 11px/1.4 var(--sans); color: var(--amber); margin-left: 6px; }
+
+/* ---------- v13: シェア ---------- */
+
+.share-btn { width: 100%; margin-top: 10px; }

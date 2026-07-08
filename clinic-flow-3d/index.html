@@ -10,6 +10,12 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/clinic-flow-3d/">
 <meta name="theme-color" content="#EAF4F8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="クリニックタウン">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -25,6 +31,7 @@
       <h1 class="title">クリニックタウン3D</h1>
     </div>
     <div class="head-btns">
+      <button class="icon-btn" id="soundBtn" title="効果音">🔊</button>
       <button class="icon-btn" id="helpBtn" title="チュートリアル">❓</button>
       <button class="icon-btn" id="resetBtn" title="はじめから">🔄</button>
     </div>
@@ -38,8 +45,8 @@
     <div class="hud-item hud-time"><b id="hDay">Day 1</b><span id="hClock">9:00</span></div>
     <div class="speed-group" role="group" aria-label="再生速度">
       <button class="speed-btn" data-speed="0">⏸</button>
-      <button class="speed-btn on" data-speed="1">×1</button>
-      <button class="speed-btn" data-speed="2">×2</button>
+      <button class="speed-btn" data-speed="1">×1</button>
+      <button class="speed-btn on" data-speed="2">×2</button>
       <button class="speed-btn" data-speed="4">×4</button>
       <button class="speed-btn" data-speed="8">×8</button>
       <button class="speed-btn" data-speed="16">×16</button>
@@ -284,6 +291,11 @@
 <script src="app/town.js"></script>
 <script src="app/staff.js"></script>
 <script src="app/game.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
 
 </body>
 </html>

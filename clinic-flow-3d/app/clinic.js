@@ -564,6 +564,9 @@ const CLINIC = (() => {
         this.patients.splice(this.patients.indexOf(pp), 1);
       });
       const stay = this.t - p.arrivedAt;
+      // 退院時の感情(体験の見える化): 待ちが短ければ笑顔、長ければ不満
+      if (p.waitTotal <= 18) this.floats.push({ x: p.x, y: p.y - 0.6, text: '😊', t: 0 });
+      else if (p.waitTotal > 45) this.floats.push({ x: p.x, y: p.y - 0.6, text: '💢', t: 0 });
       const report = { type: p.type, items: p.items, didReha: p.didReha, wait: p.waitTotal, stay, viaKiosk, seg: p.seg };
       if (this.hooks.onDischarge) {
         const revenue = this.hooks.onDischarge(p, report);
@@ -672,6 +675,18 @@ const CLINIC = (() => {
       }
       items.sort((a, b) => a.depth - b.depth);
       items.forEach((it) => it.draw());
+
+      // 感情バブル: 30分以上待っている患者はもやもや、55分以上で怒り
+      ctx.textAlign = 'center';
+      for (const p of this.patients) {
+        const waiting = p.phase === 'recepQ' || p.phase === 'waitExam' || p.phase === 'waitTreat' || p.phase === 'waitReha' || p.phase === 'cashQ';
+        if (!waiting || p.waitTotal <= 30) continue;
+        const pt = iso.p(p.x + 0.5, p.y + 0.3, 1.1);
+        ctx.font = `${Math.max(10, iso.tw * 0.26)}px sans-serif`;
+        ctx.globalAlpha = 0.92;
+        ctx.fillText(p.waitTotal > 55 ? '💢' : '😮‍💨', pt.x, pt.y + Math.sin(iso.time / 320 + p.id) * 2);
+        ctx.globalAlpha = 1;
+      }
 
       for (const z of L.ZONES) {
         if (!z.need(s)) continue;
