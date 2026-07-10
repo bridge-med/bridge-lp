@@ -209,6 +209,8 @@ const STAFF_UI = (() => {
           text: (c) => `赤字の主因は人件費率${Math.round(c.labor * 100)}%です。人を増やす前に、今の人員で単価を上げる打ち手(注射・リハ・基準)を。` },
         { id: 'a_unit', prio: 68, cond: (c) => c.h && c.h.patients >= 25 && c.h.revenue / c.h.patients < 3000,
           text: (c) => `患者数は付いてきました。単価${Math.round(c.h.revenue / c.h.patients).toLocaleString()}円は伸びしろです。次は“数を増やす投資”より“単価を上げる投資”を。` },
+        { id: 'a_hosp', prio: 47, cond: (c) => c.G.league && c.G.league.beaten >= 7 && !c.G.hospital,
+          text: () => `県の頂点に立ちました。次のステージは病院です — 回復期リハ病棟(入院料2,229点/日×病床)は外来とは別次元の算定の世界。法人タブで建設条件を確認してみてください。` },
         { id: 'a_newlow', prio: 58, cond: (c) => c.h && c.h.newCount <= 3 && c.G.aw < 0.45,
           text: (c) => `新患${c.h.newCount}人は少ないですね。認知${Math.round(c.G.aw * 100)}%が原因です。広告か看板、または商店街への顔出しを。` },
         { id: 'a_black', prio: 24, cond: (c) => c.profit > 150000,

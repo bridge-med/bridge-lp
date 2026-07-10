@@ -125,6 +125,13 @@
   const EXPAND2_COST = 20000000;
   const MRI_COST = 18000000;
   const DEXA_COST = 2500000;
+  const ECHO_COST = 2500000;
+  // グループ病院(回復期リハ病棟を核とした地域の受け皿)
+  const HOSP_BUILD_COST = 200000000;
+  const HOSP_EXPAND_COST = 150000000;
+  const HOSP_NAIKA_COST = 30000000;
+  const HOSP_OPE_COST = 50000000;
+  const WARD_FEE = 22290; // 回復期リハビリテーション病棟入院料1: 2,229点/日
   const PRP_CERT_COST = 500000;
 
   const KEYWORDS = [
@@ -203,6 +210,8 @@
       lesson: '県レベルの競争は採用力の勝負。診療の質は「人が辞めない仕組み」でしか維持できない。' },
     { id: 'regionTop', title: '地方でいちばんの医療グループになる', reward: 3000000,
       lesson: 'ここまで来ると経営は「資本配分」の仕事。どの拠点に投資し、どこを守り、どこを畳むか。' },
+    { id: 'hospital', title: 'グループ病院を開設する(回復期リハ病棟)', reward: 5000000,
+      lesson: '外来は「来た日」だけの売上、入院は「病床が埋まっている毎日」が売上。回復期リハ病棟入院料1(2,229点/日)×稼働率 — 病院経営は配置基準(PT・看護)と稼働率のゲーム。' },
     { id: 'nationTop', title: '全国いちばんの医療法人になる', reward: 5000000,
       lesson: '頂点の景色。患者に選ばれ続ける組織だけがこの位置に立てる — 次は現実で。' }
   ];
@@ -251,7 +260,9 @@
     { id: 'lg_city', name: '市いちばん', coin: 4, cond: () => (G.league ? G.league.beaten : 0) >= 4 },
     { id: 'lg_pref', name: '県いちばん', coin: 6, cond: () => (G.league ? G.league.beaten : 0) >= 7 },
     { id: 'lg_region', name: '地方いちばん', coin: 8, cond: () => (G.league ? G.league.beaten : 0) >= 9 },
-    { id: 'lg_nation', name: '全国いちばん', coin: 12, cond: () => (G.league ? G.league.beaten : 0) >= 10 }
+    { id: 'lg_nation', name: '全国いちばん', coin: 12, cond: () => (G.league ? G.league.beaten : 0) >= 10 },
+    { id: 'hosp', name: 'グループ病院を開設', coin: 6, cond: () => !!G.hospital },
+    { id: 'ward100', name: '回復期リハ病棟 100床稼働', coin: 8, cond: () => !!(G.hospital && G.hospital.last && G.hospital.last.occupied >= 100) }
   ];
 
   const TEXTBOOK = [
@@ -272,7 +283,8 @@
     { t: '⑮ 自費は価値設計から', b: 'PRPもAGAも「保険でできないこと」への対価。価格は原価ではなく価値と価格弾力性で決める。評判が低いうちは売れない — 保険診療の信頼が自費の土台。' },
     { t: '⑯ 外来管理加算のトレードオフ', b: '再診で処置・注射・リハ・物療を何もしなければ外来管理加算(52点)が付く。注射をすれば加算は消えるが注射料+薬剤が入る — 「何もしない」にも値段が付いている構造を理解して、医学的必要性で選ぶ。' },
     { t: '⑰ 客層(セグメント)から逆算する', b: '高齢者=リハ・骨粗鬆症・定着率◎。勤労者=健診・AGA・土日夜間。スポーツ=外傷・MRI・PRP・単価◎。チャネル(ケアマネ/企業/クラブ/学校)ごとに来る客層は違う — 「誰に来てほしいか」から営業先と広告を選ぶ。' },
-    { t: '⑱ 1点=10円、加算は「仕組み」で積む', b: '保険診療の価格は点数制(1点=10円)で全国一律 — だから勝負は「何を適切に算定できる体制か」。明細書発行体制等加算(1点)・時間外対応加算(1〜5点)・外来後発医薬品使用体制加算(8点)は、届出と体制づくりだけで再診や処方のたびに積み上がる。月1,000再診なら1点=月1万円。' }
+    { t: '⑱ 1点=10円、加算は「仕組み」で積む', b: '保険診療の価格は点数制(1点=10円)で全国一律 — だから勝負は「何を適切に算定できる体制か」。明細書発行体制等加算(1点)・時間外対応加算(1〜5点)・外来後発医薬品使用体制加算(8点)は、届出と体制づくりだけで再診や処方のたびに積み上がる。月1,000再診なら1点=月1万円。' },
+    { t: '⑲ 外来と入院は別のゲーム', b: '外来の売上は「患者が来た日」だけ。入院は「病床が埋まっている毎日」が売上になる(回復期リハ病棟入院料1=2,229点/日×稼働病床)。そのかわり配置基準(PT・看護師の人数)を割れば病床は使えない — 入院経営は採用・定着・稼働率の三位一体。' }
   ];
 
   // KPI定義(選んでピン留めできる)
@@ -301,7 +313,7 @@
     chairs: 6, beds: 1, machines: 0, physio: 0,
     kiosk: false, reserve: false, reviewCare: false, webIntake: false,
     kasanMeisai: false, kasanJikangai: 0, kasanKohatsu: false,
-    mri: false, dexa: false,
+    mri: false, dexa: false, echo: false,
     rehaLevel: 0,
     examMean: 6, pTreat: 0.15, pReha: 0.35, pInj: 0.2, pTrig: 0.12, pPhysio: 0.35,
     selfReha: false, selfRehaPrice: 8000, goods: false,
@@ -338,7 +350,8 @@
     specialDone: [],
     season: { bestProfit: null, bestMonth: 0, months: 0 },
     league: { beaten: 0 },
-    sound: true
+    sound: true,
+    hospital: null
   };
   Object.keys(REL_DEF).forEach((k) => { G.relations[k] = { lv: 0, last: 0 }; });
 
@@ -389,7 +402,7 @@
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
-          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound
+          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, hospital: G.hospital
         }
       }));
     } catch (e) { /* noop */ }
@@ -422,6 +435,7 @@
       if (!G.daily) G.daily = { last: '', streak: 0, chDone: '' };
       if (!G.prestige) G.prestige = { count: 0, legacy: null };
       if (d.g.sound === undefined) G.sound = true;
+      if (d.g.hospital === undefined) G.hospital = null;
       // v11-12: スペシャル依頼・月間決算・地域リーグの補完
       if (!G.league) G.league = { beaten: 0 };
       if (!G.specialDone) G.specialDone = [];
@@ -482,14 +496,29 @@
       if (report.type === 'checkup') { revenue += FEES.checkup; T.rev.checkup += FEES.checkup; rc.push({ n: '健康診断(保険外)', y: FEES.checkup }); }
 
       for (const it of report.items) {
-        if (it === 'treat') { revenue += FEES.treat; T.rev.treat += FEES.treat; T.treatCount++; didProcedure = true; rc.push({ n: '処置(創傷・固定等)', t: 150 }); }
+        if (it === 'treat') {
+          // 3割はシーネ・ギプス固定(整形らしい高点数処置)
+          if (Math.random() < 0.3) { revenue += 4900; T.rev.treat += 4900; rc.push({ n: 'シーネ・ギプス固定(四肢)', t: 490 }); }
+          else { revenue += FEES.treat; T.rev.treat += FEES.treat; rc.push({ n: '創傷処置・消炎処置', t: 150 }); }
+          T.treatCount++; didProcedure = true;
+        }
         if (it === 'inj') { revenue += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; didProcedure = true; rc.push({ n: '関節腔内注射+薬剤', t: 180 }); }
-        if (it === 'trig') { revenue += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; didProcedure = true; rc.push({ n: 'トリガーポイント注射+薬剤', t: 120 }); }
+        if (it === 'trig') {
+          // 25%は神経ブロック(硬膜外等)へステップアップ
+          if (Math.random() < 0.25) { revenue += 4000; T.rev.inj += 4000; rc.push({ n: '神経ブロック(硬膜外等)+薬剤', t: 400 }); }
+          else { revenue += FEES.trig; T.rev.inj += FEES.trig; rc.push({ n: 'トリガーポイント注射+薬剤', t: 120 }); }
+          T.trigCount++; didProcedure = true;
+        }
         if (it === 'reha') {
           const f = REHA_FEE[settings.rehaLevel];
           revenue += f; T.rev.reha += f; T.rehaCount++; didProcedure = true;
           rc.push({ n: `${REHA_NAMES[settings.rehaLevel]} ${[0, 85, 170, 185][settings.rehaLevel]}点×2単位`, t: f / 10 });
         }
+      }
+      // リハ開始時: リハビリテーション総合計画評価料(計画に基づくリハの証明)
+      if (report.didReha && report.type !== 'rehab') {
+        revenue += 3000; T.rev.reha += 3000;
+        rc.push({ n: 'リハビリテーション総合計画評価料', t: 300 });
       }
 
       // 物療(消炎鎮痛等処置): 機器があれば高回転で回る(故障イベント時は停止)
@@ -525,6 +554,11 @@
       if ((report.type === 'first' && Math.random() < 0.7) || (report.type === 'revisit' && Math.random() < 0.08)) {
         revenue += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++;
         rc.push({ n: '単純X線撮影+画像診断', t: 150 });
+      }
+      // 運動器エコー: 装置があれば初診の精査で高頻度に(いまの整形の単価トレンド)
+      if (settings.echo && report.type === 'first' && Math.random() < (seg === 'sports' ? 0.45 : 0.3)) {
+        revenue += 3500; T.rev.img += 3500;
+        rc.push({ n: '超音波検査(運動器エコー)', t: 350 });
       }
       const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
       if (settings.mri && T.mriCount < 8 && (report.type === 'first' || p.refer) && Math.random() < 0.3 * mriMul) {
@@ -806,6 +840,31 @@
     return { revenue, cost, profit };
   }
 
+  // 病院(マクロ): 入院は「病床が埋まっている毎日」が売上。配置基準がそのまま稼働上限になる
+  function hospitalDay(spec) {
+    const h = G.hospital;
+    const capPT = h.hospPTs * 6;      // PT 1人あたり6床(リハ提供体制)
+    const capNurse = h.wardNurses * 5; // 病棟看護 1人あたり5床(看護配置)
+    const usable = Math.max(0, Math.min(h.beds, capPT, capNurse));
+    const demand = clamp(0.55 + h.rep / 250 + G.branches.length * 0.015 + relLv('hospital') * 0.02, 0.5, 0.95);
+    const occupied = Math.round(usable * demand);
+    const wardRev = occupied * WARD_FEE;
+    // 外来は診療日のみ。病棟は年中無休(休診日も人件費85%はかかる)
+    const orthoV = Math.round((20 + h.orthoDocs * 18) * spec.arr * (0.9 + Math.random() * 0.2));
+    const orthoRev = orthoV * 5000;
+    const naikaV = h.naika ? Math.round((15 + h.internists * 25) * spec.arr * (0.9 + Math.random() * 0.2)) : 0;
+    const naikaRev = naikaV * 3500;
+    const opeN = h.ope ? frac(h.surgeons * 0.45 * spec.arr) : 0;
+    const opeRev = opeN * 750000;
+    const revenue = Math.round(wardRev + orthoRev + naikaRev + opeRev);
+    const staffCost = Math.round(((h.orthoDocs + h.internists + h.surgeons) * 120000 + h.hospPTs * 16000 + h.wardNurses * 18000) * Math.max(spec.pay, 0.85));
+    const cost = Math.round(staffCost + 500000 + occupied * 2000);
+    const profit = revenue - cost;
+    h.rep = clamp(h.rep + ((usable >= h.beds * 0.8 ? 64 : 46) + demand * 38 - h.rep) * 0.02, 30, 95);
+    h.last = { occupied, usable, demand, wardRev, orthoV, orthoRev, naikaV, naikaRev, opeN, opeRev, revenue, cost, profit, staffCost };
+    return { revenue, cost, profit };
+  }
+
   function corpStaff() {
     const total = { doctors: settings.doctors, nurses: settings.nurses, pts: settings.pts, receptionists: settings.receptionists };
     for (const br of G.branches) for (const k of Object.keys(total)) total[k] += br.staff[k];
@@ -885,6 +944,11 @@
 
     for (const br of G.branches) {
       const r = branchDay(br, spec);
+      T.brRevenue += r.revenue;
+      T.brProfit += r.profit;
+    }
+    if (G.hospital) {
+      const r = hospitalDay(spec);
       T.brRevenue += r.revenue;
       T.brProfit += r.profit;
     }
@@ -1890,6 +1954,7 @@
       case 'cityTop': done = (G.league ? G.league.beaten : 0) >= 4; break;
       case 'prefTop': done = (G.league ? G.league.beaten : 0) >= 7; break;
       case 'regionTop': done = (G.league ? G.league.beaten : 0) >= 9; break;
+      case 'hospital': done = !!G.hospital; break;
       case 'nationTop': done = (G.league ? G.league.beaten : 0) >= 10; break;
     }
     if (done) {
@@ -2095,8 +2160,14 @@
       </div>
       <div class="shop-row ${settings.dexa ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🦴 骨密度測定装置(DEXA)${settings.dexa ? ' 導入済み' : ''}</span>
-        <span class="shop-hint">骨粗鬆症の継続診療プログラム(1受診¥3,800)。初診の一部が定期通院に</span></div>
+        <span class="shop-hint">骨塩定量検査(DEXA法)360点+管理で1受診¥3,800。初診の一部が骨粗鬆症の定期通院に</span></div>
         ${settings.dexa ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="dexaBtn">🦴 ${yen(DEXA_COST)}</button></div>`}
+      </div>
+      <div class="shop-row ${settings.echo ? 'expand-row done' : 'expand-row'}">
+        <div class="shop-info"><span class="shop-name">📡 超音波診断装置(運動器エコー)${settings.echo ? ' 導入済み' : ''}</span>
+        <span class="shop-hint">超音波検査(運動器)350点。初診の約3割(スポーツ層4.5割)で算定。いまの整形の単価トレンド</span>
+        ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('doctor', 'normal', 17)} 剣持「エコーは診断の質も説明力も上がる。導入するなら使い倒す」</span>` : ''}</div>
+        ${settings.echo ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="echoBtn">📡 ${yen(ECHO_COST)}</button></div>`}
       </div>
       ${settings.floorLv === 1
         ? `<div class="shop-row expand-row">
@@ -2139,6 +2210,15 @@
       G.money -= MRI_COST;
       settings.mri = true;
       toast('🧲 MRI導入! 初診・紹介患者の精査で稼働します');
+      renderShop(); updateHeader(); save();
+    });
+    const echoB = $('echoBtn');
+    if (echoB) echoB.addEventListener('click', () => {
+      if (G.money < ECHO_COST) { toast(`資金が足りません(${yen(ECHO_COST)})`); return; }
+      G.money -= ECHO_COST;
+      settings.echo = true;
+      SND.click();
+      toast('📡 運動器エコー導入! 初診の精査で算定されます(350点)');
       renderShop(); updateHeader(); save();
     });
     const dexaB = $('dexaBtn');
@@ -2506,7 +2586,49 @@
         </div>`;
       }).join('')}`;
 
-    el.innerHTML = summary + (brCards || '<p class="plan-lead">まだ分院はありません。本院を軌道に乗せてから(評判70+事業計画+資金)。<b>施設基準の専従要件は分院ごと</b> — PT採用が本当の壁です。</p>') + openSection;
+    const h = G.hospital;
+    let hospSection;
+    if (!h) {
+      const canHosp = (G.league ? G.league.beaten : 0) >= 7 && G.plan && G.money >= HOSP_BUILD_COST;
+      hospSection = `
+      <h3 class="sub-title">🏥 グループ病院を建てる — 町のクリニックから、全国規模の医療グループへ</h3>
+      <p class="plan-lead">外来の売上は「来た日」だけ。入院は<b>「病床が埋まっている毎日」</b>が売上 — 回復期リハ病棟入院料1(<b>2,229点/日×病床</b>)という別次元の算定の世界です。</p>
+      <div class="pnl-row"><span>条件① 県リーグ制覇</span><b>${(G.league ? G.league.beaten : 0) >= 7 ? '✅' : `❌(現在 ${G.league ? G.league.beaten : 0}/7)`}</b></div>
+      <div class="pnl-row"><span>条件② 事業計画の策定</span><b>${G.plan ? '✅' : '❌'}</b></div>
+      <div class="pnl-row"><span>条件③ 建設資金(回復期リハ病棟60床)</span><b>${yen(HOSP_BUILD_COST)}</b></div>
+      <button class="btn-cta ${canHosp ? '' : 'ghost'}" id="hospBuild" ${canHosp ? '' : 'disabled'}>🏥 病院を建設する ${yen(HOSP_BUILD_COST)}</button>`;
+    } else {
+      const L = h.last;
+      hospSection = `
+      <h3 class="sub-title">🏥 ${escapeHtml(G.clinicName)} グループ病院 <small>— 回復期リハ病棟 ${h.beds}床${h.naika ? '・内科' : ''}${h.ope ? '・手術センター' : ''}</small></h3>
+      ${L ? `
+      <div class="pnl-row"><span>回復期リハ病棟入院料1(2,229点/日 × ${L.occupied}床稼働)</span><b>${yen(L.wardRev)}</b></div>
+      <div class="pnl-row"><span>整形外来(${L.orthoV}人)</span><b>${yen(L.orthoRev)}</b></div>
+      ${h.naika ? `<div class="pnl-row"><span>内科外来(${L.naikaV}人)</span><b>${yen(L.naikaRev)}</b></div>` : ''}
+      ${h.ope ? `<div class="pnl-row"><span>手術(人工関節・骨接合等 ${L.opeN}件)</span><b>${yen(L.opeRev)}</b></div>` : ''}
+      <div class="pnl-row"><span>人件費・固定費・変動費</span><b>−${yen(L.cost)}</b></div>
+      <div class="pnl-row total ${L.profit >= 0 ? 'pos' : 'neg'}"><span>昨日の病院損益</span><b>${L.profit >= 0 ? '+' : ''}${yen(L.profit)}</b></div>
+      <p class="pnl-note">稼働上限 ${L.usable}床 = min(病床${h.beds}, PT${h.hospPTs}×6床, 病棟看護${h.wardNurses}×5床) × 需要${Math.round(L.demand * 100)}%。<b>配置基準がそのまま売上上限</b>。入院は休診日も動き続けます(人件費85%)</p>` : '<p class="plan-lead">開院準備中 — 明日から稼働します。</p>'}
+      <div class="branch-staff">
+        <div class="plan-step"><span>病棟看護師 <small>1人=5床・日給¥18,000</small></span>
+          <div><button class="mini-btn" data-hfire="wardNurses">−</button><b>${h.wardNurses}</b><button class="mini-btn plus" data-hhire="wardNurses">＋ ${yen(150000)}</button></div></div>
+        <div class="plan-step"><span>病院PT <small>1人=6床・日給¥16,000</small></span>
+          <div><button class="mini-btn" data-hfire="hospPTs">−</button><b>${h.hospPTs}</b><button class="mini-btn plus" data-hhire="hospPTs">＋ ${yen(250000)}</button></div></div>
+        <div class="plan-step"><span>整形外科医(勤務医) <small>日給¥120,000</small></span>
+          <div><button class="mini-btn" data-hfire="orthoDocs">−</button><b>${h.orthoDocs}</b><button class="mini-btn plus" data-hhire="orthoDocs">＋ ${yen(1500000)}</button></div></div>
+        ${h.naika ? `<div class="plan-step"><span>内科医 <small>日給¥120,000</small></span>
+          <div><button class="mini-btn" data-hfire="internists">−</button><b>${h.internists}</b><button class="mini-btn plus" data-hhire="internists">＋ ${yen(1500000)}</button></div></div>` : ''}
+        ${h.ope ? `<div class="plan-step"><span>外科医(手術) <small>日給¥120,000・週約3件/人</small></span>
+          <div><button class="mini-btn" data-hfire="surgeons">−</button><b>${h.surgeons}</b><button class="mini-btn plus" data-hhire="surgeons">＋ ${yen(2000000)}</button></div></div>` : ''}
+      </div>
+      <div class="op-row">
+        ${h.beds < 120 ? `<button class="op-btn" data-hexpand="1">🏗 増床 60→120床 <small>${yen(HOSP_EXPAND_COST)}</small></button>` : ''}
+        ${!h.naika ? `<button class="op-btn" data-hnaika="1">🩺 内科を開設 <small>${yen(HOSP_NAIKA_COST)}・診療科が広がる</small></button>` : ''}
+        ${!h.ope ? `<button class="op-btn" data-hope="1">🔪 手術センター <small>${yen(HOSP_OPE_COST)}・人工関節等</small></button>` : ''}
+      </div>`;
+    }
+
+    el.innerHTML = summary + (brCards || '<p class="plan-lead">まだ分院はありません。本院を軌道に乗せてから(評判70+事業計画+資金)。<b>施設基準の専従要件は分院ごと</b> — PT採用が本当の壁です。</p>') + openSection + hospSection;
 
     el.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => {
       const cost = Number(b.dataset.opencost);
@@ -2619,6 +2741,70 @@
       toast(`✅ ${br.name}: ${REHA_NAMES[lv]}を届け出ました`);
       renderCorp(); save();
     }));
+
+    // 病院の操作
+    const hb = $('hospBuild');
+    if (hb) hb.addEventListener('click', () => {
+      if ((G.league ? G.league.beaten : 0) < 7 || !G.plan || G.money < HOSP_BUILD_COST) return;
+      G.money -= HOSP_BUILD_COST;
+      G.hospital = {
+        openedDay: G.day, beds: 60, wardNurses: 12, hospPTs: 10,
+        orthoDocs: 2, internists: 0, surgeons: 0, naika: false, ope: false,
+        rep: 60, last: null
+      };
+      SND.fanfare();
+      showModal('🏥 グループ病院、開院!', `
+        <p>回復期リハ病棟 <b>60床</b> の病院が開院しました。クリニック群で外来を受け、病院で入院リハを受ける — <b>地域完結型のグループ</b>の完成形へ。</p>
+        <div class="pnl-row"><span>回復期リハ病棟入院料1</span><b>2,229点/日 × 稼働病床</b></div>
+        <div class="pnl-row"><span>稼働の上限</span><b>min(病床, PT×6床, 病棟看護×5床)</b></div>
+        <p class="modal-note">📖 外来は「来た日」だけの売上、入院は「埋まっている毎日」が売上。そのかわり配置基準(人)を守れなければ病床は使えない — 病院経営は採用と稼働率のゲーム。</p>`,
+        '病院経営へ');
+      renderCorp(); updateHeader(); save();
+    });
+    const HIRE_COST = { wardNurses: 150000, hospPTs: 250000, orthoDocs: 1500000, internists: 1500000, surgeons: 2000000 };
+    const HMAX = { wardNurses: 40, hospPTs: 30, orthoDocs: 8, internists: 6, surgeons: 6 };
+    const HMIN = { wardNurses: 4, hospPTs: 2, orthoDocs: 1, internists: 0, surgeons: 0 };
+    el.querySelectorAll('[data-hhire]').forEach((b) => b.addEventListener('click', () => {
+      const k = b.dataset.hhire;
+      if (G.hospital[k] >= HMAX[k]) { toast('これ以上は増やせません'); return; }
+      if (G.money < HIRE_COST[k]) { toast('資金が足りません'); return; }
+      G.money -= HIRE_COST[k];
+      G.hospital[k]++;
+      SND.click();
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-hfire]').forEach((b) => b.addEventListener('click', () => {
+      const k = b.dataset.hfire;
+      if (G.hospital[k] <= HMIN[k]) { toast('これ以上は減らせません'); return; }
+      G.hospital[k]--;
+      renderCorp(); save();
+    }));
+    const hx = el.querySelector('[data-hexpand]');
+    if (hx) hx.addEventListener('click', () => {
+      if (G.money < HOSP_EXPAND_COST) { toast(`資金が足りません(${yen(HOSP_EXPAND_COST)})`); return; }
+      G.money -= HOSP_EXPAND_COST;
+      G.hospital.beds = 120;
+      toast('🏗 増床! 回復期リハ病棟120床 — 配置(PT・看護)も忘れずに');
+      renderCorp(); updateHeader(); save();
+    });
+    const hn = el.querySelector('[data-hnaika]');
+    if (hn) hn.addEventListener('click', () => {
+      if (G.money < HOSP_NAIKA_COST) { toast(`資金が足りません(${yen(HOSP_NAIKA_COST)})`); return; }
+      G.money -= HOSP_NAIKA_COST;
+      G.hospital.naika = true;
+      G.hospital.internists = Math.max(1, G.hospital.internists);
+      toast('🩺 内科を開設! 整形以外の診療科で外来の裾野が広がります');
+      renderCorp(); updateHeader(); save();
+    });
+    const ho = el.querySelector('[data-hope]');
+    if (ho) ho.addEventListener('click', () => {
+      if (G.money < HOSP_OPE_COST) { toast(`資金が足りません(${yen(HOSP_OPE_COST)})`); return; }
+      G.money -= HOSP_OPE_COST;
+      G.hospital.ope = true;
+      G.hospital.surgeons = Math.max(1, G.hospital.surgeons);
+      toast('🔪 手術センター開設! 人工関節・骨接合の手術が回り始めます');
+      renderCorp(); updateHeader(); save();
+    });
   }
 
   /* ================= UI: 経営タブ(P&L・基準・銀行) ================= */
@@ -3135,7 +3321,10 @@
         else { rev += FEES.revisit; T.rev.consult += FEES.revisit; }
         if (a.type !== 'checkup') {
           if (Math.random() < settings.pInj) { rev += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; proc = true; }
-          if (Math.random() < settings.pTrig) { rev += FEES.trig; T.rev.inj += FEES.trig; T.trigCount++; proc = true; }
+          if (Math.random() < settings.pTrig) {
+            const v = Math.random() < 0.25 ? 4000 : FEES.trig;
+            rev += v; T.rev.inj += v; T.trigCount++; proc = true;
+          }
           if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; }
           const segMul = { senior: 1.2, sports: 1.45, worker: 0.75 }[seg] || 1;
           const wantReha = a.type === 'rehab' || (settings.rehaLevel > 0 && (a.refer || Math.random() < settings.pReha * segMul));
@@ -3144,7 +3333,8 @@
             const fr = REHA_FEE[settings.rehaLevel];
             rev += fr; T.rev.reha += fr; T.rehaCount++;
           } else if (clinic.usableBeds() > 0 && Math.random() < settings.pTreat) {
-            rev += FEES.treat; T.rev.treat += FEES.treat; T.treatCount++; proc = true;
+            const v = Math.random() < 0.3 ? 4900 : FEES.treat;
+            rev += v; T.rev.treat += v; T.treatCount++; proc = true;
           }
         }
         if ((a.type === 'revisit' || a.type === 'rehab') && !proc) { rev += FEES.kanri; T.rev.consult += FEES.kanri; T.kanriCount++; }
@@ -3157,6 +3347,7 @@
           if (settings.kasanKohatsu) { rev += 80; T.rev.consult += 80; }
         }
         if (a.type === 'first' && Math.random() < 0.7) { rev += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
+        if (settings.echo && a.type === 'first' && Math.random() < (seg === 'sports' ? 0.45 : 0.3)) { rev += 3500; T.rev.img += 3500; }
         const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
         if (settings.mri && T.mriCount < 8 && (a.type === 'first' || a.refer) && Math.random() < 0.3 * mriMul) { rev += FEES.mri; T.rev.img += FEES.mri; T.mriCount++; }
         if (settings.dexa && a.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
@@ -3168,7 +3359,10 @@
         T.revenue += rev;
         const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45;
         if ((a.type === 'first' || a.type === 'revisit') && !didReha && Math.random() < loyalty * 0.85) addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
-        if (didReha && a.type !== 'rehab') for (let k = 1; k <= 8; k++) addSchedule(G.day + Math.ceil(k * 2.5), 'rehab');
+        if (didReha && a.type !== 'rehab') {
+          rev += 3000; T.rev.reha += 3000; // リハ総合計画評価料
+          for (let k = 1; k <= 8; k++) addSchedule(G.day + Math.ceil(k * 2.5), 'rehab');
+        }
         if (a.type === 'rehab' && !didReha) addSchedule(G.day + 1, 'rehab');
       }
       const n = T.patients;
