@@ -115,13 +115,38 @@
       '</div>';
   }
 
+  /* ---- 日本語の改行制御(BudouX)----
+     word-break:auto-phrase はChrome限定のため、Safari等でも
+     文節単位で折り返すよう、テキストに改行機会(ZWSP)を挿入する。 ---- */
+  const BX_SELECTOR = 'h1,h2,h3,p,q,blockquote,.stmt,.pull,.hero-h,.hero-sub,.sec-h,.card-t,.path-t,.way-t,.story-t,.road-t,.tf-t,.tl-t,.mani-line,.mani-final,.closing-h,.princ-jp,.pj .t,.prod-name,.prod-jp,.j-t,.proj-name,.drawer-item .t,.walk-card .t,.story-q,.belief-t,.story-after,.branch-cap,.founder-q,.info-row .v,.pub-t,.pub-m';
+  let bxParser = null;
+  const applyBudoux = (root) => {
+    if (!bxParser) return;
+    (root || document).querySelectorAll(BX_SELECTOR).forEach(el => {
+      if (el.dataset.bx || el.closest('.site-nav')) return;
+      el.dataset.bx = '1';
+      try { bxParser.applyToElement(el); } catch (e) {}
+    });
+  };
+  const bxScript = document.createElement('script');
+  bxScript.src = ROOT + 'shared/budoux-ja.min.js';
+  bxScript.onload = () => {
+    if (!window.budoux) return;
+    bxParser = window.budoux.loadDefaultJapaneseParser();
+    applyBudoux();
+  };
+  document.head.appendChild(bxScript);
+
   /* ---- Reveal(共通) ---- */
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
     }
   }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-  const observeAll = () => document.querySelectorAll('[data-reveal]:not(.on)').forEach(el => io.observe(el));
+  const observeAll = () => {
+    document.querySelectorAll('[data-reveal]:not(.on)').forEach(el => io.observe(el));
+    applyBudoux(); // 動的描画されたカード等にも文節改行を適用
+  };
   observeAll();
-  window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll };
+  window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll, applyBudoux: applyBudoux };
 })();
