@@ -3509,6 +3509,13 @@
     paint();
     sb.addEventListener('click', () => { G.sound = !G.sound; paint(); if (G.sound) SND.coin(); save(); });
   }
+  // 縦持ちスマホに一度だけ横持ちのコックピット表示を案内
+  try {
+    if (window.innerWidth < 900 && window.matchMedia('(orientation: portrait)').matches && !localStorage.getItem('ct3d_rotateHint') && G.tutorialDone) {
+      setTimeout(() => banner('💡 横持ちにすると、院内を見ながら操作できる「コックピット表示」になります'), 7000);
+      localStorage.setItem('ct3d_rotateHint', '1');
+    }
+  } catch (e) { /* noop */ }
   if (G.speedRefund) {
     banner(`⏩ 倍速が時間制パスになりました — 旧・買い切り分は 🪙${G.speedRefund} を返金済みです`);
     delete G.speedRefund;

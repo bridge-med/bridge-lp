@@ -1143,3 +1143,50 @@ input[type="range"]::-moz-range-thumb {
   margin-top: 8px;
 }
 .rs-learn small { font-weight: 500; color: var(--ink-3); }
+
+/* ---------- v16: コックピットレイアウト(横持ち・ワイド画面) ----------
+ * 900px以上: 左に3Dステージを常時表示(スティッキー)、右に操作パネル。
+ * スライダーを動かした瞬間に患者の流れが変わるのを「見ながら」操作できる。 */
+
+@media (min-width: 900px) {
+  .head-inner, .hud, .mission-bar, .tabs, .main { max-width: 1400px; }
+
+  /* ステージのあるタブ(院内・タウン): 2カラムのコックピット */
+  #tab-clinic.show, #tab-town.show {
+    display: grid;
+    grid-template-columns: minmax(380px, 46%) minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  #tab-clinic.show > *, #tab-town.show > * { grid-column: 2; min-width: 0; }
+  #tab-clinic.show > .stage-wrap, #tab-town.show > .stage-wrap {
+    grid-column: 1;
+    grid-row: 1 / span 99;
+    position: sticky;
+    top: 162px;
+    border-radius: var(--radius);
+    border-top: 1px solid var(--line);
+  }
+  /* ステージのない経営タブ: 2カラムのダッシュボード */
+  #tab-mgmt.show {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  #tab-mgmt.show > .note { grid-column: 1 / -1; }
+}
+
+/* 横持ちスマホ(背が低い): ヘッダーを流して遊び場を最大化 */
+@media (min-width: 900px) and (max-height: 540px) {
+  .head { position: static; }
+  .tabs { position: static; }
+  .eyebrow { display: none; }
+  .head { padding-top: 6px; }
+  .hud { margin-top: 4px; }
+  .mission-bar { margin-top: 4px; padding: 5px 12px; }
+  #tab-clinic.show > .stage-wrap, #tab-town.show > .stage-wrap {
+    position: sticky;
+    top: 8px;
+  }
+}
