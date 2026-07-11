@@ -12,7 +12,7 @@
 
   /* ---- サイトマップ(唯一の情報源。ページが増えたらここに足す) ---- */
   const NAV = [
-    { id: 'philosophy', en: 'Philosophy', jp: '思想',        d: 'なぜこの活動をしているのか。いちばん長いページです。', href: 'philosophy/index.html' },
+    { id: 'philosophy', en: 'Philosophy', jp: '考え方',      d: 'BRIDGEが何を大切にし、なぜこの活動をしているのか。', href: 'philosophy/index.html' },
     { id: 'projects',   en: 'Projects',   jp: '活動',        d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html' },
     { id: 'products',   en: 'Products',   jp: 'プロダクト',   d: '実際に使えるもの。すべて公開しています。',             href: 'products/index.html' },
     { id: 'stories',    en: 'Stories',    jp: '物語',        d: '現場で実際にあったことを、一人称で。',                 href: 'stories/index.html' },
