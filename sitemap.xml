@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- メインサイト -->
+  <url><loc>https://bridge-med.github.io/bridge-lp/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/philosophy/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/projects/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/products/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/stories/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/journal/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/research/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/about/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/community/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <!-- プロダクト -->
+  <url><loc>https://bridge-med.github.io/bridge-lp/rehaboard/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/medboard/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/hire-board/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/interview-kit/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/consult-simulator/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/round-note/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/daily-app/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/clinic-flow-3d/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/him-quiz/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/study-board/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/english-trainer/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/turnaround12/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/moyamoya/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/pmi-quest/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/ittan-horyu/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/karte/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/starter-kits/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>
