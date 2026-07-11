@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — 活動 / BRIDGE</title>
+<meta name="description" content="BRIDGEが現在進めている活動。PMI・AI・教育・研究・アプリ開発・発信。ひとつの思想が、いま動いている場所。">
+<meta property="og:title" content="Projects — 活動 / BRIDGE">
+<meta property="og:type" content="website">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/bridge.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F2D44'/%3E%3Cpath d='M12 42 Q32 20 52 42' stroke='%237FB4D9' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='24' r='4' fill='%23D9A441'/%3E%3C/svg%3E">
+<style>
+.road{max-width:var(--max);margin:clamp(52px,8vh,84px) auto 0;display:grid;grid-template-columns:repeat(6,1fr);gap:0;position:relative}
+.road::before{content:'';position:absolute;top:5px;left:0;right:0;height:1px;background:var(--line)}
+.road-step{padding:30px 16px 0 0;position:relative}
+.road-step::before{content:'';position:absolute;top:0;left:0;width:11px;height:11px;border-radius:50%;background:var(--bg-2);border:1.5px solid var(--ink-3)}
+.road-step:last-child::before{border-color:var(--dawn);background:var(--dawn)}
+.road-num{font:600 10px/1 var(--en);letter-spacing:0.18em;color:var(--ink-3);margin-bottom:12px}
+.road-t{font-family:var(--mincho);font-weight:600;font-size:clamp(15px,1.8vw,20px);margin-bottom:4px}
+.road-en{font:500 9px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:10px}
+.road-p{font-size:11.5px;line-height:2;color:var(--ink-2)}
+@media(max-width:900px){
+  .road{grid-template-columns:1fr;padding-left:28px}
+  .road::before{top:0;bottom:0;left:5px;right:auto;width:1px;height:auto}
+  .road-step{padding:0 0 36px 0}
+  .road-step:last-child{padding-bottom:0}
+  .road-step::before{left:-28px;top:8px}
+}
+</style>
+</head>
+<body data-root="../" data-page="projects">
+
+<nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
+
+<header class="page-hero">
+  <div class="page-hero-inner">
+    <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Projects</span></div>
+    <h1 data-reveal data-reveal-delay="1">思想が、動いている場所<span class="period">。</span></h1>
+    <p class="lead" data-reveal data-reveal-delay="2">
+      BRIDGEの活動はばらばらに見えて、すべて同じ問い——「その人の選択肢は、増えたか」——から始まっています。どの活動も、まず自分が最初のユーザーです。
+    </p>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 活動一覧(行を足すだけで拡張できる) ============ -->
+<section class="sec">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Current Activities — 現在の活動</div>
+  </div>
+  <div class="rows" style="margin-top:clamp(44px,6vh,64px)" id="activityRows"></div>
+  <noscript><p style="max-width:660px;margin:40px auto;color:var(--ink-3);font-size:13px">一覧の表示にはJavaScriptが必要です。</p></noscript>
+</section>
+
+<!-- ============ 進み方(Roadmap) ============ -->
+<section class="sec tint">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Roadmap — 進み方</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">すべての活動は、<br>この順番で社会へ向かう。</h2>
+  </div>
+  <div class="road">
+    <div class="road-step" data-reveal>
+      <div class="road-num">01</div><div class="road-t">思想</div><span class="road-en">Philosophy</span>
+      <p class="road-p">なぜやるのかを、先に言葉にする。手段から始めない。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="1">
+      <div class="road-num">02</div><div class="road-t">実践</div><span class="road-en">Practice</span>
+      <p class="road-p">自分の現場で使い、確かめる。最初のユーザーは自分。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="2">
+      <div class="road-num">03</div><div class="road-t">検証</div><span class="road-en">Verify</span>
+      <p class="road-p">効いたのか、数字と対話で確かめる。感想で終わらせない。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="3">
+      <div class="road-num">04</div><div class="road-t">言語化</div><span class="road-en">Articulate</span>
+      <p class="road-p">過程と学びを公開し、誰でも受け取れる形にする。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="4">
+      <div class="road-num">05</div><div class="road-t">仕組み化</div><span class="road-en">Systematize</span>
+      <p class="road-p">属人性を抜き、道具と仕組みへ。私でなくても回るように。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="5">
+      <div class="road-num">06</div><div class="road-t">社会実装</div><span class="road-en">Implement</span>
+      <p class="road-p">医療の枠を超えて、社会の当たり前になるところまで。</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<aside class="walk">
+  <div class="walk-inner">
+    <div class="eyebrow" data-reveal>Where to next — 次は、どこへ歩きますか</div>
+    <div class="walk-grid" style="margin-top:30px">
+      <a class="walk-card" href="../products/index.html" data-reveal>
+        <span class="en">Products</span><span class="t">道具に触れてみる</span>
+        <p class="p">すべて公開中。触るのが一番早い。</p>
+      </a>
+      <a class="walk-card" href="../research/index.html" data-reveal data-reveal-delay="1">
+        <span class="en">Research</span><span class="t">検証の中身を見る</span>
+        <p class="p">実践を、感想で終わらせないために。</p>
+      </a>
+      <a class="walk-card" href="../journal/index.html" data-reveal data-reveal-delay="2">
+        <span class="en">Journal</span><span class="t">過程を読む</span>
+        <p class="p">完成品ではなく「途中」もそのまま。</p>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<footer class="site-footer"></footer>
+<script src="../shared/bridge.js" defer></script>
+<script defer>
+// ================================================================
+// 活動データ(ここに足せば行が増える)
+// ================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  const ACTIVITIES = [
+    { t: 'PMI', en: 'Post Merger Integration', status: '実務', run: false,
+      p: '医療機関の承継・統合後の立て直し。評価→課題抽出→介入→再評価という、組織へのリハビリテーションの実務。' },
+    { t: 'AI活用', en: 'AI in Practice', status: '実践中', run: false,
+      p: '医療と経営の現場にAIを実装し、対話と思考のための時間を取り戻す。過程も含めて公開する。' },
+    { t: '教育', en: 'Education', status: '実践中', run: false,
+      p: 'リハビリテーション思考を、次の世代へ。学べるゲームや教材で、経営と臨床の橋を渡せる人を増やす。', href: '../products/index.html#learning' },
+    { t: '研究', en: 'Research', status: '継続中', run: false,
+      p: '大学院で学んだ「検証する目」を持ち続ける。実践を感想で終わらせず、確かめてから届ける。', href: '../research/index.html' },
+    { t: 'アプリ開発', en: 'Product Development', status: '稼働中', run: true,
+      p: 'キャリアログ、RehaBoard、Clinic Town 3Dなど。人が前へ進める仕組みを、軽い道具の形で。', href: '../products/index.html' },
+    { t: '発信', en: 'Writing', status: '継続中', run: true,
+      p: '開発の過程、現場で考えたこと、キャリアの探求。思想を、誰でも受け取れる言葉にして残す。', href: '../journal/index.html' },
+    { t: 'Next', en: 'まだ名前のない構想', status: '構想中', run: false,
+      p: '思想が先、形はあと。次の活動は、いつも現場の違和感から生まれます。' },
+  ];
+  const wrap = document.getElementById('activityRows');
+  ACTIVITIES.forEach((a, i) => {
+    const el = document.createElement(a.href ? 'a' : 'div');
+    el.className = 'row';
+    if (a.href) el.href = a.href;
+    el.setAttribute('data-reveal', '');
+    el.innerHTML =
+      '<span class="row-num">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="row-t">' + a.t + '<span class="en">' + a.en + '</span></span>' +
+      '<span class="row-p">' + a.p + '</span>' +
+      '<span style="display:flex;align-items:center;gap:14px;justify-self:end"><span class="chip' + (a.run ? ' run' : '') + '">' + a.status + '</span>' + (a.href ? '<span class="row-arr">→</span>' : '') + '</span>';
+    wrap.appendChild(el);
+  });
+  if (window.BRIDGE) window.BRIDGE.observeReveal();
+});
+</script>
+</body>
+</html>

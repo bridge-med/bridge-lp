@@ -3,352 +3,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tools — 全プロダクト一覧 / BRIDGE</title>
-<meta name="description" content="BRIDGEの公開プロダクト一覧。リハ部門・外来クリニックの運営ダッシュボードから、学習ツール、診断系のライトコンテンツ、無料配布のテンプレートまで。すべて現場の「面倒くさい」から生まれた道具です。">
-<meta property="og:title" content="Tools — 全プロダクト一覧 / BRIDGE">
-<meta property="og:description" content="医療現場の小さな課題から生まれた道具を、カテゴリごとに全部並べました。">
+<title>Products — プロダクト / BRIDGE</title>
+<meta name="description" content="BRIDGEのプロダクト一覧。医療経営ダッシュボード、学習ツール、シミュレーションゲームまで。すべて現場から生まれ、すべて公開中。">
+<meta property="og:title" content="Products — プロダクト / BRIDGE">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/products/">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../shared/subpage.css">
-<link rel="stylesheet" href="../shared/hub.css">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8553D'/%3E%3Ctext x='33' y='46' font-family='Georgia,serif' font-size='40' font-style='italic' font-weight='700' text-anchor='middle' fill='%23FAFAF7'%3EB%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/bridge.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F2D44'/%3E%3Cpath d='M12 42 Q32 20 52 42' stroke='%237FB4D9' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='24' r='4' fill='%23D9A441'/%3E%3C/svg%3E">
+<style>
+.cat-head{max-width:var(--max);margin:0 auto clamp(30px,4vh,44px)}
+.cat-head .n{font:600 11px/1 var(--en);letter-spacing:0.2em;color:var(--dawn);margin-bottom:12px;display:block}
+.cat-head h2{font-family:var(--mincho);font-weight:600;font-size:clamp(21px,3vw,30px);line-height:1.7}
+.cat-head p{font-size:13px;color:var(--ink-3);margin-top:8px;max-width:560px}
+.prod-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:960px){.prod-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.prod-grid{grid-template-columns:1fr}}
+.prod-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);transition:all .35s var(--ease)}
+a.prod-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
+.prod-num{font:600 9.5px/1 var(--en);letter-spacing:0.16em;color:var(--ink-4)}
+.prod-name{font-family:var(--mincho);font-weight:600;font-size:18px;line-height:1.5}
+.prod-jp{font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+.prod-p{font-size:12px;line-height:2;color:var(--ink-2);flex:1}
+.prod-link{font:600 10.5px/1 var(--en);letter-spacing:0.08em;color:var(--blue);display:inline-flex;gap:6px}
+a.prod-card:hover .prod-link{gap:10px}
+</style>
 </head>
-<body>
+<body data-root="../" data-page="products">
 
-<div class="progress" id="prog"></div>
+<nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
 
-<nav class="nav" id="nav">
-  <a href="../index.html" class="nav-logo">BRIDGE<span class="dot">.</span></a>
-  <div class="nav-links">
-    <a href="./index.html" class="on" aria-current="page">Tools</a>
-    <a href="../starter-kits/index.html">Kits</a>
-    <a href="../journal/index.html">Journal</a>
-    <a href="../about/index.html">Founder</a>
-    <a href="../index.html#contact">Contact</a>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-mark" aria-hidden="true" data-plx="0.08">Tools</div>
-  <div class="hero-vertical" aria-hidden="true">道具は、現場から。</div>
-  <div class="hero-inner">
-    <div class="hero-eyebrow" data-reveal>Tools — All Products</div>
-    <h1 class="hero-h" data-reveal>毎日の業務から、<span class="em">道具</span>が生まれる。</h1>
-    <p class="hero-sub" data-reveal>
-      BRIDGEのプロダクトはすべて、橋本の日常業務・学習・課題から生まれています。公開中の道具を、カテゴリごとに全部並べました。気になるものから、触ってみてください。
+<header class="page-hero">
+  <div class="page-hero-inner">
+    <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Products</span></div>
+    <h1 data-reveal data-reveal-delay="1">現場から生まれた、道具たち<span class="period">。</span></h1>
+    <p class="lead" data-reveal data-reveal-delay="2">
+      どれも、日常の業務で感じた違和感から作ったものです。まず自分が最初のユーザーになって、使い続けているものだけを公開しています。それぞれの道具が、思考の型(評価→理解→設計→実践→再評価)のどこを支えるのかも書いておきました。
     </p>
-    <div class="hero-meta" data-reveal>
-      <span>13 Products</span>
-      <span>4 Categories</span>
-      <span>Browser Only</span>
-    </div>
-    <div class="jump-row" data-reveal>
-      <a class="jump-chip" href="#management"><span class="n">01</span>経営・運営系<span class="c">6</span></a>
-      <a class="jump-chip" href="#learning"><span class="n">02</span>学習系<span class="c">3</span></a>
-      <a class="jump-chip" href="#casual"><span class="n">03</span>診断・ライト系<span class="c">3</span></a>
-      <a class="jump-chip" href="#free"><span class="n">04</span>無料配布・テンプレ<span class="c">1</span></a>
-      <a class="jump-chip" href="#live"><span class="n">05</span>その場で触る<span class="c">Live</span></a>
-    </div>
   </div>
-</section>
+</header>
 
-<!-- 流れる看板 -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track">
-    <span class="marquee-set">RehaBoard<i>リハ運営を1画面で</i>MedBoard<i>患者フローの異変に気づく</i>InterviewKit<i>構造化面接</i>ConsultSim<i>診察オペ設計</i>RoundNote<i>巡回の言いっぱなしをなくす</i>HIM Quiz<i>360問</i>StudyBoard<i>並行学習</i>Daily English<i>瞬間英作文</i>モヤモヤ診断<i>10問・約3分</i>Reha Checklist<i>無料配布</i></span>
-    <span class="marquee-set">RehaBoard<i>リハ運営を1画面で</i>MedBoard<i>患者フローの異変に気づく</i>InterviewKit<i>構造化面接</i>ConsultSim<i>診察オペ設計</i>RoundNote<i>巡回の言いっぱなしをなくす</i>HIM Quiz<i>360問</i>StudyBoard<i>並行学習</i>Daily English<i>瞬間英作文</i>モヤモヤ診断<i>10問・約3分</i>Reha Checklist<i>無料配布</i></span>
-  </div>
-</div>
+<main>
+<!-- カテゴリごとのセクションとカードは PRODUCTS 配列から自動生成 -->
+<div id="catalog"></div>
+<noscript><p style="max-width:660px;margin:60px auto;color:var(--ink-3);font-size:13px;padding:0 24px">一覧の表示にはJavaScriptが必要です。</p></noscript>
+</main>
 
-<!-- ============ 経営・運営系 ============ -->
-<section id="management">
-  <div class="s-inner">
-    <div class="s-num-ghost" aria-hidden="true" data-plx="0.06">01</div>
-    <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>01 — Management &amp; Operations · 6 Tools</div>
-      <h2 data-reveal><span class="nowrap">経営・</span><span class="em nowrap">運営系。</span></h2>
-      <p data-reveal>リハ部門・外来クリニックの運営、採用、面接、診察オペレーション。「数字で詰めない、数字で対話する」ための道具たち。</p>
-    </div>
-    <div class="products-grid">
-      <a class="product-card" href="../rehaboard/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/rehaboard.png" alt="RehaBoard ダッシュボード画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 01</div>
-          <div class="product-card-name">RehaBoard<span class="jp">リハボード</span></div>
-          <div class="product-card-tagline">リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。</div>
-          <div class="product-card-tags"><span class="hot">買い切り ¥1,980</span><span>ダッシュボード</span><span>PT別実績</span><span>朝礼サマリー</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
+<aside class="walk">
+  <div class="walk-inner">
+    <div class="eyebrow" data-reveal>Where to next — 次は、どこへ歩きますか</div>
+    <div class="walk-grid" style="margin-top:30px">
+      <a class="walk-card" href="../philosophy/index.html" data-reveal>
+        <span class="en">Philosophy</span><span class="t">道具の奥にある思想を読む</span>
+        <p class="p">なぜ「軽さ」にこだわるのか。</p>
       </a>
-      <a class="product-card" href="../medboard/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/medboard.png" alt="MedBoard ダッシュボード画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 02</div>
-          <div class="product-card-name">MedBoard<span class="jp">メドボード</span></div>
-          <div class="product-card-tagline">外来クリニックの患者フローを、2施設横並びで。「異変に気づく」のが目的。</div>
-          <div class="product-card-tags"><span>2施設比較</span><span>入力6項目</span><span>異変アラート</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
+      <a class="walk-card" href="../starter-kits/index.html" data-reveal data-reveal-delay="1">
+        <span class="en">Starter Kits</span><span class="t">無料キットから始める</span>
+        <p class="p">リハ部門KPIチェックリストを配布中。</p>
       </a>
-      <a class="product-card" href="../hire-board/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/hireboard.png" alt="HireBoard カンバン画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 04</div>
-          <div class="product-card-name">HireBoard<span class="jp">ハイヤーボード</span></div>
-          <div class="product-card-tagline">医療機関の採用をカンバンで。9紹介会社・職種別フィー自動計算。</div>
-          <div class="product-card-tags"><span>カンバン</span><span>9社管理</span><span>フィー自動計算</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
-      </a>
-      <a class="product-card" href="../interview-kit/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/interview-kit.png" alt="InterviewKit 面接記録画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 08</div>
-          <div class="product-card-name">InterviewKit<span class="jp">面接官の手帖</span></div>
-          <div class="product-card-tagline">医療機関の構造化面接ツール。職種×レベルで質問自動生成、事実と印象を分けて記録。</div>
-          <div class="product-card-tags"><span>職種×レベル</span><span>事実/印象 分離</span><span>印象偏向チェック</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
-      </a>
-      <a class="product-card" href="../consult-simulator/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/consult-simulator.png" alt="ConsultSim 診察シミュレーター画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 06</div>
-          <div class="product-card-name">ConsultSim<span class="jp">コンサルトシム</span></div>
-          <div class="product-card-tagline">診察オペレーション設計シミュレーター。1診/2診 × 曜日カスタム × グループ同期。</div>
-          <div class="product-card-tags"><span>1診/2診</span><span>曜日カスタム</span><span>需給サマリー</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
-      </a>
-      <a class="product-card" href="../round-note/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/round-note.png" alt="RoundNote ホーム画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 13</div>
-          <div class="product-card-name">RoundNote<span class="jp">本部長の巡回手帖</span></div>
-          <div class="product-card-tagline">複数施設の宿題・決定・気づきを1冊に。訪問前に「今日のアジェンダ」が立ち上がる。</div>
-          <div class="product-card-tags"><span>施設横断フォロー</span><span>アジェンダ自動生成</span><span>登録不要</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
+      <a class="walk-card" href="../community/index.html" data-reveal data-reveal-delay="2">
+        <span class="en">Community</span><span class="t">課題を持ち込む</span>
+        <p class="p">あなたの現場の「面倒くさい」を道具に。</p>
       </a>
     </div>
   </div>
-</section>
+</aside>
 
-<!-- ============ 学習系 ============ -->
-<section class="alt" id="learning">
-  <div class="s-inner">
-    <div class="s-num-ghost" aria-hidden="true" data-plx="0.06">02</div>
-    <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>02 — Learning · 3 Tools</div>
-      <h2 data-reveal><span class="em nowrap">学習系。</span></h2>
-      <p data-reveal>橋本本人が学習中のテーマから生まれた道具。まず自分が毎日使う、が前提です。</p>
-    </div>
-    <div class="products-grid">
-      <a class="product-card" href="../him-quiz/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/him-quiz.png" alt="HIM Quiz 学習画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 03</div>
-          <div class="product-card-name">HIM Quiz<span class="jp">診療情報管理士 模試</span></div>
-          <div class="product-card-tagline">全12章・360問。模擬試験モード・章別正答率・間違い蓄積まで。</div>
-          <div class="product-card-tags"><span>360問</span><span>模擬試験</span><span>復習機能</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
-      </a>
-      <a class="product-card" href="../study-board/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/studyboard.png" alt="StudyBoard 学習ダッシュボード" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 05</div>
-          <div class="product-card-name">StudyBoard<span class="jp">スタディボード</span></div>
-          <div class="product-card-tagline">複数科目を並行学習する社会人のための。ストリーク・ヒートマップ・バランス分析。</div>
-          <div class="product-card-tags"><span>ストリーク🔥</span><span>ヒートマップ</span><span>5秒記録</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
-      </a>
-      <a class="product-card" href="../english-trainer/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/english-trainer.png" alt="Daily English トレーナー画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 07</div>
-          <div class="product-card-name">Daily English<span class="jp">デイリーイングリッシュ</span></div>
-          <div class="product-card-tagline">瞬間英作文トレーナー。単語220・フレーズ135、4モード、通勤の合間に医療経営コンサル英語まで。</div>
-          <div class="product-card-tags"><span>4モード</span><span>音声読上</span><span>SRS間隔反復</span></div>
-          <span class="product-card-link">詳しく見る</span>
-        </div>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 診断・ライトコンテンツ系 ============ -->
-<section id="casual">
-  <div class="s-inner">
-    <div class="s-num-ghost" aria-hidden="true" data-plx="0.06">03</div>
-    <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>03 — Quick Checks &amp; Light Contents · 5 Tools</div>
-      <h2 data-reveal><span class="nowrap">診断・</span><span class="em nowrap">ライトコンテンツ系。</span></h2>
-      <p data-reveal>登録不要・数分で触れる、小さなコンテンツ。まずはここから遊んでみるのが、いちばん軽い入口です。</p>
-    </div>
-    <div class="products-grid">
-      <a class="product-card" href="../moyamoya/index.html" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/moyamoya.png" alt="職場モヤモヤ診断 トップ画面" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 10</div>
-          <div class="product-card-name">Moyamoya Check<span class="jp">職場モヤモヤ診断</span></div>
-          <div class="product-card-tagline">そのしんどさ、どこから来ている? 職場の“なんとなくしんどい”を10問で言語化する診断。</div>
-          <div class="product-card-tags"><span>10問・約3分</span><span>6タイプ診断</span><span>登録不要</span></div>
-          <span class="product-card-link">診断してみる</span>
-        </div>
-      </a>
-      <a class="product-card no-thumb" href="../pmi-quest/index.html" target="_blank" data-reveal>
-        <div class="product-card-num">PRODUCT 11</div>
-        <div class="product-card-name">PMI Quest<span class="jp">クリニックPMIクエスト</span></div>
-        <div class="product-card-tagline">承継直後のクリニックに着任した新任事務長として、最初の30日の課題に向き合う診断型ゲーム。あなたの医療経営スタイルがわかる。</div>
-        <div class="product-card-tags"><span>10問・約3分</span><span>診断型ゲーム</span><span>登録不要</span></div>
-        <span class="product-card-link">遊んでみる</span>
-      </a>
-      <a class="product-card no-thumb" href="../ittan-horyu/index.html" target="_blank" data-reveal>
-        <div class="product-card-num">PRODUCT 12</div>
-        <div class="product-card-name">Ittan Horyu<span class="jp">いったん保留</span></div>
-        <div class="product-card-tagline">買う前に、少しだけ寝かせる。欲しいものを一旦保留して、24時間・3日・7日おいてから冷静に判断する、衝動買いクールダウンアプリ。</div>
-        <div class="product-card-tags"><span>24時間/3日/7日</span><span>PWA</span><span>登録不要</span></div>
-        <span class="product-card-link">使ってみる</span>
-      </a>
-      <a class="product-card no-thumb" href="../turnaround12/index.html" target="_blank" data-reveal>
-        <div class="product-card-num">PRODUCT 14</div>
-        <div class="product-card-name">Turnaround 12<span class="jp">ターンアラウンド12</span></div>
-        <div class="product-card-tagline">赤字クリニックに送り込まれた事務長として、資金・院長信頼・スタッフ士気・患者評判をやりくりしながら12週間を生き抜く経営シミュレーションゲーム。イベントは毎回変わる。</div>
-        <div class="product-card-tags"><span>1プレイ約5分</span><span>経営SLG</span><span>ランクS〜C</span><span>登録不要</span></div>
-        <span class="product-card-link">着任してみる</span>
-      </a>
-      <a class="product-card no-thumb" href="../clinic-flow-3d/index.html" target="_blank" data-reveal>
-        <div class="product-card-num">PRODUCT 15</div>
-        <div class="product-card-name">Clinic Town 3D<span class="jp">クリニックタウン3D</span></div>
-        <div class="product-card-tagline">遊ぶだけで外来経営が身につくSimCity風シミュレーション。再診料75点・外来管理加算52点・運動器リハ(I)185点/単位 — 会計のたびに実際の算定項目と保険点数が見える。施設基準・加算届出・KPI・広告入札・銀行融資・分院展開から、市→県→全国いちばんの医療法人へ。スマホのホーム画面に追加すればアプリとして遊べる。</div>
-        <div class="product-card-tags"><span>保険点数で学ぶ</span><span>施設基準・届出</span><span>経営SLG</span><span>分院展開</span><span>地域リーグ</span><span>PWA対応</span><span>登録不要</span></div>
-        <span class="product-card-link">経営してみる</span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 無料配布・テンプレ系 ============ -->
-<section class="alt" id="free">
-  <div class="s-inner">
-    <div class="s-num-ghost" aria-hidden="true" data-plx="0.06">04</div>
-    <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>04 — Free Templates · 1 Kit</div>
-      <h2 data-reveal><span class="nowrap">無料配布・</span><span class="em nowrap">テンプレ系。</span></h2>
-      <p data-reveal>そのまま現場で使える形に整えた配布物。買い切りキットとあわせて、Starter Kits にもまとめています。</p>
-    </div>
-    <div class="products-grid">
-      <a class="product-card" href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" data-reveal>
-        <div class="product-card-thumb"><img src="../images/products/reha-checklist.png" alt="リハ部門 KPI チェックリスト 配布LP" loading="lazy"></div>
-        <div class="product-card-body">
-          <div class="product-card-num">PRODUCT 09 · 無料配布</div>
-          <div class="product-card-name">Reha Checklist<span class="jp">リハ部門 KPI チェックリスト</span></div>
-          <div class="product-card-tagline">整形外科クリニック向け 外来リハ KPI 見える化スターターキット。PDF + スプレッドシート雛形を無料配布。</div>
-          <div class="product-card-tags"><span class="free">無料配布</span><span>KPI 18項目</span><span>1週間で試せる</span></div>
-          <span class="product-card-link">受け取る</span>
-        </div>
-      </a>
-    </div>
-    <div class="notes-foot" data-reveal>
-      <a href="../starter-kits/index.html" class="notes-cta">買い切りキット・無料配布は Starter Kits へ →</a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ LIVE PREVIEW ============ -->
-<section id="live">
-  <div class="showcase-head">
-    <div>
-      <div class="eyebrow kicker" data-reveal>Live Preview</div>
-      <h2 data-reveal><span class="nowrap">触ってみてください。</span><span class="em nowrap">いま、ここで。</span></h2>
-    </div>
-    <div class="showcase-tabs" data-reveal id="showcaseTabs">
-      <button class="showcase-tab on" data-product="0">Reha Checklist</button>
-      <button class="showcase-tab" data-product="1">InterviewKit</button>
-      <button class="showcase-tab" data-product="2">English</button>
-      <button class="showcase-tab" data-product="3">ConsultSim</button>
-      <button class="showcase-tab" data-product="4">RehaBoard</button>
-      <button class="showcase-tab" data-product="5">HIM Quiz</button>
-      <button class="showcase-tab" data-product="6">モヤモヤ診断</button>
-      <button class="showcase-tab" data-product="7">RoundNote</button>
-    </div>
-  </div>
-  <div class="showcase-stage">
-    <div class="showcase-info" id="showcaseInfo">
-      <div class="num-tag">PRODUCT 09 · 無料配布</div>
-      <h3>Reha Checklist<span class="jp">リハ部門 KPI チェックリスト</span></h3>
-      <p id="showcaseDesc">整形外科クリニックの院長・事務長・リハ責任者向けに、外来リハ KPI を整理する無料配布物。PDF とスプレッドシート雛形をフォーム1分で受け取れる。1週間だけ試して現状把握ができる軽量フレーム。</p>
-      <div class="showcase-tags" id="showcaseTags"><span>無料配布</span><span>KPI 18項目</span><span>1週間で試せる</span></div>
-      <a class="showcase-cta" id="showcaseLink" href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank">フルサイズで開く</a>
-    </div>
-    <div class="showcase-frame" data-reveal>
-      <div class="frame-bar"><i></i><i></i><i></i></div>
-      <iframe id="showcaseFrame" src="https://bridge-med.github.io/reha-checklist-lp/" loading="lazy" title="Live preview"></iframe>
-    </div>
-  </div>
-</section>
-
-<!-- ============ P.S. ============ -->
-<section class="alt" id="ps">
-  <div class="s-inner">
-    <div class="s-head">
-      <div class="eyebrow kicker" data-reveal>P.S.</div>
-      <h2 data-reveal><span class="nowrap">このページも、</span><span class="em nowrap">プロダクトです。</span></h2>
-      <p data-reveal>あなたが今見ている BRIDGE のサイト自体も、単一HTML・GitHub Pages・ノーフレームワークで作られた道具の1つです。</p>
-      <p data-reveal><a href="../index.html" class="note-link">トップページへ戻る</a></p>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer class="foot">
-  <div class="foot-brand">BRIDGE<span class="dot">.</span></div>
-  <div class="foot-tag">A small medical studio. Tokyo / Remote.</div>
-  <div class="foot-links">
-    <a href="../index.html">Home</a>
-    <a href="./index.html">Tools</a>
-    <a href="../starter-kits/index.html">Kits</a>
-    <a href="../journal/index.html">Journal</a>
-    <a href="../about/index.html">Founder</a>
-    <a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">Note</a>
-  </div>
-</footer>
-
-<script>
-// ===== Showcase data(LPから移設) =====
-const SHOWCASE = [
-  {n:'09 · 無料配布', name:'Reha Checklist', jp:'リハ部門 KPI チェックリスト', url:'https://bridge-med.github.io/reha-checklist-lp/', desc:'整形外科クリニックの院長・事務長・リハ責任者向けに、外来リハ KPI を整理する無料配布物。PDF とスプレッドシート雛形をフォーム1分で受け取れる。1週間だけ試して現状把握ができる軽量フレーム。', tags:['無料配布','KPI 18項目','1週間で試せる']},
-  {n:'08', name:'InterviewKit', jp:'面接官の手帖', url:'https://bridge-med.github.io/interview-kit/', desc:'医療機関の中途・新卒・PMI採用に対応する構造化面接ツール。職種(リハ/看護/介護/医療技術職/事務)×経験レベル(新卒/一般/中堅/管理職)で質問を自動生成。事実と印象を物理的に分けて記録し、人当たりに流されない判断を支援する。', tags:['職種×レベル','事実/印象 分離','印象偏向チェック']},
-  {n:'07', name:'Daily English', jp:'デイリーイングリッシュ', url:'https://bridge-med.github.io/english-trainer/', desc:'瞬間英作文トレーナー。単語220・フレーズ135、4モード（リビール/4択/並替/ディクテ）、通勤の合間に医療経営コンサル英語(Lv7-9)まで。橋本が自分のために作って、毎朝使ってる。', tags:['4モード','音声読上','SRS間隔反復']},
-  {n:'06', name:'ConsultSim', jp:'コンサルトシム', url:'https://bridge-med.github.io/consult-simulator/', desc:'診察オペレーション設計シミュレーター。1診/2診体制 × 曜日ごとの診察時間カスタム × グループ同期で、院長の「こう回したい」を数字で見える化。', tags:['1診/2診','曜日カスタム','需給サマリー']},
-  {n:'01', name:'RehaBoard', jp:'リハボード', url:'https://bridge-med.github.io/rehaboard-demo/', desc:'リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。PT別実績、朝礼サマリーまで。中小規模医療機関に「導入会議が要らない軽さ」で。', tags:['ダッシュボード','PT別実績','朝礼サマリー']},
-  {n:'03', name:'HIM Quiz', jp:'診療情報管理士 模試', url:'https://bridge-med.github.io/him-quiz/', desc:'全12章・360問。模擬試験モード・章別正答率・間違い蓄積で復習。橋本本人が学習中の診療情報管理士の試験対策として、自分のために作った。', tags:['360問','模擬試験','復習機能']},
-  {n:'10', name:'Moyamoya Check', jp:'職場モヤモヤ診断', url:'https://bridge-med.github.io/bridge-lp/moyamoya/', desc:'頑張っているのに報われない。上司に振り回される。成長できている気がしない。そんな職場の“なんとなくしんどい”を、10問・約3分の診断で言語化。評価・振り回され・成長・人間関係・忙しさ・意味の6タイプで、モヤモヤの正体を整理する。', tags:['10問・約3分','6タイプ診断','登録不要']},
-  {n:'13', name:'RoundNote', jp:'本部長の巡回手帖', url:'https://bridge-med.github.io/bridge-lp/round-note/', desc:'複数施設を統括する本部長・エリアマネージャーのための巡回記録ツール。施設ごとの宿題(誰が・いつまでに)・決定事項・気づきを1冊にまとめ、訪問前に「今日の巡回アジェンダ」が自動で立ち上がる。巡回の「言いっぱなし・聞きっぱなし」をなくすための道具。', tags:['施設横断フォロー','アジェンダ自動生成','登録不要']},
-];
-
-document.querySelectorAll('.showcase-tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.showcase-tab').forEach(t=>t.classList.remove('on'));
-    tab.classList.add('on');
-    const i=+tab.dataset.product;
-    const d=SHOWCASE[i];
-    document.querySelector('.num-tag').textContent='PRODUCT '+d.n;
-    document.querySelector('#showcaseInfo h3').innerHTML=d.name+'<span class="jp">'+d.jp+'</span>';
-    document.getElementById('showcaseDesc').textContent=d.desc;
-    document.getElementById('showcaseTags').innerHTML=d.tags.map(t=>'<span>'+t+'</span>').join('');
-    document.getElementById('showcaseLink').href=d.url;
-    document.getElementById('showcaseFrame').src=d.url;
+<footer class="site-footer"></footer>
+<script src="../shared/bridge.js" defer></script>
+<script defer>
+// ================================================================
+// プロダクトデータ(足せば増える。cat は CATS のキー)
+// ================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // stage: 思考の型(評価→理解→設計→実践→再評価)のどの段階を支える道具か
+  const CATS = [
+    { id: 'management', t: '経営・運営', stage: '型の「評価」と「再評価」を支える道具', p: '数字を、責めるためではなく対話のために。現場と経営が同じ画面を見るためのツールです。' },
+    { id: 'learning', t: '学習・教育', stage: '型の「理解」と「実践」を支える道具', p: '学びの入口を、続けられる形で。ゲームも模試も、リハビリテーション的思考の教材です。' },
+    { id: 'casual', t: '診断・ライト', stage: '型の「評価」の、いちばん軽い入口', p: '登録不要で、数分で試せます。' },
+    { id: 'free', t: '無料配布', stage: '型を、まず手元で試すための雛形', p: 'まず触ってみたい方へ。' },
+  ];
+  const PRODUCTS = [
+    { cat: 'management', name: 'RehaBoard', jp: 'リハボード', href: '../rehaboard/index.html',
+      p: 'リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。' },
+    { cat: 'management', name: 'MedBoard', jp: 'メドボード', href: '../medboard/index.html',
+      p: '外来クリニックの患者フローを、2施設横並びで。「異変に気づく」のが目的。' },
+    { cat: 'management', name: 'HireBoard', jp: 'ハイヤーボード', href: '../hire-board/index.html',
+      p: '医療機関の採用をカンバンで。9紹介会社・職種別フィー自動計算。' },
+    { cat: 'management', name: 'InterviewKit', jp: '面接官の手帖', href: '../interview-kit/index.html',
+      p: '構造化面接ツール。職種×レベルで質問自動生成、事実と印象を分けて記録。' },
+    { cat: 'management', name: 'ConsultSim', jp: 'コンサルトシム', href: '../consult-simulator/index.html',
+      p: '診察オペレーション設計シミュレーター。1診/2診×曜日カスタム×グループ同期。' },
+    { cat: 'management', name: 'RoundNote', jp: '本部長の巡回手帖', href: '../round-note/index.html',
+      p: '複数施設の宿題・決定・気づきを1冊に。訪問前に「今日のアジェンダ」が立ち上がる。' },
+    { cat: 'learning', name: 'キャリアログ', jp: 'iOSアプリ', href: '../daily-app/index.html',
+      p: '日々の仕事と学びを記録し、職務経歴書・面接・1on1に活かす。続けられる仕組みの実験場。' },
+    { cat: 'learning', name: 'Clinic Town 3D', jp: 'クリニックタウン3D', href: '../clinic-flow-3d/index.html',
+      p: '遊ぶだけで外来経営が身につくSimCity風シミュレーション。算定項目まで実態準拠。' },
+    { cat: 'learning', name: 'HIM Quiz', jp: '診療情報管理士 模試', href: '../him-quiz/index.html',
+      p: '全12章・360問。模擬試験モード・章別正答率・間違い蓄積まで。' },
+    { cat: 'learning', name: 'StudyBoard', jp: 'スタディボード', href: '../study-board/index.html',
+      p: '複数科目を並行学習する社会人のための。ストリーク・ヒートマップ・バランス分析。' },
+    { cat: 'learning', name: 'Daily English', jp: 'デイリーイングリッシュ', href: '../english-trainer/index.html',
+      p: '瞬間英作文トレーナー。単語220・フレーズ135、4モード。通勤の合間に。' },
+    { cat: 'learning', name: 'Turnaround 12', jp: 'ターンアラウンド12', href: '../turnaround12/index.html',
+      p: '赤字クリニックを12週で立て直す経営シミュレーションゲーム。' },
+    { cat: 'casual', name: 'Moyamoya Check', jp: '職場モヤモヤ診断', href: '../moyamoya/index.html',
+      p: '職場の“なんとなくしんどい”を10問で言語化する診断。約3分・登録不要。' },
+    { cat: 'casual', name: 'PMI Quest', jp: 'クリニックPMIクエスト', href: '../pmi-quest/index.html',
+      p: '承継直後のクリニックで最初の30日に向き合う診断型ゲーム。' },
+    { cat: 'casual', name: 'Ittan Horyu', jp: 'いったん保留', href: '../ittan-horyu/index.html',
+      p: '買う前に、少しだけ寝かせる。衝動買いクールダウンアプリ。' },
+    { cat: 'casual', name: 'KARTE', jp: '現場のカルテ', href: '../karte/index.html',
+      p: '職場の“しんどさ”をSOAP形式のカルテに書き起こす診察型コンセプトページ。' },
+    { cat: 'free', name: 'Reha Checklist', jp: 'リハ部門KPIチェックリスト', href: 'https://bridge-med.github.io/reha-checklist-lp/', ext: true,
+      p: '外来リハKPI見える化スターターキット。PDF+スプレッドシート雛形を無料配布。' },
+  ];
+  const root = document.getElementById('catalog');
+  CATS.forEach((c, ci) => {
+    const items = PRODUCTS.filter(p => p.cat === c.id);
+    if (!items.length) return;
+    const sec = document.createElement('section');
+    sec.className = 'sec' + (ci % 2 ? ' tint' : '');
+    sec.id = c.id;
+    sec.innerHTML =
+      '<div class="cat-head" data-reveal><span class="n">' + String(ci + 1).padStart(2, '0') + ' — ' + c.stage + '</span>' +
+      '<h2>' + c.t + '</h2><p>' + c.p + '</p></div>' +
+      '<div class="prod-grid"></div>';
+    const grid = sec.querySelector('.prod-grid');
+    items.forEach((p, i) => {
+      const a = document.createElement('a');
+      a.className = 'prod-card';
+      a.href = p.href;
+      if (p.ext) { a.target = '_blank'; a.rel = 'noopener'; }
+      a.setAttribute('data-reveal', '');
+      a.setAttribute('data-reveal-delay', String(i % 3));
+      a.innerHTML =
+        '<span class="prod-num">' + c.t + '</span>' +
+        '<div><div class="prod-name">' + p.name + '</div><div class="prod-jp">' + p.jp + '</div></div>' +
+        '<p class="prod-p">' + p.p + '</p>' +
+        '<span class="prod-link">見てみる →</span>';
+      grid.appendChild(a);
+    });
+    root.appendChild(sec);
   });
+  if (window.BRIDGE) window.BRIDGE.observeReveal();
 });
 </script>
-<script src="../shared/subpage.js"></script>
-
 </body>
 </html>
