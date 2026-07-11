@@ -3,722 +3,1018 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRIDGE — 現場の「面倒くさい」を、自分ごととして解く</title>
-<meta name="description" content="BRIDGEは、医療現場の小さな課題から軽量プロダクトを作る、ひとり開発の小さな会社です。理学療法士の視点と、医療経営のリアルから生まれた道具を、すぐに使える形で。">
+<title>BRIDGE — 変化を、自分の力に。</title>
+<meta name="description" content="BRIDGEは、人が、自ら選び、納得して生きられる社会をつくるプロジェクト。リハビリテーションの考え方で、人と社会の選択肢を広げます。">
+<link rel="canonical" href="https://bridge-med.github.io/bridge-lp/">
 
-<!-- OGP -->
-<meta property="og:title" content="BRIDGE — 現場の「面倒くさい」を、自分ごととして解く">
-<meta property="og:description" content="医療現場の小さな課題から軽量プロダクトを作る、ひとり開発の小さな会社。">
+<!-- OGP / SEO -->
+<meta property="og:title" content="BRIDGE — 変化を、自分の力に。">
+<meta property="og:description" content="リハビリテーションの考え方で、人と社会の選択肢を広げる。BRIDGEは、自ら選び、納得して生きられる社会をつくるプロジェクトです。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/">
+<meta property="og:site_name" content="BRIDGE">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"BRIDGE","url":"https://bridge-med.github.io/bridge-lp/","description":"リハビリテーションの考え方で、人と社会の選択肢を広げるプロジェクト","founder":{"@type":"Person","name":"Wataru Hashimoto"}}
+</script>
+
+<!-- テーマ初期化(FOUC防止のため最初に実行) -->
+<script>
+(function(){
+  var t = null;
+  try { t = localStorage.getItem('bridge-theme'); } catch(e) {}
+  if (t !== 'dark' && t !== 'light') {
+    t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8553D'/%3E%3Ctext x='33' y='46' font-family='Georgia,serif' font-size='40' font-style='italic' font-weight='700' text-anchor='middle' fill='%23FAFAF7'%3EB%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F2D44'/%3E%3Cpath d='M12 42 Q32 20 52 42' stroke='%237FB4D9' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='24' r='4' fill='%23D9A441'/%3E%3C/svg%3E">
 
 <style>
-/* ===== BASE ===== */
+/* ================================================================
+   BRIDGE — 思想が体験になるUX
+   「変化を、自分の力に。」
+   感情の設計:安心 → 希望 → 挑戦したい → 自分で選べる → 未来が楽しみ
+   色の設計:夜明けのパレット。深い藍(信頼・静けさ)の上に、
+   夜が明けるように光(希望)が差す。医療でもITでもなく「夜明け」。
+   ================================================================ */
+
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
 :root{
-  --paper:#FAFAF7;--paper-2:#F4F1E8;--paper-3:#EDE8DD;
-  --ink:#0A0A0F;--ink-2:#2A2A35;--ink-3:#6E6E78;--ink-4:#B8B5A8;
-  --line:rgba(10,10,15,0.08);--line-w:rgba(122,99,75,0.14);
-  --vermilion:#C8553D;--vermilion-deep:#A8442F;
-  --indigo:#1B4965;--indigo-deep:#0F2D44;
-  --gold:#B8860B;
-  /* Design System v1.0 新色 — bridge-hq/design-system/ 参照 */
-  --moegi:#8A9A5B;--moegi-deep:#6B7A4F;--moegi-pale:#C8D4B0;
-  --taisha:#8B5A2B;--taisha-deep:#6B4420;--taisha-pale:#D4B896;
-  --serif-jp:'Noto Serif JP',serif;
-  --sans-jp:'Noto Sans JP',sans-serif;
-  --serif-en:'Fraunces',serif;
-  --sans-en:'Inter',sans-serif;
-  --max:1280px;
-  --pad-x:clamp(20px,5vw,80px);
-  --shadow-1:0 1px 2px rgba(15,20,36,0.04),0 4px 12px rgba(15,20,36,0.05);
-  --shadow-2:0 2px 8px rgba(15,20,36,0.06),0 16px 40px rgba(15,20,36,0.10);
-  --shadow-3:0 4px 16px rgba(15,20,36,0.08),0 32px 80px rgba(15,20,36,0.16);
+  /* Light = 夜明けのあと。紙のような白に、藍と光。 */
+  --bg:#F7F9FA;
+  --bg-2:#EEF3F6;
+  --bg-3:#E3ECF2;
+  --ink:#0E1B28;
+  --ink-2:#33465A;
+  --ink-3:#6E8093;
+  --ink-4:#A9B8C5;
+  --line:rgba(14,27,40,0.10);
+  --navy:#0F2D44;
+  --blue:#1D5C8F;
+  --blue-soft:#7FB4D9;
+  --dawn:#D9A441;          /* 光。希望のアクセント。多用しない */
+  --card:#FFFFFF;
+  --dark-sec:#0B1D2E;      /* 章の夜(Manifesto等) */
+  --dark-sec-text:#E9F0F6;
+  --dark-sec-dim:#7E93A6;
+  --hero-sky-1:#DCEAF3;
+  --hero-sky-2:#F7F4EC;
+  --hero-glow:rgba(217,164,65,0.35);
+  --shadow:0 2px 8px rgba(15,45,68,0.05),0 16px 48px rgba(15,45,68,0.08);
+  --mincho:'Shippori Mincho B1','Noto Serif JP',serif;
+  --sans:'Noto Sans JP',sans-serif;
+  --en:'Inter',sans-serif;
+  --max:1180px;
+  --text-max:660px;
+  --pad-x:clamp(24px,6vw,96px);
+  --sec-y:clamp(120px,16vh,220px);
+  --ease:cubic-bezier(.16,1,.3,1);
 }
-html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
-body{font-family:var(--sans-jp);background:var(--paper);color:var(--ink);overflow-x:hidden;line-height:1.7;font-feature-settings:"palt" 1}
-/* Smart wrapping for Japanese */
-h1,h2,h3,.hero-h,.cta-h,.manifesto-q{text-wrap:balance;word-break:auto-phrase;line-break:strict;overflow-wrap:break-word}
-p,.hero-sub,.manifesto-body,.founder-text p,.product-card-tagline{text-wrap:pretty;word-break:auto-phrase;line-break:strict;overflow-wrap:break-word}
+[data-theme="dark"]{
+  /* Dark = 夜明け前。深い藍の夜。光は同じ場所から差す。 */
+  --bg:#0A1826;
+  --bg-2:#0E2032;
+  --bg-3:#132A40;
+  --ink:#E9F0F6;
+  --ink-2:#B9C9D8;
+  --ink-3:#7E93A6;
+  --ink-4:#4A6076;
+  --line:rgba(233,240,246,0.10);
+  --navy:#DCEAF3;
+  --blue:#7FB4D9;
+  --blue-soft:#3E7CAE;
+  --dawn:#E2B45C;
+  --card:#0F2233;
+  --dark-sec:#060F19;
+  --dark-sec-text:#E9F0F6;
+  --dark-sec-dim:#7E93A6;
+  --hero-sky-1:#0A1826;
+  --hero-sky-2:#12283C;
+  --hero-glow:rgba(226,180,92,0.22);
+  --shadow:0 2px 8px rgba(0,0,0,0.25),0 16px 48px rgba(0,0,0,0.35);
+}
+
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:2;overflow-x:hidden;font-feature-settings:"palt" 1;transition:background .5s,color .5s}
+h1,h2,h3,.stmt{text-wrap:balance;word-break:auto-phrase;line-break:strict;overflow-wrap:break-word}
+p{text-wrap:pretty;word-break:auto-phrase;line-break:strict;overflow-wrap:break-word}
+a{color:inherit;text-decoration:none}
+img,svg{display:block;max-width:100%}
+button{font:inherit;background:none;border:none;cursor:pointer;color:inherit}
+::selection{background:var(--blue);color:#fff}
 .nowrap{white-space:nowrap}
 .br-pc{display:none}
 @media(min-width:720px){.br-pc{display:inline}}
-.br-sp{display:inline}
-@media(min-width:720px){.br-sp{display:none}}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0.025;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");mix-blend-mode:multiply}
-a{color:inherit;text-decoration:none}
-img{display:block;max-width:100%}
-::selection{background:var(--vermilion);color:#fff}
+section[id]{scroll-margin-top:80px}
 
-/* ===== TYPOGRAPHY HELPERS ===== */
-.serif{font-family:var(--serif-jp)}
-.serif-en{font-family:var(--serif-en);font-optical-sizing:auto}
-.sans-en{font-family:var(--sans-en)}
-.italic{font-style:italic}
-.num{font-variant-numeric:tabular-nums;font-feature-settings:'tnum'}
-.eyebrow{font:800 10px/1 var(--sans-en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3)}
-.kicker{display:inline-flex;align-items:center;gap:8px}
-.kicker::before{content:'';width:18px;height:1px;background:var(--ink-3)}
-.accent-v{color:var(--vermilion)}
-.accent-i{color:var(--indigo)}
-.accent-i-deep{color:var(--indigo-deep)}
-.fr-italic{font-family:var(--serif-en);font-style:italic;font-weight:900}
+/* ===== 共通 ===== */
+.eyebrow{font:700 10px/1 var(--en);letter-spacing:0.24em;text-transform:uppercase;color:var(--ink-3);display:inline-flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:22px;height:1px;background:var(--dawn)}
+.sec{padding:var(--sec-y) var(--pad-x);position:relative}
+.sec-inner{max-width:var(--max);margin:0 auto}
+.stmt{font-family:var(--mincho);font-weight:600;line-height:1.75;letter-spacing:0.02em}
+.hikari{color:var(--dawn)}
+.ao{color:var(--blue)}
+.body-p{max-width:var(--text-max);font-size:15px;line-height:2.3;color:var(--ink-2)}
+.sec-h{font-family:var(--mincho);font-weight:600;font-size:clamp(26px,4.4vw,46px);line-height:1.7;margin:26px 0 30px}
 
-/* ===== NAV ===== */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:20px var(--pad-x);transition:all .3s;background:transparent}
-.nav.scrolled{background:rgba(250,250,247,0.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:14px var(--pad-x)}
-.nav-logo{font:700 16px/1 var(--serif-en);letter-spacing:0.2em;color:var(--ink)}
-.nav-logo .dot{color:var(--vermilion)}
-.nav-links{display:flex;gap:24px;font:600 11px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-2)}
-.nav-links a{position:relative;padding:6px 0;transition:color .15s}
-.nav-links a::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--ink);transform:scaleX(0);transform-origin:right;transition:transform .3s}
-.nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
-.nav-links a:hover{color:var(--ink)}
-@media(max-width:640px){
-  .nav{flex-wrap:wrap;row-gap:10px}
-  .nav-links{width:100%;gap:14px;flex-wrap:wrap;font-size:10px;letter-spacing:0.1em}
-}
-section[id]{scroll-margin-top:90px}
+/* 「次へ進みたくなる」つなぎ */
+.next-lead{max-width:var(--max);margin:clamp(70px,10vh,110px) auto 0;display:flex;align-items:center;gap:18px;color:var(--ink-3)}
+.next-lead .q{font-family:var(--mincho);font-size:clamp(15px,2vw,18px);color:var(--ink-2)}
+.next-lead .arr{font-family:var(--en);color:var(--dawn);animation:nudge 2.4s var(--ease) infinite}
+@keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
-/* ===== HERO ===== */
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px var(--pad-x) 80px;position:relative;overflow:hidden}
-.hero-photo{position:absolute;inset:0;background-image:url('images/hero.jpg');background-size:cover;background-position:center;opacity:0.32;z-index:0;pointer-events:none;filter:blur(3px) saturate(0.85)}
-@media(max-width:760px){.hero-photo{opacity:0.24;background-position:center 30%;filter:blur(4px) saturate(0.85)}}
-.hero-photo::after{content:'';position:absolute;inset:-12px;background:linear-gradient(180deg,rgba(250,250,247,0.65) 0%,rgba(250,250,247,0.45) 40%,rgba(250,250,247,0.78) 100%)}
-.hero-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
-.hero-bg::before{content:'';position:absolute;top:-30%;right:-20%;width:80%;height:160%;background:radial-gradient(circle,rgba(200,85,61,0.08),transparent 60%);filter:blur(40px)}
-.hero-bg::after{content:'';position:absolute;bottom:-30%;left:-20%;width:70%;height:140%;background:radial-gradient(circle,rgba(27,73,101,0.06),transparent 60%);filter:blur(40px)}
-.hero-watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:900 clamp(160px,30vw,420px)/0.85 var(--serif-en);font-style:italic;color:var(--ink);opacity:0.025;letter-spacing:-0.04em;pointer-events:none;z-index:0;white-space:nowrap}
-.hero-inner{max-width:var(--max);margin:0 auto;width:100%;position:relative;z-index:1}
-.hero-eyebrow{font:800 11px/1 var(--sans-en);letter-spacing:0.2em;text-transform:uppercase;color:var(--vermilion);margin-bottom:48px;display:inline-flex;align-items:center;gap:12px}
-.hero-eyebrow::before{content:'';width:32px;height:1px;background:var(--vermilion)}
-.hero-h{font:900 clamp(40px,7.5vw,98px)/1.18 var(--serif-jp);letter-spacing:-0.025em;color:var(--ink);margin-bottom:28px}
-.hero-h .em{font-family:var(--serif-en);font-style:italic;font-weight:900;color:var(--vermilion);font-size:1.05em}
-.hero-h .quote{display:inline-block;position:relative}
-.hero-h .quote::before{content:'「';color:var(--ink-4);font-weight:400;margin-right:-0.1em}
-.hero-h .quote::after{content:'」';color:var(--ink-4);font-weight:400;margin-left:-0.1em}
-.hero-sub{font:500 14px/1.9 var(--sans-jp);color:var(--ink-2);max-width:560px;margin-bottom:40px}
-.hero-meta{display:flex;gap:32px;flex-wrap:wrap;font:600 11px/1 var(--sans-en);letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3)}
-.hero-meta span{display:inline-flex;align-items:center;gap:8px}
-.hero-meta span::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--vermilion);opacity:0.6}
-.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font:700 10px/1 var(--sans-en);letter-spacing:0.3em;color:var(--ink-3);text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px;animation:floaty 2.4s ease-in-out infinite;z-index:2}
-.scroll-hint::after{content:'';width:1px;height:32px;background:linear-gradient(to bottom,var(--ink-3),transparent)}
-@keyframes floaty{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,6px)}}
-
-/* ===== MANIFESTO ===== */
-.manifesto{padding:140px var(--pad-x);background:var(--paper-2);position:relative}
-.manifesto::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60px;height:1px;background:var(--vermilion)}
-.manifesto-inner{max-width:920px;margin:0 auto;text-align:center}
-.manifesto-eyebrow{margin-bottom:40px}
-.manifesto-q{font:700 clamp(22px,3.4vw,42px)/1.7 var(--serif-jp);color:var(--ink);letter-spacing:-0.015em;margin-bottom:48px}
-.manifesto-q .em{color:var(--vermilion)}
-.manifesto-body{font:500 14px/2.1 var(--sans-jp);color:var(--ink-2);max-width:680px;margin:0 auto 32px}
-.manifesto-sig{font:600 13px/1 var(--serif-en);color:var(--ink-3);font-style:italic;letter-spacing:0.04em;margin-bottom:32px}
-
-/* ===== FOR YOU(立場選択) ===== */
-.foryou{padding:48px var(--pad-x) 56px;background:var(--paper-2);border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
-.foryou-inner{max-width:var(--max);margin:0 auto;text-align:center}
-.foryou-label{font:600 11px/1 var(--sans-en);color:var(--ink-3);margin-bottom:22px;letter-spacing:0.16em;text-transform:uppercase;display:inline-flex;align-items:center;gap:10px}
-.foryou-label::before,.foryou-label::after{content:'';width:30px;height:1px;background:var(--ink-3);display:inline-block}
-.foryou-h{font:800 clamp(15px,2vw,18px)/1.5 var(--serif-jp);color:var(--ink);margin-bottom:24px;letter-spacing:-0.01em}
-.foryou-h .em{font-family:var(--serif-en);font-style:italic;color:var(--vermilion)}
-.foryou-buttons{display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.foryou-btn{padding:13px 22px;background:var(--paper);border:1px solid var(--line);font:600 12px/1 var(--sans-jp);letter-spacing:0.04em;color:var(--ink-2);cursor:pointer;transition:all .2s;border-radius:2px;display:inline-flex;align-items:center;gap:10px}
-.foryou-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--paper)}
-.foryou-btn .ic{font:800 10px/1 var(--sans-en);color:var(--vermilion);letter-spacing:0.1em}
-.foryou-btn .arr{font:600 13px/1 var(--sans-en);color:var(--ink-4);transition:transform .2s,color .2s}
-.foryou-btn:hover .arr{transform:translateX(3px);color:var(--vermilion)}
-
-/* ===== PRODUCTS (Featured) ===== */
-.products{padding:140px var(--pad-x) 100px;position:relative}
-.products-head{max-width:var(--max);margin:0 auto 56px}
-.products-head h2{font:900 clamp(28px,4.4vw,52px)/1.25 var(--serif-jp);letter-spacing:-0.02em;margin-top:14px}
-.products-head h2 .em{font-family:var(--serif-en);font-style:italic;color:var(--vermilion)}
-.products-head p{font:500 13px/1.9 var(--sans-jp);color:var(--ink-2);max-width:560px;margin-top:14px}
-.products-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-@media(max-width:760px){.products-grid{grid-template-columns:1fr}}
-.products-foot{max-width:var(--max);margin:48px auto 0;text-align:center}
-.product-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:0;display:flex;flex-direction:column;gap:0;transition:all .25s cubic-bezier(0.16,1,0.3,1);cursor:pointer;position:relative;overflow:hidden}
-.product-card-thumb{aspect-ratio:16/10;background:var(--paper-2);border-bottom:1px solid var(--line);overflow:hidden;position:relative}
-.product-card-thumb img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform .4s cubic-bezier(0.2,0.7,0.2,1)}
-.product-card:hover .product-card-thumb img{transform:scale(1.02)}
-.product-card-body{padding:24px 26px 26px;display:flex;flex-direction:column;gap:12px;flex:1}
-.product-card.no-thumb{padding:28px 26px;gap:14px}
-.product-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,85,61,0.4),transparent);opacity:0;transition:opacity .3s}
-.product-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:rgba(200,85,61,0.2)}
-.product-card:hover::before{opacity:1}
-.product-card-num{font:800 10px/1 var(--sans-en);letter-spacing:0.18em;color:var(--ink-3)}
-.product-card-name{font:900 22px/1.2 var(--serif-en);font-style:italic;color:var(--ink);margin-bottom:2px}
-.product-card-name .jp{display:block;font:700 11px/1 var(--serif-jp);color:var(--ink-3);font-style:normal;margin-top:4px;letter-spacing:0.04em}
-.product-card-tagline{font:500 12px/1.7 var(--sans-jp);color:var(--ink-2);flex:1}
-.product-card-tags{display:flex;flex-wrap:wrap;gap:5px}
-.product-card-tags span{padding:4px 9px;background:var(--paper-2);border-radius:999px;font:600 9px/1 var(--sans-jp);color:var(--ink-3);letter-spacing:0.02em}
-.product-card-link{display:inline-flex;align-items:center;gap:6px;font:700 11px/1 var(--sans-en);letter-spacing:0.1em;text-transform:uppercase;color:var(--vermilion);margin-top:6px;transition:gap .2s}
-.product-card-link:hover{gap:10px}
-.product-card-link::after{content:'→'}
-
-/* ===== TOOLBOX (Starter Kits 導線) ===== */
-.toolbox{padding:140px var(--pad-x) 120px;background:var(--paper-2);position:relative;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.toolbox-head{max-width:var(--max);margin:0 auto 40px}
-.toolbox-head h2{font:900 clamp(28px,4.4vw,52px)/1.25 var(--serif-jp);letter-spacing:-0.02em;margin-top:14px}
-.toolbox-head h2 .em{font-family:var(--serif-en);font-style:italic;color:var(--moegi-deep)}
-.toolbox-head p{font:500 13px/1.9 var(--sans-jp);color:var(--ink-2);max-width:620px;margin-top:14px}
-.toolbox-teaser{max-width:var(--max);margin:0 auto;display:flex;gap:12px;flex-wrap:wrap}
-
-/* ===== NOTES / JOURNAL 導線 ===== */
-.notes{padding:140px var(--pad-x);background:var(--paper);position:relative;border-top:1px solid var(--line)}
-.notes-head{max-width:var(--max);margin:0 auto 40px}
-.notes-head h2{font:900 clamp(28px,4.4vw,52px)/1.25 var(--serif-jp);letter-spacing:-0.02em;margin-top:14px}
-.notes-head h2 .em{font-family:var(--serif-en);font-style:italic;color:var(--vermilion)}
-.notes-head p{font:500 13px/1.9 var(--sans-jp);color:var(--ink-2);max-width:560px;margin-top:14px}
-.notes-actions{max-width:var(--max);margin:0 auto;display:flex;gap:12px;flex-wrap:wrap}
-.notes-cta{font:700 12px/1 var(--sans-jp);letter-spacing:0.08em;color:var(--ink);padding:16px 28px;border:1px solid var(--ink);border-radius:2px;display:inline-block;transition:all .2s}
-.notes-cta:hover{background:var(--ink);color:#fff}
-
-/* ===== FOUNDER(短縮版) ===== */
-.founder{padding:140px var(--pad-x);background:var(--paper-2);position:relative;overflow:hidden}
-.founder::before{content:'';position:absolute;top:-30%;right:-20%;width:80%;height:160%;background:radial-gradient(circle,rgba(27,73,101,0.05),transparent 60%);filter:blur(60px)}
-.founder-container{max-width:var(--max);margin:0 auto;position:relative}
-.founder-hero{display:grid;grid-template-columns:260px 1fr;gap:56px;align-items:center;margin-bottom:60px}
-@media(max-width:760px){.founder-hero{grid-template-columns:1fr;gap:32px}.founder-portrait{max-width:240px}}
-.founder-portrait{aspect-ratio:4/5;background:#0a0a0f url('images/founder.jpg') center/cover;border-radius:14px;position:relative;overflow:hidden;box-shadow:var(--shadow-3)}
-.founder-portrait::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,transparent 55%,rgba(10,10,15,0.45) 100%)}
-.founder-portrait .badge{position:absolute;bottom:16px;left:16px;right:16px;padding:12px 14px;background:rgba(10,10,15,0.65);backdrop-filter:blur(12px);border-radius:8px;color:#fff}
-.founder-portrait .badge .name{font:900 15px/1.2 var(--serif-jp);margin-bottom:3px}
-.founder-portrait .badge .role{font:600 9px/1 var(--sans-en);letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7)}
-.founder-name-block .name-h{font:900 clamp(32px,5vw,52px)/1.15 var(--serif-jp);letter-spacing:-0.02em;margin:12px 0 0}
-.founder-name-block .name-h .em{color:var(--vermilion);font-family:var(--serif-en);font-style:italic}
-.founder-name-block .en-name{display:block;font:700 14px/1 var(--serif-en);font-style:italic;color:var(--ink-3);margin-top:10px;letter-spacing:0.04em}
-.founder-name-block .role-tag{display:inline-block;font:800 10px/1 var(--sans-en);letter-spacing:0.18em;text-transform:uppercase;color:var(--vermilion);margin-top:16px;padding:6px 12px;background:rgba(200,85,61,0.08);border-radius:999px;border:1px solid rgba(200,85,61,0.2)}
-.founder-intro{font:500 14px/1.9 var(--sans-jp);color:var(--ink-2);margin-top:18px;max-width:540px}
-.founder-quote{background:var(--paper);border-left:4px solid var(--vermilion);padding:36px 36px 32px 44px;margin-bottom:60px;border-radius:0 14px 14px 0;box-shadow:var(--shadow-1);position:relative}
-.founder-quote::before{content:'"';position:absolute;top:-12px;left:32px;font:900 90px/1 var(--serif-en);font-style:italic;color:var(--vermilion);opacity:0.18}
-.founder-quote q{font:700 clamp(18px,2.4vw,28px)/1.75 var(--serif-jp);color:var(--ink);display:block;quotes:none;letter-spacing:-0.01em}
-.founder-quote q::before,.founder-quote q::after{content:''}
-.founder-quote .cite{display:block;font:600 12px/1 var(--serif-en);font-style:italic;color:var(--ink-3);margin-top:20px;letter-spacing:0.04em}
-.founder-foot{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
-.founder-roles{display:flex;flex-wrap:wrap;gap:6px}
-.founder-roles span{padding:8px 14px;background:var(--paper);border:1px solid var(--line);border-radius:999px;font:700 11px/1 var(--sans-jp);color:var(--ink-2)}
-.note-link{font:600 12px/1.5 var(--sans-jp);color:var(--ink-2);border-bottom:1px solid var(--line);padding-bottom:6px;transition:color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px}
-.note-link::after{content:'→';transition:transform .2s}
-.note-link:hover{color:var(--vermilion);border-color:var(--vermilion)}
-.note-link:hover::after{transform:translateX(4px)}
-
-/* ===== CTA ===== */
-.cta-section{padding:140px var(--pad-x);background:var(--paper);position:relative;overflow:hidden;text-align:center}
-.cta-section::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80vw;max-width:1200px;height:80vw;max-height:1200px;background:radial-gradient(circle,rgba(200,85,61,0.06),transparent 60%);filter:blur(60px);z-index:0}
-.cta-inner{max-width:820px;margin:0 auto;position:relative;z-index:1}
-.cta-eyebrow{margin-bottom:32px}
-.cta-h{font:900 clamp(34px,6vw,72px)/1.2 var(--serif-jp);letter-spacing:-0.025em;margin-bottom:32px}
-.cta-h .em{color:var(--vermilion);font-family:var(--serif-en);font-style:italic}
-.cta-h .quote{display:inline-block;position:relative}
-.cta-h .quote::before{content:'「';color:var(--ink-4);font-weight:400;margin-right:-0.05em}
-.cta-h .quote::after{content:'」';color:var(--ink-4);font-weight:400;margin-left:-0.05em}
-.cta-sub{font:500 14px/1.95 var(--sans-jp);color:var(--ink-2);max-width:520px;margin:0 auto 40px}
-.cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.cta-btn{padding:16px 28px;border-radius:999px;font:800 13px/1 var(--sans-jp);letter-spacing:0.02em;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:10px}
-.cta-btn.primary{background:var(--ink);color:#fff;box-shadow:0 4px 16px rgba(15,20,36,0.2)}
-.cta-btn.primary:hover{background:var(--vermilion);transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,85,61,0.3)}
-.cta-btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
-.cta-btn.ghost:hover{background:var(--paper-2);transform:translateY(-2px)}
-.cta-btn::after{content:'→';transition:transform .2s}
-.cta-btn:hover::after{transform:translateX(3px)}
-.cta-foot{margin-top:28px;font:500 12px/1.8 var(--sans-jp);color:var(--ink-3);max-width:480px;margin-left:auto;margin-right:auto}
-
-/* ===== FOOTER ===== */
-.footer{padding:60px var(--pad-x) 40px;background:var(--ink);color:#fff;border-top:1px solid var(--vermilion)}
-.footer-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
-@media(max-width:640px){.footer-inner{grid-template-columns:1fr;gap:24px;text-align:center}}
-.footer-brand{font:900 22px/1 var(--serif-en);font-style:italic;letter-spacing:-0.02em}
-.footer-brand .dot{color:var(--vermilion)}
-.footer-tag{font:500 11px/1 var(--sans-en);color:rgba(255,255,255,0.5);margin-top:6px;letter-spacing:0.04em}
-.footer-links{display:flex;gap:18px;font:700 11px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase}
-@media(max-width:640px){.footer-links{justify-content:center;flex-wrap:wrap;gap:14px}}
-.footer-links a{padding:6px 0;color:rgba(255,255,255,0.7);transition:color .15s}
-.footer-links a:hover{color:#fff}
-.footer-copy{max-width:var(--max);margin:32px auto 0;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;font:500 10px/1 var(--sans-en);color:rgba(255,255,255,0.4);letter-spacing:0.04em}
-@media(max-width:640px){.footer-copy{flex-direction:column;gap:8px;text-align:center}}
-
-/* ===== ANIMATIONS ===== */
-[data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .9s cubic-bezier(0.16,1,0.3,1),transform .9s cubic-bezier(0.16,1,0.3,1)}
-[data-reveal].vis{opacity:1;transform:none}
-[data-reveal-delay="1"]{transition-delay:.08s}
-[data-reveal-delay="2"]{transition-delay:.16s}
-[data-reveal-delay="3"]{transition-delay:.24s}
-[data-reveal-delay="4"]{transition-delay:.32s}
-
-/* progress bar */
-.progress{position:fixed;top:0;left:0;height:2px;background:var(--vermilion);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px rgba(200,85,61,0.5)}
-
-/* 落款(はんこ) */
-.hanko{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--vermilion);color:#fff;font:700 15px/1 var(--serif-jp);border-radius:4px;transform:rotate(-4deg);box-shadow:0 1px 4px rgba(200,85,61,0.35);letter-spacing:0;vertical-align:middle;margin-left:10px}
-
-/* ===== v2.0 — ページ間トランジション ===== */
-@view-transition{navigation:auto}
-::view-transition-old(root){animation:vt-out .22s ease both}
-::view-transition-new(root){animation:vt-in .3s ease both}
-@keyframes vt-out{to{opacity:0;transform:translateY(-10px)}}
-@keyframes vt-in{from{opacity:0;transform:translateY(12px)}}
-
-/* ===== v2.0 — 見出しに朱のマーカーがすっと引かれる ===== */
-.hero-h .marker{background-image:linear-gradient(104deg,rgba(200,85,61,0.16) 1%,rgba(200,85,61,0.26) 96%);background-repeat:no-repeat;background-size:0% 40%;background-position:0 82%;animation:sweep .9s cubic-bezier(0.2,0.7,0.2,1) 1.15s forwards}
-@keyframes sweep{to{background-size:100% 40%}}
-
-/* ===== v3.0 — 現場と経営を、心電図が繋ぐ ===== */
-.hero-bridge{display:flex;align-items:center;gap:18px;max-width:640px;margin-bottom:44px}
-.hb-canvas{flex:1;min-width:0;height:72px;display:block}
-.hb-side{display:flex;flex-direction:column;gap:5px;align-items:center;flex-shrink:0}
-.hb-jp{font:900 15px/1 var(--serif-jp);color:var(--ink-2)}
-.hb-en{font:600 8px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)}
-
-/* ===== v3.0 — 心電図の区切り線(スクロールで描画) ===== */
-.ecg-divider{padding:46px var(--pad-x) 0;background:var(--paper)}
-.ecg-divider svg{display:block;max-width:var(--max);margin:0 auto;width:100%;height:64px;overflow:visible}
-.ecg-divider path{fill:none;stroke:var(--vermilion);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:0.55;stroke-dasharray:1600;stroke-dashoffset:1600}
-.ecg-divider.vis path{animation:ecgdraw 2s cubic-bezier(0.3,0,0.2,1) forwards}
-@keyframes ecgdraw{to{stroke-dashoffset:0}}
-
-/* ===== v3.0 — 目次(スクロールスパイ) ===== */
-.toc{position:fixed;right:clamp(14px,2.2vw,34px);top:50%;transform:translateY(-50%);z-index:95;display:flex;flex-direction:column;gap:15px}
-.toc a{display:flex;align-items:center;justify-content:flex-end;gap:9px}
-.toc .lbl{font:700 10px/1 var(--sans-jp);color:var(--ink-2);opacity:0;transform:translateX(6px);transition:opacity .25s,transform .25s;letter-spacing:0.04em}
-.toc .num{font:800 9px/1 var(--sans-en);color:var(--ink-4);letter-spacing:0.08em;transition:color .2s}
-.toc .bar{width:16px;height:1px;background:var(--ink-4);transition:width .25s,background .25s}
-.toc a:hover .lbl{opacity:1;transform:none}
-.toc a:hover .num{color:var(--ink)}
-.toc a.on .num{color:var(--vermilion)}
-.toc a.on .bar{width:32px;background:var(--vermilion)}
-.toc a.on .lbl{opacity:1;transform:none;color:var(--ink)}
-@media(max-width:1100px){.toc{display:none}}
-
-/* ===== v3.0 — 語単位リビール(Manifesto) ===== */
-[data-words] .w{display:inline-block;opacity:0.07;transform:translateY(0.3em);transition:opacity .7s cubic-bezier(0.2,0.7,0.2,1),transform .7s cubic-bezier(0.2,0.7,0.2,1)}
-[data-words].vis .w{opacity:1;transform:none}
-
-/* ===== v2.0 — 流れる看板(マーキー) ===== */
-.marquee{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper);padding:16px 0;position:relative;z-index:2}
-.marquee-track{display:flex;width:max-content;animation:marq 36s linear infinite}
-.marquee:hover .marquee-track{animation-play-state:paused}
-.marquee-set{display:flex;align-items:center;gap:44px;padding-right:44px;font:700 13px/1 var(--serif-jp);color:var(--ink-3);white-space:nowrap}
-.marquee-set i{font:italic 700 12px/1 var(--serif-en);color:var(--vermilion);letter-spacing:0.04em}
-@keyframes marq{to{transform:translateX(-50%)}}
-
-/* ===== v2.0 — カルテ用紙(方眼)と処方箋モチーフ ===== */
-.foryou,.manifesto{background-image:linear-gradient(rgba(27,73,101,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(27,73,101,0.045) 1px,transparent 1px);background-size:24px 24px}
-.product-card-num{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px dashed var(--line-w)}
-.product-card-num::after{content:'✚ BRIDGE';font:800 8px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-4)}
-.product-card::after{content:'効';position:absolute;top:14px;right:14px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--vermilion);color:#fff;font:700 21px/1 var(--serif-jp);border-radius:6px;transform:rotate(14deg) scale(0);opacity:0;transition:transform .3s cubic-bezier(0.34,1.56,0.64,1),opacity .18s;z-index:3;box-shadow:0 2px 10px rgba(200,85,61,0.4);pointer-events:none}
-.product-card:hover::after{transform:rotate(-5deg) scale(1);opacity:0.94}
-
-/* motion に配慮 */
+/* ===== Reveal(GSAPなしでも動くベース) ===== */
+[data-reveal]{opacity:0;transform:translateY(28px);transition:opacity 1.1s var(--ease),transform 1.1s var(--ease)}
+[data-reveal].on{opacity:1;transform:none}
+[data-reveal-delay="1"]{transition-delay:.12s}
+[data-reveal-delay="2"]{transition-delay:.24s}
+[data-reveal-delay="3"]{transition-delay:.36s}
+[data-reveal-delay="4"]{transition-delay:.48s}
+[data-reveal-delay="5"]{transition-delay:.6s}
 @media(prefers-reduced-motion:reduce){
   [data-reveal]{opacity:1;transform:none;transition:none}
-  html{scroll-behavior:auto}
-  .scroll-hint{animation:none}
-  .hero-h .marker{animation:none;background-size:100% 40%}
-  .ecg-divider path{animation:none;stroke-dashoffset:0}
-  [data-words] .w{opacity:1;transform:none;transition:none}
-  .marquee-track{animation:none}
-  .product-card::after{transition:none}
+  .next-lead .arr{animation:none}
 }
 
+/* ===== 進行バー(いまどこにいるか=安心) ===== */
+.progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:200;background:transparent;pointer-events:none}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--dawn));transform:scaleX(0);transform-origin:left}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:20px var(--pad-x);transition:all .35s;background:transparent}
+.nav.scrolled{background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:13px var(--pad-x)}
+.nav-logo{font:700 15px/1 var(--en);letter-spacing:0.22em;display:flex;align-items:center;gap:10px}
+.nav-logo svg{width:22px;height:22px}
+.nav-right{display:flex;align-items:center;gap:22px}
+.nav-links{display:flex;gap:20px;font:600 10px/1 var(--en);letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-3)}
+.nav-links a{padding:6px 0;position:relative;transition:color .2s}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--dawn);transform:scaleX(0);transform-origin:right;transition:transform .35s var(--ease)}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
+.theme-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3);transition:all .3s}
+.theme-btn:hover{color:var(--ink);border-color:var(--ink-3)}
+.theme-btn svg{width:15px;height:15px}
+[data-theme="light"] .icon-sun{display:none}
+[data-theme="dark"] .icon-moon{display:none}
+@media(max-width:760px){.nav-links{display:none}}
+
+/* ===== 01 HERO ===== */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:140px var(--pad-x) 110px;position:relative;overflow:hidden;background:linear-gradient(180deg,var(--hero-sky-1),var(--hero-sky-2) 70%,var(--bg))}
+.hero-canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hero-glow{position:absolute;left:50%;bottom:-16%;transform:translateX(-50%);width:min(900px,120vw);aspect-ratio:2/1;border-radius:50% 50% 0 0;background:radial-gradient(ellipse at 50% 100%,var(--hero-glow),transparent 65%);z-index:0;pointer-events:none}
+.hero-bridge{position:absolute;left:0;right:0;bottom:0;z-index:0;pointer-events:none;opacity:.9}
+.hero-bridge svg{width:100%;height:clamp(120px,22vh,220px)}
+.hero-bridge .arc{stroke:var(--blue-soft);stroke-width:1.5;fill:none;opacity:.7}
+.hero-bridge .deck{stroke:var(--ink-3);stroke-width:1;fill:none;opacity:.45}
+.hero-bridge .cable{stroke:var(--ink-4);stroke-width:.6;fill:none;opacity:.4}
+.hero-inner{max-width:var(--max);margin:0 auto;width:100%;position:relative;z-index:1}
+.hero-eyebrow{font:700 11px/1 var(--en);letter-spacing:0.26em;text-transform:uppercase;color:var(--ink-3);margin-bottom:clamp(32px,5vh,56px)}
+.hero-eyebrow .b{color:var(--blue)}
+.hero-h{font-family:var(--mincho);font-weight:600;font-size:clamp(38px,8.6vw,98px);line-height:1.5;letter-spacing:0.02em;color:var(--ink)}
+.hero-h .period{color:var(--dawn)}
+.hero-sub{max-width:600px;margin-top:clamp(28px,4.5vh,44px);font-size:clamp(15px,1.9vw,17px);line-height:2.3;color:var(--ink-2);font-family:var(--mincho);font-weight:500}
+.hero-note{max-width:560px;margin-top:20px;font-size:13px;line-height:2.2;color:var(--ink-3)}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:clamp(36px,6vh,56px)}
+.hero-meta{display:flex;gap:26px;margin-top:clamp(36px,6vh,60px);font:500 10px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3);flex-wrap:wrap}
+.scroll-hint{position:absolute;bottom:30px;left:var(--pad-x);z-index:1;font:600 9px/1 var(--en);letter-spacing:0.3em;color:var(--ink-4);display:flex;align-items:center;gap:10px}
+.scroll-hint::after{content:'';width:1px;height:34px;background:linear-gradient(var(--ink-4),transparent);animation:drip 2.2s infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+@media(prefers-reduced-motion:reduce){.scroll-hint::after{animation:none}}
+
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 32px;border-radius:100px;font:700 13px/1 var(--sans);letter-spacing:0.06em;transition:all .3s var(--ease)}
+.btn.primary{background:var(--blue);color:#fff}
+[data-theme="dark"] .btn.primary{background:var(--blue);color:#08131E}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn.ghost{border:1px solid var(--line);color:var(--ink-2)}
+.btn.ghost:hover{border-color:var(--ink-3);color:var(--ink);transform:translateY(-2px)}
+
+/* ===== 02 WHY(ストーリー) ===== */
+.why-scene{max-width:var(--max);margin:0 auto}
+.why-lines{margin:clamp(56px,8vh,90px) 0 0}
+.why-line{font-family:var(--mincho);font-weight:500;font-size:clamp(22px,3.6vw,38px);line-height:2;color:var(--ink-3);transition:color .8s}
+.why-line.now{color:var(--ink)}
+.why-turn{margin-top:clamp(56px,9vh,96px)}
+.why-turn .stmt{font-size:clamp(27px,4.8vw,54px)}
+.why-mvp{max-width:var(--max);margin:clamp(90px,13vh,150px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.mvp-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(28px,3.5vw,44px);box-shadow:var(--shadow)}
+.mvp-tag{font:700 10px/1 var(--en);letter-spacing:0.22em;text-transform:uppercase;color:var(--dawn);margin-bottom:20px}
+.mvp-t{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2.2vw,21px);line-height:1.9;margin-bottom:14px}
+.mvp-p{font-size:13px;line-height:2.2;color:var(--ink-2)}
+@media(max-width:860px){.why-mvp{grid-template-columns:1fr}}
+
+/* ===== 03 REHABILITATION(再定義+図解) ===== */
+.rehab{background:var(--bg-2)}
+.rehab-common{max-width:var(--text-max);margin:44px 0 0;color:var(--ink-3);font-size:14px;line-height:2.3}
+.rehab-common .strike{color:var(--ink-4)}
+.etym{max-width:640px;margin:clamp(56px,8vh,90px) 0 0;border-left:2px solid var(--dawn);padding:8px 0 8px 28px}
+.etym-word{font:600 clamp(20px,3.2vw,30px)/1.4 var(--en);letter-spacing:0.02em;margin-bottom:14px}
+.etym-word i{font-style:italic;font-weight:400;color:var(--ink-3)}
+.etym-p{font-size:13.5px;line-height:2.2;color:var(--ink-2);max-width:520px}
+.rehab-def{margin:clamp(76px,11vh,130px) 0 0}
+.rehab-def .lead{font-size:13px;letter-spacing:0.06em;color:var(--ink-3);margin-bottom:22px}
+.rehab-def .stmt{font-size:clamp(26px,4.6vw,52px)}
+/* 図解:一本の道が、複数の道になる */
+.branch-fig{max-width:880px;margin:clamp(76px,11vh,120px) auto 0}
+.branch-fig svg{width:100%;height:auto}
+.branch-fig .base{stroke:var(--ink-3);stroke-width:2;fill:none}
+.branch-fig .opt{stroke:var(--blue);stroke-width:1.6;fill:none;opacity:.85}
+.branch-fig .opt.d{stroke:var(--dawn)}
+.branch-fig .dot{fill:var(--ink)}
+.branch-fig .lbl{font:600 11px var(--sans);fill:var(--ink-3);letter-spacing:.08em}
+.branch-fig .lbl.b{fill:var(--ink);font-size:12px}
+.branch-cap{text-align:center;margin-top:26px;font-size:13px;color:var(--ink-3);letter-spacing:0.04em}
+.rehab-targets{margin:clamp(70px,10vh,110px) 0 0}
+.rehab-targets .lead{font-family:var(--mincho);font-size:clamp(16px,2.3vw,21px);color:var(--ink-2);margin-bottom:30px}
+.target-words{display:flex;flex-wrap:wrap;gap:12px 32px;font-family:var(--mincho);font-weight:600;font-size:clamp(24px,4.4vw,44px);line-height:1.5}
+.target-words .mo{color:var(--ink-4);font-size:0.6em;font-weight:400;margin-left:2px}
+
+/* ===== 04 THINKING(フレームワーク) ===== */
+.think-flow{max-width:var(--max);margin:clamp(64px,9vh,100px) auto 0;display:grid;grid-template-columns:repeat(5,1fr) 1.25fr;gap:0;position:relative}
+.think-flow::before{content:'';position:absolute;top:5px;left:0;right:0;height:1px;background:var(--line)}
+.tf-step{padding:32px 18px 0 0;position:relative}
+.tf-step::before{content:'';position:absolute;top:0;left:0;width:11px;height:11px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink-3)}
+.tf-step.out::before{border-color:var(--dawn);background:var(--dawn)}
+.tf-num{font:600 10px/1 var(--en);letter-spacing:0.18em;color:var(--ink-3);margin-bottom:12px}
+.tf-t{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2vw,22px);margin-bottom:4px}
+.tf-en{font:500 9px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:12px}
+.tf-p{font-size:12px;line-height:2;color:var(--ink-2);max-width:170px}
+.tf-step.out .tf-t{color:var(--dawn)}
+.think-loop-note{max-width:var(--max);margin:34px auto 0;font-size:12.5px;color:var(--ink-3);display:flex;align-items:center;gap:10px}
+.think-loop-note svg{width:16px;height:16px;stroke:var(--ink-3)}
+@media(max-width:900px){
+  .think-flow{grid-template-columns:1fr;padding-left:28px}
+  .think-flow::before{top:0;bottom:0;left:5px;right:auto;width:1px;height:auto}
+  .tf-step{padding:0 0 40px 0}
+  .tf-step::before{left:-28px;top:8px}
+  .tf-p{max-width:none}
+}
+/* 同じ型を、3つの対象へ */
+.think-apply{max-width:var(--max);margin:clamp(80px,11vh,130px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.ta-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(26px,3vw,38px);box-shadow:var(--shadow)}
+.ta-tag{font:700 10px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+.ta-t{font-family:var(--mincho);font-weight:600;font-size:18px;margin-bottom:14px}
+.ta-p{font-size:12.5px;line-height:2.15;color:var(--ink-2)}
+@media(max-width:860px){.think-apply{grid-template-columns:1fr}}
+
+/* ===== 05 PRINCIPLES ===== */
+.princ{background:var(--bg-2)}
+.princ-grid{max-width:var(--max);margin:clamp(60px,9vh,100px) auto 0;border-top:1px solid var(--line)}
+.princ-item{display:grid;grid-template-columns:64px 260px 1fr;gap:20px 36px;align-items:baseline;padding:clamp(28px,4.5vh,42px) 0;border-bottom:1px solid var(--line)}
+.princ-num{font:600 11px/1 var(--en);letter-spacing:0.14em;color:var(--dawn)}
+.princ-en{font:700 clamp(16px,2vw,20px)/1.4 var(--en);letter-spacing:0.04em}
+.princ-jp{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2.4vw,24px);line-height:1.9}
+.princ-jp small{display:block;font-family:var(--sans);font-weight:400;font-size:12.5px;color:var(--ink-3);margin-top:8px;letter-spacing:.04em}
+@media(max-width:760px){.princ-item{grid-template-columns:1fr;gap:8px}}
+
+/* ===== 06 PROJECTS(データ駆動・自動拡張) ===== */
+.proj-grid{max-width:var(--max);margin:clamp(56px,8vh,90px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.proj-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 26px 22px;display:flex;flex-direction:column;gap:12px;transition:all .35s var(--ease);position:relative;box-shadow:var(--shadow)}
+a.proj-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
+.proj-top{display:flex;justify-content:space-between;align-items:center}
+.proj-num{font:600 10px/1 var(--en);letter-spacing:0.16em;color:var(--ink-4)}
+.proj-status{font:600 9.5px/1 var(--en);letter-spacing:0.12em;padding:5px 10px;border:1px solid var(--line);border-radius:100px;color:var(--ink-3);white-space:nowrap}
+.proj-status.run{border-color:color-mix(in srgb,var(--dawn) 55%,transparent);color:var(--dawn)}
+.proj-name{font-family:var(--mincho);font-weight:600;font-size:19px;line-height:1.5}
+.proj-en{font:500 9.5px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3)}
+.proj-desc{font-size:12.5px;line-height:2.05;color:var(--ink-2);flex:1}
+.proj-link{font:600 11px/1 var(--en);letter-spacing:0.08em;color:var(--blue);display:inline-flex;gap:6px;align-items:center}
+a.proj-card:hover .proj-link{gap:10px}
+.proj-card.next-card{border-style:dashed;background:transparent;box-shadow:none}
+.proj-card.next-card .proj-name{color:var(--ink-3)}
+@media(max-width:960px){.proj-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.proj-grid{grid-template-columns:1fr}}
+
+/* ===== 07 STORIES ===== */
+.stories{background:var(--bg-2)}
+.story-note{max-width:var(--text-max);font-size:12.5px;color:var(--ink-3);margin-top:18px}
+.story-rail{max-width:var(--max);margin:clamp(56px,8vh,90px) auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.story-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(26px,3vw,36px);display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow)}
+.story-tag{font:700 10px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--blue)}
+.story-before{font-size:13px;color:var(--ink-3);line-height:2}
+.story-before s{text-decoration-color:var(--ink-4)}
+.story-arrow{font-family:var(--en);color:var(--dawn);font-size:14px}
+.story-after{font-family:var(--mincho);font-weight:600;font-size:clamp(16px,1.9vw,19px);line-height:1.95}
+.story-p{font-size:12px;line-height:2.05;color:var(--ink-2)}
+
+/* ===== 08 ROADMAP ===== */
+.road{max-width:var(--max);margin:clamp(64px,9vh,100px) auto 0;display:grid;grid-template-columns:repeat(6,1fr);gap:0;position:relative}
+.road::before{content:'';position:absolute;top:5px;left:0;right:0;height:1px;background:var(--line)}
+.road-step{padding:32px 18px 0 0;position:relative}
+.road-step::before{content:'';position:absolute;top:0;left:0;width:11px;height:11px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink-3)}
+.road-step:last-child::before{border-color:var(--dawn);background:var(--dawn)}
+.road-num{font:600 10px/1 var(--en);letter-spacing:0.18em;color:var(--ink-3);margin-bottom:12px}
+.road-t{font-family:var(--mincho);font-weight:600;font-size:clamp(16px,1.9vw,21px);margin-bottom:4px}
+.road-en{font:500 9px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:12px}
+.road-p{font-size:11.5px;line-height:2;color:var(--ink-2)}
+@media(max-width:900px){
+  .road{grid-template-columns:1fr;padding-left:28px}
+  .road::before{top:0;bottom:0;left:5px;right:auto;width:1px;height:auto}
+  .road-step{padding:0 0 40px 0}
+  .road-step:last-child{padding-bottom:0}
+  .road-step::before{left:-28px;top:8px}
+}
+
+/* ===== 09 MANIFESTO(スクロール演出) ===== */
+.manifesto{background:var(--dark-sec);color:var(--dark-sec-text)}
+.manifesto .eyebrow{color:var(--dark-sec-dim)}
+.mani-stage{max-width:860px;margin:clamp(60px,9vh,100px) auto 0;display:grid;gap:clamp(40px,7vh,64px)}
+.mani-line{font-family:var(--mincho);font-weight:500;font-size:clamp(20px,3.4vw,34px);line-height:1.95;letter-spacing:0.03em;display:flex;gap:20px;align-items:baseline}
+.mani-line .ichi{color:var(--dawn);font-size:0.75em;flex-shrink:0}
+.mani-final{margin-top:clamp(50px,8vh,80px);font-family:var(--mincho);font-weight:600;font-size:clamp(30px,5.6vw,64px);line-height:1.6;letter-spacing:0.02em}
+.mani-final .period{color:var(--dawn)}
+.mani-sig{max-width:860px;margin:clamp(60px,9vh,90px) auto 0;font:500 12px/1 var(--en);letter-spacing:0.14em;color:var(--dark-sec-dim);display:flex;align-items:center;gap:14px}
+.mani-sig .seal{display:inline-grid;place-items:center;width:30px;height:30px;border:1.5px solid var(--dawn);border-radius:6px;color:var(--dawn);font-family:var(--mincho);font-size:13px;transform:rotate(-3deg)}
+
+/* ===== 10 COMMUNITY ===== */
+.join{text-align:center;padding-top:clamp(140px,19vh,230px);padding-bottom:clamp(120px,16vh,200px)}
+.join .eyebrow{justify-content:center}
+.join .eyebrow::before{display:none}
+.join-h{font-family:var(--mincho);font-weight:600;font-size:clamp(27px,5.2vw,58px);line-height:1.75;margin:32px auto 34px;max-width:940px}
+.join-p{max-width:540px;margin:0 auto;font-size:14.5px;line-height:2.4;color:var(--ink-2)}
+.join-ways{max-width:900px;margin:clamp(48px,7vh,72px) auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;text-align:left}
+.way{border:1px solid var(--line);border-radius:16px;padding:22px;background:var(--card);box-shadow:var(--shadow)}
+.way-t{font-family:var(--mincho);font-weight:600;font-size:16px;margin-bottom:8px}
+.way-t .en{font:600 9px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn);display:block;margin-bottom:8px}
+.way-p{font-size:11.5px;line-height:1.95;color:var(--ink-2)}
+@media(max-width:860px){.join-ways{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.join-ways{grid-template-columns:1fr}}
+.join-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:clamp(44px,7vh,64px)}
+.join-foot{margin-top:36px;font-size:12px;color:var(--ink-3);letter-spacing:0.04em}
+
+/* ===== FOOTER ===== */
+.footer{border-top:1px solid var(--line);padding:56px var(--pad-x) 64px}
+.footer-inner{max-width:var(--max);margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:32px;flex-wrap:wrap}
+.footer-brand{font:700 16px/1 var(--en);letter-spacing:0.22em;display:flex;align-items:center;gap:10px}
+.footer-brand svg{width:20px;height:20px}
+.footer-tag{margin-top:12px;font-size:11.5px;color:var(--ink-3);letter-spacing:0.04em}
+.footer-links{display:flex;gap:24px;font:600 10px/1 var(--en);letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);flex-wrap:wrap}
+.footer-links a:hover{color:var(--ink)}
+.footer-copy{width:100%;margin-top:34px;font:500 10px/1 var(--en);letter-spacing:0.12em;color:var(--ink-4)}
 </style>
 </head>
 <body>
 
-<div class="progress" id="prog"></div>
-
-<!-- ============ 目次(スクロールスパイ) ============ -->
-<nav class="toc" id="toc" aria-label="ページ内目次">
-  <a href="#top"><span class="lbl">はじめに</span><span class="num">00</span><span class="bar"></span></a>
-  <a href="#manifesto"><span class="lbl">思想</span><span class="num">01</span><span class="bar"></span></a>
-  <a href="#products"><span class="lbl">道具</span><span class="num">02</span><span class="bar"></span></a>
-  <a href="#starter-kits"><span class="lbl">キット</span><span class="num">03</span><span class="bar"></span></a>
-  <a href="#journal"><span class="lbl">手記</span><span class="num">04</span><span class="bar"></span></a>
-  <a href="#founder"><span class="lbl">店主</span><span class="num">05</span><span class="bar"></span></a>
-  <a href="#contact"><span class="lbl">相談</span><span class="num">06</span><span class="bar"></span></a>
-</nav>
+<div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
 
 <!-- ============ NAV ============ -->
-<nav class="nav" id="nav">
-  <a href="#top" class="nav-logo">BRIDGE<span class="dot">.</span></a>
-  <div class="nav-links">
-    <a href="./products/index.html">Tools</a>
-    <a href="./starter-kits/index.html">Kits</a>
-    <a href="./journal/index.html">Journal</a>
-    <a href="./about/index.html">Founder</a>
-    <a href="#contact">Contact</a>
+<nav class="nav" id="nav" aria-label="グローバルナビゲーション">
+  <a class="nav-logo" href="#top" aria-label="BRIDGE トップへ">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 44 Q32 16 56 44" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="32" cy="22" r="4.5" fill="var(--dawn)"/></svg>
+    BRIDGE
+  </a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#why">Why</a>
+      <a href="#rehabilitation">Rehabilitation</a>
+      <a href="#thinking">Thinking</a>
+      <a href="#projects">Projects</a>
+      <a href="#stories">Stories</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#manifesto">Manifesto</a>
+      <a href="#join">Join</a>
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="ライト/ダークモード切り替え">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
   </div>
 </nav>
 
-<!-- ============ HERO ============ -->
+<!-- ============ 01 HERO ============ -->
 <section class="hero" id="top">
-  <div class="hero-photo" role="img" aria-label="木の机に置かれた手書きノート、朱の小箱、湯呑、ノートPC"></div>
-  <div class="hero-bg"></div>
-  <div class="hero-watermark">BRIDGE</div>
+  <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-bridge" aria-hidden="true">
+    <svg viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax slice">
+      <path class="arc" id="bridgeArc" d="M-40 190 Q 300 40 600 40 T 1240 190"/>
+      <path class="deck" d="M-40 150 H 1240"/>
+      <g class="cable">
+        <path d="M120 150 V 122"/><path d="M220 150 V 92"/><path d="M320 150 V 68"/><path d="M420 150 V 52"/>
+        <path d="M520 150 V 43"/><path d="M600 150 V 40"/><path d="M680 150 V 43"/><path d="M780 150 V 52"/>
+        <path d="M880 150 V 68"/><path d="M980 150 V 92"/><path d="M1080 150 V 122"/>
+      </g>
+    </svg>
+  </div>
   <div class="hero-inner">
-    <div class="hero-eyebrow" data-reveal>BRIDGE — A Small Medical Studio</div>
+    <div class="hero-eyebrow" data-reveal><span class="b">BRIDGE</span> — A Project for Human Possibility</div>
     <h1 class="hero-h" data-reveal data-reveal-delay="1">
-      現場の<span class="em quote nowrap marker">面倒くさい</span>を<span class="nowrap">自分ごと</span>として<span class="em nowrap">解く</span>。
+      <span class="nowrap">変化を、</span><br class="br-pc"><span class="nowrap">自分の力に</span><span class="period">。</span>
     </h1>
     <p class="hero-sub" data-reveal data-reveal-delay="2">
-      理学療法士がひとりで作る、医療の道具屋。現場の小さな課題から、明日使える軽い道具を。
+      リハビリテーションの考え方で、<br class="br-pc">人と社会の選択肢を広げる。
     </p>
-    <div class="hero-bridge" data-reveal data-reveal-delay="3" aria-hidden="true">
-      <div class="hb-side"><span class="hb-jp">現場</span><span class="hb-en">Clinical Field</span></div>
-      <canvas class="hb-canvas" id="ecgBridge" width="560" height="108"></canvas>
-      <div class="hb-side"><span class="hb-jp">経営</span><span class="hb-en">Management</span></div>
+    <p class="hero-note" data-reveal data-reveal-delay="3">
+      BRIDGEは、アプリでもサービスでもなく、<span class="nowrap">「人が、自ら選び、納得して生きられる社会」</span>をつくるプロジェクトです。プロダクトは、そのための手段です。
+    </p>
+    <div class="hero-actions" data-reveal data-reveal-delay="4">
+      <a class="btn primary" href="#why">なぜ、BRIDGEなのか</a>
+      <a class="btn ghost" href="#projects">プロジェクトを見る</a>
     </div>
-    <div class="hero-meta" data-reveal data-reveal-delay="4">
-      <span>Established 2026</span>
+    <div class="hero-meta" data-reveal data-reveal-delay="5">
+      <span>Since 2026</span>
       <span>Tokyo / Remote</span>
-      <span>Solo Studio</span>
+      <span>Rehabilitation × Society</span>
     </div>
   </div>
   <div class="scroll-hint">SCROLL</div>
 </section>
 
-<!-- ============ 流れる看板 ============ -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track">
-    <span class="marquee-set">現場の「面倒くさい」を、自分ごととして解く。<i>BRIDGE — A Small Medical Studio</i>机上の空論は作らない。<i>13 Tools &amp; Counting</i>数字は、対話のためにある。<i>Built by hand. No frameworks.</i>「軽さ」は正義である。<i>Tokyo / Remote</i></span>
-    <span class="marquee-set">現場の「面倒くさい」を、自分ごととして解く。<i>BRIDGE — A Small Medical Studio</i>机上の空論は作らない。<i>13 Tools &amp; Counting</i>数字は、対話のためにある。<i>Built by hand. No frameworks.</i>「軽さ」は正義である。<i>Tokyo / Remote</i></span>
-  </div>
-</div>
+<!-- ============ 02 WHY ============ -->
+<section class="sec" id="why">
+  <div class="why-scene">
+    <div class="eyebrow" data-reveal>Why BRIDGE — なぜ、存在するのか</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">人生は、変化の連続だから。</h2>
 
-<!-- ============ FOR YOU(立場選択) ============ -->
-<section class="foryou">
-  <div class="foryou-inner">
-    <div class="foryou-label" data-reveal>For You</div>
-    <h3 class="foryou-h" data-reveal data-reveal-delay="1"><span class="nowrap">あなたに合う道具から、</span><span class="em nowrap">見せます。</span></h3>
-    <div class="foryou-buttons" data-reveal data-reveal-delay="2">
-      <a class="foryou-btn" href="./products/index.html#management"><span class="ic">01</span>経営の方<span class="arr">→</span></a>
-      <a class="foryou-btn" href="./products/index.html#casual"><span class="ic">02</span>医療現場の方<span class="arr">→</span></a>
-      <a class="foryou-btn" href="./products/index.html#learning"><span class="ic">03</span>学習者の方<span class="arr">→</span></a>
-      <a class="foryou-btn" href="./products/index.html"><span class="ic">04</span>全部見る<span class="arr">→</span></a>
+    <div class="why-lines" id="whyLines">
+      <p class="why-line" data-reveal>病気になっても。</p>
+      <p class="why-line" data-reveal>転職しても。</p>
+      <p class="why-line" data-reveal>組織が変わっても。</p>
+      <p class="why-line" data-reveal>AIが進化しても。</p>
     </div>
-  </div>
-</section>
 
-<!-- ============ MANIFESTO ============ -->
-<section class="manifesto" id="manifesto">
-  <div class="manifesto-inner">
-    <div class="eyebrow kicker manifesto-eyebrow" data-reveal>Manifesto</div>
-    <p class="manifesto-q" data-words>
-      <span class="em">机上の空論は 作らない。</span><br>
-      数字は 縛るためでなく、 <span class="nowrap">対話のためにある。</span><br>
-      そして <span class="em">「軽さ」は正義である。</span>
-    </p>
-    <p class="manifesto-body" data-reveal data-reveal-delay="2">
-      自分が最初のユーザーになる、小さな道具屋。重厚なSaaSではなく、明日から使える軽いものを、ひとつずつ。
-    </p>
-    <div class="manifesto-sig" data-reveal data-reveal-delay="3">— Hashimoto Wataru / Founder<span class="hanko" aria-hidden="true">橋</span></div>
-    <div data-reveal data-reveal-delay="4">
-      <a href="./about/index.html" class="note-link">思想の続きは、Founder ページに</a>
+    <div class="why-turn" data-reveal>
+      <p class="stmt">人はもう一度、<br>自分の人生を<span class="ao">選び直せる</span><span class="hikari">。</span></p>
+      <p class="body-p" style="margin-top:30px">
+        変化は、選択肢を奪うもののように見えます。けれど、適切な見方と、適切な仕組みがあれば——変化は、次の一歩の材料になる。その選択肢を増やすこと。それがBRIDGEです。
+      </p>
     </div>
-  </div>
-</section>
 
-<div class="ecg-divider" aria-hidden="true">
-  <svg viewBox="0 0 1200 64" preserveAspectRatio="none"><path d="M0 36 H340 L360 36 L372 10 L386 56 L398 24 L412 36 H700 L716 36 L726 18 L738 50 L748 30 L760 36 H1200"/></svg>
-</div>
-
-<!-- ============ FEATURED TOOLS ============ -->
-<section class="products" id="products">
-  <div class="products-head">
-    <div class="eyebrow kicker" data-reveal>Featured Tools</div>
-    <h2 data-reveal data-reveal-delay="1"><span class="nowrap">毎日の業務から、</span><span class="em nowrap">道具が生まれる。</span></h2>
-    <p data-reveal data-reveal-delay="2">
-      すべて、日常業務から生まれた道具。<span class="nowrap">まずは代表の4本を。</span>
-    </p>
-  </div>
-  <div class="products-grid" id="productsGrid">
-    <a class="product-card" href="./rehaboard/index.html" target="_blank" data-reveal>
-      <div class="product-card-thumb"><img src="images/products/rehaboard.png" alt="RehaBoard ダッシュボード画面" loading="lazy"></div>
-      <div class="product-card-body">
-        <div class="product-card-num">PRODUCT 01 · 経営・運営</div>
-        <div class="product-card-name">RehaBoard<span class="jp">リハボード</span></div>
-        <div class="product-card-tagline">リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。</div>
-        <div class="product-card-tags"><span>ダッシュボード</span><span>PT別実績</span><span>朝礼サマリー</span></div>
-        <span class="product-card-link">詳しく見る</span>
+    <div class="why-mvp">
+      <div class="mvp-card" data-reveal>
+        <div class="mvp-tag">Mission</div>
+        <p class="mvp-t">リハビリテーションという学問を通して、人と社会の選択肢を広げる。</p>
+        <p class="mvp-p">職種を広めたいのではありません。この学問が持つ本来の可能性を、医療の枠を超えて届けます。</p>
       </div>
+      <div class="mvp-card" data-reveal data-reveal-delay="1">
+        <div class="mvp-tag">Vision</div>
+        <p class="mvp-t">誰もが、自ら選び、納得して人生をデザインできる社会。</p>
+        <p class="mvp-p">正解を配る社会ではなく、一人ひとりが自分の答えを選べる社会へ。</p>
+      </div>
+      <div class="mvp-card" data-reveal data-reveal-delay="2">
+        <div class="mvp-tag">Philosophy</div>
+        <p class="mvp-t">人は、自ら選び、納得して生きることで、最も幸福になれる。</p>
+        <p class="mvp-p">与えられた最適解より、自分で選んだ道。BRIDGEのすべての設計は、この人間観から始まります。</p>
+      </div>
+    </div>
+
+    <div class="next-lead" data-reveal>
+      <span class="q">では、その「リハビリテーション」とは何か。</span><span class="arr">↓</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 WHAT IS REHABILITATION ============ -->
+<section class="sec rehab" id="rehabilitation">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>What is Rehabilitation — リハビリテーションとは何か</div>
+
+    <p class="rehab-common" data-reveal data-reveal-delay="1">
+      <span class="strike">歩けるようになること。身体機能を回復させる技術。</span><br>
+      ——一般には、そう思われています。間違いではありません。<br>
+      けれど、それはこの学問の、ほんの一部です。
+    </p>
+
+    <div class="etym" data-reveal>
+      <div class="etym-word"><i>re</i><span class="hikari"> + </span><i>habilis</i> = 再び、その人らしく。</div>
+      <p class="etym-p">
+        語源はラテン語。habilis(ふさわしい)に、re(再び)。つまりこの言葉は最初から、「機能の回復」ではなく<span class="nowrap">「その人がその人らしく生きられる状態への回復」</span>を指しています。
+      </p>
+    </div>
+
+    <div class="rehab-def">
+      <p class="lead" data-reveal>BRIDGEの定義は、こうです。</p>
+      <p class="stmt" data-reveal data-reveal-delay="1">
+        人や組織が本来持つ可能性を引き出し、<br>
+        自ら選び、納得して<span class="nowrap">前へ進める状態</span>をつくること<span class="hikari">。</span>
+      </p>
+    </div>
+
+    <!-- 図解:一本の道が、選べる複数の道になる -->
+    <div class="branch-fig" data-reveal>
+      <svg viewBox="0 0 880 300" role="img" aria-label="図解:一本しかなかった道が、リハビリテーションの考え方によって選べる複数の道に分岐する">
+        <circle class="dot" cx="60" cy="150" r="5"/>
+        <text class="lbl b" x="40" y="128">いま</text>
+        <path class="base" id="brBase" d="M60 150 H 360"/>
+        <text class="lbl" x="150" y="174">一本しか見えていなかった道</text>
+        <path class="opt" id="brA" d="M360 150 C 480 150 520 60 820 52"/>
+        <path class="opt d" id="brB" d="M360 150 C 500 150 540 150 820 150"/>
+        <path class="opt" id="brC" d="M360 150 C 480 150 520 240 820 248"/>
+        <text class="lbl b" x="832" y="56">挑戦する</text>
+        <text class="lbl b" x="832" y="154">選び直す</text>
+        <text class="lbl b" x="832" y="252">続ける</text>
+        <circle class="dot" cx="360" cy="150" r="4" fill="var(--dawn)"/>
+        <text class="lbl" x="312" y="122">可能性に気づく</text>
+      </svg>
+      <p class="branch-cap">どの道を選んでもいい。<strong>選べること</strong>そのものが、回復である。</p>
+    </div>
+
+    <div class="rehab-targets">
+      <p class="lead" data-reveal>そして、その対象は患者だけではありません。</p>
+      <div class="target-words">
+        <span data-reveal>患者<span class="mo">も。</span></span>
+        <span data-reveal data-reveal-delay="1">医療者<span class="mo">も。</span></span>
+        <span data-reveal data-reveal-delay="2">組織<span class="mo">も。</span></span>
+        <span data-reveal data-reveal-delay="3">企業<span class="mo">も。</span></span>
+        <span data-reveal data-reveal-delay="4">社会<span class="mo">も。</span></span>
+      </div>
+      <p class="body-p" style="margin-top:34px" data-reveal>
+        対象は違っても、考え方は同じ。本来持っている可能性を引き出し、選べる状態をつくる。この見方を、BRIDGEは<strong>あらゆる場面に持ち込みます</strong>。
+      </p>
+    </div>
+
+    <div class="next-lead" data-reveal>
+      <span class="q">その「考え方」には、型があります。</span><span class="arr">↓</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 REHABILITATION THINKING ============ -->
+<section class="sec" id="thinking">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Rehabilitation Thinking — 思考のフレームワーク</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">評価から始めて、<br>選択肢が広がるまで。</h2>
+    <p class="body-p" data-reveal data-reveal-delay="2">
+      リハビリテーションの臨床で使われる思考の型を、BRIDGEはそのまま、キャリアにも、組織にも、AI導入にも適用します。
+    </p>
+  </div>
+
+  <div class="think-flow">
+    <div class="tf-step" data-reveal>
+      <div class="tf-num">01</div><div class="tf-t">評価</div><span class="tf-en">Assess</span>
+      <p class="tf-p">思い込みではなく、事実から始める。いま何ができて、何に困っているのか。</p>
+    </div>
+    <div class="tf-step" data-reveal data-reveal-delay="1">
+      <div class="tf-num">02</div><div class="tf-t">理解</div><span class="tf-en">Understand</span>
+      <p class="tf-p">数字の奥にある文脈を読む。その人・その組織にとっての「意味」を掴む。</p>
+    </div>
+    <div class="tf-step" data-reveal data-reveal-delay="2">
+      <div class="tf-num">03</div><div class="tf-t">設計</div><span class="tf-en">Design</span>
+      <p class="tf-p">目標と道筋を、本人と一緒に決める。押し付けの計画は続かない。</p>
+    </div>
+    <div class="tf-step" data-reveal data-reveal-delay="3">
+      <div class="tf-num">04</div><div class="tf-t">実践</div><span class="tf-en">Practice</span>
+      <p class="tf-p">小さく始めて、続けられる形で。意志ではなく仕組みで支える。</p>
+    </div>
+    <div class="tf-step" data-reveal data-reveal-delay="4">
+      <div class="tf-num">05</div><div class="tf-t">再評価</div><span class="tf-en">Reassess</span>
+      <p class="tf-p">変化を測り、設計に戻す。この循環が、前進を確かなものにする。</p>
+    </div>
+    <div class="tf-step out" data-reveal data-reveal-delay="5">
+      <div class="tf-num">→</div><div class="tf-t">選択肢が広がる</div><span class="tf-en">Choices Expand</span>
+      <p class="tf-p">循環のたびに、選べる道が増えていく。それがこの型の目的地。</p>
+    </div>
+  </div>
+  <p class="think-loop-note" data-reveal>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    01〜05は一度きりではなく、循環します。回すほど、選択肢は増えます。
+  </p>
+
+  <div class="think-apply">
+    <div class="ta-card" data-reveal>
+      <div class="ta-tag">For Person</div>
+      <p class="ta-t">人に使えば、リハビリと<br>キャリア設計になる。</p>
+      <p class="ta-p">身体の回復も、働き方の再設計も、同じ型で進む。評価し、理解し、一緒に設計し、小さく実践する。</p>
+    </div>
+    <div class="ta-card" data-reveal data-reveal-delay="1">
+      <div class="ta-tag">For Organization</div>
+      <p class="ta-t">組織に使えば、<br>経営改善とPMIになる。</p>
+      <p class="ta-p">承継直後のクリニックの立て直しは、組織へのリハビリテーション。評価→介入→再評価は、そのまま経営の言葉になる。</p>
+    </div>
+    <div class="ta-card" data-reveal data-reveal-delay="2">
+      <div class="ta-tag">For Technology</div>
+      <p class="ta-t">技術に使えば、<br>人を広げるAI導入になる。</p>
+      <p class="ta-p">AIは置き換えではなく拡張。生まれた時間を対話と思考に還す設計まで含めて、導入と呼ぶ。</p>
+    </div>
+  </div>
+
+  <div class="next-lead" data-reveal>
+    <span class="q">この型を、BRIDGEは5つの原則で運用しています。</span><span class="arr">↓</span>
+  </div>
+</section>
+
+<!-- ============ 05 PRINCIPLES ============ -->
+<section class="sec princ" id="principles">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Principles — 5つの原則</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">すべての判断は、<br>この5つに立ち返る。</h2>
+  </div>
+  <div class="princ-grid">
+    <div class="princ-item" data-reveal>
+      <div class="princ-num">01</div>
+      <div class="princ-en">Human First</div>
+      <div class="princ-jp">病気ではなく、人を見る。<small>診断名でも役職でもなく、その人の人生から始める。</small></div>
+    </div>
+    <div class="princ-item" data-reveal>
+      <div class="princ-num">02</div>
+      <div class="princ-en">Expand Choices</div>
+      <div class="princ-jp">正解を与えるのではなく、選択肢を増やす。<small>選ぶのはいつも本人。私たちは選べる状態をつくる。</small></div>
+    </div>
+    <div class="princ-item" data-reveal>
+      <div class="princ-num">03</div>
+      <div class="princ-en">Believe Potential</div>
+      <div class="princ-jp">現状ではなく、可能性を見る。<small>いまの姿は、その人の上限ではない。</small></div>
+    </div>
+    <div class="princ-item" data-reveal>
+      <div class="princ-num">04</div>
+      <div class="princ-en">Build Systems</div>
+      <div class="princ-jp">努力だけに頼らず、続けられる仕組みを作る。<small>意志の強さは前提にしない。設計で支える。</small></div>
+    </div>
+    <div class="princ-item" data-reveal>
+      <div class="princ-num">05</div>
+      <div class="princ-en">Learn Forever</div>
+      <div class="princ-jp">実践し、検証し、改善し続ける。<small>思想も道具も、完成しない。だから面白い。</small></div>
+    </div>
+  </div>
+  <div class="sec-inner">
+    <div class="next-lead" data-reveal>
+      <span class="q">原則は、動くものになって初めて検証できます。</span><span class="arr">↓</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 PROJECTS(データ駆動) ============ -->
+<section class="sec" id="projects">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Projects — 現在の活動</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">思想を、動くものにする。</h2>
+    <p class="body-p" data-reveal data-reveal-delay="2">
+      どのプロジェクトも、まず自分が最初のユーザーになって使い続けています。机上の空論は、作りません。
+    </p>
+  </div>
+  <!-- カードはJSの PROJECTS 配列から自動生成。追加は配列に1行足すだけ -->
+  <div class="proj-grid" id="projGrid"></div>
+  <noscript><p style="max-width:660px;margin:40px auto;color:var(--ink-3);font-size:13px">プロジェクト一覧の表示にはJavaScriptが必要です。<a href="./products/index.html" style="text-decoration:underline">プロダクト一覧はこちら</a>。</p></noscript>
+
+  <div class="sec-inner">
+    <div class="next-lead" data-reveal>
+      <span class="q">道具の先に、増やしたい「瞬間」があります。</span><span class="arr">↓</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 STORIES ============ -->
+<section class="sec stories" id="stories">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Stories — 選択肢が増える瞬間</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">BRIDGEが増やしたいのは、<br>こういう瞬間。</h2>
+    <p class="story-note" data-reveal data-reveal-delay="2">
+      ※ 特定の個人の事例ではなく、臨床・経営・キャリアの現場から描いた「増やしたい瞬間」のスケッチです。誇張された成功談を並べるより、正直でいたいので。
+    </p>
+  </div>
+  <!-- カードはJSの STORIES 配列から自動生成 -->
+  <div class="story-rail" id="storyRail"></div>
+
+  <div class="sec-inner">
+    <div class="next-lead" data-reveal>
+      <span class="q">この瞬間を社会の当たり前にするまでの、道のり。</span><span class="arr">↓</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 ROADMAP ============ -->
+<section class="sec" id="roadmap">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Roadmap — 進み方</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">すべての活動は、<br>この順番で社会へ向かう。</h2>
+  </div>
+  <div class="road">
+    <div class="road-step" data-reveal>
+      <div class="road-num">01</div><div class="road-t">思想</div><span class="road-en">Philosophy</span>
+      <p class="road-p">なぜやるのかを、先に言葉にする。手段から始めない。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="1">
+      <div class="road-num">02</div><div class="road-t">実践</div><span class="road-en">Practice</span>
+      <p class="road-p">自分の現場で使い、確かめる。最初のユーザーは自分。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="2">
+      <div class="road-num">03</div><div class="road-t">検証</div><span class="road-en">Verify</span>
+      <p class="road-p">効いたのか、数字と対話で確かめる。感想で終わらせない。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="3">
+      <div class="road-num">04</div><div class="road-t">言語化</div><span class="road-en">Articulate</span>
+      <p class="road-p">過程と学びを公開し、誰でも受け取れる形にする。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="4">
+      <div class="road-num">05</div><div class="road-t">仕組み化</div><span class="road-en">Systematize</span>
+      <p class="road-p">属人性を抜き、道具と仕組みへ。私でなくても回るように。</p>
+    </div>
+    <div class="road-step" data-reveal data-reveal-delay="5">
+      <div class="road-num">06</div><div class="road-t">社会実装</div><span class="road-en">Implement</span>
+      <p class="road-p">医療の枠を超えて、社会の当たり前になるところまで。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 09 MANIFESTO ============ -->
+<section class="sec manifesto" id="manifesto">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Manifesto — 宣言</div>
+    <div class="mani-stage" id="maniStage">
+      <p class="mani-line" data-reveal><span class="ichi">一、</span>病気ではなく、人を見る。</p>
+      <p class="mani-line" data-reveal><span class="ichi">一、</span>正解を与えるのではなく、選択肢を増やす。</p>
+      <p class="mani-line" data-reveal><span class="ichi">一、</span>現状ではなく、可能性を見る。</p>
+      <p class="mani-line" data-reveal><span class="ichi">一、</span>努力だけに頼らず、続けられる仕組みを作る。</p>
+      <p class="mani-line" data-reveal><span class="ichi">一、</span>実践し、検証し、改善し続ける。</p>
+      <p class="mani-line" data-reveal><span class="ichi">一、</span>リハビリテーションを、医療の枠から解き放つ。</p>
+      <p class="mani-final" data-reveal>そして——<br>変化を、自分の力に<span class="period">。</span></p>
+    </div>
+    <div class="mani-sig" data-reveal>— BRIDGE Project<span class="seal" aria-hidden="true">橋</span></div>
+  </div>
+</section>
+
+<!-- ============ 10 COMMUNITY ============ -->
+<section class="sec join" id="join">
+  <div class="eyebrow" data-reveal>Community — 一緒に作る</div>
+  <h2 class="join-h" data-reveal data-reveal-delay="1">
+    一緒に、選択肢の増える<br>社会を作りませんか<span class="hikari">。</span>
+  </h2>
+  <p class="join-p" data-reveal data-reveal-delay="2">
+    これは商品の宣伝ではありません。この思想が社会に届くなら、届けるのは私でなくてもいい。医師でも、看護師でも、PTでも、OTでも、STでも、学生でも、経営者でも、AIでも。だからこれは、仲間への手紙です。
+  </p>
+  <div class="join-ways">
+    <a class="way" href="https://note.com/prime_duck4944" target="_blank" rel="noopener" data-reveal>
+      <div class="way-t"><span class="en">Read</span>読む</div>
+      <p class="way-p">noteで思想と過程を公開しています。まずはここから。</p>
     </a>
-    <a class="product-card" href="./medboard/index.html" target="_blank" data-reveal>
-      <div class="product-card-thumb"><img src="images/products/medboard.png" alt="MedBoard ダッシュボード画面" loading="lazy"></div>
-      <div class="product-card-body">
-        <div class="product-card-num">PRODUCT 02 · 経営・運営</div>
-        <div class="product-card-name">MedBoard<span class="jp">メドボード</span></div>
-        <div class="product-card-tagline">外来クリニックの患者フローを、2施設横並びで。「異変に気づく」のが目的。</div>
-        <div class="product-card-tags"><span>2施設比較</span><span>入力6項目</span><span>異変アラート</span></div>
-        <span class="product-card-link">詳しく見る</span>
-      </div>
+    <a class="way" href="mailto:h.w19961013@gmail.com" data-reveal data-reveal-delay="1">
+      <div class="way-t"><span class="en">Talk</span>話す</div>
+      <p class="way-p">共感も、異論も、現場の「面倒くさい」も。メールかDMでどうぞ。</p>
     </a>
-    <a class="product-card" href="./him-quiz/index.html" target="_blank" data-reveal>
-      <div class="product-card-thumb"><img src="images/products/him-quiz.png" alt="HIM Quiz 学習画面" loading="lazy"></div>
-      <div class="product-card-body">
-        <div class="product-card-num">PRODUCT 03 · 学習</div>
-        <div class="product-card-name">HIM Quiz<span class="jp">診療情報管理士 模試</span></div>
-        <div class="product-card-tagline">全12章・360問。模擬試験モード・章別正答率・間違い蓄積まで。</div>
-        <div class="product-card-tags"><span>360問</span><span>模擬試験</span><span>復習機能</span></div>
-        <span class="product-card-link">詳しく見る</span>
-      </div>
+    <a class="way" href="./products/index.html" data-reveal data-reveal-delay="2">
+      <div class="way-t"><span class="en">Use</span>使う</div>
+      <p class="way-p">道具はすべて公開しています。触ってみるのが一番早い。</p>
     </a>
-    <a class="product-card" href="./moyamoya/index.html" target="_blank" data-reveal>
-      <div class="product-card-thumb"><img src="images/products/moyamoya.png" alt="職場モヤモヤ診断 トップ画面" loading="lazy"></div>
-      <div class="product-card-body">
-        <div class="product-card-num">PRODUCT 10 · 診断・ライト</div>
-        <div class="product-card-name">Moyamoya Check<span class="jp">職場モヤモヤ診断</span></div>
-        <div class="product-card-tagline">そのしんどさ、どこから来ている? 職場の“なんとなくしんどい”を10問で言語化する診断。</div>
-        <div class="product-card-tags"><span>10問・約3分</span><span>6タイプ診断</span><span>登録不要</span></div>
-        <span class="product-card-link">診断してみる</span>
-      </div>
+    <a class="way" href="mailto:h.w19961013@gmail.com?subject=BRIDGEと一緒に作りたい" data-reveal data-reveal-delay="3">
+      <div class="way-t"><span class="en">Build</span>作る</div>
+      <p class="way-p">あなたの現場の課題を、一緒に道具にしませんか。共創歓迎。</p>
     </a>
   </div>
-  <div class="products-foot" data-reveal>
-    <a href="./products/index.html" class="notes-cta">すべてのプロダクトを見る →</a>
+  <div class="join-actions" data-reveal>
+    <a class="btn primary" href="mailto:h.w19961013@gmail.com">メールを書く</a>
+    <a class="btn ghost" href="https://x.com/WataruPT1013" target="_blank" rel="noopener">XでDMする</a>
+    <a class="btn ghost" href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteを読む</a>
   </div>
-</section>
-
-<!-- ============ STARTER KITS 導線 ============ -->
-<section class="toolbox" id="starter-kits">
-  <div class="toolbox-head">
-    <div class="eyebrow kicker" data-reveal>Starter Kits</div>
-    <h2 data-reveal data-reveal-delay="1"><span class="nowrap">明日から使える、</span><span class="em nowrap">小さな道具屋。</span></h2>
-    <p data-reveal data-reveal-delay="2">
-      買い切りの RehaBoard(¥1,980)と、無料のKPIチェックリスト。<span class="nowrap">導入会議の要らない軽さで。</span>
-    </p>
-  </div>
-  <div class="toolbox-teaser" data-reveal data-reveal-delay="3">
-    <a class="cta-btn primary" href="./starter-kits/index.html">Starter Kits を見る</a>
-    <a class="cta-btn ghost" href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener">無料チェックリストを受け取る</a>
-  </div>
-</section>
-
-<!-- ============ JOURNAL 導線 ============ -->
-<section class="notes" id="journal">
-  <div class="notes-head">
-    <div class="eyebrow kicker" data-reveal>Journal</div>
-    <h2 data-reveal data-reveal-delay="1"><span class="nowrap">日々の手記と、</span><span class="em nowrap">実験室。</span></h2>
-    <p data-reveal data-reveal-delay="2">
-      note・朝の手帖・仕事日記・実験室。<span class="nowrap">道具になる前の「途中」も、そのまま。</span>
-    </p>
-  </div>
-  <div class="notes-actions" data-reveal data-reveal-delay="3">
-    <a href="./journal/index.html" class="notes-cta">Journal を見る →</a>
-    <a href="https://note.com/prime_duck4944" target="_blank" rel="noopener" class="notes-cta">Note で記事を読む →</a>
-  </div>
-</section>
-
-<!-- ============ FOUNDER(短縮版) ============ -->
-<section class="founder" id="founder">
-  <div class="founder-container">
-
-    <div class="founder-hero">
-      <div class="founder-portrait" data-reveal>
-        <div class="badge">
-          <div class="name">橋本 渉</div>
-          <div class="role">Founder · Builder</div>
-        </div>
-      </div>
-      <div class="founder-name-block">
-        <div class="eyebrow kicker" data-reveal>Founder</div>
-        <h2 class="name-h" data-reveal data-reveal-delay="1">
-          <span class="nowrap">臨床</span><span class="em">×</span><span class="nowrap">研究</span><span class="em">×</span><span class="nowrap">経営、</span><br class="br-sp">
-          <span class="em nowrap">そして道具づくり。</span>
-          <span class="en-name">Wataru Hashimoto</span>
-        </h2>
-        <span class="role-tag" data-reveal data-reveal-delay="2">PT × Consultant × Builder</span>
-        <p class="founder-intro" data-reveal data-reveal-delay="3">
-          現場で診て、大学院で書き、経営の数字に責任を持ち、いま道具を作る。<span class="nowrap">「臨床×研究×経営」</span>を、一人で繋ぐ。
-        </p>
-      </div>
-    </div>
-
-    <div class="founder-quote" data-reveal>
-      <q><span class="nowrap">医療を持続可能にするには、</span><span class="nowrap">経営の視点が要る。</span><br class="br-pc"><span class="nowrap">そう気づいた理学療法士が、</span><span class="nowrap">いま道具を作っている。</span></q>
-      <span class="cite">— Wataru Hashimoto<span class="hanko" aria-hidden="true">橋</span></span>
-    </div>
-
-    <div class="founder-foot" data-reveal>
-      <div class="founder-roles">
-        <span>理学療法士</span>
-        <span>医科学修士</span>
-        <span>医療経営コンサル</span>
-        <span>診療情報管理士(学習中)</span>
-        <span>Solo Builder</span>
-      </div>
-      <a href="./about/index.html" class="note-link">
-        来歴の続き・なぜ作るのか・BRIDGEの思想と仕事の進め方は、Founder ページに
-      </a>
-      <a href="https://note.com/prime_duck4944" target="_blank" class="note-link">
-        Note で開発の過程・現場で考えたこと・キャリア探求を書いています
-      </a>
-    </div>
-
-  </div>
-</section>
-
-<div class="ecg-divider" aria-hidden="true">
-  <svg viewBox="0 0 1200 64" preserveAspectRatio="none"><path d="M0 36 H480 L496 36 L508 8 L522 58 L534 22 L548 36 H1200"/></svg>
-</div>
-
-<!-- ============ CTA ============ -->
-<section class="cta-section" id="contact">
-  <div class="cta-inner">
-    <div class="eyebrow kicker cta-eyebrow" data-reveal>Get in Touch</div>
-    <h2 class="cta-h" data-reveal data-reveal-delay="1">
-      現場の<span class="em quote nowrap">面倒くさい</span>が<span class="nowrap">あれば</span>、<span class="nowrap">教えてください。</span>
-    </h2>
-    <p class="cta-sub" data-reveal data-reveal-delay="2">
-      受託・導入・業務分析、何でも。<span class="nowrap">返信はできるだけ早く。</span>
-    </p>
-    <div class="cta-actions" data-reveal data-reveal-delay="3">
-      <a href="mailto:h.w19961013@gmail.com" class="cta-btn primary">メールで相談</a>
-      <a href="https://x.com/WataruPT1013" target="_blank" class="cta-btn ghost">XでDM</a>
-      <a href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" class="cta-btn ghost">無料チェックリストを受け取る</a>
-    </div>
-    <p class="cta-foot" data-reveal data-reveal-delay="4">
-      まず触ってみたい方は、無料配布の<span class="nowrap">リハ部門 KPI チェックリスト</span>から。
-    </p>
-  </div>
+  <p class="join-foot" data-reveal>
+    ページを閉じたあと、「リハビリテーションって、身体を治すことだけじゃないんだ」と<br class="br-pc">感じてもらえたなら、このページの役割は果たされています。
+  </p>
 </section>
 
 <!-- ============ FOOTER ============ -->
 <footer class="footer">
   <div class="footer-inner">
     <div>
-      <div class="footer-brand">BRIDGE<span class="dot">.</span></div>
-      <div class="footer-tag">A small medical studio. Tokyo / Remote.</div>
+      <div class="footer-brand">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 44 Q32 16 56 44" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="32" cy="22" r="4.5" fill="var(--dawn)"/></svg>
+        BRIDGE
+      </div>
+      <div class="footer-tag">A project to expand human possibility. — 人と社会の選択肢を広げるプロジェクト。</div>
     </div>
     <div class="footer-links">
       <a href="./products/index.html">Tools</a>
-      <a href="./starter-kits/index.html">Kits</a>
-      <a href="./journal/index.html">Journal</a>
       <a href="./about/index.html">Founder</a>
-      <a href="https://note.com/prime_duck4944" target="_blank">Note</a>
-      <a href="https://x.com/WataruPT1013" target="_blank">X</a>
-      <a href="https://github.com/bridge-med" target="_blank">GitHub</a>
-      <a href="mailto:h.w19961013@gmail.com">Mail</a>
+      <a href="./journal/index.html">Journal</a>
+      <a href="./starter-kits/index.html">Starter Kits</a>
+      <a href="./legal/privacy.html">Privacy</a>
     </div>
-  </div>
-  <div class="footer-copy">
-    <span>© 2026 BRIDGE — Hashimoto Wataru</span>
-    <span>Built by hand. No frameworks.</span>
+    <div class="footer-copy">© 2026 BRIDGE. All rights reserved.</div>
   </div>
 </footer>
 
+<!-- ============ LIBS(CDN・読めなくてもページは成立する) ============ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js" defer></script>
+
 <script>
-const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ================================================================
+   データ(ここに足せば、カードは自動で増える)
+   ================================================================ */
+const PROJECTS = [
+  { name:'BRIDGE Tools', en:'Medical Studio', status:'稼働中', run:true,
+    desc:'医療現場の「面倒くさい」を解く軽量ツール群。RehaBoard、MedBoardなど、導入会議の要らない軽さで。',
+    href:'./products/index.html' },
+  { name:'キャリアログ', en:'Career Log', status:'稼働中', run:true,
+    desc:'日々の仕事と学びを記録し、キャリアを前へ進めるアプリ。「続けられる仕組み」の実験場。',
+    href:'./daily-app/index.html' },
+  { name:'Clinic Flow 3D', en:'Simulation Game', status:'稼働中', run:true,
+    desc:'外来経営を、まちづくりゲームとして体験する3Dシミュレーション。遊びながら医療経営を学ぶ。',
+    href:'./clinic-flow-3d/index.html' },
+  { name:'PMI', en:'Post Merger Integration', status:'実務', run:false,
+    desc:'医療機関の承継・統合後の立て直し。評価→介入→再評価という、組織へのリハビリテーションの実務。',
+    href:null },
+  { name:'AI活用', en:'AI in Practice', status:'実践中', run:false,
+    desc:'医療と経営の現場にAIを実装し、対話と思考のための時間を取り戻す。過程も含めて公開する。',
+    href:null },
+  { name:'教育', en:'Education', status:'実践中', run:false,
+    desc:'リハビリテーション思考を、次の世代へ。学べるゲームや教材で、経営と臨床の橋を渡せる人を増やす。',
+    href:null },
+  { name:'研究', en:'Research', status:'継続中', run:false,
+    desc:'大学院で学んだ「検証する目」を持ち続ける。実践を感想で終わらせず、確かめてから届ける。',
+    href:null },
+  { name:'発信', en:'note / X', status:'継続中', run:true,
+    desc:'開発の過程、現場で考えたこと、キャリアの探求。思想を、誰でも受け取れる言葉にして残す。',
+    href:'https://note.com/prime_duck4944', external:true },
+  { name:'Next', en:'まだ名前のない構想', status:'構想中', run:false,
+    desc:'思想が先、形はあと。次のプロジェクトは、いつも現場の違和感から生まれます。',
+    href:null, next:true },
+];
 
-// ===== Reveal on scroll(区切り線・語リビールも同じ観測で) =====
-const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target)}})},{threshold:0.12});
-document.querySelectorAll('[data-reveal],.ecg-divider,[data-words]').forEach(el=>io.observe(el));
+const STORIES = [
+  { tag:'Patient', before:'「歩けないから、あきらめる」', after:'「どうやって行くかを、選ぶ」',
+    p:'目標が「歩行の自立」から「孫の運動会に行く」に変わった日、リハビリは訓練ではなく人生の設計になる。' },
+  { tag:'Clinician', before:'「数字に、萎縮する朝礼」', after:'「数字から、始まる対話」',
+    p:'同じ数字を、現場と経営が同じ画面で見る。責める道具だったKPIが、考えるための共通言語になる。' },
+  { tag:'Organization', before:'「承継直後、どこから手をつけるか分からない」', after:'「評価→介入→再評価の道筋がある」',
+    p:'組織も、患者と同じように診立てられる。課題が言葉になった瞬間、組織は前に進み始める。' },
+  { tag:'Career', before:'「辞めるか、我慢するかの二択」', after:'「働き方を、再設計するという第三の道」',
+    p:'記録が溜まると、自分の輪郭が見えてくる。選択肢は、二つではなかったと気づく。' },
+  { tag:'AI', before:'「書類に消えていた、毎日の30分」', after:'「患者との対話に還る、毎日の30分」',
+    p:'AIが置き換えたのは人ではなく、人を人から遠ざけていた作業。技術は、こう使うためにある。' },
+];
 
-// ===== Manifesto: 語単位リビール =====
-document.querySelectorAll('[data-words]').forEach(el=>{
-  const frag=document.createDocumentFragment();
-  [...el.childNodes].forEach(node=>{
-    if(node.nodeType===3){
-      node.textContent.split(/\s+/).filter(Boolean).forEach(w=>{
-        const s=document.createElement('span');s.className='w';s.textContent=w;frag.appendChild(s);
-      });
-    }else if(node.nodeType===1){
-      if(node.tagName!=='BR')node.classList.add('w');
-      frag.appendChild(node);
-    }
-  });
-  el.textContent='';el.appendChild(frag);
-  el.querySelectorAll('.w').forEach((s,i)=>{s.style.transitionDelay=(i*90)+'ms'});
+/* ================================================================
+   レンダリング(データ駆動)
+   ================================================================ */
+const projGrid = document.getElementById('projGrid');
+PROJECTS.forEach((p, i) => {
+  const el = document.createElement(p.href ? 'a' : 'div');
+  el.className = 'proj-card' + (p.next ? ' next-card' : '');
+  if (p.href) { el.href = p.href; if (p.external) { el.target = '_blank'; el.rel = 'noopener'; } }
+  el.setAttribute('data-reveal', '');
+  el.setAttribute('data-reveal-delay', String(i % 3));
+  el.innerHTML = `
+    <div class="proj-top">
+      <span class="proj-num">${String(i + 1).padStart(2, '0')}</span>
+      <span class="proj-status${p.run ? ' run' : ''}">${p.status}</span>
+    </div>
+    <div>
+      <div class="proj-name">${p.name}</div>
+      <div class="proj-en">${p.en}</div>
+    </div>
+    <p class="proj-desc">${p.desc}</p>
+    ${p.href ? '<span class="proj-link">見てみる <span aria-hidden="true">→</span></span>' : ''}`;
+  projGrid.appendChild(el);
 });
 
-// ===== 現場と経営を繋ぐ心電図(朱) =====
-const cv=document.getElementById('ecgBridge');
-if(cv){
-  const ctx=cv.getContext('2d');
-  const W=cv.width,H=cv.height,base=H*0.58;
-  const wave=t=>{
-    const p=t%190;
-    if(p<10)return -8*Math.sin(p/10*Math.PI);
-    if(p<20)return 0;
-    if(p<24)return 13*(p-20)/4;
-    if(p<30)return 13-70*(p-24)/6;
-    if(p<36)return -57+74*(p-30)/6;
-    if(p<46)return 17-17*(p-36)/10;
-    if(p<76)return -11*Math.sin((p-46)/30*Math.PI);
-    return 0;
-  };
-  const buf=new Float32Array(W).fill(base);
-  let head=0,t=0;
-  const GAP=16,SPEED=3;
-  const draw=()=>{
-    ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='#C8553D';
-    ctx.lineWidth=2;
-    ctx.shadowColor='rgba(200,85,61,0.55)';
-    ctx.shadowBlur=6;
-    ctx.beginPath();
-    let pen=false;
-    for(let x=0;x<W;x++){
-      const ahead=(x-head+W)%W;
-      if(ahead>0&&ahead<GAP){pen=false;continue}
-      if(!pen){ctx.moveTo(x,buf[x]);pen=true}
-      else ctx.lineTo(x,buf[x]);
-    }
-    ctx.stroke();
-    ctx.fillStyle='#E8836B';
-    ctx.shadowBlur=12;
-    ctx.beginPath();ctx.arc(head,buf[head],2.6,0,Math.PI*2);ctx.fill();
-  };
-  if(REDUCED){
-    for(let x=0;x<W;x++)buf[x]=base+wave(x);
-    draw();
-  }else{
-    (function tick(){
-      for(let i=0;i<SPEED;i++){buf[head]=base+wave(t);head=(head+1)%W;t++}
-      draw();
-      requestAnimationFrame(tick);
-    })();
+const storyRail = document.getElementById('storyRail');
+STORIES.forEach((s, i) => {
+  const el = document.createElement('div');
+  el.className = 'story-card';
+  el.setAttribute('data-reveal', '');
+  el.setAttribute('data-reveal-delay', String(i % 3));
+  el.innerHTML = `
+    <div class="story-tag">${s.tag}</div>
+    <p class="story-before"><s>${s.before}</s></p>
+    <div class="story-arrow" aria-hidden="true">↓</div>
+    <p class="story-after">${s.after}</p>
+    <p class="story-p">${s.p}</p>`;
+  storyRail.appendChild(el);
+});
+
+/* ================================================================
+   ベース挙動(ライブラリ非依存)
+   ================================================================ */
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Reveal
+const io = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
   }
-}
+}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
 
-// ===== 目次:スクロールスパイ =====
-const tocLinks=[...document.querySelectorAll('#toc a')];
-const secIds=tocLinks.map(a=>a.getAttribute('href').slice(1));
-const spy=new IntersectionObserver(es=>{
-  es.forEach(e=>{
-    if(!e.isIntersecting)return;
-    const id=e.target.id;
-    tocLinks.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+id));
-  });
-},{rootMargin:'-42% 0px -52% 0px'});
-secIds.forEach(id=>{const el=document.getElementById(id);if(el)spy.observe(el)});
+// Whyの行:読まれるたびに「いまの一行」が濃くなる
+const whyIO = new IntersectionObserver((entries) => {
+  for (const e of entries) e.target.classList.toggle('now', e.isIntersecting);
+}, { rootMargin: '-40% 0px -40% 0px' });
+document.querySelectorAll('.why-line').forEach(el => whyIO.observe(el));
 
-// ===== Nav scroll state =====
-const nav=document.getElementById('nav');
-const prog=document.getElementById('prog');
-window.addEventListener('scroll',()=>{
-  nav.classList.toggle('scrolled',window.scrollY>40);
-  const h=document.documentElement.scrollHeight-window.innerHeight;
-  prog.style.width=(window.scrollY/h*100)+'%';
+// Nav / progress
+const nav = document.getElementById('nav');
+const bar = document.getElementById('progressBar');
+const onScroll = () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  bar.style.transform = `scaleX(${h > 0 ? window.scrollY / h : 0})`;
+};
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+// テーマ切り替え
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('bridge-theme', next); } catch (e) {}
 });
 
-// ===== Magnetic buttons(マウス環境のみ・reduced-motion 尊重) =====
-if(matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
-  document.querySelectorAll('.cta-btn,.foryou-btn,.notes-cta').forEach(b=>{
-    b.addEventListener('mousemove',e=>{
-      const r=b.getBoundingClientRect();
-      b.style.transform=`translate(${((e.clientX-r.left-r.width/2)*0.12).toFixed(1)}px,${((e.clientY-r.top-r.height/2)*0.3).toFixed(1)}px)`;
-    });
-    b.addEventListener('mouseleave',()=>{b.style.transform=''});
-  });
-}
+// Heroの光の粒(夜明けの塵)— 控えめに
+(function () {
+  if (reduced) return;
+  const cv = document.getElementById('heroCanvas');
+  const ctx = cv.getContext('2d');
+  let w, h, parts = [];
+  const N = 34;
+  function size() {
+    w = cv.width = cv.offsetWidth * devicePixelRatio;
+    h = cv.height = cv.offsetHeight * devicePixelRatio;
+  }
+  function make() {
+    parts = Array.from({ length: N }, () => ({
+      x: Math.random() * w, y: h * (0.35 + Math.random() * 0.65),
+      r: (0.6 + Math.random() * 1.6) * devicePixelRatio,
+      vy: (0.06 + Math.random() * 0.16) * devicePixelRatio,
+      o: 0.12 + Math.random() * 0.3,
+      tw: Math.random() * Math.PI * 2,
+    }));
+  }
+  function tick(t) {
+    ctx.clearRect(0, 0, w, h);
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    for (const p of parts) {
+      p.y -= p.vy; p.tw += 0.02;
+      if (p.y < h * 0.18) { p.y = h * (0.75 + Math.random() * 0.25); p.x = Math.random() * w; }
+      const o = p.o * (0.6 + 0.4 * Math.sin(p.tw));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = dark ? `rgba(226,180,92,${o})` : `rgba(217,164,65,${o * 0.8})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  size(); make();
+  window.addEventListener('resize', () => { size(); make(); }, { passive: true });
+  requestAnimationFrame(tick);
+})();
 
+/* ================================================================
+   演出強化(GSAP + Lenis が読み込めた場合のみ)
+   ================================================================ */
+window.addEventListener('load', () => {
+  if (reduced || !window.gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Lenis(慣性スクロール=「ゆっくり世界へ入っていく」)
+  if (window.Lenis) {
+    const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9 });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((t) => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const el = document.querySelector(a.getAttribute('href'));
+        if (el) { e.preventDefault(); lenis.scrollTo(el, { offset: -70, duration: 1.4 }); }
+      });
+    });
+  }
+
+  // Hero:橋の弧を描く+スクロールでパララックス
+  const arc = document.getElementById('bridgeArc');
+  if (arc) {
+    const len = arc.getTotalLength();
+    gsap.fromTo(arc, { strokeDasharray: len, strokeDashoffset: len },
+      { strokeDashoffset: 0, duration: 2.4, ease: 'power2.out', delay: 0.4 });
+  }
+  gsap.to('.hero-inner', {
+    yPercent: -14, opacity: 0.25, ease: 'none',
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+  });
+  gsap.to('.hero-bridge', {
+    yPercent: 18, ease: 'none',
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+  });
+
+  // 図解:道の分岐を、スクロールに合わせて描く
+  ['brBase', 'brA', 'brB', 'brC'].forEach((id, i) => {
+    const p = document.getElementById(id);
+    if (!p) return;
+    const len = p.getTotalLength();
+    gsap.fromTo(p, { strokeDasharray: len, strokeDashoffset: len }, {
+      strokeDashoffset: 0, ease: 'none',
+      scrollTrigger: { trigger: '.branch-fig', start: 'top 78%', end: 'top 30%', scrub: true },
+      delay: i * 0.1
+    });
+  });
+
+  // Manifesto:一行ずつ、静かに立ち上がる
+  gsap.utils.toArray('.mani-line, .mani-final').forEach((el) => {
+    gsap.fromTo(el, { opacity: 0.12, y: 14 }, {
+      opacity: 1, y: 0, ease: 'none',
+      scrollTrigger: { trigger: el, start: 'top 85%', end: 'top 55%', scrub: true }
+    });
+  });
+});
 </script>
 
 </body>
