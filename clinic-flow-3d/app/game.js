@@ -3694,7 +3694,7 @@
       // 未到着の来院を期待値で処理
       const arr = G.arrivals.slice(G.nextArrivalIdx);
       G.nextArrivalIdx = G.arrivals.length;
-      let rehaAvail = Math.min(clinic.usableMachines() * 26, clinic.rehaCap());
+      let rehaAvail = Math.min(clinic.usableMachines() * 34, clinic.rehaCap());
       const examCapDay = Math.max(10, settings.doctors * (spec.min / (settings.examMean + (G.evExamDelta || 0) + 1.5)) * 0.72);
       let examServed = 0, turnedAway = 0;
       for (const a of arr) {

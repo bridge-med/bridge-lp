@@ -28,7 +28,9 @@ const CLINIC = (() => {
       CHAIRS: [
         { x: 1, y: 8 }, { x: 2, y: 8 }, { x: 3, y: 8 }, { x: 4, y: 8 },
         { x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }, { x: 4, y: 10 },
-        { x: 5, y: 8 }, { x: 5, y: 10 }, { x: 6, y: 8 }, { x: 6, y: 10 }
+        { x: 5, y: 8 }, { x: 5, y: 10 }, { x: 6, y: 8 }, { x: 6, y: 10 },
+        { x: 3, y: 7 }, { x: 4, y: 7 },
+        { x: 1, y: 12 }, { x: 2, y: 12 }, { x: 3, y: 12 }, { x: 4, y: 12 }, { x: 5, y: 12 }, { x: 6, y: 12 }
       ],
       STANDS: [{ x: 0, y: 9 }, { x: 6, y: 9 }, { x: 0, y: 8 }, { x: 0, y: 10 }, { x: 2, y: 9 }, { x: 4, y: 9 }, { x: 0, y: 11 }, { x: 6, y: 7 }],
       BEDS: [
@@ -67,7 +69,7 @@ const CLINIC = (() => {
         signage: { x: 0, y: 7, w: 1, label: '📺' },
         bus: { x: 0, y: 13, w: 2, label: '🚌 送迎バス' }
       },
-      MAX: { doctors: 3, chairs: 12, beds: 3, machines: 6, receptionists: 2, nurses: 3, pts: 6 }
+      MAX: { doctors: 3, chairs: 20, beds: 3, machines: 6, receptionists: 2, nurses: 3, pts: 6 }
     };
   }
 
@@ -91,7 +93,9 @@ const CLINIC = (() => {
         { x: 1, y: 8 }, { x: 2, y: 8 }, { x: 3, y: 8 }, { x: 4, y: 8 }, { x: 5, y: 8 }, { x: 6, y: 8 },
         { x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }, { x: 4, y: 10 }, { x: 5, y: 10 }, { x: 6, y: 10 },
         { x: 1, y: 12 }, { x: 2, y: 12 }, { x: 3, y: 12 }, { x: 4, y: 12 }, { x: 5, y: 12 }, { x: 6, y: 12 },
-        { x: 7, y: 9 }, { x: 7, y: 11 }
+        { x: 7, y: 9 }, { x: 7, y: 11 },
+        { x: 1, y: 14 }, { x: 2, y: 14 }, { x: 3, y: 14 }, { x: 4, y: 14 }, { x: 5, y: 14 }, { x: 6, y: 14 }, { x: 7, y: 14 },
+        { x: 0, y: 8 }, { x: 0, y: 10 }, { x: 8, y: 9 }, { x: 8, y: 11 }, { x: 8, y: 12 }
       ],
       STANDS: [{ x: 0, y: 9 }, { x: 0, y: 11 }, { x: 7, y: 7 }, { x: 0, y: 7 }, { x: 2, y: 9 }, { x: 4, y: 9 }, { x: 2, y: 11 }, { x: 4, y: 11 }, { x: 0, y: 13 }, { x: 6, y: 9 }],
       BEDS: [
@@ -135,7 +139,7 @@ const CLINIC = (() => {
         signage: { x: 0, y: 12, w: 1, label: '📺' },
         bus: { x: 0, y: 15, w: 2, label: '🚌 送迎バス' }
       },
-      MAX: { doctors: 4, chairs: 20, beds: 4, machines: 12, receptionists: 3, nurses: 4, pts: 12 }
+      MAX: { doctors: 4, chairs: 32, beds: 4, machines: 12, receptionists: 3, nurses: 4, pts: 12 }
     };
   }
 
@@ -161,7 +165,9 @@ const CLINIC = (() => {
         { x: 1, y: 8 }, { x: 2, y: 8 }, { x: 3, y: 8 }, { x: 4, y: 8 }, { x: 5, y: 8 }, { x: 6, y: 8 }, { x: 7, y: 8 },
         { x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }, { x: 4, y: 10 }, { x: 5, y: 10 }, { x: 6, y: 10 }, { x: 7, y: 10 },
         { x: 1, y: 12 }, { x: 2, y: 12 }, { x: 3, y: 12 }, { x: 4, y: 12 }, { x: 5, y: 12 }, { x: 6, y: 12 }, { x: 7, y: 12 },
-        { x: 1, y: 14 }, { x: 2, y: 14 }, { x: 3, y: 14 }, { x: 4, y: 14 }, { x: 5, y: 14 }, { x: 6, y: 14 }, { x: 7, y: 14 }
+        { x: 1, y: 14 }, { x: 2, y: 14 }, { x: 3, y: 14 }, { x: 4, y: 14 }, { x: 5, y: 14 }, { x: 6, y: 14 }, { x: 7, y: 14 },
+        { x: 1, y: 16 }, { x: 2, y: 16 }, { x: 3, y: 16 }, { x: 4, y: 16 }, { x: 5, y: 16 }, { x: 6, y: 16 }, { x: 7, y: 16 },
+        { x: 8, y: 9 }, { x: 8, y: 11 }, { x: 8, y: 13 }, { x: 8, y: 14 }, { x: 0, y: 14 }
       ],
       STANDS: [
         { x: 0, y: 8 }, { x: 0, y: 9 }, { x: 0, y: 10 }, { x: 0, y: 11 }, { x: 0, y: 12 }, { x: 0, y: 13 },
@@ -216,7 +222,7 @@ const CLINIC = (() => {
         signage: { x: 0, y: 7, w: 1, label: '📺' },
         bus: { x: 0, y: 19, w: 2, label: '🚌 送迎バス' }
       },
-      MAX: { doctors: 6, chairs: 28, beds: 6, machines: 18, receptionists: 4, nurses: 6, pts: 20 }
+      MAX: { doctors: 6, chairs: 40, beds: 6, machines: 18, receptionists: 4, nurses: 6, pts: 20 }
     };
   }
 
@@ -253,7 +259,7 @@ const CLINIC = (() => {
       this.doctors = [{ patient: null }, { patient: null }, { patient: null }, { patient: null }, { patient: null }, { patient: null }];
       this.bedUsed = [null, null, null, null, null, null];
       this.machineUsed = new Array(18).fill(null);
-      this.seatUsed = new Array(28).fill(null);
+      this.seatUsed = new Array(40).fill(null);
       this.standUsed = new Array(12).fill(null);
       this.heat = new Float32Array(this.L.W * this.L.H);
       this.floats = [];
@@ -287,10 +293,11 @@ const CLINIC = (() => {
 
     /* ---------- 患者投入 ---------- */
 
-    // 待合の飽和度(椅子+立ちスペースに対する待機人数)
+    // 待合の飽和度(椅子+立ちスペースに対する待機人数)。
+    // リハ待ちはリハ室側で待つ(枠が埋まれば次回振替になる)ので、入口の混雑離脱には数えない
     waitingLoad() {
       const cap = Math.min(this.s.chairs, this.L.CHAIRS.length) + this.L.STANDS.length;
-      const n = this.recQueue.length + this.examQueue.length + this.treatQueue.length + this.rehaQueue.length;
+      const n = this.recQueue.length + this.examQueue.length + this.treatQueue.length;
       return { n, cap };
     }
 
@@ -364,6 +371,17 @@ const CLINIC = (() => {
 
     standingCount() { return this.standUsed.filter(Boolean).length; }
 
+    // リハ待ちが機器の回転を大きく超えたら、その場で次回振替(会計へ)。待合の滞留と長時間待ちを防ぐ
+    toRehaOrDefer(p) {
+      const waiting = this.rehaQueue.filter((q) => q.phase === 'waitReha').length;
+      if (this.rehaToday >= this.rehaCap() || waiting >= this.usableMachines() * 2 + 2) {
+        this.toCashier(p);
+        return;
+      }
+      this.rehaQueue.push(p);
+      this.seatInWaiting(p, 'waitReha');
+    }
+
     toCashier(p) {
       p.phase = 'cashQ';
       this.cashQueue.push(p);
@@ -379,8 +397,7 @@ const CLINIC = (() => {
       const r = Math.random();
       const rehaOk = s.rehaLevel > 0 && this.usableMachines() > 0;
       if (p.refer && rehaOk) {
-        this.rehaQueue.push(p);
-        this.seatInWaiting(p, 'waitReha');
+        this.toRehaOrDefer(p);
         return;
       }
       if (p.refer && this.usableBeds() > 0) {
@@ -394,8 +411,7 @@ const CLINIC = (() => {
         this.treatQueue.push(p);
         this.seatInWaiting(p, 'waitTreat');
       } else if (rehaOk && r < s.pTreat + s.pReha * segMul) {
-        this.rehaQueue.push(p);
-        this.seatInWaiting(p, 'waitReha');
+        this.toRehaOrDefer(p);
       } else {
         this.toCashier(p);
       }
@@ -438,8 +454,7 @@ const CLINIC = (() => {
           this.recQueue.splice(this.recQueue.indexOf(cur), 1);
           this.routeQueue(this.recQueue, L.RECEP.service.slice(0, nWin), L.RECEP.queue);
           if (cur.type === 'rehab') {
-            this.rehaQueue.push(cur);
-            this.seatInWaiting(cur, 'waitReha');
+            this.toRehaOrDefer(cur);
           } else {
             this.examQueue.push(cur);
             this.seatInWaiting(cur, 'waitExam');
@@ -535,7 +550,7 @@ const CLINIC = (() => {
             this.freeSeat(p);
             p.phase = 'reha';
             p.busyUntil = Infinity;
-            this.walkTo(p, L.MACHINES[i].spot, (pp) => { pp.busyUntil = this.t + triRand(11, 18); });
+            this.walkTo(p, L.MACHINES[i].spot, (pp) => { pp.busyUntil = this.t + triRand(9, 14); });
           }
         }
       }
