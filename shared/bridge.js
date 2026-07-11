@@ -72,6 +72,19 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
+    // 下層ページのヒーローに、ロゴの線を静かに敷く
+    const ph = document.querySelector('.page-hero');
+    if (ph && !ph.querySelector('.ph-lines')) {
+      const deco = document.createElement('div');
+      deco.className = 'ph-lines';
+      deco.setAttribute('aria-hidden', 'true');
+      deco.innerHTML = '<svg viewBox="0 0 900 420" preserveAspectRatio="xMidYMid slice">' +
+        '<path class="pl-n" pathLength="1" d="M-40 310 C 220 90, 470 110, 630 240 S 890 440, 960 450"/>' +
+        '<path class="pl-s" pathLength="1" d="M-20 410 C 260 340, 490 200, 650 130 S 910 30, 960 10"/>' +
+        '</svg>';
+      ph.prepend(deco);
+    }
+
     document.getElementById('themeBtn').addEventListener('click', () => {
       const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
