@@ -1,5 +1,5 @@
 /* ================================================================
-   BRIDGE Site Runtime v3.0 — 正式ロゴ準拠
+   BRIDGE Site Runtime v3.1 — 正式ロゴ準拠
    全ページ共通:ヘッダー/フッター描画・テーマ・Reveal・メニュー
    使い方:
      <body data-root="../" data-page="philosophy">
@@ -12,12 +12,12 @@
 
   /* ---- サイトマップ(唯一の情報源。ページが増えたらここに足す) ---- */
   const NAV = [
-    { id: 'philosophy', en: 'Philosophy', jp: '思想',        d: 'なぜこの活動をしているのか。いちばん長いページです。', href: 'philosophy/index.html' },
-    { id: 'projects',   en: 'Projects',   jp: '活動',        d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html' },
-    { id: 'products',   en: 'Products',   jp: 'プロダクト',   d: '実際に使えるもの。すべて公開しています。',             href: 'products/index.html' },
-    { id: 'stories',    en: 'Stories',    jp: '物語',        d: '現場で実際にあったことを、一人称で。',                 href: 'stories/index.html' },
-    { id: 'journal',    en: 'Journal',    jp: '手記',        d: '完成していない考えも、そのまま公開しています。',       href: 'journal/index.html' },
-    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、これまでの歩み。',                    href: 'about/index.html' },
+    { id: 'philosophy', en: 'Philosophy', jp: '考え方',        d: 'BRIDGEが何を大切にし、なぜこの活動をしているのか。', href: 'philosophy/index.html' },
+    { id: 'projects',   en: 'Projects',   jp: '活動',          d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html' },
+    { id: 'products',   en: 'Products',   jp: 'プロダクト',     d: '実際に使えるもの。すべて公開しています。',             href: 'products/index.html' },
+    { id: 'stories',    en: 'Stories',    jp: '物語',          d: '現場で実際にあったことを、一人称で。',                 href: 'stories/index.html' },
+    { id: 'journal',    en: 'Journal',    jp: '手記',          d: '完成していない考えも、そのまま公開しています。',       href: 'journal/index.html' },
+    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、これまでの歩み。',                     href: 'about/index.html' },
   ];
   const CTA = { id: 'community', en: 'Contact', jp: '話をする', d: '共感も、異論も、相談も。', href: 'community/index.html' };
 
@@ -45,7 +45,6 @@
         '<button class="nav-burger" id="navBurger" aria-label="メニューを開く" aria-expanded="false"><span></span><span></span></button>' +
       '</div>';
 
-    // モバイル・探索メニュー(全ページ+一言の説明)
     const drawer = document.createElement('div');
     drawer.className = 'nav-drawer';
     drawer.setAttribute('aria-label', 'サイト内メニュー');
@@ -77,6 +76,52 @@
     });
   }
 
+  /* ---- Philosophyページの言語・Manifesto表現を調整 ---- */
+  if (PAGE === 'philosophy') {
+    document.title = 'Philosophy — BRIDGE';
+
+    const heroTitle = document.querySelector('.page-hero h1');
+    if (heroTitle) heroTitle.innerHTML = 'Philosophy<span class="period">.</span>';
+
+    const heroLead = document.querySelector('.page-hero .lead');
+    if (heroLead) heroLead.textContent = 'BRIDGEが何を大切にし、なぜこの活動を続けているのかを書いたページです。気になる章から読んでもらって構いません。';
+
+    const principleEyebrow = document.querySelector('#principles .eyebrow');
+    if (principleEyebrow) principleEyebrow.textContent = 'Principles — 大切にしていること';
+
+    const principleHeading = document.querySelector('#principles .sec-h');
+    if (principleHeading) principleHeading.textContent = '迷ったときに、ここへ戻ります。';
+
+    const manifestoEyebrow = document.querySelector('#manifesto .eyebrow');
+    if (manifestoEyebrow) manifestoEyebrow.textContent = 'Manifesto';
+
+    const manifestoStage = document.querySelector('#manifesto .mani-stage');
+    if (manifestoStage) {
+      const lines = [
+        ['Human First', '病気ではなく、人を見る。'],
+        ['Expand Choices', '正解を与えるのではなく、選択肢を増やす。'],
+        ['Believe Potential', '現状ではなく、可能性を見る。'],
+        ['Build Systems', '努力だけに頼らず、続けられる仕組みを作る。'],
+        ['Keep Learning', '実践し、検証し、改善し続ける。'],
+        ['For Society', 'リハビリテーションの価値を、社会へ広げる。'],
+      ];
+      manifestoStage.innerHTML = lines.map(([key, text]) =>
+        '<p class="mani-line" data-reveal><span class="mani-key">' + key + '</span><span>' + text + '</span></p>'
+      ).join('') +
+        '<p class="mani-final" data-reveal>選べる未来を、<br>増やしていく<span class="period">。</span></p>';
+
+      const style = document.createElement('style');
+      style.textContent =
+        '#manifesto .mani-line{display:grid;grid-template-columns:minmax(112px,150px) 1fr;gap:28px;align-items:baseline}' +
+        '#manifesto .mani-key{font:600 10px/1.5 var(--en);letter-spacing:.15em;text-transform:uppercase;color:var(--dawn)}' +
+        '@media(max-width:640px){#manifesto .mani-line{grid-template-columns:1fr;gap:8px}#manifesto .mani-key{font-size:9px}}';
+      document.head.appendChild(style);
+    }
+
+    const signature = document.querySelector('#manifesto .mani-sig');
+    if (signature) signature.textContent = 'BRIDGE — EXPAND CHOICES.';
+  }
+
   /* ---- フッター(最後にもう一度、地図を渡す) ---- */
   const footEl = document.querySelector('.site-footer');
   if (footEl) {
@@ -88,7 +133,7 @@
       '<div class="footer-grid">' +
         '<div><div class="footer-brand">' + MARK + '<span>BRIDGE<span class="tg">EXPAND CHOICES.</span></span></div>' +
         '<p class="footer-tagline">選択肢を増やし、人と社会の可能性を広げるプロジェクト。</p></div>' +
-        col('思想', [
+        col('Philosophy', [
           { t: 'Philosophy', href: 'philosophy/index.html' },
           { t: 'Manifesto', href: 'philosophy/index.html#manifesto' },
           { t: 'Stories', href: 'stories/index.html' },
