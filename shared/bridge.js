@@ -1,0 +1,130 @@
+/* ================================================================
+   BRIDGE Site Runtime v2.0
+   全ページ共通:ヘッダー/フッター描画・テーマ・Reveal・メニュー
+   使い方:
+     <body data-root="../" data-page="philosophy">
+     ...
+     <script src="../shared/bridge.js" defer></script>
+   data-root  … サイトルートへの相対パス("./" or "../")
+   data-page  … ナビのアクティブ表示に使うページID
+   ================================================================ */
+(function () {
+  'use strict';
+  const ROOT = document.body.dataset.root || './';
+  const PAGE = document.body.dataset.page || '';
+
+  /* ---- サイトマップ(ここが唯一の情報源。ページが増えたらここに足す) ---- */
+  const NAV = [
+    { id: 'philosophy', en: 'Philosophy', jp: '思想',     d: 'なぜ存在するのか。リハビリテーションとは何か。', href: 'philosophy/index.html' },
+    { id: 'projects',   en: 'Projects',   jp: '活動',     d: 'PMI・AI・教育・研究・アプリ開発。',             href: 'projects/index.html' },
+    { id: 'products',   en: 'Products',   jp: 'プロダクト', d: '現場で使える道具たち。すべて公開中。',          href: 'products/index.html' },
+    { id: 'stories',    en: 'Stories',    jp: '物語',     d: '選択肢が増える瞬間のスケッチ。',                 href: 'stories/index.html' },
+    { id: 'journal',    en: 'Journal',    jp: '手記',     d: '過程を、そのまま公開する。',                     href: 'journal/index.html' },
+    { id: 'research',   en: 'Research',   jp: '研究',     d: '実践を、感想で終わらせない。',                   href: 'research/index.html' },
+    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、歩み。',                     href: 'about/index.html' },
+  ];
+  const CTA = { id: 'community', en: 'Community', jp: '一緒に作る', href: 'community/index.html' };
+
+  const LOGO_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 44 Q32 16 56 44" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="32" cy="22" r="4.5" fill="var(--dawn)"/></svg>';
+
+  /* ---- ヘッダー ---- */
+  const navEl = document.querySelector('.site-nav');
+  if (navEl) {
+    navEl.innerHTML =
+      '<a class="nav-logo" href="' + ROOT + 'index.html" aria-label="BRIDGE ホームへ">' + LOGO_SVG + 'BRIDGE</a>' +
+      '<div class="nav-right">' +
+        '<div class="nav-links">' +
+          NAV.map(n => '<a href="' + ROOT + n.href + '"' + (n.id === PAGE ? ' class="active" aria-current="page"' : '') + '>' + n.en + '</a>').join('') +
+        '</div>' +
+        '<a class="nav-cta" href="' + ROOT + CTA.href + '">' + CTA.en + '</a>' +
+        '<button class="theme-btn" id="themeBtn" aria-label="ライト/ダークモード切り替え">' +
+          '<svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>' +
+          '<svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' +
+        '</button>' +
+        '<button class="nav-burger" id="navBurger" aria-label="メニューを開く" aria-expanded="false"><span></span><span></span></button>' +
+      '</div>';
+
+    // モバイル・探索メニュー(全ページ+一言の説明=地図)
+    const drawer = document.createElement('div');
+    drawer.className = 'nav-drawer';
+    drawer.setAttribute('aria-label', 'サイト内メニュー');
+    const all = NAV.concat([{ id: CTA.id, en: CTA.en, jp: CTA.jp, d: '思想への共感が、いちばんの参加。', href: CTA.href }]);
+    drawer.innerHTML = '<nav class="drawer-list">' +
+      all.map((n, i) =>
+        '<a class="drawer-item" style="transition-delay:' + (0.05 + i * 0.05) + 's" href="' + ROOT + n.href + '">' +
+          '<span class="t"><span class="en">' + n.en + '</span>' + n.jp + '</span>' +
+          '<span class="d">' + (n.d || '') + '</span>' +
+        '</a>').join('') +
+      '</nav>';
+    document.body.appendChild(drawer);
+
+    const burger = document.getElementById('navBurger');
+    burger.addEventListener('click', () => {
+      const open = document.body.classList.toggle('menu-open');
+      burger.setAttribute('aria-expanded', String(open));
+      burger.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
+    });
+
+    // スクロールで背景
+    const onScroll = () => navEl.classList.toggle('scrolled', window.scrollY > 40);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // テーマ切り替え
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('bridge-theme', next); } catch (e) {}
+    });
+  }
+
+  /* ---- フッター(サイトマップ=最後にもう一度、地図を渡す) ---- */
+  const footEl = document.querySelector('.site-footer');
+  if (footEl) {
+    const col = (h, links) =>
+      '<div class="footer-col"><div class="h">' + h + '</div>' +
+      links.map(l => '<a href="' + (l.ext ? '' : ROOT) + l.href + '"' + (l.ext ? ' target="_blank" rel="noopener"' : '') + '>' + l.t + '</a>').join('') +
+      '</div>';
+    footEl.innerHTML =
+      '<div class="footer-grid">' +
+        '<div><div class="footer-brand">' + LOGO_SVG + 'BRIDGE</div>' +
+        '<p class="footer-tagline">人と社会の選択肢を広げる、リハビリテーションのプロジェクト。</p></div>' +
+        col('思想', [
+          { t: 'Philosophy', href: 'philosophy/index.html' },
+          { t: 'Manifesto', href: 'philosophy/index.html#manifesto' },
+          { t: 'Stories', href: 'stories/index.html' },
+        ]) +
+        col('活動', [
+          { t: 'Projects', href: 'projects/index.html' },
+          { t: 'Research', href: 'research/index.html' },
+          { t: 'Journal', href: 'journal/index.html' },
+        ]) +
+        col('つくったもの', [
+          { t: 'Products', href: 'products/index.html' },
+          { t: 'Starter Kits', href: 'starter-kits/index.html' },
+          { t: 'キャリアログ', href: 'daily-app/index.html' },
+        ]) +
+        col('つながる', [
+          { t: 'Community', href: 'community/index.html' },
+          { t: 'About', href: 'about/index.html' },
+          { t: 'note', href: 'https://note.com/prime_duck4944', ext: true },
+          { t: 'X', href: 'https://x.com/WataruPT1013', ext: true },
+        ]) +
+      '</div>' +
+      '<div class="footer-base">' +
+        '<span>© 2026 BRIDGE. All rights reserved.</span>' +
+        '<span><a href="' + ROOT + 'legal/privacy.html">Privacy</a> · A project to expand human possibility.</span>' +
+      '</div>';
+  }
+
+  /* ---- Reveal(共通) ---- */
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+    }
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  const observeAll = () => document.querySelectorAll('[data-reveal]:not(.on)').forEach(el => io.observe(el));
+  observeAll();
+  // 動的描画されたカードにも適用できるよう公開
+  window.BRIDGE = { ROOT: ROOT, observeReveal: observeAll };
+})();

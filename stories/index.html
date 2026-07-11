@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stories — 物語 / BRIDGE</title>
+<meta name="description" content="選択肢が増える瞬間のスケッチ。患者、医療者、組織、キャリア、AI。BRIDGEが増やしたい瞬間を、物語の形で。">
+<meta property="og:title" content="Stories — 物語 / BRIDGE">
+<meta property="og:type" content="website">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/bridge.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F2D44'/%3E%3Cpath d='M12 42 Q32 20 52 42' stroke='%237FB4D9' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='24' r='4' fill='%23D9A441'/%3E%3C/svg%3E">
+<style>
+.story-list{max-width:820px;margin:0 auto;display:grid;gap:clamp(28px,4vh,44px)}
+.story{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(30px,4vw,48px);box-shadow:var(--shadow)}
+.story-tag{font:700 10px/1 var(--en);letter-spacing:0.22em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:20px}
+.story-before{font-size:14px;color:var(--ink-3);line-height:2.1}
+.story-before s{text-decoration-color:var(--ink-4)}
+.story-arrow{font-family:var(--en);color:var(--dawn);font-size:16px;margin:14px 0}
+.story-after{font-family:var(--mincho);font-weight:600;font-size:clamp(19px,2.8vw,26px);line-height:1.9;margin-bottom:16px}
+.story-p{font-size:13px;line-height:2.2;color:var(--ink-2)}
+.honest{max-width:660px;margin:clamp(30px,4vh,44px) 0 0;padding:20px 26px;border-left:2px solid var(--dawn);font-size:12.5px;line-height:2.1;color:var(--ink-3)}
+</style>
+</head>
+<body data-root="../" data-page="stories">
+
+<nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
+
+<header class="page-hero">
+  <div class="page-hero-inner">
+    <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Stories</span></div>
+    <h1 data-reveal data-reveal-delay="1">選択肢が増える、その瞬間<span class="period">。</span></h1>
+    <p class="lead" data-reveal data-reveal-delay="2">
+      リハビリテーションが本当に起きるとき、変わるのは身体だけではありません。目の前の道の本数が変わります。患者も、医療者も、組織も、キャリアも。
+    </p>
+    <p class="honest" data-reveal data-reveal-delay="3">
+      正直に書きます——ここにあるのは特定の個人の実例ではなく、臨床・経営・キャリアの現場から描いた「増やしたい瞬間」のスケッチです。誇張された成功談を並べるより、正直でいたいので。実際の物語が増えたら、本人の了承を得て、ここに載せていきます。
+    </p>
+  </div>
+</header>
+
+<main>
+<section class="sec">
+  <!-- 物語は STORIES 配列から自動生成(足せば増える) -->
+  <div class="story-list" id="storyList"></div>
+</section>
+</main>
+
+<aside class="walk">
+  <div class="walk-inner">
+    <div class="eyebrow" data-reveal>Where to next — 次は、どこへ歩きますか</div>
+    <div class="walk-grid" style="margin-top:30px">
+      <a class="walk-card" href="../philosophy/index.html" data-reveal>
+        <span class="en">Philosophy</span><span class="t">瞬間の奥にある思想を読む</span>
+        <p class="p">なぜ「選べること」が回復なのか。</p>
+      </a>
+      <a class="walk-card" href="../products/index.html" data-reveal data-reveal-delay="1">
+        <span class="en">Products</span><span class="t">瞬間を生む道具に触れる</span>
+        <p class="p">物語の裏には、いつも道具がある。</p>
+      </a>
+      <a class="walk-card" href="../community/index.html" data-reveal data-reveal-delay="2">
+        <span class="en">Community</span><span class="t">あなたの物語を聞かせる</span>
+        <p class="p">選択肢が増えた経験、教えてください。</p>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<footer class="site-footer"></footer>
+<script src="../shared/bridge.js" defer></script>
+<script defer>
+window.addEventListener('DOMContentLoaded', () => {
+  // ================================================================
+  // 物語データ(足せば増える)
+  // ================================================================
+  const STORIES = [
+    { tag: 'Patient — 患者', before: '「歩けないから、あきらめる」', after: '「どうやって行くかを、選ぶ」',
+      p: '目標が「歩行の自立」から「孫の運動会に行く」に変わった日、リハビリは訓練ではなく人生の設計になる。歩くのか、車椅子で行くのか、家族と行くのか。どれを選んでもいい。選べることが、回復のはじまり。' },
+    { tag: 'Clinician — 医療者', before: '「数字に、萎縮する朝礼」', after: '「数字から、始まる対話」',
+      p: '目標未達のスタッフが沈黙する朝礼を、何度も見てきた。同じ数字を、現場と経営が同じ画面で見る。それだけで、数字は「責める道具」から「考えるための共通言語」に変わる。' },
+    { tag: 'Organization — 組織', before: '「承継直後、どこから手をつけるか分からない」', after: '「評価→介入→再評価の道筋がある」',
+      p: '組織も、患者と同じように診立てられる。いま何ができていて、何に困っているのか。課題が言葉になった瞬間、組織は前に進み始める。PMIは、組織に対するリハビリテーション。' },
+    { tag: 'Career — キャリア', before: '「辞めるか、我慢するかの二択」', after: '「働き方を、再設計するという第三の道」',
+      p: '日々の記録が溜まると、自分の輪郭が見えてくる。強みも、消耗の原因も。選択肢は、二つではなかったと気づく。キャリアの再設計も、評価から始まるリハビリテーション。' },
+    { tag: 'AI — テクノロジー', before: '「書類に消えていた、毎日の30分」', after: '「患者との対話に還る、毎日の30分」',
+      p: 'AIが置き換えたのは人ではなく、人を人から遠ざけていた作業。生まれた時間をどこへ還すかまで設計して、はじめて「導入」と呼べる。技術は、こう使うためにある。' },
+  ];
+  const list = document.getElementById('storyList');
+  STORIES.forEach((s) => {
+    const el = document.createElement('article');
+    el.className = 'story';
+    el.setAttribute('data-reveal', '');
+    el.innerHTML =
+      '<span class="story-tag">' + s.tag + '</span>' +
+      '<p class="story-before"><s>' + s.before + '</s></p>' +
+      '<div class="story-arrow" aria-hidden="true">↓</div>' +
+      '<p class="story-after">' + s.after + '</p>' +
+      '<p class="story-p">' + s.p + '</p>';
+    list.appendChild(el);
+  });
+  if (window.BRIDGE) window.BRIDGE.observeReveal();
+});
+</script>
+</body>
+</html>

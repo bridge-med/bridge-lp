@@ -3,379 +3,185 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About / Founder — 橋本 渉 / BRIDGE</title>
-<meta name="description" content="BRIDGEの運営者紹介。臨床×研究×医療経営×Builder。理学療法士がなぜ道具を作るのか、BRIDGEの思想(Our Stance)と仕事の進め方(How We Work)をまとめています。">
-<meta property="og:title" content="About / Founder — 橋本 渉 / BRIDGE">
-<meta property="og:description" content="臨床×研究×経営、そして道具づくり。BRIDGEの思想と制作スタンス。">
+<title>About — BRIDGEについて / BRIDGE</title>
+<meta name="description" content="BRIDGEという名前の由来、歩み、運営者について。臨床×研究×経営×道具づくり。">
+<meta property="og:title" content="About — BRIDGEについて / BRIDGE">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/about/">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../shared/subpage.css">
-<link rel="stylesheet" href="../shared/hub.css">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8553D'/%3E%3Ctext x='33' y='46' font-family='Georgia,serif' font-size='40' font-style='italic' font-weight='700' text-anchor='middle' fill='%23FAFAF7'%3EB%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/bridge.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F2D44'/%3E%3Cpath d='M12 42 Q32 20 52 42' stroke='%237FB4D9' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='24' r='4' fill='%23D9A441'/%3E%3C/svg%3E">
 <style>
-/* ===== FOUNDER(LPから移設) ===== */
-.founder{padding:120px var(--pad-x);background:var(--paper-2);position:relative;overflow:hidden}
-.founder::before{content:'';position:absolute;top:-30%;right:-20%;width:80%;height:160%;background:radial-gradient(circle,rgba(27,73,101,0.05),transparent 60%);filter:blur(60px)}
-.founder-container{max-width:var(--max);margin:0 auto;position:relative}
-.founder-hero{display:grid;grid-template-columns:260px 1fr;gap:56px;align-items:center;margin-bottom:60px}
-@media(max-width:760px){.founder-hero{grid-template-columns:1fr;gap:32px}.founder-portrait{max-width:240px}}
-.founder-portrait{aspect-ratio:4/5;background:#0a0a0f url('../images/founder.jpg') center/cover;border-radius:14px;position:relative;overflow:hidden;box-shadow:var(--shadow-2)}
-.founder-portrait::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,transparent 55%,rgba(10,10,15,0.45) 100%)}
-.founder-portrait .badge{position:absolute;bottom:16px;left:16px;right:16px;padding:12px 14px;background:rgba(10,10,15,0.65);backdrop-filter:blur(12px);border-radius:8px;color:#fff}
-.founder-portrait .badge .name{font:900 15px/1.2 var(--serif-jp);margin-bottom:3px}
-.founder-portrait .badge .role{font:600 9px/1 var(--sans-en);letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7)}
-.founder-name-block .name-h{font:900 clamp(32px,5vw,52px)/1.15 var(--serif-jp);letter-spacing:-0.02em;margin:12px 0 0}
-.founder-name-block .name-h .em{color:var(--vermilion);font-family:var(--serif-en);font-style:italic}
-.founder-name-block .en-name{display:block;font:700 14px/1 var(--serif-en);font-style:italic;color:var(--ink-3);margin-top:10px;letter-spacing:0.04em}
-.founder-name-block .role-tag{display:inline-block;font:800 10px/1 var(--sans-en);letter-spacing:0.18em;text-transform:uppercase;color:var(--vermilion);margin-top:16px;padding:6px 12px;background:rgba(200,85,61,0.08);border-radius:999px;border:1px solid rgba(200,85,61,0.2)}
-.founder-intro{font:500 14px/1.9 var(--sans-jp);color:var(--ink-2);margin-top:18px;max-width:540px}
-.founder-quote-box{background:var(--paper);border-left:4px solid var(--vermilion);padding:36px 36px 32px 44px;margin-bottom:60px;border-radius:0 14px 14px 0;box-shadow:var(--shadow-1);position:relative}
-.founder-quote-box::before{content:'"';position:absolute;top:-12px;left:32px;font:900 90px/1 var(--serif-en);font-style:italic;color:var(--vermilion);opacity:0.18}
-.founder-quote-box q{font:700 clamp(18px,2.4vw,28px)/1.75 var(--serif-jp);color:var(--ink);display:block;quotes:none;letter-spacing:-0.01em}
-.founder-quote-box q::before,.founder-quote-box q::after{content:''}
-.founder-quote-box .cite{display:block;font:600 12px/1 var(--serif-en);font-style:italic;color:var(--ink-3);margin-top:20px;letter-spacing:0.04em}
-.founder-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:48px}
-@media(max-width:880px){.founder-timeline{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){.founder-timeline{grid-template-columns:1fr}}
-.tl-step{background:var(--paper);padding:28px 22px;display:flex;flex-direction:column;gap:10px;transition:background .25s;position:relative}
-.tl-step:hover{background:var(--paper-2)}
-.tl-step.now{background:linear-gradient(180deg,rgba(138,154,91,0.08),var(--paper))}
-.tl-step.now::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--moegi)}
-.tl-num{font:900 38px/1 var(--serif-en);font-style:italic;color:var(--vermilion)}
-.tl-tag{font:800 9px/1 var(--sans-en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3)}
-.tl-title{font:900 18px/1.2 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
-.tl-body{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2);flex:1}
-.tl-now-tag{display:inline-block;margin-top:6px;padding:3px 8px;background:var(--moegi);color:#fff;font:800 9px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;border-radius:2px;align-self:flex-start}
-.founder-foot{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
-.founder-roles{display:flex;flex-wrap:wrap;gap:6px}
-.founder-roles span{padding:8px 14px;background:var(--paper);border:1px solid var(--line);border-radius:999px;font:700 11px/1 var(--sans-jp);color:var(--ink-2)}
-
-/* ===== FOUNDER WHY(深掘り) ===== */
-.founder-why{margin-top:80px;padding-top:60px;border-top:1px solid var(--line)}
-.founder-why-head{margin-bottom:40px}
-.founder-why-h{font:900 clamp(22px,3.4vw,34px)/1.4 var(--serif-jp);letter-spacing:-0.02em;color:var(--ink);margin-top:14px}
-.founder-why-h .em{font-family:var(--serif-en);font-style:italic;color:var(--vermilion)}
-.founder-why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-@media(max-width:880px){.founder-why-grid{grid-template-columns:1fr}}
-.founder-why-card{background:var(--paper);padding:36px 32px;display:flex;flex-direction:column;gap:14px}
-.founder-why-num{font:900 28px/1 var(--serif-en);font-style:italic;color:var(--vermilion);margin-bottom:4px}
-.founder-why-tag{font:800 10px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)}
-.founder-why-h3{font:800 16px/1.5 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
-.founder-why-p{font:500 12.5px/1.95 var(--sans-jp);color:var(--ink-2);flex:1}
-
-/* ===== FOUNDER VISION ===== */
-.founder-vision{margin-top:60px;padding:40px 36px;background:var(--paper-2);border:1px solid var(--line-w);border-radius:2px;position:relative;margin-bottom:60px}
-.founder-vision::before{content:'\201C';font:900 80px/0.6 var(--serif-en);color:var(--vermilion);font-style:italic;position:absolute;top:18px;left:24px;opacity:0.18}
-.founder-vision-tag{font:800 10px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--vermilion);margin-bottom:14px;position:relative}
-.founder-vision-text{font:500 italic 15px/2 var(--serif-jp);color:var(--ink);position:relative;letter-spacing:-0.01em}
-.founder-vision-text strong{font-style:normal;color:var(--vermilion);font-weight:900;font-family:var(--serif-en)}
-
-/* ===== STANCE(LPから移設) ===== */
-.stance{padding:120px var(--pad-x);background:var(--paper)}
-.stance-head{max-width:var(--max);margin:0 auto 60px}
-.stance-head h2{font:900 clamp(28px,4.4vw,52px)/1.25 var(--serif-jp);letter-spacing:-0.02em;margin-top:14px}
-.stance-head h2 .em{color:var(--vermilion);font-family:var(--serif-en);font-style:italic}
-.stance-list{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-@media(max-width:760px){.stance-list{grid-template-columns:1fr}}
-.stance-item{background:var(--paper);padding:36px 32px;display:flex;gap:24px;transition:background .2s}
-.stance-item:hover{background:var(--paper-2)}
-.stance-num{font:900 28px/1 var(--serif-en);font-style:italic;color:var(--vermilion);flex-shrink:0;width:48px}
-.stance-content h3{font:800 16px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:10px;letter-spacing:-0.01em}
-.stance-content p{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
-
-/* ===== PROCESS(LPから移設) ===== */
-.process{padding:120px var(--pad-x);background:var(--ink);color:#fff;position:relative;overflow:hidden}
-.process::before{content:'';position:absolute;bottom:-50%;left:-30%;width:80%;height:200%;background:radial-gradient(circle,rgba(27,73,101,0.3),transparent 60%);filter:blur(60px)}
-.process-inner{max-width:var(--max);margin:0 auto;position:relative;z-index:1}
-.process-head{margin-bottom:60px}
-.process-head .eyebrow{color:rgba(255,255,255,0.5)}
-.process-head h2{font:900 clamp(28px,4.4vw,52px)/1.25 var(--serif-jp);letter-spacing:-0.02em;color:#fff;margin-top:14px;max-width:680px}
-.process-head h2 .em{color:#FBBF24;font-family:var(--serif-en);font-style:italic}
-.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(255,255,255,0.12)}
-@media(max-width:760px){.process-steps{grid-template-columns:repeat(2,1fr)}}
-.process-step{padding:36px 24px 36px 0;border-right:1px solid rgba(255,255,255,0.12);position:relative}
-.process-step:last-child{border-right:0}
-@media(max-width:760px){.process-step:nth-child(2n){border-right:0}.process-step{padding:32px 16px}}
-.process-step-num{font:900 32px/1 var(--serif-en);font-style:italic;color:#FBBF24;margin-bottom:18px}
-.process-step h3{font:800 16px/1.3 var(--serif-jp);color:#fff;margin-bottom:10px}
-.process-step p{font:500 12px/1.85 var(--sans-jp);color:rgba(255,255,255,0.7)}
-
-/* ===== CONTACT MINI ===== */
-.buy-h{font:900 clamp(24px,4vw,40px)/1.5 var(--serif-jp);letter-spacing:-0.02em;color:var(--ink);margin:14px 0 28px}
-.buy-h .em{color:var(--vermilion);font-family:var(--serif-en);font-style:italic}
+.name-fig{max-width:720px;margin:clamp(44px,6vh,64px) auto 0;text-align:center}
+.name-fig svg{width:100%;max-width:560px;margin:0 auto}
+.name-fig .arc{stroke:var(--blue-soft);stroke-width:2;fill:none}
+.name-fig .lbl{font:600 12px var(--sans);fill:var(--ink-2);letter-spacing:.06em}
+.name-cap{margin-top:20px;font-size:13px;color:var(--ink-3)}
+.tl{max-width:var(--max);margin:clamp(48px,7vh,72px) auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.tl::before{content:'';position:absolute;top:5px;left:0;right:0;height:1px;background:var(--line)}
+.tl-step{padding:30px 20px 0 0;position:relative}
+.tl-step::before{content:'';position:absolute;top:0;left:0;width:11px;height:11px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink-3)}
+.tl-step.now::before{border-color:var(--dawn);background:var(--dawn)}
+.tl-tag{font:600 9px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:10px}
+.tl-t{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2vw,22px);margin-bottom:10px}
+.tl-p{font-size:12px;line-height:2.05;color:var(--ink-2);max-width:220px}
+.tl-step.now .tl-t{color:var(--dawn)}
+@media(max-width:860px){
+  .tl{grid-template-columns:1fr;padding-left:28px}
+  .tl::before{top:0;bottom:0;left:5px;right:auto;width:1px;height:auto}
+  .tl-step{padding:0 0 38px 0}
+  .tl-step::before{left:-28px;top:8px}
+  .tl-p{max-width:none}
+}
+.founder-wrap{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:240px 1fr;gap:clamp(28px,5vw,56px);align-items:start}
+.founder-photo{aspect-ratio:4/5;border-radius:16px;background:var(--dark-sec) url('../images/founder.jpg') center/cover;box-shadow:var(--shadow)}
+.founder-roles{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.founder-roles span{font:600 10.5px/1 var(--sans);padding:7px 13px;border:1px solid var(--line);border-radius:100px;color:var(--ink-2)}
+.founder-q{font-family:var(--mincho);font-weight:500;font-size:clamp(17px,2.4vw,22px);line-height:2;margin-top:26px;color:var(--ink)}
+.founder-q .cite{display:block;font:500 11px/1 var(--en);letter-spacing:0.12em;color:var(--ink-3);margin-top:14px}
+@media(max-width:760px){.founder-wrap{grid-template-columns:1fr}.founder-photo{max-width:220px}}
+.info-rows{max-width:660px;border-top:1px solid var(--line);margin-top:clamp(36px,5vh,52px)}
+.info-row{display:grid;grid-template-columns:140px 1fr;gap:20px;padding:16px 0;border-bottom:1px solid var(--line);font-size:13px}
+.info-row .k{font:600 10px/2.2 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3)}
+.info-row .v{color:var(--ink-2);line-height:2.1}
+@media(max-width:520px){.info-row{grid-template-columns:1fr;gap:2px}}
 </style>
 </head>
-<body>
+<body data-root="../" data-page="about">
 
-<div class="progress" id="prog"></div>
+<nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
 
-<nav class="nav" id="nav">
-  <a href="../index.html" class="nav-logo">BRIDGE<span class="dot">.</span></a>
-  <div class="nav-links">
-    <a href="../products/index.html">Tools</a>
-    <a href="../starter-kits/index.html">Kits</a>
-    <a href="../journal/index.html">Journal</a>
-    <a href="./index.html" class="on" aria-current="page">Founder</a>
-    <a href="../index.html#contact">Contact</a>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-mark" aria-hidden="true" data-plx="0.08">About</div>
-  <div class="hero-vertical" aria-hidden="true">机上の空論は、作らない。</div>
-  <div class="hero-inner">
-    <div class="hero-eyebrow" data-reveal>About / Founder</div>
-    <h1 class="hero-h" data-reveal><span class="nowrap">臨床</span><span class="em">×</span><span class="nowrap">研究</span><span class="em">×</span><span class="nowrap">経営、</span><br class="br-sp"><span class="em nowrap">そして道具づくり。</span></h1>
-    <p class="hero-sub" data-reveal>
-      BRIDGEは、理学療法士がひとりで運営する「医療現場のための道具屋」です。なぜ作るのか、どう作るのか。運営者の来歴と、BRIDGEの思想をここにまとめています。
+<header class="page-hero">
+  <div class="page-hero-inner">
+    <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>About</span></div>
+    <h1 data-reveal data-reveal-delay="1">BRIDGEについて<span class="period">。</span></h1>
+    <p class="lead" data-reveal data-reveal-delay="2">
+      これは個人の紹介ページではありません。BRIDGEというプロジェクトの、名前の由来と、歩みと、いま運営している人間についての短い記録です。
     </p>
-    <div class="hero-meta" data-reveal>
-      <span>Established 2026</span>
-      <span>Tokyo / Remote</span>
-      <span>Solo Studio</span>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 名前の由来 ============ -->
+<section class="sec">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>The Name — 名前の由来</div>
+    <p class="stmt" style="font-size:clamp(24px,4.2vw,44px);margin:26px 0 30px" data-reveal data-reveal-delay="1">
+      分かれてしまったものの間に、<br>橋を架ける<span class="hikari">。</span>
+    </p>
+    <p class="body-p" data-reveal data-reveal-delay="2">
+      現場と経営。臨床と数字。エビデンスと実感。人と技術。いまの状態と、本来の可能性。——本当は繋がっているはずなのに、分かれてしまったものが、世の中にはたくさんあります。そのあいだに橋を架けて、行き来できるようにする。BRIDGEという名前は、その仕事の宣言です。
+    </p>
+  </div>
+  <div class="name-fig" data-reveal>
+    <svg viewBox="0 0 560 150" role="img" aria-label="図:現場と経営、いまと可能性の間に橋が架かる">
+      <text class="lbl" x="30" y="130">現場</text>
+      <text class="lbl" x="490" y="130">経営</text>
+      <text class="lbl" x="222" y="30" fill="var(--dawn)">BRIDGE</text>
+      <path class="arc" d="M60 115 Q 280 30 500 115"/>
+      <circle cx="60" cy="115" r="4" fill="var(--ink-3)"/>
+      <circle cx="500" cy="115" r="4" fill="var(--ink-3)"/>
+      <circle cx="280" cy="72" r="4" fill="var(--dawn)"/>
+    </svg>
+    <p class="name-cap">いちばん最初の橋は「現場と経営」。いまは「人と可能性」まで広がりました。</p>
+  </div>
+</section>
+
+<!-- ============ 歩み ============ -->
+<section class="sec tint">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Journey — 歩み</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">4つの現場を、渡ってきた。</h2>
+  </div>
+  <div class="tl">
+    <div class="tl-step" data-reveal>
+      <span class="tl-tag">01 Clinical</span>
+      <div class="tl-t">臨床</div>
+      <p class="tl-p">理学療法士として現場に立つ。患者の「もっとできるのに」を、ここで知った。</p>
+    </div>
+    <div class="tl-step" data-reveal data-reveal-delay="1">
+      <span class="tl-tag">02 Research</span>
+      <div class="tl-t">研究</div>
+      <p class="tl-p">大学院で「評価の客観性」と向き合い、英語論文を発表。検証する目を得た。</p>
+    </div>
+    <div class="tl-step" data-reveal data-reveal-delay="2">
+      <span class="tl-tag">03 Management</span>
+      <div class="tl-t">経営</div>
+      <p class="tl-p">事業会社で医療経営・PMIの数字に責任を持つ。「医療を持続可能にする」視点が言語化された。</p>
+    </div>
+    <div class="tl-step now" data-reveal data-reveal-delay="3">
+      <span class="tl-tag">04 Now</span>
+      <div class="tl-t">BRIDGE</div>
+      <p class="tl-p">4つの現場の交差点で、人と社会の選択肢を広げるプロジェクトを始めた。</p>
     </div>
   </div>
 </section>
 
 <!-- ============ FOUNDER ============ -->
-<section class="founder" id="founder">
-  <div class="founder-container">
-
-    <div class="founder-hero">
-      <div class="founder-portrait" data-reveal>
-        <div class="badge">
-          <div class="name">橋本 渉</div>
-          <div class="role">Founder · Builder</div>
+<section class="sec" id="founder">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Founder — 運営している人</div>
+    <div class="founder-wrap" style="margin-top:clamp(36px,5vh,52px)">
+      <div class="founder-photo" data-reveal role="img" aria-label="橋本渉のポートレート"></div>
+      <div>
+        <h2 class="sec-h" style="margin-top:0" data-reveal>橋本 渉<span style="display:block;font:500 11px/1 var(--en);letter-spacing:0.18em;color:var(--ink-3);margin-top:12px">WATARU HASHIMOTO</span></h2>
+        <p class="body-p" data-reveal data-reveal-delay="1">
+          理学療法士。現場で患者を診て、大学院で論文を書き、事業会社で医療経営の数字に責任を持ち、いまBRIDGEで道具を作る。ただし——このプロジェクトの主語は、私でなくていい。この思想が社会に届くなら、誰が届けても構いません。
+        </p>
+        <div class="founder-roles" data-reveal data-reveal-delay="2">
+          <span>理学療法士</span><span>医科学修士</span><span>医療経営コンサル</span><span>診療情報管理士(学習中)</span><span>Solo Builder</span>
         </div>
-      </div>
-      <div class="founder-name-block">
-        <div class="eyebrow kicker" data-reveal>Founder</div>
-        <h2 class="name-h" data-reveal data-reveal-delay="1">
-          <span class="nowrap">臨床</span><span class="em">×</span><span class="nowrap">研究</span><span class="em">×</span><span class="nowrap">経営、</span><br class="br-sp">
-          <span class="em nowrap">そして道具づくり。</span>
-          <span class="en-name">Wataru Hashimoto</span>
-        </h2>
-        <span class="role-tag" data-reveal data-reveal-delay="2">PT × Consultant × Builder</span>
-        <p class="founder-intro" data-reveal data-reveal-delay="3">
-          現場で患者を診て、大学院で論文を書き、事業会社で医療経営の数字に責任を持ち、いまBRIDGEで道具を作る。<span class="nowrap">「臨床×研究×経営」</span>を一人で繋ぐことが、設計の出発点です。
+        <p class="founder-q" data-reveal data-reveal-delay="3">
+          「医療を持続可能にするには、経営の視点が要る。そう気づいた理学療法士が、いま道具を作っている。」
+          <span class="cite">— Wataru Hashimoto</span>
         </p>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="founder-quote-box" data-reveal>
-      <q><span class="nowrap">医療を持続可能にするには、</span><span class="nowrap">経営の視点が要る。</span><br class="br-pc"><span class="nowrap">そう気づいた理学療法士が、</span><span class="nowrap">いま道具を作っている。</span></q>
-      <span class="cite">— Wataru Hashimoto<span class="hanko" aria-hidden="true">橋</span></span>
+<!-- ============ 概要 ============ -->
+<section class="sec tint">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Overview — 概要</div>
+    <div class="info-rows" data-reveal data-reveal-delay="1">
+      <div class="info-row"><span class="k">Name</span><span class="v">BRIDGE(ブリッジ)</span></div>
+      <div class="info-row"><span class="k">Since</span><span class="v">2026年</span></div>
+      <div class="info-row"><span class="k">Base</span><span class="v">東京 / リモート</span></div>
+      <div class="info-row"><span class="k">Form</span><span class="v">個人プロジェクト(Solo Studio)</span></div>
+      <div class="info-row"><span class="k">Mission</span><span class="v">リハビリテーションという学問を通して、人と社会の選択肢を広げる</span></div>
+      <div class="info-row"><span class="k">Contact</span><span class="v"><a href="mailto:h.w19961013@gmail.com" style="text-decoration:underline">h.w19961013@gmail.com</a> / <a href="https://x.com/WataruPT1013" target="_blank" rel="noopener" style="text-decoration:underline">X @WataruPT1013</a></span></div>
     </div>
+  </div>
+</section>
 
-    <div class="founder-timeline">
-      <div class="tl-step" data-reveal>
-        <div class="tl-num">01</div>
-        <div class="tl-tag">Clinical</div>
-        <div class="tl-title">臨床</div>
-        <div class="tl-body">理学療法士として現場に立つ。患者の動線を体に染み込ませた日々。<span class="nowrap">「もっとできるのに」</span>を、ここで知った。</div>
-      </div>
-      <div class="tl-step" data-reveal data-reveal-delay="1">
-        <div class="tl-num">02</div>
-        <div class="tl-tag">Research</div>
-        <div class="tl-title">研究</div>
-        <div class="tl-body">大学院で<span class="nowrap">「評価の客観性」</span>と向き合う。英語論文を発表。データ解釈と現場応用の難しさから、別角度の視点を獲得。</div>
-      </div>
-      <div class="tl-step" data-reveal data-reveal-delay="2">
-        <div class="tl-num">03</div>
-        <div class="tl-tag">Management</div>
-        <div class="tl-title">経営</div>
-        <div class="tl-body">事業会社で医療経営コンサル。PMI・VUフェーズの数字に責任。<span class="nowrap">「医療を持続可能にする」</span>視点が、ここで言語化された。</div>
-      </div>
-      <div class="tl-step now" data-reveal data-reveal-delay="3">
-        <div class="tl-num">04</div>
-        <div class="tl-tag">Builder</div>
-        <div class="tl-title">道具づくり</div>
-        <div class="tl-body">BRIDGEを開始。臨床×研究×経営の交差点で、自分のために、現場のために、軽い道具を作る。</div>
-        <span class="tl-now-tag">Now</span>
-      </div>
-    </div>
+</main>
 
-    <div class="founder-why" data-reveal>
-      <div class="founder-why-head">
-        <div class="eyebrow kicker">Why I make</div>
-        <h3 class="founder-why-h"><span class="nowrap">なぜ、</span><span class="em nowrap">道具を作るのか。</span></h3>
-      </div>
-      <div class="founder-why-grid">
-        <div class="founder-why-card">
-          <div class="founder-why-num">01</div>
-          <div class="founder-why-tag">Origin</div>
-          <h4 class="founder-why-h3">現場で見た「数字で萎縮する」スタッフ</h4>
-          <p class="founder-why-p">
-            朝礼で月次の数字を読み上げ、目標未達のスタッフが沈黙する朝礼を、何度も見てきた。数字を出すと現場が萎縮する。だから出さなくなる。けれど経営側は数字を求める。その間で、責任者が板挟みになる。私はそこに立ったことがある側の人間です。
-          </p>
-        </div>
-        <div class="founder-why-card">
-          <div class="founder-why-num">02</div>
-          <div class="founder-why-tag">Stance</div>
-          <h4 class="founder-why-h3">自分が最初のユーザーになる</h4>
-          <p class="founder-why-p">
-            道具を作って、まず自分が毎日使う。使いにくいと感じたら作り直す。現場の人が嫌がるなら作り直す。机上の空論は作らない、というのは私の信条であり、同時に、私自身を守るための仕組みでもあります。「触ったことのない現場のためにプロダクトは作れない」を出発点にしています。
-          </p>
-        </div>
-        <div class="founder-why-card">
-          <div class="founder-why-num">03</div>
-          <div class="founder-why-tag">Future</div>
-          <h4 class="founder-why-h3">数字で対話できる、医療現場へ</h4>
-          <p class="founder-why-p">
-            数字を「責める道具」から「対話の入口」に変えたい。同じ数字を、現場と経営が同じ画面で見て、同じ言葉で議論できる。医療を持続可能にするには、その対話の運用が必要だと思っています。BRIDGEは、そのための小さな道具屋です。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="founder-vision" data-reveal>
-      <div class="founder-vision-tag">Vision</div>
-      <p class="founder-vision-text">
-        重厚なシステムが入る前に、<strong>軽い道具で対話を始められる</strong>医療現場を増やしたい。
-        Excelの集計表よりは構造化されていて、業務システムよりは軽い。<br>
-        その「中間」に、まだ届いていない現場が、たくさんあると思っています。
-      </p>
-    </div>
-
-    <div class="founder-foot" data-reveal>
-      <div class="founder-roles">
-        <span>理学療法士</span>
-        <span>医科学修士</span>
-        <span>医療経営コンサル</span>
-        <span>診療情報管理士(学習中)</span>
-        <span>Solo Builder</span>
-      </div>
-      <a href="https://note.com/prime_duck4944" target="_blank" class="note-link">
-        Note で開発の過程・現場で考えたこと・キャリア探求を書いています
+<aside class="walk">
+  <div class="walk-inner">
+    <div class="eyebrow" data-reveal>Where to next — 次は、どこへ歩きますか</div>
+    <div class="walk-grid" style="margin-top:30px">
+      <a class="walk-card" href="../philosophy/index.html" data-reveal>
+        <span class="en">Philosophy</span><span class="t">BRIDGEの思想を読む</span>
+        <p class="p">なぜ存在するのか。いちばん長いページ。</p>
+      </a>
+      <a class="walk-card" href="../projects/index.html" data-reveal data-reveal-delay="1">
+        <span class="en">Projects</span><span class="t">いまの活動を見る</span>
+        <p class="p">PMI・AI・教育・研究・アプリ開発。</p>
+      </a>
+      <a class="walk-card" href="../community/index.html" data-reveal data-reveal-delay="2">
+        <span class="en">Community</span><span class="t">話しかけてみる</span>
+        <p class="p">共感も、異論も、歓迎します。</p>
       </a>
     </div>
-
   </div>
-</section>
+</aside>
 
-<!-- 流れる看板 -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track">
-    <span class="marquee-set">机上の空論は作らない。<i>Our Stance</i>数字は対話のためにある。<i>Six Principles</i>横断して考える。<i>PT × Consultant × Builder</i>軽さが正義。<i>1 → 10</i>「現場で使える」が最上位の判断基準。<i>BRIDGE</i></span>
-    <span class="marquee-set">机上の空論は作らない。<i>Our Stance</i>数字は対話のためにある。<i>Six Principles</i>横断して考える。<i>PT × Consultant × Builder</i>軽さが正義。<i>1 → 10</i>「現場で使える」が最上位の判断基準。<i>BRIDGE</i></span>
-  </div>
-</div>
-
-<!-- ============ STANCE ============ -->
-<section class="stance" id="stance">
-  <div class="stance-head">
-    <div class="eyebrow kicker" data-reveal>Our Stance</div>
-    <h2 data-reveal data-reveal-delay="1"><span class="nowrap">BRIDGEの全活動は、</span><span class="em nowrap">この6つの思想</span>の上に立っています。</h2>
-  </div>
-  <div class="stance-list">
-    <div class="stance-item" data-reveal>
-      <div class="stance-num">01</div>
-      <div class="stance-content">
-        <h3>机上の空論は作らない。</h3>
-        <p>触ったことのない現場に、プロダクトは設計できない。デモを動かすだけでなく、自分で使い続けるのが前提です。</p>
-      </div>
-    </div>
-    <div class="stance-item" data-reveal>
-      <div class="stance-num">02</div>
-      <div class="stance-content">
-        <h3>数字は対話のためにある。</h3>
-        <p>KPIは現場を縛る道具ではなく、改善と対話のきっかけ。「責める数字」でなく「考える数字」を設計します。</p>
-      </div>
-    </div>
-    <div class="stance-item" data-reveal>
-      <div class="stance-num">03</div>
-      <div class="stance-content">
-        <h3>横断して考える。</h3>
-        <p>運営改善・採用・評価制度・診療報酬・現場導線。分断せず繋げて設計する。組織は分業でも、課題は繋がっている。</p>
-      </div>
-    </div>
-    <div class="stance-item" data-reveal>
-      <div class="stance-num">04</div>
-      <div class="stance-content">
-        <h3>軽さが正義。</h3>
-        <p>大企業向けの重いSaaSではなく、中小の医療機関がすぐ使える軽さを最優先。導入会議が要らないくらい軽く。</p>
-      </div>
-    </div>
-    <div class="stance-item" data-reveal>
-      <div class="stance-num">05</div>
-      <div class="stance-content">
-        <h3>1→10が得意。</h3>
-        <p>ゼロから発明するより、既にある運用を整理・型化・仕組み化して磨く。現場には既に答えがある。それを言語化するのが仕事です。</p>
-      </div>
-    </div>
-    <div class="stance-item" data-reveal>
-      <div class="stance-num">06</div>
-      <div class="stance-content">
-        <h3>「現場で使える」が最上位の判断基準。</h3>
-        <p>技術的に美しくても、現場の人が嫌がるなら作り直す。最後の判断はいつも「現場の人の表情」。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ PROCESS ============ -->
-<section class="process" id="process">
-  <div class="process-inner">
-    <div class="process-head">
-      <div class="eyebrow kicker" data-reveal>How We Work</div>
-      <h2 data-reveal data-reveal-delay="1"><span class="nowrap">依頼から納品まで、</span><span class="em nowrap">4ステップ。</span></h2>
-    </div>
-    <div class="process-steps">
-      <div class="process-step" data-reveal>
-        <div class="process-step-num">01</div>
-        <h3>現場ヒアリング</h3>
-        <p>「困っていること」を、業務フローレベルで聞きます。会議室ではなく、できれば現場のデスクで。</p>
-      </div>
-      <div class="process-step" data-reveal data-reveal-delay="1">
-        <div class="process-step-num">02</div>
-        <h3>動くプロトタイプ</h3>
-        <p>提案書ではなく、いきなり動くものを作って渡します。重厚な準備期間は設けません。</p>
-      </div>
-      <div class="process-step" data-reveal data-reveal-delay="2">
-        <div class="process-step-num">03</div>
-        <h3>現場で試す</h3>
-        <p>しばらく実際に現場で使ってもらいます。「触らないと分からないこと」を全部洗い出します。</p>
-      </div>
-      <div class="process-step" data-reveal data-reveal-delay="3">
-        <div class="process-step-num">04</div>
-        <h3>磨いて、納品</h3>
-        <p>フィードバックを反映して、運用に乗る形に仕上げます。納品後も、月1のメンテナンスはセットで。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ CONTACT ============ -->
-<section class="buy">
-  <div class="eyebrow" data-reveal>Get in Touch</div>
-  <h2 class="buy-h" data-reveal>現場の<span class="em">「面倒くさい」</span>があれば、教えてください。</h2>
-  <div class="cta-actions-c" data-reveal>
-    <a class="buy-btn primary" href="mailto:h.w19961013@gmail.com">メールで相談</a>
-    <a class="buy-btn ghost" href="https://x.com/WataruPT1013" target="_blank" rel="noopener">XでDM</a>
-  </div>
-  <p class="buy-note">受託・SaaS導入・業務分析・コンテンツ寄稿、何でも。返信はできるだけ早く。</p>
-</section>
-
-<!-- FOOTER -->
-<footer class="foot">
-  <div class="foot-brand">BRIDGE<span class="dot">.</span></div>
-  <div class="foot-tag">A small medical studio. Tokyo / Remote.</div>
-  <div class="foot-links">
-    <a href="../index.html">Home</a>
-    <a href="../products/index.html">Tools</a>
-    <a href="../starter-kits/index.html">Kits</a>
-    <a href="../journal/index.html">Journal</a>
-    <a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">Note</a>
-    <a href="https://x.com/WataruPT1013" target="_blank" rel="noopener">X</a>
-    <a href="https://github.com/bridge-med" target="_blank" rel="noopener">GitHub</a>
-  </div>
-</footer>
-
-<script src="../shared/subpage.js"></script>
-
+<footer class="site-footer"></footer>
+<script src="../shared/bridge.js" defer></script>
 </body>
 </html>
