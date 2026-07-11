@@ -1202,3 +1202,27 @@ input[type="range"]::-moz-range-thumb {
   font: 600 11px/1.5 var(--sans);
 }
 .pulse-legend b { font-family: var(--en); }
+
+/* ---------- v18: 打ち手マーカー・月間レセプト集計 ---------- */
+
+.pulse-ev {
+  font: 600 10px/1.5 var(--sans);
+  color: var(--amber);
+  background: var(--amber-pale);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.acct-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px dotted var(--line);
+}
+.acct-info { flex: 1; min-width: 0; }
+.acct-name { font: 600 11.5px/1.5 var(--sans); color: var(--ink-2); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acct-bar { height: 5px; background: var(--bg-deep); border-radius: 999px; overflow: hidden; }
+.acct-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--blue), var(--green)); border-radius: 999px; }
+.acct-n { font: 600 10.5px/1.3 var(--sans); color: var(--ink-3); text-align: right; flex: 0 0 auto; display: flex; flex-direction: column; }
+.acct-n small { font-size: 9.5px; }
+.acct-yen { font: 700 12px/1.3 var(--en); color: var(--blue-deep); flex: 0 0 auto; min-width: 84px; text-align: right; }

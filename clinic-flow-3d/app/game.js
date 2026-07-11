@@ -379,9 +379,27 @@
       newCount: 0, injCount: 0, trigCount: 0, physioCount: 0, xrayCount: 0, mriCount: 0, prpCount: 0, osteoVisits: 0, treatCount: 0, kanriCount: 0,
       segCounts: { senior: 0, worker: 0, sports: 0 },
       rev: { consult: 0, inj: 0, treat: 0, physio: 0, img: 0, reha: 0, osteo: 0, checkup: 0, jihi: 0 },
-      balked: 0, soothe: 0, pulse: [],
+      balked: 0, soothe: 0, pulse: [], pulseEv: [], acct: {},
       brRevenue: 0, brProfit: 0
     };
+  }
+
+  // 算定項目の日次集計(月間レセプト集計の元データ)。点数項目は1点=10円、保険外はyen指定
+  function acc(T, name, ten, yenAmt) {
+    const a = T.acct[name] = T.acct[name] || { n: 0, ten: 0, yen: 0 };
+    a.n++;
+    a.ten += ten || 0;
+    a.yen += yenAmt !== undefined ? yenAmt : (ten || 0) * 10;
+  }
+
+  // 打ち手マーカー: 日中に操作した打ち手を時刻つきで記録(ライブモニターに▼表示)
+  function pushPulseEv(icon, label) {
+    const T = G.today;
+    const spec = G.daySpec;
+    if (!T || !spec || spec.kind === 'closed' || G.t <= 0 || G.t >= spec.min) return;
+    T.pulseEv.push({ t: G.t, icon, label });
+    if (T.pulseEv.length > 20) T.pulseEv.shift();
+    if (activeTab === 'clinic') renderPulse();
   }
 
   /* ================= セーブ/ロード ================= */
@@ -588,7 +606,8 @@
         }
       }
 
-      // 🧾 直近の会計(点数の学び): 最後の患者の算定内訳を保存
+      // 🧾 直近の会計(点数の学び)+ 月間集計へ反映
+      rc.forEach((x) => acc(T, x.n, x.t, x.t ? undefined : x.y));
       G.lastReceipt = {
         type: report.type, seg,
         rc,
@@ -965,7 +984,7 @@
       patients: T.patients, avgWait: T.avgWait, rehaCount: T.rehaCount,
       newCount: T.newCount, injCount: T.injCount, trigCount: T.trigCount,
       physioCount: T.physioCount, mriCount: T.mriCount, kanriCount: T.kanriCount,
-      segS: T.segCounts.senior, segW: T.segCounts.worker, segP: T.segCounts.sports, balked: T.balked || 0,
+      segS: T.segCounts.senior, segW: T.segCounts.worker, segP: T.segCounts.sports, balked: T.balked || 0, acct: T.acct,
       jihi: T.rev.jihi, staffCost: Math.round(mainStaffCost() * spec.pay), pts: settings.pts,
       brRevenue: T.brRevenue, brProfit: T.brProfit
     });
@@ -1208,11 +1227,63 @@
       ctx.stroke();
       ctx.setLineDash([]);
     }
+    // 打ち手マーカー: 操作した瞬間を▼で刻む(打ち手と波形の因果を見る)
+    const evs = (T && T.pulseEv) || [];
+    ctx.textAlign = 'center';
+    evs.forEach((ev) => {
+      const ex = x(ev.t);
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = 'rgba(201,138,45,0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(ex, 12);
+      ctx.lineTo(ex, cssH - 4);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = '10px sans-serif';
+      ctx.fillText(ev.icon, ex, 10);
+    });
     const last = data[data.length - 1];
     if (lg) lg.innerHTML = `
       <span style="color:${PULSE_COLORS.n}">● 院内 <b>${last.n}人</b></span>
       <span style="color:${PULSE_COLORS.w}">● いまの平均待ち <b>${last.w}分</b></span>
-      <span style="color:${PULSE_COLORS.r}">● 売上 <b>${yen(last.r)}</b></span>`;
+      <span style="color:${PULSE_COLORS.r}">● 売上 <b>${yen(last.r)}</b></span>
+      ${evs.slice(-4).map((ev) => `<span class="pulse-ev">${ev.icon} ${fmtClock(ev.t)} ${ev.label}</span>`).join('')}`;
+  }
+
+  /* ================= 🧾 月間レセプト集計(算定項目ランキング) ================= */
+
+  function renderAcct() {
+    const el = $('acctBody');
+    if (!el) return;
+    const agg = {};
+    G.history.slice(-30).forEach((h) => {
+      if (!h.acct) return;
+      Object.entries(h.acct).forEach(([k, v]) => {
+        const a = agg[k] = agg[k] || { n: 0, ten: 0, yen: 0 };
+        a.n += v.n; a.ten += v.ten; a.yen += v.yen;
+      });
+    });
+    const rows = Object.entries(agg).sort((a, b) => b[1].yen - a[1].yen);
+    if (!rows.length) {
+      el.innerHTML = '<p class="plan-lead">まだ実績がありません。1日診療すると、算定項目ごとの件数×点数がここに積み上がります。</p>';
+      return;
+    }
+    const total = rows.reduce((a, [, v]) => a + v.yen, 0);
+    el.innerHTML = `
+      <p class="plan-lead">直近30日の算定内訳(件数×点数)。<b>どの行為が収益の柱か</b> — 実際のレセプト分析と同じ視点で読む。</p>
+      ${rows.slice(0, 16).map(([k, v]) => `
+        <div class="acct-row">
+          <div class="acct-info">
+            <span class="acct-name">${k}</span>
+            <div class="acct-bar"><i style="width:${Math.max(1, v.yen / total * 100).toFixed(1)}%"></i></div>
+          </div>
+          <span class="acct-n">${v.n.toLocaleString()}件${v.ten ? `<small>${v.ten.toLocaleString()}点</small>` : '<small>保険外</small>'}</span>
+          <b class="acct-yen">${yen(v.yen)}</b>
+        </div>`).join('')}
+      ${rows.length > 16 ? `<p class="pnl-note">ほか${rows.length - 16}項目</p>` : ''}
+      <div class="pnl-row total"><span>合計(直近30日・本院)</span><b>${yen(total)}</b></div>
+      <p class="pnl-note">📖 レセプト分析の第一歩は「件数×単価」への分解。件数が多い低単価(物療)と、件数が少ない高単価(MRI・リハ)の両輪で単価は作られる。</p>`;
   }
 
   /* ================= 👤 患者タップ(現場介入: 院長の声かけ) ================= */
@@ -1243,6 +1314,7 @@
       G.today.soothe = (G.today.soothe || 0) + 1;
       p.soothed = true;
       clinic.floats.push({ x: p.x, y: p.y - 0.6, text: '🙏', t: 0 });
+      pushPulseEv('🙏', '院長の声かけ');
       SND.coin();
       $('modal').classList.remove('show');
       toast('🙏 声をかけました — この患者さんの体感待ちがやわらぎます');
@@ -1300,6 +1372,7 @@
     vis('achCard', 2);
     vis('prestigeCard', 3);
     vis('leagueCard', 3);
+    vis('acctCard', 3);
     ['kpiCard', 'plannerCard', 'bankCard', 'pnlCard', 'kijunCard'].forEach((id) => vis(id, 3));
     const lock = $('mgmtLock');
     if (lock) lock.hidden = stage >= 3;
@@ -2147,7 +2220,7 @@
     if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); renderReceipt(); renderPulse(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
-    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); }
+    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); renderAcct(); }
   }
 
   /* ================= UI: 診療時間 ================= */
@@ -2207,6 +2280,7 @@
     G.money -= cost;
     SND.click();
     setSettingValue(key, cur + step);
+    pushPulseEv('👥', `${SHOP[key].label}`);
     clinic.applySettings();
     renderShop(); updateHeader(); save();
   }
@@ -2395,6 +2469,7 @@
       if (G.money < 50000) { toast('資金が足りません(¥50,000)'); return; }
       G.money -= 50000;
       settings.reserve = true;
+      pushPulseEv('📅', '予約制ON');
       toast('予約制を導入しました');
     } else { settings.reserve = false; }
     renderShop(); updateHeader(); save();
@@ -2405,6 +2480,7 @@
       G.money -= 300000;
       settings.kiosk = true;
       clinic.applySettings();
+      pushPulseEv('🏧', '自動精算機');
       toast('自動精算機を設置しました');
     } else { settings.kiosk = false; clinic.applySettings(); }
     renderShop(); updateHeader(); save();
@@ -2419,6 +2495,7 @@
       if (G.money < 200000) { toast('資金が足りません(¥200,000)'); return; }
       G.money -= 200000;
       settings.webIntake = true;
+      pushPulseEv('📱', 'Web問診');
       toast('📱 Web問診・事前受付を導入! 受付時間が約45%短縮されます(受付ボトルネック対策)');
     } else { settings.webIntake = false; }
     renderShop(); updateHeader(); save();
@@ -2437,6 +2514,8 @@
       $(label).textContent = fmt(v);
       save();
     });
+    const POLICY_JP = { examMean: '診察時間', pTreat: '処置方針', pReha: 'リハ方針', pInj: '関節注方針', pTrig: 'トリガー方針', pPhysio: '物療方針' };
+    $(key).addEventListener('change', (e) => pushPulseEv('🎛', `${POLICY_JP[key]}→${fmt(Number(e.target.value))}`));
   });
 
   /* ================= UI: KPI ================= */
@@ -3445,51 +3524,60 @@
         T.segCounts[seg] = (T.segCounts[seg] || 0) + 1;
         T.patients++;
         let rev = 0, proc = false, didReha = false;
-        if (a.type === 'checkup') { rev += FEES.checkup; T.rev.checkup += FEES.checkup; }
-        else if (a.type === 'first') { rev += FEES.first; T.rev.consult += FEES.first; T.newCount++; }
-        else { rev += FEES.revisit; T.rev.consult += FEES.revisit; }
+        if (a.type === 'checkup') { rev += FEES.checkup; T.rev.checkup += FEES.checkup; acc(T, '健康診断(保険外)', 0, FEES.checkup); }
+        else if (a.type === 'first') { rev += FEES.first; T.rev.consult += FEES.first; T.newCount++; acc(T, '初診料', 291); }
+        else { rev += FEES.revisit; T.rev.consult += FEES.revisit; acc(T, '再診料', 75); }
         if (a.type !== 'checkup') {
-          if (Math.random() < settings.pInj) { rev += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; proc = true; }
+          if (Math.random() < settings.pInj) { rev += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; proc = true; acc(T, '関節腔内注射+薬剤', 180); }
           if (Math.random() < settings.pTrig) {
-            const v = Math.random() < 0.25 ? 4000 : FEES.trig;
+            const block = Math.random() < 0.25;
+            const v = block ? 4000 : FEES.trig;
             rev += v; T.rev.inj += v; T.trigCount++; proc = true;
+            acc(T, block ? '神経ブロック(硬膜外等)+薬剤' : 'トリガーポイント注射+薬剤', block ? 400 : 120);
           }
-          if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; }
+          if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; acc(T, '消炎鎮痛等処置(器具等)', 35); }
           const segMul = { senior: 1.2, sports: 1.45, worker: 0.75 }[seg] || 1;
           const wantReha = a.type === 'rehab' || (settings.rehaLevel > 0 && (a.refer || Math.random() < settings.pReha * segMul));
           if (wantReha && settings.rehaLevel > 0 && rehaAvail >= 1) {
             rehaAvail--; didReha = true; proc = true;
             const fr = REHA_FEE[settings.rehaLevel];
             rev += fr; T.rev.reha += fr; T.rehaCount++;
+            acc(T, `${REHA_NAMES[settings.rehaLevel]} ${[0, 85, 170, 185][settings.rehaLevel]}点×2単位`, fr / 10);
           } else if (clinic.usableBeds() > 0 && Math.random() < settings.pTreat) {
-            const v = Math.random() < 0.3 ? 4900 : FEES.treat;
+            const gips = Math.random() < 0.3;
+            const v = gips ? 4900 : FEES.treat;
             rev += v; T.rev.treat += v; T.treatCount++; proc = true;
+            acc(T, gips ? 'シーネ・ギプス固定(四肢)' : '創傷処置・消炎処置', gips ? 490 : 150);
           }
         }
-        if ((a.type === 'revisit' || a.type === 'rehab') && !proc) { rev += FEES.kanri; T.rev.consult += FEES.kanri; T.kanriCount++; }
+        if ((a.type === 'revisit' || a.type === 'rehab') && !proc) { rev += FEES.kanri; T.rev.consult += FEES.kanri; T.kanriCount++; acc(T, '外来管理加算', 52); }
         if (a.type === 'revisit' || a.type === 'rehab') {
-          const add = (settings.kasanMeisai ? 10 : 0) + (settings.kasanJikangai === 2 ? 50 : settings.kasanJikangai === 1 ? 10 : 0);
+          let add = 0;
+          if (settings.kasanMeisai) { add += 10; acc(T, '明細書発行体制等加算', 1); }
+          if (settings.kasanJikangai === 2) { add += 50; acc(T, '時間外対応加算1', 5); }
+          else if (settings.kasanJikangai === 1) { add += 10; acc(T, '時間外対応加算3', 1); }
           if (add) { rev += add; T.rev.consult += add; }
         }
         if ((a.type === 'first' || a.type === 'revisit') && Math.random() < 0.55) {
-          rev += FEES.presc; T.rev.consult += FEES.presc;
-          if (settings.kasanKohatsu) { rev += 80; T.rev.consult += 80; }
+          rev += FEES.presc; T.rev.consult += FEES.presc; acc(T, '処方箋料', 60);
+          if (settings.kasanKohatsu) { rev += 80; T.rev.consult += 80; acc(T, '外来後発医薬品使用体制加算1', 8); }
         }
-        if (a.type === 'first' && Math.random() < 0.7) { rev += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; }
-        if (settings.echo && a.type === 'first' && Math.random() < (seg === 'sports' ? 0.45 : 0.3)) { rev += 3500; T.rev.img += 3500; }
+        if (a.type === 'first' && Math.random() < 0.7) { rev += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; acc(T, '単純X線撮影+画像診断', 150); }
+        if (settings.echo && a.type === 'first' && Math.random() < (seg === 'sports' ? 0.45 : 0.3)) { rev += 3500; T.rev.img += 3500; acc(T, '超音波検査(運動器エコー)', 350); }
         const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
-        if (settings.mri && T.mriCount < 8 && (a.type === 'first' || a.refer) && Math.random() < 0.3 * mriMul) { rev += FEES.mri; T.rev.img += FEES.mri; T.mriCount++; }
+        if (settings.mri && T.mriCount < 8 && (a.type === 'first' || a.refer) && Math.random() < 0.3 * mriMul) { rev += FEES.mri; T.rev.img += FEES.mri; T.mriCount++; acc(T, 'MRI撮影(1.5T)+コンピュータ断層診断', 1600); }
         if (settings.dexa && a.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
         if (didReha && settings.selfReha) {
           const pJ = clamp((G.rep - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
-          if (Math.random() < pJ) { rev += settings.selfRehaPrice; T.rev.jihi += settings.selfRehaPrice; }
+          if (Math.random() < pJ) { rev += settings.selfRehaPrice; T.rev.jihi += settings.selfRehaPrice; acc(T, '自費リハ延長(保険外)', 0, settings.selfRehaPrice); }
         }
-        if (settings.goods && proc && Math.random() < 0.12 * clamp(G.rep / 70, 0.6, 1.3)) { rev += FEES.goods; T.rev.jihi += FEES.goods; T.goodsCogs += FEES.goodsCogs; }
+        if (settings.goods && proc && Math.random() < 0.12 * clamp(G.rep / 70, 0.6, 1.3)) { rev += FEES.goods; T.rev.jihi += FEES.goods; T.goodsCogs += FEES.goodsCogs; acc(T, '物販: サポーター等(保険外)', 0, FEES.goods); }
         T.revenue += rev;
         const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45;
         if ((a.type === 'first' || a.type === 'revisit') && !didReha && Math.random() < loyalty * 0.85) addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
         if (didReha && a.type !== 'rehab') {
-          rev += 3000; T.rev.reha += 3000; // リハ総合計画評価料
+          rev += 3000; T.rev.reha += 3000;
+          acc(T, 'リハビリテーション総合計画評価料', 300);
           for (let k = 1; k <= 8; k++) addSchedule(G.day + Math.ceil(k * 2.5), 'rehab');
         }
         if (a.type === 'rehab' && !didReha) addSchedule(G.day + 1, 'rehab');
