@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — 仕事のご依頼 / BRIDGE</title>
+<meta name="description" content="医療機関の経営支援・PMI伴走、業務のAI設計と軽量ツール開発、講演・研修。何を頼めて、どう進むのか。初回相談は無料です。">
+<link rel="canonical" href="https://bridge-med.github.io/bridge-lp/services/">
+<meta property="og:title" content="Services — 仕事のご依頼 / BRIDGE">
+<meta property="og:description" content="医療機関の経営支援・PMI伴走、業務のAI設計と軽量ツール開発、講演・研修。初回相談は無料です。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/ogp.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ProfessionalService","name":"BRIDGE","url":"https://bridge-med.github.io/bridge-lp/services/","description":"医療機関の経営支援・PMI伴走、業務のAI設計・軽量ツール開発、講演・研修","founder":{"@type":"Person","name":"Wataru Hashimoto"},"areaServed":"JP"}
+</script>
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/bridge.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+/* サービスメニュー(3本・行型) */
+.svc{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:120px 1fr;gap:16px 40px;padding:clamp(36px,6vh,56px) 0;border-bottom:1px solid var(--line);align-items:start}
+.svc:last-of-type{border-bottom:none}
+.svc-num{font:600 12px/2 var(--en);letter-spacing:0.18em;color:var(--dawn)}
+.svc-t{font-family:var(--mincho);font-weight:600;font-size:clamp(20px,3vw,28px);line-height:1.7;margin-bottom:12px}
+.svc-p{font-size:14px;line-height:2.25;color:var(--ink-2);max-width:640px}
+.svc-for{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.svc-for span{font:600 11px/1.7 var(--sans);padding:6px 12px;border:1px solid var(--line);border-radius:100px;color:var(--ink-3)}
+@media(max-width:720px){.svc{grid-template-columns:1fr;gap:8px}}
+/* 進め方 */
+.flow{max-width:var(--max);margin:clamp(40px,6vh,60px) auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.flow::before{content:'';position:absolute;top:5px;left:0;right:0;height:1px;background:var(--line)}
+.flow-step{padding:28px 18px 0 0;position:relative}
+.flow-step::before{content:'';position:absolute;top:0;left:0;width:11px;height:11px;border-radius:50%;background:var(--bg-2);border:1.5px solid var(--ink-3)}
+.flow-step:last-child::before{border-color:var(--dawn);background:var(--dawn)}
+.flow-num{font:600 10px/1 var(--en);letter-spacing:0.18em;color:var(--ink-3);margin-bottom:10px}
+.flow-t{font-family:var(--mincho);font-weight:600;font-size:clamp(16px,2vw,20px);margin-bottom:8px}
+.flow-p{font-size:12.5px;line-height:2.05;color:var(--ink-2);max-width:230px}
+@media(max-width:860px){
+  .flow{grid-template-columns:1fr;padding-left:28px}
+  .flow::before{top:0;bottom:0;left:5px;right:auto;width:1px;height:auto}
+  .flow-step{padding:0 0 36px 0}
+  .flow-step::before{left:-28px;top:8px}
+  .flow-p{max-width:none}
+}
+/* 料金・正直な話 */
+.fee{max-width:720px;margin:clamp(36px,5vh,52px) 0 0;border-left:2px solid var(--dawn);padding:10px 0 10px 28px}
+.fee p{font-size:14px;line-height:2.3;color:var(--ink-2)}
+.fee p+p{margin-top:1.2em}
+.honest-list{max-width:720px;margin:clamp(30px,4vh,44px) 0 0;display:grid;gap:14px}
+.honest-list li{list-style:none;font-size:13.5px;line-height:2.2;color:var(--ink-2);padding-left:22px;position:relative}
+.honest-list li::before{content:'—';position:absolute;left:0;color:var(--dawn)}
+/* CTA */
+.svc-cta{text-align:center;padding-top:clamp(80px,11vh,120px);padding-bottom:clamp(80px,11vh,120px)}
+.svc-cta-h{font-family:var(--mincho);font-weight:600;font-size:clamp(21px,3.6vw,34px);line-height:2;max-width:820px;margin:0 auto}
+.svc-cta-p{max-width:520px;margin:20px auto 0;font-size:13.5px;line-height:2.3;color:var(--ink-2)}
+.svc-cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:clamp(30px,4vh,44px)}
+</style>
+</head>
+<body data-root="../" data-page="services">
+
+<nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
+
+<header class="page-hero">
+  <div class="page-hero-inner">
+    <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Services</span></div>
+    <h1 data-reveal data-reveal-delay="1">仕事のご依頼</h1>
+    <p class="lead" data-reveal data-reveal-delay="2">
+      何を頼めて、どう進むのかをまとめました。初回の相談は無料です。相談したからといって、依頼しなければいけないわけではありません。
+    </p>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ できること ============ -->
+<section class="sec">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Menu — できること</div>
+  </div>
+  <div class="sec-inner">
+    <div class="svc" data-reveal>
+      <span class="svc-num">01</span>
+      <div>
+        <h2 class="svc-t">医療機関の経営支援・PMI伴走</h2>
+        <p class="svc-p">
+          承継・統合後のクリニックや、数字の見え方に課題のあるリハ部門の立て直しに伴走します。進め方は臨床と同じで、評価から始めて、課題を言葉にして、介入して、また測ります。理学療法士として現場に立ち、事業会社でPMIの数字に責任を持ってきた人間が、現場と経営の両方の言葉で話します。
+        </p>
+        <div class="svc-for">
+          <span>承継直後のクリニック</span><span>リハ部門の運営改善</span><span>KPI設計と朝礼の再設計</span><span>月次の伴走</span>
+        </div>
+      </div>
+    </div>
+    <div class="svc" data-reveal>
+      <span class="svc-num">02</span>
+      <div>
+        <h2 class="svc-t">業務のAI設計・軽量ツール開発</h2>
+        <p class="svc-p">
+          書類仕事や集計に消えている時間を、AIと軽い道具で取り戻します。RehaBoardやMedBoardのような「導入会議の要らない軽さ」のツールを、あなたの現場に合わせて作ります。提案書ではなく、まず動くものを見てもらう進め方です。
+        </p>
+        <div class="svc-for">
+          <span>ダッシュボード制作</span><span>AI業務設計</span><span>Excel業務の置き換え</span><span>既存ツールのカスタマイズ</span>
+        </div>
+      </div>
+    </div>
+    <div class="svc" data-reveal>
+      <span class="svc-num">03</span>
+      <div>
+        <h2 class="svc-t">講演・研修・執筆</h2>
+        <p class="svc-p">
+          リハビリテーション的思考、医療職のキャリア設計、現場と経営の橋渡しについて話します。院内研修から学生向けまで。ゲームで学ぶ経営(Clinic Town 3D)を使った参加型の回もできます。
+        </p>
+        <div class="svc-for">
+          <span>院内研修</span><span>キャリア講演</span><span>執筆・寄稿</span><span>ゲームで学ぶ経営</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 進め方 ============ -->
+<section class="sec tint">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>How We Work — 進め方</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">会議室ではなく、現場のデスクから</h2>
+  </div>
+  <div class="flow">
+    <div class="flow-step" data-reveal>
+      <div class="flow-num">01</div><div class="flow-t">現場ヒアリング</div>
+      <p class="flow-p">困っていることを、業務フローのレベルで聞きます。できれば現場のデスクで。</p>
+    </div>
+    <div class="flow-step" data-reveal data-reveal-delay="1">
+      <div class="flow-num">02</div><div class="flow-t">動くものを先に</div>
+      <p class="flow-p">提案書の代わりに、動くプロトタイプや評価結果を最初に出します。</p>
+    </div>
+    <div class="flow-step" data-reveal data-reveal-delay="2">
+      <div class="flow-num">03</div><div class="flow-t">現場で試す</div>
+      <p class="flow-p">実際に使ってもらい、触らないと分からないことを全部洗い出します。</p>
+    </div>
+    <div class="flow-step" data-reveal data-reveal-delay="3">
+      <div class="flow-num">04</div><div class="flow-t">磨いて、運用へ</div>
+      <p class="flow-p">フィードバックを反映して、運用に乗る形に仕上げます。納品後の相談も続けられます。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 料金と、正直な話 ============ -->
+<section class="sec">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Fee — 料金の考え方</div>
+    <div class="fee" data-reveal data-reveal-delay="1">
+      <p>
+        <strong>初回相談(オンライン30〜60分)と、お見積りは無料です。</strong>料金は内容と期間によって変わるため、相談のうえで個別にお出しします。予算が先に決まっている場合は、その中でできる範囲を正直にお伝えします。
+      </p>
+    </div>
+    <div class="eyebrow" style="margin-top:clamp(50px,7vh,70px)" data-reveal>Honestly — 先に伝えておきたいこと</div>
+    <ul class="honest-list" data-reveal data-reveal-delay="1">
+      <li>ひとりで運営しているため、同時にお受けできる件数に限りがあります。時期によってはお待たせします。</li>
+      <li>大規模なシステム開発や、成果を保証する類のお仕事はお受けしていません。合わないと判断した場合は、正直にそうお伝えします。</li>
+      <li>実績の詳細は守秘の関係でサイトには載せていません。相談の場では、話せる範囲で具体的にお話しします。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="sec svc-cta tint">
+  <h2 class="svc-cta-h" data-reveal>まずは、現場の「面倒くさい」を<br class="br-pc">聞かせてください</h2>
+  <p class="svc-cta-p" data-reveal data-reveal-delay="1">
+    メール1通で始まります。うまく言葉になっていなくても大丈夫です。
+  </p>
+  <div class="svc-cta-actions" data-reveal data-reveal-delay="2">
+    <a class="btn primary" href="mailto:h.w19961013@gmail.com?subject=%E3%80%90%E7%9B%B8%E8%AB%87%E3%80%91BRIDGE%E3%81%B8%E3%81%AE%E4%BB%95%E4%BA%8B%E3%81%AE%E7%9B%B8%E8%AB%87&body=%E3%81%8A%E5%90%8D%E5%89%8D%EF%BC%9A%0A%E3%81%94%E6%89%80%E5%B1%9E%EF%BC%9A%0A%E5%9B%B0%E3%81%A3%E3%81%A6%E3%81%84%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E7%AE%87%E6%9D%A1%E6%9B%B8%E3%81%8D%E3%81%A7%E3%82%82%EF%BC%89%EF%BC%9A%0A">相談メールを書く</a>
+    <a class="btn ghost" href="https://x.com/WataruPT1013" target="_blank" rel="noopener noreferrer">XでDMする</a>
+  </div>
+</section>
+
+</main>
+
+<aside class="walk">
+  <div class="walk-inner">
+    <div class="eyebrow" data-reveal>Where to next — 次は、どこへ</div>
+    <div class="walk-grid" style="margin-top:30px">
+      <a class="walk-card" href="../stories/index.html" data-reveal>
+        <span class="en">Stories</span><span class="t">なぜこの仕事をしているのか</span>
+        <p class="p">朝礼の沈黙——実話から読めます。</p>
+      </a>
+      <a class="walk-card" href="../products/index.html" data-reveal data-reveal-delay="1">
+        <span class="en">Products</span><span class="t">仕事の成果物を先に見る</span>
+        <p class="p">作った道具はすべて公開しています。</p>
+      </a>
+      <a class="walk-card" href="../about/index.html" data-reveal data-reveal-delay="2">
+        <span class="en">About</span><span class="t">誰に頼むのかを知る</span>
+        <p class="p">経歴と、BRIDGEという名前の由来。</p>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<footer class="site-footer"></footer>
+<script src="../shared/bridge.js" defer></script>
+</body>
+</html>

@@ -10,6 +10,7 @@
   <url><loc>https://bridge-med.github.io/bridge-lp/research/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/about/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/community/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/services/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <!-- プロダクト -->
   <url><loc>https://bridge-med.github.io/bridge-lp/rehaboard/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medboard/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>

@@ -15,6 +15,7 @@
      それ以外はメニュー(ドロワー)とフッターから辿れる ---- */
   const NAV = [
     { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、これまでの歩み。',                    href: 'about/index.html', primary: true },
+    { id: 'services',   en: 'Services',   jp: '仕事のご依頼',  d: '経営支援・PMI伴走、AI設計・ツール開発、講演・研修。',  href: 'services/index.html', primary: true },
     { id: 'projects',   en: 'Projects',   jp: '活動',        d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html', primary: true },
     { id: 'products',   en: 'Products',   jp: 'プロダクト',   d: '実際に使えるもの。すべて公開しています。',             href: 'products/index.html', primary: true },
     { id: 'journal',    en: 'Journal',    jp: '手記',        d: '完成していない考えも、そのまま公開しています。',       href: 'journal/index.html', primary: true },
@@ -119,6 +120,7 @@
           { t: 'Starter Kits', href: 'starter-kits/index.html' },
         ]) +
         col('つながる', [
+          { t: 'Services', href: 'services/index.html' },
           { t: 'Contact', href: 'community/index.html' },
           { t: 'note', href: 'https://note.com/prime_duck4944', ext: true },
           { t: 'X', href: 'https://x.com/WataruPT1013', ext: true },
