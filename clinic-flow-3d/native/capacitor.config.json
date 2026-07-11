@@ -1,0 +1,17 @@
+{
+  "appId": "jp.bridgemed.clinictown",
+  "appName": "クリニックタウン3D",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "automatic"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#3E7CA6"
+    }
+  }
+}

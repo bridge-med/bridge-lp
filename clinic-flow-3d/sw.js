@@ -1,6 +1,6 @@
 /* クリニックタウン3D — Service Worker
  * network-first(常に最新を取りに行き、オフライン時はキャッシュで起動) */
-const VER = 'ct3d-v16';
+const VER = 'ct3d-v20';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -23,4 +23,18 @@ self.addEventListener('fetch', (e) => {
       })
       .catch(() => caches.match(e.request))
   );
+});
+
+self.addEventListener('periodicsync', (e) => {
+  if (e.tag !== 'ct3d-daily') return;
+  e.waitUntil(self.registration.showNotification('クリニックタウン3D', {
+    body: '🎁 今日のログインボーナスとスタッフからの依頼が届いています',
+    icon: 'icon-192.png',
+    tag: 'ct3d-daily'
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil(clients.openWindow('./'));
 });

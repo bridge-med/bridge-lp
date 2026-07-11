@@ -222,6 +222,9 @@ const CLINIC = (() => {
 
   const LAYOUTS = { 1: layoutLv1, 2: layoutLv2, 3: layoutLv3 };
 
+  // 客層でヘアカラーを変える(高齢=白髪/勤労=黒/スポーツ=茶)
+  const SEG_HAIR = { senior: '#E3DED2', worker: '#4A3B2E', sports: '#B5651D' };
+
   const PHASE_COLORS = {
     walk: '#9AA7B0', recepQ: '#C98A2D', recep: '#C98A2D',
     waitExam: '#3E7CA6', exam: '#2C5F82',
@@ -316,7 +319,7 @@ const CLINIC = (() => {
       return true;
     }
 
-    recepWindows() { return Math.min(this.s.receptionists, this.L.RECEP.service.length); }
+    recepWindows() { return Math.max(0, Math.min(this.s.receptionists - (this.s.cashHelper ? 1 : 0), this.L.RECEP.service.length)); }
 
     /* ---------- 内部ヘルパー ---------- */
 
@@ -368,7 +371,7 @@ const CLINIC = (() => {
     }
 
     cashServices() {
-      return this.s.kiosk ? this.L.CASH.service : this.L.CASH.service.slice(0, 1);
+      return (this.s.kiosk || this.s.cashHelper) ? this.L.CASH.service : this.L.CASH.service.slice(0, 1);
     }
 
     afterExam(p) {
@@ -655,6 +658,10 @@ const CLINIC = (() => {
         items.push({ depth: sp.x + sp.y, draw: () => iso.figure(sp.x, sp.y, '#FFFFFF', { coat: true, dot: this.recBusy[w] ? '#3E7CA6' : '#4FA98C' }) });
       }
       items.push({ depth: L.CASH.staff.x + L.CASH.staff.y, draw: () => iso.figure(L.CASH.staff.x, L.CASH.staff.y, '#FFFFFF', { coat: true, dot: this.cashBusy[0] ? '#3E7CA6' : '#4FA98C' }) });
+      if (s.cashHelper) {
+        const hx = L.CASH.kiosk.x, hy = L.CASH.kiosk.y - 0.55;
+        items.push({ depth: hx + hy, draw: () => iso.figure(hx, hy, '#FFFFFF', { coat: true, dot: this.cashBusy[1] ? '#3E7CA6' : '#C98A2D' }) });
+      }
       for (let d = 0; d < Math.min(s.doctors, L.EXAM.length); d++) {
         const sp = L.EXAM[d].doctor;
         items.push({ depth: sp.x + sp.y, draw: () => iso.figure(sp.x, sp.y, '#FFFFFF', { coat: true, dot: this.doctors[d].patient ? '#3E7CA6' : '#4FA98C' }) });
@@ -671,7 +678,7 @@ const CLINIC = (() => {
 
       for (const p of this.patients) {
         const color = PHASE_COLORS[p.phase] || '#9AA7B0';
-        items.push({ depth: p.x + p.y + 0.01, draw: () => iso.figure(p.x, p.y, color, { walking: p.path.length > 0 }) });
+        items.push({ depth: p.x + p.y + 0.01, draw: () => iso.figure(p.x, p.y, color, { walking: p.path.length > 0, hair: SEG_HAIR[p.seg] }) });
       }
       items.sort((a, b) => a.depth - b.depth);
       items.forEach((it) => it.draw());

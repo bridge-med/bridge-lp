@@ -40,11 +40,15 @@
       o.stop(t0 + dur + 0.02);
     }
     return {
-      cash() { tone(880, 0.09, 'triangle', 0.035); tone(1318, 0.12, 'triangle', 0.028, 0.05); },
-      coin() { tone(988, 0.08, 'triangle', 0.05); tone(1480, 0.14, 'triangle', 0.045, 0.07); },
-      fanfare() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.22, 'triangle', 0.055, i * 0.09)); },
+      cash() { tone(880, 0.09, 'triangle', 0.028); tone(1318, 0.12, 'triangle', 0.022, 0.05); },
+      coin() { tone(988, 0.07, 'triangle', 0.05); tone(1480, 0.09, 'triangle', 0.045, 0.06); tone(1976, 0.16, 'triangle', 0.04, 0.12); },
+      fanfare() {
+        [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.22, 'triangle', 0.055, i * 0.09));
+        [523, 659, 784].forEach((f) => tone(f, 0.5, 'triangle', 0.035, 0.42));
+      },
       day() { tone(392, 0.22, 'sine', 0.045); tone(523, 0.3, 'sine', 0.04, 0.12); },
-      click() { tone(520, 0.05, 'square', 0.02); }
+      click() { tone(520, 0.05, 'square', 0.02); },
+      buzz() { tone(196, 0.18, 'square', 0.03); }
     };
   })();
 
@@ -314,6 +318,7 @@
     chairs: 6, beds: 1, machines: 0, physio: 0,
     kiosk: false, reserve: false, reviewCare: false, webIntake: false,
     kasanMeisai: false, kasanJikangai: 0, kasanKohatsu: false,
+    cashHelper: false,
     mri: false, dexa: false, echo: false,
     rehaLevel: 0,
     examMean: 6, pTreat: 0.15, pReha: 0.35, pInj: 0.2, pTrig: 0.12, pPhysio: 0.35,
@@ -352,6 +357,7 @@
     season: { bestProfit: null, bestMonth: 0, months: 0 },
     league: { beaten: 0 },
     sound: true,
+    notify: false,
     hospital: null,
     kaitei: { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] }
   };
@@ -422,7 +428,7 @@
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
-          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, hospital: G.hospital, kaitei: G.kaitei
+          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei
         }
       }));
     } catch (e) { /* noop */ }
@@ -455,6 +461,7 @@
       if (!G.daily) G.daily = { last: '', streak: 0, chDone: '' };
       if (!G.prestige) G.prestige = { count: 0, legacy: null };
       if (d.g.sound === undefined) G.sound = true;
+      if (d.g.notify === undefined) G.notify = false;
       if (d.g.hospital === undefined) G.hospital = null;
       if (!G.kaitei) G.kaitei = { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] };
       // v11-12: スペシャル依頼・月間決算・地域リーグの補完
@@ -465,6 +472,7 @@
       if (!G.speedPass) G.speedPass = { tier: 0, until: 0 };
       if (!G.bonds) G.bonds = { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 };
       if (G.daily.chState === undefined) Object.assign(G.daily, { chState: '', chDay: '', lastClearChar: '', chain: 0 });
+      if (G.daily.quizDone === undefined) G.daily.quizDone = '';
       if (d.g.speedUnlocked) {
         const OLD_PRICE = { 8: 12, 16: 25, 32: 50 };
         let refund = 0;
@@ -1592,9 +1600,12 @@
     el.innerHTML = `
       ${m ? `<div class="todo-row"><span class="todo-tag mission">🎯 ミッション</span><p>${m.title}</p></div>` : ''}
       <div class="todo-row"><span class="todo-tag daily">📅 依頼</span><div class="req-body">${reqRow}</div></div>
+      <div class="todo-row"><span class="todo-tag quiz">🧠 クイズ</span><p>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</p></div>
       <div class="todo-row"><span class="todo-tag">🔍 いまの詰まり</span><p>${bn.text}</p></div>
       ${bn.fixes.length ? `<div class="fix-row">${bn.fixes.map((f) => `<button class="fix-chip" data-goto="${f.tab}|${f.sel}">${f.label} →</button>`).join('')}</div>` : ''}`;
     bindGoto(el);
+    const qb = $('quizBtn');
+    if (qb) qb.addEventListener('click', () => { SND.click(); showQuizModal(); });
     el.querySelectorAll('[data-chact]').forEach((b) => b.addEventListener('click', () => {
       G.daily.chDay = today;
       G.daily.chState = b.dataset.chact;
@@ -1845,6 +1856,72 @@
       if (same.length) return Object.assign({}, same[h % same.length], { chain: true });
     }
     return pool[h % pool.length];
+  }
+
+  /* --- 🧠 算定◯×クイズ(日替わり・教育コンテンツ) --- */
+
+  const QUIZ = [
+    { q: '処置や検査を行わなかった再診でも、計画的な医学管理を行えば外来管理加算(52点)を算定できる', a: true,
+      exp: '外来管理加算は「何もしない再診」の医学管理を評価する加算。処置・リハ・検査等を行った日は算定できない。' },
+    { q: '初診料は291点である', a: true,
+      exp: '1点=10円なので¥2,910。クリニック外来の収益の土台になる基本診療料。' },
+    { q: '運動器リハビリテーション料(I)は、専従の常勤PT2名がいれば届出できる', a: false,
+      exp: 'PT2名は(II)の要件。(I)はより手厚い専従スタッフ体制に加え、100㎡以上の訓練室など面積要件も必要。' },
+    { q: '消炎鎮痛等処置(いわゆる物療)は1回350点である', a: false,
+      exp: '正しくは35点(¥350)。低単価だが、継続通院を支える整形外来の重要な柱。' },
+    { q: '処方箋料は60点である', a: true,
+      exp: '院外処方箋の交付1回につき60点(¥600)。' },
+    { q: '関節腔内注射を行った日でも、外来管理加算を併せて算定できる', a: false,
+      exp: '注射・処置・リハ等を行った日は外来管理加算は算定不可。「どちらか」の関係を覚えておこう。' },
+    { q: '回復期リハビリテーション病棟入院料は、算定上限日数の範囲内なら入院中毎日算定できる', a: true,
+      exp: '病棟単位の包括入院料で、疾患ごとの上限日数まで毎日算定する。病院経営の安定収益源。' },
+    { q: '疾患別リハビリテーションの1単位は20分である', a: true,
+      exp: '1単位=20分。運動器リハは患者1人につき1日6単位までなど、上限も定められている。' },
+    { q: '診療報酬の点数は都道府県ごとに異なる', a: false,
+      exp: '診療報酬は全国一律の公定価格。原則2年に1度の改定で見直される(このゲームの改定イベントの元ネタ)。' },
+    { q: '時間外加算が付くのは初診料だけである', a: false,
+      exp: '再診料にも時間外・休日・深夜の加算がある。届出した夜間・早朝等加算も再診で算定できる。' },
+    { q: 'リハビリテーション総合計画評価料は300点である', a: true,
+      exp: '多職種でリハ計画を作り評価した場合に月1回300点。「計画→実施→評価」の流れごと点数になっている。' },
+    { q: '施設基準の要件(専従PTの人数など)を満たせなくなっても、届出済みなら算定を続けてよい', a: false,
+      exp: '要件を満たせなくなったら速やかに届出の変更(辞退)が必要。要件割れのまま算定を続けると返還の対象になる。' },
+    { q: 'MRIの撮影料は、装置の性能(テスラ数)にかかわらず同じ点数である', a: false,
+      exp: '1.5T未満/1.5T以上3T未満/3T以上で点数が異なる。高性能機ほど高い点数が設定されている。' },
+    { q: '関節腔内注射では、手技料とは別に使用した薬剤の薬剤料も算定できる', a: true,
+      exp: '注射の手技料と薬剤料は別建て。ヒアルロン酸などの薬剤料が加わって1回の算定額になる。' }
+  ];
+
+  function pickQuiz(dateStr) {
+    let h = 7;
+    for (let i = 0; i < dateStr.length; i++) h = (h * 37 + dateStr.charCodeAt(i)) % 9973;
+    return QUIZ[h % QUIZ.length];
+  }
+
+  function showQuizModal() {
+    const today = todayKey();
+    const q = pickQuiz(today);
+    const done = G.daily.quizDone === today;
+    showModal('🧠 今日の算定◯×クイズ', `
+      <p class="quiz-q">Q. ${q.q}</p>
+      ${done
+        ? `<div class="rs-bottle">本日は回答済みです。<br><small>📖 ${q.exp}</small></div>`
+        : `<div class="modal-actions quiz-actions"><button class="btn-cta" id="quizO">⭕ 正しい</button><button class="btn-cta ghost" id="quizX">❌ 誤り</button></div><div id="quizResult"></div>`}
+      <p class="modal-note">毎日1問、実際の診療報酬から出題。正解で🪙+1。</p>`, done ? '閉じる' : 'あとで');
+    if (done) return;
+    const answer = (ans) => {
+      if (G.daily.quizDone === today) return;
+      const ok = ans === q.a;
+      G.daily.quizDone = today;
+      if (ok) { G.coins += 1; SND.coin(); } else { SND.buzz(); }
+      const res = $('quizResult');
+      if (res) res.innerHTML = `<div class="rs-bottle ${ok ? '' : 'rs-balk'}"><b>${ok ? '⭕ 正解! 🪙+1' : `❌ 不正解…(正解は${q.a ? '⭕' : '❌'})`}</b><br><small>📖 ${q.exp}</small></div>`;
+      const bo = $('quizO'), bx = $('quizX');
+      if (bo) bo.disabled = true;
+      if (bx) bx.disabled = true;
+      save(); renderTodo(); updateHeader();
+    };
+    $('quizO').addEventListener('click', () => answer(true));
+    $('quizX').addEventListener('click', () => answer(false));
   }
 
   function requestHtml(ch, size) {
@@ -2707,9 +2784,45 @@
     renderAds(); updateHeader(); save();
   }
 
+  // 🔁 スタッフ応援配置: 受付・会計スタッフをタップして配置を切り替える
+  function showStaffModal(kind) {
+    const L = clinic.L;
+    const canHelp = settings.receptionists >= 2;
+    const recepN = clinic.recepWindows();
+    const cashN = clinic.cashServices().length;
+    showModal(kind === 'cash' ? '💴 会計まわりの采配' : '🪟 受付まわりの采配', `
+      <div class="pnl-row"><span>受付窓口の稼働</span><b>${recepN}窓口(受付 ${settings.receptionists}人${settings.cashHelper ? ' − 応援1' : ''})</b></div>
+      <div class="pnl-row"><span>会計窓口の稼働</span><b>${cashN}窓口${settings.kiosk ? '(自動精算機あり)' : settings.cashHelper ? '(応援+1)' : ''}</b></div>
+      <p>受付スタッフを1人、<b>会計の応援</b>に回せます。会計が2窓口になり精算の列が早く進む一方、受付の窓口は1つ減ります。</p>
+      ${settings.kiosk ? '<p class="modal-note">自動精算機ですでに会計は2窓口です。応援は受付を減らすだけなので不要。</p>' : ''}
+      ${!canHelp ? '<p class="modal-note">⚠️ 受付が1人だけの間は応援に出せません(受付窓口が0になってしまう)。</p>' : ''}
+      <div class="modal-actions"><button class="btn-cta${settings.cashHelper ? ' ghost' : ''}" id="helperBtn" ${!settings.cashHelper && !canHelp ? 'disabled' : ''}>${settings.cashHelper ? '受付に戻す' : '会計へ応援に出す'}</button></div>
+      <p class="modal-note">📖 ボトルネックは動く。朝は受付、昼過ぎは会計 — 人の配置も「打ち手」のひとつ。</p>`,
+      '閉じる');
+    $('helperBtn').addEventListener('click', () => {
+      if (!settings.cashHelper && !canHelp) return;
+      settings.cashHelper = !settings.cashHelper;
+      SND.click();
+      pushPulseEv('🔁', settings.cashHelper ? '会計へ応援' : '受付へ復帰');
+      toast(settings.cashHelper ? '🔁 受付スタッフ1人が会計の応援に入りました' : '🪟 応援スタッフが受付に戻りました');
+      $('modal').classList.remove('show');
+      save();
+    });
+  }
+
   $('clinicStage').addEventListener('click', (e) => {
     const rect = $('clinicStage').getBoundingClientRect();
     const px = e.clientX - rect.left, py = e.clientY - rect.top;
+    // スタッフ(受付・会計)のタップを患者より優先
+    const L = clinic.L;
+    const staffPts = [];
+    for (let w = 0; w < clinic.recepWindows(); w++) staffPts.push({ p: L.RECEP.staff[w], kind: 'recep' });
+    staffPts.push({ p: L.CASH.staff, kind: 'cash' });
+    if (settings.cashHelper) staffPts.push({ p: { x: L.CASH.kiosk.x, y: L.CASH.kiosk.y - 0.55 }, kind: 'cash' });
+    for (const st of staffPts) {
+      const sp = clinicIso.p(st.p.x + 0.5, st.p.y + 0.5, 0);
+      if (Math.hypot(sp.x - px, sp.y - py) < clinicIso.tw * 0.7) { showStaffModal(st.kind); return; }
+    }
     let best = null, bd = Infinity;
     for (const p of clinic.patients) {
       const sp = clinicIso.p(p.x + 0.5, p.y + 0.5, 0);
@@ -3798,6 +3911,47 @@
     const paint = () => { sb.textContent = G.sound ? '🔊' : '🔇'; sb.title = G.sound ? '効果音ON' : '効果音OFF'; };
     paint();
     sb.addEventListener('click', () => { G.sound = !G.sound; paint(); if (G.sound) SND.coin(); save(); });
+  }
+  // 🔔 通知(デイリーボーナスのリマインド): Capacitorネイティブ or PWAのperiodicSync
+  async function setupNotifications() {
+    try {
+      const LN = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
+      if (LN) {
+        const perm = await LN.requestPermissions();
+        if (perm.display !== 'granted') return false;
+        await LN.schedule({ notifications: [{
+          id: 1, title: 'クリニックタウン3D',
+          body: '🎁 今日のログインボーナスとスタッフからの依頼が届いています',
+          schedule: { on: { hour: 19, minute: 0 }, repeats: true }
+        }] });
+        return true;
+      }
+      if (!('Notification' in window)) return false;
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') return false;
+      if (navigator.serviceWorker) {
+        const reg = await navigator.serviceWorker.ready;
+        if (reg.periodicSync) await reg.periodicSync.register('ct3d-daily', { minInterval: 20 * 3600 * 1000 }).catch(() => {});
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+  const ntb = $('notifyBtn');
+  if (ntb) {
+    const paintN = () => { ntb.textContent = G.notify ? '🔔' : '🔕'; ntb.title = G.notify ? 'デイリー通知ON' : 'デイリー通知OFF'; };
+    paintN();
+    ntb.addEventListener('click', async () => {
+      if (G.notify) {
+        G.notify = false;
+        paintN(); save();
+        toast('🔕 デイリー通知をOFFにしました');
+        return;
+      }
+      const ok = await setupNotifications();
+      G.notify = ok;
+      paintN(); save();
+      toast(ok ? '🔔 毎日のボーナスと依頼をお知らせします' : '通知が許可されませんでした(端末の設定を確認してください)');
+    });
   }
   // 縦持ちスマホに一度だけ横持ちのコックピット表示を案内
   try {

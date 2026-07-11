@@ -147,6 +147,13 @@ class Iso {
     ctx.beginPath();
     ctx.arc(c.x, by - 28 * s, 6 * s, 0, Math.PI * 2);
     ctx.fill();
+    if (o.hair) {
+      ctx.fillStyle = o.hair;
+      ctx.beginPath();
+      ctx.arc(c.x, by - 29.2 * s, 5.8 * s, Math.PI * 1.02, Math.PI * 1.98);
+      ctx.closePath();
+      ctx.fill();
+    }
     if (o.dot) {
       ctx.fillStyle = o.dot;
       ctx.beginPath();
