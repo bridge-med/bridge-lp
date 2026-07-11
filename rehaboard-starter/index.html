@@ -21,12 +21,12 @@
 /* ===== BASE ===== */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --paper:#FAFAF7;--paper-2:#F4F1E8;--paper-3:#EDE8DD;
+  --paper:#FBFAF7;--paper-2:#F4EFE6;--paper-3:#EDE8DD;
   --ink:#0A0A0F;--ink-2:#2A2A35;--ink-3:#6E6E78;--ink-4:#B8B5A8;
   --line:rgba(10,10,15,0.08);--line-w:rgba(122,99,75,0.14);
-  --vermilion:#C8553D;--vermilion-deep:#A8442F;
-  --indigo:#1B4965;--indigo-deep:#0F2D44;
-  --gold:#B8860B;
+  --vermilion:#A98F63;--vermilion-deep:#8A744C;
+  --indigo:#24365C;--indigo-deep:#16233E;
+  --gold:#A98F63;
   --moegi:#8A9A5B;--moegi-deep:#6B7A4F;--moegi-pale:#C8D4B0;
   --taisha:#8B5A2B;--taisha-deep:#6B4420;--taisha-pale:#D4B896;
   --serif-jp:'Noto Serif JP',serif;
@@ -61,7 +61,7 @@ img,svg{display:block;max-width:100%}
 .em{color:var(--vermilion);font-family:var(--serif-en);font-style:italic;font-weight:900}
 
 /* progress bar */
-.progress{position:fixed;top:0;left:0;height:2px;background:var(--vermilion);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px rgba(200,85,61,0.5)}
+.progress{position:fixed;top:0;left:0;height:2px;background:var(--vermilion);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px rgba(169,143,99,0.5)}
 
 /* nav */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px var(--pad-x);transition:all .3s;background:transparent}
@@ -274,7 +274,7 @@ section.alt{background:var(--paper-2)}
     <div class="hero-eyebrow" data-reveal>RehaBoard Starter Kit / ¥2,980</div>
     <h1 class="hero-h" data-reveal>
       リハ部門の数字を、<span class="em">責めるためでなく、</span><br>
-      <span class="em">流れを整える</span>ために。
+      <span class="em">流れを整える</span>ために
     </h1>
     <p class="hero-sub" data-reveal>
       整形外科クリニックのリハ部門が、Googleスプレッドシート1ファイルだけで「総単位数」「新患→2回目→継続」の流れを一画面で見られるようになる、ひと揃いのスターターキットです。電子カルテ連携も、SaaS契約も要りません。明日から動きます。
@@ -334,7 +334,7 @@ section.alt{background:var(--paper-2)}
   <div class="s-inner">
     <div class="s-head" data-reveal>
       <div class="eyebrow kicker">02 / Before & After</div>
-      <h2><span class="nowrap">本キットを入れると、</span><span class="em nowrap">こうなります。</span></h2>
+      <h2><span class="nowrap">本キットを入れると、</span><span class="em nowrap">こうなります</span></h2>
       <p>派手な変化ではなく、日々の運用で「数字の見え方」が静かに変わるイメージです。</p>
     </div>
 
@@ -377,7 +377,7 @@ section.alt{background:var(--paper-2)}
   <div class="s-inner">
     <div class="s-head" data-reveal>
       <div class="eyebrow kicker">03 / Structure</div>
-      <h2><span class="nowrap">14のシートで、</span><span class="em nowrap">入力 → 集計 → 可視化。</span></h2>
+      <h2><span class="nowrap">14のシートで、</span><span class="em nowrap">入力 → 集計 → 可視化</span></h2>
       <p>1つのスプレッドシートの中に、入力する場所・集計が走る場所・見るための場所が分かれています。触る場所と触らない場所が、最初から決まっています。</p>
     </div>
 
@@ -418,7 +418,7 @@ section.alt{background:var(--paper-2)}
   <div class="s-inner">
     <div class="s-head" data-reveal>
       <div class="eyebrow kicker">04 / Morning View</div>
-      <h2><span class="nowrap">朝礼に、</span><span class="em nowrap">そのまま使える。</span></h2>
+      <h2><span class="nowrap">朝礼に、</span><span class="em nowrap">そのまま使える</span></h2>
       <p>毎朝の朝礼で、画面投影するだけ。「先週の動き」「当月の進捗」「気になる数字」が、責任者が口頭で説明しなくても、スタッフ全員が自分で読めます。</p>
     </div>
 
@@ -509,7 +509,7 @@ section.alt{background:var(--paper-2)}
   <div class="s-inner">
     <div class="s-head" data-reveal>
       <div class="eyebrow kicker">05 / Monthly Review</div>
-      <h2><span class="nowrap">月次レビューを、</span><span class="em nowrap">ひと続きで回す。</span></h2>
+      <h2><span class="nowrap">月次レビューを、</span><span class="em nowrap">ひと続きで回す</span></h2>
       <p>月初に、「今月の数字」「良かった点」「詰まり」「来月の改善アクション(1つに絞る)」「スタッフへの共有文言」「院長報告」までが、1つのシートで連続して整理できます。</p>
     </div>
 
@@ -559,7 +559,7 @@ section.alt{background:var(--paper-2)}
   <div class="s-inner">
     <div class="s-head" data-reveal>
       <div class="eyebrow kicker">06 / Director's Report</div>
-      <h2><span class="nowrap">院長報告は、</span><span class="em nowrap">A4 1枚で。</span></h2>
+      <h2><span class="nowrap">院長報告は、</span><span class="em nowrap">A4 1枚で</span></h2>
       <p>毎月作り直しが要らない、固定フォーマット。立ち入った専門用語ではなく、経営側が読みやすい粒度で「先月の事実」「来月の運用変更」「院長への相談事項1つ」までを揃えます。</p>
     </div>
 
@@ -606,7 +606,7 @@ section.alt{background:var(--paper-2)}
   <div class="s-inner">
     <div class="s-head" data-reveal>
       <div class="eyebrow kicker">07 / Good vs Bad</div>
-      <h2><span class="nowrap">KPI定義書には、</span><span class="em nowrap">「悪い使い方」も書いてあります。</span></h2>
+      <h2><span class="nowrap">KPI定義書には、</span><span class="em nowrap">「悪い使い方」も書いてあります</span></h2>
       <p>数字は、運用する側の姿勢で簡単に毒にも薬にもなります。本キットの KPI定義書(全19指標)は、各指標について「良い使い方」と「悪い使い方」を明文化しています。導入時に責任者で読み合わせる前提です。</p>
     </div>
 
@@ -646,7 +646,7 @@ section.alt{background:var(--paper-2)}
   <div data-reveal>
     <div class="eyebrow kicker" style="display:inline-flex;justify-content:center;color:var(--ink-3);margin-bottom:14px">Pricing</div>
     <h2 style="font:900 clamp(24px,3.6vw,40px)/1.3 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.02em">
-      <span class="nowrap">買い切り、</span><span class="em nowrap">¥2,980。</span>
+      <span class="nowrap">買い切り、</span><span class="em nowrap">¥2,980</span>
     </h2>
     <p style="font:500 13px/1.85 var(--sans-jp);color:var(--ink-2);max-width:560px;margin:0 auto 48px">
       明日から使えるかどうかが、買う理由のすべてだと思います。<br class="br-pc">サブスクではなく、買い切りです。
