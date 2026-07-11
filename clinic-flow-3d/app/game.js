@@ -379,7 +379,7 @@
       newCount: 0, injCount: 0, trigCount: 0, physioCount: 0, xrayCount: 0, mriCount: 0, prpCount: 0, osteoVisits: 0, treatCount: 0, kanriCount: 0,
       segCounts: { senior: 0, worker: 0, sports: 0 },
       rev: { consult: 0, inj: 0, treat: 0, physio: 0, img: 0, reha: 0, osteo: 0, checkup: 0, jihi: 0 },
-      balked: 0,
+      balked: 0, soothe: 0, pulse: [],
       brRevenue: 0, brProfit: 0
     };
   }
@@ -569,7 +569,9 @@
       if (settings.dexa && report.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
 
       // サイネージは体感待ち時間を削り、カフェは待ちの不満をやわらげる
-      let sat = clamp(1.25 - report.wait * waitFeel() / 40, 0, 1);
+      // 院長の声かけ(サービスリカバリー): 体感待ちが約35%やわらぐ
+      const feltWait = report.wait * (report.soothed ? 0.65 : 1);
+      let sat = clamp(1.25 - feltWait * waitFeel() / 40, 0, 1);
       if (G.deco.cafe) sat = Math.min(1, sat + 0.05);
       if (report.didReha) sat = Math.min(1, sat + 0.1);
 
@@ -661,6 +663,7 @@
     G.today = newToday();
     G.adSpendToday = 0;
     G.repDayStart = G.rep;
+    G.lastPulseT = 0;
 
     // 現場イベント(当日限りの効果をリセット→低確率で発生)
     G.evArrivalMul = 1; G.evExamDelta = 0; G.evRecepSlow = false; G.evPhysioDown = false; G.evExtraRefer = 0;
@@ -1139,6 +1142,111 @@
       const mood = v.kind === 'event' ? 'idea' : st.mood(c);
       return `<div class="voice-row">${STAFF_UI.faceSVG(v.char, mood, 44)}<div class="voice-txt"><small>${st.title} ${st.name}${v.kind === 'event' ? ' — 現場から報告' : ' — 今日の振り返り'}</small><p>${v.text}</p></div></div>`;
     }).join('');
+  }
+
+  /* ================= 📈 ライブモニター(日中のリアルタイム描画) ================= */
+
+  const PULSE_COLORS = { n: '#3E7CA6', w: '#C4574E', r: '#3A8A70' };
+
+  function renderPulse() {
+    const cv = $('pulseChart');
+    if (!cv) return;
+    const T = G.today;
+    const data = (T && T.pulse) || [];
+    const spec = G.daySpec || specOf(G.day);
+    const cssW = cv.parentElement.clientWidth - 36;
+    const cssH = 110;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.style.width = cssW + 'px';
+    cv.style.height = cssH + 'px';
+    cv.width = cssW * dpr;
+    cv.height = cssH * dpr;
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    const lg = $('pulseLegend');
+    if (!data.length) {
+      ctx.fillStyle = '#7C929E';
+      ctx.font = '600 11.5px "Noto Sans JP", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('リアルタイム運転中(×1〜×4)に描画されます', cssW / 2, cssH / 2);
+      if (lg) lg.innerHTML = '';
+      return;
+    }
+    const totalMin = Math.max(spec.min || 480, 60);
+    const x = (t) => (t / totalMin) * cssW;
+    const maxN = Math.max(10, ...data.map((d) => d.n));
+    const maxW = Math.max(30, ...data.map((d) => d.w));
+    const maxR = Math.max(30000, ...data.map((d) => d.r));
+    const yOf = (v, max) => cssH - 4 - (v / max) * (cssH - 12);
+    // 院内人数(面)
+    ctx.beginPath();
+    ctx.moveTo(x(data[0].t), cssH - 4);
+    data.forEach((d) => ctx.lineTo(x(d.t), yOf(d.n, maxN)));
+    ctx.lineTo(x(data[data.length - 1].t), cssH - 4);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(62,124,166,0.16)';
+    ctx.fill();
+    const line = (key, max, color, width) => {
+      ctx.beginPath();
+      data.forEach((d, i) => { const px = x(d.t), py = yOf(d[key], max); if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width || 1.8;
+      ctx.stroke();
+    };
+    line('n', maxN, PULSE_COLORS.n, 1.6);
+    line('w', maxW, PULSE_COLORS.w, 1.8);
+    line('r', maxR, PULSE_COLORS.r, 1.8);
+    // 待ち30分の警戒ライン
+    if (maxW > 30) {
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(196,87,78,0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, yOf(30, maxW));
+      ctx.lineTo(cssW, yOf(30, maxW));
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    const last = data[data.length - 1];
+    if (lg) lg.innerHTML = `
+      <span style="color:${PULSE_COLORS.n}">● 院内 <b>${last.n}人</b></span>
+      <span style="color:${PULSE_COLORS.w}">● いまの平均待ち <b>${last.w}分</b></span>
+      <span style="color:${PULSE_COLORS.r}">● 売上 <b>${yen(last.r)}</b></span>`;
+  }
+
+  /* ================= 👤 患者タップ(現場介入: 院長の声かけ) ================= */
+
+  const PHASE_JP = {
+    walk: '移動中', recepQ: '受付待ち', recep: '受付中', waitExam: '診察待ち', exam: '診察中',
+    waitTreat: '処置待ち', treat: '処置中', waitReha: 'リハ待ち', reha: 'リハ中', cashQ: '会計待ち', cash: '会計中'
+  };
+  const ITEM_JP = { inj: '関節注', trig: 'トリガー/ブロック', treat: '処置', reha: 'リハ' };
+  const SOOTHE_MAX = 3;
+
+  function showPatientModal(p) {
+    const used = G.today.soothe || 0;
+    const waiting = p.phase === 'recepQ' || p.phase === 'waitExam' || p.phase === 'waitTreat' || p.phase === 'waitReha' || p.phase === 'cashQ';
+    const can = used < SOOTHE_MAX && !p.soothed && waiting;
+    showModal(`👤 ${TYPE_NAMES[p.type] || '患者'}の患者さん(${SEG_NAMES[p.seg] || ''})`, `
+      <div class="pnl-row"><span>いまの状態</span><b>${PHASE_JP[p.phase] || p.phase}</b></div>
+      <div class="pnl-row"><span>ここまでの待ち時間</span><b class="${p.waitTotal > 30 ? 'neg-t' : ''}">${Math.round(p.waitTotal)}分</b></div>
+      ${p.items.length ? `<div class="pnl-row"><span>実施済み</span><b>${p.items.map((i) => ITEM_JP[i] || i).join('・')}</b></div>` : ''}
+      ${p.soothed
+        ? '<p class="modal-note">🙏 声かけ済み — 体感待ちがやわらいでいます。</p>'
+        : `<p class="modal-note">⚡ <b>院長の声かけ</b>(残り${SOOTHE_MAX - used}回/日): 待たせている理由を説明して一言お詫びすると、<b>体感待ち時間が約35%やわらぐ</b>。待ち時間そのものより「放置された感」が離反を生む — サービスリカバリーの基本。</p>
+        ${waiting ? `<div class="modal-actions"><button class="btn-cta" id="sootheBtn" ${can ? '' : 'disabled'}>🙏 声をかける(残り${SOOTHE_MAX - used})</button></div>` : ''}`}`,
+      '閉じる');
+    const sb = $('sootheBtn');
+    if (sb) sb.addEventListener('click', () => {
+      if ((G.today.soothe || 0) >= SOOTHE_MAX || p.soothed) return;
+      G.today.soothe = (G.today.soothe || 0) + 1;
+      p.soothed = true;
+      clinic.floats.push({ x: p.x, y: p.y - 0.6, text: '🙏', t: 0 });
+      SND.coin();
+      $('modal').classList.remove('show');
+      toast('🙏 声をかけました — この患者さんの体感待ちがやわらぎます');
+    });
   }
 
   /* ================= 🧾 レセプト表示・加算届出(算定の学び) ================= */
@@ -2036,7 +2144,7 @@
     activeTab = tab;
     document.querySelectorAll('.tab-btn').forEach((x) => x.classList.toggle('on', x.dataset.tab === tab));
     document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('show', p.id === `tab-${tab}`));
-    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); renderReceipt(); }
+    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); renderReceipt(); renderPulse(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
     if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); }
@@ -2452,6 +2560,19 @@
     r.last = G.day;
     renderAds(); updateHeader(); save();
   }
+
+  $('clinicStage').addEventListener('click', (e) => {
+    const rect = $('clinicStage').getBoundingClientRect();
+    const px = e.clientX - rect.left, py = e.clientY - rect.top;
+    let best = null, bd = Infinity;
+    for (const p of clinic.patients) {
+      const sp = clinicIso.p(p.x + 0.5, p.y + 0.5, 0);
+      const d = Math.hypot(sp.x - px, sp.y - py);
+      if (d < bd) { bd = d; best = p; }
+    }
+    if (!best || bd > clinicIso.tw * 0.9) return;
+    showPatientModal(best);
+  });
 
   $('townStage').addEventListener('click', (e) => {
     const rect = $('townStage').getBoundingClientRect();
@@ -3277,6 +3398,14 @@
     }
     clinic.tick(dt);
     town.tick(dt);
+    // 📈 ライブモニター: 10分ごとに院内の状態をサンプリング
+    if (G.t - (G.lastPulseT || 0) >= 10) {
+      G.lastPulseT = G.t;
+      const waiting = clinic.patients.filter((p) => p.phase === 'recepQ' || p.phase === 'waitExam' || p.phase === 'waitTreat' || p.phase === 'waitReha' || p.phase === 'cashQ');
+      const curWait = waiting.length ? waiting.reduce((a, p) => a + p.waitTotal, 0) / waiting.length : 0;
+      G.today.pulse.push({ t: G.t, n: clinic.patients.length, w: Math.round(curWait), r: G.today.revenue });
+      if (activeTab === 'clinic' && G.speed <= 4) renderPulse();
+    }
     const townPatients = town.walkers.some((w) => w.kind === 'patient');
     if (G.t >= spec.min && !townPatients && clinic.patients.length === 0) endDay();
     else if (G.t >= spec.min + 150) {

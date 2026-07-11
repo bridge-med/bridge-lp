@@ -567,7 +567,7 @@ const CLINIC = (() => {
       // 退院時の感情(体験の見える化): 待ちが短ければ笑顔、長ければ不満
       if (p.waitTotal <= 18) this.floats.push({ x: p.x, y: p.y - 0.6, text: '😊', t: 0 });
       else if (p.waitTotal > 45) this.floats.push({ x: p.x, y: p.y - 0.6, text: '💢', t: 0 });
-      const report = { type: p.type, items: p.items, didReha: p.didReha, wait: p.waitTotal, stay, viaKiosk, seg: p.seg };
+      const report = { type: p.type, items: p.items, didReha: p.didReha, wait: p.waitTotal, stay, viaKiosk, seg: p.seg, soothed: !!p.soothed };
       if (this.hooks.onDischarge) {
         const revenue = this.hooks.onDischarge(p, report);
         if (revenue > 0) this.floats.push({ x: p.x, y: p.y, text: `+¥${revenue.toLocaleString()}`, t: 0 });

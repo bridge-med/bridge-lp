@@ -1190,3 +1190,15 @@ input[type="range"]::-moz-range-thumb {
     top: 8px;
   }
 }
+
+/* ---------- v17: ライブモニター ---------- */
+
+#pulseChart { display: block; width: 100%; }
+.pulse-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 6px;
+  font: 600 11px/1.5 var(--sans);
+}
+.pulse-legend b { font-family: var(--en); }
