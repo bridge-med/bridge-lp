@@ -284,7 +284,8 @@
     { t: '⑯ 外来管理加算のトレードオフ', b: '再診で処置・注射・リハ・物療を何もしなければ外来管理加算(52点)が付く。注射をすれば加算は消えるが注射料+薬剤が入る — 「何もしない」にも値段が付いている構造を理解して、医学的必要性で選ぶ。' },
     { t: '⑰ 客層(セグメント)から逆算する', b: '高齢者=リハ・骨粗鬆症・定着率◎。勤労者=健診・AGA・土日夜間。スポーツ=外傷・MRI・PRP・単価◎。チャネル(ケアマネ/企業/クラブ/学校)ごとに来る客層は違う — 「誰に来てほしいか」から営業先と広告を選ぶ。' },
     { t: '⑱ 1点=10円、加算は「仕組み」で積む', b: '保険診療の価格は点数制(1点=10円)で全国一律 — だから勝負は「何を適切に算定できる体制か」。明細書発行体制等加算(1点)・時間外対応加算(1〜5点)・外来後発医薬品使用体制加算(8点)は、届出と体制づくりだけで再診や処方のたびに積み上がる。月1,000再診なら1点=月1万円。' },
-    { t: '⑲ 外来と入院は別のゲーム', b: '外来の売上は「患者が来た日」だけ。入院は「病床が埋まっている毎日」が売上になる(回復期リハ病棟入院料1=2,229点/日×稼働病床)。そのかわり配置基準(PT・看護師の人数)を割れば病床は使えない — 入院経営は採用・定着・稼働率の三位一体。' }
+    { t: '⑲ 外来と入院は別のゲーム', b: '外来の売上は「患者が来た日」だけ。入院は「病床が埋まっている毎日」が売上になる(回復期リハ病棟入院料1=2,229点/日×稼働病床)。そのかわり配置基準(PT・看護師の人数)を割れば病床は使えない — 入院経営は採用・定着・稼働率の三位一体。' },
+    { t: '⑳ 制度は2年ごとに動く(診療報酬改定)', b: '保険診療の価格は国が2年に一度改定する。下がる項目を嘆くのではなく、上がった項目・新設された加算に体制を寄せるのが改定対応。「一つの算定に依存しない収益の複線化」が、ルール変更に強い経営を作る。' }
   ];
 
   // KPI定義(選んでピン留めできる)
@@ -351,7 +352,8 @@
     season: { bestProfit: null, bestMonth: 0, months: 0 },
     league: { beaten: 0 },
     sound: true,
-    hospital: null
+    hospital: null,
+    kaitei: { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] }
   };
   Object.keys(REL_DEF).forEach((k) => { G.relations[k] = { lv: 0, last: 0 }; });
 
@@ -420,7 +422,7 @@
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
-          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, hospital: G.hospital
+          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, hospital: G.hospital, kaitei: G.kaitei
         }
       }));
     } catch (e) { /* noop */ }
@@ -454,6 +456,7 @@
       if (!G.prestige) G.prestige = { count: 0, legacy: null };
       if (d.g.sound === undefined) G.sound = true;
       if (d.g.hospital === undefined) G.hospital = null;
+      if (!G.kaitei) G.kaitei = { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] };
       // v11-12: スペシャル依頼・月間決算・地域リーグの補完
       if (!G.league) G.league = { beaten: 0 };
       if (!G.specialDone) G.specialDone = [];
@@ -960,6 +963,15 @@
       const pick = Math.round(T.revenue * 0.003 * bondLv('billing'));
       T.revenue += pick; T.rev.consult += pick;
     }
+    // 📜 診療報酬改定の影響(カテゴリ別単価係数)
+    if (spec.kind !== 'closed' && G.kaitei && G.kaitei.count > 0) {
+      const k = G.kaitei;
+      const adj = Math.round(
+        T.rev.consult * (k.consult - 1) + T.rev.inj * (k.inj - 1) + T.rev.treat * (k.treat - 1) +
+        T.rev.physio * (k.physio - 1) + T.rev.reha * (k.reha - 1) + T.rev.img * (k.img - 1)
+      );
+      if (adj) { T.kaiteiAdj = adj; T.revenue += adj; }
+    }
     T.cost = dayCost();
     T.profit = T.revenue - T.cost;
     T.avgWait = T.waitN ? T.waitSum / T.waitN : 0;
@@ -973,6 +985,12 @@
       const r = hospitalDay(spec);
       T.brRevenue += r.revenue;
       T.brProfit += r.profit;
+    }
+    if (G.kaitei && G.kaitei.count > 0 && T.brRevenue) {
+      const k = G.kaitei;
+      const avg = (k.consult + k.inj + k.treat + k.physio + k.reha + k.img) / 6;
+      const badj = Math.round(T.brRevenue * (avg - 1));
+      if (badj) { T.brRevenue += badj; T.brProfit += badj; }
     }
 
     G.money += T.profit + T.brProfit;
@@ -1073,6 +1091,7 @@
         ${shareBtnHtml()}`, '2年目へ');
       bindShare(`🎊 ${title} 「${G.clinicName}」Day365決算: 年商${yen(G.cum.revenue)}・拠点${1 + G.branches.length}`);
     }
+    kaiteiCheck();
     planDay();
 
     // 段階解放(Day4・Day8)— 新しい打ち手のお披露目
@@ -1249,6 +1268,54 @@
       <span style="color:${PULSE_COLORS.w}">● いまの平均待ち <b>${last.w}分</b></span>
       <span style="color:${PULSE_COLORS.r}">● 売上 <b>${yen(last.r)}</b></span>
       ${evs.slice(-4).map((ev) => `<span class="pulse-ev">${ev.icon} ${fmtClock(ev.t)} ${ev.label}</span>`).join('')}`;
+  }
+
+  /* ================= 📜 診療報酬改定(365日ごと・制度は動く) ================= */
+
+  // 現実の改定でよくある方向性をパターン化。年次決算の2日後に2つ抽選して施行
+  const KAITEI_POOL = [
+    { name: 'リハビリテーション料の適正化', fx: { reha: 0.96 }, note: '運動器リハの評価引き下げ。量から質(アウトカム)への圧力' },
+    { name: '外来機能・かかりつけの評価強化', fx: { consult: 1.02 }, note: '初再診・継続管理への評価が引き上げ' },
+    { name: '画像診断の適正化', fx: { img: 0.94 }, note: 'MRI・X線の評価引き下げ。「必要性の説明」がより重要に' },
+    { name: '注射・処置の見直し', fx: { inj: 0.97, treat: 0.98 }, note: '注射・処置の一部が引き下げ' },
+    { name: '物理療法の包括化圧力', fx: { physio: 0.95 }, note: '消炎鎮痛等処置の評価見直し' },
+    { name: '運動器リハの評価引き上げ', fx: { reha: 1.03 }, note: 'アウトカム実績のあるリハへの評価アップ' },
+    { name: '地域連携・紹介の加算拡充', fx: { consult: 1.015 }, note: '紹介・情報連携への評価が上がる' },
+    { name: '検査の包括範囲拡大', fx: { img: 0.97, inj: 0.99 }, note: '出来高だった項目の一部が包括に' }
+  ];
+  const KAITEI_CAT = { consult: '初再診・管理料', inj: '注射', treat: '処置', physio: '物療', reha: 'リハ', img: '画像' };
+
+  function applyKaitei() {
+    const k = G.kaitei;
+    const picks = [];
+    const pool = KAITEI_POOL.slice();
+    for (let i = 0; i < 2 && pool.length; i++) picks.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    const changes = [];
+    picks.forEach((p) => {
+      Object.entries(p.fx).forEach(([cat, mul]) => {
+        const before = k[cat];
+        k[cat] = clamp(Math.round(k[cat] * mul * 1000) / 1000, 0.85, 1.12);
+        changes.push(`${KAITEI_CAT[cat]} ${k[cat] > before ? '+' : ''}${Math.round((k[cat] / before - 1) * 100)}%`);
+      });
+    });
+    k.count++;
+    k.log.push({ day: G.day, names: picks.map((p) => p.name) });
+    SND.day();
+    showModal(`📜 診療報酬改定(第${k.count}次)`, `
+      <p>2年に一度、<b>診療報酬(点数)は国が改定します</b>。今回の改定内容:</p>
+      ${picks.map((p) => `<div class="pnl-row"><span>📌 ${p.name}</span></div><p class="pnl-note">${p.note}</p>`).join('')}
+      <div class="pnl-row"><span>単価への影響</span><b>${changes.join(' / ')}</b></div>
+      <div class="pnl-row"><span>現在の累積係数</span><b>${Object.keys(KAITEI_CAT).map((c) => `${KAITEI_CAT[c]}${Math.round((k[c] - 1) * 100) >= 0 ? '+' : ''}${Math.round((k[c] - 1) * 100)}%`).join(' ')}</b></div>
+      <p class="modal-note">📖 経営は制度の上に乗っている。下がった項目を嘆くより、上がった項目に体制を寄せるのが改定対応 — 2年ごとの「ルール変更に強い経営」こそ本当の実力。</p>`,
+      '改定に対応する');
+    banner(`📜 診療報酬改定! ${changes.join(' / ')} — P&Lで影響を確認`);
+  }
+
+  function kaiteiCheck() {
+    // 年次決算(Day366)の2日後に施行: Day368, 733, 1098…
+    if (G.day <= 367) return;
+    const due = Math.floor((G.day - 3) / 365);
+    if ((G.kaitei.count || 0) < due) applyKaitei();
   }
 
   /* ================= 🧾 月間レセプト集計(算定項目ランキング) ================= */
@@ -3028,6 +3095,12 @@
       <div class="pnl-row"><span>家賃・固定費${settings.mri ? '(MRI維持含む)' : ''}</span><b>−${yen(COSTS.rent[settings.floorLv] + COSTS.base[settings.floorLv] + (settings.mri ? COSTS.mriMaint : 0))}</b></div>
       <div class="pnl-row"><span>広告費(本日消化)</span><b>−${yen(G.adSpendToday + (G.billboard ? COSTS.billboardDay : 0))}</b></div>
       <div class="pnl-row"><span>変動費(材料・自費原価)</span><b>−${yen(T.patients * COSTS.perPatient + T.goodsCogs + T.jihiCogs)}</b></div>
+      ${(() => {
+        const k = G.kaitei;
+        if (!k || !k.count) return '';
+        const est = Math.round(T.rev.consult * (k.consult - 1) + T.rev.inj * (k.inj - 1) + T.rev.treat * (k.treat - 1) + T.rev.physio * (k.physio - 1) + T.rev.reha * (k.reha - 1) + T.rev.img * (k.img - 1));
+        return est ? `<div class="pnl-row"><span>📜 診療報酬改定の影響(第${k.count}次まで累積・日締めで計上)</span><b class="${est >= 0 ? 'pos-t' : 'neg-t'}">${est >= 0 ? '+' : ''}${yen(est)}</b></div>` : '';
+      })()}
       ${G.loans.length ? `<div class="pnl-row"><span>支払利息(${G.loans.length}件)</span><b>−${yen(loanInterestDay())}</b></div>` : ''}
       <div class="pnl-row total ${T.revenue - cost >= 0 ? 'pos' : 'neg'}"><span>本院 本日見込み損益</span><b>${T.revenue - cost >= 0 ? '+' : ''}${yen(T.revenue - cost)}</b></div>
       <div class="pnl-note">人件費率(本日): ${T.revenue > 0 ? Math.round(staffCost / T.revenue * 100) + '%' : '–'}(目安 45〜55%)</div>
