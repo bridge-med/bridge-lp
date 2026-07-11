@@ -1,34 +1,34 @@
 /* ================================================================
-   BRIDGE Design System v2.0 — 「夜明け」
+   BRIDGE Design System v3.0 — 正式ロゴ準拠
    全ページ共通のデザイントークン+コンポーネント。
-   思想:静けさ / 知性 / 希望 / 誠実 / 余白 / 選択
-   配色:深い藍(信頼)の上に、夜明けの光(希望)。
+   配色:白と余白を基調に、藍を骨格、砂色を温度として使う。
+   ロゴの思想:線は交差するが接続しない。自由と余白。
    ================================================================ */
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
 :root{
-  /* Light = 夜明けのあと */
-  --bg:#F7F9FA;
-  --bg-2:#EEF3F6;
-  --bg-3:#E3ECF2;
-  --ink:#0E1B28;
-  --ink-2:#33465A;
-  --ink-3:#6E8093;
-  --ink-4:#A9B8C5;
-  --line:rgba(14,27,40,0.10);
-  --navy:#0F2D44;
-  --blue:#1D5C8F;
-  --blue-soft:#7FB4D9;
-  --dawn:#D9A441;
+  /* Light = 白と余白 */
+  --bg:#FBFAF7;
+  --bg-2:#F4EFE6;
+  --bg-3:#EAE2D3;
+  --ink:#1B1B1E;
+  --ink-2:#45464C;
+  --ink-3:#7D7E85;
+  --ink-4:#B6B3AB;
+  --line:rgba(27,27,30,0.10);
+  --navy:#16233E;
+  --blue:#24365C;
+  --blue-soft:#8B9BBC;
+  --dawn:#A98F63;          /* 砂色。ロゴの温度。使いすぎない */
   --card:#FFFFFF;
-  --dark-sec:#0B1D2E;
-  --dark-sec-text:#E9F0F6;
-  --dark-sec-dim:#7E93A6;
-  --hero-sky-1:#DCEAF3;
-  --hero-sky-2:#F7F4EC;
-  --hero-glow:rgba(217,164,65,0.35);
-  --shadow:0 2px 8px rgba(15,45,68,0.05),0 16px 48px rgba(15,45,68,0.08);
+  --dark-sec:#131A2A;
+  --dark-sec-text:#EFECE4;
+  --dark-sec-dim:#8E93A3;
+  --hero-sky-1:#F4EFE6;
+  --hero-sky-2:#FBFAF7;
+  --hero-glow:rgba(169,143,99,0.16);
+  --shadow:0 2px 8px rgba(22,35,62,0.04),0 16px 48px rgba(22,35,62,0.07);
   --mincho:'Shippori Mincho B1','Noto Serif JP',serif;
   --sans:'Noto Sans JP',sans-serif;
   --en:'Inter',sans-serif;
@@ -39,24 +39,24 @@
   --ease:cubic-bezier(.16,1,.3,1);
 }
 [data-theme="dark"]{
-  /* Dark = 夜明け前 */
-  --bg:#0A1826;
-  --bg-2:#0E2032;
-  --bg-3:#132A40;
-  --ink:#E9F0F6;
-  --ink-2:#B9C9D8;
-  --ink-3:#7E93A6;
-  --ink-4:#4A6076;
-  --line:rgba(233,240,246,0.10);
-  --navy:#DCEAF3;
-  --blue:#7FB4D9;
-  --blue-soft:#3E7CAE;
-  --dawn:#E2B45C;
-  --card:#0F2233;
-  --dark-sec:#060F19;
-  --hero-sky-1:#0A1826;
-  --hero-sky-2:#12283C;
-  --hero-glow:rgba(226,180,92,0.22);
+  /* Dark = 炭と藍 */
+  --bg:#111521;
+  --bg-2:#161B2B;
+  --bg-3:#1D2436;
+  --ink:#EDEAE2;
+  --ink-2:#C2BFB6;
+  --ink-3:#8A8D98;
+  --ink-4:#565A68;
+  --line:rgba(237,234,226,0.10);
+  --navy:#D8DEEB;
+  --blue:#9FB1D4;
+  --blue-soft:#5A6C92;
+  --dawn:#C2A97E;
+  --card:#181E2E;
+  --dark-sec:#0B0F1A;
+  --hero-sky-1:#161B2B;
+  --hero-sky-2:#111521;
+  --hero-glow:rgba(194,169,126,0.12);
   --shadow:0 2px 8px rgba(0,0,0,0.25),0 16px 48px rgba(0,0,0,0.35);
 }
 
@@ -103,8 +103,11 @@ main{display:block}
 /* ===== ヘッダー(JSが .site-nav に描画) ===== */
 .site-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px var(--pad-x);transition:all .35s;background:transparent}
 .site-nav.scrolled{background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:12px var(--pad-x)}
-.nav-logo{font:700 15px/1 var(--en);letter-spacing:0.22em;display:flex;align-items:center;gap:10px;z-index:2}
-.nav-logo svg{width:22px;height:22px;flex-shrink:0}
+.nav-logo{font:500 14px/1 var(--en);letter-spacing:0.34em;display:flex;align-items:center;gap:12px;z-index:2;color:var(--ink)}
+.nav-logo svg{width:40px;height:18px;flex-shrink:0}
+.logo-mark .l-navy{stroke:var(--navy);fill:none;stroke-linecap:round}
+.logo-mark .l-sand{stroke:var(--dawn);fill:none;stroke-linecap:round}
+[data-theme="dark"] .logo-mark .l-navy{stroke:var(--ink)}
 .nav-right{display:flex;align-items:center;gap:20px}
 .nav-links{display:flex;gap:20px;font:600 10px/1 var(--en);letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-3)}
 .nav-links a{padding:6px 0;position:relative;transition:color .2s}
@@ -218,8 +221,9 @@ a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 /* ===== フッター(JSが .site-footer に描画) ===== */
 .site-footer{border-top:1px solid var(--line);padding:64px var(--pad-x) 56px;background:var(--bg-2)}
 .footer-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:36px}
-.footer-brand{font:700 16px/1 var(--en);letter-spacing:0.22em;display:flex;align-items:center;gap:10px}
-.footer-brand svg{width:20px;height:20px}
+.footer-brand{font:500 15px/1 var(--en);letter-spacing:0.34em;display:flex;align-items:center;gap:12px}
+.footer-brand svg{width:44px;height:20px}
+.footer-brand .tg{display:block;font:500 8.5px/1 var(--en);letter-spacing:0.22em;color:var(--ink-3);margin-top:7px}
 .footer-tagline{margin-top:14px;font-size:11.5px;color:var(--ink-3);letter-spacing:0.04em;line-height:2;max-width:240px}
 .footer-col .h{font:700 9.5px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:16px}
 .footer-col a{display:block;font-size:12px;color:var(--ink-2);padding:5px 0;transition:color .2s}

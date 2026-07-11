@@ -41,7 +41,7 @@ a.prod-card:hover .prod-link{gap:10px}
     <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Products</span></div>
     <h1 data-reveal data-reveal-delay="1">現場から生まれた、道具たち<span class="period">。</span></h1>
     <p class="lead" data-reveal data-reveal-delay="2">
-      すべて、日常の業務と違和感から生まれたプロダクトです。まず自分が最初のユーザーになり、使い続けているものだけを公開しています。導入会議の要らない軽さで。
+      どれも、日常の業務で感じた違和感から作ったものです。まず自分が最初のユーザーになって、使い続けているものだけを公開しています。それぞれの道具が、思考の型(評価→理解→設計→実践→再評価)のどこを支えるのかも書いておきました。
     </p>
   </div>
 </header>
@@ -79,11 +79,12 @@ a.prod-card:hover .prod-link{gap:10px}
 // プロダクトデータ(足せば増える。cat は CATS のキー)
 // ================================================================
 window.addEventListener('DOMContentLoaded', () => {
+  // stage: 思考の型(評価→理解→設計→実践→再評価)のどの段階を支える道具か
   const CATS = [
-    { id: 'management', t: '経営・運営', p: '数字を「責める道具」から「対話の入口」へ。現場と経営が同じ画面を見るためのツール。' },
-    { id: 'learning', t: '学習・教育', p: '学びの入口を、続けられる形で。ゲームも模試も、リハビリテーション思考の教材。' },
-    { id: 'casual', t: '診断・ライト', p: '登録不要・数分で試せる、軽い入口。' },
-    { id: 'free', t: '無料配布', p: 'まず触ってみたい方へ。' },
+    { id: 'management', t: '経営・運営', stage: '型の「評価」と「再評価」を支える道具', p: '数字を、責めるためではなく対話のために。現場と経営が同じ画面を見るためのツールです。' },
+    { id: 'learning', t: '学習・教育', stage: '型の「理解」と「実践」を支える道具', p: '学びの入口を、続けられる形で。ゲームも模試も、リハビリテーション的思考の教材です。' },
+    { id: 'casual', t: '診断・ライト', stage: '型の「評価」の、いちばん軽い入口', p: '登録不要で、数分で試せます。' },
+    { id: 'free', t: '無料配布', stage: '型を、まず手元で試すための雛形', p: 'まず触ってみたい方へ。' },
   ];
   const PRODUCTS = [
     { cat: 'management', name: 'RehaBoard', jp: 'リハボード', href: '../rehaboard/index.html',
@@ -129,7 +130,7 @@ window.addEventListener('DOMContentLoaded', () => {
     sec.className = 'sec' + (ci % 2 ? ' tint' : '');
     sec.id = c.id;
     sec.innerHTML =
-      '<div class="cat-head" data-reveal><span class="n">' + String(ci + 1).padStart(2, '0') + ' — ' + items.length + ' tools</span>' +
+      '<div class="cat-head" data-reveal><span class="n">' + String(ci + 1).padStart(2, '0') + ' — ' + c.stage + '</span>' +
       '<h2>' + c.t + '</h2><p>' + c.p + '</p></div>' +
       '<div class="prod-grid"></div>';
     const grid = sec.querySelector('.prod-grid');
