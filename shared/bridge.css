@@ -142,11 +142,10 @@ body.menu-open .drawer-item{opacity:1;transform:none}
 .drawer-item .t{font-family:var(--mincho);font-weight:600;font-size:20px}
 .drawer-item .t .en{display:block;font:600 9px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn);margin-bottom:6px}
 .drawer-item .d{font-size:11px;color:var(--ink-3);text-align:right;line-height:1.8;max-width:180px}
+.nav-burger{display:block}
 @media(max-width:920px){
   .nav-links,.nav-cta{display:none}
-  .nav-burger{display:block}
 }
-@media(min-width:921px){.nav-drawer{display:none}}
 
 /* ===== ページヒーロー(下層ページ共通) ===== */
 .page-hero{padding:clamp(150px,22vh,240px) var(--pad-x) clamp(70px,10vh,110px);background:linear-gradient(180deg,var(--hero-sky-1),var(--bg));position:relative;overflow:hidden}

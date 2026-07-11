@@ -10,14 +10,16 @@
   const ROOT = document.body.dataset.root || './';
   const PAGE = document.body.dataset.page || '';
 
-  /* ---- サイトマップ(唯一の情報源。ページが増えたらここに足す) ---- */
+  /* ---- サイトマップ(唯一の情報源。ページが増えたらここに足す)
+     primary: ヘッダーに常時表示する主要入口(増やしすぎない)
+     それ以外はメニュー(ドロワー)とフッターから辿れる ---- */
   const NAV = [
+    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、これまでの歩み。',                    href: 'about/index.html', primary: true },
+    { id: 'projects',   en: 'Projects',   jp: '活動',        d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html', primary: true },
+    { id: 'products',   en: 'Products',   jp: 'プロダクト',   d: '実際に使えるもの。すべて公開しています。',             href: 'products/index.html', primary: true },
+    { id: 'journal',    en: 'Journal',    jp: '手記',        d: '完成していない考えも、そのまま公開しています。',       href: 'journal/index.html', primary: true },
     { id: 'philosophy', en: 'Philosophy', jp: '考え方',      d: 'BRIDGEが何を大切にし、なぜこの活動をしているのか。', href: 'philosophy/index.html' },
-    { id: 'projects',   en: 'Projects',   jp: '活動',        d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html' },
-    { id: 'products',   en: 'Products',   jp: 'プロダクト',   d: '実際に使えるもの。すべて公開しています。',             href: 'products/index.html' },
     { id: 'stories',    en: 'Stories',    jp: '物語',        d: '現場で実際にあったことを、一人称で。',                 href: 'stories/index.html' },
-    { id: 'journal',    en: 'Journal',    jp: '手記',        d: '完成していない考えも、そのまま公開しています。',       href: 'journal/index.html' },
-    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、これまでの歩み。',                    href: 'about/index.html' },
   ];
   const CTA = { id: 'community', en: 'Contact', jp: '話をする', d: '共感も、異論も、相談も。', href: 'community/index.html' };
 
@@ -35,7 +37,7 @@
       '<a class="nav-logo" href="' + ROOT + 'index.html" aria-label="BRIDGE ホームへ">' + MARK + 'BRIDGE</a>' +
       '<div class="nav-right">' +
         '<div class="nav-links">' +
-          NAV.map(n => '<a href="' + ROOT + n.href + '"' + (n.id === PAGE ? ' class="active" aria-current="page"' : '') + '>' + n.en + '</a>').join('') +
+          NAV.filter(n => n.primary).map(n => '<a href="' + ROOT + n.href + '"' + (n.id === PAGE ? ' class="active" aria-current="page"' : '') + '>' + n.en + '</a>').join('') +
         '</div>' +
         '<a class="nav-cta" href="' + ROOT + CTA.href + '">' + CTA.en + '</a>' +
         '<button class="theme-btn" id="themeBtn" aria-label="ライト/ダークモード切り替え">' +
