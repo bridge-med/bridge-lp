@@ -1,37 +1,38 @@
 /* ================================================================
-   BRIDGE Site Runtime v2.0
+   BRIDGE Site Runtime v3.0 — 正式ロゴ準拠
    全ページ共通:ヘッダー/フッター描画・テーマ・Reveal・メニュー
    使い方:
      <body data-root="../" data-page="philosophy">
-     ...
      <script src="../shared/bridge.js" defer></script>
-   data-root  … サイトルートへの相対パス("./" or "../")
-   data-page  … ナビのアクティブ表示に使うページID
    ================================================================ */
 (function () {
   'use strict';
   const ROOT = document.body.dataset.root || './';
   const PAGE = document.body.dataset.page || '';
 
-  /* ---- サイトマップ(ここが唯一の情報源。ページが増えたらここに足す) ---- */
+  /* ---- サイトマップ(唯一の情報源。ページが増えたらここに足す) ---- */
   const NAV = [
-    { id: 'philosophy', en: 'Philosophy', jp: '思想',     d: 'なぜ存在するのか。リハビリテーションとは何か。', href: 'philosophy/index.html' },
-    { id: 'projects',   en: 'Projects',   jp: '活動',     d: 'PMI・AI・教育・研究・アプリ開発。',             href: 'projects/index.html' },
-    { id: 'products',   en: 'Products',   jp: 'プロダクト', d: '現場で使える道具たち。すべて公開中。',          href: 'products/index.html' },
-    { id: 'stories',    en: 'Stories',    jp: '物語',     d: '選択肢が増える瞬間のスケッチ。',                 href: 'stories/index.html' },
-    { id: 'journal',    en: 'Journal',    jp: '手記',     d: '過程を、そのまま公開する。',                     href: 'journal/index.html' },
-    { id: 'research',   en: 'Research',   jp: '研究',     d: '実践を、感想で終わらせない。',                   href: 'research/index.html' },
-    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、歩み。',                     href: 'about/index.html' },
+    { id: 'philosophy', en: 'Philosophy', jp: '思想',        d: 'なぜこの活動をしているのか。いちばん長いページです。', href: 'philosophy/index.html' },
+    { id: 'projects',   en: 'Projects',   jp: '活動',        d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html' },
+    { id: 'products',   en: 'Products',   jp: 'プロダクト',   d: '実際に使えるもの。すべて公開しています。',             href: 'products/index.html' },
+    { id: 'stories',    en: 'Stories',    jp: '物語',        d: '現場で実際にあったことを、一人称で。',                 href: 'stories/index.html' },
+    { id: 'journal',    en: 'Journal',    jp: '手記',        d: '完成していない考えも、そのまま公開しています。',       href: 'journal/index.html' },
+    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、これまでの歩み。',                    href: 'about/index.html' },
   ];
-  const CTA = { id: 'community', en: 'Community', jp: '一緒に作る', href: 'community/index.html' };
+  const CTA = { id: 'community', en: 'Contact', jp: '話をする', d: '共感も、異論も、相談も。', href: 'community/index.html' };
 
-  const LOGO_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 44 Q32 16 56 44" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="32" cy="22" r="4.5" fill="var(--dawn)"/></svg>';
+  /* ---- 正式ロゴ(交差する二本の線。接続はしない) ---- */
+  const MARK =
+    '<svg class="logo-mark" viewBox="0 0 240 110" aria-hidden="true">' +
+    '<path class="l-navy" stroke-width="6" d="M8 74 C 62 16, 118 24, 176 84"/>' +
+    '<path class="l-sand" stroke-width="6" d="M58 94 C 118 60, 158 22, 232 12"/>' +
+    '</svg>';
 
   /* ---- ヘッダー ---- */
   const navEl = document.querySelector('.site-nav');
   if (navEl) {
     navEl.innerHTML =
-      '<a class="nav-logo" href="' + ROOT + 'index.html" aria-label="BRIDGE ホームへ">' + LOGO_SVG + 'BRIDGE</a>' +
+      '<a class="nav-logo" href="' + ROOT + 'index.html" aria-label="BRIDGE ホームへ">' + MARK + 'BRIDGE</a>' +
       '<div class="nav-right">' +
         '<div class="nav-links">' +
           NAV.map(n => '<a href="' + ROOT + n.href + '"' + (n.id === PAGE ? ' class="active" aria-current="page"' : '') + '>' + n.en + '</a>').join('') +
@@ -44,11 +45,11 @@
         '<button class="nav-burger" id="navBurger" aria-label="メニューを開く" aria-expanded="false"><span></span><span></span></button>' +
       '</div>';
 
-    // モバイル・探索メニュー(全ページ+一言の説明=地図)
+    // モバイル・探索メニュー(全ページ+一言の説明)
     const drawer = document.createElement('div');
     drawer.className = 'nav-drawer';
     drawer.setAttribute('aria-label', 'サイト内メニュー');
-    const all = NAV.concat([{ id: CTA.id, en: CTA.en, jp: CTA.jp, d: '思想への共感が、いちばんの参加。', href: CTA.href }]);
+    const all = NAV.concat([CTA]);
     drawer.innerHTML = '<nav class="drawer-list">' +
       all.map((n, i) =>
         '<a class="drawer-item" style="transition-delay:' + (0.05 + i * 0.05) + 's" href="' + ROOT + n.href + '">' +
@@ -65,12 +66,10 @@
       burger.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
     });
 
-    // スクロールで背景
     const onScroll = () => navEl.classList.toggle('scrolled', window.scrollY > 40);
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
-    // テーマ切り替え
     document.getElementById('themeBtn').addEventListener('click', () => {
       const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
@@ -78,17 +77,17 @@
     });
   }
 
-  /* ---- フッター(サイトマップ=最後にもう一度、地図を渡す) ---- */
+  /* ---- フッター(最後にもう一度、地図を渡す) ---- */
   const footEl = document.querySelector('.site-footer');
   if (footEl) {
     const col = (h, links) =>
       '<div class="footer-col"><div class="h">' + h + '</div>' +
-      links.map(l => '<a href="' + (l.ext ? '' : ROOT) + l.href + '"' + (l.ext ? ' target="_blank" rel="noopener"' : '') + '>' + l.t + '</a>').join('') +
+      links.map(l => '<a href="' + (l.ext ? '' : ROOT) + l.href + '"' + (l.ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + l.t + (l.ext ? ' ↗' : '') + '</a>').join('') +
       '</div>';
     footEl.innerHTML =
       '<div class="footer-grid">' +
-        '<div><div class="footer-brand">' + LOGO_SVG + 'BRIDGE</div>' +
-        '<p class="footer-tagline">人と社会の選択肢を広げる、リハビリテーションのプロジェクト。</p></div>' +
+        '<div><div class="footer-brand">' + MARK + '<span>BRIDGE<span class="tg">EXPAND CHOICES.</span></span></div>' +
+        '<p class="footer-tagline">選択肢を増やし、人と社会の可能性を広げるプロジェクト。</p></div>' +
         col('思想', [
           { t: 'Philosophy', href: 'philosophy/index.html' },
           { t: 'Manifesto', href: 'philosophy/index.html#manifesto' },
@@ -96,24 +95,23 @@
         ]) +
         col('活動', [
           { t: 'Projects', href: 'projects/index.html' },
-          { t: 'Research', href: 'research/index.html' },
           { t: 'Journal', href: 'journal/index.html' },
+          { t: 'About', href: 'about/index.html' },
         ]) +
         col('つくったもの', [
           { t: 'Products', href: 'products/index.html' },
-          { t: 'Starter Kits', href: 'starter-kits/index.html' },
           { t: 'キャリアログ', href: 'daily-app/index.html' },
+          { t: 'Starter Kits', href: 'starter-kits/index.html' },
         ]) +
         col('つながる', [
-          { t: 'Community', href: 'community/index.html' },
-          { t: 'About', href: 'about/index.html' },
+          { t: 'Contact', href: 'community/index.html' },
           { t: 'note', href: 'https://note.com/prime_duck4944', ext: true },
           { t: 'X', href: 'https://x.com/WataruPT1013', ext: true },
         ]) +
       '</div>' +
       '<div class="footer-base">' +
         '<span>© 2026 BRIDGE. All rights reserved.</span>' +
-        '<span><a href="' + ROOT + 'legal/privacy.html">Privacy</a> · A project to expand human possibility.</span>' +
+        '<span><a href="' + ROOT + 'legal/privacy.html">Privacy</a></span>' +
       '</div>';
   }
 
@@ -125,6 +123,5 @@
   }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
   const observeAll = () => document.querySelectorAll('[data-reveal]:not(.on)').forEach(el => io.observe(el));
   observeAll();
-  // 動的描画されたカードにも適用できるよう公開
-  window.BRIDGE = { ROOT: ROOT, observeReveal: observeAll };
+  window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll };
 })();

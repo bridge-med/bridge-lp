@@ -4,88 +4,83 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Philosophy — 思想 / BRIDGE</title>
-<meta name="description" content="なぜBRIDGEは存在するのか。リハビリテーションとは何か。Mission・Vision・Philosophy・5つの原則・Manifestoの全文。">
+<meta name="description" content="なぜBRIDGEはあるのか。私が考えるリハビリテーションとは何か。選択肢を増やすということについて、いちばん長く書いたページです。">
+<link rel="canonical" href="https://bridge-med.github.io/bridge-lp/philosophy/">
 <meta property="og:title" content="Philosophy — 思想 / BRIDGE">
 <meta property="og:description" content="リハビリテーションとは、人や組織が本来持つ可能性を引き出し、自ら選び、納得して前へ進める状態をつくること。">
 <meta property="og:type" content="article">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/ogp.png">
 <script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/bridge.css">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F2D44'/%3E%3Cpath d='M12 42 Q32 20 52 42' stroke='%237FB4D9' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='24' r='4' fill='%23D9A441'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
-/* ページ内目次(探索できる長文=知の地図) */
-.toc{position:sticky;top:76px;z-index:10;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px var(--pad-x);display:flex;gap:18px;overflow-x:auto;font:600 10px/1 var(--en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);scrollbar-width:none}
+.toc{position:sticky;top:64px;z-index:10;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px var(--pad-x);display:flex;gap:20px;overflow-x:auto;font:600 10px/1 var(--en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);scrollbar-width:none}
 .toc::-webkit-scrollbar{display:none}
 .toc a{white-space:nowrap;padding:4px 0;transition:color .2s}
 .toc a:hover{color:var(--ink)}
 
-.why-line{font-family:var(--mincho);font-weight:500;font-size:clamp(21px,3.4vw,36px);line-height:2;color:var(--ink-3);transition:color .8s}
-.why-line.now{color:var(--ink)}
-.why-turn .stmt{font-size:clamp(26px,4.6vw,50px)}
-.mvp-grid{max-width:var(--max);margin:clamp(56px,8vh,90px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-@media(max-width:860px){.mvp-grid{grid-template-columns:1fr}}
+.prose{max-width:var(--text-max);font-size:15px;line-height:2.4;color:var(--ink-2)}
+.prose+.prose{margin-top:1.8em}
+.prose strong{color:var(--ink);font-weight:700}
+.pull{font-family:var(--mincho);font-weight:600;font-size:clamp(22px,3.8vw,40px);line-height:1.9;letter-spacing:0.02em;margin:clamp(40px,6vh,64px) 0;max-width:860px}
+.pull .sand{color:var(--dawn)}
 
-.rehab-common{max-width:var(--text-max);margin:40px 0 0;color:var(--ink-3);font-size:14px;line-height:2.3}
-.rehab-common .strike{color:var(--ink-4)}
-.etym{max-width:640px;margin:clamp(52px,7vh,80px) 0 0;border-left:2px solid var(--dawn);padding:8px 0 8px 28px}
-.etym-word{font:600 clamp(20px,3.2vw,30px)/1.4 var(--en);letter-spacing:0.02em;margin-bottom:14px}
+.etym{max-width:640px;margin:clamp(44px,6vh,64px) 0;border-left:2px solid var(--dawn);padding:8px 0 8px 28px}
+.etym-word{font:600 clamp(19px,3vw,28px)/1.4 var(--en);letter-spacing:0.02em;margin-bottom:12px}
 .etym-word i{font-style:italic;font-weight:400;color:var(--ink-3)}
-.etym-p{font-size:13.5px;line-height:2.2;color:var(--ink-2);max-width:520px}
-.rehab-def{margin:clamp(64px,9vh,110px) 0 0}
-.rehab-def .lead{font-size:13px;color:var(--ink-3);margin-bottom:20px}
-.rehab-def .stmt{font-size:clamp(25px,4.4vw,48px)}
-.branch-fig{max-width:880px;margin:clamp(64px,9vh,100px) auto 0}
+.etym-word .sand{color:var(--dawn);font-style:normal}
+
+.branch-fig{max-width:880px;margin:clamp(48px,7vh,72px) auto}
 .branch-fig svg{width:100%;height:auto}
 .branch-fig .base{stroke:var(--ink-3);stroke-width:2;fill:none}
-.branch-fig .opt{stroke:var(--blue);stroke-width:1.6;fill:none;opacity:.85}
+.branch-fig .opt{stroke:var(--navy);stroke-width:1.6;fill:none;opacity:.85}
+[data-theme="dark"] .branch-fig .opt{stroke:var(--blue)}
 .branch-fig .opt.d{stroke:var(--dawn)}
 .branch-fig .dot{fill:var(--ink)}
 .branch-fig .lbl{font:600 11px var(--sans);fill:var(--ink-3);letter-spacing:.08em}
 .branch-fig .lbl.b{fill:var(--ink);font-size:12px}
-.branch-cap{text-align:center;margin-top:24px;font-size:13px;color:var(--ink-3)}
-.target-words{display:flex;flex-wrap:wrap;gap:12px 32px;font-family:var(--mincho);font-weight:600;font-size:clamp(23px,4.2vw,42px);line-height:1.5;margin-top:28px}
-.target-words .mo{color:var(--ink-4);font-size:.6em;font-weight:400;margin-left:2px}
+.branch-cap{text-align:center;margin-top:22px;font-size:13px;color:var(--ink-3)}
 
-.tf-flow{max-width:var(--max);margin:clamp(56px,8vh,90px) auto 0;display:grid;grid-template-columns:repeat(5,1fr) 1.25fr;gap:0;position:relative}
+.mvp-grid{max-width:var(--max);margin:clamp(40px,6vh,60px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:860px){.mvp-grid{grid-template-columns:1fr}}
+
+.tf-flow{max-width:var(--max);margin:clamp(44px,6vh,64px) auto 0;display:grid;grid-template-columns:repeat(5,1fr) 1.25fr;gap:0;position:relative}
 .tf-flow::before{content:'';position:absolute;top:5px;left:0;right:0;height:1px;background:var(--line)}
-.tf-step{padding:30px 18px 0 0;position:relative}
-.tf-step::before{content:'';position:absolute;top:0;left:0;width:11px;height:11px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink-3)}
+.tf-step{padding:28px 18px 0 0;position:relative}
+.tf-step::before{content:'';position:absolute;top:0;left:0;width:11px;height:11px;border-radius:50%;background:var(--bg-2);border:1.5px solid var(--ink-3)}
 .tf-step.out::before{border-color:var(--dawn);background:var(--dawn)}
-.tf-num{font:600 10px/1 var(--en);letter-spacing:0.18em;color:var(--ink-3);margin-bottom:12px}
-.tf-t{font-family:var(--mincho);font-weight:600;font-size:clamp(16px,1.9vw,21px);margin-bottom:4px}
-.tf-en{font:500 9px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:12px}
+.tf-num{font:600 10px/1 var(--en);letter-spacing:0.18em;color:var(--ink-3);margin-bottom:10px}
+.tf-t{font-family:var(--mincho);font-weight:600;font-size:clamp(16px,1.9vw,20px);margin-bottom:4px}
+.tf-en{font:500 9px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:10px}
 .tf-p{font-size:12px;line-height:2;color:var(--ink-2);max-width:170px}
 .tf-step.out .tf-t{color:var(--dawn)}
 @media(max-width:900px){
   .tf-flow{grid-template-columns:1fr;padding-left:28px}
   .tf-flow::before{top:0;bottom:0;left:5px;right:auto;width:1px;height:auto}
-  .tf-step{padding:0 0 38px 0}
+  .tf-step{padding:0 0 34px 0}
   .tf-step::before{left:-28px;top:8px}
   .tf-p{max-width:none}
 }
-.tf-note{max-width:var(--max);margin:30px auto 0;font-size:12.5px;color:var(--ink-3)}
-.apply-grid{max-width:var(--max);margin:clamp(56px,8vh,90px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-@media(max-width:860px){.apply-grid{grid-template-columns:1fr}}
 
-.princ-grid{max-width:var(--max);margin:clamp(52px,7vh,84px) auto 0;border-top:1px solid var(--line)}
-.princ-item{display:grid;grid-template-columns:64px 260px 1fr;gap:18px 36px;align-items:baseline;padding:clamp(26px,4vh,40px) 0;border-bottom:1px solid var(--line)}
+.princ-grid{max-width:var(--max);margin:clamp(40px,6vh,60px) auto 0;border-top:1px solid var(--line)}
+.princ-item{display:grid;grid-template-columns:64px 250px 1fr;gap:16px 36px;align-items:baseline;padding:clamp(24px,3.8vh,36px) 0;border-bottom:1px solid var(--line)}
 .princ-num{font:600 11px/1 var(--en);letter-spacing:0.14em;color:var(--dawn)}
-.princ-en{font:700 clamp(16px,2vw,20px)/1.4 var(--en);letter-spacing:0.04em}
-.princ-jp{font-family:var(--mincho);font-weight:600;font-size:clamp(16px,2.3vw,23px);line-height:1.9}
-.princ-jp small{display:block;font-family:var(--sans);font-weight:400;font-size:12.5px;color:var(--ink-3);margin-top:8px}
+.princ-en{font:700 clamp(15px,1.9vw,19px)/1.4 var(--en);letter-spacing:0.04em}
+.princ-jp{font-size:14px;line-height:2.2;color:var(--ink-2)}
+.princ-jp b{display:block;font-family:var(--mincho);font-weight:600;font-size:clamp(16px,2.2vw,21px);line-height:1.8;color:var(--ink);margin-bottom:6px}
 @media(max-width:760px){.princ-item{grid-template-columns:1fr;gap:8px}}
 
 .mani{background:var(--dark-sec);color:var(--dark-sec-text)}
 .mani .eyebrow{color:var(--dark-sec-dim)}
-.mani-stage{max-width:860px;margin:clamp(52px,8vh,88px) auto 0;display:grid;gap:clamp(34px,6vh,56px)}
-.mani-line{font-family:var(--mincho);font-weight:500;font-size:clamp(20px,3.4vw,34px);line-height:1.95;letter-spacing:0.03em;display:flex;gap:20px;align-items:baseline}
+.mani-stage{max-width:860px;margin:clamp(44px,7vh,72px) auto 0;display:grid;gap:clamp(30px,5vh,48px)}
+.mani-line{font-family:var(--mincho);font-weight:500;font-size:clamp(19px,3.2vw,32px);line-height:2;letter-spacing:0.03em;display:flex;gap:20px;align-items:baseline}
 .mani-line .ichi{color:var(--dawn);font-size:.75em;flex-shrink:0}
-.mani-final{margin-top:clamp(40px,7vh,70px);font-family:var(--mincho);font-weight:600;font-size:clamp(30px,5.6vw,62px);line-height:1.6}
+.mani-final{margin-top:clamp(36px,6vh,60px);font-family:var(--mincho);font-weight:600;font-size:clamp(28px,5vw,54px);line-height:1.7}
 .mani-final .period{color:var(--dawn)}
-.mani-sig{max-width:860px;margin:clamp(52px,8vh,80px) auto 0;font:500 12px/1 var(--en);letter-spacing:0.14em;color:var(--dark-sec-dim);display:flex;align-items:center;gap:14px}
-.mani-sig .seal{display:inline-grid;place-items:center;width:30px;height:30px;border:1.5px solid var(--dawn);border-radius:6px;color:var(--dawn);font-family:var(--mincho);font-size:13px;transform:rotate(-3deg)}
+.mani-sig{max-width:860px;margin:clamp(44px,7vh,64px) auto 0;font:500 12px/1 var(--en);letter-spacing:0.14em;color:var(--dark-sec-dim)}
 </style>
 </head>
 <body data-root="../" data-page="philosophy">
@@ -97,91 +92,73 @@
     <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Philosophy</span></div>
     <h1 data-reveal data-reveal-delay="1">思想<span class="period">。</span></h1>
     <p class="lead" data-reveal data-reveal-delay="2">
-      なぜBRIDGEは存在するのか。リハビリテーションとは何か。ここは、いちばん長いページです。急がず、興味のある章から読んでください。
+      なぜこの活動をしているのか、いちばん長く書いたページです。上の目次から、気になる章だけ読んでもらっても構いません。
     </p>
   </div>
 </header>
 
-<!-- ページ内の章(ここでも「選べる」) -->
 <nav class="toc" aria-label="ページ内目次">
-  <a href="#why">Why</a>
-  <a href="#mvp">Mission / Vision</a>
-  <a href="#rehabilitation">Rehabilitation</a>
-  <a href="#thinking">Thinking</a>
-  <a href="#principles">Principles</a>
+  <a href="#choose">人は、もっと選べる</a>
+  <a href="#rehabilitation">リハビリテーションとは</a>
+  <a href="#expand">選択肢を増やす</a>
+  <a href="#happiness">選ぶことと、納得</a>
+  <a href="#beyond">臨床から社会へ</a>
+  <a href="#thinking">思考の型</a>
+  <a href="#principles">原則</a>
   <a href="#manifesto">Manifesto</a>
 </nav>
 
 <main>
 
-<!-- ============ WHY ============ -->
-<section class="sec" id="why">
+<!-- ============ 1-2. 人は、もっと選べる ============ -->
+<section class="sec" id="choose">
   <div class="sec-inner">
-    <div class="eyebrow" data-reveal>Why BRIDGE — なぜ、存在するのか</div>
-    <h2 class="sec-h" data-reveal data-reveal-delay="1">人生は、変化の連続だから。</h2>
-    <div style="margin-top:clamp(44px,6vh,70px)">
-      <p class="why-line" data-reveal>病気になっても。</p>
-      <p class="why-line" data-reveal>転職しても。</p>
-      <p class="why-line" data-reveal>組織が変わっても。</p>
-      <p class="why-line" data-reveal>AIが進化しても。</p>
-    </div>
-    <div class="why-turn" style="margin-top:clamp(44px,7vh,80px)" data-reveal>
-      <p class="stmt">人はもう一度、<br>自分の人生を<span class="ao">選び直せる</span><span class="hikari">。</span></p>
-      <p class="body-p" style="margin-top:28px">
-        変化は、選択肢を奪うもののように見えます。けれど、適切な見方と、適切な仕組みがあれば——変化は、次の一歩の材料になる。その選択肢を増やすこと。それがBRIDGEです。
-      </p>
-    </div>
+    <div class="eyebrow" data-reveal>Why — なぜ、この活動をしているのか</div>
+    <p class="pull" data-reveal data-reveal-delay="1">人は、もっと選べる<span class="sand">。</span><br>私はそう考えています。</p>
+    <p class="prose" data-reveal>
+      人生は変化の連続です。病気をすることもあれば、転職することもあります。組織が変わることも、AIのような技術が仕事の前提を変えてしまうこともあります。変化はたいてい、選択肢を奪うものとして現れます。「もう歩けないから、あきらめる」「この職場で我慢するしかない」という形で。
+    </p>
+    <p class="prose" data-reveal>
+      でも、臨床でも経営の現場でも、私は何度も逆の場面を見てきました。適切な見方と、続けられる仕組みがあれば、変化はむしろ次の一歩の材料になります。選べないと思い込んでいた人が、選べるようになる瞬間がある。BRIDGEは、その瞬間を増やすための活動です。
+    </p>
   </div>
 </section>
 
-<!-- ============ MISSION / VISION / PHILOSOPHY ============ -->
-<section class="sec tint" id="mvp" style="padding-top:clamp(80px,10vh,130px)">
+<!-- ============ 3-4. リハビリテーションとは ============ -->
+<section class="sec tint" id="rehabilitation">
   <div class="sec-inner">
-    <div class="eyebrow" data-reveal>Mission / Vision / Philosophy</div>
-  </div>
-  <div class="mvp-grid">
-    <div class="card" data-reveal>
-      <span class="card-tag d">Mission</span>
-      <p class="card-t">リハビリテーションという学問を通して、人と社会の選択肢を広げる。</p>
-      <p class="card-p">職種を広めたいのではありません。この学問が持つ本来の可能性を、医療の枠を超えて届けます。</p>
-    </div>
-    <div class="card" data-reveal data-reveal-delay="1">
-      <span class="card-tag d">Vision</span>
-      <p class="card-t">誰もが、自ら選び、納得して人生をデザインできる社会。</p>
-      <p class="card-p">正解を配る社会ではなく、一人ひとりが自分の答えを選べる社会へ。</p>
-    </div>
-    <div class="card" data-reveal data-reveal-delay="2">
-      <span class="card-tag d">Philosophy</span>
-      <p class="card-t">人は、自ら選び、納得して生きることで、最も幸福になれる。</p>
-      <p class="card-p">与えられた最適解より、自分で選んだ道。BRIDGEのすべての設計は、この人間観から始まります。</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ REHABILITATION ============ -->
-<section class="sec" id="rehabilitation">
-  <div class="sec-inner">
-    <div class="eyebrow" data-reveal>What is Rehabilitation — リハビリテーションとは何か</div>
-    <p class="rehab-common" data-reveal data-reveal-delay="1">
-      <span class="strike">歩けるようになること。身体機能を回復させる技術。</span><br>
-      ——一般には、そう思われています。間違いではありません。<br>
-      けれど、それはこの学問の、ほんの一部です。
+    <div class="eyebrow" data-reveal>What is Rehabilitation — 私が考えるリハビリテーション</div>
+    <p class="prose" style="margin-top:36px" data-reveal>
+      リハビリテーションと聞くと、多くの人は「歩く練習」や「身体機能を回復させる訓練」を思い浮かべると思います。それは間違いではありません。私も理学療法士として、その仕事をしてきました。ただ、それはこの学問の一部でしかありません。
     </p>
     <div class="etym" data-reveal>
-      <div class="etym-word"><i>re</i><span class="hikari"> + </span><i>habilis</i> = 再び、その人らしく。</div>
-      <p class="etym-p">
-        語源はラテン語。habilis(ふさわしい)に、re(再び)。この言葉は最初から、「機能の回復」ではなく<span class="nowrap">「その人がその人らしく生きられる状態への回復」</span>を指しています。
+      <div class="etym-word"><i>re</i><span class="sand"> + </span><i>habilis</i></div>
+      <p class="prose" style="font-size:13.5px">
+        リハビリテーションの語源はラテン語です。habilis(ふさわしい)に、re(再び)を重ねた言葉で、直訳すると「再び、ふさわしい状態になること」。つまりこの言葉は最初から、機能の回復ではなく、<strong>その人がその人らしく生きられる状態への回復</strong>を指していました。
       </p>
     </div>
-    <div class="rehab-def">
-      <p class="lead" data-reveal>BRIDGEの定義は、こうです。</p>
-      <p class="stmt" data-reveal data-reveal-delay="1">
-        人や組織が本来持つ可能性を引き出し、<br>
-        自ら選び、納得して<span class="nowrap">前へ進める状態</span>をつくること<span class="hikari">。</span>
-      </p>
-    </div>
+    <p class="prose" data-reveal>
+      だから私は、リハビリテーションをこう定義しています。
+    </p>
+    <p class="pull" data-reveal>
+      人や組織が本来持つ可能性を引き出し、<br>
+      自ら選び、納得して前へ進める状態をつくること<span class="sand">。</span>
+    </p>
+    <p class="prose" data-reveal>
+      この定義に立つと、対象は患者に限らなくなります。数字に追われて萎縮している医療チームにも、承継したばかりで立て直しの道筋が見えないクリニックにも、キャリアに行き詰まりを感じている人にも、同じ考え方が使えます。対象が変わるだけで、やることの本質は変わりません。私が広めたいのは理学療法士という職業ではなく、この<strong>考え方そのもの</strong>です。
+    </p>
+  </div>
+</section>
+
+<!-- ============ 5. 選択肢を増やすということ ============ -->
+<section class="sec" id="expand">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Expand Choices — 選択肢を増やすということ</div>
+    <p class="prose" style="margin-top:36px" data-reveal>
+      「選択肢を増やす」というのは、比喩ではなく、リハビリテーションで実際に起きることです。目標が「歩行の自立」から「孫の運動会に行く」に変わった患者を想像してみてください。歩いて行くのか、車椅子で行くのか、家族と一緒に行くのか。道が一本から三本に増えた瞬間、リハビリは訓練ではなく、人生の設計になります。
+    </p>
     <div class="branch-fig" data-reveal>
-      <svg viewBox="0 0 880 300" role="img" aria-label="図解:一本しかなかった道が、リハビリテーションの考え方によって選べる複数の道に分岐する">
+      <svg viewBox="0 0 880 300" role="img" aria-label="図解:一本しか見えていなかった道が、選べる複数の道に分かれていく">
         <circle class="dot" cx="60" cy="150" r="5"/>
         <text class="lbl b" x="40" y="128">いま</text>
         <path class="base" d="M60 150 H 360"/>
@@ -195,115 +172,140 @@
         <circle class="dot" cx="360" cy="150" r="4" fill="var(--dawn)"/>
         <text class="lbl" x="312" y="122">可能性に気づく</text>
       </svg>
-      <p class="branch-cap">どの道を選んでもいい。<strong>選べること</strong>そのものが、回復である。</p>
+      <p class="branch-cap">どの道を選んでもいい。<strong>選べること</strong>そのものが、回復だと考えています。</p>
     </div>
-    <div style="margin-top:clamp(64px,9vh,100px)">
-      <p class="lead" style="font-family:var(--mincho);font-size:clamp(16px,2.3vw,21px);color:var(--ink-2)" data-reveal>そして、その対象は患者だけではありません。</p>
-      <div class="target-words">
-        <span data-reveal>患者<span class="mo">も。</span></span>
-        <span data-reveal data-reveal-delay="1">医療者<span class="mo">も。</span></span>
-        <span data-reveal data-reveal-delay="2">組織<span class="mo">も。</span></span>
-        <span data-reveal data-reveal-delay="3">企業<span class="mo">も。</span></span>
-        <span data-reveal data-reveal-delay="4">社会<span class="mo">も。</span></span>
-      </div>
-      <p class="body-p" style="margin-top:32px" data-reveal>
-        対象は違っても、考え方は同じ。本来持っている可能性を引き出し、選べる状態をつくる。この見方を、BRIDGEはあらゆる場面に持ち込みます。
-      </p>
+    <p class="prose" data-reveal>
+      大事なのは、増えた道のどれを選んでもいい、ということです。挑戦する人だけが正しいわけではありません。いまの場所で続けることも、立派な選択です。選択肢を増やす仕事は、正解を配る仕事とは違います。
+    </p>
+  </div>
+</section>
+
+<!-- ============ 6. 選ぶことと、納得して生きること ============ -->
+<section class="sec tint" id="happiness">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Mission / Vision / Philosophy</div>
+    <p class="prose" style="margin-top:36px" data-reveal>
+      なぜそこまで「選ぶこと」にこだわるのか。私は、人は自ら選び、納得して生きることで、最も幸福になれると考えているからです。他人が用意した最適解の上を歩くより、多少遠回りでも自分で選んだ道のほうが、人は前を向けます。これは臨床で患者を見てきた実感であり、自分自身の転職や進学で確かめてきたことでもあります。
+    </p>
+  </div>
+  <div class="mvp-grid">
+    <div class="card" data-reveal>
+      <span class="card-tag d">Mission</span>
+      <p class="card-t">リハビリテーションという学問を通して、人と社会の選択肢を広げる。</p>
+    </div>
+    <div class="card" data-reveal data-reveal-delay="1">
+      <span class="card-tag d">Vision</span>
+      <p class="card-t">誰もが、自ら選び、納得して人生をデザインできる社会。</p>
+    </div>
+    <div class="card" data-reveal data-reveal-delay="2">
+      <span class="card-tag d">Philosophy</span>
+      <p class="card-t">人は、自ら選び、納得して生きることで、最も幸福になれる。</p>
     </div>
   </div>
 </section>
 
-<!-- ============ THINKING ============ -->
+<!-- ============ 7. 臨床から社会へ ============ -->
+<section class="sec" id="beyond">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Beyond Clinical — 臨床から社会へ</div>
+    <p class="prose" style="margin-top:36px" data-reveal>
+      私は臨床から出発して、大学院で研究をして、いまは事業会社で医療機関の経営とPMI(承継・統合後の立て直し)に携わっています。経歴だけ見るとバラバラに見えるかもしれません。でも本人としては、ずっと同じことをしている感覚があります。
+    </p>
+    <p class="prose" data-reveal>
+      患者に対して、評価して、課題を見つけて、目標を立てて、介入して、また評価する。組織に対しても、まったく同じことをします。対象が人か組織かが違うだけです。だから私はPMIを「組織に対するリハビリテーション」と呼んでいます。AIの導入も同じで、技術で人を置き換えるのではなく、書類仕事に消えていた時間を対話と思考に戻すための設計だと捉えています。
+    </p>
+    <p class="prose" data-reveal>
+      リハビリテーションの考え方は、病院の中だけで使うにはもったいない。それがBRIDGEの出発点です。
+    </p>
+  </div>
+</section>
+
+<!-- ============ 8. 思考の型 ============ -->
 <section class="sec tint" id="thinking">
   <div class="sec-inner">
-    <div class="eyebrow" data-reveal>Rehabilitation Thinking — 思考のフレームワーク</div>
-    <h2 class="sec-h" data-reveal data-reveal-delay="1">評価から始めて、<br>選択肢が広がるまで。</h2>
-    <p class="body-p" data-reveal data-reveal-delay="2">
-      リハビリテーションの臨床で使われる思考の型を、BRIDGEはそのまま、キャリアにも、組織にも、AI導入にも適用します。
+    <div class="eyebrow" data-reveal>Rehabilitation Thinking — 思考の型</div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">評価から始めて、選択肢が広がるまで。</h2>
+    <p class="prose" data-reveal data-reveal-delay="2">
+      臨床で使われる思考の型を、私はそのまま組織にもキャリアにもAI導入にも使っています。型は5段階で、一度きりではなく循環します。回すたびに、選べる道が増えていきます。
     </p>
   </div>
   <div class="tf-flow">
     <div class="tf-step" data-reveal>
       <div class="tf-num">01</div><div class="tf-t">評価</div><span class="tf-en">Assess</span>
-      <p class="tf-p">思い込みではなく、事実から始める。いま何ができて、何に困っているのか。</p>
+      <p class="tf-p">思い込みではなく、事実から始めます。いま何ができて、何に困っているのか。</p>
     </div>
     <div class="tf-step" data-reveal data-reveal-delay="1">
       <div class="tf-num">02</div><div class="tf-t">理解</div><span class="tf-en">Understand</span>
-      <p class="tf-p">数字の奥にある文脈を読む。その人・その組織にとっての「意味」を掴む。</p>
+      <p class="tf-p">数字の奥にある文脈を読みます。その人、その組織にとっての意味をつかむ。</p>
     </div>
     <div class="tf-step" data-reveal data-reveal-delay="2">
       <div class="tf-num">03</div><div class="tf-t">設計</div><span class="tf-en">Design</span>
-      <p class="tf-p">目標と道筋を、本人と一緒に決める。押し付けの計画は続かない。</p>
+      <p class="tf-p">目標と道筋を、本人と一緒に決めます。押し付けた計画は続きません。</p>
     </div>
     <div class="tf-step" data-reveal data-reveal-delay="3">
       <div class="tf-num">04</div><div class="tf-t">実践</div><span class="tf-en">Practice</span>
-      <p class="tf-p">小さく始めて、続けられる形で。意志ではなく仕組みで支える。</p>
+      <p class="tf-p">小さく始めて、続けられる形にします。意志の強さではなく、仕組みで支える。</p>
     </div>
     <div class="tf-step" data-reveal data-reveal-delay="4">
       <div class="tf-num">05</div><div class="tf-t">再評価</div><span class="tf-en">Reassess</span>
-      <p class="tf-p">変化を測り、設計に戻す。この循環が、前進を確かなものにする。</p>
+      <p class="tf-p">変化を測って、設計に戻します。この循環が前進を確かなものにします。</p>
     </div>
     <div class="tf-step out" data-reveal data-reveal-delay="5">
       <div class="tf-num">→</div><div class="tf-t">選択肢が広がる</div><span class="tf-en">Choices Expand</span>
-      <p class="tf-p">循環のたびに、選べる道が増えていく。それがこの型の目的地。</p>
-    </div>
-  </div>
-  <p class="tf-note" data-reveal>※ 01〜05は一度きりではなく循環します。回すほど、選択肢は増えます。</p>
-  <div class="apply-grid">
-    <div class="card" data-reveal>
-      <span class="card-tag">For Person</span>
-      <p class="card-t">人に使えば、リハビリとキャリア設計になる。</p>
-      <p class="card-p">身体の回復も、働き方の再設計も、同じ型で進む。評価し、理解し、一緒に設計し、小さく実践する。</p>
-    </div>
-    <div class="card" data-reveal data-reveal-delay="1">
-      <span class="card-tag">For Organization</span>
-      <p class="card-t">組織に使えば、経営改善とPMIになる。</p>
-      <p class="card-p">承継直後のクリニックの立て直しは、組織へのリハビリテーション。評価→介入→再評価は、そのまま経営の言葉になる。</p>
-    </div>
-    <div class="card" data-reveal data-reveal-delay="2">
-      <span class="card-tag">For Technology</span>
-      <p class="card-t">技術に使えば、人を広げるAI導入になる。</p>
-      <p class="card-p">AIは置き換えではなく拡張。生まれた時間を対話と思考に還す設計まで含めて、導入と呼ぶ。</p>
+      <p class="tf-p">この型の目的地です。回すほど、選べる道が増えていく。</p>
     </div>
   </div>
 </section>
 
-<!-- ============ PRINCIPLES ============ -->
+<!-- ============ 9. 原則 ============ -->
 <section class="sec" id="principles">
   <div class="sec-inner">
     <div class="eyebrow" data-reveal>Principles — 5つの原則</div>
-    <h2 class="sec-h" data-reveal data-reveal-delay="1">すべての判断は、この5つに立ち返る。</h2>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">判断に迷ったら、ここに戻ります。</h2>
   </div>
   <div class="princ-grid">
     <div class="princ-item" data-reveal>
       <div class="princ-num">01</div>
       <div class="princ-en">Human First</div>
-      <div class="princ-jp">病気ではなく、人を見る。<small>診断名でも役職でもなく、その人の人生から始める。</small></div>
+      <div class="princ-jp"><b>病気ではなく、人を見る。</b>診断名や役職から入らず、その人の人生から始めます。</div>
     </div>
     <div class="princ-item" data-reveal>
       <div class="princ-num">02</div>
       <div class="princ-en">Expand Choices</div>
-      <div class="princ-jp">正解を与えるのではなく、選択肢を増やす。<small>選ぶのはいつも本人。私たちは選べる状態をつくる。</small></div>
+      <div class="princ-jp"><b>正解を与えるのではなく、選択肢を増やす。</b>選ぶのはいつも本人です。私は選べる状態をつくる側にいます。</div>
     </div>
     <div class="princ-item" data-reveal>
       <div class="princ-num">03</div>
       <div class="princ-en">Believe Potential</div>
-      <div class="princ-jp">現状ではなく、可能性を見る。<small>いまの姿は、その人の上限ではない。</small></div>
+      <div class="princ-jp"><b>現状ではなく、可能性を見る。</b>いまの姿を、その人の上限だと考えません。</div>
     </div>
     <div class="princ-item" data-reveal>
       <div class="princ-num">04</div>
       <div class="princ-en">Build Systems</div>
-      <div class="princ-jp">努力だけに頼らず、続けられる仕組みを作る。<small>意志の強さは前提にしない。設計で支える。</small></div>
+      <div class="princ-jp"><b>努力だけに頼らず、続けられる仕組みを作る。</b>続くかどうかを、意志の強さの問題にしません。</div>
     </div>
     <div class="princ-item" data-reveal>
       <div class="princ-num">05</div>
       <div class="princ-en">Learn Forever</div>
-      <div class="princ-jp">実践し、検証し、改善し続ける。<small>思想も道具も、完成しない。だから面白い。</small></div>
+      <div class="princ-jp"><b>実践し、検証し、改善し続ける。</b>思想も道具も完成しません。だから面白いのだと思います。</div>
     </div>
   </div>
 </section>
 
-<!-- ============ MANIFESTO ============ -->
+<!-- ============ 10. 目的と手段 ============ -->
+<section class="sec tint">
+  <div class="sec-inner">
+    <div class="eyebrow" data-reveal>Ends and Means — 何が目的で、何が手段か</div>
+    <p class="prose" style="margin-top:36px" data-reveal>
+      最後に、順番をはっきりさせておきます。目的は、人と社会の選択肢を増やすことです。アプリも、AIも、ダッシュボードも、経営支援も、全部そのための手段です。手段が目的になりそうになったら、作っているものを止めてでも、ここに戻ってくるつもりです。
+    </p>
+    <p class="prose" data-reveal>
+      そして、この活動の主語は私でなくても構いません。医師でも、看護師でも、セラピストでも、学生でも、経営者でも、この考え方を届けられる人なら誰でもいい。だから思想は、いつでも人に渡せる形で、こうして文章にしておくようにしています。
+    </p>
+  </div>
+</section>
+
+<!-- ============ 11. MANIFESTO ============ -->
 <section class="sec mani" id="manifesto">
   <div class="sec-inner">
     <div class="eyebrow" data-reveal>Manifesto — 宣言</div>
@@ -316,28 +318,28 @@
       <p class="mani-line" data-reveal><span class="ichi">一、</span>リハビリテーションを、医療の枠から解き放つ。</p>
       <p class="mani-final" data-reveal>そして——<br>変化を、自分の力に<span class="period">。</span></p>
     </div>
-    <div class="mani-sig" data-reveal>— BRIDGE Project<span class="seal" aria-hidden="true">橋</span></div>
+    <div class="mani-sig" data-reveal>— BRIDGE / Wataru Hashimoto</div>
   </div>
 </section>
 
 </main>
 
-<!-- 次はどこへ歩く? -->
+<!-- ============ 12. 導線 ============ -->
 <aside class="walk">
   <div class="walk-inner">
-    <div class="eyebrow" data-reveal>Where to next — 次は、どこへ歩きますか</div>
+    <div class="eyebrow" data-reveal>Where to next — 次は、どこへ</div>
     <div class="walk-grid" style="margin-top:30px">
       <a class="walk-card" href="../projects/index.html" data-reveal>
         <span class="en">Projects</span><span class="t">思想が動いている場所を見る</span>
-        <p class="p">PMI・AI・教育・研究・アプリ開発。</p>
+        <p class="p">PMI、AI、教育、研究。いまやっていること。</p>
       </a>
       <a class="walk-card" href="../stories/index.html" data-reveal data-reveal-delay="1">
-        <span class="en">Stories</span><span class="t">選択肢が増える瞬間を読む</span>
-        <p class="p">患者、医療者、組織、キャリア、AI。</p>
+        <span class="en">Stories</span><span class="t">実際にあったことを読む</span>
+        <p class="p">この思想の元になった、現場の実話です。</p>
       </a>
       <a class="walk-card" href="../community/index.html" data-reveal data-reveal-delay="2">
-        <span class="en">Community</span><span class="t">一緒に作る</span>
-        <p class="p">共感したら、それだけで十分です。</p>
+        <span class="en">Contact</span><span class="t">話をする</span>
+        <p class="p">共感でも、異論でも。</p>
       </a>
     </div>
   </div>
@@ -345,12 +347,5 @@
 
 <footer class="site-footer"></footer>
 <script src="../shared/bridge.js" defer></script>
-<script>
-// Whyの行:読まれる瞬間に濃くなる
-const whyIO = new IntersectionObserver((entries) => {
-  for (const e of entries) e.target.classList.toggle('now', e.isIntersecting);
-}, { rootMargin: '-40% 0px -40% 0px' });
-document.querySelectorAll('.why-line').forEach(el => whyIO.observe(el));
-</script>
 </body>
 </html>
