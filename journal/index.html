@@ -18,7 +18,10 @@
 .j-grid{max-width:var(--max);margin:clamp(36px,5vh,52px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:960px){.j-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.j-grid{grid-template-columns:1fr}}
-.j-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow);transition:all .35s var(--ease)}
+.j-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 14px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow);transition:all .35s var(--ease)}
+.j-thumb{width:100%;height:auto;aspect-ratio:1200/630;object-fit:cover;border-radius:9px;border:1px solid var(--line);background:var(--bg-3);display:block}
+.j-card>.j-meta,.j-card>.j-t,.j-card>.j-ex,.j-card>.j-tags{padding:0 8px}
+.lab-shot{width:100%;height:auto;aspect-ratio:1440/900;object-fit:cover;object-position:top;border-radius:9px;border:1px solid var(--line);background:var(--bg-3);display:block;margin-bottom:4px}
 a.j-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
 .j-meta{display:flex;justify-content:space-between;align-items:center;font:600 10px/1 var(--en);letter-spacing:0.12em;color:var(--ink-4)}
 .j-tags{display:flex;gap:6px;flex-wrap:wrap}
@@ -72,24 +75,28 @@ a.j-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
   </div>
   <div class="lab-grid">
     <a class="card" href="../morning/index.html" data-reveal>
+      <img class="lab-shot" src="../images/products/morning.png" alt="" loading="lazy" width="1440" height="900">
       <span class="card-tag">Daily</span>
       <div class="card-t">朝の手帖</div>
       <p class="card-p">政治経済・医療政策・論文・テックを毎朝まとめて読む内製ダッシュボード。</p>
       <span class="card-link">見てみる →</span>
     </a>
     <a class="card" href="../worklog/index.html" data-reveal data-reveal-delay="1">
+      <img class="lab-shot" src="../images/products/worklog.png" alt="" loading="lazy" width="1440" height="900">
       <span class="card-tag">Log</span>
       <div class="card-t">CxO Roadmap Log</div>
       <p class="card-p">日々の現場仕事・数字成果・組織改善を、実績ログに変換する個人用アプリ。</p>
       <span class="card-link">見てみる →</span>
     </a>
     <a class="card" href="../karte/index.html" data-reveal data-reveal-delay="2">
+      <img class="lab-shot" src="../images/products/karte.png" alt="" loading="lazy" width="1440" height="900">
       <span class="card-tag">Concept</span>
       <div class="card-t">KARTE</div>
       <p class="card-p">職場のしんどさをSOAP形式で書き起こす、診察型コンセプトページ。</p>
       <span class="card-link">見てみる →</span>
     </a>
     <a class="card" href="../moyamoya/index.html" data-reveal data-reveal-delay="3">
+      <img class="lab-shot" src="../images/products/moyamoya.png" alt="" loading="lazy" width="1440" height="900">
       <span class="card-tag">Diagnosis</span>
       <div class="card-t">Moyamoya Check</div>
       <p class="card-p">職場の“なんとなくしんどい”を10問で言語化する診断。</p>
@@ -158,6 +165,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       a.href = it.url; a.target = '_blank'; a.rel = 'noopener';
       a.setAttribute('data-reveal', ''); a.setAttribute('data-reveal-delay', String(i % 3));
       a.innerHTML =
+        (it.thumbnail ? '<img class="j-thumb" src="' + esc(it.thumbnail) + '" alt="" loading="lazy" width="1200" height="630" onerror="this.remove()">' : '') +
         '<div class="j-meta"><span>' + esc(it.date || '') + '</span><span>note ↗</span></div>' +
         '<div class="j-t">' + esc(it.title) + '</div>' +
         '<p class="j-ex">' + esc(it.excerpt || '') + '</p>' +

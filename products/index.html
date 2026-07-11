@@ -22,7 +22,9 @@
 .prod-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:960px){.prod-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.prod-grid{grid-template-columns:1fr}}
-.prod-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);transition:all .35s var(--ease)}
+.prod-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 14px 22px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);transition:all .35s var(--ease)}
+.prod-shot{width:100%;height:auto;aspect-ratio:1440/900;object-fit:cover;object-position:top;border-radius:9px;border:1px solid var(--line);background:var(--bg-3);display:block}
+.prod-card>div,.prod-card>p,.prod-card>span{padding:0 8px}
 a.prod-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
 .prod-num{font:600 9.5px/1 var(--en);letter-spacing:0.16em;color:var(--ink-4)}
 .prod-name{font-family:var(--mincho);font-weight:600;font-size:18px;line-height:1.5}
@@ -87,39 +89,39 @@ window.addEventListener('DOMContentLoaded', () => {
     { id: 'free', t: '無料配布', stage: '型を、まず手元で試すための雛形', p: 'まず触ってみたい方へ。' },
   ];
   const PRODUCTS = [
-    { cat: 'management', name: 'RehaBoard', jp: 'リハボード', href: '../rehaboard/index.html',
+    { cat: 'management', name: 'RehaBoard', img: 'rehaboard.png', jp: 'リハボード', href: '../rehaboard/index.html',
       p: 'リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。' },
-    { cat: 'management', name: 'MedBoard', jp: 'メドボード', href: '../medboard/index.html',
+    { cat: 'management', name: 'MedBoard', img: 'medboard.png', jp: 'メドボード', href: '../medboard/index.html',
       p: '外来クリニックの患者フローを、2施設横並びで。「異変に気づく」のが目的。' },
-    { cat: 'management', name: 'HireBoard', jp: 'ハイヤーボード', href: '../hire-board/index.html',
+    { cat: 'management', name: 'HireBoard', img: 'hireboard.png', jp: 'ハイヤーボード', href: '../hire-board/index.html',
       p: '医療機関の採用をカンバンで。9紹介会社・職種別フィー自動計算。' },
-    { cat: 'management', name: 'InterviewKit', jp: '面接官の手帖', href: '../interview-kit/index.html',
+    { cat: 'management', name: 'InterviewKit', img: 'interview-kit.png', jp: '面接官の手帖', href: '../interview-kit/index.html',
       p: '構造化面接ツール。職種×レベルで質問自動生成、事実と印象を分けて記録。' },
-    { cat: 'management', name: 'ConsultSim', jp: 'コンサルトシム', href: '../consult-simulator/index.html',
+    { cat: 'management', name: 'ConsultSim', img: 'consult-simulator.png', jp: 'コンサルトシム', href: '../consult-simulator/index.html',
       p: '診察オペレーション設計シミュレーター。1診/2診×曜日カスタム×グループ同期。' },
-    { cat: 'management', name: 'RoundNote', jp: '本部長の巡回手帖', href: '../round-note/index.html',
+    { cat: 'management', name: 'RoundNote', img: 'round-note.png', jp: '本部長の巡回手帖', href: '../round-note/index.html',
       p: '複数施設の宿題・決定・気づきを1冊に。訪問前に「今日のアジェンダ」が立ち上がる。' },
-    { cat: 'learning', name: 'キャリアログ', jp: 'iOSアプリ', href: '../daily-app/index.html',
+    { cat: 'learning', name: 'キャリアログ', img: 'careerlog.png', jp: 'iOSアプリ', href: '../daily-app/index.html',
       p: '日々の仕事と学びを記録し、職務経歴書・面接・1on1に活かす。続けられる仕組みの実験場。' },
-    { cat: 'learning', name: 'Clinic Town 3D', jp: 'クリニックタウン3D', href: '../clinic-flow-3d/index.html',
+    { cat: 'learning', name: 'Clinic Town 3D', img: 'clinic-flow-3d.png', jp: 'クリニックタウン3D', href: '../clinic-flow-3d/index.html',
       p: '遊ぶだけで外来経営が身につくSimCity風シミュレーション。算定項目まで実態準拠。' },
-    { cat: 'learning', name: 'HIM Quiz', jp: '診療情報管理士 模試', href: '../him-quiz/index.html',
+    { cat: 'learning', name: 'HIM Quiz', img: 'him-quiz.png', jp: '診療情報管理士 模試', href: '../him-quiz/index.html',
       p: '全12章・360問。模擬試験モード・章別正答率・間違い蓄積まで。' },
-    { cat: 'learning', name: 'StudyBoard', jp: 'スタディボード', href: '../study-board/index.html',
+    { cat: 'learning', name: 'StudyBoard', img: 'studyboard.png', jp: 'スタディボード', href: '../study-board/index.html',
       p: '複数科目を並行学習する社会人のための。ストリーク・ヒートマップ・バランス分析。' },
-    { cat: 'learning', name: 'Daily English', jp: 'デイリーイングリッシュ', href: '../english-trainer/index.html',
+    { cat: 'learning', name: 'Daily English', img: 'english-trainer.png', jp: 'デイリーイングリッシュ', href: '../english-trainer/index.html',
       p: '瞬間英作文トレーナー。単語220・フレーズ135、4モード。通勤の合間に。' },
-    { cat: 'learning', name: 'Turnaround 12', jp: 'ターンアラウンド12', href: '../turnaround12/index.html',
+    { cat: 'learning', name: 'Turnaround 12', img: 'turnaround12.png', jp: 'ターンアラウンド12', href: '../turnaround12/index.html',
       p: '赤字クリニックを12週で立て直す経営シミュレーションゲーム。' },
-    { cat: 'casual', name: 'Moyamoya Check', jp: '職場モヤモヤ診断', href: '../moyamoya/index.html',
+    { cat: 'casual', name: 'Moyamoya Check', img: 'moyamoya.png', jp: '職場モヤモヤ診断', href: '../moyamoya/index.html',
       p: '職場の“なんとなくしんどい”を10問で言語化する診断。約3分・登録不要。' },
-    { cat: 'casual', name: 'PMI Quest', jp: 'クリニックPMIクエスト', href: '../pmi-quest/index.html',
+    { cat: 'casual', name: 'PMI Quest', img: 'pmi-quest.png', jp: 'クリニックPMIクエスト', href: '../pmi-quest/index.html',
       p: '承継直後のクリニックで最初の30日に向き合う診断型ゲーム。' },
-    { cat: 'casual', name: 'Ittan Horyu', jp: 'いったん保留', href: '../ittan-horyu/index.html',
+    { cat: 'casual', name: 'Ittan Horyu', img: 'ittan-horyu.png', jp: 'いったん保留', href: '../ittan-horyu/index.html',
       p: '買う前に、少しだけ寝かせる。衝動買いクールダウンアプリ。' },
-    { cat: 'casual', name: 'KARTE', jp: '現場のカルテ', href: '../karte/index.html',
+    { cat: 'casual', name: 'KARTE', img: 'karte.png', jp: '現場のカルテ', href: '../karte/index.html',
       p: '職場の“しんどさ”をSOAP形式のカルテに書き起こす診察型コンセプトページ。' },
-    { cat: 'free', name: 'Reha Checklist', jp: 'リハ部門KPIチェックリスト', href: 'https://bridge-med.github.io/reha-checklist-lp/', ext: true,
+    { cat: 'free', name: 'Reha Checklist', img: 'reha-checklist.png', jp: 'リハ部門KPIチェックリスト', href: 'https://bridge-med.github.io/reha-checklist-lp/', ext: true,
       p: '外来リハKPI見える化スターターキット。PDF+スプレッドシート雛形を無料配布。' },
   ];
   const root = document.getElementById('catalog');
@@ -142,6 +144,7 @@ window.addEventListener('DOMContentLoaded', () => {
       a.setAttribute('data-reveal', '');
       a.setAttribute('data-reveal-delay', String(i % 3));
       a.innerHTML =
+        (p.img ? '<img class="prod-shot" src="../images/products/' + p.img + '" alt="' + p.name + 'の画面" loading="lazy" width="1440" height="900">' : '') +
         '<span class="prod-num">' + c.t + '</span>' +
         '<div><div class="prod-name">' + p.name + '</div><div class="prod-jp">' + p.jp + '</div></div>' +
         '<p class="prod-p">' + p.p + '</p>' +
