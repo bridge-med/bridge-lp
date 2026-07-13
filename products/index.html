@@ -6,6 +6,8 @@
 <title>Products — プロダクト / BRIDGE</title>
 <meta name="description" content="BRIDGEのプロダクト一覧。医療経営ダッシュボード、学習ツール、シミュレーションゲームまで。すべて現場から生まれ、すべて公開中。">
 <meta property="og:title" content="Products — プロダクト / BRIDGE">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/ogp/products.jpg">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/products/">
 <script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
@@ -144,7 +146,7 @@ window.addEventListener('DOMContentLoaded', () => {
       a.setAttribute('data-reveal', '');
       a.setAttribute('data-reveal-delay', String(i % 3));
       a.innerHTML =
-        (p.img ? '<img class="prod-shot" src="../images/products/' + p.img + '" alt="' + p.name + 'の画面" loading="lazy" width="1440" height="900">' : '') +
+        (p.img ? '<img class="prod-shot" src="../images/products/thumbs/' + p.img.replace('.png', '.webp') + '" alt="' + p.name + 'の画面" loading="lazy" width="880" height="550">' : '') +
         '<span class="prod-num">' + c.t + '</span>' +
         '<div><div class="prod-name">' + p.name + '</div><div class="prod-jp">' + p.jp + '</div></div>' +
         '<p class="prod-p">' + p.p + '</p>' +

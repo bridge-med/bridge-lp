@@ -249,7 +249,7 @@
   <div class="make-row flip" data-reveal>
     <div class="make-media">
       <div class="frame-phone">
-        <img src="./images/products/careerlog.png" alt="キャリアログの実際の画面。今日の仕事ログを書く導線と、週間の積み上げが表示されている" loading="lazy" width="780" height="1688">
+        <img src="./images/products/thumbs/careerlog.webp" alt="キャリアログの実際の画面。今日の仕事ログを書く導線と、週間の積み上げが表示されている" loading="lazy" width="780" height="1688">
       </div>
     </div>
     <div>
@@ -264,7 +264,7 @@
     <div class="make-media">
       <div class="frame-browser">
         <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
-        <img src="./images/products/clinic-flow-3d.png" alt="Clinic Town 3Dの実際の画面。3Dのクリニックとスタッフ、経営指標が表示されている" loading="lazy" width="1440" height="900">
+        <img src="./images/products/thumbs/clinic-flow-3d.webp" alt="Clinic Town 3Dの実際の画面。3Dのクリニックとスタッフ、経営指標が表示されている" loading="lazy" width="1440" height="900">
       </div>
     </div>
     <div>
@@ -345,7 +345,7 @@ window.addEventListener('DOMContentLoaded', () => {
         a.href = it.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
         a.setAttribute('data-reveal', '');
         a.innerHTML =
-          (it.thumbnail ? '<img class="jl-thumb" src="' + esc(it.thumbnail) + '" alt="" loading="lazy" width="1200" height="630" onerror="this.remove();this.closest(\'.jl-card\').classList.add(\'nothumb\')">' : '') +
+          (it.thumbnail ? '<img class="jl-thumb" src="' + esc(it.thumbnail) + '" alt="" loading="lazy" width="1200" height="630" onerror="this.closest(\'.jl-card\').classList.add(\'nothumb\');this.remove()">' : '') +
           '<div class="jl-body"><div class="jl-meta"><span class="cat">' + catOf(it.title || '') + '</span><span>' + esc(it.date || '') + '</span><span>note ↗</span></div>' +
           '<div class="jl-t">' + esc(it.title) + '</div></div>';
         grid.appendChild(a);
