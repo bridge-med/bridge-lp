@@ -1374,7 +1374,14 @@
     const used = G.today.soothe || 0;
     const waiting = p.phase === 'recepQ' || p.phase === 'waitExam' || p.phase === 'waitTreat' || p.phase === 'waitReha' || p.phase === 'cashQ';
     const can = used < SOOTHE_MAX && !p.soothed && waiting;
-    showModal(`👤 ${TYPE_NAMES[p.type] || '患者'}の患者さん(${SEG_NAMES[p.seg] || ''})`, `
+    const pe = p.persona;
+    const title = pe ? `👤 ${pe.name}さん(${pe.age}) — ${TYPE_NAMES[p.type] || '患者'}` : `👤 ${TYPE_NAMES[p.type] || '患者'}の患者さん(${SEG_NAMES[p.seg] || ''})`;
+    const speech = pe && typeof PERSONA !== 'undefined'
+      ? `<div class="persona-speech">「${PERSONA.patientLine(pe, PERSONA.ctxOf(p), { wait: p.waitTotal, variant: G.day })}」</div>` : '';
+    showModal(title, `
+      ${speech}
+      ${pe ? `<div class="pnl-row"><span>主訴</span><b>${pe.complaint}</b></div>
+      <div class="pnl-row"><span>ひとこと</span><b>${pe.job}・${pe.chLabel}(${SEG_NAMES[p.seg] || ''})</b></div>` : ''}
       <div class="pnl-row"><span>いまの状態</span><b>${PHASE_JP[p.phase] || p.phase}</b></div>
       <div class="pnl-row"><span>ここまでの待ち時間</span><b class="${p.waitTotal > 30 ? 'neg-t' : ''}">${Math.round(p.waitTotal)}分</b></div>
       ${p.items.length ? `<div class="pnl-row"><span>実施済み</span><b>${p.items.map((i) => ITEM_JP[i] || i).join('・')}</b></div>` : ''}
@@ -1392,7 +1399,10 @@
       pushPulseEv('🙏', '院長の声かけ');
       SND.coin();
       $('modal').classList.remove('show');
-      toast('🙏 声をかけました — この患者さんの体感待ちがやわらぎます');
+      const reply = p.persona && typeof PERSONA !== 'undefined'
+        ? `${p.persona.name}さん「${PERSONA.patientLine(p.persona, 'soothe', { variant: G.day })}」`
+        : 'この患者さんの体感待ちがやわらぎます';
+      toast(`🙏 ${reply}`);
     });
   }
 
@@ -2780,6 +2790,10 @@
     } else {
       toast(`🍵 ${def.name}: 定期訪問。関係は良好です(${stars(r.lv, def.max)})`);
     }
+    if (typeof PERSONA !== 'undefined' && PERSONA.contact(key)) {
+      const ct = PERSONA.contact(key);
+      setTimeout(() => toast(`💬 ${ct.name}「${PERSONA.contactLine(key, Math.min(r.lv, 2), 'visit')}」`), 1700);
+    }
     r.last = G.day;
     renderAds(); updateHeader(); save();
   }
@@ -2790,7 +2804,12 @@
     const canHelp = settings.receptionists >= 2;
     const recepN = clinic.recepWindows();
     const cashN = clinic.cashServices().length;
+    const wl = clinic.waitingLoad();
+    const busy = kind === 'cash' ? clinic.cashQueue.length >= 3 : wl.n >= Math.max(5, wl.cap * 0.45);
+    const floorLine = typeof PERSONA !== 'undefined' && typeof STAFF_UI !== 'undefined'
+      ? `<div class="persona-speech">${STAFF_UI.faceSVG(kind === 'cash' ? 'billing' : 'front', busy ? 'busy' : 'normal', 34)} ${STAFF_UI.STAFF[kind === 'cash' ? 'billing' : 'front'].name}「${PERSONA.staffLine(kind, busy, G.day + (G.today ? G.today.patients : 0))}」</div>` : '';
     showModal(kind === 'cash' ? '💴 会計まわりの采配' : '🪟 受付まわりの采配', `
+      ${floorLine}
       <div class="pnl-row"><span>受付窓口の稼働</span><b>${recepN}窓口(受付 ${settings.receptionists}人${settings.cashHelper ? ' − 応援1' : ''})</b></div>
       <div class="pnl-row"><span>会計窓口の稼働</span><b>${cashN}窓口${settings.kiosk ? '(自動精算機あり)' : settings.cashHelper ? '(応援+1)' : ''}</b></div>
       <p>受付スタッフを1人、<b>会計の応援</b>に回せます。会計が2窓口になり精算の列が早く進む一方、受付の窓口は1つ減ります。</p>
@@ -2871,7 +2890,10 @@
     const def = REL_DEF[b.id];
     if (def) {
       const r = G.relations[b.id];
+      const ct = typeof PERSONA !== 'undefined' ? PERSONA.contact(b.id) : null;
+      const greet = ct ? `<div class="persona-speech">🧑‍💼 ${ct.name}(${ct.title})<br>「${PERSONA.contactLine(b.id, r.lv, 'greet')}」</div>` : '';
       showModal(def.name, `
+        ${greet}
         <p>${def.desc}</p>
         <p>関係レベル: <b class="rel-stars">${stars(r.lv, def.max)}</b>${r.lv > 0 ? `(最終訪問 Day ${r.last} / 30日放置で冷える)` : ''}</p>
         <p><b>効果:</b> ${def.effect}</p>
@@ -3993,6 +4015,24 @@
           onStaffTap: (kind) => showStaffModal(kind),
           onBuildingTap: (b) => { SND.click(); openBuilding(b); },
           buildingActLabel,
+          getShareMeta: () => ({
+            name: G.clinicName,
+            sub: `Day ${G.day} ・ 評判 ${Math.round(G.rep)} ・ 認知 ${Math.round(G.aw * 100)}% ・ 本日 ${G.today ? G.today.patients : 0}人`,
+            tag: '#クリニックタウン3D'
+          }),
+          onShare: (blob, meta) => {
+            const file = new File([blob], 'clinic-town-3d.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              navigator.share({ files: [file], title: 'クリニックタウン3D', text: `${meta.name} ${meta.sub} ${meta.tag}` }).catch(() => {});
+            } else {
+              const a = document.createElement('a');
+              a.href = URL.createObjectURL(blob);
+              a.download = 'clinic-town-3d.png';
+              a.click();
+              setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+              toast('📸 現場の一コマを保存しました — SNSでシェアしてください');
+            }
+          },
           onTooFar: () => toast('💬 もう少し近づいて声をかけましょう'),
           onModeSwitch: (m) => {
             SND.click();
