@@ -22,6 +22,7 @@
       if (!window.THREE) throw new Error('THREE not loaded');
       this.clinic = clinic;
       this.hooks = hooks || {};
+      this.town = (hooks && hooks.town) || null;
       this.active = false;
       this.built = false;
       this.patMeshes = new Map(); // patient id -> group
@@ -34,6 +35,10 @@
       this.stick = { on: false, dx: 0, dy: 0 };
       this.staticSig = '';
       this.colliders = [];
+      this.mode = 'clinic'; // 'clinic' | 'town'
+      this.S = 1;           // 街モードは1タイル=2mに拡大
+      this.bounds = { w: 20, h: 14 };
+      this.walkerMeshes = [];
       this._raf = null;
       this._lastTs = 0;
     }
@@ -53,7 +58,9 @@
         hair: new THREE.SphereGeometry(0.178, 12, 8),
         dot: new THREE.SphereGeometry(0.055, 8, 6),
         box: new THREE.BoxGeometry(1, 1, 1),
-        hit: new THREE.CylinderGeometry(0.44, 0.44, 1.75, 6)
+        hit: new THREE.CylinderGeometry(0.44, 0.44, 1.75, 6),
+        trunk: new THREE.CylinderGeometry(0.14, 0.2, 1.1, 6),
+        leaf: new THREE.SphereGeometry(0.85, 10, 8)
       };
       this.hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
     }
@@ -194,6 +201,10 @@
     }
 
     stateSig() {
+      if (this.mode === 'town') {
+        const t = (this.hooks.getTown && this.hooks.getTown()) || {};
+        return 'town|' + [(t.branches || []).join('.'), !!t.billboard].join('|');
+      }
       const s = this.clinic.s;
       const deco = (this.hooks.getDeco && this.hooks.getDeco()) || {};
       return [s.floorLv, s.doctors, s.nurses, s.pts, s.receptionists, s.chairs, s.beds, s.machines,
@@ -201,15 +212,194 @@
     }
 
     buildStatic() {
+      if (this.mode === 'town') this.buildTownStatic();
+      else this.buildClinicStatic();
+    }
+
+    clearScene() {
+      while (this.staticGroup.children.length) this.staticGroup.remove(this.staticGroup.children[0]);
+      while (this.staffGroup.children.length) this.staffGroup.remove(this.staffGroup.children[0]);
+      for (const [, g] of this.patMeshes) this.patGroup.remove(g);
+      this.patMeshes.clear();
+      for (const m of this.walkerMeshes) this.patGroup.remove(m);
+      this.walkerMeshes = [];
+      this.colliders = [];
+      this.staffTappable = [];
+      this.anchors = [];
+      this.target = null;
+      if (this.actBtn) this.actBtn.style.display = 'none';
+    }
+
+    // 透明な対話アンカー(建物・出入口)
+    addAnchor(x, z, tap, range) {
+      const a = new THREE.Object3D();
+      a.position.set(x, 0, z);
+      a.userData.tap = tap;
+      a.userData.range = range || 4.5;
+      this.staticGroup.add(a);
+      this.anchors.push(a);
+      return a;
+    }
+
+    // 窓付きの外壁マテリアル(色ごとにキャッシュ)
+    buildingMat(hex) {
+      const key = 'bld' + hex;
+      if (this.mats.has(key)) return this.mats.get(key);
+      const cv = document.createElement('canvas');
+      cv.width = 128; cv.height = 128;
+      const c = cv.getContext('2d');
+      c.fillStyle = '#' + hex.toString(16).padStart(6, '0');
+      c.fillRect(0, 0, 128, 128);
+      c.fillStyle = 'rgba(120,150,170,0.55)';
+      for (let y = 14; y < 110; y += 30) {
+        for (let x = 12; x < 116; x += 28) c.fillRect(x, y, 16, 18);
+      }
+      const tex = new THREE.CanvasTexture(cv);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      const m = new THREE.MeshLambertMaterial({ map: tex });
+      this.mats.set(key, m);
+      return m;
+    }
+
+    /* ---------- 🗺 街のシーン ---------- */
+    buildTownStatic() {
+      const T = TOWN;
+      const t = (this.hooks.getTown && this.hooks.getTown()) || {};
+      const S = 2;
+      this.S = S;
+      this.bounds = { w: T.W * S, h: T.H * S };
+      this.ensureGeos();
+      this.clearScene();
+      const G3 = this.staticGroup;
+
+      // 芝生の地面+道路
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(420, 420), this.mat(0xBBCFB2));
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.set(T.W * S / 2, -0.02, T.H * S / 2);
+      G3.add(ground);
+      const roadGeo = new THREE.PlaneGeometry(S, S);
+      const roadMat = this.mat(0xAab4bc);
+      T.ROADS.forEach((k) => {
+        const [x, y] = k.split(',').map(Number);
+        const r = new THREE.Mesh(roadGeo, roadMat);
+        r.rotation.x = -Math.PI / 2;
+        r.position.set(x * S + S / 2, 0.005, y * S + S / 2);
+        G3.add(r);
+      });
+
+      // 建物(本院・分院・営業先・その他)
+      const buildings = [...T.BUILDINGS, ...((this.town && this.town.branchBuildings) || [])];
+      for (const b of buildings) {
+        const bx = b.x * S, bz = b.y * S, bw = b.w * S, bd = b.d * S, bh = b.h * S * 1.6;
+        const wallHex = parseInt(b.wall.slice(1), 16);
+        const bm = new THREE.Mesh(this.geos.box, bh > 2.4 ? this.buildingMat(wallHex) : this.mat(wallHex));
+        bm.scale.set(bw, bh, bd);
+        bm.position.set(bx + bw / 2, bh / 2, bz + bd / 2);
+        G3.add(bm);
+        this.colliders.push({ x0: bx - 0.22, z0: bz - 0.22, x1: bx + bw + 0.22, z1: bz + bd + 0.22 });
+        const roof = new THREE.Mesh(this.geos.box, this.mat(parseInt(b.roof.slice(1), 16)));
+        roof.scale.set(bw + 0.3, 0.28, bd + 0.3);
+        roof.position.set(bx + bw / 2, bh + 0.14, bz + bd / 2);
+        G3.add(roof);
+        if (b.label) {
+          const lb = this.labelSprite(b.label, { scale: 1.5 });
+          lb.position.set(bx + bw / 2, bh + 1.3, bz + bd / 2);
+          G3.add(lb);
+        }
+        if (b.action || b.mine) {
+          this.addAnchor(bx + bw / 2, bz + bd + 0.9, { kind: 'building', b }, Math.max(6.5, (bw + bd) / 2 + 2.5));
+        }
+      }
+
+      // 住宅(認知の広がる家々)・マンション
+      for (const h of T.HOUSES) {
+        const hx = h.x * S, hz = h.y * S;
+        const hh = h.mansion ? 6.5 : 1.9;
+        if (h.mansion) {
+          const mw = S * 1.4, md = S * 0.9;
+          const mm = new THREE.Mesh(this.geos.box, this.buildingMat(0xE8E6E0));
+          mm.scale.set(mw, hh, md);
+          mm.position.set(hx + mw / 2, hh / 2, hz + md / 2);
+          G3.add(mm);
+          this.colliders.push({ x0: hx - 0.22, z0: hz - 0.22, x1: hx + mw + 0.22, z1: hz + md + 0.22 });
+        } else {
+          this.addBox(G3, hx, hz, S * 0.9, S * 0.9, hh, 0xF6F1E6);
+        }
+        if (!h.mansion) {
+          const roof = new THREE.Mesh(this.geos.box, this.mat(0xB08A5A));
+          roof.scale.set(S, 0.24, S);
+          roof.position.set(hx + S * 0.45, 2.02, hz + S * 0.45);
+          G3.add(roof);
+        }
+      }
+
+      // 樹木
+      for (const tr of T.TREES) {
+        const tx = tr.x * S + S / 2, tz = tr.y * S + S / 2;
+        const trunk = new THREE.Mesh(this.geos.trunk, this.mat(0x8A6B4A));
+        trunk.position.set(tx, 0.55, tz);
+        const leaf = new THREE.Mesh(this.geos.leaf, this.mat(0x7FB08A));
+        leaf.position.set(tx, 1.7, tz);
+        G3.add(trunk, leaf);
+        this.colliders.push({ x0: tx - 0.5, z0: tz - 0.5, x1: tx + 0.5, z1: tz + 0.5 });
+      }
+
+      // 駅前看板(掲出中のみ)
+      if (t.billboard) {
+        const bx = T.BILLBOARD.x * S + S / 2, bz = T.BILLBOARD.y * S + S / 2;
+        const pole = new THREE.Mesh(this.geos.trunk, this.mat(0x6E7F8C));
+        pole.scale.set(0.6, 2.4, 0.6);
+        pole.position.set(bx, 1.3, bz);
+        G3.add(pole);
+        const panel = new THREE.Mesh(this.geos.box, this.mat(0xFFFFFF));
+        panel.scale.set(2.6, 1.5, 0.16);
+        panel.position.set(bx, 3.3, bz);
+        G3.add(panel);
+        const lb = this.labelSprite('🏥 ' + ((this.hooks.getClinicName && this.hooks.getClinicName()) || 'クリニック'), { scale: 1.1 });
+        lb.position.set(bx, 3.3, bz + 0.35);
+        G3.add(lb);
+      }
+
+      this.staticSig = this.stateSig();
+    }
+
+    /* ---------- 🚶 街の通行人 ---------- */
+    syncWalkers() {
+      const walkers = (this.town && this.town.walkers) || [];
+      const S = this.S;
+      while (this.walkerMeshes.length < walkers.length) {
+        const m = this.makeFigure(0x9AA7B0, {});
+        this.patGroup.add(m);
+        this.walkerMeshes.push(m);
+      }
+      while (this.walkerMeshes.length > walkers.length) {
+        this.patGroup.remove(this.walkerMeshes.pop());
+      }
+      for (let i = 0; i < walkers.length; i++) {
+        const w = walkers[i];
+        const m = this.walkerMeshes[i];
+        const hex = w.color ? parseInt(String(w.color).slice(1), 16) : 0x9AA7B0;
+        if (m.userData.colHex !== hex) {
+          m.userData.torso.material = this.mat(hex);
+          m.userData.colHex = hex;
+        }
+        const bob = Math.sin(performance.now() * 0.012 + i * 3) * 0.05;
+        m.position.set(w.x * S + S / 2, Math.max(0, bob), w.y * S + S / 2);
+        if (w.path && w.path.length) {
+          const tg = w.path[0];
+          m.rotation.y = Math.atan2((tg.x - w.x), (tg.y - w.y));
+        }
+      }
+    }
+
+    buildClinicStatic() {
       const L = this.clinic.L;
       const s = this.clinic.s;
       const deco = (this.hooks.getDeco && this.hooks.getDeco()) || {};
+      this.S = 1;
+      this.bounds = { w: L.W, h: L.H };
       this.ensureGeos();
-      // clear
-      while (this.staticGroup.children.length) this.staticGroup.remove(this.staticGroup.children[0]);
-      while (this.staffGroup.children.length) this.staffGroup.remove(this.staffGroup.children[0]);
-      this.colliders = [];
-      this.staffTappable = [];
+      this.clearScene();
       const G3 = this.staticGroup;
 
       // 地面(外周)と床
@@ -317,6 +507,9 @@
       for (let n = 0; n < Math.min(s.nurses, 6); n++) addStaff(L.NURSE_ROW(n), 0xFFFFFF, { hair: 0x4A3B2E, dot: 0xC4574E });
       const ptVis = Math.min(s.pts, L.PT_VIS || 10);
       for (let n = 0; n < ptVis; n++) addStaff(L.PT_ROW(n), 0xFFFFFF, { hair: 0x3A342C, dot: 0x4FA98C });
+
+      // 入口: 近づくと「街へ出る」
+      if (this.town) this.addAnchor(L.DOOR.x + 0.5, L.H - 0.7, { kind: 'door' }, 3.5);
 
       this.staticSig = this.stateSig();
     }
@@ -467,20 +660,50 @@
         if (p && this.hooks.onPatientTap) this.hooks.onPatientTap(p);
       } else if (tap.kind === 'staff' && this.hooks.onStaffTap) {
         this.hooks.onStaffTap(tap.staffKind);
+      } else if (tap.kind === 'door') {
+        this.switchMode('town');
+      } else if (tap.kind === 'building') {
+        if (tap.b.id === 'clinic') this.switchMode('clinic');
+        else if (this.hooks.onBuildingTap) this.hooks.onBuildingTap(tap.b);
       }
     }
 
-    // 視界の正面・4.5m以内で最も中心に近い対象を自動ターゲット
+    // 院内⇄街 のシームレス移動
+    switchMode(mode) {
+      this.mode = mode;
+      this.buildStatic();
+      this.placePlayer();
+      if (this.hooks.onModeSwitch) this.hooks.onModeSwitch(mode);
+    }
+
+    placePlayer() {
+      if (this.mode === 'town') {
+        const T = TOWN;
+        const e = T.CLINIC_ENTRANCE;
+        this.camera.position.set(e.x * this.S + this.S / 2, 1.5, (e.y - 0.2) * this.S);
+        this.yaw = Math.PI / 2; // メインストリートを向く
+        this.pitch = -0.04;
+      } else {
+        const L = this.clinic.L;
+        this.camera.position.set(L.DOOR.x - 0.9, 1.5, L.H - 1.4); // 入口脇(患者動線を避ける)
+        this.yaw = 0;
+        this.pitch = -0.04;
+      }
+    }
+
+    // 視界の正面・近距離で最も中心に近い対象を自動ターゲット
     pickTarget() {
       const fw = new THREE.Vector3();
       this.camera.getWorldDirection(fw);
-      const cands = [...this.patGroup.children, ...(this.staffTappable || [])];
+      const cands = this.mode === 'town'
+        ? [...(this.anchors || [])]
+        : [...this.patGroup.children, ...(this.staffTappable || []), ...(this.anchors || [])];
       let best = null, bestAng = 0.62; // 約35度以内
       const v = new THREE.Vector3();
       for (const g of cands) {
         v.copy(g.position).setY(this.camera.position.y).sub(this.camera.position);
         const d = v.length();
-        if (d < 0.6 || d > 4.5) continue;
+        if (d < 0.6 || d > (g.userData.range || 4.5)) continue;
         v.normalize();
         const ang = fw.angleTo(v);
         if (ang < bestAng) { bestAng = ang; best = g; }
@@ -488,24 +711,33 @@
       if (best !== this.target) {
         this.target = best;
         if (best) {
-          const tap = best.userData.tap;
-          let label = '💬 声をかける';
-          if (tap.kind === 'patient') {
-            const p = this.clinic.patients.find((q) => q.id === tap.pid);
-            label = p && p.waitTotal > 30 ? '💢 お待たせしている患者さんに声をかける' : '💬 患者さんに声をかける';
-          } else label = tap.staffKind === 'cash' ? '💴 会計の采配を見る' : '🪟 受付の采配を見る';
-          this.actBtn.textContent = label;
+          this.actBtn.textContent = this.targetLabel(best.userData.tap);
           this.actBtn.style.display = 'block';
         } else {
           this.actBtn.style.display = 'none';
         }
       }
       if (this.target) {
+        const big = this.target.userData.tap.kind === 'building' ? 1.8 : 1;
         this.ring.visible = true;
         this.ring.position.set(this.target.position.x, 0.035, this.target.position.z);
-        const s = 1 + Math.sin(performance.now() * 0.006) * 0.08;
+        const s = (1 + Math.sin(performance.now() * 0.006) * 0.08) * big;
         this.ring.scale.set(s, s, 1);
       } else this.ring.visible = false;
+    }
+
+    targetLabel(tap) {
+      if (tap.kind === 'patient') {
+        const p = this.clinic.patients.find((q) => q.id === tap.pid);
+        return p && p.waitTotal > 30 ? '💢 お待たせしている患者さんに声をかける' : '💬 患者さんに声をかける';
+      }
+      if (tap.kind === 'staff') return tap.staffKind === 'cash' ? '💴 会計の采配を見る' : '🪟 受付の采配を見る';
+      if (tap.kind === 'door') return '🚪 街へ出る';
+      if (tap.kind === 'building') {
+        if (tap.b.id === 'clinic') return '🏥 院内に入る';
+        return (this.hooks.buildingActLabel && this.hooks.buildingActLabel(tap.b)) || `🏢 ${tap.b.label}`;
+      }
+      return '💬 調べる';
     }
 
     /* ---------- 移動+衝突 ---------- */
@@ -524,9 +756,8 @@
       const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
       let nx = this.camera.position.x + (-sin * fz + cos * fx) * sp;
       let nz = this.camera.position.z + (-cos * fz - sin * fx) * sp;
-      const L = this.clinic.L;
-      nx = Math.max(0.35, Math.min(L.W - 0.35, nx));
-      nz = Math.max(0.35, Math.min(L.H - 0.35, nz));
+      nx = Math.max(0.35, Math.min(this.bounds.w - 0.35, nx));
+      nz = Math.max(0.35, Math.min(this.bounds.h - 0.35, nz));
       for (const c of this.colliders) {
         if (nx > c.x0 && nx < c.x1 && nz > c.z0 && nz < c.z1) {
           const pl = nx - c.x0, pr = c.x1 - nx, pt = nz - c.z0, pb = c.z1 - nz;
@@ -548,7 +779,8 @@
       this.move(dt);
       this.camera.rotation.y = this.yaw;
       this.camera.rotation.x = this.pitch;
-      this.syncPatients();
+      if (this.mode === 'town') this.syncWalkers();
+      else this.syncPatients();
       this.pickTarget();
       if (this._fn % 12 === 0 && this.hooks.getHud) {
         const h = this.hooks.getHud();
@@ -566,16 +798,14 @@
       this.camera.updateProjectionMatrix();
     }
 
-    enter() {
+    enter(mode) {
       if (this.active) return true;
       try {
         if (!this.renderer) this.buildRenderer();
       } catch (e) { return false; }
-      const L = this.clinic.L;
+      this.mode = mode || 'clinic';
       this.buildStatic();
-      this.camera.position.set(L.DOOR.x - 0.9, 1.5, L.H - 1.4); // 入口脇(患者動線を避ける)
-      this.yaw = 0;
-      this.pitch = -0.04;
+      this.placePlayer();
       this.active = true;
       this._fn = 0;
       this.target = null;

@@ -2838,6 +2838,10 @@
     const tile = townIso.unproject(e.clientX - rect.left, e.clientY - rect.top);
     const b = town.buildingAt(tile);
     if (!b) return;
+    openBuilding(b);
+  });
+
+  function openBuilding(b) {
     if (b.id.startsWith('br_')) {
       const br = G.branches.find((x) => 'br_' + x.siteId === b.id);
       if (br) showModal(br.name, `<p>患者 ${br.last ? br.last.visits : 0}人/日 / リハ ${br.last ? br.last.reha : 0}件/日 / ${REHA_NAMES[br.rehaLevel]}</p><p>評判 ${Math.round(br.rep)} / 認知 ${Math.round(br.aw * 100)}% / 昨日の損益 ${br.last ? yen(br.last.profit) : '–'}</p><p class="modal-note">詳細な経営は「🏢 法人」タブで。</p>`, '閉じる');
@@ -2879,7 +2883,20 @@
         visitRelation(b.id);
       });
     }
-  });
+  }
+
+  // 3D視察(街)用: 建物ごとの介入ボタンのラベル
+  function buildingActLabel(b) {
+    if (b.id.startsWith('br_')) return `🏥 ${b.label}の様子を見る`;
+    if (b.id === 'station') return G.billboard ? '🪧 駅前看板を確認する' : '🪧 駅前看板の商談をする';
+    if (b.id === 'rival') return '🕵 ライバルの様子をうかがう';
+    const def = REL_DEF[b.id];
+    if (def) {
+      const r = G.relations[b.id];
+      return r && r.lv > 0 ? `🤝 ${def.name}を訪問する(${'★'.repeat(r.lv)})` : `🤝 ${def.name}に営業する`;
+    }
+    return `🏢 ${b.label || '建物'}を調べる`;
+  }
 
   /* ================= UI: 法人(分院) ================= */
 
@@ -3633,7 +3650,7 @@
       }
     }
     if (activeTab === 'clinic' && !(walk3d && walk3d.active)) clinic.draw(clinicIso, view);
-    if (activeTab === 'town') {
+    if (activeTab === 'town' && !(walk3d && walk3d.active)) {
       town.setAwareness(G.aw);
       town.draw(townIso, {
         billboard: G.billboard,
@@ -3954,36 +3971,57 @@
       toast(ok ? '🔔 毎日のボーナスと依頼をお知らせします' : '通知が許可されませんでした(端末の設定を確認してください)');
     });
   }
-  /* --- 🚶 3D視察モード: 経営者が「現場に降りる」 --- */
+  /* --- 🚶 3D視察モード: 経営者が「現場に降りる」(院内⇄街) --- */
   let walk3d = null;
+  function launchWalk(mode) {
+    if (tutIdx >= 0) { toast('まずはチュートリアルを終えましょう'); return; }
+    if (!window.Walk3D || !window.THREE) { toast('この端末では3D表示を利用できません'); return; }
+    if (!walk3d) {
+      try {
+        walk3d = new Walk3D(clinic, {
+          town,
+          getDeco: () => G.deco || {},
+          getTown: () => ({ branches: G.branches.map((x) => x.siteId), billboard: G.billboard }),
+          getClinicName: () => G.clinicName,
+          getHud: () => ({
+            line1: `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}) ${fmtClock(G.t)} — ${escapeHtml(G.clinicName)}`,
+            line2: walk3d && walk3d.mode === 'town'
+              ? `認知 ${Math.round(G.aw * 100)}% ・ 評判 ${Math.round(G.rep)} ・ 本日 ${G.today ? G.today.patients : 0}人 / ${yen(G.today ? G.today.revenue : 0)}`
+              : `院内 ${clinic.patients.length}人 ・ 本日 ${G.today ? G.today.patients : 0}人 / ${yen(G.today ? G.today.revenue : 0)}`
+          }),
+          onPatientTap: (p) => showPatientModal(p),
+          onStaffTap: (kind) => showStaffModal(kind),
+          onBuildingTap: (b) => { SND.click(); openBuilding(b); },
+          buildingActLabel,
+          onTooFar: () => toast('💬 もう少し近づいて声をかけましょう'),
+          onModeSwitch: (m) => {
+            SND.click();
+            pushPulseEv('🚶', m === 'town' ? '街へ営業に' : '院内へ戻る');
+            banner(m === 'town' ? '🗺 街に出ました — 病院やケアマネ事業所に近づくと営業できます' : '🏥 院内に戻りました');
+          },
+          onEnter: () => {
+            if (G.speed > 2) { G.speed = 2; updateSpeedButtons(); }
+            pushPulseEv('🚶', walk3d && walk3d.mode === 'town' ? '街を視察' : '現場視察');
+            SND.click();
+            banner(walk3d && walk3d.mode === 'town'
+              ? '🗺 街の視察 — 営業先の建物に近づくと訪問できます。院の入口から中にも入れます'
+              : '🚶 視察モード — 現場を歩いて、患者さんやスタッフに声をかけられます');
+          },
+          onExit: () => { SND.click(); }
+        });
+      } catch (e) { toast('この端末では3D表示を利用できません'); return; }
+    }
+    if (!walk3d.enter(mode)) toast('この端末では3D表示を利用できません');
+  }
   const wkb = $('walkBtn');
   if (wkb) {
     if (!window.Walk3D || !window.THREE) wkb.style.display = 'none';
-    else wkb.addEventListener('click', () => {
-      if (tutIdx >= 0) { toast('まずはチュートリアルを終えましょう'); return; }
-      if (!walk3d) {
-        try {
-          walk3d = new Walk3D(clinic, {
-            getDeco: () => G.deco || {},
-            getHud: () => ({
-              line1: `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}) ${fmtClock(G.t)} — ${escapeHtml(G.clinicName)}`,
-              line2: `院内 ${clinic.patients.length}人 ・ 本日 ${G.today ? G.today.patients : 0}人 / ${yen(G.today ? G.today.revenue : 0)}`
-            }),
-            onPatientTap: (p) => showPatientModal(p),
-            onStaffTap: (kind) => showStaffModal(kind),
-            onTooFar: () => toast('💬 もう少し近づいて声をかけましょう'),
-            onEnter: () => {
-              if (G.speed > 2) { G.speed = 2; updateSpeedButtons(); }
-              pushPulseEv('🚶', '現場視察');
-              SND.click();
-              banner('🚶 視察モード — 現場を歩いて、患者さんやスタッフに声をかけられます');
-            },
-            onExit: () => { SND.click(); }
-          });
-        } catch (e) { toast('この端末では3D表示を利用できません'); wkb.style.display = 'none'; return; }
-      }
-      if (!walk3d.enter()) { toast('この端末では3D表示を利用できません'); wkb.style.display = 'none'; }
-    });
+    else wkb.addEventListener('click', () => launchWalk('clinic'));
+  }
+  const wtb = $('walkTownBtn');
+  if (wtb) {
+    if (!window.Walk3D || !window.THREE) wtb.style.display = 'none';
+    else wtb.addEventListener('click', () => launchWalk('town'));
   }
 
   // 縦持ちスマホに一度だけ横持ちのコックピット表示を案内

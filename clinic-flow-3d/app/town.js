@@ -323,5 +323,5 @@ const TOWN = (() => {
     }
   }
 
-  return { W, H, TownSim, TOTAL_HOUSEHOLDS, CLINIC_ENTRANCE };
+  return { W, H, TownSim, TOTAL_HOUSEHOLDS, CLINIC_ENTRANCE, ROADS, BUILDINGS, HOUSES, TREES, BILLBOARD };
 })();
