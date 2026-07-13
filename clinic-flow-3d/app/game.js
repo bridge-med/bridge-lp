@@ -3632,7 +3632,7 @@
         dt -= step;
       }
     }
-    if (activeTab === 'clinic') clinic.draw(clinicIso, view);
+    if (activeTab === 'clinic' && !(walk3d && walk3d.active)) clinic.draw(clinicIso, view);
     if (activeTab === 'town') {
       town.setAwareness(G.aw);
       town.draw(townIso, {
@@ -3953,6 +3953,38 @@
       toast(ok ? '🔔 毎日のボーナスと依頼をお知らせします' : '通知が許可されませんでした(端末の設定を確認してください)');
     });
   }
+  /* --- 🚶 3D視察モード: 経営者が「現場に降りる」 --- */
+  let walk3d = null;
+  const wkb = $('walkBtn');
+  if (wkb) {
+    if (!window.Walk3D || !window.THREE) wkb.style.display = 'none';
+    else wkb.addEventListener('click', () => {
+      if (tutIdx >= 0) { toast('まずはチュートリアルを終えましょう'); return; }
+      if (!walk3d) {
+        try {
+          walk3d = new Walk3D(clinic, {
+            getDeco: () => G.deco || {},
+            getHud: () => ({
+              line1: `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}) ${fmtClock(G.t)} — ${escapeHtml(G.clinicName)}`,
+              line2: `院内 ${clinic.patients.length}人 ・ 本日 ${G.today ? G.today.patients : 0}人 / ${yen(G.today ? G.today.revenue : 0)}`
+            }),
+            onPatientTap: (p) => showPatientModal(p),
+            onStaffTap: (kind) => showStaffModal(kind),
+            onTooFar: () => toast('💬 もう少し近づいて声をかけましょう'),
+            onEnter: () => {
+              if (G.speed > 2) { G.speed = 2; updateSpeedButtons(); }
+              pushPulseEv('🚶', '現場視察');
+              SND.click();
+              banner('🚶 視察モード — 現場を歩いて、患者さんやスタッフに声をかけられます');
+            },
+            onExit: () => { SND.click(); }
+          });
+        } catch (e) { toast('この端末では3D表示を利用できません'); wkb.style.display = 'none'; return; }
+      }
+      if (!walk3d.enter()) { toast('この端末では3D表示を利用できません'); wkb.style.display = 'none'; }
+    });
+  }
+
   // 縦持ちスマホに一度だけ横持ちのコックピット表示を案内
   try {
     if (window.innerWidth < 900 && window.matchMedia('(orientation: portrait)').matches && !localStorage.getItem('ct3d_rotateHint') && G.tutorialDone) {
