@@ -52,8 +52,10 @@
         head: new THREE.SphereGeometry(0.17, 12, 10),
         hair: new THREE.SphereGeometry(0.178, 12, 8),
         dot: new THREE.SphereGeometry(0.055, 8, 6),
-        box: new THREE.BoxGeometry(1, 1, 1)
+        box: new THREE.BoxGeometry(1, 1, 1),
+        hit: new THREE.CylinderGeometry(0.44, 0.44, 1.75, 6)
       };
+      this.hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
     }
 
     labelSprite(text, opts) {
@@ -123,6 +125,11 @@
         g.add(dot);
       }
       g.userData.torso = torso;
+      if (o.tappable) {
+        const hit = new THREE.Mesh(this.geos.hit, this.hitMat);
+        hit.position.y = 0.87;
+        g.add(hit);
+      }
       return g;
     }
 
@@ -145,8 +152,16 @@
           <div class="walk-info" id="walkInfo"></div>
           <button class="walk-exit" id="walkExit">✕ 視察を終える</button>
         </div>
-        <div class="walk-hint">🕹 移動: 左スティック/WASD ・ 見回す: ドラッグ ・ 患者/受付をタップで声かけ・采配</div>
-        <div class="walk-stick" id="walkStick"><div class="walk-knob" id="walkKnob"></div></div>`;
+        <div class="walk-hint">🕹 左タッチ: 移動 ・ 右ドラッグ: 見回す ・ WASD対応</div>
+        <button class="walk-act" id="walkAct" style="display:none"></button>
+        <div class="walk-stick" id="walkStick"><div class="walk-knob" id="walkKnob"></div></div>
+        <div class="walk-rotate" id="walkRotate" style="display:none">
+          <div class="walk-rotate-box">
+            <div class="walk-rotate-icon">📱↻</div>
+            <p><b>横持ちがおすすめです</b><br>スマホを横にすると、現場が見渡しやすくなります</p>
+            <button class="btn-cta ghost" id="walkRotateSkip">このまま続ける</button>
+          </div>
+        </div>`;
       this.ov = ov;
       document.body.appendChild(ov);
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -167,6 +182,14 @@
       this.patGroup = new THREE.Group();
       this.scene.add(this.staticGroup, this.staffGroup, this.patGroup);
       this.ray = new THREE.Raycaster();
+      // 自動ターゲットの足元リング
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.56, 28),
+        new THREE.MeshBasicMaterial({ color: 0x4FA98C, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
+      ring.rotation.x = -Math.PI / 2;
+      ring.visible = false;
+      this.ring = ring;
+      this.scene.add(ring);
+      this.target = null;
       this.bindControls();
     }
 
@@ -278,6 +301,7 @@
 
       /* --- スタッフ --- */
       const addStaff = (pos, bodyHex, o, tapKind) => {
+        if (tapKind) (o = o || {}).tappable = true;
         const f = this.makeFigure(bodyHex, o);
         f.position.set(pos.x + 0.5, 0, pos.y + 0.5);
         if (o && o.face !== undefined) f.rotation.y = o.face;
@@ -304,7 +328,7 @@
         seen.add(p.id);
         let g = this.patMeshes.get(p.id);
         if (!g) {
-          g = this.makeFigure(PHASE_COL3[p.phase] || 0x9AA7B0, { hair: SEG_HAIR3[p.seg] });
+          g = this.makeFigure(PHASE_COL3[p.phase] || 0x9AA7B0, { hair: SEG_HAIR3[p.seg], tappable: true });
           g.userData.tap = { kind: 'patient', pid: p.id };
           g.userData.phase = p.phase;
           this.patMeshes.set(p.id, g);
@@ -343,24 +367,58 @@
     /* ---------- 操作 ---------- */
     bindControls() {
       const cv = this.renderer.domElement;
+      const stickEl = this.ov.querySelector('#walkStick');
+      const knob = this.ov.querySelector('#walkKnob');
+      const setKnob = (dx, dy) => { knob.style.transform = `translate(${dx * 40}px, ${dy * 40}px)`; };
       let look = null;
+      let stickPt = null; // フローティングスティック: 左側タッチの基点
       cv.addEventListener('pointerdown', (e) => {
-        look = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() };
         cv.setPointerCapture(e.pointerId);
+        if (e.pointerType === 'touch' && !stickPt && e.clientX < window.innerWidth * 0.45) {
+          stickPt = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() };
+          stickEl.style.left = (e.clientX - 64) + 'px';
+          stickEl.style.top = (e.clientY - 64) + 'px';
+          stickEl.style.bottom = 'auto';
+          stickEl.classList.add('on');
+          this.stick.on = true;
+          return;
+        }
+        look = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() };
       });
       cv.addEventListener('pointermove', (e) => {
+        if (stickPt && e.pointerId === stickPt.id) {
+          let dx = (e.clientX - stickPt.x) / 52;
+          let dy = (e.clientY - stickPt.y) / 52;
+          const len = Math.hypot(dx, dy);
+          if (len > 1) { dx /= len; dy /= len; }
+          this.stick.dx = dx; this.stick.dy = dy;
+          setKnob(dx, dy);
+          return;
+        }
         if (!look || e.pointerId !== look.id) return;
-        this.yaw -= (e.clientX - look.x) * 0.0052;
-        this.pitch = Math.max(-1.25, Math.min(1.25, this.pitch - (e.clientY - look.y) * 0.0045));
+        this.yaw -= (e.clientX - look.x) * 0.0056;
+        this.pitch = Math.max(-1.25, Math.min(1.25, this.pitch - (e.clientY - look.y) * 0.0048));
         look.x = e.clientX; look.y = e.clientY;
       });
-      cv.addEventListener('pointerup', (e) => {
+      const endPointer = (e) => {
+        if (stickPt && e.pointerId === stickPt.id) {
+          const moved = Math.hypot(e.clientX - stickPt.sx, e.clientY - stickPt.sy);
+          const dt = performance.now() - stickPt.t;
+          if (moved < 9 && dt < 350) this.tapAt(e.clientX, e.clientY);
+          stickPt = null;
+          this.stick.on = false; this.stick.dx = 0; this.stick.dy = 0;
+          setKnob(0, 0);
+          stickEl.classList.remove('on');
+          return;
+        }
         if (!look || e.pointerId !== look.id) return;
         const moved = Math.hypot(e.clientX - look.sx, e.clientY - look.sy);
         const dt = performance.now() - look.t;
         if (moved < 9 && dt < 400) this.tapAt(e.clientX, e.clientY);
         look = null;
-      });
+      };
+      cv.addEventListener('pointerup', endPointer);
+      cv.addEventListener('pointercancel', endPointer);
       this._onKey = (e) => {
         if (!this.active) return;
         const k = e.key.toLowerCase();
@@ -373,38 +431,16 @@
       window.addEventListener('keydown', this._onKey);
       window.addEventListener('keyup', this._onKey);
 
-      // ジョイスティック
-      const stick = this.ov.querySelector('#walkStick');
-      const knob = this.ov.querySelector('#walkKnob');
-      const setKnob = (dx, dy) => { knob.style.transform = `translate(${dx * 34}px, ${dy * 34}px)`; };
-      let sid = null;
-      stick.addEventListener('pointerdown', (e) => {
-        sid = e.pointerId;
-        stick.setPointerCapture(sid);
-        this.stick.on = true;
-        e.stopPropagation();
+      // 自動ターゲットの介入ボタン(狙わなくていい声かけ)
+      this.actBtn = this.ov.querySelector('#walkAct');
+      this.actBtn.addEventListener('click', () => { if (this.target) this.interact(this.target); });
+      this.ov.querySelector('#walkRotateSkip').addEventListener('click', () => {
+        this._rotateDismissed = true;
+        this.ov.querySelector('#walkRotate').style.display = 'none';
       });
-      stick.addEventListener('pointermove', (e) => {
-        if (e.pointerId !== sid || !this.stick.on) return;
-        const r = stick.getBoundingClientRect();
-        let dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-        let dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-        const len = Math.hypot(dx, dy);
-        if (len > 1) { dx /= len; dy /= len; }
-        this.stick.dx = dx; this.stick.dy = dy;
-        setKnob(dx, dy);
-      });
-      const endStick = (e) => {
-        if (e.pointerId !== sid) return;
-        this.stick.on = false; this.stick.dx = 0; this.stick.dy = 0;
-        setKnob(0, 0);
-        sid = null;
-      };
-      stick.addEventListener('pointerup', endStick);
-      stick.addEventListener('pointercancel', endStick);
 
       this.ov.querySelector('#walkExit').addEventListener('click', () => this.exit());
-      this._onResize = () => { if (this.active) this.resize(); };
+      this._onResize = () => { if (this.active) { this.resize(); this.checkRotate(); } };
       window.addEventListener('resize', this._onResize);
     }
 
@@ -420,13 +456,56 @@
       if (!node) return;
       const dist = node.position.distanceTo(this.camera.position);
       if (dist > 4.5) { if (this.hooks.onTooFar) this.hooks.onTooFar(); return; }
+      this.interact(node);
+    }
+
+    interact(node) {
       const tap = node.userData.tap;
+      if (!tap) return;
       if (tap.kind === 'patient') {
         const p = this.clinic.patients.find((q) => q.id === tap.pid);
         if (p && this.hooks.onPatientTap) this.hooks.onPatientTap(p);
       } else if (tap.kind === 'staff' && this.hooks.onStaffTap) {
         this.hooks.onStaffTap(tap.staffKind);
       }
+    }
+
+    // 視界の正面・4.5m以内で最も中心に近い対象を自動ターゲット
+    pickTarget() {
+      const fw = new THREE.Vector3();
+      this.camera.getWorldDirection(fw);
+      const cands = [...this.patGroup.children, ...(this.staffTappable || [])];
+      let best = null, bestAng = 0.62; // 約35度以内
+      const v = new THREE.Vector3();
+      for (const g of cands) {
+        v.copy(g.position).setY(this.camera.position.y).sub(this.camera.position);
+        const d = v.length();
+        if (d < 0.6 || d > 4.5) continue;
+        v.normalize();
+        const ang = fw.angleTo(v);
+        if (ang < bestAng) { bestAng = ang; best = g; }
+      }
+      if (best !== this.target) {
+        this.target = best;
+        if (best) {
+          const tap = best.userData.tap;
+          let label = '💬 声をかける';
+          if (tap.kind === 'patient') {
+            const p = this.clinic.patients.find((q) => q.id === tap.pid);
+            label = p && p.waitTotal > 30 ? '💢 お待たせしている患者さんに声をかける' : '💬 患者さんに声をかける';
+          } else label = tap.staffKind === 'cash' ? '💴 会計の采配を見る' : '🪟 受付の采配を見る';
+          this.actBtn.textContent = label;
+          this.actBtn.style.display = 'block';
+        } else {
+          this.actBtn.style.display = 'none';
+        }
+      }
+      if (this.target) {
+        this.ring.visible = true;
+        this.ring.position.set(this.target.position.x, 0.035, this.target.position.z);
+        const s = 1 + Math.sin(performance.now() * 0.006) * 0.08;
+        this.ring.scale.set(s, s, 1);
+      } else this.ring.visible = false;
     }
 
     /* ---------- 移動+衝突 ---------- */
@@ -441,7 +520,7 @@
       const len = Math.hypot(fx, fz);
       if (len < 0.01) return;
       fx /= Math.max(1, len); fz /= Math.max(1, len);
-      const sp = 3.1 * dt;
+      const sp = 3.5 * dt;
       const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
       let nx = this.camera.position.x + (-sin * fz + cos * fx) * sp;
       let nz = this.camera.position.z + (-cos * fz - sin * fx) * sp;
@@ -470,6 +549,7 @@
       this.camera.rotation.y = this.yaw;
       this.camera.rotation.x = this.pitch;
       this.syncPatients();
+      this.pickTarget();
       if (this._fn % 12 === 0 && this.hooks.getHud) {
         const h = this.hooks.getHud();
         const el = this.ov.querySelector('#walkInfo');
@@ -498,7 +578,17 @@
       this.pitch = -0.04;
       this.active = true;
       this._fn = 0;
+      this.target = null;
+      this._rotateDismissed = false;
       this.ov.style.display = 'block';
+      // 横持ち前提: 全画面化+横向きロックを試みる(非対応環境は案内表示にフォールバック)
+      try {
+        const fs = document.documentElement.requestFullscreen ? document.documentElement.requestFullscreen({ navigationUI: 'hide' }) : Promise.reject();
+        fs.then(() => {
+          if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+          setTimeout(() => this.checkRotate(), 350);
+        }).catch(() => this.checkRotate());
+      } catch (e) { this.checkRotate(); }
       this._bodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       this.resize();
@@ -508,9 +598,20 @@
       return true;
     }
 
+    checkRotate() {
+      const el = this.ov && this.ov.querySelector('#walkRotate');
+      if (!el) return;
+      const portrait = window.innerHeight > window.innerWidth && 'ontouchstart' in window;
+      el.style.display = portrait && !this._rotateDismissed && this.active !== false ? 'flex' : 'none';
+    }
+
     exit() {
       if (!this.active) return;
       this.active = false;
+      try {
+        if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      } catch (e) { /* noop */ }
       if (this._raf) cancelAnimationFrame(this._raf);
       this.ov.style.display = 'none';
       document.body.style.overflow = this._bodyOverflow || '';

@@ -3793,7 +3793,8 @@
   window.GAME = {
     G, settings, clinic, town, KIJUN, REHA_FEE, KPIS, REL_DEF, autoDay,
     pickChallenge, specialRequest, monthlyClose, todayKey,
-    grant: (n) => { G.money += n; updateHeader(); }
+    grant: (n) => { G.money += n; updateHeader(); },
+    getWalk: () => walk3d
   };
   $('skipBtn').addEventListener('click', () => {
     if (tutIdx >= 0) return;

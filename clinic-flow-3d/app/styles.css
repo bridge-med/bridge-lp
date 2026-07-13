@@ -1258,7 +1258,7 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 4px 14px rgba(34,51,61,0.35);
 }
 .walk-hint {
-  position: absolute; bottom: max(12px, env(safe-area-inset-bottom)); left: 50%;
+  position: absolute; bottom: max(10px, env(safe-area-inset-bottom)); left: 50%;
   transform: translateX(-50%);
   background: rgba(255,255,255,0.85); color: #40525E; border-radius: 999px;
   padding: 7px 16px; font: 600 11px/1.4 var(--sans);
@@ -1266,13 +1266,42 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: none;
 }
 .walk-stick {
-  position: absolute; left: 18px; bottom: max(52px, calc(env(safe-area-inset-bottom) + 44px));
-  width: 108px; height: 108px; border-radius: 50%;
-  background: rgba(255,255,255,0.28); border: 2px solid rgba(255,255,255,0.55);
-  touch-action: none;
+  position: absolute; left: 22px; bottom: max(56px, calc(env(safe-area-inset-bottom) + 48px));
+  width: 128px; height: 128px; border-radius: 50%;
+  background: rgba(255,255,255,0.22); border: 2px solid rgba(255,255,255,0.45);
+  touch-action: none; pointer-events: none; opacity: 0.55;
+  transition: opacity 0.15s;
 }
+.walk-stick.on { opacity: 1; background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.65); }
 .walk-knob {
-  position: absolute; left: 50%; top: 50%; width: 46px; height: 46px;
-  margin: -23px 0 0 -23px; border-radius: 50%;
-  background: rgba(255,255,255,0.85); box-shadow: 0 3px 10px rgba(34,51,61,0.3);
+  position: absolute; left: 50%; top: 50%; width: 54px; height: 54px;
+  margin: -27px 0 0 -27px; border-radius: 50%;
+  background: rgba(255,255,255,0.88); box-shadow: 0 3px 10px rgba(34,51,61,0.3);
 }
+@media (hover: hover) and (pointer: fine) { .walk-stick { display: none; } }
+.walk-act {
+  position: absolute; left: 50%; bottom: max(46px, calc(env(safe-area-inset-bottom) + 40px));
+  transform: translateX(-50%);
+  border: none; border-radius: 999px;
+  background: #4FA98C; color: #fff;
+  font: 700 14px/1 var(--sans); padding: 15px 26px;
+  box-shadow: 0 6px 20px rgba(34,51,61,0.35);
+  max-width: calc(100vw - 180px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.walk-act:active { transform: translateX(-50%) scale(0.96); }
+.walk-rotate {
+  position: absolute; inset: 0; z-index: 5;
+  background: rgba(34,51,61,0.72);
+  display: flex; align-items: center; justify-content: center;
+}
+.walk-rotate-box {
+  background: #fff; border-radius: 18px; padding: 26px 26px 20px;
+  max-width: 320px; text-align: center;
+  font: 500 13.5px/1.7 var(--sans); color: var(--ink);
+}
+.walk-rotate-icon { font-size: 44px; margin-bottom: 8px; animation: walkRotateWiggle 1.6s ease-in-out infinite; }
+@keyframes walkRotateWiggle {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+}
+.walk-rotate-box .btn-cta { margin-top: 14px; width: 100%; }
