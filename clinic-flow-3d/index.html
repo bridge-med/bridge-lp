@@ -79,6 +79,7 @@
           <span class="badge">院内 <b id="cIn">0</b>人 / 平均待ち <b id="cWait">–</b></span>
         </div>
         <div class="view-group">
+          <button class="view-btn walk-launch" id="walkBtn">🚶 視察(3D)</button>
           <button class="view-btn" id="heatBtn">🔥 導線ヒート</button>
           <button class="view-btn" id="lineBtn">〰 導線ライン</button>
         </div>
@@ -303,10 +304,12 @@
   </div>
 </div>
 
+<script src="vendor/three.min.js"></script>
 <script src="app/iso.js"></script>
 <script src="app/clinic.js"></script>
 <script src="app/town.js"></script>
 <script src="app/staff.js"></script>
+<script src="app/walk3d.js"></script>
 <script src="app/game.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
