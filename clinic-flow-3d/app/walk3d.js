@@ -157,7 +157,10 @@
       ov.innerHTML = `
         <div class="walk-hud-top">
           <div class="walk-info" id="walkInfo"></div>
-          <button class="walk-exit" id="walkExit">✕ 視察を終える</button>
+          <div class="walk-hud-right">
+            <button class="walk-exit walk-cam" id="walkCam">📸</button>
+            <button class="walk-exit" id="walkExit">✕ 視察を終える</button>
+          </div>
         </div>
         <div class="walk-hint">🕹 左タッチ: 移動 ・ 右ドラッグ: 見回す ・ WASD対応</div>
         <button class="walk-act" id="walkAct" style="display:none"></button>
@@ -557,6 +560,73 @@
       }
     }
 
+    // 待合のひとりごと: 近くの患者が時々しゃべる(人格エンジン)
+    spawnChat() {
+      if (typeof PERSONA === 'undefined' || this.chat) return;
+      const near = this.clinic.patients.filter((p) => {
+        if (!p.persona) return false;
+        const dx = p.x + 0.5 - this.camera.position.x, dz = p.y + 0.5 - this.camera.position.z;
+        return Math.hypot(dx, dz) < 14;
+      });
+      if (!near.length) return;
+      const p = near[Math.floor(Math.random() * near.length)];
+      const useAmbient = Math.random() < 0.25 && p.waitTotal < 25;
+      const line = useAmbient
+        ? PERSONA.ambientLine(p.id + this._fn)
+        : PERSONA.patientLine(p.persona, PERSONA.ctxOf(p), { wait: p.waitTotal, variant: p.id + Math.floor(this._fn / 210) });
+      const g = this.patMeshes.get(p.id);
+      if (!g) return;
+      const sp = this.labelSprite(line, { scale: 0.82, bg: 'rgba(255,255,255,0.96)' });
+      sp.position.y = 2.15;
+      g.add(sp);
+      this.chat = { g, sp, until: performance.now() + 4200, text: line, name: p.persona.name };
+    }
+
+    /* ---------- 📸 現場の一コマ(SNSシェア) ---------- */
+    snapshot() {
+      try {
+        this.renderer.render(this.scene, this.camera);
+        const srcCv = this.renderer.domElement;
+        const W = 1200, H = Math.max(400, Math.round(W * srcCv.height / srcCv.width));
+        const bar = 150;
+        const cv = document.createElement('canvas');
+        cv.width = W; cv.height = H + bar;
+        const c = cv.getContext('2d');
+        c.drawImage(srcCv, 0, 0, W, H);
+        const meta = (this.hooks.getShareMeta && this.hooks.getShareMeta()) || { name: 'クリニックタウン3D', sub: '', tag: '#クリニックタウン3D' };
+        // 直近のセリフを吹き出しで焼き込む(現場の空気)
+        if (this.chat && this.chat.text) {
+          const q = `${this.chat.name}さん「${this.chat.text}」`;
+          c.font = '600 30px sans-serif';
+          const tw = Math.min(W - 80, c.measureText(q).width + 48);
+          c.fillStyle = 'rgba(255,255,255,0.93)';
+          c.strokeStyle = 'rgba(91,103,112,0.4)';
+          c.lineWidth = 3;
+          const bx = 36, by = 30, bh = 62;
+          c.beginPath();
+          if (c.roundRect) c.roundRect(bx, by, tw, bh, 18); else c.rect(bx, by, tw, bh);
+          c.fill(); c.stroke();
+          c.fillStyle = '#40525E';
+          c.fillText(q, bx + 24, by + 42, W - 130);
+        }
+        c.fillStyle = '#22333D';
+        c.fillRect(0, H, W, bar);
+        c.fillStyle = '#FFFFFF';
+        c.font = '700 42px sans-serif';
+        c.fillText(`🏥 ${meta.name}`, 36, H + 62);
+        c.fillStyle = '#BFD3E0';
+        c.font = '500 28px sans-serif';
+        c.fillText(meta.sub, 36, H + 110);
+        c.fillStyle = '#7FB8A2';
+        c.font = '700 30px sans-serif';
+        const tagW = c.measureText(meta.tag).width;
+        c.fillText(meta.tag, W - tagW - 36, H + 90);
+        cv.toBlob((blob) => {
+          if (blob && this.hooks.onShare) this.hooks.onShare(blob, meta);
+        }, 'image/png');
+      } catch (e) { /* noop */ }
+    }
+
     /* ---------- 操作 ---------- */
     bindControls() {
       const cv = this.renderer.domElement;
@@ -633,6 +703,7 @@
       });
 
       this.ov.querySelector('#walkExit').addEventListener('click', () => this.exit());
+      this.ov.querySelector('#walkCam').addEventListener('click', () => this.snapshot());
       this._onResize = () => { if (this.active) { this.resize(); this.checkRotate(); } };
       window.addEventListener('resize', this._onResize);
     }
@@ -729,7 +800,8 @@
     targetLabel(tap) {
       if (tap.kind === 'patient') {
         const p = this.clinic.patients.find((q) => q.id === tap.pid);
-        return p && p.waitTotal > 30 ? '💢 お待たせしている患者さんに声をかける' : '💬 患者さんに声をかける';
+        const nm = p && p.persona ? `${p.persona.name}さん` : '患者さん';
+        return p && p.waitTotal > 30 ? `💢 お待たせしている${nm}に声をかける` : `💬 ${nm}に声をかける`;
       }
       if (tap.kind === 'staff') return tap.staffKind === 'cash' ? '💴 会計の采配を見る' : '🪟 受付の采配を見る';
       if (tap.kind === 'door') return '🚪 街へ出る';
@@ -776,6 +848,11 @@
       const dt = Math.min(0.06, (ts - this._lastTs) / 1000 || 0.016);
       this._lastTs = ts;
       if (++this._fn % 45 === 0 && this.stateSig() !== this.staticSig) this.buildStatic();
+      if (this.mode === 'clinic' && (this._fn === 40 || this._fn % 120 === 0)) this.spawnChat();
+      if (this.chat && performance.now() > this.chat.until) {
+        if (this.chat.g && this.chat.sp) this.chat.g.remove(this.chat.sp);
+        this.chat = null;
+      }
       this.move(dt);
       this.camera.rotation.y = this.yaw;
       this.camera.rotation.x = this.pitch;

@@ -1305,3 +1305,14 @@ input[type="range"]::-moz-range-thumb {
   50% { transform: rotate(90deg); }
 }
 .walk-rotate-box .btn-cta { margin-top: 14px; width: 100%; }
+
+/* ===== v25: ペルソナ(人格)+📸現場の一コマ ===== */
+.persona-speech {
+  background: #FBF6EA; border: 1px solid #EAD9B8; border-radius: 12px;
+  padding: 10px 14px; margin: 2px 0 12px;
+  font: 600 13.5px/1.65 var(--sans); color: #5A4A2E;
+  display: flex; align-items: center; gap: 9px;
+}
+.persona-speech svg { flex: 0 0 auto; }
+.walk-hud-right { display: flex; gap: 8px; pointer-events: auto; }
+.walk-cam { font-size: 17px; padding: 12px 14px; }
