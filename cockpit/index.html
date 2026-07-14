@@ -34,9 +34,9 @@
 .ck-fresh{text-align:right;display:flex;flex-direction:column;gap:6px;min-width:150px}
 .ck-fresh .l{font:500 9.5px/1 var(--en);letter-spacing:0.12em;color:var(--ink-4)}
 .ck-fresh .v{font-size:12px;line-height:1.5}
-.f-near{color:var(--ink-2)}
-.f-mid{color:var(--ink-3)}
-.f-far{color:var(--ink-4)}
+.f-near{color:var(--ink)}
+.f-mid{color:var(--ink-2)}
+.f-far{color:var(--ink-3)}
 .ck-legend{max-width:var(--max);margin:clamp(28px,5vh,44px) auto 0;font-size:12px;line-height:2;color:var(--ink-3);border:1px solid var(--line);border-radius:12px;padding:18px 22px}
 .ck-legend .h{font:600 10px/1 var(--en);letter-spacing:0.16em;color:var(--ink-4);margin-bottom:8px}
 @media(max-width:860px){
@@ -45,6 +45,7 @@
   .ck-fresh{text-align:right}
 }
 </style>
+<noscript><style>[data-reveal]{opacity:1 !important;transform:none !important}</style></noscript>
 </head>
 <body data-root="../" data-page="cockpit">
 
@@ -135,7 +136,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const wrap = document.createElement('section');
     wrap.className = 'ck-sec';
     wrap.innerHTML =
-      '<div class="ck-head" data-reveal><span class="eyebrow" style="margin:0">' + sec.en + ' · ' + items.length + '</span>' +
+      '<div class="ck-head" data-reveal><h2 class="eyebrow" style="margin:0">' + sec.en + ' · ' + items.length + '</h2>' +
       '<span class="n">' + esc(sec.key) + '</span><p>' + esc((ledger.statuses || {})[sec.key] || '') + '</p></div>' +
       '<div class="ck-rows"></div>';
     const rows = wrap.querySelector('.ck-rows');
