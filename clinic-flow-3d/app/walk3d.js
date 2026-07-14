@@ -230,6 +230,11 @@
       this.staffTappable = [];
       this.anchors = [];
       this.target = null;
+      if (this.cross) {
+        if (this.cross.spA && this.cross.gA) this.cross.gA.remove(this.cross.spA);
+        if (this.cross.spB && this.cross.gB) this.cross.gB.remove(this.cross.spB);
+        this.cross = null;
+      }
       if (this.actBtn) this.actBtn.style.display = 'none';
     }
 
@@ -493,23 +498,25 @@
       }
 
       /* --- スタッフ --- */
-      const addStaff = (pos, bodyHex, o, tapKind) => {
-        if (tapKind) (o = o || {}).tappable = true;
+      this.staffByRole = {};
+      const addStaff = (pos, bodyHex, o, tap, role) => {
+        if (tap) (o = o || {}).tappable = true;
         const f = this.makeFigure(bodyHex, o);
         f.position.set(pos.x + 0.5, 0, pos.y + 0.5);
         if (o && o.face !== undefined) f.rotation.y = o.face;
         this.staffGroup.add(f);
-        if (tapKind) { f.userData.tap = { kind: 'staff', staffKind: tapKind }; this.staffTappable.push(f); }
+        if (tap) { f.userData.tap = tap; this.staffTappable.push(f); }
+        if (role && !this.staffByRole[role]) this.staffByRole[role] = f;
         return f;
       };
       const nWin = this.clinic.recepWindows();
-      for (let w = 0; w < nWin; w++) addStaff(L.RECEP.staff[w], 0xFFFFFF, { hair: 0x4A3B2E, dot: 0xC98A2D, face: Math.PI }, 'recep');
-      addStaff(L.CASH.staff, 0xFFFFFF, { hair: 0x3A342C, dot: 0x8C7BC4, face: Math.PI }, 'cash');
-      if (s.cashHelper) addStaff({ x: L.CASH.kiosk.x, y: L.CASH.kiosk.y - 0.55 }, 0xFFFFFF, { hair: 0x4A3B2E, dot: 0xC98A2D, face: Math.PI }, 'cash');
-      for (let i = 0; i < Math.min(s.doctors, L.EXAM.length); i++) addStaff(L.EXAM[i].doctor, 0xFFFFFF, { hair: 0x30302E, dot: 0x2C5F82 });
-      for (let n = 0; n < Math.min(s.nurses, 6); n++) addStaff(L.NURSE_ROW(n), 0xFFFFFF, { hair: 0x4A3B2E, dot: 0xC4574E });
+      for (let w = 0; w < nWin; w++) addStaff(L.RECEP.staff[w], 0xFFFFFF, { hair: 0x4A3B2E, dot: 0xC98A2D, face: Math.PI }, { kind: 'staff', staffKind: 'recep' }, w === 0 ? 'front' : null);
+      addStaff(L.CASH.staff, 0xFFFFFF, { hair: 0x3A342C, dot: 0x8C7BC4, face: Math.PI }, { kind: 'staff', staffKind: 'cash' }, 'cash');
+      if (s.cashHelper) addStaff({ x: L.CASH.kiosk.x, y: L.CASH.kiosk.y - 0.55 }, 0xFFFFFF, { hair: 0x4A3B2E, dot: 0xC98A2D, face: Math.PI }, { kind: 'staff', staffKind: 'cash' });
+      for (let i = 0; i < Math.min(s.doctors, L.EXAM.length); i++) addStaff(L.EXAM[i].doctor, 0xFFFFFF, { hair: 0x30302E, dot: 0x2C5F82 }, { kind: 'floorstaff', role: 'doctor', idx: i }, i === 0 ? 'doctor' : null);
+      for (let n = 0; n < Math.min(s.nurses, 6); n++) addStaff(L.NURSE_ROW(n), 0xFFFFFF, { hair: 0x4A3B2E, dot: 0xC4574E }, { kind: 'floorstaff', role: 'nurse', idx: n }, n === 0 ? 'nurse' : null);
       const ptVis = Math.min(s.pts, L.PT_VIS || 10);
-      for (let n = 0; n < ptVis; n++) addStaff(L.PT_ROW(n), 0xFFFFFF, { hair: 0x3A342C, dot: 0x4FA98C });
+      for (let n = 0; n < ptVis; n++) addStaff(L.PT_ROW(n), 0xFFFFFF, { hair: 0x3A342C, dot: 0x4FA98C }, { kind: 'floorstaff', role: 'pt', idx: n }, n === 0 ? 'pt' : null);
 
       // 入口: 近づくと「街へ出る」
       if (this.town) this.addAnchor(L.DOOR.x + 0.5, L.H - 0.7, { kind: 'door' }, 3.5);
@@ -580,6 +587,41 @@
       sp.position.y = 2.15;
       g.add(sp);
       this.chat = { g, sp, until: performance.now() + 4200, text: line, name: p.persona.name };
+    }
+
+    // スタッフ同士の掛け合い: 現場の連携が「聞こえる」
+    spawnCross() {
+      if (typeof PERSONA === 'undefined' || this.cross) return;
+      const t = PERSONA.crossTalk(Math.floor(this._fn / 300) + (this.clinic.s.doctors || 1));
+      const gA = this.staffByRole && this.staffByRole[t.aRole];
+      const gB = this.staffByRole && this.staffByRole[t.bRole];
+      if (!gA || !gB) return;
+      // 近くにいる時だけ(遠くの会話は聞こえない)
+      const dA = Math.hypot(gA.position.x - this.camera.position.x, gA.position.z - this.camera.position.z);
+      const dB = Math.hypot(gB.position.x - this.camera.position.x, gB.position.z - this.camera.position.z);
+      if (Math.min(dA, dB) > 12) return;
+      this.cross = { t, gA, gB, stage: 0, at: performance.now() };
+    }
+
+    stepCross() {
+      const c = this.cross;
+      const now = performance.now();
+      if (c.stage === 0) {
+        c.spA = this.labelSprite(`${c.t.aName}「${c.t.aText}」`, { scale: 0.78, bg: 'rgba(235,244,250,0.96)' });
+        c.spA.position.y = 2.1;
+        c.gA.add(c.spA);
+        c.stage = 1;
+      } else if (c.stage === 1 && now - c.at > 2600) {
+        c.gA.remove(c.spA);
+        c.spB = this.labelSprite(`${c.t.bName}「${c.t.bText}」`, { scale: 0.78, bg: 'rgba(235,250,242,0.96)' });
+        c.spB.position.y = 2.1;
+        c.gB.add(c.spB);
+        c.stage = 2;
+        c.at = now;
+      } else if (c.stage === 2 && now - c.at > 2600) {
+        c.gB.remove(c.spB);
+        this.cross = null;
+      }
     }
 
     /* ---------- 📸 現場の一コマ(SNSシェア) ---------- */
@@ -731,6 +773,8 @@
         if (p && this.hooks.onPatientTap) this.hooks.onPatientTap(p);
       } else if (tap.kind === 'staff' && this.hooks.onStaffTap) {
         this.hooks.onStaffTap(tap.staffKind);
+      } else if (tap.kind === 'floorstaff' && this.hooks.onFloorStaffTap) {
+        this.hooks.onFloorStaffTap(tap.role, tap.idx);
       } else if (tap.kind === 'door') {
         this.switchMode('town');
       } else if (tap.kind === 'building') {
@@ -804,6 +848,10 @@
         return p && p.waitTotal > 30 ? `💢 お待たせしている${nm}に声をかける` : `💬 ${nm}に声をかける`;
       }
       if (tap.kind === 'staff') return tap.staffKind === 'cash' ? '💴 会計の采配を見る' : '🪟 受付の采配を見る';
+      if (tap.kind === 'floorstaff') {
+        const st = typeof PERSONA !== 'undefined' ? PERSONA.genStaff(tap.role, tap.idx) : null;
+        return st ? `🗣 ${st.name}さん(${st.role})に声をかける` : '🗣 スタッフに声をかける';
+      }
       if (tap.kind === 'door') return '🚪 街へ出る';
       if (tap.kind === 'building') {
         if (tap.b.id === 'clinic') return '🏥 院内に入る';
@@ -853,6 +901,8 @@
         if (this.chat.g && this.chat.sp) this.chat.g.remove(this.chat.sp);
         this.chat = null;
       }
+      if (this.mode === 'clinic' && this._fn % 240 === 90) this.spawnCross();
+      if (this.cross) this.stepCross();
       this.move(dt);
       this.camera.rotation.y = this.yaw;
       this.camera.rotation.x = this.pitch;
