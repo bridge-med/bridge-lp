@@ -360,6 +360,7 @@
     league: { beaten: 0 },
     sound: true,
     notify: false,
+    regulars: [], personaSeq: 0,
     hospital: null,
     kaitei: { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] }
   };
@@ -430,7 +431,8 @@
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
-          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei
+          specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
+          regulars: (G.regulars || []).slice(-80), personaSeq: G.personaSeq || 0
         }
       }));
     } catch (e) { /* noop */ }
@@ -464,6 +466,8 @@
       if (!G.prestige) G.prestige = { count: 0, legacy: null };
       if (d.g.sound === undefined) G.sound = true;
       if (d.g.notify === undefined) G.notify = false;
+      if (!G.regulars) G.regulars = [];
+      if (!G.personaSeq) G.personaSeq = 0;
       if (d.g.hospital === undefined) G.hospital = null;
       if (!G.kaitei) G.kaitei = { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] };
       // v11-12: スペシャル依頼・月間決算・地域リーグの補完
@@ -509,7 +513,31 @@
     return Math.max(15, (G.repDayStart !== undefined ? G.repDayStart : G.rep) - 3);
   }
 
+  // 常連の記憶: 再来の患者は「前に来た同じ人」として戻ってくる
+  function assignPersona(type, seg) {
+    if (typeof PERSONA === 'undefined') return null;
+    if (!G.regulars) G.regulars = [];
+    const isReturn = type === 'revisit' || type === 'rehab';
+    if (isReturn && G.regulars.length) {
+      const pool = G.regulars.filter((r) => r.seg === seg);
+      const list = pool.length ? pool : G.regulars;
+      const r = list[Math.floor(Math.random() * list.length)];
+      r.visits++;
+      r.lastDay = G.day;
+      return Object.assign({}, r.p, { visits: r.visits });
+    }
+    G.personaSeq = (G.personaSeq || 0) + 1;
+    const p = PERSONA.genPatient(G.personaSeq, seg);
+    G.regulars.push({ p, seg, visits: 1, lastDay: G.day });
+    if (G.regulars.length > 80) {
+      G.regulars.sort((a, b) => a.lastDay - b.lastDay);
+      G.regulars.splice(0, G.regulars.length - 80);
+    }
+    return Object.assign({}, p, { visits: 1 });
+  }
+
   const clinic = new CLINIC.ClinicSim(settings, {
+    assignPersona,
     onRelayout(L) {
       clinicIso.W = L.W; clinicIso.H = L.H;
       clinicIso.resize();
@@ -1379,12 +1407,16 @@
     const can = used < SOOTHE_MAX && !p.soothed && waiting;
     const pe = p.persona;
     const title = pe ? `👤 ${pe.name}さん(${pe.age}) — ${TYPE_NAMES[p.type] || '患者'}` : `👤 ${TYPE_NAMES[p.type] || '患者'}の患者さん(${SEG_NAMES[p.seg] || ''})`;
+    const isRegular = pe && pe.visits >= 5;
     const speech = pe && typeof PERSONA !== 'undefined'
-      ? `<div class="persona-speech">「${PERSONA.patientLine(pe, PERSONA.ctxOf(p), { wait: p.waitTotal, variant: G.day })}」</div>` : '';
+      ? `<div class="persona-speech">「${isRegular && (G.day + pe.age) % 2 === 0
+        ? PERSONA.regularLine(pe)
+        : PERSONA.patientLine(pe, PERSONA.ctxOf(p), { wait: p.waitTotal, variant: G.day })}」</div>` : '';
     showModal(title, `
       ${speech}
       ${pe ? `<div class="pnl-row"><span>主訴</span><b>${pe.complaint}</b></div>
-      <div class="pnl-row"><span>ひとこと</span><b>${pe.job}・${pe.chLabel}(${SEG_NAMES[p.seg] || ''})</b></div>` : ''}
+      <div class="pnl-row"><span>ひとこと</span><b>${pe.job}・${pe.chLabel}(${SEG_NAMES[p.seg] || ''})</b></div>
+      ${pe.visits ? `<div class="pnl-row"><span>通院</span><b>${pe.visits}回目${isRegular ? ' 🌟常連さん' : ''}</b></div>` : ''}` : ''}
       <div class="pnl-row"><span>いまの状態</span><b>${PHASE_JP[p.phase] || p.phase}</b></div>
       <div class="pnl-row"><span>ここまでの待ち時間</span><b class="${p.waitTotal > 30 ? 'neg-t' : ''}">${Math.round(p.waitTotal)}分</b></div>
       ${p.items.length ? `<div class="pnl-row"><span>実施済み</span><b>${p.items.map((i) => ITEM_JP[i] || i).join('・')}</b></div>` : ''}
@@ -3809,6 +3841,15 @@
           for (let k = 1; k <= 8; k++) addSchedule(G.day + Math.ceil(k * 2.5), 'rehab');
         }
         if (a.type === 'rehab' && !didReha) addSchedule(G.day + 1, 'rehab');
+      }
+      // 常連の記憶: スキップした日も、来ていた分だけ通院回数を進める
+      if (G.regulars && G.regulars.length && T.patients > 0) {
+        const bump = Math.min(8, T.patients, G.regulars.length);
+        for (let i = 0; i < bump; i++) {
+          const r = G.regulars[Math.floor(Math.random() * G.regulars.length)];
+          r.visits++;
+          r.lastDay = G.day;
+        }
       }
       const n = T.patients;
       if (n > 0) {

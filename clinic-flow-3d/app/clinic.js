@@ -320,7 +320,8 @@ const CLINIC = (() => {
         items: [], didReha: false, refer: !!(opts && opts.refer),
         seg: (opts && opts.seg) || 'senior'
       };
-      if (typeof PERSONA !== 'undefined') p.persona = PERSONA.genPatient(p.id, p.seg);
+      if (this.hooks.assignPersona) p.persona = this.hooks.assignPersona(type, p.seg);
+      else if (typeof PERSONA !== 'undefined') p.persona = PERSONA.genPatient(p.id, p.seg);
       this.patients.push(p);
       this.recQueue.push(p);
       this.routeQueue(this.recQueue, L.RECEP.service.slice(0, this.recepWindows()), L.RECEP.queue);

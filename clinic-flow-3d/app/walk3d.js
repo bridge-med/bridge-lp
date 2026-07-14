@@ -580,7 +580,9 @@
       const useAmbient = Math.random() < 0.25 && p.waitTotal < 25;
       const line = useAmbient
         ? PERSONA.ambientLine(p.id + this._fn)
-        : PERSONA.patientLine(p.persona, PERSONA.ctxOf(p), { wait: p.waitTotal, variant: p.id + Math.floor(this._fn / 210) });
+        : (p.persona.visits >= 5 && (p.id + this._fn) % 3 === 0
+          ? PERSONA.regularLine(p.persona)
+          : PERSONA.patientLine(p.persona, PERSONA.ctxOf(p), { wait: p.waitTotal, variant: p.id + Math.floor(this._fn / 210) }));
       const g = this.patMeshes.get(p.id);
       if (!g) return;
       const sp = this.labelSprite(line, { scale: 0.82, bg: 'rgba(255,255,255,0.96)' });
