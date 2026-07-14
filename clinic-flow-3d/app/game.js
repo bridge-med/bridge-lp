@@ -244,6 +244,8 @@
     { id: 'p1000', name: '来院 累計1,000人', coin: 2, cond: (st) => st.patients >= 1000 },
     { id: 'p10000', name: '来院 累計10,000人', coin: 5, cond: (st) => st.patients >= 10000 },
     { id: 'new300', name: '新患 累計300人', coin: 2, cond: (st) => st.newp >= 300 },
+    { id: 'fans10', name: '🌟顔なじみ10人(通院5回以上)', coin: 2, cond: () => (G.regulars || []).filter((r) => r.visits >= 5).length >= 10 },
+    { id: 'fans30', name: '🌟顔なじみ30人 — 地域のかかりつけ', coin: 4, cond: () => (G.regulars || []).filter((r) => r.visits >= 5).length >= 30 },
     { id: 'reha1000', name: 'リハ 累計1,000件', coin: 2, cond: (st) => st.reha >= 1000 },
     { id: 'reha10000', name: 'リハ 累計10,000件', coin: 5, cond: (st) => st.reha >= 10000 },
     { id: 'inj500', name: '注射 累計500件', coin: 2, cond: (st) => st.inj >= 500 },
@@ -280,6 +282,7 @@
     { t: '⑥ リハはLTVで考える', b: 'リハ1回の単価より「完遂までに何回通うか」。中断率を下げることが最大のリハ収益改善。単位/PT/日で稼働を見る。' },
     { t: '⑦ 紹介は資産、広告は費用', b: '病院・ケアマネ・スポーツクラブからの紹介は継続的に流れる。ただし関係は30日で冷め始める — 定期訪問が資産のメンテナンス。' },
     { t: '⑧ CPAはLTVと比べる', b: '広告の良し悪しは「1人獲得にいくらか(CPA)」を「1人が生涯いくら使うか(LTV)」と比べて判断。CPCが高騰したら撤退ラインを決める。' },
+    { t: '⑧+ 常連は歩く広告塔', b: '通院5回以上の「顔なじみ」は治療継続の成果であり、口コミの発信源。新患獲得コストゼロで認知を広げてくれる。院内の体験投資は広告費でもある。' },
     { t: '⑨ 施設基準は経営の土台', b: '運動器リハ(III)=専従1名/(II)=常勤PT2名/(I)=4名+100㎡。要件割れは自主返還・指導のリスク。採用と定着は算定要件そのもの。' },
     { t: '⑩ 分院は専従の壁', b: '施設基準の専従要件は施設ごと。本院のPTを分院に兼務させることはできない。分院展開のボトルネックは資金より採用。' },
     { t: '⑪ 借入は時間を買う道具', b: '金利は「計画の質」で決まる。事業計画なしに銀行は貸さない。返済原資(日次黒字)の目処を先に立てる。' },
@@ -1052,6 +1055,9 @@
       if (G.rep >= 70) dAw += 0.006; else if (G.rep >= 60) dAw += 0.003;
       if (settings.reviewCare) dAw += 0.003;
       dAw += 0.001 * relLv('shoutengai');
+      // 🌟常連の口コミ: 顔なじみ(通院5回以上)が多いほど認知がじわっと広がる(上限+0.3%/日)
+      const fans = (G.regulars || []).filter((r) => r.visits >= 5).length;
+      dAw += Math.min(0.003, fans * 0.0001);
       if (boostActive('lucky')) dAw += 0.007;
       G.aw = clamp(G.aw + dAw, 0.05, 0.95);
       if (settings.reviewCare) G.rep = Math.min(100, G.rep + 0.15);
@@ -2752,7 +2758,8 @@
       const lastH = G.history.filter((h) => h.kind !== 'closed').slice(-1)[0];
       tEl.innerHTML = `
         <div class="op-row">${Object.entries(segLabel).map(([k, v]) => `<button class="op-btn ${G.targetSeg === k ? 'on' : ''}" data-tseg="${k}">${v}</button>`).join('')}</div>
-        <p class="ctrl-note">高齢者=リハ・骨粗鬆症・定着◎ / 勤労者=健診・AGA・定着△ / スポーツ=MRI・PRP・単価◎${lastH && lastH.segS !== undefined ? ` — 昨日の客層: 高齢${lastH.segS}・勤労${lastH.segW}・スポーツ${lastH.segP}人` : ''}</p>`;
+        <p class="ctrl-note">高齢者=リハ・骨粗鬆症・定着◎ / 勤労者=健診・AGA・定着△ / スポーツ=MRI・PRP・単価◎${lastH && lastH.segS !== undefined ? ` — 昨日の客層: 高齢${lastH.segS}・勤労${lastH.segW}・スポーツ${lastH.segP}人` : ''}</p>
+        ${(() => { const f = (G.regulars || []).filter((r) => r.visits >= 5).length; return f ? `<p class="ctrl-note">🌟 顔なじみ(通院5回以上) <b>${f}人</b> — 口コミで認知+${Math.min(0.3, f * 0.01).toFixed(2)}%/日。常連は費用ゼロの広告塔</p>` : ''; })()}`;
       tEl.querySelectorAll('[data-tseg]').forEach((b) => b.addEventListener('click', () => {
         G.targetSeg = b.dataset.tseg;
         toast(`🎯 ターゲット方針: ${segLabel[G.targetSeg]}(商圏からの新患の客層が寄ります)`);
