@@ -381,5 +381,22 @@ const PERSONA = (() => {
     return { aRole: c.a[0], aName: c.a[1], aText: c.a[2], bRole: c.b[0], bName: c.b[1], bText: c.b[2] };
   }
 
-  return { genPatient, patientLine, ctxOf, contact, contactLine, staffLine, ambientLine, genStaff, floorStaffLine, crossTalk };
+  /* ---------- 常連の記憶(通院回数でセリフが育つ) ---------- */
+
+  const REGULAR_LINES = [
+    'もう{n}回目。すっかり顔なじみですね',
+    '受付で「いつもの」で通じるようになりましたよ',
+    '今日で{n}回目。ここに来るのが習慣になっちゃった',
+    '{n}回通って、だいぶ良くなった実感がありますよ',
+    '先生、私の顔もう覚えましたよね?({n}回目です)',
+    '通い始めた頃より、待合が広くなりましたねぇ'
+  ];
+
+  function regularLine(persona) {
+    const v = persona.visits || 2;
+    const idx = Math.abs(persona.age + v) % REGULAR_LINES.length;
+    return REGULAR_LINES[idx].replace('{n}', String(v));
+  }
+
+  return { genPatient, patientLine, ctxOf, contact, contactLine, staffLine, ambientLine, genStaff, floorStaffLine, crossTalk, regularLine };
 })();
