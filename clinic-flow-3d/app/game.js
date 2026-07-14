@@ -152,7 +152,9 @@
     company: { name: '運送会社', cost: 30000, max: 2, effect: '健診 +Lv×1.5件/日', desc: '従業員の定期健診・腰痛対策セミナー。' },
     sports: { name: 'スポーツクラブ', cost: 30000, max: 3, effect: 'スポーツ外傷の新患 +Lv×0.6人/日・PRP需要UP', desc: 'トレーナーと提携し、外傷・障害の受け皿になる。' },
     school: { name: '高校(部活動)', cost: 25000, max: 2, effect: '部活外傷の新患 +Lv×0.5人/日', desc: '部活動の外傷対応・メディカルチェックで信頼を作る。' },
-    shoutengai: { name: '商店街組合', cost: 40000, max: 3, effect: '訪問ごとに認知+1.2%・評判+0.5', desc: '祭りへの協賛・健康相談ブース。地域の顔になる。' }
+    shoutengai: { name: '商店街組合', cost: 40000, max: 3, effect: '訪問ごとに認知+1.2%・評判+0.5', desc: '祭りへの協賛・健康相談ブース。地域の顔になる。' },
+    pharmacy: { name: '薬局(門前)', cost: 15000, max: 3, effect: '再診の定着 +2%/Lv(通いやすさ)', desc: '疑義照会・在庫連携・お薬手帳。院と薬局が繋がっている安心感は再診の定着に効く。' },
+    houkatsu: { name: '地域包括支援センター', cost: 20000, max: 3, effect: '高齢の新患 +Lv×0.5人/日', desc: '介護予防教室・転倒予防の講師。地域の高齢者との接点を作る。' }
   };
 
   const SITES = [
@@ -636,7 +638,7 @@
 
       const showBoost = settings.reserve ? 0.05 : 0;
       const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45; // 客層で再診定着が違う
-      if ((report.type === 'first' || report.type === 'revisit') && !report.didReha && Math.random() < loyalty * sat + showBoost) {
+      if ((report.type === 'first' || report.type === 'revisit') && !report.didReha && Math.random() < loyalty * sat + showBoost + 0.02 * relLv('pharmacy')) {
         addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
       }
       if (report.didReha && report.type !== 'rehab') {
@@ -784,6 +786,7 @@
     for (let i = 0; i < frac(relLv('company') * 1.5); i++) push('checkup', 'station', false, 'worker');
     for (let i = 0; i < frac(relLv('sports') * 0.6); i++) push('first', 'station', true, 'sports');
     for (let i = 0; i < frac(relLv('school') * 0.5); i++) push('first', 'station', false, 'sports');
+    for (let i = 0; i < frac(relLv('houkatsu') * 0.5); i++) push('first', 'house', false, 'senior');
 
     // 再診・リハ(予約済み)
     const due = G.schedule[G.day] || { revisit: 0, rehab: 0 };
@@ -3799,7 +3802,7 @@
         if (settings.goods && proc && Math.random() < 0.12 * clamp(G.rep / 70, 0.6, 1.3)) { rev += FEES.goods; T.rev.jihi += FEES.goods; T.goodsCogs += FEES.goodsCogs; acc(T, '物販: サポーター等(保険外)', 0, FEES.goods); }
         T.revenue += rev;
         const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45;
-        if ((a.type === 'first' || a.type === 'revisit') && !didReha && Math.random() < loyalty * 0.85) addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
+        if ((a.type === 'first' || a.type === 'revisit') && !didReha && Math.random() < loyalty * 0.85 + 0.02 * relLv('pharmacy')) addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
         if (didReha && a.type !== 'rehab') {
           rev += 3000; T.rev.reha += 3000;
           acc(T, 'リハビリテーション総合計画評価料', 300);
@@ -4013,6 +4016,12 @@
           }),
           onPatientTap: (p) => showPatientModal(p),
           onStaffTap: (kind) => showStaffModal(kind),
+          onFloorStaffTap: (role, idx) => {
+            if (typeof PERSONA === 'undefined') return;
+            const st = PERSONA.genStaff(role, idx);
+            SND.click();
+            toast(`🗣 ${st.name}(${st.role})「${PERSONA.floorStaffLine(role, idx, G.day)}」`);
+          },
           onBuildingTap: (b) => { SND.click(); openBuilding(b); },
           buildingActLabel,
           getShareMeta: () => ({
