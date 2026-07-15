@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ================================================================
-   cockpit/ledger.json の lastCommit をgit履歴から焼き込む。
+   cockpit-76a805/ledger.json の lastCommit をgit履歴から焼き込む。
    静的サイトでビルドがないため、出荷(コミット)のたびに現場が実行する。
    使い方: node scripts/update-ledger.mjs
    ================================================================ */
@@ -10,7 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
-const ledgerPath = join(repo, 'cockpit', 'ledger.json');
+const ledgerPath = join(repo, 'cockpit-76a805', 'ledger.json');
 const ledger = JSON.parse(readFileSync(ledgerPath, 'utf8'));
 
 const lastCommitDate = (paths) => {
