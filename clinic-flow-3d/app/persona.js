@@ -398,5 +398,22 @@ const PERSONA = (() => {
     return REGULAR_LINES[idx].replace('{n}', String(v));
   }
 
-  return { genPatient, patientLine, ctxOf, contact, contactLine, staffLine, ambientLine, genStaff, floorStaffLine, crossTalk, regularLine };
+  /* ---------- 🎓 卒業(治って通院終了する、良いお別れ) ---------- */
+
+  const GRADU_LINES = [
+    'おかげさまで、すっかり良くなりました。{n}回、お世話になりました!',
+    '先生、今日で卒業ですね。ちょっと寂しいけど…嬉しいです',
+    'もう痛くないんです。ここに通って本当に良かった',
+    '{n}回通いました。スタッフのみなさんにもよろしくお伝えください',
+    '孫と走れるようになりましたよ。ありがとうございました',
+    'また何かあったら、真っ先にここに来ますね。…来ないのが一番だけど!'
+  ];
+
+  function graduLine(persona) {
+    const v = persona.visits || 8;
+    const idx = Math.abs(persona.age + v) % GRADU_LINES.length;
+    return GRADU_LINES[idx].replace('{n}', String(v));
+  }
+
+  return { genPatient, patientLine, ctxOf, contact, contactLine, staffLine, ambientLine, genStaff, floorStaffLine, crossTalk, regularLine, graduLine };
 })();

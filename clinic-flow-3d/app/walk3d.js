@@ -263,6 +263,7 @@
     applyWeather(kind) {
       if (this.wx.kind === kind) return;
       this.wx.kind = kind;
+      if (this.hooks.onAmbience) this.hooks.onAmbience(this.mode === 'town' ? kind : null);
       const sky = { sunny: 0xDCEAF2, cloudy: 0xC9D3D9, rain: 0xAEBBC4, heat: 0xF3E9D2, ice: 0xE9EEF3 }[kind] || 0xDCEAF2;
       this.scene.background.setHex(sky);
       this.scene.fog.color.setHex(sky);
@@ -996,6 +997,12 @@
       }
       this.camera.position.x = nx;
       this.camera.position.z = nz;
+      // 足音(移動中、約0.42秒間隔)
+      this._stepT = (this._stepT || 0) + dt;
+      if (this._stepT > 0.42) {
+        this._stepT = 0;
+        if (this.hooks.onStep) this.hooks.onStep();
+      }
     }
 
     /* ---------- ループ ---------- */
