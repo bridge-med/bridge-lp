@@ -154,6 +154,29 @@
   };
   document.head.appendChild(bxScript);
 
+  /* ---- 利用ログ(第12条・第15条の最小実装) ----
+     この端末でどのページをいつ開いたかを localStorage に記録する。
+     外部送信はしない。cockpit(運営の台帳)が「自分が最後に使った日」として読む。 ---- */
+  try {
+    const sc = document.currentScript || document.querySelector('script[src*="shared/bridge.js"]');
+    const base = sc ? new URL(sc.src, location.href).pathname.replace(/shared\/bridge\.js.*$/, '') : '/';
+    const rel = location.pathname.indexOf(base) === 0 ? location.pathname.slice(base.length) : location.pathname;
+    let id = (rel.split('/')[0] || '').replace(/\.html?$/, '');
+    if (!id || id === 'index') id = 'home';
+    const KEY = 'bridge-usage';
+    const log = JSON.parse(localStorage.getItem(KEY) || '{}');
+    const today = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD(端末のローカル日付)
+    if (log[id] !== today) { log[id] = today; localStorage.setItem(KEY, JSON.stringify(log)); }
+  } catch (e) {}
+
+  /* ---- 訪問者計測(未計測) ----
+     訪問者数はまだ測っていない。有効化の手順は docs/analytics.md(約5分)。
+     それまで cockpit には「未計測」と正直に表示する。 ---- */
+  const ANALYTICS_ENDPOINT = '';
+  if (ANALYTICS_ENDPOINT && navigator.sendBeacon) {
+    try { navigator.sendBeacon(ANALYTICS_ENDPOINT, JSON.stringify({ p: location.pathname, r: document.referrer })); } catch (e) {}
+  }
+
   /* ---- Reveal(共通) ---- */
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {

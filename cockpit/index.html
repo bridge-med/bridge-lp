@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cockpit — 運営の台帳 / BRIDGE</title>
+<meta name="description" content="BRIDGEの全プロダクトを週1回、続けるか、直すか、手放すかの目で見渡す運営者専用の台帳。">
+<meta name="robots" content="noindex">
+<!-- OGPは意図的に置かない。noindexの運営者専用ページに外部プレビューを作らない(第32条の設計判断・PM承認済み) -->
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/bridge.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+/* Cockpit専用。共通基盤(bridge.css)は太らせない */
+.ck-wrap{max-width:var(--max);margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+.ck-sec{margin:clamp(40px,7vh,72px) auto 0}
+.ck-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.ck-head .n{font:700 12px/1 var(--en);letter-spacing:0.08em;color:var(--ink-4)}
+.ck-head p{font-size:12px;color:var(--ink-3)}
+.ck-rows{border-top:1px solid var(--line)}
+.ck-row{display:grid;grid-template-columns:250px 1fr auto;gap:8px 28px;align-items:start;padding:clamp(18px,3vh,26px) 12px;border-bottom:1px solid var(--line)}
+.ck-row.is-pending{box-shadow:inset 2px 0 0 var(--dawn)}
+.ck-row.is-dormant .ck-name,.ck-row.is-dormant .ck-serves{color:var(--ink-3)}
+.ck-name{font-family:var(--mincho);font-weight:600;font-size:17px;line-height:1.6}
+.ck-name a{color:inherit;text-decoration:none}
+.ck-name a:hover{color:var(--blue)}
+.ck-name .en{display:block;font:500 9.5px/1 var(--en);letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin-top:6px}
+.ck-mid{display:flex;flex-direction:column;gap:8px}
+.ck-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ck-serves{font-size:12.5px;line-height:1.9;color:var(--ink-2);max-width:560px}
+.ck-note{font-size:11.5px;line-height:1.8;color:var(--ink-3)}
+.ck-decision{margin-top:4px;font-size:12px;line-height:1.9;color:var(--ink-2);max-width:560px}
+.ck-decision summary{cursor:pointer;font:600 10px/1 var(--en);letter-spacing:0.14em;color:var(--ink-3);padding:6px 0;list-style-position:inside}
+.ck-decision summary:hover{color:var(--ink)}
+.ck-decision pre{margin-top:8px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font:11px/1.8 ui-monospace,monospace;color:var(--ink-2);overflow-x:auto}
+.ck-fresh{text-align:right;display:flex;flex-direction:column;gap:6px;min-width:150px}
+.ck-fresh .l{font:500 9.5px/1 var(--en);letter-spacing:0.12em;color:var(--ink-4)}
+.ck-fresh .v{font-size:12px;line-height:1.5}
+.f-near{color:var(--ink)}
+.f-mid{color:var(--ink-2)}
+.f-far{color:var(--ink-3)}
+.ck-legend{max-width:var(--max);margin:clamp(28px,5vh,44px) auto 0;font-size:12px;line-height:2;color:var(--ink-3);border:1px solid var(--line);border-radius:12px;padding:18px 22px}
+.ck-legend .h{font:600 10px/1 var(--en);letter-spacing:0.16em;color:var(--ink-4);margin-bottom:8px}
+/* レビューモード(週1の再評価。保存は書き戻しJSONのコピペ経由) */
+.ck-topline{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:clamp(20px,4vh,32px);padding-bottom:14px;border-bottom:1px solid var(--line)}
+.ck-topline .v{font-size:12.5px;color:var(--ink-2)}
+.ck-topline .v .l{font:600 9.5px/1 var(--en);letter-spacing:0.14em;color:var(--ink-4);margin-right:8px}
+.ck-review-btn{font:600 12px/1 var(--sans);letter-spacing:0.04em;min-height:44px;padding:0 20px;border:1px solid var(--line);border-radius:100px;background:none;color:var(--ink-2);cursor:pointer;transition:all .25s}
+.ck-review-btn:hover{border-color:var(--ink-3);color:var(--ink)}
+.ck-status-picker{display:none;gap:6px;flex-wrap:wrap;margin-top:4px}
+body.reviewing .ck-status-picker{display:flex}
+.ck-status-picker .chip{cursor:pointer;min-height:28px;display:inline-flex;align-items:center}
+.ck-status-picker .chip.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.ck-reviewbar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 16px;background:var(--card);border-top:1px solid var(--line);box-shadow:var(--shadow)}
+body.reviewing .ck-reviewbar{display:flex}
+.ck-reviewbar .n{font-size:12px;color:var(--ink-2)}
+.ck-reviewbar .msg{font-size:11.5px;color:var(--ink-3)}
+@media(max-width:860px){
+  .ck-row{grid-template-columns:1fr auto}
+  .ck-mid{grid-column:1 / -1}
+  .ck-fresh{text-align:right}
+}
+</style>
+<noscript><style>[data-reveal]{opacity:1 !important;transform:none !important}</style></noscript>
+</head>
+<body data-root="../" data-page="cockpit">
+
+<nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
+
+<header class="page-hero">
+  <div class="page-hero-inner">
+    <div class="eyebrow" data-reveal>OPERATOR · MIRROR</div>
+    <h1 data-reveal data-reveal-delay="1">続けるか、直すか、手放すか</h1>
+    <p class="lead" data-reveal data-reveal-delay="2">
+      BRIDGEの道具を、週に一度ここで見渡します。この数字は、責めるためではなく、次の一手のためにあります。「最後にふれた日」はこの端末の記録です。訪問者の数は、まだ測れていません。測れるようになるまで、測れていないと書いておきます。
+    </p>
+  </div>
+</header>
+
+<main class="ck-wrap">
+  <div class="ck-topline" id="topline" hidden>
+    <span class="v"><span class="l">LAST REVIEW</span><span id="lastReview"></span></span>
+    <button class="ck-review-btn" id="reviewBtn" type="button">レビューを始める</button>
+  </div>
+  <div id="board"></div>
+  <noscript><p style="max-width:660px;margin:60px auto;color:var(--ink-3);font-size:13px">台帳の表示にはJavaScriptが必要です。データは cockpit/ledger.json にあります。</p></noscript>
+
+  <div class="ck-legend" data-reveal>
+    <div class="h">HOW TO READ</div>
+    左端に砂色の線がある行は、いま運営者の判断を待っている道具。文字が淡い日付は、それだけ長くふれていないという距離のしるし。状態を変えるときは「レビューを始める」から選び直し、書き戻し用JSONをコピーして cockpit/ledger.json を置き換える。最終更新日は出荷のたびに scripts/update-ledger.mjs で焼き直す。
+    <div id="knownIssues"></div>
+  </div>
+</main>
+
+<div class="ck-reviewbar" id="reviewbar">
+  <span class="n" id="changeCount">変更 0件</span>
+  <button class="ck-review-btn" id="copyBtn" type="button">書き戻し用JSONをコピー</button>
+  <button class="ck-review-btn" id="finishBtn" type="button">レビューを終える</button>
+  <span class="msg" id="copyMsg"></span>
+</div>
+
+<aside class="walk">
+  <div class="walk-inner">
+    <div class="eyebrow" data-reveal>Where to next — 次は、どこへ歩きますか</div>
+    <div class="walk-grid" style="margin-top:30px">
+      <a class="walk-card" href="https://github.com/bridge-med/bridge-lp/blob/master/CONSTITUTION.md" target="_blank" rel="noopener" data-reveal>
+        <span class="en">Constitution</span><span class="t">憲法に照らす</span>
+        <p class="p">判断に迷ったら、問いはひとつ。選択肢は増えたか。</p>
+      </a>
+      <a class="walk-card" href="../products/index.html" data-reveal data-reveal-delay="1">
+        <span class="en">Products</span><span class="t">公開中の一覧を見る</span>
+        <p class="p">訪問者に見えている姿を確かめる。</p>
+      </a>
+      <a class="walk-card" href="../journal/index.html" data-reveal data-reveal-delay="2">
+        <span class="en">Journal</span><span class="t">過程を書き残す</span>
+        <p class="p">引退も休止も、隠さず書けば思想の一部になる。</p>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<footer class="site-footer"></footer>
+<script src="../shared/bridge.js" defer></script>
+<script defer>
+window.addEventListener('DOMContentLoaded', async () => {
+  const board = document.getElementById('board');
+  let ledger;
+  try {
+    ledger = await (await fetch('ledger.json', { cache: 'no-store' })).json();
+  } catch (e) {
+    board.innerHTML = '<p style="color:var(--ink-3);font-size:13px;margin:60px 0">ledger.json を読み込めませんでした。ローカルではHTTPサーバー経由で開いてください。</p>';
+    return;
+  }
+
+  let usage = {};
+  try { usage = JSON.parse(localStorage.getItem('bridge-usage') || '{}'); } catch (e) {}
+
+  const DAY = 86400000;
+  const daysAgo = (d) => Math.floor((Date.now() - new Date(d + 'T00:00:00')) / DAY);
+  const fresh = (d) => {
+    if (!d) return null;
+    const n = daysAgo(d);
+    if (n <= 0) return { t: 'きょう', c: 'f-near' };
+    if (n === 1) return { t: 'きのう', c: 'f-near' };
+    if (n < 7)  return { t: n + '日前', c: 'f-near' };
+    if (n < 30) return { t: Math.round(n / 7) + '週間前', c: 'f-mid' };
+    return { t: Math.round(n / 7) + '週間ふれていない', c: 'f-far' };
+  };
+
+  // triage順。判断を待つものが先頭に来る
+  const SECTIONS = [
+    { key: '未掲載',  en: 'PENDING',   pending: true },
+    { key: '引退候補', en: 'RETIRING',  pending: true },
+    { key: '休止中',  en: 'DORMANT',   dormant: true },
+    { key: '計測中',  en: 'MEASURING' },
+    { key: '稼働中',  en: 'RUNNING' },
+  ];
+
+  const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  SECTIONS.forEach((sec) => {
+    const items = ledger.products.filter((p) => p.status === sec.key);
+    if (!items.length) return;
+    const wrap = document.createElement('section');
+    wrap.className = 'ck-sec';
+    wrap.innerHTML =
+      '<div class="ck-head" data-reveal><h2 class="eyebrow" style="margin:0">' + sec.en + ' · ' + items.length + '</h2>' +
+      '<span class="n">' + esc(sec.key) + '</span><p>' + esc((ledger.statuses || {})[sec.key] || '') + '</p></div>' +
+      '<div class="ck-rows"></div>';
+    const rows = wrap.querySelector('.ck-rows');
+
+    items.forEach((p) => {
+      const row = document.createElement('div');
+      row.className = 'ck-row' + (sec.pending ? ' is-pending' : '') + (sec.dormant ? ' is-dormant' : '');
+      row.setAttribute('data-reveal', '');
+      row.dataset.id = p.id;
+
+      const used = p.measure === 'local' ? fresh(usage[p.id]) : null;
+      const usedHtml = p.measure === 'local'
+        ? (used ? '<span class="v ' + used.c + '">' + esc(used.t) + '</span>' : '<span class="v f-far">この端末では記録なし</span>')
+        : '<span class="v f-mid">計測対象外</span>';
+      const commit = fresh(p.lastCommit);
+
+      row.innerHTML =
+        '<div class="ck-name"><a href="' + esc(p.href) + '"' + (/^https?:/.test(p.href) ? ' target="_blank" rel="noopener"' : '') + '>' + esc(p.name) + '<span class="en">' + esc(p.jp) + '</span></a></div>' +
+        '<div class="ck-mid">' +
+          '<div class="ck-chips"><span class="chip' + (sec.pending ? ' run' : '') + '">型の「' + esc(p.stage) + '」</span></div>' +
+          '<p class="ck-serves">' + esc(p.serves) + '</p>' +
+          (p.note ? '<p class="ck-note">' + esc(p.note) + '</p>' : '') +
+          (p.measure !== 'local' && p.measureNote ? '<p class="ck-note">' + esc(p.measureNote) + '</p>' : '') +
+          (p.decision ? '<details class="ck-decision"><summary>DECISION NOTES — 判断材料</summary><p>' + esc(p.decision.points) + '</p>' + (p.decision.catalogDraft ? '<pre>' + esc(p.decision.catalogDraft) + '</pre>' : '') + '</details>' : '') +
+          '<div class="ck-status-picker" role="group" aria-label="' + esc(p.name) + 'の状態">' +
+            SECTIONS.map((s) => '<button type="button" class="chip' + (s.key === p.status ? ' sel' : '') + '" data-s="' + esc(s.key) + '">' + esc(s.key) + '</button>').join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="ck-fresh">' +
+          '<div><span class="l">LAST TOUCH</span><br>' + usedHtml + '</div>' +
+          '<div><span class="l">LAST COMMIT</span><br>' + (commit ? '<span class="v">' + esc(p.lastCommit) + '</span>' : '<span class="v f-far">—</span>') + '</div>' +
+        '</div>';
+      rows.appendChild(row);
+    });
+    board.appendChild(wrap);
+  });
+
+  if (Array.isArray(ledger.knownIssues) && ledger.knownIssues.length) {
+    document.getElementById('knownIssues').innerHTML =
+      '<div class="h" style="margin-top:14px">KNOWN ISSUES</div>' +
+      ledger.knownIssues.map((k) => '<div>・' + esc(k) + '</div>').join('');
+  }
+
+  /* ---- レビューモード ----
+     状態の選び直しはこの画面で、保存は書き戻しJSONのコピペで。
+     閉じた日を端末に覚えさせ、次に開いたとき「最後に見渡した日」として出す。 ---- */
+  const RKEY = 'bridge-cockpit-reviewed';
+  const topline = document.getElementById('topline');
+  const lastReviewEl = document.getElementById('lastReview');
+  const changes = {};
+
+  const renderLastReview = () => {
+    let d = null;
+    try { d = localStorage.getItem(RKEY); } catch (e) {}
+    const f = d ? fresh(d) : null;
+    lastReviewEl.textContent = f ? f.t + '(' + d + ')' : 'まだ見渡していない';
+  };
+  renderLastReview();
+  topline.hidden = false;
+
+  const countEl = document.getElementById('changeCount');
+  const msgEl = document.getElementById('copyMsg');
+  const updateCount = () => { countEl.textContent = '変更 ' + Object.keys(changes).length + '件'; };
+
+  document.getElementById('reviewBtn').addEventListener('click', () => {
+    document.body.classList.add('reviewing');
+    msgEl.textContent = '';
+    updateCount();
+  });
+
+  board.addEventListener('click', (ev) => {
+    const chip = ev.target.closest('.ck-status-picker .chip');
+    if (!chip || !document.body.classList.contains('reviewing')) return;
+    const row = chip.closest('.ck-row');
+    const p = ledger.products.find((x) => x.id === row.dataset.id);
+    if (!p) return;
+    const next = chip.dataset.s;
+    if (next === p.status) { delete changes[p.id]; } else { changes[p.id] = next; }
+    row.querySelectorAll('.ck-status-picker .chip').forEach((c) => c.classList.toggle('sel', c === chip));
+    msgEl.textContent = '';
+    updateCount();
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const out = JSON.parse(JSON.stringify(ledger));
+    out.products.forEach((p) => { if (changes[p.id]) p.status = changes[p.id]; });
+    const text = JSON.stringify(out, null, 2) + '\n';
+    try {
+      await navigator.clipboard.writeText(text);
+      msgEl.textContent = 'コピーした。cockpit/ledger.json を置き換えて出荷する';
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); msgEl.textContent = 'コピーした。cockpit/ledger.json を置き換えて出荷する'; }
+      catch (e2) { msgEl.textContent = 'コピーできなかった。ブラウザの権限を確認'; }
+      ta.remove();
+    }
+  });
+
+  document.getElementById('finishBtn').addEventListener('click', () => {
+    try { localStorage.setItem(RKEY, new Date().toLocaleDateString('sv-SE')); } catch (e) {}
+    document.body.classList.remove('reviewing');
+    renderLastReview();
+  });
+
+  if (window.BRIDGE) window.BRIDGE.observeReveal();
+});
+</script>
+</body>
+</html>
