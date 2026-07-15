@@ -48,7 +48,37 @@
       },
       day() { tone(392, 0.22, 'sine', 0.045); tone(523, 0.3, 'sine', 0.04, 0.12); },
       click() { tone(520, 0.05, 'square', 0.02); },
-      buzz() { tone(196, 0.18, 'square', 0.03); }
+      buzz() { tone(196, 0.18, 'square', 0.03); },
+      step() { tone(95 + Math.random() * 45, 0.045, 'triangle', 0.014); },
+      // 🌧 環境音: フィルタ済みノイズのループ(雨・雪の風)
+      ambience(kind) {
+        if (this._amb && this._ambKind === kind) return;
+        this.ambOff();
+        if (!kind || !G.sound) return;
+        const c = ac();
+        if (!c || c.state === 'suspended') return;
+        try {
+          const len = c.sampleRate * 2;
+          const buf = c.createBuffer(1, len, c.sampleRate);
+          const d = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+          const src2 = c.createBufferSource();
+          src2.buffer = buf;
+          src2.loop = true;
+          const filt = c.createBiquadFilter();
+          filt.type = 'lowpass';
+          filt.frequency.value = kind === 'rain' ? 900 : 420;
+          const g = c.createGain();
+          g.gain.value = kind === 'rain' ? 0.014 : 0.008;
+          src2.connect(filt).connect(g).connect(c.destination);
+          src2.start();
+          this._amb = { src: src2, g };
+          this._ambKind = kind;
+        } catch (e) { /* noop */ }
+      },
+      ambOff() {
+        if (this._amb) { try { this._amb.src.stop(); } catch (e) { /* noop */ } this._amb = null; this._ambKind = null; }
+      }
     };
   })();
 
@@ -246,6 +276,8 @@
     { id: 'new300', name: '新患 累計300人', coin: 2, cond: (st) => st.newp >= 300 },
     { id: 'fans10', name: '🌟顔なじみ10人(通院5回以上)', coin: 2, cond: () => (G.regulars || []).filter((r) => r.visits >= 5).length >= 10 },
     { id: 'fans30', name: '🌟顔なじみ30人 — 地域のかかりつけ', coin: 4, cond: () => (G.regulars || []).filter((r) => r.visits >= 5).length >= 30 },
+    { id: 'gradu10', name: '🎓卒業 累計10人(治して送り出す)', coin: 3, cond: (st) => (st.gradu || 0) >= 10 },
+    { id: 'gradu50', name: '🎓卒業 累計50人 — 地域を治す医院', coin: 6, cond: (st) => (st.gradu || 0) >= 50 },
     { id: 'reha1000', name: 'リハ 累計1,000件', coin: 2, cond: (st) => st.reha >= 1000 },
     { id: 'reha10000', name: 'リハ 累計10,000件', coin: 5, cond: (st) => st.reha >= 10000 },
     { id: 'inj500', name: '注射 累計500件', coin: 2, cond: (st) => st.inj >= 500 },
@@ -352,7 +384,7 @@
     tutorialDone: false, plan: null,
     lastStage: 1, blackStreak: 0,
     coins: 2, boosts: {}, deco: {}, achDone: [],
-    stats: { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: 0 },
+    stats: { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: 0, gradu: 0 },
     clinicName: 'あなたのクリニック',
     daily: { last: '', streak: 0, chDone: '', chState: '', chDay: '', lastClearChar: '', chain: 0 },
     prestige: { count: 0, legacy: null },
@@ -508,6 +540,7 @@
       if (d.g.notify === undefined) G.notify = false;
       if (!G.regulars) G.regulars = [];
       if (!G.personaSeq) G.personaSeq = 0;
+      if (G.stats && G.stats.gradu === undefined) G.stats.gradu = 0;
       if (d.g.hospital === undefined) G.hospital = null;
       if (!G.kaitei) G.kaitei = { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] };
       // v11-12: スペシャル依頼・月間決算・地域リーグの補完
@@ -564,11 +597,12 @@
       const r = list[Math.floor(Math.random() * list.length)];
       r.visits++;
       r.lastDay = G.day;
-      return Object.assign({}, r.p, { visits: r.visits });
+      if (!r.rid) r.rid = 'r' + (G.personaSeq = (G.personaSeq || 0) + 1);
+      return Object.assign({}, r.p, { visits: r.visits, rid: r.rid });
     }
     G.personaSeq = (G.personaSeq || 0) + 1;
     const p = PERSONA.genPatient(G.personaSeq, seg);
-    G.regulars.push({ p, seg, visits: 1, lastDay: G.day });
+    G.regulars.push({ p, seg, visits: 1, lastDay: G.day, rid: 'r' + G.personaSeq });
     if (G.regulars.length > 80) {
       G.regulars.sort((a, b) => a.lastDay - b.lastDay);
       G.regulars.splice(0, G.regulars.length - 80);
@@ -583,6 +617,17 @@
       clinicIso.resize();
     },
     onDischarge(p, report) {
+      // 🎓 卒業: 8回以上通った常連は、治って通院を終えることがある(良いお別れ)
+      if (p.persona && p.persona.rid && p.persona.visits >= 8 && Math.random() < 0.15) {
+        const idx = G.regulars.findIndex((r) => r.rid === p.persona.rid);
+        if (idx >= 0) {
+          G.regulars.splice(idx, 1);
+          G.stats.gradu = (G.stats.gradu || 0) + 1;
+          G.rep = Math.min(100, G.rep + 0.4);
+          if (typeof PERSONA !== 'undefined') banner(`🎓 ${p.persona.name}さんが卒業しました — 「${PERSONA.graduLine(p.persona)}」(評判+0.4)`);
+          if (clinic.floats) clinic.floats.push({ x: p.x, y: p.y - 0.6, text: '🎓', t: 0 });
+        }
+      }
       let revenue = 0;
       const T = G.today;
       const seg = report.seg || 'senior';
@@ -2802,7 +2847,7 @@
       tEl.innerHTML = `
         <div class="op-row">${Object.entries(segLabel).map(([k, v]) => `<button class="op-btn ${G.targetSeg === k ? 'on' : ''}" data-tseg="${k}">${v}</button>`).join('')}</div>
         <p class="ctrl-note">高齢者=リハ・骨粗鬆症・定着◎ / 勤労者=健診・AGA・定着△ / スポーツ=MRI・PRP・単価◎${lastH && lastH.segS !== undefined ? ` — 昨日の客層: 高齢${lastH.segS}・勤労${lastH.segW}・スポーツ${lastH.segP}人` : ''}</p>
-        ${(() => { const f = (G.regulars || []).filter((r) => r.visits >= 5).length; return f ? `<p class="ctrl-note">🌟 顔なじみ(通院5回以上) <b>${f}人</b> — 口コミで認知+${Math.min(0.3, f * 0.01).toFixed(2)}%/日。常連は費用ゼロの広告塔</p>` : ''; })()}`;
+        ${(() => { const f = (G.regulars || []).filter((r) => r.visits >= 5).length; const g = (G.stats && G.stats.gradu) || 0; return f || g ? `<p class="ctrl-note">🌟 顔なじみ(通院5回以上) <b>${f}人</b> — 口コミで認知+${Math.min(0.3, f * 0.01).toFixed(2)}%/日${g ? ` ・ 🎓卒業 累計<b>${g}人</b>(治して送り出した数)` : ''}</p>` : ''; })()}`;
       tEl.querySelectorAll('[data-tseg]').forEach((b) => b.addEventListener('click', () => {
         G.targetSeg = b.dataset.tseg;
         toast(`🎯 ターゲット方針: ${segLabel[G.targetSeg]}(商圏からの新患の客層が寄ります)`);
@@ -3892,13 +3937,20 @@
         }
         if (a.type === 'rehab' && !didReha) addSchedule(G.day + 1, 'rehab');
       }
-      // 常連の記憶: スキップした日も、来ていた分だけ通院回数を進める
+      // 常連の記憶: スキップした日も、来ていた分だけ通院回数を進める(卒業も静かに起きる)
       if (G.regulars && G.regulars.length && T.patients > 0) {
         const bump = Math.min(8, T.patients, G.regulars.length);
         for (let i = 0; i < bump; i++) {
           const r = G.regulars[Math.floor(Math.random() * G.regulars.length)];
           r.visits++;
           r.lastDay = G.day;
+        }
+        for (let i = G.regulars.length - 1; i >= 0; i--) {
+          if (G.regulars[i].visits >= 8 && Math.random() < 0.08) {
+            G.regulars.splice(i, 1);
+            G.stats.gradu = (G.stats.gradu || 0) + 1;
+            G.rep = Math.min(100, G.rep + 0.2);
+          }
         }
       }
       const n = T.patients;
@@ -4100,6 +4152,8 @@
           getTown: () => ({ branches: G.branches.map((x) => x.siteId), billboard: G.billboard }),
           getClinicName: () => G.clinicName,
           getWeather: () => ensureWeather(),
+          onStep: () => SND.step(),
+          onAmbience: (kind) => SND.ambience(kind === 'rain' ? 'rain' : kind === 'ice' ? 'wind' : null),
           getBuddyLine: (mode) => {
             const wx = ensureWeather();
             const cands = [];
@@ -4180,7 +4234,7 @@
               ? '🗺 街の視察 — 営業先の建物に近づくと訪問できます。院の入口から中にも入れます'
               : '🚶 視察モード — 現場を歩いて、患者さんやスタッフに声をかけられます');
           },
-          onExit: () => { SND.click(); }
+          onExit: () => { SND.click(); SND.ambOff(); }
         });
       } catch (e) { toast('この端末では3D表示を利用できません'); return; }
     }
