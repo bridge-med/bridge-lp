@@ -170,7 +170,7 @@
   } catch (e) {}
 
   /* ---- 訪問者計測(未計測) ----
-     訪問者数はまだ測っていない。測れる状態になったら endpoint を設定して有効化する。
+     訪問者数はまだ測っていない。有効化の手順は docs/analytics.md(約5分)。
      それまで cockpit には「未計測」と正直に表示する。 ---- */
   const ANALYTICS_ENDPOINT = '';
   if (ANALYTICS_ENDPOINT && navigator.sendBeacon) {

@@ -1,0 +1,51 @@
+# 訪問者計測の有効化手順
+
+> 状態: **未計測**(2026-07-15時点)。
+> 端末内の利用ログ(`bridge-usage`)は稼働済みだが、訪問者数はまだ測っていない。
+> cockpit(運営の台帳)にも「未計測」と明示している。この文書は、気が向いた日に
+> 5分で計測を立ち上げるための手順である(憲法第15条「測ってから語る」への道)。
+
+## いま入っている仕組み
+
+- `shared/bridge.js` — 端末内利用ログ(localStorage、外部送信なし)と、訪問者計測フック `ANALYTICS_ENDPOINT`(既定は空文字=無効)
+- `shared/usage.js` — bridge.jsを読まないプロダクトページ用の利用ログ単機能版
+
+## 手順A(推奨・約5分): GoatCounter
+
+無料・クッキーなし・個人情報を集めない計測サービス。プライバシーポリシーの改定が
+ほぼ不要で、BRIDGEの性格に合う。
+
+1. https://www.goatcounter.com/ でアカウントを作る(サイトコードは例: `bridge-med`)
+2. `shared/bridge.js` の「訪問者計測(未計測)」ブロックを、次の3行に置き換える
+
+```js
+/* ---- 訪問者計測(GoatCounter) ---- */
+const gc = document.createElement('script');
+gc.dataset.goatcounter = 'https://bridge-med.goatcounter.com/count'; // 自分のサイトコードに
+gc.src = 'https://gc.zgo.at/count.js'; gc.async = true;
+document.head.appendChild(gc);
+```
+
+3. コミットして出荷し、翌日 GoatCounter のダッシュボードに数字が出ていることを確かめる
+
+補足:
+- bridge.jsを読まないページ(clinic-flow-3d等)も測るなら、`shared/usage.js` の末尾に同じ3行を足す
+- cockpitはnoindexだが計測には載る。運営者の自分のアクセスは GoatCounter の設定で除外できる
+- `legal/privacy.html` に計測サービス名を1行追記すること(第32条)
+
+## 手順B: 自前エンドポイント
+
+`shared/bridge.js` の `ANALYTICS_ENDPOINT` にURLを入れると、ページ表示ごとに
+`navigator.sendBeacon` で次のJSONがPOSTされる。
+
+```json
+{ "p": "/bridge-lp/products/index.html", "r": "https://参照元" }
+```
+
+受け口(Cloudflare Workers等)は自作が必要。手順Aより重いので、独自の集計要件が
+出てきたときの選択肢として残す。
+
+## タイミングの注意
+
+独自ドメイン移行(憲法・未決事項#5)の**前**に有効化すると、移行前後の比較データが取れる。
+移行後に入れると基準値を失う。
