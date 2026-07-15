@@ -4100,6 +4100,38 @@
           getTown: () => ({ branches: G.branches.map((x) => x.siteId), billboard: G.billboard }),
           getClinicName: () => G.clinicName,
           getWeather: () => ensureWeather(),
+          getBuddyLine: (mode) => {
+            const wx = ensureWeather();
+            const cands = [];
+            if (mode === 'town') {
+              // 冷えかけの営業関係
+              let cold = null;
+              Object.keys(REL_DEF).forEach((k) => {
+                const r = G.relations[k];
+                if (r && r.lv > 0 && G.day - r.last > 18 && (!cold || r.last < G.relations[cold].last)) cold = k;
+              });
+              if (cold) cands.push(`${REL_DEF[cold].name}、${G.day - G.relations[cold].last}日ご無沙汰です。関係は30日で冷え始めますよ`);
+              if (!G.billboard) cands.push('駅前の看板枠、まだ空いてます。駅利用者の新患に効きますよ');
+              if (G.aw < 0.5) cands.push(`認知はまだ${Math.round(G.aw * 100)}%。商店街や包括センターで顔を売りましょう`);
+              const fans = (G.regulars || []).filter((r) => r.visits >= 5).length;
+              if (fans >= 5) cands.push(`顔なじみが${fans}人。口コミが効き始めています。良い流れです`);
+              if (wx.kind === 'ice') cands.push('この路面…明日は転倒の初診が増えます。処置の備えを');
+              if (wx.kind === 'rain') cands.push('雨の日はリハのキャンセルが出ます。午後の枠、電話を入れておきましょう');
+              cands.push('営業は「提供できる医療」が先。リハ体制が整うほど紹介は太くなります');
+              return { name: '白瀬', text: cands[(G.day + Math.floor(G.t / 60)) % cands.length] };
+            }
+            const bn = bottleneckInfo();
+            const wl = clinic.waitingLoad();
+            if (bn && bn.text && !bn.text.includes('なし')) cands.push(bn.text);
+            if (wl.n >= wl.cap * 0.6) cands.push(`待合が埋まってきました(${wl.n}/${wl.cap})。混雑の前に一手を`);
+            if (wx.note) cands.push(`今日は${wx.label}。${wx.note}`);
+            const angry = clinic.patients.filter((p) => p.waitTotal > 45).length;
+            if (angry) cands.push(`${angry}人、かなりお待たせしています。院長の声かけどうでしょう`);
+            if ((G.today.soothe || 0) === 0 && clinic.patients.some((p) => p.waitTotal > 30)) cands.push('お待たせしている方に声をかけると、体感の待ちがやわらぎますよ');
+            cands.push('現場を歩くと、数字にならない詰まりが見えますね');
+            cands.push('患者さんをタップすると、その方の事情が分かりますよ');
+            return { name: '松岡', text: cands[(G.day + Math.floor(G.t / 45)) % cands.length] };
+          },
           getHud: () => ({
             line1: `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}) ${fmtClock(G.t)} — ${escapeHtml(G.clinicName)}`,
             line2: walk3d && walk3d.mode === 'town'

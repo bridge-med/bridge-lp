@@ -158,6 +158,7 @@
         <div class="walk-hud-top">
           <div class="walk-info" id="walkInfo"></div>
           <div class="walk-hud-right">
+            <button class="walk-exit walk-cam" id="walkBuddy" title="帯同スタッフ">👥</button>
             <button class="walk-exit walk-cam" id="walkCam">📸</button>
             <button class="walk-exit" id="walkExit">✕ 視察を終える</button>
           </div>
@@ -202,6 +203,60 @@
       this.scene.add(ring);
       this.target = null;
       this.bindControls();
+    }
+
+    /* ---------- 👥 帯同視察(松岡/白瀬が同行して解説) ---------- */
+    ensureBuddy() {
+      const want = this.mode === 'town' ? 'advisor' : 'front';
+      if (this.buddy && this.buddy.userData.kind === want) return;
+      if (this.buddy) { this.scene.remove(this.buddy); this.buddy = null; }
+      this.clearBuddyChat();
+      const f = want === 'advisor'
+        ? this.makeFigure(0x5B6770, { hair: 0x3A342C, dot: 0xC9A227, pants: 0x40525E })
+        : this.makeFigure(0xFFFFFF, { hair: 0x4A3B2E, dot: 0xC98A2D });
+      f.userData.kind = want;
+      f.position.set(this.camera.position.x + 1, 0, this.camera.position.z + 1);
+      f.visible = this.companionOn !== false;
+      this.scene.add(f);
+      this.buddy = f;
+    }
+
+    clearBuddyChat() {
+      if (this.buddyChat && this.buddy) this.buddy.remove(this.buddyChat.sp);
+      this.buddyChat = null;
+    }
+
+    stepBuddy(dt) {
+      this.ensureBuddy();
+      if (!this.companionOn || !this.buddy) return;
+      // プレイヤーの斜め後ろについてくる
+      const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
+      const tx = this.camera.position.x + sin * 1.3 + cos * 0.8;
+      const tz = this.camera.position.z + cos * 1.3 - sin * 0.8;
+      const b = this.buddy.position;
+      const dx = tx - b.x, dz = tz - b.z;
+      const dist = Math.hypot(dx, dz);
+      if (dist > 0.25) {
+        const sp = Math.min(dist, 4.2 * dt * Math.max(1, dist * 0.8));
+        b.x += (dx / dist) * sp;
+        b.z += (dz / dist) * sp;
+        b.y = Math.abs(Math.sin(performance.now() * 0.012)) * 0.04;
+        this.buddy.rotation.y = Math.atan2(dx, dz);
+      } else {
+        b.y = 0;
+        this.buddy.rotation.y = this.yaw + Math.PI; // プレイヤーと同じ向き
+      }
+      // 解説(状況を読んで一言)
+      if (this.buddyChat && performance.now() > this.buddyChat.until) this.clearBuddyChat();
+      if (!this.buddyChat && this._fn % 360 === 80 && this.hooks.getBuddyLine) {
+        const line = this.hooks.getBuddyLine(this.mode);
+        if (line && line.text) {
+          const sp = this.labelSprite(`${line.name}「${line.text}」`, { scale: 0.8, bg: 'rgba(255,250,238,0.96)' });
+          sp.position.y = 2.05;
+          this.buddy.add(sp);
+          this.buddyChat = { sp, until: performance.now() + 5200 };
+        }
+      }
     }
 
     /* ---------- 🌦 天気の描画(空の色+雨/雪) ---------- */
@@ -790,6 +845,14 @@
 
       this.ov.querySelector('#walkExit').addEventListener('click', () => this.exit());
       this.ov.querySelector('#walkCam').addEventListener('click', () => this.snapshot());
+      this.companionOn = true;
+      const bb = this.ov.querySelector('#walkBuddy');
+      bb.addEventListener('click', () => {
+        this.companionOn = !this.companionOn;
+        bb.style.opacity = this.companionOn ? '1' : '0.45';
+        if (this.buddy) this.buddy.visible = this.companionOn;
+        if (!this.companionOn) this.clearBuddyChat();
+      });
       this._onResize = () => { if (this.active) { this.resize(); this.checkRotate(); } };
       window.addEventListener('resize', this._onResize);
     }
@@ -943,6 +1006,7 @@
       if (++this._fn % 45 === 0 && this.stateSig() !== this.staticSig) this.buildStatic();
       if (this._fn % 30 === 1 && this.hooks.getWeather) this.applyWeather((this.hooks.getWeather() || {}).kind);
       this.stepWeather(dt);
+      this.stepBuddy(dt);
       if (this.mode === 'clinic' && (this._fn === 40 || this._fn % 120 === 0)) this.spawnChat();
       if (this.chat && performance.now() > this.chat.until) {
         if (this.chat.g && this.chat.sp) this.chat.g.remove(this.chat.sp);
