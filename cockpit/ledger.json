@@ -134,9 +134,8 @@
       "stage": "理解",
       "serves": "外来経営を学びたい人。遊びながら経営の仕組みを体で理解し、学び方の選択肢を増やす",
       "status": "計測中",
-      "measure": "none",
-      "measureNote": "bridge.js未読込。次スプリントで敷設",
-      "note": "直近の開発が最も活発(v25まで)",
+      "measure": "local",
+      "note": "直近の開発が最も活発",
       "lastCommit": "2026-07-14"
     },
     {
@@ -199,8 +198,7 @@
       "stage": "理解",
       "serves": "経営再建を学びたい人。失敗しても安全な場所で、経営判断の因果を理解できるようにする",
       "status": "計測中",
-      "measure": "none",
-      "measureNote": "bridge.js未読込。次スプリントで敷設",
+      "measure": "local",
       "note": "",
       "lastCommit": "2026-07-05"
     },
@@ -216,8 +214,7 @@
       "stage": "評価",
       "serves": "職場にモヤモヤを抱える人。言語化することで、我慢以外の選択肢に気づけるようにする",
       "status": "計測中",
-      "measure": "none",
-      "measureNote": "bridge.js未読込。次スプリントで敷設",
+      "measure": "local",
       "note": "",
       "lastCommit": "2026-07-04"
     },
@@ -233,8 +230,7 @@
       "stage": "理解",
       "serves": "承継直後のクリニック当事者。最初の30日で何が起きるかを疑似体験し、備えの選択肢を増やす",
       "status": "計測中",
-      "measure": "none",
-      "measureNote": "bridge.js未読込。次スプリントで敷設",
+      "measure": "local",
       "note": "",
       "lastCommit": "2026-07-04"
     },
@@ -250,8 +246,7 @@
       "stage": "評価",
       "serves": "衝動買いを見直したい人。買う前に一拍おくことで、買う・買わないを自分で選び直せるようにする",
       "status": "計測中",
-      "measure": "none",
-      "measureNote": "bridge.js未読込。次スプリントで敷設",
+      "measure": "local",
       "note": "",
       "lastCommit": "2026-07-01"
     },
@@ -267,8 +262,7 @@
       "stage": "評価",
       "serves": "職場のしんどさを抱える人。SOAP形式で書き起こすことで、感情を事実と分けて扱えるようにする",
       "status": "計測中",
-      "measure": "none",
-      "measureNote": "bridge.js未読込。次スプリントで敷設",
+      "measure": "local",
       "note": "",
       "lastCommit": "2026-07-05"
     },
@@ -299,8 +293,7 @@
       "stage": "実践",
       "serves": "疲れた人・やる気が出ない人。頑張らせずに、小さな回復行動をひとつだけ選べるようにする",
       "status": "未掲載",
-      "measure": "none",
-      "measureNote": "bridge.js未読込",
+      "measure": "local",
       "note": "動くPWA。カタログ掲載か引退かの判断待ち",
       "lastCommit": "2026-07-07"
     },
@@ -316,8 +309,7 @@
       "stage": "実践",
       "serves": "返信の角が立たないか気にする人。やわらかい返し方の選択肢を3つ増やす",
       "status": "未掲載",
-      "measure": "none",
-      "measureNote": "bridge.js未読込",
+      "measure": "local",
       "note": "動くPWA。返信生成にworkerバックエンド依存あり。掲載判断待ち",
       "lastCommit": "2026-07-01"
     },
@@ -335,7 +327,7 @@
       "serves": "集中して作業したい人。タスク管理ではなく、いまやる一つに集中する時間の選択肢を増やす",
       "status": "未掲載",
       "measure": "none",
-      "measureNote": "Expo書き出しのためbridge.js未読込",
+      "measureNote": "Expo書き出しHTMLのため敷設しない(再書き出しで消える)。手動記録",
       "note": "mobile-pomodoro(Expoソース)とpomodoro-app(Web書き出し)の2ディレクトリで1プロダクト。掲載判断待ち",
       "lastCommit": "2026-07-01"
     },
@@ -351,8 +343,7 @@
       "stage": "実践",
       "serves": "整形外科クリニックのリハ部門。スプレッドシート1枚でKPI管理を明日から始められるようにする",
       "status": "未掲載",
-      "measure": "none",
-      "measureNote": "bridge.js未読込",
+      "measure": "local",
       "note": "販売LP(2,980円)だがstarter-kitsハブからリンクされていない孤立ページ。導線をつなぐか引退かの判断待ち",
       "lastCommit": "2026-07-11"
     }
