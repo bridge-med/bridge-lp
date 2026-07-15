@@ -32,6 +32,10 @@
 .ck-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .ck-serves{font-size:12.5px;line-height:1.9;color:var(--ink-2);max-width:560px}
 .ck-note{font-size:11.5px;line-height:1.8;color:var(--ink-3)}
+.ck-decision{margin-top:4px;font-size:12px;line-height:1.9;color:var(--ink-2);max-width:560px}
+.ck-decision summary{cursor:pointer;font:600 10px/1 var(--en);letter-spacing:0.14em;color:var(--ink-3);padding:6px 0;list-style-position:inside}
+.ck-decision summary:hover{color:var(--ink)}
+.ck-decision pre{margin-top:8px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font:11px/1.8 ui-monospace,monospace;color:var(--ink-2);overflow-x:auto}
 .ck-fresh{text-align:right;display:flex;flex-direction:column;gap:6px;min-width:150px}
 .ck-fresh .l{font:500 9.5px/1 var(--en);letter-spacing:0.12em;color:var(--ink-4)}
 .ck-fresh .v{font-size:12px;line-height:1.5}
@@ -186,6 +190,7 @@ window.addEventListener('DOMContentLoaded', async () => {
           '<p class="ck-serves">' + esc(p.serves) + '</p>' +
           (p.note ? '<p class="ck-note">' + esc(p.note) + '</p>' : '') +
           (p.measure !== 'local' && p.measureNote ? '<p class="ck-note">' + esc(p.measureNote) + '</p>' : '') +
+          (p.decision ? '<details class="ck-decision"><summary>DECISION NOTES — 判断材料</summary><p>' + esc(p.decision.points) + '</p>' + (p.decision.catalogDraft ? '<pre>' + esc(p.decision.catalogDraft) + '</pre>' : '') + '</details>' : '') +
           '<div class="ck-status-picker" role="group" aria-label="' + esc(p.name) + 'の状態">' +
             SECTIONS.map((s) => '<button type="button" class="chip' + (s.key === p.status ? ' sel' : '') + '" data-s="' + esc(s.key) + '">' + esc(s.key) + '</button>').join('') +
           '</div>' +

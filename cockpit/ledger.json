@@ -295,7 +295,11 @@
       "status": "未掲載",
       "measure": "local",
       "note": "動くPWA。カタログ掲載か引退かの判断待ち",
-      "lastCommit": "2026-07-15"
+      "lastCommit": "2026-07-15",
+      "decision": {
+        "points": "動くPWAとして完成しており、第31条の申告(実践/疲れた人のセルフケア)は立つ。論点は第12条——運営者自身が使い続けているか。掲載するなら「診断・ライト」の並びに1行で足せる。使っていないなら休止中として正直に置く手もある",
+        "catalogDraft": "{ cat: 'casual', name: 'Gokigen Gacha', jp: 'ごきげん回復ガチャ', href: '../gokigen-gacha/index.html',\n  p: '疲れた日に、いまの自分にちょうどいい回復行動をひとつだけ。押すだけのセルフケアガチャ。' }\n※ img はサムネイル(images/products/thumbs)を作ってから足す"
+      }
     },
     {
       "id": "yawagaeshi",
@@ -311,7 +315,11 @@
       "status": "未掲載",
       "measure": "local",
       "note": "動くPWA。返信生成にworkerバックエンド依存あり。掲載判断待ち",
-      "lastCommit": "2026-07-15"
+      "lastCommit": "2026-07-15",
+      "decision": {
+        "points": "実装は整っている(PWA+サービスワーカー)が、返信生成が外部workerに依存する。公開すればその稼働保証と維持コストが発生する。第31条の申告は立つ。論点は依存先の維持と第12条の実利用",
+        "catalogDraft": "{ cat: 'casual', name: 'Yawagaeshi', jp: 'やわ返', href: '../yawagaeshi/index.html',\n  p: '送る前に、ひと呼吸。角の立たないやわらかい返信案を3つつくる。' }\n※ 掲載前に worker の稼働確認が要る"
+      }
     },
     {
       "id": "bridge-focus",
@@ -329,7 +337,11 @@
       "measure": "none",
       "measureNote": "Expo書き出しHTMLのため敷設しない(再書き出しで消える)。手動記録",
       "note": "mobile-pomodoro(Expoソース)とpomodoro-app(Web書き出し)の2ディレクトリで1プロダクト。掲載判断待ち",
-      "lastCommit": "2026-07-01"
+      "lastCommit": "2026-07-01",
+      "decision": {
+        "points": "ソース(mobile-pomodoro)は運用文書まで揃った本格実装。ただしWeb版はExpo自動書き出しでtitleも空のままで、カタログから直リンクするには粗い。載せるなら紹介ページを1枚かませるか、iOS配信を待つ。第12条の実利用が確認できるまでは未掲載が安全と見る",
+        "catalogDraft": "{ cat: 'learning', name: 'BRIDGE Focus', jp: 'ポモドーロタイマー', href: '../pomodoro-app/index.html',\n  p: 'タスク管理ではなく、いまやる一つに集中するためのタイマー。集中の記録が作業に紐づいて残る。' }\n※ hrefは書き出し物への直リンク。紹介ページを作るならそちらへ向ける"
+      }
     },
     {
       "id": "rehaboard-starter",
@@ -345,7 +357,11 @@
       "status": "未掲載",
       "measure": "local",
       "note": "販売LP(2,980円)だがstarter-kitsハブからリンクされていない孤立ページ。導線をつなぐか引退かの判断待ち",
-      "lastCommit": "2026-07-15"
+      "lastCommit": "2026-07-15",
+      "decision": {
+        "points": "販売LP(2,980円)として完成しているのに、どこからもリンクされていない。載せる場所はPRODUCTSより、RehaBoard系を既に束ねているstarter-kitsハブが自然に見える。引退させる場合はnote側の商品ページとの整合を先に確認する",
+        "catalogDraft": "starter-kits/index.html のキット一覧に1枚:\n{ name: 'RehaBoard Starter Kit(スプレッドシート版)', href: '../rehaboard-starter/index.html',\n  p: 'スプレッドシート1枚で、リハ部門のKPI管理を明日から始める買い切りキット。' }"
+      }
     }
   ]
 }
