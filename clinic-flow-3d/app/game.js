@@ -395,7 +395,7 @@
     league: { beaten: 0 },
     sound: true,
     notify: false,
-    regulars: [], personaSeq: 0,
+    regulars: [], personaSeq: 0, graduLog: [],
     hospital: null,
     kaitei: { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] }
   };
@@ -504,7 +504,7 @@
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
           specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
-          regulars: (G.regulars || []).slice(-80), personaSeq: G.personaSeq || 0
+          regulars: (G.regulars || []).slice(-80), personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30)
         }
       }));
     } catch (e) { /* noop */ }
@@ -541,6 +541,7 @@
       if (!G.regulars) G.regulars = [];
       if (!G.personaSeq) G.personaSeq = 0;
       if (G.stats && G.stats.gradu === undefined) G.stats.gradu = 0;
+      if (!G.graduLog) G.graduLog = [];
       if (d.g.hospital === undefined) G.hospital = null;
       if (!G.kaitei) G.kaitei = { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] };
       // v11-12: スペシャル依頼・月間決算・地域リーグの補完
@@ -624,6 +625,8 @@
           G.regulars.splice(idx, 1);
           G.stats.gradu = (G.stats.gradu || 0) + 1;
           G.rep = Math.min(100, G.rep + 0.4);
+          (G.graduLog = G.graduLog || []).push({ name: p.persona.name, age: p.persona.age, ch: p.persona.chLabel, visits: p.persona.visits, day: G.day });
+          if (G.graduLog.length > 30) G.graduLog.shift();
           if (typeof PERSONA !== 'undefined') banner(`🎓 ${p.persona.name}さんが卒業しました — 「${PERSONA.graduLine(p.persona)}」(評判+0.4)`);
           if (clinic.floats) clinic.floats.push({ x: p.x, y: p.y - 0.6, text: '🎓', t: 0 });
         }
@@ -2171,6 +2174,8 @@
       ${applied}
       <div class="pnl-row"><span>引き継ぐもの</span><b>実績(${G.achDone.length}/${ACHIEVEMENTS.length})・累計スタッツ・プレミアム施設・倍速パス・キャラとの信頼・院名</b></div>
       <div class="pnl-row"><span>リセットされるもの</span><b>資金・評判・日数・スタッフ・分院・ミッション(再挑戦で報酬も再獲得)</b></div>
+      ${(G.graduLog || []).length ? `<h3 class="sub-title">🎓 卒業アルバム(直近${Math.min(12, G.graduLog.length)}人 / 累計${G.stats.gradu || 0}人)</h3>
+      <div class="ach-list">${G.graduLog.slice(-12).reverse().map((g) => `<span class="ach-chip done">🎓 ${escapeHtml(g.name)}さん(${g.age}・${g.ch}) 通院${g.visits}回 — Day ${g.day}</span>`).join('')}</div>` : ''}
       <h3 class="sub-title">次に殿堂入りした場合の開始ボーナス(実績${G.achDone.length}個 連動)</h3>
       <div class="pnl-row"><span>開始資金(実績1つ+¥200,000)</span><b>${yen(lg.money)}</b></div>
       <div class="pnl-row"><span>初期評判(実績3つで+1)</span><b>${lg.rep}</b></div>
@@ -3947,9 +3952,11 @@
         }
         for (let i = G.regulars.length - 1; i >= 0; i--) {
           if (G.regulars[i].visits >= 8 && Math.random() < 0.08) {
-            G.regulars.splice(i, 1);
+            const rg = G.regulars.splice(i, 1)[0];
             G.stats.gradu = (G.stats.gradu || 0) + 1;
             G.rep = Math.min(100, G.rep + 0.2);
+            (G.graduLog = G.graduLog || []).push({ name: rg.p.name, age: rg.p.age, ch: rg.p.chLabel, visits: rg.visits, day: G.day });
+            if (G.graduLog.length > 30) G.graduLog.shift();
           }
         }
       }
