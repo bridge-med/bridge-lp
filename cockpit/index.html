@@ -91,6 +91,7 @@ body.reviewing .ck-reviewbar{display:flex}
   <div class="ck-legend" data-reveal>
     <div class="h">HOW TO READ</div>
     左端に砂色の線がある行は、いま運営者の判断を待っている道具。文字が淡い日付は、それだけ長くふれていないという距離のしるし。状態を変えるときは「レビューを始める」から選び直し、書き戻し用JSONをコピーして cockpit/ledger.json を置き換える。最終更新日は出荷のたびに scripts/update-ledger.mjs で焼き直す。
+    <div id="knownIssues"></div>
   </div>
 </main>
 
@@ -203,6 +204,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     board.appendChild(wrap);
   });
+
+  if (Array.isArray(ledger.knownIssues) && ledger.knownIssues.length) {
+    document.getElementById('knownIssues').innerHTML =
+      '<div class="h" style="margin-top:14px">KNOWN ISSUES</div>' +
+      ledger.knownIssues.map((k) => '<div>・' + esc(k) + '</div>').join('');
+  }
 
   /* ---- レビューモード ----
      状態の選び直しはこの画面で、保存は書き戻しJSONのコピペで。

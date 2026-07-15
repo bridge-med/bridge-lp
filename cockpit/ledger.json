@@ -363,5 +363,9 @@
         "catalogDraft": "starter-kits/index.html のキット一覧に1枚:\n{ name: 'RehaBoard Starter Kit(スプレッドシート版)', href: '../rehaboard-starter/index.html',\n  p: 'スプレッドシート1枚で、リハ部門のKPI管理を明日から始める買い切りキット。' }"
       }
     }
+  ],
+  "knownIssues": [
+    "プロダクト9ページがdata-rootなしでbridge.jsを読み、budoux-ja.min.jsが404になる(実害はコンソールノイズのみ)。直すとBudouXが各アプリの文字組みに新しく効き始めるため、designer照合込みの独立スプリントで対応する",
+    "Google Fontsへの接続エラーがサンドボックス検証環境でのみ出る(本番は無関係)。環境非依存の総点検はauditor領分として別途"
   ]
 }
