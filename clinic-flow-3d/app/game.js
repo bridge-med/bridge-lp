@@ -376,6 +376,43 @@
   }
   function openDaysCount() { return settings.schedule.filter((k) => k !== 'closed').length; }
 
+  /* ================= 🌦 天気(季節×日替わり・決定論) ================= */
+
+  const WEATHER = {
+    sunny:  { icon: '☀️', label: '晴れ',   newMul: 1.0,  show: 0,     falls: 0 },
+    cloudy: { icon: '☁️', label: 'くもり', newMul: 0.97, show: 0,     falls: 0 },
+    rain:   { icon: '☔', label: '雨',     newMul: 0.8,  show: -0.05, falls: 1.2,
+      note: '新患の足が鈍る一方、濡れた路面の転倒で初診が入る。リハのキャンセルに注意' },
+    heat:   { icon: '🥵', label: '猛暑日', newMul: 0.9,  show: -0.05, falls: 0.3,
+      note: '暑さで通院がおっくうに。リハの中断が増えやすい日' },
+    ice:    { icon: '❄️', label: '雪・凍結', newMul: 0.75, show: -0.07, falls: 2.6,
+      note: '路面凍結で転倒の初診が急増。処置・固定の備えを' }
+  };
+
+  // ゲーム内の月(実プレイ開始月から30日=1ヶ月で進む)
+  function gameMonth(day) {
+    return ((new Date().getMonth() + Math.floor((day - 1) / 30)) % 12) + 1;
+  }
+
+  function weatherFor(day) {
+    let h = (day * 2654435761) % 4294967296;
+    h = ((h ^ (h >>> 13)) * 1103515245) % 2147483648;
+    const r = (h % 1000) / 1000;
+    const m = gameMonth(day);
+    if (m === 6) return r < 0.42 ? 'rain' : r < 0.72 ? 'cloudy' : 'sunny'; // 梅雨
+    if (m === 7 || m === 8) return r < 0.28 ? 'heat' : r < 0.42 ? 'rain' : r < 0.55 ? 'cloudy' : 'sunny'; // 夏
+    if (m === 12 || m <= 2) return r < 0.22 ? 'ice' : r < 0.32 ? 'rain' : r < 0.58 ? 'cloudy' : 'sunny'; // 冬
+    return r < 0.16 ? 'rain' : r < 0.42 ? 'cloudy' : 'sunny'; // 春秋
+  }
+
+  function ensureWeather() {
+    if (!G.weather || G.weather.day !== G.day) {
+      const kind = weatherFor(G.day);
+      G.weather = Object.assign({ day: G.day, kind }, WEATHER[kind]);
+    }
+    return G.weather;
+  }
+
   function monthRevenueMain() {
     return G.history.slice(-30).reduce((a, d) => a + d.revenue, 0) + (G.today ? G.today.revenue : 0);
   }
@@ -776,12 +813,15 @@
     const arrivals = [];
     const push = (type, source, refer, seg) => arrivals.push({ t: 0, type, source, refer: !!refer, seg: seg || pickMix(baseMix) });
     const sundayBoost = weekdayOf(G.day) === 6 ? 1.3 : 1; // 日曜開院は競合が休み
+    const wx = ensureWeather();
 
-    // 自然新患(雨・流行イベントで増減)
+    // 自然新患(天気・流行イベントで増減)
     const share = G.rep / (G.rep + rivalRepNow());
     const campMul = boostActive('campaign') ? 1.5 : 1;
-    const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost * (G.evArrivalMul || 1) * campMul + (Math.random() * 4 - 2)));
+    const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost * wx.newMul * (G.evArrivalMul || 1) * campMul + (Math.random() * 4 - 2)));
     for (let i = 0; i < nNew; i++) push('first', 'house');
+    // 天気による転倒・外傷の初診(雨は少し、凍結は多い)
+    for (let i = 0; i < frac(wx.falls * spec.arr); i++) push('first', 'house', false, Math.random() < 0.7 ? 'senior' : 'worker');
 
     // リスティング広告
     const report = {};
@@ -821,7 +861,7 @@
 
     // 再診・リハ(予約済み)
     const due = G.schedule[G.day] || { revisit: 0, rehab: 0 };
-    const showRate = (0.75 + 0.2 * (G.rep / 100) + (settings.reserve ? 0.05 : 0) + (G.deco.bus ? 0.04 : 0) + 0.01 * bondLv('front')) * Math.min(1.1, G.evArrivalMul || 1);
+    const showRate = (0.75 + 0.2 * (G.rep / 100) + (settings.reserve ? 0.05 : 0) + (G.deco.bus ? 0.04 : 0) + 0.01 * bondLv('front') + (G.weather ? G.weather.show : 0)) * Math.min(1.1, G.evArrivalMul || 1);
     for (let i = 0; i < due.revisit; i++) if (Math.random() < showRate) push('revisit', 'house');
     for (let i = 0; i < due.rehab; i++) if (Math.random() < showRate) push('rehab', 'house');
     delete G.schedule[G.day];
@@ -1691,6 +1731,7 @@
         <div class="rs-item"><small>評判</small><b>${Math.round(G.rep)}</b><small class="rs-delta ${repDelta >= 0 ? 'up' : 'down'}">${repDelta >= 0 ? '+' : ''}${repDelta}</small></div>
         <div class="rs-item"><small>新患</small><b>${T.newCount}人</b>${delta(T.newCount, prev ? prev.newCount || 0 : 0, false, true)}</div>
       </div>
+      ${G.weather && G.weather.note ? `<div class="rs-bottle">${G.weather.icon} <b>${G.weather.label}</b> — ${G.weather.note}</div>` : ''}
       ${T.balked ? `<div class="rs-bottle rs-balk">🚪 混雑で <b>${T.balked}人</b> が入口で帰ってしまいました(機会損失 約${yen(T.balked * 3500)}) — 椅子か回転(受付・診察)を</div>` : ''}
       <div class="rs-bottle">🔍 ${bn.text}</div>
       ${st ? `<div class="voice-row rs-voice">${STAFF_UI.faceSVG(dv.char, 'normal', 40)}<div class="voice-txt"><small>${st.title} ${st.name}</small><p>${dv.text}</p></div></div>` : ''}
@@ -2364,7 +2405,9 @@
     const hm = $('hMedal');
     if (hm) hm.textContent = `🪙 ${G.coins || 0}`;
     const spec = G.daySpec || specOf(G.day);
-    $('hDay').textContent = `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}${spec.kind === 'am' ? '·午前' : spec.kind === 'closed' ? '·休診' : ''})`;
+    const wxh = ensureWeather();
+    $('hDay').textContent = `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}${spec.kind === 'am' ? '·午前' : spec.kind === 'closed' ? '·休診' : ''}) ${wxh.icon}`;
+    $('hDay').title = `天気: ${wxh.label}${wxh.note ? ' — ' + wxh.note : ''}`;
     $('hClock').textContent = spec.kind === 'closed' ? '—' : fmtClock(G.t);
     $('hRep').textContent = Math.round(G.rep);
     $('hAw').textContent = `${Math.round(G.aw * 100)}%`;
@@ -4056,6 +4099,7 @@
           getDeco: () => G.deco || {},
           getTown: () => ({ branches: G.branches.map((x) => x.siteId), billboard: G.billboard }),
           getClinicName: () => G.clinicName,
+          getWeather: () => ensureWeather(),
           getHud: () => ({
             line1: `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}) ${fmtClock(G.t)} — ${escapeHtml(G.clinicName)}`,
             line2: walk3d && walk3d.mode === 'town'

@@ -192,6 +192,7 @@
       this.patGroup = new THREE.Group();
       this.scene.add(this.staticGroup, this.staffGroup, this.patGroup);
       this.ray = new THREE.Raycaster();
+      this.wx = { kind: null, points: null, speed: 0 };
       // 自動ターゲットの足元リング
       const ring = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.56, 28),
         new THREE.MeshBasicMaterial({ color: 0x4FA98C, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
@@ -201,6 +202,47 @@
       this.scene.add(ring);
       this.target = null;
       this.bindControls();
+    }
+
+    /* ---------- 🌦 天気の描画(空の色+雨/雪) ---------- */
+    applyWeather(kind) {
+      if (this.wx.kind === kind) return;
+      this.wx.kind = kind;
+      const sky = { sunny: 0xDCEAF2, cloudy: 0xC9D3D9, rain: 0xAEBBC4, heat: 0xF3E9D2, ice: 0xE9EEF3 }[kind] || 0xDCEAF2;
+      this.scene.background.setHex(sky);
+      this.scene.fog.color.setHex(sky);
+      if (this.wx.points) { this.scene.remove(this.wx.points); this.wx.points = null; }
+      if ((kind === 'rain' || kind === 'ice') && this.mode === 'town') {
+        const n = kind === 'rain' ? 420 : 300;
+        const pos = new Float32Array(n * 3);
+        for (let i = 0; i < n; i++) {
+          pos[i * 3] = (Math.random() - 0.5) * 36;
+          pos[i * 3 + 1] = Math.random() * 12;
+          pos[i * 3 + 2] = (Math.random() - 0.5) * 36;
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const mat = new THREE.PointsMaterial({
+          color: kind === 'rain' ? 0x9FB6C6 : 0xFFFFFF,
+          size: kind === 'rain' ? 0.06 : 0.12,
+          transparent: true, opacity: kind === 'rain' ? 0.7 : 0.9
+        });
+        this.wx.points = new THREE.Points(geo, mat);
+        this.wx.speed = kind === 'rain' ? 11 : 2.2;
+        this.scene.add(this.wx.points);
+      }
+    }
+
+    stepWeather(dt) {
+      const p = this.wx.points;
+      if (!p) return;
+      p.position.set(this.camera.position.x, 0, this.camera.position.z);
+      const arr = p.geometry.attributes.position.array;
+      for (let i = 1; i < arr.length; i += 3) {
+        arr[i] -= this.wx.speed * dt;
+        if (arr[i] < 0) arr[i] = 12;
+      }
+      p.geometry.attributes.position.needsUpdate = true;
     }
 
     stateSig() {
@@ -788,6 +830,7 @@
     // 院内⇄街 のシームレス移動
     switchMode(mode) {
       this.mode = mode;
+      this.wx.kind = null; // 天気の描画をモードに合わせて再適用
       this.buildStatic();
       this.placePlayer();
       if (this.hooks.onModeSwitch) this.hooks.onModeSwitch(mode);
@@ -898,6 +941,8 @@
       const dt = Math.min(0.06, (ts - this._lastTs) / 1000 || 0.016);
       this._lastTs = ts;
       if (++this._fn % 45 === 0 && this.stateSig() !== this.staticSig) this.buildStatic();
+      if (this._fn % 30 === 1 && this.hooks.getWeather) this.applyWeather((this.hooks.getWeather() || {}).kind);
+      this.stepWeather(dt);
       if (this.mode === 'clinic' && (this._fn === 40 || this._fn % 120 === 0)) this.spawnChat();
       if (this.chat && performance.now() > this.chat.until) {
         if (this.chat.g && this.chat.sp) this.chat.g.remove(this.chat.sp);
