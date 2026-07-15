@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-14",
+  "updated": "2026-07-15",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -136,7 +136,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "直近の開発が最も活発",
-      "lastCommit": "2026-07-14"
+      "lastCommit": "2026-07-15"
     },
     {
       "id": "him-quiz",
@@ -200,7 +200,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-05"
+      "lastCommit": "2026-07-15"
     },
     {
       "id": "moyamoya",
@@ -216,7 +216,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-04"
+      "lastCommit": "2026-07-15"
     },
     {
       "id": "pmi-quest",
@@ -232,7 +232,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-04"
+      "lastCommit": "2026-07-15"
     },
     {
       "id": "ittan-horyu",
@@ -248,7 +248,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-01"
+      "lastCommit": "2026-07-15"
     },
     {
       "id": "karte",
@@ -264,7 +264,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-05"
+      "lastCommit": "2026-07-15"
     },
     {
       "id": "reha-checklist",
@@ -295,7 +295,7 @@
       "status": "未掲載",
       "measure": "local",
       "note": "動くPWA。カタログ掲載か引退かの判断待ち",
-      "lastCommit": "2026-07-07"
+      "lastCommit": "2026-07-15"
     },
     {
       "id": "yawagaeshi",
@@ -311,7 +311,7 @@
       "status": "未掲載",
       "measure": "local",
       "note": "動くPWA。返信生成にworkerバックエンド依存あり。掲載判断待ち",
-      "lastCommit": "2026-07-01"
+      "lastCommit": "2026-07-15"
     },
     {
       "id": "bridge-focus",
@@ -345,7 +345,7 @@
       "status": "未掲載",
       "measure": "local",
       "note": "販売LP(2,980円)だがstarter-kitsハブからリンクされていない孤立ページ。導線をつなぐか引退かの判断待ち",
-      "lastCommit": "2026-07-11"
+      "lastCommit": "2026-07-15"
     }
   ]
 }
