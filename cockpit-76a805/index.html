@@ -86,11 +86,11 @@ body.reviewing .ck-reviewbar{display:flex}
     <button class="ck-review-btn" id="reviewBtn" type="button">レビューを始める</button>
   </div>
   <div id="board"></div>
-  <noscript><p style="max-width:660px;margin:60px auto;color:var(--ink-3);font-size:13px">台帳の表示にはJavaScriptが必要です。データは cockpit/ledger.json にあります。</p></noscript>
+  <noscript><p style="max-width:660px;margin:60px auto;color:var(--ink-3);font-size:13px">台帳の表示にはJavaScriptが必要です。データは cockpit-76a805/ledger.json にあります。</p></noscript>
 
   <div class="ck-legend" data-reveal>
     <div class="h">HOW TO READ</div>
-    左端に砂色の線がある行は、いま運営者の判断を待っている道具。文字が淡い日付は、それだけ長くふれていないという距離のしるし。状態を変えるときは「レビューを始める」から選び直し、書き戻し用JSONをコピーして cockpit/ledger.json を置き換える。最終更新日は出荷のたびに scripts/update-ledger.mjs で焼き直す。
+    左端に砂色の線がある行は、いま運営者の判断を待っている道具。文字が淡い日付は、それだけ長くふれていないという距離のしるし。状態を変えるときは「レビューを始める」から選び直し、書き戻し用JSONをコピーして cockpit-76a805/ledger.json を置き換える。最終更新日は出荷のたびに scripts/update-ledger.mjs で焼き直す。
     <div id="knownIssues"></div>
   </div>
 </main>
@@ -257,11 +257,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     const text = JSON.stringify(out, null, 2) + '\n';
     try {
       await navigator.clipboard.writeText(text);
-      msgEl.textContent = 'コピーした。cockpit/ledger.json を置き換えて出荷する';
+      msgEl.textContent = 'コピーした。cockpit-76a805/ledger.json を置き換えて出荷する';
     } catch (e) {
       const ta = document.createElement('textarea');
       ta.value = text; document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); msgEl.textContent = 'コピーした。cockpit/ledger.json を置き換えて出荷する'; }
+      try { document.execCommand('copy'); msgEl.textContent = 'コピーした。cockpit-76a805/ledger.json を置き換えて出荷する'; }
       catch (e2) { msgEl.textContent = 'コピーできなかった。ブラウザの権限を確認'; }
       ta.remove();
     }
