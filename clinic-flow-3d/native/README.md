@@ -63,6 +63,32 @@ npm install @capacitor-community/admob
 - [ ] プライバシーポリシー URL(データ収集なし・ローカルセーブのみ、の旨)
 - [ ] スクリーンショット: 横持ちコックピット表示を推奨(タブレット枠も対応)
 
+## 実機ビルド前チェック(プリフライト)
+
+ローカルPCで以下を順に。エラーが出た段階のメッセージをそのまま相談してもらえれば解決できます。
+
+```bash
+cd clinic-flow-3d/native
+node -v                      # 18+ であること
+npm install
+bash sync.sh                 # → "synced -> www/ (xx files)" が出ればOK
+npx cap add android
+npx cap doctor               # 環境診断(Android SDK のパス等)
+npx cap sync
+npx cap open android         # Android Studio が起動 → Run ▶
+```
+
+### 実機で必ず確認したい5点
+
+1. **横持ちロック**: 視察モードで自動的に横向きになるか(効かない場合は
+   `android/app/src/main/AndroidManifest.xml` の activity に
+   `android:screenOrientation="fullUser"` があるか確認)
+2. **ローカル通知**: 🔔ONで19時の通知が予約されるか(Android 13+は初回に許可ダイアログ)
+3. **3D性能**: 視察モードのフレームレート(中級機で30fps以上が目安。重い場合は
+   `walk3d.js` の `setPixelRatio` を1に固定する手がある)
+4. **セーブ永続**: アプリ再起動でDay・常連・実績が残るか(WebViewのlocalStorage)
+5. **効果音**: 初回タップ後に音が鳴るか(WebAudioのユーザー操作解禁)
+
 ## 構成
 
 ```
