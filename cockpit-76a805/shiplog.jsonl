@@ -1,0 +1,1 @@
+{"date":"2026-07-16","commit":"","scope":"出荷ハーネス構築（check-site/ゲートhook/shipスキル/shiplog/配線）","checks":{"machine":"pass","qa":"pass","editor":"n/a","designer":"n/a"},"verdict":"shipped","notes":"ゲートhookは設定ウォッチャーの仕様で次セッションから発火。今回はshipスキル手順の明示実行で担保。次セッション最初のコミットでhook発火の実地確認を行うこと"}
