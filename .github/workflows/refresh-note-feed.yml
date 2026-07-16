@@ -1,0 +1,55 @@
+name: Refresh note feed
+
+# noteのRSSを毎朝取り込み、Journalページが読む notes/feed.json を焼き直す。
+# 記事の増減がない日はコミットしない(updated_atの行だけの差分は無視)。
+
+on:
+  schedule:
+    - cron: '23 20 * * *' # 20:23 UTC = 5:23 JST 毎朝
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: refresh-note-feed
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch RSS
+        run: |
+          curl -sS --fail --retry 3 --retry-delay 5 \
+            -A "Mozilla/5.0 (compatible; BRIDGE-feed/1.0; +https://bridge-med.github.io/bridge-lp/)" \
+            "https://note.com/prime_duck4944/rss" -o /tmp/note-rss.xml
+      - name: Convert to JSON
+        run: python3 .github/scripts/rss-to-json.py /tmp/note-rss.xml notes/feed.json
+      - name: Commit if articles changed
+        id: commit
+        run: |
+          if git diff --quiet -I'"updated_at"' -- notes/feed.json; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            git checkout -- notes/feed.json
+            echo "記事の増減なし。今日は静かなまま"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add notes/feed.json
+            git commit -m 'chore(notes): noteフィードの取り込み'
+            git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
+            -d '{"ref":"master"}'
