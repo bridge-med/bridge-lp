@@ -1,0 +1,52 @@
+name: Weekly ledger refresh
+
+# 週次レビュー便。台帳(cockpit)の最終更新日を毎週月曜7:00(JST)に焼き直す。
+# 社長承認済みの自動コミット(2026-07-15)。変更が出た週だけコミットする。
+
+on:
+  schedule:
+    - cron: '0 22 * * 0' # 日曜22:00 UTC = 月曜7:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: weekly-ledger
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # プロダクトごとの最終コミット日をgit logで引くため全履歴が要る
+      - name: Refresh ledger
+        run: node scripts/update-ledger.mjs
+      - name: Commit if changed
+        id: commit
+        run: |
+          if git diff --quiet; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            echo "変更なし。今週は静かなまま"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add -A
+            git commit -m 'chore(cockpit): 週次の鮮度焼き直し'
+            git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # GITHUB_TOKENのpushはpushイベントのworkflowを起こさないため、deployを明示的に呼ぶ
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
+            -d '{"ref":"master"}'
