@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/pre-commit-gate.mjs\"",
+            "timeout": 90,
+            "statusMessage": "出荷ゲート: check-site.mjs で機械検査中"
+          }
+        ]
+      }
+    ]
+  }
+}
