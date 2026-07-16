@@ -1,0 +1,69 @@
+name: Weekly note material
+
+# 週次のnote素材便。毎週金曜21:00(JST)に、その週の出荷(コミット)とworklogメモを
+# 1本のIssueにまとめ、note記事の骨子として運営者に渡す。
+# 記事の声(一人称)は運営者のものなので、ここでは素材と骨子だけを組む。
+
+on:
+  schedule:
+    - cron: '0 12 * * 5' # 金曜12:00 UTC = 金曜21:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  material:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build material and open issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          SINCE=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)
+          WEEK=$(date -u +%Y-%m-%d)
+
+          # 今週の出荷(マージコミットは除き、件名だけ)
+          COMMITS=$(git log --since="$SINCE" --no-merges --format='- %s' -- . | head -30)
+          [ -z "$COMMITS" ] && COMMITS='- (今週の出荷はなし)'
+
+          # 今週動いたworklogメモ(label: worklog)
+          WORKLOG=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$REPO/issues?labels=worklog&state=all&since=$SINCE&per_page=10" \
+            | python3 -c 'import json,sys; items=json.load(sys.stdin); print("\n".join(f"- #{i[\"number\"]} {i[\"title\"]}" for i in items) or "- (今週のメモはなし)")')
+
+          BODY=$(cat <<EOF
+          ## 今週の素材($WEEK 締め)
+
+          ### 出荷したもの
+          $COMMITS
+
+          ### worklogのメモ
+          $WORKLOG
+
+          ### 記事の骨子(下書きの型)
+          1. 今週いちばん手が動いたことを、1つだけ選ぶ
+          2. なぜそれを作ったか(現場のどんな違和感からか)
+          3. 作ってみて分かったこと(うまくいかなかったことも書く)
+          4. 締めは静かに。宣伝で終わらせない
+
+          ### 声のガイド(憲法より)
+          - 一人称は「僕」でよい(手記・第18条)
+          - 「!」を使わない。見出しに句点を付けない(第19条)
+          - 測っていないことを効いたように書かない(第15条)
+
+          ---
+          この骨子で書けそうなら、Claudeに「このIssueから下書きを起こして」と頼めば
+          15分で直せる状態まで持っていきます。書けない週は、このIssueを閉じるだけで大丈夫です。
+          EOF
+          )
+
+          curl -sS -X POST -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/issues" \
+            -d "$(python3 -c 'import json,sys; print(json.dumps({"title": "note素材 — "+sys.argv[1]+"週", "body": sys.stdin.read(), "labels": ["note-draft"]}))' "$WEEK" <<< "$BODY")"
