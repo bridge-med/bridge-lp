@@ -33,9 +33,9 @@ jobs:
           [ -z "$COMMITS" ] && COMMITS='- (今週の出荷はなし)'
 
           # 今週動いたworklogメモ(label: worklog)
-          WORKLOG=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+          WORKLOG=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/$REPO/issues?labels=worklog&state=all&since=$SINCE&per_page=10" \
-            | python3 -c 'import json,sys; items=json.load(sys.stdin); print("\n".join(f"- #{i[\"number\"]} {i[\"title\"]}" for i in items) or "- (今週のメモはなし)")')
+            | python3 -c 'import json,sys; items=json.load(sys.stdin); print("\n".join("- #{0} {1}".format(i["number"], i["title"]) for i in items) or "- (今週のメモはなし)")')
 
           BODY=$(cat <<EOF
           ## 今週の素材($WEEK 締め)
