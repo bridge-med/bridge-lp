@@ -354,14 +354,10 @@
       ],
       "stage": "実践",
       "serves": "整形外科クリニックのリハ部門。スプレッドシート1枚でKPI管理を明日から始められるようにする",
-      "status": "未掲載",
+      "status": "計測中",
       "measure": "local",
-      "note": "販売LP(2,980円)だがstarter-kitsハブからリンクされていない孤立ページ。導線をつなぐか引退かの判断待ち",
-      "lastCommit": "2026-07-15",
-      "decision": {
-        "points": "販売LP(2,980円)として完成しているのに、どこからもリンクされていない。載せる場所はPRODUCTSより、RehaBoard系を既に束ねているstarter-kitsハブが自然に見える。引退させる場合はnote側の商品ページとの整合を先に確認する",
-        "catalogDraft": "starter-kits/index.html のキット一覧に1枚:\n{ name: 'RehaBoard Starter Kit(スプレッドシート版)', href: '../rehaboard-starter/index.html',\n  p: 'スプレッドシート1枚で、リハ部門のKPI管理を明日から始める買い切りキット。' }\n※ サムネイル作成済み(images/products/thumbs/rehaboard-starter.webp)"
-      }
+      "note": "starter-kitsハブ(KIT 03)から導線接続(2026-07-16)。副業設計の収益の器。売れ行きは計測で見る",
+      "lastCommit": "2026-07-15"
     }
   ],
   "knownIssues": [
