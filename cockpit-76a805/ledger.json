@@ -203,6 +203,22 @@
       "lastCommit": "2026-07-15"
     },
     {
+      "id": "tanaoroshi",
+      "name": "経験の棚卸し",
+      "jp": "Tanaoroshi",
+      "cat": "casual",
+      "href": "../tanaoroshi/index.html",
+      "dirs": [
+        "tanaoroshi"
+      ],
+      "stage": "評価",
+      "serves": "転職・面接を控えた医療職・対人援助職。経験を言葉にできず選択肢を狭めている人に、自分の実績を自分の言葉で語る材料を渡す",
+      "status": "計測中",
+      "measure": "local",
+      "note": "stage/servesはPM下書き・社長確認前。棚卸し(自己評価)→キャリアログ導線で再評価へ接続",
+      "lastCommit": ""
+    },
+    {
       "id": "moyamoya",
       "name": "Moyamoya Check",
       "jp": "職場モヤモヤ診断",
