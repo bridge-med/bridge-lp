@@ -71,22 +71,33 @@
   function renderChips() {
     const catEl = document.getElementById('chips-cat');
     catEl.innerHTML =
-      '<button type="button" class="chip' + (filterCat === 'all' ? ' on' : '') + '" data-cat="all">すべての場面</button>' +
+      '<button type="button" class="chip' + (filterCat === 'all' ? ' on' : '') + '" data-cat="all" aria-pressed="' + (filterCat === 'all') + '">すべての場面</button>' +
       CATEGORIES.map((c) =>
-        '<button type="button" class="chip' + (filterCat === c.id ? ' on' : '') + '" data-cat="' + c.id + '">' + esc(c.name) + '</button>'
+        '<button type="button" class="chip' + (filterCat === c.id ? ' on' : '') + '" data-cat="' + c.id + '" aria-pressed="' + (filterCat === c.id) + '">' + esc(c.name) + '</button>'
       ).join('');
     const roleEl = document.getElementById('chips-role');
     roleEl.innerHTML =
-      '<button type="button" class="chip' + (filterRole === 'all' ? ' on' : '') + '" data-role="all">すべての職種</button>' +
+      '<button type="button" class="chip' + (filterRole === 'all' ? ' on' : '') + '" data-role="all" aria-pressed="' + (filterRole === 'all') + '">すべての職種</button>' +
       ROLES.map((r) =>
-        '<button type="button" class="chip' + (filterRole === r.id ? ' on' : '') + '" data-role="' + r.id + '">' + esc(r.name) + '</button>'
+        '<button type="button" class="chip' + (filterRole === r.id ? ' on' : '') + '" data-role="' + r.id + '" aria-pressed="' + (filterRole === r.id) + '">' + esc(r.name) + '</button>'
       ).join('');
     catEl.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
       filterCat = b.dataset.cat; openKey = null; renderList();
+      const nb = document.querySelector('#chips-cat .chip[data-cat="' + b.dataset.cat + '"]');
+      if (nb) nb.focus();
     }));
     roleEl.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
       filterRole = b.dataset.role; openKey = null; renderList();
+      const nb = document.querySelector('#chips-role .chip[data-role="' + b.dataset.role + '"]');
+      if (nb) nb.focus();
     }));
+  }
+
+  // innerHTML再生成でフォーカスが<body>に落ちるのを防ぐ(キーボード・SR操作)
+  function focusRowEl(key, cls) {
+    const row = Array.from(document.querySelectorAll('.word-row')).find((r) => r.dataset.key === key);
+    const el = row && row.querySelector(cls);
+    if (el) el.focus();
   }
 
   function starSvg(onFlag) {
@@ -130,6 +141,7 @@
       const key = b.closest('.word-row').dataset.key;
       openKey = openKey === key ? null : key;
       renderList();
+      focusRowEl(key, '.word-toggle');
     }));
     listEl.querySelectorAll('.word-star').forEach((b) => b.addEventListener('click', () => {
       const key = b.closest('.word-row').dataset.key;
@@ -141,6 +153,7 @@
       }
       persist();
       renderList();
+      focusRowEl(key, '.word-star');
     }));
 
     const n = saved.length;
@@ -184,6 +197,8 @@
       saved = saved.filter((k) => k !== b.dataset.del);
       persist();
       renderSaved();
+      const next = document.querySelector('#saved-list [data-del]') || document.getElementById('saved-back');
+      if (next) next.focus();
     }));
   }
 
