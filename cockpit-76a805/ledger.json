@@ -390,6 +390,22 @@
       "measure": "local",
       "note": "starter-kitsハブ(KIT 03)から導線接続(2026-07-16)。副業設計の収益の器。売れ行きは計測で見る",
       "lastCommit": "2026-07-15"
+    },
+    {
+      "id": "medops",
+      "name": "医療管理実務ライブラリ",
+      "jp": "仮称。ブランド名は medops/data/site.mjs で一元管理",
+      "cat": "management",
+      "href": "../medops/index.html",
+      "dirs": [
+        "medops"
+      ],
+      "stage": "理解・設計",
+      "serves": "新任の医療管理職(事務長・法人本部・現場の管理職)。曖昧な実務を実行手順に変え、着手の順番を自分で選べるようにする",
+      "status": "未掲載",
+      "measure": "local",
+      "note": "第31条申告は社長確定待ち。products配列・NAV未掲載(サムネイル作成と掲載可否は社長判断)。決済開始前に特定商取引法に基づく表記の掲載が必須。法務3枚は仮文面で専門家確認要",
+      "lastCommit": ""
     }
   ],
   "knownIssues": [
