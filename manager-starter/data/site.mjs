@@ -135,6 +135,7 @@ export const FOOTER_LINKS = {
   ],
   about: [
     { label: '運営者について', href: 'about/index.html' },
+    { label: '法人・教育担当の方へ', href: 'corporate/index.html' },
     { label: 'BRIDGE(運営プロジェクト)', href: '../index.html' },
     { label: '医療管理実務ライブラリ(施設運営の実務)', href: '../medops/index.html' },
     { label: 'お問い合わせ', href: '../community/index.html' },

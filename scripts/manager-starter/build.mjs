@@ -76,13 +76,17 @@ const packAvailable = PRODUCT.status === 'published';
     ['業務分担を見直す', '自分や特定の職員へ偏った仕事を書き出し、任せる手順へつなげます。'],
     ['AIを安全に活用する', '個人情報を入力しない線引きを決めたうえで、議事メモや報告文の下書きに使います。'],
   ];
+  const profHref = (id) => {
+    const p = profs.find((x) => x.id === id);
+    return p ? `professions/${p.slug}/index.html` : null;
+  };
   const profCards = [
-    ['リハビリ職の管理職', '臨床を続けながら実績管理・教育・会議が積み重なりやすい立場です。単位数などの数字と新人教育の割り当てが最初の壁になります。'],
-    ['看護管理職', '業務分担と勤務調整の悩みが集中します。看護師が物品や雑務まで抱えている構造の整理が最初のテーマになりがちです。'],
-    ['訪問看護管理者', '訪問を続けながら採用・教育・請求・シフトまで。管理業務の種類が最も多く、月1回の型に収める工夫が必要です。'],
-    ['医療事務責任者', '他部署・他職種との調整と新人教育が課題になりやすい立場です。決定事項の記録が特に効きます。'],
-    ['クリニックの管理職', '院長との距離が近く、報告と相談の型があるだけで運営が変わります。少人数ゆえの属人化も課題です。'],
-    ['管理職を育てる上司・法人', '新任管理職へ「何を渡して何から始めてもらうか」の共通の型として使えます。法人利用のご相談はお問い合わせから。'],
+    ['リハビリ職の管理職', '臨床を続けながら実績管理・教育・会議が積み重なりやすい立場です。単位数などの数字と新人教育の割り当てが最初の壁になります。', profHref('reha')],
+    ['看護管理職', '業務分担と勤務調整の悩みが集中します。看護師が物品や雑務まで抱えている構造の整理が最初のテーマになりがちです。', profHref('nurse')],
+    ['訪問看護管理者', '訪問を続けながら採用・教育・請求・シフトまで。管理業務の種類が最も多く、月1回の型に収める工夫が必要です。', profHref('homon')],
+    ['医療事務責任者', '他部署・他職種との調整と新人教育が課題になりやすい立場です。決定事項の記録が特に効きます。', profHref('jimu')],
+    ['クリニックの管理職', '院長との距離が近く、報告と相談の型があるだけで運営が変わります。少人数ゆえの属人化も課題です。', null],
+    ['管理職を育てる上司・法人', '新任管理職へ「何を渡して何から始めてもらうか」の共通の型として使えます。法人利用のご相談も受け付けています。', 'corporate/index.html'],
   ];
   const body = `
 <section class="hero">
@@ -181,9 +185,10 @@ ${packAvailable ? `
     <h2 class="sec-h">職種別の入口</h2>
     <p class="sec-lead">同じ「管理職」でも、最初の壁は職種で違います。</p>
     <div class="grid c3" style="margin-top:22px">
-      ${profCards.map(([t, d]) => `<div class="prof-card"><span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></div>`).join('\n      ')}
+      ${profCards.map(([t, d, href]) => href
+        ? `<a class="prof-card" href="${href}"><span class="t">${esc(t)}</span><span class="d">${esc(d)}</span><span style="font-size:11.5px;color:var(--blue);font-weight:700;margin-top:2px">くわしく見る</span></a>`
+        : `<div class="prof-card plain"><span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></div>`).join('\n      ')}
     </div>
-    ${profs.length === 0 ? '<p style="font-size:12px;color:var(--ink-3);margin-top:14px">職種別の詳しいページは順次公開します。まずは共通のテンプレートと記事からどうぞ。</p>' : ''}
   </div>
 </section>
 
@@ -823,6 +828,114 @@ ${breadcrumbs(root, [['プランと料金', null]])}
     event: E.PRICING_VIEW,
     body,
     ld: [breadcrumbLd([['プランと料金', 'pricing/index.html']])],
+  }));
+}
+
+/* ================================================================
+   職種別ページ
+   ================================================================ */
+for (const pr of profs) {
+  const root = '../../';
+  const path = `professions/${pr.slug}/index.html`;
+  const others = profs.filter((x) => x.id !== pr.id);
+  const recT = (pr.recommendedTemplateIds || []).map(tplById).filter(Boolean);
+  const recA = (pr.recommendedArticleIds || []).map(artById).filter(Boolean);
+  const body = `
+${breadcrumbs(root, [['職種別', null], [pr.title, null]])}
+<div class="wrap page-head" style="border-bottom:none;padding-bottom:0">
+  <p class="eyebrow">Professions</p>
+  <h1>${esc(pr.heading)}</h1>
+  <p class="standpoint">${esc(pr.standpointText)}</p>
+</div>
+<div class="wrap" style="padding-bottom:50px">
+  <div class="text-wrap prose">
+    <p>${esc(pr.background)}</p>
+    <h2>よくある悩み</h2>
+  </div>
+  <div class="rows text-wrap" style="margin:12px 0 6px">
+    ${pr.pains.map((p, i) => `<div class="row"><span class="m">${String(i + 1).padStart(2, '0')}</span><span class="b">${esc(p)}</span></div>`).join('\n    ')}
+  </div>
+  <div class="text-wrap prose">
+    <h2>最初に確認すること</h2>
+    <ol>${pr.firstChecks.map((c) => `<li>${esc(c)}</li>`).join('')}</ol>
+    ${packAvailable && pr.packNote ? `<h2>スターターパックの使い方</h2><p>${esc(pr.packNote)}<a href="${root}pack/index.html" style="text-decoration:underline">パックの内容を見る</a></p>` : ''}
+    <h2>よくある質問</h2>
+    <div class="faq">
+      ${(pr.faq || []).map((f) => `<details><summary>${esc(f.q)}</summary><div class="a">${esc(f.a)}</div></details>`).join('\n      ')}
+    </div>
+  </div>
+  <section class="related">
+    <div class="h">まず使う無料テンプレート</div>
+    <div class="grid c2">${recT.map((t) => tplCard(t, root)).join('')}</div>
+    <div class="h" style="margin-top:22px">あわせて読む記事</div>
+    <div class="grid c2">${recA.map((a) => artCard(a, root)).join('')}</div>
+  </section>
+  <p style="font-size:13px;margin-top:26px">ほかの職種: ${others.map((o) => `<a class="fchip" style="display:inline-flex;margin:3px 4px 3px 0" href="${root}professions/${o.slug}/index.html">${esc(o.title)}</a>`).join('')}</p>
+</div>`;
+  out(path, page({
+    path,
+    title: pr.title,
+    description: pr.seoDescription,
+    pageId: 'templates',
+    event: E.PROFESSION_VIEW,
+    body,
+    ld: [breadcrumbLd([[pr.title, path]]), (pr.faq && pr.faq.length) ? {
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: pr.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    } : null],
+  }));
+}
+
+/* ================================================================
+   法人・教育担当の方へ
+   ================================================================ */
+{
+  const root = '../';
+  const points = [
+    ['新任管理職教育の共通の型になる', '管理職ごとにばらついていた1on1・会議・報告のやり方を、同じシートと言葉で揃えられます。'],
+    ['配布して終わらない', '読む教材ではなく記入して使うシートなので、研修後にそのまま現場の運用に残ります。'],
+    ['職種横断で使える', '看護・リハビリ・医療事務・訪問看護に共通の構造で、職種で変わる部分は記入式です。'],
+    ['研修の事前・事後課題に使える', '現在地チェック(12問)を事前課題に、就任後の振り返りシートを事後課題にする使い方ができます。'],
+  ];
+  const body = `
+${breadcrumbs(root, [['法人・教育担当の方へ', null]])}
+<div class="wrap page-head">
+  <p class="eyebrow">For Organizations</p>
+  <h1>法人・教育担当の方へ</h1>
+  <p class="lead">病院・医療法人・訪問看護/介護事業者・リハビリ部門で、新任管理職の教育を担当されている方向けのご案内です。</p>
+</div>
+<div class="wrap" style="padding-bottom:50px">
+  <div class="text-wrap prose">
+    <p>新任管理職が増えても、研修を毎回外注する予算はない。研修をしても、現場で何を実践するかまで落ちない。管理職によって基礎知識に差があり、1on1や評価の品質がばらつく——法人の教育担当の方から伺う悩みは、おおむねこの3つに集約されます。本サイトの資料は、この「研修と現場のあいだ」を埋めるために使えます。</p>
+  </div>
+  <div class="grid c2" style="margin:22px 0">
+    ${points.map(([t, d]) => `<div class="cat-card" style="cursor:default"><span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></div>`).join('\n    ')}
+  </div>
+  <div class="text-wrap prose">
+    <h2>利用の形</h2>
+    <ul>
+      <li><strong>いますぐ(無料)</strong> — 無料テンプレートと記事は法人内で自由に共有できます。新任管理職に<a href="${root}templates/first-7days-checklist/index.html">7日チェックリスト</a>と<a href="${root}check/index.html">現在地チェック</a>を案内するところから始められます。</li>
+      ${packAvailable ? `<li><strong>スターターパック(決済準備中)</strong> — 20種の実務シート一式。法人購入では1法人内の共有・複数拠点での利用を想定しています。<a href="${root}pack/index.html">内容はこちら</a>。</li>` : ''}
+      <li><strong>法人プラン(構想中)</strong> — 複数名利用・研修利用・導入ガイドを含む年間契約を構想しています(<a href="${root}pricing/index.html">料金の考え方</a>)。内容は導入のご相談をいただきながら固めていく段階です。</li>
+    </ul>
+    <h2>お引き受けできないこと</h2>
+    <ul>
+      <li>人事評価制度の設計・労務判断の代行(専門家の領域です)</li>
+      <li>既製の集合研修パッケージの販売(現時点では提供していません)</li>
+    </ul>
+    <p>導入を急ぐ必要はありません。まず無料テンプレートを新任管理職の方に配って、現場の反応を見るだけでも十分です。</p>
+    <p style="margin-top:18px"><a class="btn primary" href="${root}../community/index.html">法人利用について問い合わせる</a></p>
+    <p style="font-size:12px;color:var(--ink-3)">お問い合わせは${esc(SITE.parent.name)}の窓口で受け付けています。法人名・想定人数・使いたい場面をお書き添えください。</p>
+  </div>
+</div>`;
+  out('corporate/index.html', page({
+    path: 'corporate/index.html',
+    title: '法人・教育担当の方へ',
+    description: '病院・医療法人・訪問看護/介護事業者向け。新任管理職教育の共通の型として、1on1・会議・上司報告のシートを法人内で活用いただけます。複数名利用のご相談も受付中。',
+    pageId: '',
+    event: E.CORP_INQUIRY,
+    body,
+    ld: [breadcrumbLd([['法人・教育担当の方へ', 'corporate/index.html']])],
   }));
 }
 

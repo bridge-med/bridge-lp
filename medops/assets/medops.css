@@ -146,7 +146,7 @@ body.menu-open .mo-drawer{display:block}
 @media(max-width:620px){.grid.c3,.grid.c2{grid-template-columns:1fr}}
 
 .cat-card{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px;transition:all .25s var(--ease)}
-.cat-card:hover{border-color:var(--blue-soft);transform:translateY(-2px);box-shadow:var(--shadow)}
+a.cat-card:hover{border-color:var(--blue-soft);transform:translateY(-2px);box-shadow:var(--shadow)}
 .cat-card .t{font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px}
 .cat-card .t svg{color:var(--sand);flex:none}
 .cat-card .d{font-size:12px;color:var(--ink-3);line-height:1.8;flex:1}
