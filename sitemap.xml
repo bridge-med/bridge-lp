@@ -68,4 +68,33 @@
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/legal/privacy.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/legal/disclaimer.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <!-- medops:auto:end -->
+  <!-- manager-starter:auto:start (scripts/manager-starter/build.mjs が生成。手で編集しない) -->
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/check/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/first-7days-checklist/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/first-oneonone-questions/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/team-issue-sheet/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/boss-report-format/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/manager-selfcheck/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/meeting-improvement-checklist/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/member-info-sheet/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/team-task-writeout/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/ai-rules-for-managers/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/templates/pre-promotion-checklist/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/pack/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/articles/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/articles/first-30days-manager/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/articles/first-oneonone/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/articles/boss-report-4items/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/articles/team-issues-list/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/articles/delegation-escape/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/guide/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/about/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/faq/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/pricing/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/legal/terms.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/legal/privacy.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/manager-starter/legal/disclaimer.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <!-- manager-starter:auto:end -->
 </urlset>
