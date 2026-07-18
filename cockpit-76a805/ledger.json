@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-16",
+  "updated": "2026-07-17",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -216,7 +216,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "stage/servesはPM下書き・社長確認前。棚卸し(自己評価)→キャリアログ導線で再評価へ接続",
-      "lastCommit": ""
+      "lastCommit": "2026-07-17"
     },
     {
       "id": "moyamoya",
