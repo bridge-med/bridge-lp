@@ -18,6 +18,12 @@ lines = sys.argv[2:]
 base = Path(os.environ.get("UGC_SBV2_MODEL") or Path(__file__).parent / "voices" / "sbv2")
 rate = float(os.environ.get("UGC_TTS_RATE") or 1.0)
 
+# pyopenjtalkの辞書自動ダウンロードはGitHub遮断環境で失敗するため、
+# apt導入済みの辞書を使う(style_bert_vits2のimportより前に設定が必要)
+_apt_dic = "/var/lib/mecab/dic/open-jtalk/naist-jdic"
+if os.path.isdir(_apt_dic):
+    os.environ.setdefault("OPEN_JTALK_DICT_DIR", _apt_dic)
+
 from style_bert_vits2.constants import Languages
 from style_bert_vits2.nlp import bert_models
 from style_bert_vits2.tts_model import TTSModel

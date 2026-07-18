@@ -15,6 +15,8 @@ RATE="${UGC_TTS_RATE:-1.0}"                       # 話速。1.0が標準、上�
 VV_URL="${VOICEVOX_URL:-http://127.0.0.1:50021}"
 VV_SPEAKER="${VOICEVOX_SPEAKER:-2}"               # 2 = 四国めたん(ノーマル)
 SBV2_DIR="${UGC_SBV2_MODEL:-$PWD/voices/sbv2}"
+SBV2_PY="$PWD/work/venv/bin/python"          # setup.shが作るvenv(無ければsystem python)
+[ -x "$SBV2_PY" ] || SBV2_PY=python3
 DIC=/var/lib/mecab/dic/open-jtalk/naist-jdic
 MEI="$PWD/voices/mei_normal.htsvoice"
 
@@ -23,7 +25,7 @@ mkdir -p "$WORK/vo"
 pick_engine() {
   if [ -n "${UGC_TTS:-}" ]; then echo "$UGC_TTS"; return; fi
   if curl -fsS -m 2 "$VV_URL/version" >/dev/null 2>&1; then echo voicevox; return; fi
-  if [ -f "$SBV2_DIR/config.json" ] && python3 -c 'import style_bert_vits2' 2>/dev/null; then
+  if [ -f "$SBV2_DIR/config.json" ] && "$SBV2_PY" -c 'import style_bert_vits2' 2>/dev/null; then
     echo sbv2; return
   fi
   echo openjtalk
@@ -50,7 +52,7 @@ print(json.dumps(d))' <<<"$q")
     ;;
   sbv2)
     UGC_SBV2_MODEL="$SBV2_DIR" UGC_TTS_RATE="$RATE" \
-      python3 tts-sbv2.py "$WORK/vo" "${LINES[@]}"
+      "$SBV2_PY" tts-sbv2.py "$WORK/vo" "${LINES[@]}"
     ;;
   openjtalk)
     i=0

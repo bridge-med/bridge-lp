@@ -28,10 +28,18 @@ echo "== ニューラルTTS(任意): Style-Bert-VITS2 =="
 if [ -f ../voices/sbv2/config.json ]; then
   echo "  導入済み(voices/sbv2)"
 elif curl -fsS -m 8 -o /dev/null https://huggingface.co 2>/dev/null; then
-  pip install -q style-bert-vits2 huggingface_hub
-  python3 - <<'EOF'
-# 注意: 本節はHugging Face遮断環境で書かれた未検証コード。リポジトリID・
-# ファイル構成は初回実行時に要確認(litagin02/Style-Bert-VITS2 のREADME参照)
+  # システムpip(Debianパッチ済みsetuptools)は依存の旧式sdistのビルドに失敗するためvenvを使う。
+  # tts.sh もこのvenv(work/venv)を見る。
+  [ -x venv/bin/python ] || python3 -m venv venv
+  # setuptoolsは81未満に固定(pyopenjtalkが要求するpkg_resourcesが82で削除された)
+  venv/bin/pip install -q -U pip wheel 'setuptools<81'
+  # torchはCPU版を明示(既定のCUDA版は数GB大きく、この環境では不要)
+  venv/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cpu \
+    || venv/bin/pip install -q torch
+  # numpyは2未満に固定(pyopenjtalk-dictのwheelがnumpy 1.x向けビルド)
+  # transformersは5未満に固定(v5はBERT configのfloat16指定を尊重し型不一致で推論が落ちる)
+  venv/bin/pip install -q style-bert-vits2 huggingface_hub 'numpy<2' 'transformers<5'
+  venv/bin/python - <<'EOF'
 from pathlib import Path
 from huggingface_hub import snapshot_download
 
@@ -47,7 +55,12 @@ dst.mkdir(parents=True, exist_ok=True)
 for f in src.iterdir():
     f.rename(dst / f.name)
 # 日本語BERT(推論に必須・約1.3GB)
-snapshot_download("ku-nlp/deberta-v2-large-japanese-char-wwm", local_dir=dst / "bert")
+# .binはsafetensorsと重複する同内容の旧形式(1.3GB)なので除外
+snapshot_download(
+    "ku-nlp/deberta-v2-large-japanese-char-wwm",
+    local_dir=dst / "bert",
+    ignore_patterns=["*.bin"],
+)
 EOF
   echo "  Style-Bert-VITS2 導入完了"
 else
