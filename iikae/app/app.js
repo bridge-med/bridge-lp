@@ -71,8 +71,9 @@
   function renderChips() {
     const catEl = document.getElementById('chips-cat');
     catEl.innerHTML =
+      '<button type="button" class="chip' + (filterCat === 'all' ? ' on' : '') + '" data-cat="all">すべての場面</button>' +
       CATEGORIES.map((c) =>
-        '<button type="button" class="chip' + (filterCat === c.id ? ' on' : '') + '" data-cat="' + c.id + '" aria-pressed="' + (filterCat === c.id) + '">' + esc(c.name) + '</button>'
+        '<button type="button" class="chip' + (filterCat === c.id ? ' on' : '') + '" data-cat="' + c.id + '">' + esc(c.name) + '</button>'
       ).join('');
     const roleEl = document.getElementById('chips-role');
     roleEl.innerHTML =
@@ -81,8 +82,7 @@
         '<button type="button" class="chip' + (filterRole === r.id ? ' on' : '') + '" data-role="' + r.id + '">' + esc(r.name) + '</button>'
       ).join('');
     catEl.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
-      filterCat = filterCat === b.dataset.cat ? 'all' : b.dataset.cat; // もう一度押すと絞り込み解除
-      openKey = null; renderList();
+      filterCat = b.dataset.cat; openKey = null; renderList();
     }));
     roleEl.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
       filterRole = b.dataset.role; openKey = null; renderList();

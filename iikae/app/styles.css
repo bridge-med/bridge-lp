@@ -230,7 +230,7 @@ a { color: inherit; text-decoration: none; }
 .view-head .sub { font-size: 13.5px; color: var(--ink-3); line-height: 2.1; max-width: 540px; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.chips + .chips { margin-top: 8px; }
+.chips + .chips { margin-top: 16px; }
 .chip {
   min-height: 36px;
   padding: 5px 14px;
