@@ -16,10 +16,10 @@
   --sand:#A98F63; --sand-bg:rgba(169,143,99,0.10);
   --blue-bg:rgba(36,54,92,0.08);
   --warn:#8A5A2B; --warn-bg:rgba(178,124,63,0.10);
-  /* CTA用テラコッタ(社長提供LPイメージ 2026-07-18 に基づく。第22条の色数は憲法改定の検討事項) */
-  --cta:#A9502B; --cta-ink:#FFF6F0;
+  /* CTA色は砂(第22条の4系統内。テラコッタ案は社長判断で見送り 2026-07-18、cockpit-76a805/drafts参照) */
+  --cta:#A98F63; --cta-ink:#221A0E;
   /* ネイビー帯(パック紹介。両テーマ共通の暗色帯) */
-  --band:#16233E; --band-2:#1D2B4C; --band-ink:#EFECE4; --band-dim:#9AA6BF; --band-accent:#E8B48E;
+  --band:#16233E; --band-2:#1D2B4C; --band-ink:#EFECE4; --band-dim:#9AA6BF; --band-accent:#E4C695;
   --card:#FFFFFF;
   --shadow:0 1px 3px rgba(22,35,62,0.05),0 10px 30px rgba(22,35,62,0.06);
   --mincho:'Shippori Mincho B1','Noto Serif JP',serif;
@@ -38,8 +38,8 @@
   --sand:#C2A97E; --sand-bg:rgba(194,169,126,0.14);
   --blue-bg:rgba(159,177,212,0.14);
   --warn:#D2A66B; --warn-bg:rgba(210,166,107,0.14);
-  --cta:#C97F58; --cta-ink:#161311;
-  --band:#131A2A; --band-2:#1B2540; --band-ink:#EFECE4; --band-dim:#8E93A3; --band-accent:#E8B48E;
+  --cta:#C2A97E; --cta-ink:#161311;
+  --band:#131A2A; --band-2:#1B2540; --band-ink:#EFECE4; --band-dim:#8E93A3; --band-accent:#E4C695;
   --card:#181E2E;
   --shadow:0 1px 3px rgba(0,0,0,0.3),0 10px 30px rgba(0,0,0,0.35);
 }
@@ -166,7 +166,6 @@ a.cat-card:hover{border-color:var(--blue-soft);transform:translateY(-2px);box-sh
 .tpl-card .d{font-size:12px;color:var(--ink-2);line-height:1.8;flex:1}
 .tpl-card .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11px;color:var(--ink-3)}
 .tpl-card .price{font-weight:700;color:var(--ink);font-size:13px}
-.tpl-card .price .was{font-weight:500;color:var(--ink-4);text-decoration:line-through;font-size:11px;margin-right:6px}
 
 .art-card{display:flex;flex-direction:column;gap:7px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:17px 18px;transition:all .25s var(--ease)}
 .art-card:hover{border-color:var(--blue-soft);transform:translateY(-2px);box-shadow:var(--shadow)}
@@ -216,8 +215,6 @@ details.fmore[open] summary::after{transform:rotate(180deg)}
 .buy-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
 .buy-card .price-now{font-size:24px;font-weight:700}
 .buy-card .price-now small{font-size:12px;font-weight:500;color:var(--ink-3)}
-.buy-card .price-was{font-size:12px;color:var(--ink-3)}
-.buy-card .price-was s{color:var(--ink-4)}
 .buy-card .note{font-size:11px;color:var(--ink-3);line-height:1.75}
 .side-box{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:16px;font-size:12px;color:var(--ink-2)}
 .side-box .h{font-weight:700;font-size:12px;margin-bottom:8px;color:var(--ink)}
@@ -437,7 +434,6 @@ dialog.mo-dialog::backdrop{background:rgba(10,14,24,0.5)}
 .pack-band h2{font-size:clamp(19px,2.8vw,25px);font-weight:700;margin:8px 0 6px}
 .pack-band .lead{font-size:13px;color:var(--band-dim);line-height:1.9}
 .pack-band .price-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin:16px 0 4px}
-.pack-band .price-row .was{font-size:13px;color:var(--band-dim)}
 .pack-band .price-row .now{font-size:30px;font-weight:700;color:var(--band-accent)}
 .pack-band .price-row .tax{font-size:12px;color:var(--band-dim)}
 .pack-band .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}

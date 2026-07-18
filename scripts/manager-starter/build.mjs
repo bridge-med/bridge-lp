@@ -219,7 +219,6 @@ ${packAvailable ? `
         <h2>${esc(PRODUCT.title)}</h2>
         <p class="lead">${esc(PRODUCT.heading)}。管理業務をゼロから考えずに済むよう、就任からの流れに沿って整理した実務テンプレート集です。</p>
         <div class="price-row">
-          <span class="was">通常価格 <s>${fmtPrice(P.list)}</s></span>
           <span class="now">${fmtPrice(P.launch)}</span>
           <span class="tax">税込・初期販売価格</span>
         </div>
@@ -542,7 +541,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <div class="pack-meta">
       <span>収録 <b>${packItems.length}ファイル</b></span>
       <span>形式 <b>Excel・Word(スプレッドシート取込可)</b></span>
-      <span>価格 <b>${fmtPrice(P.launch)}</b> <s style="color:var(--ink-4)">${fmtPrice(P.list)}</s> <span style="color:var(--ink-3)">税込・初期価格</span></span>
+      <span>価格 <b>${fmtPrice(P.launch)}</b> <span style="color:var(--ink-3)">税込・初期販売価格</span></span>
       <span>更新 <b>${dateJp(PRODUCT.updatedAt)}</b></span>
     </div>
   </div>
@@ -592,8 +591,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <div class="buy-card">
       <span><span class="badge paid">有料</span> <span class="badge prep">決済準備中</span></span>
       <div>
-        <div class="price-was">通常価格 <s>${fmtPrice(P.list)}</s></div>
-        <div class="price-now">${fmtPrice(P.launch)} <small>税込・初期価格</small></div>
+        <div class="price-now">${fmtPrice(P.launch)} <small>税込・初期販売価格</small></div>
       </div>
       <button class="btn primary" data-buy="${PRODUCT.id}">購入方法を問い合わせる</button>
       <a class="btn ghost" href="#sample">サンプルを確認する</a>
@@ -894,7 +892,6 @@ ${breadcrumbs(root, [['プランと料金', null]])}
     <div class="plan${p.id === 'pack' ? ' hl' : ''}">
       <div class="pn">${esc(p.name)}</div>
       <div class="pp">${p.price === 0 ? '0円' : fmtPrice(p.price) + `<small> / ${esc(p.unit)}</small>`}</div>
-      ${p.listPrice ? `<div style="font-size:11.5px;color:var(--ink-3)">通常価格 ${fmtPrice(p.listPrice)}(初期価格適用中の想定)</div>` : ''}
       <ul>${p.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>
       <p class="note">${esc(p.note)}</p>
     </div>`).join('')}
