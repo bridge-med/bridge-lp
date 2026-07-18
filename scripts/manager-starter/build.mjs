@@ -99,21 +99,36 @@ const packAvailable = PRODUCT.status === 'published';
         <span>医療専門職の新任管理職向け</span><span>記入して使う実務シート</span><span>無料で試せる</span>
       </div>
       <div class="hero-cta">
-        <a class="btn primary" href="templates/first-7days-checklist/index.html">最初の7日チェックリストを見る</a>
+        <a class="btn cta" href="templates/first-7days-checklist/index.html">最初の7日チェックリストを見る</a>
         <a class="btn ghost" href="check/index.html">管理職の現在地を確認する</a>
       </div>
+      <p style="font-size:11.5px;color:var(--ink-3);margin-top:12px">登録不要・無料ですぐ使えます</p>
     </div>
-    <div class="hero-preview" aria-label="テンプレートの例(上司報告フォーマットの記入例)">
-      <div class="bar"><b>上司報告フォーマット</b><span>— 4項目・1枚で</span></div>
-      <div style="overflow-x:auto"><table>
-        <tbody>
-          <tr><th scope="row">状況</th><td>今週は大きなトラブルなし。新人2名は研修2週目です</td></tr>
-          <tr><th scope="row">課題</th><td>金曜午後の人員が薄い/物品管理の担当が未定</td></tr>
-          <tr><th scope="row">対応</th><td>来月シフトで調整予定/次回会議で担当を決めます</td></tr>
-          <tr><th scope="row">相談</th><td>応援体制についてご相談したいです(10分)</td></tr>
-        </tbody>
-      </table></div>
-      <div class="cap">無料テンプレート「上司報告の基本フォーマット」の記入例</div>
+    <div class="hero-minis" aria-label="テンプレートの例">
+      <div class="mini">
+        <div class="mt">1on1質問シート(例)</div>
+        <ul>
+          <li><span class="bx on" aria-hidden="true"></span><span>今の業務量は率直にどうですか</span></li>
+          <li><span class="bx on" aria-hidden="true"></span><span>困っていることは何ですか</span></li>
+          <li><span class="bx" aria-hidden="true"></span><span>手伝ってほしいことは</span></li>
+        </ul>
+      </div>
+      <div class="mini">
+        <div class="mt">チーム課題ボード</div>
+        <ul>
+          <li><span class="bx on" aria-hidden="true"></span><span>情報共有が漏れる — 対応中</span></li>
+          <li><span class="bx" aria-hidden="true"></span><span>新人の教え方に差 — 今週</span></li>
+          <li><span class="bx" aria-hidden="true"></span><span>発注の属人化 — 待ち</span></li>
+        </ul>
+      </div>
+      <div class="mini wide">
+        <div class="mt">90日アクションプラン</div>
+        <ul>
+          <li><span class="bx on" aria-hidden="true"></span><span>0-30日: 全員と1on1・数字を集める</span></li>
+          <li><span class="bx" aria-hidden="true"></span><span>31-60日: 課題を一覧化して優先順位</span></li>
+          <li><span class="bx" aria-hidden="true"></span><span>61-90日: 1つ仕組みにして手を離す</span></li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
@@ -121,25 +136,46 @@ const packAvailable = PRODUCT.status === 'published';
 <section class="sec">
   <div class="wrap">
     <p class="eyebrow">Worries</p>
-    <h2 class="sec-h">管理職になった日から、急に求められることが増えます</h2>
-    <div class="rows text-wrap" style="margin-top:22px">
-      ${worries.map((w, i) => `<div class="row"><span class="m">${String(i + 1).padStart(2, '0')}</span><span class="b">${esc(w)}</span></div>`).join('\n      ')}
+    <h2 class="sec-h">こんなお悩みはありませんか</h2>
+    <div class="grid c3" style="margin-top:22px">
+      ${worries.map((w) => `<div class="worry-card"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg><span class="d">${esc(w)}</span></div>`).join('\n      ')}
     </div>
   </div>
 </section>
 
 <section class="sec" style="background:var(--bg-2)">
-  <div class="wrap text-wrap">
+  <div class="wrap">
     <p class="eyebrow">Why</p>
-    <h2 class="sec-h">できなくて当然です — 管理は、臨床とは別の技能だからです</h2>
-    <p style="font-size:13.5px;color:var(--ink-2);margin-top:12px;line-height:2">医療専門職は、専門業務・患者対応・後輩指導・多職種連携を積み重ねて管理職になります。しかし管理職に求められる業務設計・人員配置・評価・目標管理・報告・会議設計・採用・数字管理は、臨床の延長ではなく別の技能です。学んでいないだけで、学べば身につきます。このサイトは、その学びを講義ではなく「記入して使う道具」の形で提供します。放置してよいわけではありませんが、一度に全部やる必要もありません。</p>
+    <h2 class="sec-h">なぜ、医療専門職の管理職は難しいのか</h2>
+    <div class="shift" style="margin-top:22px">
+      <div class="col">
+        <div class="h">臨床経験で身についたこと</div>
+        <ul>
+          <li>専門知識・技術</li>
+          <li>患者さんへの直接的な支援</li>
+          <li>後輩指導・チームでの協働</li>
+          <li>現場の状況把握力</li>
+        </ul>
+      </div>
+      <div class="arrow" aria-hidden="true"><span>役割の</span><span>シフト</span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="col after">
+        <div class="h">管理職に求められること</div>
+        <ul>
+          <li>目標設定と進捗管理</li>
+          <li>業務分担・人材育成・評価</li>
+          <li>数字での説明と上司・他部門との調整</li>
+          <li>会議設計・採用</li>
+        </ul>
+      </div>
+    </div>
+    <p class="text-wrap" style="font-size:13.5px;color:var(--ink-2);margin-top:18px;line-height:2">この2つは別の技能です。学ぶ機会がないまま任されるから難しいのであって、できなくて当然の状態から始まります。学べば身につきます。このサイトは、その学びを講義ではなく「記入して使う道具」の形で提供します。</p>
   </div>
 </section>
 
 <section class="sec">
   <div class="wrap">
     <p class="eyebrow">What</p>
-    <h2 class="sec-h">このサイトでできること</h2>
+    <h2 class="sec-h">${esc(SITE.name)}の特徴</h2>
     <div class="grid c3" style="margin-top:22px">
       ${features.map(([t, d]) => `<div class="cat-card" style="cursor:default"><span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></div>`).join('\n      ')}
     </div>
@@ -158,31 +194,59 @@ const packAvailable = PRODUCT.status === 'published';
 
 <section class="sec">
   <div class="wrap">
-    <p class="eyebrow">Templates</p>
-    <h2 class="sec-h">無料テンプレート</h2>
+    <p class="eyebrow">Free</p>
+    <h2 class="sec-h">無料で使える資料</h2>
     <p class="sec-lead">すべてページ上でそのまま使えます。コピーして、自分の職場に合わせて書き換えてください。</p>
-    <div class="grid c2" style="margin-top:22px">
-      ${featuredT.map((t) => tplCard(t, root)).join('\n      ')}
+    <div class="grid c3" style="margin-top:22px">
+      ${tpls.slice().sort((a, b) => (a.priority || 99) - (b.priority || 99)).slice(0, 6).map((t) => `
+      <a class="tpl-card" href="templates/${t.slug}/index.html">
+        <span class="top"><span class="pill-free">FREE</span><span class="badge cat">${esc(catShort(t.categoryId))}</span></span>
+        <span class="t">${esc(t.title)}</span>
+        <span class="d">${esc(t.summary)}</span>
+        <span class="meta"><span class="btn ghost small" style="pointer-events:none">無料で見る</span></span>
+      </a>`).join('')}
     </div>
-    <p class="sec-more"><a class="btn ghost small" href="templates/index.html">テンプレートをすべて見る</a></p>
+    <p class="sec-more"><a class="btn ghost small" href="templates/index.html">すべての無料資料を見る</a></p>
   </div>
 </section>
 
 ${packAvailable ? `
-<section class="sec" style="background:var(--bg-2)">
+<section class="sec">
   <div class="wrap">
-    <p class="eyebrow">Starter Pack</p>
-    <h2 class="sec-h">${esc(PRODUCT.heading)}</h2>
-    <p class="sec-lead">${esc(PRODUCT.shortDescription)}</p>
-    <p style="margin-top:18px"><a class="btn primary" href="pack/index.html">スターターパックの内容を見る</a>
-    <span style="font-size:12px;color:var(--ink-3);margin-left:12px">${fmtPrice(P.launch)}(税込・初期価格)/ 決済準備中</span></p>
+    <div class="pack-band">
+      <div>
+        <p class="eyebrow">Starter Pack</p>
+        <h2>${esc(PRODUCT.title)}</h2>
+        <p class="lead">${esc(PRODUCT.heading)}。管理業務をゼロから考えずに済むよう、就任からの流れに沿って整理した実務テンプレート集です。</p>
+        <div class="price-row">
+          <span class="was">通常価格 <s>${fmtPrice(P.list)}</s></span>
+          <span class="now">${fmtPrice(P.launch)}</span>
+          <span class="tax">税込・初期販売価格</span>
+        </div>
+        <div class="chips"><span>収録${packItems.length}ファイル</span><span>Excel / Word 編集可</span><span>AIプロンプト付き</span><span>決済準備中</span></div>
+        <p><a class="btn cta" href="pack/index.html">スターターパックを詳しく見る</a></p>
+        <p style="font-size:11.5px;color:var(--band-dim);margin-top:10px">オンライン決済は準備中です。内容とサンプルは商品ページで公開しています。</p>
+      </div>
+      <div class="inc">
+        <div class="h">収録テンプレート(一部)</div>
+        <ul>
+          <li>新任管理職の最初の30日チェックリスト</li>
+          <li>1on1質問シート(定例版)・1on1記録シート</li>
+          <li>チーム課題管理表・会議アジェンダ</li>
+          <li>上司報告フォーマット(週次・月次・緊急)</li>
+          <li>KPI候補整理シート・採用面接評価シート</li>
+          <li>管理職90日アクションプラン</li>
+        </ul>
+        <div class="more">など全${packItems.length}点。<a href="pack/index.html#files" style="text-decoration:underline;color:var(--band-ink)">収録一覧をすべて見る</a></div>
+      </div>
+    </div>
   </div>
 </section>` : ''}
 
 <section class="sec"${packAvailable ? '' : ' style="background:var(--bg-2)"'}>
   <div class="wrap">
     <p class="eyebrow">Professions</p>
-    <h2 class="sec-h">職種別の入口</h2>
+    <h2 class="sec-h">職種別に見る</h2>
     <p class="sec-lead">同じ「管理職」でも、最初の壁は職種で違います。</p>
     <div class="grid c3" style="margin-top:22px">
       ${profCards.map(([t, d, href]) => href
@@ -217,21 +281,43 @@ ${packAvailable ? `
 </section>
 
 <section class="sec" style="background:var(--bg-2)">
-  <div class="wrap text-wrap">
+  <div class="wrap">
     <p class="eyebrow">Author</p>
     <h2 class="sec-h">作っている人も、臨床しか知らない状態から管理職になりました</h2>
-    <p style="font-size:13.5px;color:var(--ink-2);margin-top:12px;line-height:2">${esc(SITE.operator.background)}このサイトの資料は、そのときに欲しかったものを、いま経営支援の実務で使っている形に整えたものです。<a href="about/index.html" style="text-decoration:underline">運営者について</a></p>
+    <div class="author-cols" style="margin-top:20px">
+      <div class="col"><div class="h">臨床経験</div><div class="d">理学療法士として病院で臨床・後輩指導・多職種連携を経験。現場の言葉で書いています。</div></div>
+      <div class="col"><div class="h">管理職経験</div><div class="d">約40名規模のリハビリ部門をマネジメント。1on1も報告も、教わらないまま現場で覚えました。</div></div>
+      <div class="col"><div class="h">医療機関支援</div><div class="d">現在は医療機関の経営支援・業務改善・採用支援に従事。支援先の管理職と一緒に道具を磨いています。</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--ink-2);margin-top:16px">現場と経営の両方を知る立場から、本当に使う道具だけを残しています。<a href="about/index.html" style="text-decoration:underline">運営者についてくわしく</a></p>
   </div>
 </section>
 
 <section class="sec">
-  <div class="wrap text-wrap" style="text-align:center">
-    <p style="font-size:14px;color:var(--ink-2);line-height:2">全部を一度に変える必要はありません。<br>まずは、最初の7日で確認することから始めてください。</p>
-    <p style="margin-top:18px"><a class="btn primary" href="templates/first-7days-checklist/index.html">無料の7日チェックリストを使う</a></p>
+  <div class="wrap text-wrap">
+    <p class="eyebrow">FAQ</p>
+    <h2 class="sec-h">よくあるご質問</h2>
+    <div class="faq" style="margin-top:12px">
+      <details><summary>Excelやパソコンが苦手でも使えますか</summary><div class="a">使えます。無料テンプレートはページ上でそのまま読め、コピーして使えます。関数の知識は不要で、印刷して手書きでも機能します。</div></details>
+      <details><summary>どの職種でも使えますか</summary><div class="a">看護師・リハビリ職・医療事務・訪問看護など医療専門職に共通の構造で作っています。職種で変わる部分(数字・教育項目など)は記入式です。</div></details>
+      <details><summary>法人内で共有できますか</summary><div class="a">無料テンプレートは院内・法人内で自由に共有できます。有料パックは1法人内での共有・複数拠点での利用を想定しています。</div></details>
+      <details><summary>返金はできますか</summary><div class="a">デジタル資料の性質上、提供後の返金は原則お受けしない方針です。販売開始時に、サンプルを購入前に確認できるようにし、正式な条件を利用規約に明記します。</div></details>
+    </div>
+    <p class="sec-more"><a class="btn ghost small" href="faq/index.html">すべての質問を見る</a></p>
   </div>
 </section>
 
-<section class="sec" style="padding-top:0">
+<div class="closing">
+  <div class="wrap">
+    <p class="stmt">全部を一度に変える必要はありません<br>まずは、最初の7日で確認することから</p>
+    <div class="hero-cta" style="justify-content:center;margin-top:22px">
+      <a class="btn cta" href="templates/first-7days-checklist/index.html">最初の7日チェックリストを見る(無料)</a>
+      <a class="btn ghost" href="check/index.html">管理職の現在地を確認する(無料)</a>
+    </div>
+  </div>
+</div>
+
+<section class="sec" style="padding-top:28px">
   <div class="wrap text-wrap">
     <div class="notice">
       <div class="h">ご利用にあたって</div>
