@@ -220,7 +220,7 @@ ${packAvailable ? `
         <p class="lead">${esc(PRODUCT.heading)}。管理業務をゼロから考えずに済むよう、就任からの流れに沿って整理した実務テンプレート集です。</p>
         <div class="price-row">
           <span class="now">${fmtPrice(P.launch)}</span>
-          <span class="tax">税込・初期販売価格</span>
+          <span class="tax">税込</span>
         </div>
         <div class="chips"><span>収録${packItems.length}ファイル</span><span>Excel / Word 編集可</span><span>AIプロンプト付き</span><span>決済準備中</span></div>
         <p><a class="btn cta" href="pack/index.html">スターターパックを詳しく見る</a></p>
@@ -541,7 +541,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <div class="pack-meta">
       <span>収録 <b>${packItems.length}ファイル</b></span>
       <span>形式 <b>Excel・Word(スプレッドシート取込可)</b></span>
-      <span>価格 <b>${fmtPrice(P.launch)}</b> <span style="color:var(--ink-3)">税込・初期販売価格</span></span>
+      <span>価格 <b>${fmtPrice(P.launch)}</b> <span style="color:var(--ink-3)">税込</span></span>
       <span>更新 <b>${dateJp(PRODUCT.updatedAt)}</b></span>
     </div>
   </div>
@@ -591,7 +591,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <div class="buy-card">
       <span><span class="badge paid">有料</span> <span class="badge prep">決済準備中</span></span>
       <div>
-        <div class="price-now">${fmtPrice(P.launch)} <small>税込・初期販売価格</small></div>
+        <div class="price-now">${fmtPrice(P.launch)} <small>税込</small></div>
       </div>
       <button class="btn primary" data-buy="${PRODUCT.id}">購入方法を問い合わせる</button>
       <a class="btn ghost" href="#sample">サンプルを確認する</a>
@@ -629,7 +629,7 @@ ${relatedSection(root, ['first-7days', 'first-oneonone-questions', 'boss-report-
   out(path, page({
     path,
     title: PRODUCT.title,
-    description: PRODUCT.shortDescription + ' 収録' + packItems.length + 'ファイル・' + fmtPrice(P.launch) + '(税込・初期価格・決済準備中)。',
+    description: PRODUCT.shortDescription + ' 収録' + packItems.length + 'ファイル・' + fmtPrice(P.launch) + '(税込・決済準備中)。',
     pageId: 'pack',
     event: E.PRODUCT_VIEW,
     body,

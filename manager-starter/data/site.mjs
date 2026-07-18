@@ -50,7 +50,7 @@ export const SITE = {
   /* 価格(すべて税込・仮設定。変更はここだけ) */
   pricing: {
     currency: 'JPY',
-    pack: { list: 14800, launch: 9800 },
+    pack: { list: 4980, launch: 4980 },  // 通常価格4,980円(社長決定 2026-07-18。値引き表示なし)
     plans: [
       {
         id: 'free',
@@ -64,11 +64,10 @@ export const SITE = {
       {
         id: 'pack',
         name: 'スターターパック(準備中)',
-        price: 9800,
-        listPrice: 14800,
+        price: 4980,
         unit: '買い切り',
         features: ['20の実務テンプレート', '使い方ガイド', 'AI活用プロンプト集', '更新版の利用(1年間)'],
-        note: '価格は仮設定です。販売開始時に改めて告知します。',
+        note: '決済は準備中です。開始時に告知します。',
         status: 'planned',
       },
       {
