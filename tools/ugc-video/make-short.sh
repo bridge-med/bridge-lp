@@ -4,8 +4,6 @@ set -euo pipefail
 cd "$(dirname "$0")"
 WORK="$PWD/work"
 SITE_ROOT="$PWD/../.."
-DIC=/var/lib/mecab/dic/open-jtalk/naist-jdic
-VOICE="$PWD/voices/mei_normal.htsvoice"
 
 mkdir -p "$WORK/vo"
 rm -rf "$WORK/rec"
@@ -23,9 +21,9 @@ NAME="${META[0]}"; END="${META[1]}"; OFFSETS="${META[2]}"
 LINES=("${META[@]:3}")
 
 echo "== ナレーション音声化 (${#LINES[@]}文) =="
+bash tts.sh "$WORK" "${LINES[@]}"
 i=0
 for line in "${LINES[@]}"; do
-  echo "$line" | open_jtalk -x "$DIC" -m "$VOICE" -r 1.0 -ow "$WORK/vo/seg$i.wav"
   d=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$WORK/vo/seg$i.wav")
   echo "  seg$i: ${d}s"
   i=$((i+1))
