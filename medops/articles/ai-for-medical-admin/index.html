@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>電子カルテ移行で移せる情報と移せない情報 — ベンダー確認項目付き | 医療管理実務ライブラリ</title>
-<meta name="description" content="電子カルテ移行で移行できるデータ・できないデータをデータ種別ごとに整理。移行できない情報の参照方法、ベンダーへの確認項目、切り替え日の決め方まで。">
-<link rel="canonical" href="https://bridge-med.github.io/bridge-lp/medops/articles/ehr-migration-data/">
-<meta property="og:title" content="電子カルテ移行で移せる情報と移せない情報 — ベンダー確認項目付き | 医療管理実務ライブラリ">
-<meta property="og:description" content="電子カルテ移行で移行できるデータ・できないデータをデータ種別ごとに整理。移行できない情報の参照方法、ベンダーへの確認項目、切り替え日の決め方まで。">
+<title>AIで医療管理業務を効率化するときの注意点 — 使いどころと入力してよい情報の線引き | 医療管理実務ライブラリ</title>
+<meta name="description" content="医療機関の管理業務で生成AIを安全に使う方法。効果が出る用途(文書下書き・メモ整理)、患者情報など入力禁止の線引き、出力の確認手順、院内ルールの作り方。">
+<link rel="canonical" href="https://bridge-med.github.io/bridge-lp/medops/articles/ai-for-medical-admin/">
+<meta property="og:title" content="AIで医療管理業務を効率化するときの注意点 — 使いどころと入力してよい情報の線引き | 医療管理実務ライブラリ">
+<meta property="og:description" content="医療機関の管理業務で生成AIを安全に使う方法。効果が出る用途(文書下書き・メモ整理)、患者情報など入力禁止の線引き、出力の確認手順、院内ルールの作り方。">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/medops/articles/ehr-migration-data/">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/medops/articles/ai-for-medical-admin/">
 <meta property="og:site_name" content="医療管理実務ライブラリ">
 <meta name="twitter:card" content="summary">
 <script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
@@ -18,8 +18,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/medops.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Crect x='16' y='12' width='32' height='40' rx='5' fill='none' stroke='%2316233E' stroke-width='3.4'/%3E%3Cpath d='M23 26h12M23 34h18M23 42h9' stroke='%2316233E' stroke-width='3.2' stroke-linecap='round'/%3E%3Cpath d='M38 24l4 4 7-8' stroke='%23A98F63' stroke-width='3.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"電子カルテ移行で移せる情報と移せない情報","description":"電子カルテの移行では、すべてのデータが新システムへ移るわけではありません。移行の可否をデータ種別ごとに整理し、ベンダーへの確認項目をまとめます。","inLanguage":"ja","datePublished":"2026-07-18","dateModified":"2026-07-18","author":{"@type":"Person","name":"橋本渉"},"publisher":{"@type":"Organization","name":"BRIDGE"},"mainEntityOfPage":"https://bridge-med.github.io/bridge-lp/medops/articles/ehr-migration-data/"}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://bridge-med.github.io/bridge-lp/medops/"},{"@type":"ListItem","position":2,"name":"記事","item":"https://bridge-med.github.io/bridge-lp/medops/articles/"},{"@type":"ListItem","position":3,"name":"電子カルテ移行で移せる情報と移せない情報","item":"https://bridge-med.github.io/bridge-lp/medops/articles/ehr-migration-data/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"AIで医療管理業務を効率化するときの注意点","description":"生成AIが効くのは文書の下書きと整理です。効果が出る使いどころ、入力してはいけない情報の線引き、出力を確認する手順を実務目線でまとめます。","inLanguage":"ja","datePublished":"2026-07-18","dateModified":"2026-07-18","author":{"@type":"Person","name":"橋本渉"},"publisher":{"@type":"Organization","name":"BRIDGE"},"mainEntityOfPage":"https://bridge-med.github.io/bridge-lp/medops/articles/ai-for-medical-admin/"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://bridge-med.github.io/bridge-lp/medops/"},{"@type":"ListItem","position":2,"name":"記事","item":"https://bridge-med.github.io/bridge-lp/medops/articles/"},{"@type":"ListItem","position":3,"name":"AIで医療管理業務を効率化するときの注意点","item":"https://bridge-med.github.io/bridge-lp/medops/articles/ai-for-medical-admin/"}]}</script>
 </head>
 <body data-page="articles" data-event="view_article">
 
@@ -65,14 +65,14 @@
 </header>
 <main>
 
-<nav class="crumbs wrap" aria-label="パンくず"><a href="../../index.html">ホーム</a><span class="sep" aria-hidden="true">/</span><a href="../../articles/index.html">記事</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">電子カルテ移行で移せる情報と移せない情報</span></nav>
+<nav class="crumbs wrap" aria-label="パンくず"><a href="../../index.html">ホーム</a><span class="sep" aria-hidden="true">/</span><a href="../../articles/index.html">記事</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">AIで医療管理業務を効率化するときの注意点</span></nav>
 <div class="wrap page-head" style="border-bottom:none;padding-bottom:0">
-  <p><span class="badge cat">電子カルテ・レセプト移行</span> <span class="chip">電子カルテ</span> <span class="chip">データ移行</span> <span class="chip">ORCA</span> <span class="chip">ベンダー確認</span></p>
-  <h1>電子カルテ移行で移せる情報と移せない情報</h1>
+  <p><span class="badge cat">文例・AI活用</span> <span class="chip">AI活用</span> <span class="chip">情報管理</span> <span class="chip">文書作成</span></p>
+  <h1>AIで医療管理業務を効率化するときの注意点</h1>
   <div class="meta-bar">
     <span>公開 <b>2026/07/18</b></span>
     <span>更新 <b>2026/07/18</b></span>
-    <span>制度基準日 <b>2026/07/01</b></span>
+    
     <span>執筆 <b>橋本渉(BRIDGE)</b></span>
   </div>
 </div>
@@ -80,27 +80,25 @@
   <div class="text-wrap">
     <div class="lead-box">
       <div class="h">この記事で分かること</div>
-      <ul><li>データ種別ごとの移行可否の一般的な傾向</li><li>移行できないデータの現実的な扱い方</li><li>ベンダーに確認する項目</li></ul>
+      <ul><li>管理業務で生成AIの効果が出る使いどころ</li><li>入力してよい情報・いけない情報の線引き</li><li>出力を実務に使う前の確認手順と院内ルールの作り方</li></ul>
       <div class="h">このような方向け</div>
-      <p>電子カルテの入れ替え・統合を控えたクリニックの事務長、システム担当を兼ねる管理職。</p>
+      <p>生成AIを業務に使いたいが、情報の扱いに不安がある医療機関の管理職・本部スタッフ。AIをまだ使ったことがない方も対象です。</p>
     </div>
     <nav class="toc" aria-label="目次">
       <div class="h">目次</div>
-      <ol><li><a href="#sec-1">結論 — 「全部移る」を前提にしない</a></li><li><a href="#sec-2">データ種別ごとの一般的な傾向</a></li><li><a href="#sec-3">移行できないデータの扱い — 3つの選択肢</a></li><li><a href="#sec-4">ベンダーへの確認項目</a></li><li><a href="#sec-5">切り替え日の決め方</a></li><li><a href="#sec-6">よくある抜け漏れ</a></li></ol>
+      <ol><li><a href="#sec-1">結論 — 効くのは「下書き」と「整理」、線引きは先に決める</a></li><li><a href="#sec-2">効果が出る使いどころ</a></li><li><a href="#sec-3">入力してはいけない情報</a></li><li><a href="#sec-4">出力を使う前の確認手順</a></li><li><a href="#sec-5">院内ルールは1枚でよい</a></li></ol>
     </nav>
     <div class="prose">
-      <h2 id="sec-1">結論 — 「全部移る」を前提にしない</h2>
-<div class="point"><p>電子カルテの移行では、<strong>移行できるデータは一部</strong>というのが現実的な前提です。大事なのは「何が移るか」を早期にベンダーへ確認し、<strong>移らないデータをどう参照するか</strong>を先に決めておくことです。切り替え後に「見られない」と気づくのが最悪のパターンです。</p></div>
-      <h2 id="sec-2">データ種別ごとの一般的な傾向</h2>
-<table><thead><tr><th>データ</th><th>移行の傾向</th><th>備考</th></tr></thead><tbody><tr><td>患者基本情報</td><td>移行できることが多い</td><td>氏名・生年月日・保険情報など。標準的な移行対象</td></tr><tr><td>病名</td><td>移行できることが多い</td><td>コードの対応関係の確認が必要</td></tr><tr><td>処方歴</td><td>条件付き</td><td>マスタの違いで変換精度に差が出る</td></tr><tr><td>カルテ記事(SOAP)</td><td>条件付き</td><td>テキストとして移っても、書式・構造は失われがち</td></tr><tr><td>シェーマ・画像・添付ファイル</td><td>移行できないことが多い</td><td>形式・容量・費用の制約が大きい</td></tr><tr><td>検査結果</td><td>条件付き</td><td>検査会社との連携形式に依存</td></tr><tr><td>文書(紹介状・同意書等)</td><td>移行できないことが多い</td><td>PDF等での書き出しは可能な場合あり</td></tr></tbody></table><p>あくまで一般的な傾向です。実際の可否は現行・移行先の組み合わせで決まるため、必ず両ベンダーに確認してください。</p>
-      <h2 id="sec-3">移行できないデータの扱い — 3つの選択肢</h2>
-<ol><li><strong>旧システムの閲覧環境を残す</strong> — 参照専用で契約を縮小して残す方法。費用と期間をベンダーに確認します。カルテには保存義務があるため、閲覧手段の確保は移行計画の一部です。</li><li><strong>書き出して保存する</strong> — PDF・CSVなどで書き出し、保管ルールを決めて参照する方法。書き出しの範囲と費用を確認します。</li><li><strong>必要分だけ手入力する</strong> — 直近の通院患者に絞って、アレルギー・主要病名・直近処方などを新システムへ入力する方法。対象患者の基準と担当を決めて計画的に行います。</li></ol>
-      <h2 id="sec-4">ベンダーへの確認項目</h2>
-<ul><li>移行できるデータの範囲(上の表の区分ごとに可否を)</li><li>移行できないデータの書き出し可否・形式・費用</li><li>旧システムを参照専用で残す場合の費用と期間</li><li>移行作業の所要期間と、診療を止める時間があるか</li><li>移行データの検証方法(誰が・いつ・何件を確認するか)</li><li>概算費用と、費用が変動する条件</li></ul><p>問い合わせ文の下書きは、無料の問い合わせ文テンプレートにそのまま使える形で載せています。</p>
-      <h2 id="sec-5">切り替え日の決め方</h2>
-<p>切り替え日はレセプトの締めに合わせて<strong>月初</strong>に置くのが基本です。月の途中で切り替えると、1か月分の請求が新旧2システムにまたがり、請求業務の負荷が大きく上がります。切り替え直前の週は新規の予約を抑える、紙の運用手順を用意しておくなど、現場の逃げ道も同時に設計します。</p>
-      <h2 id="sec-6">よくある抜け漏れ</h2>
-<ul><li><strong>検査会社・薬局など外部連携の切り替え</strong> — カルテ本体に気を取られ、検査オーダーや処方箋の連携設定が漏れがちです。連携先の一覧を先に作ります。</li><li><strong>権限・マスタ設定の準備不足</strong> — 職員アカウント、セット(定型処方等)、文書テンプレートは移行されません。稼働前の設定作業として工数を見込みます。</li><li><strong>旧システムの解約時期</strong> — 参照が必要な期間を決めてから解約日を設定します。早すぎる解約は取り返しがつきません。</li></ul>
+      <h2 id="sec-1">結論 — 効くのは「下書き」と「整理」、線引きは先に決める</h2>
+<div class="point"><p>医療の管理業務で生成AIの効果がはっきり出るのは、<strong>文書の下書きと、雑多なメモの整理</strong>です。判断や制度の最終確認には使えません。そして使い始める前に、<strong>入力してはいけない情報の線引き</strong>を決めておくこと。効率化より先に、ここを整えるのが実務の順番です。</p></div>
+      <h2 id="sec-2">効果が出る使いどころ</h2>
+<ul><li><strong>問い合わせ文・案内文の下書き</strong> — 行政やベンダーへの質問文、職員向けの告知文。ゼロから書くより、下書きを直す方が早い典型です。</li><li><strong>会議メモをタスクに変換する</strong> — 走り書きのメモを渡して「担当者・期限・確認先の表にして」と頼む使い方。抜けの発見にも役立ちます。</li><li><strong>制度解説の要約</strong> — 長い通知文の概要をつかむ入口として。ただし数字・期限・要件は必ず原典で確認します(後述)。</li></ul><p>逆に、届出の要否判断・算定の可否・労務の個別判断をAIに委ねるのは不向きです。もっともらしい誤りが混ざるためです。</p>
+      <h2 id="sec-3">入力してはいけない情報</h2>
+<p>一般的なAIサービスへの入力は、外部のサーバーに情報を送ることと同じです。次の3つは入力しない、を原則にしてください。</p><ul><li><strong>患者情報</strong> — 氏名・生年月日・病名・診療内容。要約や匿名化のつもりでも、組み合わせで個人が特定できる情報は同じ扱いです。</li><li><strong>職員の個人情報</strong> — 氏名付きの評価・面談記録・給与情報。</li><li><strong>機微な経営情報</strong> — 交渉中の契約条件、公表前の統合・閉院の計画など。</li></ul><p>実務では「固有名詞を置き換えてから入力する」が現実的な運用です。施設名は「当院」、人は「Aさん」「常勤看護師」のように抽象化すれば、文書の下書きには十分です。</p>
+      <h2 id="sec-4">出力を使う前の確認手順</h2>
+<ol><li><strong>数字・期限・制度名を原典で確認する</strong> — AIの出力にある「10日以内」「◯◯加算」の類は、厚生局・保健所・公式通知で裏を取ります。制度は改定されるため、AIの学習時点より新しい変更は反映されていません。</li><li><strong>自院の状況に合わない項目を削る</strong> — AIの出力は網羅的になりがちです。項目を足すより削る方が、使える資料になります。</li><li><strong>最終確認者を決める</strong> — 対外文書(行政・患者・連携先向け)は、AIを使ったかどうかに関わらず、出す前に責任者が読む運用にします。</li></ol>
+      <h2 id="sec-5">院内ルールは1枚でよい</h2>
+<p>立派な規程を作る必要はありません。次の3点を1枚にして共有すれば、まず十分です。</p><ul><li>使ってよいツール(と、業務での利用可否)</li><li>入力してはいけない情報(上の3分類をそのまま)</li><li>対外文書の最終確認者</li></ul><p>自法人にすでに情報管理・セキュリティの規程がある場合は、そちらが優先です。ルールを作る前に、既存規程との整合を確認してください。</p>
       <div class="notice"><div class="h">注意事項</div>この記事は一般的な進め方の整理であり、法的・行政的な判断を保証するものではありません。個別の要件は所管の保健所・厚生局・自治体・専門家に確認してください。</div>
     </div>
   </div>
@@ -125,11 +123,11 @@
       <span class="price">無料</span>
     </span>
   </a></div>
-    <div class="h" style="margin-top:22px">関連する記事</div><div class="grid c2"><a class="art-card" href="../../articles/clinic-integration-first-10/index.html" data-cat="integration">
-    <span class="meta"><span class="badge cat">統合・承継・閉院</span></span>
-    <span class="t">クリニック統合で最初に整理すべき10項目</span>
-    <span class="d">統合を任された直後に、WBSを作る前へ整理しておく10項目。ここが曖昧なままだとタスク表は何度も作り直しになります。</span>
-    <span class="meta"><span>更新 2026/07/18</span><span>制度基準日 2026/07/01</span></span>
+    <div class="h" style="margin-top:22px">関連する記事</div><div class="grid c2"><a class="art-card" href="../../articles/gyosei-question-writing/index.html" data-cat="writing">
+    <span class="meta"><span class="badge cat">文例・AI活用</span></span>
+    <span class="t">行政へ確認するときの質問文の作り方</span>
+    <span class="d">行政への問い合わせは、聞き方で回答の質が変わります。前提→番号付き質問→記録、の3部構成で作る質問文の型と文例を紹介します。</span>
+    <span class="meta"><span>更新 2026/07/18</span></span>
   </a></div>
   </section>
 </main>

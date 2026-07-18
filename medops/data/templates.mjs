@@ -11,7 +11,9 @@
 
 export const TEMPLATES = [
 
-  /* ============ 有料・代表商品 ============ */
+  /* ============ 有料・代表商品 ============
+     社長判断で公開保留(2026-07-18)。データは完成状態で残す。
+     公開時は status を 'published' に戻して再生成するだけ。 */
   {
     id: 'integration-pack',
     slug: 'visiting-clinic-integration-pack',
@@ -92,7 +94,7 @@ export const TEMPLATES = [
     availability: 'preparing',
     priority: 1,
     isFeatured: true,
-    status: 'published',
+    status: 'draft',
     /* サンプル(WBS抜粋)。詳細ページにそのまま表示する */
     sample: {
       title: '統合全体WBS(抜粋)',
@@ -493,8 +495,59 @@ export const TEMPLATES = [
   { id: 'recruiting-pack', slug: 'recruiting-interview-pack', title: '医療機関採用・面接実務パック', categoryId: 'recruiting', isFree: false, status: 'draft', priority: 26 },
   { id: 'device-drug-pack', slug: 'device-drug-management-pack', title: '医療機器・薬剤・麻薬管理パック', categoryId: 'safety', isFree: false, status: 'draft', priority: 27 },
   { id: 'wbs-pack', slug: 'medical-wbs-pack', title: '医療機関WBS・プロジェクト管理パック', categoryId: 'management', isFree: false, status: 'draft', priority: 28 },
-  { id: 'oneonone-sheet', slug: 'oneonone-sheet', title: '医療管理職向け1on1シート', categoryId: 'management', isFree: true, status: 'draft', priority: 29 },
 ];
+
+/* 1on1シートは無料テンプレートとして公開(2026-07-18追加) */
+TEMPLATES.push({
+  id: 'oneonone-sheet',
+  slug: 'oneonone-sheet',
+  title: '医療管理職向け1on1シート',
+  shortTitle: '1on1シート',
+  summary: '雑談でも評価面談でもない1on1にするための、質問の順番と記録欄を1枚にした型。',
+  description: '医療現場の1on1は、準備がないと雑談になり、準備しすぎると評価面談になります。このシートは、月1回30分を想定して、質問の順番と記録欄を型にしたものです。部下との面談経験が浅い管理職でも、この順番で聞けば「話が出てこない」「何も決まらない」を避けやすくなります。',
+  categoryId: 'management',
+  targetRoles: ['kango', 'reha', 'jimucho'],
+  phases: ['execution', 'sharing'],
+  formats: ['sheet', 'word'],
+  isFree: true,
+  version: '1.0',
+  publishedAt: '2026-07-18',
+  updatedAt: '2026-07-18',
+  reviewNote: '',
+  relatedTemplateIds: ['role-assignment-sheet', 'new-director-30days'],
+  relatedArticleIds: ['backoffice-for-clinicians'],
+  priority: 6,
+  isFeatured: true,
+  status: 'published',
+  content: {
+    intro: '1人につき1枚を使い回し、回ごとに記録欄を足していきます。前回の記録を読み返してから臨むのがいちばん効きます。',
+    groups: [
+      { title: '始める前に決めること(初回のみ)', items: [
+        '頻度と時間(月1回・30分がおすすめ。延長しない)',
+        '評価面談ではないことを相手に伝える(処遇の話はしない)',
+        '記録の保管場所(相手も見られる場所か、自分だけか)',
+      ]},
+      { title: '当日の質問(この順番で)', items: [
+        { t: '最近の業務で、気になっていることはありますか', note: '相手の議題から始める。こちらの議題は後' },
+        { t: 'うまくいったこと・工夫したことはありますか', note: '事実で聞く。「頑張っていますか」とは聞かない' },
+        { t: 'いま詰まっていることは何ですか', note: '人・物・情報のどれで詰まっているかまで聞く' },
+        { t: '私やチームに手伝ってほしいことはありますか', note: 'ここで出たことが上司側の宿題になる' },
+        { t: '今後やってみたい仕事・学びたいことはありますか', note: '毎回でなくてよい。四半期に1回程度' },
+      ]},
+      { title: '記録欄(その場で書く)', items: [
+        '話された事実(要約しすぎない):',
+        '決めたこと(誰が・いつまでに):',
+        '上司側の宿題:',
+        '次回の冒頭で確認すること:',
+      ]},
+      { title: '続けるコツ', items: [
+        '次回の冒頭は、前回「決めたこと」の確認から始める',
+        '評価・査定の話とは切り離す(混ぜると本音が出なくなります)',
+        '沈黙を埋めない。相手が考えている時間は待つ',
+      ]},
+    ],
+  },
+});
 
 export const publishedTemplates = () => TEMPLATES.filter((t) => t.status === 'published');
 export const getTemplate = (id) => TEMPLATES.find((t) => t.id === id);

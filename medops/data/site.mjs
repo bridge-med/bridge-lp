@@ -39,7 +39,7 @@ export const SITE = {
         name: '無料',
         price: 0,
         unit: '',
-        features: ['無料記事の閲覧', '無料テンプレートの利用', '有料テンプレートのサンプル閲覧'],
+        features: ['無料記事の閲覧', '無料テンプレートの利用', '新着・更新の告知(note・X)'],
         note: '登録は不要です。',
         status: 'available',
       },

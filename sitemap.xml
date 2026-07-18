@@ -35,7 +35,6 @@
   <!-- medops:auto:start (scripts/medops/build.mjs が生成。手で編集しない) -->
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/visiting-clinic-integration-pack/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/integration-first-checklist/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/site-hearing-sheet/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/kanri-ishi-change-contacts/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
@@ -44,12 +43,16 @@
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/new-director-first-30days/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/role-assignment-sheet/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/inquiry-letter-templates/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/medops/templates/oneonone-sheet/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/clinic-integration-first-10/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/kanri-ishi-change-tasks/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/ehr-migration-data/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/new-jimucho-first-30days/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/gyosei-question-writing/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/backoffice-for-clinicians/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/nurse-clerk-role-split/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bridge-med.github.io/bridge-lp/medops/articles/ai-for-medical-admin/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/categories/integration/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/categories/admin/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bridge-med.github.io/bridge-lp/medops/categories/systems/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>

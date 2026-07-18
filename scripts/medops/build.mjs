@@ -31,6 +31,7 @@ const written = [];
 
 const tpls = publishedTemplates();
 const arts = publishedArticles();
+const paidTpls = tpls.filter((t) => !t.isFree);
 const catCount = (id) => tpls.filter((t) => t.categoryId === id).length + arts.filter((a) => a.categoryId === id).length;
 const tplById = (id) => tpls.find((t) => t.id === id);
 const artById = (id) => arts.find((a) => a.id === id);
@@ -76,16 +77,16 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
     <div>
       <p class="eyebrow">${esc(SITE.name)}</p>
       <h1>${esc(SITE.tagline)}</h1>
-      <p class="sub">クリニック統合、管理医師変更、採用、業務分担。医療管理職が迷いやすい実務を、担当者・期限・確認先まで整理したテンプレートと進め方にまとめています。チェックリストと文例は無料で使えます。</p>
+      <p class="sub">クリニック統合、管理医師変更、採用、業務分担。医療管理職が迷いやすい実務を、担当者・期限・確認先まで整理したテンプレートと進め方にまとめています。${paidTpls.length ? 'チェックリストと文例は無料で使えます。' : '公開中のテンプレートは、すべて無料で使えます。'}</p>
       <div class="hero-tags">
-        <span>医療管理職向け</span><span>チェックリスト・WBS・文例</span><span>Excel・Wordで編集する前提</span>
+        <span>医療管理職向け</span><span>チェックリスト・${paidTpls.length ? 'WBS' : '記入シート'}・文例</span><span>コピーして編集する前提</span>
       </div>
       <div class="hero-cta">
-        <a class="btn primary" href="templates/index.html?free=1">無料テンプレートを見る</a>
+        <a class="btn primary" href="templates/index.html${paidTpls.length ? '?free=1' : ''}">無料テンプレートを見る</a>
         <a class="btn ghost" href="#themes">実務テーマから探す</a>
       </div>
     </div>
-    <div class="hero-preview" aria-label="テンプレートのイメージ(統合実務パックのWBS抜粋)">
+    ${paidTpls.length ? `<div class="hero-preview" aria-label="テンプレートのイメージ(統合実務パックのWBS抜粋)">
       <div class="bar"><b>統合全体WBS</b><span>— 担当・確認先・期限まで1枚で</span></div>
       <div style="overflow-x:auto"><table>
         <thead><tr><th></th><th>タスク</th><th>担当</th><th>確認先</th><th>期限</th></tr></thead>
@@ -96,8 +97,20 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
           <tr><td><span class="ph"></span></td><td>患者・施設への案内文の発送</td><td>事務</td><td>院長承認</td><td>1か月前</td></tr>
         </tbody>
       </table></div>
-      <div class="cap">統合・閉院実務パックの「統合全体WBS」より抜粋</div>
-    </div>
+      <div class="cap">有料パック「統合全体WBS」より抜粋</div>
+    </div>` : `<div class="hero-preview" aria-label="テンプレートのイメージ(クリニック統合の初動チェックリスト抜粋)">
+      <div class="bar"><b>統合の初動チェックリスト</b><span>— 最初の1週間ぶん</span></div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th></th><th>確認すること</th><th>確認先</th></tr></thead>
+        <tbody>
+          <tr><td><span class="ph on"></span></td><td>統合予定日を仮でも日付で持つ</td><td>院長・理事長</td></tr>
+          <tr><td><span class="ph on"></span></td><td>存続する保険医療機関コードの確認</td><td>院長・理事長</td></tr>
+          <tr><td><span class="ph"></span></td><td>施設基準の届出控えを集める(両院分)</td><td>院内</td></tr>
+          <tr><td><span class="ph"></span></td><td>保健所(医務担当)へ事前相談</td><td>保健所</td></tr>
+        </tbody>
+      </table></div>
+      <div class="cap">無料テンプレート「クリニック統合の初動チェックリスト」より抜粋</div>
+    </div>`}
   </div>
 </section>
 
@@ -126,7 +139,7 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
   <div class="wrap">
     <p class="eyebrow">Templates</p>
     <h2 class="sec-h">テンプレート</h2>
-    <p class="sec-lead">まず無料のチェックリストから使えます。有料パックは、内容とサンプルを確認してから検討してください。</p>
+    <p class="sec-lead">${paidTpls.length ? 'まず無料のチェックリストから使えます。有料パックは、内容とサンプルを確認してから検討してください。' : 'チェックリスト・記入シート・文例を公開しています。ページ上でそのまま使えます。'}</p>
     <div class="grid c2" style="margin-top:22px">
       ${featured.map((t) => tplCard(t, root)).join('\n      ')}
     </div>
@@ -140,7 +153,7 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
     <h2 class="sec-h">初めての方へ — 3ステップ</h2>
     <div class="steps" style="margin-top:22px">
       <div class="step"><div class="t">困っているテーマを選ぶ</div><div class="d">「統合を任された」「管理医師が変わる」など、いまの状況に近いテーマから入ってください。</div></div>
-      <div class="step"><div class="t">記事とサンプルで進め方を確認する</div><div class="d">各テーマの記事に、全体像と確認先を書いています。有料パックはサンプルを公開しています。</div></div>
+      <div class="step"><div class="t">記事${paidTpls.length ? 'とサンプル' : ''}で進め方を確認する</div><div class="d">各テーマの記事に、全体像と確認先を書いています。${paidTpls.length ? '有料パックはサンプルを公開しています。' : 'テンプレートを使う前に、まず記事で段取りをつかんでください。'}</div></div>
       <div class="step"><div class="t">テンプレートを自院用に編集する</div><div class="d">チェックリストや文例をコピーし、日付や担当者を自院の内容に書き換えて使ってください。</div></div>
     </div>
     <p class="sec-more"><a href="guide/index.html" class="btn ghost small">使い方をくわしく見る</a></p>
@@ -154,7 +167,7 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
     <div class="grid c3" style="margin-top:22px">
       ${free.slice(0, 6).map((t) => tplCard(t, root)).join('\n      ')}
     </div>
-    <p class="sec-more"><a class="btn ghost small" href="templates/index.html?free=1">無料テンプレートをすべて見る</a></p>
+    <p class="sec-more"><a class="btn ghost small" href="templates/index.html${paidTpls.length ? '?free=1' : ''}">無料テンプレートをすべて見る</a></p>
   </div>
 </section>
 
@@ -218,7 +231,7 @@ ${breadcrumbs(root, [['テンプレート', null]])}
 <div class="wrap page-head" style="border-bottom:none;padding-bottom:6px">
   <p class="eyebrow">Templates</p>
   <h1>テンプレート一覧</h1>
-  <p class="lead">公開中のテンプレートです。無料のものはページ上でそのまま使えます。有料パックはサンプルを確認してから検討してください。</p>
+  <p class="lead">${paidTpls.length ? '公開中のテンプレートです。無料のものはページ上でそのまま使えます。有料パックはサンプルを確認してから検討してください。' : '公開中のテンプレートです。すべて無料で、ページ上でそのまま使えます。'}</p>
 </div>
 <div class="wrap">
   <div class="filters" aria-label="絞り込み">
@@ -228,8 +241,7 @@ ${breadcrumbs(root, [['テンプレート', null]])}
       ${CATEGORIES.filter((c) => tpls.some((t) => t.categoryId === c.id)).map((c) => chip('cat', c.id, c.short)).join('')}
     </div>
     <div class="frow">
-      <span class="flabel">料金</span>
-      ${chip('price', 'all', 'すべて', true)}${chip('price', 'free', '無料')}${chip('price', 'paid', '有料')}
+      ${paidTpls.length ? `<span class="flabel">料金</span>${chip('price', 'all', 'すべて', true)}${chip('price', 'free', '無料')}${chip('price', 'paid', '有料')}` : ''}
       <span class="fcount" id="fCount" aria-live="polite"></span>
       <button class="freset" id="fReset">条件をリセット</button>
     </div>
@@ -267,7 +279,7 @@ ${breadcrumbs(root, [['テンプレート', null]])}
   <section id="artResults" hidden style="margin-top:30px">
     <div class="related" style="border-top:1px solid var(--line-soft);padding-top:24px"><div class="h">記事の検索結果</div><div class="grid c2"></div></div>
   </section>
-  <p style="font-size:12px;color:var(--ink-3);margin:26px 0 40px">有料テンプレートは現在「${esc(tplById('integration-pack').title)}」の1本です。管理医師変更・電子カルテ移行などのパックを順次追加していきます。</p>
+  <p style="font-size:12px;color:var(--ink-3);margin:26px 0 40px">${paidTpls.length ? `有料テンプレートは現在「${esc(paidTpls[0].title)}」の1本です。管理医師変更・電子カルテ移行などのパックを順次追加していきます。` : '現在公開しているのはすべて無料テンプレートです。案件全体を管理する有料の実務パックは、資料を整えてから公開します。'}</p>
 </div>`;
 
   out('templates/index.html', page({
@@ -617,7 +629,7 @@ ${breadcrumbs(root, [['初めての方へ', null]])}
   <ul>
     <li>クリニック統合・管理医師変更・採用・業務分担など、医療管理職の実務の進め方を記事で確認する</li>
     <li>チェックリスト・ヒアリングシート・問い合わせ文例などの無料テンプレートを、そのままコピーして使う</li>
-    <li>有料の実務パックの内容とサンプルを確認し、購入を検討する</li>
+    <li>実務テーマごとに、記事とテンプレートを行き来しながら段取りを組む</li>
   </ul>
   <h2>できないこと</h2>
   <ul>
@@ -634,7 +646,9 @@ ${breadcrumbs(root, [['初めての方へ', null]])}
     <li><strong>キーワードで探す場合</strong> — 上部の検索窓に「統合 チェックリスト」「管理医師」のように入力してください。テンプレートと記事を横断して探せます。</li>
   </ol>
   <h2>無料と有料の違い</h2>
-  <p>無料テンプレートは、初動のチェックリスト・確認先一覧・文例など、まず動き出すための資料です。ページ上でそのまま使えます。有料パックは、案件全体を管理するためのWBS・確認シート・文例を一式にしたもので、Excel・Wordファイルで提供します。有料パックのオンライン決済は準備中のため、当面は<a href="${root}../community/index.html">お問い合わせ</a>から個別に案内します。会員プランの構想は<a href="${root}pricing/index.html">プランのページ</a>にまとめています。</p>
+  <p>無料テンプレートは、初動のチェックリスト・確認先一覧・文例など、まず動き出すための資料です。ページ上でそのまま使えます。${paidTpls.length
+    ? '有料パックは、案件全体を管理するためのWBS・確認シート・文例を一式にしたもので、Excel・Wordファイルで提供します。オンライン決済は準備中のため、当面は<a href="' + root + '../community/index.html">お問い合わせ</a>から個別に案内します。'
+    : '案件全体を管理する有料の実務パック(WBS・確認シート・文例の一式)は準備中です。公開時は' + esc(SITE.parent.name) + 'のnote・Xで告知します。'}会員プランの構想は<a href="${root}pricing/index.html">プランのページ</a>にまとめています。</p>
   <h2>テンプレートの使い方</h2>
   <ol>
     <li>関連する記事で全体像と確認先を確認する</li>
@@ -667,7 +681,7 @@ ${breadcrumbs(root, [['プランと料金', null]])}
 <div class="wrap page-head">
   <p class="eyebrow">Pricing</p>
   <h1>プランと料金の考え方</h1>
-  <p class="lead">現在は無料コンテンツと有料テンプレートの単品販売(決済準備中)のみです。会員プランは構想段階のため、内容と価格は変わる可能性があります。</p>
+  <p class="lead">${paidTpls.length ? '現在は無料コンテンツと有料テンプレートの単品販売(決済準備中)のみです。' : '現在公開しているのは無料コンテンツのみです。有料テンプレートの単品販売と'}会員プランは構想段階のため、内容と価格は変わる可能性があります。</p>
 </div>
 <div class="wrap" style="padding-bottom:50px">
   <div class="plans" style="margin-top:10px">
@@ -683,7 +697,7 @@ ${breadcrumbs(root, [['プランと料金', null]])}
   <div class="text-wrap" style="margin-top:30px">
     <div class="notice">
       <div class="h">会員プランは準備中です</div>
-      いま使える資料は、無料テンプレートと有料パック(<a href="${root}templates/visiting-clinic-integration-pack/index.html" style="text-decoration:underline">統合・閉院実務パック</a>)です。会員プランの開始時期・確定価格は、決まり次第このページと${esc(SITE.parent.name)}のnote・Xで告知します。先行して法人利用を相談したい場合は<a href="${root}../community/index.html" style="text-decoration:underline">お問い合わせ</a>からどうぞ。
+      いま使える資料は、${paidTpls.length ? `無料テンプレートと有料パック(<a href="${root}templates/${paidTpls[0].slug}/index.html" style="text-decoration:underline">${esc(paidTpls[0].shortTitle)}</a>)` : `<a href="${root}templates/index.html" style="text-decoration:underline">無料テンプレート</a>`}です。会員プランの開始時期・確定価格は、決まり次第このページと${esc(SITE.parent.name)}のnote・Xで告知します。先行して法人利用を相談したい場合は<a href="${root}../community/index.html" style="text-decoration:underline">お問い合わせ</a>からどうぞ。
     </div>
   </div>
 </div>`;
@@ -753,14 +767,14 @@ ${breadcrumbs(root, [['運営者について', null]])}
   const root = '../';
   const faqs = [
     ['テンプレートは編集できますか', 'できます。むしろ編集して使う前提です。チェックリストや文例はコピーして、自院の日付・担当者・状況に書き換えてください。'],
-    ['ExcelやWordがなくても使えますか', '無料テンプレートはWebページ上でそのまま読め、テキストとしてコピーできます。有料パックのファイルはExcel・Word形式ですが、GoogleスプレッドシートやGoogleドキュメントに取り込んで使えます。'],
+    ['ExcelやWordがなくても使えますか', '無料テンプレートはWebページ上でそのまま読め、テキストとしてコピーできます。有料パックとして提供するファイルはExcel・Word形式の予定ですが、GoogleスプレッドシートやGoogleドキュメントに取り込んで使えます。'],
     ['行政への提出書類そのものですか', '違います。このサイトの資料は、検討・管理・確認のための実務資料です。届出の公式様式は所管の保健所・厚生局・自治体で入手してください。'],
     ['内容は法的判断を保証しますか', '保証しません。一般的な進め方の整理であり、個別案件の要否・要件は所管窓口や専門家への確認が必要です。資料には確認先を明記するようにしています。'],
     ['最新の制度に対応していますか', '各資料に「制度基準日」を明記しています。制度変更があった場合は内容を見直し、更新日を記録します。基準日が古い資料は、利用前に最新の取り扱いを確認してください。'],
     ['購入後に更新版は利用できますか', 'その方針です。同一バージョン系列の更新版は追加費用なしで提供する予定です。具体的な提供方法は販売開始時に案内します。'],
-    ['テンプレートを法人内で共有できますか', '有料パックは1法人内での共有・複数拠点での利用ができます。法人外への配布・転売はできません。無料テンプレートは院内での共有は自由です。'],
+    ['テンプレートを法人内で共有できますか', '無料テンプレートは院内・法人内で自由に共有できます。今後販売する有料パックは、1法人内での共有・複数拠点での利用を想定しています。いずれも法人外への配布・転売はできません。'],
     ['再配布はできますか', 'できません。購入者の法人内利用に限ります。SNSやブログへの転載もご遠慮ください(記事へのリンクは歓迎です)。'],
-    ['返金はできますか', 'デジタル資料の性質上、提供後の返金は原則お受けできない方針です。購入前にサンプルと「解決できないこと」を確認してください。決済開始時に正式な条件を利用規約に明記します。'],
+    ['返金はできますか', 'デジタル資料の性質上、提供後の返金は原則お受けしない方針です。有料テンプレートの販売開始時に、サンプルと「解決できないこと」を購入前に確認できるようにし、正式な返金条件を利用規約に明記します。'],
     ['法人契約はできますか', '法人会員プランを準備中です。先行して相談したい場合はお問い合わせからご連絡ください。'],
     ['テンプレートに患者情報を入力してもよいですか', '自院の管理下で使う分には自院の情報管理規程に従ってください。外部に共有する場合や、生成AIに入力する場合は、患者情報・個人情報を必ず除いてください。'],
     ['コンサルティングは受けられますか', 'このサイト自体は資料の提供サービスですが、運営者は医療機関の経営支援を本業としています。個別支援の相談は' + SITE.parent.name + 'の「仕事のご依頼」からどうぞ。'],
