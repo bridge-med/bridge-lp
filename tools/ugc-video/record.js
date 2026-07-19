@@ -1,13 +1,22 @@
-// Playwright録画ランナー — scenario.js を読み、操作しながら縦型webmを録画する
+// Playwright録画ランナー — scenario.js を読み、操作しながら縦型動画を録画する
 // 使い方: node record.js <workdir>   (事前にサイトを http://127.0.0.1:8123 で配信しておく)
+//
+// キャプチャ方式(UGC_CAPTURE):
+//   x11   — Xvfb上のヘッドフルChromeをffmpeg x11grabでロスレス取得(高画質・既定はmake-short.shが選ぶ)
+//   video — Playwright内蔵録画(VP8圧縮・可変fps。xvfbが無い環境のフォールバック)
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
+const { spawn } = require('child_process');
 const scenario = require('./scenario.js');
 
 const WORK = process.argv[2] || path.join(__dirname, 'work');
 const BASE = process.env.UGC_BASE_URL || 'http://127.0.0.1:8123';
 const CHROMIUM = process.env.UGC_CHROMIUM || '/opt/pw-browsers/chromium';
+const CAPTURE = process.env.UGC_CAPTURE || 'video';
+const W = scenario.viewport.width * 2;
+const H = scenario.viewport.height * 2;
 
 const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dirname] }));
 
@@ -15,34 +24,57 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
   // 高解像度録画の要点: contextのdeviceScaleFactorエミュレーションでは録画が
   // CSSピクセル(540x960)のままになる(Playwrightのscreencastはviewportサイズで
   // フレームを取るため)。ブラウザ起動引数で物理解像度ごと2倍にすると、
-  // レイアウトはCSS 540pxのまま実ピクセル1080x1920で録画できる。
-  const browser = await chromium.launch({
-    executablePath: CHROMIUM,
-    headless: true,
-    args: ['--force-device-scale-factor=2'],
-  });
-  const ctx = await browser.newContext({
-    viewport: scenario.viewport,
-    hasTouch: true,
-    recordVideo: {
-      dir: path.join(WORK, 'rec'),
-      size: { width: scenario.viewport.width * 2, height: scenario.viewport.height * 2 },
-    },
-    locale: 'ja-JP',
-  });
+  // レイアウトはCSS 540pxのまま実ピクセル1080x1920で扱える。
+  let browser = null;
+  let ctx;
+  if (CAPTURE === 'x11') {
+    // Xvfb画面いっぱいにキオスク表示し、画面そのものをffmpegで録る。
+    // 通常のlaunch+newContextだと新規ウィンドウがキオスクにならずタブバーが映るため、
+    // 最初のウィンドウをそのまま使えるpersistent contextで起動する
+    ctx = await chromium.launchPersistentContext(path.join(WORK, 'rec', 'profile'), {
+      executablePath: CHROMIUM,
+      headless: false,
+      viewport: null,
+      hasTouch: true,
+      locale: 'ja-JP',
+      args: [
+        '--force-device-scale-factor=2',
+        '--window-position=0,0',
+        `--window-size=${scenario.viewport.width},${scenario.viewport.height}`,
+        '--kiosk',
+        '--no-first-run',
+      ],
+      ignoreDefaultArgs: ['--enable-automation'],
+    });
+  } else {
+    browser = await chromium.launch({
+      executablePath: CHROMIUM,
+      headless: true,
+      args: ['--force-device-scale-factor=2'],
+    });
+    ctx = await browser.newContext({
+      viewport: scenario.viewport,
+      hasTouch: true,
+      recordVideo: { dir: path.join(WORK, 'rec'), size: { width: W, height: H } },
+      locale: 'ja-JP',
+    });
+  }
 
   // 外部リクエスト遮断(フォントCDN等でのハング防止)
   await ctx.route(/^https?:\/\/(?!127\.0\.0\.1)/, (r) => r.abort());
 
-  const page = await ctx.newPage();
+  const page = CAPTURE === 'x11' ? (ctx.pages()[0] || await ctx.newPage()) : await ctx.newPage();
 
   // テロップ・タップリップル・エンドカードの基盤を注入
-  await page.addInitScript(() => {
+  await ctx.addInitScript(() => {
     addEventListener('DOMContentLoaded', () => {
       const style = document.createElement('style');
       style.textContent = `
         /* 録画中は画面遷移のフェードを止める(設問の速送りで白フレームが出ないように) */
         .app.enter .screen{animation:none !important}
+        /* 録画にスクロールバーを写さない */
+        html{scrollbar-width:none}
+        ::-webkit-scrollbar{width:0;height:0}
         .vv-ripple{position:fixed;width:64px;height:64px;border-radius:50%;
           background:rgba(22,35,62,.30);border:2px solid rgba(22,35,62,.55);
           transform:translate(-50%,-50%) scale(.4);pointer-events:none;z-index:99998;
@@ -94,9 +126,30 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
     });
   });
 
+  // x11キャプチャはページ遷移の直前に開始する
+  let ff = null;
+  let ffStart = 0;
+  if (CAPTURE === 'x11') {
+    fs.mkdirSync(path.join(WORK, 'rec'), { recursive: true });
+    ff = spawn('ffmpeg', [
+      '-y', '-v', 'error',
+      '-f', 'x11grab', '-framerate', '30', '-video_size', `${W}x${H}`,
+      '-draw_mouse', '0', '-i', process.env.DISPLAY,
+      '-c:v', 'libx264', '-preset', 'ultrafast', '-qp', '0',
+      path.join(WORK, 'rec', 'capture.mp4'),
+    ], { stdio: ['pipe', 'inherit', 'inherit'] });
+    await new Promise((r) => setTimeout(r, 500)); // 取り込み開始を待つ
+    ffStart = Date.now();
+  }
+
   await page.goto(BASE + scenario.page, { waitUntil: 'domcontentloaded' });
 
   const t0 = Date.now();
+  if (ff) {
+    // キャプチャ開始〜タイムライン0秒のずれを記録し、mix側で頭を切り落とす
+    fs.writeFileSync(path.join(WORK, 'rec', 'lead.txt'),
+      ((t0 - ffStart) / 1000).toFixed(3));
+  }
   const until = (sec) => new Promise((res) => {
     setTimeout(res, Math.max(0, t0 + sec * 1000 - Date.now()));
   });
@@ -128,7 +181,11 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
   }, scenario.endCard);
 
   await until(scenario.T.end);
+  if (ff) {
+    ff.stdin.write('q'); // ffmpegを正常終了させてmoovを書かせる
+    await new Promise((r) => ff.on('close', r));
+  }
   await ctx.close();
-  await browser.close();
+  if (browser) await browser.close();
   console.log('recorded ok');
 })().catch((e) => { console.error(e); process.exit(1); });

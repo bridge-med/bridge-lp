@@ -4,8 +4,11 @@
 set -euo pipefail
 WORK="$1"; OUT="$2"; OFFSETS=($3); END="$4"
 
-REC=$(ls "$WORK"/rec/*.webm | head -1)
-INPUTS=(-i "$REC")
+REC=$(ls "$WORK"/rec/capture.mp4 2>/dev/null || ls "$WORK"/rec/*.webm | head -1)
+# x11キャプチャはページ表示前の頭が映っているので、record.jsが記録したリード秒を切る
+LEAD=0
+[ -f "$WORK/rec/lead.txt" ] && LEAD=$(cat "$WORK/rec/lead.txt")
+INPUTS=(-ss "$LEAD" -i "$REC")
 FILTERS=""
 LABELS=""
 n=0

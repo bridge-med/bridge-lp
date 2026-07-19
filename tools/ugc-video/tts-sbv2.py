@@ -41,10 +41,18 @@ model = TTSModel(
     device="cpu",
 )
 
+# 抑揚の自然さ(sdp_ratio)は上げるほどリズムが人間らしく揺れる。SBV2既定は0.2
+sdp = float(os.environ.get("UGC_SBV2_SDP") or 0.2)
+noise = float(os.environ.get("UGC_SBV2_NOISE") or 0.6)
+noisew = float(os.environ.get("UGC_SBV2_NOISEW") or 0.8)
+
 out.mkdir(parents=True, exist_ok=True)
 for i, line in enumerate(lines):
     # length は「大きいほど遅い」パラメータなので話速の逆数を渡す
-    sr, audio = model.infer(text=line, length=1.0 / rate)
+    sr, audio = model.infer(
+        text=line, length=1.0 / rate,
+        sdp_ratio=sdp, noise=noise, noise_w=noisew,
+    )
     if audio.dtype != np.int16:
         audio = (np.clip(audio, -1.0, 1.0) * 32767).astype(np.int16)
     with wave.open(str(out / f"seg{i}.wav"), "wb") as w:

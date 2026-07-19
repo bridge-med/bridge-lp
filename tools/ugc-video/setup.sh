@@ -3,10 +3,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-echo "== apt: open-jtalk / ffmpeg / 日本語フォント =="
+echo "== apt: open-jtalk / ffmpeg / 日本語フォント / xvfb(ロスレス録画用) =="
 apt-get update -q || true
 apt-get install -y -q open-jtalk open-jtalk-mecab-naist-jdic \
-  hts-voice-nitech-jp-atr503-m001 ffmpeg fonts-noto-cjk
+  hts-voice-nitech-jp-atr503-m001 ffmpeg fonts-noto-cjk xvfb
 
 echo "== npm: playwright (ブラウザ本体はプリインストール品を使用) =="
 mkdir -p work && cd work

@@ -55,7 +55,12 @@ python3 -m http.server 8123 --directory "$SITE_ROOT" >/dev/null 2>&1 &
 SERVER=$!
 trap 'kill $SERVER 2>/dev/null || true' EXIT
 sleep 1
-node record.js "$WORK"
+if command -v xvfb-run >/dev/null; then
+  # ロスレスキャプチャ(Xvfb + x11grab)。Playwright内蔵録画のVP8圧縮を避ける
+  UGC_CAPTURE=x11 xvfb-run -a -s "-screen 0 1080x1920x24" node record.js "$WORK"
+else
+  node record.js "$WORK"
+fi
 
 echo "== 合成 =="
 bash mix.sh "$WORK" "$WORK/$NAME.mp4" "$OFFSETS" "$END"
