@@ -166,7 +166,7 @@ ${packAvailable ? `
           <span class="now">${fmtPrice(P.list)}</span>
           <span class="tax">税込・買い切り</span>
         </div>
-        <div class="chips"><span>収録${PRODUCT.items.length}ファイル</span><span>Excel / Word 編集可</span><span>連絡文例つき</span><span>決済準備中</span></div>
+        <div class="chips"><span>テンプレート${PRODUCT.items.filter((i) => i.cat !== 'ガイド').length}点</span><span>実務ガイドつき</span><span>Excel / Word 編集可</span><span>連絡文例つき</span><span>決済準備中</span></div>
         <p><a class="btn cta" href="pack/index.html">パックの内容を見る</a></p>
       </div>
       <div class="inc">
@@ -444,7 +444,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <h1 style="font-size:clamp(21px,3.4vw,30px);font-weight:700;margin-top:8px">${esc(PRODUCT.heading)}</h1>
     <p class="lead" style="font-size:13.5px;color:var(--ink-2);margin-top:10px;max-width:var(--text-max)">${esc(PRODUCT.shortDescription)}</p>
     <div class="pack-meta">
-      <span>収録 <b>${PRODUCT.items.length}ファイル</b></span>
+      <span>テンプレート <b>${PRODUCT.items.filter((i) => i.cat !== 'ガイド').length}点</b> + 実務ガイド</span>
       <span>形式 <b>Excel・Word(スプレッドシート取込可)</b></span>
       <span>価格 <b>${fmtPrice(P.list)}</b> <span style="color:var(--ink-3)">税込・買い切り</span></span>
       <span>更新 <b>${dateJp(PRODUCT.updatedAt)}</b></span>
@@ -510,7 +510,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <div class="side-box">
       <div class="h">この商品について</div>
       <dl>
-        <dt>収録</dt><dd>${PRODUCT.items.length}ファイル</dd>
+        <dt>収録</dt><dd>テンプレート${PRODUCT.items.filter((i) => i.cat !== 'ガイド').length}点+実務ガイドPDF</dd>
         <dt>形式</dt><dd>Excel・Word</dd>
         <dt>バージョン</dt><dd>${esc(PRODUCT.version)}</dd>
         <dt>更新</dt><dd>${dateJp(PRODUCT.updatedAt)}</dd>
