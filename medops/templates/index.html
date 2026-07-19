@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>テンプレート一覧 | 医療管理実務ライブラリ</title>
-<meta name="description" content="医療管理職向けの実務テンプレート一覧。クリニック統合・管理医師変更・採用・業務分担などのチェックリスト・WBS・文例を、テーマ・対象者・形式で絞り込めます。">
+<meta name="description" content="医療機関の実務テンプレート一覧。採用・入退職・施設基準・研修記録・返戻管理・機器点検などのチェックリスト・台帳・進捗表・文例を、カテゴリ・利用場面・頻度で絞り込めます。">
 <link rel="canonical" href="https://bridge-med.github.io/bridge-lp/medops/templates/">
 <meta property="og:title" content="テンプレート一覧 | 医療管理実務ライブラリ">
-<meta property="og:description" content="医療管理職向けの実務テンプレート一覧。クリニック統合・管理医師変更・採用・業務分担などのチェックリスト・WBS・文例を、テーマ・対象者・形式で絞り込めます。">
+<meta property="og:description" content="医療機関の実務テンプレート一覧。採用・入退職・施設基準・研修記録・返戻管理・機器点検などのチェックリスト・台帳・進捗表・文例を、カテゴリ・利用場面・頻度で絞り込めます。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/medops/templates/">
 <meta property="og:site_name" content="医療管理実務ライブラリ">
@@ -30,7 +30,8 @@
     </a>
     <nav class="mo-nav" aria-label="メインナビゲーション">
       <a href="../templates/index.html" aria-current="page">テンプレート</a>
-      <a href="../articles/index.html">記事</a>
+      <a href="../articles/index.html">実務記事</a>
+      <a href="../pack/index.html">採用・入退職パック</a>
       <a href="../guide/index.html">初めての方へ</a>
     </nav>
     <form class="mo-search-form" data-search action="../templates/index.html" method="get" role="search">
@@ -46,17 +47,21 @@
     <button type="submit" aria-label="検索する"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
   </form>
     <a href="../templates/index.html">テンプレート</a>
-    <a href="../articles/index.html">記事</a>
+    <a href="../articles/index.html">実務記事</a>
+    <a href="../pack/index.html">採用・入退職パック</a>
     <a href="../guide/index.html">初めての方へ</a>
     <div class="sub">実務テーマ</div>
-    <a href="../categories/integration/index.html">統合・承継・閉院</a>
-    <a href="../categories/admin/index.html">行政手続き・施設基準</a>
-    <a href="../categories/systems/index.html">電子カルテ・レセプト移行</a>
-    <a href="../categories/safety/index.html">医療安全・薬剤・研修記録</a>
     <a href="../categories/recruiting/index.html">採用・面接</a>
-    <a href="../categories/management/index.html">マネジメント・業務分担</a>
-    <a href="../categories/writing/index.html">文例・AI活用</a>
+    <a href="../categories/staffing/index.html">入職・退職・異動</a>
+    <a href="../categories/safety/index.html">医療安全・感染対策・研修</a>
+    <a href="../categories/admin/index.html">施設基準・診療報酬管理</a>
+    <a href="../categories/systems/index.html">電子カルテ・レセプト・システム運用</a>
+    <a href="../categories/equipment/index.html">医療機器・物品・薬剤</a>
+    <a href="../categories/cooperation/index.html">地域連携・紹介管理</a>
+    <a href="../categories/writing/index.html">院内文書・対外文書</a>
+    <a href="../categories/integration/index.html">行政手続き・統合・特殊案件</a>
     <div class="sub">その他</div>
+    <a href="../corporate/index.html">法人・複数拠点での利用</a>
     <a href="../about/index.html">運営者について</a>
     <a href="../faq/index.html">よくある質問</a>
     <a href="../../index.html">BRIDGE(運営プロジェクト)</a>
@@ -68,205 +73,858 @@
 <div class="wrap page-head" style="border-bottom:none;padding-bottom:6px">
   <p class="eyebrow">Templates</p>
   <h1>テンプレート一覧</h1>
-  <p class="lead">公開中のテンプレートです。すべて無料で、ページ上でそのまま使えます。</p>
+  <p class="lead">公開中のテンプレートです。すべて無料で、ページ上でそのまま使えます。採用・入退職の完全版一式はパックにまとめています。</p>
 </div>
 <div class="wrap">
   <div class="filters" aria-label="絞り込み">
     <div class="frow">
-      <span class="flabel">テーマ</span>
+      <span class="flabel">カテゴリ</span>
       <button class="fchip" data-fkey="cat" data-fval="all" aria-pressed="true">すべて</button>
-      <button class="fchip" data-fkey="cat" data-fval="integration" aria-pressed="false">統合・承継</button><button class="fchip" data-fkey="cat" data-fval="admin" aria-pressed="false">行政・施設基準</button><button class="fchip" data-fkey="cat" data-fval="safety" aria-pressed="false">安全・研修記録</button><button class="fchip" data-fkey="cat" data-fval="recruiting" aria-pressed="false">採用・面接</button><button class="fchip" data-fkey="cat" data-fval="management" aria-pressed="false">マネジメント</button><button class="fchip" data-fkey="cat" data-fval="writing" aria-pressed="false">文例・AI</button>
-    </div>
-    <div class="frow">
-      
-      <span class="fcount" id="fCount" aria-live="polite"></span>
-      <button class="freset" id="fReset">条件をリセット</button>
+      <button class="fchip" data-fkey="cat" data-fval="recruiting" aria-pressed="false">採用・面接</button><button class="fchip" data-fkey="cat" data-fval="staffing" aria-pressed="false">入職・退職</button><button class="fchip" data-fkey="cat" data-fval="safety" aria-pressed="false">安全・研修</button><button class="fchip" data-fkey="cat" data-fval="admin" aria-pressed="false">施設基準</button><button class="fchip" data-fkey="cat" data-fval="systems" aria-pressed="false">カルテ・システム</button><button class="fchip" data-fkey="cat" data-fval="equipment" aria-pressed="false">機器・物品</button><button class="fchip" data-fkey="cat" data-fval="cooperation" aria-pressed="false">地域連携</button><button class="fchip" data-fkey="cat" data-fval="writing" aria-pressed="false">文書・文例</button><button class="fchip" data-fkey="cat" data-fval="integration" aria-pressed="false">特殊案件</button>
     </div>
     <div class="frow">
       <span class="flabel">検索</span>
-      <input type="search" id="fQ" placeholder="例: 統合 チェックリスト / 管理医師" aria-label="キーワードで絞り込む">
+      <input type="search" id="fQ" placeholder="例: 退職 アカウント / 面接 / 返戻" aria-label="キーワードで絞り込む">
       <label class="flabel" for="fSort" style="min-width:auto">並び順</label>
       <select id="fSort" aria-label="並び替え">
         <option value="reco">おすすめ順</option>
         <option value="new">新着順</option>
         <option value="upd">更新順</option>
-        <option value="price">価格が安い順</option>
       </select>
+      <span class="fcount" id="fCount" aria-live="polite"></span>
+      <button class="freset" id="fReset">条件をリセット</button>
     </div>
     <details class="fmore">
-      <summary>くわしい条件(対象者・形式・業務フェーズ)</summary>
+      <summary>くわしい条件(利用場面・発生頻度・対象者・形式)</summary>
       <div class="frow" style="margin-top:10px">
+        <label class="flabel" for="f-scene">利用場面</label>
+        <select id="f-scene"><option value="">指定しない</option><option value="junbi">準備</option><option value="kakunin">確認</option><option value="jikko">実行</option><option value="shinchoku">進捗管理</option><option value="kiroku">記録</option><option value="hokoku">報告</option><option value="toiawase">問い合わせ</option><option value="annai">案内</option><option value="teiki">定期確認</option><option value="kanryo">完了確認</option></select>
+        <label class="flabel" for="f-freq">発生頻度</label>
+        <select id="f-freq"><option value="">指定しない</option><option value="daily">毎日</option><option value="weekly">毎週</option><option value="monthly">毎月</option><option value="yearly">毎年</option><option value="nyushoku">入職時</option><option value="taishoku">退職時</option><option value="saiyoji">採用時</option><option value="kaitei">制度改定時</option><option value="trouble">トラブル時</option><option value="zuiji">随時</option></select>
         <label class="flabel" for="f-role">対象者</label>
-        <select id="f-role"><option value="">指定しない</option><option value="jimucho">事務長・事務長補佐</option><option value="honbu">医療法人本部・経営支援</option><option value="kango">看護管理者</option><option value="reha">リハビリ管理職</option><option value="saiyo">採用担当</option><option value="incho">院長・管理者</option></select>
+        <select id="f-role"><option value="">指定しない</option><option value="jimucho">事務長・事務長補佐</option><option value="honbu">医療法人本部</option><option value="iryojimu">医療事務</option><option value="somu">総務</option><option value="saiyo">採用担当</option><option value="kango">看護管理者</option><option value="homon">訪問看護管理者</option><option value="renkei">地域連携担当</option><option value="incho">院長・管理者</option><option value="keiei">経営支援担当</option></select>
         <label class="flabel" for="f-format">形式</label>
-        <select id="f-format"><option value="">指定しない</option><option value="excel">Excel</option><option value="word">Word</option><option value="checklist">チェックリスト</option><option value="wbs">WBS</option><option value="letter">文例集</option><option value="sheet">記入シート</option></select>
-        <label class="flabel" for="f-phase">フェーズ</label>
-        <select id="f-phase"><option value="">指定しない</option><option value="research">情報収集</option><option value="hearing">現場ヒアリング</option><option value="planning">計画作成</option><option value="gyosei">行政確認</option><option value="vendor">ベンダー確認</option><option value="execution">実行管理</option><option value="sharing">院内共有</option><option value="handover">引き継ぎ・運用</option></select>
+        <select id="f-format"><option value="">指定しない</option><option value="checklist">チェックリスト</option><option value="ledger">台帳</option><option value="tracker">進捗管理表</option><option value="hearing">ヒアリングシート</option><option value="record">記録表</option><option value="letter">文例</option><option value="inquiry">問い合わせ文</option><option value="notice">案内文</option><option value="wbs">WBS</option><option value="calendar">管理カレンダー</option></select>
       </div>
     </details>
   </div>
   <noscript><p style="font-size:12px;color:var(--ink-3);margin-bottom:12px">絞り込みにはJavaScriptが必要です。一覧はこのままご覧いただけます。</p></noscript>
   <div class="grid c2" id="tplList">
-    <a class="tpl-card" href="../templates/integration-first-checklist/index.html"
-   data-cat="integration" data-free="1"
-   data-roles="jimucho honbu" data-formats="checklist"
-   data-phases="research planning" data-text="クリニック統合の初動チェックリスト 統合を任された最初の1週間で確定させること・集めるもの・最初の確認先を1枚に。 統合・承継・閉院 チェックリスト"
-   data-priority="2" data-pub="20260718" data-upd="20260718"
-   data-price="0">
+    <a class="tpl-card" href="../templates/recruit-requirements-sheet/index.html"
+   data-cat="recruiting"
+   data-roles="saiyo jimucho honbu kango" data-formats="hearing checklist"
+   data-scenes="junbi kakunin" data-freq="saiyoji"
+   data-text="採用要件整理シート 求人を出す前に、業務内容・必須条件・歓迎条件・勤務条件を1枚で確定させる。 採用・面接 ヒアリングシート チェックリスト 準備 確認"
+   data-priority="1" data-pub="20260718" data-upd="20260718">
     <span class="top">
       <span class="badge free">無料</span>
-      <span class="badge cat">統合・承継・閉院</span>
+      <span class="badge cat">採用・面接</span>
+      <span class="chip">準備</span><span class="chip">確認</span>
+    </span>
+    <span class="t">採用要件整理シート</span>
+    <span class="d">求人を出す前に、業務内容・必須条件・歓迎条件・勤務条件を1枚で確定させる。</span>
+    <span class="meta">
+      <span class="chip">ヒアリングシート</span><span class="chip">チェックリスト</span>
+      <span class="chip">採用時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/interview-check-sheet/index.html"
+   data-cat="recruiting"
+   data-roles="saiyo jimucho kango honbu" data-formats="hearing record"
+   data-scenes="junbi jikko kiroku" data-freq="saiyoji"
+   data-text="面接評価シート 面接前に決める評価観点、当日の確認事項、事実と印象を分けた評価記録を1枚に。 採用・面接 ヒアリングシート 記録表 準備 実行 記録"
+   data-priority="2" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">採用・面接</span>
+      <span class="chip">準備</span><span class="chip">実行</span>
+    </span>
+    <span class="t">面接評価シート</span>
+    <span class="d">面接前に決める評価観点、当日の確認事項、事実と印象を分けた評価記録を1枚に。</span>
+    <span class="meta">
+      <span class="chip">ヒアリングシート</span><span class="chip">記録表</span>
+      <span class="chip">採用時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/onboarding-checklist/index.html"
+   data-cat="staffing"
+   data-roles="somu jimucho iryojimu honbu" data-formats="checklist tracker"
+   data-scenes="junbi shinchoku kanryo" data-freq="nyushoku"
+   data-text="入職前準備チェックリスト 入職決定から初日までに、書類・アカウント・貸与物・関係者連絡を漏れなく準備する。 入職・退職・異動 チェックリスト 進捗管理表 準備 進捗管理 完了確認"
+   data-priority="3" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">入職・退職</span>
+      <span class="chip">準備</span><span class="chip">進捗管理</span>
+    </span>
+    <span class="t">入職前準備チェックリスト</span>
+    <span class="d">入職決定から初日までに、書類・アカウント・貸与物・関係者連絡を漏れなく準備する。</span>
+    <span class="meta">
+      <span class="chip">チェックリスト</span><span class="chip">進捗管理表</span>
+      <span class="chip">入職時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/offboarding-checklist/index.html"
+   data-cat="staffing"
+   data-roles="somu jimucho iryojimu honbu" data-formats="checklist tracker"
+   data-scenes="junbi jikko kanryo" data-freq="taishoku"
+   data-text="退職時対応チェックリスト アカウント停止・貸与物返却・保険手続き・引き継ぎを、退職日から逆算して漏れなく。 入職・退職・異動 チェックリスト 進捗管理表 準備 実行 完了確認"
+   data-priority="4" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">入職・退職</span>
+      <span class="chip">準備</span><span class="chip">実行</span>
+    </span>
+    <span class="t">退職時対応チェックリスト</span>
+    <span class="d">アカウント停止・貸与物返却・保険手続き・引き継ぎを、退職日から逆算して漏れなく。</span>
+    <span class="meta">
+      <span class="chip">チェックリスト</span><span class="chip">進捗管理表</span>
+      <span class="chip">退職時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/safety-training-record/index.html"
+   data-cat="safety"
+   data-roles="jimucho kango incho somu" data-formats="record"
+   data-scenes="kiroku kanryo" data-freq="yearly zuiji"
+   data-text="医療安全研修実施記録 医療安全・感染対策研修の記録を、開催前の準備から欠席者フォローまで1枚で残す様式。 医療安全・感染対策・研修 記録表 記録 完了確認"
+   data-priority="5" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">安全・研修</span>
+      <span class="chip">記録</span><span class="chip">完了確認</span>
+    </span>
+    <span class="t">医療安全研修実施記録</span>
+    <span class="d">医療安全・感染対策研修の記録を、開催前の準備から欠席者フォローまで1枚で残す様式。</span>
+    <span class="meta">
+      <span class="chip">記録表</span>
+      <span class="chip">毎年</span><span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/facility-standards-ledger/index.html"
+   data-cat="admin"
+   data-roles="jimucho honbu iryojimu keiei" data-formats="ledger"
+   data-scenes="kakunin teiki kiroku" data-freq="monthly kaitei"
+   data-text="施設基準管理台帳 届け出ている施設基準を一覧化し、要件・担当者・確認周期・根拠資料の所在を1枚で管理。 施設基準・診療報酬管理 台帳 確認 定期確認 記録"
+   data-priority="6" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">施設基準</span>
+      <span class="chip">確認</span><span class="chip">定期確認</span>
+    </span>
+    <span class="t">施設基準管理台帳</span>
+    <span class="d">届け出ている施設基準を一覧化し、要件・担当者・確認周期・根拠資料の所在を1枚で管理。</span>
+    <span class="meta">
+      <span class="chip">台帳</span>
+      <span class="chip">毎月</span><span class="chip">制度改定時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/henrei-tracker/index.html"
+   data-cat="admin"
+   data-roles="iryojimu jimucho honbu" data-formats="tracker"
+   data-scenes="shinchoku kiroku hokoku" data-freq="monthly"
+   data-text="レセプト返戻管理表 返戻ごとの理由・担当者・対応状況・再請求月を一覧で管理し、放置と期限切れを防ぐ。 施設基準・診療報酬管理 進捗管理表 進捗管理 記録 報告"
+   data-priority="7" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">施設基準</span>
+      <span class="chip">進捗管理</span><span class="chip">記録</span>
+    </span>
+    <span class="t">レセプト返戻管理表</span>
+    <span class="d">返戻ごとの理由・担当者・対応状況・再請求月を一覧で管理し、放置と期限切れを防ぐ。</span>
+    <span class="meta">
+      <span class="chip">進捗管理表</span>
+      <span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/device-inspection-deadlines/index.html"
+   data-cat="equipment"
+   data-roles="somu jimucho kango iryojimu" data-formats="tracker ledger"
+   data-scenes="teiki kakunin shinchoku" data-freq="monthly yearly"
+   data-text="医療機器点検期限管理表 機器ごとの点検周期・次回期限・業者連絡先を一覧化し、「期限が来てから気づく」をなくす。 医療機器・物品・薬剤 進捗管理表 台帳 定期確認 確認 進捗管理"
+   data-priority="8" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">機器・物品</span>
+      <span class="chip">定期確認</span><span class="chip">確認</span>
+    </span>
+    <span class="t">医療機器点検期限管理表</span>
+    <span class="d">機器ごとの点検周期・次回期限・業者連絡先を一覧化し、「期限が来てから気づく」をなくす。</span>
+    <span class="meta">
+      <span class="chip">進捗管理表</span><span class="chip">台帳</span>
+      <span class="chip">毎月</span><span class="chip">毎年</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/job-posting-sheet/index.html"
+   data-cat="recruiting"
+   data-roles="saiyo jimucho honbu" data-formats="hearing"
+   data-scenes="junbi jikko" data-freq="saiyoji"
+   data-text="求人票作成シート 採用要件整理シートの内容を、応募者に伝わる求人票の文面へ変換するための下書き。 採用・面接 ヒアリングシート 準備 実行"
+   data-priority="10" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">採用・面接</span>
+      <span class="chip">準備</span><span class="chip">実行</span>
+    </span>
+    <span class="t">求人票作成シート</span>
+    <span class="d">採用要件整理シートの内容を、応募者に伝わる求人票の文面へ変換するための下書き。</span>
+    <span class="meta">
+      <span class="chip">ヒアリングシート</span>
+      <span class="chip">採用時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/applicant-tracker/index.html"
+   data-cat="recruiting"
+   data-roles="saiyo jimucho somu" data-formats="tracker"
+   data-scenes="shinchoku kiroku" data-freq="saiyoji"
+   data-text="応募者管理表 応募者ごとの経路・選考状況・連絡履歴・次のアクションを一覧で管理する。 採用・面接 進捗管理表 進捗管理 記録"
+   data-priority="11" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">採用・面接</span>
+      <span class="chip">進捗管理</span><span class="chip">記録</span>
+    </span>
+    <span class="t">応募者管理表</span>
+    <span class="d">応募者ごとの経路・選考状況・連絡履歴・次のアクションを一覧で管理する。</span>
+    <span class="meta">
+      <span class="chip">進捗管理表</span>
+      <span class="chip">採用時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/recruit-progress-board/index.html"
+   data-cat="recruiting"
+   data-roles="saiyo jimucho honbu keiei" data-formats="tracker"
+   data-scenes="shinchoku hokoku" data-freq="weekly monthly"
+   data-text="採用進捗管理表 募集ごとの応募数・選考中・内定・入職予定を1枚で見て、院長報告にそのまま使う。 採用・面接 進捗管理表 進捗管理 報告"
+   data-priority="12" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">採用・面接</span>
+      <span class="chip">進捗管理</span><span class="chip">報告</span>
+    </span>
+    <span class="t">採用進捗管理表</span>
+    <span class="d">募集ごとの応募数・選考中・内定・入職予定を1枚で見て、院長報告にそのまま使う。</span>
+    <span class="meta">
+      <span class="chip">進捗管理表</span>
+      <span class="chip">毎週</span><span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/account-issue-list/index.html"
+   data-cat="staffing"
+   data-roles="somu jimucho iryojimu" data-formats="ledger"
+   data-scenes="kiroku kanryo" data-freq="nyushoku taishoku"
+   data-text="アカウント発行一覧 職員ごとに発行したシステムアカウントを台帳化し、退職時の停止漏れをなくす。 入職・退職・異動 台帳 記録 完了確認"
+   data-priority="13" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">入職・退職</span>
+      <span class="chip">記録</span><span class="chip">完了確認</span>
+    </span>
+    <span class="t">アカウント発行一覧</span>
+    <span class="d">職員ごとに発行したシステムアカウントを台帳化し、退職時の停止漏れをなくす。</span>
+    <span class="meta">
+      <span class="chip">台帳</span>
+      <span class="chip">入職時</span><span class="chip">退職時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/lending-ledger/index.html"
+   data-cat="staffing"
+   data-roles="somu jimucho" data-formats="ledger"
+   data-scenes="kiroku kanryo" data-freq="nyushoku taishoku zuiji"
+   data-text="貸与物管理表 端末・制服・鍵など職員への貸与物を記録し、退職時の返却確認までを1枚で管理する。 入職・退職・異動 台帳 記録 完了確認"
+   data-priority="14" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">入職・退職</span>
+      <span class="chip">記録</span><span class="chip">完了確認</span>
+    </span>
+    <span class="t">貸与物管理表</span>
+    <span class="d">端末・制服・鍵など職員への貸与物を記録し、退職時の返却確認までを1枚で管理する。</span>
+    <span class="meta">
+      <span class="chip">台帳</span>
+      <span class="chip">入職時</span><span class="chip">退職時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/annual-training-plan/index.html"
+   data-cat="safety"
+   data-roles="jimucho kango somu" data-formats="calendar tracker"
+   data-scenes="junbi teiki shinchoku" data-freq="yearly monthly"
+   data-text="年間研修計画表 医療安全・感染対策などの年間研修を、回数要件・テーマ・担当・実施状況つきで計画する。 医療安全・感染対策・研修 管理カレンダー 進捗管理表 準備 定期確認 進捗管理"
+   data-priority="15" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">安全・研修</span>
+      <span class="chip">準備</span><span class="chip">定期確認</span>
+    </span>
+    <span class="t">年間研修計画表</span>
+    <span class="d">医療安全・感染対策などの年間研修を、回数要件・テーマ・担当・実施状況つきで計画する。</span>
+    <span class="meta">
+      <span class="chip">管理カレンダー</span><span class="chip">進捗管理表</span>
+      <span class="chip">毎年</span><span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/training-attendance/index.html"
+   data-cat="safety"
+   data-roles="somu kango jimucho" data-formats="record"
+   data-scenes="kiroku kakunin" data-freq="yearly zuiji"
+   data-text="研修出席簿 職員×研修回のマトリクスで出席を記録し、誰が未受講かを一目で分かるようにする。 医療安全・感染対策・研修 記録表 記録 確認"
+   data-priority="16" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">安全・研修</span>
+      <span class="chip">記録</span><span class="chip">確認</span>
+    </span>
+    <span class="t">研修出席簿</span>
+    <span class="d">職員×研修回のマトリクスで出席を記録し、誰が未受講かを一目で分かるようにする。</span>
+    <span class="meta">
+      <span class="chip">記録表</span>
+      <span class="chip">毎年</span><span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/untrained-follow/index.html"
+   data-cat="safety"
+   data-roles="somu kango" data-formats="tracker"
+   data-scenes="shinchoku kanryo" data-freq="zuiji"
+   data-text="未受講者フォロー表 研修の欠席者ごとに補講・資料確認の方法と完了日を管理し、受講率を取り切る。 医療安全・感染対策・研修 進捗管理表 進捗管理 完了確認"
+   data-priority="17" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">安全・研修</span>
+      <span class="chip">進捗管理</span><span class="chip">完了確認</span>
+    </span>
+    <span class="t">未受講者フォロー表</span>
+    <span class="d">研修の欠席者ごとに補講・資料確認の方法と完了日を管理し、受講率を取り切る。</span>
+    <span class="meta">
+      <span class="chip">進捗管理表</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/safety-committee-minutes/index.html"
+   data-cat="safety"
+   data-roles="somu kango jimucho" data-formats="record"
+   data-scenes="kiroku" data-freq="monthly"
+   data-text="医療安全委員会議事録テンプレート 出席者・報告事項・検討事項・決定と担当・次回への申し送りを、毎回同じ様式で残す。 医療安全・感染対策・研修 記録表 記録"
+   data-priority="18" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">安全・研修</span>
+      <span class="chip">記録</span>
+    </span>
+    <span class="t">医療安全委員会議事録テンプレート</span>
+    <span class="d">出席者・報告事項・検討事項・決定と担当・次回への申し送りを、毎回同じ様式で残す。</span>
+    <span class="meta">
+      <span class="chip">記録表</span>
+      <span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/kijun-deadline-tracker/index.html"
+   data-cat="admin"
+   data-roles="jimucho iryojimu honbu" data-formats="tracker calendar"
+   data-scenes="teiki kakunin" data-freq="monthly"
+   data-text="施設基準更新期限管理表 研修要件・定例報告・実績要件の期限だけを抜き出した、月1回眺めるための期限表。 施設基準・診療報酬管理 進捗管理表 管理カレンダー 定期確認 確認"
+   data-priority="19" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">施設基準</span>
+      <span class="chip">定期確認</span><span class="chip">確認</span>
+    </span>
+    <span class="t">施設基準更新期限管理表</span>
+    <span class="d">研修要件・定例報告・実績要件の期限だけを抜き出した、月1回眺めるための期限表。</span>
+    <span class="meta">
+      <span class="chip">進捗管理表</span><span class="chip">管理カレンダー</span>
+      <span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/kosei-inquiry-log/index.html"
+   data-cat="admin"
+   data-roles="jimucho iryojimu honbu keiei" data-formats="record inquiry"
+   data-scenes="toiawase kiroku" data-freq="zuiji"
+   data-text="厚生局問い合わせ記録 厚生局・行政への確認を、前提・質問・回答・担当者名までセットで記録する。 施設基準・診療報酬管理 記録表 問い合わせ文 問い合わせ 記録"
+   data-priority="20" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">施設基準</span>
+      <span class="chip">問い合わせ</span><span class="chip">記録</span>
+    </span>
+    <span class="t">厚生局問い合わせ記録</span>
+    <span class="d">厚生局・行政への確認を、前提・質問・回答・担当者名までセットで記録する。</span>
+    <span class="meta">
+      <span class="chip">記録表</span><span class="chip">問い合わせ文</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/santei-precheck/index.html"
+   data-cat="admin"
+   data-roles="jimucho honbu keiei incho" data-formats="checklist"
+   data-scenes="junbi kakunin" data-freq="zuiji kaitei"
+   data-text="算定開始前チェックリスト 新しい施設基準の届出・算定を始める前に、要件・体制・運用・記録の準備を確認する。 施設基準・診療報酬管理 チェックリスト 準備 確認"
+   data-priority="21" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">施設基準</span>
+      <span class="chip">準備</span><span class="chip">確認</span>
+    </span>
+    <span class="t">算定開始前チェックリスト</span>
+    <span class="d">新しい施設基準の届出・算定を始める前に、要件・体制・運用・記録の準備を確認する。</span>
+    <span class="meta">
+      <span class="chip">チェックリスト</span>
+      <span class="chip">随時</span><span class="chip">制度改定時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/system-accounts-ledger/index.html"
+   data-cat="systems"
+   data-roles="jimucho somu iryojimu" data-formats="ledger"
+   data-scenes="kakunin kiroku" data-freq="zuiji"
+   data-text="システムアカウント管理表 院内で使う全システムと管理者・契約・問い合わせ先を一覧化する、システムの台帳。 電子カルテ・レセプト・システム運用 台帳 確認 記録"
+   data-priority="22" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">カルテ・システム</span>
+      <span class="chip">確認</span><span class="chip">記録</span>
+    </span>
+    <span class="t">システムアカウント管理表</span>
+    <span class="d">院内で使う全システムと管理者・契約・問い合わせ先を一覧化する、システムの台帳。</span>
+    <span class="meta">
+      <span class="chip">台帳</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/inout-system-checklist/index.html"
+   data-cat="systems"
+   data-roles="somu jimucho iryojimu" data-formats="checklist"
+   data-scenes="jikko kanryo" data-freq="nyushoku taishoku"
+   data-text="入退職時システム対応表 入職・退職のたびに行うシステム対応(発行・権限・停止)を、システム別の手順つきで定型化。 電子カルテ・レセプト・システム運用 チェックリスト 実行 完了確認"
+   data-priority="23" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">カルテ・システム</span>
+      <span class="chip">実行</span><span class="chip">完了確認</span>
+    </span>
+    <span class="t">入退職時システム対応表</span>
+    <span class="d">入職・退職のたびに行うシステム対応(発行・権限・停止)を、システム別の手順つきで定型化。</span>
+    <span class="meta">
+      <span class="chip">チェックリスト</span>
+      <span class="chip">入職時</span><span class="chip">退職時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/vendor-inquiry-log/index.html"
+   data-cat="systems"
+   data-roles="jimucho iryojimu somu" data-formats="record tracker"
+   data-scenes="toiawase shinchoku kiroku" data-freq="zuiji trouble"
+   data-text="ベンダー問い合わせ記録 ベンダーへの問い合わせを、症状・依頼内容・回答・対応期限つきで案件管理する。 電子カルテ・レセプト・システム運用 記録表 進捗管理表 問い合わせ 進捗管理 記録"
+   data-priority="24" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">カルテ・システム</span>
+      <span class="chip">問い合わせ</span><span class="chip">進捗管理</span>
+    </span>
+    <span class="t">ベンダー問い合わせ記録</span>
+    <span class="d">ベンダーへの問い合わせを、症状・依頼内容・回答・対応期限つきで案件管理する。</span>
+    <span class="meta">
+      <span class="chip">記録表</span><span class="chip">進捗管理表</span>
+      <span class="chip">随時</span><span class="chip">トラブル時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/month-start-checklist/index.html"
+   data-cat="systems"
+   data-roles="iryojimu jimucho somu" data-formats="checklist"
+   data-scenes="jikko teiki kanryo" data-freq="monthly"
+   data-text="月初業務チェックリスト レセプト請求を中心とした月初の定型業務を、日付・担当つきで毎月同じ形で回す。 電子カルテ・レセプト・システム運用 チェックリスト 実行 定期確認 完了確認"
+   data-priority="25" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">カルテ・システム</span>
+      <span class="chip">実行</span><span class="chip">定期確認</span>
+    </span>
+    <span class="t">月初業務チェックリスト</span>
+    <span class="d">レセプト請求を中心とした月初の定型業務を、日付・担当つきで毎月同じ形で回す。</span>
+    <span class="meta">
+      <span class="chip">チェックリスト</span>
+      <span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/month-end-checklist/index.html"
+   data-cat="systems"
+   data-roles="iryojimu somu jimucho" data-formats="checklist"
+   data-scenes="jikko teiki kanryo" data-freq="monthly"
+   data-text="月末業務チェックリスト 勤怠締め・在庫確認・期限もの点検など、月末の定型業務を1枚で回す。 電子カルテ・レセプト・システム運用 チェックリスト 実行 定期確認 完了確認"
+   data-priority="26" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">カルテ・システム</span>
+      <span class="chip">実行</span><span class="chip">定期確認</span>
+    </span>
+    <span class="t">月末業務チェックリスト</span>
+    <span class="d">勤怠締め・在庫確認・期限もの点検など、月末の定型業務を1枚で回す。</span>
+    <span class="meta">
+      <span class="chip">チェックリスト</span>
+      <span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/device-ledger/index.html"
+   data-cat="equipment"
+   data-roles="somu jimucho" data-formats="ledger"
+   data-scenes="kiroku kakunin" data-freq="zuiji"
+   data-text="医療機器管理台帳 機器ごとの基本情報・購入/リース・保守契約・修理履歴を1行で管理する親台帳。 医療機器・物品・薬剤 台帳 記録 確認"
+   data-priority="27" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">機器・物品</span>
+      <span class="chip">記録</span><span class="chip">確認</span>
+    </span>
+    <span class="t">医療機器管理台帳</span>
+    <span class="d">機器ごとの基本情報・購入/リース・保守契約・修理履歴を1行で管理する親台帳。</span>
+    <span class="meta">
+      <span class="chip">台帳</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/stock-order-sheet/index.html"
+   data-cat="equipment"
+   data-roles="somu iryojimu kango" data-formats="ledger tracker"
+   data-scenes="teiki jikko" data-freq="weekly monthly"
+   data-text="物品在庫・発注点管理表 品目ごとの発注点・発注量・発注先を決めて、「切れてから気づく」と過剰在庫を減らす。 医療機器・物品・薬剤 台帳 進捗管理表 定期確認 実行"
+   data-priority="28" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">機器・物品</span>
+      <span class="chip">定期確認</span><span class="chip">実行</span>
+    </span>
+    <span class="t">物品在庫・発注点管理表</span>
+    <span class="d">品目ごとの発注点・発注量・発注先を決めて、「切れてから気づく」と過剰在庫を減らす。</span>
+    <span class="meta">
+      <span class="chip">台帳</span><span class="chip">進捗管理表</span>
+      <span class="chip">毎週</span><span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/fridge-temp-log/index.html"
+   data-cat="equipment"
+   data-roles="kango iryojimu somu" data-formats="record"
+   data-scenes="kiroku teiki" data-freq="daily"
+   data-text="冷蔵庫温度管理記録 ワクチン・薬剤用冷蔵庫の温度を毎日記録し、逸脱時の対応までを1枚で残す。 医療機器・物品・薬剤 記録表 記録 定期確認"
+   data-priority="29" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">機器・物品</span>
+      <span class="chip">記録</span><span class="chip">定期確認</span>
+    </span>
+    <span class="t">冷蔵庫温度管理記録</span>
+    <span class="d">ワクチン・薬剤用冷蔵庫の温度を毎日記録し、逸脱時の対応までを1枚で残す。</span>
+    <span class="meta">
+      <span class="chip">記録表</span>
+      <span class="chip">毎日</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/renkei-ledger/index.html"
+   data-cat="cooperation"
+   data-roles="renkei jimucho kango homon" data-formats="ledger"
+   data-scenes="kiroku kakunin" data-freq="zuiji"
+   data-text="地域連携先台帳(簡易版) 連携先ごとの窓口・紹介の方向・直近のやりとりを1行で。担当者が替わっても引き継げる台帳。 地域連携・紹介管理 台帳 記録 確認"
+   data-priority="30" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">地域連携</span>
+      <span class="chip">記録</span><span class="chip">確認</span>
+    </span>
+    <span class="t">地域連携先台帳(簡易版)</span>
+    <span class="d">連携先ごとの窓口・紹介の方向・直近のやりとりを1行で。担当者が替わっても引き継げる台帳。</span>
+    <span class="meta">
+      <span class="chip">台帳</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/renkei-visit-log/index.html"
+   data-cat="cooperation"
+   data-roles="renkei homon jimucho" data-formats="record"
+   data-scenes="kiroku shinchoku" data-freq="zuiji"
+   data-text="連携先訪問履歴 挨拶・営業訪問の日付・面会者・話題・次回の宿題を記録し、次の訪問につなげる。 地域連携・紹介管理 記録表 記録 進捗管理"
+   data-priority="31" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">地域連携</span>
+      <span class="chip">記録</span><span class="chip">進捗管理</span>
+    </span>
+    <span class="t">連携先訪問履歴</span>
+    <span class="d">挨拶・営業訪問の日付・面会者・話題・次回の宿題を記録し、次の訪問につなげる。</span>
+    <span class="meta">
+      <span class="chip">記録表</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/referral-tracker/index.html"
+   data-cat="cooperation"
+   data-roles="renkei jimucho keiei incho" data-formats="tracker"
+   data-scenes="shinchoku hokoku teiki" data-freq="monthly"
+   data-text="紹介元・紹介件数管理表 紹介元ごとの月別件数を記録し、増減の変化に早く気づいてお礼と対応につなげる。 地域連携・紹介管理 進捗管理表 進捗管理 報告 定期確認"
+   data-priority="32" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">地域連携</span>
+      <span class="chip">進捗管理</span><span class="chip">報告</span>
+    </span>
+    <span class="t">紹介元・紹介件数管理表</span>
+    <span class="d">紹介元ごとの月別件数を記録し、増減の変化に早く気づいてお礼と対応につなげる。</span>
+    <span class="meta">
+      <span class="chip">進捗管理表</span>
+      <span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/renkei-letters/index.html"
+   data-cat="cooperation"
+   data-roles="renkei jimucho somu" data-formats="letter notice"
+   data-scenes="annai" data-freq="zuiji"
+   data-text="連携先へのお礼・案内文例 紹介へのお礼と、体制変更の案内。連携先に送る定型文を2本、差し込み欄つきで。 地域連携・紹介管理 文例 案内文 案内"
+   data-priority="33" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">地域連携</span>
+      <span class="chip">案内</span>
+    </span>
+    <span class="t">連携先へのお礼・案内文例</span>
+    <span class="d">紹介へのお礼と、体制変更の案内。連携先に送る定型文を2本、差し込み欄つきで。</span>
+    <span class="meta">
+      <span class="chip">文例</span><span class="chip">案内文</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/doctor-confirm-letters/index.html"
+   data-cat="writing"
+   data-roles="jimucho somu iryojimu" data-formats="letter"
+   data-scenes="kakunin annai" data-freq="monthly zuiji"
+   data-text="医師への勤務確認・依頼文例 非常勤医師への勤務日確認と、代診・追加勤務の依頼。短く失礼のない定型文2本。 院内文書・対外文書 文例 確認 案内"
+   data-priority="34" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">文書・文例</span>
+      <span class="chip">確認</span><span class="chip">案内</span>
+    </span>
+    <span class="t">医師への勤務確認・依頼文例</span>
+    <span class="d">非常勤医師への勤務日確認と、代診・追加勤務の依頼。短く失礼のない定型文2本。</span>
+    <span class="meta">
+      <span class="chip">文例</span>
+      <span class="chip">毎月</span><span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/staff-notice-letters/index.html"
+   data-cat="writing"
+   data-roles="jimucho somu honbu" data-formats="notice"
+   data-scenes="annai" data-freq="zuiji kaitei"
+   data-text="職員への業務変更・制度変更案内文例 運用変更・制度変更を職員に案内する定型文。変更点・開始日・問い合わせ先を1枚で。 院内文書・対外文書 案内文 案内"
+   data-priority="35" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">文書・文例</span>
+      <span class="chip">案内</span>
+    </span>
+    <span class="t">職員への業務変更・制度変更案内文例</span>
+    <span class="d">運用変更・制度変更を職員に案内する定型文。変更点・開始日・問い合わせ先を1枚で。</span>
+    <span class="meta">
+      <span class="chip">案内文</span>
+      <span class="chip">随時</span><span class="chip">制度改定時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/patient-notice-letters/index.html"
+   data-cat="writing"
+   data-roles="jimucho iryojimu somu" data-formats="notice"
+   data-scenes="annai" data-freq="zuiji"
+   data-text="患者・施設向け診療変更案内文例 診療時間の変更・休診・担当医交代を、患者と連携先施設に案内する文例3本。 院内文書・対外文書 案内文 案内"
+   data-priority="36" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">文書・文例</span>
+      <span class="chip">案内</span>
+    </span>
+    <span class="t">患者・施設向け診療変更案内文例</span>
+    <span class="d">診療時間の変更・休診・担当医交代を、患者と連携先施設に案内する文例3本。</span>
+    <span class="meta">
+      <span class="chip">案内文</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/training-notice-letters/index.html"
+   data-cat="writing"
+   data-roles="somu kango jimucho" data-formats="notice"
+   data-scenes="annai" data-freq="zuiji"
+   data-text="研修案内・未受講者連絡文例 研修の開催案内と、未受講者への受講依頼。出席が集まる書き方の定型文2本。 院内文書・対外文書 案内文 案内"
+   data-priority="37" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">文書・文例</span>
+      <span class="chip">案内</span>
+    </span>
+    <span class="t">研修案内・未受講者連絡文例</span>
+    <span class="d">研修の開催案内と、未受講者への受講依頼。出席が集まる書き方の定型文2本。</span>
+    <span class="meta">
+      <span class="chip">案内文</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/ido-checklist/index.html"
+   data-cat="staffing"
+   data-roles="somu jimucho honbu" data-formats="checklist"
+   data-scenes="jikko kanryo" data-freq="zuiji"
+   data-text="異動時変更項目一覧 部署異動・拠点異動のときに変更する権限・貸与物・連絡先を一覧で確認する。 入職・退職・異動 チェックリスト 実行 完了確認"
+   data-priority="43" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">入職・退職</span>
+      <span class="chip">実行</span><span class="chip">完了確認</span>
+    </span>
+    <span class="t">異動時変更項目一覧</span>
+    <span class="d">部署異動・拠点異動のときに変更する権限・貸与物・連絡先を一覧で確認する。</span>
+    <span class="meta">
+      <span class="chip">チェックリスト</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/referral-follow-tracker/index.html"
+   data-cat="cooperation"
+   data-roles="renkei iryojimu jimucho" data-formats="tracker"
+   data-scenes="shinchoku kanryo" data-freq="zuiji"
+   data-text="紹介後フォロー管理表 受け入れた紹介ごとに、報告書の送付・お礼・経過連絡の実施状況を管理する。 地域連携・紹介管理 進捗管理表 進捗管理 完了確認"
+   data-priority="44" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">地域連携</span>
+      <span class="chip">進捗管理</span><span class="chip">完了確認</span>
+    </span>
+    <span class="t">紹介後フォロー管理表</span>
+    <span class="d">受け入れた紹介ごとに、報告書の送付・お礼・経過連絡の実施状況を管理する。</span>
+    <span class="meta">
+      <span class="chip">進捗管理表</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/emergency-cart-check/index.html"
+   data-cat="equipment"
+   data-roles="kango somu iryojimu" data-formats="record checklist"
+   data-scenes="teiki kiroku" data-freq="monthly"
+   data-text="緊急カート・救急セット点検表 救急薬品・物品の定数・使用期限・機器動作を、月1回同じ様式で点検して記録する。 医療機器・物品・薬剤 記録表 チェックリスト 定期確認 記録"
+   data-priority="45" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">機器・物品</span>
+      <span class="chip">定期確認</span><span class="chip">記録</span>
+    </span>
+    <span class="t">緊急カート・救急セット点検表</span>
+    <span class="d">救急薬品・物品の定数・使用期限・機器動作を、月1回同じ様式で点検して記録する。</span>
+    <span class="meta">
+      <span class="chip">記録表</span><span class="chip">チェックリスト</span>
+      <span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a>
+    <a class="tpl-card" href="../templates/integration-first-checklist/index.html"
+   data-cat="integration"
+   data-roles="jimucho honbu" data-formats="checklist"
+   data-scenes="junbi kakunin" data-freq="zuiji"
+   data-text="クリニック統合の初動チェックリスト 統合を任された最初の1週間で確定させること・集めるもの・最初の確認先を1枚に。 行政手続き・統合・特殊案件 チェックリスト 準備 確認"
+   data-priority="40" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">特殊案件</span>
+      <span class="chip">準備</span><span class="chip">確認</span>
     </span>
     <span class="t">クリニック統合の初動チェックリスト</span>
     <span class="d">統合を任された最初の1週間で確定させること・集めるもの・最初の確認先を1枚に。</span>
     <span class="meta">
       <span class="chip">チェックリスト</span>
+      <span class="chip">随時</span>
       <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
     </span>
   </a>
     <a class="tpl-card" href="../templates/site-hearing-sheet/index.html"
-   data-cat="integration" data-free="1"
-   data-roles="jimucho honbu" data-formats="sheet word"
-   data-phases="hearing" data-text="現場ヒアリングシート 統合・業務改善の前に、現場の業務を漏れなく聞き取るための質問と記録欄。 統合・承継・閉院 記入シート word"
-   data-priority="5" data-pub="20260718" data-upd="20260718"
-   data-price="0">
+   data-cat="integration"
+   data-roles="jimucho honbu" data-formats="hearing"
+   data-scenes="jikko kiroku" data-freq="zuiji"
+   data-text="現場ヒアリングシート 統合・業務改善の前に、現場の業務を漏れなく聞き取るための質問と記録欄。 行政手続き・統合・特殊案件 ヒアリングシート 実行 記録"
+   data-priority="42" data-pub="20260718" data-upd="20260718">
     <span class="top">
       <span class="badge free">無料</span>
-      <span class="badge cat">統合・承継・閉院</span>
+      <span class="badge cat">特殊案件</span>
+      <span class="chip">実行</span><span class="chip">記録</span>
     </span>
     <span class="t">現場ヒアリングシート</span>
     <span class="d">統合・業務改善の前に、現場の業務を漏れなく聞き取るための質問と記録欄。</span>
     <span class="meta">
-      <span class="chip">記入シート</span><span class="chip">Word</span>
+      <span class="chip">ヒアリングシート</span>
+      <span class="chip">随時</span>
       <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
     </span>
   </a>
     <a class="tpl-card" href="../templates/kanri-ishi-change-contacts/index.html"
-   data-cat="admin" data-free="1"
+   data-cat="integration"
    data-roles="jimucho honbu incho" data-formats="checklist"
-   data-phases="gyosei planning" data-text="管理医師変更の確認先一覧 管理医師が変わるときに連絡・届出する先を、行政・システム・院内に分けた一覧。 行政手続き・施設基準 チェックリスト"
-   data-priority="3" data-pub="20260718" data-upd="20260718"
-   data-price="0">
+   data-scenes="kakunin toiawase" data-freq="zuiji"
+   data-text="管理医師変更の確認先一覧 管理医師が変わるときに連絡・届出する先を、行政・システム・院内に分けた一覧。 行政手続き・統合・特殊案件 チェックリスト 確認 問い合わせ"
+   data-priority="41" data-pub="20260718" data-upd="20260718">
     <span class="top">
       <span class="badge free">無料</span>
-      <span class="badge cat">行政手続き・施設基準</span>
+      <span class="badge cat">特殊案件</span>
+      <span class="chip">確認</span><span class="chip">問い合わせ</span>
     </span>
     <span class="t">管理医師変更の確認先一覧</span>
     <span class="d">管理医師が変わるときに連絡・届出する先を、行政・システム・院内に分けた一覧。</span>
     <span class="meta">
       <span class="chip">チェックリスト</span>
+      <span class="chip">随時</span>
       <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
-    </span>
-  </a>
-    <a class="tpl-card" href="../templates/safety-training-record/index.html"
-   data-cat="safety" data-free="1"
-   data-roles="jimucho kango incho" data-formats="sheet word"
-   data-phases="execution handover" data-text="医療安全研修記録テンプレート 医療安全・感染対策研修の記録を、開催前の準備から欠席者フォローまで1枚で残す様式。 医療安全・薬剤・研修記録 記入シート word"
-   data-priority="6" data-pub="20260718" data-upd="20260718"
-   data-price="0">
-    <span class="top">
-      <span class="badge free">無料</span>
-      <span class="badge cat">医療安全・薬剤・研修記録</span>
-    </span>
-    <span class="t">医療安全研修記録テンプレート</span>
-    <span class="d">医療安全・感染対策研修の記録を、開催前の準備から欠席者フォローまで1枚で残す様式。</span>
-    <span class="meta">
-      <span class="chip">記入シート</span><span class="chip">Word</span>
-      <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
-    </span>
-  </a>
-    <a class="tpl-card" href="../templates/interview-check-sheet/index.html"
-   data-cat="recruiting" data-free="1"
-   data-roles="saiyo jimucho kango reha" data-formats="sheet word"
-   data-phases="planning execution" data-text="面接確認事項シート 医療機関の採用面接で確認する事項と、事実と印象を分けて記録する評価欄。 採用・面接 記入シート word"
-   data-priority="7" data-pub="20260718" data-upd="20260718"
-   data-price="0">
-    <span class="top">
-      <span class="badge free">無料</span>
-      <span class="badge cat">採用・面接</span>
-    </span>
-    <span class="t">面接確認事項シート</span>
-    <span class="d">医療機関の採用面接で確認する事項と、事実と印象を分けて記録する評価欄。</span>
-    <span class="meta">
-      <span class="chip">記入シート</span><span class="chip">Word</span>
-      <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
-    </span>
-  </a>
-    <a class="tpl-card" href="../templates/new-director-first-30days/index.html"
-   data-cat="management" data-free="1"
-   data-roles="jimucho" data-formats="checklist"
-   data-phases="research handover" data-text="新任事務長の最初の30日チェックリスト 事務長になって最初の1か月で確認する、お金・契約・職員・行政書類の所在。 マネジメント・業務分担 チェックリスト"
-   data-priority="4" data-pub="20260718" data-upd="20260718"
-   data-price="0">
-    <span class="top">
-      <span class="badge free">無料</span>
-      <span class="badge cat">マネジメント・業務分担</span>
-    </span>
-    <span class="t">新任事務長の最初の30日チェックリスト</span>
-    <span class="d">事務長になって最初の1か月で確認する、お金・契約・職員・行政書類の所在。</span>
-    <span class="meta">
-      <span class="chip">チェックリスト</span>
-      <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
-    </span>
-  </a>
-    <a class="tpl-card" href="../templates/role-assignment-sheet/index.html"
-   data-cat="management" data-free="1"
-   data-roles="jimucho kango reha honbu" data-formats="excel sheet"
-   data-phases="hearing planning handover" data-text="業務分担整理シート 「誰が何をやっているか」を洗い出し、属人化に印を付け、あるべき分担へ移すための表。 マネジメント・業務分担 excel 記入シート"
-   data-priority="8" data-pub="20260718" data-upd="20260718"
-   data-price="0">
-    <span class="top">
-      <span class="badge free">無料</span>
-      <span class="badge cat">マネジメント・業務分担</span>
-    </span>
-    <span class="t">業務分担整理シート</span>
-    <span class="d">「誰が何をやっているか」を洗い出し、属人化に印を付け、あるべき分担へ移すための表。</span>
-    <span class="meta">
-      <span class="chip">Excel</span><span class="chip">記入シート</span>
-      <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
     </span>
   </a>
     <a class="tpl-card" href="../templates/inquiry-letter-templates/index.html"
-   data-cat="writing" data-free="1"
-   data-roles="jimucho honbu" data-formats="letter word"
-   data-phases="gyosei vendor" data-text="行政・ベンダー問い合わせ文テンプレート 行政への事前相談・ベンダーへの移行確認など、書くのに悩む問い合わせ文の下書き4本。 文例・ai活用 文例集 word"
-   data-priority="9" data-pub="20260718" data-upd="20260718"
-   data-price="0">
+   data-cat="writing"
+   data-roles="jimucho honbu" data-formats="letter inquiry"
+   data-scenes="toiawase" data-freq="zuiji"
+   data-text="行政・ベンダー問い合わせ文テンプレート 行政への事前相談・ベンダーへの移行確認など、書くのに悩む問い合わせ文の下書き4本。 院内文書・対外文書 文例 問い合わせ文 問い合わせ"
+   data-priority="39" data-pub="20260718" data-upd="20260718">
     <span class="top">
       <span class="badge free">無料</span>
-      <span class="badge cat">文例・AI活用</span>
+      <span class="badge cat">文書・文例</span>
+      <span class="chip">問い合わせ</span>
     </span>
     <span class="t">行政・ベンダー問い合わせ文テンプレート</span>
     <span class="d">行政への事前相談・ベンダーへの移行確認など、書くのに悩む問い合わせ文の下書き4本。</span>
     <span class="meta">
-      <span class="chip">文例集</span><span class="chip">Word</span>
+      <span class="chip">文例</span><span class="chip">問い合わせ文</span>
+      <span class="chip">随時</span>
       <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
-    </span>
-  </a>
-    <a class="tpl-card" href="../templates/oneonone-sheet/index.html"
-   data-cat="management" data-free="1"
-   data-roles="kango reha jimucho" data-formats="sheet word"
-   data-phases="execution sharing" data-text="医療管理職向け1on1シート 雑談でも評価面談でもない1on1にするための、質問の順番と記録欄を1枚にした型。 マネジメント・業務分担 記入シート word"
-   data-priority="6" data-pub="20260718" data-upd="20260718"
-   data-price="0">
-    <span class="top">
-      <span class="badge free">無料</span>
-      <span class="badge cat">マネジメント・業務分担</span>
-    </span>
-    <span class="t">医療管理職向け1on1シート</span>
-    <span class="d">雑談でも評価面談でもない1on1にするための、質問の順番と記録欄を1枚にした型。</span>
-    <span class="meta">
-      <span class="chip">記入シート</span><span class="chip">Word</span>
-      <span>更新 2026/07/18</span>
-      <span class="price">無料</span>
     </span>
   </a>
   </div>
@@ -277,7 +935,7 @@
   <section id="artResults" hidden style="margin-top:30px">
     <div class="related" style="border-top:1px solid var(--line-soft);padding-top:24px"><div class="h">記事の検索結果</div><div class="grid c2"></div></div>
   </section>
-  <p style="font-size:12px;color:var(--ink-3);margin:26px 0 40px">現在公開しているのはすべて無料テンプレートです。案件全体を管理する有料の実務パックは、資料を整えてから公開します。</p>
+  <p style="font-size:12px;color:var(--ink-3);margin:26px 0 40px">採用・入退職の完全版一式は<a href="../pack/index.html" style="text-decoration:underline">採用・入退職実務パック</a>にまとめています(決済準備中)。1on1・上司報告など管理職としての進め方は<a href="../../manager-starter/index.html" style="text-decoration:underline">医療管理職スターター</a>で扱っています。</p>
 </div>
 </main>
 
@@ -286,29 +944,35 @@
     <div class="mo-footer-grid">
       <div class="fb">
         <div class="name">医療管理実務ライブラリ</div>
-        <p>クリニック統合、管理医師変更、採用、業務分担。医療管理職が迷いやすい実務を、担当者・期限・確認先まで整理したテンプレートと進め方にまとめています。</p>
+        <p>採用、入退職、施設基準、研修、レセプト、医療機器管理。医療機関で繰り返し発生する業務を、すぐに使えるチェックリスト・台帳・進捗表・文例に整理しています。</p>
       </div>
       <div>
         <div class="fh">コンテンツ</div>
         <a href="../templates/index.html">テンプレート一覧</a>
-        <a href="../articles/index.html">記事一覧</a>
+        <a href="../templates/index.html">無料テンプレート</a>
+        <a href="../articles/index.html">実務記事</a>
+        <a href="../pack/index.html">採用・入退職実務パック</a>
         <a href="../guide/index.html">初めての方へ</a>
         <a href="../faq/index.html">よくある質問</a>
       </div>
       <div>
-        <div class="fh">実務テーマ</div>
-        <a href="../categories/integration/index.html">統合・承継</a>
-        <a href="../categories/admin/index.html">行政・施設基準</a>
-        <a href="../categories/systems/index.html">カルテ・レセプト</a>
-        <a href="../categories/safety/index.html">安全・研修記録</a>
+        <div class="fh">実務カテゴリ</div>
         <a href="../categories/recruiting/index.html">採用・面接</a>
-        <a href="../categories/management/index.html">マネジメント</a>
-        <a href="../categories/writing/index.html">文例・AI</a>
+        <a href="../categories/staffing/index.html">入職・退職</a>
+        <a href="../categories/safety/index.html">安全・研修</a>
+        <a href="../categories/admin/index.html">施設基準</a>
+        <a href="../categories/systems/index.html">カルテ・システム</a>
+        <a href="../categories/equipment/index.html">機器・物品</a>
+        <a href="../categories/cooperation/index.html">地域連携</a>
+        <a href="../categories/writing/index.html">文書・文例</a>
+        <a href="../categories/integration/index.html">特殊案件</a>
       </div>
       <div>
         <div class="fh">サイトについて</div>
         <a href="../about/index.html">運営者について</a>
+        <a href="../corporate/index.html">法人・複数拠点での利用</a>
         <a href="../../index.html">BRIDGE(運営プロジェクト)</a>
+        <a href="../../manager-starter/index.html">医療管理職スターター(管理職の進め方はこちら)</a>
         <a href="../../community/index.html">お問い合わせ</a>
         <a href="../legal/terms.html">利用規約</a>
         <a href="../legal/privacy.html">プライバシーポリシー</a>

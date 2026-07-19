@@ -451,7 +451,7 @@ ${breadcrumbs(root, [['テンプレート', null]])}
   <section id="artResults" hidden style="margin-top:30px">
     <div class="related" style="border-top:1px solid var(--line-soft);padding-top:24px"><div class="h">記事の検索結果</div><div class="grid c2"></div></div>
   </section>
-  <p style="font-size:12px;color:var(--ink-3);margin:26px 0 40px">${packAvailable ? `20種の実務シート一式は<a href="${root}pack/index.html" style="text-decoration:underline">スターターパック</a>にまとめています(決済準備中)。` : '案件全体をまとめて整える有料パックは準備中です。'}施設運営・行政手続きの資料は<a href="${root}../medops/index.html" style="text-decoration:underline">${esc(SITE.sibling.name)}</a>にあります。</p>
+  <p style="font-size:12px;color:var(--ink-3);margin:26px 0 40px">${packAvailable ? `20種の実務シート一式は<a href="${root}pack/index.html" style="text-decoration:underline">スターターパック</a>にまとめています(決済準備中)。` : '案件全体をまとめて整える有料パックは準備中です。'}採用・入退職・施設基準など具体的な実務の資料は<a href="${root}../medops/index.html" style="text-decoration:underline">${esc(SITE.sibling.name)}</a>にあります。</p>
 </div>`;
   out('templates/index.html', page({
     path: 'templates/index.html',
@@ -815,7 +815,7 @@ ${breadcrumbs(root, [['運営者について', null]])}
     <li>生成AIも使いますが、一般論のまま公開せず、実務で通用した粒度に直してから出します</li>
   </ul>
   <h2>${esc(SITE.parent.name)}について</h2>
-  <p>${esc(SITE.parent.name)}は「人が、自ら選び、納得して生きられる社会をつくる」ための個人プロジェクトです。このサイトはその道具のひとつで、新任管理職が管理の仕方を自分で選べる状態をつくることを目指しています。施設運営・行政手続きの実務は姉妹サイト<a href="${root}../medops/index.html">${esc(SITE.sibling.name)}</a>で扱っています。<a href="${root}../about/index.html">プロジェクト全体について</a>もご覧ください。</p>
+  <p>${esc(SITE.parent.name)}は「人が、自ら選び、納得して生きられる社会をつくる」ための個人プロジェクトです。このサイトはその道具のひとつで、新任管理職が管理の仕方を自分で選べる状態をつくることを目指しています。採用・入退職・施設基準など具体的な実務は姉妹サイト<a href="${root}../medops/index.html">${esc(SITE.sibling.name)}</a>で扱っています。<a href="${root}../about/index.html">プロジェクト全体について</a>もご覧ください。</p>
 </div>`;
   out('about/index.html', page({
     path: 'about/index.html',
