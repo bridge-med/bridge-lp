@@ -88,7 +88,7 @@
   const list = document.getElementById('tplList');
   if (list) {
     const cards = Array.from(list.querySelectorAll('[data-cat]'));
-    const state = { cat: 'all', price: 'all', role: '', format: '', phase: '', q: '' };
+    const state = { cat: 'all', role: '', format: '', scene: '', freq: '', q: '' };
     const countEl = document.getElementById('fCount');
     const emptyEl = document.getElementById('fEmpty');
     const sortSel = document.getElementById('fSort');
@@ -99,10 +99,10 @@
       cards.forEach((c) => {
         const ok =
           (state.cat === 'all' || c.dataset.cat === state.cat) &&
-          (state.price === 'all' || (state.price === 'free') === (c.dataset.free === '1')) &&
           (!state.role || (c.dataset.roles || '').split(' ').includes(state.role)) &&
           (!state.format || (c.dataset.formats || '').split(' ').includes(state.format)) &&
-          (!state.phase || (c.dataset.phases || '').split(' ').includes(state.phase)) &&
+          (!state.scene || (c.dataset.scenes || '').split(' ').includes(state.scene)) &&
+          (!state.freq || (c.dataset.freq || '').split(' ').includes(state.freq)) &&
           (!q || (c.dataset.text || '').includes(q));
         c.style.display = ok ? '' : 'none';
         if (ok) visible++;
@@ -114,8 +114,7 @@
 
     const sort = () => {
       const key = sortSel ? sortSel.value : 'reco';
-      const val = (c) => key === 'new' ? -(+c.dataset.pub) : key === 'upd' ? -(+c.dataset.upd)
-        : key === 'price' ? (+c.dataset.price) : (+c.dataset.priority);
+      const val = (c) => key === 'new' ? -(+c.dataset.pub) : key === 'upd' ? -(+c.dataset.upd) : (+c.dataset.priority);
       cards.sort((a, b) => val(a) - val(b)).forEach((c) => list.appendChild(c));
       track('sort', { key });
     };
@@ -130,7 +129,7 @@
         apply();
       });
     });
-    ['role', 'format', 'phase'].forEach((key) => {
+    ['role', 'format', 'scene', 'freq'].forEach((key) => {
       const sel = document.getElementById('f-' + key);
       if (sel) sel.addEventListener('change', () => { state[key] = sel.value; track('filter', { key, value: sel.value }); apply(); });
     });
@@ -139,9 +138,9 @@
     if (sortSel) sortSel.addEventListener('change', sort);
     const reset = document.getElementById('fReset');
     if (reset) reset.addEventListener('click', () => {
-      state.cat = 'all'; state.price = 'all'; state.role = ''; state.format = ''; state.phase = ''; state.q = '';
+      state.cat = 'all'; state.role = ''; state.format = ''; state.scene = ''; state.freq = ''; state.q = '';
       if (qInput) qInput.value = '';
-      ['role', 'format', 'phase'].forEach((k) => { const s = document.getElementById('f-' + k); if (s) s.value = ''; });
+      ['role', 'format', 'scene', 'freq'].forEach((k) => { const s = document.getElementById('f-' + k); if (s) s.value = ''; });
       document.querySelectorAll('.fchip[data-fkey]').forEach((c) =>
         c.setAttribute('aria-pressed', String(c.dataset.fval === 'all')));
       apply();
@@ -151,10 +150,6 @@
     const params = new URLSearchParams(location.search);
     if (params.get('cat')) {
       const chip = document.querySelector('.fchip[data-fkey="cat"][data-fval="' + params.get('cat') + '"]');
-      if (chip) chip.click();
-    }
-    if (params.get('free') === '1') {
-      const chip = document.querySelector('.fchip[data-fkey="price"][data-fval="free"]');
       if (chip) chip.click();
     }
     if (params.get('q')) {

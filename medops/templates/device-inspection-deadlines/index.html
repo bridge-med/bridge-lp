@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医療機器点検期限管理表 | 医療管理実務ライブラリ</title>
+<meta name="description" content="機器ごとの点検周期・次回期限・業者連絡先を一覧化し、「期限が来てから気づく」をなくす。 無料で使えます。">
+<link rel="canonical" href="https://bridge-med.github.io/bridge-lp/medops/templates/device-inspection-deadlines/">
+<meta property="og:title" content="医療機器点検期限管理表 | 医療管理実務ライブラリ">
+<meta property="og:description" content="機器ごとの点検周期・次回期限・業者連絡先を一覧化し、「期限が来てから気づく」をなくす。 無料で使えます。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/medops/templates/device-inspection-deadlines/">
+<meta property="og:site_name" content="医療管理実務ライブラリ">
+<meta name="twitter:card" content="summary">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/medops.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Crect x='16' y='12' width='32' height='40' rx='5' fill='none' stroke='%2316233E' stroke-width='3.4'/%3E%3Cpath d='M23 26h12M23 34h18M23 42h9' stroke='%2316233E' stroke-width='3.2' stroke-linecap='round'/%3E%3Cpath d='M38 24l4 4 7-8' stroke='%23A98F63' stroke-width='3.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CreativeWork","name":"医療機器点検期限管理表","description":"機器ごとの点検周期・次回期限・業者連絡先を一覧化し、「期限が来てから気づく」をなくす。","inLanguage":"ja","isAccessibleForFree":true,"datePublished":"2026-07-18","dateModified":"2026-07-18","author":{"@type":"Person","name":"橋本渉"},"url":"https://bridge-med.github.io/bridge-lp/medops/templates/device-inspection-deadlines/"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://bridge-med.github.io/bridge-lp/medops/"},{"@type":"ListItem","position":2,"name":"テンプレート","item":"https://bridge-med.github.io/bridge-lp/medops/templates/"},{"@type":"ListItem","position":3,"name":"医療機器点検期限管理表","item":"https://bridge-med.github.io/bridge-lp/medops/templates/device-inspection-deadlines/"}]}</script>
+</head>
+<body data-page="templates" data-event="view_template">
+
+<header class="mo-header">
+  <div class="mo-header-in">
+    <a class="mo-brand" href="../../index.html" aria-label="医療管理実務ライブラリ トップへ">
+      <span class="name">医療管理実務ライブラリ</span>
+      <span class="by">by BRIDGE</span>
+    </a>
+    <nav class="mo-nav" aria-label="メインナビゲーション">
+      <a href="../../templates/index.html" aria-current="page">テンプレート</a>
+      <a href="../../articles/index.html">実務記事</a>
+      <a href="../../pack/index.html">採用・入退職パック</a>
+      <a href="../../guide/index.html">初めての方へ</a>
+    </nav>
+    <form class="mo-search-form" data-search action="../../templates/index.html" method="get" role="search">
+    <input type="search" name="q" placeholder="困りごとで検索" aria-label="サイト内検索" id="hSearch">
+    <button type="submit" aria-label="検索する"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+  </form>
+    <button class="mo-theme" id="moTheme" aria-label="ライト/ダークモード切り替え"><svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg><svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+    <button class="mo-burger" id="moBurger" aria-label="メニューを開く" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+  <nav class="mo-drawer" aria-label="モバイルメニュー">
+    <form class="mo-search-form" data-search action="../../templates/index.html" method="get" role="search">
+    <input type="search" name="q" placeholder="困りごとで検索" aria-label="サイト内検索" id="dSearch">
+    <button type="submit" aria-label="検索する"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+  </form>
+    <a href="../../templates/index.html">テンプレート</a>
+    <a href="../../articles/index.html">実務記事</a>
+    <a href="../../pack/index.html">採用・入退職パック</a>
+    <a href="../../guide/index.html">初めての方へ</a>
+    <div class="sub">実務テーマ</div>
+    <a href="../../categories/recruiting/index.html">採用・面接</a>
+    <a href="../../categories/staffing/index.html">入職・退職・異動</a>
+    <a href="../../categories/safety/index.html">医療安全・感染対策・研修</a>
+    <a href="../../categories/admin/index.html">施設基準・診療報酬管理</a>
+    <a href="../../categories/systems/index.html">電子カルテ・レセプト・システム運用</a>
+    <a href="../../categories/equipment/index.html">医療機器・物品・薬剤</a>
+    <a href="../../categories/cooperation/index.html">地域連携・紹介管理</a>
+    <a href="../../categories/writing/index.html">院内文書・対外文書</a>
+    <a href="../../categories/integration/index.html">行政手続き・統合・特殊案件</a>
+    <div class="sub">その他</div>
+    <a href="../../corporate/index.html">法人・複数拠点での利用</a>
+    <a href="../../about/index.html">運営者について</a>
+    <a href="../../faq/index.html">よくある質問</a>
+    <a href="../../../index.html">BRIDGE(運営プロジェクト)</a>
+  </nav>
+</header>
+<main>
+
+<nav class="crumbs wrap" aria-label="パンくず"><a href="../../index.html">ホーム</a><span class="sep" aria-hidden="true">/</span><a href="../../templates/index.html">テンプレート</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">機器点検期限管理表</span></nav>
+<div class="wrap page-head" style="border-bottom:none;padding-bottom:0">
+  <p><span class="badge free">無料</span> <span class="badge cat">医療機器・物品・薬剤</span> <span class="chip">定期確認</span> <span class="chip">確認</span> <span class="chip">進捗管理</span></p>
+  <h1>医療機器点検期限管理表</h1>
+  <p class="lead">機器ごとの点検周期・次回期限・業者連絡先を一覧化し、「期限が来てから気づく」をなくす。</p>
+  <div class="meta-bar">
+    <span>バージョン <b>1.0</b></span>
+    <span>公開 <b>2026/07/18</b></span>
+    <span>更新 <b>2026/07/18</b></span>
+    
+  </div>
+</div>
+<div class="wrap detail">
+  <div class="prose">
+    <p>医療機器の点検は、機器ごとに周期も業者も違うため、担当者の記憶だけでは必ず抜けます。この管理表は、機器ごとの点検周期・前回実施日・次回期限・業者連絡先を一覧にし、月1回眺めるだけで期限切れを防ぐためのものです。</p>
+    <h2 id="scene">このような場面で使います</h2>
+    <ul>
+      <li><strong>使うタイミング</strong> — 点検期限到来・月次確認</li>
+      <li><strong>期限の目安</strong> — 次回期限の2か月前に業者へ日程打診、が余裕のある運用です。</li>
+      <li><strong>確認する相手</strong> — 保守業者 / メーカー / 院内(使用部署)</li>
+      <li><strong>完了の条件</strong> — 点検対象の全機器について、次回期限と業者連絡先が埋まっている状態</li>
+    </ul>
+    
+    <p>初回は現物の棚卸しから作ってください(契約書ベースだと契約のない機器が漏れます)。以後は月1回、次回期限の列を上から眺めるだけです。</p><div id="tpl-body-device-inspection">
+      <div class="cl-group">
+        <div class="h">管理表の列(1機器=1行)</div>
+        <ul class="cl">
+          <li><span class="box" aria-hidden="true"></span><span>機器名・管理番号・設置場所:</span></li>
+          <li><span class="box" aria-hidden="true"></span><span>点検種別と周期<span class="note">法定/保守契約/自主点検の別。周期は契約書・取説で確認</span></span></li>
+          <li><span class="box" aria-hidden="true"></span><span>前回実施日・次回期限:</span></li>
+          <li><span class="box" aria-hidden="true"></span><span>業者名・連絡先<span class="note">窓口の個人名まで。担当変更があったら更新</span></span></li>
+          <li><span class="box" aria-hidden="true"></span><span>状況<span class="note">未連絡/日程調整中/確定/実施済み の4状態</span></span></li>
+          <li><span class="box" aria-hidden="true"></span><span>報告書の保管場所:</span></li>
+        </ul>
+      </div>
+      <div class="cl-group">
+        <div class="h">月次の運用</div>
+        <ul class="cl">
+          <li><span class="box" aria-hidden="true"></span><span>毎月同じ日に、次回期限が3か月以内の行に印を付ける</span></li>
+          <li><span class="box" aria-hidden="true"></span><span>2か月前になったら業者へ日程打診(この表から直接電話できる状態にしておく)</span></li>
+          <li><span class="box" aria-hidden="true"></span><span>実施後は報告書の保管場所を記録して完了</span></li>
+        </ul>
+      </div>
+      <div class="cl-group">
+        <div class="h">あわせて管理すると効くもの</div>
+        <ul class="cl">
+          <li><span class="box" aria-hidden="true"></span><span>故障・修理履歴(同じ機器の故障が続いたら更新検討の材料に)</span></li>
+          <li><span class="box" aria-hidden="true"></span><span>リース・レンタル機器の契約満了日(点検と別の期限として1列足す)</span></li>
+        </ul>
+      </div></div><p style="margin-top:18px"><button class="btn ghost small" data-copy-target="tpl-body-device-inspection">この内容をテキストでコピー</button></p>
+    
+    
+    <h2 id="omissions">よくある抜け漏れ</h2>
+    <div class="point"><ul><li>保守契約のない機器が一覧から漏れる(契約書ベースで作ると起きる。現物の棚卸しから作る)</li><li>点検結果報告書の保管場所がばらばらになる</li><li>故障・修理と点検の履歴が別管理になり、更新判断の材料が揃わない</li></ul></div>
+    
+    <h2 id="custom">自院向けに変更する部分</h2>
+    <ul><li>機器の一覧(初回は現物の棚卸しから)</li><li>周期(取扱説明書・契約書・法定要件で確認)</li></ul>
+    <div class="notice"><div class="h">注意事項</div>法定点検の要否・周期は機器の種別によって異なります。不明な機器はメーカー・業者に確認してください。</div>
+  </div>
+  <aside class="detail-side" aria-label="資料情報">
+    <div class="buy-card">
+      <span class="badge free" style="align-self:flex-start">無料</span>
+      <p class="note">登録なしで使えます。内容をコピーし、自院の運用に合わせて編集してください。Excel・Word版のダウンロード提供は準備中です。</p>
+      
+      <a class="btn ghost" href="../../templates/index.html">他のテンプレートを探す</a>
+    </div>
+    <div class="side-box">
+      <div class="h">この資料について</div>
+      <dl>
+        <dt>カテゴリ</dt><dd>医療機器・物品・薬剤</dd>
+        <dt>対象</dt><dd>総務、事務長・事務長補佐、看護管理者、医療事務</dd>
+        <dt>利用場面</dt><dd>定期確認、確認、進捗管理</dd>
+        <dt>発生頻度</dt><dd>毎月、毎年</dd>
+        <dt>形式</dt><dd>進捗管理表、台帳</dd>
+        <dt>ファイル</dt><dd>Excel(準備中)</dd>
+      </dl>
+    </div>
+  </aside>
+</div>
+
+  <section class="related wrap">
+    <div class="h">関連するテンプレート</div><div class="grid c2"><a class="tpl-card" href="../../templates/device-ledger/index.html"
+   data-cat="equipment"
+   data-roles="somu jimucho" data-formats="ledger"
+   data-scenes="kiroku kakunin" data-freq="zuiji"
+   data-text="医療機器管理台帳 機器ごとの基本情報・購入/リース・保守契約・修理履歴を1行で管理する親台帳。 医療機器・物品・薬剤 台帳 記録 確認"
+   data-priority="27" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">機器・物品</span>
+      <span class="chip">記録</span><span class="chip">確認</span>
+    </span>
+    <span class="t">医療機器管理台帳</span>
+    <span class="d">機器ごとの基本情報・購入/リース・保守契約・修理履歴を1行で管理する親台帳。</span>
+    <span class="meta">
+      <span class="chip">台帳</span>
+      <span class="chip">随時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a><a class="tpl-card" href="../../templates/stock-order-sheet/index.html"
+   data-cat="equipment"
+   data-roles="somu iryojimu kango" data-formats="ledger tracker"
+   data-scenes="teiki jikko" data-freq="weekly monthly"
+   data-text="物品在庫・発注点管理表 品目ごとの発注点・発注量・発注先を決めて、「切れてから気づく」と過剰在庫を減らす。 医療機器・物品・薬剤 台帳 進捗管理表 定期確認 実行"
+   data-priority="28" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">機器・物品</span>
+      <span class="chip">定期確認</span><span class="chip">実行</span>
+    </span>
+    <span class="t">物品在庫・発注点管理表</span>
+    <span class="d">品目ごとの発注点・発注量・発注先を決めて、「切れてから気づく」と過剰在庫を減らす。</span>
+    <span class="meta">
+      <span class="chip">台帳</span><span class="chip">進捗管理表</span>
+      <span class="chip">毎週</span><span class="chip">毎月</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a><a class="tpl-card" href="../../templates/vendor-inquiry-log/index.html"
+   data-cat="systems"
+   data-roles="jimucho iryojimu somu" data-formats="record tracker"
+   data-scenes="toiawase shinchoku kiroku" data-freq="zuiji trouble"
+   data-text="ベンダー問い合わせ記録 ベンダーへの問い合わせを、症状・依頼内容・回答・対応期限つきで案件管理する。 電子カルテ・レセプト・システム運用 記録表 進捗管理表 問い合わせ 進捗管理 記録"
+   data-priority="24" data-pub="20260718" data-upd="20260718">
+    <span class="top">
+      <span class="badge free">無料</span>
+      <span class="badge cat">カルテ・システム</span>
+      <span class="chip">問い合わせ</span><span class="chip">進捗管理</span>
+    </span>
+    <span class="t">ベンダー問い合わせ記録</span>
+    <span class="d">ベンダーへの問い合わせを、症状・依頼内容・回答・対応期限つきで案件管理する。</span>
+    <span class="meta">
+      <span class="chip">記録表</span><span class="chip">進捗管理表</span>
+      <span class="chip">随時</span><span class="chip">トラブル時</span>
+      <span>更新 2026/07/18</span>
+    </span>
+  </a></div>
+    <div class="h" style="margin-top:22px">関連する記事</div><div class="grid c2"><a class="art-card" href="../../articles/device-deadline-howto/index.html" data-cat="equipment">
+    <span class="meta"><span class="badge cat">医療機器・物品・薬剤</span></span>
+    <span class="t">医療機器の点検期限を管理する方法</span>
+    <span class="d">機器の点検管理は、現物の棚卸しから始めて「期限の一覧」を作るのが出発点です。台帳の作り方、月次の運用、業者との付き合い方を整理します。</span>
+    <span class="meta"><span>更新 2026/07/18</span></span>
+  </a></div>
+  </section>
+</main>
+
+<footer class="mo-footer">
+  <div class="wrap">
+    <div class="mo-footer-grid">
+      <div class="fb">
+        <div class="name">医療管理実務ライブラリ</div>
+        <p>採用、入退職、施設基準、研修、レセプト、医療機器管理。医療機関で繰り返し発生する業務を、すぐに使えるチェックリスト・台帳・進捗表・文例に整理しています。</p>
+      </div>
+      <div>
+        <div class="fh">コンテンツ</div>
+        <a href="../../templates/index.html">テンプレート一覧</a>
+        <a href="../../templates/index.html">無料テンプレート</a>
+        <a href="../../articles/index.html">実務記事</a>
+        <a href="../../pack/index.html">採用・入退職実務パック</a>
+        <a href="../../guide/index.html">初めての方へ</a>
+        <a href="../../faq/index.html">よくある質問</a>
+      </div>
+      <div>
+        <div class="fh">実務カテゴリ</div>
+        <a href="../../categories/recruiting/index.html">採用・面接</a>
+        <a href="../../categories/staffing/index.html">入職・退職</a>
+        <a href="../../categories/safety/index.html">安全・研修</a>
+        <a href="../../categories/admin/index.html">施設基準</a>
+        <a href="../../categories/systems/index.html">カルテ・システム</a>
+        <a href="../../categories/equipment/index.html">機器・物品</a>
+        <a href="../../categories/cooperation/index.html">地域連携</a>
+        <a href="../../categories/writing/index.html">文書・文例</a>
+        <a href="../../categories/integration/index.html">特殊案件</a>
+      </div>
+      <div>
+        <div class="fh">サイトについて</div>
+        <a href="../../about/index.html">運営者について</a>
+        <a href="../../corporate/index.html">法人・複数拠点での利用</a>
+        <a href="../../../index.html">BRIDGE(運営プロジェクト)</a>
+        <a href="../../../manager-starter/index.html">医療管理職スターター(管理職の進め方はこちら)</a>
+        <a href="../../../community/index.html">お問い合わせ</a>
+        <a href="../../legal/terms.html">利用規約</a>
+        <a href="../../legal/privacy.html">プライバシーポリシー</a>
+        <a href="../../legal/disclaimer.html">免責事項</a>
+      </div>
+    </div>
+    <div class="base">
+      <span>© 2026 BRIDGE. All rights reserved.</span>
+      <span>本サイトの資料は編集して利用する前提のひな形です。個別の判断は所管窓口・専門家へご確認ください。</span>
+    </div>
+  </div>
+</footer>
+<script src="../../assets/medops.js" defer></script>
+</body>
+</html>

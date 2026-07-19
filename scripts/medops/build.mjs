@@ -11,31 +11,33 @@ import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { SITE, ROLES, PHASES, FORMATS, fmtPrice } from '../../medops/data/site.mjs';
+import { SITE, ROLES, SCENES, FREQUENCY, FORMATS, fmtPrice } from '../../medops/data/site.mjs';
 import { CATEGORIES } from '../../medops/data/categories.mjs';
 import { TEMPLATES, publishedTemplates } from '../../medops/data/templates.mjs';
 import { ARTICLES, publishedArticles } from '../../medops/data/articles.mjs';
+import { PRODUCT } from '../../medops/data/product.mjs';
 import {
-  esc, page, breadcrumbs, breadcrumbLd, tplCard, artCard, catCard,
-  contentHtml, priceHtml, formatLabel, catName, dateJp,
+  esc, page, breadcrumbs, breadcrumbLd, tplCard, artCard, catCard, contentHtml,
+  formatLabel, sceneLabel, freqLabel, catName, catShort, dateJp,
 } from './html.mjs';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const written = [];
 const out = (path, html) => {
   const abs = join(repo, 'medops', path);
   mkdirSync(dirname(abs), { recursive: true });
   writeFileSync(abs, html);
   written.push(path);
 };
-const written = [];
 
 const tpls = publishedTemplates();
 const arts = publishedArticles();
-const paidTpls = tpls.filter((t) => !t.isFree);
 const catCount = (id) => tpls.filter((t) => t.categoryId === id).length + arts.filter((a) => a.categoryId === id).length;
 const tplById = (id) => tpls.find((t) => t.id === id);
 const artById = (id) => arts.find((a) => a.id === id);
 const E = SITE.events;
+const P = SITE.pricing.recruitPack;
+const packAvailable = PRODUCT.status === 'published';
 
 /* 関連コンテンツ(公開中のものだけを描画。draftへのリンクは作らない) */
 const relatedSection = (root, tplIds = [], artIds = []) => {
@@ -50,26 +52,29 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
 };
 
 /* ================================================================
-   トップページ
+   トップページ(実務カテゴリと資料プレビュー中心。管理職訴求は置かない)
    ================================================================ */
 {
   const root = '';
-  const featured = tpls.filter((t) => t.isFeatured).slice(0, 4);
-  const free = tpls.filter((t) => t.isFree);
-  const flagship = tplById('integration-pack');
+  const featured = tpls.filter((t) => t.isFeatured).slice(0, 6);
+  const featuredA = arts.filter((a) => a.isFeatured).slice(0, 4);
   const worries = [
-    '突然、クリニック統合を任された',
-    '行政に何を確認すればよいか分からない',
-    'タスク一覧を作ったが、前後関係が見えないと言われた',
-    '引き継ぎ資料がなく、前任者しか分からない業務が多い',
-    '医療職出身で、管理業務を体系的に学んだことがない',
-    'AIに聞いても、一般論しか返ってこない',
+    '採用面接の評価表が担当者ごとに違う',
+    '退職者のアカウント停止を忘れそうになる',
+    '研修記録がどこにあるか分からない',
+    '施設基準の更新期限を担当者しか把握していない',
+    '行政へ何を聞けばよいか整理できない',
+    '医療機器の点検期限を一覧で見られない',
+    '返戻対応の進捗が分からない',
+    '毎回同じ案内文をゼロから作っている',
   ];
   const features = [
-    ['実務経験をもとに作成', 'クリニック統合・行政手続き・採用・電子カルテ移行の支援実務で使っている構成をもとにしています。'],
-    ['タスク・期限・確認先まで整理', '「何をするか」だけでなく、誰に確認し、いつまでにやるかまで書ける形にしています。'],
-    ['編集して使う前提', 'チェックリストや文例はそのままコピーでき、自院の状況に合わせて書き換えて使えます。'],
-    ['必要以上に細かくしない', '網羅的な一覧より、現場で実際に使う単位に絞っています。項目を減らすことも整理のうちです。'],
+    ['案件ごとに必要な項目が分かる', '業務ごとに確認事項・担当者・期限を整理しています。急に任された業務でも、確認先から始められます。'],
+    ['Excel・Wordですぐ使える', '自院の運用に合わせて編集する前提のひな形です。項目を削るのも編集です。'],
+    ['確認先を分けて整理できる', '院内・行政・厚生局・ベンダー・業者を分けて管理できます。誰へ聞くかで迷いません。'],
+    ['進捗と未対応が見える', '対応済み・確認中・未対応を一覧で管理し、「誰かがやっているはず」をなくします。'],
+    ['文例まで用意している', '行政・ベンダー・職員・患者・連携先への連絡文をゼロから作らずに済みます。'],
+    ['医療機関の実務に合わせている', '一般企業向けの雛形ではなく、医療機関で実際に発生する業務を前提にしています。'],
   ];
   const body = `
 <section class="hero">
@@ -77,58 +82,60 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
     <div>
       <p class="eyebrow">${esc(SITE.name)}</p>
       <h1>${esc(SITE.tagline)}</h1>
-      <p class="sub">クリニック統合、管理医師変更、採用、業務分担。医療管理職が迷いやすい実務を、担当者・期限・確認先まで整理したテンプレートと進め方にまとめています。${paidTpls.length ? 'チェックリストと文例は無料で使えます。' : '公開中のテンプレートは、すべて無料で使えます。'}</p>
+      <p class="sub">${esc(SITE.description)}すべて無料で使えるところから始められます。</p>
       <div class="hero-tags">
-        <span>医療管理職向け</span><span>チェックリスト・${paidTpls.length ? 'WBS' : '記入シート'}・文例</span><span>コピーして編集する前提</span>
+        <span>医療機関の実務専用</span><span>チェックリスト・台帳・進捗表・文例</span><span>編集して使う前提</span>
       </div>
       <div class="hero-cta">
-        <a class="btn primary" href="templates/index.html${paidTpls.length ? '?free=1' : ''}">無料テンプレートを見る</a>
-        <a class="btn ghost" href="#themes">実務テーマから探す</a>
+        <a class="btn cta" href="#categories">実務カテゴリから探す</a>
+        <a class="btn ghost" href="templates/index.html">無料テンプレートを見る</a>
+      </div>
+      <p style="font-size:11.5px;color:var(--ink-3);margin-top:12px">登録不要・無料ですぐ使えます</p>
+    </div>
+    <div class="hero-minis" aria-label="実務資料の例">
+      <div class="mini">
+        <div class="mt">退職時対応チェックリスト</div>
+        <ul>
+          <li><span class="bx on" aria-hidden="true"></span><span>カルテ停止をベンダーへ予約</span></li>
+          <li><span class="bx on" aria-hidden="true"></span><span>鍵・カードの回収</span></li>
+          <li><span class="bx" aria-hidden="true"></span><span>翌営業日に停止確認</span></li>
+        </ul>
+      </div>
+      <div class="mini">
+        <div class="mt">採用進捗管理表</div>
+        <ul>
+          <li><span class="st">選考中</span><span>看護師(常勤) 応募3</span></li>
+          <li><span class="st">内定</span><span>医療事務 入職6/1</span></li>
+          <li><span class="st warn">停滞</span><span>PT 一次から1週間</span></li>
+        </ul>
+      </div>
+      <div class="mini wide">
+        <div class="mt">施設基準管理台帳</div>
+        <ul>
+          <li><span class="st">毎月</span><span>人員要件の確認 — 担当: 事務長</span></li>
+          <li><span class="st warn">2か月前</span><span>研修要件の期限 9/30 — 出席簿を確認</span></li>
+          <li><span class="st">保管</span><span>根拠資料: 共有/施設基準/2026</span></li>
+        </ul>
       </div>
     </div>
-    ${paidTpls.length ? `<div class="hero-preview" aria-label="テンプレートのイメージ(統合実務パックのWBS抜粋)">
-      <div class="bar"><b>統合全体WBS</b><span>— 担当・確認先・期限まで1枚で</span></div>
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th></th><th>タスク</th><th>担当</th><th>確認先</th><th>期限</th></tr></thead>
-        <tbody>
-          <tr><td><span class="ph on"></span></td><td>保健所へ統合の事前相談</td><td>事務長</td><td>保健所</td><td>3か月前</td></tr>
-          <tr><td><span class="ph on"></span></td><td>カルテ移行データの範囲確認</td><td>事務長</td><td>ベンダー</td><td>2.5か月前</td></tr>
-          <tr><td><span class="ph"></span></td><td>職員への業務ヒアリング</td><td>本部</td><td>各職種</td><td>2か月前</td></tr>
-          <tr><td><span class="ph"></span></td><td>患者・施設への案内文の発送</td><td>事務</td><td>院長承認</td><td>1か月前</td></tr>
-        </tbody>
-      </table></div>
-      <div class="cap">有料パック「統合全体WBS」より抜粋</div>
-    </div>` : `<div class="hero-preview" aria-label="テンプレートのイメージ(クリニック統合の初動チェックリスト抜粋)">
-      <div class="bar"><b>統合の初動チェックリスト</b><span>— 最初の1週間ぶん</span></div>
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th></th><th>確認すること</th><th>確認先</th></tr></thead>
-        <tbody>
-          <tr><td><span class="ph on"></span></td><td>統合予定日を仮でも日付で持つ</td><td>院長・理事長</td></tr>
-          <tr><td><span class="ph on"></span></td><td>存続する保険医療機関コードの確認</td><td>院長・理事長</td></tr>
-          <tr><td><span class="ph"></span></td><td>施設基準の届出控えを集める(両院分)</td><td>院内</td></tr>
-          <tr><td><span class="ph"></span></td><td>保健所(医務担当)へ事前相談</td><td>保健所</td></tr>
-        </tbody>
-      </table></div>
-      <div class="cap">無料テンプレート「クリニック統合の初動チェックリスト」より抜粋</div>
-    </div>`}
   </div>
 </section>
 
 <section class="sec">
   <div class="wrap">
     <p class="eyebrow">Worries</p>
-    <h2 class="sec-h">制度は調べたのに、次に何をすればよいか分からない</h2>
-    <p class="sec-lead">医療の管理業務は、制度・行政・現場・ベンダーが絡み合います。このサイトは、情報を読むだけで終わらせず、実行できる形の資料に整理して提供します。</p>
+    <h2 class="sec-h">毎回、前回のExcelを探すところから始めていませんか</h2>
     <div class="rows text-wrap" style="margin-top:22px">
       ${worries.map((w, i) => `<div class="row"><span class="m">${String(i + 1).padStart(2, '0')}</span><span class="b">${esc(w)}</span></div>`).join('\n      ')}
     </div>
+    <p class="text-wrap" style="font-size:13.5px;color:var(--ink-2);margin-top:18px;line-height:2">原因は担当者の能力ではなく、業務ごとの確認事項と資料の形式が決まっていないことです。このサイトは、医療機関で繰り返し発生する業務を「何を確認するか・誰へ聞くか・どこまで終わったか」が分かる資料に整理しています。</p>
   </div>
 </section>
 
-<section class="sec" id="themes" style="background:var(--bg-2)">
+<section class="sec" id="categories" style="background:var(--bg-2)">
   <div class="wrap">
-    <p class="eyebrow">Themes</p>
-    <h2 class="sec-h">実務テーマから探す</h2>
+    <p class="eyebrow">Categories</p>
+    <h2 class="sec-h">実務カテゴリから探す</h2>
     <div class="grid c3" style="margin-top:22px">
       ${CATEGORIES.map((c) => catCard(c, root, catCount(c.id))).join('\n      ')}
     </div>
@@ -137,60 +144,103 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
 
 <section class="sec">
   <div class="wrap">
-    <p class="eyebrow">Templates</p>
-    <h2 class="sec-h">テンプレート</h2>
-    <p class="sec-lead">${paidTpls.length ? 'まず無料のチェックリストから使えます。有料パックは、内容とサンプルを確認してから検討してください。' : 'チェックリスト・記入シート・文例を公開しています。ページ上でそのまま使えます。'}</p>
-    <div class="grid c2" style="margin-top:22px">
+    <p class="eyebrow">Free</p>
+    <h2 class="sec-h">よく使われる無料テンプレート</h2>
+    <p class="sec-lead">すべてページ上でそのまま使えます。コピーして、自院の運用に合わせて書き換えてください。</p>
+    <div class="grid c3" style="margin-top:22px">
       ${featured.map((t) => tplCard(t, root)).join('\n      ')}
     </div>
     <p class="sec-more"><a class="btn ghost small" href="templates/index.html">テンプレートをすべて見る</a></p>
   </div>
 </section>
 
-<section class="sec" style="background:var(--bg-2)">
-  <div class="wrap">
-    <p class="eyebrow">How to</p>
-    <h2 class="sec-h">初めての方へ — 3ステップ</h2>
-    <div class="steps" style="margin-top:22px">
-      <div class="step"><div class="t">困っているテーマを選ぶ</div><div class="d">「統合を任された」「管理医師が変わる」など、いまの状況に近いテーマから入ってください。</div></div>
-      <div class="step"><div class="t">記事${paidTpls.length ? 'とサンプル' : ''}で進め方を確認する</div><div class="d">各テーマの記事に、全体像と確認先を書いています。${paidTpls.length ? '有料パックはサンプルを公開しています。' : 'テンプレートを使う前に、まず記事で段取りをつかんでください。'}</div></div>
-      <div class="step"><div class="t">テンプレートを自院用に編集する</div><div class="d">チェックリストや文例をコピーし、日付や担当者を自院の内容に書き換えて使ってください。</div></div>
-    </div>
-    <p class="sec-more"><a href="guide/index.html" class="btn ghost small">使い方をくわしく見る</a></p>
-  </div>
-</section>
-
+${packAvailable ? `
 <section class="sec">
   <div class="wrap">
-    <p class="eyebrow">Free</p>
-    <h2 class="sec-h">無料で使える資料</h2>
-    <div class="grid c3" style="margin-top:22px">
-      ${free.slice(0, 6).map((t) => tplCard(t, root)).join('\n      ')}
+    <div class="pack-band">
+      <div>
+        <p class="eyebrow">Pack</p>
+        <h2>${esc(PRODUCT.title)}</h2>
+        <p class="lead">${esc(PRODUCT.heading)}。担当者が替わっても、採用〜入職〜退職を同じ形式で回せます。</p>
+        <div class="price-row">
+          <span class="now">${fmtPrice(P.list)}</span>
+          <span class="tax">税込・買い切り</span>
+        </div>
+        <div class="chips"><span>収録${PRODUCT.items.length}ファイル</span><span>マスター管理表つき</span><span>記入例・失敗事例集つき</span><span>決済準備中</span></div>
+        <p><a class="btn cta" href="pack/index.html">パックの内容を見る</a></p>
+      </div>
+      <div class="inc">
+        <div class="h">収録テンプレート(一部)</div>
+        <ul>
+          <li>採用要件整理シート・面接評価シート(完全版)</li>
+          <li>内定・不採用・辞退対応の連絡文例</li>
+          <li>入職前準備チェックリスト・アカウント発行一覧</li>
+          <li>退職時対応チェックリスト・停止確認表</li>
+          <li>採用・入退職進捗管理表</li>
+        </ul>
+        <div class="more">など全${PRODUCT.items.length}点。<a href="pack/index.html#files" style="text-decoration:underline;color:var(--band-ink)">収録一覧をすべて見る</a></div>
+      </div>
     </div>
-    <p class="sec-more"><a class="btn ghost small" href="templates/index.html${paidTpls.length ? '?free=1' : ''}">無料テンプレートをすべて見る</a></p>
   </div>
-</section>
+</section>` : ''}
 
 <section class="sec" style="background:var(--bg-2)">
   <div class="wrap">
     <p class="eyebrow">Features</p>
     <h2 class="sec-h">このサイトの資料の作り方</h2>
-    <div class="grid c2" style="margin-top:22px">
+    <div class="grid c3" style="margin-top:22px">
       ${features.map(([t, d]) => `<div class="cat-card" style="cursor:default"><span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></div>`).join('\n      ')}
-    </div>
-    <div class="text-wrap" style="margin-top:26px">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:6px">AIが作っただけの資料ではありません</h3>
-      <p style="font-size:13px;color:var(--ink-2)">資料の作成に生成AIも使っていますが、一般論のまま公開はしていません。医療現場と経営支援の実務経験をもとに、内容と粒度を整えています。<a href="about/index.html" style="text-decoration:underline">運営者について</a></p>
     </div>
   </div>
 </section>
 
 <section class="sec">
+  <div class="wrap">
+    <p class="eyebrow">How to</p>
+    <h2 class="sec-h">初めての方へ — 3ステップ</h2>
+    <div class="steps" style="margin-top:22px">
+      <div class="step"><div class="t">発生した業務のカテゴリを開く</div><div class="d">「急に面接を任された」「退職者が出た」など、いま起きている案件のカテゴリから入ってください。</div></div>
+      <div class="step"><div class="t">記事で確認事項をつかむ</div><div class="d">各カテゴリの記事に、確認する項目・確認先・よくある抜け漏れを書いています。</div></div>
+      <div class="step"><div class="t">テンプレートを自院用に編集する</div><div class="d">チェックリスト・台帳をコピーし、担当者と期限を自院の内容に書き換えて使ってください。</div></div>
+    </div>
+    <p class="sec-more"><a href="guide/index.html" class="btn ghost small">使い方をくわしく見る</a></p>
+  </div>
+</section>
+
+<section class="sec" style="background:var(--bg-2)">
+  <div class="wrap">
+    <p class="eyebrow">Articles</p>
+    <h2 class="sec-h">実務記事</h2>
+    <div class="grid c2" style="margin-top:22px">
+      ${featuredA.map((a) => artCard(a, root)).join('\n      ')}
+    </div>
+    <p class="sec-more"><a class="btn ghost small" href="articles/index.html">記事をすべて見る</a></p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap text-wrap">
+    <p class="eyebrow">Author</p>
+    <h2 class="sec-h">医療機関の実務の現場で使っている形を、そのまま公開しています</h2>
+    <p style="font-size:13.5px;color:var(--ink-2);margin-top:12px;line-height:2">${esc(SITE.operator.background)}このサイトの資料は、支援先の実務で実際に使っている構成をもとにしています。生成AIも使いますが、一般論のまま公開せず、現場で通用した粒度に直してから出しています。<a href="about/index.html" style="text-decoration:underline">運営者について</a></p>
+  </div>
+</section>
+
+<div class="closing">
+  <div class="wrap">
+    <p class="stmt">その業務、前回の資料を探すところから<br>始めなくてよくなります</p>
+    <div class="hero-cta" style="justify-content:center;margin-top:22px">
+      <a class="btn cta" href="#categories">実務カテゴリから探す</a>
+      <a class="btn ghost" href="templates/index.html">無料テンプレートを見る</a>
+    </div>
+  </div>
+</div>
+
+<section class="sec" style="padding-top:28px">
   <div class="wrap text-wrap">
     <div class="notice">
       <div class="h">ご利用にあたって</div>
-      本サイトの資料は、実務の整理を助けるひな形であり、法的・医療的・行政的な最終判断を代替するものではありません。個別の案件は所管の保健所・厚生局・自治体・専門家・ベンダーにご確認ください。テンプレートに患者情報・個人情報を入力する場合は、各機関の情報管理規程に従ってください。
-      くわしくは<a href="legal/disclaimer.html" style="text-decoration:underline">免責事項</a>をご覧ください。
+      本サイトの資料は、実務の整理を助けるひな形であり、行政・法律・労務・診療報酬上の最終判断を代替しません。個別の案件は所管の保健所・厚生局・自治体・専門家・ベンダーにご確認ください。制度や地域により対応が異なる場合があります。テンプレートに患者情報・職員の機微情報を記入する際は、自院の規程に従ってください。くわしくは<a href="legal/disclaimer.html" style="text-decoration:underline">免責事項</a>をご覧ください。
     </div>
   </div>
 </section>`;
@@ -220,51 +270,50 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
 }
 
 /* ================================================================
-   テンプレート一覧(絞り込み・並び替え・横断検索の受け口)
+   テンプレート一覧(実務カテゴリ・利用場面・頻度・対象者で絞り込み)
    ================================================================ */
 {
   const root = '../';
   const chip = (fkey, fval, label, pressed) =>
     `<button class="fchip" data-fkey="${fkey}" data-fval="${fval}" aria-pressed="${pressed ? 'true' : 'false'}">${esc(label)}</button>`;
+  const usedCats = CATEGORIES.filter((c) => tpls.some((t) => t.categoryId === c.id));
   const body = `
 ${breadcrumbs(root, [['テンプレート', null]])}
 <div class="wrap page-head" style="border-bottom:none;padding-bottom:6px">
   <p class="eyebrow">Templates</p>
   <h1>テンプレート一覧</h1>
-  <p class="lead">${paidTpls.length ? '公開中のテンプレートです。無料のものはページ上でそのまま使えます。有料パックはサンプルを確認してから検討してください。' : '公開中のテンプレートです。すべて無料で、ページ上でそのまま使えます。'}</p>
+  <p class="lead">公開中のテンプレートです。すべて無料で、ページ上でそのまま使えます。${packAvailable ? '採用・入退職の完全版一式はパックにまとめています。' : ''}</p>
 </div>
 <div class="wrap">
   <div class="filters" aria-label="絞り込み">
     <div class="frow">
-      <span class="flabel">テーマ</span>
+      <span class="flabel">カテゴリ</span>
       ${chip('cat', 'all', 'すべて', true)}
-      ${CATEGORIES.filter((c) => tpls.some((t) => t.categoryId === c.id)).map((c) => chip('cat', c.id, c.short)).join('')}
-    </div>
-    <div class="frow">
-      ${paidTpls.length ? `<span class="flabel">料金</span>${chip('price', 'all', 'すべて', true)}${chip('price', 'free', '無料')}${chip('price', 'paid', '有料')}` : ''}
-      <span class="fcount" id="fCount" aria-live="polite"></span>
-      <button class="freset" id="fReset">条件をリセット</button>
+      ${usedCats.map((c) => chip('cat', c.id, c.short)).join('')}
     </div>
     <div class="frow">
       <span class="flabel">検索</span>
-      <input type="search" id="fQ" placeholder="例: 統合 チェックリスト / 管理医師" aria-label="キーワードで絞り込む">
+      <input type="search" id="fQ" placeholder="例: 退職 アカウント / 面接 / 返戻" aria-label="キーワードで絞り込む">
       <label class="flabel" for="fSort" style="min-width:auto">並び順</label>
       <select id="fSort" aria-label="並び替え">
         <option value="reco">おすすめ順</option>
         <option value="new">新着順</option>
         <option value="upd">更新順</option>
-        <option value="price">価格が安い順</option>
       </select>
+      <span class="fcount" id="fCount" aria-live="polite"></span>
+      <button class="freset" id="fReset">条件をリセット</button>
     </div>
     <details class="fmore">
-      <summary>くわしい条件(対象者・形式・業務フェーズ)</summary>
+      <summary>くわしい条件(利用場面・発生頻度・対象者・形式)</summary>
       <div class="frow" style="margin-top:10px">
+        <label class="flabel" for="f-scene">利用場面</label>
+        <select id="f-scene"><option value="">指定しない</option>${SCENES.map((s) => `<option value="${s.id}">${esc(s.label)}</option>`).join('')}</select>
+        <label class="flabel" for="f-freq">発生頻度</label>
+        <select id="f-freq"><option value="">指定しない</option>${FREQUENCY.map((f) => `<option value="${f.id}">${esc(f.label)}</option>`).join('')}</select>
         <label class="flabel" for="f-role">対象者</label>
         <select id="f-role"><option value="">指定しない</option>${ROLES.map((r) => `<option value="${r.id}">${esc(r.label)}</option>`).join('')}</select>
         <label class="flabel" for="f-format">形式</label>
         <select id="f-format"><option value="">指定しない</option>${FORMATS.map((f) => `<option value="${f.id}">${esc(f.label)}</option>`).join('')}</select>
-        <label class="flabel" for="f-phase">フェーズ</label>
-        <select id="f-phase"><option value="">指定しない</option>${PHASES.map((p) => `<option value="${p.id}">${esc(p.label)}</option>`).join('')}</select>
       </div>
     </details>
   </div>
@@ -279,13 +328,13 @@ ${breadcrumbs(root, [['テンプレート', null]])}
   <section id="artResults" hidden style="margin-top:30px">
     <div class="related" style="border-top:1px solid var(--line-soft);padding-top:24px"><div class="h">記事の検索結果</div><div class="grid c2"></div></div>
   </section>
-  <p style="font-size:12px;color:var(--ink-3);margin:26px 0 40px">${paidTpls.length ? `有料テンプレートは現在「${esc(paidTpls[0].title)}」の1本です。管理医師変更・電子カルテ移行などのパックを順次追加していきます。` : '現在公開しているのはすべて無料テンプレートです。案件全体を管理する有料の実務パックは、資料を整えてから公開します。'}</p>
+  <p style="font-size:12px;color:var(--ink-3);margin:26px 0 40px">${packAvailable ? `採用・入退職の完全版一式は<a href="${root}pack/index.html" style="text-decoration:underline">${esc(PRODUCT.shortTitle)}</a>にまとめています(決済準備中)。` : ''}1on1・上司報告など管理職としての進め方は<a href="${root}../manager-starter/index.html" style="text-decoration:underline">${esc(SITE.sibling.name)}</a>で扱っています。</p>
 </div>`;
 
   out('templates/index.html', page({
     path: 'templates/index.html',
     title: 'テンプレート一覧',
-    description: '医療管理職向けの実務テンプレート一覧。クリニック統合・管理医師変更・採用・業務分担などのチェックリスト・WBS・文例を、テーマ・対象者・形式で絞り込めます。',
+    description: '医療機関の実務テンプレート一覧。採用・入退職・施設基準・研修記録・返戻管理・機器点検などのチェックリスト・台帳・進捗表・文例を、カテゴリ・利用場面・頻度で絞り込めます。',
     pageId: 'templates',
     event: E.VIEW_TEMPLATE,
     body,
@@ -294,163 +343,269 @@ ${breadcrumbs(root, [['テンプレート', null]])}
 }
 
 /* ================================================================
-   テンプレート詳細
+   テンプレート詳細(場面・確認先・抜け漏れ・変更点まで表示)
    ================================================================ */
 for (const t of tpls) {
   const root = '../../';
   const path = `templates/${t.slug}/index.html`;
-  const crumb = [['テンプレート', 'templates/index.html'], [t.shortTitle || t.title, null]];
-  const metaBar = `
+  const cautions = [t.notes, t.regionalDifferences, t.requiresExpertConfirmation, t.reviewNote].filter(Boolean);
+  const packNudge = packAvailable && ['recruiting', 'staffing'].includes(t.categoryId);
+  const body = `
+${breadcrumbs(root, [['テンプレート', 'templates/index.html'], [t.shortTitle || t.title, null]])}
+<div class="wrap page-head" style="border-bottom:none;padding-bottom:0">
+  <p><span class="badge free">無料</span> <span class="badge cat">${esc(catName(t.categoryId))}</span> ${(t.scenes || []).map((s) => `<span class="chip">${esc(sceneLabel(s))}</span>`).join(' ')}</p>
+  <h1>${esc(t.title)}</h1>
+  <p class="lead">${esc(t.summary)}</p>
   <div class="meta-bar">
     ${t.version ? `<span>バージョン <b>${esc(t.version)}</b></span>` : ''}
     <span>公開 <b>${dateJp(t.publishedAt)}</b></span>
     <span>更新 <b>${dateJp(t.updatedAt)}</b></span>
     ${t.effectiveDate ? `<span>制度基準日 <b>${dateJp(t.effectiveDate)}</b></span>` : ''}
-  </div>`;
-  const sideMeta = `
+  </div>
+</div>
+<div class="wrap detail">
+  <div class="prose">
+    <p>${esc(t.description)}</p>
+    <h2 id="scene">このような場面で使います</h2>
+    <ul>
+      ${t.triggerEvent ? `<li><strong>使うタイミング</strong> — ${esc(t.triggerEvent)}</li>` : ''}
+      ${t.deadlineNote ? `<li><strong>期限の目安</strong> — ${esc(t.deadlineNote)}</li>` : ''}
+      ${(t.confirmationTargets || []).length ? `<li><strong>確認する相手</strong> — ${t.confirmationTargets.map(esc).join(' / ')}</li>` : ''}
+      ${t.completionCriteria ? `<li><strong>完了の条件</strong> — ${esc(t.completionCriteria)}</li>` : ''}
+    </ul>
+    ${!t.content && (t.includedItems || []).length ? `
+    <h2 id="items">含まれる項目</h2>
+    <ul>${t.includedItems.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>
+    <p style="font-size:12.5px;color:var(--ink-3)">この項目構成をもとに、自院のExcel・Wordで表を作ってそのまま使えます。ファイルのダウンロード提供は準備中です。</p>` : ''}
+    ${contentHtml(t)}
+    ${(t.usageSteps || []).length ? `<h2 id="usage">使い方</h2><ol>${t.usageSteps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>` : ''}
+    ${(t.commonOmissions || []).length ? `
+    <h2 id="omissions">よくある抜け漏れ</h2>
+    <div class="point"><ul>${t.commonOmissions.map((o) => `<li>${esc(o)}</li>`).join('')}</ul></div>` : ''}
+    ${(t.customizationPoints || []).length ? `
+    <h2 id="custom">自院向けに変更する部分</h2>
+    <ul>${t.customizationPoints.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
+    ${cautions.length ? `<div class="notice"><div class="h">注意事項</div>${cautions.map(esc).join('<br>')}</div>` : ''}
+  </div>
+  <aside class="detail-side" aria-label="資料情報">
+    <div class="buy-card">
+      <span class="badge free" style="align-self:flex-start">無料</span>
+      <p class="note">登録なしで使えます。内容をコピーし、自院の運用に合わせて編集してください。Excel・Word版のダウンロード提供は準備中です。</p>
+      ${packNudge ? `<a class="btn primary" href="${root}pack/index.html">完全版を含む採用・入退職パックを見る</a>` : ''}
+      <a class="btn ghost" href="${root}templates/index.html">他のテンプレートを探す</a>
+    </div>
     <div class="side-box">
       <div class="h">この資料について</div>
       <dl>
-        <dt>テーマ</dt><dd>${esc(catName(t.categoryId))}</dd>
+        <dt>カテゴリ</dt><dd>${esc(catName(t.categoryId))}</dd>
         <dt>対象</dt><dd>${(t.targetRoles || []).map((r) => esc((ROLES.find((x) => x.id === r) || {}).label || r)).join('、')}</dd>
+        ${(t.scenes || []).length ? `<dt>利用場面</dt><dd>${t.scenes.map((s) => esc(sceneLabel(s))).join('、')}</dd>` : ''}
+        ${(t.frequency || []).length ? `<dt>発生頻度</dt><dd>${t.frequency.map((f) => esc(freqLabel(f))).join('、')}</dd>` : ''}
         <dt>形式</dt><dd>${(t.formats || []).map((f) => esc(formatLabel(f))).join('、')}</dd>
-        ${t.includedFiles ? `<dt>ファイル数</dt><dd>${t.includedFiles.length}ファイル</dd>` : ''}
-        ${t.estimatedTime ? `<dt>所要時間</dt><dd>${esc(t.estimatedTime)}</dd>` : ''}
+        ${(t.fileFormats || []).length ? `<dt>ファイル</dt><dd>${t.fileFormats.map((f) => esc(f === 'excel' ? 'Excel' : f === 'word' ? 'Word' : f)).join('・')}(準備中)</dd>` : ''}
       </dl>
-    </div>`;
-
-  let main = '';
-  let side = '';
-  let ld;
-  let hasSticky = false;
-  let extra = '';
-
-  if (t.isFree) {
-    main = `
-    <div class="prose">
-      <p>${esc(t.description)}</p>
-      ${contentHtml(t)}
-      ${t.reviewNote ? `<div class="notice"><div class="h">確認のお願い</div>${esc(t.reviewNote)}</div>` : ''}
-    </div>`;
-    side = `
-    <div class="buy-card">
-      <span class="badge free" style="align-self:flex-start">無料</span>
-      <p class="note">この資料は登録なしで使えます。内容をコピーし、自院用に編集してください。Excel・Word版のダウンロード提供は準備中です。</p>
-      ${(t.relatedTemplateIds || []).map(tplById).filter((x) => x && !x.isFree).slice(0, 1).map((x) =>
-        `<a class="btn primary" href="${root}templates/${x.slug}/index.html">有料版: ${esc(x.shortTitle)}を見る</a>`).join('')}
-      <a class="btn ghost" href="${root}templates/index.html">他のテンプレートを探す</a>
     </div>
-    ${sideMeta}`;
-    ld = {
+  </aside>
+</div>
+${relatedSection(root, (t.relatedTemplateIds || []).filter((id) => id !== t.id), t.relatedArticleIds)}`;
+
+  out(path, page({
+    path,
+    title: t.title,
+    description: t.summary + ' 無料で使えます。',
+    pageId: 'templates',
+    event: E.VIEW_TEMPLATE,
+    body,
+    ld: [{
       '@context': 'https://schema.org', '@type': 'CreativeWork',
       name: t.title, description: t.summary, inLanguage: 'ja',
       isAccessibleForFree: true, datePublished: t.publishedAt, dateModified: t.updatedAt,
       author: { '@type': 'Person', name: '橋本渉' },
       url: SITE.baseUrl + path.replace(/index\.html$/, ''),
-    };
-  } else {
-    const p = SITE.pricing.flagship;
-    hasSticky = true;
-    main = `
-    <div class="prose">
-      <p>${esc(t.description)}</p>
-      <h2 id="problems">こんな状況のときに</h2>
-      <ul>${(t.problems || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
-      <h2 id="outcomes">この資料でできること</h2>
-      <ul>${(t.outcomes || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
-      <h2 id="limitations">解決できないこと</h2>
-      <ul>${(t.limitations || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
-      <h2 id="files">含まれるファイル(全${t.includedFiles.length}点)</h2>
+    }, breadcrumbLd([['テンプレート', 'templates/index.html'], [t.title, path]])],
+  }));
+}
+
+/* ================================================================
+   採用・入退職実務パック(status=published のときのみ生成)
+   価格表示: 通常価格の単一表示(2026-07-19 社長決定。二重価格の枠組みは使わない)
+   (実績のない二重価格に見せない — PM条件 2026-07-18)
+   ================================================================ */
+if (packAvailable) {
+  const root = '../';
+  const path = 'pack/index.html';
+  const groups = [...new Set(PRODUCT.items.map((i) => i.cat))];
+  const body = `
+${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
+<div class="pack-hero">
+  <div class="wrap">
+    <p><span class="badge paid">有料</span> <span class="badge prep">決済準備中</span></p>
+    <p class="eyebrow" style="margin-top:10px">${esc(PRODUCT.title)}</p>
+    <h1 style="font-size:clamp(21px,3.4vw,30px);font-weight:700;margin-top:8px">${esc(PRODUCT.heading)}</h1>
+    <p class="lead" style="font-size:13.5px;color:var(--ink-2);margin-top:10px;max-width:var(--text-max)">${esc(PRODUCT.shortDescription)}</p>
+    <div class="pack-meta">
+      <span>収録 <b>${PRODUCT.items.length}ファイル</b>(記入例・失敗事例集つき)</span>
+      <span>形式 <b>Excel・Word(スプレッドシート取込可)</b></span>
+      <span>価格 <b>${fmtPrice(P.list)}</b> <span style="color:var(--ink-3)">税込・買い切り</span></span>
+      <span>更新 <b>${dateJp(PRODUCT.updatedAt)}</b></span>
+    </div>
+  </div>
+</div>
+<div class="wrap detail">
+  <div class="prose">
+    <p>${esc(PRODUCT.longDescription)}</p>
+    <h2 id="target">このような方向け</h2>
+    <ul>${PRODUCT.targetUsers.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+    <h2 id="problems">こんな状態のときに</h2>
+    <ul>${PRODUCT.problems.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+    <h2 id="outcomes">このパックでできること</h2>
+    <ul>${PRODUCT.outcomes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+    <h2 id="files">含まれるファイル(全${PRODUCT.items.length}点)</h2>
+    ${groups.map((g) => `
+    <div class="pack-group">
+      <div class="h">${esc(g)}</div>
       <ul class="files">
-        ${t.includedFiles.map((f, i) => `<li><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="fn">${esc(f.name)}</span><span class="fp">${esc(f.purpose)}</span><span class="chip">${esc(f.format)}</span></li>`).join('\n        ')}
+        ${PRODUCT.items.filter((i) => i.cat === g).map((i, n) => `<li><span class="n">${String(n + 1).padStart(2, '0')}</span><span class="fn">${esc(i.title)}</span><span class="fp">${esc(i.purpose)}</span><span class="chip">${esc(i.format)}</span></li>`).join('\n        ')}
       </ul>
-      <h2 id="sample">サンプル</h2>
-      <div class="sample-table">
-        <div class="cap">${esc(t.sample.title)} — ${esc(t.sample.note)}</div>
-        <div class="scroll"><table>
-          <thead><tr>${t.sample.head.map((h) => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead>
-          <tbody>${t.sample.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('\n          ')}</tbody>
-        </table></div>
-      </div>
-      <h2 id="usage">使い方</h2>
-      <ol>${t.usageSteps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>
-      <h2 id="inputs">導入前に準備する情報</h2>
-      <ul>${t.requiredInputs.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>
-      <h2 id="faq">よくある質問</h2>
-      <div class="faq">
-        ${t.faq.map((f) => `<details><summary>${esc(f.q)}</summary><div class="a">${esc(f.a)}</div></details>`).join('\n        ')}
-      </div>
-      <h2 id="license">利用条件</h2>
-      <ul>
-        <li>利用範囲: ${esc(t.license.scope)}</li>
-        <li>再配布・転売: できません</li>
-        <li>商用利用: ${esc(t.license.commercial)}</li>
-      </ul>
-      <div class="notice"><div class="h">確認のお願い</div>${esc(t.reviewNote)} テンプレートに患者情報・個人情報を記入する場合は、自院の情報管理規程に従い、外部への共有時は該当箇所を削除してください。</div>
-    </div>`;
-    side = `
+    </div>`).join('')}
+    <h2 id="sample">サンプル</h2>
+    <div class="sample-table">
+      <div class="cap">${esc(PRODUCT.sample.title)} — ${esc(PRODUCT.sample.note)}</div>
+      <div class="scroll"><table>
+        <thead><tr>${PRODUCT.sample.head.map((h) => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead>
+        <tbody>${PRODUCT.sample.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('\n        ')}</tbody>
+      </table></div>
+    </div>
+    <p>無料テンプレート(<a href="${root}templates/onboarding-checklist/index.html">入職前準備チェックリスト</a>・<a href="${root}templates/offboarding-checklist/index.html">退職時対応チェックリスト</a>など)が、各シートの縮小版になっています。まず無料版で使い勝手を確かめてください。</p>
+    <h2 id="flow">利用イメージ — 導入後の流れ</h2>
+    <ol>${PRODUCT.usageFlow.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
+    <h2 id="notincluded">このパックに含まれないもの</h2>
+    <ul>${PRODUCT.notIncluded.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+    <h2 id="faq">よくある質問</h2>
+    <div class="faq">
+      ${PRODUCT.faq.map((f) => `<details><summary>${esc(f.q)}</summary><div class="a">${esc(f.a)}</div></details>`).join('\n      ')}
+    </div>
+    <h2 id="price">価格</h2>
+    <ul>
+      <li>価格: <strong>${fmtPrice(P.list)}(税込・買い切り)</strong></li>
+    </ul>
+    <h2 id="license">利用条件</h2>
+    <ul>
+      <li>利用範囲: ${esc(PRODUCT.license.scope)}</li>
+      <li>再配布・転売・SNS等への転載: できません</li>
+      <li>テンプレートの編集・自院規程に合わせた改変: できます(むしろ前提です)</li>
+    </ul>
+    <div class="notice"><div class="h">ご利用にあたって</div>本パックは実務の整理を支援するひな形であり、労務・法律・診療報酬上の専門判断を代替しません。雇用契約・保険手続きは社会保険労務士等へ確認してください。記入する職員・候補者の個人情報は必要最小限にし、保管場所の閲覧範囲を確認してください。</div>
+  </div>
+  <aside class="detail-side" aria-label="価格と購入">
     <div class="buy-card">
       <span><span class="badge paid">有料</span> <span class="badge prep">決済準備中</span></span>
       <div>
-        <div class="price-was">通常価格 <s>${fmtPrice(p.list)}</s></div>
-        <div class="price-now">${fmtPrice(p.launch)} <small>税込・初期価格</small></div>
+        <div class="price-now">${fmtPrice(P.list)} <small>税込・買い切り</small></div>
       </div>
-      <button class="btn primary" data-buy="${t.id}">購入方法を問い合わせる</button>
+      <button class="btn primary" data-buy="${PRODUCT.id}">購入方法を問い合わせる</button>
       <a class="btn ghost" href="#sample">サンプルを確認する</a>
-      <p class="note">オンライン決済は現在準備中です。先行して利用したい場合は、お問い合わせから連絡してください。個別に案内します。</p>
+      <p class="note">オンライン決済は準備中です。先行して利用したい場合は、お問い合わせから連絡してください。個別に案内します。</p>
     </div>
-    ${sideMeta}`;
-    extra = `
+    <div class="side-box">
+      <div class="h">この商品について</div>
+      <dl>
+        <dt>収録</dt><dd>${PRODUCT.items.length}ファイル(Excel 9・Word 5・PDF 3)</dd>
+        <dt>形式</dt><dd>Excel・Word</dd>
+        <dt>バージョン</dt><dd>${esc(PRODUCT.version)}</dd>
+        <dt>更新</dt><dd>${dateJp(PRODUCT.updatedAt)}</dd>
+        <dt>更新版</dt><dd>購入から1年間利用(方針)</dd>
+      </dl>
+    </div>
+  </aside>
+</div>
+${relatedSection(root, ['recruit-requirements', 'onboarding-checklist', 'offboarding-checklist'], ['offboarding-accounts', 'interview-eval-items'])}
 <div class="sticky-cta">
-  <span class="p">${fmtPrice(p.launch)} <span style="font-weight:500;color:var(--ink-3)">税込</span></span>
+  <span class="p">${fmtPrice(P.launch)} <span style="font-weight:500;color:var(--ink-3)">税込</span></span>
   <a class="btn ghost small" href="#sample">サンプル</a>
-  <button class="btn primary small" data-buy="${t.id}">購入を問い合わせる</button>
+  <button class="btn primary small" data-buy="${PRODUCT.id}">購入を問い合わせる</button>
 </div>
 <dialog class="mo-dialog" id="buyDialog" aria-labelledby="buyDialogTitle">
   <div class="dh"><span id="buyDialogTitle">オンライン決済は準備中です</span><button data-close aria-label="閉じる">✕</button></div>
   <div class="db">
-    <p>この資料の内容は確定していますが、オンライン決済の仕組みをまだ用意できていません。</p>
-    <p>先行して利用したい場合は、お問い合わせからその旨を送ってください。提供方法と支払い方法を個別に案内します。販売開始の告知は${esc(SITE.parent.name)}のnote・Xで行います。</p>
+    <p>このパックの構成は確定していますが、オンライン決済と実ファイルの提供体制をまだ用意できていません。</p>
+    <p>先行して利用したい場合は、お問い合わせからその旨を送ってください。提供時期と支払い方法を個別に案内します。販売開始の告知は${esc(SITE.parent.name)}のnote・Xで行います。</p>
   </div>
   <div class="df">
     <a class="btn primary small" href="${root}../community/index.html">お問い合わせへ</a>
     <a class="btn ghost small" href="${SITE.parent.note}" target="_blank" rel="noopener noreferrer">noteを見る ↗</a>
   </div>
 </dialog>`;
-    ld = {
-      '@context': 'https://schema.org', '@type': 'CreativeWork',
-      name: t.title, description: t.summary, inLanguage: 'ja',
-      isAccessibleForFree: false, datePublished: t.publishedAt, dateModified: t.updatedAt,
-      author: { '@type': 'Person', name: '橋本渉' },
-      url: SITE.baseUrl + path.replace(/index\.html$/, ''),
-      /* 決済開始前のため Offer(価格)の構造化データは載せない */
-    };
-  }
-
-  const body = `
-${breadcrumbs(root, crumb)}
-<div class="wrap page-head" style="border-bottom:none;padding-bottom:0">
-  <p>${t.isFree ? '<span class="badge free">無料</span>' : '<span class="badge paid">有料</span> <span class="badge prep">決済準備中</span>'} <span class="badge cat">${esc(catName(t.categoryId))}</span></p>
-  <h1>${esc(t.title)}</h1>
-  <p class="lead">${esc(t.summary)}</p>
-  ${metaBar}
-</div>
-<div class="wrap detail">
-  <div>${main}</div>
-  <aside class="detail-side" aria-label="購入と資料情報">${side}</aside>
-</div>
-${relatedSection(root, (t.relatedTemplateIds || []).filter((id) => id !== t.id), t.relatedArticleIds)}
-${extra}`;
 
   out(path, page({
     path,
-    title: t.title,
-    description: t.summary + (t.isFree ? ' 無料で使えます。' : ''),
-    pageId: 'templates',
-    event: E.VIEW_TEMPLATE,
+    title: PRODUCT.title,
+    description: PRODUCT.shortDescription + ' 収録' + PRODUCT.items.length + 'ファイル・' + fmtPrice(P.launch) + '(税込・決済準備中)。',
+    pageId: 'pack',
+    event: E.VIEW_PRODUCT,
     body,
-    hasSticky,
-    ld: [ld, breadcrumbLd([['テンプレート', 'templates/index.html'], [t.title, path]])],
+    hasSticky: true,
+    ld: [{
+      '@context': 'https://schema.org', '@type': 'CreativeWork',
+      name: PRODUCT.title, description: PRODUCT.shortDescription, inLanguage: 'ja',
+      isAccessibleForFree: false, dateModified: PRODUCT.updatedAt,
+      author: { '@type': 'Person', name: '橋本渉' },
+      url: SITE.baseUrl + 'pack/',
+      /* 決済開始前のため Offer(価格)の構造化データは載せない */
+    }, breadcrumbLd([[PRODUCT.shortTitle, 'pack/index.html']])],
+  }));
+}
+
+/* ================================================================
+   法人・複数拠点での利用
+   ================================================================ */
+{
+  const root = '../';
+  const points = [
+    ['拠点ごとの資料形式を揃えられる', '施設ごとに違うExcelの形式を、同じテンプレートに統一できます。本部での取りまとめが楽になります。'],
+    ['担当者交代に耐える', '台帳・チェックリスト・記録の形式が決まっていれば、引き継ぎ資料を都度作らずに済みます。'],
+    ['入退職・研修記録の標準化', '拠点をまたいで同じチェックリスト・出席簿を使うことで、監査対応の水準が揃います。'],
+    ['無料から試せる', '公開中のテンプレートはすべて無料で、法人内で自由に共有できます。まず1拠点で試してください。'],
+  ];
+  const body = `
+${breadcrumbs(root, [['法人・複数拠点での利用', null]])}
+<div class="wrap page-head">
+  <p class="eyebrow">For Organizations</p>
+  <h1>法人・複数拠点での利用</h1>
+  <p class="lead">医療法人本部・複数拠点の運営担当・経営支援の方向けのご案内です。</p>
+</div>
+<div class="wrap" style="padding-bottom:50px">
+  <div class="text-wrap prose">
+    <p>拠点ごとに資料の形式が違う、担当者ごとにExcelの作りが違う、前任者がいないと業務が止まる——複数拠点の運営で伺う悩みの多くは、実務資料の形式が法人として決まっていないことに起因します。本サイトのテンプレートは、その「法人共通の形式」の土台として使えます。</p>
+  </div>
+  <div class="grid c2" style="margin:22px 0">
+    ${points.map(([t, d]) => `<div class="cat-card" style="cursor:default"><span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></div>`).join('\n    ')}
+  </div>
+  <div class="text-wrap prose">
+    <h2>利用の形</h2>
+    <ul>
+      <li><strong>いますぐ(無料)</strong> — 公開中のテンプレート・記事は法人内で自由に共有できます。<a href="${root}templates/index.html">テンプレート一覧</a>から必要な資料を各拠点へ案内してください。</li>
+      ${packAvailable ? `<li><strong>${esc(PRODUCT.shortTitle)}(決済準備中)</strong> — 採用〜入退職の完全版一式。法人購入では1法人内の共有・複数拠点での利用を想定しています。<a href="${root}pack/index.html">内容はこちら</a>。</li>` : ''}
+      <li><strong>法人会員(構想中)</strong> — 複数名利用・更新通知・利用ガイドを含む年間契約を構想しています(<a href="${root}pricing/index.html">料金の考え方</a>)。導入のご相談をいただきながら固めていく段階です。</li>
+    </ul>
+    <h2>お引き受けできないこと</h2>
+    <ul>
+      <li>労務・法律・診療報酬の個別判断の代行(専門家の領域です)</li>
+      <li>基幹システム(電子カルテ・勤怠等)の導入・代替</li>
+    </ul>
+    <p>導入を急ぐ必要はありません。まず無料テンプレートを1拠点で使って、現場の反応を見るだけでも十分です。</p>
+    <p style="margin-top:18px"><a class="btn primary" href="${root}../community/index.html">法人利用について問い合わせる</a></p>
+    <p style="font-size:12px;color:var(--ink-3)">お問い合わせは${esc(SITE.parent.name)}の窓口で受け付けています。法人名・拠点数・使いたい業務をお書き添えください。</p>
+  </div>
+</div>`;
+  out('corporate/index.html', page({
+    path: 'corporate/index.html',
+    title: '法人・複数拠点での利用',
+    description: '医療法人本部・複数拠点の運営担当向け。拠点ごとに違う実務資料の形式を、共通のテンプレート(採用・入退職・施設基準・研修記録)に統一できます。',
+    pageId: '',
+    event: E.CORP_INQUIRY,
+    body,
+    ld: [breadcrumbLd([['法人・複数拠点での利用', 'corporate/index.html']])],
   }));
 }
 
@@ -465,7 +620,7 @@ ${breadcrumbs(root, [['記事', null]])}
 <div class="wrap page-head" style="border-bottom:none;padding-bottom:6px">
   <p class="eyebrow">Articles</p>
   <h1>記事一覧</h1>
-  <p class="lead">実務の進め方を、結論と確認先から書いています。読み終えたときに次の行動が決まる構成を目指しています。</p>
+  <p class="lead">具体的な業務の進め方を、結論と確認項目から書いています。読み終えたときに次の行動が決まる構成を目指しています。</p>
 </div>
 <div class="wrap">
   <div class="filters"><div class="frow">
@@ -484,7 +639,7 @@ ${breadcrumbs(root, [['記事', null]])}
   out('articles/index.html', page({
     path: 'articles/index.html',
     title: '記事一覧',
-    description: '医療管理職向けの実務記事一覧。クリニック統合・管理医師変更・電子カルテ移行・新任事務長の初動などを、結論と確認先から解説します。',
+    description: '医療機関の実務記事一覧。退職時のアカウント停止、面接評価、施設基準の期限管理、返戻の進捗管理などの具体的な業務を、結論と確認項目から解説します。',
     pageId: 'articles',
     event: E.VIEW_ARTICLE,
     body,
@@ -612,8 +767,9 @@ ${breadcrumbs(root, [['実務テーマ', 'index.html#themes'], [c.name, null]])}
   }));
 }
 
+
 /* ================================================================
-   初めての方へ
+   初めての方へ(スターターとの違い・案内はここに限定)
    ================================================================ */
 {
   const root = '../';
@@ -622,48 +778,48 @@ ${breadcrumbs(root, [['初めての方へ', null]])}
 <div class="wrap page-head">
   <p class="eyebrow">Guide</p>
   <h1>初めての方へ</h1>
-  <p class="lead">このサイトでできること・できないことと、資料の探し方をまとめています。</p>
+  <p class="lead">このサイトが何をするもので、どんな場面で使うのかをまとめています。</p>
 </div>
 <div class="wrap text-wrap prose" style="padding-bottom:50px">
-  <h2>このサイトでできること</h2>
+  <h2>${esc(SITE.name)}とは</h2>
+  <p>医療機関で具体的な業務や案件が発生したときに、「何を・誰が・いつ・どの順番で処理するか」を確認できる実務ライブラリです。採用、入退職、施設基準、研修記録、レセプト返戻、医療機器管理など、繰り返し発生する業務のチェックリスト・台帳・進捗表・文例を揃えています。</p>
+  <h2>どのような場面で使うか</h2>
   <ul>
-    <li>クリニック統合・管理医師変更・採用・業務分担など、医療管理職の実務の進め方を記事で確認する</li>
-    <li>チェックリスト・ヒアリングシート・問い合わせ文例などの無料テンプレートを、そのままコピーして使う</li>
-    <li>実務テーマごとに、記事とテンプレートを行き来しながら段取りを組む</li>
+    <li>急に採用面接を任された → 採用・面接カテゴリの評価シートと記事へ</li>
+    <li>退職者が出た → 退職時対応チェックリストでアカウント停止・返却を管理</li>
+    <li>施設基準の管理を引き継いだ → 管理台帳と更新期限管理表で一覧化</li>
+    <li>研修の記録を整えたい → 実施記録・出席簿・未受講者フォロー表へ</li>
+    <li>案内文・問い合わせ文を書く → 院内文書・対外文書カテゴリの文例へ</li>
   </ul>
-  <h2>できないこと</h2>
+  <h2>医療管理職スターターとの違い</h2>
+  <p>姉妹サイト<a href="${root}../manager-starter/index.html">${esc(SITE.sibling.name)}</a>は、初めて管理職になった方向けに「管理職としての振る舞い」(1on1・上司報告・チーム運営・最初の90日)を扱います。本サイトが扱うのは「具体的な実務の処理」です。迷ったら次の基準で選んでください。</p>
   <ul>
-    <li>法的・行政的な判断の代行。届出の要否や要件の最終確認は、所管の保健所・厚生局・自治体・専門家に確認してください</li>
-    <li>行政への提出書類そのものの提供。テンプレートは検討・管理用の資料で、公式様式は各窓口で入手してください</li>
-    <li>個別コンサルティング。相談したい場合は<a href="${root}../services/index.html">${esc(SITE.parent.name)}の仕事のご依頼</a>をご覧ください</li>
+    <li>管理職としてどう進めるかを知りたい → ${esc(SITE.sibling.name)}</li>
+    <li>目の前の案件(採用・入退職・施設基準など)を処理したい → 本サイト</li>
   </ul>
-  <h2>どのような人向けか</h2>
-  <p>訪問診療クリニックの事務長・事務長補佐、医療法人本部のスタッフ、看護師長・リハビリ部門責任者などの新任管理職を想定しています。医療職出身で管理業務を体系的に学んでいない方が、迷わず進められることを優先しています。</p>
-  <h2>資料の探し方</h2>
+  <h2>テンプレートの探し方</h2>
   <ol>
-    <li><strong>状況が決まっている場合</strong> — トップページの「実務テーマから探す」で、いまの状況に近いテーマを選んでください。</li>
-    <li><strong>資料の種類で探す場合</strong> — <a href="${root}templates/index.html">テンプレート一覧</a>で、対象者・形式・無料/有料で絞り込めます。</li>
-    <li><strong>キーワードで探す場合</strong> — 上部の検索窓に「統合 チェックリスト」「管理医師」のように入力してください。テンプレートと記事を横断して探せます。</li>
+    <li><strong>案件から</strong> — トップの「実務カテゴリから探す」で、発生している業務のカテゴリを開く</li>
+    <li><strong>条件から</strong> — <a href="${root}templates/index.html">テンプレート一覧</a>で、利用場面・発生頻度・対象者・形式で絞り込む</li>
+    <li><strong>キーワードから</strong> — 上部の検索窓に「退職 アカウント」「返戻」のように入力する(テンプレートと記事を横断して探せます)</li>
   </ol>
-  <h2>無料と有料の違い</h2>
-  <p>無料テンプレートは、初動のチェックリスト・確認先一覧・文例など、まず動き出すための資料です。ページ上でそのまま使えます。${paidTpls.length
-    ? '有料パックは、案件全体を管理するためのWBS・確認シート・文例を一式にしたもので、Excel・Wordファイルで提供します。オンライン決済は準備中のため、当面は<a href="' + root + '../community/index.html">お問い合わせ</a>から個別に案内します。'
-    : '案件全体を管理する有料の実務パック(WBS・確認シート・文例の一式)は準備中です。公開時は' + esc(SITE.parent.name) + 'のnote・Xで告知します。'}会員プランの構想は<a href="${root}pricing/index.html">プランのページ</a>にまとめています。</p>
-  <h2>テンプレートの使い方</h2>
+  <h2>無料資料と有料資料の違い</h2>
+  <p>公開中のテンプレートはすべて無料で、ページ上でそのまま使えます。${packAvailable ? `有料の<a href="${root}pack/index.html">${esc(PRODUCT.shortTitle)}</a>は、採用〜入職〜退職の完全版(進捗欄・複数人管理つき)と連絡文例を一式にしたものです(決済準備中)。` : ''}会員プランの構想は<a href="${root}pricing/index.html">料金のページ</a>にまとめています。</p>
+  <h2>自院向けの編集方法</h2>
   <ol>
-    <li>関連する記事で全体像と確認先を確認する</li>
-    <li>テンプレートをコピーし、日付・担当者・自院の状況に書き換える</li>
-    <li>不明な欄は空欄のまま残し、「誰に確認するか」をメモする(空欄が確認タスクになります)</li>
+    <li>関連する記事で、確認項目と確認先の全体像をつかむ</li>
+    <li>テンプレートをコピーし、担当者・期限・システム名を自院の内容に書き換える</li>
+    <li>不要な項目は削る(削るのも編集です)。1〜2回使って、抜けていた項目を足す</li>
   </ol>
-  <h2>個別判断が必要な場合</h2>
-  <p>行政手続きの要否・期限・様式は、自治体や厚生局によって取り扱いが異なることがあります。届出・労務・契約・税務に関わる判断は、必ず所管窓口または専門家(弁護士・社会保険労務士・税理士など)に確認してください。</p>
-  <h2>AIを使うときの情報管理</h2>
-  <p>テンプレートの内容を生成AIと組み合わせて使う場合は、患者情報・職員の個人情報・機微な経営情報を入力しないでください。施設名や個人名を伏せ、状況を抽象化してから使うのが原則です。自院でAI利用のルールがある場合はそちらに従ってください。</p>
+  <h2>制度や地域差がある場合</h2>
+  <p>届出・施設基準・様式は、制度改定や自治体・厚生局によって取り扱いが異なることがあります。各資料には制度基準日と注意事項を明記しています。個別の要件は、所管の保健所・厚生局・自治体へ確認してください。労務・法律・税務に関わる判断は、社会保険労務士・弁護士・税理士等の専門家への確認が必要です。</p>
+  <h2>個人情報の取り扱いとAI利用</h2>
+  <p>台帳・記録には職員・患者の個人情報が含まれ得ます。記入は業務に必要な最小限にし、保管場所の閲覧範囲を自院の規程に合わせてください。生成AIと組み合わせて使う場合は、患者情報・職員の個人情報・公表前の経営情報を入力せず、AIの出力をそのまま行政提出や人事判断に使わないでください。</p>
 </div>`;
   out('guide/index.html', page({
     path: 'guide/index.html',
     title: '初めての方へ',
-    description: SITE.name + 'の使い方。できること・できないこと、無料と有料の違い、テンプレートの探し方と編集のしかたをまとめています。',
+    description: SITE.name + 'の使い方。どんな場面で使うか、医療管理職スターターとの違い、テンプレートの探し方と自院向けの編集方法をまとめています。',
     pageId: 'guide',
     body,
     ld: [breadcrumbLd([['初めての方へ', 'guide/index.html']])],
@@ -671,7 +827,7 @@ ${breadcrumbs(root, [['初めての方へ', null]])}
 }
 
 /* ================================================================
-   料金・プラン(ナビ非掲載。テンプレ詳細・ガイドからの導線のみ)
+   料金・プラン(ナビ非掲載。パック・ガイドからの導線のみ)
    ================================================================ */
 {
   const root = '../';
@@ -681,30 +837,29 @@ ${breadcrumbs(root, [['プランと料金', null]])}
 <div class="wrap page-head">
   <p class="eyebrow">Pricing</p>
   <h1>プランと料金の考え方</h1>
-  <p class="lead">${paidTpls.length ? '現在は無料コンテンツと有料テンプレートの単品販売(決済準備中)のみです。' : '現在公開しているのは無料コンテンツのみです。有料テンプレートの単品販売と'}会員プランは構想段階のため、内容と価格は変わる可能性があります。</p>
+  <p class="lead">現在使えるのは無料コンテンツです。${packAvailable ? '採用・入退職パックは決済準備中、' : ''}会員・法人プランは構想段階のため、内容と価格は変わる可能性があります。</p>
 </div>
 <div class="wrap" style="padding-bottom:50px">
-  <div class="plans" style="margin-top:10px">
+  <div class="plans c4" style="margin-top:10px">
     ${plans.map((p) => `
-    <div class="plan${p.id === 'personal' ? ' hl' : ''}">
+    <div class="plan${p.id === 'pack' ? ' hl' : ''}">
       <div class="pn">${esc(p.name)}</div>
       <div class="pp">${p.price === 0 ? '0円' : fmtPrice(p.price) + `<small> / ${esc(p.unit)}</small>`}</div>
-      ${p.yearly ? `<div style="font-size:11.5px;color:var(--ink-3)">年払い ${fmtPrice(p.yearly)}(想定)</div>` : ''}
       <ul>${p.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>
       <p class="note">${esc(p.note)}</p>
     </div>`).join('')}
   </div>
   <div class="text-wrap" style="margin-top:30px">
     <div class="notice">
-      <div class="h">会員プランは準備中です</div>
-      いま使える資料は、${paidTpls.length ? `無料テンプレートと有料パック(<a href="${root}templates/${paidTpls[0].slug}/index.html" style="text-decoration:underline">${esc(paidTpls[0].shortTitle)}</a>)` : `<a href="${root}templates/index.html" style="text-decoration:underline">無料テンプレート</a>`}です。会員プランの開始時期・確定価格は、決まり次第このページと${esc(SITE.parent.name)}のnote・Xで告知します。先行して法人利用を相談したい場合は<a href="${root}../community/index.html" style="text-decoration:underline">お問い合わせ</a>からどうぞ。
+      <div class="h">販売開始前です</div>
+      いま使える資料は<a href="${root}templates/index.html" style="text-decoration:underline">無料テンプレート</a>と記事です。${packAvailable ? `パックの内容は<a href="${root}pack/index.html" style="text-decoration:underline">商品ページ</a>で公開しており、先行利用の相談は<a href="${root}../community/index.html" style="text-decoration:underline">お問い合わせ</a>で受け付けています。` : ''}開始時期・確定価格は決まり次第、このページと${esc(SITE.parent.name)}のnote・Xで告知します。
     </div>
   </div>
 </div>`;
   out('pricing/index.html', page({
     path: 'pricing/index.html',
     title: 'プランと料金',
-    description: SITE.name + 'の料金の考え方。無料コンテンツ、有料テンプレートの単品販売、準備中の個人・法人会員プランについて説明します。',
+    description: SITE.name + 'の料金の考え方。無料コンテンツ、採用・入退職実務パック(準備中)、個人会員・法人会員(構想中)について説明します。',
     pageId: '',
     event: E.VIEW_PRICING,
     body,
@@ -719,11 +874,11 @@ ${breadcrumbs(root, [['プランと料金', null]])}
   const root = '../';
   const exps = [
     ['医療現場', '理学療法士として病院で臨床・チームマネジメント・教育を経験。現場の業務がどう回っているかを、中から知っています。'],
-    ['医療機関の経営支援', '訪問診療クリニックの経営支援、業務改善、事務長・看護師・医師・リハビリ職の業務整理に携わっています。'],
-    ['クリニック統合・PMI', 'クリニック統合や承継の実務支援。行政手続き・職員対応・システム移行を含む段取り全体を扱います。'],
-    ['行政手続き・施設基準', '管理医師変更、標榜時間変更、施設基準・診療報酬の整理など、保健所・厚生局への対応を実務として行っています。'],
-    ['採用・面接設計', '医師・看護師・医療事務などの採用。求人票の設計、面接評価、採用フローの整理を担当しています。'],
-    ['システム移行', '電子カルテ・ORCA・レセプトの移行管理。ベンダー調整と現場の運用設計の間をつなぐ役回りです。'],
+    ['医療機関の経営支援', '訪問診療クリニックの経営支援、業務改善、業務フローと管理資料の整備に携わっています。'],
+    ['採用・入退職の実務', '医師・看護師・医療事務などの採用、求人票・面接評価の設計、入退職対応の仕組み化を支援しています。'],
+    ['行政手続き・施設基準', '管理医師変更、施設基準・診療報酬の整理など、保健所・厚生局への対応を実務として行っています。'],
+    ['システム移行・運用', '電子カルテ・ORCA・レセプトの移行と日常運用の整理。ベンダー調整と現場の間をつなぐ役回りです。'],
+    ['クリニック統合・PMI', 'クリニック統合や承継の実務支援。行政・職員・システムを含む段取り全体を扱います。'],
   ];
   const body = `
 ${breadcrumbs(root, [['運営者について', null]])}
@@ -734,7 +889,7 @@ ${breadcrumbs(root, [['運営者について', null]])}
 </div>
 <div class="wrap text-wrap" style="padding-bottom:50px">
   <div class="prose">
-    <p>私は理学療法士として病院で働いたあと、いまは医療機関の経営支援を仕事にしています。クリニックの統合、管理医師の変更、採用、電子カルテの移行——このサイトで扱っているのは、私が日々の仕事で実際に段取りしている業務です。</p>
+    <p>私は理学療法士として病院で働いたあと、いまは医療機関の経営支援を仕事にしています。採用、入退職の対応、施設基準の整理、研修記録、電子カルテの移行——このサイトで扱っているのは、私が支援先で日々段取りしている業務そのものです。</p>
     <h2>経験している領域</h2>
   </div>
   <div class="rows" style="margin:14px 0 26px">
@@ -742,18 +897,18 @@ ${breadcrumbs(root, [['運営者について', null]])}
   </div>
   <div class="prose">
     <h2>このサイトを作った理由</h2>
-    <p>医療の管理業務には、制度の解説はたくさんあるのに、「では明日、誰が何をするのか」に落とした資料がほとんどありません。統合を任された事務長が検索して見つかるのは制度の説明ばかりで、WBSやチェックリストは出てきません。結局、みんなExcelをゼロから作っています。</p>
+    <p>医療機関の実務には、制度の解説はたくさんあるのに、「では明日、何を確認して、誰に聞けばよいのか」に落とした資料がほとんどありません。退職者が出るたびに、面接を任されるたびに、みんな前回のExcelを探し、見つからずにゼロから作っています。</p>
     <p>私自身、支援先で同じ資料を何度も作り直してきました。その資料を、同じ場面で困っている人がそのまま使える形に整えて公開する。それがこのサイトです。</p>
     <h2>AIの使い方について</h2>
     <p>資料の作成に生成AIも使っています。ただし、AIの出力は一般論になりやすく、そのままでは現場で使えません。項目を現場で使う単位に削り、確認先と期限を足し、実際の案件で通用した粒度に直してから公開しています。</p>
     <h2>${esc(SITE.parent.name)}について</h2>
-    <p>${esc(SITE.parent.name)}は「人が、自ら選び、納得して生きられる社会をつくる」ための個人プロジェクトです。このサイトはその道具のひとつで、医療管理職が自分で段取りを組み、納得して進められる状態をつくることを目指しています。<a href="${root}../about/index.html">プロジェクト全体について</a>もご覧ください。</p>
+    <p>${esc(SITE.parent.name)}は「人が、自ら選び、納得して生きられる社会をつくる」ための個人プロジェクトです。このサイトはその道具のひとつで、医療機関の担当者が前任者に頼らず、自分で実務を進められる状態をつくることを目指しています。管理職としての進め方は姉妹サイト<a href="${root}../manager-starter/index.html">${esc(SITE.sibling.name)}</a>で扱っています。<a href="${root}../about/index.html">プロジェクト全体について</a>もご覧ください。</p>
   </div>
 </div>`;
   out('about/index.html', page({
     path: 'about/index.html',
     title: '運営者について',
-    description: SITE.name + 'の運営者について。理学療法士としての医療現場経験と、クリニック統合・行政手続き・採用・電子カルテ移行などの経営支援実務をもとに資料を作っています。',
+    description: SITE.name + 'の運営者について。医療機関の経営支援・採用・行政手続き・電子カルテ移行の実務経験をもとに、実際に使っている資料を公開しています。',
     pageId: 'about',
     body,
     ld: [breadcrumbLd([['運営者について', 'about/index.html']])],
@@ -766,17 +921,19 @@ ${breadcrumbs(root, [['運営者について', null]])}
 {
   const root = '../';
   const faqs = [
-    ['テンプレートは編集できますか', 'できます。むしろ編集して使う前提です。チェックリストや文例はコピーして、自院の日付・担当者・状況に書き換えてください。'],
-    ['ExcelやWordがなくても使えますか', '無料テンプレートはWebページ上でそのまま読め、テキストとしてコピーできます。有料パックとして提供するファイルはExcel・Word形式の予定ですが、GoogleスプレッドシートやGoogleドキュメントに取り込んで使えます。'],
-    ['行政への提出書類そのものですか', '違います。このサイトの資料は、検討・管理・確認のための実務資料です。届出の公式様式は所管の保健所・厚生局・自治体で入手してください。'],
+    ['テンプレートは編集できますか', 'できます。むしろ自院の運用・規程に合わせて編集して使う前提です。項目を削ることも編集です。'],
+    ['ExcelやWordが必要ですか', '無料テンプレートはWebページ上でそのまま読め、テキストとしてコピーできます。項目構成をもとに自院のExcel・Wordで表を作れます。ファイルのダウンロード提供は準備中です。'],
+    ['Googleスプレッドシートでも使えますか', '使えます。Excel形式のファイルを提供する際も、スプレッドシートに取り込める形(複雑なマクロなし)にします。'],
+    ['行政への提出書類そのものですか', '違います。本サイトの資料は、検討・管理・確認のための実務資料です。届出の公式様式は所管の保健所・厚生局・自治体で入手してください。'],
     ['内容は法的判断を保証しますか', '保証しません。一般的な進め方の整理であり、個別案件の要否・要件は所管窓口や専門家への確認が必要です。資料には確認先を明記するようにしています。'],
-    ['最新の制度に対応していますか', '各資料に「制度基準日」を明記しています。制度変更があった場合は内容を見直し、更新日を記録します。基準日が古い資料は、利用前に最新の取り扱いを確認してください。'],
-    ['購入後に更新版は利用できますか', 'その方針です。同一バージョン系列の更新版は追加費用なしで提供する予定です。具体的な提供方法は販売開始時に案内します。'],
-    ['テンプレートを法人内で共有できますか', '無料テンプレートは院内・法人内で自由に共有できます。今後販売する有料パックは、1法人内での共有・複数拠点での利用を想定しています。いずれも法人外への配布・転売はできません。'],
-    ['再配布はできますか', 'できません。購入者の法人内利用に限ります。SNSやブログへの転載もご遠慮ください(記事へのリンクは歓迎です)。'],
-    ['返金はできますか', 'デジタル資料の性質上、提供後の返金は原則お受けしない方針です。有料テンプレートの販売開始時に、サンプルと「解決できないこと」を購入前に確認できるようにし、正式な返金条件を利用規約に明記します。'],
-    ['法人契約はできますか', '法人会員プランを準備中です。先行して相談したい場合はお問い合わせからご連絡ください。'],
-    ['テンプレートに患者情報を入力してもよいですか', '自院の管理下で使う分には自院の情報管理規程に従ってください。外部に共有する場合や、生成AIに入力する場合は、患者情報・個人情報を必ず除いてください。'],
+    ['最新の制度に対応していますか', '制度に関わる資料には「制度基準日」を明記しています。制度変更があった場合は内容を見直し、更新日を記録します。基準日が古い資料は、利用前に最新の取り扱いを確認してください。'],
+    ['テンプレートを法人内で共有できますか', '無料テンプレートは院内・法人内で自由に共有できます。有料パックは1法人内での共有・複数拠点での利用を想定しています(法人外への配布・転売は不可)。'],
+    ['管理職の仕事の進め方も学べますか', '本サイトは具体的な実務の処理に特化しています。1on1・上司報告・チーム運営など管理職としての進め方は、姉妹サイト「' + SITE.sibling.name + '」をご覧ください。'],
+    ['台帳や記録に個人情報を書いてもよいですか', '業務に必要な最小限に留め、保管場所の閲覧範囲を自院の規程に合わせてください。外部に共有する場合や生成AIに入力する場合は、個人情報を必ず除いてください。'],
+    ['AIへ患者情報や職員情報を入力してよいですか', '入力しないでください。文面の下書きにAIを使う場合は、固有名詞を置き換えた抽象的な形で使い、出力をそのまま行政提出・人事判断に使わないでください。'],
+    ['購入後に更新版は利用できますか', '有料パックは購入から1年間、更新版を追加費用なしで利用できる方針です。提供方法は販売開始時に案内します。'],
+    ['返金はできますか', 'デジタル資料の性質上、提供後の返金は原則お受けしない方針です。販売開始時に、サンプルと「含まれないもの」を購入前に確認できるようにし、正式な条件を利用規約に明記します。'],
+    ['法人契約はできますか', '法人会員プランを構想中です。先行して相談したい場合はお問い合わせからご連絡ください。'],
     ['コンサルティングは受けられますか', 'このサイト自体は資料の提供サービスですが、運営者は医療機関の経営支援を本業としています。個別支援の相談は' + SITE.parent.name + 'の「仕事のご依頼」からどうぞ。'],
   ];
   const body = `
@@ -794,7 +951,7 @@ ${breadcrumbs(root, [['よくある質問', null]])}
   out('faq/index.html', page({
     path: 'faq/index.html',
     title: 'よくある質問',
-    description: SITE.name + 'のよくある質問。テンプレートの編集・法人内共有・制度対応・返金・再配布の可否などをまとめています。',
+    description: SITE.name + 'のよくある質問。テンプレートの編集・法人内共有・制度対応・個人情報の扱い・返金の方針などをまとめています。',
     pageId: 'faq',
     body,
     ld: [breadcrumbLd([['よくある質問', 'faq/index.html']]), {

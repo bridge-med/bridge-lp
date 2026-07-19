@@ -3,14 +3,17 @@
    ここを変更したら `node scripts/medops/build.mjs` で全ページ再生成。
    ブランド名・価格・ナビは medops/data/site.mjs から取る(直書き禁止)。
    ================================================================ */
-import { SITE, NAV, FOOTER_LINKS, FORMATS, fmtPrice } from '../../medops/data/site.mjs';
+import { SITE, NAV, FOOTER_LINKS, FORMATS, SCENES, FREQUENCY, fmtPrice } from '../../medops/data/site.mjs';
 import { CATEGORIES } from '../../medops/data/categories.mjs';
 
 export const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export const formatLabel = (id) => (FORMATS.find((f) => f.id === id) || {}).label || id;
+export const sceneLabel = (id) => (SCENES.find((s) => s.id === id) || {}).label || id;
+export const freqLabel = (id) => (FREQUENCY.find((f) => f.id === id) || {}).label || id;
 export const catName = (id) => (CATEGORIES.find((c) => c.id === id) || {}).name || '';
+export const catShort = (id) => (CATEGORIES.find((c) => c.id === id) || {}).short || '';
 export const dateJp = (iso) => iso ? iso.replace(/-/g, '/') : '';
 export const dateNum = (iso) => iso ? Number(iso.replace(/-/g, '')) : 0;
 
@@ -50,6 +53,7 @@ const header = (root, page) => `
     <div class="sub">実務テーマ</div>
     ${CATEGORIES.map((c) => `<a href="${root}categories/${c.slug}/index.html">${esc(c.name)}</a>`).join('\n    ')}
     <div class="sub">その他</div>
+    <a href="${root}corporate/index.html">法人・複数拠点での利用</a>
     <a href="${root}about/index.html">運営者について</a>
     <a href="${root}faq/index.html">よくある質問</a>
     <a href="${root}../index.html">${esc(SITE.parent.name)}(運営プロジェクト)</a>
@@ -69,7 +73,7 @@ const footer = (root) => `
         ${FOOTER_LINKS.content.map((l) => `<a href="${root}${l.href}">${esc(l.label)}</a>`).join('\n        ')}
       </div>
       <div>
-        <div class="fh">実務テーマ</div>
+        <div class="fh">実務カテゴリ</div>
         ${CATEGORIES.map((c) => `<a href="${root}categories/${c.slug}/index.html">${esc(c.short)}</a>`).join('\n        ')}
       </div>
       <div>
@@ -146,33 +150,25 @@ ${footer(root)}
 
 /* ---- カード部品 ---- */
 
-export const priceHtml = (t) => {
-  if (t.isFree) return '<span class="price">無料</span>';
-  const p = SITE.pricing.flagship;
-  if (t.useFlagshipPrice) {
-    return `<span class="price"><span class="was">${fmtPrice(p.list)}</span>${fmtPrice(p.launch)} <small>税込・初期価格</small></span>`;
-  }
-  return '<span class="price">価格未定</span>';
-};
-
 export const tplCard = (t, root) => {
-  const text = [t.title, t.summary, catName(t.categoryId), (t.formats || []).map(formatLabel).join(' ')].join(' ').toLowerCase();
+  const text = [t.title, t.summary, catName(t.categoryId), (t.formats || []).map(formatLabel).join(' '), (t.scenes || []).map(sceneLabel).join(' ')].join(' ').toLowerCase();
   return `<a class="tpl-card" href="${root}templates/${t.slug}/index.html"
-   data-cat="${t.categoryId}" data-free="${t.isFree ? 1 : 0}"
+   data-cat="${t.categoryId}"
    data-roles="${(t.targetRoles || []).join(' ')}" data-formats="${(t.formats || []).join(' ')}"
-   data-phases="${(t.phases || []).join(' ')}" data-text="${esc(text)}"
-   data-priority="${t.priority || 99}" data-pub="${dateNum(t.publishedAt)}" data-upd="${dateNum(t.updatedAt)}"
-   data-price="${t.isFree ? 0 : SITE.pricing.flagship.launch}">
+   data-scenes="${(t.scenes || []).join(' ')}" data-freq="${(t.frequency || []).join(' ')}"
+   data-text="${esc(text)}"
+   data-priority="${t.priority || 99}" data-pub="${dateNum(t.publishedAt)}" data-upd="${dateNum(t.updatedAt)}">
     <span class="top">
-      ${t.isFree ? '<span class="badge free">無料</span>' : '<span class="badge paid">有料</span><span class="badge prep">決済準備中</span>'}
-      <span class="badge cat">${esc(catName(t.categoryId))}</span>
+      <span class="badge free">無料</span>
+      <span class="badge cat">${esc(catShort(t.categoryId))}</span>
+      ${(t.scenes || []).slice(0, 2).map((s) => `<span class="chip">${esc(sceneLabel(s))}</span>`).join('')}
     </span>
     <span class="t">${esc(t.title)}</span>
     <span class="d">${esc(t.summary)}</span>
     <span class="meta">
-      ${(t.formats || []).slice(0, 3).map((f) => `<span class="chip">${esc(formatLabel(f))}</span>`).join('')}
+      ${(t.formats || []).slice(0, 2).map((f) => `<span class="chip">${esc(formatLabel(f))}</span>`).join('')}
+      ${(t.frequency || []).slice(0, 2).map((f) => `<span class="chip">${esc(freqLabel(f))}</span>`).join('')}
       <span>更新 ${dateJp(t.updatedAt)}</span>
-      ${t.isFree ? '<span class="price">無料</span>' : priceHtml(t)}
     </span>
   </a>`;
 };
