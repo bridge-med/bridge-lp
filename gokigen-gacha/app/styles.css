@@ -29,13 +29,6 @@
   --soft-border: var(--line); --soft-border-strong: var(--line-strong);
   /* CTA・強調(旧プラム)→ 藍 */
   --persimmon: var(--navy); --persimmon-deep: var(--blue); --persimmon-soft: var(--bg-3);
-  /* カテゴリ系 → 4系統内で擬似的に区別(designer再設計を反映) */
-  --sage: var(--navy);       --sage-deep: var(--blue);       --sage-soft: var(--bg-3);
-  --dusty-blue: var(--navy); --dusty-blue-deep: var(--blue); --dusty-blue-soft: var(--bg-3);
-  --peach: var(--navy);      --peach-deep: var(--blue);      --peach-soft: var(--bg-3);
-  --lav: var(--navy);        --lav-deep: var(--blue);        --lav-soft: var(--bg-3);
-  --butter: var(--navy);     --butter-deep: var(--blue);     --butter-soft: var(--bg-3);
-  --cream-soft: var(--bg-3); --cream-deep: var(--ink-3);
   --danger: var(--ink-2);
 
   /* ---- shadow tokens(藍の影) ---- */
@@ -147,15 +140,15 @@ button:active { transform: scale(0.985); }
   box-shadow: 0 1px 2px rgba(120, 90, 50, 0.12);
   background:
     repeating-linear-gradient(45deg, rgba(255,255,255,0.16) 0 5px, transparent 5px 10px),
-    var(--sage);
+    var(--blue-soft);
 }
-.tape.t-sage   { background-color: var(--sage); }
-.tape.t-blue   { background-color: var(--dusty-blue); }
-.tape.t-peach  { background-color: var(--peach); }
-.tape.t-lav    { background-color: var(--lav); }
-.tape.t-green  { background-color: var(--sage); }
-.tape.t-butter { background-color: var(--butter); }
-.tape.t-cream  { background-color: var(--cream-deep); opacity: 0.55; }
+.tape.t-blue   { background-color: var(--navy); }
+.tape.t-sage   { background-color: var(--blue-soft); }
+.tape.t-green  { background-color: var(--bg-3); }
+.tape.t-peach  { background-color: var(--bg-3); }
+.tape.t-lav    { background-color: var(--bg-2); }
+.tape.t-butter { background-color: var(--bg-2); }
+.tape.t-cream  { background-color: var(--ink-3); opacity: 0.55; }
 .tape.tilt-r { transform: translateX(-50%) rotate(2.5deg); }
 
 /* ---- button variants ---- */
@@ -191,8 +184,8 @@ button:active { transform: scale(0.985); }
 .btn-primary:active { filter: brightness(0.94); }
 .btn-secondary {
   background: var(--paper);
-  color: var(--sage-deep);
-  border: 1.6px solid var(--sage);
+  color: var(--blue);
+  border: 1.6px solid var(--navy);
 }
 .btn-outline {
   background: transparent;
@@ -204,7 +197,7 @@ button:active { transform: scale(0.985); }
 }
 .btn-ghost {
   background: none;
-  color: var(--sage-deep);
+  color: var(--blue);
   min-height: 44px;
   font-size: var(--fs-md);
   font-family: var(--font-body);
@@ -228,13 +221,15 @@ button:active { transform: scale(0.985); }
   font-weight: 700;
   white-space: nowrap;
 }
-.tag.t-sage   { background: var(--sage-soft);       color: var(--sage-deep); }
-.tag.t-blue   { background: var(--dusty-blue-soft); color: var(--dusty-blue-deep); }
-.tag.t-peach  { background: var(--peach-soft);      color: var(--peach-deep); }
-.tag.t-lav    { background: var(--lav-soft);        color: var(--lav-deep); }
-.tag.t-green  { background: var(--sage-soft);       color: var(--sage-deep); }
-.tag.t-butter { background: var(--butter-soft);     color: var(--butter-deep); }
-.tag.t-cream  { background: var(--cream-soft);      color: var(--cream-deep); }
+/* カテゴリ擬似区別: 藍→生成り→無色の一本の明度スケール。色相も砂も使わない */
+.tag.t-blue   { background: var(--navy);      color: var(--btn-ink); } /* 頭・情報 : 藍濃(唯一のベタ藍) */
+.tag.t-sage   { background: var(--blue-soft); color: var(--navy);    } /* 体・回復 : 藍淡面 */
+.tag.t-green  { background: var(--bg-3);      color: var(--navy);    } /* 生活     : 生成り濃 × 濃字 */
+.tag.t-peach  { background: var(--bg-3);      color: var(--blue);    } /* 気分     : 生成り濃 × 中字 */
+.tag.t-lav    { background: var(--bg-2);      color: var(--navy);    } /* 離れる   : 生成り中 × 濃字 */
+.tag.t-butter { background: var(--bg-2);      color: var(--ink-2);   } /* やさしさ : 生成り中 × 弱字 */
+.tag.t-cream  { background: var(--bg);        color: var(--ink-3);
+                box-shadow: inset 0 0 0 1px var(--line-strong); }      /* 休む     : ほぼ無色 × 細枠 */
 
 /* ---- 見出し ---- */
 .eyebrow {
@@ -269,7 +264,7 @@ button:active { transform: scale(0.985); }
   letter-spacing: 0.02em;
 }
 .title-multi .w1 { color: var(--cocoa); }
-.title-multi .w2 { color: var(--sage-deep); }
+.title-multi .w2 { color: var(--blue); }
 .title-multi .w3 { color: var(--persimmon); }
 /* サブコピー: 画鋲で留めたメモ風 */
 .app-sub {
@@ -298,7 +293,7 @@ button:active { transform: scale(0.985); }
 
 /* タイトル最終語にバターイエローの下線マーカー */
 .title-multi .w3 {
-  background-image: linear-gradient(transparent 62%, var(--butter-soft) 62%);
+  background-image: linear-gradient(transparent 62%, var(--bg-3) 62%);
 }
 
 /* カプセルメーター(1日の抽選回数) */
@@ -336,7 +331,7 @@ button:active { transform: scale(0.985); }
 /* 「カプセルが1個もどってきました」— ぽとんと落ちてくる演出 */
 .capsule-back {
   text-align: center;
-  color: var(--sage-deep);
+  color: var(--blue);
   font-size: var(--fs-sm);
   font-weight: 800;
   margin-top: 12px;
@@ -434,15 +429,15 @@ button:active { transform: scale(0.985); }
   font-size: 1.05rem;
   margin-bottom: 2px;
 }
-.status-cell.c1 .ic { background: var(--sage-soft); }
-.status-cell.c2 .ic { background: var(--peach-soft); }
-.status-cell.c3 .ic { background: var(--butter-soft); }
+.status-cell.c1 .ic { background: var(--bg-3); }
+.status-cell.c2 .ic { background: var(--bg-2); }
+.status-cell.c3 .ic { background: var(--bg-2); }
 .status-cell .k { display: block; font-size: var(--fs-xs); color: var(--cocoa-soft); font-weight: 700; }
 .status-cell .v { display: block; font-family: var(--font-display); font-size: 1.45rem; font-weight: 900; line-height: 1.25; }
 .status-cell .v small { font-size: 0.72rem; font-weight: 700; margin-left: 1px; }
-.status-cell.c1 .v { color: var(--sage-deep); }
+.status-cell.c1 .v { color: var(--blue); }
 .status-cell.c2 .v { color: var(--persimmon); }
-.status-cell.c3 .v { color: var(--butter-deep); }
+.status-cell.c3 .v { color: var(--blue); }
 .status-note {
   margin-top: 10px;
   padding-top: 8px;
@@ -461,11 +456,11 @@ button:active { transform: scale(0.985); }
   position: relative;
   border: 1px solid var(--soft-border);
   box-shadow: var(--shadow-paper);
-  background: var(--butter-soft);
+  background: var(--bg-3);
   background-image: var(--paper-grain);
 }
 .fav-shortcut:nth-child(even) {
-  background-color: var(--peach-soft);
+  background-color: var(--bg-2);
   transform: rotate(0.9deg);
 }
 .fav-shortcut:nth-child(odd) { transform: rotate(-0.9deg); }
@@ -476,7 +471,7 @@ button:active { transform: scale(0.985); }
   margin-left: -5px;
   width: 10px; height: 10px;
   border-radius: 50%;
-  background: var(--dusty-blue);
+  background: var(--navy);
   box-shadow: inset 0 -2px 2px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .fav-shortcut .emoji { font-size: 1.6rem; display: block; margin-bottom: 3px; }
@@ -513,12 +508,13 @@ button:active { transform: scale(0.985); }
   transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 /* 状態ごとの淡い色棚 */
-.state-card.t-sage   { background-color: var(--sage-soft); }
-.state-card.t-blue   { background-color: var(--dusty-blue-soft); }
-.state-card.t-peach  { background-color: var(--peach-soft); }
-.state-card.t-lav    { background-color: var(--lav-soft); }
-.state-card.t-butter { background-color: var(--butter-soft); }
-.state-card.t-cream  { background-color: var(--cream-soft); }
+.state-card.t-blue   { background-color: var(--blue-soft); }  .state-card.t-blue   .ttl { color: var(--navy); }
+.state-card.t-sage   { background-color: var(--bg-3); }        .state-card.t-sage   .ttl { color: var(--navy); }
+.state-card.t-green  { background-color: var(--bg-3); }        .state-card.t-green  .ttl { color: var(--blue); }
+.state-card.t-peach  { background-color: var(--bg-2); }        .state-card.t-peach  .ttl { color: var(--navy); }
+.state-card.t-lav    { background-color: var(--bg-2); }        .state-card.t-lav    .ttl { color: var(--blue); }
+.state-card.t-butter { background-color: var(--bg-2); }        .state-card.t-butter .ttl { color: var(--ink-2); }
+.state-card.t-cream  { background-color: var(--card); }        .state-card.t-cream  .ttl { color: var(--ink-3); }
 .state-card .emoji { font-size: 1.5rem; display: block; margin-bottom: 5px; }
 .state-card .ttl { display: block; font-family: var(--font-display); font-weight: 700; font-size: 0.99rem; }
 .state-card .desc { display: block; font-size: var(--fs-xs); color: var(--cocoa-soft); margin-top: 2px; line-height: 1.55; }
@@ -608,12 +604,13 @@ button:active { transform: scale(0.985); }
   font-size: 2.1rem;
   border: 1.5px solid var(--sand);
 }
-.result-top .emoji.t-sage   { background: var(--sage-soft); }
-.result-top .emoji.t-blue   { background: var(--dusty-blue-soft); }
-.result-top .emoji.t-peach  { background: var(--peach-soft); }
-.result-top .emoji.t-lav    { background: var(--lav-soft); }
-.result-top .emoji.t-butter { background: var(--butter-soft); }
-.result-top .emoji.t-cream  { background: var(--cream-soft); }
+.result-top .emoji.t-blue   { background: var(--blue-soft); }
+.result-top .emoji.t-sage   { background: var(--bg-3); }
+.result-top .emoji.t-green  { background: var(--bg-3); }
+.result-top .emoji.t-peach  { background: var(--bg-2); }
+.result-top .emoji.t-lav    { background: var(--bg-2); }
+.result-top .emoji.t-butter { background: var(--bg-2); }
+.result-top .emoji.t-cream  { background: var(--card); }
 .result-top h2 { font-family: var(--font-display); font-size: 1.32rem; font-weight: 900; line-height: 1.45; }
 .result-divider {
   border: none;
@@ -628,7 +625,7 @@ button:active { transform: scale(0.985); }
 .meta-item .v { font-size: var(--fs-md); font-weight: 800; margin-top: 1px; }
 .meta-item .v .big { font-family: var(--font-display); font-size: 1.25rem; color: var(--persimmon); }
 .meta-item.wide { grid-column: 1 / -1; }
-.stars { color: var(--butter); letter-spacing: 2px; text-shadow: 0 1px 0 rgba(120,90,50,0.15); }
+.stars { color: var(--navy); letter-spacing: 2px; }
 .stars .off { color: var(--soft-border-strong); text-shadow: none; }
 .state-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
 
@@ -701,7 +698,7 @@ button:active { transform: scale(0.985); }
 .week-card-grid .k { font-size: var(--fs-xs); color: var(--cocoa-soft); font-weight: 700; }
 .week-card-grid .v { font-family: var(--font-display); font-weight: 900; font-size: 1.3rem; line-height: 1.3; }
 .week-card-grid .v small { font-size: 0.72rem; font-weight: 700; }
-.week-card-grid .cell.n1 .v { color: var(--sage-deep); }
+.week-card-grid .cell.n1 .v { color: var(--blue); }
 .week-card-grid .cell.n3 .v { color: var(--persimmon); }
 .week-card-row {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -720,9 +717,9 @@ button:active { transform: scale(0.985); }
 .week-chart { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; padding: 14px 14px 10px; margin-top: var(--sp-3); }
 .week-col { text-align: center; }
 .week-col .bar-track { height: 64px; display: flex; align-items: flex-end; justify-content: center; }
-.week-col .bar { width: 15px; border-radius: 8px 8px 3px 3px; background: var(--sage); min-height: 4px; }
+.week-col .bar { width: 15px; border-radius: 8px 8px 3px 3px; background: var(--navy); min-height: 4px; }
 .week-col.zero .bar { background: var(--soft-border); }
-.week-col .num { font-size: var(--fs-xs); font-weight: 800; color: var(--sage-deep); margin-top: 3px; }
+.week-col .num { font-size: var(--fs-xs); font-weight: 800; color: var(--blue); margin-top: 3px; }
 .week-col.zero .num { color: var(--cocoa-faint); }
 .week-col .day { font-size: 0.68rem; color: var(--cocoa-soft); }
 .week-col.today .day { color: var(--persimmon); font-weight: 800; }
@@ -786,7 +783,7 @@ button:active { transform: scale(0.985); }
 .fav-item .body { flex: 1; min-width: 0; }
 .fav-item .ttl { font-size: var(--fs-md); font-weight: 700; line-height: 1.45; }
 .fav-item .meta { font-size: var(--fs-xs); color: var(--cocoa-soft); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.fav-item .runs { color: var(--sage-deep); font-weight: 700; }
+.fav-item .runs { color: var(--blue); font-weight: 700; }
 .fav-actions { display: flex; gap: 6px; }
 
 /* =========================================================================
@@ -795,7 +792,7 @@ button:active { transform: scale(0.985); }
 .dex-head { display: flex; align-items: center; gap: 14px; margin-bottom: var(--sp-3); padding: var(--sp-4); }
 .dex-head .body { flex: 1; }
 .dex-head h2 { font-family: var(--font-display); font-size: 1.18rem; font-weight: 900; }
-.dex-head h2 .w2 { color: var(--sage-deep); }
+.dex-head h2 .w2 { color: var(--blue); }
 .dex-head p { font-size: var(--fs-xs); color: var(--cocoa-soft); margin-top: 2px; }
 .dex-count { text-align: center; flex: none; padding: 6px 14px; border-radius: var(--radius-md); background: var(--paper-2); border: 1.5px dashed var(--soft-border-strong); }
 .dex-count .k { font-size: 0.68rem; color: var(--cocoa-soft); font-weight: 700; }
@@ -862,7 +859,7 @@ button:active { transform: scale(0.985); }
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
   transition: left 0.2s ease;
 }
-.toggle.on { background: var(--sage); }
+.toggle.on { background: var(--navy); }
 .toggle.on::after { left: 25px; }
 
 .time-input {
