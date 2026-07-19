@@ -41,8 +41,9 @@ model = TTSModel(
     device="cpu",
 )
 
-# 抑揚の自然さ(sdp_ratio)は上げるほどリズムが人間らしく揺れる。SBV2既定は0.2
-sdp = float(os.environ.get("UGC_SBV2_SDP") or 0.2)
+# 抑揚の自然さ(sdp_ratio)は上げるほどリズムが人間らしく揺れる。
+# 0.4は聴き比べ(A:0.2/B:0.4/C:0.6/D:F2)で社長が選定した既定値
+sdp = float(os.environ.get("UGC_SBV2_SDP") or 0.4)
 noise = float(os.environ.get("UGC_SBV2_NOISE") or 0.6)
 noisew = float(os.environ.get("UGC_SBV2_NOISEW") or 0.8)
 
