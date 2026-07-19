@@ -9,7 +9,7 @@
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
-const scenario = require('./scenario.js');
+const scenario = require(process.env.UGC_SCENARIO || './scenario.js');
 
 const WORK = process.argv[2] || path.join(__dirname, 'work');
 const BASE = process.env.UGC_BASE_URL || 'http://127.0.0.1:8123';

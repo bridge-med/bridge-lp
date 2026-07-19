@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-# 一括実行 — 台本(scenario.js)からショート動画を生成する
+# 一括実行 — 台本からショート動画を生成する
+# 使い方: make-short.sh [台本.js]   (省略時は scenario.js。量産はプロダクトごとに
+#         scenarios/xxx.js を書いて渡すだけ)
 set -euo pipefail
 cd "$(dirname "$0")"
+SCENARIO="$(realpath "${1:-scenario.js}")"
+export UGC_SCENARIO="$SCENARIO"
 WORK="$PWD/work"
 SITE_ROOT="$PWD/../.."
 
 mkdir -p "$WORK/vo"
 rm -rf "$WORK/rec"
 
-# scenario.js からタイムラインと台本を取り出す
+# 台本からタイムラインとナレーションを取り出す
 readarray -t META < <(node -e '
-  const s = require("./scenario.js");
+  const s = require(process.env.UGC_SCENARIO);
   const keys = Object.keys(s.T).filter(k => k !== "end");
   console.log(s.name);
   console.log(s.T.end);
