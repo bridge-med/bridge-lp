@@ -18,8 +18,10 @@ for off in "${OFFSETS[@]}"; do
 done
 INPUTS+=(-i "$WORK/bgm.wav")
 FILTERS+="[$((n+1))]volume=0.16[bg];"
-FILTERS+="${LABELS}[bg]amix=inputs=$((n+1)):normalize=0,alimiter=limit=0.95[aout];"
-FILTERS+="[0:v]scale=1080:1920:flags=lanczos,fps=30[vout]"
+FILTERS+="${LABELS}[bg]amix=inputs=$((n+1)):normalize=0,alimiter=limit=0.89[aout];"
+# 全編にわたる知覚できない速さのプッシュイン(29秒で1.00→1.06)。静止画面の間ももたせる
+FILTERS+="[0:v]fps=30,scale=1188:2112:flags=lanczos,"
+FILTERS+="zoompan=z='min(zoom+0.00007,1.06)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=30[vout]"
 
 ffmpeg -y -v error "${INPUTS[@]}" -filter_complex "$FILTERS" \
   -map "[vout]" -map "[aout]" -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p \

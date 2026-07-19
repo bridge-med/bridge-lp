@@ -41,23 +41,37 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
     addEventListener('DOMContentLoaded', () => {
       const style = document.createElement('style');
       style.textContent = `
-        .vv-ripple{position:fixed;width:56px;height:56px;border-radius:50%;
-          background:rgba(30,30,30,.28);border:2px solid rgba(30,30,30,.45);
+        /* 録画中は画面遷移のフェードを止める(設問の速送りで白フレームが出ないように) */
+        .app.enter .screen{animation:none !important}
+        .vv-ripple{position:fixed;width:64px;height:64px;border-radius:50%;
+          background:rgba(22,35,62,.30);border:2px solid rgba(22,35,62,.55);
           transform:translate(-50%,-50%) scale(.4);pointer-events:none;z-index:99998;
           animation:vvrip .5s ease-out forwards}
         @keyframes vvrip{to{transform:translate(-50%,-50%) scale(1.6);opacity:0}}
-        #vv-cap{position:fixed;left:50%;bottom:7%;transform:translateX(-50%);
-          max-width:86%;padding:10px 18px;border-radius:14px;z-index:99997;
-          background:rgba(20,20,20,.82);color:#fff;font-family:'Noto Sans JP',sans-serif;
-          font-weight:700;font-size:19px;line-height:1.5;text-align:center;
-          white-space:nowrap;opacity:0;transition:opacity .35s}
-        #vv-end{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;
-          align-items:center;justify-content:center;gap:14px;background:#F7F4EE;
+        #vv-cap{position:fixed;left:50%;bottom:18%;transform:translateX(-50%);
+          width:max-content;max-width:80%;padding:10px 20px;border-radius:10px;z-index:99997;
+          background:rgba(27,27,30,.85);color:#fff;font-family:'Noto Sans JP',sans-serif;
+          font-weight:700;font-size:22px;line-height:1.55;text-align:center;
+          white-space:pre-line;opacity:0;transition:opacity .35s}
+        #vv-cap.vv-cap-hero{bottom:auto;top:30%;font-size:28px;line-height:1.7;
+          padding:14px 28px}
+        #vv-end{position:fixed;inset:0;z-index:99999;display:flex;
+          align-items:center;justify-content:center;background:#F7F4EE;
           font-family:'Noto Sans JP',sans-serif;opacity:0;transition:opacity .6s}
+        #vv-end .in{display:flex;flex-direction:column;align-items:center;gap:14px;
+          animation:vvbreath 6s ease-out forwards}
+        @keyframes vvbreath{from{transform:scale(1)}to{transform:scale(1.03)}}
         #vv-end .t1{font-size:30px;font-weight:900;color:#1e1e1e;letter-spacing:.04em}
         #vv-end .t2{font-size:17px;font-weight:500;color:#555}
-        #vv-end .t3{margin-top:22px;font-size:14px;font-weight:700;color:#1e1e1e;
-          border:1.5px solid #1e1e1e;border-radius:999px;padding:9px 26px;letter-spacing:.18em}
+        #vv-end .t2b{display:flex;align-items:center;gap:11px;margin-top:24px;
+          border:1.5px solid #c9c2b4;border-radius:12px;padding:13px 24px;background:#fff;
+          font-size:17px;font-weight:700;color:#1e1e1e}
+        #vv-end .mag{width:14px;height:14px;border:2.5px solid #6b6b6b;border-radius:50%;
+          position:relative;flex:none}
+        #vv-end .mag::after{content:'';position:absolute;width:8px;height:2.5px;
+          background:#6b6b6b;right:-7px;bottom:-2px;transform:rotate(45deg);border-radius:2px}
+        #vv-end .t3{margin-top:20px;font-size:12px;font-weight:700;color:#1e1e1e;
+          border:1.5px solid #A98F63;border-radius:999px;padding:7px 20px;letter-spacing:.18em}
       `;
       document.head.appendChild(style);
       const cap = document.createElement('div');
@@ -70,6 +84,12 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
         r.style.top = e.clientY + 'px';
         document.body.appendChild(r);
         setTimeout(() => r.remove(), 600);
+        // タップした選択肢に藍の縁取りを一瞬出す(「選んだ」の応答)
+        const el = e.target && e.target.closest && e.target.closest('.choice');
+        if (el) {
+          el.style.boxShadow = '0 0 0 3px rgba(22,35,62,.55)';
+          setTimeout(() => { el.style.boxShadow = ''; }, 280);
+        }
       }, true);
     });
   });
@@ -80,12 +100,13 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
   const until = (sec) => new Promise((res) => {
     setTimeout(res, Math.max(0, t0 + sec * 1000 - Date.now()));
   });
-  const cap = (i) => page.evaluate((t) => {
+  const cap = (i) => page.evaluate(({ t, hero }) => {
     const c = document.getElementById('vv-cap');
     if (!t) { c.style.opacity = '0'; return; }
     c.textContent = t;
+    c.classList.toggle('vv-cap-hero', hero);
     c.style.opacity = '1';
-  }, scenario.captions[i] || '');
+  }, { t: scenario.captions[i] || '', hero: i === (scenario.heroCap ?? -1) });
 
   await scenario.run(page, { until, cap, T: scenario.T });
 
@@ -96,9 +117,12 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
     const end = document.createElement('div');
     end.id = 'vv-end';
     end.innerHTML = `
-      <div class="t1">${e.title}</div>
-      <div class="t2">${e.sub}</div>
-      <div class="t3">${e.badge}</div>`;
+      <div class="in">
+        <div class="t1">${e.title}</div>
+        <div class="t2">${e.sub}</div>
+        ${e.search ? `<div class="t2b"><span class="mag"></span>${e.search}</div>` : ''}
+        <div class="t3">${e.badge}</div>
+      </div>`;
     document.body.appendChild(end);
     requestAnimationFrame(() => { end.style.opacity = '1'; });
   }, scenario.endCard);
