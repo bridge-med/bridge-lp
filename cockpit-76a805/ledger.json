@@ -327,7 +327,7 @@
       "status": "未掲載",
       "measure": "local",
       "note": "動くPWA。カタログ掲載か引退かの判断待ち",
-      "lastCommit": "2026-07-15",
+      "lastCommit": "2026-07-19",
       "decision": {
         "points": "動くPWAとして完成しており、第31条の申告(実践/疲れた人のセルフケア)は立つ。論点は第12条——運営者自身が使い続けているか。掲載するなら「診断・ライト」の並びに1行で足せる。使っていないなら休止中として正直に置く手もある",
         "catalogDraft": "{ cat: 'casual', img: 'gokigen-gacha.png', name: 'Gokigen Gacha', jp: 'ごきげん回復ガチャ', href: '../gokigen-gacha/index.html',\n  p: '疲れた日に、いまの自分にちょうどいい回復行動をひとつだけ。押すだけのセルフケアガチャ。' }\nサムネイル作成済み(images/products/thumbs/gokigen-gacha.webp)"
