@@ -121,7 +121,7 @@
         (face === 'cheer'
           ? '<ellipse cx="50" cy="68" rx="7" ry="8" fill="var(--ink)"/>'
           : '<path d="M44 66 q6 6 12 0" stroke="var(--ink)" stroke-width="2.6" fill="none" stroke-linecap="round"/>') +
-        '<path d="M16 30 q8 -14 22 -6" stroke="var(--orange-deep)" stroke-width="4" fill="none" stroke-linecap="round" opacity=".6"/>' +
+        '<path d="M16 30 q8 -14 22 -6" stroke="var(--sand)" stroke-width="4" fill="none" stroke-linecap="round" opacity=".6"/>' +
       '</svg>';
   }
 
@@ -305,7 +305,7 @@
           return '<button type="button" data-reason="' + r + '" class="' + (draft.reason === r ? 'active' : '') + '"><span class="ico">' + ico + '</span>' + r + '</button>';
         }).join('') + '</div></div>' +
 
-      '<div class="field"><label>クールダウン期間</label><div class="seg green" id="seg-period">' +
+      '<div class="field"><label>クールダウン期間</label><div class="seg" id="seg-period">' +
         Store.PERIODS.map(function (p) {
           return '<button type="button" data-period="' + p.key + '" class="' + (draft.coolingPeriod === p.key ? 'active' : '') + '">' + p.label + '</button>';
         }).join('') + '</div></div>' +
@@ -473,7 +473,7 @@
 
     var diffText;
     if (monthOffset !== 0) diffText = '';
-    else if (sum.diff > 0) diffText = '先月より ¥' + yen(sum.diff) + ' 多く見送れた👏';
+    else if (sum.diff > 0) diffText = '先月より ¥' + yen(sum.diff) + ' 多く見送れた。';
     else if (sum.diff < 0) diffText = '先月より ¥' + yen(-sum.diff) + ' 少なめ。マイペースでいこう。';
     else diffText = '先月と同じペース。';
 
@@ -493,16 +493,16 @@
         '<button data-month="1" ' + (monthOffset >= 0 ? 'disabled' : '') + '>›</button>' +
       '</div>' +
 
-      '<div class="card saved-hero" style="text-align:center;background:linear-gradient(135deg,var(--green-soft),#D6EEDE);border:none;margin-top:6px">' +
+      '<div class="card saved-hero" style="text-align:center;margin-top:6px">' +
         '<div class="muted" style="font-size:13px;font-weight:700">この月、見送れた金額</div>' +
         '<div style="font-size:40px;font-weight:900;margin:6px 0 2px">¥' + yen(sum.savedThisMonth) + '</div>' +
         (diffText ? '<div class="muted" style="font-size:12.5px">' + diffText + '</div>' : '') +
       '</div>' +
 
       '<div class="kpi-grid" style="margin-top:14px">' +
-        '<div class="kpi"><div class="v" style="color:var(--green)">' + sum.skippedCount + '</div><div class="k">見送り</div></div>' +
+        '<div class="kpi"><div class="v" style="color:var(--navy)">' + sum.skippedCount + '</div><div class="k">見送り</div></div>' +
         '<div class="kpi"><div class="v">' + sum.purchasedCount + '</div><div class="k">買った</div></div>' +
-        '<div class="kpi"><div class="v" style="color:var(--orange-deep)">' + sum.holdingCount + '</div><div class="k">保留中</div></div>' +
+        '<div class="kpi"><div class="v" style="color:var(--ink-2)">' + sum.holdingCount + '</div><div class="k">保留中</div></div>' +
       '</div>' +
 
       '<div style="margin-top:16px">' + buddyBubble(buddyMsg, sum.savedThisMonth > 0 ? 'cheer' : 'smile') + '</div>' +
@@ -631,7 +631,7 @@
   }
 
   function celebrate() {
-    var colors = ['#FF9A52', '#F2792B', '#7FC9A0', '#FFD479', '#FF7E7E'];
+    var colors = ['#A98F63', '#C2A97E', '#8B9BBC', '#24365C', '#F2EADB'];
     var frag = document.createDocumentFragment();
     for (var i = 0; i < 60; i++) {
       var p = document.createElement('i');
