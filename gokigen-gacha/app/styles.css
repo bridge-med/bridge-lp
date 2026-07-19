@@ -10,45 +10,38 @@
  * ========================================================================= */
 
 :root {
-  /* ---- color tokens: 「宵の文具店」パレット ----
-   * キャリアログ(クリーム×オレンジ×グリーン)と差別化するため、
-   * 薄藤ミルクの紙にプラム・青磁・桜鼠を合わせた、夕方以降も目にやさしい配色。
-   * 変数名は旧パレットのまま値だけ差し替えている(persimmon=プラム, sage=青磁)。 */
-  --persimmon: #A85D7C;        /* プラム: メインCTA */
-  --persimmon-deep: #8E4A66;
-  --persimmon-soft: #F0DBE4;
-  --sage: #7FA396;             /* 青磁(セラドン): 体・回復 */
-  --sage-deep: #587F71;
-  --sage-soft: #DEE9E3;
-  --dusty-blue: #8894BC;       /* 藤ねずブルー: 頭・情報 */
-  --dusty-blue-deep: #5D6B9E;
-  --dusty-blue-soft: #E1E4F0;
-  --butter: #D9A94B;           /* はちみつ */
-  --butter-deep: #8F6E23;
-  --butter-soft: #F2E4C2;
-  --peach: #D999A9;            /* 桜鼠: 気分 */
-  --peach-deep: #A5647A;
-  --peach-soft: #F3DFE4;
-  --lav: #9D8DBE;              /* 藤: 人から離れる */
-  --lav-deep: #6F5F94;
-  --lav-soft: #E6E1F0;
-  --cream-soft: #E8E0E7;       /* 灰藤 */
-  --cream-deep: #7D6E80;
+  /* ---- color tokens: 憲法第22条の4系統(正典: moyamoya/app/styles.css) ----
+   * 旧「宵の文具店」トークン名はエイリアスとして残し、値だけ4系統へ配線する。
+   * カテゴリ別の割り当ては後段のエイリアスを参照。 */
+  /* 生成り — 基調 */
+  --bg: #FBFAF7; --bg-2: #F4EFE6; --bg-3: #EAE2D3; --card: #FFFFFF;
+  /* 炭 — 文字 */
+  --ink: #1B1B1E; --ink-2: #45464C; --ink-3: #7D7E85; --ink-4: #B6B3AB;
+  /* 藍 — 骨格 */
+  --navy: #16233E; --blue: #24365C; --blue-soft: #8B9BBC;
+  /* 砂 — 温度(選択の瞬間・現在地・到達だけ。文字色にしない) */
+  --sand: #A98F63; --sand-pale: #F2EADB; --btn-ink: #FFFFFF;
+  --line: rgba(27, 27, 30, 0.10); --line-strong: rgba(27, 27, 30, 0.18);
 
-  --cocoa: #453B49;            /* テキスト: 黒ではなく葡萄鼠 */
-  --cocoa-soft: #8B7F90;
-  --cocoa-faint: #B9AEBD;
-  --ivory: #F2EEF1;            /* 背景: 薄藤ミルク */
-  --paper: #FBF9FA;            /* カード: 真っ白にしない紙色 */
-  --paper-2: #F5F1F4;
-  --soft-border: #E3D9E1;
-  --soft-border-strong: #CFC0CD;
-  --danger: #C06A5E;
+  /* ---- 旧トークン→4系統エイリアス(選択子は無改修で追従) ---- */
+  --cocoa: var(--ink); --cocoa-soft: var(--ink-3); --cocoa-faint: var(--ink-4);
+  --ivory: var(--bg); --paper: var(--card); --paper-2: var(--bg-2);
+  --soft-border: var(--line); --soft-border-strong: var(--line-strong);
+  /* CTA・強調(旧プラム)→ 藍 */
+  --persimmon: var(--navy); --persimmon-deep: var(--blue); --persimmon-soft: var(--bg-3);
+  /* カテゴリ系 → 4系統内で擬似的に区別(designer再設計を反映) */
+  --sage: var(--navy);       --sage-deep: var(--blue);       --sage-soft: var(--bg-3);
+  --dusty-blue: var(--navy); --dusty-blue-deep: var(--blue); --dusty-blue-soft: var(--bg-3);
+  --peach: var(--navy);      --peach-deep: var(--blue);      --peach-soft: var(--bg-3);
+  --lav: var(--navy);        --lav-deep: var(--blue);        --lav-soft: var(--bg-3);
+  --butter: var(--navy);     --butter-deep: var(--blue);     --butter-soft: var(--bg-3);
+  --cream-soft: var(--bg-3); --cream-deep: var(--ink-3);
+  --danger: var(--ink-2);
 
-  /* ---- shadow tokens ---- */
-  --shadow-paper: 0 1px 2px rgba(95, 70, 100, 0.06), 0 5px 16px rgba(95, 70, 100, 0.09);
-  --shadow-lift: 0 2px 4px rgba(95, 70, 100, 0.08), 0 10px 26px rgba(95, 70, 100, 0.13);
-  --shadow-cta: 0 4px 14px rgba(142, 74, 102, 0.30);
+  /* ---- shadow tokens(藍の影) ---- */
+  --shadow-paper: 0 1px 2px rgba(22, 35, 62, 0.05), 0 5px 16px rgba(22, 35, 62, 0.08);
+  --shadow-lift: 0 2px 4px rgba(22, 35, 62, 0.07), 0 10px 26px rgba(22, 35, 62, 0.12);
+  --shadow-cta: 0 4px 14px rgba(22, 35, 62, 0.22);
 
   /* ---- radius tokens ---- */
   --radius-lg: 20px;
@@ -67,34 +60,20 @@
   --maxw: 440px;
 
   /* 紙の質感: 細かい繊維ノイズ(データURI・外部リソースなし) */
-  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='%23806a88' fill-opacity='0.05'%3E%3Ccircle cx='11' cy='17' r='1'/%3E%3Ccircle cx='47' cy='6' r='0.8'/%3E%3Ccircle cx='83' cy='29' r='1.1'/%3E%3Ccircle cx='121' cy='11' r='0.7'/%3E%3Ccircle cx='29' cy='53' r='0.9'/%3E%3Ccircle cx='67' cy='67' r='1'/%3E%3Ccircle cx='103' cy='49' r='0.8'/%3E%3Ccircle cx='133' cy='73' r='1'/%3E%3Ccircle cx='17' cy='91' r='1.1'/%3E%3Ccircle cx='53' cy='103' r='0.7'/%3E%3Ccircle cx='91' cy='97' r='0.9'/%3E%3Ccircle cx='127' cy='113' r='0.8'/%3E%3Ccircle cx='37' cy='127' r='1'/%3E%3Ccircle cx='73' cy='134' r='0.8'/%3E%3Ccircle cx='7' cy='61' r='0.7'/%3E%3Ccircle cx='113' cy='131' r='1.1'/%3E%3C/g%3E%3C/svg%3E");
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='%231b1b1e' fill-opacity='0.04'%3E%3Ccircle cx='11' cy='17' r='1'/%3E%3Ccircle cx='47' cy='6' r='0.8'/%3E%3Ccircle cx='83' cy='29' r='1.1'/%3E%3Ccircle cx='121' cy='11' r='0.7'/%3E%3Ccircle cx='29' cy='53' r='0.9'/%3E%3Ccircle cx='67' cy='67' r='1'/%3E%3Ccircle cx='103' cy='49' r='0.8'/%3E%3Ccircle cx='133' cy='73' r='1'/%3E%3Ccircle cx='17' cy='91' r='1.1'/%3E%3Ccircle cx='53' cy='103' r='0.7'/%3E%3Ccircle cx='91' cy='97' r='0.9'/%3E%3Ccircle cx='127' cy='113' r='0.8'/%3E%3Ccircle cx='37' cy='127' r='1'/%3E%3Ccircle cx='73' cy='134' r='0.8'/%3E%3Ccircle cx='7' cy='61' r='0.7'/%3E%3Ccircle cx='113' cy='131' r='1.1'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --cocoa: #EEE8EF;
-    --cocoa-soft: #ABA0B0;
-    --cocoa-faint: #756B7C;
-    --ivory: #232027;
-    --paper: #2E2A33;
-    --paper-2: #29252F;
-    --soft-border: #423B4A;
-    --soft-border-strong: #554C60;
-    --persimmon-soft: #47303C;
-    --sage-soft: #29352F;
-    --dusty-blue-soft: #2B3040;
-    --butter-soft: #3E3524;
-    --peach-soft: #402E35;
-    --lav-soft: #332E42;
-    --cream-soft: #37323F;
-    --sage-deep: #A6C6B8;
-    --dusty-blue-deep: #B0BCDF;
-    --peach-deep: #E3B3C2;
-    --butter-deep: #DCC077;
-    --lav-deep: #C4B7E0;
-    --cream-deep: #C2B5C6;
-    --shadow-paper: 0 1px 2px rgba(0, 0, 0, 0.25), 0 5px 16px rgba(0, 0, 0, 0.3);
-    --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.3), 0 10px 26px rgba(0, 0, 0, 0.4);
+    /* ベーストークンのみ再定義(エイリアスはvar()参照で自動追従) */
+    --bg: #111521; --bg-2: #161B2B; --bg-3: #1D2436; --card: #181E2E;
+    --ink: #EDEAE2; --ink-2: #C2BFB6; --ink-3: #8A8D98; --ink-4: #565A68;
+    --navy: #D8DEEB; --blue: #9FB1D4; --blue-soft: #5A6C92;
+    --sand: #C2A97E; --sand-pale: #2A2418; --btn-ink: #0E1526;
+    --line: rgba(237, 234, 226, 0.10); --line-strong: rgba(237, 234, 226, 0.18);
+    --shadow-paper: 0 1px 2px rgba(0, 0, 0, 0.25), 0 5px 16px rgba(0, 0, 0, 0.30);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.30), 0 10px 26px rgba(0, 0, 0, 0.40);
+    --shadow-cta: 0 6px 18px rgba(0, 0, 0, 0.40);
   }
 }
 
@@ -197,7 +176,7 @@ button:active { transform: scale(0.985); }
 }
 .btn-primary {
   background: var(--persimmon);
-  color: #FDF6EA;
+  color: var(--btn-ink);
   box-shadow: var(--shadow-cta);
 }
 /* 縫い目(ステッチ)風の内側破線 */
@@ -351,7 +330,7 @@ button:active { transform: scale(0.985); }
   height: 50%;
   background: var(--persimmon);
 }
-.cap-dot.on.bonus::after { background: var(--sage); }
+.cap-dot.on.bonus::after { background: var(--sand); }
 .capsule-meter .cap-note { margin-left: auto; color: var(--cocoa-faint); font-weight: 600; text-align: right; }
 
 /* 「カプセルが1個もどってきました」— ぽとんと落ちてくる演出 */
@@ -377,7 +356,7 @@ button:active { transform: scale(0.985); }
   margin-right: 1px;
 }
 .cap-star.on {
-  color: var(--butter);
+  color: var(--sand);
   text-shadow: 0 1px 0 rgba(95, 70, 100, 0.2);
   animation: star-twinkle 2.4s ease-in-out infinite;
 }
@@ -555,11 +534,11 @@ button:active { transform: scale(0.985); }
 }
 @media (prefers-color-scheme: dark) { .state-card .check { background: rgba(0, 0, 0, 0.25); } }
 .state-card.selected {
-  border-color: var(--persimmon);
+  border-color: var(--sand);
   box-shadow: var(--shadow-lift);
   transform: translateY(-2px) rotate(-0.4deg);
 }
-.state-card.selected .check { background: var(--persimmon); border-color: var(--persimmon); color: #FDF6EA; }
+.state-card.selected .check { background: var(--sand); border-color: var(--sand); color: var(--btn-ink); }
 
 .select-footer {
   position: sticky;
@@ -627,7 +606,7 @@ button:active { transform: scale(0.985); }
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 2.1rem;
-  border: 1.5px dashed var(--soft-border-strong);
+  border: 1.5px solid var(--sand);
 }
 .result-top .emoji.t-sage   { background: var(--sage-soft); }
 .result-top .emoji.t-blue   { background: var(--dusty-blue-soft); }
@@ -679,8 +658,8 @@ button:active { transform: scale(0.985); }
   font-family: var(--font-display);
   font-size: 1.65rem;
   font-weight: 900;
-  color: var(--persimmon);
-  border: 3px solid var(--persimmon);
+  color: var(--navy);
+  border: 3px solid var(--sand);
   border-radius: 10px;
   transform: rotate(-4deg);
   opacity: 0.92;
@@ -760,7 +739,7 @@ button:active { transform: scale(0.985); }
   font-weight: 700;
   color: var(--cocoa-soft);
 }
-.filter-chip.active { background: var(--persimmon); border-color: var(--persimmon); color: #FDF6EA; }
+.filter-chip.active { background: var(--navy); border-color: var(--navy); color: var(--btn-ink); }
 .filter-chip small { font-weight: 500; opacity: 0.8; margin-left: 3px; }
 
 .day-label { font-size: var(--fs-sm); font-weight: 800; color: var(--cocoa-soft); margin: 16px 4px 8px; }
@@ -943,7 +922,7 @@ button:active { transform: scale(0.985); }
   top: 5px;
   width: 42px; height: 42px;
   border-radius: 50%;
-  background: var(--persimmon-soft);
+  background: var(--sand-pale);
   z-index: 0;
 }
 
