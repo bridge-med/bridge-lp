@@ -163,10 +163,9 @@ ${packAvailable ? `
         <h2>${esc(PRODUCT.title)}</h2>
         <p class="lead">${esc(PRODUCT.heading)}。担当者が替わっても、採用〜入職〜退職を同じ形式で回せます。</p>
         <div class="price-row">
-          <span class="now">${fmtPrice(P.launch)}</span>
-          <span class="tax">税込・初期販売価格</span>
+          <span class="now">${fmtPrice(P.list)}</span>
+          <span class="tax">税込・買い切り</span>
         </div>
-        <p style="font-size:11.5px;color:var(--band-dim)">通常価格${fmtPrice(P.list)}(初期販売期間の終了後に適用します)</p>
         <div class="chips"><span>収録${PRODUCT.items.length}ファイル</span><span>Excel / Word 編集可</span><span>連絡文例つき</span><span>決済準備中</span></div>
         <p><a class="btn cta" href="pack/index.html">パックの内容を見る</a></p>
       </div>
@@ -429,7 +428,7 @@ ${relatedSection(root, (t.relatedTemplateIds || []).filter((id) => id !== t.id),
 
 /* ================================================================
    採用・入退職実務パック(status=published のときのみ生成)
-   価格表示: 初期販売価格を主表示し、通常価格は適用時期つきで明記する
+   価格表示: 通常価格の単一表示(2026-07-19 社長決定。二重価格の枠組みは使わない)
    (実績のない二重価格に見せない — PM条件 2026-07-18)
    ================================================================ */
 if (packAvailable) {
@@ -447,7 +446,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <div class="pack-meta">
       <span>収録 <b>${PRODUCT.items.length}ファイル</b></span>
       <span>形式 <b>Excel・Word(スプレッドシート取込可)</b></span>
-      <span>価格 <b>${fmtPrice(P.launch)}</b> <span style="color:var(--ink-3)">税込・初期販売価格</span></span>
+      <span>価格 <b>${fmtPrice(P.list)}</b> <span style="color:var(--ink-3)">税込・買い切り</span></span>
       <span>更新 <b>${dateJp(PRODUCT.updatedAt)}</b></span>
     </div>
   </div>
@@ -488,8 +487,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     </div>
     <h2 id="price">価格</h2>
     <ul>
-      <li>初期販売価格: <strong>${fmtPrice(P.launch)}(税込)</strong></li>
-      <li>通常価格: ${fmtPrice(P.list)}(税込) — 初期販売期間の終了後に適用します。終了時期は販売開始時に明示します</li>
+      <li>価格: <strong>${fmtPrice(P.list)}(税込・買い切り)</strong></li>
     </ul>
     <h2 id="license">利用条件</h2>
     <ul>
@@ -503,8 +501,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <div class="buy-card">
       <span><span class="badge paid">有料</span> <span class="badge prep">決済準備中</span></span>
       <div>
-        <div class="price-now">${fmtPrice(P.launch)} <small>税込・初期販売価格</small></div>
-        <div class="price-later" style="font-size:11.5px;color:var(--ink-3)">通常価格${fmtPrice(P.list)}(初期販売期間の終了後に適用)</div>
+        <div class="price-now">${fmtPrice(P.list)} <small>税込・買い切り</small></div>
       </div>
       <button class="btn primary" data-buy="${PRODUCT.id}">購入方法を問い合わせる</button>
       <a class="btn ghost" href="#sample">サンプルを確認する</a>
@@ -848,7 +845,6 @@ ${breadcrumbs(root, [['プランと料金', null]])}
     <div class="plan${p.id === 'pack' ? ' hl' : ''}">
       <div class="pn">${esc(p.name)}</div>
       <div class="pp">${p.price === 0 ? '0円' : fmtPrice(p.price) + `<small> / ${esc(p.unit)}</small>`}</div>
-      ${p.listPrice ? `<div style="font-size:11.5px;color:var(--ink-3)">通常価格${fmtPrice(p.listPrice)}(初期販売期間の終了後に適用)</div>` : ''}
       <ul>${p.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>
       <p class="note">${esc(p.note)}</p>
     </div>`).join('')}
