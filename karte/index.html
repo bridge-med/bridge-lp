@@ -9,10 +9,12 @@
 <meta property="og:description" content="今日は、あなたの職場を診察します。本カルテはフィクションですが、処方箋は実在します。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/karte/">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBFAF7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111521">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700;900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FCFAF3'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23C8553D' stroke-width='3'/%3E%3Ctext x='32' y='42' font-family='serif' font-size='26' font-weight='700' text-anchor='middle' fill='%23C8553D'%3E診%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%2316233E' stroke-width='3'/%3E%3Ctext x='32' y='42' font-family='serif' font-size='26' font-weight='700' text-anchor='middle' fill='%2316233E'%3E診%3C/text%3E%3C/svg%3E">
 
 <style>
 /* ============================================================
@@ -22,18 +24,26 @@
    ============================================================ */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --desk:#EFEAD9;            /* 事務机の上 */
-  --sheet:#FCFAF3;           /* カルテ用紙 */
-  --sheet-2:#F6F2E6;
-  --rule:rgba(27,73,101,0.13);      /* 罫線(薄い藍) */
-  --rule-strong:rgba(27,73,101,0.30);
-  --ink:#22262E;             /* 印字の黒 */
-  --ink-2:#5A5F6B;
-  --ink-3:#9A978B;
-  --pen:#2B4A8B;             /* 記入のペン(藍) */
-  --stamp:#C8553D;           /* 朱肉 — 本家LPの朱をそのまま */
-  --stamp-deep:#A8442F;
-  --line:rgba(34,38,46,0.12);
+  /* 4系統(正典: moyamoya/app/styles.css) */
+  --bg:#FBFAF7; --bg-2:#F4EFE6; --bg-3:#EAE2D3; --card:#FFFFFF;
+  --ink:#1B1B1E; --ink-2:#45464C; --ink-3:#7D7E85; --ink-4:#B6B3AB;
+  --navy:#16233E; --blue:#24365C; --blue-soft:#8B9BBC;
+  --sand:#A98F63; --sand-pale:#F2EADB; --btn-ink:#FFFFFF;
+  --line:rgba(27,27,30,0.10);
+  --shadow:0 1px 2px rgba(22,35,62,0.05),0 8px 24px rgba(22,35,62,0.08);
+
+  /* karteの意味エイリアス(値だけ4系統へ配線) */
+  --desk:var(--bg-3);        /* 事務机の上 = 生成りの最濃面 */
+  --sheet:var(--card);       /* カルテ用紙 */
+  --sheet-2:var(--bg-2);
+  --pen:var(--blue);         /* 記入のペン(藍) */
+  --stamp:var(--blue);       /* 旧・朱肉 → 藍(印・見出し・CTAの既定) */
+  --stamp-deep:var(--navy);
+  --rule:rgba(22,35,62,0.14);        /* 罫線(藍の骨格) */
+  --rule-strong:rgba(22,35,62,0.30);
+  --hair:rgba(27,27,30,0.22);        /* 点線リーダー(炭) */
+  --nav-bg:rgba(251,250,247,0.85);   /* スクロール時ナビ地 */
+
   --serif:'Noto Serif JP',serif;
   --sans:'Noto Sans JP',sans-serif;
   --hand:'Klee One','Noto Sans JP',cursive;
@@ -41,20 +51,34 @@
   --max:880px;
   --pad:clamp(18px,4.5vw,56px);
 }
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#111521; --bg-2:#161B2B; --bg-3:#1D2436; --card:#181E2E;
+    --ink:#EDEAE2; --ink-2:#C2BFB6; --ink-3:#8A8D98; --ink-4:#565A68;
+    --navy:#D8DEEB; --blue:#9FB1D4; --blue-soft:#5A6C92;
+    --sand:#C2A97E; --sand-pale:#2A2418; --btn-ink:#0E1526;
+    --line:rgba(237,234,226,0.10);
+    --shadow:0 2px 8px rgba(0,0,0,.25),0 16px 48px rgba(0,0,0,.35);
+    --rule:rgba(159,177,212,0.16);
+    --rule-strong:rgba(159,177,212,0.30);
+    --hair:rgba(237,234,226,0.22);
+    --nav-bg:rgba(17,21,33,0.85);
+  }
+}
 html{scroll-behavior:smooth}
 body{background:var(--desk);color:var(--ink);font-family:var(--sans);line-height:1.8;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-feature-settings:"palt" 1}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0.03;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");mix-blend-mode:multiply}
 a{color:inherit;text-decoration:none}
-::selection{background:var(--stamp);color:#fff}
+::selection{background:var(--stamp);color:var(--btn-ink)}
 .nowrap{white-space:nowrap}
 h1,h2,h3{text-wrap:balance;word-break:auto-phrase;overflow-wrap:break-word}
 p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
 
 /* ===== NAV ===== */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px var(--pad);transition:all .3s}
-.nav.scrolled{background:rgba(239,234,217,0.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav.scrolled{background:var(--nav-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .nav-logo{font:700 15px/1 var(--serif);letter-spacing:0.2em}
-.nav-logo .dot{color:var(--stamp)}
+.nav-logo .dot{color:var(--sand)}
 .nav-r{display:flex;gap:18px;font:600 10px/1 var(--mono);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-2)}
 .nav-r a{padding:6px 0;transition:color .15s}
 .nav-r a:hover{color:var(--stamp)}
@@ -80,8 +104,8 @@ p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
 @keyframes cue{0%,100%{transform:scaleY(0.4);opacity:.4}50%{transform:scaleY(1);opacity:1}}
 
 /* ===== 用紙(共通)===== */
-.paper{max-width:var(--max);margin:0 auto;background:var(--sheet);border:1px solid var(--line);border-radius:3px;box-shadow:0 1px 3px rgba(34,38,46,0.06),0 14px 44px rgba(34,38,46,0.09);position:relative}
-.paper::before{content:'';position:absolute;top:0;bottom:0;left:clamp(30px,6vw,52px);width:1px;background:rgba(200,85,61,0.32);pointer-events:none}
+.paper{max-width:var(--max);margin:0 auto;background:var(--sheet);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);position:relative}
+.paper::before{content:'';position:absolute;top:0;bottom:0;left:clamp(30px,6vw,52px);width:1px;background:var(--rule-strong);pointer-events:none}
 .paper .holes{position:absolute;left:9px;top:0;bottom:0;width:14px;display:flex;flex-direction:column;justify-content:center;gap:110px;pointer-events:none}
 .paper .holes i{width:13px;height:13px;border-radius:50%;background:var(--desk);border:1px solid rgba(34,38,46,0.14);box-shadow:inset 0 1px 2px rgba(34,38,46,0.18)}
 .sec{padding:0 var(--pad)}
@@ -98,9 +122,9 @@ p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
 .role-btn{display:flex;align-items:flex-start;gap:13px;text-align:left;padding:16px 18px;background:var(--sheet);border:1px solid var(--line);border-radius:3px;cursor:pointer;font-family:var(--sans);transition:border-color .2s,background .2s;position:relative}
 .role-btn:hover{border-color:var(--ink-2)}
 .role-btn .box{flex-shrink:0;width:17px;height:17px;border:1.5px solid var(--ink-3);border-radius:2px;margin-top:3px;position:relative;transition:border-color .2s}
-.role-btn .box::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 13px/1 var(--hand);color:var(--stamp);opacity:0;transform:scale(1.6) rotate(-8deg);transition:all .2s}
-.role-btn.on{border-color:var(--stamp);background:rgba(200,85,61,0.04)}
-.role-btn.on .box{border-color:var(--stamp)}
+.role-btn .box::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 13px/1 var(--hand);color:var(--pen);opacity:0;transform:scale(1.6) rotate(-8deg);transition:all .2s}
+.role-btn.on{border-color:var(--sand);background:var(--sand-pale)}
+.role-btn.on .box{border-color:var(--sand)}
 .role-btn.on .box::after{opacity:1;transform:scale(1) rotate(-4deg)}
 .role-btn .r-name{font:700 14px/1.5 var(--sans);color:var(--ink);display:block;margin-bottom:3px}
 .role-btn .r-desc{font:600 11.5px/1.7 var(--hand);color:var(--pen);display:block;opacity:.85}
@@ -137,13 +161,13 @@ p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
 /* 所見行(ラベル+点線+値) */
 .o-row{display:flex;align-items:baseline;gap:10px;padding:8px 0 9px;border-bottom:1px solid var(--rule)}
 .o-k{font:600 12px/1.6 var(--sans);color:var(--ink-2);flex-shrink:0}
-.o-dots{flex:1;border-bottom:2px dotted rgba(34,38,46,0.22);transform:translateY(-4px);min-width:24px}
+.o-dots{flex:1;border-bottom:2px dotted var(--hair);transform:translateY(-4px);min-width:24px}
 .o-v{font:600 clamp(13px,2vw,15px)/1.6 var(--hand);color:var(--pen);text-align:right}
 .o-v small{font:500 10.5px/1 var(--sans);color:var(--ink-3)}
 /* 評価 */
 .dx{margin:4px 0 16px;position:relative;padding:18px 20px 16px;border:1px solid var(--rule-strong);background:var(--sheet-2);border-radius:2px}
 .dx-label{font:600 8.5px/1 var(--mono);letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
-.dx-name{font:600 clamp(19px,3.4vw,26px)/1.5 var(--hand);color:var(--pen);text-decoration:underline wavy rgba(200,85,61,0.5) 1.5px;text-underline-offset:7px}
+.dx-name{font:600 clamp(19px,3.4vw,26px)/1.5 var(--hand);color:var(--pen);text-decoration:underline wavy var(--blue-soft) 1.5px;text-underline-offset:7px}
 .dx-en{font:italic 400 10.5px/1 var(--mono);color:var(--ink-3);margin-top:10px;letter-spacing:0.06em}
 .dx-stamp{position:absolute;top:-13px;right:14px;padding:7px 10px;border:2px solid var(--stamp);color:var(--stamp);font:700 12px/1 var(--serif);letter-spacing:0.24em;transform:rotate(-5deg);background:var(--sheet);border-radius:2px;opacity:0.9}
 .a-note{font:600 clamp(13.5px,2vw,15.5px)/1.9 var(--hand);color:var(--pen);padding:6px 0 8px;border-bottom:1px solid var(--rule)}
@@ -153,13 +177,13 @@ p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
 
 /* 処方箋 Rp */
 .plan-line{font:600 clamp(14px,2.2vw,16px)/1.9 var(--hand);color:var(--pen);margin-bottom:18px}
-.rp{border:1.5px solid var(--rule-strong);border-radius:2px;background:var(--sheet);overflow:hidden}
-.rp-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1.5px solid var(--rule-strong);background:var(--sheet-2)}
+.rp{border:1.5px solid var(--rule-strong);border-top:3px solid var(--sand);border-radius:2px;background:var(--sheet);overflow:hidden}
+.rp-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1.5px solid var(--rule-strong);background:radial-gradient(120% 90% at 50% 0%,var(--sand-pale) 0%,transparent 60%),var(--sheet-2)}
 .rp-head .rx{font:italic 600 22px/1 var(--serif);color:var(--stamp)}
 .rp-head .t{font:600 9.5px/1 var(--mono);letter-spacing:0.24em;text-transform:uppercase;color:var(--ink-2)}
 .rp-item{display:block;padding:16px 18px 15px;border-bottom:1px solid var(--rule);transition:background .2s;position:relative}
 .rp-item:last-child{border-bottom:0}
-.rp-item:hover{background:rgba(200,85,61,0.035)}
+.rp-item:hover{background:var(--bg-2)}
 .rp-item .r1{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:5px}
 .rp-item .num{font:600 11px/1 var(--mono);color:var(--stamp);letter-spacing:0.04em}
 .rp-item .name{font:700 15.5px/1.4 var(--serif);color:var(--ink)}
@@ -186,7 +210,9 @@ p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
 .k-date{font:600 10.5px/2 var(--mono);color:var(--ink-3);letter-spacing:0.06em;text-transform:uppercase}
 .k-body{font:600 clamp(13px,2vw,14.5px)/1.9 var(--hand);color:var(--pen)}
 .k-body b{color:var(--ink);font-family:var(--serif);font-weight:700;margin-right:8px}
-.k-row.today .k-date,.k-row.today .k-body b{color:var(--stamp)}
+.k-row.today{position:relative}
+.k-row.today::before{content:'';position:absolute;left:-14px;top:13px;bottom:13px;width:3px;border-radius:2px;background:var(--sand)}
+.k-row.today .k-date,.k-row.today .k-body b{color:var(--navy)}
 
 /* ===== OUTRO ===== */
 .outro{padding:56px var(--pad) 90px;text-align:center}
@@ -196,14 +222,14 @@ p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
 .outro-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .o-btn{display:inline-flex;align-items:center;gap:9px;padding:14px 24px;border:1px solid var(--ink);border-radius:2px;font:700 12.5px/1 var(--sans);color:var(--ink);transition:all .2s;background:transparent;cursor:pointer;font-family:var(--sans)}
 .o-btn:hover{background:var(--ink);color:var(--sheet)}
-.o-btn.fill{background:var(--stamp);border-color:var(--stamp);color:#fff}
+.o-btn.fill{background:var(--stamp);border-color:var(--stamp);color:var(--btn-ink)}
 .o-btn.fill:hover{background:var(--stamp-deep);border-color:var(--stamp-deep)}
 .o-btn .arr{font-family:var(--mono)}
 
 /* ===== FOOTER ===== */
 .foot{padding:34px var(--pad) 44px;border-top:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
 .foot-brand{font:700 15px/1 var(--serif);letter-spacing:0.2em}
-.foot-brand .dot{color:var(--stamp)}
+.foot-brand .dot{color:var(--sand)}
 .foot-links{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font:600 10px/1 var(--mono);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-2)}
 .foot-links a:hover{color:var(--stamp)}
 .foot-tag{font:500 10px/1.8 var(--sans);color:var(--ink-3)}
@@ -381,7 +407,7 @@ p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
   <div class="outro-btns" data-r>
     <a class="o-btn fill" href="../products/index.html">処方された道具を見る<span class="arr">→</span></a>
     <a class="o-btn" href="../index.html#contact">相談する(セカンドオピニオン)<span class="arr">→</span></a>
-    <button class="o-btn" onclick="window.print()">このカルテを印刷する<span class="arr">⎙</span></button>
+    <button class="o-btn" onclick="window.print()">このカルテを印刷する<span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M8 17h8v4H8z"/></svg></span></button>
   </div>
 </section>
 
@@ -397,7 +423,7 @@ p{text-wrap:pretty;word-break:auto-phrase;overflow-wrap:break-word}
   <div class="foot-tag">Concept Model 04 “KARTE” — 現場の「面倒くさい」を、自分ごととして解く。</div>
 </footer>
 
-<noscript><style>.roles::after{content:'※ このページの問診には JavaScript が必要です。';font:500 12px/1.8 sans-serif;color:#A8442F}</style></noscript>
+<noscript><style>.roles::after{content:'※ このページの問診には JavaScript が必要です。';font:500 12px/1.8 sans-serif;color:var(--navy)}</style></noscript>
 
 <script>
 /* ============ 診療データ ============ */
