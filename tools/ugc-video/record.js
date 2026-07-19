@@ -12,13 +12,22 @@ const CHROMIUM = process.env.UGC_CHROMIUM || '/opt/pw-browsers/chromium';
 const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dirname] }));
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: CHROMIUM, headless: true });
+  // 高解像度録画の要点: contextのdeviceScaleFactorエミュレーションでは録画が
+  // CSSピクセル(540x960)のままになる(Playwrightのscreencastはviewportサイズで
+  // フレームを取るため)。ブラウザ起動引数で物理解像度ごと2倍にすると、
+  // レイアウトはCSS 540pxのまま実ピクセル1080x1920で録画できる。
+  const browser = await chromium.launch({
+    executablePath: CHROMIUM,
+    headless: true,
+    args: ['--force-device-scale-factor=2'],
+  });
   const ctx = await browser.newContext({
     viewport: scenario.viewport,
-    deviceScaleFactor: 2,
-    isMobile: true,
     hasTouch: true,
-    recordVideo: { dir: path.join(WORK, 'rec'), size: scenario.viewport },
+    recordVideo: {
+      dir: path.join(WORK, 'rec'),
+      size: { width: scenario.viewport.width * 2, height: scenario.viewport.height * 2 },
+    },
     locale: 'ja-JP',
   });
 

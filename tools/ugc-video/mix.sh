@@ -22,6 +22,6 @@ FILTERS+="${LABELS}[bg]amix=inputs=$((n+1)):normalize=0,alimiter=limit=0.95[aout
 FILTERS+="[0:v]scale=1080:1920:flags=lanczos,fps=30[vout]"
 
 ffmpeg -y -v error "${INPUTS[@]}" -filter_complex "$FILTERS" \
-  -map "[vout]" -map "[aout]" -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p \
+  -map "[vout]" -map "[aout]" -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p \
   -c:a aac -b:a 128k -t "$END" "$OUT"
 echo "$OUT ok"
