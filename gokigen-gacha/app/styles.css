@@ -225,12 +225,13 @@ button:active { transform: scale(0.985); }
 }
 /* カテゴリ擬似区別: 藍→生成り→無色の一本の明度スケール。色相も砂も使わない */
 .tag.t-blue   { background: var(--navy);      color: var(--btn-ink); } /* 頭・情報 : 藍濃(唯一のベタ藍) */
-.tag.t-sage   { background: var(--blue-soft); color: var(--navy);    } /* 体・回復 : 藍淡面 */
+.tag.t-sage   { background: var(--bg-3); color: var(--navy);
+                box-shadow: inset 0 0 0 1px var(--blue-soft); } /* 体・回復 : 藍淡の枠(中間トーン面は両テーマでAA不能のため枠で示す) */
 .tag.t-green  { background: var(--bg-3);      color: var(--navy);    } /* 生活     : 生成り濃 × 濃字 */
 .tag.t-peach  { background: var(--bg-3);      color: var(--blue);    } /* 気分     : 生成り濃 × 中字 */
 .tag.t-lav    { background: var(--bg-2);      color: var(--navy);    } /* 離れる   : 生成り中 × 濃字 */
 .tag.t-butter { background: var(--bg-2);      color: var(--ink-2);   } /* やさしさ : 生成り中 × 弱字 */
-.tag.t-cream  { background: var(--bg);        color: var(--ink-3);
+.tag.t-cream  { background: var(--bg);        color: var(--ink-2);
                 box-shadow: inset 0 0 0 1px var(--line-strong); }      /* 休む     : ほぼ無色 × 細枠 */
 
 /* ---- 見出し ---- */
@@ -510,16 +511,16 @@ button:active { transform: scale(0.985); }
   transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 /* 状態ごとの淡い色棚 */
-.state-card.t-blue   { background-color: var(--blue-soft); }  .state-card.t-blue   .ttl { color: var(--navy); }
+.state-card.t-blue   { background-color: var(--bg-2); border-color: var(--blue-soft); }  .state-card.t-blue   .ttl { color: var(--navy); }
 .state-card.t-sage   { background-color: var(--bg-3); }        .state-card.t-sage   .ttl { color: var(--navy); }
 .state-card.t-green  { background-color: var(--bg-3); }        .state-card.t-green  .ttl { color: var(--blue); }
 .state-card.t-peach  { background-color: var(--bg-2); }        .state-card.t-peach  .ttl { color: var(--navy); }
 .state-card.t-lav    { background-color: var(--bg-2); }        .state-card.t-lav    .ttl { color: var(--blue); }
 .state-card.t-butter { background-color: var(--bg-2); }        .state-card.t-butter .ttl { color: var(--ink-2); }
-.state-card.t-cream  { background-color: var(--card); }        .state-card.t-cream  .ttl { color: var(--ink-3); }
+.state-card.t-cream  { background-color: var(--card); }        .state-card.t-cream  .ttl { color: var(--ink-2); }
 .state-card .emoji { font-size: 1.5rem; display: block; margin-bottom: 5px; }
 .state-card .ttl { display: block; font-family: var(--font-display); font-weight: 700; font-size: 0.99rem; }
-.state-card .desc { display: block; font-size: var(--fs-xs); color: var(--cocoa-soft); margin-top: 2px; line-height: 1.55; }
+.state-card .desc { display: block; font-size: var(--fs-xs); color: var(--ink-2); margin-top: 2px; line-height: 1.55; }
 .state-card .check {
   position: absolute; top: 10px; right: 10px;
   width: 23px; height: 23px;
