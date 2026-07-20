@@ -19,10 +19,12 @@ readarray -t META < <(node -e '
   console.log(s.name);
   console.log(s.T.end);
   console.log(keys.map(k => s.T[k]).join(" "));
+  console.log(s.serverRoot || ".");
   s.lines.forEach(l => console.log(l));
 ')
 NAME="${META[0]}"; END="${META[1]}"; OFFSETS="${META[2]}"
-LINES=("${META[@]:3}")
+SERVER_ROOT="$(realpath "$SITE_ROOT/${META[3]}")"
+LINES=("${META[@]:4}")
 
 echo "== ナレーション音声化 (${#LINES[@]}文) =="
 bash tts.sh "$WORK" "${LINES[@]}"
@@ -36,7 +38,7 @@ done
 # 各セグメントが次のスロットに収まるか実測で確認
 node -e '
   const { execSync } = require("child_process");
-  const s = require("./scenario.js");
+  const s = require(process.env.UGC_SCENARIO);
   const keys = Object.keys(s.T).filter(k => k !== "end");
   const starts = keys.map(k => s.T[k]).concat([s.T.end]);
   let ng = 0;
@@ -55,7 +57,7 @@ echo "== BGM生成 =="
 python3 make-bgm.py "$WORK/bgm.wav" "$END"
 
 echo "== 画面録画 =="
-python3 -m http.server 8123 --directory "$SITE_ROOT" >/dev/null 2>&1 &
+python3 serve.py 8123 "$SERVER_ROOT" >/dev/null 2>&1 &
 SERVER=$!
 trap 'kill $SERVER 2>/dev/null || true' EXIT
 sleep 1

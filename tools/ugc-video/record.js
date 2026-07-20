@@ -63,6 +63,9 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
   // 外部リクエスト遮断(フォントCDN等でのハング防止)
   await ctx.route(/^https?:\/\/(?!127\.0\.0\.1)/, (r) => r.abort());
 
+  // 台本ごとの前処理(APIスタブ等)。後から登録したrouteが優先される
+  if (scenario.setup) await scenario.setup(ctx);
+
   const page = CAPTURE === 'x11' ? (ctx.pages()[0] || await ctx.newPage()) : await ctx.newPage();
 
   // テロップ・タップリップル・エンドカードの基盤を注入
