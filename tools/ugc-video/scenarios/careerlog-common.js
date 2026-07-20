@@ -3,11 +3,12 @@
 // 誠実の注記: デモデータは「対人援助職の地味な日常」の架空例(数値成果の誇張なし)。
 // AI生成のスタブ文は入力ログに忠実な控えめの下書きで、公開前にeditor照合を通す。
 
-// 直近7日ぶんの日付(今日を含む)を作る
-function lastDays(n) {
+// 終端日(オフセット指定)からさかのぼるn日ぶんの日付を作る
+function lastDays(n, clockOffsetDays = 0, endOffsetDays = 0) {
+  const end = Date.now() + (clockOffsetDays - endOffsetDays) * 86400000;
   const out = [];
   for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 86400000);
+    const d = new Date(end - i * 86400000);
     out.push(d.toISOString().slice(0, 10));
   }
   return out;
@@ -23,9 +24,14 @@ const TITLES = [
   { title: '歩行が不安定な患者さんの介助方法を、担当の看護師と一緒に見直した', tags: ['現場調整'] },
 ];
 
-function buildSeed() {
-  const days = lastDays(7);
-  const logs = TITLES.map((t, i) => ({
+// opts.clockOffsetDays — 録画中のアプリ内時計を進める日数(ふりかえり編は金曜想定で+4)
+// opts.endOffsetDays   — ログの終端を何日前にするか(続く仕組み編は「昨日まで」で1)
+// opts.titles          — ログの並び(週の範囲に入れたい項目の調整用)
+// opts.progress        — 進捗の上書き(称号を付与済みにして録画中の祝福モーダル連鎖を抑える等)
+function buildSeed(opts = {}) {
+  const { clockOffsetDays = 0, endOffsetDays = 0, titles = TITLES, progress = {} } = opts;
+  const days = lastDays(7, clockOffsetDays, endOffsetDays);
+  const logs = titles.map((t, i) => ({
     id: 'demo-' + i,
     date: days[i],
     title: t.title,
@@ -37,10 +43,10 @@ function buildSeed() {
   return {
     'bridge-daily:work_logs': JSON.stringify(logs),
     'bridge-daily:coins': '8',
-    'bridge-daily:progress': JSON.stringify({
+    'bridge-daily:progress': JSON.stringify(Object.assign({
       xp: 160, streak: 7, bestStreak: 7, lastDay: days[6], lastBonusDay: days[6],
       logsCount: 7, reflectionsCount: 0, badges: ['first_log'], capDay: null, capCounts: {},
-    }),
+    }, progress)),
   };
 }
 
@@ -94,12 +100,31 @@ const REFLECTION_CONTENT = {
 
 module.exports = {
   buildSeed,
-  // localStorageへデモデータを注入(アプリ読込前に実行される)
-  async seedStorage(ctx) {
-    const seed = buildSeed();
-    await ctx.addInitScript((data) => {
-      for (const [k, v] of Object.entries(data)) localStorage.setItem(k, v);
-    }, seed);
+  TITLES,
+  REFLECTION_CONTENT,
+  // localStorageへデモデータを注入(アプリ読込前に実行される)。
+  // clockOffsetDaysを渡すとアプリ内のDateも同じだけ進める(週の範囲表示を録画設定に合わせる)
+  async seedStorage(ctx, opts = {}) {
+    const seed = buildSeed(opts);
+    const offsetMs = (opts.clockOffsetDays || 0) * 86400000;
+    await ctx.addInitScript(({ data, offsetMs }) => {
+      // 注入は初回のみ(ページ遷移のたびに再実行されるため、録画中の状態変化を巻き戻さない)
+      if (!localStorage.getItem('bridge-daily:__seeded')) {
+        for (const [k, v] of Object.entries(data)) localStorage.setItem(k, v);
+        localStorage.setItem('bridge-daily:__seeded', '1');
+      }
+      if (offsetMs) {
+        const RealDate = Date;
+        class FakeDate extends RealDate {
+          constructor(...args) {
+            if (args.length === 0) super(RealDate.now() + offsetMs);
+            else super(...args);
+          }
+          static now() { return RealDate.now() + offsetMs; }
+        }
+        window.Date = FakeDate;
+      }
+    }, { data: seed, offsetMs });
   },
   // AIバックエンド(Supabase)のスタブ。kindとlabelに応じて下書きを返す
   async stubBackend(ctx) {
