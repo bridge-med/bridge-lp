@@ -133,7 +133,7 @@
 
   function confetti() {
     try {
-      var colors = ['#A85D7C', '#7FA396', '#8894BC', '#D9A94B', '#D999A9'];
+      var colors = ['#16233E', '#24365C', '#8B9BBC', '#A98F63', '#EAE2D3'];
       for (var i = 0; i < 14; i++) {
         var dot = document.createElement('div');
         dot.className = 'confetti-dot';
@@ -158,25 +158,25 @@
     var m = new Date().getMonth() + 1;
     if (m >= 3 && m <= 5) {
       // 春: 舞う桜の花びら
-      return '<ellipse cx="16" cy="18" rx="4" ry="2.6" fill="#EFB8C8" transform="rotate(-25 16 18)"/>' +
-        '<ellipse cx="96" cy="30" rx="3.4" ry="2.2" fill="#EFB8C8" transform="rotate(20 96 30)"/>' +
-        '<ellipse cx="88" cy="12" rx="3" ry="2" fill="#F5CDD9" transform="rotate(-10 88 12)"/>';
+      return '<ellipse cx="16" cy="18" rx="4" ry="2.6" fill="#F2EADB" transform="rotate(-25 16 18)"/>' +
+        '<ellipse cx="96" cy="30" rx="3.4" ry="2.2" fill="#F2EADB" transform="rotate(20 96 30)"/>' +
+        '<ellipse cx="88" cy="12" rx="3" ry="2" fill="#EAE2D3" transform="rotate(-10 88 12)"/>';
     }
     if (m >= 6 && m <= 8) {
       // 夏: 頭の上に小さな若葉
-      return '<path d="M55 12 q-1 -7 -7 -9 q7 -1 9 6" fill="#7FA396"/>' +
-        '<path d="M57 9 q3 -6 9 -6 q-3 6 -8 8" fill="#A3C2B5"/>' +
-        '<path d="M55 15 q1 -4 2 -6" stroke="#587F71" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
+      return '<path d="M55 12 q-1 -7 -7 -9 q7 -1 9 6" fill="#16233E"/>' +
+        '<path d="M57 9 q3 -6 9 -6 q-3 6 -8 8" fill="#8B9BBC"/>' +
+        '<path d="M55 15 q1 -4 2 -6" stroke="#24365C" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
     }
     if (m >= 9 && m <= 11) {
       // 秋: 足元に落ち葉
-      return '<ellipse cx="15" cy="90" rx="5" ry="3" fill="#D98E4A" transform="rotate(-30 15 90)"/>' +
-        '<ellipse cx="97" cy="93" rx="4" ry="2.5" fill="#C97B3D" transform="rotate(25 97 93)"/>';
+      return '<ellipse cx="15" cy="90" rx="5" ry="3" fill="#A98F63" transform="rotate(-30 15 90)"/>' +
+        '<ellipse cx="97" cy="93" rx="4" ry="2.5" fill="#8B7250" transform="rotate(25 97 93)"/>';
     }
     // 冬: あたたかいマフラー(垂れは左側・マグと重ねない)
-    return '<path d="M33 57 q22 10 44 0 l-1 7 q-21 9 -42 0 Z" fill="#C0574A"/>' +
-      '<rect x="30" y="60" width="8" height="16" rx="3" fill="#C0574A"/>' +
-      '<path d="M31 66 h6 M31 71 h6" stroke="#A94537" stroke-width="1.4"/>';
+    return '<path d="M33 57 q22 10 44 0 l-1 7 q-21 9 -42 0 Z" fill="#A98F63"/>' +
+      '<rect x="30" y="60" width="8" height="16" rx="3" fill="#A98F63"/>' +
+      '<path d="M31 66 h6 M31 71 h6" stroke="#8B7250" stroke-width="1.4"/>';
   }
 
   // ぽて(柴犬風のゆるい回復係)。mood: 'normal' | 'happy' | 'sleepy'
@@ -184,42 +184,42 @@
     if (!Store.settings().showPote) return '';
     var eyes;
     if (mood === 'happy') {
-      eyes = '<path d="M39 46 q4 -5 8 0" stroke="#46372B" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
-             '<path d="M61 46 q4 -5 8 0" stroke="#46372B" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+      eyes = '<path d="M39 46 q4 -5 8 0" stroke="#1B1B1E" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
+             '<path d="M61 46 q4 -5 8 0" stroke="#1B1B1E" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
     } else if (mood === 'sleepy') {
-      eyes = '<path d="M39 47 q4 3 8 0" stroke="#46372B" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
-             '<path d="M61 47 q4 3 8 0" stroke="#46372B" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+      eyes = '<path d="M39 47 q4 3 8 0" stroke="#1B1B1E" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+             '<path d="M61 47 q4 3 8 0" stroke="#1B1B1E" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
     } else {
-      eyes = '<circle cx="43" cy="46" r="3" fill="#46372B"/><circle cx="65" cy="46" r="3" fill="#46372B"/>';
+      eyes = '<circle cx="43" cy="46" r="3" fill="#1B1B1E"/><circle cx="65" cy="46" r="3" fill="#1B1B1E"/>';
     }
     return '' +
       '<svg viewBox="0 0 110 102" role="img" aria-label="ぽて">' +
       // 小さなラグ
-      '<ellipse cx="55" cy="94" rx="40" ry="6" fill="#7FA396" opacity="0.28"/>' +
+      '<ellipse cx="55" cy="94" rx="40" ry="6" fill="#16233E" opacity="0.28"/>' +
       // 体
-      '<ellipse cx="55" cy="72" rx="27" ry="22" fill="#E8B478"/>' +
-      '<ellipse cx="55" cy="78" rx="17" ry="13" fill="#F8ECD7"/>' +
+      '<ellipse cx="55" cy="72" rx="27" ry="22" fill="#CDBEA2"/>' +
+      '<ellipse cx="55" cy="78" rx="17" ry="13" fill="#FBFAF7"/>' +
       // 前足
-      '<ellipse cx="40" cy="88" rx="8" ry="5" fill="#E8B478"/>' +
-      '<ellipse cx="70" cy="88" rx="8" ry="5" fill="#E8B478"/>' +
+      '<ellipse cx="40" cy="88" rx="8" ry="5" fill="#CDBEA2"/>' +
+      '<ellipse cx="70" cy="88" rx="8" ry="5" fill="#CDBEA2"/>' +
       // しっぽ
-      '<circle cx="84" cy="70" r="9" fill="#E8B478"/><circle cx="86" cy="68" r="5" fill="#F8ECD7"/>' +
+      '<circle cx="84" cy="70" r="9" fill="#CDBEA2"/><circle cx="86" cy="68" r="5" fill="#FBFAF7"/>' +
       // 耳
-      '<path d="M30 25 L40 9 L48 23 Z" fill="#E8B478"/><path d="M35 22 L40 14 L44 21 Z" fill="#E7A091"/>' +
-      '<path d="M80 25 L70 9 L62 23 Z" fill="#E8B478"/><path d="M75 22 L70 14 L66 21 Z" fill="#E7A091"/>' +
+      '<path d="M30 25 L40 9 L48 23 Z" fill="#CDBEA2"/><path d="M35 22 L40 14 L44 21 Z" fill="#A98F63"/>' +
+      '<path d="M80 25 L70 9 L62 23 Z" fill="#CDBEA2"/><path d="M75 22 L70 14 L66 21 Z" fill="#A98F63"/>' +
       // 顔
-      '<circle cx="55" cy="41" r="26" fill="#E8B478"/>' +
-      '<ellipse cx="55" cy="51" rx="15" ry="12" fill="#F8ECD7"/>' +
+      '<circle cx="55" cy="41" r="26" fill="#CDBEA2"/>' +
+      '<ellipse cx="55" cy="51" rx="15" ry="12" fill="#FBFAF7"/>' +
       eyes +
-      '<ellipse cx="54" cy="51" rx="3.4" ry="2.6" fill="#46372B"/>' +
-      '<path d="M54 54 q0 4 -4 5 M54 54 q0 4 4 5" stroke="#46372B" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="35" cy="52" r="4" fill="#EFB8AC" opacity="0.8"/>' +
-      '<circle cx="75" cy="52" r="4" fill="#EFB8AC" opacity="0.8"/>' +
+      '<ellipse cx="54" cy="51" rx="3.4" ry="2.6" fill="#1B1B1E"/>' +
+      '<path d="M54 54 q0 4 -4 5 M54 54 q0 4 4 5" stroke="#1B1B1E" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="35" cy="52" r="4" fill="#F2EADB" opacity="0.8"/>' +
+      '<circle cx="75" cy="52" r="4" fill="#F2EADB" opacity="0.8"/>' +
       // マグカップ(クローバー入り)
-      '<rect x="46" y="63" width="18" height="14" rx="4" fill="#7FA396"/>' +
-      '<path d="M64 66 q6 2 0 8" stroke="#7FA396" stroke-width="3" fill="none"/>' +
-      '<circle cx="53" cy="69" r="1.7" fill="#F8ECD7"/><circle cx="57" cy="69" r="1.7" fill="#F8ECD7"/><circle cx="55" cy="72" r="1.7" fill="#F8ECD7"/>' +
-      '<path d="M51 59 q1 -3 0 -5 M57 59 q1 -3 0 -5" stroke="#C9B08A" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+      '<rect x="46" y="63" width="18" height="14" rx="4" fill="#16233E"/>' +
+      '<path d="M64 66 q6 2 0 8" stroke="#16233E" stroke-width="3" fill="none"/>' +
+      '<circle cx="53" cy="69" r="1.7" fill="#FBFAF7"/><circle cx="57" cy="69" r="1.7" fill="#FBFAF7"/><circle cx="55" cy="72" r="1.7" fill="#FBFAF7"/>' +
+      '<path d="M51 59 q1 -3 0 -5 M57 59 q1 -3 0 -5" stroke="#B6B3AB" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
       seasonAccessory() +
       '</svg>';
   }
@@ -228,10 +228,10 @@
   function plantSvg() {
     return '' +
       '<svg viewBox="0 0 30 42" aria-hidden="true">' +
-      '<path d="M15 24 q-1 -10 -8 -13 q8 0 10 9 q2 -12 11 -14 q-7 6 -9 18" fill="none" stroke="#7FA396" stroke-width="2.2" stroke-linecap="round"/>' +
-      '<circle cx="7" cy="11" r="2.4" fill="#7FA396"/><circle cx="28" cy="6" r="2.4" fill="#A3C2B5"/>' +
-      '<path d="M8 26 h14 l-2 13 h-10 Z" fill="#C9A87F"/>' +
-      '<rect x="7" y="24" width="16" height="4" rx="2" fill="#B8916A"/>' +
+      '<path d="M15 24 q-1 -10 -8 -13 q8 0 10 9 q2 -12 11 -14 q-7 6 -9 18" fill="none" stroke="#16233E" stroke-width="2.2" stroke-linecap="round"/>' +
+      '<circle cx="7" cy="11" r="2.4" fill="#16233E"/><circle cx="28" cy="6" r="2.4" fill="#8B9BBC"/>' +
+      '<path d="M8 26 h14 l-2 13 h-10 Z" fill="#EAE2D3"/>' +
+      '<rect x="7" y="24" width="16" height="4" rx="2" fill="#B6B3AB"/>' +
       '</svg>';
   }
 
@@ -239,16 +239,16 @@
   function machineSvg() {
     return '' +
       '<svg viewBox="0 0 90 112" role="img" aria-label="ガチャマシン">' +
-      '<rect x="16" y="58" width="58" height="44" rx="10" fill="#A85D7C"/>' +
-      '<rect x="16" y="58" width="58" height="10" fill="#8E4A66"/>' +
-      '<circle cx="45" cy="80" r="9" fill="#F8ECD7"/><rect x="41" y="76" width="8" height="8" rx="2" fill="#8E4A66"/>' +
-      '<rect x="30" y="94" width="30" height="8" rx="4" fill="#6E3850"/>' +
-      '<circle cx="45" cy="34" r="26" fill="#FBF9FA" stroke="#CFC0CD" stroke-width="2.5"/>' +
-      '<circle cx="36" cy="30" r="8" fill="#7FA396"/>' +
-      '<circle cx="52" cy="26" r="8" fill="#D999A9"/>' +
-      '<circle cx="48" cy="42" r="8" fill="#8894BC"/>' +
-      '<circle cx="34" cy="44" r="7" fill="#D9A94B"/>' +
-      '<rect x="38" y="2" width="14" height="8" rx="3" fill="#8E4A66"/>' +
+      '<rect x="16" y="58" width="58" height="44" rx="10" fill="#16233E"/>' +
+      '<rect x="16" y="58" width="58" height="10" fill="#24365C"/>' +
+      '<circle cx="45" cy="80" r="9" fill="#FBFAF7"/><rect x="41" y="76" width="8" height="8" rx="2" fill="#24365C"/>' +
+      '<rect x="30" y="94" width="30" height="8" rx="4" fill="#24365C"/>' +
+      '<circle cx="45" cy="34" r="26" fill="#FFFFFF" stroke="#EAE2D3" stroke-width="2.5"/>' +
+      '<circle cx="36" cy="30" r="8" fill="#16233E"/>' +
+      '<circle cx="52" cy="26" r="8" fill="#A98F63"/>' +
+      '<circle cx="48" cy="42" r="8" fill="#8B9BBC"/>' +
+      '<circle cx="34" cy="44" r="7" fill="#24365C"/>' +
+      '<rect x="38" y="2" width="14" height="8" rx="3" fill="#24365C"/>' +
       '</svg>';
   }
 
@@ -256,8 +256,8 @@
   function capsuleSvg() {
     return '' +
       '<svg viewBox="0 0 60 60" role="img" aria-label="カプセル">' +
-      '<path d="M6 30 a24 24 0 0 1 48 0 Z" fill="#FBF9FA" stroke="#CFC0CD" stroke-width="2"/>' +
-      '<path d="M6 30 a24 24 0 0 0 48 0 Z" fill="#A85D7C"/>' +
+      '<path d="M6 30 a24 24 0 0 1 48 0 Z" fill="#FFFFFF" stroke="#EAE2D3" stroke-width="2"/>' +
+      '<path d="M6 30 a24 24 0 0 0 48 0 Z" fill="#16233E"/>' +
       '<circle cx="22" cy="20" r="5" fill="#FFF" opacity="0.6"/>' +
       '</svg>';
   }

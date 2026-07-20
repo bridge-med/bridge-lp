@@ -1,5 +1,5 @@
 /* いったん保留 — Service Worker (簡易オフラインキャッシュ / PWA) */
-var CACHE = 'ittan-horyu-v1';
+var CACHE = 'ittan-horyu-v2';
 var ASSETS = [
   './',
   './index.html',

@@ -143,7 +143,7 @@ const MOYA_TYPES = {
     name: '評価されないモヤモヤ',
     typeName: '頑張りが見えない「評価されないモヤモヤ」',
     shareName: '頑張りが見えない 評価されないモヤモヤ',
-    emblem: '🏅',
+    emblem: '<svg class="mk" viewBox="0 0 40 40" fill="none" stroke-width="2" stroke-linecap="round"><path class="n" d="M9 31 L26 14"/><circle class="sd" cx="31" cy="9" r="3"/></svg>',
     catch: 'あなたは、ちゃんと頑張っているからこそ、見てもらえないことに疲れやすいタイプです。',
     description: 'あなたのモヤモヤは、努力や成果が正しく伝わっていない感覚から来ているかもしれません。自分ではかなり頑張っているのに、それが評価や役割、給与、感謝につながらないと、少しずつ疲れがたまっていきます。',
     values: [
@@ -172,7 +172,7 @@ const MOYA_TYPES = {
     name: '振り回されモヤモヤ',
     typeName: '曖昧さに疲れる「振り回されモヤモヤ」',
     shareName: '曖昧さに疲れる 振り回されモヤモヤ',
-    emblem: '🌀',
+    emblem: '<svg class="mk" viewBox="0 0 40 40" fill="none" stroke-width="2" stroke-linecap="round"><path class="n" d="M7 22 C12 12,18 30,24 20 S32 12,33 20"/><circle class="sd" cx="20" cy="21" r="3"/></svg>',
     catch: 'あなたは、方針や優先順位が見えないまま動かされることに疲れやすいタイプです。',
     description: 'あなたのモヤモヤは、急な依頼や方針変更、曖昧な指示に振り回される感覚から来ているかもしれません。頑張ること自体が嫌なのではなく、何を優先すればいいのかわからないまま動かされることに疲れやすいタイプです。',
     values: [
@@ -201,7 +201,7 @@ const MOYA_TYPES = {
     name: '成長止まりモヤモヤ',
     typeName: 'このままでいいのか不安な「成長止まりモヤモヤ」',
     shareName: 'このままでいいのか不安な 成長止まりモヤモヤ',
-    emblem: '🌱',
+    emblem: '<svg class="mk" viewBox="0 0 40 40" fill="none" stroke-width="2" stroke-linecap="round"><path class="n" d="M20 32 L20 21"/><path class="s" d="M20 21 L12 12 M20 21 L28 12"/></svg>',
     catch: 'あなたは、仕事をこなせるからこそ、成長実感のなさに不安を感じやすいタイプです。',
     description: 'あなたのモヤモヤは、日々の仕事ができるようになってきた一方で、「このまま続けて、自分はちゃんと成長できるのか」という不安から来ているかもしれません。今の仕事が嫌いというより、未来につながる実感が薄い状態です。',
     values: [
@@ -230,7 +230,7 @@ const MOYA_TYPES = {
     name: '人間関係モヤモヤ',
     typeName: '空気を読みすぎる「人間関係モヤモヤ」',
     shareName: '空気を読みすぎる 人間関係モヤモヤ',
-    emblem: '💬',
+    emblem: '<svg class="mk" viewBox="0 0 40 40" fill="none" stroke-width="2" stroke-linecap="round"><path class="n" d="M16 11 A9 9 0 0 0 16 29"/><path class="s" d="M24 11 A9 9 0 0 1 24 29"/></svg>',
     catch: 'あなたは、周りに気を配れるからこそ、言いたいことを飲み込みやすいタイプです。',
     description: 'あなたのモヤモヤは、職場の人間関係や空気を読みすぎることから来ているかもしれません。相手の反応を考えすぎたり、言いたいことを飲み込んだりして、気づかないうちに疲れがたまりやすいタイプです。',
     values: [
@@ -259,7 +259,7 @@ const MOYA_TYPES = {
     name: '忙しすぎモヤモヤ',
     typeName: '余白がなくなる「忙しすぎモヤモヤ」',
     shareName: '余白がなくなる 忙しすぎモヤモヤ',
-    emblem: '⏳',
+    emblem: '<svg class="mk" viewBox="0 0 40 40" fill="none" stroke-width="2" stroke-linecap="round"><path class="n" d="M12 11 L12 29 M18 11 L18 29 M24 11 L24 29"/><path class="s" d="M30 11 L30 29"/></svg>',
     catch: 'あなたは、忙しさそのものよりも、考える余白がなくなることに疲れやすいタイプです。',
     description: 'あなたのモヤモヤは、業務量の多さや時間に追われる感覚から来ているかもしれません。仕事を頑張る気持ちはあっても、常にバタバタしていると、丁寧に考える余裕や生活の余白が削られていきます。',
     values: [
@@ -288,7 +288,7 @@ const MOYA_TYPES = {
     name: '意味が見えないモヤモヤ',
     typeName: '目的が見えない「意味が見えないモヤモヤ」',
     shareName: '目的が見えない 意味が見えないモヤモヤ',
-    emblem: '🧭',
+    emblem: '<svg class="mk" viewBox="0 0 40 40" fill="none" stroke-width="2" stroke-linecap="round"><circle class="nc" cx="20" cy="20" r="10"/><circle class="sd" cx="20" cy="20" r="3.2"/></svg>',
     catch: 'あなたは、ただ作業するだけではなく、仕事の意味を感じたいタイプです。',
     description: 'あなたのモヤモヤは、自分の仕事が何につながっているのか見えにくいことから来ているかもしれません。作業量が多いことよりも、「これは誰のために、何のためにやっているのか」が見えないと、不完全燃焼になりやすいタイプです。',
     values: [
@@ -316,7 +316,7 @@ const MOYA_TYPES = {
 
 // 3タイプ以上が同点のときに使う「複合モヤモヤ型」の共通文言
 const MOYA_COMPOSITE = {
-  emblem: '🧩',
+  emblem: '<svg class="mk" viewBox="0 0 40 40" fill="none" stroke-width="2" stroke-linecap="round"><path class="n" d="M9 31 L31 9 M9 9 L31 31 M20 7 L20 33"/><circle class="sd" cx="20" cy="20" r="3.4"/></svg>',
   typeName: '複合モヤモヤ型',
   catch: 'あなたのモヤモヤは、ひとつの原因に絞れないタイプです。',
   description: 'あなたのモヤモヤは、複数の違和感が少しずつ重なっているのかもしれません。どれかひとつが大きくつらいというより、いくつかのズレが同時に起きている状態です。まずは、特に気になっているものから順番に見ていくと、整理しやすくなります。'
