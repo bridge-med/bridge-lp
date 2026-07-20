@@ -1,5 +1,6 @@
-// 台本 — キャリアログ(リリース済みiOSアプリのWeb書き出し) ショート動画
-// T(秒)が唯一のタイムライン情報源。ナレーション・テロップはeditor作(2026-07-20)。
+// 台本 — キャリアログ(リリース済みiOSアプリのWeb書き出し) ショート動画 v2
+// 社長方針(2026-07-20): 声なし・BGMなし(TikTok側で音源を付ける)・カット詰め・語りテロップ。
+// テロップがナレーションを兼ねる。文言はeditor台本v1のフレーズを基に現場で分割(公開前にeditor照合)。
 //
 // 注意(誠実の条項):
 // - アプリのキャリア変換は本番ではAIバックエンド(Supabase)を呼ぶ。録画環境は外部
@@ -27,32 +28,30 @@ module.exports = {
   name: 'careerlog_short',
   page: '/bridge-lp/daily-app/',
   serverRoot: '..', // Expo書き出しのbaseUrl(/bridge-lp/daily-app)に合わせ、リポジトリの親をdocrootにする
+  bgm: false,       // TikTok等の投稿時にアプリ内音源を付けるため焼き込まない
 
   viewport: { width: 540, height: 960 },
 
-  // セグメント開始時刻(秒)
+  // マイルストーン(秒)。声なしのため純粋に画の振付け
   T: {
-    seg0: 0.2,   // ホーム(フックは0秒から)
-    seg1: 7.0,   // ログを書く(入力)
-    seg2: 15.0,  // タグ・保存→記録が積み上がる
-    seg3: 22.0,  // キャリア変換(オチ)
-    seg4: 28.4,  // エンドカード
-    end: 33.4,
+    seg0: 0.2,   // ホーム+フック
+    seg1: 3.8,   // ログを書く(入力)
+    seg2: 10.3,  // タグ・保存
+    seg3: 16.5,  // キャリア変換(オチ)
+    seg4: 22.5,  // エンドカード
+    end: 27.0,
   },
 
-  // ナレーション(Style-Bert-VITS2で音声化される)
-  lines: [
-    '毎日ちゃんと働いているのに、その一日は、言葉として残らない。',
-    'キャリアログ。今日やったことを一行書くだけで、職務経歴書や面接の材料になります。',
-    'タグを付けて保存すれば、日々の記録が、静かに積み上がっていきます。',
-    '溜めたログは、職務経歴書風の文章に、そのまま変換できます。',
-    '気になったら、キャリアログで検索してみてください。',
-  ],
+  // 声なし(テロップが語りを兼ねる)。v1のナレーションはSNS投稿文の素材として台帳へ
+  lines: [],
 
+  // 語りテロップ(cap0はフック=大・中央上、以降は下部で画に同期)
   captions: [
     '毎日働いているのに、\nその一日は言葉に残らない',
     'キャリアログ — 今日を一行、書くだけ',
+    'タグを付けて、保存',
     '書いた記録が、積み上がる',
+    '溜めたログを —',
     '職務経歴書風に、そのまま変換',
     '',
   ],
@@ -81,40 +80,46 @@ module.exports = {
     await page.getByText('今日の仕事ログを書く').first().waitFor();
 
     await cap(0); // 1フレーム目からフック
-    await until(T.seg1 - 0.5);
 
     // ログを書く
-    await cap(1);
+    await until(T.seg1);
     await page.getByText('今日の仕事ログを書く').first().tap();
     await page.locator('textarea').first().waitFor();
-    await until(T.seg1 + 1.2);
-    await page.locator('textarea').first().pressSequentially(LOG_TEXT, { delay: 95 });
+    await cap(1);
+    await until(T.seg1 + 1.0);
+    await page.locator('textarea').first().pressSequentially(LOG_TEXT, { delay: 90 });
 
-    // タグ→保存→ホーム(積み上がりの反応)
-    await until(T.seg2); await cap(2);
+    // タグ→保存→ホームの反応
+    await until(T.seg1 + 4.6);
     const tag = page.getByText('現場調整').first();
     await tag.scrollIntoViewIfNeeded();
-    await until(T.seg2 + 0.6);
+    await until(T.seg1 + 5.4);
     await tag.tap({ force: true });
+    await until(T.seg2); await cap(2);
     const save = page.getByText('保存する').last();
     await save.scrollIntoViewIfNeeded();
-    await until(T.seg2 + 1.6);
+    await until(T.seg2 + 0.9);
     await save.tap();
-    await until(T.seg2 + 3.6);
+
     // 記録タブ(タブ押下はWeb書き出しで反応しないため直接遷移)
+    await until(T.seg2 + 2.7);
     await page.goto(base + '/timeline', { waitUntil: 'domcontentloaded' });
+    await page.getByText('記録').first().waitFor();
+    await cap(3);
 
     // キャリア変換 = オチ
-    await until(T.seg3); await cap(3);
+    await until(T.seg3);
     await page.goto(base + '/career', { waitUntil: 'domcontentloaded' });
     await page.getByText('職務経歴書風').first().waitFor();
-    await until(T.seg3 + 1.6);
+    await cap(4);
+    await until(T.seg3 + 2.1);
     await page.getByText('歩行が不安定な患者さん').first().tap({ force: true });
-    await until(T.seg3 + 2.4);
+    await until(T.seg3 + 2.8);
     const gen = page.getByText('生成する（2コイン）');
     await gen.scrollIntoViewIfNeeded();
     await gen.tap();
-    // 生成結果を見せる(スタブ応答なので即時)
+    await until(T.seg3 + 3.6);
+    await cap(5);
     await until(T.seg3 + 4.2);
     await page.mouse.wheel(0, 260);
   },

@@ -19,9 +19,20 @@ for off in "${OFFSETS[@]}"; do
   LABELS+="[a$n]"
   n=$((n+1))
 done
-INPUTS+=(-i "$WORK/bgm.wav")
-FILTERS+="[$((n+1))]volume=0.16[bg];"
-FILTERS+="${LABELS}[bg]amix=inputs=$((n+1)):normalize=0,alimiter=limit=0.89[aout];"
+STREAMS=$n
+if [ -f "$WORK/bgm.wav" ]; then
+  INPUTS+=(-i "$WORK/bgm.wav")
+  FILTERS+="[$((n+1))]volume=0.16[bg];"
+  LABELS+="[bg]"
+  STREAMS=$((n+1))
+fi
+if [ "$STREAMS" -gt 0 ]; then
+  FILTERS+="${LABELS}amix=inputs=$STREAMS:normalize=0,alimiter=limit=0.89[aout];"
+else
+  # 完全無音でも音声トラックは載せる(プラットフォーム互換)
+  INPUTS+=(-f lavfi -t "$END" -i anullsrc=r=44100:cl=mono)
+  FILTERS+="[1]acopy[aout];"
+fi
 # 全編にわたる知覚できない速さのプッシュイン(29秒で1.00→1.06)。静止画面の間ももたせる
 FILTERS+="[0:v]fps=30,scale=1188:2112:flags=lanczos,"
 FILTERS+="zoompan=z='min(zoom+0.00007,1.06)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=30[vout]"

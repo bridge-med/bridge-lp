@@ -84,6 +84,7 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
           animation:vvrip .5s ease-out forwards}
         @keyframes vvrip{to{transform:translate(-50%,-50%) scale(1.6);opacity:0}}
         #vv-cap{position:fixed;left:50%;bottom:18%;transform:translateX(-50%);
+          pointer-events:none;
           width:max-content;max-width:80%;padding:10px 20px;border-radius:10px;z-index:99997;
           background:rgba(27,27,30,.85);color:#fff;font-family:'Noto Sans JP',sans-serif;
           font-weight:700;font-size:22px;line-height:1.55;text-align:center;
