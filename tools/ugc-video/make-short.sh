@@ -21,12 +21,36 @@ readarray -t META < <(node -e '
   console.log(keys.map(k => s.T[k]).join(" "));
   console.log(s.serverRoot || ".");
   console.log(s.bgm === false ? "off" : "on");
+  console.log(JSON.stringify(s.voice || null));
   (s.lines || []).forEach(l => console.log(l));
 ')
 NAME="${META[0]}"; END="${META[1]}"; OFFSETS="${META[2]}"
 SERVER_ROOT="$(realpath "$SITE_ROOT/${META[3]}")"
 BGM="${META[4]}"
-LINES=("${META[@]:5}")
+VOICE_JSON="${META[5]}"
+LINES=("${META[@]:6}")
+
+# 台本の声宣言を反映(例: voice: { engine: "voicevox", speaker: 3 })
+if [ "$VOICE_JSON" != "null" ]; then
+  ENGINE=$(python3 -c "import json;print(json.loads('$VOICE_JSON').get('engine',''))")
+  SPK=$(python3 -c "import json;print(json.loads('$VOICE_JSON').get('speaker',''))")
+  [ -n "$ENGINE" ] && export UGC_TTS="$ENGINE"
+  [ -n "$SPK" ] && export VOICEVOX_SPEAKER="$SPK"
+fi
+
+# VOICEVOXエンジンが置かれていて未起動なら立ち上げる(導入はsetup.sh末尾の注記参照)
+if [ "${UGC_TTS:-}" = "voicevox" ] && ! curl -fsS -m 2 "${VOICEVOX_URL:-http://127.0.0.1:50021}/version" >/dev/null 2>&1; then
+  if [ -x "$WORK/linux-cpu-x64/run" ]; then
+    echo "== VOICEVOXエンジン起動 =="
+    "$WORK/linux-cpu-x64/run" --host 127.0.0.1 --port 50021 > "$WORK/vv.log" 2>&1 &
+    for i in $(seq 1 30); do
+      curl -fsS -m 2 http://127.0.0.1:50021/version >/dev/null 2>&1 && break
+      sleep 1
+    done
+  else
+    echo "VOICEVOXエンジンが見つからない($WORK/linux-cpu-x64)" >&2; exit 1
+  fi
+fi
 
 if [ ${#LINES[@]} -gt 0 ]; then
   echo "== ナレーション音声化 (${#LINES[@]}文) =="
