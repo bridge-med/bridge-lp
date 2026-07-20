@@ -510,7 +510,7 @@ ${breadcrumbs(root, [[PRODUCT.shortTitle, null]])}
     <div class="side-box">
       <div class="h">この商品について</div>
       <dl>
-        <dt>収録</dt><dd>${PRODUCT.items.length}ファイル(Excel 9・Word 5・PDF 3)</dd>
+        <dt>収録</dt><dd>${PRODUCT.items.length}ファイル(Excel 9・Word 5・PDF 5)</dd>
         <dt>形式</dt><dd>Excel・Word</dd>
         <dt>バージョン</dt><dd>${esc(PRODUCT.version)}</dd>
         <dt>更新</dt><dd>${dateJp(PRODUCT.updatedAt)}</dd>
