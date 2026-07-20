@@ -13,7 +13,7 @@ LINES=("$@")
 
 RATE="${UGC_TTS_RATE:-1.0}"                       # 話速。1.0が標準、上げると速い
 VV_URL="${VOICEVOX_URL:-http://127.0.0.1:50021}"
-VV_SPEAKER="${VOICEVOX_SPEAKER:-2}"               # 2 = 四国めたん(ノーマル)
+VV_SPEAKER="${VOICEVOX_SPEAKER:-3}"               # 3 = ずんだもん(ノーマル)。社長決定の既定声
 SBV2_DIR="${UGC_SBV2_MODEL:-$PWD/voices/sbv2}"
 SBV2_PY="$PWD/work/venv/bin/python"          # setup.shが作るvenv(無ければsystem python)
 [ -x "$SBV2_PY" ] || SBV2_PY=python3

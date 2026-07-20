@@ -108,6 +108,7 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
           background:#6b6b6b;right:-7px;bottom:-2px;transform:rotate(45deg);border-radius:2px}
         #vv-end .t3{margin-top:20px;font-size:12px;font-weight:700;color:#1e1e1e;
           border:1.5px solid #A98F63;border-radius:999px;padding:7px 20px;letter-spacing:.18em}
+        #vv-end .t4{margin-top:14px;font-size:10px;font-weight:500;color:#8a8a8a}
       `;
       document.head.appendChild(style);
       const cap = document.createElement('div');
@@ -179,6 +180,7 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
         <div class="t2">${e.sub}</div>
         ${e.search ? `<div class="t2b"><span class="mag"></span>${e.search}</div>` : ''}
         <div class="t3">${e.badge}</div>
+        ${e.credit ? `<div class="t4">${e.credit}</div>` : ''}
       </div>`;
     document.body.appendChild(end);
     requestAnimationFrame(() => { end.style.opacity = '1'; });
