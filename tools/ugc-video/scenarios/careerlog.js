@@ -1,6 +1,6 @@
-// 台本 — キャリアログ(リリース済みiOSアプリのWeb書き出し) ショート動画 v2
-// 社長方針(2026-07-20): 声なし・BGMなし(TikTok側で音源を付ける)・カット詰め・語りテロップ。
-// テロップがナレーションを兼ねる。文言はeditor台本v1のフレーズを基に現場で分割(公開前にeditor照合)。
+// 台本 — キャリアログ(リリース済みiOSアプリのWeb書き出し) ショート動画 v3
+// 社長方針(2026-07-20): ナレーション=VOICEVOXずんだもん(既定声)・BGMなし・語りテロップは標準語のまま
+// (editorの二層構造提案: 音=軽い/字=静か)。ナレーション5文はeditor確定稿(勧誘形の締め)。
 //
 // 注意(誠実の条項):
 // - アプリのキャリア変換は本番ではAIバックエンド(Supabase)を呼ぶ。録画環境は外部
@@ -31,19 +31,26 @@ module.exports = {
   bgm: false,       // TikTok等の投稿時にアプリ内音源を付けるため焼き込まない
 
   viewport: { width: 540, height: 960 },
+  voice: { engine: 'voicevox', speaker: 3 }, // ずんだもん(ノーマル)
 
-  // マイルストーン(秒)。声なしのため純粋に画の振付け
+  // セグメント開始時刻(秒)
   T: {
     seg0: 0.2,   // ホーム+フック
-    seg1: 3.8,   // ログを書く(入力)
-    seg2: 10.3,  // タグ・保存
-    seg3: 16.5,  // キャリア変換(オチ)
-    seg4: 22.5,  // エンドカード
-    end: 27.0,
+    seg1: 6.8,   // ログを書く(入力)
+    seg2: 14.2,  // タグ・保存
+    seg3: 20.4,  // キャリア変換(オチ)
+    seg4: 26.3,  // エンドカード
+    end: 31.5,
   },
 
-  // 声なし(テロップが語りを兼ねる)。v1のナレーションはSNS投稿文の素材として台帳へ
-  lines: [],
+  // 声=VOICEVOX ずんだもん(社長方針 2026-07-20)。テロップは標準語のまま二層で担う。
+  lines: [
+    '毎日ちゃんと働いているのに、その一日は言葉に残らないのだ。',
+    'キャリアログ。今日やったことを一行書くだけで、職務経歴書や面接の材料になるのだ。',
+    'タグを付けて保存すれば、日々の記録が静かに積み上がっていくのだ。',
+    'ためたログは、職務経歴書風にそのまま変換できるのだ。',
+    '気になったら、キャリアログで検索してみてほしいのだ。',
+  ],
 
   // 語りテロップ(cap0はフック=大・中央上、以降は下部で画に同期)
   captions: [
@@ -62,6 +69,7 @@ module.exports = {
     sub: '働いた記録を、キャリアの言葉に・iPhoneアプリ',
     search: 'キャリアログ', // App Store検索(正式名の社長確認待ち)
     badge: 'BRIDGE',
+    credit: 'VOICEVOX:ずんだもん',
   },
 
   // キャリア変換のAIバックエンドをスタブ(録画環境は外部遮断のため)
@@ -82,7 +90,7 @@ module.exports = {
     await cap(0); // 1フレーム目からフック
 
     // ログを書く
-    await until(T.seg1);
+    await until(T.seg1 - 0.4);
     await page.getByText('今日の仕事ログを書く').first().tap();
     await page.locator('textarea').first().waitFor();
     await cap(1);
@@ -90,10 +98,10 @@ module.exports = {
     await page.locator('textarea').first().pressSequentially(LOG_TEXT, { delay: 90 });
 
     // タグ→保存→ホームの反応
-    await until(T.seg1 + 4.6);
+    await until(T.seg1 + 5.2);
     const tag = page.getByText('現場調整').first();
     await tag.scrollIntoViewIfNeeded();
-    await until(T.seg1 + 5.4);
+    await until(T.seg1 + 6.0);
     await tag.tap({ force: true });
     await until(T.seg2); await cap(2);
     const save = page.getByText('保存する').last();
