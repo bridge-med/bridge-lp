@@ -31,8 +31,9 @@
       discovered: [],
       recent: [],
       lastRunAt: null, // 最後に「やってみた」した日時(ISO)
-      capsules: { day: '', count: CAPSULES_PER_DAY },
-      dailyFree: { day: '', used: false }, // 今日の1枚(1日1回、カプセル消費なしの抽選)
+      onboardedAt: null, // 初回オンボーディングを見終えた日時(ISO)。null=未完了
+      capsules: { day: '', count: CAPSULES_PER_DAY }, // 互換のため残すが、抽選の制限には使わない
+      dailyFree: { day: '', used: false }, // 互換のため残す(今は使わない)
       settings: { notifyEnabled: false, notifyTime: '21:00', showPote: true, sound: true, seasonal: true }
     };
   }
@@ -51,6 +52,7 @@
         discovered: Array.isArray(parsed.discovered) ? parsed.discovered.filter(validCardId) : d.discovered,
         recent: Array.isArray(parsed.recent) ? parsed.recent.filter(validCardId).slice(0, RECENT_MAX) : d.recent,
         lastRunAt: typeof parsed.lastRunAt === 'string' ? parsed.lastRunAt : null,
+        onboardedAt: typeof parsed.onboardedAt === 'string' ? parsed.onboardedAt : null,
         capsules: (parsed.capsules && typeof parsed.capsules.count === 'number' && typeof parsed.capsules.day === 'string')
           ? { day: parsed.capsules.day, count: Math.max(0, Math.min(CAPSULES_MAX, Math.round(parsed.capsules.count))) }
           : d.capsules,
@@ -61,6 +63,10 @@
       };
       // 旧バージョンのデータには lastRunAt がないので履歴から補完する
       if (!state.lastRunAt && state.history.length > 0) state.lastRunAt = state.history[0].at;
+      // マイグレーション: すでに履歴のある既存ユーザーには初回オンボーディングを出さない
+      if (!state.onboardedAt && state.history.length > 0) {
+        state.onboardedAt = state.history[state.history.length - 1].at || new Date().toISOString();
+      }
     } catch (e) {
       state = defaults(); // 壊れたデータは初期化にフォールバック
     }
@@ -112,10 +118,9 @@
     return !state.dailyFree.used;
   }
 
-  /** 今日まだガチャを引けるか(今日の1枚 or カプセル残あり) */
+  /** ガチャは何度でも引ける(利用制限は撤廃。互換のため関数は残す) */
   function canDraw() {
-    ensureDailyCapsules();
-    return !state.dailyFree.used || state.capsules.count > 0;
+    return true;
   }
 
   function capsuleCount() {
@@ -184,10 +189,7 @@
    */
   function draw(opts) {
     opts = opts || {};
-    ensureDailyCapsules();
-    // 今日最初の1回は「今日の1枚」としてカプセルを使わない
-    var useFree = !opts.free && !state.dailyFree.used;
-    if (!opts.free && !useFree && state.capsules.count <= 0) return null; // 今日のカプセル切れ
+    // 利用制限は撤廃。ガチャは何度でも引ける。
     var pool = D.CARDS.slice();
 
     if (opts.stateId) {
@@ -215,8 +217,6 @@
     // 状態選択時は「その状態で効いた実績のあるカード」を少しだけ優先する
     var card = pickWeighted(pool, opts.stateId);
 
-    if (useFree) state.dailyFree.used = true;      // 今日の1枚を使う
-    else if (!opts.free) state.capsules.count -= 1; // カプセルを1個使う
     // 出現したカードは図鑑で発見済みにし、直近リストへ積む
     if (state.discovered.indexOf(card.id) < 0) state.discovered.push(card.id);
     state.recent = [card.id].concat(state.recent.filter(function (id) { return id !== card.id; })).slice(0, RECENT_MAX);
@@ -418,6 +418,16 @@
     return out;
   }
 
+  /* ---- オンボーディング ---------------------------------------------------- */
+  function isOnboarded() { return !!state.onboardedAt; }
+  function markOnboarded() {
+    if (!state.onboardedAt) {
+      state.onboardedAt = new Date().toISOString();
+      save();
+      emit();
+    }
+  }
+
   /* ---- 設定 ---------------------------------------------------------------- */
   function updateSettings(patch) {
     state.settings = Object.assign({}, state.settings, patch || {});
@@ -470,6 +480,8 @@
     favoriteCards: favoriteCards,
     isDiscovered: isDiscovered,
     discoveredCount: discoveredCount,
+    isOnboarded: isOnboarded,
+    markOnboarded: markOnboarded,
     settings: function () { return Object.assign({}, state.settings); },
     updateSettings: updateSettings,
     resetAll: resetAll,

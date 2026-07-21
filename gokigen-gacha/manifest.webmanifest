@@ -1,13 +1,17 @@
 {
   "name": "ごきげん回復ガチャ",
   "short_name": "回復ガチャ",
-  "description": "疲れたときに押すだけ。今の自分にちょうどいい回復行動が出てくる。",
+  "description": "疲れた日の、あなたの味方。今の気分を選ぶと、今できる小さな回復を1つだけ提案します。",
+  "lang": "ja",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#FBFAF7",
   "theme_color": "#FBFAF7",
+  "categories": ["health", "lifestyle", "wellness"],
   "icons": [
-    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ]
 }

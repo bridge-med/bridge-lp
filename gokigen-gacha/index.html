@@ -3,13 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>ごきげん回復ガチャ — 疲れたときに押すだけ。</title>
-<meta name="description" content="疲れたとき、やる気が出ないときに、今の自分にちょうどいい小さな回復行動を1枚だけ提案するアプリ。頑張らせません。少し戻れたら十分です。">
-<meta name="robots" content="noindex">
-<meta property="og:title" content="ごきげん回復ガチャ — 疲れたときに押すだけ。">
-<meta property="og:description" content="今の自分にちょうどいい回復行動が出てくる、小さなセルフケアガチャ。">
+<title>ごきげん回復ガチャ — 疲れた日の、あなたの味方</title>
+<meta name="description" content="疲れているときに、考えなくても今できる小さな回復行動を1つだけ決めてくれるアプリ。今の気分を選んで引くだけ。頑張らせません。少し戻れたら十分です。">
+<link rel="canonical" href="https://bridge-med.github.io/bridge-lp/gokigen-gacha/">
+<meta property="og:title" content="ごきげん回復ガチャ — 疲れた日の、あなたの味方">
+<meta property="og:description" content="今の気分を選ぶと、今できる小さな回復を1つだけ提案します。ぴったりの回復を、ひとつだけ。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/gokigen-gacha/">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/products/thumbs/gokigen-gacha.webp">
+<meta property="og:image:alt" content="ごきげん回復ガチャ — ガチャマシンとマスコットのぽて">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:site_name" content="BRIDGE">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ごきげん回復ガチャ — 疲れた日の、あなたの味方">
+<meta name="twitter:description" content="今の気分を選ぶと、今できる小さな回復を1つだけ提案します。ぴったりの回復を、ひとつだけ。">
+<meta name="twitter:image" content="https://bridge-med.github.io/bridge-lp/images/products/thumbs/gokigen-gacha.webp">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBFAF7">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111521">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,7 +29,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app/styles.css?v=5">
+<link rel="stylesheet" href="app/styles.css?v=6">
 </head>
 <body>
 <div class="phone">
@@ -29,9 +37,16 @@
   <nav id="tabbar" class="tabbar" aria-label="メインナビゲーション"></nav>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="app/data.js?v=5"></script>
-<script src="app/store.js?v=5"></script>
-<script src="app/app.js?v=5"></script>
+<script src="app/data.js?v=6"></script>
+<script src="app/store.js?v=6"></script>
+<script src="app/app.js?v=6"></script>
 <script src="../shared/usage.js" defer></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* オフライン非対応でも動く */ });
+    });
+  }
+</script>
 </body>
 </html>
