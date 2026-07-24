@@ -12,6 +12,37 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/subpage.css">
+<style>
+/* RehaBoard 詳細ページ専用。
+ * 旧実装はモック内の色を inline style 属性に直書きしていた。inline は
+ * prefers-color-scheme からも [data-theme] からも上書きできず、ダーク実装の
+ * 妨げになるため、すべてクラス+トークンへ移した(憲法第22条)。 */
+
+/* 担当患者リストの4枚アラート — 緊急度は色相ではなく、
+ * 生成りの明度と藍の濃さによる1本のスケールで表す */
+.ra-alerts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+@media(max-width:640px){.ra-alerts{grid-template-columns:repeat(2,1fr)}}
+.ra-alert{padding:14px;border-radius:6px;text-align:center;border:1px solid var(--line)}
+.ra-alert .n{font:800 italic 24px/1 'Fraunces',serif}
+.ra-alert .l{font-size:10px;letter-spacing:0.04em;margin-top:4px}
+.ra-alert.lv-1{background:var(--paper-3);border-color:var(--navy);color:var(--navy);font-weight:800}
+.ra-alert.lv-2{background:var(--paper-3);color:var(--navy)}
+.ra-alert.lv-3{background:var(--paper-2);color:var(--blue)}
+.ra-alert.lv-4{background:var(--paper);color:var(--ink-2)}
+
+/* 患者一覧の行 — 残日数の少ない行ほど面を濃くする */
+.cmp-table tr.lv-1{background:var(--paper-3)}
+.cmp-table tr.lv-2{background:var(--paper-2)}
+
+/* 院長報告(A4)のモック */
+.ra-report{background:var(--paper);font-family:'Noto Serif JP',serif;color:var(--ink);line-height:1.85}
+.ra-report h3{margin:0 0 6px 0;font-weight:900;font-size:18px}
+.ra-report .meta{font-size:12px;color:var(--ink-3);margin-bottom:24px}
+.ra-report .blk{margin-bottom:18px}
+.ra-report .blk-h{font-weight:800;font-size:11px;letter-spacing:0.14em;color:var(--navy);border-left:2px solid var(--navy);padding-left:8px;margin-bottom:8px}
+.ra-report .blk-b{font-size:12px}
+.ra-report .note{color:var(--ink-3);font-size:11px}
+</style>
 </head>
 <body>
 
@@ -143,29 +174,29 @@
     <div class="mock-wrap" data-reveal>
       <div class="mock-bar"><i></i><i></i><i></i><span class="mock-title">RehaBoard — 担当患者リスト</span></div>
       <div class="mock-content">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
-          <div style="padding:14px;border-radius:6px;background:#FBE5DD;color:#8A744C;text-align:center;border:1px solid #F0C0B0">
-            <div style="font:800 italic 24px/1 'Fraunces',serif;">2</div>
-            <div style="font-size:10px;letter-spacing:0.04em;margin-top:4px;">期限切れ</div>
+        <div class="ra-alerts">
+          <div class="ra-alert lv-1">
+            <div class="n">2</div>
+            <div class="l">期限切れ</div>
           </div>
-          <div style="padding:14px;border-radius:6px;background:#FAEFD8;color:#B26B40;text-align:center;border:1px solid #E5C5A0">
-            <div style="font:800 italic 24px/1 'Fraunces',serif;">5</div>
-            <div style="font-size:10px;letter-spacing:0.04em;margin-top:4px;">7日以内</div>
+          <div class="ra-alert lv-2">
+            <div class="n">5</div>
+            <div class="l">7日以内</div>
           </div>
-          <div style="padding:14px;border-radius:6px;background:#FAF5DA;color:#806430;text-align:center;border:1px solid #D8C290">
-            <div style="font:800 italic 24px/1 'Fraunces',serif;">12</div>
-            <div style="font-size:10px;letter-spacing:0.04em;margin-top:4px;">30日以内</div>
+          <div class="ra-alert lv-3">
+            <div class="n">12</div>
+            <div class="l">30日以内</div>
           </div>
-          <div style="padding:14px;border-radius:6px;background:#EFF2E4;color:#6B7A4F;text-align:center;border:1px solid #C5D2A8">
-            <div style="font:800 italic 24px/1 'Fraunces',serif;">98</div>
-            <div style="font-size:10px;letter-spacing:0.04em;margin-top:4px;">通院中合計</div>
+          <div class="ra-alert lv-4">
+            <div class="n">98</div>
+            <div class="l">通院中合計</div>
           </div>
         </div>
         <table class="cmp-table" style="font-size:11px;">
           <thead><tr><th>患者ID</th><th>主疾患</th><th>担当PT</th><th>起算日</th><th>残日数</th><th>状態</th></tr></thead>
           <tbody>
-            <tr style="background:#FBE5DD"><td>P-2026-018</td><td>膝OA</td><td>鈴木</td><td class="num">2025-11-30</td><td class="num delta-down">期限切れ</td><td>通院中</td></tr>
-            <tr style="background:#FBEFEA"><td>P-2026-007</td><td>腰部脊柱管</td><td>小島</td><td class="num">2025-12-04</td><td class="num delta-down">3日</td><td>通院中</td></tr>
+            <tr class="lv-1"><td>P-2026-018</td><td>膝OA</td><td>鈴木</td><td class="num">2025-11-30</td><td class="num delta-down">期限切れ</td><td>通院中</td></tr>
+            <tr class="lv-2"><td>P-2026-007</td><td>腰部脊柱管</td><td>小島</td><td class="num">2025-12-04</td><td class="num delta-down">3日</td><td>通院中</td></tr>
             <tr><td>P-2026-022</td><td>肩</td><td>鈴木</td><td class="num">2025-12-22</td><td class="num">21日</td><td>通院中</td></tr>
             <tr><td>P-2026-014</td><td>膝OA</td><td>廣瀬</td><td class="num">2026-01-08</td><td class="num">38日</td><td>通院中</td></tr>
           </tbody>
@@ -187,34 +218,34 @@
 
     <div class="mock-wrap" data-reveal>
       <div class="mock-bar"><i></i><i></i><i></i><span class="mock-title">RehaBoard — 院長報告(A4 自動生成)</span></div>
-      <div class="mock-content" style="background:#FBFAF7;font-family:'Noto Serif JP',serif;color:#0A0A0F;line-height:1.85;">
-        <h3 style="margin:0 0 6px 0;font-weight:900;font-size:18px;">リハビリ部門 月次報告</h3>
-        <div style="font-size:12px;color:#6E6E78;margin-bottom:24px;">2026年4月 / BRIDGE 整形外科クリニック</div>
+      <div class="mock-content ra-report">
+        <h3>リハビリ部門 月次報告</h3>
+        <div class="meta">2026年4月 / BRIDGE 整形外科クリニック</div>
 
-        <div style="margin-bottom:18px;">
-          <div style="font-weight:800;font-size:11px;letter-spacing:0.14em;color:#A98F63;border-left:2px solid #A98F63;padding-left:8px;margin-bottom:8px;">先月の数字(確定値)</div>
-          <div style="font-size:12px;">
+        <div class="blk">
+          <div class="blk-h">先月の数字(確定値)</div>
+          <div class="blk-b">
             実施単位数: <strong>1,512 単位</strong> / 目標 1,500 単位 (達成率 100.8%)<br>
             実施患者数: 124 人 / 新規 22 人<br>
             キャンセル: 18 件 / 計画書: 19 件
           </div>
         </div>
 
-        <div style="margin-bottom:18px;">
-          <div style="font-weight:800;font-size:11px;letter-spacing:0.14em;color:#A98F63;border-left:2px solid #A98F63;padding-left:8px;margin-bottom:8px;">良かった点</div>
-          <div style="font-size:12px;">新患が前月比 +20%。初回時の説明資料を変更してから、患者からの質問が増えた。</div>
+        <div class="blk">
+          <div class="blk-h">良かった点</div>
+          <div class="blk-b">新患が前月比 +20%。初回時の説明資料を変更してから、患者からの質問が増えた。</div>
         </div>
 
-        <div style="margin-bottom:18px;">
-          <div style="font-weight:800;font-size:11px;letter-spacing:0.14em;color:#A98F63;border-left:2px solid #A98F63;padding-left:8px;margin-bottom:8px;">詰まりポイント</div>
-          <div style="font-size:12px;">・キャンセル率がやや上昇 (前月 6% → 8%) — リマインド運用の見直し検討</div>
+        <div class="blk">
+          <div class="blk-h">詰まりポイント</div>
+          <div class="blk-b">・キャンセル率がやや上昇 (前月 6% → 8%) — リマインド運用の見直し検討</div>
         </div>
 
-        <div style="margin-bottom:18px;">
-          <div style="font-weight:800;font-size:11px;letter-spacing:0.14em;color:#A98F63;border-left:2px solid #A98F63;padding-left:8px;margin-bottom:8px;">来月の運用変更</div>
-          <div style="font-size:12px;">
+        <div class="blk">
+          <div class="blk-h">来月の運用変更</div>
+          <div class="blk-b">
             初回リハ後、その場で次回予約を取る運用に統一する。<br>
-            <span style="color:#6E6E78;font-size:11px;">担当: PT_A(リーダー) / 測る指標: 2回目移行率 / 期限: 6/1 から運用</span>
+            <span class="note">担当: PT_A(リーダー) / 測る指標: 2回目移行率 / 期限: 6/1 から運用</span>
           </div>
         </div>
       </div>
