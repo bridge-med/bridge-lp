@@ -11,7 +11,7 @@
   --paper:#FBFAF7;--paper-2:#F4EFE6;--paper-3:#EAE2D3;
   /* 炭 — 文字 */
   --ink:#1B1B1E;--ink-2:#45464C;--ink-3:#7D7E85;--ink-4:#B6B3AB;
-  --line:rgba(27,27,30,0.08);--line-w:rgba(169,143,99,0.14);
+  --line:rgba(27,27,30,0.08);
   /* 藍 — 骨格。意味の強弱はこの1本のスケールで表す */
   --navy:#16233E;--blue:#24365C;--blue-soft:#8B9BBC;
   /* 砂 — 温度。「選択の瞬間」にだけ使う(選択・現在地・到達・句点) */
@@ -163,10 +163,10 @@ section.alt{background:var(--paper-2)}
 
 /* alert view — 段階は面の明度(生成り)と左罫の濃さ(藍→炭)で表す */
 .alert-view{display:flex;flex-direction:column;gap:14px}
-.alert-item{display:flex;gap:18px;padding:20px 22px;border-radius:2px;align-items:flex-start}
-.alert-item.warn{background:var(--paper-3);border-left:3px solid var(--navy)}
-.alert-item.info{background:var(--paper-2);border-left:3px solid var(--blue)}
-.alert-item.ok{background:var(--paper);border-left:3px solid var(--ink-4);border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.alert-item{display:flex;gap:18px;padding:20px 22px;border-radius:2px;align-items:flex-start;border:1px solid var(--line);border-left-width:3px;border-left-style:solid}
+.alert-item.warn{background:var(--paper-3);border-left-color:var(--navy)}
+.alert-item.info{background:var(--paper-2);border-left-color:var(--blue)}
+.alert-item.ok{background:var(--paper);border-left-color:var(--ink-4)}
 .alert-tag{font:800 10px/1 var(--sans-jp);letter-spacing:0.04em;padding:5px 10px;border-radius:2px;flex-shrink:0;color:#fff}
 .alert-item.warn .alert-tag{background:var(--navy)}
 .alert-item.info .alert-tag{background:var(--blue)}
@@ -180,8 +180,10 @@ section.alt{background:var(--paper-2)}
 .cmp-table th:not(:first-child){text-align:right}
 .cmp-table td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--ink-2)}
 .cmp-table td.num{font:600 12.5px/1 var(--serif-en);color:var(--navy);font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
-/* 変化のあった数値は「太さ」で立てる。方向は数値そのものが語る(色だけに意味を持たせない) */
-.cmp-table td.delta-down,.cmp-table td.delta-up{color:var(--navy);font-weight:800}
+/* 注目すべき数値は「太さ」で立てる。方向や理由は数値そのものが語る
+ * (色だけに意味を持たせない。旧 delta-down / delta-up は色で方向を分けていたが、
+ *  実際の用法はどちらも強調であり、名前が嘘をついていた) */
+.cmp-table td.num.mark{font-weight:800}
 .cmp-table tr.hl{background:var(--paper-2)}
 .cmp-note{font:500 11px/1.7 var(--sans-jp);color:var(--ink-3);margin-top:18px}
 

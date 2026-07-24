@@ -19,9 +19,8 @@
 .qbuild-col h4{font:700 11px/1 var(--sans-jp);letter-spacing:.04em;color:var(--ink-3);margin-bottom:10px;text-transform:uppercase}
 .qbuild-pills{display:flex;flex-wrap:wrap;gap:6px}
 .qbuild-pill{padding:7px 12px;font:700 11px/1 var(--sans-jp);border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink-2);cursor:default}
-.qbuild-pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-/* 砂: 選ばれているカテゴリ */
-.qbuild-pill.on.cat{background:var(--dawn);border-color:var(--dawn);color:var(--navy)}
+/* 砂: 選ばれていること。2列とも同じ言語で表す(同じ状態に2つの色を使わない) */
+.qbuild-pill.on{background:var(--dawn);color:var(--navy);border-color:var(--dawn)}
 .qbuild-out{margin-top:18px;border-top:1px dashed var(--line);padding-top:18px;background:#fff}
 .qbuild-out h4{font:700 10px/1 var(--sans-en);letter-spacing:.22em;color:var(--ink-3);text-transform:uppercase;margin-bottom:14px}
 .qbuild-q{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
@@ -50,7 +49,7 @@
 .bias-mock p.lead{font:500 12px/1.7 var(--sans-jp);color:var(--ink-2);margin-bottom:18px}
 .bias-mock .bias-row{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:4px;margin-bottom:6px;align-items:flex-start}
 /* 砂: チェックした=選んだ瞬間 */
-.bias-mock .bias-row.checked{background:rgba(169,143,99,0.14);border-color:var(--dawn)}
+.bias-mock .bias-row.checked{background:color-mix(in srgb,var(--dawn) 14%,var(--paper));border-color:var(--dawn)}
 .bias-mock .bias-cb{width:18px;height:18px;border:1.5px solid var(--ink-3);border-radius:3px;background:#fff;flex-shrink:0;margin-top:2px;position:relative}
 .bias-mock .bias-row.checked .bias-cb{background:var(--dawn-deep);border-color:var(--dawn-deep)}
 .bias-mock .bias-row.checked .bias-cb::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
