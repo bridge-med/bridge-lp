@@ -317,16 +317,16 @@
       "id": "gokigen-gacha",
       "name": "ごきげん回復ガチャ",
       "jp": "セルフケアPWA",
-      "cat": "uncataloged",
+      "cat": "casual",
       "href": "../gokigen-gacha/index.html",
       "dirs": [
         "gokigen-gacha"
       ],
       "stage": "実践",
       "serves": "疲れた人・やる気が出ない人。頑張らせずに、小さな回復行動をひとつだけ選べるようにする",
-      "status": "未掲載",
+      "status": "計測中",
       "measure": "local",
-      "note": "動くPWA。カタログ掲載か引退かの判断待ち",
+      "note": "2026-07-19の出荷で配色リカラーとあわせてカタログ掲載済み(products/index.html の PRODUCTS 配列)。台帳側の未反映を2026-07-24に修正。掲載判断は決着済み",
       "lastCommit": "2026-07-19",
       "decision": {
         "points": "動くPWAとして完成しており、第31条の申告(実践/疲れた人のセルフケア)は立つ。論点は第12条——運営者自身が使い続けているか。掲載するなら「診断・ライト」の並びに1行で足せる。使っていないなら休止中として正直に置く手もある",
@@ -426,6 +426,9 @@
   ],
   "knownIssues": [
     "プロダクト9ページがdata-rootなしでbridge.jsを読み、budoux-ja.min.jsが404になる(実害はコンソールノイズのみ)。直すとBudouXが各アプリの文字組みに新しく効き始めるため、designer照合込みの独立スプリントで対応する",
-    "Google Fontsへの接続エラーがサンドボックス検証環境でのみ出る(本番は無関係)。環境非依存の総点検はauditor領分として別途"
+    "Google Fontsへの接続エラーがサンドボックス検証環境でのみ出る(本番は無関係)。環境非依存の総点検はauditor領分として別途",
+    "shared/subpage.css を読む9ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit/starter-kits)にダーク実装がない。憲法第22条後半(ライト/ダークを常に等価に設計する)の未達。2026-07-24の配色リカラーでは色の4系統収束だけを行い、ダークは分離した(社長承認)。rehaboard の色がinline styleで書かれておりダークから上書きできないため、rehaboardの脱inline化が先。ダークのUI方式(prefers-color-schemeで自動追従か、9ページに切替UIを新設か。これらのページは.site-navを持たずbridge.jsの切替ボタンが注入されない)を社長が決めた後、designer照合込みの独立スプリントで対応する",
+    "実験室2ページ(worklog / morning)が公開導線を持ちながら台帳・sitemap.xml のどちらにも未登録。worklogは journal/index.html からサムネイル付きでリンクされ README に公開URLの記載があり robots.txt も全許可だが、README本文は「個人用アプリ」と称している。第31条(道具の義務)と第14条の解釈に触れるため、未掲載4件(yawagaeshi / medops / manager-starter / bridge-focus)と一束にした掲載ガバナンスの棚卸しで扱う。構造的な矛盾のためauditor領分",
+    "憲法外の色系統(萌黄・代赭・朱)が、共通基盤とは別に4ファイルへ複製されている。rehaboard-starter/index.html(自前:root・憲法外8色)、morning/index.html(同7色)、round-note/app/styles.css(自前:root で --vermilion:#C8553D ほか緑・琥珀・憲法外8色)、worklog/feed.html。2026-07-24に shared/subpage.css と shared/hub.css から撤去したが、これらは自前定義のため影響を受けず残っている。配色リカラーの残タスク"
   ]
 }

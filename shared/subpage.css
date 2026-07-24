@@ -1,18 +1,21 @@
-/* BRIDGE subpage shared CSS — v1.0 / 2026-04-27
- * Used by: medboard / hire-board / consult-simulator / him-quiz / study-board / english-trainer / rehaboard
- * Style is consistent with output/sales/index.html (LP) and rehaboard-starter/index.html
+/* BRIDGE subpage shared CSS — v1.1 / 2026-07-24
+ * Used by: medboard / hire-board / consult-simulator / him-quiz / study-board /
+ *          english-trainer / rehaboard / interview-kit / starter-kits
+ * hub.css はこのファイルのトークンに依存する(自前の :root を持たない)。
+ * 配色は憲法第22条の4系統(生成り・藍・砂・炭)のみ。砂は「選択の瞬間」だけに使う。
  */
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
+  /* 生成り — 基調。面の明度スケール */
   --paper:#FBFAF7;--paper-2:#F4EFE6;--paper-3:#EAE2D3;
+  /* 炭 — 文字 */
   --ink:#1B1B1E;--ink-2:#45464C;--ink-3:#7D7E85;--ink-4:#B6B3AB;
-  --line:rgba(27,27,30,0.08);--line-w:rgba(122,99,75,0.14);
-  --vermilion:#A98F63;--vermilion-deep:#8A744C;
-  --indigo:#24365C;--indigo-deep:#16233E;
-  --gold:#A98F63;
-  --moegi:#8A9A5B;--moegi-deep:#6B7A4F;--moegi-pale:#C8D4B0;
-  --taisha:#8B5A2B;--taisha-deep:#6B4420;--taisha-pale:#D4B896;
+  --line:rgba(27,27,30,0.08);--line-w:rgba(169,143,99,0.14);
+  /* 藍 — 骨格。意味の強弱はこの1本のスケールで表す */
+  --navy:#16233E;--blue:#24365C;--blue-soft:#8B9BBC;
+  /* 砂 — 温度。「選択の瞬間」にだけ使う(選択・現在地・到達・句点) */
+  --dawn:#A98F63;--dawn-deep:#8A744C;
   --serif-jp:'Shippori Mincho B1','Noto Serif JP',serif;
   --sans-jp:'Noto Sans JP',sans-serif;
   --serif-en:'Shippori Mincho B1','Noto Serif JP',serif;
@@ -34,35 +37,37 @@ p{text-wrap:pretty;word-break:auto-phrase;line-break:strict;overflow-wrap:break-
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0.025;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");mix-blend-mode:multiply}
 a{color:inherit;text-decoration:none}
 img,svg{display:block;max-width:100%}
-::selection{background:var(--vermilion);color:#fff}
+/* 砂: テキストを選んでいる瞬間 */
+::selection{background:var(--dawn);color:var(--navy)}
 
 .eyebrow{font:800 10px/1 var(--sans-en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3)}
 .kicker{display:inline-flex;align-items:center;gap:8px}
 .kicker::before{content:'';width:18px;height:1px;background:var(--ink-3)}
-.em{color:var(--vermilion);font-family:var(--serif-en);font-style:normal;font-weight:900}
+.em{color:var(--navy);font-family:var(--serif-en);font-style:normal;font-weight:900}
 
 /* progress bar */
-.progress{position:fixed;top:0;left:0;height:2px;background:var(--vermilion);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px rgba(169,143,99,0.5)}
+.progress{position:fixed;top:0;left:0;height:2px;background:var(--navy);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px rgba(22,35,62,0.35)}
 
 /* nav */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px var(--pad-x);transition:all .3s;background:transparent}
-.nav.scrolled{background:rgba(250,250,247,0.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:12px var(--pad-x)}
+.nav.scrolled{background:rgba(251,250,247,0.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:12px var(--pad-x)}
 .nav-logo{font:700 14px/1 var(--serif-en);letter-spacing:0.2em;color:var(--ink)}
-.nav-logo .dot{color:var(--vermilion)}
+/* 砂: 署名としての句点 */
+.nav-logo .dot{color:var(--dawn)}
 .nav-logo .small{font:500 9px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-3);margin-left:8px;text-transform:uppercase}
 .nav-actions{display:flex;gap:10px;align-items:center}
 .nav-actions a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 14px;border-radius:2px;transition:all .15s}
 .nav-actions a.back{color:var(--ink-3)}
 .nav-actions a.back:hover{color:var(--ink)}
 .nav-actions a.cta{background:var(--ink);color:#fff}
-.nav-actions a.cta:hover{background:var(--indigo-deep)}
+.nav-actions a.cta:hover{background:var(--navy)}
 
 /* hero */
 .hero{padding:160px var(--pad-x) 100px;position:relative;background:var(--paper);text-align:left;border-bottom:1px solid var(--line)}
 .hero-inner{max-width:var(--max);margin:0 auto}
-.hero-eyebrow{font:700 11px/1 var(--sans-en);letter-spacing:0.2em;text-transform:uppercase;color:var(--vermilion);margin-bottom:24px}
+.hero-eyebrow{font:700 11px/1 var(--sans-en);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:24px}
 .hero-h{font:900 clamp(32px,5.4vw,64px)/1.18 var(--serif-jp);letter-spacing:-0.02em;color:var(--ink);max-width:880px;margin-bottom:28px}
-.hero-h .em{font-family:var(--serif-en);font-style:normal;color:var(--vermilion)}
+.hero-h .em{font-family:var(--serif-en);font-style:normal;color:var(--navy)}
 .hero-sub{font:500 16px/1.95 var(--sans-jp);color:var(--ink-2);max-width:680px;margin-bottom:36px}
 .hero-meta{display:flex;flex-wrap:wrap;gap:18px;font:500 11px/1 var(--sans-en);letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3)}
 .hero-meta span::before{content:'·';margin-right:18px;color:var(--ink-4)}
@@ -74,33 +79,33 @@ section.alt{background:var(--paper-2)}
 .s-inner{max-width:var(--max);margin:0 auto}
 .s-head{margin-bottom:60px;max-width:780px}
 .s-head h2{font:900 clamp(26px,4vw,44px)/1.3 var(--serif-jp);letter-spacing:-0.02em;color:var(--ink);margin-top:14px}
-.s-head h2 .em{font-family:var(--serif-en);font-style:normal;color:var(--vermilion)}
+.s-head h2 .em{font-family:var(--serif-en);font-style:normal;color:var(--navy)}
 .s-head p{font:500 14px/1.95 var(--sans-jp);color:var(--ink-2);margin-top:16px;max-width:640px}
 
 /* problems */
 .problems{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
 @media(max-width:760px){.problems{grid-template-columns:1fr}}
 .problem-item{background:var(--paper);padding:36px 32px;display:flex;gap:22px}
-.problem-num{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--vermilion);flex-shrink:0;width:46px}
+.problem-num{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--navy);flex-shrink:0;width:46px}
 .problem-content h3{font:800 16px/1.45 var(--serif-jp);color:var(--ink);margin-bottom:10px;letter-spacing:-0.01em}
 .problem-content p{font:500 12.5px/1.85 var(--sans-jp);color:var(--ink-2)}
 
-/* before/after */
+/* before/after — 対比は面の明度(生成り)と枠の有無(藍)で表す */
 .ba-grid{display:grid;grid-template-columns:1fr 60px 1fr;gap:0;align-items:stretch}
 @media(max-width:880px){.ba-grid{grid-template-columns:1fr;gap:14px}.ba-arrow{transform:rotate(90deg);height:60px}}
 .ba-col{background:var(--paper);border:1px solid var(--line);padding:32px;border-radius:2px}
 .ba-col.before{background:var(--paper-3)}
-.ba-col.after{background:var(--paper);border-color:var(--moegi);box-shadow:0 0 0 1px var(--moegi-pale) inset}
+.ba-col.after{background:var(--paper);border-color:var(--navy);box-shadow:0 0 0 1px var(--navy) inset}
 .ba-tag{font:800 10px/1 var(--sans-en);letter-spacing:0.18em;text-transform:uppercase;display:inline-block;padding:5px 10px;border-radius:2px;margin-bottom:16px}
 .ba-col.before .ba-tag{background:var(--ink-3);color:#fff}
-.ba-col.after .ba-tag{background:var(--moegi);color:#fff}
+.ba-col.after .ba-tag{background:var(--navy);color:#fff}
 .ba-col h3{font:800 18px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.01em}
 .ba-col ul{list-style:none}
 .ba-col li{font:500 12.5px/1.7 var(--sans-jp);color:var(--ink-2);padding:8px 0 8px 22px;position:relative;border-bottom:1px dashed var(--line)}
 .ba-col li:last-child{border-bottom:0}
 .ba-col li::before{position:absolute;left:0;top:10px;font:700 10px/1 var(--sans-en);letter-spacing:0;color:var(--ink-3)}
-.ba-col.before li::before{content:'×';color:var(--vermilion);font-size:14px;top:8px}
-.ba-col.after li::before{content:'○';color:var(--moegi-deep);font-size:13px;top:8px}
+.ba-col.before li::before{content:'×';color:var(--ink-2);font-size:14px;top:8px}
+.ba-col.after li::before{content:'○';color:var(--navy);font-size:13px;top:8px}
 .ba-arrow{display:flex;align-items:center;justify-content:center}
 .ba-arrow svg{width:36px;height:36px;color:var(--ink-3)}
 
@@ -108,9 +113,6 @@ section.alt{background:var(--paper-2)}
 .mock-wrap{background:var(--paper);border:1px solid var(--line);padding:0;border-radius:4px;overflow:hidden;box-shadow:var(--shadow-2);margin-top:24px}
 .mock-bar{background:var(--paper-3);padding:8px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
 .mock-bar i{width:10px;height:10px;border-radius:50%;background:var(--ink-4);display:inline-block}
-.mock-bar i:nth-child(1){background:#E08070}
-.mock-bar i:nth-child(2){background:#E0BC60}
-.mock-bar i:nth-child(3){background:#80B870}
 .mock-title{font:600 11px/1 var(--sans-jp);color:var(--ink-3);margin-left:auto}
 .mock-content{padding:30px;background:var(--paper)}
 
@@ -118,7 +120,7 @@ section.alt{background:var(--paper-2)}
 .buy{background:var(--paper-2);padding:120px var(--pad-x);text-align:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .buy-btn{display:inline-flex;align-items:center;justify-content:center;padding:16px 22px;font:700 13px/1 var(--sans-jp);letter-spacing:0.06em;border-radius:2px;transition:all .18s;border:1px solid transparent}
 .buy-btn.primary{background:var(--ink);color:#fff}
-.buy-btn.primary:hover{background:var(--indigo-deep)}
+.buy-btn.primary:hover{background:var(--navy)}
 .buy-btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .buy-btn.ghost:hover{border-color:var(--ink)}
 .cta-actions-c{display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:28px}
@@ -128,7 +130,7 @@ section.alt{background:var(--paper-2)}
 .founder{padding:120px var(--pad-x);background:var(--paper)}
 .founder-inner{max-width:760px;margin:0 auto}
 .founder-quote{font:500 italic 18px/2 var(--serif-jp);color:var(--ink-2);padding:32px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:24px 0}
-.founder-quote::before{content:'\201C';font:900 64px/0.7 var(--serif-en);color:var(--vermilion);font-style:normal;display:block;margin-bottom:14px}
+.founder-quote::before{content:'\201C';font:900 64px/0.7 var(--serif-en);color:var(--ink-4);font-style:normal;display:block;margin-bottom:14px}
 .founder-meta{font:600 11px/1.7 var(--sans-jp);color:var(--ink-3);letter-spacing:0.04em}
 .founder-meta strong{display:block;font:700 14px/1.5 var(--serif-jp);color:var(--ink);margin-bottom:6px;font-style:normal}
 
@@ -136,7 +138,8 @@ section.alt{background:var(--paper-2)}
 .foot{padding:48px var(--pad-x);background:var(--ink);color:rgba(255,255,255,0.7);text-align:center}
 .foot a{color:rgba(255,255,255,0.85)}
 .foot-brand{font:700 13px/1 var(--serif-en);letter-spacing:0.2em;color:#fff;margin-bottom:12px}
-.foot-brand .dot{color:var(--vermilion)}
+/* 砂: 署名としての句点 */
+.foot-brand .dot{color:var(--dawn)}
 .foot-tag{font:500 11px/1.7 var(--sans-jp);color:rgba(255,255,255,0.5);margin-bottom:18px}
 .foot-links{display:flex;gap:18px;justify-content:center;font:600 11px/1 var(--sans-en);letter-spacing:0.12em;text-transform:uppercase}
 
@@ -149,20 +152,20 @@ section.alt{background:var(--paper-2)}
 .six-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
 @media(max-width:760px){.six-grid{grid-template-columns:1fr}}
 .six-item{background:var(--paper);padding:24px 22px;display:flex;flex-direction:column;gap:10px}
-.six-n{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--moegi-deep)}
+.six-n{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--navy)}
 .six-h{font:800 14px/1.4 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
 .six-d{font:500 11.5px/1.7 var(--sans-jp);color:var(--ink-3)}
 .six-foot{margin-top:24px;padding-top:20px;border-top:1px dashed var(--line);font:500 11.5px/1.85 var(--sans-jp);color:var(--ink-3)}
 
-/* alert view */
+/* alert view — 段階は面の明度(生成り)と左罫の濃さ(藍→炭)で表す */
 .alert-view{display:flex;flex-direction:column;gap:14px}
 .alert-item{display:flex;gap:18px;padding:20px 22px;border-radius:2px;align-items:flex-start}
-.alert-item.warn{background:#FBF1E5;border-left:3px solid var(--taisha)}
-.alert-item.info{background:#F0F2E5;border-left:3px solid var(--moegi)}
-.alert-item.ok{background:var(--paper-2);border-left:3px solid var(--ink-4)}
+.alert-item.warn{background:var(--paper-3);border-left:3px solid var(--navy)}
+.alert-item.info{background:var(--paper-2);border-left:3px solid var(--blue)}
+.alert-item.ok{background:var(--paper);border-left:3px solid var(--ink-4);border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
 .alert-tag{font:800 10px/1 var(--sans-jp);letter-spacing:0.04em;padding:5px 10px;border-radius:2px;flex-shrink:0;color:#fff}
-.alert-item.warn .alert-tag{background:var(--taisha)}
-.alert-item.info .alert-tag{background:var(--moegi-deep)}
+.alert-item.warn .alert-tag{background:var(--navy)}
+.alert-item.info .alert-tag{background:var(--blue)}
 .alert-item.ok .alert-tag{background:var(--ink-4)}
 .alert-body{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
 .alert-body strong{color:var(--ink);font-weight:800}
@@ -172,10 +175,10 @@ section.alt{background:var(--paper-2)}
 .cmp-table th{background:var(--paper-3);padding:12px 14px;text-align:left;font:700 10px/1 var(--sans-en);letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
 .cmp-table th:not(:first-child){text-align:right}
 .cmp-table td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--ink-2)}
-.cmp-table td.num{font:600 12.5px/1 var(--serif-en);color:var(--indigo-deep);font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
-.cmp-table td.delta-down{color:var(--vermilion)}
-.cmp-table td.delta-up{color:var(--moegi-deep)}
-.cmp-table tr.hl{background:#FAF6E8}
+.cmp-table td.num{font:600 12.5px/1 var(--serif-en);color:var(--navy);font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+/* 変化のあった数値は「太さ」で立てる。方向は数値そのものが語る(色だけに意味を持たせない) */
+.cmp-table td.delta-down,.cmp-table td.delta-up{color:var(--navy);font-weight:800}
+.cmp-table tr.hl{background:var(--paper-2)}
 .cmp-note{font:500 11px/1.7 var(--sans-jp);color:var(--ink-3);margin-top:18px}
 
 /* philosophy */
@@ -183,7 +186,7 @@ section.alt{background:var(--paper-2)}
 @media(max-width:760px){.phil-grid{grid-template-columns:1fr}}
 .phil-card{background:var(--paper);border:1px solid var(--line);padding:30px 28px;border-radius:2px}
 .phil-card h3{font:800 16px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.01em}
-.phil-card h3::before{content:'';display:block;width:24px;height:2px;background:var(--vermilion);margin-bottom:12px}
+.phil-card h3::before{content:'';display:block;width:24px;height:2px;background:var(--navy);margin-bottom:12px}
 .phil-card p{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
 
 /* ============ HireBoard / ConsultSim 共通の追加 ============ */
@@ -191,7 +194,7 @@ section.alt{background:var(--paper-2)}
 @media(max-width:760px){.feat-grid{grid-template-columns:1fr}}
 .feat-item{background:var(--paper);padding:32px 28px}
 .feat-h{font:800 16px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:10px}
-.feat-h .ic{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--paper-2);font:800 11px/28px var(--sans-en);text-align:center;color:var(--vermilion);margin-right:10px;letter-spacing:0;vertical-align:middle}
+.feat-h .ic{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--paper-2);font:800 11px/28px var(--sans-en);text-align:center;color:var(--navy);margin-right:10px;letter-spacing:0;vertical-align:middle}
 .feat-d{font:500 12px/1.8 var(--sans-jp);color:var(--ink-2)}
 
 /* kanban mock for HireBoard */
@@ -203,33 +206,38 @@ section.alt{background:var(--paper-2)}
 .kanban-card .role{font:700 10px/1.3 var(--sans-jp);color:var(--ink);margin-bottom:4px}
 .kanban-card .ag{font:600 9px/1 var(--sans-en);color:var(--ink-3);letter-spacing:0.06em}
 
-/* schedule mock for ConsultSim */
+/* schedule mock for ConsultSim — 混雑の段階は生成りの明度1本で表す */
 .sched-mock{font:500 11px/1.4 var(--sans-jp)}
 .sched-table{width:100%;border-collapse:collapse;border:1px solid var(--line)}
 .sched-table th,.sched-table td{padding:10px;text-align:center;border:1px solid var(--line);font-size:11px}
 .sched-table th{background:var(--paper-3);font:700 10px/1 var(--sans-en);letter-spacing:0.1em;color:var(--ink-3);text-transform:uppercase}
-.sched-table td.busy{background:#FBE5DD;color:var(--vermilion-deep)}
-.sched-table td.med{background:#FAF1E0;color:var(--taisha-deep)}
-.sched-table td.calm{background:#EFF2E4;color:var(--moegi-deep)}
+.sched-table td.busy{background:var(--paper-3);color:var(--navy);font-weight:800}
+.sched-table td.med{background:var(--paper-2);color:var(--blue);font-weight:700}
+.sched-table td.calm{background:var(--paper);color:var(--ink-3)}
 .sched-leg{display:flex;gap:14px;margin-top:14px;font:600 10px/1 var(--sans-en);letter-spacing:0.08em;color:var(--ink-3);text-transform:uppercase}
 .sched-leg span{display:inline-flex;align-items:center;gap:6px}
-.sched-leg span::before{content:'';display:inline-block;width:12px;height:12px;border-radius:2px}
-.sched-leg .l-busy::before{background:#FBE5DD}
-.sched-leg .l-med::before{background:#FAF1E0}
-.sched-leg .l-calm::before{background:#EFF2E4}
+.sched-leg span::before{content:'';display:inline-block;width:12px;height:12px;border-radius:2px;border:1px solid var(--ink-4)}
+.sched-leg .l-busy::before{background:var(--paper-3)}
+.sched-leg .l-med::before{background:var(--paper-2)}
+.sched-leg .l-calm::before{background:var(--paper)}
 
 /* HIM Quiz / StudyBoard / English: 学習系 */
 .lrn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px}
 @media(max-width:760px){.lrn-grid{grid-template-columns:1fr}}
 .lrn-card{background:var(--paper);border:1px solid var(--line);padding:32px 30px;border-radius:2px;display:flex;flex-direction:column;gap:14px}
-.lrn-card .num{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--moegi-deep)}
+.lrn-card .num{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--navy)}
 .lrn-card h3{font:800 16px/1.45 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
 .lrn-card p{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
+/* 科目の識別は色相を増やさず、藍→炭の明度1本スケールで表す */
+.lrn-card.t-1{border-top:3px solid var(--navy)}
+.lrn-card.t-2{border-top:3px solid var(--blue)}
+.lrn-card.t-3{border-top:3px solid var(--blue-soft)}
+.lrn-card.t-4{border-top:3px solid var(--ink-4)}
 .lrn-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
 @media(max-width:760px){.lrn-stat{grid-template-columns:1fr}}
 .lrn-stat-cell{background:var(--paper);border:1px solid var(--line);padding:24px 22px;text-align:center}
 .lrn-stat-cell .label{font:700 9px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
-.lrn-stat-cell .num{font:800 28px/1 var(--serif-en);color:var(--indigo-deep);font-style:italic}
+.lrn-stat-cell .num{font:800 28px/1 var(--serif-en);color:var(--navy);font-style:italic}
 .lrn-stat-cell .sub{font:500 10px/1.4 var(--sans-jp);color:var(--ink-3);margin-top:6px}
 
 /* v2 rebrand: ロゴシンボル */
