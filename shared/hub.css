@@ -1,8 +1,15 @@
-/* BRIDGE hub pages shared CSS — v1.1 / 2026-07-24
- * Used by: starter-kits(ハブページ)
+/* BRIDGE hub pages shared CSS — v1.2 / 2026-07-24
+ * Used by: starter-kits(ハブページ)のみ
  *   ※ products / journal / about は bridge.css へ移行済み(2026-07-24 実測で確認)
  * subpage.css の後に読み込む。自前の :root を持たず、subpage.css のトークンに依存する。
  * 配色は憲法第22条の4系統のみ。砂は「選択の瞬間」だけに使う。
+ *
+ * v1.2 で、starter-kits のDOMに出現しない20系統(.products-grid / .product-card* /
+ * .notes-grid / .note-card* / .note-link / .note-tag / .showcase-* / .marquee* /
+ * .hanko / .jump-chip / .jump-row ほか)を削除した。ルートLPは bridge.css へ
+ * 移行済みで将来のconsumerがなく、bridge.js による注入もインラインスクリプトも
+ * 無いことを実測済み。検証できない色をリポジトリに残すことが、憲法外の色が
+ * 生き延びる経路そのものであるため(第9条4号)。
  */
 
 /* ===== NAV LINKS(トップと同じ横並びナビ) ===== */
@@ -22,29 +29,7 @@
 /* fixed nav 分のアンカーずれ防止 */
 section[id]{scroll-margin-top:90px}
 
-/* ===== PRODUCT CARDS(LPと同一) ===== */
-.products-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-@media(max-width:760px){.products-grid{grid-template-columns:1fr}}
-.product-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:0;display:flex;flex-direction:column;gap:0;transition:all .25s cubic-bezier(0.16,1,0.3,1);cursor:pointer;position:relative;overflow:hidden}
-.product-card-thumb{aspect-ratio:16/10;background:var(--paper-2);border-bottom:1px solid var(--line);overflow:hidden;position:relative}
-.product-card-thumb img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform .4s cubic-bezier(0.2,0.7,0.2,1)}
-.product-card:hover .product-card-thumb img{transform:scale(1.02)}
-.product-card-body{padding:24px 26px 26px;display:flex;flex-direction:column;gap:12px;flex:1}
-.product-card.no-thumb{padding:28px 26px;gap:14px}
-.product-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(22,35,62,0.35),transparent);opacity:0;transition:opacity .3s}
-.product-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:rgba(22,35,62,0.2)}
-.product-card:hover::before{opacity:1}
-.product-card-num{font:800 10px/1 var(--sans-en);letter-spacing:0.18em;color:var(--ink-3)}
-.product-card-name{font:900 22px/1.2 var(--serif-en);font-style:normal;color:var(--ink);margin-bottom:2px}
-.product-card-name .jp{display:block;font:700 11px/1 var(--serif-jp);color:var(--ink-3);font-style:normal;margin-top:4px;letter-spacing:0.04em}
-.product-card-tagline{font:500 12px/1.7 var(--sans-jp);color:var(--ink-2);flex:1}
-.product-card-tags{display:flex;flex-wrap:wrap;gap:5px}
-.product-card-tags span{padding:4px 9px;background:var(--paper-2);border-radius:999px;font:600 9px/1 var(--sans-jp);color:var(--ink-3);letter-spacing:0.02em}
-.product-card-link{display:inline-flex;align-items:center;gap:6px;font:700 11px/1 var(--sans-en);letter-spacing:0.1em;text-transform:uppercase;color:var(--navy);margin-top:6px;transition:gap .2s}
-.product-card-link:hover{gap:10px}
-.product-card-link::after{content:'→'}
-
-/* ===== TOOLBOX(Starter Kits カード / LPと同一) ===== */
+/* ===== TOOLBOX(Starter Kits カード) ===== */
 .toolbox-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 @media(max-width:980px){.toolbox-grid{grid-template-columns:1fr}}
 .toolbox-card{background:var(--paper);border:1px solid var(--line);padding:36px 32px;display:flex;flex-direction:column;gap:18px;position:relative;transition:transform .25s,box-shadow .25s}
@@ -77,55 +62,15 @@ section[id]{scroll-margin-top:90px}
 .toolbox-foot p{font:500 11px/1.85 var(--sans-jp);color:var(--ink-3);max-width:780px}
 .toolbox-foot p + p{margin-top:8px}
 
-/* ===== NOTE CARDS(LPと同一) ===== */
-.notes-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:880px){.notes-grid{grid-template-columns:1fr}}
-.note-card{background:var(--paper);border:1px solid var(--line);padding:32px 30px;display:flex;flex-direction:column;gap:14px;text-decoration:none;transition:all .2s;position:relative;min-height:240px}
-.note-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:var(--navy)}
-.note-card-meta{display:flex;gap:10px;align-items:center;font:600 10px/1 var(--sans-en);letter-spacing:0.12em;color:var(--ink-3);text-transform:uppercase}
-.note-tag{padding:4px 9px;background:var(--paper-2);border:1px solid var(--line);border-radius:2px;font:700 9px/1 var(--sans-jp);letter-spacing:0.06em;color:var(--navy)}
-.note-card-h{font:800 16px/1.55 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
-.note-card-excerpt{font:500 12px/1.8 var(--sans-jp);color:var(--ink-2);flex:1}
-.note-card-link{font:700 11px/1 var(--sans-jp);color:var(--navy);letter-spacing:0.05em;display:inline-flex;align-items:center;gap:6px}
+/* ===== セクション末尾のCTA ===== */
 .notes-foot{max-width:var(--max);margin:56px auto 0;text-align:center}
 .notes-cta{font:700 12px/1 var(--sans-jp);letter-spacing:0.08em;color:var(--ink);padding:16px 28px;border:1px solid var(--ink);border-radius:2px;display:inline-block;transition:all .2s}
 .notes-cta:hover{background:var(--ink);color:#fff}
-.note-link{font:600 12px/1.5 var(--sans-jp);color:var(--ink-2);border-bottom:1px solid var(--line);padding-bottom:6px;transition:color .2s,border-color .2s;display:inline-flex;align-items:center;gap:8px}
-.note-link::after{content:'→';transition:transform .2s}
-.note-link:hover{color:var(--navy);border-color:var(--navy)}
-.note-link:hover::after{transform:translateX(4px)}
-
-/* ===== SHOWCASE(Live Preview / LPと同一) ===== */
-.showcase-head{max-width:var(--max);margin:0 auto 56px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:24px}
-.showcase-head h2{font:900 clamp(28px,4.4vw,52px)/1.25 var(--serif-jp);letter-spacing:-0.02em;max-width:580px;margin-top:14px}
-.showcase-head h2 .em{font-family:var(--serif-en);font-style:normal;color:var(--navy)}
-.showcase-tabs{display:flex;gap:6px;flex-wrap:wrap}
-.showcase-tab{padding:9px 16px;background:var(--paper);border:1px solid var(--line);border-radius:999px;font:700 11px/1 var(--sans-jp);color:var(--ink-2);cursor:pointer;transition:all .2s}
-.showcase-tab:hover{background:var(--paper-2)}
-.showcase-tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.showcase-stage{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:380px 1fr;gap:48px;align-items:start}
-@media(max-width:980px){.showcase-stage{grid-template-columns:1fr;gap:32px}}
-.showcase-info .num-tag{font:800 10px/1 var(--sans-en);letter-spacing:0.18em;color:var(--navy);margin-bottom:14px}
-.showcase-info h3{font:900 32px/1.2 var(--serif-en);font-style:normal;color:var(--ink);margin-bottom:6px}
-.showcase-info .jp{display:block;font:700 13px/1 var(--serif-jp);color:var(--ink-3);font-style:normal;margin-top:4px;letter-spacing:0.04em}
-.showcase-info p{font:500 13px/1.9 var(--sans-jp);color:var(--ink-2);margin-top:18px}
-.showcase-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
-.showcase-tags span{padding:5px 11px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;font:600 10px/1 var(--sans-jp);color:var(--ink-2)}
-.showcase-cta{display:inline-flex;align-items:center;gap:10px;margin-top:24px;padding:13px 22px;background:var(--ink);color:#fff;border-radius:999px;font:700 12px/1 var(--sans-jp);letter-spacing:0.02em;transition:all .2s}
-.showcase-cta:hover{background:var(--blue);transform:translateX(2px)}
-.showcase-cta::after{content:'→';transition:transform .2s}
-.showcase-cta:hover::after{transform:translateX(3px)}
-.showcase-frame{position:relative;background:var(--ink);border-radius:14px;padding:8px;box-shadow:var(--shadow-2);overflow:hidden}
-.showcase-frame::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60px;height:6px;background:var(--paper-2);border-radius:0 0 8px 8px;z-index:2}
-.showcase-frame .frame-bar{height:24px;background:var(--ink);display:flex;align-items:center;gap:6px;padding:0 14px}
-.showcase-frame .frame-bar i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.18)}
-.showcase-frame iframe{width:100%;height:560px;border:none;background:#fff;display:block;border-radius:0 0 8px 8px}
-@media(max-width:600px){.showcase-frame iframe{height:480px}}
 
 /* ===== FOOTER 微調整 ===== */
 .foot-links{flex-wrap:wrap;row-gap:10px}
 
-/* ===== EDITORIAL DETAILS — v1.1 ===== */
+/* ===== EDITORIAL DETAILS ===== */
 /* hero: 透かしタイポ + 縦書きの添え書き */
 .hero{overflow:hidden}
 .hero-mark{position:absolute;right:-2%;bottom:-8%;font:900 clamp(110px,20vw,300px)/0.8 var(--serif-en);font-style:normal;letter-spacing:-0.04em;color:var(--ink);opacity:0.03;pointer-events:none;user-select:none;white-space:nowrap;z-index:0}
@@ -136,30 +81,9 @@ section[id]{scroll-margin-top:90px}
 
 /* セクション背景の大きな番号 */
 .s-inner{position:relative}
-.s-num-ghost{position:absolute;top:-44px;right:0;font:900 clamp(88px,13vw,170px)/1 var(--serif-en);font-style:normal;color:var(--ink);opacity:0.04;pointer-events:none;user-select:none;z-index:0}
-.s-head,.products-grid,.toolbox-grid,.notes-grid,.notes-foot,.toolbox-foot{position:relative;z-index:1}
+.s-num-ghost{position:absolute;top:-44px;right:0;font:900 clamp(88px,13vw,170px)/1 var(--serif-en);font-style:normal;color:transparent;-webkit-text-stroke:1.5px rgba(27,27,30,0.13);pointer-events:none;user-select:none;z-index:0}
+.s-head,.toolbox-grid,.notes-foot,.toolbox-foot{position:relative;z-index:1}
 
-/* カテゴリジャンプチップ */
-.jump-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:36px}
-.jump-chip{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border:1px solid var(--line);background:var(--paper);border-radius:2px;font:600 12px/1 var(--sans-jp);color:var(--ink-2);transition:all .18s}
-.jump-chip:hover{border-color:var(--ink);color:var(--ink);transform:translateY(-1px)}
-.jump-chip .n{font:800 10px/1 var(--sans-en);color:var(--navy);letter-spacing:0.1em}
-.jump-chip .c{font:700 10px/1 var(--sans-en);color:var(--ink-4);letter-spacing:0.02em}
-
-/* 販売中などの強調タグ */
-.product-card-tags .hot{background:var(--navy);color:#fff}
-.product-card-tags .free{background:var(--blue);color:#fff}
-
-/* 落款(はんこ) */
-.hanko{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--navy);color:#fff;font:700 15px/1 var(--serif-jp);border-radius:4px;transform:rotate(-4deg);box-shadow:0 1px 4px rgba(22,35,62,0.35);letter-spacing:0;vertical-align:middle;margin-left:10px}
-
-/* motion に配慮 */
-@media(prefers-reduced-motion:reduce){
-  [data-reveal]{opacity:1;transform:none;transition:none}
-  html{scroll-behavior:auto}
-}
-
-/* ===== INNOVATION PASS — v2.0 ===== */
 /* ページ間トランジション(対応ブラウザのみ・MPA View Transitions) */
 @view-transition{navigation:auto}
 ::view-transition-old(root){animation:vt-out .22s ease both}
@@ -169,30 +93,6 @@ section[id]{scroll-margin-top:90px}
 
 /* カルテ用紙(方眼)— alt セクションに敷く */
 section.alt{background-image:linear-gradient(rgba(22,35,62,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(22,35,62,0.05) 1px,transparent 1px);background-size:24px 24px}
-
-/* セクション番号は塗りから輪郭線に(製図・カルテの気配) */
-.s-num-ghost{color:transparent;-webkit-text-stroke:1.5px rgba(27,27,30,0.13);opacity:1}
-
-/* 流れる看板(マーキー) */
-.marquee{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper);padding:16px 0;position:relative;z-index:2}
-.marquee-track{display:flex;width:max-content;animation:marq 36s linear infinite}
-.marquee:hover .marquee-track{animation-play-state:paused}
-.marquee-set{display:flex;align-items:center;gap:44px;padding-right:44px;font:700 13px/1 var(--serif-jp);color:var(--ink-3);white-space:nowrap}
-.marquee-set i{font:italic 700 12px/1 var(--serif-en);color:var(--navy);letter-spacing:0.04em}
-@keyframes marq{to{transform:translateX(-50%)}}
-
-/* 処方箋モチーフ:カードの頭に破線罫 */
-.product-card-num{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px dashed var(--line)}
-.product-card-num::after{content:'✚ BRIDGE';font:800 8px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-4)}
-
-/* ホバーで押される朱印(効/読)は撤去した。hover はカーソルの位置であって
- * 第22条の言う「現在地」ではない(離せば消え、タッチでは一度も発火しない)。
- * 交差する二本の線でも分岐する道でもない発明された落款であり、第24条にも反する。
- * 落款そのものは karte にある版(静止・輪郭・1ページ1つ・署名の隣)が正しい形。 */
-
-@media(prefers-reduced-motion:reduce){
-  .marquee-track{animation:none}
-}
 
 /* v2 rebrand: ロゴシンボル */
 .nav-logo{display:inline-flex;align-items:center;gap:10px}
