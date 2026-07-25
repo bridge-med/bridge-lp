@@ -193,7 +193,7 @@ footer {
     <p class="sub">病院の一日を、ただ眺める</p>
   </div>
 
-  <canvas id="cv" role="img" aria-labelledby="scene-note-h"></canvas>
+  <canvas id="cv" role="img" aria-labelledby="scene-note-h" aria-describedby="scene-note-body"></canvas>
 
   <div class="hud">
     <div class="clock" id="clock">--:--</div>
@@ -209,8 +209,10 @@ footer {
     </section>
     <section id="scene-note">
       <h2 id="scene-note-h">この絵の中で起きていること</h2>
-      <p>三階建ての小さな病院を、横から切った断面です。一階に玄関と外来の待合、診察室、レントゲン室、平行棒の並ぶリハビリ室、調理場。二階は病室が五つと休憩室、それに一日中灯っているナースステーション。三階は病室と浴室、リネン庫、カンファレンス室です。</p>
-      <p>動く点は、藍色が働いている人、炭色が患者さんと家族で、藍のほうが少し速く歩きます。朝8時半と夕方5時半、玄関で二つの流れがすれ違う。深夜1時半にナースコールがひとつ点滅し、点がひとつそこへ向かう。3時には、眠れない人の読書灯。外の道を通る人は、一日に三度だけ。時間は縮めてありますが、歩く速さだけは実際のままです。</p>
+      <div id="scene-note-body">
+        <p>三階建ての小さな病院を、横から切った断面です。一階に玄関と外来の待合、診察室、レントゲン室、平行棒の並ぶリハビリ室、調理場。二階は病室が五つと休憩室、それに一日中灯っているナースステーション。三階は病室と浴室、リネン庫、カンファレンス室です。</p>
+        <p>動く点は、藍色が働いている人、炭色が患者さんと家族で、藍のほうが少し速く歩きます。朝8時半と夕方5時半、玄関で二つの流れがすれ違う。深夜1時半にナースコールがひとつ点滅し、点がひとつそこへ向かう。3時には、眠れない人の読書灯。外の道を通る人は、一日に三度だけ。時間は縮めてありますが、歩く速さだけは実際のままです。</p>
+      </div>
     </section>
     <section>
       <h2>誰も見ていない時間について</h2>
@@ -347,19 +349,21 @@ const LAYOUTS = {
       { id: 'rehab',    f: 1, x0: 414, x1: 520 },
       { id: 'xray',     f: 1, x0: 520, x1: 600 },
       { id: 'kitchen',  f: 1, x0: 600, x1: 700 },
-      { id: 'wardA',    f: 2, x0: 60,  x1: 170 },
-      { id: 'wardB',    f: 2, x0: 170, x1: 280 },
-      { id: 'wardC',    f: 2, x0: 280, x1: 386 },
-      { id: 'ns',       f: 2, x0: 414, x1: 570 },
-      { id: 'wardD',    f: 2, x0: 570, x1: 700 },
-      { id: 'wardE',    f: 3, x0: 60,  x1: 190 },
-      { id: 'wardF',    f: 3, x0: 190, x1: 300 },
+      { id: 'wardA',    f: 2, x0: 60,  x1: 142 },
+      { id: 'wardB',    f: 2, x0: 142, x1: 224 },
+      { id: 'wardC',    f: 2, x0: 224, x1: 306 },
+      { id: 'wardD',    f: 2, x0: 306, x1: 386 },
+      { id: 'ns',       f: 2, x0: 414, x1: 550 },
+      { id: 'wardE',    f: 2, x0: 550, x1: 630 },
+      { id: 'rest',     f: 2, x0: 630, x1: 700 },
+      { id: 'wardF',    f: 3, x0: 60,  x1: 190 },
+      { id: 'wardG',    f: 3, x0: 190, x1: 300 },
       { id: 'bath',     f: 3, x0: 300, x1: 386 },
       { id: 'linen',    f: 3, x0: 414, x1: 540 },
       { id: 'conf',     f: 3, x0: 540, x1: 700 },
     ],
-    wards2: ['wardA', 'wardB', 'wardC', 'wardD'],
-    wards3: ['wardE', 'wardF'],
+    wards2: ['wardA', 'wardB', 'wardC', 'wardD', 'wardE'],
+    wards3: ['wardF', 'wardG'],
   },
 };
 
@@ -553,10 +557,9 @@ function spawnersFor(min) {
 
   // 12:00 休憩室にひとりずつ
   at(720, 'lunch', () => [0, 1, 2].map(i => {
-    const restId = roomById.rest ? 'rest' : 'conf';
     const home = [[1, roomCx('consult')], [2, roomCx('ns')], [1, roomCx('kitchen')]][i];
     return new Agent({ f: home[0], x: home[1], kind: 'staff',
-      plan: [hold(i * 5), go(roomById[restId].f, roomCx(restId)), hold(14), go(home[0], home[1]), gone()] });
+      plan: [hold(i * 5), go(2, roomCx('rest')), hold(14), go(home[0], home[1]), gone()] });
   }));
 
   // 13:30 面会の家族(縦動線の前で待つ)
