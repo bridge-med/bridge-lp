@@ -472,6 +472,7 @@ let agents = [];
 let spawned = new Set();
 let nurseCall = null;                            // {room, arrived}
 let crossing = null;                             // {startSec, dir}
+let corrT = 0.16;                                // 廊下の灯りの補間値
 
 function outX(side) { return side === 'L' ? L.bx0 - 190 : L.bx1 + 150; }
 
@@ -725,6 +726,16 @@ function draw(min, nowSec, dt) {
     litT[r.id] = cur + (target - cur) * Math.min(1, dt / 1.2);
     ctx.fillStyle = rgb(mixRgb(pal.roomOff, pal.roomOn, litT[r.id]));
     ctx.fillRect(r.x0, L.top[r.f] + 2, r.x1 - r.x0, openY(r.f) - L.top[r.f] - 2);
+  }
+
+  // 廊下の灯り(21:00にキャプションどおり半分へ絞る)
+  {
+    const target = (min >= 360 && min < 1260) ? 0.16 : 0.06;
+    corrT += (target - corrT) * Math.min(1, dt / 1.2);
+    ctx.fillStyle = rgba(pal.roomOn, corrT);
+    for (let f = 1; f <= 3; f++) {
+      ctx.fillRect(L.bx0, openY(f), L.bx1 - L.bx0, L.fb[f] - openY(f));
+    }
   }
 
   // 部屋の仕切り(藍 α.45)と開口線(藍 α.30、入口で14単位の隙間)
