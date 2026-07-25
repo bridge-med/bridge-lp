@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>手渡しの一問 — スマホを相手に渡す質問カード / BRIDGE</title>
+<meta name="description" content="1on1・振り返り・雑談の場で使う質問カード。場面を選んでスマホを相手に渡すと、3つの質問が出ます。何を話すかは答える人が選びます。登録不要・記録は残りません。">
+<meta property="og:title" content="手渡しの一問 — スマホを相手に渡す質問カード">
+<meta property="og:description" content="場面を選んでスマホを相手に渡すと、3つの質問が出ます。何を話すかは答える人が選びます。登録不要・記録は残りません。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/tewatashi/">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBFAF7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111521">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23FBFAF7'/%3E%3Cpath%20d='M12%2048%20L52%2016'%20stroke='%2316233E'%20stroke-width='4'%20stroke-linecap='round'/%3E%3Cpath%20d='M18%2016%20L28%2026'%20stroke='%23A98F63'%20stroke-width='4'%20stroke-linecap='round'/%3E%3Cpath%20d='M36%2034%20L50%2048'%20stroke='%23A98F63'%20stroke-width='4'%20stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* 手渡しの一問 — styles
+ * 二人でひとつの画面を覗く前提。カードの面は選択画面の3枚だけ。
+ * 憲法第22条の4系統(生成り・藍・砂・炭)。砂は選択の瞬間にだけ使う。
+ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:        #FBFAF7;
+  --bg-2:      #F4EFE6;
+  --bg-3:      #EAE2D3;
+  --card:      #FFFFFF;
+  --ink:       #1B1B1E;
+  --ink-2:     #45464C;
+  --ink-3:     #7D7E85;
+  --ink-4:     #B6B3AB;
+  --navy:      #16233E;
+  --blue:      #24365C;
+  --blue-soft: #8B9BBC;
+  --sand:      #A98F63;
+  --sand-pale: #F2EADB;
+  --btn-ink:   #FFFFFF;
+  --line:   rgba(27, 27, 30, 0.10);
+  --shadow-sm: 0 2px 8px rgba(22, 35, 62, 0.06);
+
+  --mincho: 'Shippori Mincho B1', 'Noto Serif JP', serif;
+  --sans: 'Noto Sans JP', sans-serif;
+  --en:   'Inter', sans-serif;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+
+  --stage: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #111521;
+    --bg-2:      #161B2B;
+    --bg-3:      #1D2436;
+    --card:      #181E2E;
+    --ink:       #EDEAE2;
+    --ink-2:     #C2BFB6;
+    --ink-3:     #8A8D98;
+    --ink-4:     #565A68;
+    --navy:      #D8DEEB;
+    --blue:      #9FB1D4;
+    --blue-soft: #5A6C92;
+    --sand:      #C2A97E;
+    --sand-pale: #2A2418;
+    --btn-ink:   #0E1526;
+    --line:   rgba(237, 234, 226, 0.10);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.30);
+  }
+}
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--sans);
+  background: var(--stage);
+  transition: background .5s ease;
+  color: var(--ink);
+  line-height: 1.8;
+  font-feature-settings: "palt" 1;
+}
+body[data-scene="handoff"] { --stage: var(--bg-2); }
+
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+/* ---------- 骨格 ---------- */
+
+.stage {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+.mark {
+  padding: 18px 20px;
+}
+.mark a {
+  font: 600 11px var(--en);
+  letter-spacing: .3em;
+  color: var(--ink-2);
+}
+.view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px 22px;
+  width: 100%;
+}
+.view.enter { animation: rise .32s var(--ease) both; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 出口。全画面に常設(表紙と終了画面では隠す) */
+.exit {
+  text-align: center;
+  padding: 4px 20px calc(20px + env(safe-area-inset-bottom));
+}
+.exit button {
+  background: none;
+  border: none;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 18px;
+  font: 500 13px/1 var(--sans);
+  color: var(--ink-2);
+}
+body[data-scene="cover"] .exit, body[data-scene="end"] .exit { visibility: hidden; }
+
+/* ---------- 共通パーツ ---------- */
+
+.scene-label {
+  font: 500 12px/1 var(--sans);
+  letter-spacing: .1em;
+  color: var(--ink-2);
+  margin-bottom: 18px;
+}
+.note {
+  font: 400 13px/1.9 var(--sans);
+  color: var(--ink-2);
+}
+.btn-main {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  min-height: 52px;
+  padding: 14px 20px;
+  background: var(--blue);
+  color: var(--btn-ink);
+  border: none;
+  border-radius: 14px;
+  font: 700 16px/1.4 var(--sans);
+  transition: transform .12s ease, opacity .2s;
+}
+.btn-main:active { transform: scale(.985); }
+.btn-ghost {
+  display: block;
+  margin: 0 auto;
+  min-height: 44px;
+  padding: 10px 20px;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font: 500 14px/1.4 var(--sans);
+  color: var(--ink-2);
+  transition: border-color .2s;
+}
+@media (hover: hover) {
+  .btn-ghost:hover { border-color: var(--blue-soft); }
+}
+.bottom-slot { margin-top: auto; padding-top: 28px; padding-bottom: clamp(28px, 8vh, 56px); }
+
+/* ---------- 表紙 ---------- */
+
+.crest { width: 56px; height: 56px; margin-bottom: 22px; }
+.crest path { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+.crest .cn { stroke: var(--navy); }
+.crest .cs { stroke: var(--sand); }
+
+.cover-title {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(28px, 8vw, 36px);
+  line-height: 1.5;
+  letter-spacing: .06em;
+  color: var(--ink);
+}
+.cover-lead {
+  margin-top: 18px;
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(15px, 4.2vw, 18px);
+  line-height: 2.1;
+  color: var(--ink);
+}
+.scene-h {
+  margin-top: 40px;
+  font: 700 13px/1 var(--sans);
+  letter-spacing: .08em;
+  color: var(--ink-2);
+}
+.scene-rows { margin-top: 6px; }
+.scene-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 64px;
+  padding: 18px 2px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  transition: background .2s;
+}
+.scene-row .t {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--ink);
+}
+.scene-row .arr { font-family: var(--en); font-size: 14px; color: var(--ink-4); }
+.scene-row.picked { background: var(--sand-pale); }
+.scene-row.picked .arr { color: var(--sand); }
+.trust {
+  margin-top: 28px;
+  font: 500 12px/1.8 var(--sans);
+  color: var(--ink-2);
+}
+
+/* ---------- 手渡し・交代 ---------- */
+
+.hand-wrap { text-align: center; }
+.hand-line {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(24px, 7vw, 34px);
+  line-height: 1.9;
+  letter-spacing: .04em;
+  color: var(--ink);
+  max-width: 13em;
+  margin: 0 auto;
+}
+.hand-sub {
+  margin-top: 16px;
+  font: 400 13px/1.9 var(--sans);
+  color: var(--ink-2);
+}
+.cross-hand { width: 120px; height: 8px; margin: 26px auto 0; display: block; }
+.cross-hand path {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw .9s var(--ease) forwards;
+}
+.cross-hand .ln { stroke: var(--navy); }
+.cross-hand .ls { stroke: var(--sand); animation-delay: .25s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* ---------- 選択 ---------- */
+
+.pick-h {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(19px, 5vw, 22px);
+  line-height: 1.8;
+  color: var(--ink);
+}
+.pick-note { margin-top: 8px; margin-bottom: 24px; }
+.picks { display: flex; flex-direction: column; gap: 12px; }
+.picks.settled { gap: 0; }
+.pick {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  min-height: 76px;
+  max-height: 280px;
+  padding: 20px 22px 20px 26px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(16px, 4.4vw, 19px);
+  line-height: 1.85;
+  color: var(--ink);
+  transition: border-color .2s, background .2s, transform .12s ease;
+}
+.pick::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 14px; bottom: 14px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--navy);
+  transition: background .2s;
+}
+.pick:active { transform: scale(.985); }
+@media (hover: hover) { .pick:hover { border-color: var(--blue-soft); } }
+.pick.chosen::before { background: var(--sand); }
+.pick.gone {
+  opacity: 0;
+  max-height: 0;
+  min-height: 0;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  box-shadow: none;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity .34s ease, max-height .45s var(--ease),
+              padding .45s var(--ease), margin .45s var(--ease);
+}
+/* 選んだ1枚が、その場で問いに育つ */
+.pick.grown {
+  border-color: transparent;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  min-height: 0;
+  max-height: none;
+  font-size: clamp(26px, 7.4vw, 40px);
+  line-height: 1.85;
+  letter-spacing: .03em;
+  max-width: 15em;
+  text-wrap: balance;
+  word-break: auto-phrase;
+  line-break: strict;
+  cursor: default;
+  transition: all .5s var(--ease);
+}
+.pick.grown:active { transform: none; }
+.pick.grown::before { opacity: 0; transition: opacity .3s; }
+.redraw { margin-top: 24px; }
+
+/* ---------- 問い(育った後) ---------- */
+
+.turn-line { width: 160px; height: 8px; margin: 32px 0 0; display: block; }
+.turn-line path {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw .9s var(--ease) forwards;
+}
+.turn-line .ln { stroke: var(--navy); }
+.turn-line .ls { stroke: var(--sand); }
+.ask-sub { margin-top: 20px; }
+
+/* ---------- 終了 ---------- */
+
+.end-h {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(24px, 7vw, 32px);
+  line-height: 1.7;
+  letter-spacing: .04em;
+  color: var(--ink);
+}
+.end-p {
+  margin-top: 18px;
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(15px, 4.2vw, 17px);
+  line-height: 2.1;
+  color: var(--ink);
+}
+.end-p2 {
+  margin-top: 12px;
+  font: 400 14px/2 var(--sans);
+  color: var(--ink-2);
+}
+.next-h {
+  margin-top: 44px;
+  font: 700 13px/1 var(--sans);
+  letter-spacing: .08em;
+  color: var(--ink-2);
+}
+.next-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  min-height: 64px;
+}
+.next-row .t {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.next-row .d {
+  font: 500 12px/1.8 var(--sans);
+  color: var(--ink-2);
+  text-align: right;
+  max-width: 200px;
+}
+.enough {
+  margin-top: 24px;
+  font: 400 13px/1.9 var(--sans);
+  color: var(--ink-2);
+}
+.restart { margin-top: 32px; }
+
+/* ---------- ページ下部の説明(表紙のみ) ---------- */
+
+.about {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 48px 22px calc(56px + env(safe-area-inset-bottom));
+}
+body:not([data-scene="cover"]) .about { display: none; }
+.about h2 {
+  font: 700 14px/1 var(--sans);
+  letter-spacing: .08em;
+  color: var(--ink-2);
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+.about p {
+  margin-top: 16px;
+  font: 400 15px/2.1 var(--sans);
+  color: var(--ink-2);
+}
+.about h2 + p { margin-top: 20px; }
+.about section + section { margin-top: 44px; }
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .cross-hand path, .turn-line path { stroke-dashoffset: 0; }
+  .pick.gone { display: none; }
+}
+</style>
+</head>
+<body data-scene="cover">
+<div class="stage">
+  <header class="mark"><a href="../index.html">BRIDGE</a></header>
+  <main id="view" class="view" aria-live="polite"></main>
+  <footer class="exit"><button type="button" id="exitBtn" hidden>もう十分</button></footer>
+</div>
+
+<section class="about" aria-label="この道具の説明">
+  <section>
+    <h2>使い方</h2>
+    <p>1on1のはじめ、月末の振り返り、休憩室で話が途切れたとき。話すことが決まらないまま向かい合う時間に、スマホを1台だけ出して、相手に渡します。</p>
+    <p>画面には質問が3つ出ます。選ぶのは、答える人です。話したくないものは、選ばずに置いておけます。話し終えたら交代して、同じことをもう一度。切り上げたくなったら、どの画面にも「もう十分」があります。</p>
+    <p>タイマーも、回数の記録もありません。終わりどきは、二人で決めてください。</p>
+  </section>
+  <section>
+    <h2>この道具について</h2>
+    <p>BRIDGEの思考の型(評価→理解→設計→実践→再評価)のうち、この道具が支えるのは「評価」と「理解」です。相手の状態を測る道具ではなく、相手が自分で選んだ話から、その人の今を知るための道具です。</p>
+    <p>増やしたい選択肢は、ひとつだけです。答える人が、何を話すかを自分で選べること。面談で何を聞かれるかは、たいてい聞く側が決めています。その一手だけを、答える側に渡します。</p>
+  </section>
+</section>
+
+<script>
+'use strict';
+
+/* ---------- 質問カード ---------- */
+const DECKS = {
+  boss: {
+    label: '上司と部下',
+    questions: [
+      '今週、思ったより時間がかかった仕事はどれでしたか',
+      '出勤してから最初にやることを、順番に教えてください',
+      '今週、いちばん落ち着いて仕事ができた時間はいつでしたか',
+      '最近「これは助かった」と思った、誰かの動きはありますか',
+      'いまの仕事で、人に説明しにくいのはどの部分ですか',
+      '手伝ってほしいけれど、言い出せないままになっていることはありますか',
+      '判断に迷ったとき、たいてい誰に相談していますか',
+      'うまくいかなかったな、と思った出来事を、ひとつ教えてください',
+      'ここで働きはじめた頃と比べて、変わったと思うことはありますか',
+      '半年後、いまの仕事のどこが少し楽になっているといいですか',
+    ],
+  },
+  senior: {
+    label: '先輩と後輩',
+    questions: [
+      'いま覚えている途中のことは、何かありますか',
+      '初日のことで、まだ覚えている場面はありますか',
+      '電話や問い合わせの対応が苦手だった時期はありますか',
+      '分からないことを聞くとき、切り出し方に迷うことはありますか',
+      'これは自分なりのやり方だな、と思っている手順はありますか',
+      '最近、誰かのやり方を見て「なるほど」と思ったことはありますか',
+      '教わったことのうち、いちばん長く使っているものは何ですか',
+      '一度できなくて、あとから平気になったことはありますか',
+      'まだ慣れないな、と思っている場面はどこですか',
+      'この仕事をしていて、意外と好きだなと思う瞬間はありますか',
+    ],
+  },
+  peer: {
+    label: '同僚同士',
+    questions: [
+      '今日あったことで、まだ誰にも話していない小さな出来事はありますか',
+      '休憩の時間は、たいてい何をしていますか',
+      '仕事の外で、最近続いていることはありますか',
+      '最近、ちょっと嬉しかったことをひとつ教えてください',
+      '忙しい日に、自分なりに気をつけていることはありますか',
+      'この職場で、地味だけど助かっている仕組みはありますか',
+      '目の前の人の仕事で、真似したいと思うところはありますか',
+      '仕事が終わったあと、切り替えにしていることはありますか',
+      'ここ数か月で、いちばん記憶に残っている一日はいつですか',
+      'いまの働き方で、ひとつだけ変えられるとしたら何を変えますか',
+    ],
+  },
+};
+
+(function () {
+  const view = document.getElementById('view');
+  const exitBtn = document.getElementById('exitBtn');
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wait = (ms) => RM ? 0 : ms;
+
+  // 記録は残さない。状態はメモリのみ(Storage APIは使わない)
+  let state = { deckId: null, turn: 'a', queue: [], swap: false };
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function draw3() {
+    if (state.queue.length < 3) {
+      const rest = new Set(state.queue);
+      state.queue = state.queue.concat(
+        shuffle(DECKS[state.deckId].questions.filter((q) => !rest.has(q)))
+      );
+    }
+    return state.queue.splice(0, 3);
+  }
+
+  function setScene(scene, html) {
+    document.body.dataset.scene = scene;
+    exitBtn.hidden = (scene === 'cover' || scene === 'end');
+    view.classList.remove('enter');
+    void view.offsetWidth;
+    view.innerHTML = html;
+    view.classList.add('enter');
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- ① 表紙 ---------- */
+
+  function renderCover() {
+    state = { deckId: null, turn: 'a', queue: [], swap: false };
+    setScene('cover', `
+      <svg class="crest" viewBox="0 0 64 64" aria-hidden="true">
+        <path class="cn" d="M12 48 L52 16"/>
+        <path class="cs" d="M18 16 L28 26"/>
+        <path class="cs" d="M36 34 L50 48"/>
+      </svg>
+      <h1 class="cover-title">手渡しの一問</h1>
+      <p class="cover-lead">1on1や振り返りのはじめに開いて、スマホを相手に渡してください。<br>3つの質問から、答える人が話したいものを1枚選びます。<br>話したことは、この場かぎりです。</p>
+      <h2 class="scene-h">どの二人で使いますか</h2>
+      <div class="scene-rows">
+        ${Object.keys(DECKS).map((id) => `
+          <button type="button" class="scene-row" data-deck="${id}">
+            <span class="t">${esc(DECKS[id].label)}</span><span class="arr">&rarr;</span>
+          </button>`).join('')}
+      </div>
+      <p class="trust">記録は残りません・登録不要</p>
+    `);
+    view.querySelectorAll('.scene-row').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.classList.add('picked');
+        state.deckId = btn.dataset.deck;
+        state.queue = shuffle(DECKS[state.deckId].questions);
+        setTimeout(renderHandoff, wait(220));
+      });
+    });
+  }
+
+  /* ---------- ②/⑤ 手渡し・交代 ---------- */
+
+  function renderHandoff() {
+    const swap = state.swap;
+    setScene('handoff', `
+      <div class="hand-wrap">
+        <p class="hand-line">${swap ? '交代です' : '相手に渡してください'}</p>
+        <p class="hand-sub">${swap
+          ? 'スマホを、相手に渡してください。ここからは、次に答える人が操作します。'
+          : 'ここからは、答える人が操作します。'}</p>
+        <svg class="cross-hand" viewBox="0 0 120 8" aria-hidden="true">
+          <path class="ln" d="M0 4 H54" pathLength="1"/>
+          <path class="ls" d="M120 4 H66" pathLength="1"/>
+        </svg>
+      </div>
+      <div class="bottom-slot">
+        <button type="button" class="btn-main" id="takeBtn">受け取りました</button>
+      </div>
+    `);
+    document.getElementById('takeBtn').addEventListener('click', renderPick);
+  }
+
+  /* ---------- ③ 選択 → ④ 問い(同じDOMのまま育てる) ---------- */
+
+  function renderPick() {
+    const three = draw3();
+    setScene('pick', `
+      <p class="scene-label">${esc(DECKS[state.deckId].label)}</p>
+      <h2 class="pick-h" id="pickH">話せそうなものを、ひとつ選んでください</h2>
+      <p class="note pick-note" id="pickNote">話したくないものは、選ばずに置いておけます。</p>
+      <div class="picks" id="picks">
+        ${three.map((q) => `<button type="button" class="pick">${esc(q)}</button>`).join('')}
+      </div>
+      <div class="redraw" id="redrawWrap">
+        <button type="button" class="btn-ghost" id="redrawBtn">別の3つを見る</button>
+      </div>
+      <div id="askTail"></div>
+    `);
+    const picksEl = document.getElementById('picks');
+    picksEl.querySelectorAll('.pick').forEach((btn) => {
+      btn.addEventListener('click', () => choose(btn), { once: true });
+    });
+    document.getElementById('redrawBtn').addEventListener('click', () => {
+      const three2 = draw3();
+      picksEl.innerHTML = three2.map((q) => `<button type="button" class="pick">${esc(q)}</button>`).join('');
+      picksEl.querySelectorAll('.pick').forEach((btn) => {
+        btn.addEventListener('click', () => choose(btn), { once: true });
+      });
+    });
+  }
+
+  function choose(btn) {
+    const picksEl = document.getElementById('picks');
+    btn.classList.add('chosen');
+    document.getElementById('redrawWrap').hidden = true;
+    setTimeout(() => {
+      picksEl.querySelectorAll('.pick:not(.chosen)').forEach((el) => el.classList.add('gone'));
+      picksEl.classList.add('settled');
+      setTimeout(() => {
+        btn.classList.add('grown');
+        btn.disabled = true;
+        document.getElementById('pickH').hidden = true;
+        document.getElementById('pickNote').hidden = true;
+        document.getElementById('askTail').innerHTML = `
+          <svg class="turn-line" viewBox="0 0 160 8" aria-hidden="true">
+            ${state.turn === 'a'
+              ? '<path class="ln" d="M0 4 H74" pathLength="1"/>'
+              : '<path class="ls" d="M160 4 H86" pathLength="1"/>'}
+          </svg>
+          <p class="note ask-sub">話し終えたら、下を押してください。</p>
+          <div class="bottom-slot">
+            <button type="button" class="btn-main" id="doneBtn">話しました</button>
+          </div>
+        `;
+        document.getElementById('doneBtn').addEventListener('click', () => {
+          state.turn = (state.turn === 'a') ? 'b' : 'a';
+          state.swap = true;
+          renderHandoff();
+        });
+      }, wait(450));
+    }, wait(200));
+  }
+
+  /* ---------- ⑥ 終了 ---------- */
+
+  function renderEnd() {
+    setScene('end', `
+      <h2 class="end-h">今日はここまで</h2>
+      <p class="end-p">記録は残りません。いま話したことは、話した二人の中にだけ残ります。</p>
+      <p class="end-p2">何も書き留めずに閉じて大丈夫です。あとで思い出したいことがあれば、自分の言葉でメモしておいてください。</p>
+      <h3 class="next-h">このあと、気が向いたら</h3>
+      <div>
+        <a class="next-row" href="../karte/index.html">
+          <span class="t">現場のカルテ</span><span class="d">職場のしんどさを、カルテの形で書き起こす</span>
+        </a>
+        <a class="next-row" href="../tanaoroshi/index.html">
+          <span class="t">経験の棚卸し</span><span class="d">18の質問で、職務経歴書のたねをつくる</span>
+        </a>
+        <a class="next-row" href="../index.html">
+          <span class="t">BRIDGE</span><span class="d">この道具をつくっているプロジェクトの入口</span>
+        </a>
+      </div>
+      <p class="enough">何も開かなくても、今日はもう十分です。</p>
+      <div class="restart">
+        <button type="button" class="btn-ghost" id="restartBtn">最初に戻る</button>
+      </div>
+    `);
+    document.getElementById('restartBtn').addEventListener('click', renderCover);
+  }
+
+  exitBtn.addEventListener('click', renderEnd);
+  renderCover();
+})();
+</script>
+<script src="../shared/usage.js" defer></script>
+</body>
+</html>
