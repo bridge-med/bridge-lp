@@ -238,6 +238,9 @@ section.alt{background:var(--paper-2)}
 .foot-brand .dot{color:var(--vermilion)}
 .foot-tag{font:500 11px/1.7 var(--sans-jp);color:rgba(255,255,255,0.5);margin-bottom:18px}
 .foot-links{display:flex;gap:18px;justify-content:center;font:600 11px/1 var(--sans-en);letter-spacing:0.12em;text-transform:uppercase}
+/* 著作権表記。旧実装は inline style に color:rgba(255,255,255,0.4) を直書きしており、
+ * 藍地で3.59:1(AA未達)かつトークン非経由でダークから到達できなかった */
+.foot-copy{margin-top:24px;font:500 10px/1.5 var(--sans-jp);color:var(--ink-4)}
 
 /* reveal */
 [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
@@ -707,7 +710,7 @@ section.alt{background:var(--paper-2)}
     <a href="https://x.com/WataruPT1013" target="_blank">X</a>
     <a href="mailto:h.w19961013@gmail.com">Mail</a>
   </div>
-  <div style="margin-top:24px;font:500 10px/1.5 var(--sans-jp);color:rgba(255,255,255,0.4)">© 2026 BRIDGE — Hashimoto Wataru / Built by hand. No frameworks.</div>
+  <div class="foot-copy">© 2026 BRIDGE — Hashimoto Wataru / Built by hand. No frameworks.</div>
 </footer>
 
 <script>
