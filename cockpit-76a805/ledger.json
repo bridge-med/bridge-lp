@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-24",
+  "updated": "2026-07-25",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -23,7 +23,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-24"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "medboard",
@@ -39,7 +39,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-24"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "hire-board",
@@ -55,7 +55,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-11"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "interview-kit",
@@ -71,7 +71,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-24"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "consult-simulator",
@@ -87,7 +87,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-24"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "round-note",
@@ -152,7 +152,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-11"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "study-board",
@@ -168,7 +168,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-24"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "english-trainer",
@@ -184,7 +184,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-11"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "turnaround12",
@@ -389,7 +389,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "starter-kitsハブ(KIT 03)から導線接続(2026-07-16)。副業設計の収益の器。売れ行きは計測で見る",
-      "lastCommit": "2026-07-15"
+      "lastCommit": "2026-07-25"
     },
     {
       "id": "medops",
