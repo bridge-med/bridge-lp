@@ -67,7 +67,10 @@ p{text-wrap:pretty;word-break:auto-phrase;line-break:strict;overflow-wrap:break-
 a{color:inherit;text-decoration:none}
 img,svg{display:block;max-width:100%}
 button{font:inherit;background:none;border:none;cursor:pointer;color:inherit}
-::selection{background:var(--blue);color:#fff}
+/* 砂: テキストを選んでいる瞬間(第22条)。subpage.css と読みを揃える。
+ * 文字色に --navy を使わないのは、ダークで淡い藍に反転して砂地の上で1.68:1に
+ * なるため。--dark-sec は両テーマとも暗いままで、ライト5.62:1 / ダーク8.45:1。 */
+::selection{background:var(--dawn);color:var(--dark-sec)}
 .nowrap{white-space:nowrap}
 .br-pc{display:none}
 @media(min-width:720px){.br-pc{display:inline}}

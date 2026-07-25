@@ -146,10 +146,9 @@
     return `
     <section class="screen screen-top">
       <div class="crest" aria-hidden="true">
-        <svg viewBox="0 0 64 64" fill="none">
-          <circle cx="26" cy="30" r="15" fill="#DCEDF6" stroke="#5B93B8" stroke-width="2.5"/>
-          <circle cx="41" cy="26" r="11" fill="#DFF2EA" stroke="#5AA88F" stroke-width="2.5"/>
-          <circle cx="35" cy="41" r="9" fill="#FBEBD9" stroke="#D99A55" stroke-width="2.5"/>
+        <svg viewBox="0 0 64 64" fill="none" stroke-width="2.5" stroke-linecap="round">
+          <path class="cn" d="M14 47 L45 16"/>
+          <path class="cs" d="M20 16 L51 47"/>
         </svg>
       </div>
       <p class="quest-eyebrow">WORKPLACE MOYAMOYA CHECK</p>
@@ -245,7 +244,7 @@
     const compositeSecond = result.isComposite ? MOYA_TYPES[result.secondaryId] : null;
     const secondCard = compositeSecond ? `
       <div class="card result-sec result-second">
-        <h3><span class="sec-ico">${compositeSecond.emblem}</span>もうひとつの傾向:${esc(compositeSecond.name)}</h3>
+        <h3 class="has-mark"><span class="sec-ico">${compositeSecond.emblem}</span>もうひとつの傾向:${esc(compositeSecond.name)}</h3>
         <p class="sec-text">${esc(compositeSecond.catch)}</p>
         <p class="sec-text">${esc(compositeSecond.description)}</p>
       </div>` : '';
@@ -260,47 +259,47 @@
       ${primaryLabel ? `<p class="result-primary-label">${primaryLabel}</p>` : ''}
 
       <div class="card result-sec">
-        <h3><span class="sec-ico">🌟</span>あなたが大事にしていること</h3>
+        <h3>あなたが大事にしていること</h3>
         <ul>${list(type.values)}</ul>
       </div>
 
       <div class="card result-sec">
-        <h3><span class="sec-ico">🌫️</span>モヤモヤしやすい場面</h3>
+        <h3>モヤモヤしやすい場面</h3>
         <ul>${list(type.scenes)}</ul>
       </div>
 
       <div class="card result-sec">
-        <h3><span class="sec-ico">🏡</span>本当は求めている環境</h3>
+        <h3>本当は求めている環境</h3>
         <p class="sec-text">${esc(type.environment)}</p>
       </div>
 
       <div class="card result-sec">
-        <h3><span class="sec-ico">☀️</span>明日からできる小さな行動</h3>
+        <h3>明日からできる小さな行動</h3>
         <ol class="action-list">${list(type.actions)}</ol>
       </div>
 
       <div class="card result-sec">
-        <h3><span class="sec-ico">🧭</span>転職・異動を考える前に整理したいこと</h3>
+        <h3>転職・異動を考える前に整理したいこと</h3>
         <p class="sec-text">${esc(type.beforeMove)}</p>
       </div>
 
       <div class="card result-sec">
-        <h3><span class="sec-ico">🤝</span>相性の良い働き方</h3>
+        <h3>相性の良い働き方</h3>
         <p class="sec-text">${esc(type.workstyle)}</p>
       </div>
 
       <div class="card result-sec">
-        <h3><span class="sec-ico">🌱</span>伸ばすと楽になるスキル</h3>
+        <h3>伸ばすと楽になるスキル</h3>
         <p class="sec-text">${esc(type.skills)}</p>
       </div>
 
       <div class="card result-sec">
-        <h3><span class="sec-ico">🔍</span>回答の傾向</h3>
+        <h3>回答の傾向</h3>
         <div class="score-chart">${bars}</div>
       </div>
 
       <div class="card result-sec share-sec">
-        <h3><span class="sec-ico">🕊️</span>結果をシェアする</h3>
+        <h3>結果をシェアする</h3>
         <pre class="share-text" id="shareText">${esc(shareText(result))}</pre>
         <div class="share-btns">
           <button class="btn btn-primary btn-sm" data-action="copy">シェア文をコピー</button>
