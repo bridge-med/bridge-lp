@@ -137,23 +137,36 @@ canvas {
 .hud .caption {
   font: 600 clamp(15px, 2.2vw, 20px)/1.9 var(--mincho);
   color: var(--ink);
-  text-align: left;
+  text-align: center;
   min-height: calc(2 * 1.9em);
   transition: opacity .7s;
 }
 .hud .caption.fade { opacity: 0; }
 .hud .mode {
-  margin-top: 6px;
+  display: block;
+  margin: 6px auto 0;
   min-height: 44px;
-  padding: 10px 0;
+  padding: 10px 2px;
   background: none;
   border: none;
   font: 500 12px var(--sans);
   letter-spacing: .06em;
   color: var(--ink-3);
   cursor: pointer;
+  position: relative;
 }
-@media (hover: hover) { .hud .mode:hover { color: var(--ink-2); } }
+.hud .mode::after {
+  content: '';
+  position: absolute; left: 2px; right: 2px; bottom: 8px;
+  height: 1px; background: var(--sand); opacity: .45;
+  transition: opacity .3s;
+}
+@media (hover: hover) {
+  .hud .mode:hover { color: var(--ink-2); }
+  .hud .mode:hover::after { opacity: 1; }
+}
+.hud .mode:focus-visible::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hud .mode::after { transition: none; } }
 
 .words {
   max-width: 660px;
@@ -225,11 +238,11 @@ footer {
   <canvas id="cv" role="img" aria-label="小さな病院の断面図。一日の光と人の動きが流れる図です" aria-describedby="scene-note-body"></canvas>
 
   <div class="hud">
+    <div class="hud-line">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="dateEl"></div>
+    </div>
     <div aria-hidden="true">
-      <div class="hud-line">
-        <div class="clock" id="clock">--:--</div>
-        <div class="date" id="dateEl"></div>
-      </div>
       <div class="track"><i id="trackDot"></i></div>
       <div class="caption" id="caption"></div>
     </div>
@@ -683,9 +696,11 @@ function spawnersFor(min) {
 }
 
 function makePasser() {
+  // 拡張描画で画面がワールドより広いことがあるため、確実に画面外から出入りさせる
+  const off = L.W * 0.6;
   const fromL = Math.random() < 0.5;
-  const a = new Agent({ f: 1, x: fromL ? -20 : L.W + 20, kind: 'person', speed: 14,
-    plan: [go(1, fromL ? L.W + 20 : -20), gone()] });
+  const a = new Agent({ f: 1, x: fromL ? -off : L.W + off, kind: 'person', speed: 14,
+    plan: [go(1, fromL ? L.W + off : -off), gone()] });
   a.outside = true;
   return a;
 }
@@ -717,10 +732,15 @@ function fit() {
   const dpr = Math.min(2, devicePixelRatio || 1);
   cv.width = Math.round(rect.width * dpr);
   cv.height = Math.round(rect.height * dpr);
-  const s = Math.min(rect.width / L.W, rect.height / L.H);
+  // 空と地面は±Mで端まで伸びるので、ワールド全体を収めない。建物を基準に拡縮する
+  const bW = L.bx1 - L.bx0;
+  const bH = L.groundY - L.roofTop;
+  const GROUND_PX = 12;                 // 地面は「帯」ではなく下端の「際」
+  const s = Math.min((rect.width * 0.86) / bW, (rect.height * 0.78) / bH);
   scale = s;
-  ctx.setTransform(s * dpr, 0, 0, s * dpr,
-    ((rect.width - L.W * s) / 2) * dpr, ((rect.height - L.H * s) / 2) * dpr);
+  const offX = (rect.width - L.W * s) / 2;
+  const offY = rect.height - L.groundY * s - GROUND_PX;
+  ctx.setTransform(s * dpr, 0, 0, s * dpr, offX * dpr, offY * dpr);
 }
 addEventListener('resize', fit);
 
@@ -743,7 +763,6 @@ function drawSpine(pal) {
 
 function draw(min, nowSec, dt) {
   const pal = paletteAt(min);
-  ctx.clearRect(0, 0, L.W, L.H);
 
   // 空(2ストップのみ)。画面がワールドより広いときも端まで空と地面で満たす
   const M = 4000;
@@ -950,7 +969,7 @@ function draw(min, nowSec, dt) {
     }
   }
 
-  // 持ち場の人(live: いつ開いても誰かがいる)
+  // 持ち場の人(live: いつ開いても誰かがいる。周期11秒のごくゆっくりした微動)
   if (mode === 'live') {
     const posts = [[2, roomCx('ns') - 12, 'staff']];
     if (isLitNow('kitchen', min)) posts.push([1, roomCx('kitchen') + 8, 'staff']);
@@ -958,10 +977,12 @@ function draw(min, nowSec, dt) {
     if (isLitNow('waiting', min)) {
       posts.push([1, roomCx('waiting') - 20, 'person'], [1, roomCx('waiting') + 16, 'person']);
     }
-    for (const [f, x, kind] of posts) {
+    for (let i = 0; i < posts.length; i++) {
+      const [f, x, kind] = posts[i];
+      const sway = RM ? 0 : Math.sin(nowSec * 0.55 + i * 1.7) * 1.2;
       ctx.fillStyle = rgb(kind === 'staff' ? pal.dotStaff : pal.dotPerson);
       ctx.beginPath();
-      ctx.arc(x, walkY(f) - 5, kind === 'staff' ? 2.2 : 2.6, 0, Math.PI * 2);
+      ctx.arc(x + sway, walkY(f) - 5, kind === 'staff' ? 2.2 : 2.6, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -1009,7 +1030,7 @@ function switchMode() {
   crossing = null;
   prevMin = -1;
   t0 = performance.now();
-  nextErrandSec = (performance.now() - t0) / 1000 + 15;
+  nextErrandSec = 15;
   applyModeLabel();
 }
 modeBtn.addEventListener('click', switchMode);
@@ -1019,7 +1040,7 @@ function spawnErrand(min) {
   const day = min >= 360 && min < 1230;
   const staffFrom = [2, roomCx('ns')];
   const spots = day
-    ? [[1, roomCx('kitchen')], [3, roomCx('linen')], [2, roomCx('bath')], [1, roomCx('consult')], [3, roomCx('conf')]]
+    ? [[1, roomCx('kitchen')], [3, roomCx('linen')], [3, roomCx('bath')], [1, roomCx('consult')], [3, roomCx('conf')]]
     : [[1, roomCx('kitchen')], [3, roomCx('linen')]];
   const [f, x] = spots[Math.floor(Math.random() * spots.length)];
   agents.push(new Agent({ f: staffFrom[0], x: staffFrom[1], kind: 'staff', speed: 30,
@@ -1087,7 +1108,8 @@ function tick(now) {
     const cs = `${hh}:${mm}<small>:${ss}</small>`;
     if (clockEl.dataset.v !== cs) { clockEl.dataset.v = cs; clockEl.innerHTML = cs; }
     const d = new Date();
-    const ds = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} (${'日月火水木金土'[d.getDay()]})`;
+    const p2 = (n) => String(n).padStart(2, '0');
+    const ds = `${d.getFullYear()}/${p2(d.getMonth() + 1)}/${p2(d.getDate())} (${'日月火水木金土'[d.getDay()]})`;
     if (dateEl.textContent !== ds) dateEl.textContent = ds;
   }
   trackDot.style.left = `calc(${(min / 1440) * 100}% - 2px)`;

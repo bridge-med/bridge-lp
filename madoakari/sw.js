@@ -1,11 +1,11 @@
 /* 窓あかり — service worker(オフラインでも時計が開くように) */
 'use strict';
 
-const CACHE = 'madoakari-v1';
+const CACHE = 'madoakari-v2';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './manifest.webmanifest', './app/icon.svg'])));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './manifest.webmanifest', './app/icon.svg', './app/icon-maskable.svg'])));
 });
 
 self.addEventListener('activate', (e) => {
