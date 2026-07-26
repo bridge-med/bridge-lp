@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>窓あかり — 病院の一日を眺めるだけの作品 / BRIDGE</title>
+<meta name="description" content="小さな病院の断面図が、いまの時刻と同じ速さで動き続けます。昼に開けば昼の、夜中に開けば夜中の病院が見えます。一日を数分にまとめて見ることもできます。誰も見ていない時間にも続いている仕事を、ただ眺めるための作品です。登録不要・端末内で完結します。">
+<meta property="og:title" content="窓あかり — 病院の一日を眺めるだけの作品">
+<meta property="og:description" content="小さな病院の断面図が、いまの時刻と同じ速さで動き続けます。夜中に開けば、夜中の病院が見えます。ただ眺めるための作品です。登録不要・端末内で完結します。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/madoakari/">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/products/thumbs/madoakari.webp">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBFAF7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111521">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="窓あかり">
+<link rel="apple-touch-icon" href="app/icon-180.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%2316233E'/%3E%3Crect%20x='24'%20y='24'%20width='16'%20height='16'%20fill='%23F2EADB'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@400;500&family=Inter:wght@500&display=swap" rel="stylesheet">
+<style>
+/* 窓あかり — styles
+ * 誰も操作しない、眺めるだけの作品。canvasに枠を描かない。
+ * ページの地色はテーマ固定。canvasだけが昼夜を持つ。
+ * ライトの正午・ダークの深夜に、一日に一度だけ絵と紙の境目が消える。
+ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:        #FBFAF7;
+  --ink:       #1B1B1E;
+  --ink-2:     #45464C;
+  --ink-3:     #7D7E85;
+  --navy:      #16233E;
+  --sand:      #A98F63;
+  --line:   rgba(27, 27, 30, 0.10);
+
+  --mincho: 'Shippori Mincho B1', 'Noto Serif JP', serif;
+  --sans: 'Noto Sans JP', sans-serif;
+  --en:   'Inter', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #111521;
+    --ink:       #EDEAE2;
+    --ink-2:     #C2BFB6;
+    --ink-3:     #8A8D98;
+    --navy:      #D8DEEB;
+    --sand:      #C2A97E;
+    --line:   rgba(237, 234, 226, 0.10);
+  }
+}
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.8;
+  font-feature-settings: "palt" 1;
+}
+a { color: inherit; text-decoration: none; }
+
+/* 最初の一画面は時計: 絵+時刻で100svhを満たし、言葉はその下 */
+.stage {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+}
+.mark { padding: 18px 20px; }
+.mark a {
+  display: inline-block;
+  padding: 16px 8px;
+  margin: -16px -8px;
+  font: 600 11px var(--en);
+  letter-spacing: .3em;
+  color: var(--ink-2);
+}
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 18px 72px; }
+
+.head { max-width: 660px; padding: 22px 2px 26px; }
+.head h1 {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(20px, 3vw, 28px);
+  letter-spacing: .1em;
+  line-height: 1.6;
+}
+.head .sub {
+  margin-top: 2px;
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(13px, 2vw, 15px);
+  color: var(--ink-2);
+  letter-spacing: .06em;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.hud { max-width: 520px; width: 100%; margin: 12px auto 0; padding: 0 18px 14px; }
+.hud .hud-line { text-align: center; }
+.hud .clock {
+  font: 500 clamp(44px, 11vw, 80px)/1.1 var(--en);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+  color: var(--ink);
+}
+.hud .clock small {
+  font-size: .55em;
+  color: var(--ink-2);
+}
+.hud .date {
+  margin-top: 2px;
+  font: 500 clamp(13px, 3.4vw, 16px) var(--sans);
+  letter-spacing: .12em;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.hud .track { height: 1px; background: var(--line); margin: 14px 0 16px; position: relative; }
+.hud .track i {
+  position: absolute; top: -1.5px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--sand);
+}
+.hud .caption {
+  font: 600 clamp(15px, 2.2vw, 20px)/1.9 var(--mincho);
+  color: var(--ink);
+  text-align: center;
+  min-height: calc(2 * 1.9em);
+  transition: opacity .7s;
+}
+.hud .caption.fade { opacity: 0; }
+.hud .mode {
+  display: block;
+  margin: 6px auto 0;
+  min-height: 44px;
+  padding: 10px 2px;
+  background: none;
+  border: none;
+  font: 500 12px var(--sans);
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  cursor: pointer;
+  position: relative;
+}
+.hud .mode::after {
+  content: '';
+  position: absolute; left: 2px; right: 2px; bottom: 8px;
+  height: 1px; background: var(--sand); opacity: .45;
+  transition: opacity .3s;
+}
+@media (hover: hover) {
+  .hud .mode:hover { color: var(--ink-2); }
+  .hud .mode:hover::after { opacity: 1; }
+}
+.hud .mode:focus-visible::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hud .mode::after { transition: none; } }
+
+.words {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: clamp(80px, 14vh, 140px) 2px 0;
+}
+.words h2 {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(18px, 2.6vw, 22px);
+  letter-spacing: .06em;
+  line-height: 1.8;
+}
+.words p {
+  margin-top: 18px;
+  font-size: 14px;
+  line-height: 2.1;
+  color: var(--ink-2);
+}
+.words section + section { margin-top: 64px; }
+
+.next { max-width: 660px; margin: 72px auto 0; padding: 0 2px; }
+.next h2 {
+  font: 700 13px/1 var(--sans);
+  letter-spacing: .08em;
+  color: var(--ink-2);
+}
+.next-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  min-height: 64px;
+}
+.next-row .t {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.next-row .d {
+  font: 500 12px/1.8 var(--sans);
+  color: var(--ink-2);
+  text-align: right;
+  max-width: 220px;
+}
+
+footer {
+  max-width: 660px;
+  margin: 56px auto 0;
+  padding: 0 2px;
+  font: 500 11px var(--en);
+  letter-spacing: .2em;
+  color: var(--ink-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud .caption { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <header class="mark"><a href="../index.html">BRIDGE</a></header>
+
+  <canvas id="cv" role="img" aria-label="小さな病院の断面図。一日の光と人の動きが流れる図です" aria-describedby="scene-note-body"></canvas>
+
+  <div class="hud">
+    <div class="hud-line">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="dateEl"></div>
+    </div>
+    <div aria-hidden="true">
+      <div class="track"><i id="trackDot"></i></div>
+      <div class="caption" id="caption"></div>
+    </div>
+    <button class="mode" id="modeBtn" type="button"></button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <h1>窓あかり</h1>
+    <p class="sub">病院の一日を、ただ眺める</p>
+  </div>
+
+  <div class="words">
+    <section>
+      <p>小さな病院の断面図が、いまの時刻と同じ速さで動いています。昼に開けば昼の、夜中に開けば夜中の病院が見えます。どこかの病院を写したものではなく、想像で建てた三階建てです。</p>
+      <p>豆粒ほどの点はスタッフと患者、窓の灯りは、いま人がいる場所です。</p>
+      <p>押せるボタンは、ひとつだけです。一日を数分にまとめて見たいときに使います。あとは眺めるだけの作品なので、途中で閉じても、また開いても大丈夫です。</p>
+      <p>ホーム画面に置いておくこともできます。通信のないところでも開き、見ているあいだ、画面はついたままです。</p>
+    </section>
+    <section id="scene-note">
+      <h2 id="scene-note-h">この絵の中で起きていること</h2>
+      <div id="scene-note-body">
+        <p>三階建ての小さな病院を、横から切った断面です。一階に玄関と外来の待合、診察室、レントゲン室、平行棒の並ぶリハビリ室、調理場。二階は病室が五つと休憩室、それに一日中灯っているナースステーション。三階は病室と浴室、リネン庫、カンファレンス室です。</p>
+        <p>動く点は、藍色が働いている人、炭色が患者さんと家族で、藍のほうが少し速く歩きます。朝8時半と夕方5時半、玄関で二つの流れがすれ違う。深夜1時半にナースコールがひとつ点滅し、点がひとつそこへ向かう。3時には、眠れない人の読書灯。外の道を通る人は、一日に三度だけ。時刻はふだん、実際の時間と同じ速さで進みます。一日を数分で見るときだけ速くなりますが、そのときも人の歩く速さは変えていません。</p>
+      </div>
+    </section>
+    <section>
+      <h2>誰も見ていない時間について</h2>
+      <p>病院の灯りは、見ている人がいなくてもついています。深夜2時の廊下を歩く人がいて、5時半には調理場に火が入る。立ち会うのは、たいていその場にいる数人だけです。</p>
+      <p>BRIDGEの道具は、思考の型(評価→理解→設計→実践→再評価)のどこかを支えるものとして作っています。この作品は、そこから外れています。仕事を前に進めるためではなく、続いている仕事のほうを見るために作りました。時計として使ってもらってもかまいません。時刻を知るついでに、いま誰かが働いていることが目に入る。それくらいのものとして、ここに置いています。</p>
+      <p>増やしたい選択肢は、ひとつだけです。自分が働いている時間を、いちど外から眺めてみること。眺めたあとで何をするかは、決めなくてかまいません。</p>
+    </section>
+  </div>
+
+  <nav class="next" aria-label="次の行き先">
+    <h2>見終えたら、どこへでも</h2>
+    <a class="next-row" href="../philosophy/index.html">
+      <span class="t">Philosophy</span><span class="d">BRIDGEが、人から考える理由</span>
+    </a>
+    <a class="next-row" href="../clinic-flow-3d/index.html">
+      <span class="t">Clinic Town 3D</span><span class="d">今度は、病院を動かす側で</span>
+    </a>
+    <a class="next-row" href="../index.html">
+      <span class="t">Home</span><span class="d">ほかの道具も、置いてあります</span>
+    </a>
+  </nav>
+
+  <footer>&copy; BRIDGE</footer>
+</div>
+
+<script>
+'use strict';
+
+/* ================================================================
+   窓あかり — アンビエントシミュレーション
+   - 論理ワールド固定(wide 1200x760 / tall 760x1000)。DOM実寸に依存しない
+   - 1日 = 240秒。人の歩行だけは実時間の速さで動く
+   - 色はすべて PALETTE に集約(4系統の中間色のみ)
+   - 署名: 砂の縦動線が床スラブとの交差で7単位切れる。隙間を通るのは人の点だけ
+   ================================================================ */
+
+const DAY_SECONDS = 240;
+const START_MIN = 330;                 // 表示上の一日は5:30から
+const SEAM_MIN = 240;                  // ループの継ぎ目(スポーン履歴の掃除)は4:00
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- パレット(時刻キーフレーム。全hexはここのみ) ---------------- */
+const PALETTE = [
+  { h: 2.0,  skyTop: '#10141F', skyBot: '#171B26', ground: '#14171D', structure: '#171C26', roomOff: '#12161E', roomOn: '#B3A184', line: '#39415A', dotStaff: '#7B89A8', dotPerson: '#63656C', sand: '#C2A97E' },
+  { h: 5.5,  skyTop: '#18223A', skyBot: '#3F4249', ground: '#22262D', structure: '#1E242F', roomOff: '#171C25', roomOn: '#B3A184', line: '#47516B', dotStaff: '#8B9BBC', dotPerson: '#6E7078', sand: '#C2A97E' },
+  { h: 7.0,  skyTop: '#63728C', skyBot: '#C3B7A3', ground: '#6F6D67', structure: '#726F66', roomOff: '#5C5A55', roomOn: '#D6C4A4', line: '#3B4661', dotStaff: '#24365C', dotPerson: '#55565C', sand: '#B79A6E' },
+  { h: 9.0,  skyTop: '#A9B4C6', skyBot: '#EDE6D8', ground: '#C6C1B5', structure: '#B9B4A9', roomOff: '#9E9A92', roomOn: '#F2EADB', line: '#2C3A57', dotStaff: '#16233E', dotPerson: '#45464C', sand: '#A98F63' },
+  { h: 12.0, skyTop: '#C4CBD6', skyBot: '#FBFAF7', ground: '#DCD8CD', structure: '#CFCAC0', roomOff: '#B3AFA7', roomOn: '#FBFAF7', line: '#24365C', dotStaff: '#16233E', dotPerson: '#45464C', sand: '#A98F63' },
+  { h: 15.0, skyTop: '#BCC4D2', skyBot: '#F4EFE6', ground: '#D5D0C4', structure: '#C7C2B7', roomOff: '#AAA69E', roomOn: '#F7F2E9', line: '#24365C', dotStaff: '#16233E', dotPerson: '#45464C', sand: '#A98F63' },
+  { h: 17.5, skyTop: '#8E9AB1', skyBot: '#D9CBB2', ground: '#A9A498', structure: '#A09A8E', roomOff: '#85817A', roomOn: '#E4D6BA', line: '#2C3A57', dotStaff: '#1B2947', dotPerson: '#4C4D53', sand: '#A98F63' },
+  { h: 19.5, skyTop: '#3A4661', skyBot: '#6E6A63', ground: '#4A4C50', structure: '#454A54', roomOff: '#3A3E47', roomOn: '#D6C4A4', line: '#4A5470', dotStaff: '#6E7E9E', dotPerson: '#5E6067', sand: '#BFA678' },
+  { h: 22.0, skyTop: '#1C2438', skyBot: '#2C3140', ground: '#262A32', structure: '#252A35', roomOff: '#1E232C', roomOn: '#BCA98C', line: '#414A64', dotStaff: '#7B89A8', dotPerson: '#63656C', sand: '#C2A97E' },
+];
+
+function hex2rgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+const lerp = (a, b, t) => a + (b - a) * t;
+function mixHex(h1, h2, t) {
+  const a = hex2rgb(h1), b = hex2rgb(h2);
+  return [Math.round(lerp(a[0], b[0], t)), Math.round(lerp(a[1], b[1], t)), Math.round(lerp(a[2], b[2], t))];
+}
+const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const mixRgb = (a, b, t) => [0, 1, 2].map(i => Math.round(lerp(a[i], b[i], t)));
+
+function paletteAt(min) {
+  const h = min / 60;
+  const ks = PALETTE;
+  let i = ks.length - 1;
+  for (let k = 0; k < ks.length; k++) { if (h >= ks[k].h) i = k; }
+  const a = ks[i], b = ks[(i + 1) % ks.length];
+  const span = (b.h - a.h + 24) % 24 || 24;
+  const t = ((h - a.h + 24) % 24) / span;
+  const out = {};
+  for (const key of Object.keys(a)) {
+    if (key === 'h') continue;
+    out[key] = mixHex(a[key], b[key], t);
+  }
+  return out;
+}
+
+/* ---------------- レイアウト(wide / tall) ---------------- */
+/* 部屋: {id, f, x0, x1} 階は 1..3。fb(床下端)はレイアウトから引く */
+const LAYOUTS = {
+  wide: {
+    W: 1200, H: 760,
+    skyBot: 296, roofTop: 296, roofBot: 304,
+    fb: { 1: 700, 2: 552, 3: 422 },
+    top: { 1: 552, 2: 422, 3: 304 },
+    bx0: 150, bx1: 1050,
+    groundY: 700,
+    spineX: 625, spineY0: 310, spineY1: 690,
+    bay: [600, 700],
+    tank: { x0: 880, x1: 960, y0: 250, y1: 288, legs: [895, 945] },
+    speedScale: 1,
+    rooms: [
+      { id: 'entrance', f: 1, x0: 150, x1: 300 },
+      { id: 'waiting',  f: 1, x0: 300, x1: 505 },
+      { id: 'consult',  f: 1, x0: 505, x1: 600 },
+      { id: 'rehab',    f: 1, x0: 700, x1: 830 },
+      { id: 'xray',     f: 1, x0: 830, x1: 925 },
+      { id: 'kitchen',  f: 1, x0: 925, x1: 1050 },
+      { id: 'wardA',    f: 2, x0: 150, x1: 275 },
+      { id: 'wardB',    f: 2, x0: 275, x1: 395 },
+      { id: 'wardC',    f: 2, x0: 395, x1: 500 },
+      { id: 'wardD',    f: 2, x0: 500, x1: 600 },
+      { id: 'ns',       f: 2, x0: 700, x1: 860 },
+      { id: 'wardE',    f: 2, x0: 860, x1: 960 },
+      { id: 'rest',     f: 2, x0: 960, x1: 1050 },
+      { id: 'wardF',    f: 3, x0: 150, x1: 290 },
+      { id: 'wardG',    f: 3, x0: 290, x1: 410 },
+      { id: 'wardH',    f: 3, x0: 410, x1: 520 },
+      { id: 'bath',     f: 3, x0: 520, x1: 600 },
+      { id: 'linen',    f: 3, x0: 700, x1: 800 },
+      { id: 'conf',     f: 3, x0: 800, x1: 1050 },
+    ],
+    wards2: ['wardA', 'wardB', 'wardC', 'wardD', 'wardE'],
+    wards3: ['wardF', 'wardG', 'wardH'],
+  },
+  tall: {
+    W: 760, H: 1000,
+    skyBot: 452, roofTop: 452, roofBot: 460,
+    fb: { 1: 940, 2: 768, 3: 608 },
+    top: { 1: 768, 2: 608, 3: 460 },
+    bx0: 60, bx1: 700,
+    groundY: 940,
+    spineX: 400, spineY0: 466, spineY1: 930,
+    bay: [386, 414],
+    tank: { x0: 560, x1: 630, y0: 406, y1: 444, legs: [575, 615] },
+    speedScale: 0.8,
+    rooms: [
+      { id: 'entrance', f: 1, x0: 60,  x1: 180 },
+      { id: 'waiting',  f: 1, x0: 180, x1: 320 },
+      { id: 'consult',  f: 1, x0: 320, x1: 386 },
+      { id: 'rehab',    f: 1, x0: 414, x1: 520 },
+      { id: 'xray',     f: 1, x0: 520, x1: 600 },
+      { id: 'kitchen',  f: 1, x0: 600, x1: 700 },
+      { id: 'wardA',    f: 2, x0: 60,  x1: 142 },
+      { id: 'wardB',    f: 2, x0: 142, x1: 224 },
+      { id: 'wardC',    f: 2, x0: 224, x1: 306 },
+      { id: 'wardD',    f: 2, x0: 306, x1: 386 },
+      { id: 'ns',       f: 2, x0: 414, x1: 550 },
+      { id: 'wardE',    f: 2, x0: 550, x1: 630 },
+      { id: 'rest',     f: 2, x0: 630, x1: 700 },
+      { id: 'wardF',    f: 3, x0: 60,  x1: 190 },
+      { id: 'wardG',    f: 3, x0: 190, x1: 300 },
+      { id: 'bath',     f: 3, x0: 300, x1: 386 },
+      { id: 'linen',    f: 3, x0: 414, x1: 540 },
+      { id: 'conf',     f: 3, x0: 540, x1: 700 },
+    ],
+    wards2: ['wardA', 'wardB', 'wardC', 'wardD', 'wardE'],
+    wards3: ['wardF', 'wardG'],
+  },
+};
+
+let L = LAYOUTS.wide;
+let roomById = {};
+function indexRooms() {
+  roomById = Object.fromEntries(L.rooms.map(r => [r.id, r]));
+}
+const roomCx = (id) => (roomById[id].x0 + roomById[id].x1) / 2;
+const walkY = (f) => L.fb[f] - 22;
+const openY = (f) => L.fb[f] - 44;
+
+/* ---------------- 灯りスケジュール(分。部屋ごとに±のずらしを固定で持つ) ---------------- */
+function litSchedule() {
+  const S = {};
+  const set = (id, spans) => { if (roomById[id]) S[id] = spans; };
+  set('ns', [[0, 1440]]);
+  set('kitchen', [[310, 780], [960, 1170]]);
+  set('entrance', [[450, 1080]]);
+  set('waiting', [[450, 1080]]);
+  set('consult', [[510, 1020]]);
+  set('rehab', [[540, 990]]);
+  set('xray', [[595, 640], [880, 915]]);
+  set('rest', [[715, 810], [1080, 1140]]);
+  set('bath', [[810, 960]]);
+  set('linen', [[480, 486], [900, 906]]);
+  set('conf', [[600, 720], [858, 945]]);
+  const wards = L.wards2.concat(L.wards3);
+  wards.forEach((id, i) => {
+    const jitterOn = (i * 7) % 41 - 20;          // ±20分
+    const jitterOff = (i * 11) % 41 - 20;
+    S[id] = [[360 + jitterOn, 470 + (i * 13) % 40], [1010 + (i * 9) % 35, 1260 + jitterOff]];
+  });
+  return S;
+}
+let LIT = {};
+let litT = {};                                    // 部屋ごとの灯り補間値 0..1
+
+const isLitNow = (id, min) => !!LIT[id] && LIT[id].some(([a, b]) => min >= a && min <= b);
+
+/* ---------------- キャプション(editor最終稿) ---------------- */
+const CAPTIONS = [
+  { m:  330, s: '調理場に、最初の灯り' },
+  { m:  360, s: '病室のカーテンが、順に開く' },
+  { m:  420, s: '朝食の配膳車が、病棟を回りはじめる' },
+  { m:  480, s: '夜勤の記録が、まだ終わらない' },
+  { m:  510, s: '玄関で、帰る人と来る人がすれ違う' },
+  { m:  540, s: '外来の待合が、少しずつ埋まる' },
+  { m:  600, s: 'レントゲン室の扉の上で、ランプが点く' },
+  { m:  660, s: 'リハビリ室に、平行棒の影' },
+  { m:  720, s: '休憩室に、ひとりずつ戻ってくる' },
+  { m:  810, s: '紙袋を提げた家族が、エレベーターを待つ' },
+  { m:  870, s: 'カンファレンス室に、書きかけのホワイトボード' },
+  { m:  960, s: '退院の荷物が、玄関を出ていく' },
+  { m: 1020, s: '外来の灯りが、端から消えていく' },
+  { m: 1140, s: 'ナースステーションで、夜勤への申し送り' },
+  { m: 1260, s: '消灯のあと、廊下の灯りが半分になる' },
+  { m: 1380, s: '見回りの足音が、いちばん端の部屋まで' },
+  { m: 1530, s: 'ナースコールが、ひとつ光る' },
+  { m: 1620, s: '眠れない人の、小さな読書灯' },
+  { m: 1740, s: '東の窓から、色が戻る' },
+  { m: 1755, s: 'また、調理場に灯り' },
+];
+
+/* ---------------- エージェント ---------------- */
+/* 全員が同じ円。区別は色と速度と軌跡だけ(第25条) */
+const go = (f, x) => ({ type: 'go', f, x });
+const hold = (sec) => ({ type: 'wait', sec });
+const gone = () => ({ type: 'gone' });
+
+class Agent {
+  constructor(opts) {
+    this.f = opts.f; this.x = opts.x;
+    this.kind = opts.kind || 'staff';           // staff | person
+    this.r = this.kind === 'staff' ? 2.2 : 2.6;
+    this.speed = (opts.speed || (this.kind === 'staff' ? 46 : 26)) * L.speedScale;
+    this.plan = opts.plan || [];
+    this.phase = Math.random() * 6.28;
+    this.done = false;
+  }
+  update(dt, nowSec) {
+    if (this.done) return;
+    const cur = this.plan[0];
+    if (!cur) { this.done = true; return; }
+    if (cur.type === 'wait') {
+      if (!cur._until) cur._until = nowSec + cur.sec;
+      if (nowSec >= cur._until) this.plan.shift();
+      return;
+    }
+    if (cur.type === 'gone') { this.done = true; return; }
+    if (RM) {                                    // reduced-motion: 移動しない。所在だけ更新
+      this.f = cur.f; this.x = cur.x;
+      this.plan.shift();
+      return;
+    }
+    if (Math.abs(this.f - cur.f) > 0.02) {
+      if (Math.abs(this.x - L.spineX) > 3) {
+        this.x += Math.sign(L.spineX - this.x) * this.speed * dt;
+      } else {
+        this.x = L.spineX;
+        const df = Math.sign(cur.f - this.f) * dt * (this.speed / 60);
+        this.f = Math.abs(cur.f - (this.f + df)) < 0.04 ? cur.f : this.f + df;
+      }
+    } else if (Math.abs(this.x - cur.x) > 3) {
+      this.x += Math.sign(cur.x - this.x) * this.speed * dt;
+    } else {
+      this.f = cur.f; this.x = cur.x;
+      this.plan.shift();
+    }
+  }
+}
+
+let agents = [];
+let spawned = new Set();
+let nurseCall = null;                            // {room, arrived}
+let crossing = null;                             // {startSec, dir}
+let corrT = 0.16;                                // 廊下の灯りの補間値
+
+function outX(side) { return side === 'L' ? L.bx0 - 190 : L.bx1 + 150; }
+
+function spawnersFor(min) {
+  const out = [];
+  const at = (t, key, fn) => {
+    if (min >= t && min < t + 3.0 && !spawned.has(key)) { spawned.add(key); out.push(fn); }
+  };
+  const wards2 = L.wards2, wards3 = L.wards3;
+
+  // 5:30 調理場に早出
+  at(330, 'cook', () => [0, 1].map(i => new Agent({ f: 1, x: outX('L') + i * 10, kind: 'staff', speed: 34,
+    plan: [hold(i * 2.5), go(1, roomCx('kitchen') - 14 + i * 28), hold(9999)] })));
+
+  // 6:00 検温ラウンド
+  at(360, 'round6', () => [
+    new Agent({ f: 2, x: roomCx('ns'), kind: 'staff', speed: 34,
+      plan: wards2.flatMap(w => [go(2, roomCx(w)), hold(2.6)]).concat([go(2, roomCx('ns')), gone()]) }),
+    new Agent({ f: 2, x: roomCx('ns') + 14, kind: 'staff', speed: 34,
+      plan: [hold(2), ...wards3.flatMap(w => [go(3, roomCx(w)), hold(2.6)]), go(2, roomCx('ns')), gone()] }),
+  ]);
+
+  // 7:00 配膳車
+  at(420, 'meal-am', () => [new Agent({ f: 1, x: roomCx('kitchen'), kind: 'staff', speed: 30,
+    plan: [go(2, roomCx(wards2[0])), go(2, roomCx(wards2[wards2.length - 1])), hold(2),
+           go(3, roomCx(wards3[0])), go(3, roomCx(wards3[wards3.length - 1])), hold(2),
+           go(1, roomCx('kitchen')), gone()] })]);
+
+  // 7:20 外を通る人(1回目)
+  at(440, 'pass1', () => [makePasser()]);
+
+  // 8:00 夜勤の記録
+  at(480, 'records', () => [new Agent({ f: 2, x: roomCx('ns') - 18, kind: 'staff',
+    plan: [hold(26), gone()] })]);
+
+  // 8:30 すれ違い(朝)
+  at(508, 'shift-am', () => {
+    crossing = { startSec: null, min: 510 };
+    const dest = [
+      [2, roomCx('ns')], [3, roomCx('linen')],
+      [1, roomCx('consult')], [1, roomCx('rehab')], [1, roomCx('kitchen')],
+    ];
+    const arrive = dest.map((d, i) => new Agent({ f: 1, x: outX('L') - i * 26, kind: 'staff', speed: 38,
+      plan: [hold(i * 1.1), go(1, roomCx('entrance')), go(d[0], d[1]), hold(i < 2 ? 9999 : 30), ...(i < 2 ? [] : [gone()])] }));
+    const leave = [0, 1, 2].map(i => new Agent({ f: 2, x: roomCx('ns') + i * 10, kind: 'staff', speed: 34,
+      plan: [hold(2 + i * 2), go(1, roomCx('entrance')), go(1, outX('L')), gone()] }));
+    return arrive.concat(leave);
+  });
+
+  // 9:00-11:30 外来
+  for (let k = 0; k < 6; k++) {
+    at(540 + k * 24, 'op' + k, () => {
+      const w = roomById.waiting;
+      const seat = w.x0 + 18 + (k % 4) * ((w.x1 - w.x0 - 36) / 3);
+      return [new Agent({ f: 1, x: outX('L'), kind: 'person',
+        plan: [go(1, seat), hold(8 + (k % 3) * 5),
+               go(1, roomCx('consult')), hold(6),
+               ...(k === 2 ? [go(1, roomCx('xray')), hold(8), go(1, roomCx('consult')), hold(4)] : []),
+               go(1, outX('L')), gone()] })];
+    });
+  }
+
+  // 11:00 リハビリ室(平行棒の往復)
+  at(655, 'rehab', () => {
+    const r = roomById.rehab;
+    return [
+      new Agent({ f: 2, x: roomCx(wards2[1]), kind: 'person', speed: 14,
+        plan: [go(1, r.x0 + 22), ...Array.from({ length: 6 }, (_, i) => go(1, i % 2 ? r.x0 + 22 : r.x1 - 22)),
+               go(2, roomCx(wards2[1])), gone()] }),
+      new Agent({ f: 1, x: roomCx('rehab'), kind: 'staff', speed: 14,
+        plan: [...Array.from({ length: 7 }, (_, i) => go(1, i % 2 ? r.x0 + 40 : r.x1 - 40)), hold(15), gone()] }),
+    ];
+  });
+
+  // 12:00 休憩室にひとりずつ
+  at(720, 'lunch', () => [0, 1, 2].map(i => {
+    const home = [[1, roomCx('consult')], [2, roomCx('ns')], [1, roomCx('kitchen')]][i];
+    return new Agent({ f: home[0], x: home[1], kind: 'staff',
+      plan: [hold(i * 5), go(2, roomCx('rest')), hold(14), go(home[0], home[1]), gone()] });
+  }));
+
+  // 13:30 面会の家族(縦動線の前で待つ)
+  at(810, 'visitor', () => [new Agent({ f: 1, x: outX('L'), kind: 'person', speed: 20,
+    plan: [go(1, L.spineX - 16), hold(6), go(2, roomCx(L.wards2[2] || L.wards2[1])), hold(18), go(1, outX('L')), gone()] })]);
+
+  // 13:40 外を通る人(2回目)
+  at(820, 'pass2', () => [makePasser()]);
+
+  // 14:30 カンファレンス
+  at(858, 'conf', () => [0, 1, 2].map(i => {
+    const home = [[2, roomCx('ns')], [1, roomCx('consult')], [2, roomCx(wards2[0])]][i];
+    const c = roomById.conf;
+    return new Agent({ f: home[0], x: home[1], kind: 'staff',
+      plan: [hold(i * 2.2), go(c.f, c.x0 + 26 + i * 22), hold(32), go(home[0], home[1]), gone()] });
+  }));
+
+  // 16:00 退院
+  at(960, 'discharge', () => {
+    const w = wards2[wards2.length - 1];
+    return [
+      new Agent({ f: 2, x: roomCx(w), kind: 'person', speed: 18,
+        plan: [go(1, roomCx('entrance')), hold(3), go(1, outX('L')), gone()] }),
+      new Agent({ f: 2, x: roomCx(w) + 12, kind: 'person', speed: 18,
+        plan: [hold(1), go(1, roomCx('entrance')), hold(3), go(1, outX('L')), gone()] }),
+    ];
+  });
+
+  // 17:30 すれ違い(夕)
+  at(1048, 'shift-pm', () => {
+    crossing = { startSec: null, min: 1050 };
+    const arrive = [0, 1].map(i => new Agent({ f: 1, x: outX('L') - i * 30, kind: 'staff', speed: 38,
+      plan: [hold(i * 1.4), go(1, roomCx('entrance')), go(2, roomCx('ns') + i * 12), hold(9999)] }));
+    const leave = [0, 1, 2, 3].map(i => {
+      const from = [[1, roomCx('consult')], [1, roomCx('rehab')], [2, roomCx(wards2[0])], [1, roomCx('kitchen')]][i];
+      return new Agent({ f: from[0], x: from[1], kind: 'staff', speed: 34,
+        plan: [hold(1.5 + i * 1.6), go(1, roomCx('entrance')), go(1, outX('L')), gone()] });
+    });
+    return arrive.concat(leave);
+  });
+
+  // 18:00 夕食の配膳車
+  at(1080, 'meal-pm', () => [new Agent({ f: 1, x: roomCx('kitchen'), kind: 'staff', speed: 30,
+    plan: [go(2, roomCx(wards2[0])), go(2, roomCx(wards2[wards2.length - 1])), hold(2),
+           go(3, roomCx(wards3[0])), go(3, roomCx(wards3[wards3.length - 1])), hold(2),
+           go(1, roomCx('kitchen')), gone()] })]);
+
+  // 19:00 申し送り
+  at(1140, 'handover', () => [0, 1].map(i => new Agent({ f: 2, x: roomCx('ns') - 20 + i * 8, kind: 'staff',
+    plan: [hold(20), go(1, roomCx('entrance')), go(1, outX('L')), gone()] })));
+
+  // 20:10 外を通る人(3回目)
+  at(1210, 'pass3', () => [makePasser()]);
+
+  // 21:00 消灯ラウンド
+  at(1256, 'round21', () => [new Agent({ f: 2, x: roomCx('ns'), kind: 'staff', speed: 30,
+    plan: [...wards2.flatMap(w => [go(2, roomCx(w)), hold(2)]),
+           ...wards3.flatMap(w => [go(3, roomCx(w)), hold(2)]),
+           go(2, roomCx('ns')), gone()] })]);
+
+  // 23:00 見回り(いちばん端の部屋まで、ゆっくり)
+  at(1380, 'round23', () => [new Agent({ f: 2, x: roomCx('ns'), kind: 'staff', speed: 12,
+    plan: [...wards2.flatMap(w => [go(2, roomCx(w)), hold(3)]), go(2, roomCx('ns')), gone()] })]);
+
+  // 1:30 ナースコール
+  at(90, 'call', () => {
+    nurseCall = { room: L.wards2[2] || L.wards2[1], arrived: false };
+    return [new Agent({ f: 2, x: roomCx('ns'), kind: 'staff', speed: 26,
+      plan: [hold(2), go(2, roomCx(nurseCall.room)), hold(12), go(2, roomCx('ns')), gone()],
+      })];
+  });
+
+  // 2:30 夜間ラウンド(3F)
+  at(150, 'round2', () => [new Agent({ f: 2, x: roomCx('ns'), kind: 'staff', speed: 10,
+    plan: [...wards3.flatMap(w => [go(3, roomCx(w)), hold(3.5)]), go(2, roomCx('ns')), gone()] })]);
+
+  return out;
+}
+
+function makePasser() {
+  // 拡張描画で画面がワールドより広いことがあるため、確実に画面外から出入りさせる
+  const off = L.W * 0.6;
+  const fromL = Math.random() < 0.5;
+  const a = new Agent({ f: 1, x: fromL ? -off : L.W + off, kind: 'person', speed: 14,
+    plan: [go(1, fromL ? L.W + off : -off), gone()] });
+  a.outside = true;
+  return a;
+}
+
+/* ---------------- 描画 ---------------- */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const clockEl = document.getElementById('clock');
+const dateEl = document.getElementById('dateEl');
+const capEl = document.getElementById('caption');
+const trackDot = document.getElementById('trackDot');
+
+let scale = 1;
+function pickLayout() {
+  const next = (innerHeight > innerWidth && innerWidth < 720) ? LAYOUTS.tall : LAYOUTS.wide;
+  if (next !== L) {
+    L = next;
+    indexRooms();
+    LIT = litSchedule();
+    litT = {};
+    agents = [];
+    // 発火済みイベントは日をまたぐまで再発火させない(部屋座標が変わるため人は入れ替える)
+    cv.classList.toggle('tall', L === LAYOUTS.tall);
+  }
+}
+function fit() {
+  pickLayout();
+  const rect = cv.getBoundingClientRect();
+  const dpr = Math.min(2, devicePixelRatio || 1);
+  cv.width = Math.round(rect.width * dpr);
+  cv.height = Math.round(rect.height * dpr);
+  // 空と地面は±Mで端まで伸びるので、ワールド全体を収めない。建物を基準に拡縮する
+  const bW = L.bx1 - L.bx0;
+  const bH = L.groundY - L.roofTop;
+  const GROUND_PX = 12;                 // 地面は「帯」ではなく下端の「際」
+  const s = Math.min((rect.width * 0.86) / bW, (rect.height * 0.78) / bH);
+  scale = s;
+  const offX = (rect.width - L.W * s) / 2;
+  const offY = rect.height - L.groundY * s - GROUND_PX;
+  ctx.setTransform(s * dpr, 0, 0, s * dpr, offX * dpr, offY * dpr);
+}
+addEventListener('resize', fit);
+
+const lw = (w) => { ctx.lineWidth = Math.max(w, 0.6 / scale); };
+
+function drawSpine(pal) {
+  // 砂の縦動線。床スラブとの交差で7単位の隙間(この作品で最も重要な1行)
+  const G = 3.5;
+  const gaps = [L.fb[2], L.fb[3]];
+  ctx.strokeStyle = rgb(pal.sand);
+  lw(1.6);
+  let segs = [[L.spineY0, L.spineY1]];
+  for (const gy of gaps) {
+    segs = segs.flatMap(([a, b]) => (gy > a && gy < b) ? [[a, gy - G], [gy + G, b]] : [[a, b]]);
+  }
+  for (const [a, b] of segs) {
+    ctx.beginPath(); ctx.moveTo(L.spineX, a); ctx.lineTo(L.spineX, b); ctx.stroke();
+  }
+}
+
+function draw(min, nowSec, dt) {
+  const pal = paletteAt(min);
+
+  // 空(2ストップのみ)。画面がワールドより広いときも端まで空と地面で満たす
+  const M = 4000;
+  ctx.fillStyle = rgb(pal.skyTop);
+  ctx.fillRect(-M, -M, L.W + 2 * M, M);
+  const g = ctx.createLinearGradient(0, 0, 0, L.skyBot);
+  g.addColorStop(0, rgb(pal.skyTop));
+  g.addColorStop(1, rgb(pal.skyBot));
+  ctx.fillStyle = g;
+  ctx.fillRect(-M, 0, L.W + 2 * M, L.skyBot);
+
+  // 空(建物より下の帯) + 地面
+  ctx.fillStyle = rgb(pal.skyBot);
+  ctx.fillRect(-M, L.skyBot, L.W + 2 * M, L.groundY - L.skyBot);
+  ctx.fillStyle = rgb(pal.ground);
+  ctx.fillRect(-M, L.groundY, L.W + 2 * M, L.H - L.groundY + M);
+
+  // 躯体
+  ctx.fillStyle = rgb(pal.structure);
+  ctx.fillRect(L.bx0, L.roofTop, L.bx1 - L.bx0, L.groundY - L.roofTop);
+
+  // 貯水タンク(屋上の異物はこれ1つだけ。塗って塊にする)
+  ctx.fillStyle = rgb(pal.structure);
+  ctx.fillRect(L.tank.x0, L.tank.y0, L.tank.x1 - L.tank.x0, L.tank.y1 - L.tank.y0);
+  ctx.strokeStyle = rgb(pal.line);
+  lw(1.2);
+  ctx.strokeRect(L.tank.x0, L.tank.y0, L.tank.x1 - L.tank.x0, L.tank.y1 - L.tank.y0);
+  for (const legX of L.tank.legs) {
+    ctx.beginPath(); ctx.moveTo(legX, L.tank.y1); ctx.lineTo(legX, L.roofTop); ctx.stroke();
+  }
+
+  // 部屋(灯りは光ではなく、面の色。1.2秒かけて補間)
+  for (const r of L.rooms) {
+    const target = isLitNow(r.id, min) ? 1 : 0;
+    const cur = litT[r.id] ?? target;
+    litT[r.id] = cur + (target - cur) * Math.min(1, dt / 1.2);
+    ctx.fillStyle = rgb(mixRgb(pal.roomOff, pal.roomOn, litT[r.id]));
+    ctx.fillRect(r.x0, L.top[r.f] + 2, r.x1 - r.x0, openY(r.f) - L.top[r.f] - 2);
+  }
+
+  // 廊下の灯り(21:00にキャプションどおり半分へ絞る)
+  {
+    const target = (min >= 360 && min < 1260) ? 0.16 : 0.06;
+    corrT += (target - corrT) * Math.min(1, dt / 1.2);
+    ctx.fillStyle = rgba(pal.roomOn, corrT);
+    for (let f = 1; f <= 3; f++) {
+      ctx.fillRect(L.bx0, openY(f), L.bx1 - L.bx0, L.fb[f] - openY(f));
+    }
+  }
+
+  // 部屋の仕切り(藍 α.45)と開口線(藍 α.30、入口で14単位の隙間)
+  ctx.strokeStyle = rgba(pal.line, 0.45);
+  lw(1);
+  for (const r of L.rooms) {
+    for (const x of [r.x0, r.x1]) {
+      if (x <= L.bx0 + 1 || x >= L.bx1 - 1) continue;
+      if (x >= L.bay[0] - 1 && x <= L.bay[1] + 1) continue;
+      ctx.beginPath(); ctx.moveTo(x, L.top[r.f] + 2); ctx.lineTo(x, openY(r.f)); ctx.stroke();
+    }
+  }
+  ctx.strokeStyle = rgba(pal.line, 0.30);
+  for (let f = 1; f <= 3; f++) {
+    const y = openY(f);
+    const doors = L.rooms.filter(r => r.f === f).map(r => (r.x0 + r.x1) / 2);
+    let x = L.bx0;
+    const stops = doors.flatMap(dx => [dx - 7, dx + 7]).filter(v => v > L.bx0 && v < L.bx1).sort((a, b) => a - b);
+    ctx.beginPath();
+    for (let i = 0; i <= stops.length; i += 2) {
+      const a = i === 0 ? L.bx0 : stops[i - 1];
+      const b = i >= stops.length ? L.bx1 : stops[i];
+      ctx.moveTo(a, y); ctx.lineTo(b, y);
+    }
+    ctx.stroke();
+  }
+
+  // 什器(待合ベンチ・NSカウンター・平行棒・浴室の窓)
+  ctx.strokeStyle = rgba(pal.line, 0.6);
+  lw(1);
+  if (roomById.waiting) {
+    const w = roomById.waiting, y = openY(1) - 12;
+    const n = 5, span = (w.x1 - w.x0 - 40) / (n - 1);
+    for (let i = 0; i < n; i++) {
+      const x = w.x0 + 20 + i * span;
+      ctx.beginPath(); ctx.moveTo(x - 13, y); ctx.lineTo(x + 13, y); ctx.stroke();
+    }
+  }
+  if (roomById.ns) {
+    const r = roomById.ns, y = L.fb[2] - 32;
+    ctx.beginPath(); ctx.moveTo(r.x0 + 10, y); ctx.lineTo(r.x1 - 10, y); ctx.stroke();
+  }
+  if (roomById.rehab) {
+    const r = roomById.rehab;
+    for (const dy of [10, 18]) {
+      const y = openY(1) - dy;
+      ctx.beginPath(); ctx.moveTo(r.x0 + 15, y); ctx.lineTo(r.x1 - 15, y); ctx.stroke();
+    }
+  }
+  if (roomById.bath) {
+    const r = roomById.bath, y = L.top[r.f] + 26;
+    ctx.beginPath(); ctx.moveTo(r.x0 + 12, y); ctx.lineTo(r.x1 - 12, y); ctx.stroke();
+  }
+
+  // レントゲン室の扉の上のランプ(使用中のみ。砂ではなく灯りの色 — 砂はナースコール専用)
+  if (roomById.xray && isLitNow('xray', min)) {
+    ctx.fillStyle = rgb(pal.roomOn);
+    ctx.fillRect(roomCx('xray') + 10, openY(1) - 12, 6, 6);
+  }
+
+  // 読書灯(3:00-3:40 / 3F病室の隅の小さな面)
+  if (min >= 180 && min <= 220 && L.wards3[0]) {
+    const r = roomById[L.wards3[0]];
+    ctx.fillStyle = rgba(pal.roomOn, 0.55);
+    ctx.fillRect(r.x1 - 24, openY(r.f) - 14, 13, 11);
+  }
+
+  // 床スラブ(藍・実線)と外形
+  ctx.strokeStyle = rgb(pal.line);
+  lw(1.6);
+  for (let f = 1; f <= 3; f++) {
+    const y = L.fb[f];
+    ctx.beginPath(); ctx.moveTo(L.bx0, y); ctx.lineTo(L.bx1, y); ctx.stroke();
+  }
+  ctx.strokeRect(L.bx0, L.roofTop, L.bx1 - L.bx0, L.groundY - L.roofTop);
+  // 屋上スラブ
+  ctx.fillStyle = rgb(pal.structure);
+  ctx.fillRect(L.bx0, L.roofTop, L.bx1 - L.bx0, L.roofBot - L.roofTop);
+
+  // 地面線(全幅)
+  ctx.beginPath(); ctx.moveTo(0, L.groundY); ctx.lineTo(L.W, L.groundY); ctx.stroke();
+
+  // 玄関・NSの、床に落ちた明るい面(19:30-5:30のみ。にじみはこの2箇所だけ)
+  const nightSpill = (min >= 1170 || min <= 330);
+  if (nightSpill) {
+    ctx.fillStyle = rgba(pal.roomOn, 0.10);
+    ctx.beginPath();
+    ctx.moveTo(L.bx0, openY(1)); ctx.lineTo(L.bx0, L.groundY);
+    ctx.lineTo(L.bx0 - 34, L.groundY); ctx.lineTo(L.bx0 - 10, openY(1));
+    ctx.closePath(); ctx.fill();
+    if (roomById.ns) {
+      const nx = roomCx('ns');
+      ctx.beginPath();
+      ctx.moveTo(nx - 18, openY(2)); ctx.lineTo(nx + 18, openY(2));
+      ctx.lineTo(nx + 30, L.fb[2]); ctx.lineTo(nx - 30, L.fb[2]);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // 縦動線(砂・交差で切れる)
+  drawSpine(pal);
+
+  // ナースコール(唯一の点滅。0.9秒矩形波。RMでは常時点灯)
+  if (nurseCall) {
+    if (min >= 90 && min < 300) {
+      const r = roomById[nurseCall.room];
+      const near = agents.some(a => !a.done && !a.outside && a.kind === 'staff' &&
+        Math.abs(a.f - r.f) < 0.05 && Math.abs(a.x - roomCx(nurseCall.room)) < 8);
+      if (near) nurseCall.arrived = true;
+      if (!nurseCall.arrived) {
+        const on = RM ? true : (nowSec % 0.9) < 0.45;
+        if (on) {
+          ctx.fillStyle = rgb(pal.sand);
+          ctx.beginPath();
+          ctx.arc(roomCx(nurseCall.room), walkY(r.f) - 8, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    } else if (min >= 300 && min < 320) {
+      nurseCall = null;
+    }
+  }
+
+  // 交差の瞬間(8:30 / 17:30): 二本の軌跡線。交点で4単位の隙間。接続しない
+  if (crossing) {
+    if (crossing.startSec == null && Math.abs(min - crossing.min) < 1) crossing.startSec = nowSec;
+    if (crossing.startSec != null) {
+      const el = nowSec - crossing.startSec;
+      const alpha = RM ? 0.5 : (el < 0.8 ? 0.6 : Math.max(0, 0.6 * (1 - (el - 0.8) / 2.5)));
+      const still = RM && Math.abs(min - crossing.min) < 25;
+      if (alpha > 0 || still) {
+        // 浅いX字。二本は交わるが、交点では互いに切れて接続しない(第24条)
+        const y = walkY(1);
+        const cxp = (L.bx0 + roomCx('entrance')) / 2 + 20;
+        const a = still ? 0.4 : alpha;
+        const S = 7, GX = 5;
+        const xA = L.bx0 - 60, xB = roomCx('entrance') + 40;
+        const yOn = (ya, yb, x) => ya + (yb - ya) * (x - xA) / (xB - xA);
+        const cross = (col, ya, yb) => {
+          ctx.strokeStyle = col;
+          ctx.beginPath();
+          ctx.moveTo(xA, ya); ctx.lineTo(cxp - GX, yOn(ya, yb, cxp - GX));
+          ctx.moveTo(cxp + GX, yOn(ya, yb, cxp + GX)); ctx.lineTo(xB, yb);
+          ctx.stroke();
+        };
+        lw(1);
+        cross(rgba(pal.line, a), y + S, y - S);
+        cross(rgba(pal.sand, a), y - S, y + S);
+        if (el < 1.2 || still) {
+          ctx.fillStyle = rgb(pal.sand);
+          ctx.beginPath(); ctx.arc(cxp, y, 2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      if (el > 3.5 && !RM) crossing = null;
+      if (RM && Math.abs(min - crossing.min) > 30) crossing = null;
+    }
+  }
+
+  // 持ち場の人(live: いつ開いても誰かがいる。周期11秒のごくゆっくりした微動)
+  if (mode === 'live') {
+    const posts = [[2, roomCx('ns') - 12, 'staff']];
+    if (isLitNow('kitchen', min)) posts.push([1, roomCx('kitchen') + 8, 'staff']);
+    if (isLitNow('consult', min)) posts.push([1, roomCx('consult') - 6, 'staff']);
+    if (isLitNow('waiting', min)) {
+      posts.push([1, roomCx('waiting') - 20, 'person'], [1, roomCx('waiting') + 16, 'person']);
+    }
+    for (let i = 0; i < posts.length; i++) {
+      const [f, x, kind] = posts[i];
+      const sway = RM ? 0 : Math.sin(nowSec * 0.55 + i * 1.7) * 1.2;
+      ctx.fillStyle = rgb(kind === 'staff' ? pal.dotStaff : pal.dotPerson);
+      ctx.beginPath();
+      ctx.arc(x + sway, walkY(f) - 5, kind === 'staff' ? 2.2 : 2.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 人の点(全員同じ円。影・グロー・縁取りなし)
+  for (const a of agents) {
+    if (a.done) continue;
+    let y;
+    if (a.outside) {
+      y = L.groundY - 4;
+    } else {
+      const fBase = Math.max(1, Math.min(3, Math.floor(a.f)));
+      const frac = a.f - fBase;
+      y = walkY(fBase) - frac * (L.fb[fBase] - (L.fb[fBase + 1] || L.fb[fBase]));
+      if (!RM) y += Math.sin(nowSec * 6 + a.phase) * 0.5;
+    }
+    ctx.fillStyle = rgb(a.kind === 'staff' ? pal.dotStaff : pal.dotPerson);
+    ctx.beginPath();
+    ctx.arc(a.x, y, a.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/* ---------------- ループ ---------------- */
+const params = new URLSearchParams(location.search);
+const jump = params.get('t');
+const startMin = jump ? ((parseFloat(jump) * 60) % 1440 + 1440) % 1440 : START_MIN;
+// 既定は「いま」: 病院が実際の時刻と同じ速さで生きる。?t=はデバッグ用に早まわし固定
+let mode = jump ? 'tour' : 'live';
+let t0 = performance.now();
+let lastFrame = performance.now();
+let lastCap = '';
+let hiddenAt = null;
+let nextErrandSec = 20;                       // live: 生活の気配(小さな用事)の次回時刻(実秒)
+
+const modeBtn = document.getElementById('modeBtn');
+function applyModeLabel() {
+  modeBtn.textContent = mode === 'live' ? '一日を数分で見る' : 'いまの時刻に戻す';
+}
+function switchMode() {
+  mode = mode === 'live' ? 'tour' : 'live';
+  spawned = new Set();
+  agents = [];
+  nurseCall = null;
+  crossing = null;
+  prevMin = -1;
+  t0 = performance.now();
+  nextErrandSec = 15;
+  applyModeLabel();
+}
+modeBtn.addEventListener('click', switchMode);
+
+// live: たまに誰かが廊下を歩く(実時間で数分〜十数分おき。夜は間遠に)
+function spawnErrand(min) {
+  const day = min >= 360 && min < 1230;
+  const staffFrom = [2, roomCx('ns')];
+  const spots = day
+    ? [[1, roomCx('kitchen')], [3, roomCx('linen')], [3, roomCx('bath')], [1, roomCx('consult')], [3, roomCx('conf')]]
+    : [[1, roomCx('kitchen')], [3, roomCx('linen')]];
+  const [f, x] = spots[Math.floor(Math.random() * spots.length)];
+  agents.push(new Agent({ f: staffFrom[0], x: staffFrom[1], kind: 'staff', speed: 30,
+    plan: [go(f, x), hold(20 + Math.random() * 40), go(staffFrom[0], staffFrom[1]), gone()] }));
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = performance.now(); }
+  else if (hiddenAt != null) { t0 += performance.now() - hiddenAt; lastFrame = performance.now(); hiddenAt = null; }
+});
+
+function currentCaption(min) {
+  const key = min < START_MIN ? min + 1440 : min;
+  let cap = CAPTIONS[CAPTIONS.length - 1].s;
+  for (const c of CAPTIONS) { if (key >= c.m) cap = c.s; }
+  return cap;
+}
+function setCaption(text) {
+  if (text === lastCap) return;
+  lastCap = text;
+  if (RM) { capEl.textContent = text; return; }
+  capEl.classList.add('fade');
+  setTimeout(() => { capEl.textContent = text; capEl.classList.remove('fade'); }, 700);
+}
+
+let prevMin = -1;
+function tick(now) {
+  if (document.hidden) { requestAnimationFrame(tick); return; }
+  const dt = Math.min(0.05, (now - lastFrame) / 1000);
+  lastFrame = now;
+  const elapsed = (now - t0) / 1000;
+  let min;
+  if (mode === 'live') {
+    const d = new Date();
+    min = d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+    // 生活の気配: 実時間で数分おきに小さな用事(夜は間遠に)
+    if (elapsed >= nextErrandSec) {
+      spawnErrand(min);
+      const night = min < 330 || min >= 1290;
+      nextErrandSec = elapsed + (night ? 900 : 300) + Math.random() * (night ? 900 : 420);
+    }
+  } else {
+    min = (startMin + elapsed * (1440 / DAY_SECONDS)) % 1440;
+  }
+
+  // 継ぎ目(4:00)でスポーン履歴を掃除
+  if (prevMin >= 0 && prevMin < SEAM_MIN && min >= SEAM_MIN && min < SEAM_MIN + 10) {
+    spawned = new Set();
+    agents = agents.filter(a => !a.done);
+    if (agents.length > 40) agents = [];
+  }
+  prevMin = min;
+
+  for (const fn of spawnersFor(min)) agents.push(...fn());
+  for (const a of agents) a.update(dt, elapsed);
+  if (agents.length > 60) agents = agents.filter(a => !a.done);
+
+  draw(min, elapsed, dt);
+
+  {
+    const hh = String(Math.floor(min / 60)).padStart(2, '0');
+    const mm = String(Math.floor(min % 60)).padStart(2, '0');
+    const sec = mode === 'live' ? new Date().getSeconds() : Math.floor((min % 1) * 60);
+    const ss = String(sec).padStart(2, '0');
+    const cs = `${hh}:${mm}<small>:${ss}</small>`;
+    if (clockEl.dataset.v !== cs) { clockEl.dataset.v = cs; clockEl.innerHTML = cs; }
+    const d = new Date();
+    const p2 = (n) => String(n).padStart(2, '0');
+    const ds = `${d.getFullYear()}/${p2(d.getMonth() + 1)}/${p2(d.getDate())} (${'日月火水木金土'[d.getDay()]})`;
+    if (dateEl.textContent !== ds) dateEl.textContent = ds;
+  }
+  trackDot.style.left = `calc(${(min / 1440) * 100}% - 2px)`;
+  setCaption(currentCaption(min));
+
+  requestAnimationFrame(tick);
+}
+
+indexRooms();
+LIT = litSchedule();
+applyModeLabel();
+fit();
+requestAnimationFrame(tick);
+
+/* ---------------- スマホアプリとしての足まわり ---------------- */
+// オフラインでも時計が開くように(file:直開きでは登録しない)
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
+}
+// 時計なので、見ている間は画面を消さない(対応端末のみ。非対応でも何も起きない)
+if ('wakeLock' in navigator) {
+  let lock = null;
+  const keepAwake = async () => {
+    try { lock = await navigator.wakeLock.request('screen'); } catch (e) { /* 省電力設定などで拒否されたら黙って諦める */ }
+  };
+  keepAwake();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) keepAwake(); });
+}
+</script>
+<script src="../shared/usage.js" defer></script>
+</body>
+</html>

@@ -45,7 +45,7 @@ a.prod-card:hover .prod-link{gap:10px}
     <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Products</span></div>
     <h1 data-reveal data-reveal-delay="1">現場から生まれた道具たち</h1>
     <p class="lead" data-reveal data-reveal-delay="2">
-      どれも、日常の業務で感じた違和感から作ったものです。まず自分が最初のユーザーになって、使い続けているものだけを公開しています。それぞれの道具が、思考の型(評価→理解→設計→実践→再評価)のどこを支えるのかも書いておきました。
+      どれも、日常の業務で感じた違和感から作ったものです。まず自分が最初のユーザーになって、使い続けているものだけを公開しています。それぞれの道具が、思考の型(評価→理解→設計→実践→再評価)のどこを支えるのかも書いておきました。最後のひとつだけは道具ではなく、型の外に置いた作品です。
     </p>
   </div>
 </header>
@@ -89,6 +89,8 @@ window.addEventListener('DOMContentLoaded', () => {
     { id: 'learning', t: '学習・教育', stage: '型の「理解」と「実践」を支える道具', p: '学びの入口を、続けられる形で。ゲームも模試も、リハビリテーション的思考の教材です。' },
     { id: 'casual', t: '診断・ライト', stage: '型の「評価」の、いちばん軽い入口', p: '登録不要で、数分で試せます。' },
     { id: 'free', t: '無料配布', stage: '型を、まず手元で試すための雛形', p: 'まず触ってみたい方へ。' },
+    { id: 'work', t: '作品', stage: '型の外に置いた、ひとつ',
+      p: '実用の機能はありません。眺めるだけのものを、ここに置いています。' },
   ];
   const PRODUCTS = [
     { cat: 'management', name: 'RehaBoard', img: 'rehaboard.png', jp: 'リハボード', href: '../rehaboard/index.html',
@@ -131,6 +133,8 @@ window.addEventListener('DOMContentLoaded', () => {
       p: '職場の“しんどさ”をSOAP形式のカルテに書き起こす診察型コンセプトページ。' },
     { cat: 'free', name: 'Reha Checklist', img: 'reha-checklist.png', jp: 'リハ部門KPIチェックリスト', href: 'https://bridge-med.github.io/reha-checklist-lp/', ext: true,
       p: '外来リハKPI見える化スターターキット。PDF+スプレッドシート雛形を無料配布。' },
+    { cat: 'work', name: '窓あかり', img: 'madoakari.png', jp: 'Madoakari', href: '../madoakari/index.html',
+      p: '朝5時半から翌朝まで、小さな病院の一日が数分で巡ります。操作するものはなく、ただ眺めるための作品です。' },
   ];
   const root = document.getElementById('catalog');
   CATS.forEach((c, ci) => {
