@@ -120,6 +120,18 @@ canvas.tall { aspect-ratio: 760 / 1000; }
   transition: opacity .7s;
 }
 .hud .caption.fade { opacity: 0; }
+.hud .mode {
+  margin-top: 6px;
+  min-height: 44px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  font: 500 12px var(--sans);
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+@media (hover: hover) { .hud .mode:hover { color: var(--ink-2); } }
 
 .words {
   max-width: 660px;
@@ -199,11 +211,12 @@ footer {
     <div class="clock" id="clock">--:--</div>
     <div class="track" aria-hidden="true"><i id="trackDot"></i></div>
     <div class="caption" id="caption" aria-hidden="true"></div>
+    <button class="mode" id="modeBtn" type="button"></button>
   </div>
 
   <div class="words">
     <section>
-      <p>小さな病院の断面図が、朝の5時半から翌朝の5時半まで動き続けます。時間は圧縮してあり、一日が数分で巡ります。</p>
+      <p>小さな病院の断面図が、いまの時刻と同じ速さで動いています。昼に開けば昼の、夜中に開けば夜中の病院が見えます。急いで見たいときだけ、一日を数分に早まわしできます。</p>
       <p>豆粒ほどの点はスタッフと患者、窓の灯りは、いま人がいる場所です。</p>
       <p>操作するところはありません。眺めるだけの作品なので、途中で閉じても、また開いても大丈夫です。</p>
     </section>
@@ -903,6 +916,22 @@ function draw(min, nowSec, dt) {
     }
   }
 
+  // 持ち場の人(live: いつ開いても誰かがいる)
+  if (mode === 'live') {
+    const posts = [[2, roomCx('ns') - 12, 'staff']];
+    if (isLitNow('kitchen', min)) posts.push([1, roomCx('kitchen') + 8, 'staff']);
+    if (isLitNow('consult', min)) posts.push([1, roomCx('consult') - 6, 'staff']);
+    if (isLitNow('waiting', min)) {
+      posts.push([1, roomCx('waiting') - 20, 'person'], [1, roomCx('waiting') + 16, 'person']);
+    }
+    for (const [f, x, kind] of posts) {
+      ctx.fillStyle = rgb(kind === 'staff' ? pal.dotStaff : pal.dotPerson);
+      ctx.beginPath();
+      ctx.arc(x, walkY(f) - 5, kind === 'staff' ? 2.2 : 2.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
   // 人の点(全員同じ円。影・グロー・縁取りなし)
   for (const a of agents) {
     if (a.done) continue;
@@ -926,10 +955,42 @@ function draw(min, nowSec, dt) {
 const params = new URLSearchParams(location.search);
 const jump = params.get('t');
 const startMin = jump ? ((parseFloat(jump) * 60) % 1440 + 1440) % 1440 : START_MIN;
+// 既定は「いま」: 病院が実際の時刻と同じ速さで生きる。?t=はデバッグ用に早まわし固定
+let mode = jump ? 'tour' : 'live';
 let t0 = performance.now();
 let lastFrame = performance.now();
 let lastCap = '';
 let hiddenAt = null;
+let nextErrandSec = 20;                       // live: 生活の気配(小さな用事)の次回時刻(実秒)
+
+const modeBtn = document.getElementById('modeBtn');
+function applyModeLabel() {
+  modeBtn.textContent = mode === 'live' ? '一日を数分で見る' : 'いまの時刻に合わせる';
+}
+function switchMode() {
+  mode = mode === 'live' ? 'tour' : 'live';
+  spawned = new Set();
+  agents = [];
+  nurseCall = null;
+  crossing = null;
+  prevMin = -1;
+  t0 = performance.now();
+  nextErrandSec = (performance.now() - t0) / 1000 + 15;
+  applyModeLabel();
+}
+modeBtn.addEventListener('click', switchMode);
+
+// live: たまに誰かが廊下を歩く(実時間で数分〜十数分おき。夜は間遠に)
+function spawnErrand(min) {
+  const day = min >= 360 && min < 1230;
+  const staffFrom = [2, roomCx('ns')];
+  const spots = day
+    ? [[1, roomCx('kitchen')], [3, roomCx('linen')], [2, roomCx('bath')], [1, roomCx('consult')], [3, roomCx('conf')]]
+    : [[1, roomCx('kitchen')], [3, roomCx('linen')]];
+  const [f, x] = spots[Math.floor(Math.random() * spots.length)];
+  agents.push(new Agent({ f: staffFrom[0], x: staffFrom[1], kind: 'staff', speed: 30,
+    plan: [go(f, x), hold(20 + Math.random() * 40), go(staffFrom[0], staffFrom[1]), gone()] }));
+}
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { hiddenAt = performance.now(); }
@@ -956,7 +1017,19 @@ function tick(now) {
   const dt = Math.min(0.05, (now - lastFrame) / 1000);
   lastFrame = now;
   const elapsed = (now - t0) / 1000;
-  const min = (startMin + elapsed * (1440 / DAY_SECONDS)) % 1440;
+  let min;
+  if (mode === 'live') {
+    const d = new Date();
+    min = d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+    // 生活の気配: 実時間で数分おきに小さな用事(夜は間遠に)
+    if (elapsed >= nextErrandSec) {
+      spawnErrand(min);
+      const night = min < 330 || min >= 1290;
+      nextErrandSec = elapsed + (night ? 900 : 300) + Math.random() * (night ? 900 : 420);
+    }
+  } else {
+    min = (startMin + elapsed * (1440 / DAY_SECONDS)) % 1440;
+  }
 
   // 継ぎ目(4:00)でスポーン履歴を掃除
   if (prevMin >= 0 && prevMin < SEAM_MIN && min >= SEAM_MIN && min < SEAM_MIN + 10) {
@@ -982,6 +1055,7 @@ function tick(now) {
 
 indexRooms();
 LIT = litSchedule();
+applyModeLabel();
 fit();
 requestAnimationFrame(tick);
 </script>
