@@ -61,6 +61,12 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 
+/* 最初の一画面は時計: 絵+時刻で100svhを満たし、言葉はその下 */
+.stage {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+}
 .mark { padding: 18px 20px; }
 .mark a {
   display: inline-block;
@@ -93,13 +99,12 @@ a { color: inherit; text-decoration: none; }
 canvas {
   display: block;
   width: 100%;
+  flex: 1;
+  min-height: 0;
   pointer-events: none;
-  aspect-ratio: 1200 / 760;
-  max-height: calc(100svh - 200px);
 }
-canvas.tall { aspect-ratio: 760 / 1000; }
 
-.hud { max-width: 520px; margin: clamp(20px, 3vh, 34px) auto 0; padding: 0 2px; }
+.hud { max-width: 520px; width: 100%; margin: 12px auto 0; padding: 0 18px 14px; }
 .hud .clock {
   font: 500 clamp(13px, 1.6vw, 16px)/1 var(--en);
   font-variant-numeric: tabular-nums;
@@ -197,21 +202,25 @@ footer {
 </style>
 </head>
 <body>
-<header class="mark"><a href="../index.html">BRIDGE</a></header>
+<div class="stage">
+  <header class="mark"><a href="../index.html">BRIDGE</a></header>
+
+  <canvas id="cv" role="img" aria-label="小さな病院の断面図。一日の光と人の動きが繰り返し流れる図です" aria-describedby="scene-note-body"></canvas>
+
+  <div class="hud">
+    <div aria-hidden="true">
+      <div class="clock" id="clock">--:--</div>
+      <div class="track"><i id="trackDot"></i></div>
+      <div class="caption" id="caption"></div>
+    </div>
+    <button class="mode" id="modeBtn" type="button"></button>
+  </div>
+</div>
 
 <div class="wrap">
   <div class="head">
     <h1>窓あかり</h1>
     <p class="sub">病院の一日を、ただ眺める</p>
-  </div>
-
-  <canvas id="cv" role="img" aria-label="小さな病院の断面図。一日の光と人の動きが繰り返し流れる図です" aria-describedby="scene-note-body"></canvas>
-
-  <div class="hud" aria-hidden="true">
-    <div class="clock" id="clock">--:--</div>
-    <div class="track" aria-hidden="true"><i id="trackDot"></i></div>
-    <div class="caption" id="caption" aria-hidden="true"></div>
-    <button class="mode" id="modeBtn" type="button"></button>
   </div>
 
   <div class="words">
@@ -714,18 +723,21 @@ function draw(min, nowSec, dt) {
   const pal = paletteAt(min);
   ctx.clearRect(0, 0, L.W, L.H);
 
-  // 空(2ストップのみ)
+  // 空(2ストップのみ)。画面がワールドより広いときも端まで空と地面で満たす
+  const M = 4000;
+  ctx.fillStyle = rgb(pal.skyTop);
+  ctx.fillRect(-M, -M, L.W + 2 * M, M);
   const g = ctx.createLinearGradient(0, 0, 0, L.skyBot);
   g.addColorStop(0, rgb(pal.skyTop));
   g.addColorStop(1, rgb(pal.skyBot));
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, L.W, L.skyBot);
+  ctx.fillRect(-M, 0, L.W + 2 * M, L.skyBot);
 
   // 空(建物より下の帯) + 地面
   ctx.fillStyle = rgb(pal.skyBot);
-  ctx.fillRect(0, L.skyBot, L.W, L.groundY - L.skyBot);
+  ctx.fillRect(-M, L.skyBot, L.W + 2 * M, L.groundY - L.skyBot);
   ctx.fillStyle = rgb(pal.ground);
-  ctx.fillRect(0, L.groundY, L.W, L.H - L.groundY);
+  ctx.fillRect(-M, L.groundY, L.W + 2 * M, L.H - L.groundY + M);
 
   // 躯体
   ctx.fillStyle = rgb(pal.structure);
