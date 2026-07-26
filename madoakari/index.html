@@ -72,7 +72,7 @@ a { color: inherit; text-decoration: none; }
   flex-direction: column;
   height: 100svh;
 }
-.mark { padding: 18px 20px; }
+.mark { padding: calc(18px + env(safe-area-inset-top, 0px)) 20px 18px; }
 .mark a {
   display: inline-block;
   padding: 16px 8px;
@@ -232,8 +232,10 @@ footer {
     position: relative;
     flex-direction: row;
     align-items: stretch;
+    /* Safariの上部タブバーの逃げ場。上端に貼り付けない */
+    padding-top: max(env(safe-area-inset-top, 0px), 12px);
   }
-  .mark { position: absolute; top: 0; left: env(safe-area-inset-left, 0px); z-index: 2; }
+  .mark { position: absolute; top: max(env(safe-area-inset-top, 0px), 12px); left: env(safe-area-inset-left, 0px); z-index: 2; padding-top: 12px; }
   canvas { flex: 1; min-width: 0; height: 100%; }
   .hud {
     width: min(340px, 42vw);
@@ -1145,8 +1147,17 @@ requestAnimationFrame(tick);
 
 /* ---------------- スマホアプリとしての足まわり ---------------- */
 // オフラインでも時計が開くように(file:直開きでは登録しない)
+// 新しい版を検知したら、一度だけ自動で読み直して最新に揃える
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
+  addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then((reg) => { reg.update().catch(() => {}); }).catch(() => {});
+  });
+  let reloadedOnce = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloadedOnce) return;
+    reloadedOnce = true;
+    location.reload();
+  });
 }
 // 時計なので、見ている間は画面を消さない(対応端末のみ。非対応でも何も起きない)
 if ('wakeLock' in navigator) {

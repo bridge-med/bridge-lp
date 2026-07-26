@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE = 'madoakari-v3';
+const CACHE = 'madoakari-v4';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
