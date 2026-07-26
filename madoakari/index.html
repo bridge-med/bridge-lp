@@ -12,6 +12,11 @@
 <meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/products/thumbs/madoakari.webp">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBFAF7">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111521">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="窓あかり">
+<link rel="apple-touch-icon" href="app/icon-180.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%2316233E'/%3E%3Crect%20x='24'%20y='24'%20width='16'%20height='16'%20fill='%23F2EADB'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1095,6 +1100,21 @@ LIT = litSchedule();
 applyModeLabel();
 fit();
 requestAnimationFrame(tick);
+
+/* ---------------- スマホアプリとしての足まわり ---------------- */
+// オフラインでも時計が開くように(file:直開きでは登録しない)
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
+}
+// 時計なので、見ている間は画面を消さない(対応端末のみ。非対応でも何も起きない)
+if ('wakeLock' in navigator) {
+  let lock = null;
+  const keepAwake = async () => {
+    try { lock = await navigator.wakeLock.request('screen'); } catch (e) { /* 省電力設定などで拒否されたら黙って諦める */ }
+  };
+  keepAwake();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) keepAwake(); });
+}
 </script>
 <script src="../shared/usage.js" defer></script>
 </body>

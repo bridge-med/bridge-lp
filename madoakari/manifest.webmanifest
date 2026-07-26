@@ -1,0 +1,17 @@
+{
+  "name": "窓あかり",
+  "short_name": "窓あかり",
+  "description": "小さな病院の一日が、いまの時刻で流れる時計。眺めるだけの作品です。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FBFAF7",
+  "theme_color": "#FBFAF7",
+  "icons": [
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "app/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "app/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
