@@ -105,11 +105,23 @@ canvas {
 }
 
 .hud { max-width: 520px; width: 100%; margin: 12px auto 0; padding: 0 18px 14px; }
+.hud .hud-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
 .hud .clock {
-  font: 500 clamp(13px, 1.6vw, 16px)/1 var(--en);
+  font: 500 clamp(15px, 2vw, 18px)/1 var(--en);
   font-variant-numeric: tabular-nums;
   letter-spacing: .14em;
   color: var(--ink-2);
+}
+.hud .date {
+  font: 500 12px var(--sans);
+  letter-spacing: .1em;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
 }
 .hud .track { height: 1px; background: var(--line); margin: 14px 0 16px; position: relative; }
 .hud .track i {
@@ -209,7 +221,10 @@ footer {
 
   <div class="hud">
     <div aria-hidden="true">
-      <div class="clock" id="clock">--:--</div>
+      <div class="hud-line">
+        <div class="clock" id="clock">--:--</div>
+        <div class="date" id="dateEl"></div>
+      </div>
       <div class="track"><i id="trackDot"></i></div>
       <div class="caption" id="caption"></div>
     </div>
@@ -673,6 +688,7 @@ function makePasser() {
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 const clockEl = document.getElementById('clock');
+const dateEl = document.getElementById('dateEl');
 const capEl = document.getElementById('caption');
 const trackDot = document.getElementById('trackDot');
 
@@ -1059,6 +1075,11 @@ function tick(now) {
 
   clockEl.textContent =
     String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(Math.floor(min % 60)).padStart(2, '0');
+  {
+    const d = new Date();
+    const ds = `${d.getMonth() + 1}月${d.getDate()}日(${'日月火水木金土'[d.getDay()]})`;
+    if (dateEl.textContent !== ds) dateEl.textContent = ds;
+  }
   trackDot.style.left = `calc(${(min / 1440) * 100}% - 2px)`;
   setCaption(currentCaption(min));
 
