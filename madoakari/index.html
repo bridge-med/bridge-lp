@@ -226,6 +226,25 @@ footer {
   color: var(--ink-3);
 }
 
+/* 横持ち(高さの低いランドスケープ): 左に絵、右に時計 */
+@media (orientation: landscape) and (max-height: 520px) {
+  .stage {
+    position: relative;
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .mark { position: absolute; top: 0; left: env(safe-area-inset-left, 0px); z-index: 2; }
+  canvas { flex: 1; min-width: 0; height: 100%; }
+  .hud {
+    width: min(340px, 42vw);
+    margin: auto 0;
+    padding: 0 calc(20px + env(safe-area-inset-right, 0px)) 0 20px;
+    align-self: center;
+  }
+  .hud .clock { font-size: clamp(30px, 12vh, 52px); }
+  .hud .caption { min-height: calc(2 * 1.9em); font-size: 14px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hud .caption { transition: none; }
 }
