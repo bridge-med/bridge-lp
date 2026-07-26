@@ -105,22 +105,22 @@ canvas {
 }
 
 .hud { max-width: 520px; width: 100%; margin: 12px auto 0; padding: 0 18px 14px; }
-.hud .hud-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-}
+.hud .hud-line { text-align: center; }
 .hud .clock {
-  font: 500 clamp(15px, 2vw, 18px)/1 var(--en);
+  font: 500 clamp(44px, 11vw, 80px)/1.1 var(--en);
   font-variant-numeric: tabular-nums;
-  letter-spacing: .14em;
+  letter-spacing: .04em;
+  color: var(--ink);
+}
+.hud .clock small {
+  font-size: .55em;
   color: var(--ink-2);
 }
 .hud .date {
-  font: 500 12px var(--sans);
-  letter-spacing: .1em;
-  color: var(--ink-3);
+  margin-top: 2px;
+  font: 500 clamp(13px, 3.4vw, 16px) var(--sans);
+  letter-spacing: .12em;
+  color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
 .hud .track { height: 1px; background: var(--line); margin: 14px 0 16px; position: relative; }
@@ -1073,11 +1073,15 @@ function tick(now) {
 
   draw(min, elapsed, dt);
 
-  clockEl.textContent =
-    String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(Math.floor(min % 60)).padStart(2, '0');
   {
+    const hh = String(Math.floor(min / 60)).padStart(2, '0');
+    const mm = String(Math.floor(min % 60)).padStart(2, '0');
+    const sec = mode === 'live' ? new Date().getSeconds() : Math.floor((min % 1) * 60);
+    const ss = String(sec).padStart(2, '0');
+    const cs = `${hh}:${mm}<small>:${ss}</small>`;
+    if (clockEl.dataset.v !== cs) { clockEl.dataset.v = cs; clockEl.innerHTML = cs; }
     const d = new Date();
-    const ds = `${d.getMonth() + 1}月${d.getDate()}日(${'日月火水木金土'[d.getDay()]})`;
+    const ds = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} (${'日月火水木金土'[d.getDay()]})`;
     if (dateEl.textContent !== ds) dateEl.textContent = ds;
   }
   trackDot.style.left = `calc(${(min / 1440) * 100}% - 2px)`;
