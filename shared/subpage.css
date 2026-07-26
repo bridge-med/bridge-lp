@@ -170,13 +170,13 @@ section.alt{background:var(--paper-2)}
 .walk .eyebrow{display:inline-flex;align-items:center;gap:10px}
 .walk .eyebrow::before{content:'';width:18px;height:1px;background:var(--dawn);flex-shrink:0}
 
-/* reveal */
-[data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
-[data-reveal].vis{opacity:1;transform:translateY(0)}
+/* reveal — JSが付与する html.js 配下でだけ隠す。JS無効環境では最初から見える */
+html.js [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
+html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 [data-reveal-delay="1"]{transition-delay:.1s}
 [data-reveal-delay="2"]{transition-delay:.2s}
 @media(prefers-reduced-motion:reduce){
-  [data-reveal]{opacity:1;transform:none;transition:none}
+  html.js [data-reveal]{opacity:1;transform:none;transition:none}
   html{scroll-behavior:auto}
 }
 
