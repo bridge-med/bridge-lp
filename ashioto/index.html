@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>足音 — 病院の一晩を歩くゲーム / BRIDGE</title>
+<meta name="description" content="21時の消灯から翌朝8時半の申し送りまで、夜勤ナースの一晩をタップで歩くゲームです。ナースコール、巡回、記録、そして急変。1プレイおよそ5分。朝には八部屋ぜんぶに人がいて、うまくいかなかったぶんは、誰かを待たせた時間として残ります。登録不要・端末内で完結します。">
+<meta property="og:title" content="足音 — 病院の一晩を歩くゲーム">
+<meta property="og:description" content="21時の消灯から朝8時半の申し送りまで、夜勤ナースの一晩をおよそ5分で。窓あかりと同じ病院を、今度は動かす側で歩きます。登録不要・端末内で完結します。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/ashioto/">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/products/thumbs/ashioto.webp">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBFAF7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111521">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%2316233E'/%3E%3Ccircle%20cx='26'%20cy='40'%20r='4'%20fill='%23F2EADB'/%3E%3Ccircle%20cx='40'%20cy='24'%20r='4'%20fill='%23A98F63'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@400;500&family=Inter:wght@500&display=swap" rel="stylesheet">
+<style>
+/* 足音 — styles
+ * 窓あかりと同じ病院を、今度は動かす側で歩くゲーム。
+ * ページの地色はテーマ固定。canvasだけが夜を持つ。
+ * 砂が出るのは5箇所のみ: 縦動線/コール/急変の交差線の一本/行き先/HUD現在地。
+ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:        #FBFAF7;
+  --ink:       #1B1B1E;
+  --ink-2:     #45464C;
+  --ink-3:     #7D7E85;
+  --navy:      #16233E;
+  --sand:      #A98F63;
+  --line:   rgba(27, 27, 30, 0.10);
+
+  --mincho: 'Shippori Mincho B1', 'Noto Serif JP', serif;
+  --sans: 'Noto Sans JP', sans-serif;
+  --en:   'Inter', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #111521;
+    --ink:       #EDEAE2;
+    --ink-2:     #C2BFB6;
+    --ink-3:     #8A8D98;
+    --navy:      #D8DEEB;
+    --sand:      #C2A97E;
+    --line:   rgba(237, 234, 226, 0.10);
+  }
+}
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.8;
+  font-feature-settings: "palt" 1;
+}
+a { color: inherit; text-decoration: none; }
+
+.mark { padding: 18px 20px; }
+.mark a {
+  display: inline-block;
+  padding: 16px 8px;
+  margin: -16px -8px;
+  font: 600 11px var(--en);
+  letter-spacing: .3em;
+  color: var(--ink-2);
+}
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 18px 72px; }
+body[data-scene="play"] .wrap { padding-left: 0; padding-right: 0; }
+
+.head { max-width: 660px; padding: 10px 2px 18px; }
+body[data-scene="play"] .head { padding-left: 18px; }
+.head h1 {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(20px, 3vw, 28px);
+  letter-spacing: .1em;
+  line-height: 1.6;
+}
+body[data-scene="play"] .head h1 { font-size: 15px; }
+.head .sub {
+  margin-top: 2px;
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(13px, 2vw, 15px);
+  color: var(--ink-2);
+  letter-spacing: .06em;
+}
+body[data-scene="play"] .head .sub { display: none; }
+body[data-scene="report"] .head { display: none; }
+
+canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1200 / 760;
+  max-height: calc(100svh - 220px);
+  touch-action: manipulation;
+}
+canvas.tall { aspect-ratio: 760 / 1000; }
+body[data-scene="play"] { overflow: hidden; height: 100svh; }
+body[data-scene="play"] canvas { max-height: calc(100svh - 300px); }
+
+/* 支援技術用の部屋ボタン */
+.sr-rooms button {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0; padding: 0;
+}
+
+/* ---------- HUD ---------- */
+.hud { max-width: 520px; margin: clamp(14px, 2.5vh, 26px) auto 0; padding: 0 18px; }
+body:not([data-scene="play"]) .hud { display: none; }
+.hud-top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.clock {
+  font: 500 clamp(13px, 1.6vw, 16px)/1 var(--en);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .14em;
+  color: var(--ink-2);
+}
+.rec { display: flex; align-items: center; gap: 8px; }
+.rec span { font: 500 10px var(--sans); letter-spacing: .08em; color: var(--ink-3); }
+.rec .bar { position: relative; width: 96px; height: 1px; background: var(--line); }
+.rec .bar i {
+  position: absolute; inset: 0 auto 0 0;
+  height: 1px; background: var(--navy);
+  width: 100%;
+  transition: width .25s linear;
+}
+.track { position: relative; height: 1px; background: var(--line); margin: 14px 0 12px; }
+.track i {
+  position: absolute; top: -1.5px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--sand);
+}
+.track b { position: absolute; top: -2px; width: 1px; height: 5px; background: var(--navy); opacity: .35; }
+.rounds { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
+.rounds s { width: 14px; height: 1px; background: var(--navy); opacity: .16; transition: opacity .3s; text-decoration: none; }
+.rounds s.due { opacity: .75; }
+.rounds .gap { width: 10px; }
+.caption {
+  font: 600 clamp(15px, 2.2vw, 20px)/1.9 var(--mincho);
+  color: var(--ink);
+  min-height: calc(2 * 1.9em);
+  transition: opacity .7s;
+}
+.caption.fade { opacity: 0; }
+
+/* ---------- 表紙 ---------- */
+.start { max-width: 660px; margin: 0 auto; padding: clamp(28px, 5vh, 48px) 2px 0; }
+body:not([data-scene="title"]) .start { display: none; }
+.start p { margin-top: 14px; font-size: 14px; line-height: 2.05; color: var(--ink-2); }
+.start .hint {
+  font-family: var(--mincho);
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 15px;
+}
+.start-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 28px;
+  padding: 14px 18px;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font: 600 17px var(--mincho);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.start-btn .arr { font-family: var(--en); color: var(--ink-3); }
+@media (hover: hover) { .start-btn:hover { border-color: var(--sand); } }
+.start .small { margin-top: 12px; font-size: 12px; color: var(--ink-3); }
+
+.words { max-width: 660px; margin: 0 auto; padding: 56px 2px 0; }
+body:not([data-scene="title"]) .words { display: none; }
+.words h2 {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(18px, 2.6vw, 22px);
+  letter-spacing: .06em;
+  line-height: 1.8;
+}
+.words p { margin-top: 16px; font-size: 14px; line-height: 2.1; color: var(--ink-2); }
+.words section + section { margin-top: 56px; }
+
+/* ---------- 申し送り ---------- */
+.report { max-width: 660px; margin: 0 auto; padding: clamp(40px, 7vh, 72px) 2px 0; }
+body:not([data-scene="report"]) .report { display: none; }
+.report h2 {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(18px, 2.6vw, 22px);
+  letter-spacing: .06em;
+  line-height: 1.8;
+}
+.report .lead { margin-top: 8px; font: 600 14px/1.9 var(--mincho); color: var(--ink-2); }
+.rep-rows { margin-top: 20px; }
+.rep-row {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  min-height: 64px;
+  border-bottom: 1px solid var(--line);
+}
+.rep-row .t { font: 600 17px var(--mincho); white-space: nowrap; }
+.rep-row .d { font: 500 12px/1.8 var(--sans); color: var(--ink-2); text-align: right; max-width: 300px; }
+.rep-row i { position: absolute; left: 0; bottom: -1px; height: 1px; background: var(--navy); }
+.report .close { margin-top: 32px; font: 600 15px/2 var(--mincho); color: var(--ink-2); }
+.again {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 36px;
+  padding: 14px 18px;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font: 600 17px var(--mincho);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.again .arr { font-family: var(--en); color: var(--ink-3); }
+@media (hover: hover) { .again:hover { border-color: var(--sand); } }
+
+.next { max-width: 660px; margin: 56px auto 0; padding: 0 2px; }
+body:not([data-scene="report"]) .next { display: none; }
+.next h2 { font: 700 13px/1 var(--sans); letter-spacing: .08em; color: var(--ink-2); }
+.next-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  min-height: 64px;
+}
+.next-row .t { font-family: var(--mincho); font-weight: 600; font-size: 17px; color: var(--ink); white-space: nowrap; }
+.next-row .d { font: 500 12px/1.8 var(--sans); color: var(--ink-2); text-align: right; max-width: 220px; }
+
+footer {
+  max-width: 660px;
+  margin: 56px auto 0;
+  padding: 0 2px;
+  font: 500 11px var(--en);
+  letter-spacing: .2em;
+  color: var(--ink-3);
+}
+body[data-scene="play"] footer { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .caption, .rec .bar i, .rounds s { transition: none; }
+}
+</style>
+</head>
+<body data-scene="title">
+<header class="mark"><a href="../index.html">BRIDGE</a></header>
+
+<div class="wrap">
+  <div class="head">
+    <h1>足音</h1>
+    <p class="sub">病院の一晩を、歩く</p>
+  </div>
+
+  <canvas id="cv" role="img" aria-label="小さな病院の断面図。二階と三階の病室を、夜勤ナースの点が歩いて回る"></canvas>
+  <div class="sr-rooms" aria-label="部屋の選択">
+    <button data-room="wardA">2階 201号室へ行く</button>
+    <button data-room="wardB">2階 202号室へ行く</button>
+    <button data-room="wardC">2階 203号室へ行く</button>
+    <button data-room="wardD">2階 204号室へ行く</button>
+    <button data-room="wardE">3階 301号室へ行く</button>
+    <button data-room="wardF">3階 302号室へ行く</button>
+    <button data-room="wardG">3階 303号室へ行く</button>
+    <button data-room="wardH">3階 304号室へ行く</button>
+    <button data-room="ns">ナースステーションへ戻る</button>
+  </div>
+
+  <div class="hud">
+    <div class="hud-top">
+      <span class="clock" id="clock">21:00</span>
+      <span class="rec"><span>記録</span><span class="bar"><i id="recBar"></i></span></span>
+    </div>
+    <div class="track" aria-hidden="true">
+      <b style="left:8.7%"></b><b style="left:26.1%"></b><b style="left:43.5%"></b><b style="left:60.9%"></b><b style="left:78.3%"></b>
+      <i id="trackDot"></i>
+    </div>
+    <div class="rounds" aria-hidden="true" id="roundTicks">
+      <s></s><s></s><s></s><s></s><span class="gap"></span><s></s><s></s><s></s><s></s>
+    </div>
+    <div class="caption" id="caption" aria-live="polite"></div>
+  </div>
+
+  <div class="start">
+    <p>21時の消灯から、翌朝8時半の申し送りまで。窓あかりと同じ病院の、二階と三階の八部屋を、ひとりで預かります。</p>
+    <p>ナースコールと、決まった時刻の巡回と、書きかけの記録。だいたい、同時に来ます。</p>
+    <p>一晩がおよそ5分です。朝には、八部屋ぜんぶに人がいます。うまくいかなかったぶんは、誰かを待たせた時間として残ります。</p>
+    <p class="hint">病室を押すと、そこへ歩きます</p>
+    <button class="start-btn" id="startBtn"><span>夜勤に入る</span><span class="arr">&rarr;</span></button>
+    <p class="small">登録は要りません。結果はどこにも保存されないので、閉じれば消えます</p>
+  </div>
+
+  <div class="words">
+    <section>
+      <h2>使い方</h2>
+      <p>病室をタップすると、ナースが歩いて向かいます。着けば、そこの用事は片づきます。記録はナースステーションに戻らないと書けません。</p>
+      <p>ナースコールと巡回と記録は、だいたい同時に来ます。全部を間に合わせられるようには作っていません。どれを先にするかだけ、決めてください。</p>
+    </section>
+    <section>
+      <h2>この一晩について</h2>
+      <p>BRIDGEの道具は、思考の型(評価→理解→設計→実践→再評価)のどこかを支えるものとして作っています。この一晩が支えるのは「理解」です。申し送りに並ぶ数字が、どういう十一時間半の結果なのかを、手を動かして知るためのものです。</p>
+      <p>この一晩は、病棟で見聞きした範囲を組み立てたもので、実際の夜勤の再現ではありません。順番と、重なり方だけ、なるべく本当に近づけました。</p>
+      <p>増やしたい選択肢は、二つあります。ひとつは、看護職ではない人が「夜勤は大変らしい」の先を一度だけ体験してみること。もうひとつは、いま夜勤に入っている人が、自分の一晩を外から見てみること。眺めたあとで何をするかは、どちらも決めなくてかまいません。</p>
+    </section>
+  </div>
+
+  <section class="report" aria-label="申し送り">
+    <h2>申し送り</h2>
+    <p class="lead">8:30 — 日勤へ</p>
+    <div class="rep-rows">
+      <div class="rep-row"><span class="t">応答</span><span class="d" id="rWait"></span><i id="mWait"></i></div>
+      <div class="rep-row"><span class="t">巡回</span><span class="d" id="rRound"></span><i id="mRound"></i></div>
+      <div class="rep-row"><span class="t">記録</span><span class="d" id="rRec"></span><i id="mRec"></i></div>
+    </div>
+    <p class="close" id="rClose"></p>
+    <button class="again" id="againBtn"><span>もう一晩</span><span class="arr">&rarr;</span></button>
+  </section>
+
+  <nav class="next" aria-label="次の行き先">
+    <h2>見終えたら、どこへでも</h2>
+    <a class="next-row" href="../madoakari/index.html">
+      <span class="t">窓あかり</span><span class="d">同じ病院を、外から眺める</span>
+    </a>
+    <a class="next-row" href="../philosophy/index.html">
+      <span class="t">Philosophy</span><span class="d">BRIDGEが、人から考える理由</span>
+    </a>
+    <a class="next-row" href="../index.html">
+      <span class="t">Home</span><span class="d">ほかの道具も、置いてあります</span>
+    </a>
+  </nav>
+
+  <footer>&copy; BRIDGE</footer>
+</div>
+
+<script>
+'use strict';
+/* ================================================================
+   足音 — 病院の一晩を歩くゲーム
+   窓あかりのエンジン(パレット/描画/座標系)を転用。
+   砂は5箇所のみ: 縦動線/コール/急変の交差線の一本/行き先/HUD現在地。
+   canvasの中に文字は描かない。
+   ================================================================ */
+
+const GAME_SECONDS = 300;
+const START_MIN = 1260;                     // 21:00
+const END_MIN = 1950;                       // 翌8:30
+const MIN_PER_SEC = (END_MIN - START_MIN) / GAME_SECONDS;   // 2.3
+const PLAYER_SPEED = 66;
+const NPC_SPEED = 34;
+
+const rmQuery = matchMedia('(prefers-reduced-motion: reduce)');
+let RM = rmQuery.matches;
+rmQuery.addEventListener('change', () => { RM = rmQuery.matches; });
+
+/* ---------------- パレット(窓あかりと同一。hexはここのみ) ---------------- */
+const PALETTE = [
+  { h: 2.0,  skyTop: '#10141F', skyBot: '#171B26', ground: '#14171D', structure: '#171C26', roomOff: '#12161E', roomOn: '#B3A184', line: '#39415A', dotStaff: '#7B89A8', dotPerson: '#63656C', sand: '#C2A97E' },
+  { h: 5.5,  skyTop: '#18223A', skyBot: '#3F4249', ground: '#22262D', structure: '#1E242F', roomOff: '#171C25', roomOn: '#B3A184', line: '#47516B', dotStaff: '#8B9BBC', dotPerson: '#6E7078', sand: '#C2A97E' },
+  { h: 7.0,  skyTop: '#63728C', skyBot: '#C3B7A3', ground: '#6F6D67', structure: '#726F66', roomOff: '#5C5A55', roomOn: '#D6C4A4', line: '#3B4661', dotStaff: '#24365C', dotPerson: '#55565C', sand: '#B79A6E' },
+  { h: 9.0,  skyTop: '#A9B4C6', skyBot: '#EDE6D8', ground: '#C6C1B5', structure: '#B9B4A9', roomOff: '#9E9A92', roomOn: '#F2EADB', line: '#2C3A57', dotStaff: '#16233E', dotPerson: '#45464C', sand: '#A98F63' },
+  { h: 12.0, skyTop: '#C4CBD6', skyBot: '#FBFAF7', ground: '#DCD8CD', structure: '#CFCAC0', roomOff: '#B3AFA7', roomOn: '#FBFAF7', line: '#24365C', dotStaff: '#16233E', dotPerson: '#45464C', sand: '#A98F63' },
+  { h: 15.0, skyTop: '#BCC4D2', skyBot: '#F4EFE6', ground: '#D5D0C4', structure: '#C7C2B7', roomOff: '#AAA69E', roomOn: '#F7F2E9', line: '#24365C', dotStaff: '#16233E', dotPerson: '#45464C', sand: '#A98F63' },
+  { h: 17.5, skyTop: '#8E9AB1', skyBot: '#D9CBB2', ground: '#A9A498', structure: '#A09A8E', roomOff: '#85817A', roomOn: '#E4D6BA', line: '#2C3A57', dotStaff: '#1B2947', dotPerson: '#4C4D53', sand: '#A98F63' },
+  { h: 19.5, skyTop: '#3A4661', skyBot: '#6E6A63', ground: '#4A4C50', structure: '#454A54', roomOff: '#3A3E47', roomOn: '#D6C4A4', line: '#4A5470', dotStaff: '#6E7E9E', dotPerson: '#5E6067', sand: '#BFA678' },
+  { h: 22.0, skyTop: '#1C2438', skyBot: '#2C3140', ground: '#262A32', structure: '#252A35', roomOff: '#1E232C', roomOn: '#BCA98C', line: '#414A64', dotStaff: '#7B89A8', dotPerson: '#63656C', sand: '#C2A97E' },
+];
+function hex2rgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+const lerp = (a, b, t) => a + (b - a) * t;
+const mixRgb = (a, b, t) => [0, 1, 2].map(i => Math.round(lerp(a[i], b[i], t)));
+const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+function paletteAt(min) {
+  const h = (min / 60) % 24;
+  const ks = PALETTE;
+  let i = ks.length - 1;
+  for (let k = 0; k < ks.length; k++) { if (h >= ks[k].h) i = k; }
+  const a = ks[i], b = ks[(i + 1) % ks.length];
+  const span = (b.h - a.h + 24) % 24 || 24;
+  const t = ((h - a.h + 24) % 24) / span;
+  const out = {};
+  for (const key of Object.keys(a)) { if (key !== 'h') out[key] = mixRgb(hex2rgb(a[key]), hex2rgb(b[key]), t); }
+  return out;
+}
+
+/* ---------------- レイアウト(ゲーム版: 病室4+4に統一) ---------------- */
+const LAYOUTS = {
+  wide: {
+    W: 1200, H: 760, skyBot: 296, roofTop: 296, roofBot: 304,
+    fb: { 1: 700, 2: 552, 3: 422 }, top: { 1: 552, 2: 422, 3: 304 },
+    bx0: 150, bx1: 1050, groundY: 700,
+    spineX: 625, spineY0: 310, spineY1: 690, bay: [600, 700],
+    tank: { x0: 880, x1: 960, y0: 250, y1: 288, legs: [895, 945] },
+    speedScale: 1,
+    rooms: [
+      { id: 'entrance', f: 1, x0: 150, x1: 300 },
+      { id: 'waiting',  f: 1, x0: 300, x1: 505 },
+      { id: 'consult',  f: 1, x0: 505, x1: 600 },
+      { id: 'rehab',    f: 1, x0: 700, x1: 830 },
+      { id: 'xray',     f: 1, x0: 830, x1: 925 },
+      { id: 'kitchen',  f: 1, x0: 925, x1: 1050 },
+      { id: 'wardA',    f: 2, x0: 150, x1: 262 },
+      { id: 'wardB',    f: 2, x0: 262, x1: 375 },
+      { id: 'wardC',    f: 2, x0: 375, x1: 487 },
+      { id: 'wardD',    f: 2, x0: 487, x1: 600 },
+      { id: 'ns',       f: 2, x0: 700, x1: 880 },
+      { id: 'rest',     f: 2, x0: 880, x1: 1050 },
+      { id: 'wardE',    f: 3, x0: 150, x1: 262 },
+      { id: 'wardF',    f: 3, x0: 262, x1: 375 },
+      { id: 'wardG',    f: 3, x0: 375, x1: 487 },
+      { id: 'wardH',    f: 3, x0: 487, x1: 600 },
+      { id: 'linen',    f: 3, x0: 700, x1: 790 },
+      { id: 'bath',     f: 3, x0: 790, x1: 880 },
+      { id: 'conf',     f: 3, x0: 880, x1: 1050 },
+    ],
+  },
+  tall: {
+    W: 760, H: 1000, skyBot: 452, roofTop: 452, roofBot: 460,
+    fb: { 1: 940, 2: 768, 3: 608 }, top: { 1: 768, 2: 608, 3: 460 },
+    bx0: 16, bx1: 744, groundY: 940,
+    spineX: 400, spineY0: 466, spineY1: 930, bay: [386, 414],
+    tank: { x0: 560, x1: 630, y0: 406, y1: 444, legs: [575, 615] },
+    speedScale: 0.8,
+    rooms: [
+      { id: 'entrance', f: 1, x0: 16,  x1: 140 },
+      { id: 'waiting',  f: 1, x0: 140, x1: 290 },
+      { id: 'consult',  f: 1, x0: 290, x1: 386 },
+      { id: 'rehab',    f: 1, x0: 414, x1: 520 },
+      { id: 'xray',     f: 1, x0: 520, x1: 630 },
+      { id: 'kitchen',  f: 1, x0: 630, x1: 744 },
+      { id: 'wardA',    f: 2, x0: 16,  x1: 108 },
+      { id: 'wardB',    f: 2, x0: 108, x1: 201 },
+      { id: 'wardC',    f: 2, x0: 201, x1: 293 },
+      { id: 'wardD',    f: 2, x0: 293, x1: 386 },
+      { id: 'ns',       f: 2, x0: 414, x1: 590 },
+      { id: 'rest',     f: 2, x0: 590, x1: 744 },
+      { id: 'wardE',    f: 3, x0: 16,  x1: 108 },
+      { id: 'wardF',    f: 3, x0: 108, x1: 201 },
+      { id: 'wardG',    f: 3, x0: 201, x1: 293 },
+      { id: 'wardH',    f: 3, x0: 293, x1: 386 },
+      { id: 'linen',    f: 3, x0: 414, x1: 520 },
+      { id: 'bath',     f: 3, x0: 520, x1: 630 },
+      { id: 'conf',     f: 3, x0: 630, x1: 744 },
+    ],
+  },
+};
+const WARDS = ['wardA', 'wardB', 'wardC', 'wardD', 'wardE', 'wardF', 'wardG', 'wardH'];
+const TAPPABLE = WARDS.concat(['ns']);
+const ROOM_NO = { wardA: '201', wardB: '202', wardC: '203', wardD: '204', wardE: '301', wardF: '302', wardG: '303', wardH: '304' };
+
+let L = LAYOUTS.wide;
+let roomById = {};
+function indexRooms() { roomById = Object.fromEntries(L.rooms.map(r => [r.id, r])); }
+const roomCx = (id) => (roomById[id].x0 + roomById[id].x1) / 2;
+const walkY = (f) => L.fb[f] - 22;
+const openY = (f) => L.fb[f] - 44;
+const isWard = (id) => WARDS.includes(id);
+
+/* ---------------- 文言(editor最終稿) ---------------- */
+const NIGHT_LINES = [
+  { m: 1260, s: '消灯。二階と三階、八部屋を朝まで預かります' },
+  { m: 1380, s: '廊下の灯りが半分になる。ここからが長い' },
+  { m: 1500, s: 'いちばん眠い時間。動いているのは足音だけ' },
+  { m: 1620, s: '眠れない人の、小さな読書灯' },
+  { m: 1740, s: '調理場に灯りが入る。朝が動きはじめる' },
+  { m: 1920, s: '日勤が上がってくる。あと三十分' },
+];
+const VISIT_LINES = [
+  '水をお渡ししました',
+  'トイレへ付き添いました',
+  '点滴を確認しました',
+  'しばらく話をしました',
+  '体の向きを変えました',
+  '痛み止めの指示を確認しました',
+  '布団をかけ直しました',
+  '用事はなかったそうです',
+];
+const EMERGENCY_LINES = [
+  '息が苦しいと訴えています。すぐに向かってください',
+  'ベッドの脇で倒れています。すぐに向かってください',
+  '呼びかけへの反応が鈍い。すぐに向かってください',
+];
+
+/* ---------------- 状態 ---------------- */
+let scene = 'title';
+let simMin = START_MIN, elapsed = 0, lastFrame = 0;
+let calls = new Map();                       // roomId -> {spawnAt, waited(gameMin at resolve)}
+let nextCallAt = 0;
+let emergency = null;                        // {room, at, line, resolved, npcSent}
+let emergencyPlanned = 0;
+let rounds = [];                             // [{from,to,visited:Set}]
+let backlog = 0, writtenCount = 0, taskCount = 0;
+let firstBacklogHint = false, backlogFullHint = false;
+let stats = { waits: [], maxWait: 0, maxWaitRoom: '', fullRounds: 0, visitedTotal: 0, emergencyMissed: false };
+let corrT = [0, 0.06, 0.06, 0.06];           // 階ごとの廊下の灯り
+let litT = {};                                // 部屋の灯り補間
+let dest = null;                              // {room, tapAt}
+let pendingTap = null;                        // hold中に押された1件の予約
+let crossing = null;
+
+const player = { f: 2, x: 0, room: 'ns', target: null, holdUntil: 0, holdRoom: null, trail: [], trailAcc: 0 };
+const npc = { f: 3, x: 0, room: 'linen', target: null, holdUntil: 0, queue: [], toEmergency: false };
+
+function resetNight() {
+  simMin = START_MIN; elapsed = 0;
+  calls = new Map();
+  nextCallAt = 10 + Math.random() * 10;                    // 実秒
+  emergency = null;
+  emergencyPlanned = 1500 + Math.random() * 60;            // 1:00-2:00
+  rounds = [[1320, 1440], [1440, 1560], [1560, 1680], [1680, 1800], [1800, 1920]]
+    .map(([from, to]) => ({ from, to, visited: new Set(), counted: false }));
+  backlog = 0; writtenCount = 0; taskCount = 0;
+  firstBacklogHint = false; backlogFullHint = false;
+  stats = { waits: [], maxWait: 0, maxWaitRoom: '', fullRounds: 0, visitedTotal: 0, emergencyMissed: false };
+  corrT = [0, 0.06, 0.06, 0.06];
+  litT = {};
+  dest = null; pendingTap = null; crossing = null;
+  player.f = 2; player.x = roomCx('ns'); player.room = 'ns';
+  player.target = null; player.holdUntil = 0; player.holdRoom = null; player.trail = [];
+  npc.f = 3; npc.x = roomCx('linen'); npc.target = null; npc.queue = []; npc.toEmergency = false; npc.holdUntil = 0;
+}
+
+/* ---------------- キャプション ---------------- */
+const capEl = document.getElementById('caption');
+let baseCap = '', lastCap = '', transientUntil = 0;
+function nightLineAt(min) {
+  let s = NIGHT_LINES[0].s;
+  for (const l of NIGHT_LINES) { if (min >= l.m) s = l.s; }
+  return s;
+}
+function say(text, holdSec) {
+  transientUntil = elapsed + (holdSec || 4);
+  setCap(text);
+}
+function setCap(text) {
+  if (text === lastCap) return;
+  lastCap = text;
+  if (RM) { capEl.textContent = text; return; }
+  capEl.classList.add('fade');
+  setTimeout(() => { capEl.textContent = text; capEl.classList.remove('fade'); }, 350);
+}
+function updateCaption() {
+  if (elapsed < transientUntil) return;
+  setCap(nightLineAt(simMin));
+}
+
+/* ---------------- 移動 ---------------- */
+function walk(who, speed, dt) {
+  const t = who.target;
+  if (!t) return;
+  const sp = speed * L.speedScale;
+  if (Math.abs(who.f - t.f) > 0.02) {
+    if (Math.abs(who.x - L.spineX) > 4) {
+      who.x += Math.sign(L.spineX - who.x) * sp * dt;
+    } else {
+      who.x = L.spineX;
+      const df = Math.sign(t.f - who.f) * dt * (sp / 70);
+      who.f = Math.abs(t.f - (who.f + df)) < 0.05 ? t.f : who.f + df;
+    }
+  } else if (Math.abs(who.x - t.x) > 4) {
+    who.x += Math.sign(t.x - who.x) * sp * dt;
+  } else {
+    who.f = t.f; who.x = t.x; who.room = t.room;
+    who.target = null;
+    return true;
+  }
+  return false;
+}
+
+function goTo(roomId) {
+  dest = { room: roomId, tapAt: elapsed };
+  player.target = { room: roomId, f: roomById[roomId].f, x: roomCx(roomId) };
+  player.holdUntil = 0; player.holdRoom = null;
+}
+
+function onPlayerArrive(roomId) {
+  dest = null;
+  const currentRound = rounds.find(r => simMin >= r.from && simMin < r.to);
+  if (emergency && !emergency.resolved && emergency.room === roomId) {
+    emergency.resolved = true;
+    stats.waits.push(simMin - emergency.atMin);
+    player.holdUntil = elapsed + 14;
+    player.holdRoom = roomId;
+    taskCount++;
+    backlog++;
+    say('当直医が来ました。いまは落ち着いています', 6);
+    return;
+  }
+  if (calls.has(roomId)) {
+    const c = calls.get(roomId);
+    const waited = simMin - c.spawnMin;
+    stats.waits.push(waited);
+    if (waited > stats.maxWait) { stats.maxWait = waited; stats.maxWaitRoom = ROOM_NO[roomId]; }
+    calls.delete(roomId);
+    player.holdUntil = elapsed + 6;
+    player.holdRoom = roomId;
+    taskCount++;
+    backlog++;
+    say(ROOM_NO[roomId] + ' ' + VISIT_LINES[Math.floor(Math.random() * VISIT_LINES.length)], 5);
+    if (currentRound) currentRound.visited.add(roomId);
+    return;
+  }
+  if (isWard(roomId) && currentRound && !currentRound.visited.has(roomId)) {
+    currentRound.visited.add(roomId);
+    player.holdUntil = elapsed + 1.4;
+    player.holdRoom = roomId;
+  }
+}
+
+/* ---------------- タスク進行 ---------------- */
+function spawnCall() {
+  const free = WARDS.filter(id => !calls.has(id) && !(emergency && !emergency.resolved && emergency.room === id) && id !== player.holdRoom);
+  if (!free.length) return;
+  const id = free[Math.floor(Math.random() * free.length)];
+  calls.set(id, { spawnAt: elapsed, spawnMin: simMin });
+}
+
+function updateGame(dt) {
+  // hold完了
+  if (player.holdUntil > 0 && elapsed >= player.holdUntil) {
+    player.holdUntil = 0; player.holdRoom = null;
+    if (pendingTap) { goTo(pendingTap); pendingTap = null; }
+  }
+  // NSで記録を書く
+  if (!player.target && player.holdUntil === 0 && player.room === 'ns' && backlog > 0) {
+    player._rec = (player._rec || 0) + dt;
+    if (player._rec >= 2.2) { player._rec = 0; backlog--; writtenCount++; }
+  }
+  // コール発生
+  if (elapsed >= nextCallAt && simMin < END_MIN - 30) {
+    if (calls.size < 3) {
+      spawnCall();
+      nextCallAt = elapsed + 18 + Math.random() * 16;
+      if (!firstBacklogHint && taskCount === 0) { /* 最初のコールはそのまま */ }
+    } else {
+      nextCallAt = elapsed + 8 * (1 / MIN_PER_SEC) * 60 / 60 + 4;   // 繰り延べ
+    }
+  }
+  // 急変
+  if (!emergency && simMin >= emergencyPlanned) {
+    const free = WARDS.filter(id => !calls.has(id));
+    const room = free[Math.floor(Math.random() * free.length)] || 'wardC';
+    emergency = { room, at: elapsed, atMin: simMin, resolved: false, npcSent: false };
+    say('急変 ' + ROOM_NO[room] + ' — ' + EMERGENCY_LINES[Math.floor(Math.random() * EMERGENCY_LINES.length)], 8);
+  }
+  if (emergency && !emergency.resolved && !emergency.npcSent && elapsed - emergency.at > 40) {
+    emergency.npcSent = true;
+    stats.emergencyMissed = true;
+    npc.toEmergency = true;
+    npc.queue = [];
+    npc.target = { room: emergency.room, f: roomById[emergency.room].f, x: roomCx(emergency.room) };
+    say('かわりに、もうひとりが向かいました', 5);
+  }
+  // ラウンド集計
+  for (const r of rounds) {
+    if (!r.counted && simMin >= r.to) {
+      r.counted = true;
+      stats.visitedTotal += r.visited.size;
+      if (r.visited.size >= WARDS.length) stats.fullRounds++;
+      backlog += Math.min(2, Math.ceil(r.visited.size / 4));
+      taskCount += Math.min(2, Math.ceil(r.visited.size / 4));
+    }
+  }
+  // 記録のヒント
+  if (!firstBacklogHint && backlog >= 1) {
+    firstBacklogHint = true;
+    say('記録がたまると、右上の線が短くなります。ナースステーションで書けます', 6);
+  }
+  if (!backlogFullHint && backlog >= 6) {
+    backlogFullHint = true;
+    say('記録が、たまっています', 4);
+  }
+  // NPC夜勤: 3Fをゆっくり回る(急変フォロー時は直行)
+  if (!npc.target && npc.holdUntil <= elapsed) {
+    if (npc.toEmergency) {
+      npc.toEmergency = false;
+      if (emergency && !emergency.resolved) { emergency.resolved = true; }
+      npc.holdUntil = elapsed + 12;
+    } else {
+      if (!npc.queue.length) npc.queue = ['wardE', 'wardF', 'wardG', 'wardH', 'linen', 'bath', 'linen'];
+      const id = npc.queue.shift();
+      npc.target = { room: id, f: roomById[id].f, x: roomCx(id) };
+    }
+  }
+}
+
+/* ---------------- 入力 ---------------- */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let scale = 1, offX = 0, offY = 0;
+
+function pickRoom(clientX, clientY) {
+  const rect = cv.getBoundingClientRect();
+  const s = Math.min(rect.width / L.W, rect.height / L.H);
+  const ox = (rect.width - L.W * s) / 2;
+  const oy = (rect.height - L.H * s) / 2;
+  const wx = (clientX - rect.left - ox) / s;
+  const wy = (clientY - rect.top - oy) / s;
+  let best = null, bd = Infinity;
+  for (const id of TAPPABLE) {
+    const r = roomById[id];
+    const dx = Math.max(r.x0 - wx, 0, wx - r.x1);
+    const dy = Math.max(L.top[r.f] - wy, 0, wy - L.fb[r.f]);
+    const d = Math.hypot(dx, dy);
+    if (d < bd) { bd = d; best = id; }
+  }
+  return bd <= 70 ? best : null;
+}
+
+function handleTap(roomId) {
+  if (!roomId) return;
+  navigator.vibrate?.(8);
+  if (scene === 'title') { startNight(roomId); return; }
+  if (scene !== 'play') return;
+  if (player.holdUntil > elapsed) { pendingTap = roomId; return; }
+  goTo(roomId);
+}
+
+cv.addEventListener('pointerdown', (e) => handleTap(pickRoom(e.clientX, e.clientY)));
+document.querySelectorAll('.sr-rooms button').forEach(b => {
+  b.addEventListener('click', () => handleTap(b.dataset.room));
+});
+
+let focusRoom = null;
+document.querySelectorAll('.sr-rooms button').forEach(b => {
+  b.addEventListener('focus', () => { focusRoom = b.dataset.room; });
+  b.addEventListener('blur', () => { focusRoom = null; });
+});
+
+/* ---------------- 描画 ---------------- */
+const lw = (w) => { ctx.lineWidth = Math.max(w, 0.6 / scale); };
+
+function fit() {
+  const next = (innerHeight > innerWidth && innerWidth < 720) ? LAYOUTS.tall : LAYOUTS.wide;
+  if (next !== L) {
+    L = next;
+    indexRooms();
+    // 部屋IDは同一。位置だけ引き直し、状態は生かす
+    player.x = roomCx(player.target ? player.target.room : player.room);
+    if (player.target) player.target.x = roomCx(player.target.room);
+    player.trail = [];
+    npc.x = roomCx(npc.target ? npc.target.room : npc.room);
+    if (npc.target) npc.target.x = roomCx(npc.target.room);
+    cv.classList.toggle('tall', L === LAYOUTS.tall);
+  }
+  const rect = cv.getBoundingClientRect();
+  const dpr = Math.min(2, devicePixelRatio || 1);
+  cv.width = Math.round(rect.width * dpr);
+  cv.height = Math.round(rect.height * dpr);
+  scale = Math.min(rect.width / L.W, rect.height / L.H);
+  offX = (rect.width - L.W * scale) / 2;
+  offY = (rect.height - L.H * scale) / 2;
+  ctx.setTransform(scale * dpr, 0, 0, scale * dpr, offX * dpr, offY * dpr);
+}
+addEventListener('resize', fit);
+
+function dotY(who) {
+  const fBase = Math.max(1, Math.min(3, Math.floor(who.f)));
+  const frac = who.f - fBase;
+  return walkY(fBase) - frac * (L.fb[fBase] - (L.fb[fBase + 1] || L.fb[fBase])) - 5;
+}
+
+function draw(nowSec, dt) {
+  const pal = paletteAt(simMin % 1440);
+  ctx.clearRect(0, 0, L.W, L.H);
+
+  // 空・地面・躯体
+  const g = ctx.createLinearGradient(0, 0, 0, L.skyBot);
+  g.addColorStop(0, rgb(pal.skyTop)); g.addColorStop(1, rgb(pal.skyBot));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, L.W, L.skyBot);
+  ctx.fillStyle = rgb(pal.skyBot); ctx.fillRect(0, L.skyBot, L.W, L.groundY - L.skyBot);
+  ctx.fillStyle = rgb(pal.ground); ctx.fillRect(0, L.groundY, L.W, L.H - L.groundY);
+  ctx.fillStyle = rgb(pal.structure);
+  ctx.fillRect(L.bx0, L.roofTop, L.bx1 - L.bx0, L.groundY - L.roofTop);
+  ctx.fillRect(L.tank.x0, L.tank.y0, L.tank.x1 - L.tank.x0, L.tank.y1 - L.tank.y0);
+  ctx.strokeStyle = rgb(pal.line); lw(1.2);
+  ctx.strokeRect(L.tank.x0, L.tank.y0, L.tank.x1 - L.tank.x0, L.tank.y1 - L.tank.y0);
+  for (const legX of L.tank.legs) { ctx.beginPath(); ctx.moveTo(legX, L.tank.y1); ctx.lineTo(legX, L.roofTop); ctx.stroke(); }
+
+  // 部屋の灯り。呼んでいる部屋は待たせるほど明るくなる(窓あかりがタイマーになる)
+  for (const r of L.rooms) {
+    let target = 0;
+    if (r.id === 'ns') target = 1;
+    if (calls.has(r.id)) {
+      const w = nowSec - calls.get(r.id).spawnAt;
+      target = 0.25 + 0.45 * Math.min(1, w / 60);
+    }
+    if (emergency && !emergency.resolved && emergency.room === r.id) target = 0.8;
+    if (player.holdRoom === r.id) target = 1;
+    const cur = litT[r.id] ?? target;
+    litT[r.id] = cur + (target - cur) * Math.min(1, dt / 1.2);
+    ctx.fillStyle = rgb(mixRgb(pal.roomOff, pal.roomOn, litT[r.id]));
+    ctx.fillRect(r.x0, L.top[r.f] + 2, r.x1 - r.x0, openY(r.f) - L.top[r.f] - 2);
+  }
+
+  // 廊下の灯り(階ごと。急変の階だけ起きる)
+  for (let f = 1; f <= 3; f++) {
+    const em = emergency && !emergency.resolved && roomById[emergency.room].f === f;
+    const target = em ? 0.20 : 0.06;
+    corrT[f] += (target - corrT[f]) * Math.min(1, dt / 0.8);
+    ctx.fillStyle = rgba(pal.roomOn, corrT[f]);
+    ctx.fillRect(L.bx0, openY(f), L.bx1 - L.bx0, L.fb[f] - openY(f));
+  }
+
+  // 仕切りと開口線(巡回の未訪問は開口線の濃度で示す)
+  const currentRound = rounds.find(r => simMin >= r.from && simMin < r.to);
+  ctx.strokeStyle = rgba(pal.line, 0.45); lw(1);
+  for (const r of L.rooms) {
+    for (const x of [r.x0, r.x1]) {
+      if (x <= L.bx0 + 1 || x >= L.bx1 - 1) continue;
+      if (x >= L.bay[0] - 1 && x <= L.bay[1] + 1) continue;
+      ctx.beginPath(); ctx.moveTo(x, L.top[r.f] + 2); ctx.lineTo(x, openY(r.f)); ctx.stroke();
+    }
+  }
+  for (let f = 1; f <= 3; f++) {
+    const y = openY(f);
+    const roomsF = L.rooms.filter(r => r.f === f);
+    for (const r of roomsF) {
+      const due = isWard(r.id) && currentRound && !currentRound.visited.has(r.id) && scene === 'play';
+      const focus = focusRoom === r.id;
+      const a = focus ? 0.75 : (due ? 0.62 : 0.30);
+      ctx.strokeStyle = rgba(pal.line, a);
+      const cx = roomCx(r.id);
+      ctx.beginPath();
+      ctx.moveTo(r.x0, y); ctx.lineTo(cx - 7, y);
+      ctx.moveTo(cx + 7, y); ctx.lineTo(r.x1, y);
+      ctx.stroke();
+    }
+    // 部屋区画の外(bay等)
+    ctx.strokeStyle = rgba(pal.line, 0.30);
+    ctx.beginPath();
+    ctx.moveTo(L.bay[0], y); ctx.lineTo(L.bay[1], y);
+    ctx.stroke();
+  }
+
+  // 什器: NSカウンター
+  ctx.strokeStyle = rgba(pal.line, 0.6); lw(1);
+  { const r = roomById.ns, y = L.fb[2] - 32;
+    ctx.beginPath(); ctx.moveTo(r.x0 + 10, y); ctx.lineTo(r.x1 - 10, y); ctx.stroke(); }
+
+  // 床スラブ・外形・地面線
+  ctx.strokeStyle = rgb(pal.line); lw(1.6);
+  for (let f = 1; f <= 3; f++) { ctx.beginPath(); ctx.moveTo(L.bx0, L.fb[f]); ctx.lineTo(L.bx1, L.fb[f]); ctx.stroke(); }
+  ctx.strokeRect(L.bx0, L.roofTop, L.bx1 - L.bx0, L.groundY - L.roofTop);
+  ctx.beginPath(); ctx.moveTo(0, L.groundY); ctx.lineTo(L.W, L.groundY); ctx.stroke();
+
+  // 夜のこぼれ光(玄関・NS)
+  ctx.fillStyle = rgba(pal.roomOn, 0.10);
+  ctx.beginPath();
+  ctx.moveTo(L.bx0, openY(1)); ctx.lineTo(L.bx0, L.groundY);
+  ctx.lineTo(L.bx0 - 34, L.groundY); ctx.lineTo(L.bx0 - 10, openY(1));
+  ctx.closePath(); ctx.fill();
+  { const nx = roomCx('ns');
+    ctx.beginPath();
+    ctx.moveTo(nx - 18, openY(2)); ctx.lineTo(nx + 18, openY(2));
+    ctx.lineTo(nx + 30, L.fb[2]); ctx.lineTo(nx - 30, L.fb[2]);
+    ctx.closePath(); ctx.fill(); }
+
+  // 縦動線(砂・交差で切れる)
+  {
+    const G = 3.5;
+    ctx.strokeStyle = rgb(pal.sand); lw(1.6);
+    let segs = [[L.spineY0, L.spineY1]];
+    for (const gy of [L.fb[2], L.fb[3]]) {
+      segs = segs.flatMap(([a, b]) => (gy > a && gy < b) ? [[a, gy - G], [gy + G, b]] : [[a, b]]);
+    }
+    for (const [a, b] of segs) { ctx.beginPath(); ctx.moveTo(L.spineX, a); ctx.lineTo(L.spineX, b); ctx.stroke(); }
+  }
+
+  // 行き先(砂の縦線1本。同時に1本しか存在しない)
+  if (dest && scene === 'play') {
+    const r = roomById[dest.room], x = roomCx(dest.room);
+    const age = nowSec - dest.tapAt;
+    const a = age < 0.45 ? 0.70 : 0.30;
+    ctx.strokeStyle = rgba(pal.sand, a); lw(1);
+    ctx.beginPath(); ctx.moveTo(x, openY(r.f)); ctx.lineTo(x, walkY(r.f) + 4); ctx.stroke();
+  }
+
+  // コール(砂の点。待たせるほど点滅が速くなる)
+  for (const [id, c] of calls) {
+    const w = nowSec - c.spawnAt;
+    const period = 1.6 - 0.7 * Math.min(1, w / 45);
+    const on = RM ? true : (nowSec % period) < period / 2;
+    const a = (emergency && !emergency.resolved) ? 0.55 : 1.0;
+    if (!on) continue;
+    ctx.fillStyle = rgba(pal.sand, a);
+    ctx.beginPath();
+    ctx.arc(roomCx(id), walkY(roomById[id].f) - 8, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 急変(交差する二本の線。交点で切れる。呼吸であって明滅ではない)
+  if (emergency && !emergency.resolved) {
+    const cx = roomCx(emergency.room);
+    const cy = walkY(roomById[emergency.room].f) - 11;
+    const SX = 20, SY = 9, GX = 5;
+    const fade = Math.min(1, (nowSec - emergency.at) / 0.6);
+    const breathe = RM ? 1 : 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(nowSec * 2 * Math.PI / 2.2));
+    const a = fade * breathe;
+    const xA = cx - SX, xB = cx + SX;
+    const yOn = (ya, yb, x) => ya + (yb - ya) * (x - xA) / (xB - xA);
+    const crossLn = (col, ya, yb) => {
+      ctx.strokeStyle = col; ctx.beginPath();
+      ctx.moveTo(xA, ya); ctx.lineTo(cx - GX, yOn(ya, yb, cx - GX));
+      ctx.moveTo(cx + GX, yOn(ya, yb, cx + GX)); ctx.lineTo(xB, yb);
+      ctx.stroke();
+    };
+    lw(1.4);
+    crossLn(rgba(pal.line, a * 0.75), cy + SY, cy - SY);
+    crossLn(rgba(pal.sand, a), cy - SY, cy + SY);
+  }
+
+  // 8:30の交差(申し送り。夜勤と日勤がすれ違う)
+  if (crossing) {
+    const el = nowSec - crossing.startSec;
+    const alpha = RM ? 0.5 : (el < 0.8 ? 0.6 : Math.max(0, 0.6 * (1 - (el - 0.8) / 2.5)));
+    if (alpha > 0) {
+      const y = walkY(1);
+      const cxp = (L.bx0 + roomCx('entrance')) / 2 + 20;
+      const S = 7, GX = 5;
+      const xA = L.bx0 - 60, xB = roomCx('entrance') + 40;
+      const yOn = (ya, yb, x) => ya + (yb - ya) * (x - xA) / (xB - xA);
+      const crossLn = (col, ya, yb) => {
+        ctx.strokeStyle = col; ctx.beginPath();
+        ctx.moveTo(xA, ya); ctx.lineTo(cxp - GX, yOn(ya, yb, cxp - GX));
+        ctx.moveTo(cxp + GX, yOn(ya, yb, cxp + GX)); ctx.lineTo(xB, yb);
+        ctx.stroke();
+      };
+      lw(1);
+      crossLn(rgba(pal.line, alpha), y + S, y - S);
+      crossLn(rgba(pal.sand, alpha), y - S, y + S);
+    }
+  }
+
+  // プレイヤーの軌跡(歩いた線。装飾ではなくこの作品の語彙)
+  if (!RM && player.trail.length > 1 && scene === 'play') {
+    const t = player.trail;
+    lw(1);
+    for (let i = 1; i < t.length; i++) {
+      const p = t[i - 1], q = t[i];
+      if (Math.hypot(q.x - p.x, q.y - p.y) > 40) continue;
+      ctx.strokeStyle = rgba(pal.dotStaff, 0.20 * (i / t.length));
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+    }
+  }
+
+  // 人の点(2体とも同じ円。区別は軌跡だけ)
+  for (const who of [npc, player]) {
+    if (scene !== 'play' && who === player) continue;
+    ctx.fillStyle = rgb(pal.dotStaff);
+    ctx.beginPath();
+    ctx.arc(who.x, dotY(who), 2.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // 対応中の進捗(細い藍の弧)
+  if (player.holdUntil > elapsed && scene === 'play') {
+    const total = emergency && emergency.room === player.holdRoom ? 14 : 6;
+    const t = 1 - (player.holdUntil - elapsed) / total;
+    ctx.strokeStyle = rgba(pal.dotStaff, 0.8); lw(1.2);
+    ctx.beginPath();
+    ctx.arc(player.x, dotY(player), 8, -Math.PI / 2, -Math.PI / 2 + clamp01(t) * Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // タイトル画面のデモコール
+  if (scene === 'title') {
+    const on = RM ? true : (nowSec % 1.6) < 0.8;
+    if (on) {
+      ctx.fillStyle = rgb(pal.sand);
+      ctx.beginPath();
+      ctx.arc(roomCx('wardG'), walkY(3) - 8, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+/* ---------------- HUD更新 ---------------- */
+const clockEl = document.getElementById('clock');
+const trackDot = document.getElementById('trackDot');
+const recBar = document.getElementById('recBar');
+const roundTicksEl = document.getElementById('roundTicks');
+const tickEls = roundTicksEl.querySelectorAll('s');
+
+function updateHud() {
+  const dispMin = simMin % 1440;
+  clockEl.textContent = String(Math.floor(dispMin / 60)).padStart(2, '0') + ':' + String(Math.floor(dispMin % 60)).padStart(2, '0');
+  trackDot.style.left = `calc(${((simMin - START_MIN) / (END_MIN - START_MIN)) * 100}% - 2px)`;
+  recBar.style.width = `${(6 - Math.min(backlog, 6)) / 6 * 100}%`;
+  const currentRound = rounds.find(r => simMin >= r.from && simMin < r.to);
+  WARDS.forEach((id, i) => {
+    const due = currentRound && !currentRound.visited.has(id);
+    tickEls[i].classList.toggle('due', !!due);
+  });
+}
+
+/* ---------------- シーン・ループ ---------------- */
+function setScene(s) {
+  scene = s;
+  document.body.dataset.scene = s;
+  requestAnimationFrame(fit);          // レイアウト変化後に座標を引き直す
+}
+
+let raf = null;
+function startNight(firstRoom) {
+  resetNight();
+  setScene('play');
+  updateCaption();
+  say(nightLineAt(START_MIN), 5);
+  if (firstRoom && firstRoom !== 'ns') goTo(firstRoom);
+}
+
+function endNight() {
+  crossing = { startSec: elapsed };
+  setTimeout(() => {
+    fillReport();
+    setScene('report');
+    window.scrollTo(0, 0);
+  }, RM ? 0 : 600);
+}
+
+function fillReport() {
+  const n = stats.waits.length;
+  const avg = n ? stats.waits.reduce((a, b) => a + b, 0) / n : 0;
+  document.getElementById('rWait').textContent = n
+    ? `${n}件に対応。平均 ${Math.round(avg)}分、いちばん長くは ${stats.maxWaitRoom || '—'}号室の方を ${Math.round(stats.maxWait)}分`
+    : '呼ばれることのない、静かな夜でした';
+  const full = stats.fullRounds;
+  document.getElementById('rRound').textContent =
+    `全部を回れたのは、5回のうち${full}回(のべ ${stats.visitedTotal} / 40室)`;
+  const carry = backlog;
+  document.getElementById('rRec').textContent = taskCount
+    ? `${taskCount}件のうち${writtenCount}件を書きました。${carry}件を日勤へ引き継ぎます`
+    : '書くことの少ない夜でした';
+
+  const respond = clamp01((20 - avg / MIN_PER_SEC) / 16);        // 実秒換算
+  const roundScore = stats.visitedTotal / 40;
+  const recordScore = taskCount ? writtenCount / taskCount : 1;
+  document.getElementById('mWait').style.width = `${Math.round(respond * 100)}%`;
+  document.getElementById('mRound').style.width = `${Math.round(roundScore * 100)}%`;
+  document.getElementById('mRec').style.width = `${Math.round(recordScore * 100)}%`;
+
+  let s = (respond + roundScore + recordScore) / 3;
+  let tier = s > 0.85 ? 1 : s > 0.65 ? 2 : s > 0.4 ? 3 : 4;
+  if (stats.emergencyMissed) tier = Math.max(tier, 3);
+  document.getElementById('rClose').textContent = [
+    '静かな一晩でした。呼ばれてすぐに行けた人が、ほとんどです',
+    'おおむね回りました。何人か待たせて、記録も少し残っています',
+    '重なった時間がありました。それでも、八部屋ぜんぶが朝を迎えています',
+    '今夜は重なりました。こういう夜があります。誰も欠けずに朝が来たなら、それで十分です',
+  ][tier - 1];
+}
+
+let pausedAt = null;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { pausedAt = performance.now(); }
+  else if (pausedAt != null) { lastFrame = performance.now(); pausedAt = null; }
+});
+
+const params = new URLSearchParams(location.search);
+const devMin = params.get('dev');
+
+function tick(now) {
+  const dt = Math.min(0.05, (now - lastFrame) / 1000);
+  lastFrame = now;
+
+  if (scene === 'play' && !document.hidden) {
+    elapsed += dt;
+    simMin = START_MIN + elapsed * MIN_PER_SEC;
+    if (simMin >= END_MIN && !crossing) { endNight(); }
+    if (simMin < END_MIN) {
+      const arrived = walk(player, PLAYER_SPEED, player.holdUntil > elapsed ? 0 : dt) ;
+      if (arrived) onPlayerArrive(player.room);
+      walk(npc, NPC_SPEED, npc.holdUntil > elapsed ? 0 : dt);
+      updateGame(dt);
+      // 軌跡サンプル
+      player.trailAcc += dt;
+      if (player.trailAcc >= 0.06) {
+        player.trailAcc = 0;
+        player.trail.push({ x: player.x, y: dotY(player) });
+        if (player.trail.length > 12) player.trail.shift();
+      }
+      updateCaption();
+      updateHud();
+    }
+  } else if (scene === 'title') {
+    walk(npc, NPC_SPEED, dt);
+    if (!npc.target && npc.holdUntil <= elapsed) {
+      if (!npc.queue.length) npc.queue = ['wardE', 'wardF', 'wardG', 'wardH', 'linen'];
+      const id = npc.queue.shift();
+      npc.target = { room: id, f: roomById[id].f, x: roomCx(id) };
+    }
+  }
+
+  const drawMin = scene === 'report' ? 510 : (scene === 'title' ? START_MIN : simMin);
+  const saveMin = simMin; simMin = drawMin;
+  draw(performance.now() / 1000, dt);
+  simMin = saveMin;
+
+  raf = requestAnimationFrame(tick);
+}
+
+document.getElementById('startBtn').addEventListener('click', () => startNight());
+document.getElementById('againBtn').addEventListener('click', () => { startNight(); });
+
+indexRooms();
+npc.x = roomCx('linen');
+player.x = roomCx('ns');
+if (devMin) { /* デバッグ: ?dev=分 で夜の途中から */ }
+fit();
+setScene('title');
+lastFrame = performance.now();
+if (devMin) {
+  startNight();
+  elapsed = (parseFloat(devMin) - START_MIN) / MIN_PER_SEC;
+}
+requestAnimationFrame(tick);
+</script>
+<script src="../shared/usage.js" defer></script>
+</body>
+</html>
