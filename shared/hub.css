@@ -40,11 +40,11 @@ section[id]{scroll-margin-top:90px}
 .toolbox-status.soon{background:var(--paper-2);color:var(--ink-3);border:1px solid var(--line)}
 .toolbox-status.consult{background:var(--paper-3);color:var(--blue);border:1px solid var(--line)}
 .toolbox-num{font:800 11px/1 var(--sans-en);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3)}
-.toolbox-name{font:800 22px/1.3 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
+.toolbox-name{font:700 22px/1.3 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
 .toolbox-name .jp{display:block;font:500 11px/1 var(--sans-jp);color:var(--ink-3);letter-spacing:0.04em;margin-top:6px}
 .toolbox-price{display:flex;align-items:baseline;gap:6px;padding-bottom:14px;border-bottom:1px dashed var(--line)}
 .toolbox-price .yen{font:600 13px/1 var(--sans-jp);color:var(--ink-3)}
-.toolbox-price .num{font:800 28px/1 var(--serif-en);color:var(--navy);letter-spacing:-0.01em}
+.toolbox-price .num{font:700 28px/1 var(--serif-en);color:var(--navy);letter-spacing:-0.01em}
 .toolbox-price .unit{font:500 10px/1.4 var(--sans-jp);color:var(--ink-3);margin-left:4px}
 .toolbox-for{font:600 11px/1.7 var(--sans-jp);color:var(--ink-2);letter-spacing:0.02em}
 .toolbox-for .label{display:inline-block;font:700 9px/1 var(--sans-en);letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin-right:8px}
@@ -73,7 +73,7 @@ section[id]{scroll-margin-top:90px}
 /* ===== EDITORIAL DETAILS ===== */
 /* hero: 透かしタイポ + 縦書きの添え書き */
 .hero{overflow:hidden}
-.hero-mark{position:absolute;right:-2%;bottom:-8%;font:900 clamp(110px,20vw,300px)/0.8 var(--serif-en);font-style:normal;letter-spacing:-0.04em;color:var(--ink);opacity:0.03;pointer-events:none;user-select:none;white-space:nowrap;z-index:0}
+.hero-mark{position:absolute;right:-2%;bottom:-8%;font:700 clamp(110px,20vw,300px)/0.8 var(--serif-en);font-style:normal;letter-spacing:-0.04em;color:var(--ink);opacity:0.03;pointer-events:none;user-select:none;white-space:nowrap;z-index:0}
 .hero-inner{position:relative;z-index:1}
 /* 1文字ずつ縦に積む(writing-mode はブラウザ差が出るため使わない) */
 .hero-vertical{position:absolute;top:50%;transform:translateY(-50%);right:clamp(20px,5vw,80px);width:15px;font:600 13px/1.9 var(--serif-jp);word-break:break-all;text-align:center;color:var(--ink-2);opacity:0.55;padding-left:16px;border-left:1px solid var(--line);z-index:1;box-sizing:content-box}
@@ -81,7 +81,7 @@ section[id]{scroll-margin-top:90px}
 
 /* セクション背景の大きな番号 */
 .s-inner{position:relative}
-.s-num-ghost{position:absolute;top:-44px;right:0;font:900 clamp(88px,13vw,170px)/1 var(--serif-en);font-style:normal;color:transparent;-webkit-text-stroke:1.5px rgba(27,27,30,0.13);pointer-events:none;user-select:none;z-index:0}
+.s-num-ghost{position:absolute;top:-44px;right:0;font:700 clamp(88px,13vw,170px)/1 var(--serif-en);font-style:normal;color:transparent;-webkit-text-stroke:1.5px rgba(27,27,30,0.13);pointer-events:none;user-select:none;z-index:0}
 .s-head,.toolbox-grid,.notes-foot,.toolbox-foot{position:relative;z-index:1}
 
 /* ページ間トランジション(対応ブラウザのみ・MPA View Transitions) */
