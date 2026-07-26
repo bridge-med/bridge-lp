@@ -688,8 +688,8 @@ function updateGame(dt) {
       taskCount += Math.min(2, Math.ceil(r.visited.size / 4));
     }
   }
-  // 記録のヒント
-  if (!firstBacklogHint && backlog >= 1) {
+  // 記録のヒント(到着文言を上書きしないよう、表示中は待つ)
+  if (!firstBacklogHint && backlog >= 1 && elapsed >= transientUntil) {
     firstBacklogHint = true;
     say('記録がたまると、右上の線が短くなります。ナースステーションで書けます', 6);
   }
