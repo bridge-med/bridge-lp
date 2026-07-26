@@ -173,7 +173,9 @@ section.alt{background:var(--paper-2)}
 /* 第29条「何もしなくても十分」の一行。三択の後に置く(先に言うと三択が値引きされて見える)。
  * editor案は --ink-3 で一段落とす意図だったが、--ink-3 は生成り上でAA未達(既知欠陥)のため
  * --ink-2 とし、サイズで静かさを出す。トーンの最終判断は designer 照合(Dバッチ)で */
-.walk-note{max-width:62ch;margin:34px 0 0;font:500 12.5px/2 var(--sans-jp);color:var(--ink-2)}
+/* 思想の言葉なので明朝(第23条)。600の見出しに対する400で静けさを出す(サイズで縮めない)。
+ * 幅はフォント解決に依存する ch を避けて em で確定 */
+.walk-note{max-width:34em;margin:34px 0 0;font:400 14px/2.1 var(--serif-jp);color:var(--ink-2)}
 
 /* reveal — JSが付与する html.js 配下でだけ隠す。JS無効環境では最初から見える */
 html.js [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
