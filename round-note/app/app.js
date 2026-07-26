@@ -80,7 +80,7 @@
 
     h += '<header class="head">';
     h += '  <div class="head-eyebrow">ROUNDNOTE</div>';
-    h += '  <h1 class="head-title">本部長の<span class="em">巡回手帖</span></h1>';
+    h += '  <h1 class="head-title">本部長の巡回手帖</h1>';
     h += '  <p class="head-sub">施設ごとの宿題・決定・気づきを1冊に。<br>「あれ、どうなった?」を、なくす。</p>';
     h += '</header>';
 

@@ -15,9 +15,7 @@
   /* 炭 — 文字 */
   --ink:   #1B1B1E;
   --ink-2: #45464C;
-  --ink-3: #7D7E85;
-  --ink-4: #B6B3AB;
-  /* 藍 — 骨格 */
+    /* 藍 — 骨格 */
   --navy:      #16233E;
   --blue:      #24365C;
   --blue-soft: #8B9BBC;
@@ -125,7 +123,7 @@ a { color: inherit; text-decoration: none; }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--blue) 0%, var(--navy) 120%);
-  color: #fff;
+  color: var(--paper);
   box-shadow: 0 4px 14px rgba(22, 35, 62, 0.30);
 }
 .btn-primary:hover { background: var(--navy); }
@@ -152,6 +150,9 @@ a { color: inherit; text-decoration: none; }
 
 .screen-top { text-align: center; padding-top: 24px; }
 
+.crest-plate { fill: var(--paper); stroke: var(--navy); }
+.crest-line { stroke: var(--dawn); }
+.crest-mark { fill: var(--navy); }
 .crest { display: flex; justify-content: center; }
 .crest svg { width: 76px; height: 76px; filter: drop-shadow(0 4px 10px rgba(22, 35, 62, 0.20)); }
 
@@ -423,7 +424,7 @@ a { color: inherit; text-decoration: none; }
 }
 .rank-letter { font-size: 30px; letter-spacing: 0; vertical-align: -4px; margin-left: 6px; }
 /* ランクは藍の濃淡+炭。最高到達のSだけ砂(--dawn-deep) */
-.rank-S { color: var(--dawn-deep); }
+.rank-S { color: var(--navy); }
 .rank-A { color: var(--navy); }
 .rank-B { color: var(--blue); }
 .rank-C { color: var(--ink-2); }
@@ -443,7 +444,7 @@ a { color: inherit; text-decoration: none; }
 .gameover-eyebrow { color: var(--navy); }
 .gameover-hero {
   border-image: none;
-  border-top-color: var(--navy);
+  border-top-width: 0;
   background: var(--navy);
 }
 .gameover-hero .result-type {
@@ -525,7 +526,7 @@ a { color: inherit; text-decoration: none; }
   bottom: 28px;
   transform: translate(-50%, 16px);
   background: var(--ink);
-  color: #fff;
+  color: var(--paper);
   font: 600 13px/1.4 var(--sans);
   border-radius: 999px;
   padding: 11px 22px;
