@@ -74,6 +74,7 @@ a.prod-card:hover .prod-link{gap:10px}
         <p class="p">あなたの現場の「面倒くさい」を道具に。</p>
       </a>
     </div>
+    <p class="walk-note" data-reveal>どれも買わずに、画面を眺めて帰ってもらってかまいません。自分の現場には要らないと分かることも、ひとつの結論です。</p>
   </div>
 </aside>
 
@@ -94,6 +95,10 @@ window.addEventListener('DOMContentLoaded', () => {
       p: '実用の機能はありません。眺めるだけのものを、ここに置いています。' },
   ];
   const PRODUCTS = [
+    { cat: 'management', name: '医療管理実務ライブラリ', img: 'medops.png', jp: '記事と無料テンプレートの別サイト', href: '../medops/index.html',
+      p: 'クリニック統合や管理医師の変更。事務長と法人本部が迷いやすい実務を、担当者と期限まで決めた手順と無料テンプレートに。' },
+    { cat: 'management', name: '医療管理職スターター', img: 'manager-starter.png', jp: '新任管理職のための別サイト', href: '../manager-starter/index.html',
+      p: '看護師やリハ職、医療事務から初めて管理職になった人へ。1on1や上司への報告を、無料のチェックリストと記入式シートに。' },
     { cat: 'management', name: 'RehaBoard', img: 'rehaboard.png', jp: 'リハボード', href: '../rehaboard/index.html',
       p: 'リハビリ部門の運営を、1画面で。月選択・期間切替・KPIカスタマイズ。' },
     { cat: 'management', name: 'MedBoard', img: 'medboard.png', jp: 'メドボード', href: '../medboard/index.html',
@@ -124,6 +129,8 @@ window.addEventListener('DOMContentLoaded', () => {
       p: '「体交してた」を、履歴書や面接で通じる言葉に。星であつめて、まとめてコピーできる対訳集。' },
     { cat: 'casual', name: 'Moyamoya Check', img: 'moyamoya.png', jp: '職場モヤモヤ診断', href: '../moyamoya/index.html',
       p: '職場の“なんとなくしんどい”を10問で言語化する診断。約3分・登録不要。' },
+    { cat: 'casual', name: 'Yawagaeshi', img: 'yawagaeshi.png', jp: 'やわ返', href: '../yawagaeshi/index.html',
+      p: '送る前に、ひと呼吸。角の立たないやわらかい返信案を3つつくる。' },
     { cat: 'casual', name: 'Gokigen Gacha', img: 'gokigen-gacha.png', jp: 'ごきげん回復ガチャ', href: '../gokigen-gacha/index.html',
       p: '疲れた日に、いまの自分にちょうどいい回復行動をひとつだけ。押すだけのセルフケアガチャ。' },
     { cat: 'casual', name: 'PMI Quest', img: 'pmi-quest.png', jp: 'クリニックPMIクエスト', href: '../pmi-quest/index.html',

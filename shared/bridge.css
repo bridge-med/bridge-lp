@@ -14,7 +14,7 @@
   --bg-3:#EAE2D3;
   --ink:#1B1B1E;
   --ink-2:#45464C;
-  --ink-3:#7D7E85;
+  --ink-3:#63646B;
   --ink-4:#B6B3AB;
   --line:rgba(27,27,30,0.10);
   --navy:#16233E;
@@ -227,11 +227,13 @@ a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 .walk-inner{max-width:var(--max);margin:0 auto}
 .walk-h{font-family:var(--mincho);font-weight:600;font-size:clamp(19px,2.6vw,26px);line-height:1.7;color:var(--ink);margin:18px 0 34px}
 .walk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.walk-card{border:1px solid var(--line);border-radius:16px;padding:24px;transition:all .3s var(--ease);background:var(--card)}
+.walk-card{border:1px solid var(--line);border-radius:2px;padding:24px;transition:all .3s var(--ease);background:var(--card)}
 .walk-card:hover{transform:translateY(-3px);border-color:var(--blue-soft)}
 .walk-card .en{font:600 9px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn-deep);display:block;margin-bottom:10px}
 .walk-card .t{font-family:var(--mincho);font-weight:600;font-size:16px;margin-bottom:6px}
 .walk-card .p{font-size:11.5px;color:var(--ink-2);line-height:1.9}
+/* 第29条「何もしなくても十分」の一行。思想の言葉なので明朝(subpage.cssと同型) */
+.walk-note{max-width:34em;margin:34px 0 0;font:400 14px/2.1 var(--mincho);color:var(--ink-2)}
 @media(max-width:760px){.walk-grid{grid-template-columns:1fr}}
 
 /* ===== フッター(JSが .site-footer に描画) ===== */
