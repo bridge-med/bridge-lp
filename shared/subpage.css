@@ -25,7 +25,8 @@
   /* 砂 — 温度。「選択の瞬間」にだけ使う(選択・現在地・到達・句点)。
    * --dawn は面・線・句点(装飾)用。文字に使うと生成りの上で2.96:1でAA未達。
    * --dawn-deep は「文字として使える砂」(--paper 5.11:1 / --paper-2 4.66:1)。
-   * 同色相・同彩度で明度のみ操作しており、砂の系統から外れていない */
+   * 同色相・同彩度で明度のみ操作しており、砂の系統から外れていない。
+ * ※いずれもライトの値。ダークでは --dawn-deep は --dawn と同値(#C2A97E)で --paper 7.56:1 */
   --dawn:#A98F63;--dawn-deep:#7D6845;
   --serif-jp:'Shippori Mincho B1','Noto Serif JP',serif;
   --sans-jp:'Noto Sans JP',sans-serif;
@@ -188,10 +189,11 @@ section.alt{background:var(--paper-2)}
 
 /* 「次はどこへ歩く?」— 各ページ末尾の3分岐(第26条・ia.md「行き止まりなし」)。
  * bridge.css の .walk をトークン適応して移植:
- *   --mincho→--serif-jp / --en→--sans-en / --card→--paper / --sec-y→120px 固定。
- *   角丸は本体の16pxではなく、このファイルのカード語彙(2px)に揃えた。
- *   .p の文字色は本体の --ink-3 ではなく --ink-2。--ink-3 は生成りの上でAA未達
- *   (knownIssues登録済み)のため、新設面に既知の欠陥を複製しない。
+ *   --mincho→--serif-jp / --en→--sans-en / --sec-y→120px 固定。
+ *   角丸2px・面は --card。2026-07-27のダークスプリントで bridge.css 側と同値に揃えた。
+ *   .p は --ink-2。11.5px の補助文には一段濃い方が読みやすいという判断であって、
+ *   --ink-3 を避けているのではない(--ink-3 は #63646B へ改訂、生成り3段すべてAA合格:
+ *   --paper 5.64 / --paper-2 5.14 / --paper-3 4.58)。
  * 砂: .en ラベルは「分岐点」の印(第22条の明示例) */
 .walk{padding:120px var(--pad-x);border-top:1px solid var(--line);background:var(--paper)}
 .walk-inner{max-width:var(--max);margin:0 auto}
@@ -208,9 +210,8 @@ section.alt{background:var(--paper-2)}
 .walk .eyebrow{display:inline-flex;align-items:center;gap:10px}
 .walk .eyebrow::before{content:'';width:18px;height:1px;background:var(--dawn);flex-shrink:0}
 /* 第29条「何もしなくても十分」の一行。三択の後に置く(先に言うと三択が値引きされて見える)。
- * editor案は --ink-3 で一段落とす意図だったが、--ink-3 は生成り上でAA未達(既知欠陥)のため
- * --ink-2 とし、サイズで静かさを出す。トーンの最終判断は designer 照合(Dバッチ)で */
-/* 思想の言葉なので明朝(第23条)。600の見出しに対する400で静けさを出す(サイズで縮めない)。
+ * 思想の言葉なので明朝(第23条)。600の見出しに対する400で静けさを出す(サイズで縮めない)。
+ * 文字色は --ink-2 で確定(designer照合 2026-07-27)。
  * 幅はフォント解決に依存する ch を避けて em で確定 */
 .walk-note{max-width:34em;margin:34px 0 0;font:400 14px/2.1 var(--serif-jp);color:var(--ink-2)}
 
@@ -219,6 +220,17 @@ section.alt{background:var(--paper-2)}
 .shot{max-width:960px;margin:56px auto 0}
 .shot img{width:100%;height:auto;border:1px solid var(--line);border-radius:2px;box-shadow:var(--shadow-1)}
 .shot-cap{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2);margin-top:10px;text-align:center}
+
+/* 交差する二本の線(第24条)。inline の stroke 属性より CSS が勝つ。
+ * 藍は地の明暗で反転させる — subpage の --navy はダークで #D8DEEB に反転済み。 */
+.nav-logo .mark path:first-child{stroke:var(--navy)}
+.nav-logo .mark path:last-child{stroke:var(--dawn)}
+/* .foot は両テーマとも暗い帯。藍は常に淡い側を取る */
+.foot-brand{display:inline-flex;align-items:center;gap:10px}
+.foot-brand .mark{width:36px;height:16px;flex-shrink:0}
+.foot-brand .mark path{fill:none;stroke-linecap:round}
+.foot-brand .mark path:first-child{stroke:var(--blue-soft)}
+.foot-brand .mark path:last-child{stroke:var(--dawn)}
 
 /* reveal — JSが付与する html.js 配下でだけ隠す。JS無効環境では最初から見える */
 html.js [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}

@@ -23,7 +23,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "medboard",
@@ -39,7 +39,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "hire-board",
@@ -55,7 +55,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "interview-kit",
@@ -71,7 +71,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "consult-simulator",
@@ -87,7 +87,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "round-note",
@@ -152,7 +152,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "study-board",
@@ -168,7 +168,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "english-trainer",
@@ -184,7 +184,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "turnaround12",
@@ -200,7 +200,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-07-27"
     },
     {
       "id": "tanaoroshi",
@@ -445,7 +445,7 @@
       "measure": "none",
       "measureNote": "bridge.js非読込のためusage.js未敷設。手動記録",
       "note": "記録が2026-07-04で停止(23日間・feed.json実測)。第12条に照らし休止中で正直に登録(2026-07-27社長委任決定)。再開したら計測中へ",
-      "lastCommit": "2026-07-07",
+      "lastCommit": "2026-07-26",
       "decision": {
         "points": "初期データは実話のみで第13条適合。実験室(journal=途中の公開)という置き場自体はIAに適う。監査役推奨(2026-07-26): 実利用が続いているなら掲載=実験室のまま台帳登録を確定(a)。使っていないなら導線撤去(b・journal/index.html 86-92行のカード削除)。判断軸は第12条。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md"
       }
@@ -466,7 +466,7 @@
       "measure": "none",
       "measureNote": "bridge.js非読込のため未計測。手動記録",
       "note": "データが2026-07-04で停止・自動更新ワークフロー不在(棚卸し実測)。休止中で正直に登録(2026-07-27社長委任決定)。復旧はワークフロー再設置とセットで",
-      "lastCommit": "2026-07-07",
+      "lastCommit": "2026-07-26",
       "decision": {
         "points": "6件中で誠実の条項に最も近い(第12・15条)。監査役推奨(2026-07-26): 休止表記(a)=statusを休止中にし、journalカード83行の「毎朝」を実態に合う文言へ(editor照合)。復旧ならワークフロー再設置とセットで表記を戻す。再開の意思がないなら導線撤去(b・カード79-85行の削除)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md"
       }
@@ -474,9 +474,7 @@
   ],
   "knownIssues": [
     "プロダクト9ページがdata-rootなしでbridge.jsを読み、budoux-ja.min.jsが404になる(実害はコンソールノイズのみ)。直すとBudouXが各アプリの文字組みに新しく効き始めるため、designer照合込みの独立スプリントで対応する",
-    "shared/subpage.css を読む9ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit/starter-kits)にダーク実装がない。憲法第22条後半(ライト/ダークを常に等価に設計する)の未達。2026-07-24の配色リカラーでは色の4系統収束だけを行い、ダークは分離した(社長承認)。rehaboard の色がinline styleで書かれておりダークから上書きできないため、rehaboardの脱inline化が先。ダークのUI方式(prefers-color-schemeで自動追従か、9ページに切替UIを新設か。これらのページは.site-navを持たずbridge.jsの切替ボタンが注入されない)を社長が決めた後、designer照合込みの独立スプリントで対応する 前提条件2つは2026-07-24に解消済み: rehaboardの脱inline化(b5880d8)とフッターの色直書き9ファイル(af553b9)。PM進言はprefers-color-scheme自動追従(切替UI新設は9ページにナビ相当を持ち込む工事になるため。第9条4号)。UI方式の社長決定待ち",
     "実験室2ページ(worklog / morning)が公開導線を持ちながら台帳・sitemap.xml のどちらにも未登録だった件は、未掲載4件(yawagaeshi / medops / manager-starter / bridge-focus)と一束にした掲載ガバナンスの棚卸しで扱い、2026-07-26に監査役棚卸し済み: 6件の推奨判断は drafts/掲載ガバナンス棚卸し-2026-07-26.md。worklogのREADME表記ズレとmorning/worklog feed.htmlの死リンク(実在しないワークフローへのリンク)は事実修正済み、2ページは台帳へ下書き登録済み。残るは社長決裁(各件の(a)/(b))のみ。あわせてrehaboard-starterはNAV・PRODUCTS配列とも未掲載だがstarter-kitsから被リンクがあり、存置か畳むかは社長判断(2026-07-26 designer/PM指摘)。棚卸しドラフトには未収載のため監査役の追補が要る。存置なら砂色相当の常時強調17箇所(--vermilion:#A98F63、第24条)がdesignerタスク。構造的な矛盾のためauditor領分",
-    "shared/subpage.css の --ink-3(#7D7E85) が文字色としてWCAG AA基準を満たさない。生成り3段すべてで不足(--paper 3.87:1 / --paper-2 3.53:1 / --paper-3 3.14:1、必要値4.5:1)。subpage.css と hub.css で文字色として計34回使われ、いずれも9〜11.5pxで大文字テキストの閾値(18.66px)に届かないため通常テキスト扱いになる。2026-07-24のqa実測で2件(.sched-table td.calm / .ra-report .note)が個別に不合格となり --ink-2 へ逃がしたが、これは対症療法であり根はトークンの値そのもの。--paper でAAを通すには約 #6F7078、--paper-3 でも通すには約 #656670 まで暗くする必要がある。ただしトークン値の変更は9ページの見た目を一斉に変えるためdesigner照合込みの独立スプリント。ダーク実装のスプリントと同時にやるのが効率的",
     "shared/subpage.css を読む9ページすべてに実物のスクリーンショットが無い(img参照ゼロ)。LPが実物について事実を主張しているのに、同じページ上に突き合わせる対象が存在しない状態。2026-07-24にstudy-boardで実害が確認された(カード見出しの色名は実物と一致していたが、LP側の罫線が4枚中3枚ずれたまま公開されていた)。designerの判断は「載せる。ただし体験のためではなく照合の錨として、無加工の写し1枚に撮影日を添える」。規約案と機械検査への落とし込み方はdesignerの照合結果にあり。第22条に但し書き(写しの内部は制限外・加工しない・色を周囲に持ち出さない・1ページ1枚)を足すかは第33条の手続きで社長判断",
     "憲法外の色系統(萌黄・代赭・朱)が共通基盤の外に残るのは3ファイル: rehaboard-starter/index.html(自前:root・憲法外8色)、morning/index.html(7色)、worklog/feed.html。round-note は2026-07-25のリカラーで解消済み。あわせて rehaboard-starter には walk(Where to next)も無く、rehaboardの分岐1枚目が1クリック先の行き止まりへ客を送る状態。turnaround12 も結果画面の終端が「もう一度」とシェアのみでBRIDGEへの戻り線が無い(第26条・designer起票2026-07-25)。ゲーム系の戻り線とあわせて同じ束で扱う",
     "medboard/index.html:54 のhero見出し(.nowrap span「月次の数字を読み上げる会議に、」)が390px幅で折り返せず18pxの横スクロールを起こす(bodyScrollWidth 408 vs 390)。2026-07-25のqa実測で発見。スプリントB以前から存在する既存不具合。対応候補はnowrapの区切り位置調整か解除。文言のリズムに関わるためdesigner照合込みで",
@@ -487,12 +485,13 @@
     "madoakari: 時計の数字(Inter 80px)が明朝ステートメントより大きい、サイト唯一のページ。第23条には適合(時刻=構造の言葉)だが声の階層が反転している。一枚限りの措置とし、二例目が出たらdesignerが規則として設計し直す(2026-07-26 PM判定)",
     "madoakari: manifest.webmanifestのtheme_color/background_colorがライト固定(#FBFAF7)。manifestはメディアクエリを持てないプラットフォーム制約による既知の非対称。<meta theme-color>は両テーマ対応済み",
     "madoakari: ?t=デバッグパラメータで開いたときもモード切替ボタンでliveへ戻せる。デバッグ専用機能のため現状維持(2026-07-26 PM判定)",
-    "8ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit)の末尾CTA見出しが同文のインラインstyleで重複している。shared/subpage.cssに.cta-hとして一本化する(PM預かりのバックログ・次にCTA周辺を触るスプリントで。第9条4号)。あわせてsans系の宣言不一致2箇所(subpage.css .alert-body strong / .sched-table td.busy のfont-weight:800、Noto Sans JPは800未読込で900が選ばれる。実害なし)も同時に整える。実測済み(2026-07-26)"
+    "8ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit)の末尾CTA見出しが同文のインラインstyleで重複している。shared/subpage.cssに.cta-hとして一本化する(PM預かりのバックログ・次にCTA周辺を触るスプリントで。第9条4号)。あわせてsans系の宣言不一致2箇所(subpage.css .alert-body strong / .sched-table td.busy のfont-weight:800、Noto Sans JPは800未読込で900が選ばれる。実害なし)も同時に整える。実測済み(2026-07-26)",
+    "subpage.css系8ページのモバイルnavが無防備。interview-kitは390pxでCTA「デモを開く↗」が縦組みに潰れnav高120px(スクロール後200px)。テーマ非依存の既存不具合。.navの折返し規則はhub.cssの640px分岐にしかなくstarter-kits以外の8ページに無い。medboardの横溢(既知)とあわせモバイルnavスプリントとして扱う(designer起票2026-07-27)"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
       "note": "shared/subpage.css を読む9ページが shared/bridge.css の資産(ダーク・Where to next・トークンの精度)を受け取っていないことに由来する一群。個別の完成の定義と担当は別々だが、次に計画を立てるときは6個の雑務ではなく1スプリントとして見ること。2026-07-24のPM照合による整理",
-      "count": 3
+      "count": 1
     }
   }
 }
