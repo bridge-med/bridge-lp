@@ -177,6 +177,12 @@ section.alt{background:var(--paper-2)}
  * 幅はフォント解決に依存する ch を避けて em で確定 */
 .walk-note{max-width:34em;margin:34px 0 0;font:400 14px/2.1 var(--serif-jp);color:var(--ink-2)}
 
+/* 写し(実物スクリーンショット) — 照合の錨(憲法第22条 写しの但し書き・ia.md 11節)。
+ * mock-wrapに入れない(枠は「表現です」と言う装置で、写しの「実物です」を打ち消す) */
+.shot{max-width:960px;margin:56px auto 0}
+.shot img{width:100%;height:auto;border:1px solid var(--line);border-radius:2px;box-shadow:var(--shadow-1)}
+.shot-cap{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2);margin-top:10px;text-align:center}
+
 /* reveal — JSが付与する html.js 配下でだけ隠す。JS無効環境では最初から見える */
 html.js [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
 html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
