@@ -14,8 +14,11 @@
   --line:rgba(27,27,30,0.08);
   /* 藍 — 骨格。意味の強弱はこの1本のスケールで表す */
   --navy:#16233E;--blue:#24365C;--blue-soft:#8B9BBC;
-  /* 砂 — 温度。「選択の瞬間」にだけ使う(選択・現在地・到達・句点) */
-  --dawn:#A98F63;--dawn-deep:#8A744C;
+  /* 砂 — 温度。「選択の瞬間」にだけ使う(選択・現在地・到達・句点)。
+   * --dawn は面・線・句点(装飾)用。文字に使うと生成りの上で2.96:1でAA未達。
+   * --dawn-deep は「文字として使える砂」(--paper 5.11:1 / --paper-2 4.66:1)。
+   * 同色相・同彩度で明度のみ操作しており、砂の系統から外れていない */
+  --dawn:#A98F63;--dawn-deep:#7D6845;
   --serif-jp:'Shippori Mincho B1','Noto Serif JP',serif;
   --sans-jp:'Noto Sans JP',sans-serif;
   --serif-en:'Shippori Mincho B1','Noto Serif JP',serif;
@@ -43,7 +46,7 @@ img,svg{display:block;max-width:100%}
 .eyebrow{font:800 10px/1 var(--sans-en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3)}
 .kicker{display:inline-flex;align-items:center;gap:8px}
 .kicker::before{content:'';width:18px;height:1px;background:var(--ink-3)}
-.em{color:var(--navy);font-family:var(--serif-en);font-style:normal;font-weight:900}
+.em{color:var(--navy);font-family:var(--serif-en);font-style:normal;font-weight:700}
 
 /* progress bar */
 .progress{position:fixed;top:0;left:0;height:2px;background:var(--navy);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px rgba(22,35,62,0.35)}
@@ -66,7 +69,7 @@ img,svg{display:block;max-width:100%}
 .hero{padding:160px var(--pad-x) 100px;position:relative;background:var(--paper);text-align:left;border-bottom:1px solid var(--line)}
 .hero-inner{max-width:var(--max);margin:0 auto}
 .hero-eyebrow{font:700 11px/1 var(--sans-en);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:24px}
-.hero-h{font:900 clamp(32px,5.4vw,64px)/1.18 var(--serif-jp);letter-spacing:-0.02em;color:var(--ink);max-width:880px;margin-bottom:28px}
+.hero-h{font:700 clamp(32px,5.4vw,64px)/1.18 var(--serif-jp);letter-spacing:-0.02em;color:var(--ink);max-width:880px;margin-bottom:28px}
 .hero-h .em{font-family:var(--serif-en);font-style:normal;color:var(--navy)}
 .hero-sub{font:500 16px/1.95 var(--sans-jp);color:var(--ink-2);max-width:680px;margin-bottom:36px}
 .hero-meta{display:flex;flex-wrap:wrap;gap:18px;font:500 11px/1 var(--sans-en);letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3)}
@@ -78,7 +81,7 @@ section{padding:120px var(--pad-x);position:relative}
 section.alt{background:var(--paper-2)}
 .s-inner{max-width:var(--max);margin:0 auto}
 .s-head{margin-bottom:60px;max-width:780px}
-.s-head h2{font:900 clamp(26px,4vw,44px)/1.3 var(--serif-jp);letter-spacing:-0.02em;color:var(--ink);margin-top:14px}
+.s-head h2{font:700 clamp(26px,4vw,44px)/1.3 var(--serif-jp);letter-spacing:-0.02em;color:var(--ink);margin-top:14px}
 .s-head h2 .em{font-family:var(--serif-en);font-style:normal;color:var(--navy)}
 .s-head p{font:500 14px/1.95 var(--sans-jp);color:var(--ink-2);margin-top:16px;max-width:640px}
 
@@ -86,8 +89,8 @@ section.alt{background:var(--paper-2)}
 .problems{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
 @media(max-width:760px){.problems{grid-template-columns:1fr}}
 .problem-item{background:var(--paper);padding:36px 32px;display:flex;gap:22px}
-.problem-num{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--navy);flex-shrink:0;width:46px}
-.problem-content h3{font:800 16px/1.45 var(--serif-jp);color:var(--ink);margin-bottom:10px;letter-spacing:-0.01em}
+.problem-num{font:700 28px/1 var(--serif-en);font-style:normal;color:var(--navy);flex-shrink:0;width:46px}
+.problem-content h3{font:700 16px/1.45 var(--serif-jp);color:var(--ink);margin-bottom:10px;letter-spacing:-0.01em}
 .problem-content p{font:500 12.5px/1.85 var(--sans-jp);color:var(--ink-2)}
 
 /* before/after — 対比は面の明度(生成り)と枠の有無(藍)で表す */
@@ -99,7 +102,7 @@ section.alt{background:var(--paper-2)}
 .ba-tag{font:800 10px/1 var(--sans-en);letter-spacing:0.18em;text-transform:uppercase;display:inline-block;padding:5px 10px;border-radius:2px;margin-bottom:16px}
 .ba-col.before .ba-tag{background:var(--ink-3);color:#fff}
 .ba-col.after .ba-tag{background:var(--navy);color:#fff}
-.ba-col h3{font:800 18px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.01em}
+.ba-col h3{font:700 18px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.01em}
 .ba-col ul{list-style:none}
 .ba-col li{font:500 12.5px/1.7 var(--sans-jp);color:var(--ink-2);padding:8px 0 8px 22px;position:relative;border-bottom:1px dashed var(--line)}
 .ba-col li:last-child{border-bottom:0}
@@ -129,8 +132,8 @@ section.alt{background:var(--paper-2)}
 /* founder */
 .founder{padding:120px var(--pad-x);background:var(--paper)}
 .founder-inner{max-width:760px;margin:0 auto}
-.founder-quote{font:500 italic 18px/2 var(--serif-jp);color:var(--ink-2);padding:32px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:24px 0}
-.founder-quote::before{content:'\201C';font:900 64px/0.7 var(--serif-en);color:var(--ink-4);font-style:normal;display:block;margin-bottom:14px}
+.founder-quote{font:500 18px/2 var(--serif-jp);color:var(--ink-2);padding:32px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:24px 0}
+.founder-quote::before{content:'\201C';font:700 64px/0.7 var(--serif-en);color:var(--ink-4);font-style:normal;display:block;margin-bottom:14px}
 .founder-meta{font:600 11px/1.7 var(--sans-jp);color:var(--ink-3);letter-spacing:0.04em}
 .founder-meta strong{display:block;font:700 14px/1.5 var(--serif-jp);color:var(--ink);margin-bottom:6px;font-style:normal}
 
@@ -146,11 +149,41 @@ section.alt{background:var(--paper-2)}
  * 直書きしており、藍地で3.59:1(AA未達)かつトークン非経由でダークから到達できなかった */
 .foot-copy{margin-top:24px;font:500 10px/1.5 var(--sans-jp);color:var(--ink-4)}
 
-/* reveal */
-[data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
-[data-reveal].vis{opacity:1;transform:translateY(0)}
+/* 「次はどこへ歩く?」— 各ページ末尾の3分岐(第26条・ia.md「行き止まりなし」)。
+ * bridge.css の .walk をトークン適応して移植:
+ *   --mincho→--serif-jp / --en→--sans-en / --card→--paper / --sec-y→120px 固定。
+ *   角丸は本体の16pxではなく、このファイルのカード語彙(2px)に揃えた。
+ *   .p の文字色は本体の --ink-3 ではなく --ink-2。--ink-3 は生成りの上でAA未達
+ *   (knownIssues登録済み)のため、新設面に既知の欠陥を複製しない。
+ * 砂: .en ラベルは「分岐点」の印(第22条の明示例) */
+.walk{padding:120px var(--pad-x);border-top:1px solid var(--line);background:var(--paper)}
+.walk-inner{max-width:var(--max);margin:0 auto}
+.walk-h{font-family:var(--serif-jp);font-weight:600;font-size:clamp(19px,2.6vw,26px);line-height:1.7;color:var(--ink);margin:18px 0 34px}
+.walk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.walk-grid{grid-template-columns:1fr}}
+.walk-card{border:1px solid var(--line);border-radius:2px;padding:24px;transition:transform .3s cubic-bezier(0.16,1,0.3,1),border-color .3s cubic-bezier(0.16,1,0.3,1);background:var(--paper);display:block}
+.walk-card:hover{transform:translateY(-3px);border-color:var(--blue-soft)}
+.walk-card .en{font:600 9px/1 var(--sans-en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn-deep);display:block;margin-bottom:10px}
+.walk-card .t{font-family:var(--serif-jp);font-weight:600;font-size:16px;margin-bottom:6px;color:var(--ink);display:block}
+.walk-card .p{font-size:11.5px;color:var(--ink-2);line-height:1.9;margin:0}
+/* 砂: 分岐点の印(第22条・第24条)。本体 bridge.css の .eyebrow::before と同じ読み。
+ * subpage の .eyebrow は ::before を持たないため walk スコープで補う */
+.walk .eyebrow{display:inline-flex;align-items:center;gap:10px}
+.walk .eyebrow::before{content:'';width:18px;height:1px;background:var(--dawn);flex-shrink:0}
+/* 第29条「何もしなくても十分」の一行。三択の後に置く(先に言うと三択が値引きされて見える)。
+ * editor案は --ink-3 で一段落とす意図だったが、--ink-3 は生成り上でAA未達(既知欠陥)のため
+ * --ink-2 とし、サイズで静かさを出す。トーンの最終判断は designer 照合(Dバッチ)で */
+/* 思想の言葉なので明朝(第23条)。600の見出しに対する400で静けさを出す(サイズで縮めない)。
+ * 幅はフォント解決に依存する ch を避けて em で確定 */
+.walk-note{max-width:34em;margin:34px 0 0;font:400 14px/2.1 var(--serif-jp);color:var(--ink-2)}
+
+/* reveal — JSが付与する html.js 配下でだけ隠す。JS無効環境では最初から見える */
+html.js [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
+html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
+[data-reveal-delay="1"]{transition-delay:.1s}
+[data-reveal-delay="2"]{transition-delay:.2s}
 @media(prefers-reduced-motion:reduce){
-  [data-reveal]{opacity:1;transform:none;transition:none}
+  html.js [data-reveal]{opacity:1;transform:none;transition:none}
   html{scroll-behavior:auto}
 }
 
@@ -159,8 +192,8 @@ section.alt{background:var(--paper-2)}
 .six-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
 @media(max-width:760px){.six-grid{grid-template-columns:1fr}}
 .six-item{background:var(--paper);padding:24px 22px;display:flex;flex-direction:column;gap:10px}
-.six-n{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--navy)}
-.six-h{font:800 14px/1.4 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
+.six-n{font:700 28px/1 var(--serif-en);font-style:normal;color:var(--navy)}
+.six-h{font:700 14px/1.4 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
 .six-d{font:500 11.5px/1.7 var(--sans-jp);color:var(--ink-3)}
 .six-foot{margin-top:24px;padding-top:20px;border-top:1px dashed var(--line);font:500 11.5px/1.85 var(--sans-jp);color:var(--ink-3)}
 
@@ -186,7 +219,7 @@ section.alt{background:var(--paper-2)}
 /* 注目すべき数値は「太さ」で立てる。方向や理由は数値そのものが語る
  * (色だけに意味を持たせない。旧 delta-down / delta-up は色で方向を分けていたが、
  *  実際の用法はどちらも強調であり、名前が嘘をついていた) */
-.cmp-table td.num.mark{font-weight:800}
+.cmp-table td.num.mark{font-weight:700}
 .cmp-table tr.hl{background:var(--paper-2)}
 .cmp-note{font:500 11px/1.7 var(--sans-jp);color:var(--ink-3);margin-top:18px}
 
@@ -194,7 +227,7 @@ section.alt{background:var(--paper-2)}
 .phil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
 @media(max-width:760px){.phil-grid{grid-template-columns:1fr}}
 .phil-card{background:var(--paper);border:1px solid var(--line);padding:30px 28px;border-radius:2px}
-.phil-card h3{font:800 16px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.01em}
+.phil-card h3{font:700 16px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.01em}
 .phil-card h3::before{content:'';display:block;width:24px;height:2px;background:var(--navy);margin-bottom:12px}
 .phil-card p{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
 
@@ -202,7 +235,7 @@ section.alt{background:var(--paper-2)}
 .feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:24px}
 @media(max-width:760px){.feat-grid{grid-template-columns:1fr}}
 .feat-item{background:var(--paper);padding:32px 28px}
-.feat-h{font:800 16px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:10px}
+.feat-h{font:700 16px/1.4 var(--serif-jp);color:var(--ink);margin-bottom:10px}
 .feat-h .ic{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--paper-2);font:800 11px/28px var(--sans-en);text-align:center;color:var(--navy);margin-right:10px;letter-spacing:0;vertical-align:middle}
 .feat-d{font:500 12px/1.8 var(--sans-jp);color:var(--ink-2)}
 
@@ -234,8 +267,8 @@ section.alt{background:var(--paper-2)}
 .lrn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px}
 @media(max-width:760px){.lrn-grid{grid-template-columns:1fr}}
 .lrn-card{background:var(--paper);border:1px solid var(--line);padding:32px 30px;border-radius:2px;display:flex;flex-direction:column;gap:14px}
-.lrn-card .num{font:900 28px/1 var(--serif-en);font-style:normal;color:var(--navy)}
-.lrn-card h3{font:800 16px/1.45 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
+.lrn-card .num{font:700 28px/1 var(--serif-en);font-style:normal;color:var(--navy)}
+.lrn-card h3{font:700 16px/1.45 var(--serif-jp);color:var(--ink);letter-spacing:-0.01em}
 .lrn-card p{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
 /* 科目の識別は色相を増やさず、藍→炭の明度1本スケールで表す */
 .lrn-card.t-1{border-top:3px solid var(--navy)}
@@ -246,7 +279,7 @@ section.alt{background:var(--paper-2)}
 @media(max-width:760px){.lrn-stat{grid-template-columns:1fr}}
 .lrn-stat-cell{background:var(--paper);border:1px solid var(--line);padding:24px 22px;text-align:center}
 .lrn-stat-cell .label{font:700 9px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
-.lrn-stat-cell .num{font:800 28px/1 var(--serif-en);color:var(--navy);font-style:italic}
+.lrn-stat-cell .num{font:700 28px/1 var(--serif-en);color:var(--navy);font-style:normal}
 .lrn-stat-cell .sub{font:500 10px/1.4 var(--sans-jp);color:var(--ink-3);margin-top:6px}
 
 /* v2 rebrand: ロゴシンボル */

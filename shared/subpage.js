@@ -1,4 +1,7 @@
-/* BRIDGE subpage shared JS — v1.0 */
+/* BRIDGE subpage shared JS — v1.1 */
+/* JSが動く環境でだけ data-reveal を隠す(CSSは html.js 配下に限定)。
+ * JS無効環境で恒久的に不可視になる既存不具合の解消 */
+document.documentElement.classList.add('js');
 const io = new IntersectionObserver(es => {
   es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); } });
 }, { threshold: 0.12 });

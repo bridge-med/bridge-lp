@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-25",
+  "updated": "2026-07-26",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -23,7 +23,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "medboard",
@@ -39,7 +39,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "hire-board",
@@ -55,7 +55,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "interview-kit",
@@ -71,7 +71,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "consult-simulator",
@@ -87,7 +87,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "round-note",
@@ -103,7 +103,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-11"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "daily-app",
@@ -152,7 +152,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "study-board",
@@ -168,7 +168,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "english-trainer",
@@ -184,7 +184,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "turnaround12",
@@ -200,7 +200,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-15"
+      "lastCommit": "2026-07-26"
     },
     {
       "id": "tanaoroshi",
@@ -428,16 +428,19 @@
     "プロダクト9ページがdata-rootなしでbridge.jsを読み、budoux-ja.min.jsが404になる(実害はコンソールノイズのみ)。直すとBudouXが各アプリの文字組みに新しく効き始めるため、designer照合込みの独立スプリントで対応する",
     "shared/subpage.css を読む9ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit/starter-kits)にダーク実装がない。憲法第22条後半(ライト/ダークを常に等価に設計する)の未達。2026-07-24の配色リカラーでは色の4系統収束だけを行い、ダークは分離した(社長承認)。rehaboard の色がinline styleで書かれておりダークから上書きできないため、rehaboardの脱inline化が先。ダークのUI方式(prefers-color-schemeで自動追従か、9ページに切替UIを新設か。これらのページは.site-navを持たずbridge.jsの切替ボタンが注入されない)を社長が決めた後、designer照合込みの独立スプリントで対応する 前提条件2つは2026-07-24に解消済み: rehaboardの脱inline化(b5880d8)とフッターの色直書き9ファイル(af553b9)。PM進言はprefers-color-scheme自動追従(切替UI新設は9ページにナビ相当を持ち込む工事になるため。第9条4号)。UI方式の社長決定待ち",
     "実験室2ページ(worklog / morning)が公開導線を持ちながら台帳・sitemap.xml のどちらにも未登録。worklogは journal/index.html からサムネイル付きでリンクされ README に公開URLの記載があり robots.txt も全許可だが、README本文は「個人用アプリ」と称している。第31条(道具の義務)と第14条の解釈に触れるため、未掲載4件(yawagaeshi / medops / manager-starter / bridge-focus)と一束にした掲載ガバナンスの棚卸しで扱う。構造的な矛盾のためauditor領分",
-    "shared/subpage.css を読む9ページで明朝の合成太字(fake bold)が出ている。link が要求する Shippori Mincho B1 は 400;500;600;700 のみ(9ページ全て同一を実測)。これに対し700超の指定が全量で: font:900が3系統(.hero-h 64px / .s-head h2 44px / .em のfont-weight:900)、font:800+serif-jpが7箇所(subpage.css 6+hub.css 1)、存在しないitalicの合成が3箇所(.lrn-stat-cell .num / interview-kitのq-num 2箇所)。輪郭が潰れて第23条が明朝に期待する質を失う。直し方は「CSS側を700に落とす」(designer推奨・軽く美しい)。2026-07-25のPM計画でWhere to next展開と同一スプリントに編成",
     "shared/subpage.css の --ink-3(#7D7E85) が文字色としてWCAG AA基準を満たさない。生成り3段すべてで不足(--paper 3.87:1 / --paper-2 3.53:1 / --paper-3 3.14:1、必要値4.5:1)。subpage.css と hub.css で文字色として計34回使われ、いずれも9〜11.5pxで大文字テキストの閾値(18.66px)に届かないため通常テキスト扱いになる。2026-07-24のqa実測で2件(.sched-table td.calm / .ra-report .note)が個別に不合格となり --ink-2 へ逃がしたが、これは対症療法であり根はトークンの値そのもの。--paper でAAを通すには約 #6F7078、--paper-3 でも通すには約 #656670 まで暗くする必要がある。ただしトークン値の変更は9ページの見た目を一斉に変えるためdesigner照合込みの独立スプリント。ダーク実装のスプリントと同時にやるのが効率的",
-    "shared/subpage.css を読む9ページすべてに Where to next(末尾の3分岐)が無い。docs/ia.md の「全ページ末尾に3分岐」「行き止まりなし」に対する常設違反で、憲法第26条に触れる。.walk / .walk-card は shared/bridge.css に実装済みだが subpage.css へ未移植。現状これらのページの末尾はフッターのみで、デモを開くか去るかの二択になっている。2026-07-24のdesigner照合で発見。moyamoya結果画面の分岐なし(第26・29条)と同じ性質の課題であり、あわせて扱う",
     "shared/subpage.css を読む9ページすべてに実物のスクリーンショットが無い(img参照ゼロ)。LPが実物について事実を主張しているのに、同じページ上に突き合わせる対象が存在しない状態。2026-07-24にstudy-boardで実害が確認された(カード見出しの色名は実物と一致していたが、LP側の罫線が4枚中3枚ずれたまま公開されていた)。designerの判断は「載せる。ただし体験のためではなく照合の錨として、無加工の写し1枚に撮影日を添える」。規約案と機械検査への落とし込み方はdesignerの照合結果にあり。第22条に但し書き(写しの内部は制限外・加工しない・色を周囲に持ち出さない・1ページ1枚)を足すかは第33条の手続きで社長判断",
-    "憲法外の色系統(萌黄・代赭・朱)が、共通基盤とは別に4ファイルへ複製されている。rehaboard-starter/index.html(自前:root・憲法外8色)、morning/index.html(同7色)、round-note/app/styles.css(自前:root で --vermilion:#C8553D ほか緑・琥珀・憲法外8色)、worklog/feed.html。2026-07-24に shared/subpage.css と shared/hub.css から撤去したが、これらは自前定義のため影響を受けず残っている。配色リカラーの残タスク あわせて、フッターの著作権表記が color:rgba(255,255,255,0.4) を inline style に直書きしており、9ファイル(rehaboard / rehaboard-starter / medboard / hire-board / consult-simulator / him-quiz / study-board / english-trainer / interview-kit)に複製されている。藍地の上で3.59:1(10px通常テキスト・AA未達)かつトークン非経由のため、ダークのトークン差し替えでは到達できない。ダーク着手の前提条件。2026-07-24のPM照合で発見"
+    "憲法外の色系統(萌黄・代赭・朱)が共通基盤の外に残るのは3ファイル: rehaboard-starter/index.html(自前:root・憲法外8色)、morning/index.html(7色)、worklog/feed.html。round-note は2026-07-25のリカラーで解消済み。あわせて rehaboard-starter には walk(Where to next)も無く、rehaboardの分岐1枚目が1クリック先の行き止まりへ客を送る状態。turnaround12 も結果画面の終端が「もう一度」とシェアのみでBRIDGEへの戻り線が無い(第26条・designer起票2026-07-25)。ゲーム系の戻り線とあわせて同じ束で扱う",
+    "medboard/index.html:54 のhero見出し(.nowrap span「月次の数字を読み上げる会議に、」)が390px幅で折り返せず18pxの横スクロールを起こす(bodyScrollWidth 408 vs 390)。2026-07-25のqa実測で発見。スプリントB以前から存在する既存不具合。対応候補はnowrapの区切り位置調整か解除。文言のリズムに関わるためdesigner照合込みで",
+    "第29条「何もしなくても十分」の一行が subpage系9ページにしかない。Dバッチで両ファミリのwalkが視覚的に同一になった結果、思想側9ページ(about/philosophy/products/projects/journal/research/services/stories/cockpit)は末尾が三枚のカードで終わり明文が無い(communityのみ.enoughを別箇所に保有)。thought-hub側にも同じ一行を置くか、プロダクトページ特有の「導入を迫らない」文脈でだけ必要か——第29条の適用範囲の解釈が要る。Eバッチ候補としてdesigner起票(2026-07-25)。社長判断待ち",
+    "絵文字がリカラー後に残る最大の彩度源になった。turnaround12は藍地の結果heroに46pxの絵文字紋章(👑💸等)、clinic-flow-3dは289個、gokigen-gachaは68個。プロジェクト全体の作法のため独断で外さずdesigner起票(2026-07-25)。社長判断は1点:「4系統リカラーを全アプリに敷き終えた今、絵文字を色の系統に含めるのか」。含めないなら反転面の上だけ filter:grayscale(1) の最小の逃げ道あり",
+    "turnaround12のcrest(紋章)の幾何が第24条の署名になっていない(角丸の枠+折れ線グラフ=既製の経営ダッシュボードアイコン)。designer代案: 枠を捨てて下降する藍の線と上昇する砂の線が一度だけ交差する紋章(憲法の署名でありゲームの主題「12週で反転させる」と一致)。色は2026-07-25にトークン化済み。幾何は次スプリント(designer起票)",
+    "round-noteのタップ領域: .tab約35px / .row-check・.row-del 26px角 / .chip-btn 61×25。WCAG 2.5.8(24px)は通るが44pxに届かない。リカラーでは幾何不変のため据え置き。次にround-noteの幾何を触るときに44px化(qa/designer起票2026-07-25)"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
       "note": "shared/subpage.css を読む9ページが shared/bridge.css の資産(ダーク・Where to next・トークンの精度)を受け取っていないことに由来する一群。個別の完成の定義と担当は別々だが、次に計画を立てるときは6個の雑務ではなく1スプリントとして見ること。2026-07-24のPM照合による整理",
-      "count": 5
+      "count": 4
     }
   }
 }

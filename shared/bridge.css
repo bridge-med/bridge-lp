@@ -21,6 +21,7 @@
   --blue:#24365C;
   --blue-soft:#8B9BBC;
   --dawn:#A98F63;          /* 砂色。ロゴの温度。使いすぎない */
+  --dawn-deep:#7D6845;     /* 文字として使える砂。--dawnは白面3.09:1でAA未達のため小さい文字はこちら */
   --card:#FFFFFF;
   --dark-sec:#131A2A;
   --dark-sec-text:#EFECE4;
@@ -52,6 +53,7 @@
   --blue:#9FB1D4;
   --blue-soft:#5A6C92;
   --dawn:#C2A97E;
+  --dawn-deep:#C2A97E;    /* ダークは--dawnが暗い面で7.33:1と合格しているため暗くしない(designer指定) */
   --card:#181E2E;
   --dark-sec:#0B0F1A;
   --hero-sky-1:#161B2B;
@@ -92,14 +94,15 @@ main{display:block}
 .sec.tint{background:var(--bg-2)}
 
 /* ===== Reveal ===== */
-[data-reveal]{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
-[data-reveal].on{opacity:1;transform:none}
+/* JSが付与する html.js 配下でだけ隠す。JS無効環境では最初から見える */
+html.js [data-reveal]{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+html.js [data-reveal].on{opacity:1;transform:none}
 [data-reveal-delay="1"]{transition-delay:.1s}
 [data-reveal-delay="2"]{transition-delay:.2s}
 [data-reveal-delay="3"]{transition-delay:.3s}
 [data-reveal-delay="4"]{transition-delay:.4s}
 @media(prefers-reduced-motion:reduce){
-  [data-reveal]{opacity:1;transform:none;transition:none}
+  html.js [data-reveal]{opacity:1;transform:none;transition:none}
   html{scroll-behavior:auto}
 }
 
@@ -222,13 +225,13 @@ a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 /* 「次はどこへ歩く?」— 各ページ末尾の分岐(押し付けない導線) */
 .walk{padding:var(--sec-y) var(--pad-x);border-top:1px solid var(--line)}
 .walk-inner{max-width:var(--max);margin:0 auto}
-.walk-h{font-family:var(--mincho);font-weight:600;font-size:clamp(19px,2.6vw,26px);margin:22px 0 34px}
+.walk-h{font-family:var(--mincho);font-weight:600;font-size:clamp(19px,2.6vw,26px);line-height:1.7;color:var(--ink);margin:18px 0 34px}
 .walk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .walk-card{border:1px solid var(--line);border-radius:16px;padding:24px;transition:all .3s var(--ease);background:var(--card)}
 .walk-card:hover{transform:translateY(-3px);border-color:var(--blue-soft)}
-.walk-card .en{font:600 9px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn);display:block;margin-bottom:10px}
+.walk-card .en{font:600 9px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn-deep);display:block;margin-bottom:10px}
 .walk-card .t{font-family:var(--mincho);font-weight:600;font-size:16px;margin-bottom:6px}
-.walk-card .p{font-size:11.5px;color:var(--ink-3);line-height:1.9}
+.walk-card .p{font-size:11.5px;color:var(--ink-2);line-height:1.9}
 @media(max-width:760px){.walk-grid{grid-template-columns:1fr}}
 
 /* ===== フッター(JSが .site-footer に描画) ===== */

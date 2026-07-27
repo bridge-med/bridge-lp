@@ -5,6 +5,9 @@
      <body data-root="../" data-page="philosophy">
      <script src="../shared/bridge.js" defer></script>
    ================================================================ */
+/* JSが動く環境でだけ data-reveal を隠す(CSSは html.js 配下に限定)。
+ * JS無効環境で恒久的に不可視になる既存不具合の解消。先頭・同期実行 */
+document.documentElement.classList.add('js');
 (function () {
   'use strict';
   const ROOT = document.body.dataset.root || './';

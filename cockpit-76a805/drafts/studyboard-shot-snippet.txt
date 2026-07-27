@@ -1,0 +1,17 @@
+<!-- study-board/index.html 02/Features セクション末尾(feat-gridの直後・</div></div></section>の手前)に挿入する。
+     designer照合済みの型(2026-07-25)。出荷は憲法第22条但し書きの社長裁可後。
+
+     日付の根拠: images/products/studyboard.png は 23df91e (2026-07-07) でリポジトリに追加された。
+     実際の撮影日は記録がなく、サンドボックスからは実物(github.io)に届かず撮り直し不能。
+     「2026-07-07 リポジトリ収載時点」は git で検証可能な事実として記載する。
+     社長が実際の撮影日を覚えている場合、または手元で撮り直す場合は差し替えること。
+
+     必要なCSS(subpage.cssへ。裁可後に追加):
+     .shot{max-width:960px;margin:56px auto 0}
+     .shot img{width:100%;height:auto;border:1px solid var(--line);border-radius:2px;box-shadow:var(--shadow-1)}
+     .shot-cap{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2);margin-top:10px;text-align:center}
+-->
+<figure class="shot" data-reveal>
+  <img src="../images/products/shots/studyboard.png" alt="StudyBoardのダッシュボード画面。4科目の週次サマリーと科目バランスの円グラフ" width="1440" height="900" loading="lazy">
+  <figcaption class="shot-cap">StudyBoard 実画面 — 2026-07-07 リポジトリ収載時点(無加工)</figcaption>
+</figure>

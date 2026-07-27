@@ -1,28 +1,30 @@
 /* ターンアラウンド12 — styles
- * スマホファースト / カードUI / 白×淡ブルー×淡グリーン / メーター管理ゲーム
+ * スマホファースト / カードUI / 憲法第22条の4系統(生成り・藍・砂・炭) / メーター管理ゲーム
+ * 状態の段階(良/注意/危険)は色相ではなく、藍の濃さ+面の明度+反転で表す
+ * 砂は「選択の瞬間」だけ(あなたの一手・現在地・自己ベスト)
  */
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #F4F9FB;
-  --bg-deep: #EAF4F8;
-  --card: #FFFFFF;
-  --ink: #22333D;
-  --ink-2: #4A5D68;
-  --ink-3: #7C929E;
-  --blue: #3E7CA6;
-  --blue-deep: #2C5F82;
-  --blue-pale: #DCEDF6;
-  --green: #4FA98C;
-  --green-deep: #3A8A70;
-  --green-pale: #DFF2EA;
-  --amber: #C98A2D;
-  --amber-pale: #FBF0DC;
-  --red: #C4574E;
-  --red-pale: #FAE7E5;
-  --line: rgba(62, 124, 166, 0.16);
-  --shadow: 0 1px 2px rgba(34, 51, 61, 0.05), 0 6px 20px rgba(62, 124, 166, 0.10);
+  /* 生成り — 基調 */
+  --paper:   #FBFAF7;
+  --paper-2: #F4EFE6;
+  --paper-3: #EAE2D3;
+  --card:    #FFFFFF;
+  /* 炭 — 文字 */
+  --ink:   #1B1B1E;
+  --ink-2: #45464C;
+    /* 藍 — 骨格 */
+  --navy:      #16233E;
+  --blue:      #24365C;
+  --blue-soft: #8B9BBC;
+  /* 砂 — 温度(選択の瞬間・現在地・到達だけ) */
+  --dawn:      #A98F63;
+  --dawn-deep: #7D6845;
+
+  --line: rgba(27, 27, 30, 0.10);
+  --shadow: 0 1px 2px rgba(22, 35, 62, 0.05), 0 6px 20px rgba(22, 35, 62, 0.08);
   --radius: 16px;
   --sans: 'Noto Sans JP', sans-serif;
   --en: 'Inter', sans-serif;
@@ -33,9 +35,9 @@ html { -webkit-font-smoothing: antialiased; }
 body {
   font-family: var(--sans);
   background:
-    radial-gradient(circle at 15% 0%, var(--green-pale) 0%, transparent 45%),
-    radial-gradient(circle at 90% 12%, var(--blue-pale) 0%, transparent 50%),
-    var(--bg);
+    radial-gradient(circle at 15% 0%, var(--paper-2) 0%, transparent 45%),
+    radial-gradient(circle at 90% 12%, var(--paper-3) 0%, transparent 50%),
+    var(--paper);
   background-attachment: fixed;
   color: var(--ink);
   line-height: 1.8;
@@ -52,15 +54,24 @@ a { color: inherit; text-decoration: none; }
   position: fixed;
   top: 0; left: 0; right: 0;
   height: 6px;
-  background: rgba(62, 124, 166, 0.12);
+  background: var(--line);
   z-index: 100;
 }
 .progress-fill {
+  position: relative;
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, var(--blue) 0%, var(--green) 100%);
+  background: var(--navy);
   border-radius: 0 3px 3px 0;
   transition: width 0.35s ease;
+}
+/* 現在地 = 砂 */
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--dawn);
 }
 
 /* ---------- レイアウト ---------- */
@@ -111,27 +122,27 @@ a { color: inherit; text-decoration: none; }
 .btn:active { transform: scale(0.98); }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--blue) 0%, var(--green) 120%);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(62, 124, 166, 0.35);
+  background: linear-gradient(135deg, var(--blue) 0%, var(--navy) 120%);
+  color: var(--paper);
+  box-shadow: 0 4px 14px rgba(22, 35, 62, 0.30);
 }
-.btn-primary:hover { background: linear-gradient(135deg, var(--blue-deep) 0%, var(--green-deep) 120%); }
+.btn-primary:hover { background: var(--navy); }
 
 .btn-secondary {
-  background: var(--green-pale);
-  color: var(--green-deep);
-  border: 1px solid rgba(79, 169, 140, 0.35);
+  background: var(--paper-2);
+  color: var(--navy);
+  border: 1px solid var(--line);
 }
-.btn-secondary:hover { background: #d2ecdf; }
+.btn-secondary:hover { background: var(--paper-3); }
 
 .btn-ghost {
   background: transparent;
-  color: var(--ink-3);
+  color: var(--ink-2);
   font-weight: 500;
   font-size: 14px;
   padding: 12px;
 }
-.btn-ghost:hover { color: var(--ink-2); }
+.btn-ghost:hover { color: var(--ink); }
 
 .btn-sm { padding: 12px 16px; font-size: 14px; border-radius: 12px; }
 
@@ -139,14 +150,17 @@ a { color: inherit; text-decoration: none; }
 
 .screen-top { text-align: center; padding-top: 24px; }
 
+.crest-plate { fill: var(--paper); stroke: var(--navy); }
+.crest-line { stroke: var(--dawn); }
+.crest-mark { fill: var(--navy); }
 .crest { display: flex; justify-content: center; }
-.crest svg { width: 76px; height: 76px; filter: drop-shadow(0 4px 10px rgba(62, 124, 166, 0.25)); }
+.crest svg { width: 76px; height: 76px; filter: drop-shadow(0 4px 10px rgba(22, 35, 62, 0.20)); }
 
 .top-title {
   font: 900 clamp(24px, 7.4vw, 38px)/1.3 var(--sans);
   letter-spacing: 0.02em;
   word-break: keep-all;
-  background: linear-gradient(120deg, var(--blue-deep) 20%, var(--green-deep) 90%);
+  background: linear-gradient(120deg, var(--navy) 20%, var(--blue) 90%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -172,7 +186,7 @@ a { color: inherit; text-decoration: none; }
   gap: 7px;
 }
 .rule span { font-size: 16px; }
-.rule b { color: var(--red); font-weight: 800; margin-left: 2px; white-space: nowrap; }
+.rule b { color: var(--navy); font-weight: 800; margin-left: 2px; white-space: nowrap; }
 
 .top-meta {
   display: flex;
@@ -182,17 +196,18 @@ a { color: inherit; text-decoration: none; }
 }
 .top-meta span {
   font: 600 12px/1 var(--sans);
-  color: var(--blue-deep);
-  background: var(--blue-pale);
+  color: var(--navy);
+  background: var(--paper-2);
   border-radius: 999px;
   padding: 8px 14px;
 }
 
+/* 自己ベスト = 到達の印。砂はここだけ文字にも使う(--dawn-deep) */
 .best-badge {
   font: 700 12.5px/1 var(--sans);
-  color: var(--amber);
-  background: var(--amber-pale);
-  border: 1px solid rgba(201, 138, 45, 0.3);
+  color: var(--dawn-deep);
+  background: var(--paper);
+  border: 1px solid var(--dawn);
   border-radius: 999px;
   padding: 9px 16px;
   align-self: center;
@@ -208,11 +223,11 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink);
 }
 
-.story-card { border-left: 4px solid var(--green); }
+.story-card { border-left: 4px solid var(--blue-soft); }
 .story-card p { font: 500 14px/2.1 var(--sans); color: var(--ink-2); }
 .story-card p + p { margin-top: 14px; }
 .story-card p:first-child { font-weight: 700; color: var(--ink); }
-.story-card p:last-child { font-weight: 700; color: var(--blue-deep); }
+.story-card p:last-child { font-weight: 700; color: var(--navy); }
 
 /* ---------- プレイ画面 ---------- */
 
@@ -224,9 +239,9 @@ a { color: inherit; text-decoration: none; }
 .day-chip {
   font: 800 12px/1 var(--en);
   letter-spacing: 0.1em;
-  color: var(--green-deep);
-  background: var(--green-pale);
-  border: 1px solid rgba(79, 169, 140, 0.35);
+  color: var(--navy);
+  background: var(--paper-2);
+  border: 1px solid var(--line);
   border-radius: 999px;
   padding: 8px 14px;
 }
@@ -234,10 +249,12 @@ a { color: inherit; text-decoration: none; }
 .quiz-count {
   font: 800 14px/1 var(--en);
   letter-spacing: 0.08em;
-  color: var(--blue-deep);
+  color: var(--navy);
 }
 
-/* メーター */
+/* メーター
+ * 段階は色相ではなく藍の濃さで:
+ *   通常 = 淡藍→藍のグラデ / 注意 = 藍→濃藍 / 危険 = 濃藍 + 数値を藍地に生成りで反転 */
 
 .meters {
   display: flex;
@@ -251,31 +268,38 @@ a { color: inherit; text-decoration: none; }
   align-items: baseline;
 }
 .meter-name { font: 700 12px/1.4 var(--sans); color: var(--ink-2); }
-.meter-val { font: 800 14px/1 var(--en); color: var(--blue-deep); }
+.meter-val { font: 800 14px/1 var(--en); color: var(--navy); }
 .meter-cash-val { font-size: 18px; }
-.meter-cash-val small { font: 700 11px/1 var(--sans); margin-left: 2px; color: var(--ink-3); }
+.meter-cash-val small { font: 700 11px/1 var(--sans); margin-left: 2px; color: var(--ink-2); }
 .meter-track {
   height: 8px;
   margin-top: 4px;
-  background: rgba(62, 124, 166, 0.1);
+  background: var(--paper-3);
   border-radius: 999px;
   overflow: hidden;
 }
 .meter-track i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--blue), var(--green));
+  background: linear-gradient(90deg, var(--blue-soft), var(--blue));
   border-radius: 999px;
   transition: width 0.5s ease;
 }
-.meter.is-warn .meter-val { color: var(--amber); }
-.meter.is-warn .meter-track i { background: linear-gradient(90deg, var(--amber), #DBA95B); }
-.meter.is-danger .meter-val { color: var(--red); }
-.meter.is-danger .meter-track i { background: linear-gradient(90deg, var(--red), #D98079); }
-.meter.is-danger .meter-name { color: var(--red); }
+.meter.is-warn .meter-name { color: var(--ink); }
+.meter.is-warn .meter-track i { background: linear-gradient(90deg, var(--blue), var(--navy)); }
+.meter.is-danger .meter-name { color: var(--navy); font-weight: 900; }
+.meter.is-danger .meter-val {
+  color: var(--paper);
+  background: var(--navy);
+  border-radius: 6px;
+  padding: 2px 8px;
+  margin: -2px -8px;
+}
+.meter.is-danger .meter-val small { color: var(--paper-2); }
+.meter.is-danger .meter-track i { background: var(--navy); }
 
 .scene-title { font: 900 21px/1.5 var(--sans); color: var(--ink); }
-.scene-title::before { content: '▶'; font-size: 13px; color: var(--green); margin-right: 8px; vertical-align: 2px; }
+.scene-title::before { content: '▶'; font-size: 13px; color: var(--dawn); margin-right: 8px; vertical-align: 2px; }
 
 .situation-card { border-left: 4px solid var(--blue); padding: 16px 18px; }
 .situation-card p { font: 500 14px/1.95 var(--sans); color: var(--ink-2); }
@@ -298,8 +322,8 @@ a { color: inherit; text-decoration: none; }
   box-shadow: var(--shadow);
   transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.choice:hover { border-color: var(--blue); background: #FBFDFE; }
-.choice:active { transform: scale(0.98); background: var(--blue-pale); }
+.choice:hover { border-color: var(--blue); background: var(--paper); }
+.choice:active { transform: scale(0.98); background: var(--paper-2); }
 
 .choice-letter {
   flex: 0 0 auto;
@@ -308,19 +332,18 @@ a { color: inherit; text-decoration: none; }
   width: 32px; height: 32px;
   border-radius: 10px;
   font: 800 14px/1 var(--en);
-  color: var(--blue-deep);
-  background: var(--blue-pale);
+  color: var(--navy);
+  background: var(--paper-2);
 }
-.choice:nth-child(even) .choice-letter { color: var(--green-deep); background: var(--green-pale); }
 
 .choice-label { font: 600 14px/1.65 var(--sans); color: var(--ink); }
 
 .gamble-tag {
   display: inline-block;
   font: 700 10.5px/1 var(--sans);
-  color: var(--amber);
-  background: var(--amber-pale);
-  border: 1px solid rgba(201, 138, 45, 0.3);
+  color: var(--navy);
+  background: var(--paper-2);
+  border: 1px solid var(--line);
   border-radius: 999px;
   padding: 4px 9px;
   margin-left: 6px;
@@ -330,17 +353,18 @@ a { color: inherit; text-decoration: none; }
 
 /* 週リザルト */
 
+/* あなたの一手 = 選択の瞬間。砂の左罫+砂の見出し */
 .choice-echo {
   font: 600 13.5px/1.8 var(--sans);
   color: var(--ink);
-  border-left: 4px solid var(--green);
+  border-left: 4px solid var(--dawn);
   padding: 14px 18px;
 }
 .echo-label {
   display: block;
   font: 700 10.5px/1 var(--en);
   letter-spacing: 0.18em;
-  color: var(--green-deep);
+  color: var(--dawn-deep);
   text-transform: uppercase;
   margin-bottom: 6px;
 }
@@ -354,8 +378,8 @@ a { color: inherit; text-decoration: none; }
   padding: 7px 14px;
   margin-bottom: 10px;
 }
-.gamble-badge.success { color: var(--green-deep); background: var(--green-pale); border: 1px solid rgba(79, 169, 140, 0.35); }
-.gamble-badge.fail { color: var(--red); background: var(--red-pale); border: 1px solid rgba(196, 87, 78, 0.3); }
+.gamble-badge.success { color: var(--navy); background: var(--paper-2); border: 1px solid var(--line); }
+.gamble-badge.fail { color: var(--navy); background: var(--paper-3); border: 1px solid var(--line); }
 
 .deltas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .delta {
@@ -372,9 +396,9 @@ a { color: inherit; text-decoration: none; }
   from { opacity: 0; transform: scale(0.85); }
   to { opacity: 1; transform: scale(1); }
 }
-.delta.plus { color: var(--green-deep); background: var(--green-pale); }
-.delta.minus { color: var(--red); background: var(--red-pale); }
-.delta.zero { color: var(--ink-3); background: var(--bg-deep); }
+.delta.plus { color: var(--navy); background: var(--paper-2); }
+.delta.minus { color: var(--navy); background: var(--paper-3); }
+.delta.zero { color: var(--ink-2); background: var(--paper-2); }
 .delta.settle { border: 1.5px dashed currentColor; background: transparent; }
 
 /* ---------- リザルト画面 ---------- */
@@ -385,9 +409,9 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
   padding: 30px 24px 26px;
   border-top: 5px solid transparent;
-  border-image: linear-gradient(90deg, var(--blue), var(--green)) 1;
+  border-image: linear-gradient(90deg, var(--blue), var(--navy)) 1;
   background:
-    radial-gradient(circle at 50% 0%, var(--blue-pale) 0%, transparent 60%),
+    radial-gradient(circle at 50% 0%, var(--paper-2) 0%, transparent 60%),
     var(--card);
 }
 .result-emblem { font-size: 46px; line-height: 1; margin-bottom: 12px; }
@@ -395,18 +419,19 @@ a { color: inherit; text-decoration: none; }
 .rank-line {
   font: 800 13px/1 var(--en);
   letter-spacing: 0.2em;
-  color: var(--ink-3);
+  color: var(--ink-2);
   margin-bottom: 6px;
 }
 .rank-letter { font-size: 30px; letter-spacing: 0; vertical-align: -4px; margin-left: 6px; }
-.rank-S { color: var(--amber); }
-.rank-A { color: var(--blue-deep); }
-.rank-B { color: var(--green-deep); }
+/* ランクは藍の濃淡+炭。最高到達のSだけ砂(--dawn-deep) */
+.rank-S { color: var(--navy); }
+.rank-A { color: var(--navy); }
+.rank-B { color: var(--blue); }
 .rank-C { color: var(--ink-2); }
 
 .result-type {
   font: 900 clamp(21px, 6vw, 26px)/1.5 var(--sans);
-  background: linear-gradient(120deg, var(--blue-deep) 20%, var(--green-deep) 90%);
+  background: linear-gradient(120deg, var(--navy) 20%, var(--blue) 90%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -415,23 +440,25 @@ a { color: inherit; text-decoration: none; }
 .result-catch { font: 700 14px/1.8 var(--sans); color: var(--ink); margin-bottom: 12px; }
 .result-desc { font: 500 13px/2 var(--sans); color: var(--ink-2); text-align: left; }
 
-.gameover-eyebrow { color: var(--red); }
+/* ゲームオーバー = 最重要状態。藍地に生成り文字の反転(rehaboard前例) */
+.gameover-eyebrow { color: var(--navy); }
 .gameover-hero {
-  border-image: linear-gradient(90deg, var(--red), var(--amber)) 1;
-  background:
-    radial-gradient(circle at 50% 0%, var(--red-pale) 0%, transparent 60%),
-    var(--card);
+  border-image: none;
+  border-top-width: 0;
+  background: var(--navy);
 }
 .gameover-hero .result-type {
-  background: linear-gradient(120deg, var(--red) 20%, var(--amber) 90%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: currentColor;
+  color: var(--paper);
 }
+.gameover-hero .result-desc { color: var(--paper-2); }
 .gameover-last {
   font-weight: 700;
-  color: var(--ink);
-  border-left: 3px solid var(--red);
+  color: var(--paper);
+  border-left: 3px solid var(--blue-soft);
   padding-left: 10px;
   margin-bottom: 12px;
 }
@@ -441,7 +468,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 8px;
   font: 800 15px/1.4 var(--sans);
-  color: var(--blue-deep);
+  color: var(--navy);
   margin-bottom: 10px;
 }
 .sec-ico { font-size: 17px; }
@@ -459,8 +486,8 @@ a { color: inherit; text-decoration: none; }
 }
 .log-week {
   font: 800 12px/1 var(--en);
-  color: var(--green-deep);
-  background: var(--green-pale);
+  color: var(--navy);
+  background: var(--paper-2);
   border-radius: 8px;
   padding: 6px 0;
   text-align: center;
@@ -473,7 +500,7 @@ a { color: inherit; text-decoration: none; }
 .share-text {
   font: 500 12.5px/1.9 var(--sans);
   color: var(--ink-2);
-  background: var(--bg-deep);
+  background: var(--paper-2);
   border: 1px dashed var(--line);
   border-radius: 12px;
   padding: 14px 16px;
@@ -486,7 +513,7 @@ a { color: inherit; text-decoration: none; }
 
 .result-note {
   font: 500 11px/1.8 var(--sans);
-  color: var(--ink-3);
+  color: var(--ink-2);
   text-align: center;
   margin-top: 4px;
 }
@@ -499,7 +526,7 @@ a { color: inherit; text-decoration: none; }
   bottom: 28px;
   transform: translate(-50%, 16px);
   background: var(--ink);
-  color: #fff;
+  color: var(--paper);
   font: 600 13px/1.4 var(--sans);
   border-radius: 999px;
   padding: 11px 22px;
@@ -510,6 +537,16 @@ a { color: inherit; text-decoration: none; }
   max-width: calc(100vw - 40px);
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .app.enter .screen { animation: none; }
+  .delta { animation: none; }
+  .progress-fill, .meter-track i { transition: none; }
+  .btn, .choice, .toast { transition: none; }
+  .btn:active, .choice:active { transform: none; }
+}
 
 /* ---------- PC ---------- */
 

@@ -25,7 +25,7 @@
 .qbuild-out h4{font:700 10px/1 var(--sans-en);letter-spacing:.22em;color:var(--ink-3);text-transform:uppercase;margin-bottom:14px}
 .qbuild-q{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
 .qbuild-q:last-child{border-bottom:none}
-.qbuild-q-num{font:900 italic 13px/1 var(--serif-en);color:var(--navy)}
+.qbuild-q-num{font:700 13px/1 var(--serif-en);color:var(--navy)}
 .qbuild-q-text{font:500 12px/1.65 var(--sans-jp);color:var(--ink)}
 .qbuild-q.lvl .qbuild-q-num{color:var(--ink-3)}
 
@@ -41,11 +41,11 @@
 .facimp-cell .jp{font:600 11px/1 var(--sans-jp);color:var(--ink-2);letter-spacing:.04em;margin-bottom:14px;display:block}
 .facimp-cell p{font:500 12px/1.85 var(--sans-jp);color:var(--ink);white-space:pre-line}
 .facimp-q{padding:14px 22px;background:var(--paper-2);border-bottom:1px solid var(--line);font:700 13px/1.5 var(--serif-jp);color:var(--ink)}
-.facimp-q-num{font:900 italic 14px/1 var(--serif-en);color:var(--navy);margin-right:8px}
+.facimp-q-num{font:700 14px/1 var(--serif-en);color:var(--navy);margin-right:8px}
 
 /* 印象偏向チェック mock */
 .bias-mock{padding:24px;background:#fff;border:2px solid var(--navy);border-radius:6px}
-.bias-mock h4{font:900 16px/1.3 var(--serif-jp);color:var(--navy);margin-bottom:6px}
+.bias-mock h4{font:700 16px/1.3 var(--serif-jp);color:var(--navy);margin-bottom:6px}
 .bias-mock p.lead{font:500 12px/1.7 var(--sans-jp);color:var(--ink-2);margin-bottom:18px}
 .bias-mock .bias-row{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:4px;margin-bottom:6px;align-items:flex-start}
 /* 砂: チェックした=選んだ瞬間 */
@@ -297,12 +297,12 @@
   <div class="s-inner">
     <div class="s-head" data-reveal>
       <div class="eyebrow kicker">06 / Philosophy</div>
-      <h2><span class="nowrap">印象を否定しない。</span><span class="em nowrap">ただ、事実と分ける</span></h2>
+      <h2><span class="nowrap">印象は残したまま、</span><span class="em nowrap">事実と分ける</span></h2>
     </div>
     <div class="phil-grid" data-reveal>
       <div class="phil-card"><h3>印象は判断の素材</h3><p>違和感や好感は、現場で活きる感覚。否定はしない。ただし「印象だ」と自覚して書くと、判断が歪まない。</p></div>
-      <div class="phil-card"><h3>質問を揃える、答えを揃えない</h3><p>同じ問いを使うのは比較のため。答えを型にはめるためではない。職種ごとに別の問いを当てる。</p></div>
-      <div class="phil-card"><h3>採点は会話のため</h3><p>5軸スコアは候補者を順位付ける道具ではなく、面接官同士が「なぜそう感じたか」を話すための共通言語。</p></div>
+      <div class="phil-card"><h3>質問を揃える、答えを揃えない</h3><p>同じ問いを使うのは比較のためです。答えは、それぞれの言葉のまま受け取る。職種が変われば、当てる問いも変わります。</p></div>
+      <div class="phil-card"><h3>採点は会話のため</h3><p>5軸スコアの用途はひとつ。面接官同士が「なぜそう感じたか」を話すための共通言語です。点数が並んだ後に、会話が始まります。</p></div>
     </div>
   </div>
 </section>
@@ -310,7 +310,7 @@
 <section class="buy">
   <div data-reveal>
     <div class="eyebrow kicker" style="display:inline-flex;justify-content:center;color:var(--ink-3);margin-bottom:14px">Try Now</div>
-    <h2 style="font:900 clamp(24px,3.6vw,40px)/1.3 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.02em"><span class="nowrap">いまブラウザで、</span><span class="em nowrap">面接記録を始める</span></h2>
+    <h2 style="font:700 clamp(24px,3.6vw,40px)/1.3 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.02em"><span class="nowrap">いまブラウザで、</span><span class="em nowrap">面接記録を始める</span></h2>
     <p style="font:500 13px/1.85 var(--sans-jp);color:var(--ink-2);max-width:560px;margin:0 auto 36px">InterviewKit はフル機能を無料公開中。<br class="br-pc">候補者作成・職種選択・記録・印刷まで、すべて手元で動きます。データは外部に送信されません。</p>
     <div class="cta-actions-c">
       <a class="buy-btn primary" href="https://bridge-med.github.io/interview-kit/" target="_blank" data-link="demo">デモを開く ↗</a>
@@ -335,6 +335,28 @@
     </div>
   </div>
 </section>
+
+<aside class="walk" aria-labelledby="walk-next">
+  <div class="walk-inner">
+    <div class="eyebrow" data-reveal>Where to next</div>
+    <h2 class="walk-h" id="walk-next" data-reveal>次は、どこへ歩きますか</h2>
+    <div class="walk-grid">
+      <a class="walk-card" href="../hire-board/index.html" data-reveal>
+        <span class="en">HireBoard</span><span class="t">選考全体の進み方を追う</span>
+        <p class="p">面接の外側にある採用の流れを、1枚のカンバンで。</p>
+      </a>
+      <a class="walk-card" href="../philosophy/index.html" data-reveal data-reveal-delay="1">
+        <span class="en">Philosophy</span><span class="t">その人から始める原則を読む</span>
+        <p class="p">役職の前に、その人の人生から始めるという原則。</p>
+      </a>
+      <a class="walk-card" href="../products/index.html" data-reveal data-reveal-delay="2">
+        <span class="en">Products</span><span class="t">ほかの道具を見る</span>
+        <p class="p">経営・運営から学習まで、公開中の道具の一覧です。</p>
+      </a>
+    </div>
+    <p class="walk-note" data-reveal>次の面接のメモを、事実と印象で二つに分けてみようと思えたなら、それで十分です。この手帖を使うかどうかは、そのあとの話です。</p>
+  </div>
+</aside>
 
 <footer class="foot">
   <div class="foot-brand"><svg class="mark" viewBox="0 0 240 110" aria-hidden="true"><path d="M8 74 C 62 16, 118 24, 176 84" stroke="#16233E" stroke-width="10"/><path d="M58 94 C 118 60, 158 22, 232 12" stroke="#A98F63" stroke-width="10"/></svg>BRIDGE</div>
