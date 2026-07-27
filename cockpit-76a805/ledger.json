@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-26",
+  "updated": "2026-07-27",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -346,11 +346,11 @@
       "serves": "返信の角が立たないか気にする人。やわらかい返し方の選択肢を3つ増やす",
       "status": "未掲載",
       "measure": "local",
-      "note": "動くPWA。返信生成にworkerバックエンド依存あり。掲載判断待ち",
+      "note": "動くPWA。返信生成は既定でモック(REPLY_PROVIDER='mock'・endpoint空)のためworker稼働は公開の前提でない(remote切替時のみ依存)。karte/index.htmlの処方からリンクあり=完全な非公開ではない。掲載判断待ち",
       "lastCommit": "2026-07-15",
       "decision": {
-        "points": "実装は整っている(PWA+サービスワーカー)が、返信生成が外部workerに依存する。公開すればその稼働保証と維持コストが発生する。第31条の申告は立つ。論点は依存先の維持と第12条の実利用",
-        "catalogDraft": "{ cat: 'casual', img: 'yawagaeshi.png', name: 'Yawagaeshi', jp: 'やわ返', href: '../yawagaeshi/index.html',\n  p: '送る前に、ひと呼吸。角の立たないやわらかい返信案を3つつくる。' }\n※ 掲載前に worker の稼働確認が要る。サムネイル作成済み"
+        "points": "実装は整っている(PWA+サービスワーカー)。返信生成は既定でモック生成のため、公開にworkerの稼働は必須でない(2026-07-26監査役が実測: replyService.js 24行)。第31条の申告は立つ。論点は第12条の実利用ただ一つ。監査役推奨(2026-07-26): 実利用を確認できれば掲載(a)、できなければ引退(b・karteの処方リンク556行の撤去とセット)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
+        "catalogDraft": "{ cat: 'casual', img: 'yawagaeshi.png', name: 'Yawagaeshi', jp: 'やわ返', href: '../yawagaeshi/index.html',\n  p: '送る前に、ひと呼吸。角の立たないやわらかい返信案を3つつくる。' }\n※ 既定はモック生成のためworker稼働は掲載の前提でない。サムネイル作成済み"
       }
     },
     {
@@ -368,10 +368,10 @@
       "status": "未掲載",
       "measure": "none",
       "measureNote": "Expo書き出しHTMLのため敷設しない(再書き出しで消える)。手動記録",
-      "note": "mobile-pomodoro(Expoソース)とpomodoro-app(Web書き出し)の2ディレクトリで1プロダクト。掲載判断待ち",
+      "note": "mobile-pomodoro(Expoソース)とpomodoro-app(Web書き出し)の2ディレクトリで1プロダクト。名称「BRIDGE Focus」は子が親の名を名乗る形で第30条に抵触(未決事項#1と同型)。掲載判断待ち",
       "lastCommit": "2026-07-07",
       "decision": {
-        "points": "ソース(mobile-pomodoro)は運用文書まで揃った本格実装。ただしWeb版はExpo自動書き出しでtitleも空のままで、カタログから直リンクするには粗い。載せるなら紹介ページを1枚かませるか、iOS配信を待つ。第12条の実利用が確認できるまでは未掲載が安全と見る",
+        "points": "ソース(mobile-pomodoro)は運用文書まで揃った本格実装。ただしWeb版はExpo自動書き出しでtitleも空のままで、カタログから直リンクするには粗い(第32条)。名称の第30条抵触もある。監査役推奨(2026-07-26): Web書き出し(pomodoro-app/)を公開ツリーから引退(a・導線ゼロのため訪問者影響なし)。iOS配信または紹介ページ+実利用確認+改名が揃ったら掲載を再検討。代替(b)は紹介ページを作って掲載だが命名の決着が先。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'learning', img: 'bridge-focus.png', name: 'BRIDGE Focus', jp: 'ポモドーロタイマー', href: '../pomodoro-app/index.html',\n  p: 'タスク管理ではなく、いまやる一つに集中するためのタイマー。集中の記録が作業に紐づいて残る。' }\n※ hrefは書き出し物への直リンク。紹介ページを作るならそちらへ向ける。サムネイル作成済み"
       }
     },
@@ -405,7 +405,11 @@
       "status": "未掲載",
       "measure": "local",
       "note": "第31条申告は社長確定待ち。products配列・NAV未掲載(サムネイル作成と掲載可否は社長判断)。有料の統合・閉院実務パックは社長判断で公開保留(2026-07-18、データは完成状態で保持)。現在の公開物はすべて無料。決済開始前に特定商取引法に基づく表記が必須。法務3枚は仮文面で専門家確認要",
-      "lastCommit": "2026-07-18"
+      "lastCommit": "2026-07-18",
+      "decision": {
+        "points": "sitemap収載済みで検索には開かれているのに、BRIDGE本体(products/NAV)からの導線ゼロの半公開。実体は記事10・無料テンプレ9で空室でない(第14条適合)。aboutで「BRIDGE(運営: 橋本渉)」を自己申告済み。監査役推奨(2026-07-26): 掲載(a・PRODUCTS配列に1行+サムネイル作成+第31条申告確定)。代替(b)はsitemap撤去で出荷前へ戻す(scripts/medops/build.mjs)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
+        "catalogDraft": "{ cat: 'management', img: 'medops.png', name: '医療管理実務ライブラリ', jp: '仮称', href: '../medops/index.html',\n  p: '事務長・法人本部・新任管理職の実務を、実行手順と無料テンプレートに。' }\n※ サムネイル未作成。コピーはeditor照合前提"
+      }
     },
     {
       "id": "manager-starter",
@@ -421,13 +425,58 @@
       "status": "未掲載",
       "measure": "local",
       "note": "第31条申告は社長確定待ち。medopsとの棲み分け=施設運営(medops)/チーム運営(本サイト)、統合可否は未決事項。スターターパックは決済準備中表示で公開(実ファイル20点の整備が公開後の最優先タスク)。法務3枚はmedopsと同一水準の仮文面で専門家確認は両サイト分を1回で。第2弾出荷済み(記事計10本・職種別4枚・法人向け)。次回改善候補: ビルド出力とデータの整合を出荷ゲートで機械検査する(qa提案・PM支持。再ビルド→チェックサム比較をshipスキルかcheck-siteへ)。products掲載・正式名称は社長判断",
-      "lastCommit": "2026-07-18"
+      "lastCommit": "2026-07-18",
+      "decision": {
+        "points": "medopsと同じ半公開(sitemap収載済み・本体からの導線ゼロ)。パックは「決済準備中」「実ファイル提供体制は未用意」とページ上で正直に表記済み(pack/index.html 261行)で第14・15条は保たれている。監査役推奨(2026-07-26): medopsと同時に掲載(a)。掲載する場合パック実ファイル20点の整備が最優先タスクのまま。代替(b)はsitemap撤去(scripts/manager-starter/build.mjs)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
+        "catalogDraft": "{ cat: 'management', img: 'manager-starter.png', name: '医療管理職スターター', jp: '仮称', href: '../manager-starter/index.html',\n  p: '臨床は分かる。でも管理職の仕事は教わっていない。新任管理職の最初の90日を道具にする。' }\n※ サムネイル未作成。コピーはeditor照合前提"
+      }
+    },
+    {
+      "id": "worklog",
+      "name": "CxO Roadmap Log",
+      "jp": "実績ログ(実験室)",
+      "cat": "uncataloged",
+      "href": "../worklog/index.html",
+      "dirs": [
+        "worklog"
+      ],
+      "stage": "評価・再評価",
+      "serves": "運営者自身(将来のCxO候補としての)。日々の現場仕事と数字成果を実績の言葉に変換し、職務経歴書・面談・昇格での選択肢を増やす",
+      "status": "未掲載",
+      "measure": "none",
+      "measureNote": "bridge.js非読込のためusage.js未敷設。手動記録",
+      "note": "journal実験室からサムネイル付きで公開導線あり。noindex。台帳未登録だったのを2026-07-26の棚卸しで下書き登録(stage/servesは監査役下書き・社長確認前)。README「個人用アプリ」表記と実在しないrefresh-worklogワークフローの記載は同日修正済み",
+      "lastCommit": "2026-07-07",
+      "decision": {
+        "points": "初期データは実話のみで第13条適合。実験室(journal=途中の公開)という置き場自体はIAに適う。監査役推奨(2026-07-26): 実利用が続いているなら掲載=実験室のまま台帳登録を確定(a)。使っていないなら導線撤去(b・journal/index.html 86-92行のカード削除)。判断軸は第12条。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md"
+      }
+    },
+    {
+      "id": "morning",
+      "name": "朝の手帖",
+      "jp": "内製ダッシュボード(実験室)",
+      "cat": "uncataloged",
+      "href": "../morning/index.html",
+      "dirs": [
+        "morning",
+        "daily"
+      ],
+      "stage": "理解",
+      "serves": "運営者自身。政治経済・医療政策・論文・テックを一画面に集め、毎朝読むものを自分で選べるようにする",
+      "status": "未掲載",
+      "measure": "none",
+      "measureNote": "bridge.js非読込のため未計測。手動記録",
+      "note": "データ(daily/feed.json)は2026-07-04 07:10 JSTで停止し、自動更新ワークフロー(refresh-daily.yml)はリポジトリに存在しない。journalカードの「毎朝まとめて読む」と実態が乖離。フッターの死リンクは2026-07-26に「自動更新は停止中」へ事実修正済み。台帳未登録だったのを同日下書き登録(stage/servesは監査役下書き・社長確認前)",
+      "lastCommit": "2026-07-07",
+      "decision": {
+        "points": "6件中で誠実の条項に最も近い(第12・15条)。監査役推奨(2026-07-26): 休止表記(a)=statusを休止中にし、journalカード83行の「毎朝」を実態に合う文言へ(editor照合)。復旧ならワークフロー再設置とセットで表記を戻す。再開の意思がないなら導線撤去(b・カード79-85行の削除)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md"
+      }
     }
   ],
   "knownIssues": [
     "プロダクト9ページがdata-rootなしでbridge.jsを読み、budoux-ja.min.jsが404になる(実害はコンソールノイズのみ)。直すとBudouXが各アプリの文字組みに新しく効き始めるため、designer照合込みの独立スプリントで対応する",
     "shared/subpage.css を読む9ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit/starter-kits)にダーク実装がない。憲法第22条後半(ライト/ダークを常に等価に設計する)の未達。2026-07-24の配色リカラーでは色の4系統収束だけを行い、ダークは分離した(社長承認)。rehaboard の色がinline styleで書かれておりダークから上書きできないため、rehaboardの脱inline化が先。ダークのUI方式(prefers-color-schemeで自動追従か、9ページに切替UIを新設か。これらのページは.site-navを持たずbridge.jsの切替ボタンが注入されない)を社長が決めた後、designer照合込みの独立スプリントで対応する 前提条件2つは2026-07-24に解消済み: rehaboardの脱inline化(b5880d8)とフッターの色直書き9ファイル(af553b9)。PM進言はprefers-color-scheme自動追従(切替UI新設は9ページにナビ相当を持ち込む工事になるため。第9条4号)。UI方式の社長決定待ち",
-    "実験室2ページ(worklog / morning)が公開導線を持ちながら台帳・sitemap.xml のどちらにも未登録。worklogは journal/index.html からサムネイル付きでリンクされ README に公開URLの記載があり robots.txt も全許可だが、README本文は「個人用アプリ」と称している。第31条(道具の義務)と第14条の解釈に触れるため、未掲載5件(yawagaeshi / medops / manager-starter / bridge-focus / rehaboard-starter)と一束にした掲載ガバナンスの棚卸しで扱う。rehaboard-starterはNAV・PRODUCTS配列とも未掲載だがstarter-kitsから被リンクがあり、存置か畳むかは社長判断。存置なら砂色相当の常時強調17箇所(--vermilion:#A98F63、第24条)がdesignerタスク(2026-07-26 designer/PM指摘)。構造的な矛盾のためauditor領分",
+    "実験室2ページ(worklog / morning)が公開導線を持ちながら台帳・sitemap.xml のどちらにも未登録だった件は、未掲載4件(yawagaeshi / medops / manager-starter / bridge-focus)と一束にした掲載ガバナンスの棚卸しで扱い、2026-07-26に監査役棚卸し済み: 6件の推奨判断は drafts/掲載ガバナンス棚卸し-2026-07-26.md。worklogのREADME表記ズレとmorning/worklog feed.htmlの死リンク(実在しないワークフローへのリンク)は事実修正済み、2ページは台帳へ下書き登録済み。残るは社長決裁(各件の(a)/(b))のみ。あわせてrehaboard-starterはNAV・PRODUCTS配列とも未掲載だがstarter-kitsから被リンクがあり、存置か畳むかは社長判断(2026-07-26 designer/PM指摘)。棚卸しドラフトには未収載のため監査役の追補が要る。存置なら砂色相当の常時強調17箇所(--vermilion:#A98F63、第24条)がdesignerタスク。構造的な矛盾のためauditor領分",
     "shared/subpage.css の --ink-3(#7D7E85) が文字色としてWCAG AA基準を満たさない。生成り3段すべてで不足(--paper 3.87:1 / --paper-2 3.53:1 / --paper-3 3.14:1、必要値4.5:1)。subpage.css と hub.css で文字色として計34回使われ、いずれも9〜11.5pxで大文字テキストの閾値(18.66px)に届かないため通常テキスト扱いになる。2026-07-24のqa実測で2件(.sched-table td.calm / .ra-report .note)が個別に不合格となり --ink-2 へ逃がしたが、これは対症療法であり根はトークンの値そのもの。--paper でAAを通すには約 #6F7078、--paper-3 でも通すには約 #656670 まで暗くする必要がある。ただしトークン値の変更は9ページの見た目を一斉に変えるためdesigner照合込みの独立スプリント。ダーク実装のスプリントと同時にやるのが効率的",
     "shared/subpage.css を読む9ページすべてに実物のスクリーンショットが無い(img参照ゼロ)。LPが実物について事実を主張しているのに、同じページ上に突き合わせる対象が存在しない状態。2026-07-24にstudy-boardで実害が確認された(カード見出しの色名は実物と一致していたが、LP側の罫線が4枚中3枚ずれたまま公開されていた)。designerの判断は「載せる。ただし体験のためではなく照合の錨として、無加工の写し1枚に撮影日を添える」。規約案と機械検査への落とし込み方はdesignerの照合結果にあり。第22条に但し書き(写しの内部は制限外・加工しない・色を周囲に持ち出さない・1ページ1枚)を足すかは第33条の手続きで社長判断",
     "憲法外の色系統(萌黄・代赭・朱)が共通基盤の外に残るのは3ファイル: rehaboard-starter/index.html(自前:root・憲法外8色)、morning/index.html(7色)、worklog/feed.html。round-note は2026-07-25のリカラーで解消済み。あわせて rehaboard-starter には walk(Where to next)も無く、rehaboardの分岐1枚目が1クリック先の行き止まりへ客を送る状態。turnaround12 も結果画面の終端が「もう一度」とシェアのみでBRIDGEへの戻り線が無い(第26条・designer起票2026-07-25)。ゲーム系の戻り線とあわせて同じ束で扱う",
