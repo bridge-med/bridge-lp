@@ -232,6 +232,8 @@ a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 .walk-card .en{font:600 9px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn-deep);display:block;margin-bottom:10px}
 .walk-card .t{font-family:var(--mincho);font-weight:600;font-size:16px;margin-bottom:6px}
 .walk-card .p{font-size:11.5px;color:var(--ink-2);line-height:1.9}
+/* 第29条「何もしなくても十分」の一行。思想の言葉なので明朝(subpage.cssと同型) */
+.walk-note{max-width:34em;margin:34px 0 0;font:400 14px/2.1 var(--mincho);color:var(--ink-2)}
 @media(max-width:760px){.walk-grid{grid-template-columns:1fr}}
 
 /* ===== フッター(JSが .site-footer に描画) ===== */
