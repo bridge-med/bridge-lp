@@ -97,11 +97,30 @@ img,svg{display:block;max-width:100%}
 .nav-logo .dot{color:var(--dawn)}
 .nav-logo .small{font:500 9px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-3);margin-left:8px;text-transform:uppercase}
 .nav-actions{display:flex;gap:10px;align-items:center}
-.nav-actions a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 14px;border-radius:2px;transition:all .15s}
+.nav-actions a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 14px;border-radius:2px;transition:all .15s;white-space:nowrap}
 .nav-actions a.back{color:var(--ink-3)}
 .nav-actions a.back:hover{color:var(--ink)}
 .nav-actions a.cta{background:var(--ink);color:var(--on-fill)}
 .nav-actions a.cta:hover{background:var(--navy)}
+/* ===== モバイル nav(≤560px)— 第25条・第27条 / ia.md 8節 =====
+ * 製品ページの nav を「ロゴ」と「CTA」の二つだけにする。
+ * ・← BRIDGE は .nav-logo と行き先が同一(../index.html)。狭い一行に同じ行き先を
+ *   二度置くことを選択肢とは呼ばない(第27条)。帰り道はロゴが担う。
+ * ・製品名(.small)は直下の hero-eyebrow と <title> が名乗る。nav は静かにする(第24条の2)。
+ *   交差する二本の線(.mark)は残す——署名はこちらである(第24条)。
+ * 560px の根拠:内容幅の実測最悪値は english-trainer の 226+88+112+gap10=436px。
+ *   1行で収まる下限はビューポート485px。FOUT時の代替フォント幅を見て 560 に置く。
+ * 適用は .nav-actions を持つ製品ページのみ。starter-kits は .nav-links であり
+ *   hub.css の 640px 分岐が持つ。:has() で分離しているので二重適用しない。
+ * 色は触れない(第22条)。ライト/ダークは同一規則で完結する。 */
+@media(max-width:560px){
+  .nav:has(.nav-actions){padding:12px var(--pad-x)}
+  .nav.scrolled:has(.nav-actions){padding:10px var(--pad-x)}
+  .nav:has(.nav-actions) .nav-logo{min-height:44px}
+  .nav:has(.nav-actions) .nav-logo .small{display:none}
+  .nav:has(.nav-actions) .nav-actions a.back{display:none}
+  .nav:has(.nav-actions) .nav-actions a{flex-shrink:0;min-height:44px;display:inline-flex;align-items:center}
+}
 
 /* hero */
 .hero{padding:160px var(--pad-x) 100px;position:relative;background:var(--paper);text-align:left;border-bottom:1px solid var(--line)}
