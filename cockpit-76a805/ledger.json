@@ -485,7 +485,8 @@
     "madoakari: 時計の数字(Inter 80px)が明朝ステートメントより大きい、サイト唯一のページ。第23条には適合(時刻=構造の言葉)だが声の階層が反転している。一枚限りの措置とし、二例目が出たらdesignerが規則として設計し直す(2026-07-26 PM判定)",
     "madoakari: manifest.webmanifestのtheme_color/background_colorがライト固定(#FBFAF7)。manifestはメディアクエリを持てないプラットフォーム制約による既知の非対称。<meta theme-color>は両テーマ対応済み",
     "madoakari: ?t=デバッグパラメータで開いたときもモード切替ボタンでliveへ戻せる。デバッグ専用機能のため現状維持(2026-07-26 PM判定)",
-    "モバイル残件(390px外・designer起票2026-07-29): starter-kitsの.nav-links aのタップ領域が22px(hub.css:17 padding:6px 0)でia.md 8節の44px未達。561〜920pxの製品ページnavリンクも16px(ia.mdのモバイル定義は≤920px)。320pxで.cmp-tableがhire-board/rehaboardで横溢、study-boardは320pxでbodyScrollWidth 328(原因未特定)。いずれも390pxでは発生しない。実測済み"
+    "320px残件(実測済み2026-07-29): .cmp-tableがhire-board/rehaboardで横溢、study-boardはbodyScrollWidth 328(原因未特定)。390pxでは発生しない。タップ領域の項(starter-kits 22px/561〜920px 16px)は2026-07-30の44px化スプリントで解消済み",
+    "starter-kitsのモバイルnavをbridge.jsのNAVドロワーへ寄せる(designer起票2026-07-30): ia.md 3節は「モバイルはロゴ+ハンバーガー」だがstarter-kitsだけ5リンクを固定ヘッダーに並べており、44px化後のnavHが94px(製品ページ68pxより37%高い・390pxで画面の11%)。ドロワー化すれば68pxに揃い+10pxの症状手当ても不要になる。今回のCSSは症状の手当てで治療ではない(designer型出しの明記)。あわせてia.md改定議題: タップ44pxの境界を幅(920px)でなくpointer:coarseで切るか"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
