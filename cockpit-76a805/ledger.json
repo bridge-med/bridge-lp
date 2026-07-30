@@ -485,7 +485,7 @@
     "madoakari: 時計の数字(Inter 80px)が明朝ステートメントより大きい、サイト唯一のページ。第23条には適合(時刻=構造の言葉)だが声の階層が反転している。一枚限りの措置とし、二例目が出たらdesignerが規則として設計し直す(2026-07-26 PM判定)",
     "madoakari: manifest.webmanifestのtheme_color/background_colorがライト固定(#FBFAF7)。manifestはメディアクエリを持てないプラットフォーム制約による既知の非対称。<meta theme-color>は両テーマ対応済み",
     "madoakari: ?t=デバッグパラメータで開いたときもモード切替ボタンでliveへ戻せる。デバッグ専用機能のため現状維持(2026-07-26 PM判定)",
-    "8ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit)の末尾CTA見出しが同文のインラインstyleで重複している。shared/subpage.cssに.cta-hとして一本化する(PM預かりのバックログ・次にCTA周辺を触るスプリントで。第9条4号)。あわせてsans系の宣言不一致2箇所(subpage.css .alert-body strong / .sched-table td.busy のfont-weight:800、Noto Sans JPは800未読込で900が選ばれる。実害なし)も同時に整える。実測済み(2026-07-26)",
+    "rehaboard-starter/index.html が旧CTA見出しのインライン宣言(font:700 clamp(24px,3.6vw,40px)...)を保持している。8ページの.cta-h一本化(2026-07-29出荷)の対象外だったuncatalogedページ。自前:rootの憲法外8色の既存起票と同じ束で、掲載/畳むの社長判断が出たときに合わせて処置する。qa発見(2026-07-29)",
     "モバイル残件(390px外・designer起票2026-07-29): starter-kitsの.nav-links aのタップ領域が22px(hub.css:17 padding:6px 0)でia.md 8節の44px未達。561〜920pxの製品ページnavリンクも16px(ia.mdのモバイル定義は≤920px)。320pxで.cmp-tableがhire-board/rehaboardで横溢、study-boardは320pxでbodyScrollWidth 328(原因未特定)。いずれも390pxでは発生しない。実測済み"
   ],
   "issueGroups": {
