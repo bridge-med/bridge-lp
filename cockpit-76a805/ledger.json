@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-29",
+  "updated": "2026-07-30",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -23,7 +23,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-07-30"
     },
     {
       "id": "medboard",
@@ -39,7 +39,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-29"
+      "lastCommit": "2026-07-30"
     },
     {
       "id": "hire-board",
@@ -55,7 +55,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-07-30"
     },
     {
       "id": "interview-kit",
@@ -71,7 +71,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-29"
+      "lastCommit": "2026-07-30"
     },
     {
       "id": "consult-simulator",
@@ -87,7 +87,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-07-30"
     },
     {
       "id": "round-note",
@@ -152,7 +152,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-07-30"
     },
     {
       "id": "study-board",
@@ -168,7 +168,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-07-30"
     },
     {
       "id": "english-trainer",
@@ -184,7 +184,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-07-30"
     },
     {
       "id": "turnaround12",
@@ -476,7 +476,7 @@
     "プロダクト9ページがdata-rootなしでbridge.jsを読み、budoux-ja.min.jsが404になる(実害はコンソールノイズのみ)。直すとBudouXが各アプリの文字組みに新しく効き始めるため、designer照合込みの独立スプリントで対応する",
     "実験室2ページ(worklog / morning)が公開導線を持ちながら台帳・sitemap.xml のどちらにも未登録だった件は、未掲載4件(yawagaeshi / medops / manager-starter / bridge-focus)と一束にした掲載ガバナンスの棚卸しで扱い、2026-07-26に監査役棚卸し済み: 6件の推奨判断は drafts/掲載ガバナンス棚卸し-2026-07-26.md。worklogのREADME表記ズレとmorning/worklog feed.htmlの死リンク(実在しないワークフローへのリンク)は事実修正済み、2ページは台帳へ下書き登録済み。残るは社長決裁(各件の(a)/(b))のみ。あわせてrehaboard-starterはNAV・PRODUCTS配列とも未掲載だがstarter-kitsから被リンクがあり、存置か畳むかは社長判断(2026-07-26 designer/PM指摘)。棚卸しドラフトには未収載のため監査役の追補が要る。存置なら砂色相当の常時強調17箇所(--vermilion:#A98F63、第24条)がdesignerタスク。構造的な矛盾のためauditor領分",
     "shared/subpage.css を読む9ページすべてに実物のスクリーンショットが無い(img参照ゼロ)。LPが実物について事実を主張しているのに、同じページ上に突き合わせる対象が存在しない状態。2026-07-24にstudy-boardで実害が確認された(カード見出しの色名は実物と一致していたが、LP側の罫線が4枚中3枚ずれたまま公開されていた)。designerの判断は「載せる。ただし体験のためではなく照合の錨として、無加工の写し1枚に撮影日を添える」。規約案と機械検査への落とし込み方はdesignerの照合結果にあり。第22条に但し書き(写しの内部は制限外・加工しない・色を周囲に持ち出さない・1ページ1枚)を足すかは第33条の手続きで社長判断",
-    "憲法外の色系統(萌黄・代赭・朱)が共通基盤の外に残るのは3ファイル: rehaboard-starter/index.html(自前:root・憲法外8色)、morning/index.html(7色)、worklog/feed.html。round-note は2026-07-25のリカラーで解消済み。あわせて rehaboard-starter には walk(Where to next)も無く、rehaboardの分岐1枚目が1クリック先の行き止まりへ客を送る状態。turnaround12 も結果画面の終端が「もう一度」とシェアのみでBRIDGEへの戻り線が無い(第26条・designer起票2026-07-25)。ゲーム系の戻り線とあわせて同じ束で扱う",
+    "憲法外の色系統(萌黄・代赭・朱)が共通基盤の外に残るのは3ファイル: rehaboard-starter/index.html(自前:root・憲法外8色)、morning/index.html(7色)、worklog/feed.html。round-note は2026-07-25のリカラーで解消済み。あわせて rehaboard-starter には walk(Where to next)も無く、rehaboardの分岐1枚目が1クリック先の行き止まりへ客を送る状態。turnaround12 も結果画面の終端が「もう一度」とシェアのみでBRIDGEへの戻り線が無い(第26条・designer起票2026-07-25)。ゲーム系の戻り線とあわせて同じ束で扱う。rehaboard-starter は旧CTA見出しのインライン宣言(.cta-h一本化2026-07-29の対象外)も保持しており、同ページの処遇(存置/畳む・社長判断待ち)が出たときに一括処置する(qa発見2026-07-29)",
     "見出し横溢の残件(390px外・実測済み2026-07-29): consult-simulator「経験頼みになっていませんか?」が375px以下で横溢(body 364)、hire-board「HireBoardを入れると、」が320px以下で横溢。いずれも安全なスパン分割が存在しない(designer実測4件中2件が退行)。処置の禁則: 分割してよいのは第一スパンだけで、.em側(第二スパン)や再組み替えが起きる分割を機械適用すると430〜360pxでデスクトップの行組みごと崩れる。CSSでのnowrap一括解除もtext-wrap:balanceの組み直しで不可",
     "第29条「何もしなくても十分」の一行が subpage系9ページにしかない。Dバッチで両ファミリのwalkが視覚的に同一になった結果、思想側9ページ(about/philosophy/products/projects/journal/research/services/stories/cockpit)は末尾が三枚のカードで終わり明文が無い(communityのみ.enoughを別箇所に保有)。thought-hub側にも同じ一行を置くか、プロダクトページ特有の「導入を迫らない」文脈でだけ必要か——第29条の適用範囲の解釈が要る。Eバッチ候補としてdesigner起票(2026-07-25)。社長判断待ち",
     "絵文字がリカラー後に残る最大の彩度源になった。turnaround12は藍地の結果heroに46pxの絵文字紋章(👑💸等)、clinic-flow-3dは289個、gokigen-gachaは68個。プロジェクト全体の作法のため独断で外さずdesigner起票(2026-07-25)。社長判断は1点:「4系統リカラーを全アプリに敷き終えた今、絵文字を色の系統に含めるのか」。含めないなら反転面の上だけ filter:grayscale(1) の最小の逃げ道あり",
@@ -485,7 +485,6 @@
     "madoakari: 時計の数字(Inter 80px)が明朝ステートメントより大きい、サイト唯一のページ。第23条には適合(時刻=構造の言葉)だが声の階層が反転している。一枚限りの措置とし、二例目が出たらdesignerが規則として設計し直す(2026-07-26 PM判定)",
     "madoakari: manifest.webmanifestのtheme_color/background_colorがライト固定(#FBFAF7)。manifestはメディアクエリを持てないプラットフォーム制約による既知の非対称。<meta theme-color>は両テーマ対応済み",
     "madoakari: ?t=デバッグパラメータで開いたときもモード切替ボタンでliveへ戻せる。デバッグ専用機能のため現状維持(2026-07-26 PM判定)",
-    "rehaboard-starter/index.html が旧CTA見出しのインライン宣言(font:700 clamp(24px,3.6vw,40px)...)を保持している。8ページの.cta-h一本化(2026-07-29出荷)の対象外だったuncatalogedページ。自前:rootの憲法外8色の既存起票と同じ束で、掲載/畳むの社長判断が出たときに合わせて処置する。qa発見(2026-07-29)",
     "モバイル残件(390px外・designer起票2026-07-29): starter-kitsの.nav-links aのタップ領域が22px(hub.css:17 padding:6px 0)でia.md 8節の44px未達。561〜920pxの製品ページnavリンクも16px(ia.mdのモバイル定義は≤920px)。320pxで.cmp-tableがhire-board/rehaboardで横溢、study-boardは320pxでbodyScrollWidth 328(原因未特定)。いずれも390pxでは発生しない。実測済み"
   ],
   "issueGroups": {
