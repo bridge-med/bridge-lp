@@ -34,7 +34,11 @@
 @media(max-width:640px){
   .nav{flex-wrap:wrap;row-gap:28px;padding:14px var(--pad-x)}
   .nav.scrolled{row-gap:28px;padding:14px var(--pad-x)}
-  .nav-links{width:100%;gap:18px;flex-wrap:wrap;font-size:10px;letter-spacing:0.1em}
+  .nav-links{width:100%;gap:22px;flex-wrap:wrap;font-size:10px;letter-spacing:0.1em}
+  /* この帯は font-size:10px へ縮み、最短ラベル(Kits)の実テキストが約26.8pxまで痩せる。
+   * 基底の±8pxでは44pxに1.2px届かないため、この帯だけ±10pxへ広げる。
+   * gap も18→22pxにして隣接クリアランス2pxを確保する(22−20)。 */
+  .nav-links a::before{left:-10px;right:-10px}
 }
 
 /* fixed nav 分のアンカーずれ防止 */
