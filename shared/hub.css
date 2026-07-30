@@ -20,10 +20,21 @@
 .nav-links a:hover{color:var(--ink)}
 .nav-links a.on{color:var(--ink)}
 .nav-links a.on::after{transform:scaleX(1)}
+/* タップ領域44px(ia.md 8節)。箱は太らせず、当たり判定だけを ::before で重ねる。
+ * .nav-links a の ::after は現在地/hover の下線であり、padding を増やすと
+ * 文字から剥がれる。当たりと見た目は分離する(見た目に嘘をつかない)。
+ * 横は ±8px 広げて最小リンク(Kits 28px)を44pxにする。隣との間隔は下の分岐で18pxへ。 */
+.nav-logo{position:relative}
+.nav-logo::before{content:'';position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
+.nav-links a::before{content:'';position:absolute;left:-8px;right:-8px;top:50%;height:44px;transform:translateY(-50%)}
+/* 折返し2行。上下の当たり判定(44px)が重ならない最小の row-gap は 28px
+ * (ロゴ中心と リンク行中心の距離 = 19 + row-gap ≧ 44)。
+ * 余白14pxは、ロゴ側の44pxが画面上端で欠けない下限(12pxだと42pxに削られる)。
+ * 結果 navH 84→93px(スクロール時95px)。意図した増分である。 */
 @media(max-width:640px){
-  .nav{flex-wrap:wrap;row-gap:10px}
-  .nav.scrolled{row-gap:8px}
-  .nav-links{width:100%;gap:14px;flex-wrap:wrap;font-size:10px;letter-spacing:0.1em}
+  .nav{flex-wrap:wrap;row-gap:28px;padding:14px var(--pad-x)}
+  .nav.scrolled{row-gap:28px;padding:14px var(--pad-x)}
+  .nav-links{width:100%;gap:18px;flex-wrap:wrap;font-size:10px;letter-spacing:0.1em}
 }
 
 /* fixed nav 分のアンカーずれ防止 */
