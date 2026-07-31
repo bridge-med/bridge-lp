@@ -272,7 +272,7 @@
 
     document.getElementById('result-stmt').textContent = reducible
       ? '見直せそうな手作業が、' + fmtMonthly(reducible) + 'ぶん見つかりました。'
-      : '見直す手作業より、守る仕事が残りました。';
+      : 'チェックが付いたのは、人がやるべき仕事だけでした。';
 
     const wrap = document.getElementById('result-groups');
     wrap.innerHTML = ['a', 'b', 'c'].map((k) => {
@@ -290,7 +290,7 @@
               (e.custom ? '<span class="res-mine">自分で足した項目</span>' : '') + '</div>' +
             '<div class="res-est">' + esc(freqOf(e.f).label) + ' × ' + esc(minsOf(e.m).label) + ' → ' + fmtMonthly(e.mins) +
               (k === 'c' ? '。ここは削らずに残します' : '') + '</div>' +
-            '<div class="res-step"><span class="k">最初の一歩</span>' + esc(e.step) + '</div>' +
+            '<div class="res-step"><span class="k">' + (k === 'c' ? '守りかた' : '最初の一歩') + '</span>' + esc(e.step) + '</div>' +
           '</div>'
         ).join('') +
       '</section>';
@@ -306,9 +306,10 @@
       if (!items.length) return;
       const sum = k === 'c' ? '' : ' — 合計 ' + fmtMonthly(items.reduce((s, e) => s + e.mins, 0));
       parts.push('■ ' + CLASSES[k].name + suffix + sum);
+      if (k === 'c') parts.push('  ' + CLASSES.c.desc);
       items.forEach((e) => {
         parts.push('・' + e.label + '(' + freqOf(e.f).label + ' × ' + minsOf(e.m).label + ' → ' + fmtMonthly(e.mins) + ')');
-        parts.push('  最初の一歩:' + e.step);
+        parts.push('  ' + (k === 'c' ? '守りかた' : '最初の一歩') + ':' + e.step);
       });
       parts.push('');
     });
