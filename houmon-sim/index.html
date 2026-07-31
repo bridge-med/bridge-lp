@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>訪問診療 収益シミュレータ(仮称) — BRIDGE</title>
+<meta name="description" content="訪問診療の体制案を収益の概算で比較する道具。在支診区分・患者構成・訪問頻度から月間の概算を出し、体制AとBを並べて見比べます。">
+<meta name="robots" content="noindex">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t)}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* 配色は憲法第22条の4系統(生成り・藍・砂・炭)のみ。トークン差し替えでライト/ダーク対応 */
+:root{
+  color-scheme:light;
+  --paper:#FBFAF7;--paper-2:#F4EFE6;--paper-3:#EAE2D3;--card:#FFFFFF;
+  --ink:#1B1B1E;--ink-2:#45464C;--ink-3:#63646B;--ink-4:#B6B3AB;
+  --line:rgba(27,27,30,0.10);
+  --navy:#16233E;--blue:#24365C;--blue-soft:#8B9BBC;
+  --dawn:#A98F63;--dawn-deep:#7D6845;
+  --on-fill:#FBFAF7;
+  --serif:'Shippori Mincho B1',serif;
+  --sans:'Noto Sans JP',sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#161B2B;--paper-2:#111521;--paper-3:#0B0F1A;--card:#1D2436;
+    --ink:#EDEAE2;--ink-2:#C2BFB6;--ink-3:#8A8D98;--ink-4:#565A68;
+    --line:rgba(237,234,226,0.12);
+    --navy:#D8DEEB;--blue:#9FB1D4;--blue-soft:#5A6C92;
+    --dawn:#C2A97E;--dawn-deep:#C2A97E;
+    --on-fill:#111521;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#161B2B;--paper-2:#111521;--paper-3:#0B0F1A;--card:#1D2436;
+  --ink:#EDEAE2;--ink-2:#C2BFB6;--ink-3:#8A8D98;--ink-4:#565A68;
+  --line:rgba(237,234,226,0.12);
+  --navy:#D8DEEB;--blue:#9FB1D4;--blue-soft:#5A6C92;
+  --dawn:#C2A97E;--dawn-deep:#C2A97E;
+  --on-fill:#111521;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.8;font-size:14px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 18px 72px}
+header h1{font:700 20px/1.5 var(--serif);letter-spacing:-0.01em}
+header .sub{font-size:12px;color:var(--ink-3);margin-top:2px}
+/* 点数未検証の帯 — points.js の verified が true になるまで消えない */
+.unverified{margin:16px 0 0;padding:10px 14px;border:1px solid var(--dawn);border-left-width:4px;border-radius:2px;background:var(--paper-2);font-size:12px;color:var(--ink-2)}
+.unverified b{color:var(--ink)}
+.unverified .ver{font-size:11px;color:var(--ink-3)}
+.boards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:880px){.boards{grid-template-columns:1fr}}
+.board{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:18px 16px;display:flex;flex-direction:column;gap:14px}
+.board h2{font:600 15px/1.5 var(--serif);display:flex;align-items:baseline;gap:8px}
+.board h2 .tag{font:700 10px/1 var(--sans);letter-spacing:0.14em;padding:4px 8px;border-radius:2px;background:var(--navy);color:var(--on-fill)}
+.board.b h2 .tag{background:var(--ink-3)}
+label{font-size:11px;color:var(--ink-3);display:block;margin-bottom:3px}
+select,input[type=number]{width:100%;padding:8px 10px;font:500 13px/1.4 var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:2px;min-height:44px}
+select:focus,input:focus,button:focus{outline:2px solid var(--blue-soft);outline-offset:1px}
+.row{display:grid;gap:10px}
+.groups{display:flex;flex-direction:column;gap:8px}
+.group{display:grid;grid-template-columns:1.2fr 0.9fr 0.8fr 0.7fr 44px;gap:6px;align-items:end}
+.group .del{min-height:44px;border:1px solid var(--line);background:var(--paper);color:var(--ink-3);border-radius:2px;cursor:pointer;font-size:15px}
+.group .del:hover{color:var(--ink);border-color:var(--ink-3)}
+@media(max-width:520px){
+  .group{grid-template-columns:1fr 1fr;column-gap:6px;row-gap:2px}
+  .group .del{grid-column:2;justify-self:end;width:44px}
+  .groups .group + .group{border-top:1px dashed var(--line);padding-top:10px}
+}
+.add{align-self:flex-start;padding:8px 12px;font:500 12px/1 var(--sans);background:var(--paper-2);border:1px solid var(--line);border-radius:2px;color:var(--ink-2);cursor:pointer;min-height:44px}
+.add:hover{border-color:var(--ink-3);color:var(--ink)}
+.cap{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.result{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
+.result .total{font:700 26px/1.2 var(--serif);color:var(--navy);font-variant-numeric:tabular-nums}
+.result .total small{font:500 12px/1 var(--sans);color:var(--ink-3);margin-left:6px}
+.kv{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);border-bottom:1px dashed var(--line);padding:4px 0}
+.kv b{font-variant-numeric:tabular-nums;color:var(--ink)}
+/* キャパ超過は文言「(供給を超えています)」が意味を運ぶ。砂は未検証帯の一箇所に集約(第22条) */
+.copyb{padding:9px 12px;font:500 12px/1 var(--sans);background:transparent;border:1px solid var(--line);border-radius:2px;color:var(--ink-2);cursor:pointer;min-height:44px}
+.copyb:hover{border-color:var(--ink-3);color:var(--ink)}
+.diff{margin-top:16px;background:var(--paper-2);border:1px solid var(--line);border-radius:2px;padding:14px 16px}
+.diff h3{font:600 13px/1.5 var(--serif);margin-bottom:6px}
+.diff p{font-size:13px;color:var(--ink-2)}
+.diff b{font-variant-numeric:tabular-nums;color:var(--navy)}
+.notes{margin-top:28px;font-size:11.5px;color:var(--ink-3);line-height:1.9;border-top:1px solid var(--line);padding-top:16px}
+.notes h3{font:600 12px/1.6 var(--sans);color:var(--ink-2);margin-bottom:4px}
+.notes ul{padding-left:1.3em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>訪問診療 収益シミュレータ<span style="font-family:var(--sans);font-weight:500;font-size:12px;color:var(--ink-3)">(仮称)</span></h1>
+    <p class="sub">体制案を数字で比較し、納得して選ぶための概算。入力は端末内にだけ保存されます。</p>
+    <div class="unverified" id="unverified" hidden>
+      <b>点数マスタは未検証の下書きです。</b>金額を判断に使う前に、points.js の値を令和8年度点数表と突き合わせてください。
+      <span class="ver" id="verLabel"></span>
+    </div>
+  </header>
+
+  <div class="boards" id="boards"></div>
+
+  <div class="diff" id="diff" hidden>
+    <h3>AとBの差</h3>
+    <p id="diffText"></p>
+  </div>
+
+  <div class="notes">
+    <h3>この概算の前提(骨格版)</h3>
+    <ul>
+      <li>月間収益 = Σ 患者数 ×(総管の月額 + 訪問診療料 × 月訪問回数)。1点=10円で換算します</li>
+      <li>訪問診療料は、居宅かつ単一建物1人の行を「同一建物以外」、それ以外の行を「同一建物」として扱う簡略化をしています</li>
+      <li>往診料・各種加算・情報通信機器併用・重症患者(厚労大臣が定める状態)の高点数側・2026改定の重症患者割合の届出要件は、まだ入れていません</li>
+      <li>これは概算であり、算定要件の確認を代替しません。実際の算定は原典と審査支払機関の取り扱いに従ってください</li>
+      <li>点数マスタの版: <span id="verFoot">—</span>(この表示は検証後も残ります)</li>
+    </ul>
+  </div>
+</div>
+<script src="points.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

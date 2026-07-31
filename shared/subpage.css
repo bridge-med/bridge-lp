@@ -97,11 +97,37 @@ img,svg{display:block;max-width:100%}
 .nav-logo .dot{color:var(--dawn)}
 .nav-logo .small{font:500 9px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-3);margin-left:8px;text-transform:uppercase}
 .nav-actions{display:flex;gap:10px;align-items:center}
-.nav-actions a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 14px;border-radius:2px;transition:all .15s}
+.nav-actions a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 14px;border-radius:2px;transition:all .15s;white-space:nowrap;flex-shrink:0}
 .nav-actions a.back{color:var(--ink-3)}
 .nav-actions a.back:hover{color:var(--ink)}
 .nav-actions a.cta{background:var(--ink);color:var(--on-fill)}
 .nav-actions a.cta:hover{background:var(--navy)}
+/* ===== モバイル nav — 第25条・第27条 / ia.md 3節・8節 =====
+ * 二段構え。上の帯は「触れる大きさ」、下の帯は「何を残すか」。
+ *
+ * ≤920px(ia.md 8節のモバイル定義)— タップ領域44px。あわせて nav の余白を
+ *   12px に落とす(同節「固定ヘッダーは12px+blurで薄く」)。これで 920px 以下は
+ *   navH 68〜69px の一定値になり、560px の境界で背が動かない。
+ * ≤560px — 一行に収まらないので二つに絞る。
+ *   ・← BRIDGE は .nav-logo と行き先が同一(../index.html)。狭い一行に同じ行き先を
+ *     二度置くことを選択肢とは呼ばない(第27条)。帰り道はロゴが担う。
+ *   ・製品名(.small)は直下の hero-eyebrow と <title> が名乗る。nav は静かにする(第24条の2)。
+ *     交差する二本の線(.mark)は残す——署名はこちらである(第24条)。
+ *   560px の根拠:内容幅の実測最悪値は english-trainer の 226+88+112+gap10=436px。
+ *     1行で収まる下限はビューポート485px。FOUT時の代替フォント幅を見て 560 に置く。
+ * 適用は .nav-actions を持つ製品ページのみ。starter-kits は .nav-links であり
+ *   hub.css 側が持つ。:has() で分離しているので二重適用しない。
+ * 色は触れない(第22条)。ライト/ダークは同一規則で完結する。 */
+@media(max-width:920px){
+  .nav:has(.nav-actions){padding:12px var(--pad-x)}
+  .nav.scrolled:has(.nav-actions){padding:10px var(--pad-x)}
+  .nav:has(.nav-actions) .nav-logo{min-height:44px}
+  .nav:has(.nav-actions) .nav-actions a{min-height:44px;display:inline-flex;align-items:center}
+}
+@media(max-width:560px){
+  .nav:has(.nav-actions) .nav-logo .small{display:none}
+  .nav:has(.nav-actions) .nav-actions a.back{display:none}
+}
 
 /* hero */
 .hero{padding:160px var(--pad-x) 100px;position:relative;background:var(--paper);text-align:left;border-bottom:1px solid var(--line)}
@@ -159,6 +185,7 @@ section.alt{background:var(--paper-2)}
 
 /* CTA shared */
 .buy{background:var(--paper-2);padding:120px var(--pad-x);text-align:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cta-h{font:700 clamp(24px,3.6vw,40px)/1.3 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.02em}
 .buy-btn{display:inline-flex;align-items:center;justify-content:center;padding:16px 22px;font:700 13px/1 var(--sans-jp);letter-spacing:0.06em;border-radius:2px;transition:all .18s;border:1px solid transparent}
 .buy-btn.primary{background:var(--ink);color:var(--on-fill)}
 .buy-btn.primary:hover{background:var(--navy)}
@@ -258,12 +285,14 @@ html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 .alert-item.warn{background:var(--paper-3);border-left-color:var(--navy)}
 .alert-item.info{background:var(--paper-2);border-left-color:var(--blue)}
 .alert-item.ok{background:var(--card);border-left-color:var(--ink-4)}
-.alert-tag{font:800 10px/1 var(--sans-jp);letter-spacing:0.04em;padding:5px 10px;border-radius:2px;flex-shrink:0;color:var(--on-fill)}
+/* sans-jp の太字は 900 — Noto Sans JP は 400/500/700/900 のみ読込で、旧宣言の 800 でも
+ * 900 フェイスが選ばれていた。宣言を実描画に合わせた(ピクセル不変)。td.busy も同じ */
+.alert-tag{font:900 10px/1 var(--sans-jp);letter-spacing:0.04em;padding:5px 10px;border-radius:2px;flex-shrink:0;color:var(--on-fill)}
 .alert-item.warn .alert-tag{background:var(--navy)}
 .alert-item.info .alert-tag{background:var(--blue)}
 .alert-item.ok .alert-tag{background:var(--ink-4);color:var(--ink)}
 .alert-body{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
-.alert-body strong{color:var(--ink);font-weight:800}
+.alert-body strong{color:var(--ink);font-weight:900}
 
 /* compare table */
 .cmp-table{width:100%;border-collapse:collapse;font:500 12px/1.5 var(--sans-jp)}
@@ -308,7 +337,7 @@ html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 .sched-table{width:100%;border-collapse:collapse;border:1px solid var(--line)}
 .sched-table th,.sched-table td{padding:10px;text-align:center;border:1px solid var(--line);font-size:11px}
 .sched-table th{background:var(--paper-3);font:700 10px/1 var(--sans-en);letter-spacing:0.1em;color:var(--ink-3);text-transform:uppercase}
-.sched-table td.busy{background:var(--paper-3);color:var(--navy);font-weight:800}
+.sched-table td.busy{background:var(--paper-3);color:var(--navy);font-weight:900}
 .sched-table td.med{background:var(--paper-2);color:var(--blue);font-weight:700}
 .sched-table td.calm{background:var(--card);color:var(--ink-2)}
 .sched-leg{display:flex;gap:14px;margin-top:14px;font:600 10px/1 var(--sans-en);letter-spacing:0.08em;color:var(--ink-3);text-transform:uppercase}
