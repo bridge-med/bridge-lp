@@ -358,7 +358,7 @@
     $('intro-start').addEventListener('click', function () { show('view-type'); });
     $('intro-continue').addEventListener('click', function () { startPlan(); });
     $('intro-restart').addEventListener('click', function () {
-      if (!confirm('いまの段取り表を消して、新しくつくり直しますか。')) return;
+      if (!confirm('いまの段取り表を、チェックとメモごと消して、新しくつくり直しますか。')) return;
       clearSaved();
       state = null;
       $('intro-start').hidden = false;
@@ -385,13 +385,13 @@
       if (!v) { $('plan-dday-input').value = state.dday; return; }
       shiftDday(v);
       renderPlan();
-      toast('表全体をずらしました');
+      toast('表全体の期限を動かしました');
     });
 
     $('plan-print').addEventListener('click', printPlan);
     $('plan-csv').addEventListener('click', exportCsv);
     $('plan-reset').addEventListener('click', function () {
-      if (!confirm('いまの段取り表を消して、新しくつくり直しますか。')) return;
+      if (!confirm('いまの段取り表を、チェックとメモごと消して、新しくつくり直しますか。')) return;
       clearSaved();
       state = null;
       $('intro-start').hidden = false;
