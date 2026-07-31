@@ -343,10 +343,11 @@ a { color: inherit; text-decoration: none; }
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
+/* フェーズ番号は連番であって「選択の瞬間」ではないため、砂は使わない(第22条) */
 .phase-h .n {
   font: 600 10px/1 var(--en);
   letter-spacing: 0.18em;
-  color: var(--dawn);
+  color: var(--ink-4);
   margin-right: 10px;
   vertical-align: 2px;
 }
@@ -392,13 +393,14 @@ a { color: inherit; text-decoration: none; }
 .name-input::placeholder { color: var(--ink-4); font-weight: 400; }
 .memo {
   width: 100%;
-  margin-top: 6px;
+  margin-top: 2px;
   border: none;
   border-bottom: 1px dashed transparent;
   background: transparent;
   color: var(--ink-2);
   font: 400 12.5px/1.9 var(--sans);
-  padding: 0 0 2px;
+  min-height: 44px;
+  padding: 8px 0 6px;
   transition: border-color .25s;
 }
 .memo::placeholder { color: var(--ink-4); }
@@ -419,7 +421,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-2);
   font: 500 12.5px/1.4 var(--sans);
   padding: 6px 8px;
-  min-height: 36px;
+  min-height: 44px;
   transition: border-color .25s;
 }
 .due:focus { outline: none; border-color: var(--blue-soft); }
@@ -435,6 +437,13 @@ a { color: inherit; text-decoration: none; }
 .del::before { content: ''; position: absolute; inset: -7px; }
 .del svg { width: 10px; height: 10px; }
 .del:hover { color: var(--ink-2); }
+
+/* キーボード走査時だけ藍のリングを戻す */
+.due:focus-visible, .memo:focus-visible, .name-input:focus-visible,
+.date-field input[type="date"]:focus-visible, .plan-dday input[type="date"]:focus-visible {
+  outline: 2px solid var(--blue-soft);
+  outline-offset: 2px;
+}
 
 .add-row {
   margin-top: 10px;
@@ -535,9 +544,13 @@ a { color: inherit; text-decoration: none; }
   .task-row.done .tick { background: #45464C; border-color: #45464C; color: #fff; }
   .task-name { font-size: 11.5px; line-height: 1.7; }
   .task-note { font-size: 9.5px; line-height: 1.7; }
+  .task-row.done .task-name { color: #45464C; }
   .memo { display: none; }
-  .memo.has-note { display: block; border: none; font-size: 9.5px; margin-top: 2px; }
+  .memo.has-note { display: block; border: none; font-size: 9.5px; margin-top: 2px; min-height: 0; padding: 0; }
   .due { border: none; background: none; padding: 0; min-height: 0; font-size: 11px; }
+  .task-row.done .due { color: #45464C; }
+  input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
+  input:focus, input:focus-visible { outline: none !important; }
   .name-input { border: none; font-size: 11.5px; }
 }
 

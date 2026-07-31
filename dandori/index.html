@@ -22,6 +22,12 @@
 
 <div class="wrap">
 
+  <!-- 印刷専用ヘッダ(画面では出さない) -->
+  <div class="print-head" aria-hidden="true">
+    <div class="print-title" id="print-title"></div>
+    <div class="print-meta" id="print-meta"></div>
+  </div>
+
   <header class="bar">
     <div class="name"><a href="./"><span>段取りメーカー</span><span class="en">Dandori</span></a></div>
     <div class="bar-right">
@@ -122,12 +128,6 @@
 
   </main>
 
-</div>
-
-<!-- 印刷専用ヘッダ(画面では出さない) -->
-<div class="print-head" aria-hidden="true">
-  <div class="print-title" id="print-title"></div>
-  <div class="print-meta" id="print-meta"></div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
