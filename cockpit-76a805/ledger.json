@@ -74,6 +74,22 @@
       "lastCommit": "2026-07-27"
     },
     {
+      "id": "hire-draft",
+      "name": "HireDraft",
+      "jp": "求人票の下ごしらえ",
+      "cat": "management",
+      "href": "../hire-draft/index.html",
+      "dirs": [
+        "hire-draft"
+      ],
+      "status": "計測中",
+      "measure": "local",
+      "stage": "設計",
+      "serves": "クリニック・訪問診療の採用担当。他院の求人票の写しではなく、自院のことばで募集を組み立てる選択肢を増やす",
+      "lastCommit": "",
+      "note": "2026-07-31 新規出荷(社長就寝中の委任実行)。命名(HireDraft)とstage/servesは社長確定待ち"
+    },
+    {
       "id": "consult-simulator",
       "name": "ConsultSim",
       "jp": "コンサルトシム",

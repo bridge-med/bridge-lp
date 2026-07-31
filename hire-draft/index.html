@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>求人票の下ごしらえ — 自院のことばで、募集を組み立てる</title>
+<meta name="description" content="職種と労働条件を選んで埋めていくと、クリニック・訪問診療の求人票の下書きがひとつ組み上がります。気をつけたい表現は書いている途中で、書き漏れやすい項目は組み立てたときにお知らせします。登録不要、端末内で完結します。">
+<meta property="og:title" content="求人票の下ごしらえ — 自院のことばで、募集を組み立てる">
+<meta property="og:description" content="職種と労働条件を選んで埋めていくと、求人票の下書きが組み上がります。書き漏れと表現の注意つき。登録不要・端末内で完結。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/hire-draft/">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111521" media="(prefers-color-scheme: dark)">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="bar">
+    <div class="name"><a href="./"><span>求人票の下ごしらえ</span><span class="en">HireDraft</span></a></div>
+    <button class="theme-btn" id="themeBtn" aria-label="ライト/ダークモード切り替え">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </header>
+
+  <main>
+
+    <!-- ① 入口 -->
+    <section class="view" id="view-intro" aria-label="はじめに">
+      <div class="intro-hero">
+        <h1>求人票を、他院の写しではなく<br><span class="nowrap">自院のことばで</span></h1>
+        <p class="intro-lead">急に人を募集することになって、よその求人票を写して整えた——そんな経験はありませんか。写した求人票では、書いてはいけない表現に気づきにくく、記載も漏れます。なにより、自院で働く様子がどこにも書かれません。</p>
+        <p class="intro-lead">この道具は、職種と労働条件を選んで埋めていくと、求人票の下書きがひとつ組み上がる、クリニック・訪問診療の採用担当のための下ごしらえ台です。気をつけたい表現は、書いている途中でその場に出します。書き漏れやすい項目は、下書きを組み立てたときに一覧でお知らせします。仕上げと公開は、あなたの手で。</p>
+        <div class="intro-actions">
+          <button type="button" class="btn primary" id="intro-start">下ごしらえを始める</button>
+          <span class="resume-note" id="resume-note" hidden>前回の続きから再開できます</span>
+        </div>
+        <ul class="intro-notes">
+          <li>登録は要りません。書いた内容は、この端末の中にだけ自動保存されます。外部のサーバーには送られません</li>
+          <li>この道具はAIを使っていません。あらかじめ用意した文型に、あなたが選んだ内容を流し込んで組み立てているだけです</li>
+          <li>表現の注意は、代表的な言い回しに反応する簡易な仕組みです。法令への適合は保証できません</li>
+        </ul>
+        <div class="decl">
+          <p>この道具が受け持つのは、評価・理解・設計・実践・再評価という順のうちの「設計」——決めた条件を、応募する人が読める文章に組み立てる段階です。</p>
+          <p>増やしたいのは、クリニック・訪問診療の採用担当が、見学に来た人へ口頭で伝えていることを、そのまま求人票に書けるという選択肢です。</p>
+        </div>
+      </div>
+      <footer class="foot">
+        <a href="../products/index.html">← BRIDGEのプロダクト一覧</a>
+        <a href="../index.html">BRIDGE</a>
+      </footer>
+    </section>
+
+    <!-- ② 入力 -->
+    <section class="view" id="view-form" aria-label="求人の内容を入力する">
+      <div class="view-head">
+        <h2>選んで埋める</h2>
+        <p class="sub">上から順でなくてもかまいません。選択肢は、実際に当てはまるものだけを選んでください。書いた内容はこの端末に自動保存されます。</p>
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">01</span>募集する職種</h3>
+        <div class="chips" id="chips-role" role="group" aria-label="職種を選ぶ"></div>
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">02</span>雇用形態</h3>
+        <div class="chips" id="chips-emp" role="group" aria-label="雇用形態を選ぶ"></div>
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">03</span>施設のこと</h3>
+        <label class="f-label" for="f-facname">施設名</label>
+        <input class="f-input" type="text" id="f-facname" data-k="facName" placeholder="例: やまだ内科クリニック" autocomplete="organization">
+        <label class="f-label">施設の形態</label>
+        <div class="chips" id="chips-factype" role="group" aria-label="施設の形態を選ぶ"></div>
+        <label class="f-label" for="f-dept">診療科・サービス内容</label>
+        <input class="f-input" type="text" id="f-dept" data-k="dept" placeholder="例: 内科・消化器内科">
+        <label class="f-label" for="f-access">アクセス</label>
+        <input class="f-input" type="text" id="f-access" data-k="access" placeholder="例: ○○駅から徒歩5分・駐車場あり">
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">04</span>募集の背景</h3>
+        <p class="f-help">「なぜ今、募集しているのか」が書いてあると、応募する側は職場の状況を想像できます。当てはまるものをひとつ。</p>
+        <div class="chips" id="chips-why" role="group" aria-label="募集の背景を選ぶ"></div>
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">05</span>仕事内容</h3>
+        <p class="f-help">実際にお願いする仕事だけに印をつけてください。<span id="task-role-note"></span></p>
+        <div class="check-list" id="list-tasks"></div>
+        <label class="f-label" for="f-tasknote">補足(任意)。人数や件数を書くと、1日の忙しさが伝わります</label>
+        <textarea class="f-input" id="f-tasknote" data-k="taskNote" rows="2" placeholder="例: 外来は1日40人前後。午後は訪問が2〜3件あります"></textarea>
+        <div class="ng-notes" data-ng-for="taskNote" aria-live="polite"></div>
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">06</span>応募の条件</h3>
+        <p class="f-label">資格(職種から自動で入ります)</p>
+        <p class="f-fixed" id="f-license">職種を選ぶと、ここに入ります</p>
+        <label class="f-label" for="f-licnote">資格の補足(任意)</label>
+        <input class="f-input" type="text" id="f-licnote" data-k="licNote" placeholder="例: 准看護師の方は相談してください">
+        <p class="f-label">経験</p>
+        <div class="chips" id="chips-exp" role="group" aria-label="経験の条件を選ぶ"></div>
+        <p class="f-label">歓迎する方(当てはまるものだけ)</p>
+        <div class="check-list" id="list-welcomes"></div>
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">07</span>労働条件</h3>
+        <label class="f-label" id="pay-label" for="f-paymin">給与</label>
+        <div class="pay-row">
+          <span class="pay-unit" id="pay-unit">月給</span>
+          <input class="f-input pay-num" type="text" inputmode="numeric" id="f-paymin" data-k="payMin" placeholder="25" aria-label="給与の下限">
+          <span class="pay-affix" id="pay-affix1">万円</span>
+          <span class="pay-tilde">〜</span>
+          <input class="f-input pay-num" type="text" inputmode="numeric" id="f-paymax" data-k="payMax" placeholder="32" aria-label="給与の上限">
+          <span class="pay-affix" id="pay-affix2">万円</span>
+        </div>
+        <label class="f-label" for="f-paynote">給与の補足(任意)</label>
+        <input class="f-input" type="text" id="f-paynote" data-k="payNote" placeholder="例: 賞与年2回(昨年度実績2.5か月)・経験により加算">
+        <div class="ng-notes" data-ng-for="payNote" aria-live="polite"></div>
+        <label class="f-label" for="f-hours">勤務時間</label>
+        <input class="f-input" type="text" id="f-hours" data-k="hours" placeholder="例: 9:00〜18:00(休憩60分)・土曜は13:00まで">
+        <label class="f-label" for="f-holidays">休日</label>
+        <input class="f-input" type="text" id="f-holidays" data-k="holidays" placeholder="例: 木曜・日曜・祝日、夏季・年末年始">
+        <p class="f-label">加入保険</p>
+        <div class="check-list two-col" id="list-ins"></div>
+        <p class="f-help">労災保険は、法律ですべての職場が加入するため、下書きに自動で入ります。</p>
+        <p class="f-help" id="ins-note" hidden>非常勤の場合、勤務時間によって加入の条件が変わります。下書きにもその一文が入ります。</p>
+        <p class="f-label">受動喫煙への対応</p>
+        <div class="chips" id="chips-smoke" role="group" aria-label="受動喫煙への対応を選ぶ"></div>
+        <p class="f-help">2020年から、募集のときに書くことが決められている項目です。</p>
+        <label class="f-label" for="f-trial">試用期間(任意)</label>
+        <input class="f-input" type="text" id="f-trial" data-k="trial" placeholder="例: 3か月(その間の条件は変わりません)">
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">08</span>職場の様子</h3>
+        <p class="f-help">形容ではなく、確かめられる事実で。空欄の項目は下書きに入りません。</p>
+        <label class="f-label" for="f-staff">スタッフ構成</label>
+        <input class="f-input" type="text" id="f-staff" data-k="staff" placeholder="例: 医師2名(常勤1・非常勤1)・看護師3名・事務4名">
+        <label class="f-label" for="f-karte">カルテ・システム</label>
+        <input class="f-input" type="text" id="f-karte" data-k="karte" placeholder="例: 電子カルテとレセコン一体型を使っています">
+        <label class="f-label" for="f-overtime">残業の実際</label>
+        <input class="f-input" type="text" id="f-overtime" data-k="overtime" placeholder="例: 月平均5時間。レセプトの時期は30分ほど延びます">
+        <p class="f-label">当てはまるもの</p>
+        <div class="check-list" id="list-perks"></div>
+        <label class="f-label" for="f-voice">自院のことば(任意)</label>
+        <p class="f-help">見学に来た人へ、いつも口頭で伝えていることを、そのまま書いてみてください。他院の求人票と最も違うのが、この部分です。</p>
+        <textarea class="f-input" id="f-voice" data-k="voice" rows="3" placeholder="例: 午前は駆け足ですが、午後は患者さんとゆっくり話せます。分からないことをその場で聞ける距離に、いつも誰かがいます"></textarea>
+        <div class="ng-notes" data-ng-for="voice" aria-live="polite"></div>
+      </div>
+
+      <div class="form-sec">
+        <h3><span class="n">09</span>選考と応募方法</h3>
+        <div class="chips" id="chips-flow" role="group" aria-label="選考の流れを選ぶ"></div>
+        <label class="f-label" for="f-apply">応募・問い合わせの方法</label>
+        <input class="f-input" type="text" id="f-apply" data-k="apply" placeholder="例: お電話(平日9〜17時)または応募フォームから">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn primary" id="to-preview">下書きを組み立てる</button>
+        <button type="button" class="btn quiet" id="form-back">← 最初にもどる</button>
+      </div>
+      <p class="f-help" id="build-hint" hidden>「01 募集する職種」を選ぶと、組み立てられます。</p>
+    </section>
+
+    <!-- ③ 下書き -->
+    <section class="view" id="view-preview" aria-label="できあがった下書き">
+      <div class="view-head">
+        <h2>下書きができました</h2>
+        <p class="sub">掲載先の様式に貼り付けて、そのまま使えます。直したいところが見つかったら、入力にもどれます。</p>
+      </div>
+
+      <div class="warn-block" id="missing-block" hidden>
+        <p class="warn-t">まだ埋まっていない項目</p>
+        <ul class="warn-list" id="missing-list"></ul>
+        <p class="warn-p">空欄のまま公開すると、応募する側は問い合わせで確かめるしかなくなります。分かっている範囲だけでも埋めておくのがおすすめです。</p>
+      </div>
+
+      <div class="warn-block ng" id="ng-block" hidden>
+        <p class="warn-t">表現の注意</p>
+        <ul class="warn-list" id="ng-list"></ul>
+        <p class="warn-p" id="ng-disclaimer"></p>
+      </div>
+
+      <article class="draft" id="draft-doc" aria-label="求人票の下書き"></article>
+
+      <div class="preview-actions">
+        <button type="button" class="btn primary" id="draft-copy">コピーする</button>
+        <button type="button" class="btn ghost" id="draft-save">テキストで保存</button>
+      </div>
+      <p class="preview-note">下書きの文はすべて、あなたが選んだ内容から組み立てています。実際と違う項目が残っていないか、掲載の前にもう一度だけ確かめてください。</p>
+      <div class="sibling-link">
+        <p>求人を出したあと、応募者とのやりとりを追うならHireBoard。面接の質問を組み立てるなら、面接官の手帖へ。</p>
+        <a href="../hire-board/index.html">HireBoard →</a>
+        <a href="../interview-kit/index.html">面接官の手帖 →</a>
+      </div>
+      <div class="back-line">
+        <button type="button" class="btn quiet" id="preview-back">← 入力にもどる</button>
+      </div>
+      <footer class="foot">
+        <a href="../products/index.html">← BRIDGEのプロダクト一覧</a>
+        <a href="../index.html">BRIDGE</a>
+      </footer>
+    </section>
+
+  </main>
+
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="app/data.js"></script>
+<script src="app/app.js"></script>
+
+<script src="../shared/usage.js" defer></script>
+</body>
+</html>
