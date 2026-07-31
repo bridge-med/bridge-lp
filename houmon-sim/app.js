@@ -94,14 +94,14 @@
       Object.entries(L.kubun), v => { sc.kubun = v; update(); }, title + ' 在支診の区分')));
 
     const groupsWrap = el('div', { class: 'groups' });
-    groupsWrap.append(el('label', {}, '患者構成(行ごとに: 種別 / 単一建物の人数帯 / 訪問頻度 / 患者数)'));
+    groupsWrap.append(el('label', {}, '患者構成'));
     sc.groups.forEach((g, i) => {
       const row = el('div', { class: 'group' });
       row.append(
-        select(g.type, Object.entries(L.type), v => { g.type = v; update(); }, `${title} 構成${i + 1} 種別`),
-        select(g.band, L.band.map((b, idx) => [idx, b]), v => { g.band = Number(v); update(); }, `${title} 構成${i + 1} 人数帯`),
-        select(g.freq, [[2, L.freq[2]], [1, L.freq[1]]], v => { g.freq = Number(v); update(); }, `${title} 構成${i + 1} 訪問頻度`),
-        numInput(g.patients, v => { g.patients = v; update(); }, `${title} 構成${i + 1} 患者数`),
+        field('種別', select(g.type, Object.entries(L.type), v => { g.type = v; update(); }, `${title} 構成${i + 1} 種別`)),
+        field('単一建物の人数帯', select(g.band, L.band.map((b, idx) => [idx, b]), v => { g.band = Number(v); update(); }, `${title} 構成${i + 1} 人数帯`)),
+        field('訪問頻度', select(g.freq, [[2, L.freq[2]], [1, L.freq[1]]], v => { g.freq = Number(v); update(); }, `${title} 構成${i + 1} 訪問頻度`)),
+        field('患者数', numInput(g.patients, v => { g.patients = v; update(); }, `${title} 構成${i + 1} 患者数`)),
         el('button', { class: 'del', 'aria-label': `${title} 構成${i + 1} を削除`, onclick: () => { sc.groups.splice(i, 1); update(); } }, '×')
       );
       groupsWrap.append(row);

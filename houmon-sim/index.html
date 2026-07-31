@@ -6,6 +6,7 @@
 <title>訪問診療 収益シミュレータ(仮称) — BRIDGE</title>
 <meta name="description" content="訪問診療の体制案を収益の概算で比較する道具。在支診区分・患者構成・訪問頻度から月間の概算を出し、体制AとBを並べて見比べます。">
 <meta name="robots" content="noindex">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t)}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -58,15 +59,19 @@ header .sub{font-size:12px;color:var(--ink-3);margin-top:2px}
 .board h2 .tag{font:700 10px/1 var(--sans);letter-spacing:0.14em;padding:4px 8px;border-radius:2px;background:var(--navy);color:var(--on-fill)}
 .board.b h2 .tag{background:var(--ink-3)}
 label{font-size:11px;color:var(--ink-3);display:block;margin-bottom:3px}
-select,input[type=number]{width:100%;padding:8px 10px;font:500 13px/1.4 var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:2px;min-height:40px}
+select,input[type=number]{width:100%;padding:8px 10px;font:500 13px/1.4 var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:2px;min-height:44px}
 select:focus,input:focus,button:focus{outline:2px solid var(--blue-soft);outline-offset:1px}
 .row{display:grid;gap:10px}
 .groups{display:flex;flex-direction:column;gap:8px}
-.group{display:grid;grid-template-columns:1.2fr 0.9fr 0.8fr 0.7fr 34px;gap:6px;align-items:end}
-.group .del{min-height:40px;border:1px solid var(--line);background:var(--paper);color:var(--ink-3);border-radius:2px;cursor:pointer;font-size:15px}
+.group{display:grid;grid-template-columns:1.2fr 0.9fr 0.8fr 0.7fr 44px;gap:6px;align-items:end}
+.group .del{min-height:44px;border:1px solid var(--line);background:var(--paper);color:var(--ink-3);border-radius:2px;cursor:pointer;font-size:15px}
 .group .del:hover{color:var(--ink);border-color:var(--ink-3)}
-@media(max-width:520px){.group{grid-template-columns:1fr 1fr;grid-auto-rows:auto}.group .del{grid-column:2;justify-self:end;width:44px}}
-.add{align-self:flex-start;padding:8px 12px;font:500 12px/1 var(--sans);background:var(--paper-2);border:1px solid var(--line);border-radius:2px;color:var(--ink-2);cursor:pointer;min-height:40px}
+@media(max-width:520px){
+  .group{grid-template-columns:1fr 1fr;column-gap:6px;row-gap:2px}
+  .group .del{grid-column:2;justify-self:end;width:44px}
+  .groups .group + .group{border-top:1px dashed var(--line);padding-top:10px}
+}
+.add{align-self:flex-start;padding:8px 12px;font:500 12px/1 var(--sans);background:var(--paper-2);border:1px solid var(--line);border-radius:2px;color:var(--ink-2);cursor:pointer;min-height:44px}
 .add:hover{border-color:var(--ink-3);color:var(--ink)}
 .cap{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .result{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
@@ -74,8 +79,8 @@ select:focus,input:focus,button:focus{outline:2px solid var(--blue-soft);outline
 .result .total small{font:500 12px/1 var(--sans);color:var(--ink-3);margin-left:6px}
 .kv{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);border-bottom:1px dashed var(--line);padding:4px 0}
 .kv b{font-variant-numeric:tabular-nums;color:var(--ink)}
-.kv.warn b{color:var(--dawn-deep)}
-.copyb{padding:9px 12px;font:500 12px/1 var(--sans);background:transparent;border:1px solid var(--line);border-radius:2px;color:var(--ink-2);cursor:pointer;min-height:40px}
+/* キャパ超過は文言「(供給を超えています)」が意味を運ぶ。砂は未検証帯の一箇所に集約(第22条) */
+.copyb{padding:9px 12px;font:500 12px/1 var(--sans);background:transparent;border:1px solid var(--line);border-radius:2px;color:var(--ink-2);cursor:pointer;min-height:44px}
 .copyb:hover{border-color:var(--ink-3);color:var(--ink)}
 .diff{margin-top:16px;background:var(--paper-2);border:1px solid var(--line);border-radius:2px;padding:14px 16px}
 .diff h3{font:600 13px/1.5 var(--serif);margin-bottom:6px}
