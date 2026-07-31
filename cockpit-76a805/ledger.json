@@ -431,6 +431,23 @@
       }
     },
     {
+      "id": "houmon-sim",
+      "name": "訪問診療 収益シミュレータ",
+      "jp": "仮称。第30条の命名は社長判断待ち",
+      "cat": "management",
+      "href": "../houmon-sim/index.html",
+      "dirs": [
+        "houmon-sim"
+      ],
+      "stage": "設計",
+      "serves": "訪問診療事業の院長・事務長・法人本部。体制案を収益の概算で比較し、次の一手を勘ではなく自分で選べるようにする",
+      "status": "未掲載",
+      "measure": "none",
+      "measureNote": "未掲載のため未敷設。掲載時にusage.jsを敷く",
+      "note": "2026-07-30社長GO(骨格版)。着手順序は道具→社長の実務検証→LP(第11・14条、GOでもLPから作らない)。点数マスタ(points.js)は全行未検証の下書きで、verified:falseの間はアプリが警告帯を常時表示する。原典との突き合わせと点数確定は社長検証(検討ドラフトの着手順序②)。掲載条件は社長が実務で1回以上使った事実の確認(第12条後段)。stage/serves申告は社長確定待ち",
+      "lastCommit": "2026-07-30"
+    },
+    {
       "id": "worklog",
       "name": "CxO Roadmap Log",
       "jp": "実績ログ(実験室)",
