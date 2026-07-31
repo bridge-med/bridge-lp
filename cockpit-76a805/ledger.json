@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-27",
+  "updated": "2026-07-31",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -431,6 +431,22 @@
       }
     },
     {
+      "id": "dandori",
+      "name": "段取りメーカー",
+      "jp": "本番日から逆算する段取り表",
+      "cat": "management",
+      "href": "../dandori/index.html",
+      "dirs": [
+        "dandori"
+      ],
+      "stage": "設計",
+      "serves": "電カル移行・統合・管理医師変更を初めて任された事務長・法人本部の担当者。逆算の全体像を自分の手で持ち、いつまでに何を終えるかを自分で決められるようにする",
+      "status": "計測中",
+      "measure": "local",
+      "note": "2026-07-31新規出荷(夜間委任・PM代理決裁、PR #68)。タスクはmedops既公開物の再編(第13条)。stage/servesは現場下書き・社長確認前",
+      "lastCommit": "2026-07-31"
+    },
+    {
       "id": "worklog",
       "name": "CxO Roadmap Log",
       "jp": "実績ログ(実験室)",
@@ -486,7 +502,8 @@
     "madoakari: manifest.webmanifestのtheme_color/background_colorがライト固定(#FBFAF7)。manifestはメディアクエリを持てないプラットフォーム制約による既知の非対称。<meta theme-color>は両テーマ対応済み",
     "madoakari: ?t=デバッグパラメータで開いたときもモード切替ボタンでliveへ戻せる。デバッグ専用機能のため現状維持(2026-07-26 PM判定)",
     "8ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit)の末尾CTA見出しが同文のインラインstyleで重複している。shared/subpage.cssに.cta-hとして一本化する(PM預かりのバックログ・次にCTA周辺を触るスプリントで。第9条4号)。あわせてsans系の宣言不一致2箇所(subpage.css .alert-body strong / .sched-table td.busy のfont-weight:800、Noto Sans JPは800未読込で900が選ばれる。実害なし)も同時に整える。実測済み(2026-07-26)",
-    "subpage.css系8ページのモバイルnavが無防備。interview-kitは390pxでCTA「デモを開く↗」が縦組みに潰れnav高120px(スクロール後200px)。テーマ非依存の既存不具合。.navの折返し規則はhub.cssの640px分岐にしかなくstarter-kits以外の8ページに無い。medboardの横溢(既知)とあわせモバイルnavスプリントとして扱う(designer起票2026-07-27)"
+    "subpage.css系8ページのモバイルnavが無防備。interview-kitは390pxでCTA「デモを開く↗」が縦組みに潰れnav高120px(スクロール後200px)。テーマ非依存の既存不具合。.navの折返し規則はhub.cssの640px分岐にしかなくstarter-kits以外の8ページに無い。medboardの横溢(既知)とあわせモバイルnavスプリントとして扱う(designer起票2026-07-27)",
+    "診断/生成系ツール(tanaoroshi/iikae/dandori等)はビュー切替がJS必須で、JS無効時に本文が空白になる系統パターン(qa起票2026-07-31)。noscriptの最低限の案内を検討。あわせてdandoriは過去日の本番日を許容(クラッシュなし・警告もなし)。ブロックか警告かはUX判断待ち"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
