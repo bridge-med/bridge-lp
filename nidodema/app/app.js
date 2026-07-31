@@ -313,7 +313,8 @@
       });
       parts.push('');
     });
-    parts.push('※時間は入力にもとづく目安です。');
+    parts.push('※時間は入力にもとづく目安です。月の回数は、' +
+      FREQ.map((f) => f.label + 'を' + f.n + '回').join('、') + 'として計算しています。');
     return parts.join('\n');
   }
 
