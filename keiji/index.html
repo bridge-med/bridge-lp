@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>掲示じたく — 院内の貼り紙を、毎回ゼロから書かない</title>
+<meta name="description" content="臨時休診・診療時間変更・担当医変更などの院内掲示を、種類を選んで数カ所埋めるだけで作れます。そのまま貼れるA4の掲示と、ホームページやSNS用の文面が同時にできあがります。登録不要、入力は端末の中にだけ残ります。">
+<meta property="og:title" content="掲示じたく — 院内の貼り紙を、毎回ゼロから書かない">
+<meta property="og:description" content="臨時休診・診療時間変更・担当医変更などの院内掲示が、選んで埋めるだけでできあがる。A4印刷とHP・SNS用文面に対応。登録不要。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/keiji/">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111521" media="(prefers-color-scheme: dark)">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Crect x='17' y='14' width='30' height='38' rx='3' fill='%23FFFFFF' stroke='%2316233E' stroke-width='3'/%3E%3Ccircle cx='32' cy='14' r='4.5' fill='%23A98F63'/%3E%3Cpath d='M23 27h18M23 34h18M23 41h11' stroke='%2316233E' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="bar">
+    <div class="name"><a href="./"><span>掲示じたく</span><span class="en">Keiji</span></a></div>
+    <button class="theme-btn" id="themeBtn" aria-label="ライト/ダークモード切り替え">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </header>
+
+  <main>
+
+    <!-- ① 種類を選ぶ -->
+    <section class="view" id="view-select" aria-label="お知らせの種類を選ぶ">
+      <div class="intro-hero">
+        <h1>院内の貼り紙を、<br class="sp">毎回ゼロから書かない</h1>
+        <p class="intro-lead">臨時休診、診療時間の変更、担当医の交代。受付や事務の方が書くことになる掲示は、たいてい急に決まります。前に作ったファイルを探して、日付と曜日を直して、敬語に迷って——そのたびに、時間が取られていきます。</p>
+        <p class="intro-lead">種類を選んで、日付など数カ所を埋めると、そのまま貼れるA4の掲示と、ホームページやSNSに載せる文面が同時にできあがります。印刷もコピーも、この画面からできます。</p>
+        <ul class="intro-notes">
+          <li>登録は要りません。入力した内容は、この端末の中にだけ残ります</li>
+          <li>決まった型に流し込むだけです。AIは使っていません</li>
+        </ul>
+      </div>
+      <h2 class="type-head">どのお知らせをつくりますか</h2>
+      <div class="type-grid" id="type-grid"></div>
+      <footer class="foot">
+        <a href="../products/index.html">← BRIDGEのプロダクト一覧</a>
+        <a href="../index.html">BRIDGE</a>
+      </footer>
+    </section>
+
+    <!-- ② 埋める -->
+    <section class="view" id="view-form" aria-label="内容を埋める">
+      <div class="view-head">
+        <h1 id="form-title">お知らせ</h1>
+        <button type="button" class="link-btn" id="form-back">← 種類を選び直す</button>
+      </div>
+      <p class="form-note">埋めた内容は、この端末の中にだけ残ります。次に開いたときも、施設名などはそのまま使えます。</p>
+      <form id="form-el">
+        <div id="form-fields"></div>
+        <div class="form-actions">
+          <button type="submit" class="btn primary">文面をつくる</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ③ できあがり -->
+    <section class="view" id="view-output" aria-label="できあがった文面">
+      <div class="view-head">
+        <h1>できあがり</h1>
+        <button type="button" class="link-btn" id="out-edit">← 内容を直す</button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab-btn on" role="tab" aria-selected="true" data-tab="poster">貼る(A4掲示)</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="web">載せる(HP・SNS)</button>
+      </div>
+      <div id="pane-poster">
+        <div class="poster-box"><div class="poster" id="poster"></div></div>
+        <div class="out-actions">
+          <button type="button" class="btn primary" id="btn-print">印刷する</button>
+          <button type="button" class="btn quiet" id="btn-copy-poster">文面をテキストでコピー</button>
+        </div>
+        <p class="out-note">印刷すると、画面のボタンなどは入らず、この掲示だけがA4いっぱいに刷られます。テキストのコピーは、メールや院内の連絡に貼るときに使えます。</p>
+      </div>
+      <div id="pane-web" hidden>
+        <div class="web-box" id="web-text"></div>
+        <div class="out-actions">
+          <button type="button" class="btn primary" id="btn-copy-web">文面をコピー</button>
+        </div>
+        <p class="out-note">ホームページのお知らせ欄や、SNS・LINEの投稿にそのまま貼れる長さにしてあります。</p>
+      </div>
+      <div class="out-actions">
+        <button type="button" class="link-btn" id="out-restart">← ほかのお知らせもつくる</button>
+      </div>
+      <footer class="foot">
+        <a href="../medops/index.html">医療管理実務ライブラリ</a>
+        <a href="../products/index.html">← BRIDGEのプロダクト一覧</a>
+        <a href="../index.html">BRIDGE</a>
+      </footer>
+    </section>
+
+  </main>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="app/data.js"></script>
+<script src="app/app.js"></script>
+</body>
+</html>
