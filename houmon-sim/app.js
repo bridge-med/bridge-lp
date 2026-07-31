@@ -164,6 +164,9 @@
     const banner = document.getElementById('unverified');
     document.getElementById('verLabel').textContent = `(点数マスタ: ${POINTS.version})`;
     banner.hidden = POINTS.verified === true;
+    // 版の表示は警告帯と別に、免責の並びへ恒久で出す(検証後も消えない)
+    document.getElementById('verFoot').textContent =
+      POINTS.version + (POINTS.verified === true ? '(検証済み)' : '(未検証)');
   }
 
   function update() {

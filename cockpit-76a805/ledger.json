@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-30",
+  "updated": "2026-07-31",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -445,7 +445,7 @@
       "measure": "none",
       "measureNote": "未掲載のため未敷設。掲載時にusage.jsを敷く",
       "note": "2026-07-30社長GO(骨格版)。着手順序は道具→社長の実務検証→LP(第11・14条、GOでもLPから作らない)。点数マスタ(points.js)は全行未検証の下書きで、verified:falseの間はアプリが警告帯を常時表示する。原典との突き合わせと点数確定は社長検証(検討ドラフトの着手順序②)。掲載条件は社長が実務で1回以上使った事実の確認(第12条後段)。stage/serves申告は社長確定待ち",
-      "lastCommit": "2026-07-30"
+      "lastCommit": "2026-07-31"
     },
     {
       "id": "worklog",
