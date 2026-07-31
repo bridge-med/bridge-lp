@@ -303,6 +303,8 @@
   }
 
   function printPlan() {
+    /* 日付セグメントの選択ハイライトが印字されないように */
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     var t = typeOf(state.type);
     $('print-title').textContent = t.name + 'の段取り表';
     $('print-meta').textContent = t.dlabel + ' ' + fmt(state.dday) + ' — 段取りメーカー(BRIDGE)で作成。期限は目安。届出の要否・期限は所管窓口へ確認';

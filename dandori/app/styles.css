@@ -343,11 +343,12 @@ a { color: inherit; text-decoration: none; }
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
-/* フェーズ番号は連番であって「選択の瞬間」ではないため、砂は使わない(第22条) */
+/* フェーズ番号は連番であって「選択の瞬間」ではないため、砂は使わない(第22条)。
+   --ink-4は紙上1.96:1で沈むため--ink-3(紙上4.04:1) */
 .phase-h .n {
   font: 600 10px/1 var(--en);
   letter-spacing: 0.18em;
-  color: var(--ink-4);
+  color: var(--ink-3);
   margin-right: 10px;
   vertical-align: 2px;
 }
@@ -389,7 +390,7 @@ a { color: inherit; text-decoration: none; }
   font: 600 14px/1.9 var(--sans);
   padding: 0 0 2px;
 }
-.name-input:focus { outline: none; border-bottom-color: var(--blue-soft); }
+.name-input:focus { outline: none; border-bottom: 1.5px solid var(--blue-soft); }
 .name-input::placeholder { color: var(--ink-4); font-weight: 400; }
 .memo {
   width: 100%;
@@ -404,8 +405,8 @@ a { color: inherit; text-decoration: none; }
   transition: border-color .25s;
 }
 .memo::placeholder { color: var(--ink-4); }
-.memo:hover, .memo:focus { border-bottom-color: var(--line); }
-.memo:focus { outline: none; border-bottom-color: var(--blue-soft); }
+.memo:hover { border-bottom-color: var(--line); }
+.memo:focus { outline: none; border-bottom: 1.5px solid var(--blue-soft); }
 
 .task-side {
   flex: none;
@@ -438,8 +439,8 @@ a { color: inherit; text-decoration: none; }
 .del svg { width: 10px; height: 10px; }
 .del:hover { color: var(--ink-2); }
 
-/* キーボード走査時だけ藍のリングを戻す */
-.due:focus-visible, .memo:focus-visible, .name-input:focus-visible,
+/* フォーカスの可視化。枠のある入力はリング、下線で成立している入力は下線を実線に */
+.due:focus-visible,
 .date-field input[type="date"]:focus-visible, .plan-dday input[type="date"]:focus-visible {
   outline: 2px solid var(--blue-soft);
   outline-offset: 2px;
