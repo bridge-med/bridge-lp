@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-27",
+  "updated": "2026-07-31",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -486,6 +486,22 @@
       "decision": {
         "points": "6件中で誠実の条項に最も近い(第12・15条)。監査役推奨(2026-07-26): 休止表記(a)=statusを休止中にし、journalカード83行の「毎朝」を実態に合う文言へ(editor照合)。復旧ならワークフロー再設置とセットで表記を戻す。再開の意思がないなら導線撤去(b・カード79-85行の削除)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md"
       }
+    },
+    {
+      "id": "nidodema",
+      "name": "二度手間さがし",
+      "jp": "Nidodema",
+      "cat": "casual",
+      "href": "../nidodema/index.html",
+      "dirs": [
+        "nidodema"
+      ],
+      "stage": "評価",
+      "serves": "医療・介護の現場管理職(事務長・部門長・主任)。部署の手作業を数えられる形にして、どの手作業から手を付けるか・何を人の仕事として残すかを自分で選べるようにする",
+      "status": "計測中",
+      "measure": "local",
+      "note": "2026-07-31夜の委任実装(PM企画・案A)。PR#67。master合流(公開)は社長決裁5件の回答が前提(最重要: g6/g7の一次体験の裏付け。詳細はshiplog 2026-07-31)",
+      "lastCommit": "2026-07-31"
     }
   ],
   "knownIssues": [
@@ -503,7 +519,8 @@
     "madoakari: manifest.webmanifestのtheme_color/background_colorがライト固定(#FBFAF7)。manifestはメディアクエリを持てないプラットフォーム制約による既知の非対称。<meta theme-color>は両テーマ対応済み",
     "madoakari: ?t=デバッグパラメータで開いたときもモード切替ボタンでliveへ戻せる。デバッグ専用機能のため現状維持(2026-07-26 PM判定)",
     "8ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit)の末尾CTA見出しが同文のインラインstyleで重複している。shared/subpage.cssに.cta-hとして一本化する(PM預かりのバックログ・次にCTA周辺を触るスプリントで。第9条4号)。あわせてsans系の宣言不一致2箇所(subpage.css .alert-body strong / .sched-table td.busy のfont-weight:800、Noto Sans JPは800未読込で900が選ばれる。実害なし)も同時に整える。実測済み(2026-07-26)",
-    "subpage.css系8ページのモバイルnavが無防備。interview-kitは390pxでCTA「デモを開く↗」が縦組みに潰れnav高120px(スクロール後200px)。テーマ非依存の既存不具合。.navの折返し規則はhub.cssの640px分岐にしかなくstarter-kits以外の8ページに無い。medboardの横溢(既知)とあわせモバイルnavスプリントとして扱う(designer起票2026-07-27)"
+    "subpage.css系8ページのモバイルnavが無防備。interview-kitは390pxでCTA「デモを開く↗」が縦組みに潰れnav高120px(スクロール後200px)。テーマ非依存の既存不具合。.navの折返し規則はhub.cssの640px分岐にしかなくstarter-kits以外の8ページに無い。medboardの横溢(既知)とあわせモバイルnavスプリントとして扱う(designer起票2026-07-27)",
+    "tanaoroshiに、nidodema照合(2026-07-31)で見つかった同種のコントラスト欠陥が残っている: --ink-3が旧値#7D7E85 / --ink-4を本文(.foot・.intro-notes等)に使用 / ::selectionがダークで文字が消える / --dawnを小文字ラベルに使用。nidodemaで確定した値(--ink-3 #63646B・--dawn-deep #7D6845・selectionは砂地に炭)へ揃える。あわせてチップ/トグルon状態の藍ベタを静かにする案は、両ツール同時に変えること(単独変更禁止・designer起票)"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
