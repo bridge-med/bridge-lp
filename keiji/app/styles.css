@@ -1,0 +1,497 @@
+/* 掲示じたく — styles
+ * 白生成りの紙面に、藍が骨格。掲示プレビューだけは「紙」なのでテーマに追従しない(憲法第22条後段)。
+ * トークンは shared/bridge.css v3.0 から転記(このツールは共通シェルを読まないため)。
+ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FBFAF7;
+  --bg-2: #F4EFE6;
+  --ink: #1B1B1E;
+  --ink-2: #45464C;
+  --ink-3: #63646B;
+  --ink-4: #B6B3AB;
+  --line: rgba(27, 27, 30, 0.10);
+  --navy: #16233E;
+  --blue: #24365C;
+  --blue-soft: #8B9BBC;
+  --dawn: #A98F63;         /* 面と線の砂。白面 3.09:1 なので文字には使わない */
+  --dawn-deep: #7D6845;    /* 文字として使える砂(白面 5.11:1) */
+  --card: #FFFFFF;
+  --shadow: 0 2px 8px rgba(22, 35, 62, 0.04), 0 16px 48px rgba(22, 35, 62, 0.07);
+  --mincho: 'Shippori Mincho B1', 'Noto Serif JP', serif;
+  --sans: 'Noto Sans JP', sans-serif;
+  --en: 'Inter', sans-serif;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+}
+[data-theme="dark"] {
+  --bg: #111521;
+  --bg-2: #161B2B;
+  --ink: #EDEAE2;
+  --ink-2: #C2BFB6;
+  --ink-3: #8A8D98;
+  --ink-4: #565A68;
+  --line: rgba(237, 234, 226, 0.10);
+  --navy: #D8DEEB;
+  --blue: #9FB1D4;
+  --blue-soft: #5A6C92;
+  --dawn: #C2A97E;
+  --dawn-deep: #C2A97E;    /* 暗い面では砂のまま 7.33:1 で足りる */
+  --card: #181E2E;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.35);
+}
+
+html { -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.9;
+  min-height: 100dvh;
+  font-feature-settings: "palt" 1;
+  transition: background .5s, color .5s;
+}
+button { font: inherit; background: none; border: none; cursor: pointer; color: inherit; }
+[hidden] { display: none !important; }
+a { color: inherit; text-decoration: none; }
+::selection { background: var(--blue); color: #fff; }
+
+.sp { display: inline; }
+@media (min-width: 600px) { .sp { display: none; } }
+
+/* ---------- 骨格 ---------- */
+
+.wrap {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 12px 22px calc(64px + env(safe-area-inset-bottom));
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0 10px;
+}
+.bar .name {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+.bar .name a { display: inline-flex; align-items: baseline; gap: 9px; min-height: 44px; padding-top: 12px; }
+.bar .name .en {
+  font: 600 9px/1 var(--en);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.theme-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: grid; place-items: center;
+  color: var(--ink-3);
+  transition: color .3s, border-color .3s;
+  position: relative;
+}
+.theme-btn::before { content: ''; position: absolute; inset: -5px; border-radius: 50%; }
+.theme-btn svg { width: 15px; height: 15px; }
+.theme-btn:hover { color: var(--ink); border-color: var(--blue-soft); }
+.theme-btn .icon-sun { display: none; }
+[data-theme="dark"] .theme-btn .icon-sun { display: block; }
+[data-theme="dark"] .theme-btn .icon-moon { display: none; }
+
+/* ---------- ビュー切替 ---------- */
+
+.view { display: none; }
+.view.on { display: block; animation: rise .45s var(--ease) both; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .view.on { animation: none; }
+}
+
+/* ---------- ① 入口 ---------- */
+
+.intro-hero { padding: 34px 0 8px; }
+.intro-hero h1 {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: clamp(24px, 6vw, 32px);
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: var(--navy);
+  margin-bottom: 18px;
+}
+.intro-lead {
+  color: var(--ink-2);
+  font-size: 14.5px;
+  max-width: 40em;
+  margin-bottom: 14px;
+}
+.intro-notes {
+  list-style: none;
+  margin: 22px 0 30px;
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+.intro-notes li { padding-left: 1.2em; position: relative; }
+.intro-notes li::before { content: '—'; position: absolute; left: 0; color: var(--ink-4); }
+
+.type-head {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+/* 分岐する道(第24条)。角丸カードの均質な格子にはしない */
+.type-grid { border-top: 1px solid var(--line); }
+.type-card {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 16px;
+  min-height: 64px;
+  padding: 13px 4px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.type-card::after {
+  content: '→';
+  grid-column: 2;
+  grid-row: 1 / 3;
+  font-family: var(--en);
+  font-size: 14px;
+  color: var(--ink-3);
+  transition: color .3s, transform .3s var(--ease);
+}
+.type-card:hover::after, .type-card:focus-visible::after { color: var(--dawn); transform: translateX(3px); }
+.type-name { grid-column: 1; grid-row: 1; font-weight: 700; font-size: 15px; color: var(--ink); }
+.type-desc { grid-column: 1; grid-row: 2; font-size: 12.5px; line-height: 1.7; color: var(--ink-3); }
+
+/* ---------- ② 埋める ---------- */
+
+.view-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 22px 0 4px; }
+.view-head h1 {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: 0.03em;
+  color: var(--navy);
+}
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  padding: 0 4px;
+  margin: -10px -4px;
+  transition: color .3s;
+  white-space: nowrap;
+}
+.link-btn:hover { color: var(--ink); }
+
+.form-note { color: var(--ink-3); font-size: 12.5px; margin-bottom: 18px; }
+
+.field { margin-bottom: 18px; }
+.field label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+/* 必須は「選択の瞬間」ではない(第22条)。砂は現在地と題字だけに残す */
+.field .req {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-3);
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0 5px;
+  line-height: 1.7;
+}
+.field input, .field select, .field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  transition: border-color .3s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  /* --blue-soft は白面 2.79:1 で、線1本では「いまここ」を示せない。
+     枠の色は変えつつ、輪郭は両テーマで濃い --blue で描く */
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+  border-color: var(--blue-soft);
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--ink-3); }
+.field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%237D7E85' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+.field .custom-input { margin-top: 8px; }
+.field .hint { font-size: 11.5px; line-height: 1.7; color: var(--ink-3); margin-top: 5px; }
+.field-sep {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  margin: 26px 0 14px;
+}
+
+.form-actions { margin-top: 26px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 26px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  transition: transform .3s var(--ease), opacity .3s;
+}
+.btn.primary { background: var(--navy); color: var(--bg); }
+[data-theme="dark"] .btn.primary { color: #111521; }
+.btn.primary:hover { transform: translateY(-1px); opacity: .92; }
+.btn.quiet { color: var(--ink-3); border: 1px solid var(--line); background: none; }
+.btn.quiet:hover { color: var(--ink); border-color: var(--blue-soft); }
+
+/* ---------- ③ できあがり ---------- */
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  margin: 8px 0 20px;
+}
+.tab-btn {
+  padding: 8px 14px 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink-3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .3s, border-color .3s;
+}
+.tab-btn.on { color: var(--ink); border-bottom-color: var(--dawn); }
+
+.out-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 8px;
+}
+.out-note { color: var(--ink-3); font-size: 11.5px; line-height: 1.8; }
+
+/* --- 掲示プレビュー(A4)。紙なのでテーマに追従しない --- */
+
+.poster-box {
+  container-type: inline-size;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: clamp(12px, 4vw, 28px);
+}
+.poster {
+  background: #FFFFFF;
+  color: #1B1B1E;
+  aspect-ratio: 210 / 297;
+  width: 100%;
+  padding: 8.5% 9%;
+  box-shadow: 0 1px 3px rgba(22, 35, 62, 0.12), 0 12px 32px rgba(22, 35, 62, 0.14);
+  display: flex;
+  flex-direction: column;
+  /* 印刷は 15pt / 幅210mm = 紙幅の2.5%。プレビューも同じ比率にして、
+     画面で見た大きさのまま刷られるようにする */
+  font-size: 2.5cqw;
+  line-height: 2;
+}
+.poster-head {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 1.6em;
+  font-size: 0.82em;
+  color: #45464C;
+}
+.poster-title {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: 1.9em;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: #16233E;
+  /* 余った高さは題字の上と差出の上で半分ずつ引き受ける。
+     題字と本文のかたまりが紙の中央に立ち、日付と差出が上下の隅を押さえる */
+  margin: auto 0 0.5em;
+  padding-top: 0.6em;
+}
+.poster-title::after {
+  content: '';
+  display: block;
+  width: 3.2em;
+  height: 1px;
+  background: #A98F63;
+  margin: 0.55em auto 0;
+}
+.poster-body { flex: 0 0 auto; }
+.poster-body p { margin: 0 0 0.9em; }
+.poster-body > :last-child { margin-bottom: 0; }
+.poster-big {
+  font-family: var(--mincho);
+  font-weight: 600;
+  font-size: 1.8em;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: #16233E;
+  border: 1px solid rgba(22, 35, 62, 0.35);
+  border-radius: 6px;
+  padding: 0.55em 0.6em;
+  margin: 1.1em 0 !important;
+}
+.poster-kv {
+  border-top: 1px solid rgba(27, 27, 30, 0.16);
+  border-bottom: 1px solid rgba(27, 27, 30, 0.16);
+  margin: 1.1em 0;
+  padding: 0.35em 0;
+}
+.poster-kv > div { display: flex; gap: 1.4em; padding: 0.18em 0.2em; }
+.poster-kv dt { min-width: 9em; color: #45464C; }
+/* 掲示の「答え」にあたる行は、離れても読める大きさにする */
+.poster-kv dd { font-weight: 700; font-size: 1.15em; }
+.poster-pre {
+  border: 1px solid rgba(27, 27, 30, 0.16);
+  border-radius: 6px;
+  padding: 0.7em 1em;
+  margin: 1.1em 0;
+  text-align: center;
+}
+.poster-pre-label {
+  display: block;
+  font-size: 0.82em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #45464C;
+  margin-bottom: 0.2em;
+}
+.poster-pre-line { display: block; font-weight: 700; font-size: 1.3em; }
+.poster-foot {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 1em;
+  font-weight: 700;
+  margin-top: auto;
+  padding-top: 1.2em;
+}
+.poster-signer { font-weight: 400; }
+
+/* --- HP・SNS用 --- */
+
+.web-box {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 20px;
+  font-size: 14px;
+  line-height: 2;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: var(--shadow);
+}
+
+/* ---------- トースト・フッター ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(26px + env(safe-area-inset-bottom));
+  transform: translate(-50%, 16px);
+  background: var(--navy);
+  color: var(--bg);
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s, transform .35s var(--ease);
+  z-index: 10;
+}
+[data-theme="dark"] .toast { color: #111521; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid var(--line);
+  margin-top: 48px;
+  padding-top: 18px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.foot a { display: inline-flex; align-items: center; min-height: 44px; transition: color .3s; }
+.foot a:hover { color: var(--ink); }
+
+/* ---------- 動きを減らす設定のとき ----------
+ * 位置の変化はすべて止める。色の変化(いまどこを触っているか)だけ残す。
+ * 各コンポーネントの定義より後ろに置かないと打ち消せないため、末尾にまとめる。 */
+
+@media (prefers-reduced-motion: reduce) {
+  .view.on { animation: none; }
+  .type-card, .btn, .type-card::after { transition: border-color .3s, color .3s, background .3s; }
+  .type-card:hover, .btn.primary:hover, .type-card:hover::after, .type-card:focus-visible::after { transform: none; }
+  .toast { transition: opacity .2s; transform: translate(-50%, 0); }
+  .toast.show { transform: translate(-50%, 0); }
+}
+
+/* ---------- 印刷: 掲示だけをA4いっぱいに ---------- */
+
+@media print {
+  @page { size: A4; margin: 0; }
+  body { background: #fff; }
+  /* 掲示より上の要素は畳み、掲示だけを通常フローでA4いっぱいに広げる
+     (position:fixed は印刷でページ分割・基準ずれを起こすため使わない) */
+  .bar, .view-head, .tabs, .out-actions, .out-note, .toast, .foot { display: none; }
+  #pane-web { display: none; }
+  #pane-poster[hidden] { display: block !important; }
+  .wrap { max-width: none; margin: 0; padding: 0; }
+  .poster-box { container-type: normal; padding: 0; border: none; border-radius: 0; background: none; }
+  #poster {
+    width: 210mm;
+    /* 296mm だと Chromium が2ページ目(白紙)を吐く。294mm で必ず1枚に収まる。
+       height ではなく min-height にして、長い本文は切り落とさず次ページへ流す */
+    height: auto;
+    min-height: 294mm;
+    aspect-ratio: auto;
+    padding: 24mm 20mm;
+    box-shadow: none;
+    font-size: 15pt;
+  }
+}
