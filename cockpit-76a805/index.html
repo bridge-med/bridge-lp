@@ -63,6 +63,9 @@ body.reviewing .ck-reviewbar{display:flex}
   .ck-mid{grid-column:1 / -1}
   .ck-fresh{text-align:right}
 }
+/* Where to nextが4枚になったため、このページだけ2×2に(共通の3列は他ページが依存。
+   このstyleはbridge.cssより後に読まれるため、無条件に書くと760px以下の1カラム指定まで潰す) */
+@media(min-width:761px){.walk-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 <noscript><style>[data-reveal]{opacity:1 !important;transform:none !important}</style></noscript>
 </head>
