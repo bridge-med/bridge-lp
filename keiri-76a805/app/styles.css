@@ -52,6 +52,8 @@ body {
 }
 button { font: inherit; background: none; border: none; cursor: pointer; color: inherit; }
 [hidden] { display: none !important; }
+/* 視覚的に隠しつつ、支援技術には読ませる */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 a { color: inherit; text-decoration: none; }
 ::selection { background: var(--blue); color: #fff; }
 
