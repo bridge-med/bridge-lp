@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>副業の帳簿 — 固定費と売上 / BRIDGE(運営者用)</title>
+<meta name="description" content="AI・開発関連の固定費を、副業の売上でどれだけ回収できているかを見る運営者専用の帳簿。データは端末の中にだけ保存されます。">
+<meta name="robots" content="noindex">
+<!-- OGPは意図的に置かない。noindexの運営者専用ページに外部プレビューを作らない(cockpitと同じ設計判断) -->
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111521" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="bar">
+    <h1 class="name"><a href="./"><span>副業の帳簿</span><span class="en">Keiri</span></a></h1>
+    <button class="theme-btn" id="themeBtn" aria-label="ライト/ダークモード切り替え">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <noscript><p style="max-width:660px;margin:40px auto;color:var(--ink-3);font-size:13px">この帳簿の表示と計算にはJavaScriptが必要です。データはこの端末のブラウザの中にだけ保存されます。</p></noscript>
+
+    <!-- ホーム(ダッシュボード) -->
+    <section class="view" id="view-home" aria-label="今月の収支">
+      <h2 id="home-month"></h2>
+      <p class="sub">数字はすべて支払額ベースです。税務上の経費算入額は固定費・経費タブとCSVで確認できます。</p>
+
+      <div class="hero-num">
+        <div class="l">損益分岐までの残額(今月の固定費 − 今月の売上)</div>
+        <div class="v" id="home-breakeven"></div>
+        <div class="s" id="home-breakeven-note"></div>
+      </div>
+
+      <div class="hero-num">
+        <div class="l">固定費回収率(今月の売上 ÷ 今月の固定費)</div>
+        <div class="v" id="home-recovery"></div>
+      </div>
+
+      <div class="stat-grid" id="home-stats"></div>
+
+      <div class="sec-label">年間累計</div>
+      <div class="stat-grid" id="home-year"></div>
+
+      <div class="sec-label">月別推移</div>
+      <div class="tbl-wrap"><table aria-label="月別推移">
+        <thead><tr><th scope="col">月</th><th scope="col">売上</th><th scope="col">固定費</th><th scope="col">経費</th><th scope="col">利益</th></tr></thead>
+        <tbody id="home-trend"></tbody>
+      </table></div>
+      <p class="list-note">固定費は現在契約中の月割り支払額を各月に適用しています。売上・経費の記録がある月と今月だけを表示します。</p>
+
+      <div class="sec-label">商品別利益(今年)</div>
+      <div class="tbl-wrap"><table aria-label="商品別利益">
+        <thead><tr><th scope="col">商品・サービス</th><th scope="col">件数</th><th scope="col">売上</th><th scope="col">手数料</th><th scope="col">粗利</th></tr></thead>
+        <tbody id="home-products"></tbody>
+      </table></div>
+      <p class="list-note">粗利は売上から手数料を引いた金額です。固定費・経費は商品に紐付けていません。</p>
+
+      <div class="sec-label">サービス別コスト(契約中)</div>
+      <div class="tbl-wrap"><table aria-label="サービス別コスト">
+        <thead><tr><th scope="col">サービス</th><th scope="col">月額換算</th><th scope="col">割合</th><th scope="col">算入額(月)</th></tr></thead>
+        <tbody id="home-services"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 売上 -->
+    <section class="view" id="view-sales" aria-label="売上の記録">
+      <h2>売上</h2>
+      <p class="sub">売れたら日付と金額だけでも残します。利益は「売上 − 手数料」で自動計算します。</p>
+
+      <form class="form" id="form-sale" novalidate>
+        <div class="form-title" id="sale-form-title">売上を追加</div>
+        <div class="form-grid">
+          <div class="field"><label for="s-date">売上日</label><input type="date" id="s-date" required></div>
+          <div class="field"><label for="s-name">商品・サービス名</label><input type="text" id="s-name" list="dl-products" placeholder="例: 経験の棚卸し 支援版" required></div>
+          <div class="field"><label for="s-channel">販売チャネル<span class="opt">(任意)</span></label><input type="text" id="s-channel" list="dl-channels" placeholder="例: note / Stores / 直販"></div>
+          <div class="field"><label for="s-amount">売上金額(円)</label><input type="number" id="s-amount" inputmode="numeric" min="0" step="1" required></div>
+          <div class="field"><label for="s-fee">手数料(円)<span class="opt">(なければ0)</span></label><input type="number" id="s-fee" inputmode="numeric" min="0" step="1" value="0"></div>
+          <div class="field full"><label for="s-memo">メモ<span class="opt">(任意)</span></label><input type="text" id="s-memo"></div>
+        </div>
+        <p class="calc-preview">利益: <b id="s-profit-preview">—</b></p>
+        <div class="form-errors" id="sale-errors" role="alert" hidden></div>
+        <div class="form-actions">
+          <button type="submit" class="btn primary" id="sale-submit">追加する</button>
+          <button type="button" class="btn quiet" id="sale-cancel" hidden>編集をやめる</button>
+          <button type="button" class="btn danger" id="sale-delete" hidden>削除する</button>
+        </div>
+      </form>
+
+      <div id="sales-list"></div>
+    </section>
+
+    <!-- 固定費 -->
+    <section class="view" id="view-fixed" aria-label="固定費の管理">
+      <h2>固定費</h2>
+      <p class="sub" id="fixed-summary">サブスクや年会費など、毎月・毎年かかる費用を登録します。</p>
+
+      <form class="form" id="form-fixed" novalidate>
+        <div class="form-title" id="fixed-form-title">固定費を追加</div>
+        <div class="form-grid">
+          <div class="field"><label for="f-name">サービス名</label><input type="text" id="f-name" placeholder="例: Claude Pro" required></div>
+          <div class="field"><label for="f-amount">金額(円)</label><input type="number" id="f-amount" inputmode="numeric" min="0" step="1" required></div>
+          <div class="field full">
+            <label>支払いの周期</label>
+            <div class="radio-row" role="radiogroup" aria-label="支払いの周期">
+              <label><input type="radio" name="f-cycle" value="monthly" checked>月額</label>
+              <label><input type="radio" name="f-cycle" value="yearly">年額</label>
+            </div>
+          </div>
+          <div class="field"><label for="f-payday">支払日<span class="opt">(1〜31・任意)</span></label><input type="number" id="f-payday" inputmode="numeric" min="1" max="31" step="1"></div>
+          <div class="field"><label for="f-renewal">更新日<span class="opt">(任意)</span></label><input type="date" id="f-renewal"></div>
+          <div class="field"><label for="f-category">カテゴリ</label>
+            <select id="f-category">
+              <option>AI</option>
+              <option>開発</option>
+              <option>サーバー・ドメイン</option>
+              <option>ソフトウェア</option>
+              <option>その他</option>
+            </select>
+          </div>
+          <div class="field"><label for="f-account">勘定科目<span class="opt">(確定申告CSV用)</span></label>
+            <select id="f-account">
+              <option>通信費</option>
+              <option>諸会費</option>
+              <option>支払手数料</option>
+              <option>消耗品費</option>
+              <option>新聞図書費</option>
+              <option>雑費</option>
+            </select>
+          </div>
+          <div class="field"><label for="f-ratio">副業利用割合(%)</label><input type="number" id="f-ratio" inputmode="numeric" min="0" max="100" step="1" value="100"></div>
+          <div class="field full">
+            <label>契約状態</label>
+            <div class="radio-row" role="radiogroup" aria-label="契約状態">
+              <label><input type="radio" name="f-status" value="active" checked>契約中</label>
+              <label><input type="radio" name="f-status" value="ended">解約済み</label>
+            </div>
+          </div>
+        </div>
+        <p class="calc-preview">月額換算: <b id="f-monthly-preview">—</b> / 経費算入額(月): <b id="f-deduct-preview">—</b></p>
+        <div class="form-errors" id="fixed-errors" role="alert" hidden></div>
+        <div class="form-actions">
+          <button type="submit" class="btn primary" id="fixed-submit">追加する</button>
+          <button type="button" class="btn quiet" id="fixed-cancel" hidden>編集をやめる</button>
+          <button type="button" class="btn danger" id="fixed-delete" hidden>削除する</button>
+        </div>
+      </form>
+
+      <div id="fixed-list"></div>
+      <p class="list-note">解約したサービスは削除せず「解約済み」にすると、記録として残したまま集計から外れます。</p>
+    </section>
+
+    <!-- 経費 -->
+    <section class="view" id="view-exp" aria-label="経費の記録">
+      <h2>経費</h2>
+      <p class="sub">単発の支出を記録します。固定費タブに登録済みのサブスク等は、二重計上になるためここには入力しません。</p>
+
+      <form class="form" id="form-exp" novalidate>
+        <div class="form-title" id="exp-form-title">経費を追加</div>
+        <div class="form-grid">
+          <div class="field"><label for="e-date">日付</label><input type="date" id="e-date" required></div>
+          <div class="field"><label for="e-payee">支払先</label><input type="text" id="e-payee" list="dl-payees" placeholder="例: Amazon" required></div>
+          <div class="field"><label for="e-amount">金額(円)</label><input type="number" id="e-amount" inputmode="numeric" min="0" step="1" required></div>
+          <div class="field"><label for="e-account">勘定科目</label>
+            <select id="e-account">
+              <option>消耗品費</option>
+              <option>通信費</option>
+              <option>支払手数料</option>
+              <option>外注工賃</option>
+              <option>広告宣伝費</option>
+              <option>旅費交通費</option>
+              <option>新聞図書費</option>
+              <option>諸会費</option>
+              <option>雑費</option>
+            </select>
+          </div>
+          <div class="field"><label for="e-ratio">副業利用割合(%)</label><input type="number" id="e-ratio" inputmode="numeric" min="0" max="100" step="1" value="100"></div>
+          <div class="field"><label for="e-purpose">用途<span class="opt">(任意)</span></label><input type="text" id="e-purpose" placeholder="例: 検証用デバイス"></div>
+          <div class="field full check-row">
+            <input type="checkbox" id="e-receipt">
+            <label for="e-receipt">領収書・証憑あり</label>
+          </div>
+          <div class="field full"><label for="e-memo">メモ<span class="opt">(任意)</span></label><input type="text" id="e-memo"></div>
+        </div>
+        <p class="calc-preview">経費算入額: <b id="e-deduct-preview">—</b></p>
+        <div class="form-errors" id="exp-errors" role="alert" hidden></div>
+        <div class="form-actions">
+          <button type="submit" class="btn primary" id="exp-submit">追加する</button>
+          <button type="button" class="btn quiet" id="exp-cancel" hidden>編集をやめる</button>
+          <button type="button" class="btn danger" id="exp-delete" hidden>削除する</button>
+        </div>
+      </form>
+
+      <div id="exp-list"></div>
+    </section>
+
+    <!-- 出力 -->
+    <section class="view" id="view-out" aria-label="CSV出力とバックアップ">
+      <h2>出力</h2>
+      <p class="sub">CSVはBOM付きUTF-8で書き出します。Excelでそのまま開いても日本語は文字化けしません。</p>
+
+      <div class="out-block">
+        <div class="t">月次CSV</div>
+        <div class="d">指定月の売上・固定費(月割)・経費の明細と集計です。</div>
+        <div class="out-row">
+          <label for="out-month" class="sr-only">対象月</label>
+          <input type="month" id="out-month">
+          <button type="button" class="btn ghost" id="out-monthly-btn">書き出す</button>
+        </div>
+      </div>
+
+      <div class="out-block">
+        <div class="t">年次CSV</div>
+        <div class="d">指定年の月ごとの売上・固定費・経費・利益の一覧です。</div>
+        <div class="out-row">
+          <select id="out-year-1" aria-label="年次CSVの対象年"></select>
+          <button type="button" class="btn ghost" id="out-yearly-btn">書き出す</button>
+        </div>
+      </div>
+
+      <div class="out-block">
+        <div class="t">確定申告用の経費一覧CSV</div>
+        <div class="d">指定年の経費レコードと、契約中の固定費(年額換算 × 副業利用割合)を経費算入額付きで並べます。年の途中で契約・解約したものは書き出し後に手で調整してください。</div>
+        <div class="out-row">
+          <select id="out-year-2" aria-label="確定申告用経費一覧CSVの対象年"></select>
+          <button type="button" class="btn ghost" id="out-tax-btn">書き出す</button>
+        </div>
+      </div>
+
+      <div class="out-block">
+        <div class="t">売上一覧CSV</div>
+        <div class="d">売上の全レコードです。年で絞ることもできます。</div>
+        <div class="out-row">
+          <select id="out-year-3" aria-label="売上一覧CSVの対象年(全期間可)"></select>
+          <button type="button" class="btn ghost" id="out-sales-btn">書き出す</button>
+        </div>
+      </div>
+
+      <div class="out-block">
+        <div class="t">バックアップ</div>
+        <div class="d">データはこの端末のブラウザの中にだけあります。ブラウザのデータを消すと帳簿も消えるため、月に一度はJSONで書き出して手元に残しておくと安心です。</div>
+        <div class="out-row">
+          <button type="button" class="btn ghost" id="backup-export-btn">JSONで書き出す</button>
+          <button type="button" class="btn ghost" id="backup-import-btn">JSONを読み込む</button>
+          <input type="file" id="backup-file" accept="application/json,.json" hidden>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <a href="../cockpit-76a805/index.html">← Cockpit(運営の台帳)</a>
+    <a href="../index.html">BRIDGE</a>
+  </footer>
+
+</div>
+
+<datalist id="dl-products"></datalist>
+<datalist id="dl-channels"></datalist>
+<datalist id="dl-payees"></datalist>
+
+<nav class="tabbar" aria-label="画面の切り替え">
+  <div class="tabbar-inner">
+    <button type="button" class="tab" data-view="home">ホーム</button>
+    <button type="button" class="tab" data-view="sales">売上</button>
+    <button type="button" class="tab" data-view="fixed">固定費</button>
+    <button type="button" class="tab" data-view="exp">経費</button>
+    <button type="button" class="tab" data-view="out">出力</button>
+  </div>
+</nav>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="app/calc.js"></script>
+<script src="app/app.js"></script>
+<script src="../shared/usage.js" defer></script>
+</body>
+</html>
