@@ -64,8 +64,58 @@
     view.editingTask = false;
     if (extra) Object.keys(extra).forEach(function (k) { view[k] = extra[k]; });
     render();
+    syncHash();
     window.scrollTo(0, 0);
   }
+
+  // ---- ハッシュルーティング(画面へのURL直行を可能にする) ---------------------
+  var HASH_ALIAS = { weekly: 'review', reflect: 'reflection' };
+  var suppressHash = false;
+
+  function hashFor() {
+    switch (view.name) {
+      case 'taskDetail':    return '#/task/' + (view.taskId || '');
+      case 'taskNew':       return '#/task/new';
+      case 'projectDetail': return '#/project/' + (view.projectId || '');
+      case 'review':        return '#/weekly';
+      default:              return '#/' + view.name;
+    }
+  }
+
+  function syncHash() {
+    var h = hashFor();
+    if (window.location.hash !== h) {
+      suppressHash = true;
+      window.location.hash = h;
+    }
+  }
+
+  /** '#/tasks' 等を view に反映する。不明なハッシュはダッシュボードへ */
+  function applyHash(hash) {
+    var parts = String(hash || '').replace(/^#\/?/, '').split('/').filter(Boolean);
+    var head = HASH_ALIAS[parts[0]] || parts[0];
+    if (!head) { view.name = 'dashboard'; return; }
+    if (head === 'task') {
+      if (parts[1] === 'new' || !parts[1]) { view.name = 'taskNew'; view.wizard = null; return; }
+      if (Store.task(parts[1])) { view.name = 'taskDetail'; view.taskId = parts[1]; return; }
+      view.name = 'tasks'; return;
+    }
+    if (head === 'project') {
+      if (parts[1] && Store.project(parts[1])) { view.name = 'projectDetail'; view.projectId = parts[1]; return; }
+      view.name = 'projects'; return;
+    }
+    var known = ['dashboard', 'tasks', 'projects', 'people', 'reflection', 'review', 'settings', 'menu'];
+    view.name = known.indexOf(head) >= 0 ? head : 'dashboard';
+  }
+
+  window.addEventListener('hashchange', function () {
+    if (suppressHash) { suppressHash = false; return; }
+    view.compose = null;
+    view.editingTask = false;
+    applyHash(window.location.hash);
+    render();
+    window.scrollTo(0, 0);
+  });
 
   function shortDate(iso) {
     if (!iso) return '—';
@@ -1250,5 +1300,7 @@
 
   // ---- 起動 -----------------------------------------------------------------------
   Store.load();
+  if (Store.user() && window.location.hash) applyHash(window.location.hash);
   render();
+  if (Store.user()) syncHash();
 })();
