@@ -1167,9 +1167,37 @@
       '</div>' +
       '<section class="card"><p class="card-title">来週に向けて</p><ul class="tips">' +
         r.tips.map(function (tip) { return '<li>' + esc(tip) + '</li>'; }).join('') +
-      '</ul></section>';
+      '</ul></section>' +
+      '<section class="card">' +
+        '<p class="card-title">キャリアログに残す</p>' +
+        '<p class="field-note">今週の動きを、キャリアの記録として貼り付けられる形にしました。コピーして、キャリアログ(iOSアプリ)や職務経歴のメモに追加できます。「気づき」の欄だけは、自分の言葉で。</p>' +
+        '<textarea id="careerLogText" rows="8" aria-label="キャリアログに残す週次記録">' + esc(careerLogText(r)) + '</textarea>' +
+        '<div class="btn-row"><button class="btn btn-primary" id="copyCareerLog">コピーする</button></div>' +
+      '</section>';
     app.innerHTML = shell(html, 'review');
     bindCommon();
+    document.getElementById('copyCareerLog').addEventListener('click', function () {
+      copyText(document.getElementById('careerLogText').value, 'コピーしました。キャリアログに貼り付けてください');
+    });
+  }
+
+  /** 週次レビューの実績を、キャリアログ向けの下書きテキストにする */
+  function careerLogText(r) {
+    var completedTitles = r.completed.map(function (t) { return t.title; });
+    var projectNames = [];
+    r.completed.forEach(function (t) {
+      var p = Store.project(t.projectId);
+      if (p && projectNames.indexOf(p.name) < 0) projectNames.push(p.name);
+    });
+    return AI.composeCareerLog({
+      from: Store.dueLabel(Store.daysFromToday(-7)),
+      to: Store.dueLabel(Store.todayStr()),
+      decided: r.decided,
+      delegated: r.delegated,
+      reminded: r.reminded,
+      completedTitles: completedTitles,
+      projects: projectNames
+    });
   }
 
   // ---- 画面: 設定 --------------------------------------------------------------

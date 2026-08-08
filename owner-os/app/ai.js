@@ -335,6 +335,27 @@
     }
   }
 
+  /**
+   * キャリアログ(iOSアプリ)へ貼り付けるための週次記録の下書き。
+   * o: { from, to(表示用日付), decided, delegated, reminded,
+   *      completedTitles[], projects[] }
+   * 事実の行だけを機械が書き、意味づけは本人の欄として空けておく。
+   */
+  function composeCareerLog(o) {
+    var lines = ['【マネジメントの記録】' + o.from + '〜' + o.to];
+    lines.push('意思決定・分類: ' + o.decided + '件 / 委任・依頼: ' + o.delegated + '件 / 催促: ' + o.reminded + '件');
+    if (o.completedTitles && o.completedTitles.length) {
+      lines.push('完了: ' + o.completedTitles.map(function (t) { return '「' + t + '」'; }).join(''));
+    }
+    if (o.projects && o.projects.length) {
+      lines.push('動かしたプロジェクト: ' + o.projects.join('、'));
+    }
+    lines.push('');
+    lines.push('気づき(自分の言葉で):');
+    lines.push('');
+    return lines.join('\n');
+  }
+
   /** 催促文の下書き。o: { personName, title, due, userName } */
   function composeReminder(o, tone) {
     var name = o.personName ? o.personName + 'さん' : 'ご担当者さま';
@@ -403,6 +424,7 @@
     },
     composeRequest: composeRequest,
     composeReminder: composeReminder,
+    composeCareerLog: composeCareerLog,
     _mock: { suggest: mockSuggest, reflect: mockReflect } // テスト用
   };
 })(typeof window !== 'undefined' ? window : globalThis);

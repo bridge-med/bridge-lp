@@ -199,3 +199,28 @@ test('AI.reflect: 手がかりがない入力では書き込み用の促しを�
   const r = await AI._mock.reflect('もやもやする');
   assert.ok(r.fact.includes('書いてみて'));
 });
+
+test('AI.composeCareerLog: 実績の行と自記入欄が入る', () => {
+  const text = AI.composeCareerLog({
+    from: '7/30(木)', to: '8/6(木)',
+    decided: 3, delegated: 2, reminded: 1,
+    completedTitles: ['統合キックオフの開催'],
+    projects: ['医療法人統合プロジェクト']
+  });
+  assert.ok(text.includes('意思決定・分類: 3件'));
+  assert.ok(text.includes('委任・依頼: 2件'));
+  assert.ok(text.includes('「統合キックオフの開催」'));
+  assert.ok(text.includes('医療法人統合プロジェクト'));
+  assert.ok(text.includes('気づき(自分の言葉で):'));
+});
+
+test('AI.composeCareerLog: 完了ゼロの週でも破綻しない', () => {
+  const text = AI.composeCareerLog({
+    from: '7/30(木)', to: '8/6(木)',
+    decided: 0, delegated: 0, reminded: 0,
+    completedTitles: [], projects: []
+  });
+  assert.ok(text.includes('意思決定・分類: 0件'));
+  assert.ok(!text.includes('完了:'));
+  assert.ok(!text.includes('動かしたプロジェクト:'));
+});
