@@ -1,0 +1,55 @@
+name: EAS Build (mobile)
+
+# Builds (and optionally submits) the BRIDGE Worklog app via EAS.
+# Dormant until you add the EXPO_TOKEN secret. Run it manually from the Actions
+# tab (choose platform/profile), or by pushing a tag like "mobile-v0.1.0".
+#
+# Requirements before first run:
+#   - Expo account + `eas init` (sets EAS_PROJECT_ID / owner)
+#   - Repo secret: EXPO_TOKEN (Expo access token)
+#   - For submit: store credentials configured in EAS / eas.json
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform
+        type: choice
+        options: [all, ios, android]
+        default: all
+      profile:
+        description: EAS build profile
+        type: choice
+        options: [preview, production]
+        default: preview
+      submit:
+        description: Submit to stores after build
+        type: boolean
+        default: false
+  push:
+    tags:
+      - 'mobile-v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm ci --legacy-peer-deps
+      - name: Build
+        run: |
+          PLATFORM="${{ github.event.inputs.platform || 'all' }}"
+          PROFILE="${{ github.event.inputs.profile || 'production' }}"
+          SUBMIT=""
+          if [ "${{ github.event.inputs.submit }}" = "true" ]; then SUBMIT="--auto-submit"; fi
+          eas build --non-interactive --platform "$PLATFORM" --profile "$PROFILE" $SUBMIT
