@@ -1,0 +1,61 @@
+# Web preview auto-deploy for a NEW app repo.
+# COPY this file to the repo root at: .github/workflows/deploy-web.yml
+# Then: repo Settings → Pages → Source = "GitHub Actions".
+#
+# Result: every push that touches the app publishes a fresh web build to
+#   https://<owner>.github.io/<repo>/
+#
+# Prereqs in app.config.ts:
+#   experiments.baseUrl = "/<repo>"   (the repo name; "" for <owner>.github.io repos)
+#
+# If your app lives at the repo ROOT (not in mobile/), set WORKDIR: "." below.
+
+name: Deploy web preview
+
+on:
+  push:
+    branches: [main]
+    paths: ['mobile/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  WORKDIR: mobile   # set to "." if the Expo app is at the repo root
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install
+        working-directory: ${{ env.WORKDIR }}
+        run: npm ci --legacy-peer-deps
+      - name: Export web
+        working-directory: ${{ env.WORKDIR }}
+        run: |
+          npx expo export --platform web --output-dir dist
+          cp dist/+not-found.html dist/404.html || true   # client-side routing fallback
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.WORKDIR }}/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
