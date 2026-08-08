@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-03",
+  "updated": "2026-08-08",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -135,7 +135,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "仮称のまま出荷(命名は社長決裁待ち)。配色は社長支給モック準拠でSaaS青+状態色——第22条の適用範囲は第33条議題としてauditorへ。AI相当機能は端末内ルールの「下書き」(外部送信なし)。実API接続はai.jsのprovider差し替えで対応可",
-      "lastCommit": ""
+      "lastCommit": "2026-08-08"
     },
     {
       "id": "daily-app",

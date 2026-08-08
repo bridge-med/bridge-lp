@@ -2,10 +2,10 @@
 // Records are flat objects with a user_id so they map ~1:1 onto Supabase tables
 // (the storage layer can be swapped from AsyncStorage to Supabase in one place).
 
-import type { CareerOutputType, TaskStatus, TaskRepeat } from './constants';
+import type { CareerOutputType, Ownership, TaskStatus, TaskRepeat } from './constants';
 
 export type ID = string;
-export type { TaskStatus, TaskRepeat, CareerOutputType };
+export type { Ownership, TaskStatus, TaskRepeat, CareerOutputType };
 
 export interface BaseRecord {
   id: ID;
@@ -57,6 +57,11 @@ export interface Task extends BaseRecord {
   importance?: 'high' | 'low'; // 重要度 (Eisenhower matrix axis)
   urgency?: 'high' | 'low'; // 緊急度 (Eisenhower matrix axis)
   category?: string; // 分類 (free text; user-defined)
+  // オーナーシップ（委任）まわり。すべて任意で後方互換。lib/ownership.ts 参照。
+  ownership?: Ownership; // 分類（決める/聞く/任せる）。「今はやらない」は status 'hold'
+  ballHolder?: string; // いまボールを持っている相手（自由記述。空なら自分）
+  nextCheckDate?: string | null; // 次回確認日 yyyy-mm-dd（催促のタイミング）
+  completionCriteria?: string; // 完了条件（渡すときに決める）
 }
 
 export type ReflectionPeriod = 'week' | 'month';
