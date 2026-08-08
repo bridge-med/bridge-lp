@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AiTaskSheet } from '../../components/AiTaskSheet';
 import { BlockHeader } from '../../components/BlockHeader';
@@ -15,6 +15,7 @@ import { tasks } from '../../lib/data';
 import { addPeriod, dueLabel, todayKey } from '../../lib/date';
 import { tapLight, tapSuccess } from '../../lib/haptics';
 import { QUADRANTS, quadrantOf, type Quadrant } from '../../lib/matrix';
+import { ballGroups, composeReminder, ownerBuckets, OWNERSHIP_LABEL } from '../../lib/ownership';
 import { progress } from '../../lib/progress';
 import { useCollection } from '../../lib/store';
 import { colors, fonts, radius, spacing, type } from '../../lib/theme';
@@ -43,7 +44,7 @@ export default function TasksScreen() {
   const [editing, setEditing] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
-  const [view, setView] = useState<'list' | 'matrix'>('list');
+  const [view, setView] = useState<'list' | 'matrix' | 'ball'>('list');
   const [addQuad, setAddQuad] = useState<Quadrant | null>(null);
   const [toast, setToast] = useState<{ msg: string; undo: () => void } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -112,6 +113,16 @@ export default function TasksScreen() {
     return { byQ, unclassified, catRows, maxCell };
   }, [all]);
 
+  const buckets = useMemo(() => ownerBuckets(all), [all]);
+  const holderGroups = useMemo(() => ballGroups(all), [all]);
+  const ballEmpty =
+    buckets.decide.length + buckets.hand.length + buckets.remind.length + buckets.blocked.length + holderGroups.length === 0;
+
+  function shareReminder(t: Task) {
+    tapLight();
+    void Share.share({ message: composeReminder(t, 'polite') });
+  }
+
   function quickComplete(t: Task) {
     const toDone = t.status !== 'done';
     if (toDone) {
@@ -167,10 +178,16 @@ export default function TasksScreen() {
 
         <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.lg }}>
           <View style={styles.seg}>
-            {(['list', 'matrix'] as const).map((m) => (
+            {(
+              [
+                { m: 'list', icon: 'list', label: 'リスト' },
+                { m: 'matrix', icon: 'grid', label: 'マトリクス' },
+                { m: 'ball', icon: 'users', label: 'ボール' },
+              ] as const
+            ).map(({ m, icon, label }) => (
               <Pressable key={m} onPress={() => { tapLight(); setView(m); }} style={[styles.segBtn, view === m && { backgroundColor: c.primary }]}>
-                <Feather name={m === 'list' ? 'list' : 'grid'} size={14} color={view === m ? '#fff' : colors.text2} />
-                <Text style={[styles.segText, { color: view === m ? '#fff' : colors.text2 }]}>{m === 'list' ? 'リスト' : 'マトリクス'}</Text>
+                <Feather name={icon} size={14} color={view === m ? '#fff' : colors.text2} />
+                <Text style={[styles.segText, { color: view === m ? '#fff' : colors.text2 }]}>{label}</Text>
               </Pressable>
             ))}
           </View>
@@ -242,6 +259,119 @@ export default function TasksScreen() {
                   })}
                 </View>
               ))
+            )}
+          </View>
+        ) : view === 'ball' ? (
+          <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.lg }}>
+            <Text style={type.muted}>タスク名より先に、いま誰がボールを持っているかを見るための一覧です。</Text>
+
+            {ballEmpty ? (
+              <EmptyState
+                icon="users"
+                title="ボールの所在は、まだ記録されていません"
+                hint={'タスクを開いて「誰かに聞く・任せる」を選び、\n渡す相手を書くと、ここに並びます。'}
+              />
+            ) : (
+              <>
+                {buckets.remind.length ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text style={styles.sectionHead}>今日、催促する <Text style={styles.count}>{buckets.remind.length}</Text></Text>
+                    <Text style={[type.muted, { fontSize: 11 }]}>確認日が来ています。状況を聞くタイミングです。</Text>
+                    {buckets.remind.map((t) => (
+                      <View key={t.id} style={styles.ballRow}>
+                        <Pressable style={{ flex: 1 }} onPress={() => edit(t)}>
+                          <Text style={type.bodyMed} numberOfLines={2}>{t.title}</Text>
+                          <Text style={[type.muted, { marginTop: 2 }]}>
+                            {t.ballHolder}さん{t.nextCheckDate ? ` ・確認日 ${dueLabel(t.nextCheckDate)?.text ?? t.nextCheckDate}` : ''}
+                          </Text>
+                        </Pressable>
+                        <Pressable onPress={() => shareReminder(t)} hitSlop={6} style={[styles.remindBtn, { borderColor: c.primary }]}>
+                          <Feather name="send" size={12} color={c.primary} />
+                          <Text style={[styles.remindTxt, { color: c.primary }]}>催促文</Text>
+                        </Pressable>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+
+                {buckets.hand.length ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text style={styles.sectionHead}>今日、誰かに渡す <Text style={styles.count}>{buckets.hand.length}</Text></Text>
+                    <Text style={[type.muted, { fontSize: 11 }]}>聞く・任せる予定なのに、まだ手元にあるタスクです。タップして相手を決められます。</Text>
+                    {buckets.hand.map((t) => (
+                      <Pressable key={t.id} onPress={() => edit(t)} style={styles.ballRow}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={type.bodyMed} numberOfLines={2}>{t.title}</Text>
+                          <Text style={[type.muted, { marginTop: 2 }]}>{t.ownership ? OWNERSHIP_LABEL[t.ownership] : ''} ・相手 未設定</Text>
+                        </View>
+                        <Feather name="chevron-right" size={16} color={colors.muted} />
+                      </Pressable>
+                    ))}
+                  </View>
+                ) : null}
+
+                {holderGroups.map((g) => (
+                  <View key={g.holder} style={{ gap: spacing.sm }}>
+                    <Text style={styles.sectionHead}>{g.holder}さんが持っている <Text style={styles.count}>{g.items.length}</Text></Text>
+                    {g.items.map((t) => {
+                      const due = dueLabel(t.dueDate);
+                      const check = t.nextCheckDate ? dueLabel(t.nextCheckDate) : null;
+                      return (
+                        <Pressable key={t.id} onPress={() => edit(t)} style={styles.ballRow}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={type.bodyMed} numberOfLines={2}>{t.title}</Text>
+                            <Text style={[type.muted, { marginTop: 2 }]}>
+                              {check ? `確認日 ${check.text}` : '確認日 未設定'}
+                              {due ? ` ・期限 ${due.text}` : ''}
+                            </Text>
+                          </View>
+                          <Feather name="chevron-right" size={16} color={colors.muted} />
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ))}
+
+                {buckets.decide.length ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text style={styles.sectionHead}>自分で決める <Text style={styles.count}>{buckets.decide.length}</Text></Text>
+                    <Text style={[type.muted, { fontSize: 11 }]}>判断すれば前に進むタスクです。ここだけは、渡せません。</Text>
+                    {buckets.decide.map((t) => {
+                      const due = dueLabel(t.dueDate);
+                      return (
+                        <Pressable key={t.id} onPress={() => edit(t)} style={styles.ballRow}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={type.bodyMed} numberOfLines={2}>{t.title}</Text>
+                            {due ? <Text style={[type.muted, { marginTop: 2, color: due.tone === 'overdue' ? c.danger : colors.text2 }]}>期限 {due.text}</Text> : null}
+                          </View>
+                          <Feather name="chevron-right" size={16} color={colors.muted} />
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ) : null}
+
+                {buckets.blocked.length ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text style={styles.sectionHead}>いま、止まっている <Text style={styles.count}>{buckets.blocked.length}</Text></Text>
+                    <Text style={[type.muted, { fontSize: 11 }]}>期限超過や、保留の見直し日が来ているタスクです。</Text>
+                    {buckets.blocked.map((t) => {
+                      const due = dueLabel(t.dueDate);
+                      return (
+                        <Pressable key={t.id} onPress={() => edit(t)} style={styles.ballRow}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={type.bodyMed} numberOfLines={2}>{t.title}</Text>
+                            <Text style={[type.muted, { marginTop: 2, color: c.danger }]}>
+                              {t.status === 'hold' ? '保留の見直し日が来ています' : due ? due.text : ''}
+                            </Text>
+                          </View>
+                          <Feather name="chevron-right" size={16} color={colors.muted} />
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ) : null}
+              </>
             )}
           </View>
         ) : (
@@ -380,6 +510,9 @@ const styles = StyleSheet.create({
   mdue: { fontFamily: fonts.gothicMed, fontSize: 10, marginTop: 2 },
   cellEmpty: { fontFamily: fonts.gothic, fontSize: 12, color: colors.muted, paddingVertical: spacing.sm, textAlign: 'center' },
   uRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  ballRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  remindBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6 },
+  remindTxt: { fontFamily: fonts.gothicMed, fontSize: 11.5 },
   heat: { backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, padding: spacing.sm },
   heatRow: { flexDirection: 'row', alignItems: 'center', height: 34 },
   heatLabel: { width: 86, fontFamily: fonts.gothicMed, fontSize: 12, color: colors.text2, paddingRight: 6 },

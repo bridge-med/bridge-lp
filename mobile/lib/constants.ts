@@ -81,6 +81,11 @@ export const TAG_PRESETS = [
 
 export type TaskStatus = 'todo' | 'doing' | 'done' | 'hold';
 
+// 4分類（オーナーシップ）: タスクを受けたらまず「自分で実行するか」を決める。
+// decide=自分で決める / ask=誰かに聞く / delegate=誰かに任せる。
+// 4つ目の「今はやらない」は既存の TaskStatus 'hold' を使う（保留の二重化を避ける）。
+export type Ownership = 'decide' | 'ask' | 'delegate';
+
 export const TASK_STATUSES: { key: TaskStatus; label: string; tone: 'neutral' | 'primary' | 'accent' | 'warn' }[] = [
   { key: 'todo', label: '未着手', tone: 'neutral' },
   { key: 'doing', label: '進行中', tone: 'primary' },

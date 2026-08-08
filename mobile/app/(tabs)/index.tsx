@@ -13,6 +13,7 @@ import { quickMemos, tasks, workLogs } from '../../lib/data';
 import { dueLabel, parseKey, startOfWeekKey, todayKey } from '../../lib/date';
 import { tapLight, tapSuccess } from '../../lib/haptics';
 import { levelInfo, stageForLevel } from '../../lib/leveling';
+import { ownerBuckets, ownershipInUse } from '../../lib/ownership';
 import { usePrefs } from '../../lib/prefs';
 import { progress, useProgress } from '../../lib/progress';
 import { useCollection } from '../../lib/store';
@@ -51,6 +52,9 @@ export default function HomeScreen() {
     () => allTasks.filter((t) => t.status !== 'done' && t.dueDate && t.dueDate <= today).sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : 1)).slice(0, 4),
     [allTasks, today],
   );
+  // 4区分（決める/渡す/催促/止まる）。オーナーシップを使い始めた人にだけ見せる
+  const showOwner = useMemo(() => ownershipInUse(allTasks), [allTasks]);
+  const owner = useMemo(() => ownerBuckets(allTasks), [allTasks]);
 
   function completeTask(t: Task) {
     tapSuccess();
@@ -142,6 +146,27 @@ export default function HomeScreen() {
             <View style={styles.tDiv} />
             <Tally num={coins} label="コイン" tint={colors.gold} />
           </View>
+
+          {/* owner buckets: 今日の4区分（ボールの所在） */}
+          {showOwner ? (
+            <>
+              <View style={styles.recentHead}>
+                <Text style={type.title}>今日の4区分</Text>
+                <Pressable onPress={() => router.push('/tasks')} hitSlop={8}>
+                  <Text style={[type.muted, { color: c.primary }]}>ボール一覧 →</Text>
+                </Pressable>
+              </View>
+              <Pressable onPress={() => router.push('/tasks')} style={styles.tally}>
+                <Tally num={owner.decide.length} label="決める" />
+                <View style={styles.tDiv} />
+                <Tally num={owner.hand.length} label="渡す" />
+                <View style={styles.tDiv} />
+                <Tally num={owner.remind.length} label="催促" tint={owner.remind.length ? colors.gold : undefined} />
+                <View style={styles.tDiv} />
+                <Tally num={owner.blocked.length} label="止まる" tint={owner.blocked.length ? c.danger : undefined} />
+              </Pressable>
+            </>
+          ) : null}
 
           {/* today's tasks */}
           {dueTasks.length > 0 ? (
