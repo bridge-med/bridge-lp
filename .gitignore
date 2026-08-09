@@ -1,3 +1,4 @@
 __pycache__/
 *.pyc
+# 末尾スラッシュなし: 検証用symlinkにも効かせるため(スラッシュ付きはディレクトリ実体のみ)
 node_modules
