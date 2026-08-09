@@ -3,12 +3,19 @@
  * 画面遷移・レンダリング・イベント処理。データの読み書きは GachaStore、
  * 静的データは GACHA_DATA を参照する。
  *
+ * 中心の価値:「疲れているときに、考えなくても今できる小さな回復を1つだけ決める」
+ * 最短フロー: 今の状態を選ぶ → カードが1枚出る → 少しやってみる → 少し戻れた
+ *
  * 画面の役割:
- *   home      = 回復ステーション
- *   select    = 今の自分を選ぶ棚
- *   result    = ぽてが持ってきた1枚
- *   history   = 回復の足あと
- *   dex       = 回復カードのコレクション
+ *   onboarding = 初回の3画面(スキップ可)
+ *   home       = いま、どんな感じ?(1画面1アクション)
+ *   select     = 今の状態をえらぶ(上位4 + ほかの気分)
+ *   spin       = ガチャ演出(約1秒)
+ *   result     = 出てきた1枚(行動を先出し)
+ *   done       = 少し戻れました
+ *   myrecovery = マイ回復(最近・お気に入り・ふりかえり・よく合う)
+ *   dex        = 回復カード図鑑
+ *   settings   = じぶんに合わせる(歯車から開く)
  * ========================================================================= */
 (function () {
   'use strict';
@@ -22,16 +29,33 @@
 
   var state = {
     screen: 'home',
-    stateId: null,          // 選択中の状態(null = 選ばずに回す)
+    stateId: null,          // 選択中の状態(null = おまかせ)
     card: null,             // 表示中のカード
     resultContext: 'gacha', // 'gacha' | 'favorite' | 'dex'
     dexFilter: 'all',
-    historyFilter: 'all',
-    favFilter: 'all',
+    showAllStates: false,   // 状態選択で「ほかの気分」を開いているか
+    redrawCount: 0,         // 続けて引き直した回数(探しすぎ防止のやさしい合図)
+    resultExpanded: false,  // 結果画面の「くわしく」を開いているか
+    onboardStep: 0,
     lastPraise: '',
     lastWord: '',
-    capsuleRefilled: false // 直前の「やってみた」でカプセルが戻ったか
+    lastHeading: ''
   };
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- 利用計測(端末内のみ・個人特定情報は送らない) ---------- */
+  function track(name) {
+    try {
+      var KEY = 'gokigenGacha:events';
+      var log = JSON.parse(window.localStorage.getItem(KEY) || '[]');
+      if (!Array.isArray(log)) log = [];
+      log.push({ e: name, at: Date.now() });
+      if (log.length > 200) log = log.slice(log.length - 200);
+      window.localStorage.setItem(KEY, JSON.stringify(log));
+    } catch (e) { /* 保存できなくても進行に影響なし */ }
+    try { window.dispatchEvent(new CustomEvent('gokigen:track', { detail: { event: name } })); } catch (e) {}
+  }
 
   /* ---------- ユーティリティ ---------- */
 
@@ -47,9 +71,7 @@
     return D.CARDS.find(function (c) { return c.id === id; }) || null;
   }
 
-  function cardNo(card) {
-    return D.CARDS.indexOf(card) + 1;
-  }
+  function cardNo(card) { return D.CARDS.indexOf(card) + 1; }
 
   var toastTimer = null;
   function showToast(msg) {
@@ -91,19 +113,11 @@
   }
 
   function homePoteMessage() {
-    if (Store.capsuleCount() === 0) return pick(D.POTE.capsuleEmpty); // 今日のカプセル切れ
     var since = Store.daysSinceLastRun();
     if (since !== null && since >= 3) return pick(D.POTE.comeback);   // 久しぶり
     if (Store.todayCount() > 0) return pick(D.POTE.doneToday);        // 今日すでに回復済み
     var lines = D.POTE.timeOfDay[timeSlot()] || [];
     return pick(lines.concat(pick(D.POTE.home)));                     // 時間帯 + たまに定番
-  }
-
-  function streakNote() {
-    var streak = Store.streakDays();
-    if (streak === 0) return D.POTE.streakNote.zero;
-    if (streak === 1) return D.POTE.streakNote.one;
-    return D.POTE.streakNote.more;
   }
 
   /* ---------- 効果音(小さなポップ音・設定でOFF可) ---------- */
@@ -132,9 +146,10 @@
   /* ---------- 紙吹雪(実行完了時の控えめな演出) ---------- */
 
   function confetti() {
+    if (reduceMotion) return; // 動きを抑える設定では出さない
     try {
       var colors = ['#16233E', '#24365C', '#8B9BBC', '#A98F63', '#EAE2D3'];
-      for (var i = 0; i < 14; i++) {
+      for (var i = 0; i < 12; i++) {
         var dot = document.createElement('div');
         dot.className = 'confetti-dot';
         var size = 5 + Math.random() * 6;
@@ -157,23 +172,19 @@
     if (!Store.settings().seasonal) return '';
     var m = new Date().getMonth() + 1;
     if (m >= 3 && m <= 5) {
-      // 春: 舞う桜の花びら
       return '<ellipse cx="16" cy="18" rx="4" ry="2.6" fill="#F2EADB" transform="rotate(-25 16 18)"/>' +
         '<ellipse cx="96" cy="30" rx="3.4" ry="2.2" fill="#F2EADB" transform="rotate(20 96 30)"/>' +
         '<ellipse cx="88" cy="12" rx="3" ry="2" fill="#EAE2D3" transform="rotate(-10 88 12)"/>';
     }
     if (m >= 6 && m <= 8) {
-      // 夏: 頭の上に小さな若葉
       return '<path d="M55 12 q-1 -7 -7 -9 q7 -1 9 6" fill="#16233E"/>' +
         '<path d="M57 9 q3 -6 9 -6 q-3 6 -8 8" fill="#8B9BBC"/>' +
         '<path d="M55 15 q1 -4 2 -6" stroke="#24365C" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
     }
     if (m >= 9 && m <= 11) {
-      // 秋: 足元に落ち葉
       return '<ellipse cx="15" cy="90" rx="5" ry="3" fill="#A98F63" transform="rotate(-30 15 90)"/>' +
         '<ellipse cx="97" cy="93" rx="4" ry="2.5" fill="#8B7250" transform="rotate(25 97 93)"/>';
     }
-    // 冬: あたたかいマフラー(垂れは左側・マグと重ねない)
     return '<path d="M33 57 q22 10 44 0 l-1 7 q-21 9 -42 0 Z" fill="#A98F63"/>' +
       '<rect x="30" y="60" width="8" height="16" rx="3" fill="#A98F63"/>' +
       '<path d="M31 66 h6 M31 71 h6" stroke="#8B7250" stroke-width="1.4"/>';
@@ -194,20 +205,14 @@
     }
     return '' +
       '<svg viewBox="0 0 110 102" role="img" aria-label="ぽて">' +
-      // 小さなラグ
       '<ellipse cx="55" cy="94" rx="40" ry="6" fill="#16233E" opacity="0.28"/>' +
-      // 体
       '<ellipse cx="55" cy="72" rx="27" ry="22" fill="#CDBEA2"/>' +
       '<ellipse cx="55" cy="78" rx="17" ry="13" fill="#FBFAF7"/>' +
-      // 前足
       '<ellipse cx="40" cy="88" rx="8" ry="5" fill="#CDBEA2"/>' +
       '<ellipse cx="70" cy="88" rx="8" ry="5" fill="#CDBEA2"/>' +
-      // しっぽ
       '<circle cx="84" cy="70" r="9" fill="#CDBEA2"/><circle cx="86" cy="68" r="5" fill="#FBFAF7"/>' +
-      // 耳
       '<path d="M30 25 L40 9 L48 23 Z" fill="#CDBEA2"/><path d="M35 22 L40 14 L44 21 Z" fill="#A98F63"/>' +
       '<path d="M80 25 L70 9 L62 23 Z" fill="#CDBEA2"/><path d="M75 22 L70 14 L66 21 Z" fill="#A98F63"/>' +
-      // 顔
       '<circle cx="55" cy="41" r="26" fill="#CDBEA2"/>' +
       '<ellipse cx="55" cy="51" rx="15" ry="12" fill="#FBFAF7"/>' +
       eyes +
@@ -215,7 +220,6 @@
       '<path d="M54 54 q0 4 -4 5 M54 54 q0 4 4 5" stroke="#1B1B1E" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
       '<circle cx="35" cy="52" r="4" fill="#F2EADB" opacity="0.8"/>' +
       '<circle cx="75" cy="52" r="4" fill="#F2EADB" opacity="0.8"/>' +
-      // マグカップ(クローバー入り)
       '<rect x="46" y="63" width="18" height="14" rx="4" fill="#16233E"/>' +
       '<path d="M64 66 q6 2 0 8" stroke="#16233E" stroke-width="3" fill="none"/>' +
       '<circle cx="53" cy="69" r="1.7" fill="#FBFAF7"/><circle cx="57" cy="69" r="1.7" fill="#FBFAF7"/><circle cx="55" cy="72" r="1.7" fill="#FBFAF7"/>' +
@@ -235,7 +239,7 @@
       '</svg>';
   }
 
-  // ガチャマシン(柿色)
+  // ガチャマシン(藍)
   function machineSvg() {
     return '' +
       '<svg viewBox="0 0 90 112" role="img" aria-label="ガチャマシン">' +
@@ -252,7 +256,7 @@
       '</svg>';
   }
 
-  // カプセル
+  // カプセル(演出用)
   function capsuleSvg() {
     return '' +
       '<svg viewBox="0 0 60 60" role="img" aria-label="カプセル">' +
@@ -264,8 +268,7 @@
 
   var TAB_ICONS = {
     home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 L12 3 L21 11"/><path d="M5 10 V21 H19 V10"/></svg>',
-    history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15.5 14"/></svg>',
-    favorites: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5 C7 16.5 3.5 13.5 3.5 9.5 A4.5 4.5 0 0 1 12 6.5 A4.5 4.5 0 0 1 20.5 9.5 C20.5 13.5 17 16.5 12 20.5 Z"/></svg>',
+    myrecovery: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20 a7.5 7.5 0 0 1 15 0"/></svg>',
     dex: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5 C10 3.8 7 3.5 4 4.5 V19 C7 18 10 18.3 12 20 C14 18.3 17 18 20 19 V4.5 C17 3.5 14 3.8 12 5.5 Z"/><path d="M12 5.5 V20"/></svg>',
     settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8 L13.2 5.6 L16.2 4.9 L16.9 7.9 L19.8 8.8 L18.6 11.6 L20.5 14 L18 15.8 L18.4 18.9 L15.3 19 L13.9 21.8 L12 20 L10.1 21.8 L8.7 19 L5.6 18.9 L6 15.8 L3.5 14 L5.4 11.6 L4.2 8.8 L7.1 7.9 L7.8 4.9 L10.8 5.6 Z" opacity="0.5"/></svg>'
   };
@@ -275,7 +278,7 @@
   function stars(difficulty) {
     var s = '';
     for (var i = 1; i <= 3; i++) s += i <= difficulty ? '★' : '<span class="off">☆</span>';
-    return '<span class="stars">' + s + '</span>';
+    return '<span class="stars" aria-hidden="true">' + s + '</span>';
   }
 
   function difficultyLabel(d) {
@@ -300,46 +303,55 @@
       avatar + '<div class="pote-bubble">' + html + '</div>' + shelf + '</div>';
   }
 
-  /* ---------- カプセル(1日の抽選回数)UI ---------- */
-
-  function capsuleMeter() {
-    var count = Store.capsuleCount();
-    var per = Store.CAPSULES_PER_DAY;
-    var freeAvail = Store.dailyFreeAvailable();
-    var slots = Math.max(per, count);
-    // 先頭は「今日の1枚」(カプセルなしで引ける)の星スロット
-    var dots = '<span class="cap-star' + (freeAvail ? ' on' : '') + '" aria-hidden="true">★</span>';
-    for (var i = 0; i < slots; i++) {
-      dots += '<span class="cap-dot' + (i < count ? ' on' : '') + (i >= per ? ' bonus' : '') + '" aria-hidden="true"></span>';
-    }
-    var note = freeAvail ? '★は今日の1枚。カプセルなしで引けます'
-      : count === 0 ? 'あしたの朝に補充されます'
-      : esc(D.POTE.capsuleNote);
-    return '<div class="capsule-meter" role="status" aria-label="今日のカプセル 残り' + count + '個' + (freeAvail ? '、今日の1枚あり' : '') + '">' +
-      '<span class="cap-label">きょうのカプセル</span>' +
-      '<span class="cap-dots">' + dots + '</span>' +
-      '<span class="cap-note">' + note + '</span>' +
-      '</div>';
+  function gearButton() {
+    return '<button class="gear-btn" data-action="tab" data-tab="settings" aria-label="設定を開く">' + TAB_ICONS.settings + '</button>';
   }
 
-  function capsulesLeft() { return Store.canDraw(); }
+  /* ---------- 集計ヘルパー(マイ回復) ---------- */
+
+  // 今月、回復を記録できた日数
+  function daysThisMonth() {
+    var now = new Date();
+    var y = now.getFullYear(), m = now.getMonth();
+    var set = {};
+    Store.history().forEach(function (e) {
+      var d = new Date(e.at);
+      if (d.getFullYear() === y && d.getMonth() === m) set[Store.dayKey(e.at)] = 1;
+    });
+    return Object.keys(set).length;
+  }
+
+  // 「自分によく合う回復」= これまでよく実行したカード(上位)
+  function suitedCards(limit) {
+    var runs = Store.cardRunCounts();
+    return Object.keys(runs)
+      .sort(function (a, b) { return runs[b] - runs[a]; })
+      .map(findCard)
+      .filter(Boolean)
+      .slice(0, limit || 3);
+  }
 
   /* ---------- レンダリング ---------- */
 
   var TABS = [
     { id: 'home', label: 'ホーム' },
-    { id: 'history', label: '履歴' },
-    { id: 'favorites', label: 'お気に入り' },
-    { id: 'dex', label: '図鑑' },
-    { id: 'settings', label: '設定' }
+    { id: 'myrecovery', label: 'マイ回復' },
+    { id: 'dex', label: '図鑑' }
   ];
 
   function activeTab() {
     if (['select', 'spin', 'result', 'done'].indexOf(state.screen) >= 0) return 'home';
+    if (state.screen === 'settings') return '';   // 設定はタブに属さない
     return state.screen;
   }
 
   function renderTabbar() {
+    // オンボーディングと演出中はタブを隠して迷いを減らす
+    if (state.screen === 'onboarding' || state.screen === 'spin') {
+      tabbarEl.hidden = true;
+      return;
+    }
+    tabbarEl.hidden = false;
     var active = activeTab();
     tabbarEl.innerHTML = TABS.map(function (t) {
       return '<button class="tab-btn' + (t.id === active ? ' active' : '') + '" data-action="tab" data-tab="' + t.id + '" aria-label="' + t.label + '"' +
@@ -350,13 +362,13 @@
 
   function render() {
     var screens = {
+      onboarding: renderOnboarding,
       home: renderHome,
       select: renderSelect,
       spin: renderSpin,
       result: renderResult,
       done: renderDone,
-      history: renderHistory,
-      favorites: renderFavorites,
+      myrecovery: renderMyRecovery,
       dex: renderDex,
       settings: renderSettings
     };
@@ -369,460 +381,440 @@
     bind();
   }
 
-  /* ---- 1. ホーム = 回復ステーション ---- */
-  function renderHome() {
-    var favs = Store.favoriteCards().slice(0, 2);
-    var favHtml = favs.length === 0 ? '' :
-      '<div class="eyebrow">♥ 最近のお気に入り <button class="right" data-action="tab" data-tab="favorites">すべて見る ›</button></div>' +
-      '<div class="fav-shortcuts">' +
-      favs.map(function (c) {
-        return '<button class="fav-shortcut" data-action="open-favorite" data-card="' + c.id + '">' +
-          '<span class="heart">♥</span>' +
-          '<span class="emoji">' + c.emoji + '</span>' +
-          '<span class="ttl">' + esc(c.title) + '</span>' +
-          categoryTag(c.category, true) +
-          '</button>';
-      }).join('') +
-      '</div>';
+  /* ---- 0. 初回オンボーディング(3画面・スキップ可) ---- */
+  function renderOnboarding() {
+    var steps = D.ONBOARDING;
+    var i = Math.max(0, Math.min(steps.length - 1, state.onboardStep));
+    var s = steps[i];
+    var last = i === steps.length - 1;
+    var dots = steps.map(function (_, n) {
+      return '<span class="ob-dot' + (n === i ? ' on' : '') + '" aria-hidden="true"></span>';
+    }).join('');
+    var stepList = s.steps
+      ? '<ol class="ob-steps">' + s.steps.map(function (t, n) {
+          return '<li><span class="n">' + (n + 1) + '</span>' + esc(t) + '</li>';
+        }).join('') + '</ol>'
+      : '';
+    var body = s.body ? '<p class="ob-body">' + esc(s.body) + '</p>' : '';
 
     return '' +
-      '<header class="app-head">' +
-      '<div class="machine">' + machineSvg() + '</div>' +
-      '<h1 class="title-multi"><span class="w1">ごきげん</span><br><span class="w2">回復</span><span class="w3">ガチャ</span></h1>' +
-      '</header>' +
-      '<p class="app-sub">' + esc(D.APP.subcopy) + '</p>' +
-      poteRow(esc(homePoteMessage()), { plant: true, mood: timeSlot() === 'night' ? 'sleepy' : 'normal' }) +
-      '<div class="paper station-status">' +
-      '<h3>🌿 今日の回復ステータス</h3>' +
-      '<div class="status-grid">' +
-      '<div class="status-cell c1"><span class="ic">🌱</span><span class="k">今日の回復</span><span class="v">' + Store.todayCount() + '<small>回</small></span></div>' +
-      '<div class="status-cell c2"><span class="ic">📅</span><span class="k">連続</span><span class="v">' + Store.streakDays() + '<small>日</small></span></div>' +
-      '<button class="status-cell c3" data-action="tab" data-tab="dex"><span class="ic">📖</span><span class="k">みつけた</span><span class="v">' + Store.discoveredCount() + '<small>枚</small></span></button>' +
+      '<div class="onboarding">' +
+      '<div class="ob-top"><button class="ob-skip" data-action="onboard-skip">スキップ</button></div>' +
+      '<div class="ob-body-wrap">' +
+      (Store.settings().showPote ? '<div class="ob-pote">' + poteSvg(last ? 'happy' : 'normal') + '</div>' : '<div class="ob-emoji" aria-hidden="true">' + s.emoji + '</div>') +
+      '<h1 class="ob-title">' + esc(s.title) + '</h1>' +
+      body +
+      stepList +
       '</div>' +
-      '<p class="status-note">' + esc(streakNote()) + '</p>' +
+      '<div class="ob-foot">' +
+      '<div class="ob-dots" role="progressbar" aria-valuemin="1" aria-valuemax="' + steps.length + '" aria-valuenow="' + (i + 1) + '">' + dots + '</div>' +
+      '<button class="btn btn-primary" data-action="' + (last ? 'onboard-done' : 'onboard-next') + '">' + (last ? 'はじめる' : '次へ') + '</button>' +
       '</div>' +
-      capsuleMeter() +
-      '<button class="btn btn-primary" data-action="go-select"' + (capsulesLeft() ? '' : ' disabled') + '>今の状態を選ぶ</button>' +
-      '<button class="btn btn-secondary" data-action="spin-now"' + (capsulesLeft() ? '' : ' disabled') + '>そのまま回す</button>' +
-      favHtml +
-      '<button class="paper today-strip" data-action="tab" data-tab="history">' +
-      '<span>🗂️</span><span class="ttl">今日実行したカード</span>' +
-      '<span class="num">' + Store.todayCount() + '<small> 枚</small></span><span class="arrow">›</span>' +
-      '</button>';
+      '</div>';
   }
 
-  /* ---- 2. 状態選択 = 今の自分を選ぶ棚 ---- */
+  /* ---- 1. ホーム = いま、どんな感じ? ---- */
+  function renderHome() {
+    track('gokigen_home_view');
+    var hasHistory = Store.history().length > 0;
+    var last = hasHistory ? findCard(Store.history()[0].cardId) : null;
+    var todayN = Store.todayCount();
+
+    var quiet = '';
+    if (hasHistory && last) {
+      var lead = todayN > 0 ? '今日やった回復' : '最近やった回復';
+      quiet = '' +
+        '<div class="home-quiet">' +
+        '<button class="quiet-strip" data-action="tab" data-tab="myrecovery" aria-label="マイ回復をひらく">' +
+        '<span class="q-emoji" aria-hidden="true">' + last.emoji + '</span>' +
+        '<span class="q-body"><span class="q-k">' + lead + '</span><span class="q-ttl">' + esc(last.title) + '</span></span>' +
+        (todayN > 0 ? '<span class="q-badge">今日 ' + todayN + '回</span>' : '') +
+        '<span class="q-arrow" aria-hidden="true">›</span>' +
+        '</button>' +
+        (todayN > 0 ? '<p class="home-note">' + esc(pick(D.POTE.doneToday)) + '</p>' : '') +
+        '</div>';
+    }
+
+    return '' +
+      '<div class="home-top">' +
+      '<span class="home-brand">' + esc(D.APP.name) + '</span>' +
+      gearButton() +
+      '</div>' +
+      '<h1 class="home-h1">いま、どんな感じ?</h1>' +
+      '<p class="home-sub">' + esc(D.APP.subcopy) + '</p>' +
+      '<div class="home-hero">' +
+      '<div class="home-machine">' + machineSvg() + '</div>' +
+      (Store.settings().showPote ? '<div class="home-pote">' + poteSvg(timeSlot() === 'night' ? 'sleepy' : 'normal') + '</div>' : '') +
+      '</div>' +
+      (Store.settings().showPote ? '<p class="home-pote-line">' + esc(homePoteMessage()) + '</p>' : '') +
+      '<div class="home-cta">' +
+      '<button class="btn btn-primary" data-action="go-select">今の状態から引く<span class="btn-arrow" aria-hidden="true">›</span></button>' +
+      '<button class="btn btn-secondary" data-action="spin-now">おまかせで引く</button>' +
+      '</div>' +
+      quiet;
+  }
+
+  /* ---- 2. 状態選択 = 今の自分をえらぶ ---- */
   function renderSelect() {
-    var selected = state.stateId ? D.stateById[state.stateId] : null;
-    var ctaLabel = selected ? '「' + selected.label + '」の状態で回す' : 'この状態で回す';
+    var primary = D.PRIMARY_STATES.map(function (id) { return D.stateById[id]; }).filter(Boolean);
+    var rest = D.STATES.filter(function (s) { return D.PRIMARY_STATES.indexOf(s.id) < 0; });
+
+    function stateCard(s, big) {
+      return '<button class="state-card t-' + s.tone + (big ? ' big' : '') + '" data-action="pick-state" data-state="' + s.id + '" aria-label="' + esc(s.label) + '。' + esc(s.desc) + '">' +
+        '<span class="emoji" aria-hidden="true">' + s.emoji + '</span>' +
+        '<span class="ttl">' + esc(s.label) + '</span>' +
+        '<span class="desc">' + esc(s.desc) + '</span>' +
+        '</button>';
+    }
+
+    var moreBlock = state.showAllStates
+      ? '<div class="state-grid more">' + rest.map(function (s) { return stateCard(s, false); }).join('') + '</div>'
+      : '<button class="btn btn-ghost more-btn" data-action="show-all-states" aria-expanded="false">ほかの気分も見る<span aria-hidden="true"> ▾</span></button>';
+
     return '' +
       '<div class="page-head">' +
       '<button class="back" data-action="tab" data-tab="home" aria-label="ホームに戻る">‹</button>' +
-      '<h2>今の状態をえらぶ</h2>' +
+      '<h2>いま、どんな感じ?</h2>' +
       '</div>' +
-      '<p class="page-desc">いちばん近い気分を、ひとつ選ぶだけで大丈夫です。</p>' +
-      poteRow(esc(pick(D.POTE.select)), { small: true }) +
-      '<div class="state-shelf">' +
-      D.STATES.map(function (s) {
-        var sel = state.stateId === s.id;
-        return '<button class="state-card t-' + s.tone + (sel ? ' selected' : '') + '" data-action="pick-state" data-state="' + s.id + '" aria-pressed="' + sel + '">' +
-          '<span class="check" aria-hidden="true">✓</span>' +
-          '<span class="emoji">' + s.emoji + '</span>' +
-          '<span class="ttl">' + esc(s.label) + '</span>' +
-          '<span class="desc">' + esc(s.desc) + '</span>' +
-          '</button>';
-      }).join('') +
-      '</div>' +
-      '<div class="select-footer">' +
-      '<button class="btn btn-primary" data-action="spin-with-state"' + (state.stateId && capsulesLeft() ? '' : ' disabled') + '>' + esc(ctaLabel) + '</button>' +
-      '<button class="btn btn-ghost" data-action="spin-now"' + (capsulesLeft() ? '' : ' disabled') + '>選ばずに回す</button>' +
-      '<p class="select-note">' + esc(capsulesLeft() ? D.POTE.selectNote : pick(D.POTE.capsuleEmpty)) + '</p>' +
-      '</div>';
+      '<p class="select-hint">迷ったら「疲れた」で大丈夫です。</p>' +
+      '<div class="state-grid primary">' + primary.map(function (s) { return stateCard(s, true); }).join('') + '</div>' +
+      moreBlock +
+      poteRow(esc(pick(D.POTE.select)), { small: true, className: 'select-pote' }) +
+      '<button class="btn btn-ghost quiet omakase" data-action="spin-now">選ばずに、おまかせで引く</button>';
   }
 
-  /* ---- 3. ガチャ演出 ---- */
+  /* ---- 3. ガチャ演出(約1秒) ---- */
   function renderSpin() {
     return '' +
       '<div class="spin-screen">' +
+      '<div class="spin-stage">' +
       '<div class="spin-machine">' + machineSvg() + '</div>' +
+      (Store.settings().showPote ? '<div class="spin-pote">' + poteSvg('normal') + '</div>' : '') +
       '<div class="spin-capsule">' + capsuleSvg() + '</div>' +
-      '<p class="spin-text">' + esc(pick(D.POTE.spinning)) + '<span class="spin-dots"></span></p>' +
+      '</div>' +
+      '<p class="spin-text" aria-live="polite">' + esc(pick(D.POTE.spinning)) + '<span class="spin-dots"></span></p>' +
       '</div>';
   }
 
-  /* ---- 4. 回復カード = ぽてが持ってきた1枚 ---- */
+  /* ---- 4. 結果カード = 出てきた1枚(行動を先出し) ---- */
   function renderResult() {
     var c = state.card;
     if (!c) return renderHome();
+    track('gokigen_card_view');
     var cat = catOf(c);
+    var fav = Store.isFavorite(c.id);
+    var fromGacha = state.resultContext === 'gacha';
+    var fromDex = state.resultContext === 'dex';
+    var expanded = state.resultExpanded || fromDex;
+
     var statePills = c.suitedStates.map(function (id) {
       var s = D.stateById[id];
       return s ? '<span class="tag t-' + s.tone + '">' + esc(s.label) + '</span>' : '';
     }).join('');
-    var fav = Store.isFavorite(c.id);
-    var fromDex = state.resultContext === 'dex';
 
-    return '' +
-      '<div class="page-head">' +
-      '<button class="back" data-action="' + (fromDex ? 'tab' : 'go-home') + '"' + (fromDex ? ' data-tab="dex"' : '') + ' aria-label="戻る">‹</button>' +
-      '<h2>回復カード</h2>' +
-      '</div>' +
-      '<p class="result-note">ぽてがカードを持ってきました</p>' +
-      '<div class="paper result-card">' +
-      '<span class="tape t-' + cat.tone + '"></span>' +
-      '<div class="result-top">' +
-      '<div class="emoji t-' + cat.tone + '">' + c.emoji + '</div>' +
-      '<div><h2>' + esc(c.title) + '</h2>' +
-      // 履歴からの控えめな学習: 同じ状態で2回以上実行していたら添える
-      (Store.runsForCardInState(c.id, state.stateId) >= 2
-        ? '<span class="tag t-' + cat.tone + ' aff-tag">♥ この状態でよく効いています</span>' : '') +
-      '</div>' +
-      '</div>' +
-      '<hr class="result-divider">' +
+    var details = '' +
+      '<div class="result-details"' + (expanded ? '' : ' hidden') + '>' +
       '<div class="meta-grid">' +
-      '<div class="meta-item"><div class="k">🏷️ カテゴリ</div><div class="v">' + categoryTag(c.category) + '</div></div>' +
-      '<div class="meta-item"><div class="k">🕐 時間の目安</div><div class="v"><span class="big">' + c.durationMinutes + '</span> 分</div></div>' +
-      '<div class="meta-item"><div class="k">⭐ むずかしさ</div><div class="v">' + stars(c.difficulty) + '<br><small style="font-weight:600;color:var(--cocoa-soft);font-size:0.7rem">' + difficultyLabel(c.difficulty) + '</small></div></div>' +
-      '<div class="meta-item"><div class="k">👤 向いている状態</div><div class="state-pills">' + statePills + '</div></div>' +
-      '<div class="meta-item wide"><div class="k">♥ 回復タイプ</div><div class="v"><span class="tag t-' + cat.tone + '">' + esc(c.recoveryType) + '</span></div></div>' +
+      '<div class="meta-item"><div class="k">カテゴリ</div><div class="v">' + categoryTag(c.category) + '</div></div>' +
+      '<div class="meta-item"><div class="k">むずかしさ</div><div class="v">' + stars(c.difficulty) + ' <small>' + difficultyLabel(c.difficulty) + '</small></div></div>' +
+      '<div class="meta-item"><div class="k">回復タイプ</div><div class="v"><span class="tag t-' + cat.tone + '">' + esc(c.recoveryType) + '</span></div></div>' +
+      '<div class="meta-item"><div class="k">向いている状態</div><div class="state-pills">' + statePills + '</div></div>' +
       '</div>' +
-      '<hr class="result-divider">' +
-      '<div class="result-block"><div class="k">💬 今日のメッセージ</div><p>' + esc(c.mainMessage) + '</p></div>' +
-      '<div class="result-block"><div class="k">📝 やること</div><p>' + esc(c.action) + '</p></div>' +
+      '<div class="result-msg"><p>' + esc(c.mainMessage) + '</p></div>' +
       '<div class="result-pote">' +
       (Store.settings().showPote ? '<div class="pote-avatar small">' + poteSvg('normal') + '</div>' : '') +
       '<div class="pote-bubble">' + esc(c.poteMessage) + '</div>' +
       '</div>' +
-      '</div>' +
-      '<div class="result-actions">' +
-      '<button class="btn btn-primary" data-action="did-it">やってみた</button>' +
-      '<button class="btn btn-outline" data-action="not-now"' + (capsulesLeft() ? '' : ' disabled') + '>今はちがう</button>' +
-      '<div class="btn-row">' +
+      '<div class="result-sub-actions">' +
       '<button class="btn btn-outline btn-sm' + (fav ? ' isfav' : '') + '" data-action="toggle-fav" aria-pressed="' + fav + '">' + heart(fav) + ' お気に入り' + (fav ? '済み' : '') + '</button>' +
-      '<button class="btn btn-outline btn-sm" data-action="respin"' + (capsulesLeft() ? '' : ' disabled') + '>もう一回まわす</button>' +
-      '</div>' +
-      (capsulesLeft() ? '' : '<p class="select-note">' + esc(pick(D.POTE.capsuleEmpty)) + '</p>') +
-      '<div class="share-line"><button class="btn btn-ghost quiet" data-action="copy-share">⤴ シェア文をコピー</button>' +
-      (navigator.share ? '<button class="btn btn-ghost quiet" data-action="webshare">共有する</button>' : '') +
+      '<button class="btn btn-outline btn-sm" data-action="share-card">⤴ シェア</button>' +
       '</div>' +
       '</div>';
+
+    return '' +
+      '<div class="page-head">' +
+      '<button class="back" data-action="' + (fromDex ? 'tab' : 'go-home') + '"' + (fromDex ? ' data-tab="dex"' : '') + ' aria-label="戻る">‹</button>' +
+      '<h2>今日の回復</h2>' +
+      '</div>' +
+      '<div class="paper result-card">' +
+      '<span class="tape t-' + cat.tone + '"></span>' +
+      '<div class="result-emoji t-' + cat.tone + '" aria-hidden="true">' + c.emoji + '</div>' +
+      '<h2 class="result-title">' + esc(c.title) + '</h2>' +
+      '<div class="result-duration"><span aria-hidden="true">🕐</span> 約' + c.durationMinutes + '分</div>' +
+      '<p class="result-action">' + esc(c.action) + '</p>' +
+      '</div>' +
+      (fromGacha && state.redrawCount >= 3 ? '<p class="redraw-note">' + esc(D.POTE.redrawNote) + '</p>' : '') +
+      '<div class="result-actions">' +
+      '<button class="btn btn-primary" data-action="did-it">少しやってみる<span class="btn-arrow" aria-hidden="true">›</span></button>' +
+      (fromGacha
+        ? '<button class="btn btn-outline" data-action="not-now">今はちがう</button>'
+        : '<button class="btn btn-outline" data-action="' + (fromDex ? 'tab" data-tab="dex' : 'go-home') + '">' + (fromDex ? '図鑑にもどる' : 'ホームにもどる') + '</button>') +
+      '</div>' +
+      '<button class="details-toggle" data-action="toggle-details" aria-expanded="' + expanded + '">' +
+      (expanded ? 'とじる' : 'くわしく見る') + '<span aria-hidden="true">' + (expanded ? ' ▴' : ' ▾') + '</span></button>' +
+      details;
   }
 
-  /* ---- 5. 実行完了 ---- */
+  /* ---- 5. 実行完了 = 少し戻れました ---- */
   function renderDone() {
     var c = state.card;
     var fav = c ? Store.isFavorite(c.id) : false;
     return '' +
       '<div class="done-screen">' +
-      '<div class="done-stamp" role="img" aria-label="回復完了">回復完了</div>' +
-      poteRow('<strong>' + esc(state.lastPraise) + '</strong><span class="sub">' + esc(c ? '「' + c.title + '」ができました' : '') + '</span>', { mood: 'happy', className: 'done-pote' }) +
-      '<div class="paper station-status">' +
-      '<h3>🌿 今日の回復ステータス</h3>' +
-      '<div class="status-grid" style="grid-template-columns:1fr 1fr">' +
-      '<div class="status-cell c1"><span class="ic">🌱</span><span class="k">今日の実行数</span><span class="v">' + Store.todayCount() + '<small>回</small></span></div>' +
-      '<div class="status-cell c2"><span class="ic">📅</span><span class="k">連続回復日数</span><span class="v">' + Store.streakDays() + '<small>日</small></span></div>' +
-      '</div>' +
-      '<p class="status-note">' + esc(streakNote()) + '</p>' +
-      '</div>' +
+      poteRow(
+        '<strong class="done-head">' + esc(state.lastHeading) + '</strong>' +
+        '<span class="sub">' + esc(state.lastPraise) + '</span>',
+        { mood: 'happy', className: 'done-pote' }
+      ) +
+      (c ? '<div class="paper done-card">' +
+        '<span class="done-emoji" aria-hidden="true">' + c.emoji + '</span>' +
+        '<div class="done-card-body"><span class="k">やってみた回復</span><span class="ttl">' + esc(c.title) + '</span></div>' +
+        '</div>' : '') +
+      '<p class="done-count">今日は ' + Store.todayCount() + ' 回、自分をいたわれました</p>' +
       '<div class="paper done-word">' +
-      '<div class="ic">📎</div>' +
+      '<div class="ic" aria-hidden="true">📎</div>' +
       '<div><div class="k">今日のひとこと</div><p>' + esc(state.lastWord) + '</p></div>' +
       '</div>' +
-      (state.capsuleRefilled ? '<p class="capsule-back">💊 カプセルが1個もどってきました</p>' : '') +
       '<div class="result-actions">' +
-      '<button class="btn btn-primary" data-action="spin-again"' + (capsulesLeft() ? '' : ' disabled') + '>もう1枚引く</button>' +
-      '<button class="btn btn-secondary" data-action="go-home">ホームに戻る</button>' +
-      (c && !fav ? '<button class="btn btn-ghost" data-action="toggle-fav">♡ お気に入りに追加</button>' : '') +
-      '<div class="share-line"><button class="btn btn-ghost quiet" data-action="copy-share">⤴ シェア文をコピー</button></div>' +
+      '<button class="btn btn-primary" data-action="go-home">ホームにもどる</button>' +
+      '<div class="btn-row">' +
+      '<button class="btn btn-outline btn-sm" data-action="spin-again">もう1枚引く</button>' +
+      (c ? '<button class="btn btn-outline btn-sm' + (fav ? ' isfav' : '') + '" data-action="toggle-fav">' + heart(fav) + ' お気に入り' + (fav ? '済み' : '') + '</button>' : '') +
+      '</div>' +
+      '<p class="done-enough">今日はここまででも、十分です。</p>' +
       '</div>' +
       '</div>';
   }
 
-  /* ---- 6. 履歴 = 回復の足あと ---- */
-  function renderHistory() {
+  /* ---- 6. マイ回復 = 最近・お気に入り・ふりかえり・よく合う ---- */
+  function renderMyRecovery() {
+    track('gokigen_my_recovery_view');
     var history = Store.history();
-    var week = Store.last7Days();
-    var maxCount = Math.max(1, Math.max.apply(null, week.map(function (d) { return d.count; })));
-    var todayKey = Store.dayKey(new Date());
+    var favs = Store.favoriteCards();
 
-    // 今週の足あと(週1でふり返るまとめカード)
-    var w = Store.weeklySummary();
-    var topCat = w.topCategory ? D.categoryById[w.topCategory.id] : null;
-    var topCard = w.topCard ? findCard(w.topCard.id) : null;
-    function md(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
-    var summary = '' +
-      '<div class="paper week-card">' +
-      '<span class="tape t-butter tilt-r"></span>' +
-      '<div class="week-card-head"><span class="ttl">🍂 今週の足あと</span><span class="range">' + md(w.from) + ' 〜 ' + md(w.to) + '</span></div>' +
-      '<div class="week-card-grid">' +
-      '<div class="cell n1"><div class="k">回復</div><div class="v">' + w.count + '<small>回</small></div></div>' +
-      '<div class="cell n1"><div class="k">動いた日</div><div class="v">' + w.activeDays + '<small>日</small></div></div>' +
-      '<div class="cell n3"><div class="k">連続</div><div class="v">' + Store.streakDays() + '<small>日</small></div></div>' +
-      '</div>' +
-      (w.count === 0
-        ? '<p class="week-card-row empty">今週はこれからです。1枚戻れたら十分です。</p>'
-        : '<div class="week-card-row"><span class="k">よく引いたカテゴリ</span>' + (topCat ? categoryTag(topCat.id) : '') + '</div>' +
-          (topCard
-            ? '<div class="week-card-row"><span class="k">いちばん頼ったカード</span><span class="v-card">' + topCard.emoji + ' ' + esc(topCard.title) + ' <small>(' + w.topCard.count + '回)</small></span></div>'
-            : '') +
-          '<div class="share-line"><button class="btn btn-ghost quiet" data-action="copy-week">⤴ 今週のまとめをコピー</button></div>'
-      ) +
-      '</div>';
-
-    var chart = '' +
-      '<div class="paper week-chart">' +
-      week.map(function (d) {
-        var h = d.count === 0 ? 4 : Math.round((d.count / maxCount) * 60);
-        return '<div class="week-col' + (d.count === 0 ? ' zero' : '') + (d.key === todayKey ? ' today' : '') + '">' +
-          '<div class="bar-track"><div class="bar" style="height:' + h + 'px"></div></div>' +
-          '<div class="num">' + d.count + '</div>' +
-          '<div class="day">' + d.weekday + '</div>' +
-          '</div>';
-      }).join('') +
-      '</div>';
-
-    if (history.length === 0) {
-      return '<div class="page-head"><h2>回復の足あと</h2></div>' +
-        '<p class="page-desc">これまでの回復ガチャを、やさしくふり返ります。</p>' +
-        summary +
+    if (history.length === 0 && favs.length === 0) {
+      return '' +
+        '<div class="page-head with-gear"><h2>マイ回復</h2>' + gearButton() + '</div>' +
         '<div class="paper empty-state">' +
         (Store.settings().showPote ? '<div class="pote-avatar">' + poteSvg('normal') + '</div>' : '') +
-        '<p>' + esc(D.POTE.emptyHistory) + '</p>' +
-        '<button class="btn btn-primary btn-sm" data-action="spin-now">1枚引いてみる</button>' +
+        '<p>' + esc(D.POTE.emptyMyRecovery) + '</p>' +
+        '<button class="btn btn-primary btn-sm" data-action="go-select">1枚引いてみる</button>' +
         '</div>';
     }
 
-    // カテゴリフィルター
-    var filters = [{ id: 'all', label: 'すべて' }].concat(D.CATEGORIES);
-    var filterHtml = '<div class="filter-row" role="tablist">' +
-      filters.map(function (f) {
-        return '<button class="filter-chip' + (state.historyFilter === f.id ? ' active' : '') + '" data-action="history-filter" data-filter="' + f.id + '">' + esc(f.label) + '</button>';
-      }).join('') + '</div>';
-
-    var entries = history.slice(0, 80).filter(function (e) {
-      if (state.historyFilter === 'all') return true;
-      var c = findCard(e.cardId);
-      return c && c.category === state.historyFilter;
-    });
-
-    // 日付ごとにグループ化(履歴は新しい順で保存されている)
-    var groups = [];
-    var lastKey = null;
-    entries.forEach(function (e) {
-      var k = Store.dayKey(e.at);
-      if (k !== lastKey) { groups.push({ key: k, items: [] }); lastKey = k; }
-      groups[groups.length - 1].items.push(e);
-    });
-
-    function dayLabel(key) {
-      if (key === todayKey) return '今日';
-      var y = new Date();
-      y.setDate(y.getDate() - 1);
-      if (key === Store.dayKey(y)) return '昨日';
-      var parts = key.split('-');
-      return Number(parts[1]) + '月' + Number(parts[2]) + '日';
-    }
-
-    var listHtml = groups.length === 0
-      ? '<div class="paper empty-state"><p>このカテゴリの履歴はまだありません。</p></div>'
-      : groups.map(function (g) {
-        return '<div class="day-label">' + dayLabel(g.key) + '</div>' +
-          g.items.map(function (e) {
+    /* --- セクション1: 最近やった回復 --- */
+    var recent = history.slice(0, 6);
+    var recentHtml = '<div class="eyebrow">最近やった回復</div>' +
+      (recent.length === 0
+        ? '<div class="paper soft-empty">' + esc(D.POTE.emptyRecent) + '</div>'
+        : '<div class="my-recent">' + recent.map(function (e) {
             var c = findCard(e.cardId);
             if (!c) return '';
             var st = e.stateId ? D.stateById[e.stateId] : null;
-            var time = new Date(e.at);
-            var hm = time.getHours() + ':' + (time.getMinutes() < 10 ? '0' : '') + time.getMinutes();
+            var t = new Date(e.at);
+            var when = (t.getMonth() + 1) + '/' + t.getDate();
             var fav = Store.isFavorite(c.id);
-            var cat = catOf(c);
-            return '<div class="paper trail-item">' +
-              '<div class="when"><span class="t">' + hm + '</span></div>' +
-              '<span class="state-mini tag t-' + (st ? st.tone : 'cream') + '" title="' + (st ? esc(st.label) : '状態未選択') + '">' + (st ? st.emoji : '🎲') + '</span>' +
-              '<span class="arr">→</span>' +
-              '<div class="body">' +
-              '<div class="ttl">' + esc(c.title) + '</div>' +
-              categoryTag(c.category, true) +
-              '</div>' +
-              '<button class="icon-btn' + (fav ? ' active' : '') + '" data-action="fav-card" data-card="' + c.id + '" aria-label="お気に入り">' + heart(fav) + '</button>' +
-              '<button class="icon-btn danger" data-action="del-history" data-id="' + e.id + '" aria-label="この履歴を削除">✕</button>' +
-              '</div>';
-          }).join('');
-      }).join('');
+            return '<button class="paper recent-item" data-action="open-card" data-card="' + c.id + '">' +
+              '<span class="r-emoji tag t-' + catOf(c).tone + '" aria-hidden="true">' + c.emoji + '</span>' +
+              '<span class="r-body"><span class="r-ttl">' + esc(c.title) + '</span>' +
+              '<span class="r-meta">' + (st ? esc(st.label) + ' · ' : '') + when + '</span></span>' +
+              (fav ? '<span class="r-fav" aria-hidden="true">♥</span>' : '') +
+              '</button>';
+          }).join('') + '</div>');
 
-    return '<div class="page-head"><h2>回復の足あと</h2></div>' +
-      '<p class="page-desc">これまでの回復ガチャを、やさしくふり返ります。</p>' +
-      summary +
-      chart +
-      '<div class="eyebrow">🗂️ 戻れた行動の記録</div>' +
-      filterHtml +
-      listHtml +
-      poteRow(esc(D.POTE.history), { small: true, className: 'done-pote' });
-  }
+    /* --- セクション2: お気に入り --- */
+    var favHtml = '<div class="eyebrow">お気に入り</div>' +
+      (favs.length === 0
+        ? '<div class="paper soft-empty">' + esc(D.POTE.emptyFavorites) + '</div>'
+        : '<div class="my-fav">' + favs.slice(0, 8).map(function (c) {
+            return '<button class="paper fav-item" data-action="open-card" data-card="' + c.id + '">' +
+              '<span class="emoji tag t-' + catOf(c).tone + '" aria-hidden="true">' + c.emoji + '</span>' +
+              '<div class="body"><div class="ttl">' + esc(c.title) + '</div>' +
+              '<div class="meta">約' + c.durationMinutes + '分</div></div>' +
+              '<span class="icon-btn active" data-action="unfav-card" data-card="' + c.id + '" role="button" aria-label="お気に入り解除">♥</span>' +
+              '</button>';
+          }).join('') + '</div>');
 
-  /* ---- 7. お気に入り ---- */
-  function renderFavorites() {
-    var favs = Store.favoriteCards();
-    if (favs.length === 0) {
-      return '<div class="page-head"><h2>お気に入り</h2></div>' +
-        '<p class="page-desc">自分に効きやすいカードを、ここにストックできます。</p>' +
-        '<div class="paper empty-state">' +
-        (Store.settings().showPote ? '<div class="pote-avatar">' + poteSvg('normal') + '</div>' : '') +
-        '<p>' + esc(D.POTE.emptyFavorites) + '</p>' +
-        '<button class="btn btn-primary btn-sm" data-action="spin-now">1枚引いてみる</button>' +
-        '</div>';
+    /* --- セクション3: 今週のふりかえり(数字より文章) --- */
+    var w = Store.weeklySummary();
+    var topCat = w.topCategory ? D.categoryById[w.topCategory.id] : null;
+    var topCard = w.topCard ? findCard(w.topCard.id) : null;
+    var reflectLines = [];
+    if (w.count > 0) {
+      reflectLines.push('今週は' + w.activeDays + '日、自分をいたわれました');
+      if (topCat) reflectLines.push('「' + topCat.label + '」のカードをよく使っています');
+      if (topCard) reflectLines.push('「' + topCard.title + '」が、最近よく合っています');
+    } else {
+      reflectLines.push('今週はこれからです。1枚戻れたら十分です');
     }
+    // 小さな週グラフ(管理画面らしくしない)
+    var week = Store.last7Days();
+    var maxC = Math.max(1, Math.max.apply(null, week.map(function (d) { return d.count; })));
+    var todayKey = Store.dayKey(new Date());
+    var miniChart = '<div class="mini-week" aria-hidden="true">' + week.map(function (d) {
+      var h = d.count === 0 ? 5 : Math.round((d.count / maxC) * 40) + 5;
+      return '<div class="mw-col' + (d.count === 0 ? ' zero' : '') + (d.key === todayKey ? ' today' : '') + '">' +
+        '<div class="mw-bar" style="height:' + h + 'px"></div>' +
+        '<div class="mw-day">' + d.weekday + '</div></div>';
+    }).join('') + '</div>';
 
-    var filters = [{ id: 'all', label: 'すべて' }].concat(
-      D.CATEGORIES.filter(function (cat) {
-        return favs.some(function (c) { return c.category === cat.id; });
-      })
-    );
-    var filterHtml = filters.length > 2
-      ? '<div class="filter-row">' + filters.map(function (f) {
-          return '<button class="filter-chip' + (state.favFilter === f.id ? ' active' : '') + '" data-action="fav-filter" data-filter="' + f.id + '">' + esc(f.label) + '</button>';
-        }).join('') + '</div>'
-      : '';
+    var reflectHtml = '<div class="eyebrow">今週のふりかえり</div>' +
+      '<div class="paper reflect-card">' +
+      reflectLines.map(function (l, i) { return '<p class="reflect-line' + (i === 0 ? ' lead' : '') + '">' + esc(l) + '</p>'; }).join('') +
+      miniChart +
+      '</div>';
 
-    var shown = favs.filter(function (c) {
-      return state.favFilter === 'all' || c.category === state.favFilter;
-    });
-    var runs = Store.cardRunCounts();
+    /* --- 控えめな数字 --- */
+    var topCatRecent = Store.topCategory7d();
+    var topCatRecentLabel = topCatRecent ? D.categoryById[topCatRecent.categoryId].label : '—';
+    var quietStats = '<div class="paper quiet-stats">' +
+      '<div class="qs-cell"><span class="qs-k">今月いたわれた日</span><span class="qs-v">' + daysThisMonth() + '<small>日</small></span></div>' +
+      '<div class="qs-cell"><span class="qs-k">最近やった回数</span><span class="qs-v">' + w.count + '<small>回</small></span></div>' +
+      '<div class="qs-cell"><span class="qs-k">よく使うカテゴリ</span><span class="qs-v small">' + esc(topCatRecentLabel) + '</span></div>' +
+      '</div>';
 
-    return '<div class="page-head"><h2>お気に入り</h2></div>' +
-      '<p class="page-desc">自分に効きやすい回復カードのストックです。よくやる順に並びます。</p>' +
-      '<button class="btn btn-primary" data-action="spin-favorite">お気に入りから1枚引く</button>' +
-      '<div style="height:14px"></div>' +
-      filterHtml +
-      (shown.length === 0
-        ? '<div class="paper empty-state"><p>このカテゴリのお気に入りはまだありません。</p></div>'
-        : shown.map(function (c) {
-          var cat = catOf(c);
-          var n = runs[c.id] || 0;
-          return '<div class="paper fav-item">' +
-            '<span class="emoji tag t-' + cat.tone + '">' + c.emoji + '</span>' +
-            '<div class="body">' +
-            '<div class="ttl">' + esc(c.title) + '</div>' +
-            '<div class="meta">' + categoryTag(c.category, true) + '<span>🕐 ' + c.durationMinutes + '分</span>' +
-            (n > 0 ? '<span class="runs">' + n + '回やってみた</span>' : '') + '</div>' +
-            '</div>' +
-            '<div class="fav-actions">' +
-            '<button class="icon-btn active" data-action="unfav-card" data-card="' + c.id + '" aria-label="お気に入り解除">♥</button>' +
-            '<button class="icon-btn" data-action="open-favorite" data-card="' + c.id + '" aria-label="このカードを開く">▶</button>' +
-            '</div>' +
-            '</div>';
-        }).join(''));
+    /* --- セクション4: 自分によく合う回復 --- */
+    var suited = suitedCards(3);
+    var suitedHtml = '<div class="eyebrow">自分によく合う回復</div>' +
+      (suited.length === 0
+        ? '<div class="paper soft-empty">' + esc(D.POTE.emptySuited) + '</div>'
+        : '<div class="my-suited">' + suited.map(function (c) {
+            var n = Store.cardRunCounts()[c.id] || 0;
+            return '<button class="paper suited-item" data-action="open-card" data-card="' + c.id + '">' +
+              '<span class="emoji tag t-' + catOf(c).tone + '" aria-hidden="true">' + c.emoji + '</span>' +
+              '<div class="body"><div class="ttl">' + esc(c.title) + '</div>' +
+              '<div class="meta">約' + c.durationMinutes + '分' + (n > 0 ? ' · ' + n + '回やってみた' : '') + '</div></div>' +
+              '<span class="arrow" aria-hidden="true">›</span>' +
+              '</button>';
+          }).join('') + '</div>');
+
+    return '' +
+      '<div class="page-head with-gear"><h2>マイ回復</h2>' + gearButton() + '</div>' +
+      '<p class="page-desc">' + esc(D.POTE.myRecovery) + '</p>' +
+      recentHtml +
+      favHtml +
+      reflectHtml +
+      quietStats +
+      suitedHtml;
   }
 
-  /* ---- 8. 図鑑 = 回復カードのコレクション ---- */
+  /* ---- 7. 図鑑 = 回復カードのコレクション ---- */
   function renderDex() {
-    var catCounts = Store.dexCategoryCounts();
+    track('gokigen_dex_view');
     var filters = [{ id: 'all', label: 'すべて' }].concat(D.CATEGORIES);
     var cards = state.dexFilter === 'all'
       ? D.CARDS
       : D.CARDS.filter(function (c) { return c.category === state.dexFilter; });
+    var found = Store.discoveredCount();
 
     return '' +
-      '<div class="paper dex-head">' +
-      '<span class="tape t-sage tilt-r"></span>' +
-      '<div class="body"><h2>回復<span class="w2">カード</span>図鑑</h2><p>カードを集めて、自分に合う回復の引き出しを増やそう。</p></div>' +
-      '<div class="dex-count"><div class="k">発見済み</div><div class="v">' + Store.discoveredCount() + '<small> / ' + D.CARDS.length + '</small></div></div>' +
-      '</div>' +
-      '<div class="filter-row">' +
+      '<div class="page-head with-gear"><h2>回復カード図鑑</h2></div>' +
+      '<p class="dex-lead">これまでに <b>' + found + '</b> 種類の回復を見つけました。</p>' +
+      '<div class="filter-row" role="tablist">' +
       filters.map(function (f) {
-        var count = f.id === 'all' ? '' : '<small>' + catCounts[f.id].found + '/' + catCounts[f.id].total + '</small>';
-        return '<button class="filter-chip' + (state.dexFilter === f.id ? ' active' : '') + '" data-action="dex-filter" data-filter="' + f.id + '">' +
-          esc(f.label) + count + '</button>';
+        return '<button class="filter-chip' + (state.dexFilter === f.id ? ' active' : '') + '" data-action="dex-filter" data-filter="' + f.id + '" aria-pressed="' + (state.dexFilter === f.id) + '">' +
+          esc(f.label) + '</button>';
       }).join('') +
       '</div>' +
       '<div class="dex-grid">' +
       cards.map(function (c) {
-        var found = Store.isDiscovered(c.id);
+        var isFound = Store.isDiscovered(c.id);
         var no = cardNo(c);
-        if (!found) {
-          return '<div class="dex-card locked">' +
+        if (!isFound) {
+          return '<div class="dex-card locked" aria-label="まだ見ぬカード">' +
             '<span class="no">' + no + '</span>' +
-            '<span class="emoji">' + c.emoji + '</span>' +
-            '<span class="ttl">???</span>' +
-            '<span class="sub">まだ見ぬカード</span>' +
+            '<span class="emoji" aria-hidden="true">' + c.emoji + '</span>' +
+            '<span class="ttl">？</span>' +
+            '<span class="sub">これから</span>' +
             '</div>';
         }
         var fav = Store.isFavorite(c.id);
         var cat = catOf(c);
-        return '<button class="dex-card" data-action="open-dex-card" data-card="' + c.id + '">' +
+        return '<button class="dex-card" data-action="open-dex-card" data-card="' + c.id + '" aria-label="' + esc(c.title) + '">' +
           '<span class="tape t-' + cat.tone + (no % 2 === 0 ? ' tilt-r' : '') + '"></span>' +
           '<span class="no">' + no + '</span>' +
-          (fav ? '<span class="heart">♥</span>' : '') +
-          '<span class="emoji">' + c.emoji + '</span>' +
+          (fav ? '<span class="heart" aria-hidden="true">♥</span>' : '') +
+          '<span class="emoji" aria-hidden="true">' + c.emoji + '</span>' +
           '<span class="ttl">' + esc(c.title) + '</span>' +
+          '<span class="dex-meta">約' + c.durationMinutes + '分</span>' +
           categoryTag(c.category) +
           '</button>';
       }).join('') +
       '</div>' +
-      (Store.discoveredCount() < D.CARDS.length
-        ? poteRow(esc(D.POTE.dex), { small: true, className: 'done-pote' })
-        : poteRow('全部集まりました。すごい引き出しです。', { small: true, mood: 'happy', className: 'done-pote' }));
+      poteRow(esc(found >= D.CARDS.length ? '全部集まりました。すごい引き出しです' : D.POTE.dex), { small: true, className: 'done-pote' });
   }
 
-  /* ---- 9. 設定 ---- */
+  /* ---- 8. 設定 = じぶんに合わせる ---- */
   function renderSettings() {
     var s = Store.settings();
     function toggle(key, on) {
       return '<button class="toggle' + (on ? ' on' : '') + '" data-action="toggle-setting" data-key="' + key + '" role="switch" aria-checked="' + on + '" aria-label="切り替え"></button>';
     }
+    var legal = 'legal.html';
     return '' +
-      '<div class="page-head"><h2>じぶんに合わせる</h2></div>' +
-      '<p class="page-desc">通知や表示を、自分に合う形に調整できます。</p>' +
+      '<div class="page-head">' +
+      '<button class="back" data-action="tab" data-tab="home" aria-label="ホームに戻る">‹</button>' +
+      '<h2>じぶんに合わせる</h2>' +
+      '</div>' +
 
-      '<div class="eyebrow">🔔 通知</div>' +
+      '<div class="eyebrow">表示・サウンド</div>' +
       '<div class="paper setting-group">' +
-      '<div class="setting-row"><span class="ic">🔔</span><span class="lbl">毎日のリマインダー<small>「少し戻る時間です」とお知らせします</small></span>' + toggle('notifyEnabled', s.notifyEnabled) + '</div>' +
-      '<div class="setting-row"><span class="ic">🕘</span><label class="lbl" for="notifyTime">リマインダー時刻</label><input type="time" class="time-input" id="notifyTime" value="' + esc(s.notifyTime) + '"' + (s.notifyEnabled ? '' : ' disabled') + '></div>' +
+      '<div class="setting-row"><span class="ic" aria-hidden="true">🐕</span><span class="lbl">ぽてを表示する</span>' + toggle('showPote', s.showPote) + '</div>' +
+      '<div class="setting-row"><span class="ic" aria-hidden="true">🍂</span><span class="lbl">季節の小物<small>ぽてが月ごとに小さく衣替えします</small></span>' + toggle('seasonal', s.seasonal) + '</div>' +
+      '<div class="setting-row"><span class="ic" aria-hidden="true">🔈</span><span class="lbl">効果音</span>' + toggle('sound', s.sound) + '</div>' +
       '</div>' +
 
-      '<div class="eyebrow">🎨 表示・サウンド</div>' +
+      '<div class="eyebrow">通知</div>' +
       '<div class="paper setting-group">' +
-      '<div class="setting-row"><span class="ic">🐕</span><span class="lbl">ぽてを表示する</span>' + toggle('showPote', s.showPote) + '</div>' +
-      '<div class="setting-row"><span class="ic">🍂</span><span class="lbl">季節の小物<small>ぽてが月ごとに小さく衣替えします</small></span>' + toggle('seasonal', s.seasonal) + '</div>' +
-      '<div class="setting-row"><span class="ic">🔈</span><span class="lbl">効果音</span>' + toggle('sound', s.sound) + '</div>' +
+      '<div class="setting-row"><span class="ic" aria-hidden="true">🔔</span><span class="lbl">毎日のリマインダー<small>「少し戻る時間です」とお知らせします</small></span>' + toggle('notifyEnabled', s.notifyEnabled) + '</div>' +
+      '<div class="setting-row"><span class="ic" aria-hidden="true">🕘</span><label class="lbl" for="notifyTime">リマインダー時刻</label><input type="time" class="time-input" id="notifyTime" value="' + esc(s.notifyTime) + '"' + (s.notifyEnabled ? '' : ' disabled') + '></div>' +
       '</div>' +
 
-      '<div class="eyebrow">🗃️ データ</div>' +
+      '<div class="eyebrow">データ</div>' +
       '<div class="paper setting-group">' +
-      '<button class="setting-row danger" data-action="reset-data"><span class="ic">🧹</span><span class="lbl">データをリセット<small>履歴・お気に入り・図鑑をすべて消します</small></span></button>' +
+      '<div class="setting-row info"><span class="ic" aria-hidden="true">🔒</span><span class="lbl">データの保存について<small>' + esc(D.APP.dataNote) + '</small></span></div>' +
+      '<button class="setting-row danger" data-action="reset-data"><span class="ic" aria-hidden="true">🧹</span><span class="lbl">データを削除する<small>履歴・お気に入り・図鑑をすべて消します</small></span></button>' +
       '</div>' +
 
-      '<div class="eyebrow">📖 このアプリについて</div>' +
-      '<div class="paper">' +
-      '<p class="about-text"><strong>' + esc(D.APP.name) + '</strong><br>' +
-      '疲れたとき、やる気が出ないときに、今の自分に合った小さな回復行動を1枚だけ提案するアプリです。頑張らせません。少し戻れたら十分です。</p>' +
+      '<div class="eyebrow">このアプリについて</div>' +
+      '<div class="paper setting-group">' +
+      '<div class="about-block"><strong>' + esc(D.APP.name) + '</strong>' +
+      '<p>疲れたとき、やる気が出ないときに、今の自分に合った小さな回復行動を1枚だけ提案するアプリです。少し戻れたら十分です。</p></div>' +
+      '<a class="setting-row link" href="' + legal + '"><span class="ic" aria-hidden="true">🔐</span><span class="lbl">プライバシーポリシー</span><span class="chev" aria-hidden="true">›</span></a>' +
+      '<a class="setting-row link" href="' + legal + '#terms"><span class="ic" aria-hidden="true">📜</span><span class="lbl">利用規約</span><span class="chev" aria-hidden="true">›</span></a>' +
+      '<a class="setting-row link" href="' + legal + '#disclaimer"><span class="ic" aria-hidden="true">⚠️</span><span class="lbl">免責事項</span><span class="chev" aria-hidden="true">›</span></a>' +
+      '<a class="setting-row link" href="mailto:' + esc(D.APP.contact) + '"><span class="ic" aria-hidden="true">✉️</span><span class="lbl">お問い合わせ</span><span class="chev" aria-hidden="true">›</span></a>' +
       '</div>' +
-      '<div class="eyebrow">📎 注意事項</div>' +
-      '<div class="paper"><p class="about-text">' + esc(D.APP.disclaimer) + '</p></div>';
+
+      '<div class="paper disclaimer-note"><p>' + esc(D.APP.disclaimer) + '</p></div>' +
+      '<button class="btn btn-ghost quiet replay-ob" data-action="replay-onboarding">はじめての説明をもう一度見る</button>';
   }
 
   /* ---------- ガチャフロー ---------- */
 
   var spinTimer = null;
   function startSpin(drawFn) {
+    track('gokigen_gacha_start');
     state.screen = 'spin';
     render();
     playPop(520);
     clearTimeout(spinTimer);
+    var wait = reduceMotion ? 260 : 950; // 演出は約1秒。動きを抑える設定では大幅に短縮
     spinTimer = setTimeout(function () {
       var card = drawFn();
       if (!card) {
-        // カプセル切れなどで引けなかったときは、責めずにホームへ戻す
         state.screen = 'home';
         render();
-        showToast(Store.capsuleCount() === 0 ? '今日のカプセルはおしまいです' : 'カードを引けませんでした');
+        showToast('カードを引けませんでした');
         return;
       }
       state.card = card;
       state.resultContext = 'gacha';
+      state.resultExpanded = false;
       state.screen = 'result';
       render();
       playPop(760);
-    }, 1200);
+    }, wait);
   }
 
   /* ---------- イベント ---------- */
@@ -842,11 +834,42 @@
     }
   }
 
+  function shareCard(c) {
+    track('gokigen_share');
+    if (navigator.share) {
+      navigator.share({ text: c.shareText }).catch(function () { /* キャンセルは無視 */ });
+    } else {
+      copyText(c.shareText)
+        .then(function () { showToast('シェア文をコピーしました'); })
+        .catch(function () { showToast('コピーできませんでした'); });
+    }
+  }
+
   function handle(action, el) {
     switch (action) {
+      /* --- オンボーディング --- */
+      case 'onboard-next':
+        state.onboardStep = Math.min(D.ONBOARDING.length - 1, state.onboardStep + 1);
+        render();
+        break;
+      case 'onboard-skip':
+      case 'onboard-done':
+        Store.markOnboarded();
+        if (action === 'onboard-done') track('gokigen_onboarding_complete');
+        state.screen = 'home';
+        state.onboardStep = 0;
+        render();
+        break;
+      case 'replay-onboarding':
+        state.screen = 'onboarding';
+        state.onboardStep = 0;
+        render();
+        break;
+
+      /* --- ナビ --- */
       case 'tab':
         state.screen = el.dataset.tab;
-        if (state.screen === 'select') state.stateId = null;
+        if (state.screen === 'select') { state.stateId = null; state.showAllStates = false; state.redrawCount = 0; }
         render();
         break;
 
@@ -856,33 +879,43 @@
         break;
 
       case 'go-select':
+        track('gokigen_state_select_open');
         state.stateId = null;
+        state.showAllStates = false;
+        state.redrawCount = 0;
         state.screen = 'select';
         render();
         break;
 
-      case 'pick-state':
-        state.stateId = state.stateId === el.dataset.state ? null : el.dataset.state;
+      case 'show-all-states':
+        state.showAllStates = true;
         render();
         break;
 
-      case 'spin-with-state':
-        if (!state.stateId) return;
-        startSpin(function () { return Store.draw({ stateId: state.stateId }); });
+      /* --- 状態タップ → そのままガチャ(確認操作を増やさない) --- */
+      case 'pick-state': {
+        var sid = el.dataset.state;
+        state.stateId = sid;
+        state.redrawCount = 0;
+        track('gokigen_state_selected');
+        startSpin(function () { return Store.draw({ stateId: sid }); });
         break;
+      }
 
       case 'spin-now':
         state.stateId = null;
+        state.redrawCount = 0;
         startSpin(function () { return Store.draw({}); });
         break;
 
-      case 'respin':
       case 'spin-again':
-        startSpin(function () { return Store.draw({ stateId: state.stateId }); });
+        state.stateId = null;
+        state.redrawCount = 0;
+        startSpin(function () { return Store.draw({}); });
         break;
 
       case 'not-now': {
-        // 同じ状態に合う別カードを再抽選。候補が少なければ同カテゴリ以外へ広げる
+        state.redrawCount += 1;
         var current = state.card;
         startSpin(function () {
           return Store.draw({
@@ -894,15 +927,19 @@
         break;
       }
 
+      case 'toggle-details':
+        state.resultExpanded = !state.resultExpanded;
+        render();
+        break;
+
+      /* --- 実行(少しやってみる) --- */
       case 'did-it': {
         if (!state.card) return;
-        var entry = Store.addHistory(state.card.id, state.stateId);
-        state.capsuleRefilled = !!(entry && entry.capsuleRefilled);
+        track('gokigen_try_action');
+        Store.addHistory(state.card.id, state.stateId);
+        state.lastHeading = pick(D.POTE.doneHeading);
         state.lastPraise = pick(D.POTE.praise);
-        // 褒め言葉と「今日のひとこと」が同じ文にならないようにする
-        var words = D.POTE.todayWord.filter(function (w) {
-          return w.indexOf(state.lastPraise) < 0;
-        });
+        var words = D.POTE.todayWord.filter(function (w) { return w.indexOf(state.lastPraise) < 0; });
         state.lastWord = pick(words.length > 0 ? words : D.POTE.todayWord);
         state.screen = 'done';
         render();
@@ -911,60 +948,12 @@
         break;
       }
 
+      /* --- お気に入り --- */
       case 'toggle-fav': {
         if (!state.card) return;
         var added = Store.toggleFavorite(state.card.id);
+        if (added) track('gokigen_favorite_add');
         showToast(added ? 'お気に入りに追加しました' : 'お気に入りを解除しました');
-        render();
-        break;
-      }
-
-      case 'copy-week': {
-        var ws = Store.weeklySummary();
-        var wsCat = ws.topCategory ? D.categoryById[ws.topCategory.id] : null;
-        var wsCard = ws.topCard ? findCard(ws.topCard.id) : null;
-        var lines = ['今週のごきげん回復:' + ws.count + '回'];
-        if (wsCat) lines.push('よく引いたカテゴリ:' + wsCat.label);
-        if (wsCard) lines.push('いちばん頼ったカード:' + wsCard.title);
-        lines.push('');
-        lines.push('少し戻るだけでも、ちゃんと前進です。');
-        copyText(lines.join('\n'))
-          .then(function () { showToast('今週のまとめをコピーしました'); })
-          .catch(function () { showToast('コピーできませんでした'); });
-        break;
-      }
-
-      case 'copy-share': {
-        if (!state.card) return;
-        copyText(state.card.shareText)
-          .then(function () { showToast('シェア文をコピーしました'); })
-          .catch(function () { showToast('コピーできませんでした'); });
-        break;
-      }
-
-      case 'webshare':
-        if (!state.card || !navigator.share) return;
-        navigator.share({ text: state.card.shareText }).catch(function () { /* キャンセルは無視 */ });
-        break;
-
-      case 'open-favorite': {
-        var favCard = findCard(el.dataset.card);
-        if (!favCard) return;
-        state.card = favCard;
-        state.stateId = null;
-        state.resultContext = 'favorite';
-        state.screen = 'result';
-        render();
-        break;
-      }
-
-      case 'spin-favorite':
-        startSpin(function () { return Store.drawFromFavorites(); });
-        break;
-
-      case 'fav-card': {
-        var addedFav = Store.toggleFavorite(el.dataset.card);
-        showToast(addedFav ? 'お気に入りに追加しました' : 'お気に入りを解除しました');
         render();
         break;
       }
@@ -975,45 +964,49 @@
         render();
         break;
 
-      case 'del-history':
-        Store.removeHistory(el.dataset.id);
-        showToast('履歴を削除しました');
-        render();
+      /* --- シェア --- */
+      case 'share-card':
+        if (state.card) shareCard(state.card);
         break;
 
-      case 'dex-filter':
-        state.dexFilter = el.dataset.filter;
-        render();
-        break;
-
-      case 'history-filter':
-        state.historyFilter = el.dataset.filter;
-        render();
-        break;
-
-      case 'fav-filter':
-        state.favFilter = el.dataset.filter;
-        render();
-        break;
-
-      case 'open-dex-card': {
-        var dexCard = findCard(el.dataset.card);
-        if (!dexCard) return;
-        state.card = dexCard;
+      /* --- カードを開く(マイ回復から) --- */
+      case 'open-card': {
+        var oc = findCard(el.dataset.card);
+        if (!oc) return;
+        state.card = oc;
         state.stateId = null;
-        state.resultContext = 'dex';
+        state.resultContext = 'favorite';
+        state.resultExpanded = true;
         state.screen = 'result';
         render();
         break;
       }
 
+      /* --- 図鑑 --- */
+      case 'dex-filter':
+        state.dexFilter = el.dataset.filter;
+        render();
+        break;
+
+      case 'open-dex-card': {
+        var dc = findCard(el.dataset.card);
+        if (!dc) return;
+        state.card = dc;
+        state.stateId = null;
+        state.resultContext = 'dex';
+        state.resultExpanded = true;
+        state.screen = 'result';
+        render();
+        break;
+      }
+
+      /* --- 設定 --- */
       case 'toggle-setting': {
         var key = el.dataset.key;
         var cur = Store.settings();
         var next = !cur[key];
         Store.updateSettings((function () { var p = {}; p[key] = next; return p; })());
         if (key === 'notifyEnabled' && next) {
-          // 端末通知はUIのみ(静的ホスティングのため)。設定は保存され、将来の実装で使える。
           showToast('リマインダーをONにしました(端末通知は準備中です)');
         }
         render();
@@ -1023,13 +1016,14 @@
       case 'reset-data':
         if (window.confirm('履歴・お気に入り・図鑑の記録をすべて消します。よろしいですか?')) {
           Store.resetAll();
+          Store.markOnboarded(); // 既に使っている人には再度オンボを出さない
           state = {
             screen: 'settings', stateId: null, card: null, resultContext: 'gacha',
-            dexFilter: 'all', historyFilter: 'all', favFilter: 'all',
-            lastPraise: '', lastWord: '', capsuleRefilled: false
+            dexFilter: 'all', showAllStates: false, redrawCount: 0, resultExpanded: false,
+            onboardStep: 0, lastPraise: '', lastWord: '', lastHeading: ''
           };
           render();
-          showToast('データをリセットしました');
+          showToast('データを削除しました');
         }
         break;
     }
@@ -1038,5 +1032,6 @@
   /* ---------- 初期化 ---------- */
 
   Store.init();
+  if (!Store.isOnboarded()) state.screen = 'onboarding';
   render();
 })();
