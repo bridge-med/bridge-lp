@@ -10,28 +10,27 @@
 - `shared/bridge.js` — 端末内利用ログ(localStorage、外部送信なし)と、訪問者計測フック `ANALYTICS_ENDPOINT`(既定は空文字=無効)
 - `shared/usage.js` — bridge.jsを読まないプロダクトページ用の利用ログ単機能版
 
-## 手順A(推奨・約5分): GoatCounter
+## 手順A(推奨・約2分): GoatCounter
 
 無料・クッキーなし・個人情報を集めない計測サービス。プライバシーポリシーの改定が
 ほぼ不要で、BRIDGEの性格に合う。
 
+ローダーは実装済み(2026-08-09)。残る作業はサイトコードを入れるだけ。
+
 1. https://www.goatcounter.com/ でアカウントを作る(サイトコードは例: `bridge-med`)
-2. `shared/bridge.js` の「訪問者計測(未計測)」ブロックを、次の3行に置き換える
+2. 次の2箇所の `GOATCOUNTER_CODE = ''` に同じサイトコードを入れる
+   - `shared/bridge.js` の「訪問者計測(未計測)」ブロック
+   - `shared/usage.js` の末尾ブロック(bridge.jsを読まないプロダクトページ用)
+3. 同じコミットで `legal/privacy.html` に下の一文を追記する(第32条)
+4. コミットして出荷し、翌日 GoatCounter のダッシュボードに数字が出ていることを確かめる
 
-```js
-/* ---- 訪問者計測(GoatCounter) ---- */
-const gc = document.createElement('script');
-gc.dataset.goatcounter = 'https://bridge-med.goatcounter.com/count'; // 自分のサイトコードに
-gc.src = 'https://gc.zgo.at/count.js'; gc.async = true;
-document.head.appendChild(gc);
-```
+privacy追記文(用意済み・「アクセス解析」の節として追加):
 
-3. コミットして出荷し、翌日 GoatCounter のダッシュボードに数字が出ていることを確かめる
+> 訪問者数の把握のため、アクセス解析サービス GoatCounter を利用しています。
+> Cookieを使わず、個人を特定する情報は収集されません。
 
 補足:
-- bridge.jsを読まないページ(clinic-flow-3d等)も測るなら、`shared/usage.js` の末尾に同じ3行を足す
 - cockpitはnoindexだが計測には載る。運営者の自分のアクセスは GoatCounter の設定で除外できる
-- `legal/privacy.html` に計測サービス名を1行追記すること(第32条)
 
 ## 手順B: 自前エンドポイント
 

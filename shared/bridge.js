@@ -173,8 +173,17 @@ document.documentElement.classList.add('js');
   } catch (e) {}
 
   /* ---- 訪問者計測(未計測) ----
-     訪問者数はまだ測っていない。有効化の手順は docs/analytics.md(約5分)。
-     それまで cockpit には「未計測」と正直に表示する。 ---- */
+     GOATCOUNTER_CODE にサイトコード(例: 'bridge-med')を入れるとGoatCounterの計測が始まる。
+     空文字のままなら何も読み込まない=未計測。手順と選定理由は docs/analytics.md。
+     有効化する同じコミットで legal/privacy.html に計測の一文(analytics.mdに用意済み)を
+     追記すること(第32条)。それまで cockpit には「未計測」と正直に表示する。 ---- */
+  const GOATCOUNTER_CODE = '';
+  if (GOATCOUNTER_CODE) {
+    const gc = document.createElement('script');
+    gc.dataset.goatcounter = 'https://' + GOATCOUNTER_CODE + '.goatcounter.com/count';
+    gc.src = 'https://gc.zgo.at/count.js'; gc.async = true;
+    document.head.appendChild(gc);
+  }
   const ANALYTICS_ENDPOINT = '';
   if (ANALYTICS_ENDPOINT && navigator.sendBeacon) {
     try { navigator.sendBeacon(ANALYTICS_ENDPOINT, JSON.stringify({ p: location.pathname, r: document.referrer })); } catch (e) {}
