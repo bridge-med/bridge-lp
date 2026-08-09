@@ -10,13 +10,15 @@
   --bg-2: #F4EFE6;
   --ink: #1B1B1E;
   --ink-2: #45464C;
-  --ink-3: #7D7E85;
+  --ink-3: #63646B;
   --ink-4: #B6B3AB;
   --line: rgba(27, 27, 30, 0.10);
   --navy: #16233E;
   --blue: #24365C;
   --blue-soft: #8B9BBC;
-  --dawn: #A98F63;
+  --dawn: #A98F63;         /* 砂色。面と罫に使う温度 */
+  --dawn-deep: #7D6845;    /* 文字として使える砂。--dawnは白面3.09:1でAA未達 */
+  --dark-sec: #131A2A;     /* 砂の上に置く炭(チェック印・選択範囲) */
   --card: #FFFFFF;
   --shadow: 0 2px 8px rgba(22, 35, 62, 0.04), 0 16px 48px rgba(22, 35, 62, 0.07);
   --mincho: 'Shippori Mincho B1', 'Noto Serif JP', serif;
@@ -36,6 +38,8 @@
   --blue: #9FB1D4;
   --blue-soft: #5A6C92;
   --dawn: #C2A97E;
+  --dawn-deep: #C2A97E;    /* ダークは--dawnが暗い面で7.33:1と合格しているため暗くしない */
+  --dark-sec: #0B0F1A;
   --card: #181E2E;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.35);
 }
@@ -53,7 +57,7 @@ body {
 button { font: inherit; background: none; border: none; cursor: pointer; color: inherit; }
 [hidden] { display: none !important; }
 a { color: inherit; text-decoration: none; }
-::selection { background: var(--blue); color: #fff; }
+::selection { background: var(--dawn); color: var(--dark-sec); }
 
 /* スマホでだけ効かせる改行 */
 .sp { display: inline; }
@@ -207,7 +211,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 13px;
 }
 .btn.quiet:hover { color: var(--ink); }
-.btn.quiet.marked { color: var(--dawn); }
+.btn.quiet.marked { color: var(--dawn-deep); }
 .btn:disabled { opacity: 0.4; cursor: default; }
 .btn:disabled:hover { transform: none; box-shadow: none; }
 
@@ -295,7 +299,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-2);
   margin-bottom: 6px;
 }
-.field label .opt { font-weight: 400; color: var(--ink-4); font-size: 11.5px; margin-left: 8px; }
+.field label .opt { font-weight: 400; color: var(--ink-3); font-size: 11.5px; margin-left: 8px; }
 .field textarea {
   width: 100%;
   min-height: 72px;
@@ -321,7 +325,7 @@ a { color: inherit; text-decoration: none; }
 .reassure {
   margin-top: 14px;
   font-size: 12px;
-  color: var(--ink-4);
+  color: var(--ink-3);
   line-height: 2;
 }
 
@@ -346,7 +350,7 @@ a { color: inherit; text-decoration: none; }
   display: inline-block;
   font-size: 10px;
   font-weight: 500;
-  color: var(--dawn);
+  color: var(--dawn-deep);
   border: 1px solid currentColor;
   border-radius: 100px;
   padding: 0 8px;
@@ -355,7 +359,7 @@ a { color: inherit; text-decoration: none; }
   vertical-align: 1px;
 }
 .mat-row .a { font-size: 13.5px; color: var(--ink-2); line-height: 2.05; }
-.mat-row .a .k { color: var(--ink-4); font-size: 11px; margin-right: 7px; }
+.mat-row .a .k { color: var(--ink-3); font-size: 11px; margin-right: 7px; }
 .mat-row .ops { display: flex; gap: 16px; }
 .mat-row .ops button {
   font-size: 12px;
@@ -451,7 +455,7 @@ a { color: inherit; text-decoration: none; }
   flex-wrap: wrap;
   gap: 6px 18px;
   font-size: 11.5px;
-  color: var(--ink-4);
+  color: var(--ink-3);
 }
 .foot a:hover { color: var(--ink-2); }
 
