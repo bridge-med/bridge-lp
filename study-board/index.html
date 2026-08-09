@@ -14,7 +14,7 @@
 <script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t)}})();</script>
 <link rel="stylesheet" href="../shared/subpage.css">
 </head>
-<body>
+<body data-root="../">
 
 <div class="progress" id="prog"></div>
 <nav class="nav" id="nav">
@@ -133,7 +133,7 @@
 <section class="buy">
   <div data-reveal>
     <div class="eyebrow kicker" style="display:inline-flex;justify-content:center;color:var(--ink-3);margin-bottom:14px">Try Now</div>
-    <h2 style="font:700 clamp(24px,3.6vw,40px)/1.3 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.02em"><span class="nowrap">5秒で記録して、</span><span class="em nowrap">続ける</span></h2>
+    <h2 class="cta-h"><span class="nowrap">5秒で記録して、</span><span class="em nowrap">続ける</span></h2>
     <p style="font:500 13px/1.85 var(--sans-jp);color:var(--ink-2);max-width:560px;margin:0 auto 36px">無料・ログイン不要・ブラウザのみ。<br class="br-pc">データはローカル保存(端末を変えるとリセット)。</p>
     <div class="cta-actions-c">
       <a class="buy-btn primary" href="https://bridge-med.github.io/study-board/" target="_blank" data-link="demo">デモを開く ↗</a>

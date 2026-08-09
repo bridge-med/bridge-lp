@@ -102,6 +102,19 @@ img,svg{display:block;max-width:100%}
 .nav-actions a.back:hover{color:var(--ink)}
 .nav-actions a.cta{background:var(--ink);color:var(--on-fill)}
 .nav-actions a.cta:hover{background:var(--navy)}
+/* モバイル: 製品名はheroが名乗るためロゴ側を畳み、CTAは1行を保つ。
+ * さらに狭い画面では文字を潰さず行ごと折り返す */
+@media(max-width:640px){
+  .nav{flex-wrap:wrap;row-gap:8px;padding:14px var(--pad-x)}
+  .nav.scrolled{padding:10px var(--pad-x)}
+  .nav-logo .small{display:none}
+  .nav-actions{gap:6px}
+  .nav-actions a{white-space:nowrap;padding:9px 10px;position:relative}
+  /* 見た目29px高のまま、タップ領域だけ縦に44px超へ(round-note .row-check前例) */
+  .nav-actions a::before{content:'';position:absolute;inset:-8px 0}
+}
+/* 320〜360px: emの一息が入りきらないときだけ、文節で折ることを許す(折れ位置はBudouXが決める) */
+@media(max-width:360px){.s-head h2 .em.nowrap{white-space:normal}}
 
 /* hero */
 .hero{padding:160px var(--pad-x) 100px;position:relative;background:var(--paper);text-align:left;border-bottom:1px solid var(--line)}
@@ -159,6 +172,7 @@ section.alt{background:var(--paper-2)}
 
 /* CTA shared */
 .buy{background:var(--paper-2);padding:120px var(--pad-x);text-align:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cta-h{font:700 clamp(24px,3.6vw,40px)/1.3 var(--serif-jp);color:var(--ink);margin-bottom:14px;letter-spacing:-0.02em}
 .buy-btn{display:inline-flex;align-items:center;justify-content:center;padding:16px 22px;font:700 13px/1 var(--sans-jp);letter-spacing:0.06em;border-radius:2px;transition:all .18s;border:1px solid transparent}
 .buy-btn.primary{background:var(--ink);color:var(--on-fill)}
 .buy-btn.primary:hover{background:var(--navy)}
@@ -263,7 +277,7 @@ html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 .alert-item.info .alert-tag{background:var(--blue)}
 .alert-item.ok .alert-tag{background:var(--ink-4);color:var(--ink)}
 .alert-body{font:500 12px/1.85 var(--sans-jp);color:var(--ink-2)}
-.alert-body strong{color:var(--ink);font-weight:800}
+.alert-body strong{color:var(--ink);font-weight:900} /* Noto Sans JPは800未読込。実描画の900を明示 */
 
 /* compare table */
 .cmp-table{width:100%;border-collapse:collapse;font:500 12px/1.5 var(--sans-jp)}
@@ -308,7 +322,7 @@ html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 .sched-table{width:100%;border-collapse:collapse;border:1px solid var(--line)}
 .sched-table th,.sched-table td{padding:10px;text-align:center;border:1px solid var(--line);font-size:11px}
 .sched-table th{background:var(--paper-3);font:700 10px/1 var(--sans-en);letter-spacing:0.1em;color:var(--ink-3);text-transform:uppercase}
-.sched-table td.busy{background:var(--paper-3);color:var(--navy);font-weight:800}
+.sched-table td.busy{background:var(--paper-3);color:var(--navy);font-weight:900} /* 同上: 800→実描画の900 */
 .sched-table td.med{background:var(--paper-2);color:var(--blue);font-weight:700}
 .sched-table td.calm{background:var(--card);color:var(--ink-2)}
 .sched-leg{display:flex;gap:14px;margin-top:14px;font:600 10px/1 var(--sans-en);letter-spacing:0.08em;color:var(--ink-3);text-transform:uppercase}

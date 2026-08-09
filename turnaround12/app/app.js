@@ -269,9 +269,8 @@
     <section class="screen screen-top">
       <div class="crest" aria-hidden="true">
         <svg viewBox="0 0 64 64" fill="none">
-          <rect class="crest-plate" x="8" y="14" width="48" height="40" rx="6" stroke-width="2.5"/>
-          <path class="crest-line" d="M14 42 L24 34 L32 38 L42 26 L50 22" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path class="crest-mark" d="M32 6 L36 14 H28 Z"/>
+          <path class="crest-fall" d="M5 44 C 12 16, 24 12, 55 51"/>
+          <path class="crest-rise" d="M15 54 C 29 50, 38 22, 59 11"/>
         </svg>
       </div>
       <p class="quest-eyebrow">TURNAROUND TWELVE</p>
