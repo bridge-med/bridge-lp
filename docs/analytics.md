@@ -10,28 +10,21 @@
 - `shared/bridge.js` — 端末内利用ログ(localStorage、外部送信なし)と、訪問者計測フック `ANALYTICS_ENDPOINT`(既定は空文字=無効)
 - `shared/usage.js` — bridge.jsを読まないプロダクトページ用の利用ログ単機能版
 
-## 手順A(推奨・約5分): GoatCounter
+## 手順A(推奨・約2分): GoatCounter
 
 無料・クッキーなし・個人情報を集めない計測サービス。プライバシーポリシーの改定が
 ほぼ不要で、BRIDGEの性格に合う。
 
-1. https://www.goatcounter.com/ でアカウントを作る(サイトコードは例: `bridge-med`)
-2. `shared/bridge.js` の「訪問者計測(未計測)」ブロックを、次の3行に置き換える
+**2026-08-09に有効化済み。** サイトコード `wataru`(社長開設)。`shared/bridge.js` と
+`shared/usage.js` の `GOATCOUNTER_CODE` に設定済みで、`legal/privacy.html` には
+「本サイト(BRIDGE)のアクセス解析」の節(日英)を追記済み(第32条)。
+ダッシュボード: https://wataru.goatcounter.com/
 
-```js
-/* ---- 訪問者計測(GoatCounter) ---- */
-const gc = document.createElement('script');
-gc.dataset.goatcounter = 'https://bridge-med.goatcounter.com/count'; // 自分のサイトコードに
-gc.src = 'https://gc.zgo.at/count.js'; gc.async = true;
-document.head.appendChild(gc);
-```
-
-3. コミットして出荷し、翌日 GoatCounter のダッシュボードに数字が出ていることを確かめる
+サイトコードを変える日が来たら、上記2ファイルの `GOATCOUNTER_CODE` を同じ値で書き換える。
+空文字に戻せば計測は止まる(何も読み込まれない)。
 
 補足:
-- bridge.jsを読まないページ(clinic-flow-3d等)も測るなら、`shared/usage.js` の末尾に同じ3行を足す
 - cockpitはnoindexだが計測には載る。運営者の自分のアクセスは GoatCounter の設定で除外できる
-- `legal/privacy.html` に計測サービス名を1行追記すること(第32条)
 
 ## 手順B: 自前エンドポイント
 
