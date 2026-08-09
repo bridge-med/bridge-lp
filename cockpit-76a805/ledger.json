@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-03",
+  "updated": "2026-08-09",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -505,22 +505,22 @@
     }
   ],
   "knownIssues": [
-    "tanaoroshi/app/styles.css の --ink-3 が #7D7E85 のままで、shared/bridge.css v3.0 の #63646B に未追従(ライトの補助文字が3.87:1でAA未達)。keiji出荷時(2026-07-31)のdesigner照合で発見。今回スコープ外・独立修正で対応する",
-    "プロダクト9ページがdata-rootなしでbridge.jsを読み、budoux-ja.min.jsが404になる(実害はコンソールノイズのみ)。直すとBudouXが各アプリの文字組みに新しく効き始めるため、designer照合込みの独立スプリントで対応する",
     "実験室2ページ(worklog / morning)が公開導線を持ちながら台帳・sitemap.xml のどちらにも未登録だった件は、未掲載4件(yawagaeshi / medops / manager-starter / bridge-focus)と一束にした掲載ガバナンスの棚卸しで扱い、2026-07-26に監査役棚卸し済み: 6件の推奨判断は drafts/掲載ガバナンス棚卸し-2026-07-26.md。worklogのREADME表記ズレとmorning/worklog feed.htmlの死リンク(実在しないワークフローへのリンク)は事実修正済み、2ページは台帳へ下書き登録済み。残るは社長決裁(各件の(a)/(b))のみ。あわせてrehaboard-starterはNAV・PRODUCTS配列とも未掲載だがstarter-kitsから被リンクがあり、存置か畳むかは社長判断(2026-07-26 designer/PM指摘)。棚卸しドラフトには未収載のため監査役の追補が要る。存置なら砂色相当の常時強調17箇所(--vermilion:#A98F63、第24条)がdesignerタスク。構造的な矛盾のためauditor領分",
     "shared/subpage.css を読む9ページすべてに実物のスクリーンショットが無い(img参照ゼロ)。LPが実物について事実を主張しているのに、同じページ上に突き合わせる対象が存在しない状態。2026-07-24にstudy-boardで実害が確認された(カード見出しの色名は実物と一致していたが、LP側の罫線が4枚中3枚ずれたまま公開されていた)。designerの判断は「載せる。ただし体験のためではなく照合の錨として、無加工の写し1枚に撮影日を添える」。規約案と機械検査への落とし込み方はdesignerの照合結果にあり。第22条に但し書き(写しの内部は制限外・加工しない・色を周囲に持ち出さない・1ページ1枚)を足すかは第33条の手続きで社長判断",
     "憲法外の色系統(萌黄・代赭・朱)が共通基盤の外に残るのは3ファイル: rehaboard-starter/index.html(自前:root・憲法外8色)、morning/index.html(7色)、worklog/feed.html。round-note は2026-07-25のリカラーで解消済み。あわせて rehaboard-starter には walk(Where to next)も無く、rehaboardの分岐1枚目が1クリック先の行き止まりへ客を送る状態。turnaround12 も結果画面の終端が「もう一度」とシェアのみでBRIDGEへの戻り線が無い(第26条・designer起票2026-07-25)。ゲーム系の戻り線とあわせて同じ束で扱う",
-    "medboard/index.html:54 のhero見出し(.nowrap span「月次の数字を読み上げる会議に、」)が390px幅で折り返せず18pxの横スクロールを起こす(bodyScrollWidth 408 vs 390)。2026-07-25のqa実測で発見。スプリントB以前から存在する既存不具合。対応候補はnowrapの区切り位置調整か解除。文言のリズムに関わるためdesigner照合込みで",
     "第29条「何もしなくても十分」の一行が subpage系9ページにしかない。Dバッチで両ファミリのwalkが視覚的に同一になった結果、思想側9ページ(about/philosophy/products/projects/journal/research/services/stories/cockpit)は末尾が三枚のカードで終わり明文が無い(communityのみ.enoughを別箇所に保有)。thought-hub側にも同じ一行を置くか、プロダクトページ特有の「導入を迫らない」文脈でだけ必要か——第29条の適用範囲の解釈が要る。Eバッチ候補としてdesigner起票(2026-07-25)。社長判断待ち",
     "絵文字がリカラー後に残る最大の彩度源になった。turnaround12は藍地の結果heroに46pxの絵文字紋章(👑💸等)、clinic-flow-3dは289個、gokigen-gachaは68個。プロジェクト全体の作法のため独断で外さずdesigner起票(2026-07-25)。社長判断は1点:「4系統リカラーを全アプリに敷き終えた今、絵文字を色の系統に含めるのか」。含めないなら反転面の上だけ filter:grayscale(1) の最小の逃げ道あり",
-    "turnaround12のcrest(紋章)の幾何が第24条の署名になっていない(角丸の枠+折れ線グラフ=既製の経営ダッシュボードアイコン)。designer代案: 枠を捨てて下降する藍の線と上昇する砂の線が一度だけ交差する紋章(憲法の署名でありゲームの主題「12週で反転させる」と一致)。色は2026-07-25にトークン化済み。幾何は次スプリント(designer起票)",
-    "round-noteのタップ領域: .tab約35px / .row-check・.row-del 26px角 / .chip-btn 61×25。WCAG 2.5.8(24px)は通るが44pxに届かない。リカラーでは幾何不変のため据え置き。次にround-noteの幾何を触るときに44px化(qa/designer起票2026-07-25)",
     "madoakari: 時計の数字(Inter 80px)が明朝ステートメントより大きい、サイト唯一のページ。第23条には適合(時刻=構造の言葉)だが声の階層が反転している。一枚限りの措置とし、二例目が出たらdesignerが規則として設計し直す(2026-07-26 PM判定)",
     "madoakari: manifest.webmanifestのtheme_color/background_colorがライト固定(#FBFAF7)。manifestはメディアクエリを持てないプラットフォーム制約による既知の非対称。<meta theme-color>は両テーマ対応済み",
     "madoakari: ?t=デバッグパラメータで開いたときもモード切替ボタンでliveへ戻せる。デバッグ専用機能のため現状維持(2026-07-26 PM判定)",
-    "8ページ(rehaboard/medboard/hire-board/consult-simulator/him-quiz/study-board/english-trainer/interview-kit)の末尾CTA見出しが同文のインラインstyleで重複している。shared/subpage.cssに.cta-hとして一本化する(PM預かりのバックログ・次にCTA周辺を触るスプリントで。第9条4号)。あわせてsans系の宣言不一致2箇所(subpage.css .alert-body strong / .sched-table td.busy のfont-weight:800、Noto Sans JPは800未読込で900が選ばれる。実害なし)も同時に整える。実測済み(2026-07-26)",
-    "subpage.css系8ページのモバイルnavが無防備。interview-kitは390pxでCTA「デモを開く↗」が縦組みに潰れnav高120px(スクロール後200px)。テーマ非依存の既存不具合。.navの折返し規則はhub.cssの640px分岐にしかなくstarter-kits以外の8ページに無い。medboardの横溢(既知)とあわせモバイルnavスプリントとして扱う(designer起票2026-07-27)",
-    "tanaoroshiに、nidodema照合(2026-07-31)で見つかった同種のコントラスト欠陥が残っている: --ink-3が旧値#7D7E85 / --ink-4を本文(.foot・.intro-notes等)に使用 / ::selectionがダークで文字が消える / --dawnを小文字ラベルに使用。nidodemaで確定した値(--ink-3 #63646B・--dawn-deep #7D6845・selectionは砂地に炭)へ揃える。あわせてチップ/トグルon状態の藍ベタを静かにする案は、両ツール同時に変えること(単独変更禁止・designer起票)"
+    "tanaoroshi/nidodemaのチップ/トグルon状態の藍ベタを静かにする案は、両ツール同時に変えること(単独変更禁止・designer起票)。tanaoroshiのトークン追従(--ink-3/--dawn-deep/selection)は2026-08-09に完了済みで、残るはこの意匠判断のみ。nidodema master合流の社長決裁5件と同じ束で扱う",
+    "turnaround12にダークテーマがない(:rootはライトのみ。[data-theme=dark]もprefers-color-schemeも無い)。crest刷新(2026-08-09)でcrest側はトークン純化済みのため、アプリにダークが来た日にそのまま反転する。第22条「両テーマを常に等価に」への既存負債としてdesigner起票2026-08-09",
+    "round-noteにもダークテーマがない(両テーマで同一描画)。tanaoroshiは[data-theme=dark]はあるがprefers-color-schemeが無く、システム暗色の既定利用者にはライトが出る。turnaround12の件と同じダーク追従の束で扱う(designer照合2026-08-09)",
+    "starter-kitsのnav-links(hub.css)が22px高で、44px未達の要素が18個ある。モバイルnavスプリント(2026-08-09)はsubpage.css系の.nav-actionsを45pxにしたが、hub.css系のnav-linksは未対応。ハブ側ページ全体に効くためhub.cssの独立スプリントで(designer照合2026-08-09)",
+    "iikae / keiji / keiri-76a805 の::selectionが藍地(--blue)のまま。tanaoroshi・nidodemaが移った「砂地に炭」(選択の瞬間=砂、第22条)に未追従(designer照合2026-08-09)",
+    "rehaboardの.cmp-tableが320pxで11px欠ける(モバイルnavスプリント以前からの既存。designer照合2026-08-09で発見)",
+    "legal/privacy.htmlは全h2・全リンクが砂色。コントラストは2026-08-09の#7D6845化でAA解消済みだが、砂の多用そのものが第22条「選択の瞬間にだけ」に触れる。色ではなく用法の問題のため社長の審美判断待ち(designer照合2026-08-09)",
+    "モバイルnavの取引の記録: 640px以下でロゴの製品名(.small)を畳んだのは「1行50pxのヘッダを守るために、スクロール後の現在地表示を諦めた」取引である(navはfixedでheroが流れた後は頁名を名乗らない)。将来ロゴ側で現在地を示す案は文言が動くためeditor同席で別議題(designer照合2026-08-09)"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
