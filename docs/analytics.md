@@ -15,19 +15,13 @@
 無料・クッキーなし・個人情報を集めない計測サービス。プライバシーポリシーの改定が
 ほぼ不要で、BRIDGEの性格に合う。
 
-ローダーは実装済み(2026-08-09)。残る作業はサイトコードを入れるだけ。
+**2026-08-09に有効化済み。** サイトコード `wataru`(社長開設)。`shared/bridge.js` と
+`shared/usage.js` の `GOATCOUNTER_CODE` に設定済みで、`legal/privacy.html` には
+「本サイト(BRIDGE)のアクセス解析」の節(日英)を追記済み(第32条)。
+ダッシュボード: https://wataru.goatcounter.com/
 
-1. https://www.goatcounter.com/ でアカウントを作る(サイトコードは例: `bridge-med`)
-2. 次の2箇所の `GOATCOUNTER_CODE = ''` に同じサイトコードを入れる
-   - `shared/bridge.js` の「訪問者計測(未計測)」ブロック
-   - `shared/usage.js` の末尾ブロック(bridge.jsを読まないプロダクトページ用)
-3. 同じコミットで `legal/privacy.html` に下の一文を追記する(第32条)
-4. コミットして出荷し、翌日 GoatCounter のダッシュボードに数字が出ていることを確かめる
-
-privacy追記文(用意済み・「アクセス解析」の節として追加):
-
-> 訪問者数の把握のため、アクセス解析サービス GoatCounter を利用しています。
-> Cookieを使わず、個人を特定する情報は収集されません。
+サイトコードを変える日が来たら、上記2ファイルの `GOATCOUNTER_CODE` を同じ値で書き換える。
+空文字に戻せば計測は止まる(何も読み込まれない)。
 
 補足:
 - cockpitはnoindexだが計測には載る。運営者の自分のアクセスは GoatCounter の設定で除外できる
