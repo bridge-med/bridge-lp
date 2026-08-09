@@ -109,8 +109,12 @@ img,svg{display:block;max-width:100%}
   .nav.scrolled{padding:10px var(--pad-x)}
   .nav-logo .small{display:none}
   .nav-actions{gap:6px}
-  .nav-actions a{white-space:nowrap;padding:9px 10px}
+  .nav-actions a{white-space:nowrap;padding:9px 10px;position:relative}
+  /* 見た目29px高のまま、タップ領域だけ縦に44px超へ(round-note .row-check前例) */
+  .nav-actions a::before{content:'';position:absolute;inset:-8px 0}
 }
+/* 320〜360px: emの一息が入りきらないときだけ、文節で折ることを許す(折れ位置はBudouXが決める) */
+@media(max-width:360px){.s-head h2 .em.nowrap{white-space:normal}}
 
 /* hero */
 .hero{padding:160px var(--pad-x) 100px;position:relative;background:var(--paper);text-align:left;border-bottom:1px solid var(--line)}
