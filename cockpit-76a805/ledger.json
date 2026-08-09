@@ -520,7 +520,9 @@
     "iikae / keiji / keiri-76a805 の::selectionが藍地(--blue)のまま。tanaoroshi・nidodemaが移った「砂地に炭」(選択の瞬間=砂、第22条)に未追従(designer照合2026-08-09)",
     "rehaboardの.cmp-tableが320pxで11px欠ける(モバイルnavスプリント以前からの既存。designer照合2026-08-09で発見)",
     "legal/privacy.htmlは全h2・全リンクが砂色。コントラストは2026-08-09の#7D6845化でAA解消済みだが、砂の多用そのものが第22条「選択の瞬間にだけ」に触れる。色ではなく用法の問題のため社長の審美判断待ち(designer照合2026-08-09)",
-    "モバイルnavの取引の記録: 640px以下でロゴの製品名(.small)を畳んだのは「1行50pxのヘッダを守るために、スクロール後の現在地表示を諦めた」取引である(navはfixedでheroが流れた後は頁名を名乗らない)。将来ロゴ側で現在地を示す案は文言が動くためeditor同席で別議題(designer照合2026-08-09)"
+    "モバイルnavの取引の記録: 640px以下でロゴの製品名(.small)を畳んだのは「1行50pxのヘッダを守るために、スクロール後の現在地表示を諦めた」取引である(navはfixedでheroが流れた後は頁名を名乗らない)。将来ロゴ側で現在地を示す案は文言が動くためeditor同席で別議題(designer照合2026-08-09)",
+    "madoakari/index.htmlのog:imageが製品サムネ流用の.webpで、一部スクレイパー(X/Slack等)が展開しない。twitter:cardとog:image:width/heightも欠落。scripts/make-ogp.mjsのCARDS配列に1行足して家族の顔に差し替える候補(designer起票2026-08-09)",
+    "既存OGP9枚(思想ハブ)の小見出しが--dawn #A98F63のままで、タイムライン縮小時にほぼ消える。新規5枚は--dawn-deep #7D6845を採用(canonのトークン注記準拠)。9枚を焼き直して揃えるかは社長の審美判断(designer起票2026-08-09)"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
