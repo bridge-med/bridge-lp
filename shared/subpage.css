@@ -102,6 +102,15 @@ img,svg{display:block;max-width:100%}
 .nav-actions a.back:hover{color:var(--ink)}
 .nav-actions a.cta{background:var(--ink);color:var(--on-fill)}
 .nav-actions a.cta:hover{background:var(--navy)}
+/* モバイル: 製品名はheroが名乗るためロゴ側を畳み、CTAは1行を保つ。
+ * さらに狭い画面では文字を潰さず行ごと折り返す */
+@media(max-width:640px){
+  .nav{flex-wrap:wrap;row-gap:8px;padding:14px var(--pad-x)}
+  .nav.scrolled{padding:10px var(--pad-x)}
+  .nav-logo .small{display:none}
+  .nav-actions{gap:6px}
+  .nav-actions a{white-space:nowrap;padding:9px 10px}
+}
 
 /* hero */
 .hero{padding:160px var(--pad-x) 100px;position:relative;background:var(--paper);text-align:left;border-bottom:1px solid var(--line)}
