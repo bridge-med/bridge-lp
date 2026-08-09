@@ -177,7 +177,7 @@ document.documentElement.classList.add('js');
      空文字のままなら何も読み込まない=未計測。手順と選定理由は docs/analytics.md。
      有効化する同じコミットで legal/privacy.html に計測の一文(analytics.mdに用意済み)を
      追記すること(第32条)。それまで cockpit には「未計測」と正直に表示する。 ---- */
-  const GOATCOUNTER_CODE = '';
+  const GOATCOUNTER_CODE = 'wataru';
   if (GOATCOUNTER_CODE) {
     const gc = document.createElement('script');
     gc.dataset.goatcounter = 'https://' + GOATCOUNTER_CODE + '.goatcounter.com/count';

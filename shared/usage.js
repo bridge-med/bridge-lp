@@ -22,7 +22,7 @@
   /* ---- 訪問者計測 — bridge.js と同じ規約。
      GOATCOUNTER_CODE を入れるときは bridge.js 側と同じ値にすること(docs/analytics.md) ---- */
   try {
-    var GOATCOUNTER_CODE = '';
+    var GOATCOUNTER_CODE = 'wataru';
     if (GOATCOUNTER_CODE) {
       var gc = document.createElement('script');
       gc.setAttribute('data-goatcounter', 'https://' + GOATCOUNTER_CODE + '.goatcounter.com/count');
