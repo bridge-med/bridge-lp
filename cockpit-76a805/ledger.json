@@ -23,7 +23,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "medboard",
@@ -39,7 +39,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "hire-board",
@@ -55,7 +55,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "interview-kit",
@@ -71,7 +71,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "consult-simulator",
@@ -87,7 +87,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "round-note",
@@ -103,7 +103,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-26"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "keiji",
@@ -136,7 +136,7 @@
       "measure": "none",
       "measureNote": "iOSアプリのためこの台帳では計測できない。手動記録",
       "note": "運営者の利用が止まっている。原因は評価中",
-      "lastCommit": "2026-07-07"
+      "lastCommit": "2026-07-08"
     },
     {
       "id": "clinic-flow-3d",
@@ -168,7 +168,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "study-board",
@@ -184,7 +184,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "english-trainer",
@@ -200,7 +200,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "turnaround12",
@@ -216,7 +216,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-27"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "tanaoroshi",
@@ -232,7 +232,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "棚卸し(自己評価)→キャリアログ導線で再評価へ接続。stage/servesは2026-07-18社長確定",
-      "lastCommit": "2026-07-18"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "iikae",
@@ -248,7 +248,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "棚卸し(評価)→言いかえ帳(理解)の双方向導線。stage/servesはPM案、社長確定待ち",
-      "lastCommit": "2026-07-18"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "moyamoya",
@@ -264,7 +264,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-19"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "pmi-quest",
@@ -296,7 +296,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-19"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "karte",
@@ -312,7 +312,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-19"
+      "lastCommit": "2026-08-09"
     },
     {
       "id": "reha-checklist",
@@ -343,7 +343,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "2026-07-19の出荷で配色リカラーとあわせてカタログ掲載済み(products/index.html の PRODUCTS 配列)。台帳側の未反映を2026-07-24に修正。掲載判断は決着済み",
-      "lastCommit": "2026-07-19",
+      "lastCommit": "2026-08-09",
       "decision": {
         "points": "動くPWAとして完成しており、第31条の申告(実践/疲れた人のセルフケア)は立つ。論点は第12条——運営者自身が使い続けているか。掲載するなら「診断・ライト」の並びに1行で足せる。使っていないなら休止中として正直に置く手もある",
         "catalogDraft": "{ cat: 'casual', img: 'gokigen-gacha.png', name: 'Gokigen Gacha', jp: 'ごきげん回復ガチャ', href: '../gokigen-gacha/index.html',\n  p: '疲れた日に、いまの自分にちょうどいい回復行動をひとつだけ。押すだけのセルフケアガチャ。' }\nサムネイル作成済み(images/products/thumbs/gokigen-gacha.webp)"
@@ -384,7 +384,7 @@
       "measure": "none",
       "measureNote": "Expo書き出しHTMLのため敷設しない(再書き出しで消える)。手動記録",
       "note": "Web書き出し(pomodoro-app)は2026-07-27に引退(社長委任決定・監査役推奨a)。title空・Expo残骸で第32条未達、導線ゼロのため訪問者影響なし。ソース(mobile-pomodoro)は保持。iOS配信または紹介ページ+実利用確認+改名(第30条)が揃ったら掲載を再検討",
-      "lastCommit": "2026-07-07",
+      "lastCommit": "2026-07-08",
       "decision": {
         "points": "ソース(mobile-pomodoro)は運用文書まで揃った本格実装。ただしWeb版はExpo自動書き出しでtitleも空のままで、カタログから直リンクするには粗い(第32条)。名称の第30条抵触もある。監査役推奨(2026-07-26): Web書き出し(pomodoro-app/)を公開ツリーから引退(a・導線ゼロのため訪問者影響なし)。iOS配信または紹介ページ+実利用確認+改名が揃ったら掲載を再検討。代替(b)は紹介ページを作って掲載だが命名の決着が先。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'learning', img: 'bridge-focus.png', name: 'BRIDGE Focus', jp: 'ポモドーロタイマー', href: '../pomodoro-app/index.html',\n  p: 'タスク管理ではなく、いまやる一つに集中するためのタイマー。集中の記録が作業に紐づいて残る。' }\n※ hrefは書き出し物への直リンク。紹介ページを作るならそちらへ向ける。サムネイル作成済み"
