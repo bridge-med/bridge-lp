@@ -1,10 +1,12 @@
-# Growth OS — 仕事の記録を、次の仕事に(運営者用)
+# Growth OS — 仕事の記録を、次の仕事に
 
 日々の仕事の記録(Worklog)を、プロジェクト・収益化アイデア・コンテンツ・売上の管理まで
-1つの流れでつなぐ、運営者専用の台帳。cockpit(運営台帳)・keiri(副業の帳簿)と同じ系列の内部ツール。
+1つの流れでつなぐ台帳。運営者用の内部ツールとして出荷し、2026-08-09の社長決裁で
+プロダクトカタログ(products)に掲載した。
 
-- URL: `growth-76a805/index.html`(noindex・NAV/PRODUCTS非掲載。直接URLでのみ開く)
+- URL: `growth-76a805/index.html`(noindex。Productsカタログから開く)
 - データはすべて端末の localStorage(`bridge-growth-v1`)にのみ保存。外部送信はしない
+- デモデータはすべて架空の汎用サンプル(実在の業務・人物・数字は含めない)
 - ビルドなし。`index.html` + `app/` の4ファイルで完結
 
 ## 構成(責務分離。やわ返 yawagaeshi と同じ設計)

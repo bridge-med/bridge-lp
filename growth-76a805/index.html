@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Growth OS — 仕事の記録を、次の仕事に / BRIDGE(運営者用)</title>
-<meta name="description" content="日々の仕事の記録を、プロジェクト・コンテンツ・商品につなげる運営者専用の台帳。データは端末の中にだけ保存されます。">
+<title>Growth OS — 仕事の記録を、次の仕事に / BRIDGE</title>
+<meta name="description" content="日々の仕事の記録を、プロジェクト・コンテンツ・収益化のたねにつなげる台帳。登録不要・データは端末の中にだけ保存されます。">
 <meta name="robots" content="noindex">
-<!-- OGPは意図的に置かない。noindexの運営者専用ページに外部プレビューを作らない(cockpit・keiriと同じ設計判断) -->
+<!-- OGPは意図的に置かない。noindexページに外部プレビューを作らない(yawagaeshiと同じ設計判断) -->
 <script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
 <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111521" media="(prefers-color-scheme: dark)">
@@ -23,7 +23,7 @@
   <!-- 左ナビ -->
   <aside class="sidenav" aria-label="メインナビゲーション">
     <div class="brand">
-      <h1><a href="./"><span class="brand-name">Growth OS</span><span class="brand-eyebrow">BRIDGE 運営者用</span></a></h1>
+      <h1><a href="./"><span class="brand-name">Growth OS</span><span class="brand-eyebrow">BRIDGE</span></a></h1>
     </div>
     <nav class="nav-list" id="navList">
       <a href="#dashboard" data-view="dashboard"><span class="en">Dashboard</span><span class="jp">今日の全体</span></a>
@@ -72,7 +72,7 @@
           <div id="d-next"></div>
         </section>
         <section class="panel">
-          <div class="panel-head"><h3>最近のWorklog</h3><a class="more" href="#worklog">記録する</a></div>
+          <div class="panel-head"><h3>最近の記録</h3><a class="more" href="#worklog">記録する</a></div>
           <div id="d-logs"></div>
         </section>
         <section class="panel">
@@ -347,23 +347,23 @@
   <!-- 右サイドパネル -->
   <aside class="sidepanel" aria-label="今日の補助情報">
     <section class="side-sec">
-      <h4>Today Focus</h4>
+      <h4>今日のFocus</h4>
       <div id="side-focus"></div>
     </section>
     <section class="side-sec">
-      <h4>Next Actions</h4>
+      <h4>次にやること</h4>
       <div id="side-next"></div>
     </section>
     <section class="side-sec">
-      <h4>AI Suggestions</h4>
+      <h4>AIからの提案</h4>
       <div id="side-ai"></div>
     </section>
     <section class="side-sec">
-      <h4>Revenue Hints</h4>
+      <h4>収益のヒント</h4>
       <div id="side-revenue"></div>
     </section>
     <section class="side-sec">
-      <h4>Recent Logs</h4>
+      <h4>最近の記録</h4>
       <div id="side-recent"></div>
     </section>
   </aside>
