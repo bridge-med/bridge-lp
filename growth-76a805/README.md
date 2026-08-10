@@ -42,8 +42,10 @@ POST { templateId, system, prompt, source }
 ```
 
 `system` にはGrowth OSの回答方針(次の1アクションまで落とす、売れる可能性と作りやすさを分けて考える等)、
-`prompt` にはテンプレートの出力見出しと素材のJSONが入っている。Worker側は
-yawagaeshi/worker と同じ要領で建てられる(モデルは差し替え自由)。
+`prompt` にはテンプレートの出力見出しと素材のJSONが入っている。
+
+**Worker本体は `worker/` に用意済み**(yawagaeshi/workerと同型・Gemini連携・テスト付き)。
+デプロイ手順は `worker/README.md`。デプロイまでは既定のテンプレート生成で動く。
 
 将来RAGや履歴文脈を足す場合も、注入点は `aiService.js` の `buildPrompt()` 1か所。
 UIとstoreには手を入れずに済む。
