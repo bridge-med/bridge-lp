@@ -162,6 +162,54 @@
   }
 
   // ============================================================
+  // 今日の3つ — 朝に選ぶ、今日終わらせること(最大3件)
+  // 日付が変われば空に戻る。繰り越さない。過去分は保持するが表示しない。
+  // ============================================================
+  function focus3Block() {
+    const day = S.today(); // 開きっぱなしのタブでも描画時点の日付で判定する
+    // all()は新しい順(unshift)なので、朝選んだ順に並ぶよう反転する
+    const items = DB.focus3.all().filter(f => f.date === day).reverse();
+    const doneCount = items.filter(f => f.done).length;
+
+    const rows = items.map(f => h('div', { class: 'f3-row' + (f.done ? ' done' : '') }, [
+      h('button', {
+        class: 'f3-toggle', type: 'button', 'aria-pressed': f.done ? 'true' : 'false',
+        onclick: () => { f.done = !f.done; DB.focus3.upsert(f); route(); },
+      }, [
+        h('span', { class: 'f3-mark', 'aria-hidden': 'true' }),
+        h('span', { class: 'f3-text' }, f.text),
+      ]),
+      h('button', { class: 'f3-del', type: 'button', 'aria-label': '「' + f.text + '」を消す', onclick: () => { DB.focus3.remove(f.id); route(); } }, '×'),
+    ]));
+
+    let addRow = null;
+    if (items.length < 3) {
+      const field = h('input', { class: 'f3-input', type: 'text', placeholder: '今日終わらせること', maxlength: '80', enterkeyhint: 'done', 'aria-label': '今日終わらせること' });
+      const add = () => {
+        const text = field.value.trim();
+        if (!text) return;
+        if (DB.focus3.all().filter(f => f.date === day).length >= 3) return;
+        DB.focus3.upsert({ date: day, text, done: false });
+        route();
+      };
+      field.addEventListener('keydown', e => {
+        if (e.isComposing || e.keyCode === 229) return; // 日本語入力の確定Enterでは追加しない
+        if (e.key === 'Enter') { e.preventDefault(); add(); }
+      });
+      addRow = h('div', { class: 'f3-add' }, [field, h('button', { class: 'btn sm', type: 'button', onclick: add }, '追加')]);
+    }
+
+    return h('section', { class: 'block' }, [
+      h('div', { class: 'block-head' }, ['今日の3つ',
+        doneCount ? h('a', { class: 'link', href: '#/daily/new?focus3=1' }, '今日のログに使う →') : null]),
+      items.length
+        ? h('div', { class: 'f3-list' }, rows)
+        : h('p', { class: 'block-note' }, '日付が変わると空になります。'),
+      addRow,
+    ]);
+  }
+
+  // ============================================================
   // ダッシュボード
   // ============================================================
   function viewDashboard() {
@@ -226,6 +274,7 @@
     const recentNums = nums.slice(0, 3);
 
     return page('CxO Roadmap Log', '日々の現場仕事を、CxO候補としての実績ログに変換する。', h('div', null, [
+      focus3Block(),
       quick,
       stats,
       help,
@@ -273,10 +322,20 @@
     ]), addBtn('#/daily/new', '＋ 追加'));
   }
 
-  function viewDailyForm(id) {
+  function viewDailyForm(id, query) {
     const isNew = !id;
     const data = isNew ? S.factories.daily() : DB.dailyLogs.get(id);
     if (!data) return notFound();
+
+    // 「今日の3つ」の完了分をメモの下書きに引き継ぐ(案件ログの ?from= と同型)
+    let fromFocus3 = false;
+    if (isNew && query && query.focus3) {
+      const doneTexts = DB.focus3.all().filter(f => f.date === S.today() && f.done).map(f => f.text).reverse();
+      if (doneTexts.length && !data.memo) {
+        data.memo = doneTexts.join('\n');
+        fromFocus3 = true;
+      }
+    }
     const { node, collect } = buildForm(S.forms.daily, data);
 
     const convert = !isNew ? h('div', { class: 'card' }, [
@@ -296,7 +355,8 @@
       DB.dailyLogs.upsert(obj);
       location.hash = '#/daily';
     }
-    return page(isNew ? '日次ログを追加' : '日次ログを編集', null, h('div', null, [
+    return page(isNew ? '日次ログを追加' : '日次ログを編集',
+      fromFocus3 ? '「今日の3つ」の終わった分を、雑メモの下書きにしました。' : null, h('div', null, [
       h('div', { class: 'note info' }, 'きれいに書かなくてOK。あとから案件ログや数字成果に整理するためのメモです。'),
       node, convert,
       !isNew ? deleteRow(() => { DB.dailyLogs.remove(data.id); location.hash = '#/daily'; }) : null,
@@ -695,7 +755,7 @@
     switch (a) {
       case undefined: view = viewDashboard(); break;
       case 'daily':
-        view = !b ? viewDailyList() : b === 'new' ? viewDailyForm(null) : b === 'edit' ? viewDailyForm(c) : viewDailyList();
+        view = !b ? viewDailyList() : b === 'new' ? viewDailyForm(null, query) : b === 'edit' ? viewDailyForm(c) : viewDailyList();
         break;
       case 'cases':
         view = !b ? viewCaseList() : b === 'new' ? viewCaseForm(null, query) : b === 'edit' ? viewCaseForm(c) : b === 'view' ? viewCaseDetail(c) : viewCaseList();
