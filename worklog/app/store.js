@@ -44,6 +44,9 @@ CXO.store = (function () {
   const weekly = collection('weekly');
   const monthly = collection('monthly');
   const skills = collection('skills');
+  // 「今日の3つ」— 型の「設計→実践」の入口。朝に自ら選んだ3件が、夜には日次ログ(再評価)の材料になる。
+  // {id, date:'YYYY-MM-DD', text, done}。日付が変われば表示は空に戻る(過去分は保持・繰り越さない)。
+  const focus3 = collection('focus3');
 
   // ---- バックアップ用: 全データ書き出し / 取り込み ----
   function exportAll() {
@@ -51,15 +54,16 @@ CXO.store = (function () {
       _app: 'cxo-roadmap-log', _version: 1, exportedAt: now(),
       dailyLogs: dailyLogs.all(), cases: cases.all(), numbers: numbers.all(),
       weekly: weekly.all(), monthly: monthly.all(), skills: skills.all(),
+      focus3: focus3.all(),
     };
   }
   function importAll(data) {
-    ['dailyLogs', 'cases', 'numbers', 'weekly', 'monthly', 'skills'].forEach(k => {
+    ['dailyLogs', 'cases', 'numbers', 'weekly', 'monthly', 'skills', 'focus3'].forEach(k => {
       if (Array.isArray(data[k])) write(k, data[k]);
     });
   }
   function resetAll() {
-    ['dailyLogs', 'cases', 'numbers', 'weekly', 'monthly', 'skills', 'seeded']
+    ['dailyLogs', 'cases', 'numbers', 'weekly', 'monthly', 'skills', 'focus3', 'seeded']
       .forEach(k => localStorage.removeItem(NS + k));
   }
 
@@ -154,7 +158,7 @@ CXO.store = (function () {
   }
 
   return {
-    dailyLogs, cases, numbers, weekly, monthly, skills,
+    dailyLogs, cases, numbers, weekly, monthly, skills, focus3,
     exportAll, importAll, resetAll, seed,
   };
 })();

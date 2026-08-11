@@ -296,7 +296,11 @@ CXO.schema = (function () {
     return Object.assign(o, defaults || {});
   }
 
-  const today = () => new Date().toISOString().slice(0, 10);
+  // 端末のローカル日付。toISOString()はUTC基準で、日本では朝9時まで前日になるため使わない
+  const today = () => {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  };
 
   const factories = {
     daily: () => blankFromForm(forms.daily, { date: today(), status: 'メモ', promote: false }),
