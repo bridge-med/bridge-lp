@@ -13,3 +13,6 @@ private/
 .DS_Store
 Thumbs.db
 node_modules/
+
+# アプリの実行時ファイル
+app/.session

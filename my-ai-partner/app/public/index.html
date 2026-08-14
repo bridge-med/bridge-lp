@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>わたしのAIパートナー</title>
+<style>
+  :root {
+    --bg:#FAF5EF; --panel:#FFFFFF; --panel-soft:#FBEDE7; --ink:#40342B; --ink-soft:#8A7A6D;
+    --line:#EDE2D8; --accent:#DE7963; --accent-deep:#C05F4B; --accent-soft:#F7DCD3;
+    --chip-ink:#9C4A37; --ok:#5E9273;
+  }
+  * { box-sizing:border-box; }
+  html,body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-size:15px; line-height:1.75;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif; }
+  .layout { display:flex; height:100vh; }
+
+  /* ---- sidebar ---- */
+  aside { width:236px; flex:none; background:var(--panel); border-right:1px solid var(--line);
+    display:flex; flex-direction:column; padding:18px 14px; gap:4px; }
+  .brand { display:flex; align-items:center; gap:10px; padding:4px 8px 14px; }
+  .heart { width:34px; height:34px; flex:none; background:var(--accent); border-radius:50% 50% 46% 46%;
+    position:relative; transform:rotate(-6deg); }
+  .heart::after { content:"♥"; position:absolute; inset:0; display:grid; place-items:center;
+    color:#fff; font-size:16px; transform:rotate(6deg); }
+  .brand b { font-size:14.5px; display:block; line-height:1.3; }
+  .brand small { color:var(--ink-soft); font-size:10.5px; }
+  nav button { display:flex; align-items:center; gap:10px; width:100%; border:none; background:none;
+    font:inherit; font-size:14px; color:var(--ink); padding:9px 12px; border-radius:10px; cursor:pointer; text-align:left; }
+  nav button:hover { background:var(--bg); }
+  nav button.active { background:var(--panel-soft); color:var(--accent-deep); font-weight:700; }
+  nav .ic { width:20px; text-align:center; }
+  .mascot { margin-top:auto; background:var(--panel-soft); border-radius:14px; padding:12px 14px;
+    font-size:12.5px; color:var(--ink); }
+  .mascot span { font-size:20px; display:block; }
+  .foot { font-size:10.5px; color:var(--ink-soft); padding:10px 8px 0; }
+
+  /* ---- main ---- */
+  main { flex:1; display:flex; flex-direction:column; min-width:0; }
+  .topbar { padding:14px 26px; border-bottom:1px solid var(--line); background:var(--panel);
+    display:flex; align-items:center; justify-content:space-between; }
+  .topbar h1 { font-size:15.5px; margin:0; }
+  .topbar .actions button { border:1px solid var(--line); background:var(--panel); color:var(--ink-soft);
+    font:inherit; font-size:12.5px; border-radius:999px; padding:5px 14px; cursor:pointer; }
+  .topbar .actions button:hover { color:var(--accent-deep); border-color:var(--accent-soft); }
+  .view { flex:1; overflow-y:auto; padding:26px; }
+  .view.hidden { display:none; }
+
+  /* ---- home ---- */
+  .hello { max-width:640px; }
+  .hello .big { display:flex; gap:12px; align-items:center; margin-bottom:4px; }
+  .hello h2 { font-size:24px; margin:0; }
+  .hello p { color:var(--ink-soft); margin:0 0 20px; }
+  .chips { display:flex; flex-wrap:wrap; gap:10px; }
+  .chips button { border:1px solid var(--line); background:var(--panel); font:inherit; font-size:13.5px;
+    border-radius:999px; padding:8px 16px; cursor:pointer; color:var(--ink); }
+  .chips button:hover { border-color:var(--accent); color:var(--accent-deep); background:var(--panel-soft); }
+
+  /* ---- chat ---- */
+  #view-chat { display:flex; flex-direction:column; padding:0; }
+  .msgs { flex:1; overflow-y:auto; padding:26px; display:flex; flex-direction:column; gap:14px; }
+  .msg { max-width:70%; padding:11px 16px; border-radius:16px; font-size:14.5px; white-space:pre-wrap; }
+  .msg.user { align-self:flex-end; background:var(--accent-soft); border-bottom-right-radius:5px; }
+  .msg.ai { align-self:flex-start; background:var(--panel); border:1px solid var(--line); border-bottom-left-radius:5px; }
+  .msg.ai.thinking { color:var(--ink-soft); }
+  .msg.ai.thinking::after { content:"…"; animation:dots 1.2s infinite; }
+  @keyframes dots { 0%{content:"·"} 33%{content:"··"} 66%{content:"···"} }
+  .composer { border-top:1px solid var(--line); background:var(--panel); padding:14px 26px 10px; }
+  .inputrow { display:flex; gap:10px; }
+  .inputrow textarea { flex:1; resize:none; border:1px solid var(--line); border-radius:14px;
+    font:inherit; padding:10px 14px; height:46px; max-height:130px; background:var(--bg); color:var(--ink); }
+  .inputrow textarea:focus { outline:2px solid var(--accent-soft); border-color:var(--accent); }
+  .inputrow button { flex:none; width:46px; height:46px; border:none; border-radius:50%;
+    background:var(--accent); color:#fff; font-size:17px; cursor:pointer; }
+  .inputrow button:disabled { opacity:.45; cursor:default; }
+  .disclaimer { text-align:center; font-size:11px; color:var(--ink-soft); padding:8px 0 2px; }
+
+  /* ---- docs ---- */
+  .doc { max-width:680px; background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:20px 24px; margin-bottom:16px; overflow-x:auto; }
+  .doc h1 { font-size:18px; margin:0 0 8px; } .doc h2 { font-size:15.5px; margin:18px 0 6px; }
+  .doc h3 { font-size:14px; margin:14px 0 4px; }
+  .doc p { margin:6px 0; } .doc ul { margin:6px 0; padding-left:20px; }
+  .doc code { background:var(--bg); border-radius:5px; padding:1px 6px; font-size:12.5px;
+    font-family:ui-monospace,Menlo,monospace; }
+  .doc table { border-collapse:collapse; font-size:13px; margin:8px 0; }
+  .doc td,.doc th { border:1px solid var(--line); padding:5px 10px; text-align:left; }
+  .doc pre { background:var(--bg); border-radius:8px; padding:10px 14px; font-size:12.5px; overflow-x:auto; }
+  .doc .empty { color:var(--ink-soft); }
+  .tabs { display:flex; gap:8px; margin-bottom:14px; }
+  .tabs button { border:none; background:none; font:inherit; font-size:13px; padding:6px 14px;
+    border-radius:999px; cursor:pointer; color:var(--ink-soft); }
+  .tabs button.active { background:var(--accent-soft); color:var(--chip-ink); font-weight:700; }
+
+  @media (max-width:760px) {
+    aside { position:fixed; z-index:9; left:0; top:0; bottom:0; transform:translateX(-100%); transition:transform .2s; }
+    aside.open { transform:none; box-shadow:0 0 40px rgba(0,0,0,.2); }
+    .menu-btn { display:inline-block !important; }
+    .msg { max-width:88%; }
+  }
+  .menu-btn { display:none; border:none; background:none; font-size:18px; cursor:pointer; color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="heart" aria-hidden="true"></div>
+      <div><b>わたしのAIパートナー</b><small>一緒に、やりたいことを見つけよう</small></div>
+    </div>
+    <nav id="nav">
+      <button data-v="home" class="active"><span class="ic">🏠</span>ホーム</button>
+      <button data-v="chat"><span class="ic">💬</span>チャット</button>
+      <button data-v="ideas"><span class="ic">💡</span>アイデア</button>
+      <button data-v="note"><span class="ic">📝</span>note</button>
+      <button data-v="x"><span class="ic">🕊️</span>X（Twitter）</button>
+      <button data-v="progress"><span class="ic">📈</span>進捗</button>
+      <button data-v="profile"><span class="ic">👤</span>プロフィール</button>
+    </nav>
+    <div class="mascot"><span>🧡</span>一緒に、小さな一歩を積み重ねていこうね。</div>
+    <div class="foot">© My AI Partner ｜ ローカルで動いています</div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <span style="display:flex;align-items:center;gap:10px">
+        <button class="menu-btn" id="menuBtn">☰</button>
+        <h1 id="viewTitle">ホーム</h1>
+      </span>
+      <span class="actions"><button id="newChat">＋ 新しい会話</button></span>
+    </div>
+
+    <div class="view" id="view-home">
+      <div class="hello">
+        <div class="big"><div class="heart" aria-hidden="true"></div><h2>おかえりなさい！</h2></div>
+        <p>今日も、あなたらしい一歩を一緒に考えよう。</p>
+        <div class="chips" id="homeChips">
+          <button>やりたいことが分からない…</button>
+          <button>noteのネタを考えたい</button>
+          <button>Xの投稿を作りたい</button>
+          <button>文章を添削してほしい</button>
+          <button>AIの使い方を教えて</button>
+          <button>なんとなく話したい</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view hidden" id="view-chat">
+      <div class="msgs" id="msgs"></div>
+      <div class="composer">
+        <div class="inputrow">
+          <textarea id="input" placeholder="メッセージを入力…" rows="1"></textarea>
+          <button id="send" title="送信">➤</button>
+        </div>
+        <div class="disclaimer">AIの回答は参考情報です。最終的な判断はご自身でお願いします。</div>
+      </div>
+    </div>
+
+    <div class="view hidden" id="view-docs">
+      <div class="tabs" id="docTabs"></div>
+      <div id="docBody"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const msgsEl = $('#msgs'), input = $('#input'), sendBtn = $('#send');
+
+/* ---------- ビュー定義 ---------- */
+const DOC_VIEWS = {
+  ideas:    { title:'アイデア', tabs:[['インボックス','ideas/inbox.md'],['noteのネタ','ideas/note.md'],['Xのネタ','ideas/x.md']] },
+  note:     { title:'note',     tabs:[['ネタ帳','ideas/note.md'],['作り方','work/note/README.md']] },
+  x:        { title:'X（Twitter）', tabs:[['ネタ帳','ideas/x.md'],['作り方','work/x/README.md']] },
+  progress: { title:'進捗',     tabs:[['あゆみ','profile/progress.md']] },
+  profile:  { title:'プロフィール', tabs:[['興味','profile/interests.md'],['得意','profile/strengths.md'],['好み','profile/preferences.md'],['苦手','profile/dislikes.md'],['条件','profile/constraints.md'],['目標','profile/goals.md'],['基本','profile/basics.md']] },
+};
+let currentView = 'home';
+
+function switchView(v) {
+  currentView = v;
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+  $('#view-home').classList.toggle('hidden', v !== 'home');
+  $('#view-chat').classList.toggle('hidden', v !== 'chat');
+  $('#view-docs').classList.toggle('hidden', !DOC_VIEWS[v]);
+  $('#viewTitle').textContent = v === 'home' ? 'ホーム' : v === 'chat' ? 'チャット' : DOC_VIEWS[v].title;
+  $('#sidebar').classList.remove('open');
+  if (DOC_VIEWS[v]) loadDocs(v);
+  if (v === 'chat') { input.focus(); msgsEl.scrollTop = msgsEl.scrollHeight; }
+}
+$('#nav').addEventListener('click', e => { const b = e.target.closest('button'); if (b) switchView(b.dataset.v); });
+$('#menuBtn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+
+/* ---------- 簡易Markdown表示 ---------- */
+function esc(s){ return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function md(src){
+  const lines = esc(src).split('\n'); let out = [], i = 0, buf = [];
+  const flush = () => { if (buf.length) { out.push('<p>'+buf.join('<br>')+'</p>'); buf = []; } };
+  while (i < lines.length) {
+    let l = lines[i];
+    if (l.startsWith('```')) { flush(); let code = []; i++;
+      while (i < lines.length && !lines[i].startsWith('```')) code.push(lines[i++]);
+      out.push('<pre>'+code.join('\n')+'</pre>'); i++; continue; }
+    if (/^\|/.test(l)) { flush(); let rows = [];
+      while (i < lines.length && /^\|/.test(lines[i])) { if (!/^\|[\s:-]+\|/.test(lines[i].replace(/\|/g,'|'))||!/^[|\s:-]+$/.test(lines[i])) rows.push(lines[i]); i++; }
+      out.push('<table>'+rows.map(r => '<tr>'+r.replace(/^\||\|$/g,'').split('|').map(c=>'<td>'+inline(c.trim())+'</td>').join('')+'</tr>').join('')+'</table>'); continue; }
+    if (/^#{1,3} /.test(l)) { flush(); const n = l.match(/^#+/)[0].length; out.push(`<h${n}>`+inline(l.replace(/^#+ /,''))+`</h${n}>`); i++; continue; }
+    if (/^[-・] /.test(l)) { flush(); let items = [];
+      while (i < lines.length && /^[-・] /.test(lines[i])) items.push('<li>'+inline(lines[i++].slice(2))+'</li>');
+      out.push('<ul>'+items.join('')+'</ul>'); continue; }
+    if (!l.trim()) { flush(); i++; continue; }
+    buf.push(inline(l)); i++;
+  }
+  flush(); return out.join('');
+}
+function inline(s){ return s
+  .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
+  .replace(/`([^`]+)`/g,'<code>$1</code>'); }
+
+async function loadDocs(v){
+  const conf = DOC_VIEWS[v]; const tabs = $('#docTabs'); tabs.innerHTML = '';
+  conf.tabs.forEach(([label, file], idx) => {
+    const b = document.createElement('button'); b.textContent = label;
+    b.onclick = () => showDoc(v, idx); tabs.appendChild(b);
+  });
+  showDoc(v, 0);
+}
+async function showDoc(v, idx){
+  const conf = DOC_VIEWS[v];
+  document.querySelectorAll('#docTabs button').forEach((b,i) => b.classList.toggle('active', i === idx));
+  const body = $('#docBody'); body.innerHTML = '<div class="doc"><p class="empty">読み込み中…</p></div>';
+  try {
+    const r = await fetch('/api/view?name='+encodeURIComponent(conf.tabs[idx][1]));
+    const j = await r.json();
+    body.innerHTML = '<div class="doc">'+(j.content ? md(j.content) : '<p class="empty">まだ何もありません</p>')+'</div>';
+  } catch { body.innerHTML = '<div class="doc"><p class="empty">読み込めませんでした</p></div>'; }
+}
+
+/* ---------- チャット ---------- */
+const LS = 'aip-transcript';
+let transcript = [];
+try { transcript = JSON.parse(localStorage.getItem(LS) || '[]'); } catch {}
+function saveT(){ try { localStorage.setItem(LS, JSON.stringify(transcript.slice(-200))); } catch {} }
+function bubble(role, text, extra=''){
+  const d = document.createElement('div');
+  d.className = 'msg '+role+(extra?' '+extra:''); d.textContent = text;
+  msgsEl.appendChild(d); msgsEl.scrollTop = msgsEl.scrollHeight; return d;
+}
+function renderTranscript(){
+  msgsEl.innerHTML = '';
+  if (!transcript.length)
+    bubble('ai', 'ここでは、まだやりたいことが決まっていなくても大丈夫です。\nAIを触ってみたい、副業がちょっと気になる、noteを書いてみたい、何か作ってみたい——どこからでも始められます。\n今日は、いま一番気になっていることをそのまま教えてください。');
+  transcript.forEach(m => bubble(m.role, m.text));
+}
+renderTranscript();
+
+let busy = false;
+async function send(text){
+  const msg = (text ?? input.value).trim();
+  if (!msg || busy) return;
+  busy = true; sendBtn.disabled = true; input.value = '';
+  switchView('chat');
+  transcript.push({role:'user', text:msg}); saveT(); bubble('user', msg);
+  const th = bubble('ai', '考えています', 'thinking');
+  try {
+    const r = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message: msg}) });
+    const j = await r.json();
+    th.remove();
+    const reply = j.reply || j.error || 'うまく届きませんでした。もう一度お願いします。';
+    transcript.push({role:'ai', text:reply}); saveT(); bubble('ai', reply);
+  } catch {
+    th.remove(); bubble('ai', 'つながりませんでした。アプリ(黒い画面)が閉じていないか確認して、もう一度送ってみてください。');
+  }
+  busy = false; sendBtn.disabled = false; input.focus();
+}
+sendBtn.addEventListener('click', () => send());
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
+$('#homeChips').addEventListener('click', e => { const b = e.target.closest('button'); if (b) send(b.textContent); });
+$('#newChat').addEventListener('click', async () => {
+  if (!confirm('新しい会話を始めますか？(いままでの話題はリセットされます。記録されたプロフィール等は残ります)')) return;
+  await fetch('/api/new', {method:'POST'}); transcript = []; saveT(); renderTranscript(); switchView('chat');
+});
+</script>
+</body>
+</html>
