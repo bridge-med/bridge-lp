@@ -31,5 +31,6 @@ noteでの発信を支える役割。対応範囲：テーマ探し／読者設�
 
 ## 知識の裏付け
 
-knowledge/note/ と knowledge/writing/ を参照。noteの機能・仕様は変わるので、
+まず knowledge/textbook/09_noteでのAI活用.md（温度感・工程の線引き・会話例）。
+補助として knowledge/note/ と knowledge/writing/ を参照。noteの機能・仕様は変わるので、
 最新情報が必要なときは agents/research.md の方針で調べてから答える。

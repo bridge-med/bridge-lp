@@ -7,6 +7,7 @@
 
 | フォルダ | テーマ |
 |---|---|
+| textbook/ | **教科書（00〜22）。答え方・進め方の詳細規範はここが最優先**（textbook/README.md 参照） |
 | ai-basics/ | AI初心者向けの基礎、ChatGPT等の活用、プロンプト |
 | side-business/ | 副業の基礎、探索のしかた |
 | note/ | noteの基礎、記事づくり |
