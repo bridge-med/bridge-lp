@@ -11,6 +11,7 @@ import { readFile, writeFile, unlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve, dirname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
 
 const APP  = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(APP, '..');                       // my-ai-partner/
@@ -103,9 +104,17 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
+const LAN = process.env.AIP_LAN === '1';           // 1=同じWi-Fiのスマホからも使える
+server.listen(PORT, LAN ? '0.0.0.0' : '127.0.0.1', () => {
   const addr = `http://127.0.0.1:${PORT}`;
   console.log(`わたしのAIパートナー: ${addr} で待っています(このウィンドウは開いたまま)`);
+  if (LAN) {
+    const nets = os.networkInterfaces();
+    for (const list of Object.values(nets)) for (const n of list || [])
+      if (n.family === 'IPv4' && !n.internal)
+        console.log(`スマホからは(同じWi-Fiで): http://${n.address}:${PORT}`);
+    console.log('※家庭内共有モードです。自宅のWi-Fi以外では使わないでください');
+  }
   const cmd = process.platform === 'darwin' ? ['open', [addr]]
     : process.platform === 'win32' ? ['cmd', ['/c', 'start', '', addr]]
     : ['xdg-open', [addr]];
