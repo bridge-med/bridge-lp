@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>わたしのAIパートナー</title>
+<style>
+  :root {
+    --bg:#FAF5EF; --panel:#FFFFFF; --panel-soft:#FBEDE7; --ink:#40342B; --ink-soft:#8A7A6D;
+    --line:#EDE2D8; --accent:#DE7963; --accent-deep:#C05F4B; --accent-soft:#F7DCD3;
+    --chip-ink:#9C4A37; --ok:#5E9273; --warn:#B98A3E;
+  }
+  * { box-sizing:border-box; }
+  html,body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-size:15px; line-height:1.75;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif; }
+  .layout { display:flex; height:100dvh; }
+
+  aside { width:232px; flex:none; background:var(--panel); border-right:1px solid var(--line);
+    display:flex; flex-direction:column; padding:18px 14px; gap:4px; }
+  .brand { display:flex; align-items:center; gap:10px; padding:4px 8px 14px; }
+  .heart { width:34px; height:34px; flex:none; background:var(--accent); border-radius:50% 50% 46% 46%;
+    position:relative; transform:rotate(-6deg); }
+  .heart::after { content:"♥"; position:absolute; inset:0; display:grid; place-items:center;
+    color:#fff; font-size:16px; transform:rotate(6deg); }
+  .brand b { font-size:13px; display:block; line-height:1.3; white-space:nowrap; letter-spacing:-.01em; }
+  .brand small { color:var(--ink-soft); font-size:10.5px; }
+  nav button { display:flex; align-items:center; gap:10px; width:100%; border:none; background:none;
+    font:inherit; font-size:14px; color:var(--ink); padding:9px 12px; border-radius:10px; cursor:pointer; text-align:left; }
+  nav button:hover { background:var(--bg); }
+  nav button.active { background:var(--panel-soft); color:var(--accent-deep); font-weight:700; }
+  nav .ic { width:20px; text-align:center; }
+  .mascot { margin-top:auto; background:var(--panel-soft); border-radius:14px; padding:12px 14px; font-size:12.5px; }
+  .mascot span { font-size:20px; display:block; }
+  .foot { font-size:10.5px; color:var(--ink-soft); padding:10px 8px 0; }
+
+  main { flex:1; display:flex; flex-direction:column; min-width:0; }
+  .topbar { padding:14px 22px; border-bottom:1px solid var(--line); background:var(--panel);
+    display:flex; align-items:center; justify-content:space-between; }
+  .topbar h1 { font-size:15.5px; margin:0; }
+  .topbar .actions button { border:1px solid var(--line); background:var(--panel); color:var(--ink-soft);
+    font:inherit; font-size:12.5px; border-radius:999px; padding:5px 14px; cursor:pointer; }
+  .topbar .actions button:hover { color:var(--accent-deep); border-color:var(--accent-soft); }
+  .menu-btn { display:none; border:none; background:none; font-size:18px; cursor:pointer; color:var(--ink); }
+  .view { flex:1; overflow-y:auto; padding:24px; }
+  .view.hidden { display:none; }
+
+  .hello { max-width:640px; }
+  .hello .big { display:flex; gap:12px; align-items:center; margin-bottom:4px; }
+  .hello h2 { font-size:23px; margin:0; }
+  .hello p { color:var(--ink-soft); margin:0 0 20px; }
+  .chips { display:flex; flex-wrap:wrap; gap:10px; }
+  .chips button { border:1px solid var(--line); background:var(--panel); font:inherit; font-size:13.5px;
+    border-radius:999px; padding:8px 16px; cursor:pointer; color:var(--ink); }
+  .chips button:hover { border-color:var(--accent); color:var(--accent-deep); background:var(--panel-soft); }
+
+  #view-chat { display:flex; flex-direction:column; padding:0; }
+  .msgs { flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:14px; }
+  .msg { max-width:74%; padding:11px 16px; border-radius:16px; font-size:14.5px; white-space:pre-wrap; overflow-wrap:break-word; }
+  .msg.user { align-self:flex-end; background:var(--accent-soft); border-bottom-right-radius:5px; }
+  .msg.ai { align-self:flex-start; background:var(--panel); border:1px solid var(--line); border-bottom-left-radius:5px; }
+  .msg.ai.thinking { color:var(--ink-soft); }
+  .msg.ai.thinking::after { content:"…"; animation:dots 1.2s infinite; }
+  @keyframes dots { 0%{content:"·"} 33%{content:"··"} 66%{content:"···"} }
+  .composer { border-top:1px solid var(--line); background:var(--panel); padding:12px 22px 8px; }
+  .inputrow { display:flex; gap:10px; }
+  .inputrow textarea { flex:1; resize:none; border:1px solid var(--line); border-radius:14px;
+    font:inherit; padding:10px 14px; height:46px; max-height:130px; background:var(--bg); color:var(--ink); }
+  .inputrow textarea:focus { outline:2px solid var(--accent-soft); border-color:var(--accent); }
+  .inputrow button { flex:none; width:46px; height:46px; border:none; border-radius:50%;
+    background:var(--accent); color:#fff; font-size:17px; cursor:pointer; }
+  .inputrow button:disabled { opacity:.45; cursor:default; }
+  .disclaimer { text-align:center; font-size:11px; color:var(--ink-soft); padding:7px 0 2px; }
+
+  .card { max-width:620px; background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:20px 24px; margin-bottom:16px; }
+  .card h3 { margin:0 0 8px; font-size:15.5px; }
+  .card p, .card li { font-size:13.5px; color:var(--ink); }
+  .card p.soft, .card small { color:var(--ink-soft); }
+  .card ol { padding-left:20px; margin:6px 0; }
+  .card input[type=password], .card input[type=text], .card select {
+    width:100%; font:inherit; font-size:13.5px; border:1px solid var(--line); border-radius:10px;
+    padding:9px 12px; background:var(--bg); color:var(--ink); }
+  .card .row { display:flex; gap:10px; margin-top:10px; align-items:center; }
+  .btn { border:none; background:var(--accent); color:#fff; font:inherit; font-size:13.5px;
+    border-radius:999px; padding:8px 20px; cursor:pointer; }
+  .btn.ghost { background:var(--panel); color:var(--ink-soft); border:1px solid var(--line); }
+  .status-ok { color:var(--ok); font-size:12.5px; font-weight:700; }
+  .status-warn { color:var(--warn); font-size:12.5px; font-weight:700; }
+
+  .memlist { display:flex; flex-direction:column; gap:8px; max-width:620px; }
+  .memitem { display:flex; gap:10px; align-items:flex-start; background:var(--panel);
+    border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:13.5px; }
+  .memitem .d { color:var(--ink-soft); font-size:11.5px; flex:none; padding-top:2px; }
+  .memitem .t { flex:1; }
+  .memitem button { border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:14px; }
+  .memitem button:hover { color:var(--accent-deep); }
+  .empty { color:var(--ink-soft); font-size:13.5px; }
+
+  @media (max-width:760px) {
+    aside { position:fixed; z-index:9; left:0; top:0; bottom:0; transform:translateX(-100%); transition:transform .2s; }
+    aside.open { transform:none; box-shadow:0 0 40px rgba(0,0,0,.2); }
+    .menu-btn { display:inline-block; }
+    .msg { max-width:88%; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="heart" aria-hidden="true"></div>
+      <div><b>わたしのAIパートナー</b><small>一緒に、やりたいことを見つけよう</small></div>
+    </div>
+    <nav id="nav">
+      <button data-v="home" class="active"><span class="ic">🏠</span>ホーム</button>
+      <button data-v="chat"><span class="ic">💬</span>チャット</button>
+      <button data-v="memory"><span class="ic">🧡</span>おぼえたこと</button>
+      <button data-v="settings"><span class="ic">⚙️</span>設定</button>
+    </nav>
+    <div class="mascot"><span>🧡</span>一緒に、小さな一歩を積み重ねていこうね。</div>
+    <div class="foot">© My AI Partner</div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <span style="display:flex;align-items:center;gap:10px">
+        <button class="menu-btn" id="menuBtn">☰</button>
+        <h1 id="viewTitle">ホーム</h1>
+      </span>
+      <span class="actions"><button id="newChat">＋ 新しい会話</button></span>
+    </div>
+
+    <div class="view" id="view-home">
+      <div class="hello">
+        <div class="big"><div class="heart" aria-hidden="true"></div><h2>おかえりなさい！</h2></div>
+        <p>今日も、あなたらしい一歩を一緒に考えよう。</p>
+        <div class="chips" id="homeChips">
+          <button>やりたいことが分からない…</button>
+          <button>noteのネタを考えたい</button>
+          <button>Xの投稿を作りたい</button>
+          <button>文章を添削してほしい</button>
+          <button>AIの使い方を教えて</button>
+          <button>なんとなく話したい</button>
+        </div>
+        <div class="card" id="homeSetupNote" style="margin-top:22px; display:none">
+          <h3>はじめて使う方へ</h3>
+          <p>最初に1回だけ「設定」で鍵（APIキー）を入れると、AIと話せるようになります。</p>
+          <button class="btn" onclick="switchView('settings')">設定をひらく</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view hidden" id="view-chat">
+      <div class="msgs" id="msgs"></div>
+      <div class="composer">
+        <div class="inputrow">
+          <textarea id="input" placeholder="メッセージを入力…" rows="1"></textarea>
+          <button id="send" title="送信">➤</button>
+        </div>
+        <div class="disclaimer">AIの回答は参考情報です。最終的な判断はご自身でお願いします。</div>
+      </div>
+    </div>
+
+    <div class="view hidden" id="view-memory">
+      <div class="card">
+        <h3>おぼえたこと</h3>
+        <p class="soft">会話の中で「今後も大事そう」とAIが判断したことが、ここに残ります。あなたのブラウザの中だけに保存され、外部には送られません（AIへの返答作成時にだけ使われます）。いらないものは×で消せます。</p>
+      </div>
+      <div class="memlist" id="memList"></div>
+    </div>
+
+    <div class="view hidden" id="view-settings">
+      <div class="card">
+        <h3>AIの鍵（APIキー）<span id="keyStatus"></span></h3>
+        <p class="soft">AIを動かすための鍵です。この鍵はこのブラウザの中だけに保存され、AI（Anthropic社）以外には送信されません。</p>
+        <input type="password" id="apiKey" placeholder="sk-ant- から始まる鍵を貼り付け">
+        <div class="row">
+          <button class="btn" id="saveKey">保存</button>
+          <button class="btn ghost" id="clearKey">削除</button>
+        </div>
+        <p class="soft" style="margin-top:14px"><b>鍵の作り方（初回だけ・約10分）</b></p>
+        <ol class="soft" style="font-size:13px">
+          <li>console.anthropic.com でアカウント登録（Claudeのアプリとは別の「開発者向け」サイトです）</li>
+          <li>「Billing」でクレジットを購入（$5から。使った分だけ減ります）</li>
+          <li>「API Keys」→「Create Key」→ 表示された鍵をコピーして上に貼り付け</li>
+        </ol>
+        <p class="soft" style="font-size:12.5px">費用の目安：1回の返事で数円程度。軽い利用なら月に数百円ほどです。</p>
+      </div>
+      <div class="card">
+        <h3>AIのモデル</h3>
+        <select id="modelSel">
+          <option value="claude-opus-5">標準（かしこい・おすすめ）</option>
+          <option value="claude-haiku-4-5">軽量（はやい・低コスト）</option>
+        </select>
+      </div>
+      <div class="card">
+        <h3>データの初期化</h3>
+        <div class="row">
+          <button class="btn ghost" id="resetChat">会話履歴を消す</button>
+          <button class="btn ghost" id="resetAll">すべて初期化</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const LS = { key:'aipw-key', model:'aipw-model', mem:'aipw-mem', hist:'aipw-hist' };
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+let apiKey = localStorage.getItem(LS.key) || '';
+let model = localStorage.getItem(LS.model) || 'claude-opus-5';
+let memories = load(LS.mem, []);          // [{d:'2026-08-15', t:'...'}]
+let hist = load(LS.hist, []);             // [{role:'user'|'assistant', text:'...'}]
+
+/* ---------- AIの人格（システムプロンプト） ---------- */
+const BASE_SYSTEM = `あなたは「わたしのAIパートナー」。AI・副業・発信の初心者である利用者の、「話しやすい、少し詳しい相棒」です。教師にも、コンサルタントにも、営業にもならない。利用者は経験がないだけで能力が低いわけではない。子ども扱いや幼稚な説明はしない。
+
+## 常に守る5つ
+1. 先に答える。情報が足りなくても仮置きで答え「違っていたら教えてください」と添える。聞き返しは1回にひとつ、選択肢を添える。質問攻めは禁止。
+2. 教えすぎない。次に試せるものは1〜3個まで。一覧の羅列や講義をしない。1回の返答はスマホで読み切れる長さに。
+3. 決めつけない。診断・断定はせず「こういう方向は合いそう」まで。決定権は常に本人に返す。
+4. 誘導しない。副業・note・Xは選択肢の一つ。生活改善・趣味・学習・創作も同格に扱い、本人が興味を示したときだけ深掘りする。
+5. 煽らない。「簡単に稼げる」「誰でも」「すぐ」「絶対」「人生が変わる」は禁止。収益の質問には「事実→正直な相場観→小さな一歩の提案」の順で答える。
+
+## 話し方
+・です・ます調で、近所の詳しい人の距離感。絵文字は原則使わない。ビックリマークを連発しない。
+・「良い質問ですね」等の質問の評価をしない。「いかがでしたか」「ぜひ試してみてください」を使わない。
+・回答の型（初対面や不安そうな相手に）：共感ひとこと→結論→そのまま使える例ひとつ→確認はひとつまで。会話が温まったら型より流れを優先。
+・AIが間違えることがある事実は隠さない。日付・お金・固有名詞は「公式で確認を」とセットで。医療・法律・税金は整理まで、判断は専門家へ。
+
+## 記憶のルール
+今後の会話が変わるほど大事なことを本人が明言したときだけ、返答の最後に「【メモ】〜」という行を1行加える（例：【メモ】料理系の発信に興味あり）。推測・性格診断・収入や家族の推測はメモしない。毎回はメモしない。「合わなかった」も大事な発見としてメモしてよい。
+
+## 安全
+個人が特定される情報を公開文に入れさせない。怪しい儲け話は断定を避けつつ一緒に確認し「一晩置く」を勧める。危険・違法な依頼は穏やかに断る。`;
+
+function buildSystem() {
+  let s = BASE_SYSTEM;
+  if (memories.length) {
+    s += `\n\n## これまでに覚えたこと（本人が話したことだけ）\n` +
+      memories.map(m => `- ${m.t}`).join('\n');
+  }
+  return s;
+}
+
+/* ---------- ビュー切り替え ---------- */
+const TITLES = { home:'ホーム', chat:'チャット', memory:'おぼえたこと', settings:'設定' };
+let currentView = 'home';
+function switchView(v) {
+  currentView = v;
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+  for (const name of Object.keys(TITLES)) $('#view-'+name).classList.toggle('hidden', name !== v);
+  $('#viewTitle').textContent = TITLES[v];
+  $('#sidebar').classList.remove('open');
+  if (v === 'memory') renderMem();
+  if (v === 'settings') renderSettings();
+  if (v === 'chat') { $('#input').focus(); const m=$('#msgs'); m.scrollTop = m.scrollHeight; }
+}
+$('#nav').addEventListener('click', e => { const b = e.target.closest('button'); if (b) switchView(b.dataset.v); });
+$('#menuBtn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+
+/* ---------- チャット ---------- */
+const msgsEl = $('#msgs'), input = $('#input'), sendBtn = $('#send');
+function bubble(role, text, extra='') {
+  const d = document.createElement('div');
+  d.className = 'msg '+role+(extra?' '+extra:''); d.textContent = text;
+  msgsEl.appendChild(d); msgsEl.scrollTop = msgsEl.scrollHeight; return d;
+}
+const GREETING = 'ここでは、まだやりたいことが決まっていなくても大丈夫です。\nAIを触ってみたい、副業がちょっと気になる、noteを書いてみたい、何か作ってみたい——どこからでも始められます。\n今日は、いま一番気になっていることをそのまま教えてください。';
+function renderTranscript() {
+  msgsEl.innerHTML = '';
+  if (!hist.length) bubble('ai', GREETING);
+  hist.forEach(m => bubble(m.role === 'assistant' ? 'ai' : 'user', m.text));
+}
+
+let busy = false;
+async function send(text) {
+  const msg = (text ?? input.value).trim();
+  if (!msg || busy) return;
+  if (!apiKey) { switchView('settings'); $('#apiKey').focus(); return; }
+  busy = true; sendBtn.disabled = true; input.value = '';
+  switchView('chat');
+  hist.push({ role:'user', text: msg }); save(LS.hist, hist); bubble('user', msg);
+  const th = bubble('ai', '考えています', 'thinking');
+  try {
+    const reply = await askClaude();
+    th.remove();
+    hist.push({ role:'assistant', text: reply }); save(LS.hist, hist);
+    bubble('ai', reply);
+  } catch (e) {
+    th.remove();
+    bubble('ai', friendlyError(e));
+    hist.pop(); save(LS.hist, hist);   // 失敗した送信は履歴に残さない(再送しやすく)
+    input.value = msg;
+  }
+  busy = false; sendBtn.disabled = false; input.focus();
+}
+
+async function askClaude() {
+  const recent = hist.slice(-30).map(m => ({ role: m.role, content: m.text }));
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 4096,
+      output_config: { effort: 'low' },
+      system: [{ type:'text', text: buildSystem(), cache_control: { type:'ephemeral' } }],
+      messages: recent,
+    }),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) { const err = new Error(data?.error?.message || res.statusText); err.status = res.status; err.type = data?.error?.type; throw err; }
+  if (data.stop_reason === 'refusal') {
+    return 'ごめんなさい、その内容には答えられませんでした。別の聞き方で試してみてください。';
+  }
+  let reply = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+  if (!reply) return '(うまく答えられませんでした。もう一度お願いします)';
+  // 【メモ】行を取り出して記憶に保存し、表示からは外す
+  const lines = reply.split('\n');
+  const kept = [];
+  for (const line of lines) {
+    const m = line.match(/^【メモ】\s*(.+)$/);
+    if (m) {
+      const t = m[1].trim();
+      if (t && !memories.some(x => x.t === t)) {
+        memories.push({ d: new Date().toLocaleDateString('ja-JP'), t });
+        save(LS.mem, memories);
+      }
+    } else kept.push(line);
+  }
+  return kept.join('\n').trim() || reply;
+}
+
+function friendlyError(e) {
+  if (e.status === 401) return '鍵（APIキー）が違うようです。「設定」で貼り直してみてください。';
+  if (e.status === 429) return 'いま少し混み合っています。1分ほど待ってから、もう一度送ってみてください。';
+  if (e.status === 529 || e.status === 500) return 'AI側が混み合っているようです。少し待ってからもう一度お願いします。';
+  if (e.status === 400 && /credit|billing/i.test(e.message || '')) return 'AIの利用残高が足りないようです。console.anthropic.com の「Billing」でクレジットを追加してください。';
+  if (!e.status) return 'インターネットにつながっていないかもしれません。接続を確認して、もう一度送ってみてください。';
+  return '少し調子が悪いみたいです。時間をおいてもう一度お願いします。\n(詳細: ' + (e.message || e) + ')';
+}
+
+sendBtn.addEventListener('click', () => send());
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
+$('#homeChips').addEventListener('click', e => { const b = e.target.closest('button'); if (b) send(b.textContent); });
+$('#newChat').addEventListener('click', () => {
+  if (!confirm('新しい会話を始めますか？（話題はリセットされます。「おぼえたこと」は残ります）')) return;
+  hist = []; save(LS.hist, hist); renderTranscript(); switchView('chat');
+});
+
+/* ---------- おぼえたこと ---------- */
+function renderMem() {
+  const el = $('#memList'); el.innerHTML = '';
+  if (!memories.length) { el.innerHTML = '<p class="empty">まだ何もありません。会話の中で大事なことが出てくると、ここに残ります。</p>'; return; }
+  memories.forEach((m, i) => {
+    const d = document.createElement('div'); d.className = 'memitem';
+    const dd = document.createElement('span'); dd.className='d'; dd.textContent = m.d;
+    const tt = document.createElement('span'); tt.className='t'; tt.textContent = m.t;
+    const x = document.createElement('button'); x.textContent = '×'; x.title = '忘れる';
+    x.onclick = () => { memories.splice(i,1); save(LS.mem, memories); renderMem(); };
+    d.append(dd, tt, x); el.appendChild(d);
+  });
+}
+
+/* ---------- 設定 ---------- */
+function renderSettings() {
+  $('#keyStatus').innerHTML = apiKey ? ' <span class="status-ok">設定済み</span>' : ' <span class="status-warn">未設定</span>';
+  $('#apiKey').value = apiKey;
+  $('#modelSel').value = model;
+}
+$('#saveKey').addEventListener('click', () => {
+  apiKey = $('#apiKey').value.trim();
+  localStorage.setItem(LS.key, apiKey);
+  renderSettings(); refreshSetupNote();
+  if (apiKey) { alert('保存しました。チャットで話しかけてみてください。'); switchView('chat'); }
+});
+$('#clearKey').addEventListener('click', () => { apiKey=''; localStorage.removeItem(LS.key); renderSettings(); refreshSetupNote(); });
+$('#modelSel').addEventListener('change', e => { model = e.target.value; localStorage.setItem(LS.model, model); });
+$('#resetChat').addEventListener('click', () => { if (confirm('会話履歴を消しますか？')) { hist=[]; save(LS.hist,hist); renderTranscript(); } });
+$('#resetAll').addEventListener('click', () => {
+  if (!confirm('鍵・会話・おぼえたこと、すべてを消して最初の状態に戻します。よいですか？')) return;
+  Object.values(LS).forEach(k => localStorage.removeItem(k));
+  location.reload();
+});
+
+function refreshSetupNote() { $('#homeSetupNote').style.display = apiKey ? 'none' : 'block'; }
+
+renderTranscript();
+refreshSetupNote();
+</script>
+</body>
+</html>
