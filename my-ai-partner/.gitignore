@@ -1,0 +1,15 @@
+# 秘密情報は絶対にコミットしない
+.env
+.env.*
+*.key
+*.pem
+secrets/
+credentials*
+
+# 本人だけのメモ置き場（記録に残したくないもの）
+private/
+
+# OS・ツールのゴミ
+.DS_Store
+Thumbs.db
+node_modules/
