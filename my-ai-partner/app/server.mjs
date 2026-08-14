@@ -16,7 +16,17 @@ import os from 'node:os';
 const APP  = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(APP, '..');                       // my-ai-partner/
 const PORT = Number(process.env.AIP_PORT || 8737);
-const CLAUDE = process.env.AIP_CLAUDE_BIN || 'claude'; // テスト時に差し替え可
+/* claudeコマンドの場所を探す(PATHに無い直後のインストールにも対応) */
+function findClaude() {
+  if (process.env.AIP_CLAUDE_BIN) return process.env.AIP_CLAUDE_BIN;
+  const home = os.homedir();
+  for (const c of [
+    join(home, '.local', 'bin', process.platform === 'win32' ? 'claude.exe' : 'claude'),
+    '/usr/local/bin/claude', '/opt/homebrew/bin/claude',
+  ]) if (existsSync(c)) return c;
+  return 'claude';
+}
+const CLAUDE = findClaude();
 const SESSION_FILE = join(APP, '.session');
 const TIMEOUT_MS = 240_000;
 
