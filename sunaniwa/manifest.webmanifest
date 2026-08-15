@@ -1,0 +1,15 @@
+{
+  "name": "砂庭",
+  "short_name": "砂庭",
+  "description": "指でなぞると砂紋ができ、長く押すと石が置ける、一坪の枯山水。点数も時間制限もありません。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F4EFE6",
+  "theme_color": "#F4EFE6",
+  "icons": [
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

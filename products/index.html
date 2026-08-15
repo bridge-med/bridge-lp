@@ -91,8 +91,8 @@ window.addEventListener('DOMContentLoaded', () => {
     { id: 'learning', t: '学習・教育', stage: '型の「理解」と「実践」を支える道具', p: '学びの入口を、続けられる形で。ゲームも模試も、リハビリテーション的思考の教材です。' },
     { id: 'casual', t: '診断・ライト', stage: '型の「評価」の、いちばん軽い入口', p: '登録不要で、数分で試せます。' },
     { id: 'free', t: '無料配布', stage: '型を、まず手元で試すための雛形', p: 'まず触ってみたい方へ。' },
-    { id: 'work', t: '作品', stage: '型の外に置いた、ひとつ',
-      p: '実用の機能はありません。眺めるだけのものを、ここに置いています。' },
+    { id: 'work', t: '作品', stage: '型の外に置いたもの',
+      p: '実用の機能はありません。眺めるもの、ただ手を動かすものを、ここに置いています。' },
   ];
   const PRODUCTS = [
     { cat: 'management', name: '医療管理実務ライブラリ', img: 'medops.png', jp: '記事と無料テンプレートの別サイト', href: '../medops/index.html',
@@ -149,6 +149,8 @@ window.addEventListener('DOMContentLoaded', () => {
       p: '外来リハKPI見える化スターターキット。PDF+スプレッドシート雛形を無料配布。' },
     { cat: 'work', name: '窓あかり', img: 'madoakari.png', jp: 'Madoakari', href: '../madoakari/index.html',
       p: '朝5時半から翌朝まで、小さな病院の一日が数分で巡ります。操作するものはなく、ただ眺めるための作品です。' },
+    { cat: 'work', name: '砂庭', img: 'sunaniwa.png', jp: 'Sunaniwa', href: '../sunaniwa/index.html',
+      p: 'なぞると砂紋ができ、長く押すと石が置ける一坪の枯山水。点数も時間もありません。引いた紋は、しばらくすると砂に還ります。' },
   ];
   const root = document.getElementById('catalog');
   CATS.forEach((c, ci) => {
