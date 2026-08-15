@@ -1,11 +1,12 @@
-/* 砂庭 — Service Worker (簡易オフラインキャッシュ / PWA)
+/* ふたつめの波 — Service Worker (簡易オフラインキャッシュ / PWA)
    資産を足したら CACHE の版名を上げること */
-var CACHE = 'sunaniwa-v1';
+var CACHE = 'futatsume-v1';
 var ASSETS = [
   './',
   './index.html',
   './app/styles.css',
   './app/store.js',
+  './app/stages.js',
   './app/app.js',
   './app/icon.svg',
   './manifest.webmanifest'
