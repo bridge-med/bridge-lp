@@ -136,7 +136,7 @@
       "measure": "none",
       "measureNote": "iOSアプリのためこの台帳では計測できない。手動記録",
       "note": "運営者の利用が止まっている。原因は評価中",
-      "lastCommit": "2026-07-13"
+      "lastCommit": "2026-06-22"
     },
     {
       "id": "clinic-flow-3d",
@@ -384,7 +384,7 @@
       "measure": "none",
       "measureNote": "Expo書き出しHTMLのため敷設しない(再書き出しで消える)。手動記録",
       "note": "Web書き出し(pomodoro-app)は2026-07-27に引退(社長委任決定・監査役推奨a)。title空・Expo残骸で第32条未達、導線ゼロのため訪問者影響なし。ソース(mobile-pomodoro)は保持。iOS配信または紹介ページ+実利用確認+改名(第30条)が揃ったら掲載を再検討",
-      "lastCommit": "2026-07-13",
+      "lastCommit": "2026-06-20",
       "decision": {
         "points": "ソース(mobile-pomodoro)は運用文書まで揃った本格実装。ただしWeb版はExpo自動書き出しでtitleも空のままで、カタログから直リンクするには粗い(第32条)。名称の第30条抵触もある。監査役推奨(2026-07-26): Web書き出し(pomodoro-app/)を公開ツリーから引退(a・導線ゼロのため訪問者影響なし)。iOS配信または紹介ページ+実利用確認+改名が揃ったら掲載を再検討。代替(b)は紹介ページを作って掲載だが命名の決着が先。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'learning', img: 'bridge-focus.png', name: 'BRIDGE Focus', jp: 'ポモドーロタイマー', href: '../pomodoro-app/index.html',\n  p: 'タスク管理ではなく、いまやる一つに集中するためのタイマー。集中の記録が作業に紐づいて残る。' }\n※ hrefは書き出し物への直リンク。紹介ページを作るならそちらへ向ける。サムネイル作成済み"
