@@ -552,6 +552,39 @@ a { color: inherit; }
   .gauge-spark { height: 22px; }
 }
 
+/* 見本データが入っているあいだの帯 */
+.demo-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+  padding: 11px 14px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface-2);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.demo-strip .eyebrow { flex: none; }
+.demo-strip span:nth-child(2) { flex: 1; min-width: 160px; }
+
+/* 過去の日を埋めているときの帯 */
+.q-backfill {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  line-height: 1.7;
+  margin: -12px 0 22px;
+  padding: 9px 12px;
+  border-left: 2px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 0 var(--r-s) var(--r-s) 0;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
 /* STANDBY（未入力） */
 .standby {
   margin-top: 18px;

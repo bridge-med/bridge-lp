@@ -26,6 +26,7 @@
   var inputStep = 0;
   var inputDraft = null;
   var inputDir = 'fwd';
+  var inputDayKey = null;   // 入力中の日。既定は今日。過去の日も埋められる
   var installPrompt = null;
 
   /* ================================================================
@@ -163,7 +164,7 @@
     if (view === next && next !== 'input') return;
     view = next;
     if (next === 'log') logDayKey = logDayKey || S.today();
-    if (next === 'input') { inputStep = 0; inputDraft = null; inputDir = 'fwd'; }
+    if (next === 'input') { inputStep = 0; inputDraft = null; inputDir = 'fwd'; inputDayKey = S.today(); }
     render();
     el.screen.scrollTop = 0;
     global.scrollTo({ top: 0, behavior: 'auto' });
@@ -221,7 +222,18 @@
         + '</div>';
     }).join('');
 
-    var out = '<section class="sec">'
+    var out = '';
+
+    // 見本が入っているあいだは、それが自分の数字でないことを常に示す
+    if (S.get().settings.demo) {
+      out += '<div class="demo-strip">'
+        + '<span class="eyebrow">Demo Data</span>'
+        + '<span>見本の数値です。あなたの記録ではありません。</span>'
+        + '<button class="btn sm ghost" type="button" data-demo-clear="1">消す</button>'
+        + '</div>';
+    }
+
+    out += '<section class="sec">'
       + '<div class="sec-head"><h2>System Status</h2>'
       + '<span class="eyebrow">' + (st ? 'UPDATED ' + S.hhmm(d.inputAt) : 'STANDBY') + '</span></div>'
       + '<div class="status-rail">' + gauges + '</div>';
@@ -230,6 +242,12 @@
       out += '<div class="standby">'
         + '<p>今日の状態はまだ読み取れていません。<br>5つの質問に答えると、30秒で割り出します。</p>'
         + '<button class="btn primary" type="button" data-go="input">状態を入力する</button>'
+        // まだ1日も記録がない人には、先に動く実物を見せる
+        + (S.recordedKeys().length === 0 && !S.get().settings.demo
+          ? '<p class="hint" style="margin:18px 0 12px">'
+            + 'はじめてなら、45日分の見本で履歴と分析の動きを先に見られます。</p>'
+            + '<button class="btn ghost sm" type="button" data-demo-load="1">見本を見る</button>'
+          : '')
         + '</div>';
     }
     out += '</section>';
@@ -362,8 +380,9 @@
   /* ---------------- INPUT ---------------- */
 
   function viewInput() {
-    var k = S.today();
+    var k = inputDayKey || S.today();
     var d = S.day(k, true);
+    var isToday = k === S.today();
 
     if (inputDraft === null) {
       inputDraft = {};
@@ -404,8 +423,11 @@
     return '<div class="q-head">'
       + '<span class="q-count num">' + (inputStep + 1) + ' / ' + E.QUESTIONS.length + '</span>'
       + '<span class="q-prog"><i style="width:' + ((inputStep + 1) / E.QUESTIONS.length * 100) + '%"></i></span>'
-      + '<button class="icon-btn" type="button" data-go="home" aria-label="閉じる">' + C.icon('close') + '</button>'
+      + '<button class="icon-btn" type="button" data-go="' + (isToday ? 'home' : 'log') + '" aria-label="閉じる">' + C.icon('close') + '</button>'
       + '</div>'
+      + (isToday ? '' : '<div class="q-backfill"><span class="eyebrow">Backfill</span>'
+        + '<span>' + fmtDateShort(k) + 'の分を入力しています。'
+        + '設問の「今日」「昨日」は、この日から見た言い方です</span></div>')
       + '<div class="q-body" data-dir="' + inputDir + '">'
       + '<div class="q-no">Q' + (inputStep + 1) + '</div>'
       + '<h1 class="q-title">' + esc(q.title) + '</h1>'
@@ -447,7 +469,8 @@
   }
 
   function commitInput() {
-    var k = S.today();
+    var k = inputDayKey || S.today();
+    var isToday = k === S.today();
     E.submitInput(k, {
       sleep: inputDraft.sleep,
       condition: inputDraft.condition,
@@ -460,7 +483,10 @@
     setTimeout(function () {
       inputDraft = null;
       inputStep = 0;
-      view = 'home';
+      // 過去の日を埋めたときは、その日のログ画面に戻す
+      if (isToday) { view = 'home'; }
+      else { view = 'log'; logDayKey = k; }
+      inputDayKey = S.today();
       render();
       setTimeout(checkEggs, 500);
     }, 1250);
@@ -492,16 +518,25 @@
     }
     out += '</div></section>';
 
+    out += '<section class="sec"><div class="sec-head"><h2>Status of the day</h2>'
+      + (d.status ? '<button class="btn sm ghost" type="button" data-input-day="' + esc(k) + '">入力し直す</button>' : '')
+      + '</div>';
     if (d.status) {
-      out += '<section class="sec"><div class="sec-head"><h2>Status of the day</h2></div>'
-        + '<div class="status-rail">'
+      out += '<div class="status-rail">'
         + E.PARAMS.map(function (p) {
           return '<div class="gauge"><div class="gauge-ring">' + C.ringSVG(d.status[p.id], p.varName, 34)
             + '<div class="gauge-val">' + d.status[p.id] + '</div></div>'
             + '<div class="gauge-label">' + p.label + '</div></div>';
         }).join('')
-        + '</div></section>';
+        + '</div>';
+    } else {
+      // 抜けた日を後から埋められる。忘れた1日で履歴に穴が残らないように
+      out += '<div class="panel"><p class="hint" style="margin:0 0 14px">'
+        + 'この日の状態は入力されていません。あとからでも5問に答えれば、履歴と分析に入ります。</p>'
+        + '<button class="btn primary block" type="button" data-input-day="' + esc(k) + '">'
+        + (isToday ? '状態を入力する' : 'この日を入力する') + '</button></div>';
     }
+    out += '</section>';
 
     out += '<p class="hint">ログを足すと、その日の状態も計算し直します。'
       + '前夜の飲酒や夜更かしは、翌日のENERGYとFOCUSに反映されます。</p>';
@@ -1192,7 +1227,7 @@
   var wordmarkTaps = 0, wordmarkTimer = null;
 
   document.addEventListener('click', function (e) {
-    var t = e.target.closest ? e.target.closest('[data-tab],[data-go],[data-step],[data-choice],[data-mission],[data-add-log],[data-event],[data-logday],[data-range],[data-series],[data-toggle-theme],[data-demo],[data-export],[data-import],[data-install],[data-terminal],[data-wipe],[data-wipe-yes],[data-endday],[data-share],[data-reopen],[data-close-sheet],[data-type],[data-qty],[data-save],[data-del],[data-ov-close]') : null;
+    var t = e.target.closest ? e.target.closest('[data-tab],[data-go],[data-step],[data-choice],[data-mission],[data-add-log],[data-input-day],[data-event],[data-logday],[data-range],[data-series],[data-toggle-theme],[data-demo],[data-demo-load],[data-demo-clear],[data-export],[data-import],[data-install],[data-terminal],[data-wipe],[data-wipe-yes],[data-endday],[data-share],[data-reopen],[data-close-sheet],[data-type],[data-qty],[data-save],[data-del],[data-ov-close]') : null;
     if (!t) return;
 
     /* ---- ナビ ---- */
@@ -1237,6 +1272,18 @@
     }
 
     /* ---- ログ ---- */
+    /* 指定した日の状態を入力する（過去の日も可） */
+    if (t.dataset.inputDay) {
+      inputDayKey = t.dataset.inputDay;
+      inputStep = 0;
+      inputDraft = null;
+      inputDir = 'fwd';
+      view = 'input';
+      render();
+      global.scrollTo({ top: 0, behavior: 'auto' });
+      return;
+    }
+
     if (t.dataset.addLog) { openLogSheet(view === 'log' ? (logDayKey || S.today()) : S.today(), null); return; }
     if (t.dataset.event) { openLogSheet(t.dataset.day, t.dataset.event); return; }
     if (t.dataset.logday) {
@@ -1310,6 +1357,20 @@
       if (S.get().settings.demo) { E.clearDemo(); toast('DEMO DATA REMOVED'); }
       else { E.seedDemo(45); toast('DEMO DATA LOADED'); }
       render();
+      return;
+    }
+    if (t.dataset.demoLoad) {
+      E.seedDemo(45);
+      view = 'history';
+      render();
+      toast('DEMO DATA LOADED');
+      return;
+    }
+    if (t.dataset.demoClear) {
+      E.clearDemo();
+      view = 'home';
+      render();
+      toast('DEMO DATA REMOVED');
       return;
     }
     if (t.dataset.export) { doExport(); toast('EXPORTED'); return; }

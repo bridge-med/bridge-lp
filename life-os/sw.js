@@ -1,6 +1,6 @@
 /* LIFE//OS — Service Worker（オフラインキャッシュ / PWA）
    資産を更新したら CACHE の版名を必ず上げる。上げ忘れは旧画面の配信になる。 */
-var CACHE = 'life-os-v1';
+var CACHE = 'life-os-v2';
 var ASSETS = [
   './',
   './index.html',
