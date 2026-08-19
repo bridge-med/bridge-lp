@@ -67,9 +67,12 @@ else
   echo "  スキップ(Hugging Faceに到達できない。tts.shはOpen JTalkにフォールバック)"
 fi
 
-# VOICEVOX(ニューラル・商用可)は配布がGitHub Releasesのみ:
-#   https://github.com/VOICEVOX/voicevox_engine/releases の linux-cpu 版を展開し
-#   ./run --host 127.0.0.1 --port 50021 で起動しておけば tts.sh が自動で使う。
+# VOICEVOX(ずんだもん等・無料・要クレジット表記):
+#   linux-cpu版を work/linux-cpu-x64/ に展開しておけば、make-short.shが台本の
+#   voice宣言({engine:"voicevox",speaker:3}等)に応じて自動起動して使う。
+#   配布はGitHub Releases。プロキシ環境ではセッションのリポジトリスコープにより
+#   curl直では取れないことがある(2026-07-20はWebFetchでリダイレクト先の署名URLを
+#   取り出してrelease-assets.githubusercontent.comから取得した)。
 #   AivisSpeech等のVOICEVOX互換エンジンも VOICEVOX_URL 指定で利用可。
 
 echo "setup ok"

@@ -63,6 +63,9 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
   // 外部リクエスト遮断(フォントCDN等でのハング防止)
   await ctx.route(/^https?:\/\/(?!127\.0\.0\.1)/, (r) => r.abort());
 
+  // 台本ごとの前処理(APIスタブ等)。後から登録したrouteが優先される
+  if (scenario.setup) await scenario.setup(ctx);
+
   const page = CAPTURE === 'x11' ? (ctx.pages()[0] || await ctx.newPage()) : await ctx.newPage();
 
   // テロップ・タップリップル・エンドカードの基盤を注入
@@ -81,6 +84,7 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
           animation:vvrip .5s ease-out forwards}
         @keyframes vvrip{to{transform:translate(-50%,-50%) scale(1.6);opacity:0}}
         #vv-cap{position:fixed;left:50%;bottom:18%;transform:translateX(-50%);
+          pointer-events:none;
           width:max-content;max-width:80%;padding:10px 20px;border-radius:10px;z-index:99997;
           background:rgba(27,27,30,.85);color:#fff;font-family:'Noto Sans JP',sans-serif;
           font-weight:700;font-size:22px;line-height:1.55;text-align:center;
@@ -104,6 +108,7 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
           background:#6b6b6b;right:-7px;bottom:-2px;transform:rotate(45deg);border-radius:2px}
         #vv-end .t3{margin-top:20px;font-size:12px;font-weight:700;color:#1e1e1e;
           border:1.5px solid #A98F63;border-radius:999px;padding:7px 20px;letter-spacing:.18em}
+        #vv-end .t4{margin-top:14px;font-size:10px;font-weight:500;color:#8a8a8a}
       `;
       document.head.appendChild(style);
       const cap = document.createElement('div');
@@ -175,6 +180,7 @@ const { chromium } = require(require.resolve('playwright', { paths: [WORK, __dir
         <div class="t2">${e.sub}</div>
         ${e.search ? `<div class="t2b"><span class="mag"></span>${e.search}</div>` : ''}
         <div class="t3">${e.badge}</div>
+        ${e.credit ? `<div class="t4">${e.credit}</div>` : ''}
       </div>`;
     document.body.appendChild(end);
     requestAnimationFrame(() => { end.style.opacity = '1'; });
