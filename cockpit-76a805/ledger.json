@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16",
+  "updated": "2026-08-20",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -404,7 +404,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "starter-kitsハブ(KIT 03)から導線接続(2026-07-16)。副業設計の収益の器。売れ行きは計測で見る",
-      "lastCommit": "2026-07-25"
+      "lastCommit": "2026-08-20"
     },
     {
       "id": "medops",
@@ -518,6 +518,26 @@
       "measure": "local",
       "note": "2026-08-09出荷。カタログ掲載は同日の社長決裁。デモデータは架空の汎用サンプル",
       "lastCommit": "2026-08-11"
+    },
+    {
+      "id": "misebiraki",
+      "name": "みせびらき",
+      "jp": "売れる状態までの工程",
+      "cat": "uncataloged",
+      "href": "../misebiraki/index.html",
+      "dirs": [
+        "misebiraki"
+      ],
+      "stage": "実践・再評価",
+      "serves": "自分の道具や経験を売りたい個人。仕事終わりの短い時間でも売れる状態まで一歩ずつ進められるようにして、「まとまった時間が取れないから出せない」を理由から外す",
+      "status": "未掲載",
+      "measure": "local",
+      "note": "2026-08-20新設。運営者用として出荷。カタログ掲載は社長決裁待ち(第14条・Growth OSと同じ手順)。売り方の型5種の工程定義は app/data.js が唯一の情報源",
+      "lastCommit": "",
+      "decision": {
+        "points": "契機は2026-08-20の実害: 販売中の商品(¥2,980)の購入CTA3本が死んだアンカーを指しており、押しても何も起きない状態で公開されていた。Growth OSは『販売中』という粗い状態しか持たないため、経路が通っていないことを拾えない。この道具は代金を受け取って買った人に届くまでを工程に分け、今夜の持ち時間で終わる1手だけを出す。Growth OS(何を作るか)とは受け持ちが重ならない",
+        "catalogDraft": "{ cat: 'management', img: 'misebiraki.png', name: 'みせびらき', jp: '売れる状態までの工程', href: '../misebiraki/index.html',\n  p: '作ったものが売れないのは、たいてい商品ではなく経路が通っていないから。売り方の型ごとに工程を並べて、今夜の空き時間で終わる1手だけを出す。' }\n※ 掲載するならサムネイル(images/products/thumbs/misebiraki.webp)の作成が要る"
+      }
     }
   ],
   "knownIssues": [
