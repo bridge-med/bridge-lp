@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>ふたつめの波 — 二つ重なったところに、灯がともる / BRIDGE</title>
+<meta name="description" content="波は一つでは何も起こせません。二つの輪が同じ場所で重なった瞬間に、そこの灯がともり、灯った灯がまた波を出して連鎖します。全十二面の水面のパズル。点数も時間制限もありません。登録不要・端末内で完結します。">
+<meta property="og:title" content="ふたつめの波 — 二つ重なったところに、灯がともる">
+<meta property="og:description" content="波は一つでは何も起こせません。二つの輪が重なったところに灯がともり、灯った灯がまた波を出します。全十二面の水面のパズル。点数も時間制限もありません。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/futatsume/">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/products/thumbs/futatsume.webp">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4EFE6">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161B2B">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ふたつめの波">
+<link rel="apple-touch-icon" href="app/icon.svg">
+<link rel="icon" type="image/svg+xml" href="app/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/styles.css?v=1">
+</head>
+<body>
+
+<canvas id="water" class="water" role="application" aria-label="水面。触れると波が広がり、二つの波が重なったところの灯がともります"></canvas>
+
+<header class="bar">
+  <a class="back" href="../products/index.html">← BRIDGE</a>
+  <span class="mark">ふたつめの波</span>
+  <span class="left" id="left" aria-label="残りの波"></span>
+</header>
+
+<p id="hint" class="hint" aria-hidden="true">水面に印を置いて、放つ。二つの波が重なったところに、灯がともる。</p>
+<p id="stage" class="stage" aria-hidden="true"></p>
+<button id="act" class="btn act" type="button">放つ</button>
+
+<div id="over" class="over" aria-hidden="true"><p>ここまで</p></div>
+
+<p id="say" class="sr" role="status" aria-live="polite"></p>
+
+<script src="app/store.js?v=1"></script>
+<script src="app/stages.js?v=1"></script>
+<script src="app/app.js?v=1"></script>
+<script src="../shared/usage.js" defer></script>
+</body>
+</html>
