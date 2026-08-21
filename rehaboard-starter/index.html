@@ -255,9 +255,12 @@ section.alt{background:var(--paper-2)}
   RehaBoard Starter Kit 紹介ページ
   ------------------------------------------------------------
   ★ URL差し替えポイント(購入ページ確定後、href のみ書き換え)
-    [購入]    data-link="purchase-starter"  → note の購入ページ
-    [相談]    data-link="consult-all"       → Google フォーム/メール
+    [購入]    data-link="purchase-starter"  → note の販売ページ。未開設のため暫定で community(問い合わせ)へ。
+                                              開設したら最下部CTAのhrefをnoteのURLに差し替え、
+                                              buy-note 1行目の「準備中」の但し書きを削る
+    [相談]    data-link="consult-all"       → community(メール・X DM)
     [LP戻る]  data-link="bridge-lp"         → BRIDGE LP
+  ※ ナビの「購入する」は同ページ内の価格セクション(#purchase)へのスクロール
   ============================================================
 -->
 
@@ -267,7 +270,7 @@ section.alt{background:var(--paper-2)}
   <a href="../index.html" class="nav-logo" data-link="bridge-lp">BRIDGE<span class="dot">.</span><span class="small">RehaBoard Starter</span></a>
   <div class="nav-actions">
     <a href="../index.html" class="back" data-link="bridge-lp">← BRIDGE</a>
-    <a href="#purchase-rehaboard-starter" class="cta" data-link="purchase-starter">購入する</a>
+    <a href="#purchase" class="cta" data-link="purchase-starter">購入する</a>
   </div>
 </nav>
 
@@ -670,12 +673,13 @@ section.alt{background:var(--paper-2)}
         <li>アップデート無償提供</li>
       </ul>
       <div class="buy-actions">
-        <a class="buy-btn primary" href="#purchase-rehaboard-starter" data-link="purchase-starter">Starter Kit を購入する</a>
-        <a class="buy-btn ghost" href="#consult-rehaboard" data-link="consult-all">先に相談する(自施設で使えるか不安な方)</a>
+        <a class="buy-btn primary" href="../community/index.html" data-link="purchase-starter">購入を申し込む</a>
+        <a class="buy-btn ghost" href="../community/index.html" data-link="consult-all">先に相談する(自施設で使えるか不安な方)</a>
       </div>
     </div>
 
     <p class="buy-note">
+      ※ noteでの販売ページは準備中です。それまでは、お問い合わせからお申し込みください。スプレッドシートの共有方法と支払い方法を個別にご案内します。<br>
       ※ 本キットは部門運営のKPI管理を目的としたツールです。診療報酬算定の要件充足、監査対応、施設基準の充足については保証しません。各施設の責任のもと、公式情報に基づいてご判断ください。<br>
       ※ 個人情報を入れない設計です。患者は匿名ID(P-2026-001 等)、PTもPT_IDで運用します。デジタル商品の性質上、原則として返金は承っておりません。
     </p>
