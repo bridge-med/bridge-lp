@@ -1,0 +1,15 @@
+{
+  "name": "ふたつめの波",
+  "short_name": "ふたつめの波",
+  "description": "二つの波が重なったところに灯がともる、水面のパズル。点数も時間制限もありません。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F4EFE6",
+  "theme_color": "#F4EFE6",
+  "icons": [
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
