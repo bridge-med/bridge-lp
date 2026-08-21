@@ -1,0 +1,17 @@
+{
+  "name": "LIFE//OS",
+  "short_name": "LIFE//OS",
+  "description": "毎日30秒の入力から、ENERGY・FOCUS・MOOD・BODY・SOCIALの5つの状態を割り出すパーソナルダッシュボード。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B0C0F",
+  "theme_color": "#0B0C0F",
+  "categories": ["productivity", "health", "lifestyle"],
+  "icons": [
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "app/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

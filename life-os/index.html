@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>LIFE//OS — 今日の自分を、起動する</title>
+<meta name="description" content="毎日30秒の入力から、ENERGY・FOCUS・MOOD・BODY・SOCIALの5つの状態を割り出すパーソナルダッシュボード。登録不要・端末内保存・オフライン対応。">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B0C0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LIFE//OS">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="app/icon.svg">
+<link rel="apple-touch-icon" href="app/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/styles.css">
+</head>
+<body>
+
+<!-- 起動シーケンス -->
+<div id="boot" class="boot" hidden>
+  <div class="boot-inner">
+    <div class="boot-mark">LIFE<span>//</span>OS</div>
+    <div class="boot-sub" id="boot-sub">BOOT SEQUENCE</div>
+    <div class="boot-ring">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="boot-ring-track" cx="60" cy="60" r="52"></circle>
+        <circle class="boot-ring-fill" id="boot-ring-fill" cx="60" cy="60" r="52"></circle>
+      </svg>
+      <div class="boot-pct" id="boot-pct">0<small>%</small></div>
+    </div>
+    <ul class="boot-list" id="boot-list"></ul>
+    <div class="boot-ready" id="boot-ready">SYSTEM READY.</div>
+    <button class="boot-skip" id="boot-skip" type="button">SKIP</button>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+  <header class="topbar">
+    <button class="wordmark" id="wordmark" type="button" aria-label="LIFE//OS">LIFE<span>//</span>OS</button>
+    <div class="topbar-meta">
+      <time class="topbar-date" id="topbar-date"></time>
+      <span class="topbar-clock" id="topbar-clock"></span>
+    </div>
+  </header>
+
+  <main class="screen" id="screen" tabindex="-1"></main>
+
+  <nav class="tabbar" id="tabbar" aria-label="メインナビゲーション"></nav>
+</div>
+
+<div class="sheet-host" id="sheet-host" hidden></div>
+<div class="overlay-host" id="overlay-host" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="app/store.js"></script>
+<script src="app/engine.js"></script>
+<script src="app/charts.js"></script>
+<script src="app/app.js"></script>
+</body>
+</html>
