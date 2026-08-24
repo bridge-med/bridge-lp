@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-08-23T20:41:36+00:00",
+  "updated_at": "2026-08-24T20:50:19+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "病院で評価される人と、市場で評価される人は少し違う",
+      "url": "https://note.com/prime_duck4944/n/n0171f3c4138f",
+      "guid": "https://note.com/prime_duck4944/n/n0171f3c4138f",
+      "pubDate": "2026-08-24T21:02:34+09:00",
+      "date": "2026-08-24",
+      "excerpt": "病院で働いていた頃、「仕事ができる人」",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/306647761/rectangle_large_type_2_4957f85c74eb334ef58b27474d32ad85.png?width=800"
+    },
     {
       "title": "PT5年目くらいから、キャリアの差が広がり始める理由",
       "url": "https://note.com/prime_duck4944/n/n1f29ad68ed1b",
@@ -47,15 +56,6 @@
       "date": "2026-06-28",
       "excerpt": "2026年1月から、医療職から事業会社へ転職しました。正直に言うと、最初に困ったのは仕事内容そのものよりも、会議やチャットで当たり前のように出てくる“ビジネス用語”でした。たとえば、BtoB。今でこそ普通に使っています…",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/289673485/rectangle_large_type_2_42a71fc96f0902c8b2166c89eb72b4ef.png?width=800"
-    },
-    {
-      "title": "医療職のキャリアは、専門性だけでは広がりにくい。",
-      "url": "https://note.com/prime_duck4944/n/nc7bc3d021b2f",
-      "guid": "https://note.com/prime_duck4944/n/nc7bc3d021b2f",
-      "pubDate": "2026-06-27T16:03:26+09:00",
-      "date": "2026-06-27",
-      "excerpt": "現場経験に「何を掛け合わせるか」で、選択肢は変わる医療職として働いていると、キャリアの中心にはいつも「専門性」があります。疾患の知識。評価や治療の技術。患者さんへの説明。多職種連携。現場での判断力。後輩指導。チームの中…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/289225336/rectangle_large_type_2_3b95c4823d2febef1c2f4449ca7eb939.png?width=800"
     }
   ]
 }
