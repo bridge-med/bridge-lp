@@ -1,0 +1,17 @@
+[
+  { "id": "internal",       "name_ja": "内科(一般内科)",        "name_en": "General Internal Medicine", "priority_phase": 1 },
+  { "id": "cardiology",     "name_ja": "循環器内科",            "name_en": "Cardiology",                "priority_phase": 2 },
+  { "id": "gastro",         "name_ja": "消化器内科",            "name_en": "Gastroenterology",          "priority_phase": 2 },
+  { "id": "respiratory",    "name_ja": "呼吸器内科",            "name_en": "Respiratory Medicine",      "priority_phase": 2 },
+  { "id": "diabetes",       "name_ja": "糖尿病内科",            "name_en": "Diabetology",               "priority_phase": 2 },
+  { "id": "orthopedics",    "name_ja": "整形外科",              "name_en": "Orthopedics",               "priority_phase": 1 },
+  { "id": "ophthalmology",  "name_ja": "眼科",                  "name_en": "Ophthalmology",             "priority_phase": 1 },
+  { "id": "dermatology",    "name_ja": "皮膚科",                "name_en": "Dermatology",               "priority_phase": 2 },
+  { "id": "ent",            "name_ja": "耳鼻咽喉科",            "name_en": "Otorhinolaryngology",       "priority_phase": 2 },
+  { "id": "pediatrics",     "name_ja": "小児科",                "name_en": "Pediatrics",                "priority_phase": 2 },
+  { "id": "urology",        "name_ja": "泌尿器科",              "name_en": "Urology",                   "priority_phase": 2 },
+  { "id": "gynecology",     "name_ja": "婦人科",                "name_en": "Gynecology",                "priority_phase": 2 },
+  { "id": "psychiatry",     "name_ja": "精神科・心療内科",      "name_en": "Psychiatry / Psychosomatic","priority_phase": 2 },
+  { "id": "dialysis",       "name_ja": "人工透析",              "name_en": "Dialysis",                  "priority_phase": 1 },
+  { "id": "homecare",       "name_ja": "在宅医療・訪問診療",    "name_en": "Home Care Medicine",        "priority_phase": 1 }
+]

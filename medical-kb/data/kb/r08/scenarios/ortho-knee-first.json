@@ -1,0 +1,31 @@
+{
+  "id": "r08-scn-ortho-knee-first",
+  "specialty_id": "orthopedics",
+  "title": "膝痛の初診から運動器リハビリテーション導入まで(整形外科)",
+  "patient": { "age": 72, "chief_complaint": "膝痛", "visit": "first" },
+  "confidence": "draft",
+  "notes": "臨床フローは設計上の想定。billingの各行は算定候補の『スロット』であり、区分番号・点数・算定可否は一次資料(告示・留意事項通知)で解決するまで未確定(status: unresolved)。点数はresolvedかつevidence付きになるまで入れない。",
+  "steps": [
+    { "day_offset": 0, "action": "医師の診察(初診)" },
+    { "day_offset": 0, "action": "単純X線撮影(膝関節)と読影" },
+    { "day_offset": 0, "action": "関節内注射(膝)" },
+    { "day_offset": 7, "action": "再診。経過確認とリハビリテーション適応の判断" },
+    { "day_offset": 7, "action": "運動器リハビリテーションの実施(個別療法)" }
+  ],
+  "billing": [
+    { "step_no": 1, "kind": "candidate", "label": "初診料", "status": "unresolved", "reason": "初診に対応する基本診療料。点数・機能強化加算等の加算体系は告示で解決する" },
+    { "step_no": 2, "kind": "candidate", "label": "単純撮影(X線)の撮影料・診断料", "status": "unresolved", "reason": "部位・方向数による点数構成を画像診断の部の告示で解決する" },
+    { "step_no": 2, "kind": "candidate", "label": "画像診断関連の加算(電子画像管理等)", "status": "unresolved", "reason": "適用可否は施設の体制と告示の要件による" },
+    { "step_no": 3, "kind": "candidate", "label": "関節穿刺または関節腔内注射に相当する処置・注射料", "status": "unresolved", "reason": "処置(穿刺)と注射(関節腔内注射)のどちらで算定するか、および薬剤料の扱いは留意事項通知で解決する" },
+    { "step_no": 4, "kind": "candidate", "label": "再診料", "status": "unresolved", "reason": "外来管理加算の可否は同日の処置・リハ実施と関係するため留意事項通知で解決する" },
+    { "step_no": 5, "kind": "candidate", "label": "運動器リハビリテーション料", "status": "unresolved", "reason": "施設基準区分(I/II/III)・単位数・起算日・標準的算定日数の規定を告示と留意事項通知で解決する" },
+    { "step_no": 5, "kind": "facility_req", "label": "運動器リハビリテーション料の施設基準(区分・人員・面積・機器)", "status": "unresolved", "reason": "特掲診療料の施設基準告示・届出手続き通知で解決する" },
+    { "kind": "note", "label": "確認論点: 同一日の関節内注射と外来管理加算の関係", "status": "unresolved", "reason": "処置・注射実施日の外来管理加算の算定可否を留意事項通知で確認する" },
+    { "kind": "note", "label": "確認論点: リハビリテーション実施日の消炎鎮痛等処置との併算定", "status": "unresolved", "reason": "併算定の可否・主従関係を留意事項通知で確認し、billing_rulesへ根拠付きで登録する" },
+    { "kind": "note", "label": "確認論点: リハビリテーション総合計画評価・目標設定等支援の要否(高齢者)", "status": "unresolved", "reason": "対象患者・算定周期を告示・通知で確認する" }
+  ],
+  "open_questions": [
+    "初診当日にリハビリテーションを開始した場合の疾患別リハ起算日の扱い",
+    "運動器リハの標準的算定日数超過後の扱い(月13単位等の規定の有無を含めR8の規定を確認)"
+  ]
+}

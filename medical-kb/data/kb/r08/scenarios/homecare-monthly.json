@@ -1,0 +1,29 @@
+{
+  "id": "r08-scn-homecare-monthly",
+  "specialty_id": "homecare",
+  "title": "在宅療養患者への月2回の訪問診療(在宅医療)",
+  "patient": { "age": 85, "chief_complaint": "通院困難(要介護3・慢性心不全等)", "visit": "revisit", "condition": "自宅(戸建て)療養・月2回の計画的訪問" },
+  "confidence": "draft",
+  "notes": "臨床フローは設計上の想定。在宅は『訪問診療料(1日単位)』と『在宅時医学総合管理料等(月単位)』の二層構造に、在支診/在支病等の施設類型・単一建物診療患者数・重症度が絡む、最も条件分岐が多い領域。全スロットを告示・通知で解決するまで未確定。",
+  "steps": [
+    { "day_offset": 0, "action": "計画的な訪問診療(月1回目)。診察・バイタル・処方" },
+    { "day_offset": 14, "action": "計画的な訪問診療(月2回目)" },
+    { "day_offset": 20, "action": "臨時往診(発熱の連絡を受け緊急訪問)" },
+    { "day_offset": 30, "action": "月末: 月単位の医学総合管理料の整理。訪問看護ステーションへの指示書交付" }
+  ],
+  "billing": [
+    { "step_no": 1, "kind": "candidate", "label": "在宅患者訪問診療料", "status": "unresolved", "reason": "同一建物居住者か否か等の区分・点数を告示で解決する" },
+    { "step_no": 3, "kind": "candidate", "label": "往診料(緊急・夜間等の加算含む)", "status": "unresolved", "reason": "往診料と訪問診療料の使い分け・同日関係を留意事項通知で解決する" },
+    { "step_no": 4, "kind": "candidate", "label": "在宅時医学総合管理料(在医総管)相当の月単位管理料", "status": "unresolved", "reason": "施設類型(在支診等)・月の訪問回数・単一建物診療患者数・重症度による点数マトリクスを告示で解決する" },
+    { "step_no": 4, "kind": "candidate", "label": "訪問看護指示料相当", "status": "unresolved", "reason": "名称・点数・交付頻度の制限を告示で解決する" },
+    { "step_no": 1, "kind": "candidate", "label": "在宅療養に係る指導管理料・材料(該当する場合)", "status": "unresolved", "reason": "在宅酸素療法指導管理料等の該当有無は患者状態による。包括関係も要確認" },
+    { "step_no": 4, "kind": "facility_req", "label": "在宅療養支援診療所等の施設基準(類型・24時間体制・実績要件)", "status": "unresolved", "reason": "基本/特掲の施設基準告示・届出手続き通知で解決する" },
+    { "kind": "note", "label": "確認論点: 訪問診療料と往診料の同日・同月の算定関係", "status": "unresolved", "reason": "billing_rulesへ根拠付きで登録する" },
+    { "kind": "note", "label": "確認論点: 在医総管と他の医学管理料の併算定制限", "status": "unresolved", "reason": "包括・排他の範囲が広いため通知の別表を精読する" },
+    { "kind": "note", "label": "確認論点: 単一建物診療患者数の数え方(施設入居者の場合)", "status": "unresolved", "reason": "施設総管との区分を含め留意事項通知で確認する" }
+  ],
+  "open_questions": [
+    "R8改定での在宅関連(在医総管・施設総管・往診料)の変更点",
+    "介護保険(居宅療養管理指導)との給付調整の整理"
+  ]
+}

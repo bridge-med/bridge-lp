@@ -1,0 +1,28 @@
+{
+  "id": "r08-scn-internal-lifestyle",
+  "specialty_id": "internal",
+  "title": "生活習慣病(高血圧・2型糖尿病)の継続外来管理(一般内科)",
+  "patient": { "age": 58, "chief_complaint": "高血圧・2型糖尿病の定期通院", "visit": "revisit", "condition": "月1回通院・内服治療中" },
+  "confidence": "draft",
+  "notes": "臨床フローは設計上の想定。生活習慣病の管理料体系はR6改定で大きく再編された経緯があり(特定疾患療養管理料の対象疾患変更・生活習慣病管理料の再編)、R8での姿は必ず告示・留意事項通知で確認する。旧年度知識での補完を禁止。",
+  "steps": [
+    { "day_offset": 0, "action": "再診。血圧測定・療養計画に基づく指導" },
+    { "day_offset": 0, "action": "採血(HbA1c・脂質・肝腎機能等)" },
+    { "day_offset": 0, "action": "院外処方箋の交付(降圧薬・血糖降下薬)" },
+    { "day_offset": 30, "action": "翌月再診。検査結果の説明と療養計画の見直し" }
+  ],
+  "billing": [
+    { "step_no": 1, "kind": "candidate", "label": "再診料", "status": "unresolved", "reason": "点数・外来管理加算の扱いは告示・通知で解決" },
+    { "step_no": 1, "kind": "candidate", "label": "生活習慣病に対する医学管理料(生活習慣病管理料等のR8体系)", "status": "unresolved", "reason": "R8時点の管理料の名称・区分・点数・包括範囲(検査包括の有無)・療養計画書要件を告示・通知で解決する" },
+    { "step_no": 2, "kind": "candidate", "label": "検体検査料(採血料・判断料・各検査項目)", "status": "unresolved", "reason": "管理料に包括される場合は算定不可となるため、包括範囲の確定が先" },
+    { "step_no": 3, "kind": "candidate", "label": "処方箋料", "status": "unresolved", "reason": "点数と一般名処方加算等の加算体系を告示で解決する" },
+    { "step_no": 1, "kind": "candidate", "label": "外来データ提出・情報通信機器関連の加算の有無", "status": "unresolved", "reason": "R8で該当する加算の存否自体を告示で確認する(存在を仮定しない)" },
+    { "step_no": 1, "kind": "facility_req", "label": "管理料算定に必要な届出・体制(要否含む)", "status": "unresolved", "reason": "施設基準の要否自体を告示で確認する" },
+    { "kind": "note", "label": "確認論点: 管理料と検体検査の併算定(包括範囲)", "status": "unresolved", "reason": "包括ならbilling_rulesのincludedとして根拠付きで登録" },
+    { "kind": "note", "label": "確認論点: 特定疾患処方管理加算の対象疾患・点数のR8時点の規定", "status": "unresolved", "reason": "対象疾患の告示別表を確認する" }
+  ],
+  "open_questions": [
+    "R8での生活習慣病管理料(I)(II)相当の構造と療養計画書の要件",
+    "オンライン診療併用時の管理料の扱い"
+  ]
+}

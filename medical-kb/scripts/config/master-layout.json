@@ -1,0 +1,37 @@
+{
+  "_readme": [
+    "医科診療行為マスター(CSV/Shift_JIS)の列マッピング定義。",
+    "列番号は0始まり。**必ず「マスターファイル仕様説明書」(manifest id: r08-master-spec) の実物と照合してから** verified を true にすること。",
+    "verified が false の間、parse_masters.mjs は変換を実行しない(推測レイアウトでの取込を防ぐため)。",
+    "列の当たりを付けるには parse_masters.mjs --inspect で先頭行を列番号付きでダンプできる。",
+    "columns の値: 仕様書で確認した0始まりの列番号を入れる。不明・未確認は null のまま残す。"
+  ],
+  "master": "ika_shinryokoi",
+  "encoding": "shift_jis",
+  "verified": false,
+  "verified_against": null,
+  "verified_at": null,
+  "columns": {
+    "change_kbn": null,
+    "code": null,
+    "name_kanji": null,
+    "name_kana": null,
+    "short_name": null,
+    "points": null,
+    "points_kbn": null,
+    "unit_code": null,
+    "unit_name": null,
+    "age_lower": null,
+    "age_upper": null,
+    "hospital_clinic_kbn": null,
+    "inpatient_outpatient_kbn": null,
+    "notification_kbn": null,
+    "effective_start": null,
+    "effective_end": null
+  },
+  "code_maps": {
+    "_note": "単位コード・点数識別等のコード値→意味の対応表。仕様書から転記し、転記元ページをsourceに記録する。",
+    "unit_code": {},
+    "points_kbn": {}
+  }
+}

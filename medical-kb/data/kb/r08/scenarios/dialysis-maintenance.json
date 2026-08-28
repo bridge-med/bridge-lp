@@ -1,0 +1,30 @@
+{
+  "id": "r08-scn-dialysis-maintenance",
+  "specialty_id": "dialysis",
+  "title": "維持血液透析の外来通院(1か月・週3回)(人工透析)",
+  "patient": { "age": 68, "chief_complaint": "慢性腎臓病(維持透析中)", "visit": "revisit", "condition": "週3回・1回4時間の維持血液透析" },
+  "confidence": "draft",
+  "notes": "臨床フローは設計上の想定。透析は時間区分・施設区分・包括範囲・材料/薬剤の扱いが点数構造の中心であり、すべて告示と留意事項通知で解決するまで未確定。",
+  "steps": [
+    { "day_offset": 0, "action": "外来維持血液透析(4時間・週3回の初回)" },
+    { "day_offset": 2, "action": "外来維持血液透析(2回目)" },
+    { "day_offset": 4, "action": "外来維持血液透析(3回目)。以降1か月継続(月12〜13回想定)" },
+    { "day_offset": 7, "action": "月1回の医師による詳細な評価・検査(採血等)" },
+    { "day_offset": 30, "action": "月末: 月単位の管理料・加算の整理" }
+  ],
+  "billing": [
+    { "step_no": 1, "kind": "candidate", "label": "人工腎臓(慢性維持透析・時間区分)", "status": "unresolved", "reason": "施設区分(慢性維持透析1/2/3等)と時間区分(4時間未満/4〜5時間/5時間以上)の組合せで点数が決まる構造。R8の区分と点数は告示で解決する" },
+    { "step_no": 1, "kind": "candidate", "label": "透析液・水質確保・導入期などの加算群", "status": "unresolved", "reason": "加算の種類・要件(導入期加算、障害者等加算、時間外・休日加算等)を告示・通知で解決する" },
+    { "step_no": 1, "kind": "candidate", "label": "ダイアライザー等の特定保険医療材料・薬剤の扱い", "status": "unresolved", "reason": "包括か出来高かの範囲を留意事項通知で確認する" },
+    { "step_no": 1, "kind": "candidate", "label": "再診料(透析日の基本診療料)", "status": "unresolved", "reason": "透析実施日の再診料・外来管理加算の扱いを留意事項通知で確認する" },
+    { "step_no": 4, "kind": "candidate", "label": "透析患者の検査(月単位の包括/出来高の別)", "status": "unresolved", "reason": "人工腎臓に包括される検査範囲の規定を確認する" },
+    { "step_no": 5, "kind": "candidate", "label": "慢性維持透析患者外来医学管理料(相当の管理料)", "status": "unresolved", "reason": "名称・点数・包括範囲(検査等)をR8告示で解決する" },
+    { "step_no": 1, "kind": "facility_req", "label": "人工腎臓の施設基準(施設区分の要件・透析機器・水質管理・人員)", "status": "unresolved", "reason": "特掲診療料の施設基準告示・届出手続き通知で解決する" },
+    { "kind": "note", "label": "確認論点: 管理料と個別検査の併算定(包括範囲)", "status": "unresolved", "reason": "管理料に包括される検査・注射等の範囲はbilling_rulesの included として根拠付きで登録する" },
+    { "kind": "note", "label": "確認論点: 月の算定回数上限(人工腎臓の回数規定)", "status": "unresolved", "reason": "月14回目以降等の扱いを留意事項通知で確認する" }
+  ],
+  "open_questions": [
+    "R8改定での人工腎臓の施設区分・点数の変更点",
+    "エリスロポエチン等の薬剤の包括状況(HIF-PH阻害薬含む)のR8時点の扱い"
+  ]
+}
