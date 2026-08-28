@@ -495,7 +495,7 @@
           state.screen = 'clear';
           const score = computeScore(state.stats);
           const rank = rankFor(score);
-          if (saveBest(score, rank.rank)) showToast('自己ベストを更新しました!');
+          if (saveBest(score, rank.rank)) showToast('自己ベストを更新しました');
         } else {
           state.week += 1;
           state.phase = 'choose';
@@ -516,6 +516,14 @@
       }
     }
   }
+
+  /* ---------- テーマ切替 ---------- */
+
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('bridge-theme', next); } catch (e) {}
+  });
 
   render();
 })();
