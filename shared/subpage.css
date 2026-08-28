@@ -92,7 +92,12 @@ img,svg{display:block;max-width:100%}
 /* nav */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px var(--pad-x);transition:all .3s;background:transparent}
 .nav.scrolled{background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:12px var(--pad-x)}
-.nav-logo{font:700 14px/1 var(--serif-en);letter-spacing:0.2em;color:var(--ink)}
+.nav-logo{font:700 14px/1 var(--serif-en);letter-spacing:0.2em;color:var(--ink);position:relative}
+/* 見た目は変えず、タップ領域だけ44px以上へ広げる(.nav-actionsと同じ手)。
+ * 注意: nav折り返し時にこの当たり判定は.nav-actionsのボタンと幾何学的に重なる。
+ * クリックを奪わないのは.back/.ctaがposition:relativeかつDOM順で後にあるため。
+ * .nav-actionsからpositionを外す・.nav-logoにz-indexを足す変更はこの前提を壊す */
+.nav-logo::before{content:'';position:absolute;inset:-14px 0}
 /* 砂: 署名としての句点 */
 .nav-logo .dot{color:var(--dawn)}
 .nav-logo .small{font:500 9px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-3);margin-left:8px;text-transform:uppercase}
@@ -197,6 +202,9 @@ section.alt{background:var(--paper-2)}
 .foot-brand .dot{color:var(--dawn)}
 .foot-tag{font:500 11px/1.7 var(--sans-jp);color:color-mix(in srgb,var(--on-solid) 58%,var(--ink-solid));margin-bottom:18px}
 .foot-links{display:flex;gap:18px;justify-content:center;font:600 11px/1 var(--sans-en);letter-spacing:0.12em;text-transform:uppercase}
+.foot-links a{position:relative}
+/* タップ領域の44px化。行高11pxのまま上下に17pxずつ広げる */
+.foot-links a::before{content:'';position:absolute;inset:-17px 0}
 /* 著作権表記。旧実装は各ページの inline style に color:rgba(255,255,255,0.4) を
  * 直書きしており、藍地で3.59:1(AA未達)かつトークン非経由でダークから到達できなかった */
 .foot-copy{margin-top:24px;font:500 10px/1.5 var(--sans-jp);color:color-mix(in srgb,var(--on-solid) 52%,var(--ink-solid))}
@@ -280,6 +288,7 @@ html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 .alert-body strong{color:var(--ink);font-weight:900} /* Noto Sans JPは800未読込。実描画の900を明示 */
 
 /* compare table */
+.cmp-scroll{overflow-x:auto}
 .cmp-table{width:100%;border-collapse:collapse;font:500 12px/1.5 var(--sans-jp)}
 .cmp-table th{background:var(--paper-3);padding:12px 14px;text-align:left;font:700 10px/1 var(--sans-en);letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
 .cmp-table th:not(:first-child){text-align:right}

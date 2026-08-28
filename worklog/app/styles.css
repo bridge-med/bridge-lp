@@ -296,3 +296,10 @@ details.card > summary::-webkit-details-marker { display: none; }
 .bar { height: 7px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 8px; }
 .bar-fill { height: 100%; background: var(--primary); border-radius: 999px; }
 .out { background: var(--surface-2); }
+
+/* 動きを減らす設定の利用者には遷移を全停止する */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  /* transitionを持たない唯一の実動作。transition:noneでは止まらない */
+  .fab:active { transform: none; }
+}
