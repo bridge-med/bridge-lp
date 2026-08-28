@@ -25,9 +25,31 @@
 
   --line: rgba(27, 27, 30, 0.10);
   --shadow: 0 1px 2px rgba(22, 35, 62, 0.05), 0 6px 18px rgba(22, 35, 62, 0.08);
+  --shadow-btn: 0 4px 14px rgba(22, 35, 62, 0.30);
+  --shadow-sel: 0 1px 4px rgba(27, 27, 30, 0.12);
   --radius: 14px;
   --sans: 'Noto Sans JP', sans-serif;
   --en: 'Inter', sans-serif;
+}
+
+/* ダーク。値は shared/subpage.css のダーク対応表と同一(第22条・両テーマ等価) */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:   #161B2B;
+  --paper-2: #111521;
+  --paper-3: #0B0F1A;
+  --card:    #1D2436;
+  --ink:   #EDEAE2;
+  --ink-2: #C2BFB6;
+  --navy:      #D8DEEB;
+  --blue:      #9FB1D4;
+  --blue-soft: #5A6C92;
+  --dawn:      #C2A97E;
+  --dawn-deep: #C2A97E;
+  --line: rgba(237, 234, 226, 0.12);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.20), 0 6px 18px rgba(0, 0, 0, 0.26);
+  --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-sel: 0 1px 4px rgba(0, 0, 0, 0.32);
 }
 
 html { -webkit-font-smoothing: antialiased; }
@@ -43,6 +65,7 @@ body {
   line-height: 1.8;
   min-height: 100dvh;
   font-feature-settings: "palt" 1;
+  transition: background 0.5s, color 0.5s;
 }
 
 button { font-family: inherit; cursor: pointer; }
@@ -111,7 +134,7 @@ a { color: inherit; text-decoration: none; }
 .btn-primary {
   background: linear-gradient(135deg, var(--blue) 0%, var(--navy) 120%);
   color: var(--paper);
-  box-shadow: 0 4px 14px rgba(22, 35, 62, 0.30);
+  box-shadow: var(--shadow-btn);
 }
 .btn-primary:hover { background: var(--navy); }
 
@@ -125,7 +148,7 @@ a { color: inherit; text-decoration: none; }
 .btn-outline {
   background: transparent;
   color: var(--blue);
-  border: 1.5px dashed rgba(22, 35, 62, 0.4);
+  border: 1.5px dashed color-mix(in srgb, var(--navy) 40%, transparent);
 }
 .btn-outline:hover { background: var(--paper-2); }
 
@@ -139,11 +162,11 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-2);
   text-decoration: underline;
   text-underline-offset: 4px;
-  text-decoration-color: rgba(69, 70, 76, 0.4);
+  text-decoration-color: color-mix(in srgb, var(--ink-2) 40%, transparent);
   padding: 4px 2px;
 }
 .link-btn:hover { color: var(--blue); }
-.link-btn.danger { color: var(--navy); font-weight: 700; text-decoration-color: rgba(22, 35, 62, 0.4); }
+.link-btn.danger { color: var(--navy); font-weight: 700; text-decoration-color: color-mix(in srgb, var(--navy) 40%, transparent); }
 .link-btn.back { display: inline-block; margin-bottom: 14px; text-decoration: none; font-weight: 700; color: var(--blue); }
 
 /* ---------- KPI ---------- */
@@ -208,14 +231,16 @@ a { color: inherit; text-decoration: none; }
 .row-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .row-arrow { font: 700 14px/1 var(--en); color: var(--ink-2); }
 
-.row.is-done .row-text { color: var(--ink-2); text-decoration: line-through; text-decoration-color: rgba(125, 126, 133, 0.6); }
+/* 旧値rgba(125,126,133,0.6)は対応トークンが無く、最も近い--ink-2 60%へ寄せた。
+ * 実効色は#AFB0B3→#8E8E90と一段濃くなる(2026-08-28 designer照合で容認・社長審美判断待ち) */
+.row.is-done .row-text { color: var(--ink-2); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ink-2) 60%, transparent); }
 
 /* 完了チェック = 到達の印。砂の面に白のチェック(interview-kit前例) */
 /* 見た目は26px角のまま、タップ領域だけ44px角に広げる(tanaoroshi .theme-btn前例) */
 .row-check {
   flex: 0 0 auto;
   width: 26px; height: 26px;
-  border: 1.5px solid rgba(22, 35, 62, 0.4);
+  border: 1.5px solid color-mix(in srgb, var(--navy) 40%, transparent);
   border-radius: 8px;
   background: var(--card);
   color: var(--paper);
@@ -336,7 +361,7 @@ a { color: inherit; text-decoration: none; }
   padding: 9px 14px;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.seg-btn input:checked + span { background: var(--card); color: var(--navy); box-shadow: 0 1px 4px rgba(27, 27, 30, 0.12); }
+.seg-btn input:checked + span { background: var(--card); color: var(--navy); box-shadow: var(--shadow-sel); }
 .seg-btn input:focus-visible + span { outline: 2px solid var(--blue); }
 
 .due-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -369,7 +394,7 @@ a { color: inherit; text-decoration: none; }
   gap: 6px;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.tab.on { background: var(--card); color: var(--navy); box-shadow: 0 1px 4px rgba(27, 27, 30, 0.12); }
+.tab.on { background: var(--card); color: var(--navy); box-shadow: var(--shadow-sel); }
 .tab-count {
   font: 800 10.5px/1 var(--en);
   color: var(--ink-2);
@@ -441,6 +466,31 @@ a { color: inherit; text-decoration: none; }
 }
 .foot-brand:hover { color: var(--navy); }
 
+/* ---------- テーマ切替 ---------- */
+
+/* ヘッダを持たない画面のため固定配置(turnaround12と同じ手) */
+.theme-btn {
+  position: fixed;
+  top: 16px; right: 16px;
+  z-index: 150;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  display: grid; place-items: center;
+  color: var(--ink-2);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: color 0.3s, border-color 0.3s, background 0.5s;
+}
+/* 見た目は34pxのまま、タップ領域だけ44pxに広げる */
+.theme-btn::before { content: ''; position: absolute; inset: -5px; border-radius: 50%; }
+.theme-btn svg { width: 15px; height: 15px; }
+.theme-btn:hover { color: var(--ink); border-color: var(--blue-soft); }
+.theme-btn .icon-sun { display: none; }
+[data-theme="dark"] .theme-btn .icon-sun { display: block; }
+[data-theme="dark"] .theme-btn .icon-moon { display: none; }
+
 /* ---------- トースト ---------- */
 
 .toast {
@@ -467,6 +517,7 @@ a { color: inherit; text-decoration: none; }
   .app.enter .screen { animation: none; }
   .btn, .row-follow, .row-check, .row-del, .tab, .seg-btn span, .chip-btn, .facility-card, .input, .link-btn, .foot-brand, .toast { transition: none; }
   .btn:active, .facility-card:hover, .facility-card:active { transform: none; }
+  body, .theme-btn { transition: none; }
 }
 
 /* ---------- PC ---------- */

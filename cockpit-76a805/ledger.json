@@ -216,7 +216,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-08-28"
     },
     {
       "id": "tanaoroshi",
@@ -566,7 +566,6 @@
     "madoakari: manifest.webmanifestのtheme_color/background_colorがライト固定(#FBFAF7)。manifestはメディアクエリを持てないプラットフォーム制約による既知の非対称。<meta theme-color>は両テーマ対応済み",
     "madoakari: ?t=デバッグパラメータで開いたときもモード切替ボタンでliveへ戻せる。デバッグ専用機能のため現状維持(2026-07-26 PM判定)",
     "tanaoroshi/nidodemaのチップ/トグルon状態の藍ベタを静かにする案は、両ツール同時に変えること(単独変更禁止・designer起票)。tanaoroshiのトークン追従(--ink-3/--dawn-deep/selection)は2026-08-09に完了済みで、残るはこの意匠判断のみ。nidodema master合流の社長決裁5件と同じ束で扱う",
-    "round-noteにもダークテーマがない(両テーマで同一描画)。tanaoroshiは[data-theme=dark]はあるがprefers-color-schemeが無く、システム暗色の既定利用者にはライトが出る。turnaround12の件と同じダーク追従の束で扱う(designer照合2026-08-09)",
     "legal/privacy.htmlは全h2・全リンクが砂色。コントラストは2026-08-09の#7D6845化でAA解消済みだが、砂の多用そのものが第22条「選択の瞬間にだけ」に触れる。色ではなく用法の問題のため社長の審美判断待ち(designer照合2026-08-09)",
     "モバイルnavの取引の記録: 640px以下でロゴの製品名(.small)を畳んだのは「1行50pxのヘッダを守るために、スクロール後の現在地表示を諦めた」取引である(navはfixedでheroが流れた後は頁名を名乗らない)。将来ロゴ側で現在地を示す案は文言が動くためeditor同席で別議題(designer照合2026-08-09)",
     "madoakari/index.htmlのog:imageが製品サムネ流用の.webpで、一部スクレイパー(X/Slack等)が展開しない。twitter:cardとog:image:width/heightも欠落。scripts/make-ogp.mjsのCARDS配列に1行足して家族の顔に差し替える候補(designer起票2026-08-09)",
@@ -575,7 +574,10 @@
     "bridge.css系(ルートLP)に44px未達のタップ要素が27個ある(2026-08-28実測: nav-logo 18px・theme-btn 34px・nav-burger 38px・ドロワー内リンク34px・本文中の矢印リンク16〜18px・.btn 43pxなど)。2026-08-28にhub.css/subpage.css系はヒットエリア拡張(::before)で解消済みだが、bridge.cssは未対応。ルートLP全体に効くため独立スプリントで。本文中のインラインリンクはWCAG 2.5.8の例外対象として除外してよい",
     "keiri-76a805の.btn.danger:hoverがborder-color:var(--dawn)で、砂を「危険」の合図に当てている(第22条の用法逸脱の疑い。今回のdiff外の既存。designer照合2026-08-28で発見)",
     "擬似要素で隣からタップ領域を借りる手法の成立条件は「隣接行の行間(row-gap) ≥ 拡張量」(2026-08-28 designerが実測から導いた式。hub.cssのfoot-links row-gap:10px×拡張17pxで実際に隣行の字面を奪う事故が起き、row-gap撤去=18pxで解消済み)。微残1点: starter-kits 320pxでロゴ最下1pxがKitsリンクの箱に入る(1pxのため措置なしと判断)",
-    "turnaround12/app/data.js:504の選択肢ラベル「承知しました!」の「!」は登場人物の台詞で、即レス癖の描写そのもの(直上の整理された返答と対)としてdesignerが残置を支持。第19条の禁則の適用範囲の解釈のため最終判断はeditor。コード側に理由コメント済み(2026-08-28)"
+    "turnaround12/app/data.js:504の選択肢ラベル「承知しました!」の「!」は登場人物の台詞で、即レス癖の描写そのもの(直上の整理された返答と対)としてdesignerが残置を支持。第19条の禁則の適用範囲の解釈のため最終判断はeditor。コード側に理由コメント済み(2026-08-28)",
+    "固定配置のテーマ切替ボタン(turnaround12/round-note)の取引の記録: 「常時到達できること」と引き換えに「スクロール中、右上44pxのヒット箱が本文の操作要素と重なる」(round-note実測で宿題行×4・施設カード×3、turnaround12は選択肢と重なる。トップ画面は非重複)。誤爆は1タップ・非破壊で、worklogの固定.fabの前例に沿い容認(2026-08-28 designer)。将来この2アプリにヘッダを持たせるならその中に収める",
+    "round-noteの完了取り消し線が、rgba直値のトークン化(color-mix --ink-2 60%)で一段濃くなった(実効#AFB0B3→#8E8E90。対応トークンが無く最も近い--ink-2に寄せた。文字色と同系で引く筋は正しいとdesignerは容認)。これで良しとするかは社長の審美判断。コード側に理由コメント済み(2026-08-28)",
+    "メタtheme-colorがmedia属性でシステム設定にのみ追従し、ページ内トグルでテーマを切り替えた利用者にはアドレスバー色が旧テーマのまま残る。tanaoroshi/nidodema/turnaround12/round-noteの4アプリ共通の非対称(madoakariのmanifest既知事項の親戚)。トグルハンドラに1行で直るが、4アプリ同時に揃えるべき変更のため起票のみ(2026-08-28 PM)"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
