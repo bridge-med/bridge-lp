@@ -13,6 +13,7 @@
 import { readFileSync, existsSync, readdirSync, rmSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { KB_ROOT, loadJson, nowIso } from './lib/util.mjs';
+import { ensureExtracted, loadIkaMaster, loadEdtTables } from './lib/edt.mjs';
 import { DatabaseSync } from 'node:sqlite';
 
 const args = process.argv.slice(2);
@@ -111,6 +112,42 @@ if (existsSync(scenDir)) {
       count('scenario_billing');
     }
   }
+}
+
+/* ---- マスター・電子点数表(原典CSVから直接投入。JSONを介さない) ---- */
+const srcMasters = join(KB_ROOT, 'data', 'sources', rev, 'masters');
+if (existsSync(srcMasters)) {
+  ensureExtracted(rev);
+  const bulk = (table, cols, rows, extra = {}) => {
+    const allCols = [...Object.keys(extra), ...cols];
+    const stmt = db.prepare(`INSERT INTO ${table} (${allCols.join(',')}) VALUES (${allCols.map(() => '?').join(',')})`);
+    db.exec('BEGIN');
+    for (const r of rows) {
+      stmt.run(...Object.values(extra), ...cols.map(c => {
+        const v = r[c];
+        return v === undefined || v === null || v === '' ? null : v;
+      }));
+      count(table);
+    }
+    db.exec('COMMIT');
+  };
+
+  const master = loadIkaMaster(rev);
+  bulk('master_items',
+    ['code', 'short_name', 'name_kana', 'name_official', 'data_kikaku_code', 'points_kbn', 'points_raw', 'inout_kbn', 'kouki_kbn'],
+    master.rows, { revision: rev, source_file: master.source_file });
+
+  const edt = loadEdtTables(rev);
+  bulk('edt_hojo',
+    ['code', 'short_name', 'hokatsu_unit1', 'hokatsu_group1', 'hokatsu_unit2', 'hokatsu_group2', 'hokatsu_unit3', 'hokatsu_group3',
+     'haihan_day', 'haihan_month', 'haihan_simul', 'haihan_week', 'nyuin_group', 'santei_kaisu_rel', 'start_date', 'end_date'],
+    edt.hojo, { revision: rev });
+  bulk('edt_hokatsu', ['group_no', 'code', 'short_name', 'tokurei', 'start_date', 'end_date'], edt.hokatsu, { revision: rev });
+  bulk('edt_haihan', ['haihan_type', 'code1', 'name1', 'code2', 'name2', 'haihan_kbn', 'tokurei', 'start_date', 'end_date'], edt.haihan, { revision: rev });
+  bulk('edt_nyuin_kasan', ['group_no', 'code', 'short_name', 'kasan_id', 'start_date', 'end_date'], edt.nyuin, { revision: rev });
+  bulk('edt_santei_kaisu', ['code', 'short_name', 'unit_code', 'unit_name', 'max_count', 'tokurei', 'start_date', 'end_date'], edt.santei_kaisu, { revision: rev });
+} else {
+  console.log('data/sources のマスター原典が無いため master_items / edt_* はスキップ(原典取得後に再実行)');
 }
 
 db.close();

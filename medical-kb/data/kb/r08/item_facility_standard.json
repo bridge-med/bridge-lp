@@ -1,1 +1,5 @@
-[]
+[
+  { "item_id": "r08-H002-1", "fs_id": "r08-fs-h002-1", "relation": "required" },
+  { "item_id": "r08-H002-2", "fs_id": "r08-fs-h002-2", "relation": "required" },
+  { "item_id": "r08-H002-3", "fs_id": "r08-fs-h002-3", "relation": "required" }
+]

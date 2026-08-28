@@ -1,67 +1,62 @@
 # BRIDGE MEDICAL — 診療報酬 Knowledge Base
 
 日本のクリニック経営シミュレーターの基盤となる、診療報酬の構造化Knowledge Base。
-現在の対象は令和8年度改定(revision: r08)。単なる点数表の転載ではなく、
+現在の対象は令和8年度改定(revision: r08、施行2026-06-01・一次資料照合済み)。
 将来〔患者属性×診療科×診療行為×施設基準×人員配置×算定履歴×併算定ルール〕から
 「何を算定できるか/何点か/なぜか」を判定するエンジンに発展させるための土台。
 
-**最重要原則: 一次資料主義。** 点数・算定条件・併算定可否は、厚生労働省等の一次資料の
-実物と照合(evidence付き)するまでKBに入れない。この原則はスクリプトの安全装置として実装されている
-(validate_kb.mjs が根拠なし点数を拒否 / parse_masters.mjs は仕様書照合前に動かない)。
+**最重要原則: 一次資料主義。** 点数・算定条件・併算定可否は、一次資料の実物と照合
+(evidence付き)するまでKBに入れない。validate_kb.mjs が根拠なし点数を機械的に拒否し、
+parse系は仕様書照合済みレイアウト(master-layout.json)以外では動かない。
 
 ## 現在の状態(2026-08-28)
 
 | 成果物 | 状態 |
 |---|---|
-| 一次資料の所在マニフェスト(告示・通知・疑義解釈・マスター) | 作成済み。URL・文書番号はWeb検索由来で**実物未照合** |
-| 原典(data/sources/) | **未取得**。構築環境の外向き通信制限のため(issues.md #1) |
-| スキーマ・取得/解析/構築/検証スクリプト | 実装済み・動作確認済み |
-| 診療報酬項目・施設基準・併算定ルールの実データ | **0件**(推測で埋めない方針のため) |
-| 診療科マスター(15科)・診療シナリオ5本(整形/眼科/透析/内科/在宅) | 作成済み。算定スロットは全て未解決 |
-| 診療科別Knowledge Pack(重点5科) | 骨格作成済み。[確定]記載はまだ無い |
-
-## 何を取得するか
-
-`data/manifest/sources.r08.json` が一覧。カテゴリは A:本体(告示・点数表) / B:算定ルール(留意事項通知) /
-C:施設基準(告示・届出手続き・チェックリスト) / D:疑義解釈(事務連絡・随時追加) /
-E:マスター(医科診療行為・医薬品・特定器材・コメント) / F:参考(支払基金・厚生局ポータル)。
+| 一次資料(告示69/70/71号・保医発0305第6/7/8号・疑義解釈その1〜11・訂正連絡・チェックリスト等) | **51文書取得済み**(全件sha256台帳付き)。うち規範文書・マスター等49件は番号・日付・出所をPDF実物等で照合しverified化。残り2件は取りこぼし検出用のポータルスナップショット(照合対象外) |
+| 医科診療行為マスター(11,829件)・医薬品/特定器材/コメントマスター | 取得済み。列レイアウトは仕様書で照合済み |
+| 医科電子点数表(支払基金・公式機械可読ルール) | **DB取込済み**: 背反77,998 / 包括248,141 / 算定回数6,349 / 入院基本料7,047 / 補助11,829 |
+| 疑義解釈 qa_entries | **710問を機械抽出**(draft・目視照合は今後。issues #7) |
+| 診療報酬項目(items・evidence付き) | 11件(整形外科シナリオ解決セット)。残り4科は今後(issues #8) |
+| 施設基準(運動器リハI/II/III) | 人員・面積・機器・様式番号まで通知原文引用付きで登録 |
+| 診療シナリオ | 整形外科は算定スロット解決済み(点数・除外理由・根拠付き)。他4科は骨格 |
+| Knowledge Pack | 整形外科に[確定]記載を反映。他4科は骨格 |
 
 ## データ構造
 
-- 正規データ: `data/kb/common/`(年度非依存) + `data/kb/r08/`(改定単位) のJSON。gitで差分管理
-- 派生DB: `data/db/kb.sqlite`(build_db.mjsで再生成。コミットしない)
-- スキーマ: `data/schema/schema.sql`(revisions / documents / evidence / items /
-  facility_standards / billing_rules / specialties / item_specialty / qa_entries / scenarios ほか)
-- 詳細: `docs/architecture.md`(設計) / `docs/data-dictionary.md`(ID規約・enum・配置)
+- 正規データ(手動キュレーション): `data/kb/common/` + `data/kb/r08/` のJSON。
+  points を持つレコードは evidence(資料ID・ページ・原文引用)が必須
+- 機械可読一次データ: `data/sources/r08/masters/` の原典CSV(ZIP)から
+  build_db.mjs が直接 `master_items` / `edt_*` テーブルへ取込む(JSONを介さない)
+- 派生DB: `data/db/kb.sqlite`(約63MB・全35万行。コミットせず数秒で再生成)
+- スキーマ: `data/schema/schema.sql` / 詳細: `docs/architecture.md`・`docs/data-dictionary.md`
 
-## 更新方法
-
-`docs/update-guide.md` を参照。要点:
+## 更新方法(要点。詳細は docs/update-guide.md)
 
 ```
-node medical-kb/scripts/fetch_sources.mjs --rev r08   # 原典取得(要ネットワーク許可環境)
-node medical-kb/scripts/parse_masters.mjs ...          # マスター取込(仕様書照合後)
-node medical-kb/scripts/validate_kb.mjs --rev r08      # 品質ゲート
-node medical-kb/scripts/build_db.mjs --rev r08         # SQLite再生成
+node medical-kb/scripts/fetch_sources.mjs --rev r08   # 原典取得(新規疑義解釈の追加もここ)
+node medical-kb/scripts/parse_masters.mjs --rev r08   # マスター読込の目視確認
+node medical-kb/scripts/extract_qa.mjs --rev r08      # 疑義解釈の機械抽出
+node medical-kb/scripts/validate_kb.mjs --rev r08     # 品質ゲート(不合格ならコミットしない)
+node medical-kb/scripts/build_db.mjs --rev r08        # SQLite再生成(マスター・電子点数表込み)
 ```
 
-疑義解釈の追加はマニフェストへの1エントリ追加で取り込める。令和10年度改定は
-`data/kb/r10/` と `sources.r10.json` の並置で追加する(年度ハードコードなし)。
+ネットワーク要件: 実行環境の許可ドメインに mhlw.go.jp / *.mhlw.go.jp /
+shinryohoshu.mhlw.go.jp / www.ssk.or.jp が必要(2026-08-28に環境設定へ追加済み)。
 
 ## 精度上の限界(必読)
 
-1. **実データ未投入**。原典未取得のため、点数・要件・併算定の全テーブルが空。現状は「器と手順」まで
-2. マニフェストの文書番号・施行日(2026-06-01)は検索由来(search-located)。実物照合前に信用しない
-3. Knowledge Pack・シナリオの記述は[一般整理]と[未検証]のみで構成され、算定可否・点数を断定していない
-4. 告示・通知PDFからの構造化は人手照合が前提。全自動抽出は精度上採らない
-5. 未解決事項・矛盾は `issues.md` に集約(現在 open 5件)
+1. キュレーション済みitemsは11件のみ。網羅はこれから(電子点数表・マスターは全項目分DBにある)
+2. 疑義解釈710問は機械抽出のdraft。引用時は原典ページで確認(issues #7)
+3. ポータル掲載PDF(訂正反映後版)を正とし、訂正の時系列差分は追っていない(issues #9)
+4. マスターの日付系列(経過措置等)は項番対応未確定のため未使用(issues #6)
+5. 背反・包括・算定回数テーブルは「レセプト審査の機械チェック水準」であり、
+   通知の文章条件(留意事項)のすべてを表現しない。エンジン化では両者の併用が前提
 
 ## 今後の作業(優先順)
 
-1. ネットワーク許可環境での原典取得と、マニフェストの実物照合(issues.md #1・#2)
-2. マスター仕様書照合→医科診療行為マスター取込(items.master.json)
-3. 重点5科(整形・在宅・眼科・透析・内科)の頻出項目から items / facility_standards /
-   billing_rules を evidence 付きで構築、シナリオの算定スロットを解決
-4. 疑義解釈のqa_entries化と関連項目への反映
-5. 品質チェック(validate + 人手レビュー)→ Knowledge Packの[確定]昇格
-6. 一定品質到達後、判定エンジン設計とClinic Town 3D統合の検討(別フェーズ)
+1. 在宅・眼科・透析・内科のシナリオ解決セットを同手順で登録(issues #8)
+2. 重点5科に関わる疑義解釈の目視照合とverified昇格(issues #7)
+3. 基本診療料の体制加算群(機能強化・医療DX等)と施設基準DBの拡充(告示70号・0305第7号)
+4. 判定エンジンのプロトタイプ(items＋edt_haihan/hokatsu/santei_kaisuの併用判定)
+5. Knowledge Pack残り4科の[確定]化、改定ポイント(概要版PDF)の反映

@@ -148,7 +148,8 @@ CREATE TABLE IF NOT EXISTS billing_rules (
   source_item     TEXT NOT NULL,          -- items.id または区分番号
   target_item     TEXT NOT NULL,          -- 相手方。'*'は包括範囲などの集合を表しnoteで補足
   rule_type       TEXT NOT NULL,          -- mutually_exclusive併算定不可 / same_day_ng同日不可 /
-                                          -- same_month_ng同月不可 / included包括される /
+                                          -- same_month_ng同月不可 / same_week_ng週内不可 /
+                                          -- simultaneous_ng同時不可 / included包括される /
                                           -- major_only主たるもののみ / conditional条件付き併算定可
   condition       TEXT,                   -- 条件(conditional等の内容)
   period          TEXT,                   -- 'same_day'/'same_month'/'same_week'/など
@@ -163,6 +164,89 @@ CREATE TABLE IF NOT EXISTS billing_rules (
 );
 CREATE INDEX IF NOT EXISTS idx_rules_source ON billing_rules(revision, source_item);
 CREATE INDEX IF NOT EXISTS idx_rules_target ON billing_rules(revision, target_item);
+
+-- ---- レセ電マスター・医科電子点数表(機械可読一次データの取込先) ----
+-- 原典: 医科診療行為マスター(診療報酬情報提供サービス) / 医科電子点数表テーブル(支払基金)。
+-- build_db.mjs が data/sources/ の原典CSVから直接投入する(手で編集しない)。
+-- 列の意味の根拠は scripts/config/master-layout.json とそこに記載の仕様書。
+
+CREATE TABLE IF NOT EXISTS master_items (
+  revision        TEXT NOT NULL REFERENCES revisions(id),
+  code            TEXT NOT NULL,          -- 診療行為コード(9桁)
+  short_name      TEXT,                   -- 省略漢字名称(レセプト表示名)
+  name_kana       TEXT,
+  name_official   TEXT,                   -- 基本漢字名称(告示名称に対応)
+  data_kikaku_code TEXT,                  -- 数量データの単位コード
+  points_kbn      TEXT,                   -- 点数識別(1金額/3点数/5%加算/6%減算 等)
+  points_raw      REAL,                   -- 新又は現点数(点数識別に従って解釈する)
+  inout_kbn       TEXT,                   -- 入外適用区分(0両方/1入院のみ/2入院外のみ)
+  kouki_kbn       TEXT,                   -- 後期高齢者医療適用区分
+  source_file     TEXT,
+  PRIMARY KEY (revision, code)
+);
+
+CREATE TABLE IF NOT EXISTS edt_hojo (      -- 補助マスターテーブル(各テーブルとの連結)
+  revision        TEXT NOT NULL,
+  code            TEXT NOT NULL,
+  short_name      TEXT,
+  hokatsu_unit1   TEXT, hokatsu_group1 TEXT,
+  hokatsu_unit2   TEXT, hokatsu_group2 TEXT,
+  hokatsu_unit3   TEXT, hokatsu_group3 TEXT, -- 包括単位: 1=1日/2=同一月/3=同時/5=手術前1週間/6=1手術
+  haihan_day      INTEGER,                -- 背反(1日につき)関連あり
+  haihan_month    INTEGER,
+  haihan_simul    INTEGER,
+  haihan_week     INTEGER,
+  nyuin_group     TEXT,                   -- 入院基本料テーブル参照グループ
+  santei_kaisu_rel INTEGER,               -- 算定回数テーブル関連あり
+  start_date      TEXT, end_date TEXT,
+  PRIMARY KEY (revision, code)
+);
+
+CREATE TABLE IF NOT EXISTS edt_hokatsu (   -- 包括・被包括テーブル
+  revision   TEXT NOT NULL,
+  group_no   TEXT NOT NULL,               -- 例 'A000001'。補助マスターの包括グループから参照される
+  code       TEXT NOT NULL,               -- 包括される側(被包括)の診療行為コード
+  short_name TEXT,
+  tokurei    INTEGER,                     -- 特例条件あり(内容は通知の本文で確認)
+  start_date TEXT, end_date TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_hokatsu_group ON edt_hokatsu(revision, group_no);
+CREATE INDEX IF NOT EXISTS idx_hokatsu_code ON edt_hokatsu(revision, code);
+
+CREATE TABLE IF NOT EXISTS edt_haihan (    -- 背反関連テーブル(併算定不可)
+  revision    TEXT NOT NULL,
+  haihan_type TEXT NOT NULL,              -- same_day/same_month/simultaneous/same_week
+  code1       TEXT NOT NULL,
+  name1       TEXT,
+  code2       TEXT NOT NULL,
+  name2       TEXT,
+  haihan_kbn  TEXT,                       -- 1=①を算定/2=②を算定/3=いずれか一方
+  tokurei     INTEGER,
+  start_date  TEXT, end_date TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_haihan_c1 ON edt_haihan(revision, code1);
+CREATE INDEX IF NOT EXISTS idx_haihan_c2 ON edt_haihan(revision, code2);
+
+CREATE TABLE IF NOT EXISTS edt_nyuin_kasan ( -- 入院基本料テーブル(入院基本料×加算の可否)
+  revision   TEXT NOT NULL,
+  group_no   TEXT NOT NULL,
+  code       TEXT NOT NULL,
+  short_name TEXT,
+  kasan_id   TEXT,
+  start_date TEXT, end_date TEXT
+);
+
+CREATE TABLE IF NOT EXISTS edt_santei_kaisu ( -- 算定回数テーブル(算定単位ごとの上限回数)
+  revision   TEXT NOT NULL,
+  code       TEXT NOT NULL,
+  short_name TEXT,
+  unit_code  TEXT,                        -- 算定単位コード(手引き付表1)
+  unit_name  TEXT,                        -- '日','月','初診時' 等
+  max_count  INTEGER,
+  tokurei    INTEGER,
+  start_date TEXT, end_date TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_santei_code ON edt_santei_kaisu(revision, code);
 
 -- ---- 診療科 --------------------------------------------------
 CREATE TABLE IF NOT EXISTS specialties (

@@ -19,16 +19,29 @@ node medical-kb/scripts/fetch_sources.mjs --rev r08
 - 取得後、**各文書の実物を開き、表題・文書番号・日付をマニフェストと照合**して
   `verified: true` に更新する。ここまでやって初めて「一次資料がある」状態になる
 
-## 2. マスターの取込
+## 2. マスター・電子点数表の取込
+
+取込本体は build_db.mjs が行う(ZIPの展開→CSV読込→master_items/edt_*テーブルへ直接投入)。
+事前の目視確認と、改定でレイアウトが変わったときの再照合には次を使う。
 
 ```
-unzip -o data/sources/r08/masters/master_ika_shinryokoi.zip -d data/sources/r08/masters/
-node medical-kb/scripts/parse_masters.mjs --inspect --file <CSVパス>   # 列構成の確認
-# マスターファイル仕様説明書と照合し scripts/config/master-layout.json を埋め、verified: true にする
-node medical-kb/scripts/parse_masters.mjs --file <CSVパス> --rev r08
+node medical-kb/scripts/parse_masters.mjs --rev r08                 # 件数・サンプルの目視確認
+node medical-kb/scripts/parse_masters.mjs --inspect --file <CSVパス> # 列構成のダンプ(仕様書との突合用)
 ```
 
-安全装置: layout が `verified: false` の間は変換されない。仕様書と照合せずに外さないこと。
+列マッピングは scripts/config/master-layout.json。改定でマスターの版が変わったら、
+仕様説明書(spec_R08rec1相当)・活用の手引きの新版と照合し、verified_against を更新する。
+安全装置: layout が `verified: false` の間は読込が例外で停止する。照合せずに外さないこと。
+
+## 2の2. 疑義解釈の機械抽出
+
+```
+node medical-kb/scripts/extract_qa.mjs --rev r08
+```
+
+qa_entries.json を全面再生成する(confidence=verifiedへ手動昇格済みのIDは維持される)。
+抽出はdraft品質(issues #7)。引用に使う問は原典PDFの該当ページで目視照合し、
+qa_entries.json の該当エントリの confidence を verified に上げる。
 
 ## 3. 告示・通知からの構造化(人手+照合)
 

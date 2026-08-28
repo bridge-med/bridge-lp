@@ -40,14 +40,19 @@ const qa = loadOr(join(kbDir, 'qa_entries.json'), []);
 const evidence = loadOr(join(kbDir, 'evidence.json'), []);
 const specialties = loadOr(join(KB_ROOT, 'data', 'kb', 'common', 'specialties.json'), []);
 const manifest = loadOr(join(KB_ROOT, 'data', 'manifest', `sources.${rev}.json`), { documents: [] });
-const master = loadOr(join(kbDir, 'items.master.json'), null);
+let master = null;
+try {
+  const { ensureExtracted, loadIkaMaster } = await import('./lib/edt.mjs');
+  ensureExtracted(rev);
+  master = loadIkaMaster(rev);
+} catch { /* 原典未取得・レイアウト未検証時はE7をスキップ */ }
 
 const errors = [];
 const warns = [];
 
 const CONF = new Set(['verified', 'search-located', 'draft', 'unknown']);
 const RELEVANCE = new Set(['primary', 'secondary', 'possible']);
-const RULE_TYPES = new Set(['mutually_exclusive', 'same_day_ng', 'same_month_ng', 'included', 'major_only', 'conditional']);
+const RULE_TYPES = new Set(['mutually_exclusive', 'same_day_ng', 'same_month_ng', 'same_week_ng', 'simultaneous_ng', 'included', 'major_only', 'conditional']);
 
 const docById = new Map(manifest.documents.map(d => [d.id, d]));
 const itemIds = new Set(items.map(i => i.id));
@@ -103,25 +108,36 @@ if (existsSync(scenDir)) {
   for (const f of readdirSync(scenDir).filter(n => n.endsWith('.json'))) {
     const s = loadJson(join(scenDir, f));
     for (const b of s.billing || []) {
-      if (b.status === 'resolved' && !itemIds.has(b.item_id)) {
+      if (b.status === 'resolved' && b.kind === 'facility_req') {
+        if (!fsIds.has(b.fs_id)) errors.push(`E4 scenario ${s.id}: resolved なのに fs_id=${b.fs_id} が facility_standards に無い`);
+      } else if (b.status === 'resolved' && !itemIds.has(b.item_id)) {
         errors.push(`E4 scenario ${s.id}: resolved なのに item_id=${b.item_id} が items に無い`);
       }
       if (b.points != null && b.status !== 'resolved') {
         errors.push(`E1 scenario ${s.id}: 未解決の算定候補「${b.label}」に点数が入っている(根拠なし点数の混入)`);
       }
+      if (b.points != null && b.status === 'resolved') {
+        const it = items.find(x => x.id === b.item_id);
+        if (it && it.points != null && Number(it.points) !== Number(b.points)) {
+          errors.push(`E1 scenario ${s.id}: 「${b.label}」の点数(${b.points})がitems(${it.points})と不一致`);
+        }
+      }
     }
   }
 }
 
-/* E7: マスター突合 */
-if (master?.items?.length) {
-  const byCode = new Map(master.items.map(m => [m.code, m]));
+/* E7: マスター突合(点数識別3=点数の項目のみ数値比較) */
+if (master?.rows?.length) {
+  const byCode = new Map(master.rows.map(m => [m.code, m]));
   for (const it of items) {
     if (it.code && it.points != null && byCode.has(it.code)) {
-      const mp = Number(byCode.get(it.code).points_raw);
-      if (Number.isFinite(mp) && mp !== Number(it.points)) {
-        errors.push(`E7 ${it.id}: 点数がマスターと不一致 (kb=${it.points} / master=${mp})。点数識別の解釈も含め確認`);
+      const m = byCode.get(it.code);
+      const mp = Number(m.points_raw);
+      if (m.points_kbn === '3' && Number.isFinite(mp) && mp !== Number(it.points)) {
+        errors.push(`E7 ${it.id}: 点数がマスターと不一致 (kb=${it.points} / master=${mp})`);
       }
+    } else if (it.code && !byCode.has(it.code)) {
+      warns.push(`E7 ${it.id}: code=${it.code} が医科診療行為マスターに存在しない`);
     }
   }
 }

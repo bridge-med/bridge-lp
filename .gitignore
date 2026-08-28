@@ -7,3 +7,5 @@ node_modules
 medical-kb/data/db/*.sqlite
 medical-kb/data/validation-report.json
 medical-kb/data/manifest/crawl-report.*.json
+# ZIP原典の展開ディレクトリ(スクリプトが再展開する)
+medical-kb/data/sources/*/masters/*_x/

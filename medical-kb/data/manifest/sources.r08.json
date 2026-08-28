@@ -2,13 +2,15 @@
   "revision": "r08",
   "revision_name": "令和8年度診療報酬改定",
   "effective_from": "2026-06-01",
-  "effective_from_confidence": "search-located",
+  "effective_from_confidence": "verified",
   "generated_at": "2026-08-28",
   "notes": [
-    "このマニフェストは 2026-08-28 時点のWeb検索で所在を特定したもの。URL・文書番号は一次資料の実物でまだ照合していない(verified: false)。",
-    "confidence の定義: verified = 一次資料の実物で確認済み / search-located = 検索結果で所在・番号を把握したのみ / unknown = 不明。",
-    "fetch_sources.mjs はこのファイルを読み、data/sources/r08/ 以下へ原典を無加工で保存し、retrieval-log.json に sha256 と取得日時を記録する。",
-    "取得成功後は各文書の実物を開き、doc_number・issued_date を照合してから verified: true に更新すること。"
+    "2026-08-28: 厚労省改定ポータル(newpage_67729.html)の実物を取得・解析し、文書名・番号・URLをポータル記載どおりに全面更新した。",
+    "confidence の定義: verified = PDF実物の表題・番号まで照合済み / portal-listed = 厚労省ポータルの掲載名で確認(PDF内未照合) / search-located = 検索結果のみ / unknown = 不明。",
+    "ポータル掲載の点数表・通知PDFは訂正反映後の最新版(例: 医科点数表=0730訂正後)。訂正履歴の原文は訂正事務連絡(teisei-*)で追跡する。",
+    "スコープは医科。歯科・調剤の点数表・様式は対象外(必要になったらポータルから追加)。",
+    "疑義解釈は今後も追加され得る。追加時は qa-{連番} エントリを増やして fetch_sources を再実行する。",
+    "2026-08-28: 全37+14文書を取得。告示69(制定文の号数)/70/71の号数、保医発0305第6/7/8号、疑義解釈その1〜11の巻号をPDF実物で照合しverified化。施行日2026-06-01は留意事項通知制定文の「令和8年6月1日より適用される」で確認。"
   ],
   "documents": [
     {
@@ -17,309 +19,666 @@
       "title": "令和8年度診療報酬改定について(厚生労働省 改定ポータル)",
       "doc_type": "portal",
       "issuer": "厚生労働省",
-      "doc_number": null,
-      "issued_date": null,
-      "urls": [{ "url": "https://www.mhlw.go.jp/stf/newpage_67729.html", "kind": "official", "confidence": "search-located" }],
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/stf/newpage_67729.html",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
       "save_as": "mhlw/portal_newpage_67729.html",
       "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "告示・通知・疑義解釈の正式な一覧はこのページにある。fetch_sources.mjs はここからPDFリンクを列挙して取得する設計。"
+      "status": "retrieved",
+      "verified": true,
+      "notes": "全文書の正式な一覧元。新規文書の検出はこのページの再取得・差分で行う。"
     },
     {
-      "id": "r08-kokuji-santei",
+      "id": "r08-kokuji69-seitei",
       "category": "A",
-      "title": "診療報酬の算定方法の一部を改正する件(医科点数表を含む告示)",
+      "title": "診療報酬の算定方法の一部を改正する件(令和8年厚生労働省告示第69号) 制定文",
       "doc_type": "kokuji",
       "issuer": "厚生労働省",
       "doc_number": "令和8年厚生労働省告示第69号",
-      "doc_number_confidence": "search-located",
-      "issued_date": null,
-      "urls": [],
-      "save_as": "mhlw/kokuji_069_santei_hoho.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "個別PDFのURLは未特定。ポータルのクロールで解決する。"
-    },
-    {
-      "id": "r08-gaiyo-zentai",
-      "category": "A",
-      "title": "令和8年度診療報酬改定について【全体概要版】(保険局医療課・令和8年3月10日版)",
-      "doc_type": "setsumei",
-      "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
-      "issued_date": "2026-03-10",
+      "doc_number_confidence": "verified",
       "urls": [
-        { "url": "https://www.mhlw.go.jp/content/12400000/001701061.pdf", "kind": "official", "confidence": "search-located" },
-        { "url": "https://www.mhlw.go.jp/content/12400000/001685766.pdf", "kind": "official-candidate", "confidence": "search-located" }
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001665291.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
       ],
-      "save_as": "mhlw/gaiyo_zentai_r0803.pdf",
+      "save_as": "mhlw/kokuji69_seitei.pdf",
       "fetch": "direct",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "同名PDFが2つのURLで観測された(版違いの可能性)。両方取得して新しい方を正とする。"
+      "status": "retrieved",
+      "verified": true,
+      "notes": "施行期日(effective_from)の一次根拠はこの制定文で確認する。"
     },
     {
-      "id": "r08-ryuiji-tsuchi",
+      "id": "r08-kokuji69-ika",
+      "category": "A",
+      "title": "診療報酬の算定方法の一部を改正する件(告示第69号) 別表第一 医科点数表",
+      "doc_type": "kokuji",
+      "issuer": "厚生労働省",
+      "doc_number": "令和8年厚生労働省告示第69号",
+      "doc_number_confidence": "verified",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001686842.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "mhlw/kokuji69_ika_tensuhyo.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "点数の一次根拠。items.points のevidenceは原則ここを指す。"
+    },
+    {
+      "id": "r08-ryuiji-seitei",
       "category": "B",
-      "title": "診療報酬の算定方法の一部改正に伴う実施上の留意事項について",
+      "title": "診療報酬の算定方法の一部改正に伴う実施上の留意事項について(令和8年3月5日 保医発0305第6号) 制定文",
       "doc_type": "tsuchi",
       "issuer": "厚生労働省保険局医療課",
       "doc_number": "令和8年3月5日 保医発0305第6号",
-      "doc_number_confidence": "search-located",
+      "doc_number_confidence": "verified",
       "issued_date": "2026-03-05",
-      "urls": [{ "url": "https://ajhc.or.jp/siryo/20260430-4.pdf", "kind": "mirror", "confidence": "search-located" }],
-      "save_as": "mhlw/ryuiji_tsuchi_hoihatsu0305-6.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "算定条件・併算定ルールの最重要一次資料。厚労省ポータルの正式URLをクロールで解決し、ミラーは照合用。"
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001666951.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "mhlw/ryuiji_seitei.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
     },
     {
-      "id": "r08-kokuji-kihon-shisetsu",
+      "id": "r08-ryuiji-ika",
+      "category": "B",
+      "title": "留意事項通知(保医発0305第6号) 別添1 医科点数表に関する事項(0730訂正後)",
+      "doc_type": "tsuchi",
+      "issuer": "厚生労働省保険局医療課",
+      "doc_number": "令和8年3月5日 保医発0305第6号",
+      "doc_number_confidence": "verified",
+      "issued_date": "2026-03-05",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001732089.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "mhlw/ryuiji_ika_0730fix.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "算定条件・併算定ルールの最重要一次資料。ポータル掲載は令和8年7月30日訂正反映版。"
+    },
+    {
+      "id": "r08-ryuiji-yoshiki-ika",
+      "category": "B",
+      "title": "留意事項通知(保医発0305第6号) 別紙様式(医科)(0619訂正後)",
+      "doc_type": "tsuchi",
+      "issuer": "厚生労働省保険局医療課",
+      "doc_number": "令和8年3月5日 保医発0305第6号",
+      "doc_number_confidence": "verified",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001713885.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "mhlw/ryuiji_yoshiki_ika_0619fix.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "療養計画書・診療情報提供書等の様式。items の記録要件・患者説明要件の根拠になる。"
+    },
+    {
+      "id": "r08-kokuji70-kihon",
       "category": "C",
-      "title": "基本診療料の施設基準等の一部を改正する件",
+      "title": "基本診療料の施設基準等の一部を改正する件(令和8年厚生労働省告示第70号)",
       "doc_type": "kokuji",
       "issuer": "厚生労働省",
       "doc_number": "令和8年厚生労働省告示第70号",
-      "doc_number_confidence": "search-located",
-      "issued_date": null,
-      "urls": [],
-      "save_as": "mhlw/kokuji_070_kihon_shisetsu.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false
+      "doc_number_confidence": "verified",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001675854.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "mhlw/kokuji70_kihon_shisetsu.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
     },
     {
-      "id": "r08-tsuchi-kihon-todokede",
+      "id": "r08-tsuchi7-kihon-todokede",
       "category": "C",
-      "title": "基本診療料の施設基準等及びその届出に関する手続きの取扱いについて",
+      "title": "基本診療料の施設基準等及びその届出に関する手続きの取扱いについて(令和8年3月5日 保医発0305第7号)(0730訂正後)",
       "doc_type": "tsuchi",
       "issuer": "厚生労働省保険局医療課",
       "doc_number": "令和8年3月5日 保医発0305第7号",
-      "doc_number_confidence": "search-located",
+      "doc_number_confidence": "verified",
       "issued_date": "2026-03-05",
-      "urls": [{ "url": "https://healthnet.jp/wp-content/uploads/2026/04/90282e0970f41e592b0e78eccde801e3.pdf", "kind": "mirror", "confidence": "search-located" }],
-      "save_as": "mhlw/tsuchi_kihon_todokede_hoihatsu0305-7.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "約21MBとの情報あり。届出様式(様式番号)の根拠となる文書。"
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001732097.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "mhlw/tsuchi7_kihon_todokede_0730fix.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "約21MB。届出様式番号の根拠。"
     },
     {
-      "id": "r08-kokuji-tokkei-shisetsu",
+      "id": "r08-kokuji71-tokkei",
       "category": "C",
-      "title": "特掲診療料の施設基準等の一部を改正する件",
+      "title": "特掲診療料の施設基準等の一部を改正する件(令和8年厚生労働省告示第71号)",
       "doc_type": "kokuji",
       "issuer": "厚生労働省",
-      "doc_number": null,
-      "doc_number_confidence": "unknown",
-      "issued_date": null,
-      "urls": [],
-      "save_as": "mhlw/kokuji_tokkei_shisetsu.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "告示番号は未特定(第71号前後と推定されるが根拠未確認のため記載しない)。"
+      "doc_number": "令和8年厚生労働省告示第71号",
+      "doc_number_confidence": "verified",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001675855.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "mhlw/kokuji71_tokkei_shisetsu.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
     },
     {
-      "id": "r08-tsuchi-tokkei-todokede",
+      "id": "r08-tsuchi8-tokkei-todokede",
       "category": "C",
-      "title": "特掲診療料の施設基準等及びその届出に関する手続きの取扱いについて",
+      "title": "特掲診療料の施設基準等及びその届出に関する手続きの取扱いについて(令和8年3月5日 保医発0305第8号)(0730訂正後)",
       "doc_type": "tsuchi",
       "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
-      "doc_number_confidence": "unknown",
-      "issued_date": null,
-      "urls": [],
-      "save_as": "mhlw/tsuchi_tokkei_todokede.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "リハビリテーション料・在宅関連・透析関連など特掲の施設基準の根拠。通知番号は未特定。"
+      "doc_number": "令和8年3月5日 保医発0305第8号",
+      "doc_number_confidence": "verified",
+      "issued_date": "2026-03-05",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001732104.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "mhlw/tsuchi8_tokkei_todokede_0730fix.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "約27MB。リハ・在宅・透析等の特掲施設基準の根拠。"
     },
     {
-      "id": "r08-checklist-shinryojo",
+      "id": "r08-checklist-sofu",
       "category": "C",
-      "title": "令和8年度診療報酬改定に係る施設基準届出チェックリストの送付について(事務連絡)",
+      "title": "令和8年度診療報酬改定に係る施設基準届出チェックリストの送付について(令和8年4月20日 事務連絡)",
       "doc_type": "jimu_renraku",
       "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
       "issued_date": "2026-04-20",
-      "urls": [{ "url": "https://www.ajha.or.jp/topics/admininfo/pdf/2026/260421_3.pdf", "kind": "mirror", "confidence": "search-located" }],
-      "save_as": "checklists/checklist_todokede_20260420.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "医科診療所向け施設基準届出チェックリストを含むとみられる。厚労省正式URLはポータルから解決。"
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001693862.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "checklists/checklist_sofu_20260420.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
     },
     {
-      "id": "r08-qa-20260323",
-      "category": "D",
-      "title": "疑義解釈資料の送付について(事務連絡 令和8年3月23日)",
+      "id": "r08-checklist-teisei1",
+      "category": "C",
+      "title": "施設基準届出チェックリストの一部訂正について(令和8年5月1日 事務連絡)",
       "doc_type": "jimu_renraku",
       "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
+      "issued_date": "2026-05-01",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001697773.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "checklists/checklist_teisei_20260501.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-checklist-teisei2",
+      "category": "C",
+      "title": "施設基準届出チェックリストの一部訂正について(令和8年5月29日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-05-29",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001706142.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "checklists/checklist_teisei_20260529.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-checklist-shinryojo-xlsx",
+      "category": "C",
+      "title": "施設基準届出チェックリスト 別添2(医科診療所用)(0529訂正後・xlsx)",
+      "doc_type": "checklist",
+      "issuer": "厚生労働省保険局医療課",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001706146.xlsx",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "checklists/checklist_shinryojo_0529fix.xlsx",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "医科診療所向けチェックリストの実体。クリニックシミュレーターの施設基準DBの照合起点。"
+    },
+    {
+      "id": "r08-baseup-todokede",
+      "category": "C",
+      "title": "ベースアップ評価料に係る施設基準の届出について(周知)(令和8年4月24日)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-04-24",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001695495.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "checklists/baseup_todokede_20260424.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-01",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その1)(令和8年3月23日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
       "issued_date": "2026-03-23",
       "urls": [
-        { "url": "https://www.mhlw.go.jp/content/12400000/001678310.pdf", "kind": "official", "confidence": "search-located" },
-        { "url": "https://kouseikyoku.mhlw.go.jp/kyushu/000481271.pdf", "kind": "mirror", "confidence": "search-located" }
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001678310.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
       ],
-      "save_as": "q_and_a/qa_20260323.pdf",
+      "save_as": "q_and_a/qa01_20260323.pdf",
       "fetch": "direct",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "「その1」に相当する可能性が高いが、号数は実物で確認するまで確定しない。"
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-02",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その2)(令和8年4月1日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-04-01",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001689076.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa02_20260401.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-02-teisei",
+      "category": "D",
+      "title": "「疑義解釈資料の送付について(その2)」の一部訂正について(令和8年4月9日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-04-09",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001689078.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa02_teisei_20260409.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-03",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その3)(令和8年4月20日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-04-20",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001693874.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa03_20260420.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-04",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その4)(令和8年4月21日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-04-21",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001694332.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa04_20260421.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-05",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その5)(令和8年5月8日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-05-08",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001698587.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa05_20260508.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-06",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その6)(令和8年5月22日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-05-22",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001703573.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa06_20260522.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-07",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その7)(令和8年5月29日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-05-29",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001707505.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa07_20260529.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-08",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その8)(令和8年6月17日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-06-17",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001712853.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa08_20260617.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-09",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その9)(令和8年6月26日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-06-26",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001716069.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa09_20260626.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-10",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その10)(令和8年7月17日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-07-17",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001725624.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa10_20260717.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-11",
+      "category": "D",
+      "title": "疑義解釈資料の送付について(その11)(令和8年7月30日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-07-30",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001731253.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa11_20260730.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-qa-service",
+      "category": "D",
+      "title": "療養の給付と直接関係ないサービス等の取扱いに関する疑義解釈資料の送付について(令和8年5月29日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-05-29",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001706045.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/qa_service_20260529.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "保険外負担(自費サービス)との線引き。シミュレーターの自費収益設計に関係。"
     },
     {
       "id": "r08-teisei-20260402",
       "category": "D",
-      "title": "令和8年度診療報酬改定関連通知及び官報掲載事項の一部訂正について(事務連絡 令和8年4月2日)",
+      "title": "令和8年度診療報酬改定関連通知及び官報掲載事項の一部訂正について(令和8年4月2日 事務連絡)",
       "doc_type": "jimu_renraku",
       "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
       "issued_date": "2026-04-02",
-      "urls": [{ "url": "https://www.ajha.or.jp/topics/admininfo/pdf/2026/260407_3.pdf", "kind": "mirror", "confidence": "search-located" }],
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001698334.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
       "save_as": "q_and_a/teisei_20260402.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "訂正事務連絡。点数・条文の転記時は必ずこの訂正を突き合わせること。"
-    },
-    {
-      "id": "r08-qa-20260420",
-      "category": "D",
-      "title": "疑義解釈資料の送付について(事務連絡 令和8年4月20日)",
-      "doc_type": "jimu_renraku",
-      "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
-      "issued_date": "2026-04-20",
-      "urls": [{ "url": "https://www.mhlw.go.jp/content/12400000/001693874.pdf", "kind": "official", "confidence": "search-located" }],
-      "save_as": "q_and_a/qa_20260420.pdf",
       "fetch": "direct",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "別添1〜5構成との情報。届出関係の疑義解釈(その3相当?)を含む可能性。号数は実物で確認。"
+      "status": "retrieved",
+      "verified": true,
+      "notes": "訂正事務連絡はポータル掲載の本体PDF(訂正後版)に反映済み。訂正履歴の追跡用に保存する。"
     },
     {
-      "id": "r08-qa-20260522",
+      "id": "r08-teisei-20260501",
       "category": "D",
-      "title": "疑義解釈資料の送付について(事務連絡 令和8年5月22日)",
+      "title": "令和8年度診療報酬改定関連通知及び官報掲載事項の一部訂正について(令和8年5月1日 事務連絡)",
       "doc_type": "jimu_renraku",
       "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
-      "issued_date": "2026-05-22",
-      "urls": [{ "url": "https://www.mhlw.go.jp/content/12400000/001703573.pdf", "kind": "official", "confidence": "search-located" }],
-      "save_as": "q_and_a/qa_20260522.pdf",
+      "issued_date": "2026-05-01",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001700249.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/teisei_20260501.pdf",
       "fetch": "direct",
-      "status": "not_retrieved",
-      "verified": false
+      "status": "retrieved",
+      "verified": true
     },
     {
-      "id": "r08-qa-20260529",
+      "id": "r08-teisei-20260529",
       "category": "D",
-      "title": "疑義解釈資料の送付について(事務連絡 令和8年5月29日)",
+      "title": "令和8年度診療報酬改定関連通知及び官報掲載事項の一部訂正について(令和8年5月29日 事務連絡)",
       "doc_type": "jimu_renraku",
       "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
       "issued_date": "2026-05-29",
-      "urls": [{ "url": "https://www.mhlw.go.jp/content/12400000/001706317.pdf", "kind": "official", "confidence": "search-located" }],
-      "save_as": "q_and_a/qa_20260529.pdf",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001707506.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/teisei_20260529.pdf",
       "fetch": "direct",
-      "status": "not_retrieved",
-      "verified": false
+      "status": "retrieved",
+      "verified": true
     },
     {
-      "id": "r08-qa-20260717",
+      "id": "r08-teisei-20260619",
       "category": "D",
-      "title": "疑義解釈資料の送付について(事務連絡 令和8年7月17日)",
+      "title": "令和8年度診療報酬改定関連通知及び官報掲載事項の一部訂正について(令和8年6月19日 事務連絡)",
       "doc_type": "jimu_renraku",
       "issuer": "厚生労働省保険局医療課",
-      "doc_number": null,
-      "issued_date": "2026-07-17",
-      "urls": [{ "url": "https://www.mhlw.go.jp/content/12400000/001725624.pdf", "kind": "official", "confidence": "search-located" }],
-      "save_as": "q_and_a/qa_20260717.pdf",
+      "issued_date": "2026-06-19",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001713779.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/teisei_20260619.pdf",
       "fetch": "direct",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "疑義解釈はこれ以降も追加され得る。ポータルのクロールで新規事務連絡を検出し、このマニフェストへ追記する運用。"
+      "status": "retrieved",
+      "verified": true
     },
     {
-      "id": "r08-master-ika",
-      "category": "E",
-      "title": "医科診療行為マスター(全件・ZIP)",
-      "doc_type": "master",
-      "issuer": "診療報酬情報提供サービス(厚生労働省)",
-      "doc_number": null,
-      "issued_date": null,
-      "urls": [{ "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/", "kind": "portal", "confidence": "search-located" }],
-      "save_as": "masters/master_ika_shinryokoi.zip",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "ダウンロードURLは動的。トップ→マスターダウンロードページを辿る。文字コードはShift_JIS。"
+      "id": "r08-teisei-20260730",
+      "category": "D",
+      "title": "令和8年度診療報酬改定関連通知及び官報掲載事項の一部訂正について(令和8年7月30日 事務連絡)",
+      "doc_type": "jimu_renraku",
+      "issuer": "厚生労働省保険局医療課",
+      "issued_date": "2026-07-30",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001731226.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "q_and_a/teisei_20260730.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
     },
     {
-      "id": "r08-master-iyakuhin",
-      "category": "E",
-      "title": "医薬品マスター(全件・ZIP)",
-      "doc_type": "master",
-      "issuer": "診療報酬情報提供サービス(厚生労働省)",
-      "urls": [{ "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/", "kind": "portal", "confidence": "search-located" }],
-      "save_as": "masters/master_iyakuhin.zip",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false
-    },
-    {
-      "id": "r08-master-tokutei-kizai",
-      "category": "E",
-      "title": "特定器材マスター(全件・ZIP)",
-      "doc_type": "master",
-      "issuer": "診療報酬情報提供サービス(厚生労働省)",
-      "urls": [{ "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/", "kind": "portal", "confidence": "search-located" }],
-      "save_as": "masters/master_tokutei_kizai.zip",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false
-    },
-    {
-      "id": "r08-master-comment",
-      "category": "E",
-      "title": "コメントマスター(全件・ZIP)",
-      "doc_type": "master",
-      "issuer": "診療報酬情報提供サービス(厚生労働省)",
-      "urls": [{ "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/", "kind": "portal", "confidence": "search-located" }],
-      "save_as": "masters/master_comment.zip",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false
-    },
-    {
-      "id": "r08-master-spec",
-      "category": "E",
-      "title": "マスターファイル仕様説明書(レコード仕様)",
-      "doc_type": "spec",
-      "issuer": "診療報酬情報提供サービス(厚生労働省)",
-      "urls": [{ "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/", "kind": "portal", "confidence": "search-located" }],
-      "save_as": "masters/master_spec.pdf",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false,
-      "notes": "parse_masters.mjs の列マッピング(scripts/config/master-layout.json)はこの仕様書で必ず照合してから使うこと。"
-    },
-    {
-      "id": "r08-ssk-master-changes",
-      "category": "E",
-      "title": "令和8年 基本マスターに関する変更情報(社会保険診療報酬支払基金)",
-      "doc_type": "reference",
-      "issuer": "社会保険診療報酬支払基金",
-      "urls": [{ "url": "https://www.ssk.or.jp/seikyushiharai/tensuhyo/kihonmasta/r08kaiteijoho.html", "kind": "official", "confidence": "search-located" }],
-      "save_as": "masters/ssk_r08_kaiteijoho.html",
-      "fetch": "crawl",
-      "status": "not_retrieved",
-      "verified": false
+      "id": "r08-gaiyo-zentai",
+      "category": "A",
+      "title": "令和8年度診療報酬改定について【全体概要版】(保険局医療課)",
+      "doc_type": "setsumei",
+      "issuer": "厚生労働省保険局医療課",
+      "urls": [
+        {
+          "url": "https://www.mhlw.go.jp/content/12400000/001701061.pdf",
+          "kind": "official",
+          "confidence": "search-located"
+        }
+      ],
+      "save_as": "mhlw/gaiyo_zentai.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "改定ポイントの把握用(Knowledge Pack 14節)。規範性は告示・通知が優先。取得後に表題・版を確認する。"
     },
     {
       "id": "r08-ssk-kankei-tsuchi",
@@ -327,12 +686,18 @@
       "title": "令和8年度診療報酬改定関係通知一覧(社会保険診療報酬支払基金)",
       "doc_type": "portal",
       "issuer": "社会保険診療報酬支払基金",
-      "urls": [{ "url": "https://www.ssk.or.jp/shinryohoshu/kankeitsuuchi/kankeitsuuchi_r08.html", "kind": "official", "confidence": "search-located" }],
+      "urls": [
+        {
+          "url": "https://www.ssk.or.jp/shinryohoshu/kankeitsuuchi/kankeitsuuchi_r08.html",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
       "save_as": "mhlw/ssk_kankeitsuuchi_r08.html",
       "fetch": "crawl",
-      "status": "not_retrieved",
+      "status": "retrieved",
       "verified": false,
-      "notes": "厚労省ポータルの取りこぼし検出用のクロスチェック元。"
+      "notes": "厚労省ポータルの取りこぼし検出用クロスチェック。"
     },
     {
       "id": "r08-kouseikyoku-kanto",
@@ -340,12 +705,293 @@
       "title": "令和8年度診療報酬改定について(関東信越厚生局)",
       "doc_type": "portal",
       "issuer": "関東信越厚生局",
-      "urls": [{ "url": "https://kouseikyoku.mhlw.go.jp/kantoshinetsu/iryo_shido/r08kaitei_00001.html", "kind": "official", "confidence": "search-located" }],
+      "urls": [
+        {
+          "url": "https://kouseikyoku.mhlw.go.jp/kantoshinetsu/iryo_shido/r08kaitei_00001.html",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
       "save_as": "kouseikyoku/kanto_r08kaitei.html",
       "fetch": "crawl",
-      "status": "not_retrieved",
+      "status": "retrieved",
       "verified": false,
-      "notes": "届出様式・受理関係の実務資料が厚生局側にのみ置かれることがあるため対象に含める。"
+      "notes": "届出受理・様式の実務資料の所在確認用。"
+    },
+    {
+      "id": "r08-master-ika-zip",
+      "category": "E",
+      "title": "医科診療行為マスター(全件・ZIP・s_20260731)",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/downloadMenu/sFile",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/master_ika_s.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "Shift_JIS CSV。レイアウトは spec_R08rec1.pdf「(7)医科診療行為マスター」で照合済み。"
+    },
+    {
+      "id": "r08-master-iyakuhin-zip",
+      "category": "E",
+      "title": "医薬品マスター(全件・ZIP・y_20260812)",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/downloadMenu/yFile",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/master_iyakuhin_y.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-master-kizai-zip",
+      "category": "E",
+      "title": "特定器材マスター(全件・ZIP・t_20260529)",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/downloadMenu/tFile",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/master_kizai_t.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-master-comment-zip",
+      "category": "E",
+      "title": "コメントマスター(全件・ZIP・c_20260807)",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/downloadMenu/cFile",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/master_comment_c.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-spec-rec1",
+      "category": "E",
+      "title": "レセプト電算処理システム マスターファイル仕様説明書 本編(R08rec1)",
+      "doc_type": "spec",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/spec/R08rec1.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/spec_R08rec1.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "医科診療行為マスターの列定義はこの本編(7)節。列マッピング(scripts/config/master-layout.json)の根拠。"
+    },
+    {
+      "id": "r08-spec-rec2",
+      "category": "E",
+      "title": "マスターファイル仕様説明書 別紙関係(R08rec2)",
+      "doc_type": "spec",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/spec/R08rec2.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/spec_R08rec2.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-spec-rec3",
+      "category": "E",
+      "title": "マスターファイル仕様説明書 ファイルレイアウト(R08rec3)",
+      "doc_type": "spec",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/spec/R08rec3.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/spec_R08rec3.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-ssk-edt-ika",
+      "category": "E",
+      "title": "医科電子点数表テーブル(令和8年度版・令和8年7月31日)(支払基金)",
+      "doc_type": "master",
+      "issuer": "社会保険診療報酬支払基金",
+      "urls": [
+        {
+          "url": "https://www.ssk.or.jp/seikyushiharai/tensuhyo/ikashika/index.files/tensuhyo_02.zip",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/ssk_ika_denshitensuhyo_R08.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "補助マスター/包括テーブル/背反テーブル1〜4(1日・同一月・同時・1週間)/入院基本料テーブル/算定回数テーブル。併算定・包括・回数制限の公式機械可読データ。"
+    },
+    {
+      "id": "r08-ssk-edt-tebiki",
+      "category": "E",
+      "title": "医科電子点数表 活用の手引き(令和8年7月24日)(支払基金)",
+      "doc_type": "spec",
+      "issuer": "社会保険診療報酬支払基金",
+      "urls": [
+        {
+          "url": "https://www.ssk.or.jp/seikyushiharai/tensuhyo/ikashika/index.files/tensuhyo_01.pdf",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/ssk_tebiki_ika.pdf",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "電子点数表テーブルの列定義(p25-30)。背反区分1/2/3、包括単位、算定単位コードの意味の根拠。"
+    },
+    {
+      "id": "r08-ssk-ikashika-index",
+      "category": "F",
+      "title": "電子点数表ページ(支払基金・医科歯科)",
+      "doc_type": "portal",
+      "issuer": "社会保険診療報酬支払基金",
+      "urls": [
+        {
+          "url": "https://www.ssk.or.jp/seikyushiharai/tensuhyo/ikashika/index.html",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/ssk_ikashika_index.html",
+      "fetch": "crawl",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-hokan-tables-zip",
+      "category": "E",
+      "title": "訪問看護療養費 各種テーブル(基本/基本・加算対応/算定回数限度/併算定背反/施設基準)",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r.zip",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/table_kihon_r.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true,
+      "notes": "r.zip〜r5.zipの5ファイル。コード51-59の訪問看護療養費専用(医科は支払基金の電子点数表側)。在宅・訪問看護連携の設計で使用。"
+    },
+    {
+      "id": "r08-hokan-table-r2",
+      "category": "E",
+      "title": "訪問看護療養費 基本・基本加算対応テーブル",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r2.zip",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/table_kihon_kasan_r2.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-hokan-table-r3",
+      "category": "E",
+      "title": "訪問看護療養費 算定回数限度テーブル",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r3.zip",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/table_santei_gendo_r3.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-hokan-table-r4",
+      "category": "E",
+      "title": "訪問看護療養費 併算定背反テーブル",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r4.zip",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/table_heisantei_haihan_r4.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
+    },
+    {
+      "id": "r08-hokan-table-r5",
+      "category": "E",
+      "title": "訪問看護療養費 施設基準テーブル",
+      "doc_type": "master",
+      "issuer": "診療報酬情報提供サービス(厚生労働省)",
+      "urls": [
+        {
+          "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r5.zip",
+          "kind": "official",
+          "confidence": "verified"
+        }
+      ],
+      "save_as": "masters/table_shisetsu_kijun_r5.zip",
+      "fetch": "direct",
+      "status": "retrieved",
+      "verified": true
     }
   ]
 }
