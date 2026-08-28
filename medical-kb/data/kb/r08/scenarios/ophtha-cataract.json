@@ -3,31 +3,35 @@
   "specialty_id": "ophthalmology",
   "title": "かすみ目の初診から白内障手術(外来)まで(眼科)",
   "patient": { "age": 76, "chief_complaint": "かすみ目・視力低下", "visit": "first" },
-  "confidence": "draft",
-  "notes": "臨床フローは設計上の想定。算定候補はすべて未解決スロット。眼科は検査の包括・併算定関係が細かいため、留意事項通知の眼科学的検査の部の精読が必須。",
+  "confidence": "verified",
+  "notes": "2026-08-28: 主要スロットを一次資料で解決。屈折×矯正視力の併算定は条件付き(rule-0005)。眼内レンズ材料・薬剤と術後管理の範囲は未解決スロットに残した。",
   "steps": [
     { "day_offset": 0, "action": "医師の診察(初診)" },
     { "day_offset": 0, "action": "視力検査・屈折検査・眼圧測定" },
     { "day_offset": 0, "action": "細隙灯顕微鏡検査・精密眼底検査(散瞳)" },
     { "day_offset": 0, "action": "白内障の診断。手術適応の説明" },
-    { "day_offset": 14, "action": "術前検査(角膜曲率・眼軸長測定等)と手術説明・同意取得" },
+    { "day_offset": 14, "action": "術前検査(角膜曲率・光学的眼軸長測定)と手術説明・同意取得" },
     { "day_offset": 28, "action": "水晶体再建術(外来手術・片眼・眼内レンズ挿入)" },
     { "day_offset": 29, "action": "術後再診(翌日診察)" }
   ],
   "billing": [
-    { "step_no": 1, "kind": "candidate", "label": "初診料", "status": "unresolved", "reason": "点数は告示で解決" },
-    { "step_no": 2, "kind": "candidate", "label": "屈折検査・矯正視力検査・眼圧測定等の眼科学的検査料", "status": "unresolved", "reason": "各検査の点数と同時算定の可否(屈折検査と矯正視力検査の併算定制限等)を告示・留意事項通知で解決する" },
-    { "step_no": 3, "kind": "candidate", "label": "細隙灯顕微鏡検査・精密眼底検査", "status": "unresolved", "reason": "片眼/両眼の単位、散瞳剤使用時の扱いを解決する" },
-    { "step_no": 5, "kind": "candidate", "label": "術前検査(角膜曲率半径計測・光学的眼軸長測定等)", "status": "unresolved", "reason": "水晶体再建術前提の検査の算定要件を確認する" },
-    { "step_no": 6, "kind": "candidate", "label": "水晶体再建術(眼内レンズ挿入・片眼)", "status": "unresolved", "reason": "術式区分と点数、眼内レンズの特定保険医療材料の扱いを告示・材料価格基準で解決する" },
-    { "step_no": 6, "kind": "candidate", "label": "手術医療機器等加算・薬剤料・特定保険医療材料料", "status": "unresolved", "reason": "該当の有無を告示で確認する" },
-    { "step_no": 7, "kind": "candidate", "label": "再診料(術後)", "status": "unresolved", "reason": "術後管理の枠組み(手術料に含まれる範囲)を留意事項通知で確認する" },
-    { "step_no": 6, "kind": "facility_req", "label": "水晶体再建術の実施に係る施設・届出要件の有無", "status": "unresolved", "reason": "施設基準の要否自体を特掲診療料の施設基準告示で確認する(要否不明のまま断定しない)" },
-    { "kind": "note", "label": "確認論点: 眼科学的検査の同日・同月の併算定制限", "status": "unresolved", "reason": "検査の部の通則・各区分の留意事項を精読し、billing_rulesへ根拠付きで登録する" },
-    { "kind": "note", "label": "確認論点: コンタクトレンズ検査料との関係", "status": "unresolved", "reason": "該当患者の場合の包括関係を確認する" }
+    { "step_no": 1, "kind": "candidate", "label": "初診料", "item_id": "r08-A000", "points": 291, "status": "resolved", "confidence": "verified", "reason": "告示A000注1" },
+    { "step_no": 2, "kind": "candidate", "label": "屈折検査", "item_id": "r08-D261-2", "points": 69, "status": "resolved", "confidence": "verified", "reason": "初回の屈折異常疑いなので矯正視力検査と併算定可(rule-0005)" },
+    { "step_no": 2, "kind": "candidate", "label": "矯正視力検査", "item_id": "r08-D263-1", "points": 69, "status": "resolved", "confidence": "verified", "reason": "併算定条件はrule-0005(初回疑い時・眼鏡処方時のみ)。2回目以降の通院では原則どちらか" },
+    { "step_no": 2, "kind": "candidate", "label": "精密眼圧測定", "item_id": "r08-D264", "points": 82, "status": "resolved", "confidence": "verified", "reason": "告示D264" },
+    { "step_no": 3, "kind": "candidate", "label": "細隙灯顕微鏡検査(前眼部及び後眼部)", "item_id": "r08-D257", "points": 110, "status": "resolved", "confidence": "verified", "reason": "告示D257" },
+    { "step_no": 3, "kind": "candidate", "label": "精密眼底検査(片側)", "item_id": "r08-D255", "points": 56, "status": "resolved", "confidence": "verified", "reason": "両側実施なら112点(160081130)。散瞳剤の薬剤料は別途(未解決)" },
+    { "step_no": 5, "kind": "candidate", "label": "角膜曲率半径計測", "item_id": "r08-D265", "points": 84, "status": "resolved", "confidence": "verified", "reason": "IOL度数計算" },
+    { "step_no": 5, "kind": "candidate", "label": "光学的眼軸長測定", "item_id": "r08-D269-2", "points": 150, "status": "resolved", "confidence": "verified", "reason": "IOL度数計算(光学式)" },
+    { "step_no": 6, "kind": "candidate", "label": "水晶体再建術(眼内レンズ挿入・その他)", "item_id": "r08-K282-1-ro", "points": 12100, "status": "resolved", "confidence": "verified", "reason": "片眼。縫着17,840/レンズなし7,430/計画的後嚢切開21,780の術式区分あり。特掲の施設基準・届出の定めなし(0305-8確認済み)" },
+    { "step_no": 6, "kind": "candidate", "label": "眼内レンズ(特定保険医療材料)・手術薬剤", "status": "unresolved", "reason": "材料価格基準(告示73号)と特定器材マスターから解決する(次回)" },
+    { "step_no": 6, "kind": "facility_req", "label": "水晶体再建術の施設基準", "status": "resolved", "none_required": true, "confidence": "verified", "reason": "施設基準・届出の定めなし(0305-8の施設基準一覧に単独項なし。緑内障併用眼内ドレーン挿入術のみ第60の6に規定)。evidence: r08-K282-1-ro/facility_standard_req" },
+    { "step_no": 7, "kind": "candidate", "label": "再診料(術後翌日)", "item_id": "r08-A001", "points": 76, "status": "resolved", "confidence": "verified", "reason": "術後の診察・処置の手術点数への包括範囲は留意事項通知K282関連で確認(未解決論点)" },
+    { "kind": "note", "label": "確認論点: 眼科学的検査の同月再検の制限・コンタクトレンズ検査料との包括関係", "status": "unresolved", "reason": "留意事項通知(検査の部)とedt_haihan/santei_kaisuで個別確認し、確定分をrulesへ登録する" },
+    { "kind": "note", "label": "確認論点: 手術当日の検査・注射等の手術料への包括(手術通則)", "status": "unresolved", "reason": "第10部手術の通則の留意事項を精読して確定する" }
   ],
   "open_questions": [
-    "外来手術当日の基本診療料・検査の算定関係(手術当日の扱い)",
-    "両眼手術を別日に行う場合の算定(片眼ごとの算定単位)の確認"
+    "両眼手術(別日)の2眼目の算定関係",
+    "術後の外来管理加算・処置の扱い(手術後の一定期間の包括の有無)"
   ]
 }

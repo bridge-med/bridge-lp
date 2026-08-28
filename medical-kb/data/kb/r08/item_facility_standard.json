@@ -1,5 +1,57 @@
 [
-  { "item_id": "r08-H002-1", "fs_id": "r08-fs-h002-1", "relation": "required" },
-  { "item_id": "r08-H002-2", "fs_id": "r08-fs-h002-2", "relation": "required" },
-  { "item_id": "r08-H002-3", "fs_id": "r08-fs-h002-3", "relation": "required" }
+  {
+    "item_id": "r08-H002-1",
+    "fs_id": "r08-fs-h002-1",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-H002-2",
+    "fs_id": "r08-fs-h002-2",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-H002-3",
+    "fs_id": "r08-fs-h002-3",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-B001-3-1-lipid",
+    "fs_id": "r08-fs-b001-3",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-B001-3-1-ht",
+    "fs_id": "r08-fs-b001-3",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-B001-3-1-dm",
+    "fs_id": "r08-fs-b001-3",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-B001-3-3",
+    "fs_id": "r08-fs-b001-3",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-J038-1-ro",
+    "fs_id": "r08-fs-j038-1",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-J038-n2-i",
+    "fs_id": "r08-fs-j038-donyuki1",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-J038-n9",
+    "fs_id": "r08-fs-j038-suishitsu",
+    "relation": "required"
+  },
+  {
+    "item_id": "r08-C002-2-ro-1",
+    "fs_id": "r08-fs-zaishien",
+    "relation": "required"
+  }
 ]

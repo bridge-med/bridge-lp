@@ -109,7 +109,8 @@ if (existsSync(scenDir)) {
     const s = loadJson(join(scenDir, f));
     for (const b of s.billing || []) {
       if (b.status === 'resolved' && b.kind === 'facility_req') {
-        if (!fsIds.has(b.fs_id)) errors.push(`E4 scenario ${s.id}: resolved なのに fs_id=${b.fs_id} が facility_standards に無い`);
+        // none_required: 一次資料で「施設基準の定めなし」を確認した否定的解決。根拠はreasonに記す
+        if (!b.none_required && !fsIds.has(b.fs_id)) errors.push(`E4 scenario ${s.id}: resolved なのに fs_id=${b.fs_id} が facility_standards に無い`);
       } else if (b.status === 'resolved' && !itemIds.has(b.item_id)) {
         errors.push(`E4 scenario ${s.id}: resolved なのに item_id=${b.item_id} が items に無い`);
       }

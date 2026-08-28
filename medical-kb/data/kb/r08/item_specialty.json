@@ -1,22 +1,338 @@
 [
-  { "item_id": "r08-A000", "specialty_id": "internal", "relevance": "primary", "rationale": "全診療科共通の基本診療料", "confidence": "verified" },
-  { "item_id": "r08-A000", "specialty_id": "orthopedics", "relevance": "primary", "rationale": "全診療科共通の基本診療料", "confidence": "verified" },
-  { "item_id": "r08-A000", "specialty_id": "ophthalmology", "relevance": "primary", "rationale": "全診療科共通の基本診療料", "confidence": "verified" },
-  { "item_id": "r08-A000", "specialty_id": "dialysis", "relevance": "secondary", "rationale": "維持透析は再診中心のため初診の頻度は低い", "confidence": "draft" },
-  { "item_id": "r08-A000", "specialty_id": "homecare", "relevance": "secondary", "rationale": "訪問診療開始時の初診の扱いは留意事項通知で確認(訪問診療料との関係)", "confidence": "draft" },
-  { "item_id": "r08-A001", "specialty_id": "internal", "relevance": "primary", "rationale": "外来継続管理の軸", "confidence": "verified" },
-  { "item_id": "r08-A001", "specialty_id": "orthopedics", "relevance": "primary", "rationale": "リハ通院等の継続再診", "confidence": "verified" },
-  { "item_id": "r08-A001", "specialty_id": "ophthalmology", "relevance": "primary", "rationale": "緑内障等の継続管理", "confidence": "verified" },
-  { "item_id": "r08-A001", "specialty_id": "dialysis", "relevance": "primary", "rationale": "透析実施日の基本診療料(外来管理加算の扱いは留意事項で確認)", "confidence": "draft" },
-  { "item_id": "r08-A001-n8", "specialty_id": "internal", "relevance": "primary", "rationale": "処置・検査の少ない内科外来で算定機会が多い", "confidence": "verified" },
-  { "item_id": "r08-A001-n8", "specialty_id": "orthopedics", "relevance": "secondary", "rationale": "処置・リハ実施日は算定不可(rule-0001)のため算定機会が限られる", "confidence": "verified" },
-  { "item_id": "r08-H002-1", "specialty_id": "orthopedics", "relevance": "primary", "rationale": "整形外科の中核収益項目", "confidence": "verified" },
-  { "item_id": "r08-H002-2", "specialty_id": "orthopedics", "relevance": "primary", "rationale": "同上(規模の小さい施設区分)", "confidence": "verified" },
-  { "item_id": "r08-H002-3", "specialty_id": "orthopedics", "relevance": "primary", "rationale": "同上(最小の施設区分)", "confidence": "verified" },
-  { "item_id": "r08-J116", "specialty_id": "orthopedics", "relevance": "primary", "rationale": "膝関節症等で頻用", "confidence": "verified" },
-  { "item_id": "r08-J116", "specialty_id": "internal", "relevance": "possible", "rationale": "リウマチ・痛風等で実施し得る", "confidence": "draft" },
-  { "item_id": "r08-E001-1-i", "specialty_id": "internal", "relevance": "primary", "rationale": "胸部X線は内科外来で頻用", "confidence": "verified" },
-  { "item_id": "r08-E001-1-ro", "specialty_id": "orthopedics", "relevance": "primary", "rationale": "四肢の単純X線(膝・肩等)", "confidence": "verified" },
-  { "item_id": "r08-E002-1-ro", "specialty_id": "orthopedics", "relevance": "primary", "rationale": "四肢単純X線の撮影料", "confidence": "verified" },
-  { "item_id": "r08-E002-1-ro", "specialty_id": "internal", "relevance": "primary", "rationale": "胸部X線の撮影料", "confidence": "verified" }
+  {
+    "item_id": "r08-A000",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "全診療科共通の基本診療料",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-A000",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "全診療科共通の基本診療料",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-A000",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "全診療科共通の基本診療料",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-A000",
+    "specialty_id": "dialysis",
+    "relevance": "secondary",
+    "rationale": "維持透析は再診中心のため初診の頻度は低い",
+    "confidence": "draft"
+  },
+  {
+    "item_id": "r08-A000",
+    "specialty_id": "homecare",
+    "relevance": "secondary",
+    "rationale": "訪問診療開始時の初診の扱いは留意事項通知で確認(訪問診療料との関係)",
+    "confidence": "draft"
+  },
+  {
+    "item_id": "r08-A001",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "外来継続管理の軸",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-A001",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "リハ通院等の継続再診",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-A001",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "緑内障等の継続管理",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-A001",
+    "specialty_id": "dialysis",
+    "relevance": "primary",
+    "rationale": "透析実施日の基本診療料(外来管理加算の扱いは留意事項で確認)",
+    "confidence": "draft"
+  },
+  {
+    "item_id": "r08-A001-n8",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "処置・検査の少ない内科外来で算定機会が多い",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-A001-n8",
+    "specialty_id": "orthopedics",
+    "relevance": "secondary",
+    "rationale": "処置・リハ実施日は算定不可(rule-0001)のため算定機会が限られる",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-H002-1",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "整形外科の中核収益項目",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-H002-2",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "同上(規模の小さい施設区分)",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-H002-3",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "同上(最小の施設区分)",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-J116",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "膝関節症等で頻用",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-J116",
+    "specialty_id": "internal",
+    "relevance": "possible",
+    "rationale": "リウマチ・痛風等で実施し得る",
+    "confidence": "draft"
+  },
+  {
+    "item_id": "r08-E001-1-i",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "胸部X線は内科外来で頻用",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-E001-1-ro",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "四肢の単純X線(膝・肩等)",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-E002-1-ro",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "四肢単純X線の撮影料",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-E002-1-ro",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "胸部X線の撮影料",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-B001-3-1-lipid",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "生活習慣病外来の中核管理料",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-B001-3-1-ht",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "同上",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-B001-3-1-dm",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "同上",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-B001-3-1-dm",
+    "specialty_id": "diabetes",
+    "relevance": "primary",
+    "rationale": "糖尿病主病の管理料",
+    "confidence": "draft"
+  },
+  {
+    "item_id": "r08-B001-3-3",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "検査を出来高で残す管理料の選択肢",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-F400-3",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "院外処方の基本",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-F400-3",
+    "specialty_id": "orthopedics",
+    "relevance": "primary",
+    "rationale": "院外処方の基本",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-F400-3",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "点眼薬等の院外処方",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-F400-n4",
+    "specialty_id": "internal",
+    "relevance": "primary",
+    "rationale": "特定疾患(生活習慣病等)の長期処方で頻用",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-F400-n6-i",
+    "specialty_id": "internal",
+    "relevance": "secondary",
+    "rationale": "一般名処方の体制次第",
+    "confidence": "draft"
+  },
+  {
+    "item_id": "r08-D255",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "眼底評価の基本検査",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-D257",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "前眼部・後眼部評価の基本",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-D261-2",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "視力低下の初期評価",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-D263-1",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "同上",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-D264",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "緑内障管理・術前評価",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-D265",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "IOL度数計算",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-D269-2",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "IOL度数計算",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-K282-1-ro",
+    "specialty_id": "ophthalmology",
+    "relevance": "primary",
+    "rationale": "白内障手術の中核術式",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-J038-1-ro",
+    "specialty_id": "dialysis",
+    "relevance": "primary",
+    "rationale": "維持透析の中核",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-J038-n2-i",
+    "specialty_id": "dialysis",
+    "relevance": "primary",
+    "rationale": "導入期の加算",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-J038-n9",
+    "specialty_id": "dialysis",
+    "relevance": "primary",
+    "rationale": "体制加算",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-B001-15",
+    "specialty_id": "dialysis",
+    "relevance": "primary",
+    "rationale": "月次管理料",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-B001-15",
+    "specialty_id": "internal",
+    "relevance": "possible",
+    "rationale": "腎臓内科外来で関与し得る",
+    "confidence": "draft"
+  },
+  {
+    "item_id": "r08-C000",
+    "specialty_id": "homecare",
+    "relevance": "primary",
+    "rationale": "臨時対応の基本",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-C000",
+    "specialty_id": "internal",
+    "relevance": "secondary",
+    "rationale": "外来主体でも臨時往診はあり得る",
+    "confidence": "draft"
+  },
+  {
+    "item_id": "r08-C001-1-i",
+    "specialty_id": "homecare",
+    "relevance": "primary",
+    "rationale": "定期訪問の基本",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-C002-2-ro-1",
+    "specialty_id": "homecare",
+    "relevance": "primary",
+    "rationale": "月次収益の中核",
+    "confidence": "verified"
+  },
+  {
+    "item_id": "r08-C007",
+    "specialty_id": "homecare",
+    "relevance": "primary",
+    "rationale": "訪問看護連携の基本",
+    "confidence": "verified"
+  }
 ]
