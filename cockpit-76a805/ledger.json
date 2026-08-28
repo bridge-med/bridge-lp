@@ -103,7 +103,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-08-28"
     },
     {
       "id": "keiji",
@@ -568,7 +568,6 @@
     "tanaoroshi/nidodemaのチップ/トグルon状態の藍ベタを静かにする案は、両ツール同時に変えること(単独変更禁止・designer起票)。tanaoroshiのトークン追従(--ink-3/--dawn-deep/selection)は2026-08-09に完了済みで、残るはこの意匠判断のみ。nidodema master合流の社長決裁5件と同じ束で扱う",
     "legal/privacy.htmlは全h2・全リンクが砂色。コントラストは2026-08-09の#7D6845化でAA解消済みだが、砂の多用そのものが第22条「選択の瞬間にだけ」に触れる。色ではなく用法の問題のため社長の審美判断待ち(designer照合2026-08-09)",
     "モバイルnavの取引の記録: 640px以下でロゴの製品名(.small)を畳んだのは「1行50pxのヘッダを守るために、スクロール後の現在地表示を諦めた」取引である(navはfixedでheroが流れた後は頁名を名乗らない)。将来ロゴ側で現在地を示す案は文言が動くためeditor同席で別議題(designer照合2026-08-09)",
-    "madoakari/index.htmlのog:imageが製品サムネ流用の.webpで、一部スクレイパー(X/Slack等)が展開しない。twitter:cardとog:image:width/heightも欠落。scripts/make-ogp.mjsのCARDS配列に1行足して家族の顔に差し替える候補(designer起票2026-08-09)",
     "既存OGP9枚(思想ハブ)の小見出しが--dawn #A98F63のままで、タイムライン縮小時にほぼ消える。新規5枚は--dawn-deep #7D6845を採用(canonのトークン注記準拠)。9枚を焼き直して揃えるかは社長の審美判断(designer起票2026-08-09)",
     "Growth OS(growth-76a805)のtodayFocusとworklog「今日の3つ」(2026-08-11出荷)が「朝、今日やることを決める」という同じ問いに答えており、書き分けが未決。書き分け案: worklog=今日の実行(日付キー・完了・3件・繰り越さない)/Growth OS=事業の台帳の付箋(日付キーなしの設定値)。将来Growth OSを日常のホームにするなら、todayFocusを「今日の3つ」の設計に置き換えて統合する。今回の出荷ではGrowth OSに触れていない(2026-08-11 PM判定)",
     "bridge.css系(ルートLP)に44px未達のタップ要素が27個ある(2026-08-28実測: nav-logo 18px・theme-btn 34px・nav-burger 38px・ドロワー内リンク34px・本文中の矢印リンク16〜18px・.btn 43pxなど)。2026-08-28にhub.css/subpage.css系はヒットエリア拡張(::before)で解消済みだが、bridge.cssは未対応。ルートLP全体に効くため独立スプリントで。本文中のインラインリンクはWCAG 2.5.8の例外対象として除外してよい",
