@@ -15,6 +15,8 @@
 /* ===== NAV LINKS(トップと同じ横並びナビ) ===== */
 .nav-links{display:flex;gap:24px;font:600 11px/1 var(--sans-en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-2)}
 .nav-links a{position:relative;padding:6px 0;transition:color .15s}
+/* 見た目の行高(23px)は変えず、タップ領域だけ44px以上へ広げる(subpage.css .nav-actionsと同じ手) */
+.nav-links a::before{content:'';position:absolute;inset:-11px 0}
 .nav-links a::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--ink);transform:scaleX(0);transform-origin:right;transition:transform .3s}
 .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 .nav-links a:hover{color:var(--ink)}
@@ -52,7 +54,7 @@ section[id]{scroll-margin-top:90px}
 .toolbox-list li{font:500 12px/1.5 var(--sans-jp);color:var(--ink-2);padding-left:18px;position:relative}
 .toolbox-list li::before{content:'';position:absolute;left:0;top:8px;width:10px;height:1px;background:var(--ink-3)}
 .toolbox-actions{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:14px}
-.toolbox-btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 18px;font:700 12px/1 var(--sans-jp);letter-spacing:0.06em;border-radius:2px;transition:all .18s;border:1px solid transparent}
+.toolbox-btn{display:inline-flex;align-items:center;justify-content:center;padding:15px 18px;font:700 12px/1 var(--sans-jp);letter-spacing:0.06em;border-radius:2px;transition:all .18s;border:1px solid transparent}
 .toolbox-btn.primary{background:var(--ink);color:var(--on-fill)}
 .toolbox-btn.primary:hover{background:var(--navy)}
 .toolbox-btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
@@ -68,7 +70,9 @@ section[id]{scroll-margin-top:90px}
 .notes-cta:hover{background:var(--ink);color:var(--on-fill)}
 
 /* ===== FOOTER 微調整 ===== */
-.foot-links{flex-wrap:wrap;row-gap:10px}
+/* 行間はsubpage.cssのgap:18pxのまま使う。.foot-links a::beforeの上下17px拡張が
+ * 隣の行の字面を奪わない条件は「行間 ≥ 拡張量」(2026-08-28 designer実測) */
+.foot-links{flex-wrap:wrap}
 
 /* ===== EDITORIAL DETAILS ===== */
 /* hero: 透かしタイポ + 縦書きの添え書き */

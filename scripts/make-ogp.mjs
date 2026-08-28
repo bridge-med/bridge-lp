@@ -68,6 +68,15 @@ const CARDS = [
     title: '経験の棚卸し',
     line: '面接の前に、思い出せなかった経験を、ひとつずつ',
   },
+  {
+    slug: 'madoakari',
+    // products/index.html PRODUCTS[].cat 'work'(作品)の一枚
+    eyebrow: 'WORK',
+    // madoakari/index.html の h1
+    title: '窓あかり',
+    // og:title の一行
+    line: '病院の一日を眺めるだけの作品',
+  },
 ];
 
 const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
