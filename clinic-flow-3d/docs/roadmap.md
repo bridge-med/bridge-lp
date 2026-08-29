@@ -22,6 +22,11 @@ v33でLayer 3(Reimbursement Engine)と診療科モジュール基盤が入った
 |---|---|---|
 | 1 | ~~`.mini-btn` のタップ領域44px化~~ **解消(v34)** | v33 qa指摘。v34でmini/speed/tab/view/opの5部品を一括で高さ44px化(mini-btnは幅も44px。speed-btnの幅はHUD 8ボタンが390px幅に収まらないため自然幅のまま=WCAG AAの24pxは満たす) |
 | 2 | ダークモード / prefers-reduced-motion 非対応 | 既存仕様(v33起因ではない)。対応時は第24条(ライト/ダーク等価)との関係整理が必要 |
+| 3 | 法人タブ≥900pxの2カラム化(索引スティッキー+詳細ペイン) | v35 designer裁定: 拠点が6件を超えたら再検討。判断基準は索引の行数であって画面幅ではない |
+| 4 | 概算行への `.sim-tag` 付与・レセプトmodalに合計点/円・kb-rejectに「体制を整えるで満たせます」導線 | v35 designer C2〜C4。次の部門便で一括 |
+| 5 | 本院レセプトのneeds_review表示をplayerWarnヘルパーに寄せる | v35 designer C8(部門側はv35で対応済み。本院側は既存仕様) |
+| 6 | 320px: ヘッダー`.speed-group`起因の全体横スクロール・`.site-name`のellipsisが「(本院)」を食う | 既存負債+v35 designer C5/C6 |
+| 7 | v33以前のトースト「!」の一括撤去 | v35 editor進言(第19条4号)。新規部門文言は「!」ゼロで、同一画面内に不整合が生まれている |
 
 ## 判断メモ
 

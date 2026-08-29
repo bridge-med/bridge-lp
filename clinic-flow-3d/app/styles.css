@@ -1157,6 +1157,9 @@ input[type="range"]::-moz-range-thumb {
 @media (min-width: 900px) {
   .head-inner, .hud, .mission-bar, .tabs, .main { max-width: 1400px; }
 
+  /* 法人タブは拠点の索引=読む列。行長を本文幅に収める(第23条) */
+  #tab-corp.show { max-width: 800px; margin-left: auto; margin-right: auto; }
+
   /* ステージのあるタブ(院内・タウン): 2カラムのコックピット */
   #tab-clinic.show, #tab-town.show {
     display: grid;
@@ -1379,5 +1382,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .choice-row b { flex: 0 0 auto; font: 800 12px/1.4 var(--sans); color: var(--ink); }
 .choice-row.on { border-left-color: var(--blue); background: var(--blue-pale); color: var(--ink); }
-.spec-open { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; }
-.spec-open small { font: 500 10px/1.5 var(--sans); color: var(--ink-3); }
+.choice-row.on b { color: var(--blue-deep); }
+.spec-open { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; }
+.spec-open small { flex: 1 1 100%; font: 500 10px/1.5 var(--sans); color: var(--ink-3); }
+.spec-open .mini-btn { flex: 0 0 auto; }

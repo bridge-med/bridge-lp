@@ -3238,6 +3238,11 @@
 
   const DEPT_KEIJI_COST = 50000; // 体制整備(院内掲示・長期処方対応)の費用: ゲーム上の仮定
 
+  // KB整備の未了メモ(needs_review等)はプレイヤー面に出さない。debugModeでのみ見せる(designer A1)
+  const DEV_WARN = new Set(['needs_review', 'rule_unmachined', 'limit_unstructured', 'unknown_item', 'no_points', 'engine']);
+  const playerWarn = (ws) => (ws || []).filter((w) => !DEV_WARN.has(w.kind) && w.kind !== 'conditional_ok');
+  const devWarn = (ws) => (ws || []).filter((w) => DEV_WARN.has(w.kind));
+
   // 主役レバー(科ごとに1つ)。制度上の数値は全てKB(kbPts)から読む
   function deptLeverHtml(m, d) {
     if (m.id === 'internal') {
@@ -3256,7 +3261,7 @@
           ${d.policy.keiji
             ? '<span class="kijun-badge">長期処方・リフィル対応の体制あり(届出不要)</span>'
             : `<button class="op-btn" data-dkeiji="${m.id}">📋 体制を整える(院内掲示・長期処方対応) <small>${yen(DEPT_KEIJI_COST)}</small></button>`}
-          <button class="op-btn ${d.policy.ippanmei ? 'on' : ''}" data-dippan="${m.id}">一般名処方 ${d.policy.ippanmei ? 'ON' : 'OFF'}</button>
+          <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
         </div>
       </div>`;
     }
@@ -3290,7 +3295,8 @@
       <div class="op-row">
         <button class="op-btn" data-dreceipt="${m.id}">📖 昨日の代表レセプトを見る</button>
       </div>
-      ${L && L.warnings.length ? `<p class="pnl-note">要確認: ${L.warnings[0].message}</p>` : ''}
+      ${(() => { const pw = playerWarn(L && L.warnings); return pw.length ? `<p class="pnl-note">${pw[0].message}</p>` : ''; })()}
+      ${G.debugMode && L && devWarn(L.warnings).length ? `<p class="pnl-note">dev: ${devWarn(L.warnings).map((w) => w.message).join(' / ')}</p>` : ''}
     </div>`;
   }
 
@@ -3320,8 +3326,9 @@
         ${(x.rules || []).filter((r) => r.quote).map((r) => `<div class="kb-quote">「${r.quote}」</div>`).join('')}
         ${x.fsInfo ? `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''}</div>` : ''}
       </div>`).join('');
-    const warnRows = ((s.kb && s.kb.warnings) || []).filter((w) => w.kind !== 'conditional_ok').slice(0, 3)
-      .map((w) => `<div class="kb-cond">⚠ ${w.message}</div>`).join('');
+    const warnRows = playerWarn(s.kb && s.kb.warnings).slice(0, 3)
+      .map((w) => `<div class="kb-cond">⚠ ${w.message}</div>`).join('')
+      + (G.debugMode ? devWarn(s.kb && s.kb.warnings).map((w) => `<div class="kb-cond">dev: ${w.message}</div>`).join('') : '');
     showModal(`📖 ${m.name}部門の代表レセプト`, `
       <p class="plan-lead">${s.label}</p>
       ${lineRows}${rejRows}${warnRows}
@@ -3375,7 +3382,7 @@
             <button class="mini-btn ${can ? 'plus' : ''}" data-deptopen="${m.id}" ${can ? '' : 'disabled'}>開設する ${yen(m.open.cost)}</button></div>
         </div>`);
       } else {
-        deptParts.push(`<div class="spec-row"><b>${m.icon} ${m.name}</b><small>${m.desc}</small></div>`);
+        deptParts.push(`<div class="spec-row"><b>${m.icon} ${m.name}</b> <span class="kijun-badge off">準備中</span><small>${m.desc}</small></div>`);
       }
     }
     const specialtySection = deptParts.length ? `<h3 class="sub-title">🌱 別の診療科を開く <small>— 診療科部門。会計は1行ずつ根拠つき</small></h3>${deptParts.join('')}` : '';
