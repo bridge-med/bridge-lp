@@ -60,7 +60,7 @@
         note: '導入期加算1の体制(様式2の2)。届出は施設基準の行から' },
     ],
     deptBadge(d) { return `${d.equip.beds}床×${d.policy.cools}クール`; },
-    infoLine(i) { return `患者 ${i.census}人・本日 ${i.seen}/${i.capacity}枠` + (i.waitlist ? `・待機${i.waitlist}` : ''); },
+    infoLine(i) { return `患者 ${i.census}人・昨日 ${i.seen}/${i.capacity}枠` + (i.waitlist ? `・待機${i.waitlist}` : ''); },
 
     fsDefs: [
       { fsId: 'r08-fs-j038-1',

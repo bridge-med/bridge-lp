@@ -3289,6 +3289,8 @@
     const due = d.pt.filter((p) => p.nv <= G.day);
     const route = [...new Set(orderHomecareRoute(due).map((o) => o.p.cl))];
     town.setHomecare({ clusters: counts, route });
+    const legend = $('hcLegend');
+    if (legend) legend.hidden = false;
   }
 
   /* ================= 診療科部門のUI(法人タブ内) ================= */
@@ -3317,11 +3319,10 @@
       </div>`;
     }
     if (m.id === 'homecare') {
-      const L = d.last; const i = L && L.info;
+      const i = d.last && d.last.info;
       return `
       <div class="dept-lever">
-        <span class="ctrl-head">訪問ルート <small>— 患者宅の地区を近い順に回る。今日のルートは「🗺 タウン」タブに</small></span>
-        <div class="pnl-row"><span>本日の訪問</span><b>${i ? `${i.visits}件(移動${i.travelMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''})` : '明日から'}</b></div>
+        <span class="ctrl-head">訪問ルート <small>— 患者宅の地区を近い順に回る(本日の予定ルートは「🗺 タウン」タブへ)</small></span>
         <div class="pnl-row"><span>在宅患者</span><b>${d.pt.length}人 / 受入枠${i && i.cap !== undefined ? i.cap : TOWN.HOMECARE_SITES.length * HOMECARE_CAP_PER_CLUSTER}人</b></div>
         ${deptActionsHtml(m, d) || '<span class="kijun-badge">24時間の連絡・往診体制あり</span>'}
       </div>`;

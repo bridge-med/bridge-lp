@@ -55,7 +55,7 @@
         note: '在宅療養支援診療所(通常型)の体制。届出は施設基準の行から' },
     ],
     deptBadge(d) { return `在宅 ${d.pt.length}人`; },
-    infoLine(i) { return `本日 ${i.visits}件(往診${i.oushin})・移動${i.travelMin}分` + (i.deferred ? `・翌日へ${i.deferred}件` : ''); },
+    infoLine(i) { return `昨日 ${i.visits}件(往診${i.oushin})・移動${i.travelMin}分` + (i.deferred ? `・翌日へ${i.deferred}件` : ''); },
 
     fsDefs: [
       { fsId: 'r08-fs-zaishien',

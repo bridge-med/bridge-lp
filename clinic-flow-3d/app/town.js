@@ -263,8 +263,8 @@ const TOWN = (() => {
         }
         const hp = this._hcPath;
         const cut = Math.max(1, Math.floor(hp.length * Math.min(1, state.hcProgress || 0)));
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'rgba(62,124,166,0.7)';
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#2C5F82';
         const seg = (from, to, dash) => {
           if (to - from < 1) return;
           ctx.setLineDash(dash);
@@ -277,12 +277,23 @@ const TOWN = (() => {
         };
         seg(0, cut, []);
         seg(cut, hp.length - 1, [4, 4]);
+        // 道路から患者宅へのスパー(線が家に届いて、街と診療が交差する)
+        for (const ci of this.homecare.route) {
+          const s = HOMECARE_SITES[ci];
+          const road = nearestRoad(s.x, s.y);
+          const idx = hp.findIndex((t) => t.x === road.x && t.y === road.y);
+          ctx.setLineDash(idx >= 0 && idx <= cut ? [] : [4, 4]);
+          const a = iso.p(road.x + 0.5, road.y + 0.5, 0.02);
+          const b = iso.p(s.x + 0.5, s.y + 0.5, 0.02);
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
         ctx.setLineDash([]);
       }
 
       const items = [];
 
-      // 在宅患者の地区(患者がいる所だけ小さな家として描く。個別メッシュ化しない)
+      // 在宅患者の地区(患者がいる所だけ小さな家として描く。個別メッシュ化しない)。
+      // 屋根は常に紫(紹介由来の患者の色)。「今日回る」は建物の色ではなく藍のリングと線で言う
       if (this.homecare && this.homecare.clusters) {
         HOMECARE_SITES.forEach((s, i) => {
           const n = this.homecare.clusters[i] || 0;
@@ -291,12 +302,15 @@ const TOWN = (() => {
           items.push({
             depth: s.x + s.y,
             draw: () => {
-              iso.building(s.x, s.y, 1, 1, 0.8, '#FBF7EE', onRoute ? '#6FAE93' : '#8C7BC4');
-              ctx.fillStyle = onRoute ? '#3A8A70' : '#6B5CA8';
-              ctx.font = `800 ${Math.max(8, iso.tw * 0.14)}px 'Inter',sans-serif`;
-              ctx.textAlign = 'center';
-              const c = iso.p(s.x + 0.5, s.y + 0.5, 1.15);
-              ctx.fillText(String(n), c.x, c.y);
+              iso.building(s.x, s.y, 1, 1, 0.8, '#FBF7EE', '#8C7BC4');
+              if (onRoute) {
+                const c = iso.p(s.x + 0.5, s.y + 0.5, 0);
+                ctx.strokeStyle = 'rgba(44,95,130,0.9)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(c.x, c.y, iso.tw * 0.42, iso.tw * 0.21, 0, 0, Math.PI * 2);
+                ctx.stroke();
+              }
             }
           });
         });
