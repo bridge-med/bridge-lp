@@ -75,10 +75,18 @@ const MACHINE_HINTS = {
     targetItemIds: ['r08-A001', 'r08-A002', 'r08-C000'], direction: 'source_blocks_targets' },
 };
 
+/* 表示用クリーニング:
+   - conditions等からKB内部の作業メモ「(…未登録…)」「(コード…)」を除去(ゲーム画面に内部メモを出さない)
+   - 引用(quote)はNFKC正規化(PDF由来の全角英数を読める形に。内容は変えない) */
+const cleanText = (s) => s ? s
+  .replace(/[（(][^（()）]*未登録[^（()）]*[）)]/g, '')
+  .replace(/\s{2,}/g, ' ').replace(/。\s*。/g, '。').trim() : s;
+const normQuote = (s) => (s ? s.normalize('NFKC') : s);
+
 const evByEntity = {};
 for (const e of evidence) {
   const k = e.entity_id;
-  (evByEntity[k] = evByEntity[k] || []).push({ field: e.field, doc: e.document_id, page: e.page, quote: e.quote, note: e.note });
+  (evByEntity[k] = evByEntity[k] || []).push({ field: e.field, doc: e.document_id, page: e.page, quote: normQuote(e.quote), note: e.note });
 }
 const docTitles = {};
 for (const d of manifest.documents) docTitles[d.id] = { title: d.title, url: d.urls?.[0]?.url || null, number: d.doc_number || null };
@@ -99,7 +107,7 @@ const pack = {
     id: it.id, code: it.code, kubun: it.kubun_no, name: it.name, shortName: it.short_name,
     categoryL: it.category_l, categoryM: it.category_m,
     points: it.points, unit: it.unit,
-    conditions: it.conditions || null, exclusions: it.exclusions || null,
+    conditions: cleanText(it.conditions) || null, exclusions: cleanText(it.exclusions) || null,
     countLimitText: it.count_limit || null, periodLimitText: it.period_limit || null,
     limit: LIMITS[it.id] || null,
     inpatient: it.inpatient ?? null, outpatient: it.outpatient ?? null,
@@ -125,7 +133,7 @@ const pack = {
     id: r.id, source: r.source_item, target: r.target_item, type: r.rule_type,
     condition: r.condition || null, period: r.period || null,
     bidirectional: r.bidirectional ?? 1,
-    doc: r.source_document, page: r.source_page || null, quote: r.quote || null,
+    doc: r.source_document, page: r.source_page || null, quote: normQuote(r.quote) || null,
     confidence: r.confidence,
     machine: MACHINE_HINTS[r.id] || null,
   })),

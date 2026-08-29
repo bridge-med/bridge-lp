@@ -1632,21 +1632,26 @@
     if (!r) { card.hidden = true; return; }
     card.hidden = false;
     const learn = !!settings.learnMode;
-    const open = learn || G.receiptDetailOpen;
+    const open = KBI && (learn || G.receiptDetailOpen);
 
-    // 明細行: KB項目は令和8年度の実点数、kbタグ無しの点数行は教育用概算
-    const rows = r.rc.map((x) => `<div class="rcpt-row${x.kb ? ' kb' : ''}"><span>${x.n}${x.kb ? '' : (x.t ? ' <i class="sim-tag">概算</i>' : '')}</span><b>${x.t ? `${x.t.toLocaleString()}点` : yen(x.y)}</b></div>`).join('');
+    // 明細行: KB読込済みかつKB項目の行だけを「実点数(出典あり)」として扱う。
+    // それ以外の点数行は教育用概算(KB未読込時は全行が概算表示になる)
+    const isKb = (x) => KBI && x.kb;
+    const rows = r.rc.map((x) => `<div class="rcpt-row${isKb(x) ? ' kb' : ''}"><span>${x.n}${isKb(x) ? '' : (x.t ? ' <i class="sim-tag">概算</i>' : '')}</span><b>${x.t ? `${x.t.toLocaleString()}点` : yen(x.y)}</b></div>`).join('');
 
-    // 算定詳細(学習モード/トグルで展開): 根拠・未算定とその理由・機会損失
+    // 算定詳細(学習モード/トグルで展開): 根拠・未算定とその理由
     let detail = '';
-    if (open && KBI) {
+    if (open) {
+      const pageOf = (ev) => (ev && ev.page ? String(ev.page).replace(/^PDF\s*/, '') : '');
+      const usedDocs = [];
       const evRows = r.rc.filter((x) => x.kb).map((x) => {
         const it = REIMB.getItem(x.kb);
         const ev = it && it.evidence && (it.evidence.find((e) => e.field === 'points') || it.evidence[0]);
         const doc = ev && REIMB.docOf(ev.doc);
-        return `<div class="kb-ev"><b>${it ? it.name : x.kb}</b> <small>${it && it.kubun ? `[${it.kubun}]` : ''}</small>
+        if (doc && !usedDocs.includes(doc.title)) usedDocs.push(doc.title);
+        return `<div class="kb-ev"><b>${it ? it.name : x.kb}</b> <small>${it && it.kubun ? `[${it.kubun}]` : ''}${ev ? ` ${pageOf(ev)}` : ''}</small>
           ${it && it.conditions ? `<p class="kb-cond">条件: ${it.conditions}</p>` : ''}
-          ${ev ? `<p class="kb-quote">「${ev.quote}」<br><small>出典: ${doc ? doc.title : ev.doc}${ev.page ? ` ${ev.page}` : ''}</small></p>` : ''}
+          ${ev ? `<p class="kb-quote">「${ev.quote}」</p>` : ''}
         </div>`;
       }).join('');
       const rejected = (r.kb && r.kb.rejected) || [];
@@ -1656,33 +1661,26 @@
           ${x.fsInfo ? `<p class="kb-cond">必要条件: ${x.fsInfo.staffing || ''}${x.fsInfo.formNo ? `(届出: ${x.fsInfo.formNo})` : ''}</p>` : ''}
           ${x.rules && x.rules[0] && x.rules[0].quote ? `<p class="kb-quote">「${x.rules[0].quote}」</p>` : ''}
         </div>`).join('');
-      // 機会損失: リハをより上位の施設基準で算定した場合の差
-      let upsell = '';
-      const rehaLine = r.rc.find((x) => x.kb && x.kb.indexOf('r08-H002') === 0);
-      if (rehaLine && settings.rehaLevel > 0 && settings.rehaLevel < 3) {
-        const d = (kbPts('r08-H002-1', 185) - kbPts(REHA_KB_ITEM[settings.rehaLevel], 85)) * 2;
-        upsell = `<div class="kb-ev"><b>💡 運動器リハ(I)を届け出ると</b><p class="kb-cond">この会計は+${d}点(2単位)。施設基準タブで要件と月間試算を確認</p></div>`;
-      }
       const warn = ((r.kb && r.kb.warnings) || []).filter((w) => w.kind !== 'conditional_ok');
       detail = `<div class="rcpt-detail">
-        ${evRows}${rejRows}${upsell}
+        ${evRows}${rejRows}
         ${warn.length ? `<p class="kb-cond">⚠ ${warn.map((w) => w.message).join(' / ')}</p>` : ''}
-        <p class="rcpt-note">「概算」の行はKB未登録の教育用簡略値。点数付きの行(青)は令和8年度告示の実点数(出典つき)</p>
+        <p class="rcpt-note">出典: ${usedDocs.join(' / ') || '令和8年度診療報酬KB'}。「概算」の行はKB未登録の教育用簡略値</p>
         ${G.debugMode && r.kb ? `<pre class="kb-trace">${JSON.stringify(r.kb.trace, null, 1)}</pre>` : ''}
       </div>`;
     }
 
     el.innerHTML = `
-      <div class="rcpt-head"><b>${TYPE_NAMES[r.type] || r.type}</b> <small>${SEG_NAMES[r.seg] || ''}の患者さん</small>
+      <div class="rcpt-head"><span class="rcpt-head-t"><b>${TYPE_NAMES[r.type] || r.type}</b> <small>${SEG_NAMES[r.seg] || ''}の患者さん</small></span>
         <span class="rcpt-tools">
           <button class="mini-btn${learn ? ' plus' : ''}" id="learnModeBtn" title="診療報酬の根拠を常に表示">🎓 学習モード${learn ? 'ON' : ''}</button>
-          ${learn ? '' : `<button class="mini-btn" id="rcptDetailBtn">${open ? '閉じる' : '📖 算定詳細'}</button>`}
+          ${learn || !KBI ? '' : `<button class="mini-btn" id="rcptDetailBtn">${open ? '閉じる' : '📖 算定詳細'}</button>`}
         </span>
       </div>
       ${rows}
       <div class="rcpt-row total"><span>合計${r.ten ? `(${r.ten.toLocaleString()}点)` : ''}</span><b>${yen(r.yen)}</b></div>
       ${detail}
-      <p class="rcpt-note">1点=10円・全国一律の公定価格${KBI ? '。点数は令和8年度診療報酬KB(告示・通知の一次資料照合済み)に同期' : '(教育用の概算)'}</p>`;
+      ${open ? '' : `<p class="rcpt-note">1点=10円・全国一律の公定価格${KBI ? '。点数は令和8年度診療報酬KB(告示・通知の一次資料照合済み)に同期' : '(教育用の概算)'}</p>`}`;
     const lb = $('learnModeBtn');
     if (lb) lb.addEventListener('click', () => { settings.learnMode = !settings.learnMode; save(); renderReceipt(); });
     const db = $('rcptDetailBtn');
@@ -3219,16 +3217,15 @@
         ${corpToday ? `<span>昨日の法人損益 <b class="${(corpToday.profit + corpToday.brProfit) >= 0 ? 'pos-t' : 'neg-t'}">${yen(corpToday.profit + corpToday.brProfit)}</b></span>` : ''}
       </div>`;
 
-    // 診療科モジュール(将来の多診療科展開の基盤)。整形外科がReference Implementation
+    // これから開く診療科: 静的な一覧のみ(選べるようになった便で「分岐する道」として出し直す)
     const specRows = (typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.playable() : []).map((m) => {
       const active = settings.specialty === m.id;
-      const full = m.status === 'full';
-      return `<div class="kijun-row ${active ? 'ok' : ''}">
-        <div><b>${m.icon} ${m.name}</b> <small>[${full ? '完全実装' : '基本構造'}]</small><br><small>${m.desc}</small></div>
-        ${active ? '<span class="kijun-badge">本院</span>' : `<button class="mini-btn" data-spec="${m.id}">見る</button>`}
+      return `<div class="spec-row">
+        <b>${m.icon} ${m.name}</b>${active ? ' <span class="kijun-badge">本院</span>' : ''}
+        <small>${m.desc}</small>
       </div>`;
     }).join('');
-    const specialtySection = specRows ? `<h3 class="sub-title">🏥 診療科モジュール <small>— 本院は整形外科。他科は基本構造(KB項目・患者像・導線)まで実装済み</small></h3>${specRows}` : '';
+    const specialtySection = specRows ? `<h3 class="sub-title">🏥 これから開く診療科 <small>— 本院は整形外科。法人が育つと街に増えていく</small></h3>${specRows}` : '';
 
     const brCards = G.branches.map((br, bi) => {
       const machineMax = (br.floorLv || 1) >= 3 ? 18 : (br.floorLv || 1) >= 2 ? 12 : 6;
@@ -3331,12 +3328,6 @@
 
     el.innerHTML = summary + (brCards || '<p class="plan-lead">まだ分院はありません。本院を軌道に乗せてから(評判70+事業計画+資金)。<b>施設基準の専従要件は分院ごと</b> — PT採用が本当の壁です。</p>') + openSection + hospSection + specialtySection;
 
-    el.querySelectorAll('[data-spec]').forEach((b) => b.addEventListener('click', () => {
-      const m = SPECIALTIES.get(b.dataset.spec);
-      if (!m) return;
-      const items = (KBI ? REIMB.itemsFor(m.id) : []).slice(0, 8);
-      banner(`${m.icon} ${m.name}(${m.status === 'full' ? '完全実装' : '基本構造'}) — 患者像: ${m.patientProfiles.map((p) => p.label).join('・')} / 導線: ${m.workflows[0]} / KB登録項目: ${items.map((i) => `${i.name}${i.points != null ? ` ${i.points}点` : ''}`).join('、') || '(未登録)'}${m.todo ? ` / 次の実装: ${m.todo}` : ''}`);
-    }));
 
     el.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => {
       const cost = Number(b.dataset.opencost);
@@ -3565,25 +3556,28 @@
     $('kijunBody').innerHTML = KIJUN.map((k) => {
       const ok = k.ok(settings.pts, settings.floorLv);
       const active = settings.rehaLevel === k.lv;
-      const status = active ? '適用中' : ok ? '条件充足(届出可能)' : '条件不足';
-      // KBの実要件・様式・増収試算(simulation estimate)
+      const badge = active ? '<span class="kijun-badge">適用中</span>'
+        : ok ? '<span class="kijun-badge alt">条件充足</span>'
+        : '<span class="kijun-badge off">条件不足</span>';
+      // KBの実要件(1行要約)と増収試算(simulation estimate)
       let kbInfo = '';
       if (KBI) {
         const fs = REIMB.getFacilityStandard(REHA_KB_FS[k.lv]);
         if (fs) {
+          const staffing = (fs.staffing || '').split('。')[0];
           let est = '';
           if (!active && settings.rehaLevel > 0 && k.lv > settings.rehaLevel && rehaMo > 0) {
             const d = (kbPts(REHA_KB_ITEM[k.lv], 0) - kbPts(REHA_KB_ITEM[settings.rehaLevel], 0)) * 2 * rehaMo;
             est = `<br><b>推定月間増収 約${yen(d * 10)}</b>(現在のリハ${rehaMo}回/月ベースの試算・確定収益ではない)`;
           }
-          kbInfo = `<div class="kijun-kb">📖 制度上の要件: ${fs.staffing || ''}<br>設備: ${fs.equipment || ''}${fs.formNo ? `<br>届出様式: ${fs.formNo}` : ''}${est}</div>`;
+          kbInfo = `<div class="kijun-kb">制度上の要件: ${staffing}${fs.formNo ? ` / 届出: ${fs.formNo.split('。')[0]}` : ''}${est}</div>`;
         }
       }
       return `<div class="kijun-row ${active ? 'ok' : ''}">
-        <div><b>${k.name}</b> — リハ1回(2単位) ${yen(k.fee)} <small>[${status}]</small><br><small>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
-        ${active ? '<span class="kijun-badge">届出済</span>' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
+        <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
+        ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
-    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。※届出→即日適用はゲーム上の簡略化(実制度では届出受理・月初適用等の手続きがある)。</p>`
+    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。※届出→即日適用はゲーム上の簡略化(実制度では届出受理・月初適用等の手続きがある)。制度上の要件全文はレシートの学習モード・medical-kbを参照。</p>`
       + `<h3 class="sub-title">📮 その他の届出・加算 <small>— 1点=10円。小さくても「仕組み」で毎回積み上がる(点数はKB未登録の概算)</small></h3>`
       + KASAN.map((k) => {
         const done = k.done();
