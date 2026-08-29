@@ -13,6 +13,7 @@ const DEPT = require(join(ROOT, 'app', 'departments.js'));
 const INTERNAL = require(join(ROOT, 'app', 'specialties', 'internal-medicine.js'));
 const OPHTHA = require(join(ROOT, 'app', 'specialties', 'ophthalmology.js'));
 const DIALYSIS = require(join(ROOT, 'app', 'specialties', 'dialysis.js'));
+const HOMECARE = require(join(ROOT, 'app', 'specialties', 'homecare.js'));
 
 REIMB.init(KB);
 DEPT.init(REIMB, KB);
@@ -286,6 +287,88 @@ t('装置26台で施設区分1が要件割れし、人工腎臓が算定でき�
   eq(dept.fs.includes('r08-fs-j038-1'), false, '適用から外れる');
   ok(!agg.byItem['r08-J038-1-ro'], '人工腎臓は算定されない');
   ok(agg.sample === null || !agg.sample.lines.some((l) => l.kb === 'r08-J038-1-ro'), 'サンプルにも出ない');
+});
+
+console.log('# 在宅部門');
+
+/* ゲーム側ctx(地区割当・ルート順)のスタブ */
+function hcCtx(dept, day, rand, spec) {
+  const counts = {};
+  for (const p of dept.pt) counts[p.cl] = (counts[p.cl] || 0) + 1;
+  return Object.assign(ctx(day, rand, spec), {
+    homecareCap: 84,
+    assignCluster: () => { for (let i = 0; i < 12; i++) if ((counts[i] || 0) < 7) { counts[i] = (counts[i] || 0) + 1; return i; } return null; },
+    releaseCluster: (i) => { counts[i] = Math.max(0, (counts[i] || 0) - 1); },
+    orderByRoute: (due) => due.map((p, i) => ({ p, travelMin: i === 0 ? 8 : 3 })),
+  });
+}
+
+t('訪問診療の算定日は往診料が却下される(rule-0008)', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  const p = { pr: 'home', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r = DEPT.evalVisit(HOMECARE, dept, p, { type: 'visit', kbActs: [{ id: 'visit' }, { id: 'oushin' }] }, 1);
+  ok(r.ev.billableItems.some((b) => b.itemId === 'r08-C001-1-i'), '訪問診療は算定');
+  ok(r.ev.rejectedItems.some((b) => b.itemId === 'r08-C000'), '同日の往診料は却下');
+});
+
+t('訪問診療は週3回まで(4回目は患者単位で却下)', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  const p = { pr: 'home', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  let rejected = 0;
+  for (let i = 0; i < 4; i++) {
+    const r = DEPT.evalVisit(HOMECARE, dept, p, { type: 'visit', kbActs: [{ id: 'visit' }] }, 2 + i);
+    if (r.ev.rejectedItems.some((b) => b.itemId === 'r08-C001-1-i')) rejected++;
+  }
+  eq(p.wc['r08-C001-1-i'], 3, '週3回で止まる');
+  eq(rejected, 1, '4回目だけ却下');
+});
+
+t('在医総管は在支診の届出がないと却下・届出後は月1回算定できる', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  const p = { pr: 'home', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r1 = DEPT.evalVisit(HOMECARE, dept, p, { type: 'visit', kbActs: [{ id: 'visit' }, { id: 'zaiisoukan' }] }, 1);
+  ok(r1.ev.rejectedItems.some((b) => b.itemId === 'r08-C002-2-ro-1'), '未届出は却下');
+  dept.fs.push('r08-fs-zaishien');
+  const r2 = DEPT.evalVisit(HOMECARE, dept, p, { type: 'visit', kbActs: [{ id: 'visit' }, { id: 'zaiisoukan' }] }, 3);
+  const sk = r2.ev.billableItems.find((b) => b.itemId === 'r08-C002-2-ro-1');
+  ok(sk, '届出後は算定');
+  eq(sk.points, REIMB.pointsOf('r08-C002-2-ro-1'), '点数はKB由来');
+  const r3 = DEPT.evalVisit(HOMECARE, dept, p, { type: 'visit', kbActs: [{ id: 'visit' }, { id: 'zaiisoukan' }] }, 10);
+  ok(r3.ev.rejectedItems.some((b) => b.itemId === 'r08-C002-2-ro-1'), '同月2回目は却下');
+});
+
+t('在宅180日運用: 収益は全てエンジン算定・在医総管は月2回目の訪問後だけ申請される', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.policy.oncall = true;
+  dept.fs.push('r08-fs-zaishien');
+  const rand = rng(31);
+  let revenue = 0, engineYen = 0;
+  for (let d = 1; d <= 180; d++) {
+    const spec = d % 7 === 0 ? CLOSED : OPEN;
+    const agg = DEPT.runDay(HOMECARE, dept, hcCtx(dept, d, rand, spec));
+    revenue += agg.revenue; engineYen += agg.points * 10;
+  }
+  eq(revenue, engineYen, '収益=エンジン算定のみ(概算なし)');
+  ok(dept.pt.length > 10, `患者が増える(${dept.pt.length}人)`);
+  for (const p of dept.pt) {
+    ok(!p.mc['r08-C002-2-ro-1'] || p.mc['r08-C002-2-ro-1'] <= 1, '在医総管は月1回まで');
+    ok(!p.mc['r08-C007'] || p.mc['r08-C007'] <= 1, '訪問看護指示料は月1回まで');
+  }
+});
+
+t('1日の訪問枠(移動+診療時間)を超えた分は翌日に繰り越される', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.fs.push('r08-fs-zaishien');
+  // 期日の来た患者を大量に用意(枠は480分/医師1人 → 25分+移動で最大18件前後)
+  for (let i = 0; i < 40; i++) {
+    dept.seq++;
+    dept.pt.push({ id: 'hcx' + i, pr: 'home', en: 1, nv: 5, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, cl: i % 12, iv: 15, sj: 0 });
+  }
+  dept.sd = 1; // シードを飛ばす
+  const agg = DEPT.runDay(HOMECARE, dept, hcCtx(dept, 5, rng(2)));
+  ok(agg.info.visits < 40, `全件は回れない(実際${agg.info.visits}件)`);
+  ok(agg.info.deferred > 0, `繰越が出る(${agg.info.deferred}件)`);
+  ok(agg.info.visits + agg.info.deferred >= 40 - 5, '回った+繰越で概ね全件を説明できる');
 });
 
 console.log(failed ? `\nNG: ${failed}/${n} 失敗` : `\n全${n}件 合格`);

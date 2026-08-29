@@ -1217,7 +1217,9 @@
       for (const id of Object.keys(G.depts)) {
         const mod = SPECIALTIES.get(id);
         if (!mod || mod.status !== 'full' || !mod.runDay) continue;
-        const r = DEPT.runDay(mod, G.depts[id], { day: G.day, spec, rep: G.rep, aw: G.aw, rand: Math.random });
+        const dctx = { day: G.day, spec, rep: G.rep, aw: G.aw, rand: Math.random };
+        if (id === 'homecare') Object.assign(dctx, homecareCtx(G.depts[id]));
+        const r = DEPT.runDay(mod, G.depts[id], dctx);
         T.brRevenue += r.revenue;
         T.brProfit += r.profit;
         for (const ev of r.events) if (ev.kind === 'fs_broken') toast(`⚠️ ${mod.name}部門: ${ev.message}`);
@@ -1315,6 +1317,7 @@
     G.day++;
     G.t = 0;
     clinic.rehaToday = 0;
+    updateHomecareTown();
     if (G.day === 366 && !G.annualDone) {
       G.annualDone = true;
       G.coins += 10;
@@ -3234,6 +3237,60 @@
     return 60000;
   }
 
+  /* ================= 在宅部門: ルートと街の連携 ================= */
+
+  const HOMECARE_CAP_PER_CLUSTER = 7; // 地区あたりの患者上限(ゲーム仮定。全員べつべつの戸建て)
+  const HOMECARE_MIN_PER_TILE = 1.2;  // タウン1タイルの移動時間(分・ゲーム仮定)
+
+  // 今日回る患者を地区の近い順に並べ、移動時間を付ける(同一地区内は2分)
+  function orderHomecareRoute(due) {
+    const S = TOWN.HOMECARE_SITES;
+    const byCl = new Map();
+    for (const p of due) { if (!byCl.has(p.cl)) byCl.set(p.cl, []); byCl.get(p.cl).push(p); }
+    let cur = TOWN.CLINIC_ENTRANCE;
+    const out = []; const rest = [...byCl.keys()];
+    const dist = (cl) => Math.abs(S[cl].x - cur.x) + Math.abs(S[cl].y - cur.y);
+    while (rest.length) {
+      rest.sort((a, b) => dist(a) - dist(b));
+      const cl = rest.shift();
+      const travel = dist(cl) * HOMECARE_MIN_PER_TILE;
+      byCl.get(cl).forEach((p, i) => out.push({ p, travelMin: i === 0 ? travel : 2 }));
+      cur = S[cl];
+    }
+    return out;
+  }
+
+  function homecareCtx(dept) {
+    const counts = {};
+    for (const p of dept.pt) counts[p.cl] = (counts[p.cl] || 0) + 1;
+    const nSites = TOWN.HOMECARE_SITES.length;
+    return {
+      homecareCap: nSites * HOMECARE_CAP_PER_CLUSTER,
+      assignCluster: () => {
+        const avail = [];
+        for (let i = 0; i < nSites; i++) if ((counts[i] || 0) < HOMECARE_CAP_PER_CLUSTER) avail.push(i);
+        if (!avail.length) return null;
+        const i = avail[Math.floor(Math.random() * avail.length)];
+        counts[i] = (counts[i] || 0) + 1;
+        return i;
+      },
+      releaseCluster: (i) => { counts[i] = Math.max(0, (counts[i] || 0) - 1); },
+      orderByRoute: (due) => orderHomecareRoute(due),
+    };
+  }
+
+  // タウン表示へ: 地区の患者数と今日のルート(期日が来ている患者の地区を近い順に)
+  function updateHomecareTown() {
+    if (!town.setHomecare) return;
+    const d = G.depts.homecare;
+    if (!d || !DEPTI) { town.setHomecare(null); return; }
+    const counts = {};
+    for (const p of d.pt) counts[p.cl] = (counts[p.cl] || 0) + 1;
+    const due = d.pt.filter((p) => p.nv <= G.day);
+    const route = [...new Set(orderHomecareRoute(due).map((o) => o.p.cl))];
+    town.setHomecare({ clusters: counts, route });
+  }
+
   /* ================= 診療科部門のUI(法人タブ内) ================= */
 
   const DEPT_KEIJI_COST = 50000; // 体制整備(院内掲示・長期処方対応)の費用: ゲーム上の仮定
@@ -3257,6 +3314,16 @@
       <div class="dept-lever">
         <span class="ctrl-head">検査設備への投資 <small>— 設備が検査可能範囲と単価を決める</small></span>
         ${deptActionsHtml(m, d) || '<span class="kijun-badge">導入済みの設備で診療中</span>'}
+      </div>`;
+    }
+    if (m.id === 'homecare') {
+      const L = d.last; const i = L && L.info;
+      return `
+      <div class="dept-lever">
+        <span class="ctrl-head">訪問ルート <small>— 患者宅の地区を近い順に回る。今日のルートは「🗺 タウン」タブに</small></span>
+        <div class="pnl-row"><span>本日の訪問</span><b>${i ? `${i.visits}件(移動${i.travelMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''})` : '明日から'}</b></div>
+        <div class="pnl-row"><span>在宅患者</span><b>${d.pt.length}人 / 受入枠${i && i.cap !== undefined ? i.cap : TOWN.HOMECARE_SITES.length * HOMECARE_CAP_PER_CLUSTER}人</b></div>
+        ${deptActionsHtml(m, d) || '<span class="kijun-badge">24時間の連絡・往診体制あり</span>'}
       </div>`;
     }
     if (m.id === 'dialysis') {
@@ -3564,6 +3631,7 @@
       G.money -= m.open.cost;
       G.depts[id] = DEPT.create(m, G.day);
       if (town.setDepts) town.setDepts(Object.keys(G.depts));
+      if (id === 'homecare') updateHomecareTown();
       G.corpOpen = 'dept-' + id;
       SND.fanfare();
       toast(`🎉 ${m.name}部門を開設しました — 明日から診療開始`);
@@ -4304,7 +4372,8 @@
       town.draw(townIso, {
         billboard: G.billboard,
         hospitalTie: relLv('hospital') > 0, caremaneTie: relLv('caremane') > 0, companyTie: relLv('company') > 0,
-        listing: Object.values(G.ads).reduce((a, b) => a + b, 0)
+        listing: Object.values(G.ads).reduce((a, b) => a + b, 0),
+        hcProgress: G.daySpec && G.daySpec.min ? Math.min(1, G.t / G.daySpec.min) : 0
       });
     }
     updateHeader();
@@ -4524,6 +4593,7 @@
   clinicIso.W = clinic.L.W; clinicIso.H = clinic.L.H;
   town.setBranches(G.branches.map((x) => x.siteId));
   if (town.setDepts) town.setDepts(Object.keys(G.depts || {}));
+  updateHomecareTown();
   clinic.deco = G.deco;
   planDay();
   applyUnlocks();
