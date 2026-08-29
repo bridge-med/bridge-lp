@@ -2,3 +2,10 @@ __pycache__/
 *.pyc
 # 末尾スラッシュなし: 検証用symlinkにも効かせるため(スラッシュ付きはディレクトリ実体のみ)
 node_modules
+
+# medical-kb: 派生物(再生成可能)はコミットしない。原典(data/sources)と正規データ(data/kb)はコミットする
+medical-kb/data/db/*.sqlite
+medical-kb/data/validation-report.json
+medical-kb/data/manifest/crawl-report.*.json
+# ZIP原典の展開ディレクトリ(スクリプトが再展開する)
+medical-kb/data/sources/*/masters/*_x/

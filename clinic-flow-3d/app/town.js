@@ -94,6 +94,20 @@ const TOWN = (() => {
     tonari: { x: 24, y: 17, w: 2, d: 2, h: 1.5, label: '隣駅クリニック' }
   };
 
+  // 診療科部門の建設地(部門id → 位置)。在宅(homecare)は本院発なので建物を持たない
+  const DEPT_SPOTS = {
+    internal: { x: 15, y: 10, w: 2, d: 2, h: 1.3, label: '内科クリニック' },
+    ophthalmology: { x: 16, y: 3, w: 2, d: 2, h: 1.3, label: '眼科クリニック' },
+    dialysis: { x: 23, y: 6, w: 2, d: 2, h: 1.4, label: '透析クリニック' }
+  };
+
+  // 在宅患者の地区(戸建ての集まり)。訪問診療部門があるときだけ患者数に応じて描く
+  const HOMECARE_SITES = [
+    { x: 6, y: 4 }, { x: 21, y: 4 }, { x: 27, y: 3 }, { x: 1, y: 5 },
+    { x: 2, y: 7 }, { x: 13, y: 10 }, { x: 24, y: 10 }, { x: 8, y: 13 },
+    { x: 16, y: 13 }, { x: 9, y: 18 }, { x: 18, y: 18 }, { x: 27, y: 19 }
+  ];
+
   class TownSim {
     constructor(hooks) {
       this.hooks = hooks; // { onPatientArrive(walker) }
@@ -101,6 +115,7 @@ const TOWN = (() => {
       this.ambientTimer = 0;
       this.rivalTimer = 3;
       this.branchBuildings = [];
+      this.deptBuildings = [];
     }
 
     setBranches(siteIds) {
@@ -108,6 +123,19 @@ const TOWN = (() => {
         const sp = BRANCH_SPOTS[id];
         return { id: 'br_' + id, label: sp.label, x: sp.x, y: sp.y, w: sp.w, d: sp.d, h: sp.h, wall: '#FFFFFF', roof: '#4FA98C', mine: true, action: true };
       });
+    }
+
+    setDepts(deptIds) {
+      this.deptBuildings = (deptIds || []).filter((id) => DEPT_SPOTS[id]).map((id) => {
+        const sp = DEPT_SPOTS[id];
+        return { id: 'dept_' + id, label: sp.label, x: sp.x, y: sp.y, w: sp.w, d: sp.d, h: sp.h, wall: '#FFFFFF', roof: '#4FA98C', mine: true, action: true };
+      });
+    }
+
+    // 在宅: 地区ごとの患者数と今日のルート(地区indexの列)。nullで非表示
+    setHomecare(state) {
+      this.homecare = state;
+      this._hcPath = null; // ルート線は日替わり。キャッシュを破棄
     }
 
     // 患者トリップ: source: 'house' | 'station' | 'hospital' | 'caremane'
@@ -196,7 +224,7 @@ const TOWN = (() => {
 
     buildingAt(tile) {
       const withDoor = (b) => tile.x >= b.x - 1 && tile.x <= b.x + b.w && tile.y >= b.y - 1 && tile.y <= b.y + b.d;
-      return this.branchBuildings.find(withDoor) || BUILDINGS.find((b) => (b.action || b.mine) && withDoor(b)) || null;
+      return this.branchBuildings.find(withDoor) || (this.deptBuildings || []).find(withDoor) || BUILDINGS.find((b) => (b.action || b.mine) && withDoor(b)) || null;
     }
 
     draw(iso, state) {
@@ -220,10 +248,76 @@ const TOWN = (() => {
         ctx.fill();
       }
 
+      // 在宅の訪問ルート: 自院から出て患者宅の地区を回り自院へ戻る閉じた線。
+      // 進んだ分は実線・残りは点線(進み具合はstate.hcProgress 0..1)
+      if (this.homecare && this.homecare.route && this.homecare.route.length) {
+        if (!this._hcPath) {
+          const stops = [CLINIC_ENTRANCE,
+            ...this.homecare.route.map((i) => nearestRoad(HOMECARE_SITES[i].x, HOMECARE_SITES[i].y)),
+            CLINIC_ENTRANCE];
+          const path = [];
+          for (let i = 0; i < stops.length - 1; i++) {
+            path.push(stops[i], ...astarGrid(W, H, NOT_ROAD, stops[i], stops[i + 1]));
+          }
+          this._hcPath = path;
+        }
+        const hp = this._hcPath;
+        const cut = Math.max(1, Math.floor(hp.length * Math.min(1, state.hcProgress || 0)));
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#2C5F82';
+        const seg = (from, to, dash) => {
+          if (to - from < 1) return;
+          ctx.setLineDash(dash);
+          ctx.beginPath();
+          for (let i = from; i <= to; i++) {
+            const p = iso.p(hp[i].x + 0.5, hp[i].y + 0.5, 0.02);
+            if (i === from) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+          }
+          ctx.stroke();
+        };
+        seg(0, cut, []);
+        seg(cut, hp.length - 1, [4, 4]);
+        // 道路から患者宅へのスパー(線が家に届いて、街と診療が交差する)
+        for (const ci of this.homecare.route) {
+          const s = HOMECARE_SITES[ci];
+          const road = nearestRoad(s.x, s.y);
+          const idx = hp.findIndex((t) => t.x === road.x && t.y === road.y);
+          ctx.setLineDash(idx >= 0 && idx <= cut ? [] : [4, 4]);
+          const a = iso.p(road.x + 0.5, road.y + 0.5, 0.02);
+          const b = iso.p(s.x + 0.5, s.y + 0.5, 0.02);
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+
       const items = [];
 
+      // 在宅患者の地区(患者がいる所だけ小さな家として描く。個別メッシュ化しない)。
+      // 屋根は常に紫(紹介由来の患者の色)。「今日回る」は建物の色ではなく藍のリングと線で言う
+      if (this.homecare && this.homecare.clusters) {
+        HOMECARE_SITES.forEach((s, i) => {
+          const n = this.homecare.clusters[i] || 0;
+          if (!n) return;
+          const onRoute = (this.homecare.route || []).includes(i);
+          items.push({
+            depth: s.x + s.y,
+            draw: () => {
+              iso.building(s.x, s.y, 1, 1, 0.8, '#FBF7EE', '#8C7BC4');
+              if (onRoute) {
+                const c = iso.p(s.x + 0.5, s.y + 0.5, 0);
+                ctx.strokeStyle = 'rgba(44,95,130,0.9)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(c.x, c.y, iso.tw * 0.42, iso.tw * 0.21, 0, 0, Math.PI * 2);
+                ctx.stroke();
+              }
+            }
+          });
+        });
+      }
+
       // 建物(本院・施設・分院)
-      for (const b of [...BUILDINGS, ...this.branchBuildings]) {
+      for (const b of [...BUILDINGS, ...this.branchBuildings, ...(this.deptBuildings || [])]) {
         items.push({
           depth: b.x + b.w / 2 + b.y + b.d / 2,
           draw: () => {
@@ -298,7 +392,7 @@ const TOWN = (() => {
       items.forEach((it) => it.draw());
 
       // ラベル(主要施設のみ)
-      for (const b of [...BUILDINGS, ...this.branchBuildings]) {
+      for (const b of [...BUILDINGS, ...this.branchBuildings, ...(this.deptBuildings || [])]) {
         if (!b.label) continue;
         const tie = (b.id === 'hospital' && state.hospitalTie) || (b.id === 'caremane' && state.caremaneTie) || (b.id === 'company' && state.companyTie);
         iso.label(b.x + b.w / 2, b.y + b.d / 2 + 0.4, (tie ? '🤝 ' : '') + b.label, {
@@ -324,5 +418,5 @@ const TOWN = (() => {
     }
   }
 
-  return { W, H, TownSim, TOTAL_HOUSEHOLDS, CLINIC_ENTRANCE, ROADS, BUILDINGS, HOUSES, TREES, BILLBOARD };
+  return { W, H, TownSim, TOTAL_HOUSEHOLDS, CLINIC_ENTRANCE, ROADS, BUILDINGS, HOUSES, TREES, BILLBOARD, HOMECARE_SITES };
 })();

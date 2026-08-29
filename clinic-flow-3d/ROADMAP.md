@@ -63,4 +63,4 @@ Capacitorネイティブ雛形あり(`native/`、ビルドはローカルPCが�
 - テスト: Playwright(ヘッドレスWebGL=SwiftShader)で毎版E2E。`window.GAME`(+`getWalk()`)がデバッグAPI
 - 3D: Three.js r128をvendor同梱(オフラインPWA対応)。1タイル=1m(院内)/2m(街)
 - セーブ: `clinicTown_v3`(localStorage)。殿堂引き継ぎは`clinicTown_prestige`
-- sw.js: network-first、VERは版ごとにbump(現在 ct3d-v32)
+- sw.js: network-first、VERは版ごとにbump(現在はsw.jsのVER定数を参照)

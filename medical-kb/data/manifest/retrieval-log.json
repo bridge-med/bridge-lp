@@ -1,0 +1,368 @@
+{
+  "entries": [
+    {
+      "id": "r08-portal-mhlw",
+      "url": "https://www.mhlw.go.jp/stf/newpage_67729.html",
+      "dest": "data/sources/r08/mhlw/portal_newpage_67729.html",
+      "sha256": "54787ec02ba70b69e06bc51a58710f5cdd8f4294b22799ce7b3d237e0cb941a6",
+      "retrieved_at": "2026-08-28T22:42:47.930Z"
+    },
+    {
+      "id": "r08-kokuji69-seitei",
+      "url": "https://www.mhlw.go.jp/content/12400000/001665291.pdf",
+      "dest": "data/sources/r08/mhlw/kokuji69_seitei.pdf",
+      "sha256": "67b96c8bbc772fa34ac2fcdc6abebe6e1fc3d7a71b621847e8d83a769ef2979f",
+      "retrieved_at": "2026-08-28T22:42:48.555Z"
+    },
+    {
+      "id": "r08-kokuji69-ika",
+      "url": "https://www.mhlw.go.jp/content/12400000/001686842.pdf",
+      "dest": "data/sources/r08/mhlw/kokuji69_ika_tensuhyo.pdf",
+      "sha256": "1b72d3cc1d0006f0e8f91afd2c3a49f21272e3ba376b8d24a6dffda63092e2d6",
+      "retrieved_at": "2026-08-28T22:42:49.230Z"
+    },
+    {
+      "id": "r08-ryuiji-seitei",
+      "url": "https://www.mhlw.go.jp/content/12400000/001666951.pdf",
+      "dest": "data/sources/r08/mhlw/ryuiji_seitei.pdf",
+      "sha256": "8e035d6747bdc9a376cfd8b64e5c9cccbf5aed44e33f6b3bb2b59d91bc779540",
+      "retrieved_at": "2026-08-28T22:42:49.626Z"
+    },
+    {
+      "id": "r08-ryuiji-ika",
+      "url": "https://www.mhlw.go.jp/content/12400000/001732089.pdf",
+      "dest": "data/sources/r08/mhlw/ryuiji_ika_0730fix.pdf",
+      "sha256": "2215efda7aa5edea80a4799db4832ed88e34879ed16ad84f22e93f16a2b1ab8d",
+      "retrieved_at": "2026-08-28T22:42:50.261Z"
+    },
+    {
+      "id": "r08-ryuiji-yoshiki-ika",
+      "url": "https://www.mhlw.go.jp/content/12400000/001713885.pdf",
+      "dest": "data/sources/r08/mhlw/ryuiji_yoshiki_ika_0619fix.pdf",
+      "sha256": "f2c46ded5d41687096818fb8d8a97882c5db7c6bfd2647a6bd902d5bff96fafb",
+      "retrieved_at": "2026-08-28T22:42:51.150Z"
+    },
+    {
+      "id": "r08-kokuji70-kihon",
+      "url": "https://www.mhlw.go.jp/content/12400000/001675854.pdf",
+      "dest": "data/sources/r08/mhlw/kokuji70_kihon_shisetsu.pdf",
+      "sha256": "84986b79ab50475f4e7d5b18c373de3c1e2ded561d52d6e8d127002ff96bbeaa",
+      "retrieved_at": "2026-08-28T22:42:51.665Z"
+    },
+    {
+      "id": "r08-tsuchi7-kihon-todokede",
+      "url": "https://www.mhlw.go.jp/content/12400000/001732097.pdf",
+      "dest": "data/sources/r08/mhlw/tsuchi7_kihon_todokede_0730fix.pdf",
+      "sha256": "3940ddc81a2af4c5dd5342c57311b0dcee7a151d939bbc88503e62dd34da5f29",
+      "retrieved_at": "2026-08-28T22:42:52.469Z"
+    },
+    {
+      "id": "r08-kokuji71-tokkei",
+      "url": "https://www.mhlw.go.jp/content/12400000/001675855.pdf",
+      "dest": "data/sources/r08/mhlw/kokuji71_tokkei_shisetsu.pdf",
+      "sha256": "905c0781f26fae561f513d4017ea6a3e6a928726cdd1a16d4833665c14f79852",
+      "retrieved_at": "2026-08-28T22:42:53.243Z"
+    },
+    {
+      "id": "r08-tsuchi8-tokkei-todokede",
+      "url": "https://www.mhlw.go.jp/content/12400000/001732104.pdf",
+      "dest": "data/sources/r08/mhlw/tsuchi8_tokkei_todokede_0730fix.pdf",
+      "sha256": "579d454f03be3692578092727da93d06645dd211e4db1f3cefadd66fdde574db",
+      "retrieved_at": "2026-08-28T22:42:54.553Z"
+    },
+    {
+      "id": "r08-checklist-sofu",
+      "url": "https://www.mhlw.go.jp/content/12400000/001693862.pdf",
+      "dest": "data/sources/r08/checklists/checklist_sofu_20260420.pdf",
+      "sha256": "1c1bd7634e7f941cf1eadf9922e049c8163b1f1e6a5abcc070242ca15d857e61",
+      "retrieved_at": "2026-08-28T22:42:55.325Z"
+    },
+    {
+      "id": "r08-checklist-teisei1",
+      "url": "https://www.mhlw.go.jp/content/12400000/001697773.pdf",
+      "dest": "data/sources/r08/checklists/checklist_teisei_20260501.pdf",
+      "sha256": "155cdb6e5bf88c2d494e878fc3af07a47a77fe5adba1d3a7bd420bc8bb4cee98",
+      "retrieved_at": "2026-08-28T22:42:56.047Z"
+    },
+    {
+      "id": "r08-checklist-teisei2",
+      "url": "https://www.mhlw.go.jp/content/12400000/001706142.pdf",
+      "dest": "data/sources/r08/checklists/checklist_teisei_20260529.pdf",
+      "sha256": "8de5165976508fca9bf2171d6aadae2bc322fdd720fcfddd5908872da4f31986",
+      "retrieved_at": "2026-08-28T22:42:56.671Z"
+    },
+    {
+      "id": "r08-checklist-shinryojo-xlsx",
+      "url": "https://www.mhlw.go.jp/content/12400000/001706146.xlsx",
+      "dest": "data/sources/r08/checklists/checklist_shinryojo_0529fix.xlsx",
+      "sha256": "0ad09732447d876092a944aa33e6310f5a73615cc9291505f9d7386914e01723",
+      "retrieved_at": "2026-08-28T22:42:57.224Z"
+    },
+    {
+      "id": "r08-baseup-todokede",
+      "url": "https://www.mhlw.go.jp/content/12400000/001695495.pdf",
+      "dest": "data/sources/r08/checklists/baseup_todokede_20260424.pdf",
+      "sha256": "df61ebfd36f203db039e33260a062bd16f4c744baac6c4337dd01a5061ad26d9",
+      "retrieved_at": "2026-08-28T22:42:57.826Z"
+    },
+    {
+      "id": "r08-qa-01",
+      "url": "https://www.mhlw.go.jp/content/12400000/001678310.pdf",
+      "dest": "data/sources/r08/q_and_a/qa01_20260323.pdf",
+      "sha256": "92ed2030276dae81a92d7be936de1d46ba2e77fa9acf568b5089d3ebe56af200",
+      "retrieved_at": "2026-08-28T22:42:58.239Z"
+    },
+    {
+      "id": "r08-qa-02",
+      "url": "https://www.mhlw.go.jp/content/12400000/001689076.pdf",
+      "dest": "data/sources/r08/q_and_a/qa02_20260401.pdf",
+      "sha256": "ed77a81ff3e54688d3ea37ed9aa85672947838098c615b0e4b1825df0c65a554",
+      "retrieved_at": "2026-08-28T22:42:58.919Z"
+    },
+    {
+      "id": "r08-qa-02-teisei",
+      "url": "https://www.mhlw.go.jp/content/12400000/001689078.pdf",
+      "dest": "data/sources/r08/q_and_a/qa02_teisei_20260409.pdf",
+      "sha256": "d4d07a6030a07d5d7c1887a6345dbb84fada9108a1990f5c06985afe6f778f3c",
+      "retrieved_at": "2026-08-28T22:42:59.514Z"
+    },
+    {
+      "id": "r08-qa-03",
+      "url": "https://www.mhlw.go.jp/content/12400000/001693874.pdf",
+      "dest": "data/sources/r08/q_and_a/qa03_20260420.pdf",
+      "sha256": "31591dcee239595ba43f1204cd6a00cd496c526a35d72c55be171ef737345488",
+      "retrieved_at": "2026-08-28T22:42:59.863Z"
+    },
+    {
+      "id": "r08-qa-04",
+      "url": "https://www.mhlw.go.jp/content/12400000/001694332.pdf",
+      "dest": "data/sources/r08/q_and_a/qa04_20260421.pdf",
+      "sha256": "02cdb6c907fe2b5796be8743935f179e43132490ff3a29e98a721ad065b48b38",
+      "retrieved_at": "2026-08-28T22:43:00.525Z"
+    },
+    {
+      "id": "r08-qa-05",
+      "url": "https://www.mhlw.go.jp/content/12400000/001698587.pdf",
+      "dest": "data/sources/r08/q_and_a/qa05_20260508.pdf",
+      "sha256": "cb7f2aff443a968dee6f34e475159e41b545321b055299441ddfd58861ca933f",
+      "retrieved_at": "2026-08-28T22:43:01.163Z"
+    },
+    {
+      "id": "r08-qa-06",
+      "url": "https://www.mhlw.go.jp/content/12400000/001703573.pdf",
+      "dest": "data/sources/r08/q_and_a/qa06_20260522.pdf",
+      "sha256": "d764d0d136d4e28352c99b111a9f8693f62c2469596e0916566e1e2927e62878",
+      "retrieved_at": "2026-08-28T22:43:01.504Z"
+    },
+    {
+      "id": "r08-qa-07",
+      "url": "https://www.mhlw.go.jp/content/12400000/001707505.pdf",
+      "dest": "data/sources/r08/q_and_a/qa07_20260529.pdf",
+      "sha256": "8817d6edc3df63b14bca0e6e3617da406dfd236676df1273d61056c65b383fb1",
+      "retrieved_at": "2026-08-28T22:43:02.083Z"
+    },
+    {
+      "id": "r08-qa-08",
+      "url": "https://www.mhlw.go.jp/content/12400000/001712853.pdf",
+      "dest": "data/sources/r08/q_and_a/qa08_20260617.pdf",
+      "sha256": "99a020fd31e75523f32514349ae44cd9df6f72fb68ffc95c2fb773bce46a881f",
+      "retrieved_at": "2026-08-28T22:43:02.727Z"
+    },
+    {
+      "id": "r08-qa-09",
+      "url": "https://www.mhlw.go.jp/content/12400000/001716069.pdf",
+      "dest": "data/sources/r08/q_and_a/qa09_20260626.pdf",
+      "sha256": "d9f6beb0859af9d17fa25cffc441e5e331917cfb3c0cfec696ff7c7301c5c190",
+      "retrieved_at": "2026-08-28T22:43:03.368Z"
+    },
+    {
+      "id": "r08-qa-10",
+      "url": "https://www.mhlw.go.jp/content/12400000/001725624.pdf",
+      "dest": "data/sources/r08/q_and_a/qa10_20260717.pdf",
+      "sha256": "747d2b64080c56ed9e153b9dfc9ed298e48bc15142d2c6bd834c248dbbd4b86f",
+      "retrieved_at": "2026-08-28T22:43:03.647Z"
+    },
+    {
+      "id": "r08-qa-11",
+      "url": "https://www.mhlw.go.jp/content/12400000/001731253.pdf",
+      "dest": "data/sources/r08/q_and_a/qa11_20260730.pdf",
+      "sha256": "c53a6fa2ae0749928a954e2ef7034318ab6442562f8b9ec6b5c24a488f933823",
+      "retrieved_at": "2026-08-28T22:43:04.376Z"
+    },
+    {
+      "id": "r08-qa-service",
+      "url": "https://www.mhlw.go.jp/content/12400000/001706045.pdf",
+      "dest": "data/sources/r08/q_and_a/qa_service_20260529.pdf",
+      "sha256": "4ce62e16a233a120419457d7812668b9eb510ea10487f88f819fc9f1bfe50771",
+      "retrieved_at": "2026-08-28T22:43:05.001Z"
+    },
+    {
+      "id": "r08-teisei-20260402",
+      "url": "https://www.mhlw.go.jp/content/12400000/001698334.pdf",
+      "dest": "data/sources/r08/q_and_a/teisei_20260402.pdf",
+      "sha256": "57316f9df0d0c889b5bc57c04fbd99e1ab6fb7091c2e5a79c4f3a54b48f022d2",
+      "retrieved_at": "2026-08-28T22:43:05.946Z"
+    },
+    {
+      "id": "r08-teisei-20260501",
+      "url": "https://www.mhlw.go.jp/content/12400000/001700249.pdf",
+      "dest": "data/sources/r08/q_and_a/teisei_20260501.pdf",
+      "sha256": "886f21c87c8bf2357473454548cf88b397b920ea5b5f5fc54a779229702b8294",
+      "retrieved_at": "2026-08-28T22:43:06.910Z"
+    },
+    {
+      "id": "r08-teisei-20260529",
+      "url": "https://www.mhlw.go.jp/content/12400000/001707506.pdf",
+      "dest": "data/sources/r08/q_and_a/teisei_20260529.pdf",
+      "sha256": "a7420c7940317ca02ad17ccec52c93493e355ce444fbac728d9b881ca9f5a60d",
+      "retrieved_at": "2026-08-28T22:43:07.660Z"
+    },
+    {
+      "id": "r08-teisei-20260619",
+      "url": "https://www.mhlw.go.jp/content/12400000/001713779.pdf",
+      "dest": "data/sources/r08/q_and_a/teisei_20260619.pdf",
+      "sha256": "4b150751fdf9a53ea4efd70f6156cfc1096a290a37022648de7908e4567a97e3",
+      "retrieved_at": "2026-08-28T22:43:08.569Z"
+    },
+    {
+      "id": "r08-teisei-20260730",
+      "url": "https://www.mhlw.go.jp/content/12400000/001731226.pdf",
+      "dest": "data/sources/r08/q_and_a/teisei_20260730.pdf",
+      "sha256": "2681ff7383277541826a20bf3bbf16e54dbe844adf22e4c630138ddf02cfaf2c",
+      "retrieved_at": "2026-08-28T22:43:09.390Z"
+    },
+    {
+      "id": "r08-gaiyo-zentai",
+      "url": "https://www.mhlw.go.jp/content/12400000/001701061.pdf",
+      "dest": "data/sources/r08/mhlw/gaiyo_zentai.pdf",
+      "sha256": "c3c043b116ac284fcde755e81155761c88d6a74cfa8034fe98541cbbad3ecb92",
+      "retrieved_at": "2026-08-28T22:43:09.758Z"
+    },
+    {
+      "id": "r08-master-ika",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/",
+      "dest": "data/sources/r08/masters/shinryohoshu_top.html",
+      "sha256": "640843550a0e34d1ccefbc18447f7eec5119bb8f716bc45252aa56ba6cafc8f8",
+      "retrieved_at": "2026-08-28T22:43:11.325Z"
+    },
+    {
+      "id": "r08-ssk-kankei-tsuchi",
+      "url": "https://www.ssk.or.jp/shinryohoshu/kankeitsuuchi/kankeitsuuchi_r08.html",
+      "dest": "data/sources/r08/mhlw/ssk_kankeitsuuchi_r08.html",
+      "sha256": "335b98fe62b6e387c81210c084ae09e642860d077459dc045b18f840a774305d",
+      "retrieved_at": "2026-08-28T22:43:12.717Z"
+    },
+    {
+      "id": "r08-kouseikyoku-kanto",
+      "url": "https://kouseikyoku.mhlw.go.jp/kantoshinetsu/iryo_shido/r08kaitei_00001.html",
+      "dest": "data/sources/r08/kouseikyoku/kanto_r08kaitei.html",
+      "sha256": "cfa3d9a362cf3b9cf2dd42e77094640ae80474630557e2ba084bafa6a0b6d2f7",
+      "retrieved_at": "2026-08-28T22:43:13.456Z"
+    },
+    {
+      "id": "r08-master-ika-zip",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/downloadMenu/sFile",
+      "dest": "data/sources/r08/masters/master_ika_s.zip",
+      "sha256": "9ebaddd142e644349c4d70370d8b8ea6a46cf5d6a99188112863ece0d66363ca",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-master-iyakuhin-zip",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/downloadMenu/yFile",
+      "dest": "data/sources/r08/masters/master_iyakuhin_y.zip",
+      "sha256": "5b6884f43b745365a0c0cbb3719f1efca145ebf97216aa562184d64ad4731597",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-master-kizai-zip",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/downloadMenu/tFile",
+      "dest": "data/sources/r08/masters/master_kizai_t.zip",
+      "sha256": "c2ac81d214cfbecdecebec04002a3e1994e89ef542bac34fc016c4ca745dd552",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-master-comment-zip",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/downloadMenu/cFile",
+      "dest": "data/sources/r08/masters/master_comment_c.zip",
+      "sha256": "e7b4a676c72f5a7fe7cb67c729638ae449800482ecad790ff9353c99024f12ef",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-spec-rec1",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/spec/R08rec1.pdf",
+      "dest": "data/sources/r08/masters/spec_R08rec1.pdf",
+      "sha256": "e9986b9ba0dca2c5296f55cdc1ff7abc17aabfc467a7d1dcb991c9af484d7dd4",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-spec-rec2",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/spec/R08rec2.pdf",
+      "dest": "data/sources/r08/masters/spec_R08rec2.pdf",
+      "sha256": "d40c71bfb63134f9c9a309b4d30eec56aebeb5b1f76815f98cb2b1aac33b27bb",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-spec-rec3",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/spec/R08rec3.pdf",
+      "dest": "data/sources/r08/masters/spec_R08rec3.pdf",
+      "sha256": "f392bed24db36b967cd4ce5f592e7b0ff038eec33604ac9cd00f8f930c508169",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-ssk-edt-ika",
+      "url": "https://www.ssk.or.jp/seikyushiharai/tensuhyo/ikashika/index.files/tensuhyo_02.zip",
+      "dest": "data/sources/r08/masters/ssk_ika_denshitensuhyo_R08.zip",
+      "sha256": "89fccf22c1d93b47bfe17d6f9b983ec50f0eec88c97767e62637e3c1e0aca3bc",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-ssk-edt-tebiki",
+      "url": "https://www.ssk.or.jp/seikyushiharai/tensuhyo/ikashika/index.files/tensuhyo_01.pdf",
+      "dest": "data/sources/r08/masters/ssk_tebiki_ika.pdf",
+      "sha256": "6fcb3c132b5d1b92f6ab6b1bca53a712caea8e5ab8b57a043a77c48053b1e1f6",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-ssk-ikashika-index",
+      "url": "https://www.ssk.or.jp/seikyushiharai/tensuhyo/ikashika/index.html",
+      "dest": "data/sources/r08/masters/ssk_ikashika_index.html",
+      "sha256": "ce4a03abbe8c5bbac9ba67a35ab3803dc72c8809d58bc7a4caff905629fb0718",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-hokan-tables-zip",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r.zip",
+      "dest": "data/sources/r08/masters/table_kihon_r.zip",
+      "sha256": "5e379fe6dcf6978d413717fe839a248e0e3b63a8350b16593990c8e511896b6b",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-hokan-table-r2",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r2.zip",
+      "dest": "data/sources/r08/masters/table_kihon_kasan_r2.zip",
+      "sha256": "7235a1a64f9db8a1d4c708419b2a69660ae2f680085fd9a612caf6afe7862394",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-hokan-table-r3",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r3.zip",
+      "dest": "data/sources/r08/masters/table_santei_gendo_r3.zip",
+      "sha256": "94ad90345854f92f4706ee2556fd386ee82cb1396fc62796506f30014f2da22a",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-hokan-table-r4",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r4.zip",
+      "dest": "data/sources/r08/masters/table_heisantei_haihan_r4.zip",
+      "sha256": "cee55f7a410cc3bce21d386fe015a60507d1ef5ecae3e0d03408393848f5a310",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-hokan-table-r5",
+      "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r5.zip",
+      "dest": "data/sources/r08/masters/table_shisetsu_kijun_r5.zip",
+      "sha256": "d9dc1f25dd75c03ff437fcb87156654d0e1150bfe222af5776e0602dc266e553",
+      "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    }
+  ]
+}

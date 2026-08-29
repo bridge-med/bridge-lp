@@ -1,0 +1,60 @@
+{
+  "_readme": [
+    "医科診療行為マスター(CSV/Shift_JIS)の列マッピング定義。列番号は0始まり。",
+    "照合根拠: マスターファイル仕様説明書 本編(spec_R08rec1.pdf)「(7) 医科診療行為マスター」(p26〜)の項番定義と、",
+    "s_20260731.csv の実データ(初診料/再診料/遠隔モニタリング加算等)での突合による。2026-08-28実施。",
+    "150列のうち検証済みの列のみ定義する。未検証の列を推測で追加しないこと。",
+    "name_official(基本漢字名称)は仕様書の項番との対応を桁数計算では確定しておらず、実データ3件以上の内容一致で検証した(observed)。",
+    "verified を false に戻すと parse は再び停止する(安全装置)。"
+  ],
+  "master": "ika_shinryokoi",
+  "encoding": "shift_jis",
+  "verified": true,
+  "verified_against": "spec_R08rec1.pdf (7)医科診療行為マスター p26- + s_20260731.csv 実データ突合",
+  "verified_at": "2026-08-28",
+  "columns": {
+    "change_kbn": 0,
+    "master_type": 1,
+    "code": 2,
+    "short_name": 4,
+    "name_kana": 6,
+    "data_kikaku_code": 7,
+    "points_kbn": 10,
+    "points": 11,
+    "inout_kbn": 12,
+    "kouki_kbn": 13,
+    "name_official": 112
+  },
+  "columns_observed_notes": {
+    "name_official": "idx112。初診料/乳幼児加算(初診)/心大血管疾患リハ(1)等で基本漢字名称と内容一致を確認(observed)",
+    "date_cols": "idx86=20260601(全行で施行日と一致・変更年月日と推定), idx87/idx31=99999999(廃止系と推定)。項番対応が未確定のためマッピングに含めない"
+  },
+  "code_maps": {
+    "_source": "spec_R08rec1.pdf 項番11(点数識別)・項番13(入外適用区分)の定義より転記",
+    "points_kbn": {
+      "1": "金額",
+      "3": "点数(プラス)",
+      "4": "購入価格(点数)",
+      "5": "%加算",
+      "6": "%減算",
+      "7": "減点診療行為",
+      "8": "点数(マイナス)"
+    },
+    "inout_kbn": {
+      "0": "入院・入院外とも可",
+      "1": "入院レセプトに限る",
+      "2": "入院外レセプトに限る"
+    }
+  },
+  "edt": {
+    "_source": "ssk_tebiki_ika.pdf p25-30 の各テーブルレコード情報表記仕様より。実データ列数一致を確認済み",
+    "hojo": { "cols": 27, "map": { "change_kbn": 0, "code": 1, "short_name": 2, "hokatsu_unit1": 3, "hokatsu_group1": 4, "hokatsu_unit2": 5, "hokatsu_group2": 6, "hokatsu_unit3": 7, "hokatsu_group3": 8, "haihan_day": 9, "haihan_month": 10, "haihan_simul": 11, "haihan_week": 12, "nyuin_group": 19, "santei_kaisu_rel": 20, "start_date": 25, "end_date": 26 } },
+    "hokatsu": { "cols": 7, "map": { "change_kbn": 0, "group_no": 1, "code": 2, "short_name": 3, "tokurei": 4, "start_date": 5, "end_date": 6 } },
+    "haihan": { "cols": 10, "map": { "change_kbn": 0, "code1": 1, "name1": 2, "code2": 3, "name2": 4, "haihan_kbn": 5, "tokurei": 6, "start_date": 8, "end_date": 9 } },
+    "nyuin": { "cols": 8, "map": { "change_kbn": 0, "group_no": 1, "code": 2, "short_name": 3, "kasan_id": 4, "start_date": 6, "end_date": 7 } },
+    "santei_kaisu": { "cols": 14, "map": { "change_kbn": 0, "code": 1, "short_name": 2, "unit_code": 3, "unit_name": 4, "max_count": 5, "tokurei": 6, "start_date": 12, "end_date": 13 } },
+    "haihan_kbn_map": { "1": "コード①を算定する", "2": "コード②を算定する", "3": "いずれか一方を算定する" },
+    "hokatsu_unit_map": { "0": "関連なし", "1": "1日につき", "2": "同一月内", "3": "同時", "5": "手術前1週間", "6": "1手術につき" },
+    "haihan_file_types": { "03-1": "same_day", "03-2": "same_month", "03-3": "simultaneous", "03-4": "same_week" }
+  }
+}

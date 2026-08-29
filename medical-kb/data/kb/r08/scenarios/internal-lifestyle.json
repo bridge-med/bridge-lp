@@ -1,0 +1,29 @@
+{
+  "id": "r08-scn-internal-lifestyle",
+  "specialty_id": "internal",
+  "title": "生活習慣病(高血圧・2型糖尿病)の継続外来管理(一般内科)",
+  "patient": { "age": 58, "chief_complaint": "高血圧・2型糖尿病の定期通院", "visit": "revisit", "condition": "月1回通院・内服治療中(インスリン非使用)" },
+  "confidence": "verified",
+  "notes": "2026-08-28: 主要スロットを一次資料で解決。R8の生活習慣病管理料は(I)が主病別点数(脂質610/高血圧660/糖尿病760)で検査・注射を包括、(II)は333点で検査は出来高、という二択構造。本シナリオは主病を高血圧とし(I)660点で解決した((II)選択時の姿はreasonに記載)。",
+  "steps": [
+    { "day_offset": 0, "action": "再診。血圧測定・療養計画に基づく指導" },
+    { "day_offset": 0, "action": "採血(HbA1c・脂質・肝腎機能等)" },
+    { "day_offset": 0, "action": "院外処方箋の交付(降圧薬・血糖降下薬・28日以上処方)" },
+    { "day_offset": 30, "action": "翌月再診。検査結果の説明と療養計画の見直し" }
+  ],
+  "billing": [
+    { "step_no": 1, "kind": "candidate", "label": "再診料", "item_id": "r08-A001", "points": 76, "status": "resolved", "confidence": "verified", "reason": "一般病床200床未満で算定(告示A001注1)" },
+    { "step_no": 1, "kind": "candidate", "label": "生活習慣病管理料(I)(高血圧を主病)", "item_id": "r08-B001-3-1-ht", "points": 660, "status": "resolved", "confidence": "verified", "reason": "月1回。治療計画策定と同意が算定要件(告示B001-3注1)。主病が糖尿病なら760点(r08-B001-3-1-dm)、脂質なら610点。施設基準は満たす型で届出不要(r08-fs-b001-3)" },
+    { "step_no": 1, "kind": "excluded", "label": "外来管理加算", "item_id": "r08-A001-n8", "status": "resolved", "confidence": "verified", "reason": "生活習慣病管理料(I)にA001注8の医学管理(外来管理加算)は包括される(rule-0002)" },
+    { "step_no": 2, "kind": "excluded", "label": "検体検査料(採血・HbA1c・生化学・判断料)", "status": "resolved", "item_id": "r08-B001-3-1-ht", "confidence": "verified", "reason": "第3部検査は生活習慣病管理料(I)に包括(rule-0002)。(II)333点を選択した場合は検査を出来高で算定できるため、検査量が多い患者では(II)が有利になり得る((I)算定月から6月は(II)へ変更不可・rule-0004)" },
+    { "step_no": 3, "kind": "candidate", "label": "処方箋料", "item_id": "r08-F400-3", "points": 60, "status": "resolved", "confidence": "verified", "reason": "院外処方(その他区分60点)。向精神薬多剤20点・7種類以上内服32点の減点区分に注意" },
+    { "step_no": 3, "kind": "candidate", "label": "特定疾患処方管理加算", "item_id": "r08-F400-n4", "points": 56, "status": "resolved", "confidence": "verified", "reason": "定める疾患を主病とする患者への28日以上処方・月1回(告示F400注4)。対象疾患の別表(高血圧・糖尿病等が含まれるか)は告示別表で個別確認する" },
+    { "step_no": 3, "kind": "candidate", "label": "一般名処方加算1", "item_id": "r08-F400-n6-i", "points": 8, "status": "resolved", "confidence": "verified", "reason": "一般名処方箋交付時(告示F400注6)。要件により加算2(6点)" },
+    { "kind": "note", "label": "確認論点: 特定疾患処方管理加算の対象疾患別表に高血圧・糖尿病が含まれるか", "status": "unresolved", "reason": "告示の別表(厚生労働大臣が定める疾患)を確認しevidence化する。R6改定で生活習慣病の扱いが変わった経緯があるため要注意" },
+    { "kind": "note", "label": "確認論点: 療養計画書の様式・交付/同意の頻度", "status": "unresolved", "reason": "留意事項通知B001-3と別紙様式で確認し、記録要件(documentation_req)に反映する" }
+  ],
+  "open_questions": [
+    "(I)と(II)の選択基準の実務(検査包括のロス vs 点数差)をKnowledge Packの経営節に展開する",
+    "オンライン診療併用時の(II)290点の運用"
+  ]
+}

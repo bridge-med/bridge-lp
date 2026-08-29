@@ -1,0 +1,32 @@
+{
+  "id": "r08-scn-dialysis-maintenance",
+  "specialty_id": "dialysis",
+  "title": "維持血液透析の外来通院(1か月・週3回)(人工透析)",
+  "patient": { "age": 68, "chief_complaint": "慢性腎臓病(維持透析中)", "visit": "revisit", "condition": "週3回・1回4時間の維持血液透析(施設区分1・導入期は過ぎている)" },
+  "confidence": "verified",
+  "notes": "2026-08-28: 主要スロットを一次資料で解決。人工腎臓は施設区分(1〜3・届出)×時間区分の9セル+その他で、本シナリオは区分1・4時間以上5時間未満(2,016点)で解決。透析液等の薬剤は包括(rule-0006)、月次の外来医学管理料は検査包括(rule-0007)。",
+  "steps": [
+    { "day_offset": 0, "action": "外来維持血液透析(4時間・週3回の初回)" },
+    { "day_offset": 2, "action": "外来維持血液透析(2回目)" },
+    { "day_offset": 4, "action": "外来維持血液透析(3回目)。以降1か月継続(月12〜13回想定)" },
+    { "day_offset": 7, "action": "月1回の医師による詳細な評価・検査(採血等)" },
+    { "day_offset": 30, "action": "月末: 月単位の管理料・加算の整理" }
+  ],
+  "billing": [
+    { "step_no": 1, "kind": "candidate", "label": "人工腎臓(慢性維持透析1・4時間以上5時間未満)", "item_id": "r08-J038-1-ro", "points": 2016, "status": "resolved", "confidence": "verified", "reason": "1日につき・透析実施日ごと。区分1〜3×時間区分の全点数はitemsのconditionsに記載。月14回上限(注8)。カニュレーション料込み(注4)" },
+    { "step_no": 1, "kind": "candidate", "label": "透析液水質確保加算", "item_id": "r08-J038-n9", "points": 10, "status": "resolved", "confidence": "verified", "reason": "届出医療機関で1日につき加算(注9)" },
+    { "step_no": 1, "kind": "excluded", "label": "透析液・血液凝固阻止剤・生理食塩水等の薬剤料", "item_id": "r08-J038-1-ro", "status": "resolved", "confidence": "verified", "reason": "慢性維持透析1〜3の所定点数に包括(注6・rule-0006)。エリスロポエチン等『別に厚生労働大臣が定める薬剤』の該当範囲は告示別表で個別確認" },
+    { "step_no": 1, "kind": "candidate", "label": "ダイアライザー(特定保険医療材料)", "status": "unresolved", "reason": "特定器材マスター・材料価格基準から解決する(次回)。包括対象外の材料の別定めも確認" },
+    { "step_no": 1, "kind": "candidate", "label": "再診料(透析日)", "item_id": "r08-A001", "points": 76, "status": "resolved", "confidence": "verified", "reason": "透析日の再診料自体は算定可。外来管理加算は処置(人工腎臓)実施日のため算定不可(rule-0001)" },
+    { "step_no": 1, "kind": "excluded", "label": "外来管理加算(透析日)", "item_id": "r08-A001-n8", "status": "resolved", "confidence": "verified", "reason": "第9部処置(人工腎臓)実施日は算定不可(告示A001注8・rule-0001)" },
+    { "step_no": 4, "kind": "excluded", "label": "定期採血の検査料・判断料", "item_id": "r08-B001-15", "status": "resolved", "confidence": "verified", "reason": "慢性維持透析患者外来医学管理料に注2列挙の検査・判断料が包括(rule-0007)。列挙外の検査は算定可" },
+    { "step_no": 5, "kind": "candidate", "label": "慢性維持透析患者外来医学管理料", "item_id": "r08-B001-15", "points": 2211, "status": "resolved", "confidence": "verified", "reason": "月1回(注1)。包括検査の範囲はrule-0007の別表参照" },
+    { "step_no": 1, "kind": "facility_req", "label": "人工腎臓(慢性維持透析1)の施設基準(様式87の4)", "fs_id": "r08-fs-j038-1", "status": "resolved", "confidence": "verified", "reason": "装置26台未満又は装置1台当たり患者比3.5未満+水質管理+透析機器安全管理委員会(専任医師又は臨床工学技士)。区分2は26台以上かつ3.5〜4.0未満" },
+    { "kind": "note", "label": "確認論点: 導入期加算(導入期患者受入時)", "status": "resolved", "item_id": "r08-J038-n2-i", "confidence": "verified", "reason": "導入期1月は1日につき200点(加算1・届出様式2の2)。加算2=410/加算3=810(体制要件はfs-j038-donyuki1)。本シナリオの患者は導入期外のため算定なし" },
+    { "kind": "note", "label": "確認論点: 障害者等加算140点(注3)の対象患者要件", "status": "unresolved", "reason": "『著しく人工腎臓が困難な障害者等』の範囲を留意事項通知で確認する" }
+  ],
+  "open_questions": [
+    "HIF-PH阻害薬・ESAの『別に厚生労働大臣が定める薬剤』該当範囲(告示別表)",
+    "下肢末梢動脈疾患指導管理加算等の体制加算の拾い上げ"
+  ]
+}

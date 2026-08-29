@@ -111,6 +111,7 @@ a { color: var(--blue-deep); }
   font: 700 11px/1 var(--sans);
   border-radius: 999px;
   padding: 7px 10px;
+  min-height: 44px; /* 44px化はまず高さ(v33 qa指摘の33px)。幅はHUD 8ボタンが390px幅に収まらないため自然幅のまま(WCAG AAの24pxは満たす) */
 }
 .speed-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
 .speed-btn.skip { background: var(--amber-pale); border-color: rgba(201,138,45,0.4); color: var(--amber); font-weight: 800; }
@@ -151,6 +152,7 @@ a { color: var(--blue-deep); }
   padding: 12px 8px;
   border-radius: 12px 12px 0 0;
   margin-right: 4px;
+  min-height: 44px;
 }
 .tab-btn:last-child { margin-right: 0; }
 .tab-btn.on { background: var(--card); color: var(--blue-deep); box-shadow: 0 -4px 12px rgba(62,124,166,0.08); }
@@ -221,6 +223,7 @@ a { color: var(--blue-deep); }
   border-radius: 999px;
   padding: 8px 11px;
   box-shadow: 0 2px 8px rgba(34, 51, 61, 0.08);
+  min-height: 44px;
 }
 .view-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
 
@@ -264,6 +267,8 @@ a { color: var(--blue-deep); }
   border-radius: 9px;
   padding: 9px 11px;
   white-space: nowrap;
+  min-height: 44px;
+  min-width: 44px;
 }
 .mini-btn.plus { border-color: rgba(79,169,140,0.5); color: var(--green-deep); background: var(--green-pale); }
 .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -276,6 +281,7 @@ a { color: var(--blue-deep); }
   font: 700 12px/1.3 var(--sans);
   border-radius: 999px;
   padding: 9px 14px;
+  min-height: 44px;
 }
 .op-btn small { color: var(--ink-3); font-weight: 600; }
 .op-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
@@ -1151,6 +1157,9 @@ input[type="range"]::-moz-range-thumb {
 @media (min-width: 900px) {
   .head-inner, .hud, .mission-bar, .tabs, .main { max-width: 1400px; }
 
+  /* 法人タブは拠点の索引=読む列。行長を本文幅に収める(第23条) */
+  #tab-corp.show { max-width: 800px; margin-left: auto; margin-right: auto; }
+
   /* ステージのあるタブ(院内・タウン): 2カラムのコックピット */
   #tab-clinic.show, #tab-town.show {
     display: grid;
@@ -1316,3 +1325,65 @@ input[type="range"]::-moz-range-thumb {
 .persona-speech svg { flex: 0 0 auto; }
 .walk-hud-right { display: flex; gap: 8px; pointer-events: auto; }
 .walk-cam { font-size: 17px; padding: 12px 14px; }
+
+/* ===== 診療報酬KB統合(v33): 会計詳細・学習モード ===== */
+.rcpt-head { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.rcpt-head-t { flex: 1 1 auto; min-width: 0; }
+.rcpt-tools { margin-left: auto; display: flex; gap: 4px; flex: 0 0 auto; }
+.sim-tag { font: 600 9px/1 var(--sans); color: var(--ink-3); border: 1px solid var(--line); border-radius: 3px; padding: 1px 3px; font-style: normal; margin-left: 3px; }
+.rcpt-detail { margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 7px; }
+.kb-ev { padding: 7px 0; border-bottom: 1px dotted var(--line); font: 600 11px/1.5 var(--sans); color: var(--ink); }
+.kb-reject { padding: 6px 8px; border-radius: 8px; background: var(--bg-deep); border-left: 3px solid var(--ink-3); margin: 6px 0; font: 600 11px/1.5 var(--sans); color: var(--ink); }
+.kb-cond { font: 500 10.5px/1.55 var(--sans); color: var(--ink-2); margin-top: 2px; }
+.kb-quote { font: 500 10px/1.6 var(--sans); color: var(--ink-3); margin-top: 3px; border-left: 2px solid var(--line); padding-left: 6px; }
+.kb-trace { font: 500 9px/1.4 var(--en); color: var(--ink-3); background: var(--bg); border-radius: 6px; padding: 6px; overflow-x: auto; max-height: 180px; }
+.kijun-row { align-items: flex-start; }
+.kijun-row b { word-break: keep-all; }
+.kijun-kb { font: 500 10px/1.55 var(--sans); color: var(--ink-3); margin-top: 3px; }
+.kijun-kb b { color: var(--ink-2); }
+.kijun-badge.alt { color: var(--blue-deep); background: transparent; border-color: var(--blue); }
+.kijun-badge.off { color: var(--ink-3); background: transparent; border-color: var(--line); }
+.kijun-badge.wrap { white-space: normal; text-align: left; border-radius: 12px; display: inline-block; max-width: 100%; }
+.spec-row { padding: 6px 2px; border-bottom: 1px dotted var(--line); font: 600 12px/1.5 var(--sans); color: var(--ink); }
+.spec-row small { display: block; font-weight: 500; color: var(--ink-3); }
+
+/* ===== 診療科部門(v35): 法人タブ 索引+1件展開 ===== */
+.site-row {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; text-align: left;
+  border: 1px solid var(--line); background: var(--card);
+  border-radius: 12px; padding: 10px 12px; margin: 6px 0;
+  font: 700 13px/1.5 var(--sans); color: var(--ink);
+  min-height: 44px;
+}
+.site-row.on { border-color: rgba(62, 124, 166, 0.45); background: var(--blue-pale); }
+.site-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-badge {
+  flex: 0 0 auto; font: 700 10px/1 var(--sans); color: var(--blue-deep);
+  background: var(--blue-pale); border: 1px solid rgba(62, 124, 166, 0.25);
+  border-radius: 999px; padding: 4px 8px;
+}
+.site-row.on .site-badge { background: var(--card); }
+.site-warn { flex: 0 0 auto; font-size: 12px; }
+.site-stat { margin-left: auto; font: 700 11px/1.4 var(--en); color: var(--ink-3); white-space: nowrap; }
+.site-caret { flex: 0 0 auto; color: var(--ink-3); font-size: 10px; }
+.site-detail { border-left: 3px solid rgba(62, 124, 166, 0.25); margin: 2px 0 12px; padding: 4px 0 4px 10px; }
+
+/* 部門カード: 主役レバー(排他選択)。kb-rejectの逆向き=選択中を左ボーダーで示す */
+.dept-lever { margin: 10px 0; }
+.dept-lever .ctrl-head { display: block; margin-bottom: 6px; }
+.choice-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  width: 100%; text-align: left;
+  border: 1px solid var(--line); background: var(--card);
+  border-left: 3px solid var(--line);
+  border-radius: 8px; padding: 9px 10px; margin: 5px 0;
+  font: 500 11px/1.55 var(--sans); color: var(--ink-2);
+  min-height: 44px;
+}
+.choice-row b { flex: 0 0 auto; font: 800 12px/1.4 var(--sans); color: var(--ink); }
+.choice-row.on { border-left-color: var(--blue); background: var(--blue-pale); color: var(--ink); }
+.choice-row.on b { color: var(--blue-deep); }
+.spec-open { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; }
+.spec-open small { flex: 1 1 100%; font: 500 10px/1.5 var(--sans); color: var(--ink-3); }
+.spec-open .mini-btn { flex: 0 0 auto; }
