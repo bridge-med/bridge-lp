@@ -1316,3 +1316,16 @@ input[type="range"]::-moz-range-thumb {
 .persona-speech svg { flex: 0 0 auto; }
 .walk-hud-right { display: flex; gap: 8px; pointer-events: auto; }
 .walk-cam { font-size: 17px; padding: 12px 14px; }
+
+/* ===== 診療報酬KB統合(v33): 会計詳細・学習モード ===== */
+.rcpt-tools { float: right; display: flex; gap: 4px; }
+.rcpt-row.kb b { color: var(--blue); }
+.sim-tag { font: 600 9px/1 var(--sans); color: var(--ink-3); border: 1px solid var(--line); border-radius: 3px; padding: 1px 3px; font-style: normal; margin-left: 3px; }
+.rcpt-detail { margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 7px; }
+.kb-ev, .kb-reject { padding: 6px 8px; border-radius: 8px; background: var(--bg-deep); margin-bottom: 6px; font: 600 11px/1.5 var(--sans); color: var(--ink); }
+.kb-reject { border-left: 3px solid var(--ink-3); }
+.kb-cond { font: 500 10.5px/1.55 var(--sans); color: var(--ink-2); margin-top: 2px; }
+.kb-quote { font: 500 10px/1.6 var(--sans); color: var(--ink-3); margin-top: 3px; border-left: 2px solid var(--line); padding-left: 6px; }
+.kb-trace { font: 500 9px/1.4 var(--en); color: var(--ink-3); background: var(--bg); border-radius: 6px; padding: 6px; overflow-x: auto; max-height: 180px; }
+.kijun-kb { font: 500 10px/1.55 var(--sans); color: var(--ink-3); margin-top: 3px; }
+.kijun-kb b { color: var(--ink-2); }
