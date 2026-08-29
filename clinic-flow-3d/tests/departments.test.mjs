@@ -14,6 +14,7 @@ const INTERNAL = require(join(ROOT, 'app', 'specialties', 'internal-medicine.js'
 const OPHTHA = require(join(ROOT, 'app', 'specialties', 'ophthalmology.js'));
 const DIALYSIS = require(join(ROOT, 'app', 'specialties', 'dialysis.js'));
 const HOMECARE = require(join(ROOT, 'app', 'specialties', 'homecare.js'));
+const PSYCH = require(join(ROOT, 'app', 'specialties', 'psychiatry.js'));
 
 REIMB.init(KB);
 DEPT.init(REIMB, KB);
@@ -369,6 +370,73 @@ t('1日の訪問枠(移動+診療時間)を超えた分は翌日に繰り越さ�
   ok(agg.info.visits < 40, `全件は回れない(実際${agg.info.visits}件)`);
   ok(agg.info.deferred > 0, `繰越が出る(${agg.info.deferred}件)`);
   ok(agg.info.visits + agg.info.deferred >= 40 - 5, '回った+繰越で概ね全件を説明できる');
+});
+
+console.log('# 精神科・心療内科部門');
+
+t('通院精神療法・心身医学療法の点数はKBと一致する', () => {
+  const dept = DEPT.create(PSYCH, 1);
+  const p = { pr: 'mood', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r1 = DEPT.evalVisit(PSYCH, dept, p, { type: 'revisit', kbActs: [{ id: 'i002Long' }] }, 1);
+  eq(r1.ev.billableItems.find((b) => b.itemId === 'r08-I002-1-ha-1-1').points, REIMB.pointsOf('r08-I002-1-ha-1-1'));
+  const p2 = { pr: 'shinshin', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r2 = DEPT.evalVisit(PSYCH, dept, p2, { type: 'revisit', kbActs: [{ id: 'i004Revisit' }] }, 1);
+  eq(r2.ev.billableItems.find((b) => b.itemId === 'r08-I004-2-ro').points, REIMB.pointsOf('r08-I004-2-ro'));
+});
+
+t('初診60分のセルは同一初診に1回だけ(初診料と同じ追跡)', () => {
+  const dept = DEPT.create(PSYCH, 1);
+  const p = { pr: 'mood', mc: {}, wc: {}, lb: {}, fb: false, sv: 0 };
+  const r1 = DEPT.evalVisit(PSYCH, dept, p, { type: 'first', kbActs: [{ id: 'i002FirstLong' }] }, 1);
+  ok(r1.ev.billableItems.some((b) => b.itemId === 'r08-I002-1-ro-1-1'), '初診日は算定');
+  const r2 = DEPT.evalVisit(PSYCH, dept, p, { type: 'revisit', kbActs: [{ id: 'i002FirstLong' }] }, 10);
+  ok(r2.ev.rejectedItems.some((b) => b.itemId === 'r08-I002-1-ro-1-1'), '再診では却下');
+});
+
+t('通院精神療法は週1回まで(同週2回目は却下)', () => {
+  const dept = DEPT.create(PSYCH, 1);
+  const p = { pr: 'mood', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  DEPT.evalVisit(PSYCH, dept, p, { type: 'revisit', kbActs: [{ id: 'i002Std' }] }, 8);
+  const r = DEPT.evalVisit(PSYCH, dept, p, { type: 'revisit', kbActs: [{ id: 'i002Std' }] }, 10);
+  ok(r.ev.rejectedItems.some((b) => b.itemId === 'r08-I002-1-ha-2-1'), '同週2回目は却下');
+});
+
+t('通院精神療法の算定日は外来管理加算が却下される(A001注8の精神科専門療法)', () => {
+  const dept = DEPT.create(PSYCH, 1);
+  const p = { pr: 'anxiety', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r = DEPT.evalVisit(PSYCH, dept, p, { type: 'revisit', kbActs: [{ id: 'i002Std' }, { id: 'kanri' }, { id: 'presc' }] }, 1);
+  ok(r.ev.billableItems.some((b) => b.itemId === 'r08-I002-1-ha-2-1'), '通院精神療法は算定');
+  ok(r.ev.rejectedItems.some((b) => b.itemId === 'r08-A001-n8'), '外来管理加算は却下');
+  ok(r.ev.billableItems.some((b) => b.itemId === 'r08-F400-3'), '処方箋料は算定できる');
+});
+
+t('精神科180日運用: 収益は全てエンジン算定・I002患者とI004患者が混ざらない(rule-0010の運用)', () => {
+  const dept = DEPT.create(PSYCH, 1);
+  const rand = rng(51);
+  let revenue = 0, engineYen = 0;
+  for (let d = 1; d <= 180; d++) {
+    const agg = DEPT.runDay(PSYCH, dept, ctx(d, rand, d % 7 === 0 ? CLOSED : OPEN));
+    revenue += agg.revenue; engineYen += agg.points * 10;
+  }
+  eq(revenue, engineYen, '収益=エンジン算定のみ(概算なし)');
+  ok(dept.pt.length > 60, `名簿が育つ(${dept.pt.length}人)`);
+  for (const p of dept.pt) {
+    const hasI002 = Object.keys(p.wc).concat(Object.keys(p.mc)).some((k) => k.indexOf('r08-I002') === 0);
+    const hasI004 = Object.keys(p.wc).concat(Object.keys(p.mc)).some((k) => k.indexOf('r08-I004') === 0);
+    ok(!(hasI002 && hasI004), '同一患者にI002とI004が混在しない');
+  }
+});
+
+t('30分以上の方針は1日の診察枠を圧迫し、超えた分は翌日へ繰り越される', () => {
+  const dept = DEPT.create(PSYCH, 1);
+  dept.policy.timePlan = 'long';
+  for (let i = 0; i < 30; i++) {
+    dept.seq++;
+    dept.pt.push({ id: 'psx' + i, pr: 'mood', en: 1, nv: 8, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, iv: 14 });
+  }
+  const agg = DEPT.runDay(PSYCH, dept, ctx(8, rng(3)));
+  ok(agg.info.usedMin <= agg.info.budgetMin, '枠を超えない');
+  ok(agg.info.deferred > 0, `繰越が出る(${agg.info.deferred}件)`);
 });
 
 console.log(failed ? `\nNG: ${failed}/${n} 失敗` : `\n全${n}件 合格`);

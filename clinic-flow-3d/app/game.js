@@ -3318,6 +3318,27 @@
         ${deptActionsHtml(m, d) || '<span class="kijun-badge">導入済みの設備で診療中</span>'}
       </div>`;
     }
+    if (m.id === 'psychiatry') {
+      const cur = d.policy.timePlan;
+      const i = d.last && d.last.info;
+      return `
+      <div class="dept-lever">
+        <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)</small></span>
+        <button class="choice-row ${cur === 'std' ? 'on' : ''}" data-dtime="${m.id}:std">
+          <b>30分未満で回す</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点。多くの患者を診られるが、治療の中断は起きやすい(中断率はゲーム上の仮定)</span>
+        </button>
+        <button class="choice-row ${cur === 'mix' ? 'on' : ''}" data-dtime="${m.id}:mix">
+          <b>必要に応じて30分以上</b><span>約3割の診察に時間をかける(${kbPts('r08-I002-1-ha-1-1', 0)}点)。収益と継続の中間</span>
+        </button>
+        <button class="choice-row ${cur === 'long' ? 'on' : ''}" data-dtime="${m.id}:long">
+          <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点。診られる人数が大きく減り経営は厳しくなるが、中断は最も少ない</span>
+        </button>
+        ${i ? `<div class="pnl-row"><span>昨日の診察時間</span><b>${i.usedMin}分 / 枠${i.budgetMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''}</b></div>` : ''}
+        <div class="op-row">
+          <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
+        </div>
+      </div>`;
+    }
     if (m.id === 'homecare') {
       const i = d.last && d.last.info;
       return `
@@ -3711,6 +3732,16 @@
       SND.click();
       toast(`✅ ${a.label} — ${a.note || '整いました'}`);
       renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-dtime]').forEach((b) => b.addEventListener('click', () => {
+      const [id, plan] = b.dataset.dtime.split(':');
+      const d = G.depts[id];
+      if (!d || d.policy.timePlan === plan) return;
+      d.policy.timePlan = plan;
+      toast(plan === 'long' ? '全員30分以上の方針へ — 1日に診られる人数が大きく減ります'
+        : plan === 'mix' ? '必要に応じて30分以上の方針へ — 約3割の診察に時間をかけます'
+        : '30分未満で回す方針へ — 診察の回転を上げます');
+      renderCorp(); save();
     }));
     el.querySelectorAll('[data-dcool]').forEach((b) => b.addEventListener('click', () => {
       const [id, n] = b.dataset.dcool.split(':');
