@@ -117,7 +117,7 @@
 
       // 診察: 期日の来た患者を、1日の診察時間の枠内で診る。超えた分は翌日へ
       const budget = P.dayMinutes * dept.staff.doctors;
-      let used = 0, deferred = 0;
+      let used = 0, deferred = 0, seen = 0;
       for (const p of dept.pt) {
         if (p.nv > ctx.day) continue;
         const isFirst = !p.fb;
@@ -131,6 +131,7 @@
         if (used + need > budget) { p.nv = ctx.day + 1; deferred++; continue; }
         used += need;
         api.countVisit();
+        seen++;
         const report = { type: isFirst ? 'first' : 'revisit', kbActs: [] };
         if (kind === 'i004') {
           report.kbActs.push({ id: isFirst ? 'i004First' : 'i004Revisit' });
@@ -155,7 +156,7 @@
 
       agg.cost += dept.staff.doctors * C.doctorDay + (dept.staff.nurses || 0) * C.nurseDay + (dept.staff.psws || 0) * C.pswDay
         + C.rentDay + C.baseDay + agg.visits * C.perVisit;
-      agg.info = { panel: dept.pt.length, panelCap: cap, usedMin: used, budgetMin: budget, deferred, plan };
+      agg.info = { panel: dept.pt.length, panelCap: cap, usedMin: used, budgetMin: budget, deferred, plan, visits: seen };
     },
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = M;

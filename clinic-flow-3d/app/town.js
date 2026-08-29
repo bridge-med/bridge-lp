@@ -99,7 +99,7 @@ const TOWN = (() => {
     internal: { x: 15, y: 10, w: 2, d: 2, h: 1.3, label: '内科クリニック' },
     ophthalmology: { x: 16, y: 3, w: 2, d: 2, h: 1.3, label: '眼科クリニック' },
     dialysis: { x: 23, y: 6, w: 2, d: 2, h: 1.4, label: '透析クリニック' },
-    psychiatry: { x: 7, y: 3, w: 2, d: 2, h: 1.3, label: 'メンタルクリニック' }
+    psychiatry: { x: 9, y: 3, w: 2, d: 2, h: 1.3, label: 'メンタルクリニック' }
   };
 
   // 在宅患者の地区(戸建ての集まり)。訪問診療部門があるときだけ患者数に応じて描く
