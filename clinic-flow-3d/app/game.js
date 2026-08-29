@@ -3325,10 +3325,10 @@
       <div class="dept-lever">
         <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)</small></span>
         <button class="choice-row ${cur === 'std' ? 'on' : ''}" data-dtime="${m.id}:std">
-          <b>30分未満で回す</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点。多くの患者を診られるが、治療の中断は起きやすい(中断率はゲーム上の仮定)</span>
+          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点。多くの患者を診られるが、治療の中断は起きやすい(中断率はゲーム上の仮定)</span>
         </button>
         <button class="choice-row ${cur === 'mix' ? 'on' : ''}" data-dtime="${m.id}:mix">
-          <b>必要に応じて30分以上</b><span>約3割の診察に時間をかける(${kbPts('r08-I002-1-ha-1-1', 0)}点)。収益と継続の中間</span>
+          <b>必要に応じて30分以上</b><span>約3割の診察に時間をかける(${kbPts('r08-I002-1-ha-1-1', 0)}点)。収益と治療の継続のあいだを取る</span>
         </button>
         <button class="choice-row ${cur === 'long' ? 'on' : ''}" data-dtime="${m.id}:long">
           <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点。診られる人数が大きく減り経営は厳しくなるが、中断は最も少ない</span>
@@ -3738,9 +3738,9 @@
       const d = G.depts[id];
       if (!d || d.policy.timePlan === plan) return;
       d.policy.timePlan = plan;
-      toast(plan === 'long' ? '全員30分以上の方針へ — 1日に診られる人数が大きく減ります'
+      toast(plan === 'long' ? '全員30分以上の方針へ — 診られる人数は減りますが、治療の中断は最も少なくなります'
         : plan === 'mix' ? '必要に応じて30分以上の方針へ — 約3割の診察に時間をかけます'
-        : '30分未満で回す方針へ — 診察の回転を上げます');
+        : '30分未満が基本の方針へ — 診られる人数は増えますが、治療の中断は起きやすくなります');
       renderCorp(); save();
     }));
     el.querySelectorAll('[data-dcool]').forEach((b) => b.addEventListener('click', () => {

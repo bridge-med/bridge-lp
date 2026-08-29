@@ -17,7 +17,7 @@
     name: '精神科・心療内科',
     icon: '🌙',
     status: 'full',
-    desc: '診察時間の配分が柱。時間区分がそのまま点数になり、1日の時間の使い方が経営になる',
+    desc: '診察時間の配分が柱。時間区分がそのまま点数になり、1日の使い方が経営を決める',
     patientProfiles: [
       { id: 'mood', label: '気分障害', weight: 0.5, kind: 'i002' },
       { id: 'anxiety', label: '不安障害', weight: 0.32, kind: 'i002' },
@@ -59,7 +59,7 @@
       ['nurses', '看護師', 0, 2, 120000],
       ['psws', '精神保健福祉士', 0, 2, 120000],
     ],
-    deptBadge(d) { return d.policy.timePlan === 'long' ? '全員30分以上' : d.policy.timePlan === 'mix' ? '必要に応じて30分以上' : '30分未満で回す'; },
+    deptBadge(d) { return d.policy.timePlan === 'long' ? '全員30分以上' : d.policy.timePlan === 'mix' ? '必要に応じて30分以上' : '30分未満が基本'; },
     infoLine(i) { return `継続 ${i.panel}人・昨日 ${i.visits}件(診察${i.usedMin}分)` + (i.deferred ? `・翌日へ${i.deferred}件` : ''); },
     fsDefs: [],
     fsNote: '登録項目(精神保健指定医のセル)に届出必須の基準はない(KBで否定的確認済み。非指定医のセルには注13の施設基準がある)',
