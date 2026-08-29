@@ -11,6 +11,8 @@ const KB = require(join(ROOT, 'data', 'kb-r08.js'));
 const REIMB = require(join(ROOT, 'app', 'reimbursement.js'));
 const DEPT = require(join(ROOT, 'app', 'departments.js'));
 const INTERNAL = require(join(ROOT, 'app', 'specialties', 'internal-medicine.js'));
+const OPHTHA = require(join(ROOT, 'app', 'specialties', 'ophthalmology.js'));
+const DIALYSIS = require(join(ROOT, 'app', 'specialties', 'dialysis.js'));
 
 REIMB.init(KB);
 DEPT.init(REIMB, KB);
@@ -174,6 +176,116 @@ t('点数の期待値はKBと一致する(スポット確認)', () => {
   const r = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: [{ id: 'seikatsu1Dm' }, { id: 'presc' }, { id: 'ippanmei' }] }, 1);
   const want = REIMB.pointsOf('r08-A001') + REIMB.pointsOf('r08-B001-3-1-dm') + REIMB.pointsOf('r08-F400-3') + REIMB.pointsOf('r08-F400-n6-i');
   eq(r.ev.totalPoints, want, '合計点数');
+});
+
+console.log('# 眼科部門');
+
+t('屈折×矯正視力: 条件なしは片方却下・眼鏡処方の条件付きで併算定可(rule-0005)', () => {
+  const dept = DEPT.create(OPHTHA, 1);
+  const p1 = { pr: 'g', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r1 = DEPT.evalVisit(OPHTHA, dept, p1, { type: 'revisit', kbActs: [{ id: 'refraction' }, { id: 'vision' }] }, 1);
+  ok(r1.ev.rejectedItems.some((b) => b.itemId === 'r08-D263-1'), '条件なしは矯正視力が却下');
+  const p2 = { pr: 'g', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r2 = DEPT.evalVisit(OPHTHA, dept, p2, { type: 'revisit', kbActs: [{ id: 'refraction' }, { id: 'vision' }], conditions: { refraction_first_or_glasses: true } }, 1);
+  ok(r2.ev.billableItems.some((b) => b.itemId === 'r08-D261-2') && r2.ev.billableItems.some((b) => b.itemId === 'r08-D263-1'), '条件付きで両方算定');
+});
+
+t('白内障手術の点数はKBと一致し、施設基準の定めなしでも算定できる', () => {
+  const dept = DEPT.create(OPHTHA, 1);
+  const p = { pr: 'c', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r = DEPT.evalVisit(OPHTHA, dept, p, { type: 'revisit', kbActs: [{ id: 'cataractOp' }] }, 1);
+  const op = r.ev.billableItems.find((b) => b.itemId === 'r08-K282-1-ro');
+  ok(op, '算定される');
+  eq(op.points, REIMB.pointsOf('r08-K282-1-ro'), '点数はKB由来');
+});
+
+t('手術設備なしでは手術パイプラインが動かない(ゲーム上のゲート)', () => {
+  const dept = DEPT.create(OPHTHA, 1);
+  const rand = rng(5);
+  for (let d = 1; d <= 60; d++) DEPT.runDay(OPHTHA, dept, ctx(d, rand, d % 7 === 0 ? CLOSED : OPEN));
+  eq(dept.queue.preop + dept.queue.surgery + dept.queue.postop.length, 0, '手術キューは空のまま');
+});
+
+t('眼科120日運用: 収益は全てエンジン算定(概算ゼロ)', () => {
+  const dept = DEPT.create(OPHTHA, 1);
+  dept.equip.fundusSet = true; dept.equip.surgery = true;
+  const rand = rng(9);
+  let revenue = 0, engineYen = 0, approxYen = 0, ops = 0;
+  for (let d = 1; d <= 120; d++) {
+    const agg = DEPT.runDay(OPHTHA, dept, ctx(d, rand, d % 7 === 0 ? CLOSED : OPEN));
+    revenue += agg.revenue; engineYen += agg.points * 10;
+    approxYen += agg.approx.reduce((a, x) => a + x.yen, 0);
+    ops += (agg.byItem['r08-K282-1-ro'] || { n: 0 }).n;
+  }
+  eq(approxYen, 0, '眼科に概算行はない');
+  eq(revenue, engineYen, '収益=エンジン算定のみ');
+  ok(ops > 0, `手術が実施される(${ops}件)`);
+});
+
+console.log('# 透析部門');
+
+t('人工腎臓は施設区分1(届出)がないと算定できない', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  const p = dept.pt[0];
+  const r1 = DEPT.evalVisit(DIALYSIS, dept, p, { type: 'hd', kbActs: [{ id: 'hd' }] }, 1);
+  ok(r1.ev.rejectedItems.some((b) => b.itemId === 'r08-J038-1-ro'), '未届出は却下');
+  dept.fs.push('r08-fs-j038-1');
+  const r2 = DEPT.evalVisit(DIALYSIS, dept, p, { type: 'hd', kbActs: [{ id: 'hd' }] }, 2);
+  const hd = r2.ev.billableItems.find((b) => b.itemId === 'r08-J038-1-ro');
+  ok(hd, '届出後は算定');
+  eq(hd.points, REIMB.pointsOf('r08-J038-1-ro'), '点数はKB由来');
+});
+
+t('人工腎臓は月14回まで(15回目は患者単位で却下)', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1');
+  const p = dept.pt[0];
+  let rejected = 0;
+  for (let i = 0; i < 15; i++) {
+    const r = DEPT.evalVisit(DIALYSIS, dept, p, { type: 'hd', kbActs: [{ id: 'hd' }] }, 2 + i);
+    if (r.ev.rejectedItems.some((b) => b.itemId === 'r08-J038-1-ro')) rejected++;
+  }
+  eq(p.mc['r08-J038-1-ro'], 14, '算定は14回で止まる');
+  eq(rejected, 1, '15回目だけ却下');
+});
+
+t('導入期加算1・水質確保加算はそれぞれの届出があるときだけ算定される', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1');
+  const p = dept.pt[0];
+  const r1 = DEPT.evalVisit(DIALYSIS, dept, p, { type: 'hd', kbActs: [{ id: 'hd' }, { id: 'induction' }, { id: 'waterQuality' }] }, 1);
+  ok(r1.ev.rejectedItems.some((b) => b.itemId === 'r08-J038-n2-i'), '導入期加算1は未届出で却下');
+  ok(r1.ev.rejectedItems.some((b) => b.itemId === 'r08-J038-n9'), '水質確保は未届出で却下');
+  dept.fs.push('r08-fs-j038-donyuki1', 'r08-fs-j038-suishitsu');
+  const r2 = DEPT.evalVisit(DIALYSIS, dept, p, { type: 'hd', kbActs: [{ id: 'hd' }, { id: 'induction' }, { id: 'waterQuality' }] }, 2);
+  ok(r2.ev.billableItems.some((b) => b.itemId === 'r08-J038-n2-i'), '届出後は導入期加算が算定');
+  ok(r2.ev.billableItems.some((b) => b.itemId === 'r08-J038-n9'), '届出後は水質確保が算定');
+});
+
+t('透析180日運用: 収益は全てエンジン算定・外来医学管理料は患者ごと月1回', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.policy.explain = true; dept.equip.water = true;
+  dept.fs.push('r08-fs-j038-1', 'r08-fs-j038-donyuki1', 'r08-fs-j038-suishitsu');
+  const rand = rng(11);
+  let revenue = 0, engineYen = 0;
+  for (let d = 1; d <= 180; d++) {
+    const agg = DEPT.runDay(DIALYSIS, dept, ctx(d, rand, d % 7 === 0 ? CLOSED : OPEN));
+    revenue += agg.revenue; engineYen += agg.points * 10;
+  }
+  eq(revenue, engineYen, '収益=エンジン算定のみ(材料は原価側)');
+  for (const p of dept.pt) ok(!p.mc['r08-B001-15'] || p.mc['r08-B001-15'] <= 1, '外来医学管理料は月1回まで');
+  ok(dept.pt.length > 12, `患者が増える(${dept.pt.length}人)`);
+});
+
+t('装置26台で施設区分1が要件割れし、人工腎臓が算定できなくなる', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1');
+  dept.equip.beds = 26;
+  const agg = DEPT.runDay(DIALYSIS, dept, ctx(2, rng(3)));
+  ok(agg.events.some((e) => e.kind === 'fs_broken'), '要件割れイベント');
+  eq(dept.fs.includes('r08-fs-j038-1'), false, '適用から外れる');
+  ok(!agg.byItem['r08-J038-1-ro'], '人工腎臓は算定されない');
+  ok(agg.sample === null || !agg.sample.lines.some((l) => l.kb === 'r08-J038-1-ro'), 'サンプルにも出ない');
 });
 
 console.log(failed ? `\nNG: ${failed}/${n} 失敗` : `\n全${n}件 合格`);

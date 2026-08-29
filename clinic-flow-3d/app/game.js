@@ -3243,8 +3243,36 @@
   const playerWarn = (ws) => (ws || []).filter((w) => !DEV_WARN.has(w.kind) && w.kind !== 'conditional_ok');
   const devWarn = (ws) => (ws || []).filter((w) => DEV_WARN.has(w.kind));
 
+  // 設備・体制の投資ボタン(モジュールのactions定義から。購入済みは消える)
+  function deptActionsHtml(m, d) {
+    const btns = (m.actions || []).filter((a) => a.can(d))
+      .map((a) => `<button class="op-btn" data-dact="${m.id}:${a.id}">${a.label} <small>${yen(a.cost)}</small></button>`).join('');
+    return btns ? `<div class="op-row">${btns}</div>` : '';
+  }
+
   // 主役レバー(科ごとに1つ)。制度上の数値は全てKB(kbPts)から読む
   function deptLeverHtml(m, d) {
+    if (m.id === 'ophthalmology') {
+      return `
+      <div class="dept-lever">
+        <span class="ctrl-head">検査設備への投資 <small>— 設備が検査可能範囲と単価を決める</small></span>
+        ${deptActionsHtml(m, d) || '<span class="kijun-badge">導入済みの設備で診療中</span>'}
+      </div>`;
+    }
+    if (m.id === 'dialysis') {
+      const cools = d.policy.cools;
+      return `
+      <div class="dept-lever">
+        <span class="ctrl-head">ベッド×クール <small>— ${d.equip.beds}床×${cools}クール(1日の枠 ${d.equip.beds * cools})</small></span>
+        <button class="choice-row ${cools === 2 ? 'on' : ''}" data-dcool="${m.id}:2">
+          <b>2クール</b><span>日中のみ。看護配置に余裕を残す</span>
+        </button>
+        <button class="choice-row ${cools === 3 ? 'on' : ''}" data-dcool="${m.id}:3">
+          <b>3クール</b><span>夜間も回して枠1.5倍。看護師の必要数も増える</span>
+        </button>
+        ${deptActionsHtml(m, d)}
+      </div>`;
+    }
     if (m.id === 'internal') {
       const cur = d.policy.kanri;
       const pI = [kbPts('r08-B001-3-1-lipid', 0), kbPts('r08-B001-3-1-ht', 0), kbPts('r08-B001-3-1-dm', 0)];
@@ -3282,16 +3310,20 @@
         <div><button class="mini-btn" data-dfire="${m.id}:${key}">−</button><b>${d.staff[key] || 0}</b><button class="mini-btn plus" data-dhire="${m.id}:${key}">＋ ${yen(cost)}</button></div>
       </div>`).join('');
     const info = L && L.info ? L.info : null;
+    const statTxt = info
+      ? (m.infoLine ? m.infoLine(info) : (info.panel !== undefined ? `継続患者 ${info.panel}人` : ''))
+      : '開設準備中';
     return `
     <div class="branch-card">
       <div class="branch-head">
         <b>${m.icon} ${m.name}部門</b>
-        <span class="branch-stat">${info && info.panel !== undefined ? `継続患者 ${info.panel}人` : '開設準備中'}</span>
+        <span class="branch-stat">${statTxt}</span>
       </div>
       ${L ? `<div class="branch-pnl">昨日: 患者${L.visits}人 売上${yen(L.revenue)} 損益 <b class="${L.profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(L.profit)}</b></div>` : '<div class="branch-pnl">開設準備中 — 明日から診療開始</div>'}
       ${deptLeverHtml(m, d)}
       <div class="branch-staff">${staffRows}</div>
-      <div class="branch-kijun">施設基準: ${fsRows}</div>
+      <div class="branch-kijun">施設基準: ${fsRows || `<span class="kijun-kb">${m.fsNote || 'この科の登録項目に届出必須の基準はない'}</span>`}</div>
+      ${L && L.events.filter((e) => e.kind === 'fs_warn').map((e) => `<p class="pnl-note">⚠ ${e.message}</p>`).join('') || ''}
       <div class="op-row">
         <button class="op-btn" data-dreceipt="${m.id}">📖 昨日の代表レセプトを見る</button>
       </div>
@@ -3598,6 +3630,26 @@
       const id = b.dataset.dreceipt;
       const m = SPECIALTIES.get(id);
       if (m && G.depts[id]) deptReceiptShow(m, G.depts[id]);
+    }));
+    el.querySelectorAll('[data-dact]').forEach((b) => b.addEventListener('click', () => {
+      const [id, actId] = b.dataset.dact.split(':');
+      const d = G.depts[id]; const m = SPECIALTIES.get(id);
+      const a = m ? (m.actions || []).find((x) => x.id === actId) : null;
+      if (!d || !a || !a.can(d)) return;
+      if (G.money < a.cost) { toast('資金が足りません'); return; }
+      G.money -= a.cost;
+      a.apply(d);
+      SND.click();
+      toast(`✅ ${a.label} — ${a.note || '整いました'}`);
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-dcool]').forEach((b) => b.addEventListener('click', () => {
+      const [id, n] = b.dataset.dcool.split(':');
+      const d = G.depts[id];
+      if (!d || d.policy.cools === Number(n)) return;
+      d.policy.cools = Number(n);
+      toast(Number(n) === 3 ? '3クール運用へ — 夜間帯も回します(看護配置に注意)' : '2クール運用へ — 日中のみの運用に戻します');
+      renderCorp(); save();
     }));
 
 
