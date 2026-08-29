@@ -94,6 +94,13 @@ const TOWN = (() => {
     tonari: { x: 24, y: 17, w: 2, d: 2, h: 1.5, label: '隣駅クリニック' }
   };
 
+  // 診療科部門の建設地(部門id → 位置)。在宅(homecare)は本院発なので建物を持たない
+  const DEPT_SPOTS = {
+    internal: { x: 15, y: 10, w: 2, d: 2, h: 1.3, label: '内科クリニック' },
+    ophthalmology: { x: 16, y: 3, w: 2, d: 2, h: 1.3, label: '眼科クリニック' },
+    dialysis: { x: 23, y: 6, w: 2, d: 2, h: 1.4, label: '透析クリニック' }
+  };
+
   class TownSim {
     constructor(hooks) {
       this.hooks = hooks; // { onPatientArrive(walker) }
@@ -101,12 +108,20 @@ const TOWN = (() => {
       this.ambientTimer = 0;
       this.rivalTimer = 3;
       this.branchBuildings = [];
+      this.deptBuildings = [];
     }
 
     setBranches(siteIds) {
       this.branchBuildings = (siteIds || []).filter((id) => BRANCH_SPOTS[id]).map((id) => {
         const sp = BRANCH_SPOTS[id];
         return { id: 'br_' + id, label: sp.label, x: sp.x, y: sp.y, w: sp.w, d: sp.d, h: sp.h, wall: '#FFFFFF', roof: '#4FA98C', mine: true, action: true };
+      });
+    }
+
+    setDepts(deptIds) {
+      this.deptBuildings = (deptIds || []).filter((id) => DEPT_SPOTS[id]).map((id) => {
+        const sp = DEPT_SPOTS[id];
+        return { id: 'dept_' + id, label: sp.label, x: sp.x, y: sp.y, w: sp.w, d: sp.d, h: sp.h, wall: '#FFFFFF', roof: '#4FA98C', mine: true, action: true };
       });
     }
 
@@ -196,7 +211,7 @@ const TOWN = (() => {
 
     buildingAt(tile) {
       const withDoor = (b) => tile.x >= b.x - 1 && tile.x <= b.x + b.w && tile.y >= b.y - 1 && tile.y <= b.y + b.d;
-      return this.branchBuildings.find(withDoor) || BUILDINGS.find((b) => (b.action || b.mine) && withDoor(b)) || null;
+      return this.branchBuildings.find(withDoor) || (this.deptBuildings || []).find(withDoor) || BUILDINGS.find((b) => (b.action || b.mine) && withDoor(b)) || null;
     }
 
     draw(iso, state) {
@@ -223,7 +238,7 @@ const TOWN = (() => {
       const items = [];
 
       // 建物(本院・施設・分院)
-      for (const b of [...BUILDINGS, ...this.branchBuildings]) {
+      for (const b of [...BUILDINGS, ...this.branchBuildings, ...(this.deptBuildings || [])]) {
         items.push({
           depth: b.x + b.w / 2 + b.y + b.d / 2,
           draw: () => {
@@ -298,7 +313,7 @@ const TOWN = (() => {
       items.forEach((it) => it.draw());
 
       // ラベル(主要施設のみ)
-      for (const b of [...BUILDINGS, ...this.branchBuildings]) {
+      for (const b of [...BUILDINGS, ...this.branchBuildings, ...(this.deptBuildings || [])]) {
         if (!b.label) continue;
         const tie = (b.id === 'hospital' && state.hospitalTie) || (b.id === 'caremane' && state.caremaneTie) || (b.id === 'company' && state.companyTie);
         iso.label(b.x + b.w / 2, b.y + b.d / 2 + 0.4, (tie ? '🤝 ' : '') + b.label, {

@@ -9,7 +9,9 @@ Layer 2  Clinical Ops       game.js の患者フロー(受付→診察→検査�
                             (何が行われたかを決める。金額を決めない)
 Layer 3  Reimbursement      app/reimbursement.js + data/kb-r08.js
          Engine             (行われた行為から算定可否・点数・理由・根拠を判定。UI/3Dから独立)
-Layer 4  Management Sim     game.js のP&L・KPI・スタッフ・施設基準・法人・リーグ
+Layer 3.5 Departments       app/departments.js(診療科部門の共通基盤: 患者パネル型日次シム。
+                            患者ごとに月/週回数・6月窓・初診済みを追跡し、全収益をLayer 3で算定)
+Layer 4  Management Sim     game.js のP&L・KPI・スタッフ・施設基準・法人・リーグ・部門カード
 Layer 5  Learning           レシートの算定詳細・学習モード・教科書・クイズ・Reimbursement Debugger
 ```
 
@@ -37,6 +39,15 @@ Layer 5  Learning           レシートの算定詳細・学習モード・教�
 v32までの全機能(3D視察・ペルソナ・常連・天気・リーグ・分院・ミッション)は無変更。
 変更したのは会計の点数源(ハードコード→KB)・レシートUI(詳細追加)・施設基準UI(KB要件表示)のみ。
 セーブ互換: 新フィールド(settings.learnMode / settings.specialty)は未定義時デフォルトで補完。
+
+## 診療科部門(v35)
+
+本院(整形外科・3Dシム)とは別に、他科を「部門」として法人タブから開設できる。
+部門は慢性患者の名簿(パネル)を持ち、1受診ずつ `REIMB.evaluateEncounter` で算定する
+(整形本院のマクロ式分院と違い、月1回制限・包括・6月窓が患者単位で本物どおり効く)。
+日次処理は `endDay()` 内で `DEPT.runDay(モジュール, 部門状態, ctx)`。
+代表レセプト(算定内訳+条文引用+未算定の理由)を部門カードから確認できる。
+セーブは `G.depts`(旧セーブは未定義→`{}` 補完で無傷)。タウンには部門の建物が建つ(DEPT_SPOTS)。
 
 ## 告示準拠で修正したゲーム仕様(v33)
 

@@ -176,14 +176,20 @@
         return { n: `${label}(概算)`, t };
       },
       addPatient: (profileId, extra) => DEPT.addPatient(dept, profileId, ctx.day, extra),
-      setSample: (label, lines, evOut) => {
-        if (!agg.sample) agg.sample = { label, lines, kb: evOut ? { rejected: evOut.rejectedItems, warnings: evOut.warnings } : null };
+      /* 代表レセプト: priorityが高いもの(例: 月次管理料の来院)を優先して1件保持 */
+      setSample: (label, lines, evOut, priority) => {
+        const pr = priority || 1;
+        if (!agg.sample || (agg.sample.pr || 1) < pr) {
+          agg.sample = { pr, label, lines, kb: evOut ? { rejected: evOut.rejectedItems, warnings: evOut.warnings } : null };
+        }
       },
       countVisit: () => { agg.visits++; },
       frac: (x) => { const n = Math.floor(x); return n + (ctx.rand() < (x - n) ? 1 : 0); },
       month: DEPT.monthIdx(ctx.day),
     };
     mod.runDay(dept, ctx, api, agg);
+    // 休診日など会計が無い日は、直近の代表レセプトを持ち越す(「まだ会計がありません」にしない)
+    if (!agg.sample && dept.last && dept.last.sample) agg.sample = dept.last.sample;
     agg.cost = Math.round(agg.cost);
     agg.revenue = Math.round(agg.revenue);
     agg.profit = agg.revenue - agg.cost;

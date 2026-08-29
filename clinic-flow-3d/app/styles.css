@@ -1364,3 +1364,20 @@ input[type="range"]::-moz-range-thumb {
 .site-stat { margin-left: auto; font: 700 11px/1.4 var(--en); color: var(--ink-3); white-space: nowrap; }
 .site-caret { flex: 0 0 auto; color: var(--ink-3); font-size: 10px; }
 .site-detail { border-left: 3px solid rgba(62, 124, 166, 0.25); margin: 2px 0 12px; padding: 4px 0 4px 10px; }
+
+/* 部門カード: 主役レバー(排他選択)。kb-rejectの逆向き=選択中を左ボーダーで示す */
+.dept-lever { margin: 10px 0; }
+.dept-lever .ctrl-head { display: block; margin-bottom: 6px; }
+.choice-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  width: 100%; text-align: left;
+  border: 1px solid var(--line); background: var(--card);
+  border-left: 3px solid var(--line);
+  border-radius: 8px; padding: 9px 10px; margin: 5px 0;
+  font: 500 11px/1.55 var(--sans); color: var(--ink-2);
+  min-height: 44px;
+}
+.choice-row b { flex: 0 0 auto; font: 800 12px/1.4 var(--sans); color: var(--ink); }
+.choice-row.on { border-left-color: var(--blue); background: var(--blue-pale); color: var(--ink); }
+.spec-open { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; }
+.spec-open small { font: 500 10px/1.5 var(--sans); color: var(--ink-3); }

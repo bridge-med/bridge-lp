@@ -161,6 +161,13 @@
     for (const lv of [1, 2, 3]) REHA_FEE[lv] = kbPts(REHA_KB_ITEM[lv], [0, 85, 170, 185][lv]) * 2 * 10;
     KIJUN.forEach((k) => { k.fee = REHA_FEE[k.lv]; });
   }
+  // 部門エンジン(患者パネル型): KBと同時に初期化できたときだけ部門を動かす
+  const DEPTI = (() => {
+    try {
+      if (KBI && typeof DEPT !== 'undefined') { DEPT.init(REIMB, KB_R08); return true; }
+    } catch (e) { /* noop */ }
+    return false;
+  })();
   // 現在適用中の施設基準ID群(エンジンへ渡す)
   function activeFsIds() {
     const ids = [];
@@ -417,6 +424,7 @@
     schedule: {}, arrivals: [], nextArrivalIdx: 0,
     today: null, history: [],
     branches: [],
+    depts: {}, // 診療科部門(id -> DEPT状態)
     missionIdx: 0, missionDone: [],
     tutorialDone: false, plan: null,
     lastStage: 1, blackStreak: 0,
@@ -534,7 +542,7 @@
           osteoPool: G.osteoPool, agaPool: G.agaPool, kpiPins: G.kpiPins,
           targetSeg: G.targetSeg, cum: G.cum, annualDone: G.annualDone, voiceLog: G.voiceLog,
           schedule: G.schedule, history: G.history.slice(-40),
-          branches: G.branches, missionIdx: G.missionIdx, missionDone: G.missionDone,
+          branches: G.branches, depts: G.depts, missionIdx: G.missionIdx, missionDone: G.missionDone,
           tutorialDone: G.tutorialDone, plan: G.plan,
           lastStage: G.lastStage, blackStreak: G.blackStreak,
           coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
@@ -597,6 +605,8 @@
         if (refund > 0) { G.coins += refund; G.speedRefund = refund; }
         delete G.speedUnlocked;
       }
+      // v35: 診療科部門の補完(旧セーブは部門なし)
+      if (!G.depts) G.depts = {};
       // 旧セーブの分院にv4フィールドを補完
       for (const br of G.branches) {
         if (br.floorLv === undefined) br.floorLv = 1;
@@ -1201,6 +1211,17 @@
       const r = hospitalDay(spec);
       T.brRevenue += r.revenue;
       T.brProfit += r.profit;
+    }
+    // 診療科部門(患者パネル型): 収益は全てエンジン算定+明示概算
+    if (DEPTI) {
+      for (const id of Object.keys(G.depts)) {
+        const mod = SPECIALTIES.get(id);
+        if (!mod || mod.status !== 'full' || !mod.runDay) continue;
+        const r = DEPT.runDay(mod, G.depts[id], { day: G.day, spec, rep: G.rep, aw: G.aw, rand: Math.random });
+        T.brRevenue += r.revenue;
+        T.brProfit += r.profit;
+        for (const ev of r.events) if (ev.kind === 'fs_broken') toast(`⚠️ ${mod.name}部門: ${ev.message}`);
+      }
     }
     if (G.kaitei && G.kaitei.count > 0 && T.brRevenue) {
       const k = G.kaitei;
@@ -3131,6 +3152,16 @@
   });
 
   function openBuilding(b) {
+    if (b.id.startsWith('dept_')) {
+      const id = b.id.slice(5);
+      const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(id) : null;
+      const d = G.depts[id];
+      if (m && d) {
+        const L = d.last;
+        showModal(`${m.icon} ${b.label}`, `<p>${L ? `患者 ${L.visits}人/日 / 継続患者 ${d.pt.length}人 / 昨日の損益 ${yen(L.profit)}` : '開設準備中 — 明日から診療開始'}</p><p class="modal-note">経営の操作は「🏢 法人」タブの部門カードで。</p>`, '閉じる');
+      }
+      return;
+    }
     if (b.id.startsWith('br_')) {
       const br = G.branches.find((x) => 'br_' + x.siteId === b.id);
       if (br) showModal(br.name, `<p>患者 ${br.last ? br.last.visits : 0}人/日 / リハ ${br.last ? br.last.reha : 0}件/日 / ${REHA_NAMES[br.rehaLevel]}</p><p>評判 ${Math.round(br.rep)} / 認知 ${Math.round(br.aw * 100)}% / 昨日の損益 ${br.last ? yen(br.last.profit) : '–'}</p><p class="modal-note">詳細な経営は「🏢 法人」タブで。</p>`, '閉じる');
@@ -3179,7 +3210,7 @@
 
   // 3D視察(街)用: 建物ごとの介入ボタンのラベル
   function buildingActLabel(b) {
-    if (b.id.startsWith('br_')) return `🏥 ${b.label}の様子を見る`;
+    if (b.id.startsWith('br_') || b.id.startsWith('dept_')) return `🏥 ${b.label}の様子を見る`;
     if (b.id === 'station') return G.billboard ? '🪧 駅前看板を確認する' : '🪧 駅前看板の商談をする';
     if (b.id === 'rival') return '🕵 ライバルの様子をうかがう';
     const def = REL_DEF[b.id];
@@ -3201,6 +3232,100 @@
     if (role === 'pts') return SHOP.pt.costs[Math.min(cur, SHOP.pt.costs.length - 1)];
     if (role === 'nurses') return 120000;
     return 60000;
+  }
+
+  /* ================= 診療科部門のUI(法人タブ内) ================= */
+
+  const DEPT_KEIJI_COST = 50000; // 体制整備(院内掲示・長期処方対応)の費用: ゲーム上の仮定
+
+  // 主役レバー(科ごとに1つ)。制度上の数値は全てKB(kbPts)から読む
+  function deptLeverHtml(m, d) {
+    if (m.id === 'internal') {
+      const cur = d.policy.kanri;
+      const pI = [kbPts('r08-B001-3-1-lipid', 0), kbPts('r08-B001-3-1-ht', 0), kbPts('r08-B001-3-1-dm', 0)];
+      return `
+      <div class="dept-lever">
+        <span class="ctrl-head">生活習慣病管理料の方針 <small>— 実際の算定可否は患者ごとにエンジンが判定</small></span>
+        <button class="choice-row ${cur === 'I' ? 'on' : ''}" data-dkanri="${m.id}:I">
+          <b>(I)</b><span>主病別 ${Math.min(...pI)}〜${Math.max(...pI)}点・月1回。検査・注射・病理診断などは管理料に含まれ別に算定しない</span>
+        </button>
+        <button class="choice-row ${cur === 'II' ? 'on' : ''}" data-dkanri="${m.id}:II">
+          <b>(II)</b><span>${kbPts('r08-B001-3-3', 0)}点・月1回。検査は別に算定できる。(I)を算定した月から6月以内はその患者に算定できない</span>
+        </button>
+        <div class="op-row">
+          ${d.policy.keiji
+            ? '<span class="kijun-badge">長期処方・リフィル対応の体制あり(届出不要)</span>'
+            : `<button class="op-btn" data-dkeiji="${m.id}">📋 体制を整える(院内掲示・長期処方対応) <small>${yen(DEPT_KEIJI_COST)}</small></button>`}
+          <button class="op-btn ${d.policy.ippanmei ? 'on' : ''}" data-dippan="${m.id}">一般名処方 ${d.policy.ippanmei ? 'ON' : 'OFF'}</button>
+        </div>
+      </div>`;
+    }
+    return '';
+  }
+
+  function deptCard(m, d) {
+    const L = d.last;
+    const fsRows = DEPT.fsStatus(m, d).map((st) => {
+      const fs = REIMB.getFacilityStandard(st.fsId);
+      const name = fs ? (fs.shortName || fs.name) : st.fsId;
+      if (st.notified) return `<span class="kijun-badge">${name} 適用中</span>`;
+      if (st.ok) return `<button class="mini-btn plus" data-dfsnotify="${m.id}:${st.fsId}">${name} を届け出る</button>`;
+      return `<span class="kijun-badge off">${name} 未(${st.missing.join('・')})</span>`;
+    }).join(' ');
+    const staffRows = (m.staffDef || []).map(([key, label, min, max, cost]) => `
+      <div class="plan-step"><span>${label} <small>最大${max}</small></span>
+        <div><button class="mini-btn" data-dfire="${m.id}:${key}">−</button><b>${d.staff[key] || 0}</b><button class="mini-btn plus" data-dhire="${m.id}:${key}">＋ ${yen(cost)}</button></div>
+      </div>`).join('');
+    const info = L && L.info ? L.info : null;
+    return `
+    <div class="branch-card">
+      <div class="branch-head">
+        <b>${m.icon} ${m.name}部門</b>
+        <span class="branch-stat">${info && info.panel !== undefined ? `継続患者 ${info.panel}人` : '開設準備中'}</span>
+      </div>
+      ${L ? `<div class="branch-pnl">昨日: 患者${L.visits}人 売上${yen(L.revenue)} 損益 <b class="${L.profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(L.profit)}</b></div>` : '<div class="branch-pnl">開設準備中 — 明日から診療開始</div>'}
+      ${deptLeverHtml(m, d)}
+      <div class="branch-staff">${staffRows}</div>
+      <div class="branch-kijun">施設基準: ${fsRows}</div>
+      <div class="op-row">
+        <button class="op-btn" data-dreceipt="${m.id}">📖 昨日の代表レセプトを見る</button>
+      </div>
+      ${L && L.warnings.length ? `<p class="pnl-note">要確認: ${L.warnings[0].message}</p>` : ''}
+    </div>`;
+  }
+
+  function deptReceiptShow(m, d) {
+    const s = d.last && d.last.sample;
+    if (!s) { showModal(`📖 ${m.name}部門の代表レセプト`, '<p class="plan-lead">まだ会計がありません。1日進めてから開いてください。</p>', '閉じる'); return; }
+    const pageOfEv = (p) => p ? `・${String(p).replace(/^PDF\s*/, '')}` : '';
+    const lineRows = s.lines.map((l) => {
+      const amount = l.t != null ? `${l.t}点` : yen(l.y || 0);
+      let detail = '';
+      if (l.kb) {
+        const it = REIMB.getItem(l.kb);
+        const ev = it ? ((it.evidence || []).find((e) => e.field === 'points') || (it.evidence || [])[0]) : null;
+        if (ev) {
+          const doc = REIMB.docOf(ev.doc);
+          detail = `<div class="kb-quote">「${ev.quote}」(${doc ? doc.title : ev.doc}${pageOfEv(ev.page)})</div>`;
+        }
+      } else if (l.incl && KBI) {
+        const rule = KB_R08.rules.find((r) => r.id === l.incl);
+        if (rule && rule.quote) detail = `<div class="kb-quote">「${rule.quote}」</div>`;
+      }
+      return `<div class="kb-ev"><b>${l.n}</b> — ${amount}${detail}</div>`;
+    }).join('');
+    const rejRows = ((s.kb && s.kb.rejected) || []).map((x) => `
+      <div class="kb-reject"><b>${x.name}</b>${x.points != null ? `(${x.points}点)` : ''} は算定していません
+        <div class="kb-cond">${(x.reasons || []).join('。')}</div>
+        ${(x.rules || []).filter((r) => r.quote).map((r) => `<div class="kb-quote">「${r.quote}」</div>`).join('')}
+        ${x.fsInfo ? `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''}</div>` : ''}
+      </div>`).join('');
+    const warnRows = ((s.kb && s.kb.warnings) || []).filter((w) => w.kind !== 'conditional_ok').slice(0, 3)
+      .map((w) => `<div class="kb-cond">⚠ ${w.message}</div>`).join('');
+    showModal(`📖 ${m.name}部門の代表レセプト`, `
+      <p class="plan-lead">${s.label}</p>
+      ${lineRows}${rejRows}${warnRows}
+      <p class="modal-note">点数と条文はKB(令和8年度)によります。「(概算)」の行は、KBに未登録の行為をゲーム上の概算で計上したものです。</p>`, '閉じる');
   }
 
   function renderCorp() {
@@ -3229,15 +3354,31 @@
         <span class="site-caret">${open === id ? '▴' : '▾'}</span>
       </button>`;
 
-    // これから開く診療科: 静的な一覧のみ(選べるようになった便で「分岐する道」として出し直す)
-    const specRows = (typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.playable() : []).map((m) => {
-      const active = settings.specialty === m.id;
-      return `<div class="spec-row">
-        <b>${m.icon} ${m.name}</b>${active ? ' <span class="kijun-badge">本院</span>' : ''}
-        <small>${m.desc}</small>
-      </div>`;
-    }).join('');
-    const specialtySection = specRows ? `<h3 class="sub-title">🌱 これから開く診療科 <small>— 本院は整形外科。法人が育つと街に増えていく</small></h3>${specRows}` : '';
+    // 診療科部門: fullモジュールは開設して経営できる。それ以外は準備中の一覧
+    const deptParts = [];
+    for (const m of (typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.playable() : [])) {
+      if (m.id === settings.specialty) continue;
+      const d = G.depts[m.id];
+      if (d && DEPTI && m.status === 'full') {
+        const L = d.last;
+        const p7 = d.profit7.reduce((a, x) => a + x, 0);
+        const warn = !!(L && L.events.length) || (d.profit7.length >= 7 && p7 < 0);
+        deptParts.push(siteRow('dept-' + m.id, m.icon, `${m.name}部門`,
+          m.deptBadge ? m.deptBadge(d) : '', L ? `昨日 ${yen(L.profit)}` : '準備中', warn));
+        if (open === 'dept-' + m.id) deptParts.push(`<div class="site-detail">${deptCard(m, d)}</div>`);
+      } else if (DEPTI && m.status === 'full' && m.open) {
+        const can = (!m.open.needPlan || G.plan) && G.rep >= m.open.repMin && G.money >= m.open.cost;
+        deptParts.push(`<div class="spec-row">
+          <b>${m.icon} ${m.name}</b>
+          <small>${m.desc}</small>
+          <div class="spec-open"><small>開設条件: ${m.open.condDesc}</small>
+            <button class="mini-btn ${can ? 'plus' : ''}" data-deptopen="${m.id}" ${can ? '' : 'disabled'}>開設する ${yen(m.open.cost)}</button></div>
+        </div>`);
+      } else {
+        deptParts.push(`<div class="spec-row"><b>${m.icon} ${m.name}</b><small>${m.desc}</small></div>`);
+      }
+    }
+    const specialtySection = deptParts.length ? `<h3 class="sub-title">🌱 別の診療科を開く <small>— 診療科部門。会計は1行ずつ根拠つき</small></h3>${deptParts.join('')}` : '';
 
     const brCard = (br, bi) => {
       const machineMax = (br.floorLv || 1) >= 3 ? 18 : (br.floorLv || 1) >= 2 ? 12 : 6;
@@ -3365,7 +3506,7 @@
     if (open === 'newsite') rows.push(`<div class="site-detail">${openSection}${G.hospital ? '' : hospSection}</div>`);
 
     el.innerHTML = summary
-      + '<h3 class="sub-title">🏥 同じ仕組みを増やす <small>— 整形外科の分院とグループ病院</small></h3>'
+      + '<h3 class="sub-title">🏥 同じ診療科を増やす <small>— 整形外科の分院とグループ病院</small></h3>'
       + rows.join('')
       + specialtySection;
 
@@ -3373,6 +3514,83 @@
       const id = b.dataset.site;
       G.corpOpen = G.corpOpen === id ? null : id;
       renderCorp();
+    }));
+
+    // 診療科部門の操作
+    el.querySelectorAll('[data-deptopen]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.deptopen;
+      const m = SPECIALTIES.get(id);
+      if (!m || !m.open || G.depts[id]) return;
+      if (G.money < m.open.cost) { toast('資金が足りません'); return; }
+      G.money -= m.open.cost;
+      G.depts[id] = DEPT.create(m, G.day);
+      if (town.setDepts) town.setDepts(Object.keys(G.depts));
+      G.corpOpen = 'dept-' + id;
+      SND.fanfare();
+      toast(`🎉 ${m.name}部門を開設しました — 明日から診療開始`);
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-dkanri]').forEach((b) => b.addEventListener('click', () => {
+      const [id, plan] = b.dataset.dkanri.split(':');
+      const d = G.depts[id];
+      if (!d || d.policy.kanri === plan) return;
+      d.policy.kanri = plan;
+      toast(plan === 'I'
+        ? '管理料(I)の方針に変更 — 検査・注射は管理料に含まれ、別に算定しなくなります'
+        : '管理料(II)の方針に変更 — (I)を算定した患者は、その月から6月以内は算定できません');
+      renderCorp(); save();
+    }));
+    el.querySelectorAll('[data-dkeiji]').forEach((b) => b.addEventListener('click', () => {
+      const d = G.depts[b.dataset.dkeiji];
+      if (!d || d.policy.keiji) return;
+      if (G.money < DEPT_KEIJI_COST) { toast('資金が足りません'); return; }
+      G.money -= DEPT_KEIJI_COST;
+      d.policy.keiji = true;
+      if (!d.fs.includes('r08-fs-b001-3')) d.fs.push('r08-fs-b001-3');
+      toast('📋 院内掲示と長期処方の体制を整えました — 生活習慣病管理料は届出不要(体制の要件のみ)');
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
+      const d = G.depts[b.dataset.dippan];
+      if (!d) return;
+      d.policy.ippanmei = !d.policy.ippanmei;
+      renderCorp(); save();
+    }));
+    el.querySelectorAll('[data-dhire]').forEach((b) => b.addEventListener('click', () => {
+      const [id, key] = b.dataset.dhire.split(':');
+      const d = G.depts[id]; const m = SPECIALTIES.get(id);
+      const def = m ? (m.staffDef || []).find((x) => x[0] === key) : null;
+      if (!d || !def) return;
+      if ((d.staff[key] || 0) >= def[3]) { toast('これ以上は増やせません'); return; }
+      if (G.money < def[4]) { toast('資金が足りません'); return; }
+      G.money -= def[4];
+      d.staff[key] = (d.staff[key] || 0) + 1;
+      SND.click();
+      renderCorp(); updateHeader(); save();
+    }));
+    el.querySelectorAll('[data-dfire]').forEach((b) => b.addEventListener('click', () => {
+      const [id, key] = b.dataset.dfire.split(':');
+      const d = G.depts[id]; const m = SPECIALTIES.get(id);
+      const def = m ? (m.staffDef || []).find((x) => x[0] === key) : null;
+      if (!d || !def) return;
+      if ((d.staff[key] || 0) <= def[2]) { toast('これ以上は減らせません'); return; }
+      d.staff[key]--;
+      renderCorp(); save();
+    }));
+    el.querySelectorAll('[data-dfsnotify]').forEach((b) => b.addEventListener('click', () => {
+      const [id, fsId] = b.dataset.dfsnotify.split(':');
+      const d = G.depts[id]; const m = SPECIALTIES.get(id);
+      if (!d || !m) return;
+      const st = DEPT.fsStatus(m, d).find((x) => x.fsId === fsId);
+      if (!st || !st.ok || st.notified) return;
+      d.fs.push(fsId);
+      toast('✅ 届け出ました — ゲーム上は当日から適用します(実際の適用時期は簡略化しています)');
+      renderCorp(); save();
+    }));
+    el.querySelectorAll('[data-dreceipt]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.dreceipt;
+      const m = SPECIALTIES.get(id);
+      if (m && G.depts[id]) deptReceiptShow(m, G.depts[id]);
     }));
 
 
@@ -4246,6 +4464,7 @@
   clinic.applySettings();
   clinicIso.W = clinic.L.W; clinicIso.H = clinic.L.H;
   town.setBranches(G.branches.map((x) => x.siteId));
+  if (town.setDepts) town.setDepts(Object.keys(G.depts || {}));
   clinic.deco = G.deco;
   planDay();
   applyUnlocks();

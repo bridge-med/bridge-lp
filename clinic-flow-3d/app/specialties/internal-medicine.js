@@ -52,12 +52,20 @@
       policy: { kanri: 'II', ippanmei: true, keiji: false },
     },
     open: { cost: 8000000, repMin: 65, needPlan: true,
-      condDesc: '事業計画の策定+本院評判65以上+開設資金' },
+      condDesc: '事業計画の策定・本院評判65以上・開設資金' },
+    /* 人員UI定義: [key, 表示名, 最小, 最大, 採用費(ゲーム仮定)] */
+    staffDef: [
+      ['doctors', '医師', 1, 3, 1500000],
+      ['nurses', '看護師', 0, 4, 120000],
+      ['clerks', '医療事務', 0, 3, 60000],
+    ],
+    deptBadge(d) { return `管理料(${d.policy.kanri === 'I' ? 'I' : 'II'})方針`; },
     /* ゲーム上の仮定(制度情報ではない) */
     managementParameters: {
       panelPerDoctor: 600,      // 医師1人が抱えられる継続患者数(月1回通院前提)
       visitCapPerDoctor: 45,    // 1日の外来処理能力/医師
-      enrollBase: 4.5,          // 新規継続患者/日(立ち上がり・評判で変動)
+      seedPanel: 80,            // 開設時の引き継ぎ患者(前医・健診からの紹介)。初月に分散して初来院する
+      enrollBase: 8,            // 新規継続患者/日(立ち上がり・評判で変動)
       acuteBase: 9,             // 急性(単発)外来/日
       revisitDays: [24, 34],    // 継続患者の来院間隔(日)
       acuteXrayProb: 0.3,       // 急性外来で胸部X線に至る率
@@ -65,6 +73,19 @@
       labApproxTen: 350,        // 検体検査一式の概算点数(KB未登録のため概算明示。issues #10で置換)
       costs: { doctorDay: 80000, nurseDay: 18000, clerkDay: 10000, rentDay: 30000, baseDay: 8000, perVisit: 250 },
       referralSources: ['健診センター', '調剤薬局', '地域包括'],
+    },
+    /* 開設時: 引き継ぎ患者を初月に分散して受け入れる(nv=初来院日) */
+    deptInit(dept, day) {
+      const P = this.managementParameters;
+      for (let i = 0; i < P.seedPanel; i++) {
+        const r = Math.random(); let pr = 'lipid'; let acc = 0;
+        for (const pf of this.patientProfiles) { acc += pf.weight; if (r < acc) { pr = pf.id; break; } }
+        const p = { iv: P.revisitDays[0] + Math.floor(Math.random() * (P.revisitDays[1] - P.revisitDays[0] + 1)) };
+        p.nv = day + 1 + Math.floor(Math.random() * 30);
+        // DEPT.addPatientはこの時点で使えない(モジュールは基盤に依存しない)ため素の形で積む
+        dept.seq++;
+        dept.pt.push(Object.assign({ id: 'in' + dept.seq, pr, en: day, sv: 0, mc: {}, wc: {}, lb: {}, fb: false }, p));
+      }
     },
     fsDefs: [
       { fsId: 'r08-fs-b001-3',
@@ -123,7 +144,9 @@
           else lines.push(api.approx('検体検査一式', P.labApproxTen));
         }
         p.nv = ctx.day + (p.iv || 28);
-        if (tryKanriRyo) api.setSample(`継続患者(${(this.patientProfiles.find((x) => x.id === p.pr) || {}).label}・管理料${plan === 'II' ? '(II)' : '(I)'}方針)`, lines, r.ev);
+        const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
+        if (tryKanriRyo) api.setSample(`継続患者(${prLabel})の月次来院 — 管理料${plan === 'II' ? '(II)' : '(I)'}方針`, lines, r.ev, 2);
+        else if (isFirst) api.setSample(`初診(${prLabel}・継続管理の開始)`, lines, r.ev, 1);
       }
 
       // 急性(単発)外来: パネルに載せない一見患者
@@ -135,7 +158,8 @@
         const report = { type: 'first', kbActs: [{ id: 'presc' }] };
         if (dept.policy.ippanmei) report.kbActs.push({ id: 'ippanmei' });
         if (ctx.rand() < P.acuteXrayProb) { report.kbActs.push({ id: 'xrayDiagChest' }, { id: 'xrayShoot' }); }
-        api.evalVisit(tmp, report);
+        const ra = api.evalVisit(tmp, report);
+        api.setSample('急性疾患の一見患者(初診)', ra.lines, ra.ev, 1);
       }
 
       agg.cost += dept.staff.doctors * C.doctorDay + dept.staff.nurses * C.nurseDay + dept.staff.clerks * C.clerkDay
