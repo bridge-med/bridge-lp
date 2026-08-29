@@ -1342,3 +1342,25 @@ input[type="range"]::-moz-range-thumb {
 .kijun-badge.off { color: var(--ink-3); background: transparent; border-color: var(--line); }
 .spec-row { padding: 6px 2px; border-bottom: 1px dotted var(--line); font: 600 12px/1.5 var(--sans); color: var(--ink); }
 .spec-row small { display: block; font-weight: 500; color: var(--ink-3); }
+
+/* ===== 診療科部門(v35): 法人タブ 索引+1件展開 ===== */
+.site-row {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; text-align: left;
+  border: 1px solid var(--line); background: var(--card);
+  border-radius: 12px; padding: 10px 12px; margin: 6px 0;
+  font: 700 13px/1.5 var(--sans); color: var(--ink);
+  min-height: 44px;
+}
+.site-row.on { border-color: rgba(62, 124, 166, 0.45); background: var(--blue-pale); }
+.site-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-badge {
+  flex: 0 0 auto; font: 700 10px/1 var(--sans); color: var(--blue-deep);
+  background: var(--blue-pale); border: 1px solid rgba(62, 124, 166, 0.25);
+  border-radius: 999px; padding: 4px 8px;
+}
+.site-row.on .site-badge { background: var(--card); }
+.site-warn { flex: 0 0 auto; font-size: 12px; }
+.site-stat { margin-left: auto; font: 700 11px/1.4 var(--en); color: var(--ink-3); white-space: nowrap; }
+.site-caret { flex: 0 0 auto; color: var(--ink-3); font-size: 10px; }
+.site-detail { border-left: 3px solid rgba(62, 124, 166, 0.25); margin: 2px 0 12px; padding: 4px 0 4px 10px; }

@@ -403,6 +403,7 @@
     // Reimbursement Debugger: ?debug=1 で算定詳細に評価トレースを表示
     debugMode: typeof location !== 'undefined' && /[?&]debug=1/.test(location.search),
     receiptDetailOpen: false,
+    corpOpen: null, // 法人タブで展開中の拠点(索引+1件展開)
     billboard: false,
     relations: {}, // key -> {lv, last}
     loans: [],
@@ -3217,6 +3218,17 @@
         ${corpToday ? `<span>昨日の法人損益 <b class="${(corpToday.profit + corpToday.brProfit) >= 0 ? 'pos-t' : 'neg-t'}">${yen(corpToday.profit + corpToday.brProfit)}</b></span>` : ''}
       </div>`;
 
+    // 拠点の索引+1件だけ展開(現在地は常に1つ)。展開中の拠点だけ操作UIを描く
+    const open = G.corpOpen || null;
+    const siteRow = (id, icon, name, badge, stat, warn) => `
+      <button class="site-row ${open === id ? 'on' : ''}" data-site="${id}">
+        <span class="site-name">${icon} ${name}</span>
+        ${badge ? `<span class="site-badge">${badge}</span>` : ''}
+        ${warn ? '<span class="site-warn">⚠</span>' : ''}
+        <span class="site-stat">${stat || ''}</span>
+        <span class="site-caret">${open === id ? '▴' : '▾'}</span>
+      </button>`;
+
     // これから開く診療科: 静的な一覧のみ(選べるようになった便で「分岐する道」として出し直す)
     const specRows = (typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.playable() : []).map((m) => {
       const active = settings.specialty === m.id;
@@ -3225,9 +3237,9 @@
         <small>${m.desc}</small>
       </div>`;
     }).join('');
-    const specialtySection = specRows ? `<h3 class="sub-title">🏥 これから開く診療科 <small>— 本院は整形外科。法人が育つと街に増えていく</small></h3>${specRows}` : '';
+    const specialtySection = specRows ? `<h3 class="sub-title">🌱 これから開く診療科 <small>— 本院は整形外科。法人が育つと街に増えていく</small></h3>${specRows}` : '';
 
-    const brCards = G.branches.map((br, bi) => {
+    const brCard = (br, bi) => {
       const machineMax = (br.floorLv || 1) >= 3 ? 18 : (br.floorLv || 1) >= 2 ? 12 : 6;
       const kijunBtns = KIJUN.map((k) => {
         if (br.rehaLevel === k.lv) return `<span class="kijun-badge">${k.name} 届出済</span>`;
@@ -3268,7 +3280,7 @@
         </div>
         <div class="branch-kijun">施設基準(<b>専従はこの分院のPTのみ</b>。(I)は増築100㎡+PT4名): ${kijunBtns}</div>
       </div>`;
-    }).join('');
+    };
 
     const exCount = G.branches.filter((b) => b.siteId.startsWith('ex')).length;
     const generic = { id: 'ex' + (exCount + 1), name: `郊外${exCount + 1}号院`, cost: 12000000 + exCount * 2000000, desc: '隣町の新興住宅地。マップ外だが商圏は良好。分院数に上限はありません。' };
@@ -3326,7 +3338,42 @@
       </div>`;
     }
 
-    el.innerHTML = summary + (brCards || '<p class="plan-lead">まだ分院はありません。本院を軌道に乗せてから(評判70+事業計画+資金)。<b>施設基準の専従要件は分院ごと</b> — PT採用が本当の壁です。</p>') + openSection + hospSection + specialtySection;
+    // 索引(site-row)+展開中の1件だけ詳細を描く
+    const mainLast = [...G.history].reverse().find((x) => x.kind !== 'closed') || null;
+    const rows = [];
+    rows.push(siteRow('main', '🏥', `${escapeHtml(G.clinicName)}(本院)`, '整形外科',
+      mainLast ? `昨日 ${yen(mainLast.profit)}` : '', false));
+    if (open === 'main') rows.push(`<div class="site-detail">
+      <div class="pnl-row"><span>体制</span><b>医師${settings.doctors} / 看護師${settings.nurses} / PT${settings.pts} / ${REHA_NAMES[settings.rehaLevel]}</b></div>
+      <div class="pnl-row"><span>評判 / 認知</span><b>${Math.round(G.rep)} / ${Math.round(G.aw * 100)}%</b></div>
+      ${mainLast ? `<div class="pnl-row"><span>昨日</span><b>患者${mainLast.patients}人・売上${yen(mainLast.revenue)}・損益${yen(mainLast.profit)}</b></div>` : ''}
+      <p class="pnl-note">本院の診療は「🏥 院内」タブ、人員・設備・施設基準は「📊 経営」タブで。</p>
+    </div>`);
+    G.branches.forEach((br, bi) => {
+      const p7 = br.profit7.reduce((a, x) => a + x, 0);
+      rows.push(siteRow('br' + bi, '🏥', br.name, REHA_NAMES[br.rehaLevel],
+        br.last ? `昨日 ${yen(br.last.profit)}` : '準備中', br.profit7.length >= 7 && p7 < 0));
+      if (open === 'br' + bi) rows.push(`<div class="site-detail">${brCard(br, bi)}</div>`);
+    });
+    if (G.hospital) {
+      rows.push(siteRow('hosp', '🏥', 'グループ病院', `回復期${G.hospital.beds}床`,
+        G.hospital.last ? `昨日 ${yen(G.hospital.last.profit)}` : '準備中', false));
+      if (open === 'hosp') rows.push(`<div class="site-detail">${hospSection}</div>`);
+    }
+    rows.push(siteRow('newsite', '🏗', '新しく開設する', '',
+      `分院${G.branches.length}${G.hospital ? '・病院あり' : ''}`, false));
+    if (open === 'newsite') rows.push(`<div class="site-detail">${openSection}${G.hospital ? '' : hospSection}</div>`);
+
+    el.innerHTML = summary
+      + '<h3 class="sub-title">🏥 同じ仕組みを増やす <small>— 整形外科の分院とグループ病院</small></h3>'
+      + rows.join('')
+      + specialtySection;
+
+    el.querySelectorAll('[data-site]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.site;
+      G.corpOpen = G.corpOpen === id ? null : id;
+      renderCorp();
+    }));
 
 
     el.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => {
