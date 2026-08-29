@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-29T01:00:12.838Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-29T11:37:39.173Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-29T01:00:12.838Z",
+ "generated_at": "2026-08-29T11:37:39.173Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -1841,6 +1841,273 @@
      "note": "マスター114008010=300と一致"
     }
    ]
+  },
+  {
+   "id": "r08-I002-1-ro-1-1",
+   "code": "180070310",
+   "kubun": "I002-1-ロ-(1)-①",
+   "name": "通院精神療法(初診料を算定する初診の日・60分以上・精神保健指定医)",
+   "shortName": "通院精神療法(初診60分・指定医)",
+   "categoryL": "特掲診療料",
+   "categoryM": "精神科専門療法",
+   "points": 650,
+   "unit": "1回につき",
+   "conditions": "初診料を算定する初診の日は診療に要した時間が60分以上の場合に限り算定(告示注2・留意(5))。精神科を標榜する保険医療機関の精神科を担当する医師が行った場合に限る(留意(2))。同時に複数の患者・家族への集団実施は算定不可(留意(3))。①以外(非指定医)のセル(550点)と注13の減算セルは別に存在するがKB未登録(ゲームは指定医セルのみ使用)。特掲の施設基準告示・届出通知に通院精神療法本体(精神保健指定医セル)の届出の定めはない(0305-8の届出一覧は注4・8・9・10・11・12・13の加算等のみ)",
+   "exclusions": null,
+   "countLimitText": "初診時1回(算定回数テーブル: 初診時・上限1)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "visit_first",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "psychiatry",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.239",
+     "quote": "ロ 区分番号A000に掲げる初診料を算定する初診の日に行った場合 (1) 60分以上の場合 1 精神保健指定医による場合 650点",
+     "note": "医科診療行為マスター 180070310=650とも一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-I002-1-ro-2",
+   "code": "180774810",
+   "kubun": "I002-1-ロ-(2)",
+   "name": "通院精神療法(初診料を算定する初診の日・精神保健指定医による30分以上60分未満)",
+   "shortName": "通院精神療法(初診30-60分・指定医)",
+   "categoryL": "特掲診療料",
+   "categoryM": "精神科専門療法",
+   "points": 550,
+   "unit": "1回につき",
+   "conditions": "初診料を算定する初診の日において診療に要した時間が30分以上の場合に算定(留意(5))。特掲の施設基準告示・届出通知に通院精神療法本体(精神保健指定医セル)の届出の定めはない(0305-8の届出一覧は注4・8・9・10・11・12・13の加算等のみ)",
+   "exclusions": null,
+   "countLimitText": "初診時1回(算定回数テーブル: 初診時・上限1)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "visit_first",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "psychiatry",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.239",
+     "quote": "(2) 精神保健指定医による30分以上60分未満の場合 550点",
+     "note": "医科診療行為マスター 180774810=550とも一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-I002-1-ha-1-1",
+   "code": "180070410",
+   "kubun": "I002-1-ハ-(1)-①",
+   "name": "通院精神療法(イ及びロ以外・30分以上・精神保健指定医)",
+   "shortName": "通院精神療法(30分以上・指定医)",
+   "categoryL": "特掲診療料",
+   "categoryM": "精神科専門療法",
+   "points": 410,
+   "unit": "1回につき",
+   "conditions": "診療に要した時間が30分以上の場合に限り算定(留意(5))。診療時間は医師が自ら行う問診・身体診察・精神療法に要する時間(留意(5))。特掲の施設基準告示・届出通知に通院精神療法本体(精神保健指定医セル)の届出の定めはない(0305-8の届出一覧は注4・8・9・10・11・12・13の加算等のみ)",
+   "exclusions": null,
+   "countLimitText": "1と2を合わせて週1回(退院後4週間以内は週2回)(告示注1・算定回数テーブル: 週・上限1・特例あり)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "week",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "psychiatry",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.239",
+     "quote": "ハ イ及びロ以外の場合 (1) 30分以上の場合 1 精神保健指定医による場合 410点",
+     "note": "医科診療行為マスター 180070410=410とも一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.517",
+     "quote": "通院・在宅精神療法とは、入院中の患者以外の患者であって、精神疾患又は精神症状を伴う脳器質性障害があるもの...に対して、精神科を担当する医師...が一定の治療計画のもとに危機介入、対人関係の改善、社会適応能力の向上を図るための指示、助言等の働きかけを継続的に行う治療方法をいう。",
+     "note": "対象患者と治療の性質(留意I002(1))"
+    },
+    {
+     "field": "count_limit",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.240",
+     "quote": "注1 入院中の患者以外の患者について、退院後4週間以内の期間に行われる場合にあっては1と2を合わせて週2回、その他の場合にあっては1と2を合わせて週1回に限り算定する。",
+     "note": "週1回制限の根拠(ゲームは安全側で週1のみ使用)"
+    }
+   ]
+  },
+  {
+   "id": "r08-I002-1-ha-2-1",
+   "code": "180070510",
+   "kubun": "I002-1-ハ-(2)-①",
+   "name": "通院精神療法(イ及びロ以外・30分未満・精神保健指定医)",
+   "shortName": "通院精神療法(30分未満・指定医)",
+   "categoryL": "特掲診療料",
+   "categoryM": "精神科専門療法",
+   "points": 315,
+   "unit": "1回につき",
+   "conditions": "診療に要した時間が5分を超えたときに限り算定(告示注2・留意(4))。特掲の施設基準告示・届出通知に通院精神療法本体(精神保健指定医セル)の届出の定めはない(0305-8の届出一覧は注4・8・9・10・11・12・13の加算等のみ)",
+   "exclusions": null,
+   "countLimitText": "1と2を合わせて週1回(退院後4週間以内は週2回)(告示注1・算定回数テーブル: 週・上限1・特例あり)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "week",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "psychiatry",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.239",
+     "quote": "(2) 30分未満の場合 1 精神保健指定医による場合 315点",
+     "note": "医科診療行為マスター 180070510=315とも一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-I004-2-i",
+   "code": "180020610",
+   "kubun": "I004-2-イ",
+   "name": "心身医学療法(入院外・初診時)",
+   "shortName": "心身医学療法(初診時)",
+   "categoryL": "特掲診療料",
+   "categoryM": "精神科専門療法",
+   "points": 110,
+   "unit": "1回につき",
+   "conditions": "心身症の患者への一定の治療計画に基づく治療(自律訓練法・カウンセリング・行動療法等を含む。留意(1))。初診時は診療時間が30分を超えた場合に限り算定(告示注2・留意(3))。精神科を標榜する保険医療機関以外でも算定できる(告示注1)。傷病名欄に「(心身症)」と記載(留意(4))。20歳未満は所定点数の100分の200加算",
+   "exclusions": null,
+   "countLimitText": "初診時1回(算定回数テーブル: 初診時・上限1)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "visit_first",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "psychiatry",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.243",
+     "quote": "I004 心身医学療法(1回につき)... 2 入院中の患者以外の患者 イ 初診時 110点",
+     "note": "医科診療行為マスター 180020610=110とも一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.529",
+     "quote": "心身医学療法とは、心身症の患者について、一定の治療計画に基づいて、身体的傷病と心理・社会的要因との関連を明らかにするとともに、当該患者に対して心理的影響を与えることにより、症状の改善又は傷病からの回復を図る治療方法をいう。",
+     "note": "留意I004(1)"
+    }
+   ]
+  },
+  {
+   "id": "r08-I004-2-ro",
+   "code": "180020010",
+   "kubun": "I004-2-ロ",
+   "name": "心身医学療法(入院外・再診時)",
+   "shortName": "心身医学療法(再診時)",
+   "categoryL": "特掲診療料",
+   "categoryM": "精神科専門療法",
+   "points": 80,
+   "unit": "1回につき",
+   "conditions": "当該療法に習熟した医師によって行われた場合に算定(留意(2))。精神科標榜以外でも算定できる(告示注1)。要点を診療録に記載(留意(5))",
+   "exclusions": null,
+   "countLimitText": "初診日から4週間以内は週2回、4週間を超える期間は週1回(告示注4・算定回数テーブル: 週・上限1・特例あり)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "week",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "psychiatry",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.243",
+     "quote": "ロ 再診時 80点",
+     "note": "医科診療行為マスター 180020010=80とも一致"
+    }
+   ]
   }
  ],
  "facilityStandards": [
@@ -2232,6 +2499,34 @@
     ],
     "direction": "source_blocks_targets"
    }
+  },
+  {
+   "id": "r08-rule-0009",
+   "source": "r08-I002-1-ha-1-1",
+   "target": "B000特定疾患療養管理料・r08-B001-3-3",
+   "type": "mutually_exclusive",
+   "condition": "特定疾患療養管理料(B000)又は生活習慣病管理料(II)(B001-3-3)を算定している患者については、通院・在宅精神療法は算定しない(患者単位・注1ただし書)",
+   "period": "patient",
+   "bidirectional": 0,
+   "doc": "r08-kokuji69-ika",
+   "page": "PDF p.240 (I002注1)",
+   "quote": "ただし、区分番号B000に掲げる特定疾患療養管理料及び区分番号B001-3-3に掲げる生活習慣病管理料(II)を算定している患者については算定しない。",
+   "confidence": "verified",
+   "machine": null
+  },
+  {
+   "id": "r08-rule-0010",
+   "source": "r08-I002-1-ha-1-1",
+   "target": "r08-I004-2-i・r08-I004-2-ro",
+   "type": "mutually_exclusive",
+   "condition": "入院精神療法・通院・在宅精神療法又は標準型精神分析療法を算定している患者については、心身医学療法は算定できない(患者単位。医科電子点数表の同日背反ペアには存在しないことも確認済み)",
+   "period": "patient",
+   "bidirectional": 0,
+   "doc": "r08-ryuiji-ika",
+   "page": "PDF p.529 (I004留意(8))",
+   "quote": "「I001」入院精神療法、「I002」通院・在宅精神療法又は「I003」標準型精神分析療法を算定している患者については、心身医学療法は算定できない。",
+   "confidence": "verified",
+   "machine": null
   }
  ]
 });
