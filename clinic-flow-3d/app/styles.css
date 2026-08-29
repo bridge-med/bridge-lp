@@ -1343,6 +1343,7 @@ input[type="range"]::-moz-range-thumb {
 .kijun-kb b { color: var(--ink-2); }
 .kijun-badge.alt { color: var(--blue-deep); background: transparent; border-color: var(--blue); }
 .kijun-badge.off { color: var(--ink-3); background: transparent; border-color: var(--line); }
+.kijun-badge.wrap { white-space: normal; text-align: left; border-radius: 12px; display: inline-block; max-width: 100%; }
 .spec-row { padding: 6px 2px; border-bottom: 1px dotted var(--line); font: 600 12px/1.5 var(--sans); color: var(--ink); }
 .spec-row small { display: block; font-weight: 500; color: var(--ink-3); }
 

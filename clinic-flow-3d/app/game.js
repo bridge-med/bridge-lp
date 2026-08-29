@@ -3275,7 +3275,7 @@
       const name = fs ? (fs.shortName || fs.name) : st.fsId;
       if (st.notified) return `<span class="kijun-badge">${name} 適用中</span>`;
       if (st.ok) return `<button class="mini-btn plus" data-dfsnotify="${m.id}:${st.fsId}">${name} を届け出る</button>`;
-      return `<span class="kijun-badge off">${name} 未(${st.missing.join('・')})</span>`;
+      return `<span class="kijun-badge off wrap">${name} 未(${st.missing.join('・')})</span>`;
     }).join(' ');
     const staffRows = (m.staffDef || []).map(([key, label, min, max, cost]) => `
       <div class="plan-step"><span>${label} <small>最大${max}</small></span>
