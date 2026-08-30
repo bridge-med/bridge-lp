@@ -60,6 +60,7 @@ const LIMITS = {
   'r08-J119-2':      { per: 'day', max: 1 },                    // 1日につき(算定回数テーブル: 日・上限1)
   'r08-H003-2-1-i':  { per: 'month', max: 1 },                  // 月1回(告示H003-2注1・算定回数テーブル)
   'r08-H003-2-1-ro': { per: 'month', max: 1 },
+  'r08-B009-1':      { per: 'month', max: 1 },                  // 紹介先ごと月1回(告示B009注1・算定回数テーブル)
 };
 
 /* ---- 機械判定ヒント: 文章ルール → エンジン述語 ----
@@ -71,7 +72,8 @@ const LIMITS = {
 const MACHINE_HINTS = {
   'r08-rule-0001': { type: 'same_day_ng_categories', source: 'r08-A001-n8',
     targetCategories: ['リハビリテーション', '処置', '手術', '麻酔', '放射線治療', '精神科専門療法'],
-    // 「別に厚生労働大臣が定める検査」は別表がKB未登録のため機械判定しない(needs_review警告のみ)
+    // 「別に厚生労働大臣が定める検査」の該当項目リストはbilling_rules.json側のmachine
+    // (sadamaruKensaItems)からマージされる。リスト未分類の検査カテゴリだけwarning
     reviewCategories: ['検査'] },
   'r08-rule-0002': { type: 'included_categories', source: ['r08-B001-3-1-lipid', 'r08-B001-3-1-ht', 'r08-B001-3-1-dm'],
     targetCategories: ['検査', '注射', '病理診断'], targetItemIds: ['r08-A001-n8'] },

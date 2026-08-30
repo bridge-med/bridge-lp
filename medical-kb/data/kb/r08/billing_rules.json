@@ -194,5 +194,23 @@
    "type": "handled_externally",
    "note": "神経ブロックとトリガーポイント注射は同一受診単位では併発しない前提のため判定対象なし。L100/L102はKB未登録"
   }
+ },
+ {
+  "id": "r08-rule-0013",
+  "source_item": "r08-B009-1",
+  "target_item": "特別の関係にある保険医療機関への紹介",
+  "rule_type": "conditional",
+  "condition": "情報提供先が特別の関係(開設者同一・代表者同一・役員親族3/10超等=第2部通則7(3))にある機関の場合、診療情報提供料(I)は算定できない(留意B009(4))。同一法人内の部門・分院間の紹介はこれに該当する",
+  "period": "per_claim",
+  "bidirectional": 0,
+  "source_document": "r08-ryuiji-ika",
+  "source_page": "p.229(留意B009(4))・p.27(通則7(3)定義)",
+  "quote": "当該情報を提供する保険医療機関と特別の関係にある機関に情報提供が行われた場合…は算定できない。",
+  "machine": {
+   "type": "condition_ng_item",
+   "source": "r08-B009-1",
+   "conditionKey": "specialRelation",
+   "conditionLabel": "紹介先が特別の関係にある保険医療機関(開設者同一等)"
+  }
  }
 ]

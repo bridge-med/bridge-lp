@@ -204,6 +204,14 @@
             b.ruleRefs.push(rule);
           }
         }
+      } else if (m.type === 'condition_ng_item') {
+        // 条件が真のとき算定不可(例: B009×特別の関係にある機関への紹介)
+        const src = findRec(m.source);
+        if (src && src.status === 'candidate' && conditions[m.conditionKey]) {
+          src.status = 'rejected';
+          src.reasons.push(`${m.conditionLabel}のため算定不可(${rule.id})`);
+          src.ruleRefs.push(rule);
+        }
       }
     }
 

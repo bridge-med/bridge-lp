@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-30T08:07:53.335Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-30T08:24:50.980Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-30T08:07:53.335Z",
+ "generated_at": "2026-08-30T08:24:50.980Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -2450,6 +2450,74 @@
      "note": "医科診療行為マスター180774210の240点と突合一致"
     }
    ]
+  },
+  {
+   "id": "r08-B009-1",
+   "code": "180016110",
+   "kubun": "B009",
+   "name": "診療情報提供料(I)",
+   "shortName": "診療情報提供料(I)",
+   "categoryL": "特掲診療料",
+   "categoryM": "医学管理等",
+   "points": 250,
+   "unit": "紹介先ごとに患者1人につき月1回",
+   "conditions": "別の保険医療機関での診療の必要を認め、患者の同意を得て、診療状況を示す文書を添えて紹介を行った場合に算定(告示注1)。情報提供先が「特別の関係」(開設者同一・代表者同一等=第2部通則7(3))にある機関の場合は算定できない(留意(4))。検査・画像の実施依頼の紹介でも特別の関係にある機関は除く(留意(5))",
+   "exclusions": null,
+   "countLimitText": "紹介先保険医療機関ごとに患者1人につき月1回(告示注1・電子点数表算定回数テーブル: 月・上限1・特例あり)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "internal",
+     "relevance": "primary"
+    },
+    {
+     "specialty": "orthopedics",
+     "relevance": "primary"
+    },
+    {
+     "specialty": "ophthalmology",
+     "relevance": "primary"
+    },
+    {
+     "specialty": "dialysis",
+     "relevance": "primary"
+    },
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    },
+    {
+     "specialty": "psychiatry",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.128",
+     "quote": "B009 診療情報提供料(I) 250点",
+     "note": "医科診療行為マスター180016110の250点と突合一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.128",
+     "quote": "保険医療機関が、診療に基づき、別の保険医療機関での診療の必要を認め、これに対して、患者の同意を得て、診療状況を示す文書を添えて患者の紹介を行った場合に、紹介先保険医療機関ごとに患者1人につき月1回に限り算定する。",
+     "note": "告示B009注1"
+    }
+   ]
   }
  ],
  "facilityStandards": [
@@ -2951,6 +3019,24 @@
    "machine": {
     "type": "handled_externally",
     "note": "神経ブロックとトリガーポイント注射は同一受診単位では併発しない前提のため判定対象なし。L100/L102はKB未登録"
+   }
+  },
+  {
+   "id": "r08-rule-0013",
+   "source": "r08-B009-1",
+   "target": "特別の関係にある保険医療機関への紹介",
+   "type": "conditional",
+   "condition": "情報提供先が特別の関係(開設者同一・代表者同一・役員親族3/10超等=第2部通則7(3))にある機関の場合、診療情報提供料(I)は算定できない(留意B009(4))。同一法人内の部門・分院間の紹介はこれに該当する",
+   "period": "per_claim",
+   "bidirectional": 0,
+   "doc": "r08-ryuiji-ika",
+   "page": "p.229(留意B009(4))・p.27(通則7(3)定義)",
+   "quote": "当該情報を提供する保険医療機関と特別の関係にある機関に情報提供が行われた場合...は算定できない。",
+   "machine": {
+    "type": "condition_ng_item",
+    "source": "r08-B009-1",
+    "conditionKey": "specialRelation",
+    "conditionLabel": "紹介先が特別の関係にある保険医療機関(開設者同一等)"
    }
   }
  ]

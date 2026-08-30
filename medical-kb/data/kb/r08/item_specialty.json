@@ -425,5 +425,47 @@
   "relevance": "primary",
   "rationale": "運動器リハの月次計画評価",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B009-1",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "全診療科共通の紹介の医学管理料",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B009-1",
+  "specialty_id": "orthopedics",
+  "relevance": "primary",
+  "rationale": "全診療科共通の紹介の医学管理料",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B009-1",
+  "specialty_id": "ophthalmology",
+  "relevance": "primary",
+  "rationale": "全診療科共通の紹介の医学管理料",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B009-1",
+  "specialty_id": "dialysis",
+  "relevance": "primary",
+  "rationale": "全診療科共通の紹介の医学管理料",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B009-1",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "全診療科共通の紹介の医学管理料",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B009-1",
+  "specialty_id": "psychiatry",
+  "relevance": "primary",
+  "rationale": "全診療科共通の紹介の医学管理料",
+  "confidence": "verified"
  }
 ]
