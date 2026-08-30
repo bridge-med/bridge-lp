@@ -41,3 +41,9 @@ BRIDGEは理学療法士・橋本渉が個人で運営するプロジェクト�
 - 実装・修正・改善の進め方は `dev-loop` スキル（`.claude/skills/dev-loop/SKILL.md`）に従う。依頼種別（feature/bugfix/ui-improvement/refactor/product-idea）ごとの調整もここに定める
 - 出荷前の機械検査は `node scripts/check-site.mjs`。コミット時は `.claude/settings.json` のhookが自動で強制する。直せない既知の違反は `scripts/check-site.allowlist.json` に理由付きで隔離
 - 出荷（コミット・公開）の手順は `ship` スキル（`.claude/skills/ship/SKILL.md`）に従う。判定の記録は `cockpit-76a805/shiplog.jsonl`
+
+## セッション運用（PR監視の禁止）
+
+- PRを作成しても、定期チェックの予約（send_later・Routine等でセッションを後から起こし直す仕組み）を自分で仕掛けない。イベント購読（subscribe_pr_activity）も同様
+- PRの監視・自動フォローは、社長がその都度明示的に指示したときだけ行う
+- 監視をやめる指示を受けたら、返事だけで終わらせない。サーバー側に登録済みの予約（Routine）を削除し、一覧で残存ゼロを確認してから報告する（2026-08-29の社長指示による恒久ルール）
