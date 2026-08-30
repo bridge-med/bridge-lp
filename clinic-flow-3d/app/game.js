@@ -3612,9 +3612,11 @@
     // 索引(site-row)+展開中の1件だけ詳細を描く
     const mainLast = [...G.history].reverse().find((x) => x.kind !== 'closed') || null;
     const rows = [];
-    rows.push(siteRow('main', '🏥', `${escapeHtml(G.clinicName)}(本院)`, '整形外科',
+    const mainSpec = (typeof SPECIALTIES !== 'undefined' && SPECIALTIES.get(settings.specialty)) || null;
+    rows.push(siteRow('main', '🏥', escapeHtml(G.clinicName), '本院',
       mainLast ? `昨日 ${yen(mainLast.profit)}` : '', false));
     if (open === 'main') rows.push(`<div class="site-detail">
+      <div class="pnl-row"><span>診療科</span><b>${mainSpec ? mainSpec.name : '整形外科'}</b></div>
       <div class="pnl-row"><span>体制</span><b>医師${settings.doctors} / 看護師${settings.nurses} / PT${settings.pts} / ${REHA_NAMES[settings.rehaLevel]}</b></div>
       <div class="pnl-row"><span>評判 / 認知</span><b>${Math.round(G.rep)} / ${Math.round(G.aw * 100)}%</b></div>
       ${mainLast ? `<div class="pnl-row"><span>昨日</span><b>患者${mainLast.patients}人・売上${yen(mainLast.revenue)}・損益${yen(mainLast.profit)}</b></div>` : ''}

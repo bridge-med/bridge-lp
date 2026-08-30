@@ -104,6 +104,11 @@ a { color: var(--blue-deep); }
 .hud-time span { font: 700 12px/1.2 var(--en); color: var(--ink-3); }
 
 .speed-group { display: flex; gap: 4px; }
+/* 320px級: 8ボタンは1行に収まらない。圧縮せず折り返す(幅を削るとWCAG AAの24pxを割る) */
+@media (max-width: 360px) {
+  .speed-group { flex: 1 0 100%; flex-wrap: wrap; gap: 4px; }
+  .speed-btn { flex: 1 1 calc(25% - 3px); padding: 7px 4px; }
+}
 .speed-btn {
   border: 1px solid var(--line);
   background: var(--card);
@@ -1361,7 +1366,7 @@ input[type="range"]::-moz-range-thumb {
 .site-badge {
   flex: 0 0 auto; font: 700 10px/1 var(--sans); color: var(--blue-deep);
   background: var(--blue-pale); border: 1px solid rgba(62, 124, 166, 0.25);
-  border-radius: 999px; padding: 4px 8px;
+  border-radius: 999px; padding: 4px 8px; white-space: nowrap;
 }
 .site-row.on .site-badge { background: var(--card); }
 .site-warn { flex: 0 0 auto; font-size: 12px; }
