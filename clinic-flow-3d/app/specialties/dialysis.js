@@ -66,7 +66,7 @@
       { fsId: 'r08-fs-j038-1',
         check(dept) {
           const missing = [];
-          if (dept.equip.beds >= 26) missing.push(`装置26台未満(現在${dept.equip.beds}台)`);
+          if (dept.equip.beds >= 26) missing.push(`装置台数の要件(26台未満・現在${dept.equip.beds}台)`);
           if ((dept.staff.ces || 0) < 1) missing.push('安全管理責任者(専任CE1名以上)');
           return { ok: missing.length === 0, missing };
         },

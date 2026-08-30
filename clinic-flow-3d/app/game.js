@@ -1267,7 +1267,7 @@
     for (const [k, r] of Object.entries(G.relations)) {
       if (r.lv > 0 && G.day - r.last > 30) { r.lv--; r.last = G.day; cooled.push(REL_DEF[k].name); }
     }
-    if (cooled.length) toast(`🥶 足が遠のいて関係が冷えました: ${cooled.join('・')}(定期訪問を)`);
+    if (cooled.length) toast(`🥶 足が遠のいて関係が冷えました: ${cooled.join('・')}。定期訪問で戻せます`);
 
     // 施設基準チェック
     const cur = KIJUN.find((k) => k.lv === settings.rehaLevel);
@@ -1551,7 +1551,7 @@
       <div class="pnl-row"><span>現在の累積係数</span><b>${Object.keys(KAITEI_CAT).map((c) => `${KAITEI_CAT[c]}${Math.round((k[c] - 1) * 100) >= 0 ? '+' : ''}${Math.round((k[c] - 1) * 100)}%`).join(' ')}</b></div>
       <p class="modal-note">📖 経営は制度の上に乗っている。下がった項目を嘆くより、上がった項目に体制を寄せるのが改定対応 — 2年ごとの「ルール変更に強い経営」こそ本当の実力。</p>`,
       '改定に対応する');
-    banner(`📜 診療報酬改定 — ${changes.join(' / ')} — P&Lで影響を確認`);
+    banner(`📜 診療報酬改定がありました(${changes.join(' / ')})。影響はP&Lで確認できます`);
   }
 
   function kaiteiCheck() {
@@ -2018,7 +2018,7 @@
       banner(`⏩ 7日間を自動運営しました(現在 Day ${G.day})。P&L・週次サマリーで振り返りを`);
     } else {
       G.boosts[id] = G.day + item.days;
-      toast(`${item.label} を開始 — 明日から${item.days}日間有効`);
+      toast(`${item.label} を開始しました。明日から${item.days}日間有効です`);
     }
     renderItems(); updateHeader(); save();
   }
@@ -2215,7 +2215,7 @@
       G.daily.quizDone = today;
       if (ok) { G.coins += 1; SND.coin(); } else { SND.buzz(); }
       const res = $('quizResult');
-      if (res) res.innerHTML = `<div class="rs-bottle ${ok ? '' : 'rs-balk'}"><b>${ok ? '⭕ 正解 🪙+1' : `❌ 不正解…(正解は${q.a ? '⭕' : '❌'})`}</b><br><small>📖 ${q.exp}</small></div>`;
+      if (res) res.innerHTML = `<div class="rs-bottle ${ok ? '' : 'rs-balk'}"><b>${ok ? '⭕ 正解。🪙+1' : `❌ 不正解…(正解は${q.a ? '⭕' : '❌'})`}</b><br><small>📖 ${q.exp}</small></div>`;
       const bo = $('quizO'), bx = $('quizX');
       if (bo) bo.disabled = true;
       if (bx) bx.disabled = true;
@@ -2227,7 +2227,7 @@
 
   function requestHtml(ch, size) {
     const reward = ch.coin + (ch.chain ? 1 : 0);
-    if (typeof STAFF_UI === 'undefined') return `今日の依頼: ${ch.text}(🪙+${reward})`;
+    if (typeof STAFF_UI === 'undefined') return `今日の依頼: 「${ch.text}」(🪙+${reward})`;
     const st = STAFF_UI.STAFF[ch.char];
     return `${STAFF_UI.faceSVG(ch.char, 'idea', size || 20)} <b>${st.name}</b>${ch.chain ? '<span class="chain-tag">🔗連続依頼</span>' : ''}「${ch.text}」(🪙+${reward}・信頼+${2 + (ch.chain ? 1 : 0)})`;
   }
@@ -2823,7 +2823,7 @@
       G.money -= EXPAND_COST;
       settings.floorLv = 2;
       clinic.applySettings();
-      toast('🏗 増築完了 — リハ室100㎡・診察室4室体制');
+      toast('🏗 増築が完了しました。リハ室100㎡・診察室4室の体制です');
       renderShop(); renderPnl(); updateHeader(); save();
     });
     const ex2 = $('expand2Btn');
@@ -2840,7 +2840,7 @@
       if (G.money < MRI_COST) { toast(`資金が足りません(${yen(MRI_COST)})`); return; }
       G.money -= MRI_COST;
       settings.mri = true;
-      toast('🧲 MRI導入 — 初診・紹介患者の精査で稼働します');
+      toast('🧲 MRIを導入しました。初診・紹介患者の精査で稼働します');
       renderShop(); updateHeader(); save();
     });
     const echoB = $('echoBtn');
@@ -2849,7 +2849,7 @@
       G.money -= ECHO_COST;
       settings.echo = true;
       SND.click();
-      toast('📡 運動器エコー導入 — 初診の精査で算定されます(350点)');
+      toast('📡 運動器エコーを導入しました。初診の精査で算定されます(350点)');
       renderShop(); updateHeader(); save();
     });
     const dexaB = $('dexaBtn');
@@ -2857,7 +2857,7 @@
       if (G.money < DEXA_COST) { toast(`資金が足りません(${yen(DEXA_COST)})`); return; }
       G.money -= DEXA_COST;
       settings.dexa = true;
-      toast('🦴 DEXA導入 — 骨粗鬆症の継続診療が始まります');
+      toast('🦴 DEXAを導入しました。骨粗鬆症の継続診療が始まります');
       renderShop(); updateHeader(); save();
     });
 
@@ -2945,7 +2945,7 @@
       G.money -= 200000;
       settings.webIntake = true;
       pushPulseEv('📱', 'Web問診');
-      toast('📱 Web問診・事前受付を導入 — 受付時間が約45%短縮されます(受付ボトルネック対策)');
+      toast('📱 Web問診・事前受付を導入しました。受付時間が約45%短縮されます(受付ボトルネック対策)');
     } else { settings.webIntake = false; }
     renderShop(); updateHeader(); save();
   });
@@ -3447,7 +3447,7 @@
     // 合計は明細の後(積み上げて合計に着地する紙の読み方)。点数と概算の円は混ぜない
     const totalPts = s.lines.reduce((a, l) => a + (l.t || 0), 0);
     const approxYen = s.lines.reduce((a, l) => a + (l.t == null ? (l.y || 0) : 0), 0);
-    const totalRow = `<div class="kb-ev total"><b>合計</b><span>${totalPts.toLocaleString()}点 = ${yen(totalPts * 10)}</span></div>`
+    const totalRow = `<div class="kb-ev total"><b>点数の合計</b><span>${totalPts.toLocaleString()}点 = ${yen(totalPts * 10)}</span></div>`
       + (approxYen ? `<div class="kb-cond">ほかに ${yen(approxYen)}(KB未登録・ゲーム上の概算)</div>` : '');
     // 未算定の施設基準は3状態: 要件充足(届出のみ)→導線 / 要件不足→事実のみ / 体制で解けないもの→何も足さない
     const fsStates = DEPT.fsStatus(m, d);
@@ -3456,10 +3456,10 @@
       if (x.fsInfo) {
         const st = fsStates.find((f) => f.fsId === x.fsInfo.id);
         if (st && st.ok && !st.notified) {
-          fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''} — 要件は満たしています。届け出れば、次の患者から算定できます</div>
+          fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''}。要件は満たしています。あとは届け出るだけです</div>
             <button class="mini-btn plus" data-gokijun="${m.id}">この部門の施設基準へ</button>`;
         } else if (st && !st.ok) {
-          fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name} — あと ${st.missing.join('・')} が足りません</div>`;
+          fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name} — あと${st.missing.join('・')}が足りません</div>`;
         } else {
           fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''}</div>`;
         }
@@ -3477,9 +3477,8 @@
     showModal(`📖 ${m.name}部門の代表レセプト`, `
       <p class="plan-lead">${s.label}</p>
       ${lineRows}${totalRow}${rejRows}${warnRows}
-      <p class="modal-note">点数と条文はKB(令和8年度)によります。「(概算)」の行は、KBに未登録の行為をゲーム上の概算で計上したものです。点数は1点=10円で換算しています。患者の窓口負担はこの一部です。</p>`, '閉じる');
-    const go = document.querySelector('[data-gokijun]');
-    if (go) go.addEventListener('click', () => {
+      <p class="modal-note">点数と条文はKB(令和8年度)によります。点数は1点=10円の換算で、患者の窓口負担はその一部です。「概算」の行は、KBに未登録の行為をゲーム上の概算で計上したものです。</p>`, '閉じる');
+    document.querySelectorAll('#modal [data-gokijun]').forEach((go) => go.addEventListener('click', () => {
       const mo = $('modal'); if (mo) mo.classList.remove('show');
       G.corpOpen = 'dept-' + go.dataset.gokijun;
       renderCorp();
@@ -3490,7 +3489,7 @@
         kijun.classList.add('kijun-flash');
         setTimeout(() => kijun.classList.remove('kijun-flash'), 1200);
       }
-    });
+    }));
   }
 
   function renderCorp() {
@@ -4399,7 +4398,7 @@
         updateSpeedButtons();
         setSpeed(v, b);
         $('modal').classList.remove('show');
-        toast(`⏳ 倍速×${G.speedPass.tier}パス発動 — ${passRemainText()}`);
+        toast(`⏳ 倍速×${G.speedPass.tier}パスが有効になりました。${passRemainText()}`);
         updateHeader(); save();
       });
     });
