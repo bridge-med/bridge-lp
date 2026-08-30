@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-30T07:29:28.491Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-30T07:55:25.897Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-30T07:29:28.491Z",
+ "generated_at": "2026-08-30T07:55:25.897Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -1166,7 +1166,9 @@
    "visitType": null,
    "facilityStandardReq": 1,
    "notificationReq": 0,
-   "facilityStandards": [],
+   "facilityStandards": [
+    "r08-fs-f400-n6"
+   ],
    "specialties": [
     {
      "specialty": "internal",
@@ -1194,7 +1196,7 @@
    "categoryM": "検査",
    "points": 56,
    "unit": "片側につき",
-   "conditions": "眼底カメラ撮影のみでは算定不可等の運用は留意事項通知で確認。両側は112点(160081130)",
+   "conditions": "眼底カメラ撮影のみでは算定不可等の運用は留意事項通知で確認。両側は112点(160081130)。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、算定日は外来管理加算不可(留意A001(7)キ)",
    "exclusions": null,
    "countLimitText": null,
    "periodLimitText": null,
@@ -1232,7 +1234,7 @@
    "categoryM": "検査",
    "points": 110,
    "unit": "1回につき",
-   "conditions": "前眼部のみ(D273相当48点)とは別区分。散瞳の生体染色再検査は48点",
+   "conditions": "前眼部のみ(D273相当48点)とは別区分。散瞳の生体染色再検査は48点。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、算定日は外来管理加算不可(留意A001(7)キ)",
    "exclusions": null,
    "countLimitText": null,
    "periodLimitText": null,
@@ -1270,7 +1272,7 @@
    "categoryM": "検査",
    "points": 69,
    "unit": "1回につき",
-   "conditions": "自覚的屈折検定法・検影法・レフラクトメーターによる他覚的検定法。両眼片眼・方法の別によらず所定点数(留意D261(1))。矯正視力検査との併算定は条件付き(rule-0005)",
+   "conditions": "自覚的屈折検定法・検影法・レフラクトメーターによる他覚的検定法。両眼片眼・方法の別によらず所定点数(留意D261(1))。矯正視力検査との併算定は条件付き(rule-0005)。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、算定日は外来管理加算不可(留意A001(7)キ)",
    "exclusions": null,
    "countLimitText": null,
    "periodLimitText": null,
@@ -1308,7 +1310,7 @@
    "categoryM": "検査",
    "points": 69,
    "unit": "1回につき",
-   "conditions": "1以外(交付なし)も69点(160179110)。屈折検査との併算定はrule-0005",
+   "conditions": "1以外(交付なし)も69点(160179110)。屈折検査との併算定はrule-0005。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、算定日は外来管理加算不可(留意A001(7)キ)",
    "exclusions": null,
    "countLimitText": null,
    "periodLimitText": null,
@@ -1346,7 +1348,7 @@
    "categoryM": "検査",
    "points": 82,
    "unit": "1回につき",
-   "conditions": "負荷測定加算55点(注)",
+   "conditions": "負荷測定加算55点(注)。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、算定日は外来管理加算不可(留意A001(7)キ)",
    "exclusions": null,
    "countLimitText": null,
    "periodLimitText": null,
@@ -1384,7 +1386,7 @@
    "categoryM": "検査",
    "points": 84,
    "unit": "1回につき",
-   "conditions": "白内障術前のIOL度数計算等で実施",
+   "conditions": "白内障術前のIOL度数計算等で実施。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、算定日は外来管理加算不可(留意A001(7)キ)",
    "exclusions": null,
    "countLimitText": null,
    "periodLimitText": null,
@@ -1422,7 +1424,7 @@
    "categoryM": "検査",
    "points": 150,
    "unit": "1回につき",
-   "conditions": "IOL度数計算のための眼軸長測定(光学式)",
+   "conditions": "IOL度数計算のための眼軸長測定(光学式)。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、算定日は外来管理加算不可(留意A001(7)キ)",
    "exclusions": null,
    "countLimitText": null,
    "periodLimitText": null,
@@ -2119,9 +2121,9 @@
    "categoryM": "注射",
    "points": 80,
    "unit": "1回につき",
-   "conditions": "左右両側の関節はそれぞれ算定できるが、同一側の関節に対して関節穿刺(D405/J116)と同一日に行った場合は主たるもののみ算定(留意p.585・電子点数表same_day背反)。第6部注射のためA001注8(外来管理加算)の列挙外=加算を妨げない(注8の列挙は検査の一部・リハ・精神科専門療法・処置・手術・麻酔・放射線治療)",
+   "conditions": "左右両側の関節はそれぞれ算定できるが、同一側の関節に対して関節穿刺(D405/J116)と同一日に行った場合は主たるもののみ算定(留意p.585・電子点数表same_day背反)。第6部注射のためA001注8(外来管理加算)の列挙外=加算を妨げない(注8の列挙は検査の一部・リハ・精神科専門療法・処置・手術・麻酔・放射線治療)。回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
    "exclusions": null,
-   "countLimitText": "回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
+   "countLimitText": null,
    "periodLimitText": null,
    "limit": null,
    "inpatient": 1,
@@ -2168,7 +2170,10 @@
    "exclusions": null,
    "countLimitText": "1日につき1回(電子点数表算定回数テーブル: 日・上限1)",
    "periodLimitText": null,
-   "limit": null,
+   "limit": {
+    "per": "day",
+    "max": 1
+   },
    "inpatient": 1,
    "outpatient": 1,
    "visitType": null,
@@ -2209,9 +2214,9 @@
    "categoryM": "処置",
    "points": 52,
    "unit": "1回につき",
-   "conditions": "1(100cm2未満)は入院中の患者以外の患者及び手術後の患者(入院中に限る・手術日から14日限度)についてのみ算定(告示注1)。範囲は包帯等で被覆すべき創傷面の広さ(留意(1))。同一部位に対する創傷処置・皮膚科軟膏処置・面皰圧出法・湿布処置はいずれか1つのみ(留意(3))。消炎鎮痛等処置(器具等)との同日併算定を妨げる背反は電子点数表に無い(否定的確認)",
+   "conditions": "1(100cm2未満)は入院中の患者以外の患者及び手術後の患者(入院中に限る・手術日から14日限度)についてのみ算定(告示注1)。範囲は包帯等で被覆すべき創傷面の広さ(留意(1))。同一部位に対する創傷処置・皮膚科軟膏処置・面皰圧出法・湿布処置はいずれか1つのみ(留意(3))。消炎鎮痛等処置(器具等)との同日併算定を妨げる背反は電子点数表に無い(否定的確認)。回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
    "exclusions": null,
-   "countLimitText": "回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
+   "countLimitText": null,
    "periodLimitText": null,
    "limit": null,
    "inpatient": 1,
@@ -2265,7 +2270,10 @@
    "exclusions": null,
    "countLimitText": "1日につき1回(電子点数表算定回数テーブル: 日・上限1)",
    "periodLimitText": null,
-   "limit": null,
+   "limit": {
+    "per": "day",
+    "max": 1
+   },
    "inpatient": 1,
    "outpatient": 1,
    "visitType": null,
@@ -2306,9 +2314,9 @@
    "categoryM": "処置",
    "points": 490,
    "unit": "1回につき",
-   "conditions": "ギプスシーネはギプス包帯の点数により算定(留意(5))。プラスチックギプスを用いた場合はシーネとして用いた場合が含まれる(留意(4))。四肢ギプス包帯の所定点数にはプラスチックギプスに係る費用が含まれ別に算定できない(留意(6))。6歳未満は乳幼児加算100分の55(ギプス通則3)",
+   "conditions": "ギプスシーネはギプス包帯の点数により算定(留意(5))。プラスチックギプスを用いた場合はシーネとして用いた場合が含まれる(留意(4))。四肢ギプス包帯の所定点数にはプラスチックギプスに係る費用が含まれ別に算定できない(留意(6))。6歳未満は乳幼児加算100分の55(ギプス通則3)。回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
    "exclusions": null,
-   "countLimitText": "回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
+   "countLimitText": null,
    "periodLimitText": null,
    "limit": null,
    "inpatient": 1,
@@ -2355,7 +2363,10 @@
    "exclusions": null,
    "countLimitText": "患者1人につき1月に1回(告示注1・電子点数表算定回数テーブル: 月・上限1)",
    "periodLimitText": null,
-   "limit": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
    "inpatient": 1,
    "outpatient": 1,
    "visitType": null,
@@ -2410,7 +2421,10 @@
    "exclusions": null,
    "countLimitText": "患者1人につき1月に1回(電子点数表算定回数テーブル: 月・上限1)",
    "periodLimitText": null,
-   "limit": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
    "inpatient": 1,
    "outpatient": 1,
    "visitType": null,
@@ -2646,6 +2660,35 @@
      "quote": "1の(1)及び(2)の在宅療養支援診療所の施設基準に係る届出は、別添2の様式11及び様式11の3を用いること。"
     }
    ]
+  },
+  {
+   "id": "r08-fs-f400-n6",
+   "name": "一般名処方加算の施設基準",
+   "notificationReq": 0,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": null,
+   "transitional": null,
+   "formNo": null,
+   "sourceNotice": null,
+   "sourcePage": null,
+   "evidence": [
+    {
+     "field": "requirements",
+     "doc": "r08-tsuchi8-tokkei-todokede",
+     "page": "p.175",
+     "quote": "一般名処方の趣旨を患者に十分に説明することについて、当該保険医療機関の見やすい場所に掲示していること。(2) (1)の掲示事項について、原則として、ウェブサイトに掲載していること。",
+     "note": "0305-8 第36の4 一般名処方加算に関する施設基準(1)(2)"
+    },
+    {
+     "field": "notes",
+     "doc": "r08-tsuchi8-tokkei-todokede",
+     "page": "p.175",
+     "quote": "一般名処方加算の施設基準に係る取扱いについては、当該基準を満たしていればよく、特に地方厚生(支)局長に対して、届出を行う必要はないこと。",
+     "note": "届出不要の否定的確認"
+    }
+   ]
   }
  ],
  "rules": [
@@ -2674,7 +2717,17 @@
     ],
     "reviewCategories": [
      "検査"
-    ]
+    ],
+    "sadamaruKensaItems": [
+     "r08-D255",
+     "r08-D257",
+     "r08-D261-2",
+     "r08-D263-1",
+     "r08-D264",
+     "r08-D265",
+     "r08-D269-2"
+    ],
+    "sadamaruKensaNote": "A001注8の定める検査=生体検査料のうち超音波検査等・脳波検査等・神経・筋検査・耳鼻咽喉科学的検査・眼科学的検査・負荷試験等・ラジオアイソトープを用いた諸検査・内視鏡検査(留意A001(7)キ・p.13-14)。KB登録済みの該当項目を列挙。検査カテゴリで本リストに無い項目はneeds_reviewのまま"
    }
   },
   {
@@ -2718,7 +2771,10 @@
    "page": "PDF p.114-115 (B001-3-3注2)",
    "quote": "生活習慣病管理を受けている患者に対して行った区分番号A001の注8に掲げる医学管理、第2章第1部第1節医学管理料等(...を除く。)の費用は、生活習慣病管理料(II)に含まれるものとする。",
    "confidence": "verified",
-   "machine": null
+   "machine": {
+    "type": "handled_externally",
+    "note": "内科モジュールは管理料(II)と同日に他の医学管理料を発行しない設計のため受診単位の機械判定は不要(包括の事実はルールとして記録)"
+   }
   },
   {
    "id": "r08-rule-0004",
@@ -2840,7 +2896,10 @@
    "page": "PDF p.240 (I002注1)",
    "quote": "ただし、区分番号B000に掲げる特定疾患療養管理料及び区分番号B001-3-3に掲げる生活習慣病管理料(II)を算定している患者については算定しない。",
    "confidence": "verified",
-   "machine": null
+   "machine": {
+    "type": "handled_externally",
+    "note": "患者単位の排他。エンジンは患者診断を持たないため、精神科モジュールがI002患者とB000/B001-3-3患者を名簿の上で分離して運用(受診単位の判定対象なし)"
+   }
   },
   {
    "id": "r08-rule-0010",
@@ -2854,7 +2913,10 @@
    "page": "PDF p.529 (I004留意(8))",
    "quote": "「I001」入院精神療法、「I002」通院・在宅精神療法又は「I003」標準型精神分析療法を算定している患者については、心身医学療法は算定できない。",
    "confidence": "verified",
-   "machine": null
+   "machine": {
+    "type": "handled_externally",
+    "note": "患者単位の排他。精神科モジュールがI002患者(mood/anxiety)とI004患者(shinshin)を名簿分離して運用(同一患者に両方のkbActsを発行しない)"
+   }
   },
   {
    "id": "r08-rule-0011",
@@ -2867,7 +2929,10 @@
    "doc": "r08-ryuiji-ika",
    "page": "p.585",
    "quote": "同一側の関節に対して、「D405」関節穿刺、「G010」関節腔内注射を同一日に行った場合は、主たるもののみ算定する。",
-   "machine": null
+   "machine": {
+    "type": "handled_externally",
+    "note": "部位(側)単位の判定はモデル外だが、関節穿刺はゲームに存在しない行為のため同一受診内で併発しない"
+   }
   },
   {
    "id": "r08-rule-0012",
@@ -2880,7 +2945,10 @@
    "doc": "r08-ryuiji-ika",
    "page": "p.702",
    "quote": "同一日に神経ブロックと同時に行われたトリガーポイント注射や神経幹内注射については、部位にかかわらず別に算定できない。",
-   "machine": null
+   "machine": {
+    "type": "handled_externally",
+    "note": "神経ブロックとトリガーポイント注射は同一受診内で排他分岐(ゲーム設計)のため併発しない。L100/L102はKB未登録"
+   }
   }
  ]
 });

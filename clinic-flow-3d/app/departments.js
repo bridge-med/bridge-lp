@@ -101,7 +101,9 @@
         performedCategories: report.performedCategories || [],
       },
       procedures: mod.buildProcedures(report),
-      facilityStandards: dept.fs || [],
+      // 一般名処方加算の施設基準(掲示+ウェブ掲載)は届出不要(0305-8 第36の4の2)。
+      // 一般名処方をONにしている部門は掲示等を整えている扱い(ゲーム上の仮定)
+      facilityStandards: (dept.fs || []).concat(dept.policy && dept.policy.ippanmei ? ['r08-fs-f400-n6'] : []),
       history: { month: p.mc, week: p.wc, monthsSince: msMap(p, curMonth), firstVisitBilled: !!p.fb },
     });
     const lines = [];

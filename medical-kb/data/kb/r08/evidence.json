@@ -706,5 +706,32 @@
   "page": "p.236",
   "quote": "ロ ２回目以降の場合 240点",
   "note": "医科診療行為マスター180774210の240点と突合一致"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0001",
+  "field": "machine",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.13-14",
+  "quote": "「注８」の厚生労働大臣が別に定める検査とは、第２章第３部第３節生体検査料のうち、次の各区分に掲げるものをいう。超音波検査等 脳波検査等 神経・筋検査 耳鼻咽喉科学的検査 眼科学的検査 負荷試験等 ラジオアイソトープを用いた諸検査 内視鏡検査",
+  "note": "留意A001(7)キ。KB登録済みの眼科学的検査7項目を機械リスト化した根拠"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-f400-n6",
+  "field": "requirements",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "p.175",
+  "quote": "一般名処方の趣旨を患者に十分に説明することについて、当該保険医療機関の見やすい場所に掲示していること。(２) （１）の掲示事項について、原則として、ウェブサイトに掲載していること。",
+  "note": "0305-8 第36の4 一般名処方加算に関する施設基準(1)(2)"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-f400-n6",
+  "field": "notes",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "p.175",
+  "quote": "一般名処方加算の施設基準に係る取扱いについては、当該基準を満たしていればよく、特に地方厚生（支）局長に対して、届出を行う必要はないこと。",
+  "note": "届出不要の否定的確認"
  }
 ]

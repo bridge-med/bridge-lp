@@ -135,25 +135,35 @@
         if (src) out.warnings.push({ kind: 'rule_unmachined', ruleId: rule.id, message: `${src.item.name}: ルール「${rule.condition || rule.type}」は未機械化 — 内容を確認(needs_review)`, quote: rule.quote });
         continue;
       }
+      if (m.type === 'handled_externally') {
+        // 受診単位の機械判定が不要なルール(患者単位の排他=名簿分離で運用、相手行為が同一受診内で
+        // 併発しない設計等)。理由はKBのmachine.noteに記録済み。警告は出さない
+        continue;
+      }
       if (m.type === 'same_day_ng_categories') {
         const src = findRec(m.source);
         if (!src) continue;
         const blockers = known.filter((r) => r !== src && r.status === 'candidate' && inCat(r, m.targetCategories));
+        // 「厚生労働大臣が定める検査」の別表該当項目(留意A001(7)キ・機械リスト化済み)も却下対象
+        const kensaHits = (m.sadamaruKensaItems || []).length
+          ? known.filter((r) => r !== src && r.status === 'candidate' && m.sadamaruKensaItems.includes(r.item.id))
+          : [];
         // performedCategories: KB未登録の行為(ゲーム側の簡略化項目)でも実施カテゴリを申告できる
         const perfCats = (input.encounter && input.encounter.performedCategories) || [];
         const perfHit = perfCats.filter((c) => m.targetCategories.some((t) => t.indexOf(c) === 0 || c.indexOf(t) === 0));
-        trace('rule', { rule: rule.id, blockers: blockers.map((b) => b.item.id), perfHit });
-        if (blockers.length || perfHit.length) {
+        trace('rule', { rule: rule.id, blockers: blockers.map((b) => b.item.id), kensa: kensaHits.map((b) => b.item.id), perfHit });
+        if (blockers.length || kensaHits.length || perfHit.length) {
           src.status = 'rejected';
-          const names = blockers.map((b) => b.item.name).concat(perfHit);
+          const names = blockers.concat(kensaHits).map((b) => b.item.name).concat(perfHit);
           src.reasons.push(`同日に${names.join('・')}を実施しているため算定不可(${rule.id})`);
           src.ruleRefs.push(rule);
         } else if (m.reviewCategories) {
-          // 機械化できない部分条件(例: 「厚生労働大臣が定める検査」の別表)は判定せず注意喚起のみ
-          const revHits = known.filter((r) => r !== src && r.status === 'candidate' && inCat(r, m.reviewCategories));
+          // 別表の機械リストに無い同カテゴリ項目だけは判定せず注意喚起(将来の新規登録の安全網)
+          const listed = new Set(m.sadamaruKensaItems || []);
+          const revHits = known.filter((r) => r !== src && r.status === 'candidate' && inCat(r, m.reviewCategories) && !listed.has(r.item.id));
           if (revHits.length) {
             out.warnings.push({ kind: 'needs_review', ruleId: rule.id, itemId: src.item.id,
-              message: `${src.item.name}: 同日の${revHits.map((x) => x.item.name).join('・')}が「厚生労働大臣が定める検査」に該当する場合は算定不可 — 別表未登録のため要確認(needs_review)` });
+              message: `${src.item.name}: 同日の${revHits.map((x) => x.item.name).join('・')}が「厚生労働大臣が定める検査」に該当する場合は算定不可 — 別表リスト未分類のため要確認(needs_review)` });
           }
         }
       } else if (m.type === 'same_day_ng_items') {

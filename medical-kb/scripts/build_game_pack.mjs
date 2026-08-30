@@ -56,6 +56,10 @@ const LIMITS = {
   'r08-I002-1-ha-2-1': { per: 'week', max: 1 },
   'r08-I004-2-i':    { per: 'visit_first', max: 1 },            // 初診時1回(算定回数テーブル)
   'r08-I004-2-ro':   { per: 'week', max: 1 },                   // 週1回(告示I004注4。初診4週の週2特例は安全側で未使用)
+  'r08-L104':        { per: 'day', max: 1 },                    // 1日1回(算定回数テーブル: 日・上限1)
+  'r08-J119-2':      { per: 'day', max: 1 },                    // 1日につき(算定回数テーブル: 日・上限1)
+  'r08-H003-2-1-i':  { per: 'month', max: 1 },                  // 月1回(告示H003-2注1・算定回数テーブル)
+  'r08-H003-2-1-ro': { per: 'month', max: 1 },
 };
 
 /* ---- 機械判定ヒント: 文章ルール → エンジン述語 ----
@@ -141,7 +145,9 @@ const pack = {
     bidirectional: r.bidirectional ?? 1,
     doc: r.source_document, page: r.source_page || null, quote: normQuote(r.quote) || null,
     confidence: r.confidence,
-    machine: MACHINE_HINTS[r.id] || null,
+    // billing_rules.json側のmachine(handled_externally・定める検査リスト等)をヒント表にマージ。
+    // 同キーはJSON側が優先(KBが唯一の情報源・ヒント表は型の既定値)
+    machine: (MACHINE_HINTS[r.id] || r.machine) ? Object.assign({}, MACHINE_HINTS[r.id] || {}, r.machine || {}) : null,
   })),
 };
 

@@ -176,14 +176,14 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('増収試算: simulation estimateの注記', est.note.includes('simulation estimate'));
 }
 
-/* 16. 定める検査(別表未登録)との同日: 拒否せずneeds_review警告 */
+/* 16. 定める検査(v41で別表を機械リスト化・留意A001(7)キ): 該当検査の算定日は外来管理加算却下 */
 {
   const r = REIMB.evaluateEncounter({
     procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n8' }, { itemId: 'r08-D264' }],
     facilityStandards: [], history: {},
   });
-  ok('定める検査: 外来管理加算は拒否されない(別表未登録のため確定しない)', billedIds(r).includes('r08-A001-n8'));
-  ok('定める検査: needs_review警告が出る', r.warnings.some((w) => w.kind === 'needs_review' && w.ruleId === 'r08-rule-0001'));
+  ok('定める検査: 精密眼圧測定(眼科学的検査)の算定日は外来管理加算却下', r.rejectedItems.some((x) => x.itemId === 'r08-A001-n8'));
+  ok('定める検査: 別表リスト化済みのためneeds_review警告は出ない', !r.warnings.some((w) => w.kind === 'needs_review' && w.ruleId === 'r08-rule-0001'));
 }
 
 /* 17. 便E: 整形の処置・注射(J119=処置)の算定日は外来管理加算が却下される */

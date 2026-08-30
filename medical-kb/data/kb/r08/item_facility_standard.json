@@ -73,5 +73,10 @@
   "item_id": "r08-H003-2-1-ro",
   "fs_id": "r08-fs-h002-2",
   "relation": "required"
+ },
+ {
+  "item_id": "r08-F400-n6-i",
+  "fs_id": "r08-fs-f400-n6",
+  "relation": "required"
  }
 ]
