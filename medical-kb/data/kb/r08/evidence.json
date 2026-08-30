@@ -571,5 +571,140 @@
   "page": "p.529",
   "quote": "心身医学療法とは、心身症の患者について、一定の治療計画に基づいて、身体的傷病と心理・社会的要因との関連を明らかにするとともに、当該患者に対して心理的影響を与えることにより、症状の改善又は傷病からの回復を図る治療方法をいう。",
   "note": "留意I004(1)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-G010",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.227",
+  "quote": "Ｇ０１０ 関節腔内注射 80点",
+  "note": "医科診療行為マスター130005310の80点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-G010",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.585",
+  "quote": "関節穿刺を左右両側に行った場合は、それぞれ算定できるが、同一側の関節に対して、「Ｄ４０５」関節穿刺、「Ｇ０１０」関節腔内注射を同一日に行った場合は、主たるもののみ算定する。",
+  "note": "D405留意。電子点数表same_day背反(130005310×140023010/160097010・主たるもの)とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-L104",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.363",
+  "quote": "Ｌ１０４ トリガーポイント注射 70点",
+  "note": "医科診療行為マスター150266010の70点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-L104",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.702",
+  "quote": "トリガーポイント注射は、圧痛点に局所麻酔剤あるいは局所麻酔剤を主剤とする薬剤を注射する手技であり、施行した回数及び部位にかかわらず、１日につき１回算定できる。",
+  "note": "留意L104(1)。(2)神経幹内注射と同時算定不可"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J000-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.257",
+  "quote": "Ｊ０００ 創傷処置 １ 100平方センチメートル未満 52点",
+  "note": "医科診療行為マスター140000610の52点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J000-1",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.257",
+  "quote": "１については、入院中の患者以外の患者及び手術後の患者（入院中の患者に限る。）についてのみ算定する。",
+  "note": "告示J000注1"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J000-1",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.554",
+  "quote": "同一部位に対して創傷処置、皮膚科軟膏処置、面皰圧出法又は湿布処置が行われた場合はいずれか１つのみにより算定し、併せて算定できない。",
+  "note": "留意J000(3)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J119-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.270",
+  "quote": "Ｊ１１９ 消炎鎮痛等処置（１日につき） ２ 器具等による療法 35点",
+  "note": "医科診療行為マスター140040310の35点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J119-2",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.586",
+  "quote": "「２」の器具等による療法とは、電気療法、赤外線治療、熱気浴、ホットパック、超音波療法、マイクロレーダー等による療法をいう。",
+  "note": "留意J119(2)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J122-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.271",
+  "quote": "Ｊ１２２ 四肢ギプス包帯 ２ 手指及び手、足（片側） 490点",
+  "note": "医科診療行為マスター140040510の490点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J122-2",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.588",
+  "quote": "ギプスシーネは、ギプス包帯の点数（ギプス包帯をギプスシャーレとして切割使用した場合の各区分の所定点数の 100 分の 20 に相当する点数を算定する場合を除く。）により算定する。",
+  "note": "留意ギプス通則(5)。シーネ固定をこの区分で算定する根拠"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H003-2-1-i",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.236",
+  "quote": "Ｈ００３－２ リハビリテーション総合計画評価料 １ リハビリテーション総合計画評価料１ イ 初回の場合 300点",
+  "note": "医科診療行為マスター180024710の300点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H003-2-1-i",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.236",
+  "quote": "運動器リハビリテーション料（Ⅰ）、運動器リハビリテーション料（Ⅱ）…に係る別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届出を行った保険医療機関において…患者１人につき１月に１回に限り算定する。",
+  "note": "告示注1。列挙に運動器(III)は無い=否定的確認"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H003-2-1-i",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.508",
+  "quote": "リハビリテーション総合計画評価料は、定期的な医師の診察及び運動機能検査又は作業能力検査等の結果に基づき医師、看護師、理学療法士、作業療法士、言語聴覚士、社会福祉士等の多職種が共同してリハビリテーション総合実施計画書を作成し、これに基づいて行ったリハビリテーションの効果、実施方法等について共同して評価を行った場合に算定する。",
+  "note": "留意H003-2(1)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H003-2-1-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.236",
+  "quote": "ロ ２回目以降の場合 240点",
+  "note": "医科診療行為マスター180774210の240点と突合一致"
  }
 ]

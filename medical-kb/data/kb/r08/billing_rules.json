@@ -138,5 +138,31 @@
   "quote": "「Ｉ００１」入院精神療法、「Ｉ００２」通院・在宅精神療法又は「Ｉ００３」標準型精神分析療法を算定している患者については、心身医学療法は算定できない。",
   "effective_from": "2026-06-01",
   "confidence": "verified"
+ },
+ {
+  "id": "r08-rule-0011",
+  "source_item": "r08-G010",
+  "target_item": "関節穿刺(D405検査/J116処置)",
+  "rule_type": "major_only",
+  "condition": "同一側の関節に対して関節穿刺と関節腔内注射を同一日に行った場合は主たるもののみ算定(左右両側はそれぞれ算定可)。部位(側)単位の判定は現行エンジンのモデル外のため機械ヒントなし",
+  "period": "same_day",
+  "bidirectional": 1,
+  "source_document": "r08-ryuiji-ika",
+  "source_page": "p.585",
+  "quote": "同一側の関節に対して、「Ｄ４０５」関節穿刺、「Ｇ０１０」関節腔内注射を同一日に行った場合は、主たるもののみ算定する。",
+  "machine": null
+ },
+ {
+  "id": "r08-rule-0012",
+  "source_item": "r08-L104",
+  "target_item": "神経幹内注射(L102)・神経ブロック(L100)",
+  "rule_type": "simultaneous_ng",
+  "condition": "トリガーポイント注射と神経幹内注射は同時に算定できない(留意L104(2))。同一日に神経ブロックと同時に行われたトリガーポイント注射は別に算定できない(留意L100(7))。L100/L102はKB未登録のため機械ヒントなし",
+  "period": "same_day",
+  "bidirectional": 1,
+  "source_document": "r08-ryuiji-ika",
+  "source_page": "p.702",
+  "quote": "同一日に神経ブロックと同時に行われたトリガーポイント注射や神経幹内注射については、部位にかかわらず別に算定できない。",
+  "machine": null
  }
 ]

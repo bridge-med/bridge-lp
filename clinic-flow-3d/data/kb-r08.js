@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-29T11:37:39.173Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-30T07:17:51.587Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-29T11:37:39.173Z",
+ "generated_at": "2026-08-30T07:17:51.587Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -2108,6 +2108,334 @@
      "note": "医科診療行為マスター 180020010=80とも一致"
     }
    ]
+  },
+  {
+   "id": "r08-G010",
+   "code": "130005310",
+   "kubun": "G010",
+   "name": "関節腔内注射",
+   "shortName": "関節腔内注射",
+   "categoryL": "特掲診療料",
+   "categoryM": "注射",
+   "points": 80,
+   "unit": "1回につき",
+   "conditions": "左右両側の関節はそれぞれ算定できるが、同一側の関節に対して関節穿刺(D405/J116)と同一日に行った場合は主たるもののみ算定(留意p.585・電子点数表same_day背反)。第6部注射のためA001注8(外来管理加算)の列挙外=加算を妨げない(注8の列挙は検査の一部・リハ・精神科専門療法・処置・手術・麻酔・放射線治療)",
+   "exclusions": null,
+   "countLimitText": "回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "orthopedics",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.227",
+     "quote": "G010 関節腔内注射 80点",
+     "note": "医科診療行為マスター130005310の80点と突合一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.585",
+     "quote": "関節穿刺を左右両側に行った場合は、それぞれ算定できるが、同一側の関節に対して、「D405」関節穿刺、「G010」関節腔内注射を同一日に行った場合は、主たるもののみ算定する。",
+     "note": "D405留意。電子点数表same_day背反(130005310×140023010/160097010・主たるもの)とも一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-L104",
+   "code": "150266010",
+   "kubun": "L104",
+   "name": "トリガーポイント注射",
+   "shortName": "トリガーポイント注射",
+   "categoryL": "特掲診療料",
+   "categoryM": "麻酔",
+   "points": 70,
+   "unit": "1日につき",
+   "conditions": "圧痛点に局所麻酔剤あるいは局所麻酔剤を主剤とする薬剤を注射する手技。施行した回数及び部位にかかわらず1日につき1回算定(留意(1))。神経幹内注射と同時算定不可(留意(2))。同一日に神経ブロックと同時に行われた場合は別に算定できない(L100留意(7)・電子点数表simultaneous背反)。第11部麻酔のためA001注8により算定日は外来管理加算不可",
+   "exclusions": null,
+   "countLimitText": "1日につき1回(電子点数表算定回数テーブル: 日・上限1)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "orthopedics",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.363",
+     "quote": "L104 トリガーポイント注射 70点",
+     "note": "医科診療行為マスター150266010の70点と突合一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.702",
+     "quote": "トリガーポイント注射は、圧痛点に局所麻酔剤あるいは局所麻酔剤を主剤とする薬剤を注射する手技であり、施行した回数及び部位にかかわらず、1日につき1回算定できる。",
+     "note": "留意L104(1)。(2)神経幹内注射と同時算定不可"
+    }
+   ]
+  },
+  {
+   "id": "r08-J000-1",
+   "code": "140000610",
+   "kubun": "J000-1",
+   "name": "創傷処置(100平方センチメートル未満)",
+   "shortName": "創傷処置(100cm2未満)",
+   "categoryL": "特掲診療料",
+   "categoryM": "処置",
+   "points": 52,
+   "unit": "1回につき",
+   "conditions": "1(100cm2未満)は入院中の患者以外の患者及び手術後の患者(入院中に限る・手術日から14日限度)についてのみ算定(告示注1)。範囲は包帯等で被覆すべき創傷面の広さ(留意(1))。同一部位に対する創傷処置・皮膚科軟膏処置・面皰圧出法・湿布処置はいずれか1つのみ(留意(3))。消炎鎮痛等処置(器具等)との同日併算定を妨げる背反は電子点数表に無い(否定的確認)",
+   "exclusions": null,
+   "countLimitText": "回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "orthopedics",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.257",
+     "quote": "J000 創傷処置 1 100平方センチメートル未満 52点",
+     "note": "医科診療行為マスター140000610の52点と突合一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.257",
+     "quote": "1については、入院中の患者以外の患者及び手術後の患者(入院中の患者に限る。)についてのみ算定する。",
+     "note": "告示J000注1"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.554",
+     "quote": "同一部位に対して創傷処置、皮膚科軟膏処置、面皰圧出法又は湿布処置が行われた場合はいずれか1つのみにより算定し、併せて算定できない。",
+     "note": "留意J000(3)"
+    }
+   ]
+  },
+  {
+   "id": "r08-J119-2",
+   "code": "140040310",
+   "kubun": "J119-2",
+   "name": "消炎鎮痛等処置(器具等による療法)",
+   "shortName": "消炎鎮痛等処置(器具等)",
+   "categoryL": "特掲診療料",
+   "categoryM": "処置",
+   "points": 35,
+   "unit": "1日につき",
+   "conditions": "器具等による療法とは電気療法・赤外線治療・熱気浴・ホットパック・超音波療法・マイクロレーダー等(留意(2))。療法の種類・回数・部位数にかかわらず1日につき算定(告示注1)。同一日に手技・器具・湿布のうち2以上を行った場合は主たる療法のみ(告示注2)。介達牽引・矯正固定・変形機械矯正術と併せて行った場合も主たるもののみ(J118系の注)",
+   "exclusions": null,
+   "countLimitText": "1日につき1回(電子点数表算定回数テーブル: 日・上限1)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "orthopedics",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.270",
+     "quote": "J119 消炎鎮痛等処置(1日につき) 2 器具等による療法 35点",
+     "note": "医科診療行為マスター140040310の35点と突合一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.586",
+     "quote": "「2」の器具等による療法とは、電気療法、赤外線治療、熱気浴、ホットパック、超音波療法、マイクロレーダー等による療法をいう。",
+     "note": "留意J119(2)"
+    }
+   ]
+  },
+  {
+   "id": "r08-J122-2",
+   "code": "140040510",
+   "kubun": "J122-2",
+   "name": "四肢ギプス包帯(手指及び手、足)(片側)",
+   "shortName": "ギプス・シーネ固定(手指及び手、足)",
+   "categoryL": "特掲診療料",
+   "categoryM": "処置",
+   "points": 490,
+   "unit": "1回につき",
+   "conditions": "ギプスシーネはギプス包帯の点数により算定(留意(5))。プラスチックギプスを用いた場合はシーネとして用いた場合が含まれる(留意(4))。四肢ギプス包帯の所定点数にはプラスチックギプスに係る費用が含まれ別に算定できない(留意(6))。6歳未満は乳幼児加算100分の55(ギプス通則3)",
+   "exclusions": null,
+   "countLimitText": "回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "orthopedics",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.271",
+     "quote": "J122 四肢ギプス包帯 2 手指及び手、足(片側) 490点",
+     "note": "医科診療行為マスター140040510の490点と突合一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.588",
+     "quote": "ギプスシーネは、ギプス包帯の点数(ギプス包帯をギプスシャーレとして切割使用した場合の各区分の所定点数の 100 分の 20 に相当する点数を算定する場合を除く。)により算定する。",
+     "note": "留意ギプス通則(5)。シーネ固定をこの区分で算定する根拠"
+    }
+   ]
+  },
+  {
+   "id": "r08-H003-2-1-i",
+   "code": "180024710",
+   "kubun": "H003-2-1-イ",
+   "name": "リハビリテーション総合計画評価料1(初回)",
+   "shortName": "リハ総合計画評価料1(初回)",
+   "categoryL": "特掲診療料",
+   "categoryM": "リハビリテーション",
+   "points": 300,
+   "unit": "月1回",
+   "conditions": "運動器リハビリテーション料(I)又は(II)等の施設基準の届出機関で、医師・看護師・PT・OT等の多職種が共同してリハビリテーション総合実施計画書を作成し、これに基づくリハを行った場合に患者1人につき1月に1回(告示注1)。注1の列挙に運動器リハ(III)は含まれない=(III)ではこの評価料1は算定不可(否定的確認)。介護リハ利用予定患者は評価料2の対象(注2)。本評価料自体の届出は不要(0305-8特掲届出一覧に非収載=否定的確認・リハ料側の届出で足りる)",
+   "exclusions": null,
+   "countLimitText": "患者1人につき1月に1回(告示注1・電子点数表算定回数テーブル: 月・上限1)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 0,
+   "facilityStandards": [
+    "r08-fs-h002-1",
+    "r08-fs-h002-2"
+   ],
+   "specialties": [
+    {
+     "specialty": "orthopedics",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.236",
+     "quote": "H003-2 リハビリテーション総合計画評価料 1 リハビリテーション総合計画評価料1 イ 初回の場合 300点",
+     "note": "医科診療行為マスター180024710の300点と突合一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.236",
+     "quote": "運動器リハビリテーション料(I)、運動器リハビリテーション料(II)...に係る別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届出を行った保険医療機関において...患者1人につき1月に1回に限り算定する。",
+     "note": "告示注1。列挙に運動器(III)は無い=否定的確認"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.508",
+     "quote": "リハビリテーション総合計画評価料は、定期的な医師の診察及び運動機能検査又は作業能力検査等の結果に基づき医師、看護師、理学療法士、作業療法士、言語聴覚士、社会福祉士等の多職種が共同してリハビリテーション総合実施計画書を作成し、これに基づいて行ったリハビリテーションの効果、実施方法等について共同して評価を行った場合に算定する。",
+     "note": "留意H003-2(1)"
+    }
+   ]
+  },
+  {
+   "id": "r08-H003-2-1-ro",
+   "code": "180774210",
+   "kubun": "H003-2-1-ロ",
+   "name": "リハビリテーション総合計画評価料1(2回目以降)",
+   "shortName": "リハ総合計画評価料1(2回目以降)",
+   "categoryL": "特掲診療料",
+   "categoryM": "リハビリテーション",
+   "points": 240,
+   "unit": "月1回",
+   "conditions": "初回と同じ要件(告示注1)。2回目以降の月次評価。月1回",
+   "exclusions": null,
+   "countLimitText": "患者1人につき1月に1回(電子点数表算定回数テーブル: 月・上限1)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 0,
+   "facilityStandards": [
+    "r08-fs-h002-1",
+    "r08-fs-h002-2"
+   ],
+   "specialties": [
+    {
+     "specialty": "orthopedics",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.236",
+     "quote": "ロ 2回目以降の場合 240点",
+     "note": "医科診療行為マスター180774210の240点と突合一致"
+    }
+   ]
   }
  ],
  "facilityStandards": [
@@ -2526,6 +2854,32 @@
    "page": "PDF p.529 (I004留意(8))",
    "quote": "「I001」入院精神療法、「I002」通院・在宅精神療法又は「I003」標準型精神分析療法を算定している患者については、心身医学療法は算定できない。",
    "confidence": "verified",
+   "machine": null
+  },
+  {
+   "id": "r08-rule-0011",
+   "source": "r08-G010",
+   "target": "関節穿刺(D405検査/J116処置)",
+   "type": "major_only",
+   "condition": "同一側の関節に対して関節穿刺と関節腔内注射を同一日に行った場合は主たるもののみ算定(左右両側はそれぞれ算定可)。部位(側)単位の判定は現行エンジンのモデル外のため機械ヒントなし",
+   "period": "same_day",
+   "bidirectional": 1,
+   "doc": "r08-ryuiji-ika",
+   "page": "p.585",
+   "quote": "同一側の関節に対して、「D405」関節穿刺、「G010」関節腔内注射を同一日に行った場合は、主たるもののみ算定する。",
+   "machine": null
+  },
+  {
+   "id": "r08-rule-0012",
+   "source": "r08-L104",
+   "target": "神経幹内注射(L102)・神経ブロック(L100)",
+   "type": "simultaneous_ng",
+   "condition": "トリガーポイント注射と神経幹内注射は同時に算定できない(留意L104(2))。同一日に神経ブロックと同時に行われたトリガーポイント注射は別に算定できない(留意L100(7))。L100/L102はKB未登録のため機械ヒントなし",
+   "period": "same_day",
+   "bidirectional": 1,
+   "doc": "r08-ryuiji-ika",
+   "page": "p.702",
+   "quote": "同一日に神経ブロックと同時に行われたトリガーポイント注射や神経幹内注射については、部位にかかわらず別に算定できない。",
    "machine": null
   }
  ]

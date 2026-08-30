@@ -376,5 +376,54 @@
   "relevance": "primary",
   "rationale": "心療内科(心身症)の中核",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-G010",
+  "specialty_id": "orthopedics",
+  "relevance": "primary",
+  "rationale": "変形性関節症・関節炎への関節内注射",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-L104",
+  "specialty_id": "orthopedics",
+  "relevance": "primary",
+  "rationale": "筋筋膜性疼痛への注射",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J000-1",
+  "specialty_id": "orthopedics",
+  "relevance": "primary",
+  "rationale": "外傷の創傷処置",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J119-2",
+  "specialty_id": "orthopedics",
+  "relevance": "primary",
+  "rationale": "物理療法(電気・ホットパック等)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J122-2",
+  "specialty_id": "orthopedics",
+  "relevance": "primary",
+  "rationale": "骨折・捻挫のシーネ/ギプス固定",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-H003-2-1-i",
+  "specialty_id": "orthopedics",
+  "relevance": "primary",
+  "rationale": "運動器リハの多職種計画評価",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-H003-2-1-ro",
+  "specialty_id": "orthopedics",
+  "relevance": "primary",
+  "rationale": "運動器リハの月次計画評価",
+  "confidence": "verified"
  }
 ]
