@@ -78,5 +78,35 @@
   "item_id": "r08-F400-n6-i",
   "fs_id": "r08-fs-f400-n6",
   "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n10-1",
+  "fs_id": "r08-fs-a001-n10-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n10-2",
+  "fs_id": "r08-fs-a001-n10-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n10-3",
+  "fs_id": "r08-fs-a001-n10-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n10-4",
+  "fs_id": "r08-fs-a001-n10-4",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n11",
+  "fs_id": "r08-fs-a001-n11",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-E202-2",
+  "fs_id": "r08-fs-e202",
+  "relation": "required"
  }
 ]

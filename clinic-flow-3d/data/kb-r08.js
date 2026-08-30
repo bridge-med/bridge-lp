@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-30T11:16:52.567Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-30T11:52:41.039Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-30T11:16:52.567Z",
+ "generated_at": "2026-08-30T11:52:41.039Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -2518,6 +2518,398 @@
      "note": "告示B009注1"
     }
    ]
+  },
+  {
+   "id": "r08-A001-n10-1",
+   "code": "112016070",
+   "kubun": "A001注10-イ",
+   "name": "時間外対応体制加算1",
+   "shortName": "時間外対応体制加算1",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 7,
+   "unit": "1回につき(再診料への加算)",
+   "conditions": "届出診療所において再診を行った場合に再診料へ加算(告示A001注10)。R8改定で「時間外対応加算」から改称・4区分に再編。常勤等の職員による常時の電話等対応体制(施設基準通知第2の2)。届出は様式2・実績不要",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a001-n10-1"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.6",
+     "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関(診療所に限る。)において再診を行った場合には、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。イ 時間外対応体制加算1 7点 ロ 時間外対応体制加算2 5点 ハ 時間外対応体制加算3 4点 ニ 時間外対応体制加算4 2点",
+     "note": "R8で「時間外対応加算」から「時間外対応体制加算」に改称・4区分に再編。マスター突合: 112016070=7点・112708370=5点・112708470=4点・112708570=2点で全区分一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.222",
+     "quote": "8 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において投薬を行った場合には、地域支援・外来医薬品供給対応体制加算として、当該基準に係る区分に従い、1処方につき次に掲げる点数をそれぞれ所定点数に加算する。イ 地域支援・外来医薬品供給対応体制加算1 8点",
+     "note": "【否定的確認・便Hのゲーム置換根拠】R8マスターに「外来後発医薬品使用体制加算」は0件=不存在。F100処方料注8の地域支援・外来医薬品供給対応体制加算(8/7/5点)に再編され、対象は「投薬を行った場合」=院内処方のみ。F400処方箋料の注に同種加算はない(院外処方の診療所は対象外)。ゲームの外来後発医薬品使用体制加算(8点)は削除が正しい置換"
+    }
+   ]
+  },
+  {
+   "id": "r08-A001-n10-2",
+   "code": "112708370",
+   "kubun": "A001注10-ロ",
+   "name": "時間外対応体制加算2",
+   "shortName": "時間外対応体制加算2",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 5,
+   "unit": "1回につき(再診料への加算)",
+   "conditions": "届出診療所において再診を行った場合に再診料へ加算(告示A001注10)。非常勤職員による常時の電話等対応体制(必要に応じ診療録閲覧可)(施設基準通知第2の3)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a001-n10-2"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.6",
+     "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関(診療所に限る。)において再診を行った場合には、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。イ 時間外対応体制加算1 7点 ロ 時間外対応体制加算2 5点 ハ 時間外対応体制加算3 4点 ニ 時間外対応体制加算4 2点",
+     "note": "告示A001注10の区分別点数。マスター突合: 112708370=5点で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-A001-n10-3",
+   "code": "112708470",
+   "kubun": "A001注10-ハ",
+   "name": "時間外対応体制加算3",
+   "shortName": "時間外対応体制加算3",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 4,
+   "unit": "1回につき(再診料への加算)",
+   "conditions": "届出診療所において再診を行った場合に再診料へ加算(告示A001注10)。標榜時間外の夜間の数時間の電話等対応体制(施設基準通知第2の4)。休診日・深夜・休日は留守番電話等の案内で配慮",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a001-n10-3"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.6",
+     "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関(診療所に限る。)において再診を行った場合には、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。イ 時間外対応体制加算1 7点 ロ 時間外対応体制加算2 5点 ハ 時間外対応体制加算3 4点 ニ 時間外対応体制加算4 2点",
+     "note": "告示A001注10の区分別点数。マスター突合: 112708470=4点で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-A001-n10-4",
+   "code": "112708570",
+   "kubun": "A001注10-ニ",
+   "name": "時間外対応体制加算4",
+   "shortName": "時間外対応体制加算4",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 2,
+   "unit": "1回につき(再診料への加算)",
+   "conditions": "届出診療所において再診を行った場合に再診料へ加算(告示A001注10)。複数診療所(当該診療所を含め最大3)の連携・当番日対応の体制(施設基準通知第2の5)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a001-n10-4"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.6",
+     "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関(診療所に限る。)において再診を行った場合には、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。イ 時間外対応体制加算1 7点 ロ 時間外対応体制加算2 5点 ハ 時間外対応体制加算3 4点 ニ 時間外対応体制加算4 2点",
+     "note": "告示A001注10の区分別点数。マスター突合: 112708570=2点で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-A001-n11",
+   "code": "112015770",
+   "kubun": "A001注11",
+   "name": "明細書発行体制等加算",
+   "shortName": "明細書発行体制等加算",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 1,
+   "unit": "1回につき(再診料への加算)",
+   "conditions": "施設基準(診療所・電子請求・詳細な明細書の無償交付+院内掲示)を満たす診療所を受診した患者について再診料へ加算(告示A001注11)。「満たす」型のため届出不要(施設基準通知第2の2の2)。A000注16・A001注19の電子的診療情報連携体制整備加算とは別に算定できない",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 0,
+   "facilityStandards": [
+    "r08-fs-a001-n11"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.6",
+     "quote": "11 個別の費用の計算の基礎となった項目ごとに記載した明細書の発行等につき別に厚生労働大臣が定める施設基準を満たす保険医療機関(診療所に限る。)を受診した患者については、明細書発行体制等加算として、1点を所定点数に加算する。",
+     "note": "マスター突合: 112015770=1点で一致。「届け出た」でなく「満たす」型=届出不要(施設基準通知で確認)"
+    }
+   ]
+  },
+  {
+   "id": "r08-L100-2-lumbar",
+   "code": "150235510",
+   "kubun": "L100-2",
+   "name": "腰部硬膜外ブロック(局所麻酔剤又はボツリヌス毒素使用)",
+   "shortName": "腰部硬膜外ブロック",
+   "categoryL": "特掲診療料",
+   "categoryM": "麻酔",
+   "points": 800,
+   "unit": "1回につき",
+   "conditions": "疼痛管理の専門的知識を持つ医師が神経ブロック目的で行った場合に算定(留意L100(1)(2))。同一名称の複数か所・2種類以上の神経ブロックは主たるもののみ(留意L100(4))。同一日のトリガーポイント注射・神経幹内注射は別に算定不可(留意L100(7)=rule-0012)。エックス線透視・造影等の費用は所定点数に含む(留意L100(6))。回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.363",
+     "quote": "2 眼神経ブロック、上顎神経ブロック、下顎神経ブロック、舌咽神経ブロック、蝶形口蓋神経節ブロック、腰部硬膜外ブロック 800点",
+     "note": "L100神経ブロック(局所麻酔剤又はボツリヌス毒素使用)の区分2。マスター突合: 150235510「腰部硬膜外ブロック（局所麻酔剤又はボツリヌス毒素使用）」=800点で一致。算定回数テーブル非収載(回数制限の定めなし=否定的確認)。上記以外の神経ブロックはL102神経幹内注射で算定(注)"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.702",
+     "quote": "同一名称の神経ブロックを複数か所に行った場合は、主たるもののみ算定する。また、2種類以上の神経ブロックを行った場合においても、主たるもののみ算定する。",
+     "note": "留意L100(4)。(7)の同一日トリガーポイント注射併算定不可はrule-0012に機械化"
+    }
+   ]
+  },
+  {
+   "id": "r08-D215-2-ro-3",
+   "code": "160165010",
+   "kubun": "D215-2-ロ-(3)",
+   "name": "超音波検査(断層撮影法)(その他)(頭頸部、四肢、体表、末梢血管等)",
+   "shortName": "超音波検査(四肢・体表等)",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 350,
+   "unit": "1回につき",
+   "conditions": "断層撮影法(心臓超音波検査を除く)のその他の場合のうち頭頸部、四肢、体表、末梢血管等(告示D215-2-ロ-(3))。記録に要する費用を含む",
+   "exclusions": null,
+   "countLimitText": "同一患者につき同一月2回目以降は所定点数の100分の90(生体検査料通則=rule-0015・逓減未機械化)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.197",
+     "quote": "(3) その他(頭頸部、四肢、体表、末梢血管等) 350点",
+     "note": "D215-2断層撮影法(心臓超音波検査を除く)-ロその他の場合。マスター突合: 160165010=350点で一致。算定回数テーブル非収載。ゲームの運動器エコー概算350点と同値(概算がKB実点数に置換)"
+    }
+   ]
+  },
+  {
+   "id": "r08-E202-2",
+   "code": "170020110",
+   "kubun": "E202-2",
+   "name": "磁気共鳴コンピューター断層撮影(MRI撮影)(1.5テスラ以上3テスラ未満の機器)",
+   "shortName": "MRI撮影(1.5T以上3T未満)",
+   "categoryL": "特掲診療料",
+   "categoryM": "画像診断",
+   "points": 1330,
+   "unit": "一連につき(算定回数テーブル: 一連・上限1)",
+   "conditions": "届出医療機関で1.5テスラ以上3テスラ未満の機器により行った場合に算定(告示E202-2・注1)。1・2・3を同時に行った場合は主たる撮影のみ(注2・電子点数表same_day背反)。3テスラ以上(1,700点等)・その他(900点)のセルは未登録",
+   "exclusions": null,
+   "countLimitText": "同一月に2回以上行った場合は2回目以降100分の80(コンピューター断層撮影診断料通則2=rule-0014・逓減未機械化)",
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-e202"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.219",
+     "quote": "2 1.5テスラ以上3テスラ未満の機器による場合 1,330点",
+     "note": "E202磁気共鳴コンピューター断層撮影(MRI撮影)(一連につき)。注1: 1及び2は届出医療機関に限り算定。マスター突合: 170020110=1330点・単位「一連」上限1で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-E203",
+   "code": "170015410",
+   "kubun": "E203",
+   "name": "コンピューター断層診断",
+   "shortName": "コンピューター断層診断",
+   "categoryL": "特掲診療料",
+   "categoryM": "画像診断",
+   "points": 450,
+   "unit": "月1回",
+   "conditions": "CT撮影・MRI撮影等の診断料。撮影の種類又は回数にかかわらず月1回に限り算定(告示E203注)",
+   "exclusions": null,
+   "countLimitText": "コンピューター断層撮影の種類・回数にかかわらず月1回(告示E203注・算定回数テーブル: 月・上限1)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.220",
+     "quote": "E203 コンピューター断層診断 450点 注 コンピューター断層撮影の種類又は回数にかかわらず、月1回に限り算定できるものとする。",
+     "note": "マスター突合: 170015410=450点・単位「月」上限1で一致。月1回制限はpackのLIMITSで機械化"
+    }
+   ]
+  },
+  {
+   "id": "r08-E-denshi-ct",
+   "code": "170028810",
+   "kubun": "E部第3節通則3",
+   "name": "電子画像管理加算(コンピューター断層診断料)",
+   "shortName": "電子画像管理加算(CT・MRI)",
+   "categoryL": "特掲診療料",
+   "categoryM": "画像診断",
+   "points": 120,
+   "unit": "一連の撮影につき1回(算定回数テーブル: 一連・上限1)",
+   "conditions": "撮影した画像を電子化して管理・保存した場合に一連の撮影について1回に限り加算(コンピューター断層撮影診断料通則3)。この場合フィルム費用は算定不可",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.218",
+     "quote": "撮影した画像を電子化して管理及び保存した場合においては、電子画像管理加算として、前2号により算定した点数に、一連の撮影について1回に限り、120点を所定点数に加算する。ただし、この場合において、フィルムの費用は算定できない。",
+     "note": "コンピューター断層撮影診断料通則3。マスター突合: 170028810=120点・単位「一連」上限1で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-E-denshi-tanjun",
+   "code": "170000210",
+   "kubun": "E部第1節通則4-イ",
+   "name": "電子画像管理加算(単純撮影)",
+   "shortName": "電子画像管理加算(単純撮影)",
+   "categoryL": "特掲診療料",
+   "categoryM": "画像診断",
+   "points": 57,
+   "unit": "一連の撮影につき1回(算定回数テーブル: 一連・上限1)",
+   "conditions": "撮影した画像を電子化して管理・保存した場合に一連の撮影について加算(エックス線診断料通則4-イ)。この場合フィルム費用は算定不可。特殊58点・造影66点・乳房54点のセルは未登録",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.214",
+     "quote": "撮影した画像を電子化して管理及び保存した場合においては、電子画像管理加算として、前3号までにより算定した点数に、一連の撮影について次の点数を加算する。ただし、この場合において、フィルムの費用は、算定できない。イ 単純撮影の場合 57点",
+     "note": "エックス線診断料通則4。マスター突合: 170000210=57点・単位「一連」上限1で一致"
+    }
+   ]
   }
  ],
  "facilityStandards": [
@@ -2758,6 +3150,155 @@
      "page": "p.175",
      "quote": "一般名処方加算の施設基準に係る取扱いについては、当該基準を満たしていればよく、特に地方厚生(支)局長に対して、届出を行う必要はないこと。",
      "note": "届出不要の否定的確認"
+    }
+   ]
+  },
+  {
+   "id": "r08-fs-a001-n10-1",
+   "name": "時間外対応体制加算1の施設基準",
+   "shortName": "時間外対応体制加算1",
+   "ryoType": "kihon",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "通則: 診療所であること・標榜時間外の電話等問い合わせ体制の整備と周知(院内掲示・文書配布・診察券記載等)。区分1: 継続受診患者からの電話等問い合わせに、常勤の医師・看護職員・事務職員等(週3日以上かつ週22時間以上の非常勤でも可)により常時対応できる体制。応じられなかった場合の速やかなコールバック体制",
+   "transitional": null,
+   "formNo": "様式2(実績不要)",
+   "sourceNotice": "r08-tsuchi7-kihon-todokede",
+   "sourcePage": "第2の1・2(PDF p.24)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "system_req",
+     "doc": "r08-tsuchi7-kihon-todokede",
+     "page": "第2の2(PDF p.24)",
+     "quote": "診療所を継続的に受診している患者からの電話等による問い合わせに対し、原則として当該診療所において、当該診療所の常勤の医師、看護職員又は事務職員等により、常時対応できる体制がとられていること。",
+     "note": "週3日以上・週22時間以上勤務の非常勤による常時対応でも可(みなし)。コールバック体制も要件"
+    },
+    {
+     "field": "form_no",
+     "doc": "r08-tsuchi7-kihon-todokede",
+     "page": "第2の6(PDF p.25)",
+     "quote": "時間外対応体制加算に係る届出は、別添7の様式2を用いること。なお、当該加算の届出については実績を要しない。",
+     "note": "4区分共通の届出様式。実績不要"
+    }
+   ]
+  },
+  {
+   "id": "r08-fs-a001-n10-2",
+   "name": "時間外対応体制加算2の施設基準",
+   "shortName": "時間外対応体制加算2",
+   "ryoType": "kihon",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "通則(区分1に同じ)+非常勤の医師・看護職員・事務職員等が常時電話等対応できる体制(必要に応じて診療録を閲覧できる体制)。コールバック体制",
+   "transitional": null,
+   "formNo": "様式2(実績不要)",
+   "sourceNotice": "r08-tsuchi7-kihon-todokede",
+   "sourcePage": "第2の3(PDF p.25)",
+   "confidence": "verified",
+   "evidence": []
+  },
+  {
+   "id": "r08-fs-a001-n10-3",
+   "name": "時間外対応体制加算3の施設基準",
+   "shortName": "時間外対応体制加算3",
+   "ryoType": "kihon",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "通則(区分1に同じ)+標榜時間外の夜間の数時間、常勤職員等(週3日以上かつ週22時間以上の非常勤でも可)による対応体制。休診日・深夜・休日は留守番電話等で救急医療機関の案内等の配慮。コールバック体制",
+   "transitional": null,
+   "formNo": "様式2(実績不要)",
+   "sourceNotice": "r08-tsuchi7-kihon-todokede",
+   "sourcePage": "第2の4(PDF p.25)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "system_req",
+     "doc": "r08-tsuchi7-kihon-todokede",
+     "page": "第2の4(PDF p.25)",
+     "quote": "標榜時間外の夜間の数時間は、原則として当該診療所において、当該診療所の常勤の医師、看護職員又は事務職員等により、対応できる体制がとられていること。",
+     "note": "休診日・深夜・休日は留守番電話等により地域の救急医療機関等の連絡先案内を行うなどの配慮"
+    }
+   ]
+  },
+  {
+   "id": "r08-fs-a001-n10-4",
+   "name": "時間外対応体制加算4の施設基準",
+   "shortName": "時間外対応体制加算4",
+   "ryoType": "kihon",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "通則(区分1に同じ)+複数診療所(当該診療所を含め最大3)の連携による対応体制。当番日は標榜時間外の夜間の数時間対応、当番日以外は留守番電話等で当番診療所等の案内。コールバック体制",
+   "transitional": null,
+   "formNo": "様式2(実績不要)",
+   "sourceNotice": "r08-tsuchi7-kihon-todokede",
+   "sourcePage": "第2の5(PDF p.25)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "system_req",
+     "doc": "r08-tsuchi7-kihon-todokede",
+     "page": "第2の5(PDF p.25)",
+     "quote": "複数の診療所の連携により対応する場合、連携する診療所の数は、当該診療所を含め最大で3つまでとすること。",
+     "note": "区分4は連携・当番日対応の体制"
+    }
+   ]
+  },
+  {
+   "id": "r08-fs-a001-n11",
+   "name": "明細書発行体制等加算の施設基準",
+   "shortName": "明細書発行体制等加算",
+   "ryoType": "kihon",
+   "notificationReq": 0,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "(1)診療所であること (2)電子情報処理組織又は光ディスク等による診療報酬請求 (3)算定区分・項目の名称と点数(金額)を記載した詳細な明細書の無償交付+その旨の院内掲示",
+   "transitional": null,
+   "formNo": "届出不要(「基準を満たしていればよく、特に地方厚生(支)局長に対して届出を行う必要はない」)",
+   "sourceNotice": "r08-tsuchi7-kihon-todokede",
+   "sourcePage": "第2の2の2(PDF p.26)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "form_no",
+     "doc": "r08-tsuchi7-kihon-todokede",
+     "page": "第2の2の2(PDF p.26)",
+     "quote": "明細書発行体制等加算の施設基準に係る取扱いについては、当該基準を満たしていればよく、特に地方厚生(支)局長に対して、届出を行う必要はないこと。",
+     "note": "届出不要の否定的確認(体制要件のみ)"
+    }
+   ]
+  },
+  {
+   "id": "r08-fs-e202",
+   "name": "CT撮影及びMRI撮影の施設基準(E202-2)",
+   "shortName": "CT・MRI撮影",
+   "ryoType": "tokkei",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "1.5テスラ以上3テスラ未満のMRI装置を有していること(第34の1(1))。画像診断管理加算2以上・専従診療放射線技師の要件(1(2)(3))は128列以上等のCT・3テスラ以上のMRIのみが対象=1.5T機は装置保有のみ",
+   "transitional": null,
+   "formNo": "様式37(機種名・型番・メーカー名・テスラ数・安全管理責任者・保守管理計画添付)",
+   "sourceNotice": "r08-tsuchi8-tokkei-todokede",
+   "sourcePage": "第34(PDF p.170)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "system_req",
+     "doc": "r08-tsuchi8-tokkei-todokede",
+     "page": "第34(PDF p.170)",
+     "quote": "128 列以上、64 列以上 128 列未満、16 列以上 64 列未満若しくは4列以上 16 列未満のマルチスライスCT装置又は3テスラ以上若しくは 1.5 テスラ以上3テスラ未満のMRI装置のいずれかを有していること。",
+     "note": "第34の1(1)。画像診断管理加算2以上・専従技師の(2)(3)は128列以上等CT・3T以上MRIのみ対象=1.5T機は対象外(否定的確認)。届出は様式37"
     }
    ]
   }
@@ -3008,17 +3549,21 @@
   {
    "id": "r08-rule-0012",
    "source": "r08-L104",
-   "target": "神経幹内注射(L102)・神経ブロック(L100)",
+   "target": "神経幹内注射(L102・未登録)・腰部硬膜外ブロック(r08-L100-2-lumbar)",
    "type": "simultaneous_ng",
-   "condition": "トリガーポイント注射と神経幹内注射は同時に算定できない(留意L104(2))。同一日に神経ブロックと同時に行われたトリガーポイント注射は別に算定できない(留意L100(7))。L100/L102はKB未登録のため機械ヒントなし",
+   "condition": "トリガーポイント注射と神経幹内注射は同時に算定できない(留意L104(2))。同一日に神経ブロックと同時に行われたトリガーポイント注射は別に算定できない(留意L100(7))。L100は腰部硬膜外ブロックを登録済み(便H)・L102は未登録",
    "period": "same_day",
    "bidirectional": 1,
    "doc": "r08-ryuiji-ika",
    "page": "p.702",
    "quote": "同一日に神経ブロックと同時に行われたトリガーポイント注射や神経幹内注射については、部位にかかわらず別に算定できない。",
    "machine": {
-    "type": "handled_externally",
-    "note": "神経ブロックとトリガーポイント注射は同一受診単位では併発しない前提のため判定対象なし。L100/L102はKB未登録"
+    "type": "same_day_ng_items",
+    "source": "r08-L100-2-lumbar",
+    "targetItemIds": [
+     "r08-L104"
+    ],
+    "note": "腰部硬膜外ブロックの算定日はトリガーポイント注射を却下(留意L100(7))。整形本院は同一受診で併発しない設計だが、エンジン利用側の安全網として機械化"
    }
   },
   {
@@ -3037,6 +3582,54 @@
     "source": "r08-B009-1",
     "conditionKey": "specialRelation",
     "conditionLabel": "紹介先が特別の関係にある保険医療機関(開設者同一等)"
+   }
+  },
+  {
+   "id": "r08-rule-0014",
+   "source": "r08-E202-2",
+   "target": "MRI撮影・CT撮影(E200)の同一月2回目以降",
+   "type": "conditional",
+   "condition": "E200のCT撮影とE202のMRI撮影を同一月に2回以上行った場合、当該月の2回目以降の断層撮影は一連につき所定点数の100分の80で算定(コンピューター断層撮影診断料通則2)。逓減の機械化はエンジン未対応",
+   "period": "same_month",
+   "bidirectional": 0,
+   "doc": "r08-kokuji69-ika",
+   "page": "p.218",
+   "quote": "区分番号E200に掲げるコンピューター断層撮影(CT撮影)及び区分番号E202に掲げる磁気共鳴コンピューター断層撮影(MRI撮影)を同一月に2回以上行った場合は、当該月の2回目以降の断層撮影については、所定点数にかかわらず、一連につき所定点数の100分の80に相当する点数により算定する。",
+   "machine": {
+    "type": "handled_externally",
+    "note": "ゲームはMRIを初診・紹介時の精査でのみ発行し、同一患者への同一月2回目のMRIを発行しない設計のため逓減は判定対象なし(制度の事実はルールとして記録)"
+   }
+  },
+  {
+   "id": "r08-rule-0015",
+   "source": "r08-D215-2-ro-3",
+   "target": "同一月の同一検査2回目以降",
+   "type": "conditional",
+   "condition": "D215(3のニを除く)・D216の超音波検査等を同一患者・同一月に同一検査2回以上実施した場合、2回目以降は所定点数の100分の90で算定(生体検査料通則)。逓減の機械化はエンジン未対応",
+   "period": "same_month",
+   "bidirectional": 0,
+   "doc": "r08-kokuji69-ika",
+   "page": "p.197",
+   "quote": "区分番号D215(3のニの場合を除く。)及びD216に掲げる超音波検査等について、同一患者につき同一月において同一検査を2回以上実施した場合における2回目以降の当該検査の費用は、所定点数の100分の90に相当する点数により算定する。",
+   "machine": {
+    "type": "handled_externally",
+    "note": "ゲームは運動器エコーを初診時のみ発行し、同一患者への同一月2回目を発行しない設計のため逓減は判定対象なし(制度の事実はルールとして記録)"
+   }
+  },
+  {
+   "id": "r08-rule-0016",
+   "source": "r08-A001-n11",
+   "target": "電子的診療情報連携体制整備加算(A000注16・A001注19・未登録)",
+   "type": "mutually_exclusive",
+   "condition": "明細書発行体制等加算を算定する場合、電子的診療情報連携体制整備加算は別に算定できない(告示A001注11後段)。相手項目はKB未登録",
+   "period": "same_day",
+   "bidirectional": 1,
+   "doc": "r08-kokuji69-ika",
+   "page": "p.6",
+   "quote": "この場合において、区分番号A000に掲げる初診料の注16及び区分番号A001に掲げる再診料の注19に規定する電子的診療情報連携体制整備加算は別に算定できない。",
+   "machine": {
+    "type": "handled_externally",
+    "note": "電子的診療情報連携体制整備加算はゲーム未実装・KB未登録のため判定対象なし(登録時にsame_day_ng_itemsへ昇格)"
    }
   }
  ]

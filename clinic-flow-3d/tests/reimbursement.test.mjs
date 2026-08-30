@@ -230,5 +230,49 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   eq('H003-2: 点数はKB一致', r2.billableItems.find((x) => x.itemId === 'r08-H003-2-1-i').points, pts('r08-H003-2-1-i'));
 }
 
+/* 21. 便H: 腰部硬膜外ブロック(L100-2)の算定日はトリガーポイント注射を却下(留意L100(7)=rule-0012) */
+{
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-L100-2-lumbar' }, { itemId: 'r08-L104' }],
+    facilityStandards: [], history: {},
+  });
+  ok('L100-2算定日: トリガーポイント注射は却下(rule-0012)', r.rejectedItems.some((x) => x.itemId === 'r08-L104'));
+  ok('L100-2自体は算定', billedIds(r).includes('r08-L100-2-lumbar'));
+  eq('L100-2: 点数はKB一致(800点)', r.billableItems.find((x) => x.itemId === 'r08-L100-2-lumbar').points, 800);
+}
+
+/* 22. 便H: E202-2(MRI 1.5T以上3T未満)は届出必須(注1)。無届出は却下・様式37届出で算定可 */
+{
+  const r0 = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-E202-2' }], facilityStandards: [], history: {},
+  });
+  ok('E202-2: 無届出は却下', r0.rejectedItems.some((x) => x.itemId === 'r08-E202-2'));
+  const r1 = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-E202-2' }, { itemId: 'r08-E203' }, { itemId: 'r08-E-denshi-ct' }],
+    facilityStandards: ['r08-fs-e202'], history: {},
+  });
+  ok('E202-2: 届出で算定可', billedIds(r1).includes('r08-E202-2'));
+  eq('MRI一式の合計点(1330+450+120)', r1.billableItems.reduce((a, x) => a + x.subtotal, 0), 1900);
+}
+
+/* 23. 便H: E203コンピューター断層診断は月1回(告示注・算定回数テーブル) */
+{
+  const r = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-E203' }],
+    facilityStandards: [], history: { month: { 'r08-E203': 1 } },
+  });
+  ok('E203: 同月2回目は却下(月1回)', r.rejectedItems.some((x) => x.itemId === 'r08-E203'));
+}
+
+/* 24. 便H: 時間外対応体制加算・明細書発行体制等加算はKB点数(7/4/1点)と一致 */
+{
+  eq('時間外対応体制加算1=7点', pts('r08-A001-n10-1'), 7);
+  eq('時間外対応体制加算3=4点', pts('r08-A001-n10-3'), 4);
+  eq('明細書発行体制等加算=1点', pts('r08-A001-n11'), 1);
+  eq('電子画像管理加算(単純撮影)=57点', pts('r08-E-denshi-tanjun'), 57);
+  eq('超音波(四肢・体表等)=350点', pts('r08-D215-2-ro-3'), 350);
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
