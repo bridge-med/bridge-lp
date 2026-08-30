@@ -104,11 +104,6 @@ a { color: var(--blue-deep); }
 .hud-time span { font: 700 12px/1.2 var(--en); color: var(--ink-3); }
 
 .speed-group { display: flex; gap: 4px; }
-/* 320px級: 8ボタンは1行に収まらない。圧縮せず折り返す(幅を削るとWCAG AAの24pxを割る) */
-@media (max-width: 360px) {
-  .speed-group { flex: 1 0 100%; flex-wrap: wrap; gap: 4px; }
-  .speed-btn { flex: 1 1 calc(25% - 3px); padding: 7px 4px; }
-}
 .speed-btn {
   border: 1px solid var(--line);
   background: var(--card);
@@ -116,10 +111,15 @@ a { color: var(--blue-deep); }
   font: 700 11px/1 var(--sans);
   border-radius: 999px;
   padding: 7px 10px;
-  min-height: 44px; /* 44px化はまず高さ(v33 qa指摘の33px)。幅はHUD 8ボタンが390px幅に収まらないため自然幅のまま(WCAG AAの24pxは満たす) */
+  min-height: 44px; /* 44px化はまず高さ(v33 qa指摘の33px)。幅はHUD 8ボタンが390px幅に収まらないため自然幅のまま(WCAG AAの24pxは満たす)。≤360pxは折返し側で上書き */
 }
 .speed-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
 .speed-btn.skip { background: var(--amber-pale); border-color: rgba(201,138,45,0.4); color: var(--amber); font-weight: 800; }
+/* 320px級: 8ボタンは1行に収まらない。圧縮せず折り返す(幅を削るとWCAG AAの24pxを割る) */
+@media (max-width: 360px) {
+  .speed-group { flex: 1 0 100%; flex-wrap: wrap; gap: 4px; }
+  .speed-btn { flex: 1 1 calc(25% - 3px); padding: 7px 4px; }
+}
 
 .mission-bar {
   max-width: 920px;

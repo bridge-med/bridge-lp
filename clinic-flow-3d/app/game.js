@@ -3464,9 +3464,11 @@
           fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''}</div>`;
         }
       }
+      // fsLineが施設基準名を語るとき、reasons側の同じ一文は落とす(同じ名前を2回言わない)
+      const reasons = (x.reasons || []).filter((r) => !x.fsInfo || !r.includes('施設基準'));
       return `
       <div class="kb-reject"><b>${x.name}</b>${x.points != null ? `(${x.points}点)` : ''} は算定していません
-        <div class="kb-cond">${(x.reasons || []).join('。')}</div>
+        ${reasons.length ? `<div class="kb-cond">${reasons.join('。')}</div>` : ''}
         ${(x.rules || []).filter((r) => r.quote).map((r) => `<div class="kb-quote">「${r.quote}」</div>`).join('')}
         ${fsLine}
       </div>`;
