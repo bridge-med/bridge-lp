@@ -124,12 +124,15 @@
  {
   "id": "r08-fs-f400-n6",
   "name": "一般名処方加算の施設基準",
-  "category": "特掲診療料",
+  "short_name": "一般名処方",
+  "ryo_type": "tokkei",
   "notification_req": 0,
-  "form_no": null,
-  "staffing": null,
-  "equipment": null,
-  "requirements": "一般名処方の趣旨(医薬品の供給状況・長期収載品の選定療養等を踏まえた説明)を院内の見やすい場所に掲示していること。掲示事項を原則ウェブサイトに掲載していること(自ら管理するホームページ等を有しない場合はこの限りでない)",
-  "notes": "届出は不要(当該基準を満たしていればよい=0305-8 第36の4の2)。confidence: verified"
+  "system_req": "一般名処方の趣旨(医薬品の供給状況・長期収載品の選定療養等を踏まえた説明)を院内の見やすい場所に掲示していること。掲示事項を原則ウェブサイトに掲載していること(自ら管理するホームページ等を有しない場合はこの限りでない)",
+  "form_no": "届出不要(当該基準を満たしていればよい)",
+  "source_notice": "r08-tsuchi8-tokkei-todokede",
+  "source_page": "第36の4(p.175)",
+  "effective_from": "2026-06-01",
+  "updated_at": "2026-08-30",
+  "confidence": "verified"
  }
 ]

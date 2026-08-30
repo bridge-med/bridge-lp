@@ -719,7 +719,7 @@
  {
   "entity_type": "facility_standard",
   "entity_id": "r08-fs-f400-n6",
-  "field": "requirements",
+  "field": "system_req",
   "document_id": "r08-tsuchi8-tokkei-todokede",
   "page": "p.175",
   "quote": "一般名処方の趣旨を患者に十分に説明することについて、当該保険医療機関の見やすい場所に掲示していること。(２) （１）の掲示事項について、原則として、ウェブサイトに掲載していること。",
@@ -728,7 +728,7 @@
  {
   "entity_type": "facility_standard",
   "entity_id": "r08-fs-f400-n6",
-  "field": "notes",
+  "field": "form_no",
   "document_id": "r08-tsuchi8-tokkei-todokede",
   "page": "p.175",
   "quote": "一般名処方加算の施設基準に係る取扱いについては、当該基準を満たしていればよく、特に地方厚生（支）局長に対して、届出を行う必要はないこと。",

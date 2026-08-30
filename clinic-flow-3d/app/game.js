@@ -1062,7 +1062,7 @@
 
   function branchDay(br, spec) {
     const site = siteOf(br);
-    if (branchKijunCheck(br)) toast(`⚠️ ${br.name}: 施設基準の要件割れで降格しました(専従PT・面積)`);
+    if (branchKijunCheck(br)) { toast(`⚠️ ${br.name}: 施設基準の要件割れで降格しました(専従PT・面積)`); if (G.med) G.med.fsBroken++; }
     if (spec.kind === 'closed') {
       const cost = branchRent(br) + COSTS.branchBase + (br.mri ? COSTS.mriMaint : 0);
       br.last = { revenue: 0, cost, profit: -cost, visits: 0, reha: 0 };
@@ -1299,6 +1299,7 @@
       const next = [...KIJUN].reverse().find((k) => k.lv < settings.rehaLevel && k.ok(settings.pts, settings.floorLv));
       settings.rehaLevel = next ? next.lv : 0;
       toast(`⚠️ 施設基準の要件割れ — ${REHA_NAMES[settings.rehaLevel]}に降格しました`);
+      if (G.med) G.med.fsBroken++; // 医療評価: 本院の要件割れも数える(部門・分院と同じ範囲)
     }
 
     G.rep = clamp(G.rep, Math.max(15, repStart - 3), 97);
@@ -2449,19 +2450,20 @@
     const medScore = medProper + medClean + medQuiz;
     const medGrade = medScore >= 90 ? 'S' : medScore >= 70 ? 'A' : medScore >= 50 ? 'B' : 'C';
     const medDetail = [
-      `要件どおりの算定 ${medProper}/60${med.fsBroken ? `(要件割れ${med.fsBroken}回)` : ''}`,
-      `算定の整備 ${medClean}/20${med.warnDays ? `(要確認が出た日${med.warnDays})` : ''}`,
-      `理解 ${medQuiz}/20${med.quizTotal ? `(クイズ${med.quizOk}/${med.quizTotal})` : '(クイズ未回答)'}`,
+      `要件どおりの算定 ${medProper}/60${med.fsBroken ? `(要件割れで適用が外れた${med.fsBroken}件)` : ''}`,
+      `判定の保留 ${medClean}/20${med.warnDays ? `(保留した日${med.warnDays})` : ''}`,
+      `理解 ${medQuiz}/20${med.quizTotal ? `(クイズ${med.quizOk}/${med.quizTotal})` : '(デイリークイズ未回答・回答は任意)'}`,
     ].join('・');
     G.med = { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 };
-    showModal(`📆 月間決算(第${G.season.months}期) — 評価 ${grade}`, `
+    showModal(`📆 月間決算(第${G.season.months}期) — 経営評価 ${grade}`, `
       <div class="pnl-row"><span>今月の利益(直近30日・法人)</span><b class="${profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(profit)}</b></div>
       <div class="pnl-row"><span>自己ベスト</span><b>${yen(G.season.bestProfit)}(第${G.season.bestMonth}期)${isBest && G.season.months > 1 ? ' 🏆 記録更新' : ''}</b></div>
       ${planHtml}
-      <div class="pnl-row"><span>医療(適切な算定)</span><b>${medScore}点 ${medGrade}</b></div>
-      <p class="pnl-note">${medDetail}</p>
       <div class="pnl-row"><span>成績ボーナス</span><b>${coin ? `🪙+${coin}` : 'なし(黒字着地で🪙+1〜)'}</b></div>
-      <p class="modal-note">📖 評価: S=月間利益300万 / A=100万 / B=黒字。医療スコアの内訳 — 要件割れ(施設基準を満たさないまま算定を続けた日)とKB整備メモは制度上の事実、配点の比率はゲーム上の仮定。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>
+      <div class="pnl-row total"><span>医療評価(適切な算定)</span><b>${medScore}点 ${medGrade}</b></div>
+      <p class="pnl-note"><small>${medDetail}</small></p>
+      <p class="pnl-note"><small>要件割れ(届け出た施設基準の要件を割り、その日から適用が外れたこと)は制度上の事実。判定の保留は、エンジンがまだ機械判定できない条件に当たった日。配点の比率はゲーム上の仮定</small></p>
+      <p class="modal-note">📖 経営評価: S=月間利益300万 / A=100万 / B=黒字。医療評価は別の物差し。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>
       ${isBest && G.season.months > 1 ? shareBtnHtml() : ''}`,
       '来月へ');
     if (isBest && G.season.months > 1) bindShare(`📆 「${G.clinicName}」月間利益の自己ベスト更新 — ${yen(profit)}(第${G.season.months}期・評価${grade})`);
@@ -3378,6 +3380,7 @@
         ${i ? `<div class="pnl-row"><span>昨日の診察時間</span><b>${i.usedMin}分 / 枠${i.budgetMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''}</b></div>` : ''}
         <div class="op-row">
           <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
+          <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONの部門は整えている前提=ゲーム上の簡略化</small></p>
         </div>
       </div>`;
     }
@@ -3421,6 +3424,7 @@
             ? '<span class="kijun-badge">長期処方・リフィル対応の体制あり(届出不要)</span>'
             : `<button class="op-btn" data-dkeiji="${m.id}">📋 体制を整える(院内掲示・長期処方対応) <small>${yen(DEPT_KEIJI_COST)}</small></button>`}
           <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
+          <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONの部門は整えている前提=ゲーム上の簡略化</small></p>
         </div>
       </div>`;
     }
