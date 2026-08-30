@@ -13,6 +13,7 @@
   const M = {
     id: 'ophthalmology',
     name: '眼科',
+    short: '眼科',
     icon: '👁',
     status: 'full',
     desc: '検査の積み上げ・白内障日帰り手術。設備投資が検査可能範囲と単価を決める',

@@ -12,6 +12,7 @@
   const M = {
     id: 'internal',
     name: '一般内科',
+    short: '内科',
     icon: '🩺',
     status: 'full',
     desc: '生活習慣病の継続管理が柱。管理料(I)/(II)の選択が収益設計の中心',

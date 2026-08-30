@@ -6,6 +6,7 @@
   const M = {
     id: 'orthopedics',
     name: '整形外科',
+    short: '整形外科',
     icon: '🦴',
     status: 'full',
     desc: 'リハ・注射・画像の複合単価。施設基準(運動器リハ)が経営の天井を決める',

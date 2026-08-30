@@ -11,6 +11,7 @@
   const M = {
     id: 'dialysis',
     name: '人工透析',
+    short: '透析',
     icon: '🫘',
     status: 'full',
     desc: 'ベッド数×クール数×稼働率のストック型経営。施設区分の維持が最重要',

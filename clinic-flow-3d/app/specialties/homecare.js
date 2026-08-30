@@ -15,6 +15,7 @@
   const M = {
     id: 'homecare',
     name: '在宅医療・訪問診療',
+    short: '在宅',
     icon: '🚗',
     status: 'full',
     desc: '街を診療フィールドに。訪問効率(移動距離)と24時間体制が収益を決める',

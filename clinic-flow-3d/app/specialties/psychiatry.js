@@ -15,6 +15,7 @@
   const M = {
     id: 'psychiatry',
     name: '精神科・心療内科',
+    short: '精神科',
     icon: '🌙',
     status: 'full',
     desc: '診察時間の配分が柱。時間区分がそのまま点数になり、1日の使い方が経営を決める',
