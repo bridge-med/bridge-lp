@@ -186,5 +186,49 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('定める検査: needs_review警告が出る', r.warnings.some((w) => w.kind === 'needs_review' && w.ruleId === 'r08-rule-0001'));
 }
 
+/* 17. 便E: 整形の処置・注射(J119=処置)の算定日は外来管理加算が却下される */
+{
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n8' }, { itemId: 'r08-J119-2' }],
+    facilityStandards: [], history: {},
+  });
+  ok('J119算定日: 外来管理加算は却下(A001注8・処置)', r.rejectedItems.some((x) => x.itemId === 'r08-A001-n8'));
+  ok('J119自体は算定', billedIds(r).includes('r08-J119-2'));
+}
+
+/* 18. 便E: 関節腔内注射(G010=第6部注射)はA001注8の列挙外で外来管理加算を妨げない */
+{
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n8' }, { itemId: 'r08-G010' }],
+    facilityStandards: [], history: {},
+  });
+  ok('G010算定日: 外来管理加算は算定できる(注射は注8列挙外)', billedIds(r).includes('r08-A001-n8'));
+}
+
+/* 19. 便E: トリガーポイント注射(L104=麻酔)の算定日は外来管理加算が却下される */
+{
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n8' }, { itemId: 'r08-L104' }],
+    facilityStandards: [], history: {},
+  });
+  ok('L104算定日: 外来管理加算は却下(A001注8・麻酔)', r.rejectedItems.some((x) => x.itemId === 'r08-A001-n8'));
+}
+
+/* 20. 便E: リハ総合計画評価料1は運動器(I)/(II)の届出が要る(ANY)。無届出は却下 */
+{
+  const r0 = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-H003-2-1-i' }], facilityStandards: [], history: {},
+  });
+  ok('H003-2: 無届出は却下', r0.rejectedItems.some((x) => x.itemId === 'r08-H003-2-1-i'));
+  const r2 = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-H003-2-1-i' }], facilityStandards: ['r08-fs-h002-2'], history: {},
+  });
+  ok('H003-2: 運動器(II)届出で算定可', billedIds(r2).includes('r08-H003-2-1-i'));
+  eq('H003-2: 点数はKB一致', r2.billableItems.find((x) => x.itemId === 'r08-H003-2-1-i').points, pts('r08-H003-2-1-i'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

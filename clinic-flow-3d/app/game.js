@@ -161,6 +161,10 @@
     for (const lv of [1, 2, 3]) REHA_FEE[lv] = kbPts(REHA_KB_ITEM[lv], [0, 85, 170, 185][lv]) * 2 * 10;
     KIJUN.forEach((k) => { k.fee = REHA_FEE[k.lv]; });
   }
+  // 整形の手技はKB点数(G010/L104/J000-1/J119-2/J122-2/H003-2)。注射の薬剤料だけは
+  // 薬価レイヤー未整備のため概算のまま分離して計上する(medical-kb issues #10)。
+  // 概算値は旧合算(関節注180/トリガー120)からKB手技点数を引いた残り
+  const DRUG_PTS = { inj: 100, trig: 50 };
   // 部門エンジン(患者パネル型): KBと同時に初期化できたときだけ部門を動かす
   const DEPTI = (() => {
     try {
@@ -692,15 +696,25 @@
       for (const it of report.items) {
         if (it === 'treat') {
           // 3割はシーネ・ギプス固定(整形らしい高点数処置)
-          if (Math.random() < 0.3) { revenue += 4900; T.rev.treat += 4900; rc.push({ n: 'シーネ・ギプス固定(四肢)', t: 490 }); }
-          else { revenue += FEES.treat; T.rev.treat += FEES.treat; rc.push({ n: '創傷処置・消炎処置', t: 150 }); }
+          if (Math.random() < 0.3) { const p = kbPts('r08-J122-2', 490); revenue += p * 10; T.rev.treat += p * 10; rc.push({ n: 'ギプス・シーネ固定(手指及び手、足)', t: p, kb: 'r08-J122-2' }); }
+          else { const p = kbPts('r08-J000-1', 52); revenue += p * 10; T.rev.treat += p * 10; rc.push({ n: '創傷処置(100cm²未満)', t: p, kb: 'r08-J000-1' }); }
           T.treatCount++; didProcedure = true;
         }
-        if (it === 'inj') { revenue += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; didProcedure = true; rc.push({ n: '関節腔内注射+薬剤', t: 180 }); }
+        if (it === 'inj') {
+          const p = kbPts('r08-G010', 80);
+          revenue += (p + DRUG_PTS.inj) * 10; T.rev.inj += (p + DRUG_PTS.inj) * 10; T.injCount++; didProcedure = true;
+          rc.push({ n: '関節腔内注射', t: p, kb: 'r08-G010' });
+          rc.push({ n: '関節注入薬剤', t: DRUG_PTS.inj });
+        }
         if (it === 'trig') {
-          // 25%は神経ブロック(硬膜外等)へステップアップ
+          // 25%は神経ブロック(硬膜外等)へステップアップ(L100系はKB未登録=概算のまま・次便候補)
           if (Math.random() < 0.25) { revenue += 4000; T.rev.inj += 4000; rc.push({ n: '神経ブロック(硬膜外等)+薬剤', t: 400 }); }
-          else { revenue += FEES.trig; T.rev.inj += FEES.trig; rc.push({ n: 'トリガーポイント注射+薬剤', t: 120 }); }
+          else {
+            const p = kbPts('r08-L104', 70);
+            revenue += (p + DRUG_PTS.trig) * 10; T.rev.inj += (p + DRUG_PTS.trig) * 10;
+            rc.push({ n: 'トリガーポイント注射', t: p, kb: 'r08-L104' });
+            rc.push({ n: 'トリガー注入薬剤', t: DRUG_PTS.trig });
+          }
           T.trigCount++; didProcedure = true;
         }
         if (it === 'reha') {
@@ -708,16 +722,18 @@
           report._doRehaAct = true; didProcedure = true; T.rehaCount++;
         }
       }
-      // リハ開始時: リハビリテーション総合計画評価料(計画に基づくリハの証明)
-      if (report.didReha && report.type !== 'rehab') {
-        revenue += 3000; T.rev.reha += 3000;
-        rc.push({ n: 'リハビリテーション総合計画評価料', t: 300 });
+      // リハ開始時: リハ総合計画評価料1(初回)。告示注1の列挙は運動器(I)(II)のみ=(III)では算定不可
+      if (report.didReha && report.type !== 'rehab' && settings.rehaLevel >= 2) {
+        const p = kbPts('r08-H003-2-1-i', 300);
+        revenue += p * 10; T.rev.reha += p * 10;
+        rc.push({ n: 'リハビリテーション総合計画評価料1(初回)', t: p, kb: 'r08-H003-2-1-i' });
       }
 
       // 物療(消炎鎮痛等処置): 機器があれば高回転で回る(故障イベント時は停止)
       if (settings.physio > 0 && !G.evPhysioDown && report.type !== 'checkup' && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) {
-        revenue += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; didProcedure = true;
-        rc.push({ n: '消炎鎮痛等処置(器具等)', t: 35 });
+        const p = kbPts('r08-J119-2', 35);
+        revenue += p * 10; T.rev.physio += p * 10; T.physioCount++; didProcedure = true;
+        rc.push({ n: '消炎鎮痛等処置(器具等)', t: p, kb: 'r08-J119-2' });
       }
 
       // ---- 診療報酬エンジン(Layer 3): 外来管理加算・疾患別リハをKBで判定 ----
@@ -4521,14 +4537,22 @@
         else if (a.type === 'first') { rev += FEES.first; T.rev.consult += FEES.first; T.newCount++; acc(T, '初診料', FEES.first / 10); }
         else { rev += FEES.revisit; T.rev.consult += FEES.revisit; acc(T, '再診料', FEES.revisit / 10); }
         if (a.type !== 'checkup') {
-          if (Math.random() < settings.pInj) { rev += FEES.inj; T.rev.inj += FEES.inj; T.injCount++; proc = true; acc(T, '関節腔内注射+薬剤', 180); }
+          if (Math.random() < settings.pInj) {
+            const p = kbPts('r08-G010', 80);
+            rev += (p + DRUG_PTS.inj) * 10; T.rev.inj += (p + DRUG_PTS.inj) * 10; T.injCount++; proc = true;
+            acc(T, '関節腔内注射', p); acc(T, '関節注入薬剤(概算)', DRUG_PTS.inj);
+          }
           if (Math.random() < settings.pTrig) {
             const block = Math.random() < 0.25;
-            const v = block ? 4000 : FEES.trig;
-            rev += v; T.rev.inj += v; T.trigCount++; proc = true; kanriBlock = true; // 麻酔(トリガー・ブロック)はA001注8の対象
-            acc(T, block ? '神経ブロック(硬膜外等)+薬剤' : 'トリガーポイント注射+薬剤', block ? 400 : 120);
+            T.trigCount++; proc = true; kanriBlock = true; // 麻酔(トリガー・ブロック)はA001注8の対象
+            if (block) { rev += 4000; T.rev.inj += 4000; acc(T, '神経ブロック(硬膜外等)+薬剤', 400); }
+            else {
+              const p = kbPts('r08-L104', 70);
+              rev += (p + DRUG_PTS.trig) * 10; T.rev.inj += (p + DRUG_PTS.trig) * 10;
+              acc(T, 'トリガーポイント注射', p); acc(T, 'トリガー注入薬剤(概算)', DRUG_PTS.trig);
+            }
           }
-          if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) { rev += FEES.physio; T.rev.physio += FEES.physio; T.physioCount++; proc = true; kanriBlock = true; acc(T, '消炎鎮痛等処置(器具等)', 35); }
+          if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) { const p = kbPts('r08-J119-2', 35); rev += p * 10; T.rev.physio += p * 10; T.physioCount++; proc = true; kanriBlock = true; acc(T, '消炎鎮痛等処置(器具等)', p); }
           const segMul = { senior: 1.2, sports: 1.45, worker: 0.75 }[seg] || 1;
           const wantReha = a.type === 'rehab' || (settings.rehaLevel > 0 && (a.refer || Math.random() < settings.pReha * segMul));
           if (wantReha && settings.rehaLevel > 0 && rehaAvail >= 1) {
@@ -4538,9 +4562,9 @@
             acc(T, `${REHA_NAMES[settings.rehaLevel]}×2単位`, fr / 10);
           } else if (clinic.usableBeds() > 0 && Math.random() < settings.pTreat) {
             const gips = Math.random() < 0.3;
-            const v = gips ? 4900 : FEES.treat;
-            rev += v; T.rev.treat += v; T.treatCount++; proc = true; kanriBlock = true;
-            acc(T, gips ? 'シーネ・ギプス固定(四肢)' : '創傷処置・消炎処置', gips ? 490 : 150);
+            const p = gips ? kbPts('r08-J122-2', 490) : kbPts('r08-J000-1', 52);
+            rev += p * 10; T.rev.treat += p * 10; T.treatCount++; proc = true; kanriBlock = true;
+            acc(T, gips ? 'ギプス・シーネ固定(手指及び手、足)' : '創傷処置(100cm²未満)', p);
           }
         }
         // 外来管理加算: A001注8の列挙(処置・リハ・麻酔等)を行わない場合に算定。第6部注射(関節注)は妨げない(告示準拠)
@@ -4570,8 +4594,13 @@
         const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45;
         if ((a.type === 'first' || a.type === 'revisit') && !didReha && Math.random() < loyalty * 0.85 + 0.02 * relLv('pharmacy')) addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
         if (didReha && a.type !== 'rehab') {
-          rev += 3000; T.rev.reha += 3000;
-          acc(T, 'リハビリテーション総合計画評価料', 300);
+          // 総合計画評価料1は運動器(I)(II)のみ(告示注1・(III)は算定不可)。
+          // rev への加算はこの位置だと T.revenue += rev(上) に届かないため直接 T.revenue へ(既存バグの修正)
+          if (settings.rehaLevel >= 2) {
+            const p = kbPts('r08-H003-2-1-i', 300);
+            T.revenue += p * 10; T.rev.reha += p * 10;
+            acc(T, 'リハビリテーション総合計画評価料1(初回)', p);
+          }
           for (let k = 1; k <= 8; k++) addSchedule(G.day + Math.ceil(k * 2.5), 'rehab');
         }
         if (a.type === 'rehab' && !didReha) addSchedule(G.day + 1, 'rehab');
