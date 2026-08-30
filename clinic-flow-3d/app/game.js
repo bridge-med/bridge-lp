@@ -97,7 +97,7 @@
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
-      toast('📋 コピーしました! SNSに貼り付けて自慢してください');
+      toast('📋 コピーしました。SNSに貼り付けて自慢してください');
     } catch (e) { toast('コピーに失敗しました'); }
   }
   function shareBtnHtml() { return `<button class="btn-cta ghost share-btn" id="shareBtn">📤 スコアを自慢する</button>`; }
@@ -238,13 +238,13 @@
     { name: 'ひまわり整形外科', tier: '町', rev: 8000000 },
     { name: '中央せぼねクリニック', tier: '市', rev: 15000000 },
     { name: 'みなと関節クリニック', tier: '市', rev: 25000000 },
-    { name: '医療法人 桜台会', tier: '市', rev: 40000000, title: '🥇 市でいちばんの整形外科グループ!', reward: 2000000, coin: 5 },
+    { name: '医療法人 桜台会', tier: '市', rev: 40000000, title: '🥇 市でいちばんの整形外科グループ', reward: 2000000, coin: 5 },
     { name: '大和田整形グループ', tier: '県', rev: 60000000 },
     { name: '医療法人 青葉会', tier: '県', rev: 90000000 },
-    { name: '医療法人 白鳳会', tier: '県', rev: 130000000, title: '🏅 県でいちばんの医療法人!', reward: 5000000, coin: 8 },
+    { name: '医療法人 白鳳会', tier: '県', rev: 130000000, title: '🏅 県でいちばんの医療法人', reward: 5000000, coin: 8 },
     { name: '広域医療 コスモス会', tier: '地方', rev: 180000000 },
-    { name: '医療法人 大樹会', tier: '地方', rev: 250000000, title: '👑 地方でいちばんの医療グループ!', reward: 10000000, coin: 12 },
-    { name: '全国チェーン アルカ会', tier: '全国', rev: 350000000, title: '🌟 全国いちばんの医療法人!!', reward: 30000000, coin: 20 }
+    { name: '医療法人 大樹会', tier: '地方', rev: 250000000, title: '👑 地方でいちばんの医療グループ', reward: 10000000, coin: 12 },
+    { name: '全国チェーン アルカ会', tier: '全国', rev: 350000000, title: '🌟 全国いちばんの医療法人', reward: 30000000, coin: 20 }
   ];
   function leagueRev(i) { return Math.round(LEAGUE[i].rev * (1 + G.day * 0.0006)); }
 
@@ -1267,14 +1267,14 @@
     for (const [k, r] of Object.entries(G.relations)) {
       if (r.lv > 0 && G.day - r.last > 30) { r.lv--; r.last = G.day; cooled.push(REL_DEF[k].name); }
     }
-    if (cooled.length) toast(`🥶 足が遠のいて関係が冷えました: ${cooled.join('・')}(定期訪問を!)`);
+    if (cooled.length) toast(`🥶 足が遠のいて関係が冷えました: ${cooled.join('・')}(定期訪問を)`);
 
     // 施設基準チェック
     const cur = KIJUN.find((k) => k.lv === settings.rehaLevel);
     if (cur && !cur.ok(settings.pts, settings.floorLv)) {
       const next = [...KIJUN].reverse().find((k) => k.lv < settings.rehaLevel && k.ok(settings.pts, settings.floorLv));
       settings.rehaLevel = next ? next.lv : 0;
-      toast(`⚠️ 施設基準の要件割れ! ${REHA_NAMES[settings.rehaLevel]}に降格しました`);
+      toast(`⚠️ 施設基準の要件割れ — ${REHA_NAMES[settings.rehaLevel]}に降格しました`);
     }
 
     G.rep = clamp(G.rep, Math.max(15, repStart - 3), 97);
@@ -1551,7 +1551,7 @@
       <div class="pnl-row"><span>現在の累積係数</span><b>${Object.keys(KAITEI_CAT).map((c) => `${KAITEI_CAT[c]}${Math.round((k[c] - 1) * 100) >= 0 ? '+' : ''}${Math.round((k[c] - 1) * 100)}%`).join(' ')}</b></div>
       <p class="modal-note">📖 経営は制度の上に乗っている。下がった項目を嘆くより、上がった項目に体制を寄せるのが改定対応 — 2年ごとの「ルール変更に強い経営」こそ本当の実力。</p>`,
       '改定に対応する');
-    banner(`📜 診療報酬改定! ${changes.join(' / ')} — P&Lで影響を確認`);
+    banner(`📜 診療報酬改定 — ${changes.join(' / ')} — P&Lで影響を確認`);
   }
 
   function kaiteiCheck() {
@@ -1686,10 +1686,12 @@
           ${x.fsInfo ? `<p class="kb-cond">必要条件: ${x.fsInfo.staffing || ''}${x.fsInfo.formNo ? `(届出: ${x.fsInfo.formNo})` : ''}</p>` : ''}
           ${x.rules && x.rules[0] && x.rules[0].quote ? `<p class="kb-quote">「${x.rules[0].quote}」</p>` : ''}
         </div>`).join('');
-      const warn = ((r.kb && r.kb.warnings) || []).filter((w) => w.kind !== 'conditional_ok');
+      const warn = playerWarn(r.kb && r.kb.warnings);
+      const dwarn = G.debugMode ? devWarn(r.kb && r.kb.warnings) : [];
       detail = `<div class="rcpt-detail">
         ${evRows}${rejRows}
         ${warn.length ? `<p class="kb-cond">⚠ ${warn.map((w) => w.message).join(' / ')}</p>` : ''}
+        ${dwarn.length ? `<p class="kb-cond">dev: ${dwarn.map((w) => w.message).join(' / ')}</p>` : ''}
         <p class="rcpt-note">出典: ${usedDocs.join(' / ') || '令和8年度診療報酬KB'}。「概算」の行はKB未登録の教育用簡略値</p>
         ${G.debugMode && r.kb ? `<pre class="kb-trace">${JSON.stringify(r.kb.trace, null, 1)}</pre>` : ''}
       </div>`;
@@ -1777,7 +1779,7 @@
          </ul>
          <p class="modal-note">📖 リハは整形外来の柱。施設基準(専従PT数×面積)で1回の単価が¥1,700→¥3,700まで変わります。</p>`;
     if ($('modal').classList.contains('show')) {
-      banner('🔓 新しい打ち手が解放されました! 院内・経営タブをチェック');
+      banner('🔓 新しい打ち手が解放されました。院内・経営タブをチェック');
       return;
     }
     showModal('🔓 打ち手が解放されました', body, 'やってみる');
@@ -2007,7 +2009,7 @@
     G.coins -= item.coin;
     if (id === 'training') {
       G.rep = clamp(G.rep + 3, 15, 97);
-      toast('🎓 接遇研修を実施! 評判+3');
+      toast('🎓 接遇研修を実施しました。評判+3');
     } else if (id === 'skip7') {
       const sp = G.speed;
       G.speed = 8; // 一括実行中は日次結果モーダルを抑制
@@ -2016,7 +2018,7 @@
       banner(`⏩ 7日間を自動運営しました(現在 Day ${G.day})。P&L・週次サマリーで振り返りを`);
     } else {
       G.boosts[id] = G.day + item.days;
-      toast(`${item.label} 開始! 明日から${item.days}日間有効`);
+      toast(`${item.label} を開始 — 明日から${item.days}日間有効`);
     }
     renderItems(); updateHeader(); save();
   }
@@ -2028,7 +2030,7 @@
     G.coins -= f.coin;
     G.deco[id] = true;
     clinic.deco = G.deco;
-    toast(`${f.label} を設置しました! 院内ビューにも表示されます`);
+    toast(`${f.label} を設置しました。院内ビューにも表示されます`);
     renderItems(); updateHeader(); save();
   }
 
@@ -2213,7 +2215,7 @@
       G.daily.quizDone = today;
       if (ok) { G.coins += 1; SND.coin(); } else { SND.buzz(); }
       const res = $('quizResult');
-      if (res) res.innerHTML = `<div class="rs-bottle ${ok ? '' : 'rs-balk'}"><b>${ok ? '⭕ 正解! 🪙+1' : `❌ 不正解…(正解は${q.a ? '⭕' : '❌'})`}</b><br><small>📖 ${q.exp}</small></div>`;
+      if (res) res.innerHTML = `<div class="rs-bottle ${ok ? '' : 'rs-balk'}"><b>${ok ? '⭕ 正解 🪙+1' : `❌ 不正解…(正解は${q.a ? '⭕' : '❌'})`}</b><br><small>📖 ${q.exp}</small></div>`;
       const bo = $('quizO'), bx = $('quizX');
       if (bo) bo.disabled = true;
       if (bx) bx.disabled = true;
@@ -2273,7 +2275,7 @@
     if (bondLv(ch.char) >= 3 && !(G.specialDone || []).includes(ch.char)) specialRequest(ch.char);
     SND.coin();
     const name = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : 'スタッフ';
-    banner(`🎁 ${name}の依頼クリア${ch.chain ? '(🔗連続依頼!)' : ''} → 🪙+${ch.coin + bonus}・${name}の信頼+${2 + bonus}${G.daily.chain >= 2 ? `(${G.daily.chain}日連続)` : ''}`);
+    banner(`🎁 ${name}の依頼クリア${ch.chain ? '(🔗連続依頼)' : ''} → 🪙+${ch.coin + bonus}・${name}の信頼+${2 + bonus}${G.daily.chain >= 2 ? `(${G.daily.chain}日連続)` : ''}`);
     renderTodo();
     renderStaffStrip();
     updateHeader();
@@ -2416,13 +2418,13 @@
     }
     showModal(`📆 月間決算(第${G.season.months}期) — 評価 ${grade}`, `
       <div class="pnl-row"><span>今月の利益(直近30日・法人)</span><b class="${profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(profit)}</b></div>
-      <div class="pnl-row"><span>自己ベスト</span><b>${yen(G.season.bestProfit)}(第${G.season.bestMonth}期)${isBest && G.season.months > 1 ? ' 🏆 記録更新!' : ''}</b></div>
+      <div class="pnl-row"><span>自己ベスト</span><b>${yen(G.season.bestProfit)}(第${G.season.bestMonth}期)${isBest && G.season.months > 1 ? ' 🏆 記録更新' : ''}</b></div>
       ${planHtml}
       <div class="pnl-row"><span>成績ボーナス</span><b>${coin ? `🪙+${coin}` : 'なし(黒字着地で🪙+1〜)'}</b></div>
       <p class="modal-note">📖 評価: S=月間利益300万 / A=100万 / B=黒字。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>
       ${isBest && G.season.months > 1 ? shareBtnHtml() : ''}`,
       '来月へ');
-    if (isBest && G.season.months > 1) bindShare(`📆 「${G.clinicName}」月間利益の自己ベスト更新! ${yen(profit)}(第${G.season.months}期・評価${grade})`);
+    if (isBest && G.season.months > 1) bindShare(`📆 「${G.clinicName}」月間利益の自己ベスト更新 — ${yen(profit)}(第${G.season.months}期・評価${grade})`);
   }
 
   /* ================= 🏆 地域リーグ判定・表示 ================= */
@@ -2446,9 +2448,9 @@
           <p class="modal-note">📖 上には上がいる — ライバルの月商も成長し続けます。次のステージへ。</p>
           ${shareBtnHtml()}`,
           '次の頂点へ');
-        bindShare(`🏆 ${L.title} 「${G.clinicName}」が${L.tier}の頂点に!(Day ${G.day}・法人月商 ${yen(my)})`);
+        bindShare(`🏆 ${L.title} 「${G.clinicName}」が${L.tier}の頂点に立ちました(Day ${G.day}・法人月商 ${yen(my)})`);
       } else {
-        banner(`🏆 ${L.name}(${L.tier})を追い抜きました! 法人月商 ${yen(my)}`);
+        banner(`🏆 ${L.name}(${L.tier})を追い抜きました。法人月商 ${yen(my)}`);
       }
     }
     G.league.beaten = n;
@@ -2626,7 +2628,7 @@
   function updateMissionBar() {
     const m = MISSIONS[G.missionIdx];
     const lap = G.prestige && G.prestige.count > 0 ? `🏛${G.prestige.count + 1}周目 ` : '';
-    $('missionText').textContent = lap + (m ? `MISSION ${G.missionIdx + 1}/${MISSIONS.length}: ${m.title}` : '🏆 全ミッション制覇! 街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
+    $('missionText').textContent = lap + (m ? `MISSION ${G.missionIdx + 1}/${MISSIONS.length}: ${m.title}` : '🏆 全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
   }
 
   let bannerTimer = null;
@@ -2821,7 +2823,7 @@
       G.money -= EXPAND_COST;
       settings.floorLv = 2;
       clinic.applySettings();
-      toast('🏗 増築完了! リハ室100㎡・診察室4室体制');
+      toast('🏗 増築完了 — リハ室100㎡・診察室4室体制');
       renderShop(); renderPnl(); updateHeader(); save();
     });
     const ex2 = $('expand2Btn');
@@ -2830,7 +2832,7 @@
       G.money -= EXPAND2_COST;
       settings.floorLv = 3;
       clinic.applySettings();
-      toast('🏙 別館完成! 診察室6・リハ室150㎡(機器18)・椅子28の大型体制へ');
+      toast('🏙 別館完成 — 診察室6・リハ室150㎡(機器18)・椅子28の大型体制へ');
       renderShop(); renderPnl(); updateHeader(); save();
     });
     const mriB = $('mriBtn');
@@ -2838,7 +2840,7 @@
       if (G.money < MRI_COST) { toast(`資金が足りません(${yen(MRI_COST)})`); return; }
       G.money -= MRI_COST;
       settings.mri = true;
-      toast('🧲 MRI導入! 初診・紹介患者の精査で稼働します');
+      toast('🧲 MRI導入 — 初診・紹介患者の精査で稼働します');
       renderShop(); updateHeader(); save();
     });
     const echoB = $('echoBtn');
@@ -2847,7 +2849,7 @@
       G.money -= ECHO_COST;
       settings.echo = true;
       SND.click();
-      toast('📡 運動器エコー導入! 初診の精査で算定されます(350点)');
+      toast('📡 運動器エコー導入 — 初診の精査で算定されます(350点)');
       renderShop(); updateHeader(); save();
     });
     const dexaB = $('dexaBtn');
@@ -2855,7 +2857,7 @@
       if (G.money < DEXA_COST) { toast(`資金が足りません(${yen(DEXA_COST)})`); return; }
       G.money -= DEXA_COST;
       settings.dexa = true;
-      toast('🦴 DEXA導入! 骨粗鬆症の継続診療が始まります');
+      toast('🦴 DEXA導入 — 骨粗鬆症の継続診療が始まります');
       renderShop(); updateHeader(); save();
     });
 
@@ -2943,7 +2945,7 @@
       G.money -= 200000;
       settings.webIntake = true;
       pushPulseEv('📱', 'Web問診');
-      toast('📱 Web問診・事前受付を導入! 受付時間が約45%短縮されます(受付ボトルネック対策)');
+      toast('📱 Web問診・事前受付を導入 — 受付時間が約45%短縮されます(受付ボトルネック対策)');
     } else { settings.webIntake = false; }
     renderShop(); updateHeader(); save();
   });
@@ -3765,7 +3767,7 @@
         rehaLevel: 0, aw: 0.12, rep: 52, revisitPool: 4, rehabPool: 0, profit7: [], last: null
       });
       town.setBranches(G.branches.map((x) => x.siteId));
-      toast(`🎉 ${name} を開設しました!`);
+      toast(`🎉 ${name} を開設しました`);
       renderCorp(); updateHeader(); save();
     }));
     el.querySelectorAll('[data-brhire]').forEach((b) => b.addEventListener('click', () => {
@@ -3822,7 +3824,7 @@
       if (G.money < BR_EXPAND_COST) { toast(`資金が足りません(${yen(BR_EXPAND_COST)})`); return; }
       G.money -= BR_EXPAND_COST;
       br.floorLv = 2;
-      toast(`🏗 ${br.name} を増築(100㎡)! 機器12台・運動器リハ(I)の面積要件を満たしました`);
+      toast(`🏗 ${br.name} を増築(100㎡) — 機器12台・運動器リハ(I)の面積要件を満たしました`);
       renderCorp(); updateHeader(); save();
     }));
     el.querySelectorAll('[data-brexpand2]').forEach((b) => b.addEventListener('click', () => {
@@ -3830,7 +3832,7 @@
       if (G.money < BR_EXPAND2_COST) { toast(`資金が足りません(${yen(BR_EXPAND2_COST)})`); return; }
       G.money -= BR_EXPAND2_COST;
       br.floorLv = 3;
-      toast(`🏙 ${br.name} に別館(150㎡)! 機器18台体制になりました(家賃¥90,000/日)`);
+      toast(`🏙 ${br.name} に別館(150㎡) — 機器18台体制になりました(家賃¥90,000/日)`);
       renderCorp(); updateHeader(); save();
     }));
     el.querySelectorAll('[data-brmri]').forEach((b) => b.addEventListener('click', () => {
@@ -3846,7 +3848,7 @@
       if (G.money < 30000) { toast('資金が足りません'); return; }
       G.money -= 30000;
       br.aw = clamp(br.aw + 0.015, 0.05, 0.9);
-      toast(`📣 ${br.name}: 地域営業! 認知が ${Math.round(br.aw * 100)}% になりました`);
+      toast(`📣 ${br.name}: 地域営業 — 認知が ${Math.round(br.aw * 100)}% になりました`);
       renderCorp(); updateHeader(); save();
     }));
     el.querySelectorAll('[data-brpinj]').forEach((s) => s.addEventListener('input', (e) => {
@@ -3876,7 +3878,7 @@
         rep: 60, last: null
       };
       SND.fanfare();
-      showModal('🏥 グループ病院、開院!', `
+      showModal('🏥 グループ病院、開院', `
         <p>回復期リハ病棟 <b>60床</b> の病院が開院しました。クリニック群で外来を受け、病院で入院リハを受ける — <b>地域完結型のグループ</b>の完成形へ。</p>
         <div class="pnl-row"><span>回復期リハ病棟入院料1</span><b>2,229点/日 × 稼働病床</b></div>
         <div class="pnl-row"><span>稼働の上限</span><b>min(病床, PT×6床, 病棟看護×5床)</b></div>
@@ -3907,7 +3909,7 @@
       if (G.money < HOSP_EXPAND_COST) { toast(`資金が足りません(${yen(HOSP_EXPAND_COST)})`); return; }
       G.money -= HOSP_EXPAND_COST;
       G.hospital.beds = 120;
-      toast('🏗 増床! 回復期リハ病棟120床 — 配置(PT・看護)も忘れずに');
+      toast('🏗 増床 — 回復期リハ病棟120床。配置(PT・看護)も忘れずに');
       renderCorp(); updateHeader(); save();
     });
     const hn = el.querySelector('[data-hnaika]');
@@ -3916,7 +3918,7 @@
       G.money -= HOSP_NAIKA_COST;
       G.hospital.naika = true;
       G.hospital.internists = Math.max(1, G.hospital.internists);
-      toast('🩺 内科を開設! 整形以外の診療科で外来の裾野が広がります');
+      toast('🩺 内科を開設 — 整形以外の診療科で外来の裾野が広がります');
       renderCorp(); updateHeader(); save();
     });
     const ho = el.querySelector('[data-hope]');
@@ -3925,7 +3927,7 @@
       G.money -= HOSP_OPE_COST;
       G.hospital.ope = true;
       G.hospital.surgeons = Math.max(1, G.hospital.surgeons);
-      toast('🔪 手術センター開設! 人工関節・骨接合の手術が回り始めます');
+      toast('🔪 手術センター開設 — 人工関節・骨接合の手術が回り始めます');
       renderCorp(); updateHeader(); save();
     });
   }
@@ -4249,11 +4251,11 @@
   /* ================= チュートリアル ================= */
 
   const TUTORIAL = [
-    { tab: null, sel: null, text: 'ようこそ! あなたは整形外科クリニックの新オーナー。<b>①1日進める → ②結果を見る → ③1つ改善する</b> — これだけで街いちばん、やがて<b>全国いちばんの医療法人</b>を目指せます。' },
+    { tab: null, sel: null, text: 'ようこそ。あなたは整形外科クリニックの新オーナー。<b>①1日進める → ②結果を見る → ③1つ改善する</b> — これだけで街いちばん、やがて<b>全国いちばんの医療法人</b>を目指せます。' },
     { tab: null, sel: '.hud', text: '<b>資金・評判・認知</b>が経営の体温計。右の <b>⏩1日</b> で1日まるごとスキップもOK。まずは今日1日、患者さんの流れを眺めてみましょう。' },
     { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。「今日やること」にミッション・スタッフからの依頼・詰まりの診断と打ち手が常に出ています。ボタンでその画面へ飛べます。' },
     { tab: 'clinic', sel: '#shopCard', text: '最初に触れるのは<b>受付と椅子</b>。Day 4、Day 8と進むごとに採用・リハ・大型投資・分院…と打ち手がどんどん解放されます。' },
-    { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。それでは初日の診療、スタートです!' }
+    { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。それでは初日の診療、スタートです。' }
   ];
   let tutIdx = -1;
 
@@ -4273,7 +4275,7 @@
         setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
       }
     }
-    $('tutNext').textContent = tutIdx === TUTORIAL.length - 1 ? '経営を始める!' : '次へ →';
+    $('tutNext').textContent = tutIdx === TUTORIAL.length - 1 ? '経営を始める' : '次へ →';
   }
   function endTutorial() {
     tutIdx = -1;
@@ -4360,7 +4362,7 @@
         updateSpeedButtons();
         setSpeed(v, b);
         $('modal').classList.remove('show');
-        toast(`⏳ 倍速×${G.speedPass.tier}パス発動! ${passRemainText()}`);
+        toast(`⏳ 倍速×${G.speedPass.tier}パス発動 — ${passRemainText()}`);
         updateHeader(); save();
       });
     });
@@ -4682,7 +4684,7 @@
   if (prestigeApplied) {
     save();
     const lg = prestigeApplied.legacy;
-    showModal(`🏛 ${prestigeApplied.count + 1}周目スタート!`, `
+    showModal(`🏛 ${prestigeApplied.count + 1}周目スタート`, `
       <p>殿堂入りおめでとうございます。実績連動ボーナスを適用して、新しい経営を始めます。</p>
       <div class="pnl-row"><span>開始資金</span><b>${yen(lg.money)}</b></div>
       <div class="pnl-row"><span>初期評判 / 初期認知</span><b>${lg.rep} / ${Math.round(lg.aw * 100)}%</b></div>
