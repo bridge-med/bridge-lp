@@ -48,11 +48,11 @@ const TOWN = (() => {
   // 住宅(認知が広がる対象)。weight = 世帯数の重み
   const HOUSES = [
     { x: 1, y: 15, weight: 1 }, { x: 3, y: 15, weight: 1 }, { x: 5, y: 15, weight: 1 },
-    { x: 7, y: 15, weight: 1 }, { x: 9, y: 15, weight: 1 }, { x: 11, y: 15, weight: 1 },
+    { x: 7, y: 15, weight: 1 }, { x: 9, y: 15, weight: 1 }, { x: 24, y: 15, weight: 1 },
     { x: 13, y: 15, weight: 1 }, { x: 18, y: 15, weight: 1 }, { x: 20, y: 15, weight: 1 },
     { x: 22, y: 15, weight: 1 },
-    { x: 15, y: 15, weight: 6, mansion: true },   // マンション
-    { x: 21, y: 5, weight: 1 }, { x: 21, y: 3, weight: 1 },
+    { x: 15, y: 15, weight: 6, mansion: true },   // マンション(足元2x1)
+    { x: 19, y: 3, weight: 1 }, { x: 21, y: 3, weight: 1 },
     { x: 6, y: 3, weight: 1 }, { x: 6, y: 5, weight: 1 }, { x: 14, y: 3, weight: 1 },
     // 南の新しい住宅街
     { x: 1, y: 17, weight: 1 }, { x: 3, y: 17, weight: 1 }, { x: 8, y: 17, weight: 1 },
@@ -65,7 +65,7 @@ const TOWN = (() => {
   const TOTAL_HOUSEHOLDS = HOUSES.reduce((a, h) => a + h.weight, 0); // 35
 
   const TREES = [
-    { x: 5, y: 1 }, { x: 13, y: 1 }, { x: 22, y: 1 }, { x: 17, y: 7 },
+    { x: 5, y: 1 }, { x: 13, y: 1 }, { x: 24, y: 2 }, { x: 17, y: 7 },
     { x: 2, y: 12 }, { x: 10, y: 12 }, { x: 14, y: 11 }, { x: 17, y: 12 },
     { x: 16, y: 17 }, { x: 23, y: 5 }, { x: 24, y: 12 }, { x: 29, y: 18 },
     { x: 5, y: 19 }, { x: 12, y: 18 }, { x: 18, y: 19 }, { x: 24, y: 4 }, { x: 22, y: 19 }
@@ -338,7 +338,7 @@ const TOWN = (() => {
       // 住宅
       HOUSES.forEach((h, i) => {
         const aware = this.isAware(i);
-        const w = h.mansion ? 2 : 1, d = h.mansion ? 2 : 1, hh = h.mansion ? 2.4 : 0.9;
+        const w = h.mansion ? 2 : 1, d = 1, hh = h.mansion ? 2.4 : 0.9;
         items.push({
           depth: h.x + w / 2 + h.y + d / 2,
           draw: () => {
