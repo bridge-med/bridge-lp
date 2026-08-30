@@ -3,10 +3,13 @@
  * そのまま収益に出る(判定は全てREIMB経由。ここに点数を書かない)。
  *
  * 制度とゲームの分離:
- *  - 制度上の事実(点数・月1回制限・(I)の検査等包括・(I)→(II)の6月窓)はKB+エンジンが判定
+ *  - 制度上の事実(点数・月1回制限・(I)の検査等包括・(I)→(II)の6月窓)はKB+エンジンが判定。
+ *    検体検査パネル(採血・血算・生化学まるめ・判断料・dmはHbA1c)もKB登録済み(便I) —
+ *    (I)方針の日はエンジンが包括で却下し、(II)方針では算定される。判断料・HbA1cの
+ *    月1回制限もエンジン判定
  *  - 管理料は初診日には申請しない、(II)算定日は外来管理加算を申請しない、は
  *    未機械化ルール(rule-0003)に対する安全側の運用(ゲーム上の判断であり制度の断定ではない)
- *  - 需要・来院間隔・費用・検査実施率は managementParameters(ゲーム上の仮定) */
+ *  - 需要・来院間隔・費用・検査実施の頻度は managementParameters(ゲーム上の仮定) */
 (function (root) {
   'use strict';
   const M = {
@@ -38,6 +41,12 @@
       tokushori: { itemId: 'r08-F400-n4' }, // 対象疾患の別表がKB未登録のため自動算定しない(unused: 登録後に運用へ)
       ippanmei: { itemId: 'r08-F400-n6-i' },
       joho: { itemId: 'r08-B009-1' },
+      labBlood: { itemId: 'r08-D400-1' },
+      labCbc: { itemId: 'r08-D005-5' },
+      labHba1c: { itemId: 'r08-D005-9' },
+      labChem: { itemId: 'r08-D007-n1-ha' },
+      labJudgeHem: { itemId: 'r08-D026-3' },
+      labJudgeBio: { itemId: 'r08-D026-4' },
     },
     buildProcedures(report) {
       const map = this.reimbursementMappings; const ps = [];
@@ -71,8 +80,7 @@
       acuteBase: 9,             // 急性(単発)外来/日
       revisitDays: [24, 34],    // 継続患者の来院間隔(日)
       acuteXrayProb: 0.3,       // 急性外来で胸部X線に至る率
-      labCost: 600,             // 検体検査の実施原価(¥)
-      labApproxTen: 350,        // 検体検査一式の概算点数(KB未登録のため概算明示。issues #10で置換)
+      labCost: 600,             // 検体検査の実施原価(¥)。点数はKB(D400/D005/D007/D026)が持つ
       costs: { doctorDay: 80000, nurseDay: 18000, clerkDay: 10000, rentDay: 30000, baseDay: 8000, perVisit: 250 },
       referralSources: ['健診センター', '調剤薬局', '地域包括'],
     },
@@ -148,15 +156,18 @@
           api.refer('ophthalmology', 'dm-retino', '糖尿病の定期眼底検査');
         }
 
+        // 検体検査パネルは管理料の月次来院・初診時に実施(実施原価は常に発生)。
+        // 採血+血算+生化学まるめ+判断料2種、dmはHbA1c(月1回)を追加。
+        // (I)方針の日はエンジンが包括で却下する(rule-0002) — レセプトに条文つきで出る
+        const doLab = tryKanriRyo || isFirst;
+        if (doLab) {
+          agg.cost += P.labCost;
+          report.kbActs.push({ id: 'labBlood' }, { id: 'labCbc' }, { id: 'labChem' },
+            { id: 'labJudgeHem' }, { id: 'labJudgeBio' });
+          if (p.pr === 'dm') report.kbActs.push({ id: 'labHba1c' });
+        }
         const r = api.evalVisit(p, report);
         const lines = r.lines.slice();
-        // 検体検査は管理料の月次来院時に実施(実施原価は常に発生)
-        if (tryKanriRyo || isFirst) {
-          agg.cost += P.labCost;
-          const billedI = r.ev.billableItems.some((b) => b.itemId.indexOf('r08-B001-3-1') === 0);
-          if (billedI) lines.push({ n: '検体検査一式 — 生活習慣病管理料(I)に包括', t: 0, incl: 'r08-rule-0002' });
-          else lines.push(api.approx('検体検査一式', P.labApproxTen));
-        }
         p.nv = ctx.day + (p.iv || 28);
         const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
         if (refEye) api.setSample(`継続患者(${prLabel})の月次来院 — 定期眼底検査の紹介`, lines, r.ev, 4);

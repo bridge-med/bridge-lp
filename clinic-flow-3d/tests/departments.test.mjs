@@ -133,7 +133,7 @@ t('180日運用: 収益は全てエンジン点数×10+明示概算のみで構�
   eq(revenue, engineYen + approxYen, '売上=エンジン算定+明示概算(それ以外の収益源が無い)');
 });
 
-t('(II)方針: 患者ごと月1回だけ(II)が算定され、検査は概算計上される', () => {
+t('(II)方針: 患者ごと月1回だけ(II)が算定され、検体検査はKB実点数で算定される(便I)', () => {
   const dept = DEPT.create(INTERNAL, 1);
   dept.policy.keiji = true; dept.fs.push('r08-fs-b001-3');
   dept.policy.kanri = 'II';
@@ -142,10 +142,14 @@ t('(II)方針: 患者ごと月1回だけ(II)が算定され、検査は概算計
   const agg = dept.last;
   ok(dept.pt.some((p) => p.mc['r08-B001-3-3'] === 1 || (p.lb && true)), '算定履歴が残る');
   for (const p of dept.pt) ok(!p.mc['r08-B001-3-3'] || p.mc['r08-B001-3-3'] <= 1, '月2回はいない');
-  ok(agg.approx.some((x) => x.n === '検体検査一式'), '検査は概算として明示');
+  ok(!agg.approx.some((x) => x.n === '検体検査一式'), '検査の概算行は無い(KB実点数化)');
+  ok(agg.byItem['r08-D026-4'] && agg.byItem['r08-D026-4'].n > 0, '生化学的検査(I)判断料が算定されている');
+  ok(agg.byItem['r08-D400-1'] && agg.byItem['r08-D400-1'].n > 0, '血液採取(静脈)が算定されている');
+  for (const p of dept.pt) ok(!p.mc['r08-D026-4'] || p.mc['r08-D026-4'] <= 1, '判断料の月2回はいない(D026注1)');
+  for (const p of dept.pt) ok(!p.mc['r08-D005-9'] || p.mc['r08-D005-9'] <= 1, 'HbA1cの月2回はいない');
 });
 
-t('(I)方針: 検査は包括行(0点)になり概算計上されない', () => {
+t('(I)方針: 検体検査はエンジンが包括で却下し、概算計上もされない(便I)', () => {
   const dept = DEPT.create(INTERNAL, 1);
   dept.policy.keiji = true; dept.fs.push('r08-fs-b001-3');
   dept.policy.kanri = 'I';
@@ -154,8 +158,10 @@ t('(I)方針: 検査は包括行(0点)になり概算計上されない', () => 
   for (let d = 1; d <= 40; d++) agg = DEPT.runDay(INTERNAL, dept, ctx(d, rand));
   const monthlySample = agg.sample;
   ok(monthlySample, '代表レセプトが取れる');
-  ok(monthlySample.lines.some((l) => l.incl === 'r08-rule-0002' && l.t === 0), '包括行がある');
-  ok(!monthlySample.lines.some((l) => (l.n || '').indexOf('検体検査一式(概算)') === 0), '(I)の月次来院レセプトに検査の概算行がない');
+  ok(!agg.approx.some((x) => x.n === '検体検査一式'), '検査の概算行は無い');
+  ok(monthlySample.kb && monthlySample.kb.rejected.some((x) => x.itemId === 'r08-D007-n1-ha'), '代表レセプトに検査の包括却下が出る(rule-0002)');
+  ok(monthlySample.kb && monthlySample.kb.rejected.some((x) => x.itemId === 'r08-D026-4'), '判断料も包括で却下される');
+  ok(!monthlySample.lines.some((l) => l.kb === 'r08-D007-n1-ha'), '(I)の月次レセプトに検査の算定行は無い');
   ok(agg.byItem['r08-B001-3-1-ht'] || agg.byItem['r08-B001-3-1-dm'] || agg.byItem['r08-B001-3-1-lipid'], '(I)が算定されている');
 });
 
