@@ -3606,7 +3606,29 @@
       + (approxYen ? `<div class="kb-cond">ほかに ${yen(approxYen)}(KB未登録・ゲーム上の概算)</div>` : '');
     // 未算定の施設基準は3状態: 要件充足(届出のみ)→導線 / 要件不足→事実のみ / 体制で解けないもの→何も足さない
     const fsStates = DEPT.fsStatus(m, d);
-    const rejRows = ((s.kb && s.kb.rejected) || []).map((x) => {
+    // 同じ条文(ruleId)で却下された項目は1ブロックにまとめ、条文は1回だけ引く
+    // (同じ法令文を何度も読ませない)。施設基準の導線を持つ却下は個別のまま
+    const rejAll = (s.kb && s.kb.rejected) || [];
+    const rejGroups = new Map(); const rejSingles = [];
+    for (const x of rejAll) {
+      const rid = !x.fsInfo && x.rules && x.rules.length === 1 && x.rules[0].quote ? x.rules[0].id : null;
+      if (rid) { if (!rejGroups.has(rid)) rejGroups.set(rid, []); rejGroups.get(rid).push(x); }
+      else rejSingles.push(x);
+    }
+    const rejGrouped = [];
+    for (const xs of rejGroups.values()) {
+      if (xs.length === 1) { rejSingles.push(xs[0]); continue; }
+      const names = xs.map((x) => x.name);
+      const label = names.length > 3 ? `${names.slice(0, 3).join('・')} ほか${names.length - 3}件` : names.join('・');
+      const pts = xs.reduce((a, x) => a + (x.points || 0), 0);
+      const reason = (xs[0].reasons || [])[0] || '';
+      rejGrouped.push(`
+      <div class="kb-reject"><b>${label}</b>(計${pts.toLocaleString()}点) は算定していません
+        ${reason ? `<div class="kb-cond">${reason}</div>` : ''}
+        <div class="kb-quote">「${xs[0].rules[0].quote}」</div>
+      </div>`);
+    }
+    const rejRows = rejSingles.map((x) => {
       let fsLine = '';
       if (x.fsInfo) {
         const st = fsStates.find((f) => f.fsId === x.fsInfo.id);
@@ -3627,7 +3649,7 @@
         ${(x.rules || []).filter((r) => r.quote).map((r) => `<div class="kb-quote">「${r.quote}」</div>`).join('')}
         ${fsLine}
       </div>`;
-    }).join('');
+    }).join('') + rejGrouped.join('');
     const warnRows = playerWarn(s.kb && s.kb.warnings).slice(0, 3)
       .map((w) => `<div class="kb-cond">⚠ ${w.message}</div>`).join('')
       + (G.debugMode ? devWarn(s.kb && s.kb.warnings).map((w) => `<div class="kb-cond">dev: ${w.message}</div>`).join('') : '');

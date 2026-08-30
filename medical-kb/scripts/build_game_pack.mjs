@@ -80,6 +80,8 @@ const MACHINE_HINTS = {
     // 「別に厚生労働大臣が定める検査」の該当項目リストはbilling_rules.json側のmachine
     // (sadamaruKensaItems)からマージされる。リスト未分類の検査カテゴリだけwarning
     reviewCategories: ['検査'] },
+  // 判定は受診単位。制度は月単位(留意B001-3(3)=同月の別日の検査もKB上は包括。ただし別日の
+  // 外来管理加算は算定可)。内科モジュールは検査を(I)算定日にしか出さないため乖離は表に出ない
   'r08-rule-0002': { type: 'included_categories', source: ['r08-B001-3-1-lipid', 'r08-B001-3-1-ht', 'r08-B001-3-1-dm'],
     targetCategories: ['検査', '注射', '病理診断'], targetItemIds: ['r08-A001-n8'] },
   'r08-rule-0004': { type: 'excl_window_months', source: ['r08-B001-3-1-lipid', 'r08-B001-3-1-ht', 'r08-B001-3-1-dm'],

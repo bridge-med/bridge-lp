@@ -283,9 +283,20 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
     facilityStandards: [], history: {},
   });
   ok('検体検査の算定日でも外来管理加算は算定できる(留意A001(7)キ)', billedIds(r).includes('r08-A001-n8'));
-  ok('検体検査5項目すべて算定', ['r08-D400-1', 'r08-D005-5', 'r08-D007-n1-ha', 'r08-D026-3', 'r08-D026-4'].every((id) => billedIds(r).includes(id)));
+  ok('採血+検体検査4項目すべて算定', ['r08-D400-1', 'r08-D005-5', 'r08-D007-n1-ha', 'r08-D026-3', 'r08-D026-4'].every((id) => billedIds(r).includes(id)));
   ok('needs_review警告は出ない(clearedKensaItems)', !r.warnings.some((w) => w.kind === 'needs_review' && w.ruleId === 'r08-rule-0001'));
-  eq('検体検査パネル合計(40+21+103+125+144=433点)', r.billableItems.filter((x) => x.itemId.indexOf('r08-D') === 0).reduce((a, x) => a + x.subtotal, 0), 433);
+  eq('検査パネル合計(採血40+血算21+生化学103+判断料125+144=433点)', r.billableItems.filter((x) => x.itemId.indexOf('r08-D') === 0).reduce((a, x) => a + x.subtotal, 0), 433);
+}
+
+/* 25b. 便I(editor必修2): 超音波検査(D215)は「定める検査」(超音波検査等)=算定日は外来管理加算を却下 */
+{
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n8' }, { itemId: 'r08-D215-2-ro-3' }],
+    facilityStandards: [], history: {},
+  });
+  ok('D215算定日: 外来管理加算は却下(A001注8・超音波検査等)', r.rejectedItems.some((x) => x.itemId === 'r08-A001-n8'));
+  ok('D215自体は算定', billedIds(r).includes('r08-D215-2-ro-3'));
 }
 
 /* 26. 便I: 生活習慣病管理料(I)の算定日は検体検査が包括される(rule-0002) */
