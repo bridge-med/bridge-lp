@@ -118,11 +118,13 @@
     closed: { label: '休診', min: 0, intake: 0, pay: 0, arr: 0 }
   };
 
-  // 実態準拠の算定構造(1点=10円): 初診料291点・再診料75点・外来管理加算52点・処方箋料60点。
-  // 金額は主要項目の概算(教育用に簡略化)。「何もしない再診」には外来管理加算が付く
+  // 実態準拠の算定構造(1点=10円)。KB読込時は下のKBIブロックが上書きする —
+  // ここの値はKB未読込時のフォールバックで、令和8年度KBの合算値に揃えてある(便I掃除。
+  // xray=写真診断43+撮影68+電子画像管理57、mri=撮影1330+断層診断450+電子画像管理120)。
+  // 「何もしない再診」には外来管理加算が付く
   const FEES = {
-    first: 2910, revisit: 750, kanri: 520, presc: 600, rehab: 900, checkup: 8000,
-    treat: 1500, inj: 1800, trig: 1200, physio: 350, xray: 1500, mri: 16000,
+    first: 2910, revisit: 760, kanri: 520, presc: 600, rehab: 900, checkup: 8000,
+    treat: 1500, inj: 1800, trig: 1200, physio: 350, xray: 1680, mri: 19000,
     osteo: 3800, goods: 3500, goodsCogs: 2100, prpCogs: 12000
   };
   const SEG_NAMES = { senior: '高齢者', worker: '勤労者', sports: 'スポーツ' };
@@ -154,7 +156,7 @@
   const REHA_KB_FS = { 1: 'r08-fs-h002-3', 2: 'r08-fs-h002-2', 3: 'r08-fs-h002-1' };
   if (KBI) {
     FEES.first = kbPts('r08-A000', 291) * 10;
-    FEES.revisit = kbPts('r08-A001', 75) * 10;
+    FEES.revisit = kbPts('r08-A001', 76) * 10;
     FEES.kanri = kbPts('r08-A001-n8', 52) * 10;
     FEES.presc = kbPts('r08-F400-3', 60) * 10;
     // 単純X線はフィルムレス運用の前提で電子画像管理加算(通則4-イ)まで一式(便H)
