@@ -366,13 +366,13 @@
     { t: '⑨ 施設基準は経営の土台', b: '運動器リハ(III)=専従1名/(II)=常勤PT2名/(I)=4名+100㎡。要件割れは自主返還・指導のリスク。採用と定着は算定要件そのもの。' },
     { t: '⑩ 分院は専従の壁', b: '施設基準の専従要件は施設ごと。本院のPTを分院に兼務させることはできない。分院展開のボトルネックは資金より採用。' },
     { t: '⑪ 借入は時間を買う道具', b: '金利は「計画の質」で決まる。事業計画なしに銀行は貸さない。返済原資(日次黒字)の目処を先に立てる。' },
-    { t: '⑫ 設備投資は回収期間で決める', b: 'MRI¥1,800万は1日3件×¥19,000=¥57,000の増収なら維持費を引いて回収約1.3年。「欲しい」ではなく「何日で返ってくるか」で判断する。' },
+    { t: '⑫ 設備投資は回収期間で決める', b: 'MRI¥1,800万は1日3件×¥19,000=¥57,000の増収。維持費¥12,000/日を引いた¥45,000で割ると回収は400診療日 — 月27診療日なら約15か月。「欲しい」ではなく「何日で返ってくるか」で判断する。' },
     { t: '⑬ KPIは絞って毎日見る', b: '指標を20個並べたダッシュボードは誰も見ない。日次は3〜4個(来院数・新患・単価・実施率など)に絞り、週次で構造(単価分解・継続率)、月次で計画差異を見る。' },
     { t: '⑭ 診療時間は採算で決める', b: '日曜開院は手当1.4倍でも競合が閉まっている分だけ新患が増える。半日診療は人件費6割。1コマごとの採算を見て開けるコマを決める。' },
     { t: '⑮ 自費は価値設計から', b: 'PRPもAGAも「保険でできないこと」への対価。価格は原価ではなく価値と価格弾力性で決める。評判が低いうちは売れない — 保険診療の信頼が自費の土台。' },
     { t: '⑯ 外来管理加算のトレードオフ', b: '再診で処置・リハ・物療・トリガー注射(麻酔)を行わなければ外来管理加算(52点)が付く。実は関節腔内注射(第6部注射)は加算を妨げない — A001注8が列挙するのは検査の一部・リハ・精神科専門療法・処置・手術・麻酔・放射線治療で、注射は含まれないから。制度の条文を正確に読むと収益構造の見え方が変わる。' },
     { t: '⑰ 客層(セグメント)から逆算する', b: '高齢者=リハ・骨粗鬆症・定着率◎。勤労者=健診・AGA・土日夜間。スポーツ=外傷・MRI・PRP・単価◎。チャネル(ケアマネ/企業/クラブ/学校)ごとに来る客層は違う — 「誰に来てほしいか」から営業先と広告を選ぶ。' },
-    { t: '⑱ 1点=10円、加算は「仕組み」で積む', b: '保険診療の価格は点数制(1点=10円)で全国一律 — だから勝負は「何を適切に算定できる体制か」。明細書発行体制等加算(1点)・時間外対応体制加算(2〜7点)は、体制づくりと届出だけで再診のたびに積み上がる。月1,000再診なら1点=月1万円。' },
+    { t: '⑱ 1点=10円、加算は「仕組み」で積む', b: '保険診療の価格は点数制(1点=10円)で全国一律 — だから勝負は「何を適切に算定できる体制か」。明細書発行体制等加算(1点・届出不要)・時間外対応体制加算(2〜7点・様式2で届出)は、体制を整えれば再診のたびに積み上がる。月1,000再診なら1点=月1万円。' },
     { t: '⑲ 外来と入院は別のゲーム', b: '外来の売上は「患者が来た日」だけ。入院は「病床が埋まっている毎日」が売上になる(回復期リハ病棟入院料1=2,229点/日×稼働病床)。そのかわり配置基準(PT・看護師の人数)を割れば病床は使えない — 入院経営は採用・定着・稼働率の三位一体。' },
     { t: '⑳ 制度は2年ごとに動く(診療報酬改定)', b: '保険診療の価格は国が2年に一度改定する。下がる項目を嘆くのではなく、上がった項目・新設された加算に体制を寄せるのが改定対応。「一つの算定に依存しない収益の複線化」が、ルール変更に強い経営を作る。' }
   ];
@@ -389,7 +389,7 @@
     { id: 'wait', name: '平均待ち時間', unit: '分', why: '患者体験の代表値。15分を超えたら回転設計を見直す', calc: (h) => Math.round(h.avgWait || 0) },
     { id: 'jihiDay', name: '自費売上/日', unit: '円', why: '価格決定権のある売上。評判との相関を見る', calc: (h) => h.jihi || 0 },
     { id: 'labor', name: '人件費率', unit: '%', why: '目安45〜55%。売上が伸びる前に人を増やすと悪化する', calc: (h) => h.revenue ? Math.round((h.staffCost || 0) / h.revenue * 100) : 0 },
-    { id: 'mriN', name: 'MRI件数/日', unit: '件', why: '¥1,800万の投資回収を左右する。1日3件で維持費込み回収約1.3年', calc: (h) => h.mriCount || 0 },
+    { id: 'mriN', name: 'MRI件数/日', unit: '件', why: '¥1,800万の投資回収を左右する。1日3件なら維持費込みで400診療日(約15か月)', calc: (h) => h.mriCount || 0 },
     { id: 'profit', name: '法人損益/日', unit: '円', why: '最後はここ。ただし日次のブレに一喜一憂しないこと', calc: (h) => (h.profit || 0) + (h.brProfit || 0) }
   ];
 
@@ -844,7 +844,7 @@
           rc.push({ n: 'コンピューター断層診断', t: kbPts('r08-E203', 450), kb: 'r08-E203' });
           rc.push({ n: '電子画像管理加算(CT・MRI)', t: kbPts('r08-E-denshi-ct', 120), kb: 'r08-E-denshi-ct' });
         } else {
-          rc.push({ n: 'MRI撮影(1.5T)+コンピュータ断層診断', t: FEES.mri / 10 });
+          rc.push({ n: 'MRI撮影+コンピューター断層診断', t: FEES.mri / 10 });
         }
       }
       // 骨粗鬆症プログラム(DEXA): 高齢初診の一部が継続診療に乗る
@@ -1840,13 +1840,15 @@
   // 院外処方の当院は対象外)のため届出メニューから外した(便H)
   const KASAN = [
     { id: 'meisai', name: '明細書発行体制等加算', ten: '再診ごと+1点', cost: 0,
-      req: '明細書の無料発行+院内掲示(基準を満たせば届出不要)', hint: '月1,000再診なら+1万円。体制を整えるだけで取れる加算の代表',
+      req: '電子レセプト請求+明細書の無料発行+院内掲示(基準を満たせば届出不要)', hint: '月1,000再診なら+1万円。体制を整えるだけで取れる加算の代表',
+      verb: '体制を整える', doneLabel: '体制あり',
       done: () => settings.kasanMeisai, ok: () => true, apply: () => { settings.kasanMeisai = true; } },
     { id: 'jikangai3', name: '時間外対応体制加算3', ten: '再診ごと+4点', cost: 50000,
       req: '標榜時間外の夜間の数時間の電話対応体制(様式2で届出)', hint: 'かかりつけ機能の入口。患者の安心=再診の定着にも効く',
       done: () => settings.kasanJikangai >= 1, ok: () => settings.kasanJikangai === 0, apply: () => { settings.kasanJikangai = 1; } },
     { id: 'jikangai1', name: '時間外対応体制加算1', ten: '再診ごと+7点', cost: 150000,
-      req: '受付2名以上+常時対応体制(加算3から段階を上げる)', hint: '常時対応の体制強化で同じ再診から加算が7点に',
+      req: '常時の電話等対応体制(常勤職員等・コールバック体制/様式2で届出)', gameReq: '受付2名以上(加算3から段階を上げる)',
+      hint: '常時対応の体制強化で同じ再診から加算が7点に',
       done: () => settings.kasanJikangai === 2, ok: () => settings.kasanJikangai === 1 && settings.receptionists >= 2, apply: () => { settings.kasanJikangai = 2; } }
   ];
 
@@ -2311,9 +2313,9 @@
     { q: '関節腔内注射では、手技料とは別に使用した薬剤の薬剤料も算定できる', a: true,
       exp: '注射の手技料と薬剤料は別建て。ヒアルロン酸などの薬剤料が加わって1回の算定額になる。' },
     { q: '院外処方の診療所でも、後発医薬品の使用体制を整えれば「外来後発医薬品使用体制加算」を算定できる', a: false,
-      exp: '令和8年度改定で廃止・再編。院内処方向けの「地域支援・外来医薬品供給対応体制加算」(処方料の加算)に変わり、院外処方の処方箋料には同種の加算はない。' },
+      exp: '令和8年度に「外来後発医薬品使用体制加算」はなく、院内処方向けの「地域支援・外来医薬品供給対応体制加算」(処方料の加算・8/7/5点)に再編されている。院外処方の診療所が後発を後押しして取れるのは、処方箋料の一般名処方加算1(8点)・2(6点)のほう。' },
     { q: '時間外対応体制加算は、体制の区分によって2点から7点まで点数が分かれている', a: true,
-      exp: '常時対応(1=7点)から連携当番(4=2点)まで4区分。令和8年度改定で「時間外対応加算」から改称・再編された。' }
+      exp: '常時対応(1=7点)から連携当番(4=2点)まで4区分。届出制(様式2)で、区分ごとに求められる対応体制が異なる。' }
   ];
 
   function pickQuiz(dateStr) {
@@ -2930,7 +2932,7 @@
       </div>` : `
       <div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
-        <span class="shop-hint">MRI検査 1件1,900点=¥19,000(撮影+断層診断+電子画像管理・1日最大8件)。維持費¥12,000/日。導入時に施設基準(様式37)の届出まで整える前提</span>
+        <span class="shop-hint">MRI検査 1件1,900点=¥19,000(撮影1,330+断層診断450+電子画像管理120)。断層診断450点は同一患者・同一月に1回だけ。維持費¥12,000/日・1日最大8件はゲーム上の設定。導入時に施設基準(様式37)の届出まで整える前提</span>
         ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('advisor', 'normal', 17)} 白瀬「${STAFF_UI.STAFF.advisor.invest.mri}」</span>` : ''}</div>
         ${settings.mri ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="mriBtn">🧲 ${yen(MRI_COST)}</button></div>`}
       </div>
@@ -4218,13 +4220,13 @@
         ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
     }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。※届出→即日適用はゲーム上の簡略化(実制度では届出受理・月初適用等の手続きがある)。制度上の要件全文はレシートの学習モード・medical-kbを参照。</p>`
-      + `<h3 class="sub-title">📮 その他の届出・加算 <small>— 1点=10円。小さくても「仕組み」で毎回積み上がる(点数は令和8年度KBに同期)</small></h3>`
+      + `<h3 class="sub-title">📮 その他の体制・届出 <small>— 1点=10円。小さくても「仕組み」で毎回積み上がる(点数は令和8年度KBに同期)</small></h3>`
       + KASAN.map((k) => {
         const done = k.done();
         const can = !done && k.ok();
         return `<div class="kijun-row ${done ? 'ok' : ''}">
-          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}<br>${k.hint}</small></div>
-          ${done ? '<span class="kijun-badge">届出済</span>' : `<button class="mini-btn ${can ? 'plus' : ''}" data-kasan="${k.id}" ${can ? '' : 'disabled'}>届け出る${k.cost ? ` ${yen(k.cost)}` : '(無料)'}</button>`}
+          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}<br>${k.hint}</small></div>
+          ${done ? `<span class="kijun-badge">${k.doneLabel || '届出済'}</span>` : `<button class="mini-btn ${can ? 'plus' : ''}" data-kasan="${k.id}" ${can ? '' : 'disabled'}>${k.verb || '届け出る'}${k.cost ? ` ${yen(k.cost)}` : '(無料)'}</button>`}
         </div>`;
       }).join('');
     $('kijunBody').querySelectorAll('[data-kijun]').forEach((b) => b.addEventListener('click', () => {
@@ -4746,7 +4748,7 @@
         if (a.type === 'first' && Math.random() < 0.7) { rev += FEES.xray; T.rev.img += FEES.xray; T.xrayCount++; acc(T, '単純X線撮影(写真診断+デジタル撮影+電子画像管理)', FEES.xray / 10); }
         if (settings.echo && a.type === 'first' && Math.random() < (seg === 'sports' ? 0.45 : 0.3)) { const pe = kbPts('r08-D215-2-ro-3', 350); rev += pe * 10; T.rev.img += pe * 10; acc(T, '超音波検査(運動器エコー)', pe); }
         const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
-        if (settings.mri && T.mriCount < 8 && (a.type === 'first' || a.refer) && Math.random() < 0.3 * mriMul) { rev += FEES.mri; T.rev.img += FEES.mri; T.mriCount++; acc(T, 'MRI撮影(1.5T以上3T未満)+断層診断+電子画像管理', FEES.mri / 10); }
+        if (settings.mri && T.mriCount < 8 && (a.type === 'first' || a.refer) && Math.random() < 0.3 * mriMul) { rev += FEES.mri; T.rev.img += FEES.mri; T.mriCount++; acc(T, 'MRI撮影(1.5テスラ以上3テスラ未満)+断層診断+電子画像管理', FEES.mri / 10); }
         if (settings.dexa && a.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
         if (didReha && settings.selfReha) {
           const pJ = clamp((G.rep - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
