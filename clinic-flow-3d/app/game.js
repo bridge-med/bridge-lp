@@ -3397,8 +3397,8 @@
       return `<span class="kijun-badge off wrap">${name} 未(${st.missing.join('・')})</span>`;
     }).join(' ');
     const staffRows = (m.staffDef || []).map(([key, label, min, max, cost]) => `
-      <div class="plan-step"><span>${label} <small>最大${max}</small></span>
-        <div><button class="mini-btn" data-dfire="${m.id}:${key}">−</button><b>${d.staff[key] || 0}</b><button class="mini-btn plus" data-dhire="${m.id}:${key}">＋ ${yen(cost)}</button></div>
+      <div class="plan-step"><span>${label} <small>最大${max}・採用 ${yen(cost)}</small></span>
+        <div><button class="mini-btn" data-dfire="${m.id}:${key}">−</button><b>${d.staff[key] || 0}</b><button class="mini-btn plus" data-dhire="${m.id}:${key}">＋</button></div>
       </div>`).join('');
     const info = L && L.info ? L.info : null;
     const statTxt = info
