@@ -158,9 +158,11 @@
           src.reasons.push(`同日に${names.join('・')}を実施しているため算定不可(${rule.id})`);
           src.ruleRefs.push(rule);
         } else if (m.reviewCategories) {
-          // 別表の機械リストに無い同カテゴリ項目だけは判定せず注意喚起(将来の新規登録の安全網)
+          // 別表の機械リストに無い同カテゴリ項目だけは判定せず注意喚起(将来の新規登録の安全網)。
+          // clearedKensaItems=別表外と一次資料で確認済みの項目(検体検査等)は安全網からも除外
           const listed = new Set(m.sadamaruKensaItems || []);
-          const revHits = known.filter((r) => r !== src && r.status === 'candidate' && inCat(r, m.reviewCategories) && !listed.has(r.item.id));
+          const cleared = new Set(m.clearedKensaItems || []);
+          const revHits = known.filter((r) => r !== src && r.status === 'candidate' && inCat(r, m.reviewCategories) && !listed.has(r.item.id) && !cleared.has(r.item.id));
           if (revHits.length) {
             out.warnings.push({ kind: 'needs_review', ruleId: rule.id, itemId: src.item.id,
               message: `${src.item.name}: 同日の${revHits.map((x) => x.item.name).join('・')}が「厚生労働大臣が定める検査」に該当する場合は算定不可 — 別表リスト未分類のため要確認(needs_review)` });

@@ -274,5 +274,43 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   eq('超音波(四肢・体表等)=350点', pts('r08-D215-2-ro-3'), 350);
 }
 
+/* 25. 便I: 検体検査は「定める検査」(生体検査料8区分)の対象外 — 外来管理加算を妨げず、警告も出ない */
+{
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n8' }, { itemId: 'r08-D400-1' },
+      { itemId: 'r08-D005-5' }, { itemId: 'r08-D007-n1-ha' }, { itemId: 'r08-D026-3' }, { itemId: 'r08-D026-4' }],
+    facilityStandards: [], history: {},
+  });
+  ok('検体検査の算定日でも外来管理加算は算定できる(留意A001(7)キ)', billedIds(r).includes('r08-A001-n8'));
+  ok('検体検査5項目すべて算定', ['r08-D400-1', 'r08-D005-5', 'r08-D007-n1-ha', 'r08-D026-3', 'r08-D026-4'].every((id) => billedIds(r).includes(id)));
+  ok('needs_review警告は出ない(clearedKensaItems)', !r.warnings.some((w) => w.kind === 'needs_review' && w.ruleId === 'r08-rule-0001'));
+  eq('検体検査パネル合計(40+21+103+125+144=433点)', r.billableItems.filter((x) => x.itemId.indexOf('r08-D') === 0).reduce((a, x) => a + x.subtotal, 0), 433);
+}
+
+/* 26. 便I: 生活習慣病管理料(I)の算定日は検体検査が包括される(rule-0002) */
+{
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-B001-3-1-dm' }, { itemId: 'r08-D005-9' },
+      { itemId: 'r08-D007-n1-ha' }, { itemId: 'r08-D026-4' }],
+    facilityStandards: ['r08-fs-b001-3'], history: {},
+  });
+  ok('(I)算定日: HbA1cは包括で却下', r.rejectedItems.some((x) => x.itemId === 'r08-D005-9'));
+  ok('(I)算定日: 血液化学(まるめ)は包括で却下', r.rejectedItems.some((x) => x.itemId === 'r08-D007-n1-ha'));
+  ok('(I)算定日: 判断料も包括で却下', r.rejectedItems.some((x) => x.itemId === 'r08-D026-4'));
+  ok('(I)自体は算定', billedIds(r).includes('r08-B001-3-1-dm'));
+}
+
+/* 27. 便I: 判断料・HbA1cの月1回制限(告示D026注1・算定回数テーブル) */
+{
+  const r = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-D026-3' }, { itemId: 'r08-D005-9' }],
+    facilityStandards: [], history: { month: { 'r08-D026-3': 1, 'r08-D005-9': 1 } },
+  });
+  ok('血液学的検査判断料: 同月2回目は却下', r.rejectedItems.some((x) => x.itemId === 'r08-D026-3'));
+  ok('HbA1c: 同月2回目は却下', r.rejectedItems.some((x) => x.itemId === 'r08-D005-9'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

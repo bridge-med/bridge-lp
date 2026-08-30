@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-30T12:17:36.496Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-30T12:32:30.592Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-30T12:17:36.496Z",
+ "generated_at": "2026-08-30T12:32:30.592Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -2910,6 +2910,216 @@
      "note": "エックス線診断料通則4。マスター突合: 170000210=57点・単位「一連」上限1で一致"
     }
    ]
+  },
+  {
+   "id": "r08-D400-1",
+   "code": "160095710",
+   "kubun": "D400-1",
+   "name": "血液採取(静脈)",
+   "shortName": "血液採取(静脈)",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 40,
+   "unit": "1日につき(算定回数テーブル: 日・上限1)",
+   "conditions": "入院中の患者以外の患者についてのみ算定(告示D400注1)。血液回路から採血した場合は算定しない(注3・透析中の採血が該当)。6歳未満は乳幼児加算35点",
+   "exclusions": null,
+   "countLimitText": "1日につき(告示D400・算定回数テーブル: 日・上限1)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "day",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.210",
+     "quote": "D400 血液採取(1日につき) 1 静脈 40点 注1 入院中の患者以外の患者についてのみ算定する。",
+     "note": "マスター突合: 160095710=40点・単位「日」上限1で一致。注3「血液回路から採血した場合は算定しない」=透析部門が採血を算定しない根拠"
+    }
+   ]
+  },
+  {
+   "id": "r08-D005-5",
+   "code": "160008010",
+   "kubun": "D005-5",
+   "name": "末梢血液一般検査",
+   "shortName": "末梢血液一般",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 21,
+   "unit": "1回につき",
+   "conditions": "血液形態・機能検査(告示D005-5)。赤血球数・白血球数・血色素測定・ヘマトクリット・血小板数等の基本セット。回数制限の定めなし(電子点数表の算定回数テーブルに非収載=否定的確認)。判断料は血液学的検査判断料(D026-3)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.175",
+     "quote": "5 末梢血液一般検査 21点",
+     "note": "マスター突合: 160008010=21点で一致。算定回数テーブル非収載(回数制限の定めなし=否定的確認)"
+    }
+   ]
+  },
+  {
+   "id": "r08-D005-9",
+   "code": "160010010",
+   "kubun": "D005-9",
+   "name": "ヘモグロビンA1c(HbA1c)",
+   "shortName": "HbA1c",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 49,
+   "unit": "1回につき(算定回数テーブル: 月・上限1)",
+   "conditions": "血液形態・機能検査(告示D005-9)。糖尿病の血糖コントロール指標。判断料は血液学的検査判断料(D026-3)",
+   "exclusions": null,
+   "countLimitText": "月1回(算定回数テーブル: 月・上限1)。グリコアルブミン・1,5-AGとは同一月併算定不可(電子点数表same_month背反=rule-0017)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.175",
+     "quote": "9 ヘモグロビンA1c(HbA1c) 49点",
+     "note": "マスター突合: 160010010=49点・単位「月」上限1で一致。same_month背反: グリコアルブミン(160151050)・160142350(=rule-0017)"
+    }
+   ]
+  },
+  {
+   "id": "r08-D007-n1-ha",
+   "code": null,
+   "kubun": "D007注-ハ",
+   "name": "血液化学検査(まるめ・10項目以上)",
+   "shortName": "血液化学検査(10項目以上)",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 103,
+   "unit": "1回につき(注のまるめ点数)",
+   "conditions": "患者から1回に採取した血液でD007の1から8までの検査を5項目以上行った場合、項目数に応じたまるめ点数で算定(告示D007注: 5〜7項目93点/8〜9項目99点/10項目以上103点)。医科マスターにまるめの集約コードは無く、レセプトには個別項目コード(グルコース160019410=11点等)を記載して電算処理でまるめる(否定的確認)。入院時初回加算20点は入院のみ。判断料は生化学的検査(I)判断料(D026-4)",
+   "exclusions": "生活習慣病管理料(I)算定時は包括(rule-0002)",
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.181",
+     "quote": "注 患者から1回に採取した血液を用いて本区分の1から8までに掲げる検査を5項目以上行った場合は、所定点数にかかわらず、検査の項目数に応じて次に掲げる点数により算定する。イ 5項目以上7項目以下 93点 ロ 8項目又は9項目 99点 ハ 10項目以上 103点",
+     "note": "【まるめのマスター確認】医科マスターに項目数まるめの集約コードは存在しない(「血液化学検査」で引けるのは入院時初回加算160161510のみ=否定的確認)。個別項目(グルコース160019410=11点・クレアチニン160019210=11点・HDL160023410=17点・LDL160167250=18点・中性脂肪160020910=11点等)は実在し、まるめは電算処理。KBは告示注のハ(10項目以上103点)をセルとして登録"
+    }
+   ]
+  },
+  {
+   "id": "r08-D026-3",
+   "code": "160061810",
+   "kubun": "D026-3",
+   "name": "血液学的検査判断料",
+   "shortName": "血液学的検査判断料",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 125,
+   "unit": "月1回(算定回数テーブル: 月・上限1)",
+   "conditions": "血液学的検査(D005等)を行った場合の判断料(告示D026-3)。検体検査管理加算(I)40点等は届出制",
+   "exclusions": null,
+   "countLimitText": "該当する検体検査の種類・回数にかかわらず月1回(告示D026注1・算定回数テーブル: 月・上限1)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.192",
+     "quote": "3 血液学的検査判断料 125点 ...注1 検体検査判断料は該当する検体検査の種類又は回数にかかわらずそれぞれ月1回に限り算定できるものとする。",
+     "note": "マスター突合: 160061810=125点・単位「月」上限1で一致。月1回はpackのLIMITSで機械化"
+    }
+   ]
+  },
+  {
+   "id": "r08-D026-4",
+   "code": "160061910",
+   "kubun": "D026-4",
+   "name": "生化学的検査(I)判断料",
+   "shortName": "生化学的検査(I)判断料",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 144,
+   "unit": "月1回(算定回数テーブル: 月・上限1)",
+   "conditions": "生化学的検査(I)(D007等)を行った場合の判断料(告示D026-4)。マスター名は「生化学的検査（１）判断料」",
+   "exclusions": null,
+   "countLimitText": "該当する検体検査の種類・回数にかかわらず月1回(告示D026注1・算定回数テーブル: 月・上限1)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.192",
+     "quote": "4 生化学的検査(I)判断料 144点",
+     "note": "マスター突合: 160061910(生化学的検査（１）判断料)=144点・単位「月」上限1で一致。月1回はpackのLIMITSで機械化"
+    }
+   ]
   }
  ],
  "facilityStandards": [
@@ -3339,7 +3549,16 @@
      "r08-D265",
      "r08-D269-2"
     ],
-    "sadamaruKensaNote": "A001注8の「厚生労働大臣が定める検査」=生体検査料のうち超音波検査等・脳波検査等・神経・筋検査・耳鼻咽喉科学的検査・眼科学的検査・負荷試験等・ラジオアイソトープを用いた諸検査・内視鏡検査(留意A001(7)キ・p.13-14)。KB登録済みの該当項目を列挙。検査カテゴリで本リストに無い項目はneeds_reviewのまま"
+    "sadamaruKensaNote": "A001注8の「厚生労働大臣が定める検査」=生体検査料のうち超音波検査等・脳波検査等・神経・筋検査・耳鼻咽喉科学的検査・眼科学的検査・負荷試験等・ラジオアイソトープを用いた諸検査・内視鏡検査(留意A001(7)キ・p.13-14)。KB登録済みの該当項目を列挙。検査カテゴリで本リストに無い項目はneeds_reviewのまま",
+    "clearedKensaItems": [
+     "r08-D400-1",
+     "r08-D005-5",
+     "r08-D005-9",
+     "r08-D007-n1-ha",
+     "r08-D026-3",
+     "r08-D026-4"
+    ],
+    "clearedKensaNote": "「定める検査」は第3部第3節生体検査料のうち8区分に限られる(留意A001(7)キ)。第1節検体検査料・第4節診断穿刺検体採取料の本リスト項目は別表外と確認済み=外来管理加算を妨げない(needs_review対象から除外)"
    }
   },
   {
@@ -3630,6 +3849,22 @@
    "machine": {
     "type": "handled_externally",
     "note": "電子的診療情報連携体制整備加算はゲーム未実装・KB未登録のため判定対象なし(登録時にsame_day_ng_itemsへ昇格)"
+   }
+  },
+  {
+   "id": "r08-rule-0017",
+   "source": "r08-D005-9",
+   "target": "グリコアルブミン(160151050)・1,5-AG(160142350)(いずれも未登録)",
+   "type": "same_month_ng",
+   "condition": "HbA1cとグリコアルブミン・1,5-アンヒドロ-D-グルシトール(1,5-AG)は同一月に併算定できない(電子点数表same_month背反)。相手項目はKB未登録",
+   "period": "same_month",
+   "bidirectional": 1,
+   "doc": "r08-ssk-edt-ika",
+   "page": "背反テーブル(same_month)",
+   "quote": null,
+   "machine": {
+    "type": "handled_externally",
+    "note": "内科モジュールは血糖コントロール指標をHbA1cのみで運用(グリコアルブミン等を発行しない)ため判定対象なし。登録時にsame_month機械化へ昇格"
    }
   }
  ]
