@@ -555,7 +555,8 @@
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
           specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
-          regulars: (G.regulars || []).slice(-80), personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30)
+          regulars: (G.regulars || []).slice(-80), personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30),
+          med: G.med, referLog: (G.referLog || []).slice(-120), referSeen: G.referSeen, handoverLog: (G.handoverLog || []).slice(-30)
         }
       }));
     } catch (e) { /* noop */ }
