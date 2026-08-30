@@ -434,6 +434,7 @@
     lastStage: 1, blackStreak: 0,
     coins: 2, boosts: {}, deco: {}, achDone: [],
     stats: { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: 0, gradu: 0 },
+    med: { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 }, // 医療(適切な算定)スコアの月内トラッカー
     clinicName: 'あなたのクリニック',
     daily: { last: '', streak: 0, chDone: '', chState: '', chDay: '', lastClearChar: '', chain: 0 },
     prestige: { count: 0, legacy: null },
@@ -602,6 +603,8 @@
       if (!G.bonds) G.bonds = { front: 0, doctor: 0, nurse: 0, reha: 0, billing: 0, advisor: 0 };
       if (G.daily.chState === undefined) Object.assign(G.daily, { chState: '', chDay: '', lastClearChar: '', chain: 0 });
       if (G.daily.quizDone === undefined) G.daily.quizDone = '';
+      // v41: 医療(適切な算定)スコアの月内トラッカーの補完
+      if (!G.med) G.med = { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 };
       if (d.g.speedUnlocked) {
         const OLD_PRICE = { 8: 12, 16: 25, 32: 50 };
         let refund = 0;
@@ -769,6 +772,7 @@
             rc.push({ n: b.name, t: b.subtotal, kb: b.itemId });
           }
         }
+        if (G.med && devWarn(kbEval.warnings).length) T._medWarn = true;
       } else {
         // フォールバック(KB未読込でもゲームは止めない): 従来の簡略ロジック
         if ((report.type === 'revisit' || report.type === 'rehab') && !didProcedure) {
@@ -1238,7 +1242,8 @@
         const r = DEPT.runDay(mod, G.depts[id], dctx);
         T.brRevenue += r.revenue;
         T.brProfit += r.profit;
-        for (const ev of r.events) if (ev.kind === 'fs_broken') toast(`⚠️ ${mod.name}部門: ${ev.message}`);
+        for (const ev of r.events) if (ev.kind === 'fs_broken') { toast(`⚠️ ${mod.name}部門: ${ev.message}`); if (G.med) G.med.fsBroken++; }
+        if (G.med && devWarn(r.warnings).length) T._medWarn = true;
       }
     }
     if (G.kaitei && G.kaitei.count > 0 && T.brRevenue) {
@@ -1247,6 +1252,9 @@
       const badj = Math.round(T.brRevenue * (avg - 1));
       if (badj) { T.brRevenue += badj; T.brProfit += badj; }
     }
+
+    // 医療スコアの月内トラッカー: 診療日のうちKB整備メモ(needs_review系)が出た日を数える
+    if (G.med && T.patients > 0) { G.med.days++; if (T._medWarn) G.med.warnDays++; }
 
     G.money += T.profit + T.brProfit;
     G.cum.revenue += T.revenue + T.brRevenue;
@@ -2229,6 +2237,7 @@
       if (G.daily.quizDone === today) return;
       const ok = ans === q.a;
       G.daily.quizDone = today;
+      if (G.med) { G.med.quizTotal++; if (ok) G.med.quizOk++; }
       if (ok) { G.coins += 1; SND.coin(); } else { SND.buzz(); }
       const res = $('quizResult');
       if (res) res.innerHTML = `<div class="rs-bottle ${ok ? '' : 'rs-balk'}"><b>${ok ? '⭕ 正解。🪙+1' : `❌ 不正解…(正解は${q.a ? '⭕' : '❌'})`}</b><br><small>📖 ${q.exp}</small></div>`;
@@ -2432,12 +2441,27 @@
       const rate = monthRevenueAll() / G.plan.revenue;
       planHtml = `<div class="pnl-row"><span>事業計画 達成率</span><b>${(rate * 100).toFixed(0)}%${rate >= 1 ? ' ✅' : ''}</b></div>`;
     }
+    // 医療(適切な算定)スコア: 制度上の事実(要件割れ日・KB整備メモ)+理解(クイズ)。配点はゲーム上の仮定
+    const med = G.med || { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 };
+    const medProper = Math.max(0, 60 - med.fsBroken * 10);
+    const medClean = med.days ? Math.round(20 * (1 - med.warnDays / med.days)) : 20;
+    const medQuiz = med.quizTotal ? Math.round(20 * (med.quizOk / med.quizTotal)) : 0;
+    const medScore = medProper + medClean + medQuiz;
+    const medGrade = medScore >= 90 ? 'S' : medScore >= 70 ? 'A' : medScore >= 50 ? 'B' : 'C';
+    const medDetail = [
+      `要件どおりの算定 ${medProper}/60${med.fsBroken ? `(要件割れ${med.fsBroken}回)` : ''}`,
+      `算定の整備 ${medClean}/20${med.warnDays ? `(要確認が出た日${med.warnDays})` : ''}`,
+      `理解 ${medQuiz}/20${med.quizTotal ? `(クイズ${med.quizOk}/${med.quizTotal})` : '(クイズ未回答)'}`,
+    ].join('・');
+    G.med = { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 };
     showModal(`📆 月間決算(第${G.season.months}期) — 評価 ${grade}`, `
       <div class="pnl-row"><span>今月の利益(直近30日・法人)</span><b class="${profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(profit)}</b></div>
       <div class="pnl-row"><span>自己ベスト</span><b>${yen(G.season.bestProfit)}(第${G.season.bestMonth}期)${isBest && G.season.months > 1 ? ' 🏆 記録更新' : ''}</b></div>
       ${planHtml}
+      <div class="pnl-row"><span>医療(適切な算定)</span><b>${medScore}点 ${medGrade}</b></div>
+      <p class="pnl-note">${medDetail}</p>
       <div class="pnl-row"><span>成績ボーナス</span><b>${coin ? `🪙+${coin}` : 'なし(黒字着地で🪙+1〜)'}</b></div>
-      <p class="modal-note">📖 評価: S=月間利益300万 / A=100万 / B=黒字。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>
+      <p class="modal-note">📖 評価: S=月間利益300万 / A=100万 / B=黒字。医療スコアの内訳 — 要件割れ(施設基準を満たさないまま算定を続けた日)とKB整備メモは制度上の事実、配点の比率はゲーム上の仮定。月次は「計画差異」を見る時間 — ズレたのは患者数か単価かを切り分ける。</p>
       ${isBest && G.season.months > 1 ? shareBtnHtml() : ''}`,
       '来月へ');
     if (isBest && G.season.months > 1) bindShare(`📆 「${G.clinicName}」月間利益の自己ベスト更新 — ${yen(profit)}(第${G.season.months}期・評価${grade})`);
