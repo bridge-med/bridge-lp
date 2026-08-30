@@ -3441,21 +3441,56 @@
         const rule = KB_R08.rules.find((r) => r.id === l.incl);
         if (rule && rule.quote) detail = `<div class="kb-quote">「${rule.quote}」</div>`;
       }
-      return `<div class="kb-ev"><b>${l.n}</b> — ${amount}${detail}</div>`;
+      const approx = l.t == null;
+      return `<div class="kb-ev"><b>${approx ? l.n.replace('(概算)', '') : l.n}</b>${approx ? ' <i class="sim-tag">概算</i>' : ''} — ${amount}${detail}</div>`;
     }).join('');
-    const rejRows = ((s.kb && s.kb.rejected) || []).map((x) => `
+    // 合計は明細の後(積み上げて合計に着地する紙の読み方)。点数と概算の円は混ぜない
+    const totalPts = s.lines.reduce((a, l) => a + (l.t || 0), 0);
+    const approxYen = s.lines.reduce((a, l) => a + (l.t == null ? (l.y || 0) : 0), 0);
+    const totalRow = `<div class="kb-ev total"><b>合計</b><span>${totalPts.toLocaleString()}点 = ${yen(totalPts * 10)}</span></div>`
+      + (approxYen ? `<div class="kb-cond">ほかに ${yen(approxYen)}(KB未登録・ゲーム上の概算)</div>` : '');
+    // 未算定の施設基準は3状態: 要件充足(届出のみ)→導線 / 要件不足→事実のみ / 体制で解けないもの→何も足さない
+    const fsStates = DEPT.fsStatus(m, d);
+    const rejRows = ((s.kb && s.kb.rejected) || []).map((x) => {
+      let fsLine = '';
+      if (x.fsInfo) {
+        const st = fsStates.find((f) => f.fsId === x.fsInfo.id);
+        if (st && st.ok && !st.notified) {
+          fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''} — 要件は満たしています。届け出れば、次の患者から算定できます</div>
+            <button class="mini-btn plus" data-gokijun="${m.id}">この部門の施設基準へ</button>`;
+        } else if (st && !st.ok) {
+          fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name} — あと ${st.missing.join('・')} が足りません</div>`;
+        } else {
+          fsLine = `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''}</div>`;
+        }
+      }
+      return `
       <div class="kb-reject"><b>${x.name}</b>${x.points != null ? `(${x.points}点)` : ''} は算定していません
         <div class="kb-cond">${(x.reasons || []).join('。')}</div>
         ${(x.rules || []).filter((r) => r.quote).map((r) => `<div class="kb-quote">「${r.quote}」</div>`).join('')}
-        ${x.fsInfo ? `<div class="kb-cond">必要な施設基準: ${x.fsInfo.name}${x.fsInfo.formNo ? `(${x.fsInfo.formNo})` : ''}</div>` : ''}
-      </div>`).join('');
+        ${fsLine}
+      </div>`;
+    }).join('');
     const warnRows = playerWarn(s.kb && s.kb.warnings).slice(0, 3)
       .map((w) => `<div class="kb-cond">⚠ ${w.message}</div>`).join('')
       + (G.debugMode ? devWarn(s.kb && s.kb.warnings).map((w) => `<div class="kb-cond">dev: ${w.message}</div>`).join('') : '');
     showModal(`📖 ${m.name}部門の代表レセプト`, `
       <p class="plan-lead">${s.label}</p>
-      ${lineRows}${rejRows}${warnRows}
-      <p class="modal-note">点数と条文はKB(令和8年度)によります。「(概算)」の行は、KBに未登録の行為をゲーム上の概算で計上したものです。</p>`, '閉じる');
+      ${lineRows}${totalRow}${rejRows}${warnRows}
+      <p class="modal-note">点数と条文はKB(令和8年度)によります。「(概算)」の行は、KBに未登録の行為をゲーム上の概算で計上したものです。点数は1点=10円で換算しています。患者の窓口負担はこの一部です。</p>`, '閉じる');
+    const go = document.querySelector('[data-gokijun]');
+    if (go) go.addEventListener('click', () => {
+      const mo = $('modal'); if (mo) mo.classList.remove('show');
+      G.corpOpen = 'dept-' + go.dataset.gokijun;
+      renderCorp();
+      const kijun = document.querySelector('.branch-kijun');
+      if (kijun) {
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        kijun.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+        kijun.classList.add('kijun-flash');
+        setTimeout(() => kijun.classList.remove('kijun-flash'), 1200);
+      }
+    });
   }
 
   function renderCorp() {
