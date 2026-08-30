@@ -3536,12 +3536,12 @@
       </div>
       ${L ? `<div class="branch-pnl">昨日: 患者${L.visits}人 売上${yen(L.revenue)} 損益 <b class="${L.profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(L.profit)}</b></div>` : '<div class="branch-pnl">開設準備中 — 明日から診療開始</div>'}
       ${deptLeverHtml(m, d)}
-      <div class="branch-staff">${staffRows}</div>
-      <div class="branch-kijun">施設基準: ${fsRows || `<span class="kijun-kb">${m.fsNote || 'この科の登録項目に届出必須の基準はない'}</span>`}</div>
       ${m.id === 'homecare' && (G.handoverLog || []).some((h) => h.ok) ? (() => {
         const hs = G.handoverLog.filter((h) => h.ok); const last = hs[hs.length - 1];
-        return `<p class="kb-cond">本院から引き継いだ方: ${escapeHtml(last.name)}さん(${last.age}${last.ch ? `・${escapeHtml(last.ch)}` : ''})${hs.length > 1 ? ` ほか${hs.length - 1}人` : ''}</p>`;
+        return `<p class="kb-cond">本院から引き継いだ方: ${escapeHtml(last.name)}さん${last.age ? `(${last.age}${last.ch ? `・${escapeHtml(last.ch)}` : ''})` : ''}${hs.length > 1 ? ` ほか${hs.length - 1}人` : ''}</p>`;
       })() : ''}
+      <div class="branch-staff">${staffRows}</div>
+      <div class="branch-kijun">施設基準: ${fsRows || `<span class="kijun-kb">${m.fsNote || 'この科の登録項目に届出必須の基準はない'}</span>`}</div>
       ${L && L.events.filter((e) => e.kind === 'fs_warn').map((e) => `<p class="pnl-note">⚠ ${e.message}</p>`).join('') || ''}
       <div class="op-row">
         <button class="op-btn" data-dreceipt="${m.id}">📖 昨日の代表レセプトを見る</button>

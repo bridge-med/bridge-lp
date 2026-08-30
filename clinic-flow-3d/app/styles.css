@@ -363,10 +363,12 @@ input[type="range"]::-moz-range-thumb {
 .pnl-row {
   display: flex;
   justify-content: space-between;
+  gap: 10px; /* ラベルが長い行(紹介など)で数値と密着しないため(v42 designer裁定) */
   font: 500 12.5px/1.7 var(--sans);
   color: var(--ink-2);
   padding: 3px 0;
 }
+.pnl-row b { white-space: nowrap; } /* 「3件」等の数値を行内で割らない(v42) */
 .pnl-row b { font-family: var(--en); font-weight: 700; }
 .pnl-row.total {
   border-top: 1.5px solid var(--line);
