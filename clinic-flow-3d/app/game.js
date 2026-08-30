@@ -435,6 +435,7 @@
     coins: 2, boosts: {}, deco: {}, achDone: [],
     stats: { patients: 0, newp: 0, reha: 0, inj: 0, mri: 0, revenue: 0, gradu: 0 },
     med: { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 }, // 医療(適切な算定)スコアの月内トラッカー
+    referLog: [], referSeen: {}, handoverLog: [], // 部門間紹介(直近ログ・初回banner済みの向き・本院→在宅の引き継ぎ)
     clinicName: 'あなたのクリニック',
     daily: { last: '', streak: 0, chDone: '', chState: '', chDay: '', lastClearChar: '', chain: 0 },
     prestige: { count: 0, legacy: null },
@@ -605,6 +606,10 @@
       if (G.daily.quizDone === undefined) G.daily.quizDone = '';
       // v41: 医療(適切な算定)スコアの月内トラッカーの補完
       if (!G.med) G.med = { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 };
+      // v42: 部門間紹介の記録の補完
+      if (!G.referLog) G.referLog = [];
+      if (!G.referSeen) G.referSeen = {};
+      if (!G.handoverLog) G.handoverLog = [];
       if (d.g.speedUnlocked) {
         const OLD_PRICE = { 8: 12, 16: 25, 32: 50 };
         let refund = 0;
@@ -1058,6 +1063,53 @@
     return false;
   }
 
+  /* 部門間の紹介の経路付け: 紹介先が法人内に開設済みで受け入れ余地があればパネルへ、
+     無ければ他院へ紹介する(ケアは必ず成立する。他院での診療はこのゲームでは扱わない)。
+     紹介の発生は患者ニーズ(モジュール側)が決め、ゲームが動かせるのは受け皿だけ */
+  function routeReferral(ref) {
+    const target = G.depts[ref.to];
+    const tmod = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(ref.to) : null;
+    let ok = false;
+    if (target && tmod && tmod.status === 'full') {
+      const P = tmod.managementParameters || {};
+      if (ref.to === 'homecare') {
+        // 在宅は地区(クラスタ)の空き枠が受け皿。満床なら他院の在宅医療機関へ
+        const cl = homecareCtx(target).assignCluster();
+        if (cl !== null) {
+          const np = DEPT.addPatient(target, 'home', G.day, {
+            fb: true, cl, o: 1 + Math.floor(Math.random() * 14),
+            sj: Math.random() < (P.shijiRate || 0.4) ? 1 : 0,
+          });
+          np.nv = tmod._nextVisit(np, G.day);
+          ok = true;
+        }
+      } else {
+        const cap = (P.panelPerDoctor || 9999) * (target.staff.doctors || 1);
+        if (target.pt.length < cap) {
+          DEPT.addPatient(target, ref.profile, G.day, Object.assign({ nv: G.day + 3 + Math.floor(Math.random() * 5) }, ref.extra || {}));
+          ok = true;
+        }
+      }
+    }
+    (G.referLog = G.referLog || []).push({ day: G.day, from: ref.from, to: ref.to, reason: ref.reason, ok });
+    if (G.referLog.length > 120) G.referLog.shift();
+    // 仕組みの発見は向きごとに一度だけ知らせる(以後は法人タブの記録が持つ)。本院→在宅は呼び出し側が毎回banner
+    if (ref.from !== 'main') {
+      const key = ref.from + '>' + (ok ? ref.to : 'out');
+      G.referSeen = G.referSeen || {};
+      if (!G.referSeen[key]) {
+        G.referSeen[key] = 1;
+        const fmod = SPECIALTIES.get(ref.from);
+        const fname = fmod ? fmod.name : ref.from;
+        const tname = tmod ? tmod.name : ref.to;
+        banner(ok
+          ? `🤝 ${fname}部門から${tname}部門へ紹介がありました — ${ref.reason}。記録は法人タブに`
+          : `🤝 ${fname}部門から他院へ紹介しました — ${ref.reason}。記録は法人タブに`);
+      }
+    }
+    return ok;
+  }
+
   function branchRent(br) { const lv = br.floorLv || 1; return lv >= 3 ? 90000 : lv >= 2 ? 50000 : COSTS.branchRent; }
 
   function branchDay(br, spec) {
@@ -1237,13 +1289,37 @@
       for (const id of Object.keys(G.depts)) {
         const mod = SPECIALTIES.get(id);
         if (!mod || mod.status !== 'full' || !mod.runDay) continue;
-        const dctx = { day: G.day, spec, rep: G.rep, aw: G.aw, rand: Math.random };
+        const dctx = { day: G.day, spec, rep: G.rep, aw: G.aw, rand: Math.random,
+          hasDept: (did) => !!G.depts[did] };
         if (id === 'homecare') Object.assign(dctx, homecareCtx(G.depts[id]));
         const r = DEPT.runDay(mod, G.depts[id], dctx);
         T.brRevenue += r.revenue;
         T.brProfit += r.profit;
         for (const ev of r.events) if (ev.kind === 'fs_broken') { toast(`⚠️ ${mod.name}部門: ${ev.message}`); if (G.med) G.med.fsBroken++; }
         if (G.med && devWarn(r.warnings).length) T._medWarn = true;
+        for (const ref of r.referrals || []) routeReferral(ref);
+      }
+    }
+    // 通院困難化: 高齢の常連が通院を続けられなくなり、在宅医療へ移行する(発生率はゲーム上の仮定)。
+    // 在宅部門があれば法人内の訪問診療へ、無ければ他院の在宅医療機関へ紹介する(ケアは必ず成立する)。
+    // 本院からの紹介もB009は特別の関係(法人内)では算定できないため、収入には接続しない。
+    // 卒業(治ってのお別れ)とは別の出来事: 評判は動かさず、記録もhandoverLogに分ける(designer裁定)
+    if (G.regulars && G.regulars.length && spec.kind !== 'closed') {
+      for (let i = G.regulars.length - 1; i >= 0; i--) {
+        const rg = G.regulars[i];
+        if (rg.seg !== 'senior' || rg.visits < 4) continue;
+        if (Math.random() < 0.0015) {
+          G.regulars.splice(i, 1);
+          const ok = routeReferral({ to: 'homecare', from: 'main', profile: 'home', reason: '通院困難' });
+          const nm = (rg.p && rg.p.name) || 'ある常連';
+          const age = (rg.p && rg.p.age) || '';
+          (G.handoverLog = G.handoverLog || []).push({ name: nm, age, ch: (rg.p && rg.p.chLabel) || '', visits: rg.visits, day: G.day, ok });
+          if (G.handoverLog.length > 30) G.handoverLog.shift();
+          banner(ok
+            ? `🏠 ${nm}さん${age ? `(${age})` : ''}が通院を続けられなくなりました — 在宅部門が引き継ぎます`
+            : `🏠 ${nm}さん${age ? `(${age})` : ''}が通院を続けられなくなりました — 他院の在宅診療へ引き継ぎました`);
+          break; // 1日1人まで
+        }
       }
     }
     if (G.kaitei && G.kaitei.count > 0 && T.brRevenue) {
@@ -2455,10 +2531,14 @@
       `理解 ${medQuiz}/20${med.quizTotal ? `(クイズ${med.quizOk}/${med.quizTotal})` : '(デイリークイズ未回答・回答は任意)'}`,
     ].join('・');
     G.med = { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 };
+    // 紹介(直近30日): 対比を1行で(designer裁定)
+    const refWin = (G.referLog || []).filter((l) => l.day > G.day - 30);
+    const refIn = refWin.filter((l) => l.ok).length, refOut = refWin.length - refIn;
     showModal(`📆 月間決算(第${G.season.months}期) — 経営評価 ${grade}`, `
       <div class="pnl-row"><span>今月の利益(直近30日・法人)</span><b class="${profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(profit)}</b></div>
       <div class="pnl-row"><span>自己ベスト</span><b>${yen(G.season.bestProfit)}(第${G.season.bestMonth}期)${isBest && G.season.months > 1 ? ' 🏆 記録更新' : ''}</b></div>
       ${planHtml}
+      ${refWin.length ? `<div class="pnl-row"><span>法人内で受けた紹介 / 他院へ</span><b>${refIn}件 / ${refOut}件</b></div>` : ''}
       <div class="pnl-row"><span>成績ボーナス</span><b>${coin ? `🪙+${coin}` : 'なし(黒字着地で🪙+1〜)'}</b></div>
       <div class="pnl-row total"><span>医療評価(適切な算定)</span><b>${medScore}点 ${medGrade}</b></div>
       <p class="pnl-note"><small>${medDetail}</small></p>
@@ -3458,6 +3538,10 @@
       ${deptLeverHtml(m, d)}
       <div class="branch-staff">${staffRows}</div>
       <div class="branch-kijun">施設基準: ${fsRows || `<span class="kijun-kb">${m.fsNote || 'この科の登録項目に届出必須の基準はない'}</span>`}</div>
+      ${m.id === 'homecare' && (G.handoverLog || []).some((h) => h.ok) ? (() => {
+        const hs = G.handoverLog.filter((h) => h.ok); const last = hs[hs.length - 1];
+        return `<p class="kb-cond">本院から引き継いだ方: ${last.name}さん(${last.age}${last.ch ? `・${last.ch}` : ''})${hs.length > 1 ? ` ほか${hs.length - 1}人` : ''}</p>`;
+      })() : ''}
       ${L && L.events.filter((e) => e.kind === 'fs_warn').map((e) => `<p class="pnl-note">⚠ ${e.message}</p>`).join('') || ''}
       <div class="op-row">
         <button class="op-btn" data-dreceipt="${m.id}">📖 昨日の代表レセプトを見る</button>
@@ -3590,6 +3674,30 @@
     }
     const specialtySection = deptParts.length ? `<h3 class="sub-title">🌱 別の診療科を開く <small>— 診療科部門。会計は1行ずつ根拠つき</small></h3>${deptParts.join('')}` : '';
 
+    // 🤝 今月の紹介(直近30日): 紹介は部門と部門のあいだの出来事なので独立セクションで見せる(designer裁定)。
+    // 他院へ流れた分も同じ書式・同じ色で並べ、円は出さない(失敗ではなくケアが成立した事実)
+    let referSection = '';
+    {
+      const win = (G.referLog || []).filter((l) => l.day > G.day - 30);
+      if (win.length) {
+        const nameOf = (id) => id === 'main' ? '🏥 本院' : (() => { const sm = SPECIALTIES.get(id); return sm ? `${sm.icon} ${sm.name}` : id; })();
+        const aggR = {};
+        for (const l of win) { const k = `${l.from}>${l.to}>${l.ok ? 1 : 0}`; (aggR[k] = aggR[k] || Object.assign({}, l, { n: 0 })).n++; }
+        const refRows = Object.values(aggR).map((a) => `<div class="pnl-row"><span>${nameOf(a.from)} → ${a.ok ? nameOf(a.to) : `他院の${(SPECIALTIES.get(a.to) || { name: a.to }).name}`}(${a.reason})</span><b>${a.n}件</b></div>`).join('');
+        const outTos = [...new Set(win.filter((l) => !l.ok).map((l) => l.to))];
+        const leads = outTos.map((to) => {
+          const sm = SPECIALTIES.get(to); const nm2 = sm ? sm.name : to;
+          const n2 = win.filter((l) => !l.ok && l.to === to).length;
+          if (!G.depts[to]) return `<p class="plan-lead">${nm2}部門は未開設です。開くと、この${n2}件が法人の中で続きます</p>`;
+          return to === 'homecare'
+            ? `<p class="plan-lead">${nm2}部門の地区に空きがなく他院へ回った分です。地区に空きが出ると受けられます</p>`
+            : `<p class="plan-lead">${nm2}部門が受けきれず他院へ回った分です。医師を増やすと受けられます</p>`;
+        }).join('');
+        referSection = `<h3 class="sub-title">🤝 今月の紹介 <small>— 患者さんが次に向かった先</small></h3>${refRows}${leads}
+          <p class="kb-cond">同一法人内の紹介では診療情報提供料(I)を算定できません(留意事項B009(4))。紹介は1円も生みません</p>`;
+      }
+    }
+
     const brCard = (br, bi) => {
       const machineMax = (br.floorLv || 1) >= 3 ? 18 : (br.floorLv || 1) >= 2 ? 12 : 6;
       const kijunBtns = KIJUN.map((k) => {
@@ -3720,6 +3828,7 @@
     el.innerHTML = summary
       + '<h3 class="sub-title">🏥 同じ診療科を増やす <small>— 整形外科の分院とグループ病院</small></h3>'
       + rows.join('')
+      + referSection
       + specialtySection;
 
     el.querySelectorAll('[data-site]').forEach((b) => b.addEventListener('click', () => {

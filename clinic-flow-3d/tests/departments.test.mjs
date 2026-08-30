@@ -439,5 +439,45 @@ t('30分以上の方針は1日の診察枠を圧迫し、超えた分は翌日�
   ok(agg.info.deferred > 0, `繰越が出る(${agg.info.deferred}件)`);
 });
 
+console.log('# 法人シナジー(部門間紹介)');
+
+t('内科→眼科: 糖尿病患者の眼底紹介の意図が積まれ、B009は特別の関係で却下される(法人内に眼科あり)', () => {
+  const dept = DEPT.create(INTERNAL, 1);
+  dept.pt = [{ id: 'x1', pr: 'dm', en: 1, nv: 5, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, iv: 28 }];
+  const c = ctx(5, () => 0); // rand=0: 紹介ロール(<1/12)が必ず成立
+  c.hasDept = () => true;
+  const agg = DEPT.runDay(INTERNAL, dept, c);
+  ok(agg.referrals.some((r) => r.to === 'ophthalmology' && r.profile === 'dm-retino'), '紹介の意図(眼科・dm-retino)');
+  ok(dept.pt[0].rfo === 1, '紹介済みフラグ(一度きり)');
+  const s = agg.sample;
+  ok(s && s.kb && s.kb.rejected.some((x) => x.itemId === 'r08-B009-1'), 'B009は却下される');
+  const rej = s.kb.rejected.find((x) => x.itemId === 'r08-B009-1');
+  ok(rej.reasons.join('').includes('特別の関係'), `却下理由に特別の関係(${rej.reasons[0]})`);
+  ok(!Object.keys(agg.byItem).includes('r08-B009-1'), '収益には載らない');
+});
+
+t('内科→他院: 法人内に眼科が無ければB009は算定できる(告示注1どおり)', () => {
+  const dept = DEPT.create(INTERNAL, 1);
+  dept.pt = [{ id: 'x2', pr: 'dm', en: 1, nv: 5, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, iv: 28 }];
+  const c = ctx(5, () => 0);
+  c.hasDept = () => false;
+  const agg = DEPT.runDay(INTERNAL, dept, c);
+  ok(agg.byItem['r08-B009-1'] && agg.byItem['r08-B009-1'].pts === REIMB.pointsOf('r08-B009-1'), 'B009が算定される(点数はKB)');
+  ok(agg.referrals.length >= 1, '紹介の意図は同様に積まれる(他院への経路付けはゲーム側)');
+});
+
+t('紹介は一度きり: 同じ患者の次回来院では紹介もB009申請も起きない', () => {
+  const dept = DEPT.create(INTERNAL, 1);
+  dept.pt = [{ id: 'x3', pr: 'dm', en: 1, nv: 5, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, iv: 28 }];
+  const c = ctx(5, () => 0); c.hasDept = () => true;
+  DEPT.runDay(INTERNAL, dept, c);
+  dept.pt[0].nv = 40; dept.pt[0].mc = {};
+  const c2 = ctx(40, () => 0); c2.hasDept = () => true;
+  const agg2 = DEPT.runDay(INTERNAL, dept, c2);
+  ok(agg2.referrals.filter((r) => r.to === 'ophthalmology').length === 0, '既紹介患者からの再紹介なし');
+  const s2 = agg2.sample;
+  ok(!(s2 && s2.kb && s2.kb.rejected.some((x) => x.itemId === 'r08-B009-1')), '2回目の来院ではB009を申請しない');
+});
+
 console.log(failed ? `\nNG: ${failed}/${n} 失敗` : `\n全${n}件 合格`);
 process.exit(failed ? 1 : 0);

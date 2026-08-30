@@ -149,6 +149,7 @@
     const agg = {
       day: ctx.day, revenue: 0, cost: 0, profit: 0, visits: 0, points: 0,
       byItem: {}, approx: [], sample: null, warnings: [], events: [],
+      referrals: [],          // 部門間紹介の意図({to, from, profile, reason, extra})。経路付けはゲーム側
       info: {},
     };
     for (const b of broken) {
@@ -186,6 +187,9 @@
         }
       },
       countVisit: () => { agg.visits++; },
+      /* 紹介の意図を積む。モジュールは紹介先の部門を知らない(受け皿の有無・容量は
+         ゲーム側が判定し、法人内に無ければ他院へ=ケアは必ず成立する) */
+      refer: (to, profile, reason, extra) => { agg.referrals.push({ to, from: dept.id, profile, reason, extra: extra || null }); },
       frac: (x) => { const n = Math.floor(x); return n + (ctx.rand() < (x - n) ? 1 : 0); },
       month: DEPT.monthIdx(ctx.day),
     };

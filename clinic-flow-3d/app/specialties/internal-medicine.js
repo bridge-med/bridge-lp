@@ -36,6 +36,7 @@
       presc: { itemId: 'r08-F400-3' },
       tokushori: { itemId: 'r08-F400-n4' }, // 対象疾患の別表がKB未登録のため自動算定しない(unused: 登録後に運用へ)
       ippanmei: { itemId: 'r08-F400-n6-i' },
+      joho: { itemId: 'r08-B009-1' },
     },
     buildProcedures(report) {
       const map = this.reimbursementMappings; const ps = [];
@@ -134,6 +135,18 @@
         report.kbActs.push({ id: 'presc' });
         if (dept.policy.ippanmei) report.kbActs.push({ id: 'ippanmei' });
 
+        // 糖尿病の定期眼底検査への紹介: 年1回の推奨頻度を月次来院×約1/12で表現(ゲーム上の仮定)。
+        // 患者1人につき一度(紹介先で継続患者になる)。診療情報提供料(I)は申請するが、
+        // 紹介先が法人内の眼科なら「特別の関係」でエンジンが却下する(rule-0013)。
+        // 法人内に眼科が無ければ他院への紹介となり算定できる — どちらも制度どおり
+        let refEye = false;
+        if (tryKanriRyo && p.pr === 'dm' && !p.rfo && ctx.rand() < 1 / 12) {
+          p.rfo = 1; refEye = true;
+          report.kbActs.push({ id: 'joho' });
+          report.conditions = { specialRelation: !!(ctx.hasDept && ctx.hasDept('ophthalmology')) };
+          api.refer('ophthalmology', 'dm-retino', '糖尿病の定期眼底検査');
+        }
+
         const r = api.evalVisit(p, report);
         const lines = r.lines.slice();
         // 検体検査は管理料の月次来院時に実施(実施原価は常に発生)
@@ -145,7 +158,8 @@
         }
         p.nv = ctx.day + (p.iv || 28);
         const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
-        if (tryKanriRyo) api.setSample(`継続患者(${prLabel})の月次来院 — 管理料${plan === 'II' ? '(II)' : '(I)'}方針`, lines, r.ev, 2);
+        if (refEye) api.setSample(`継続患者(${prLabel})の月次来院 — 定期眼底検査の紹介`, lines, r.ev, 4);
+        else if (tryKanriRyo) api.setSample(`継続患者(${prLabel})の月次来院 — 管理料${plan === 'II' ? '(II)' : '(I)'}方針`, lines, r.ev, 2);
         else if (isFirst) api.setSample(`初診(${prLabel}・継続管理の開始)`, lines, r.ev, 1);
       }
 
