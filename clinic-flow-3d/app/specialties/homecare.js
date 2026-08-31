@@ -158,12 +158,14 @@
         // セルは単一建物診療患者数から選ぶ: 戸建て地区=別建物なので各1人セル、
         // マンション地区=建物内の当院患者数でZAISOKANが選択(みなし1人例外込み)。
         // 人数は訪問時点の建物内患者数(全患者が毎月2回訪問+算定の決定的な運びのため月末確定と乖離しない)
+        let soukanSel = null; // マンション地区のセル選択結果(ラベル分岐用に保持)
         if ((p.mv || 0) >= 1) {
           const site = ctx.siteInfo ? ctx.siteInfo(p.cl) : null;
           let cellId = 'r08-C002-2-ro-1';
           if (site && site.mansion && ZAISOKAN) {
             const inBldg = dept.pt.filter((q) => q.cl === p.cl).length;
-            cellId = ZAISOKAN.selectCell({ count: inBldg, units: site.units }).itemId;
+            soukanSel = ZAISOKAN.selectCell({ count: inBldg, units: site.units });
+            cellId = soukanSel.itemId;
           }
           if (!p.mc[cellId]) report.kbActs.push({ id: 'zaiisoukan', itemId: cellId });
         }
@@ -172,12 +174,15 @@
         if (r.ev.billableItems.some((b) => b.itemId === 'r08-C001-1-i')) p.mv = (p.mv || 0) + 1;
         agg.cost += P.perVisitCost;
         p.nv = this._nextVisit(p, ctx.day);
+        // ラベルは地区の性質と実効人数で分岐(みなし1人はセルがro-1でもマンション訪問と言う)
         const soukan = r.ev.billableItems.find((b) => b.itemId.indexOf('r08-C002-2-ro') === 0);
-        api.setSample(
-          soukan
-            ? (soukan.itemId === 'r08-C002-2-ro-1' ? '月2回目の定期訪問+在宅時医学総合管理料' : '同一建物(マンション)の定期訪問+在医総管の人数セル')
-            : '定期訪問診療',
-          r.lines, r.ev, soukan ? 3 : 2);
+        let label = '定期訪問診療';
+        if (soukan) {
+          if (!soukanSel) label = '月2回目の定期訪問+在宅時医学総合管理料';
+          else if (soukanSel.effectiveCount === 1 && soukanSel.rawCount >= 2) label = '同一建物(マンション)の定期訪問+在宅時医学総合管理料(戸数比の例外で「1人の場合」を算定)';
+          else label = '同一建物(マンション)の定期訪問+在宅時医学総合管理料(単一建物診療患者の人数区分)';
+        }
+        api.setSample(label, r.lines, r.ev, soukan ? 3 : 2);
       }
 
       // 臨時往診(訪問診療の算定日はrule-0008で往診料が却下されることも、エンジンがそのまま見せる)

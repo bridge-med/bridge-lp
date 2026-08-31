@@ -284,9 +284,11 @@ const TOWN = (() => {
         };
         seg(0, cut, []);
         seg(cut, hp.length - 1, [4, 4]);
-        // 道路から患者宅へのスパー(線が家に届いて、街と診療が交差する)
+        // 道路から患者宅へのスパー(線が家に届いて、街と診療が交差する)。
+        // マンション地区には引かない(壁の裏で不可視=死んだ描画になる。終点は足元のリングが受ける・v50 designer実測)
         for (const ci of this.homecare.route) {
           const s = HOMECARE_SITES[ci];
+          if (s.mansion) continue;
           const road = nearestRoad(s.x, s.y);
           const idx = hp.findIndex((t) => t.x === road.x && t.y === road.y);
           ctx.setLineDash(idx >= 0 && idx <= cut ? [] : [4, 4]);
@@ -306,18 +308,21 @@ const TOWN = (() => {
           const n = this.homecare.clusters[i] || 0;
           if (!n) return;
           const onRoute = (this.homecare.route || []).includes(i);
+          // マンション地区は既存の環境建物(足元2x1)をそのまま訪問先にする(描き足すと屋根が融合する)。
+          // 患者の所在はリングで言う。リングが壁の裏に隠れないよう、深度をマンションの直後に
+          // 置き、中心と半径を足元2x1に合わせる(v50 designer実測: 従来の深度x+yでは1pxも見えない)
+          const mw = s.mansion ? 2 : 1;
           items.push({
-            depth: s.x + s.y,
+            depth: s.mansion ? s.x + mw / 2 + s.y + 0.5 + 0.01 : s.x + s.y,
             draw: () => {
-              // マンション地区は既存の環境建物をそのまま訪問先にする(描き足すと屋根が融合する)。
-              // 患者の所在はルートのリングだけで言う
               if (!s.mansion) iso.building(s.x, s.y, 1, 1, 0.8, '#FBF7EE', '#8C7BC4');
               if (onRoute) {
-                const c = iso.p(s.x + 0.5, s.y + 0.5, 0);
+                const c = iso.p(s.x + mw / 2, s.y + 0.5, 0);
+                const rr = s.mansion ? 1.5 : 1;
                 ctx.strokeStyle = 'rgba(44,95,130,0.9)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.ellipse(c.x, c.y, iso.tw * 0.42, iso.tw * 0.21, 0, 0, Math.PI * 2);
+                ctx.ellipse(c.x, c.y, iso.tw * 0.42 * rr, iso.tw * 0.21 * rr, 0, 0, Math.PI * 2);
                 ctx.stroke();
               }
             }
