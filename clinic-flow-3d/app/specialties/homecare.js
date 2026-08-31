@@ -53,7 +53,7 @@
     actions: [
       { id: 'oncall', label: '24時間の連絡・往診体制を整える', cost: 300000,
         can: (d) => !d.policy.oncall, apply: (d) => { d.policy.oncall = true; },
-        note: '在宅療養支援診療所(通常型)の体制。届出は施設基準の行から' },
+        note: '届け出ると在宅時医学総合管理料を算定でき、休診日も臨時往診を受けられる。届出は下の施設基準の行から(在宅療養支援診療所・通常型)' },
     ],
     deptBadge(d) { return `在宅 ${d.pt.length}人`; },
     infoLine(i) { return `昨日 ${i.visits}件(往診${i.oushin})・移動${i.travelMin}分` + (i.deferred ? `・翌日へ${i.deferred}件` : ''); },
