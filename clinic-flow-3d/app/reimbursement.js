@@ -206,6 +206,19 @@
             b.ruleRefs.push(rule);
           }
         }
+      } else if (m.type === 'same_month_group') {
+        // グループ内のどれかを同月に算定済みなら、グループの別項目も算定不可
+        // (例: 在医総管の人数セル横断の患者ごと月1回=rule-0020・保留#27)
+        for (const gid of m.group) {
+          const t = findRec(gid);
+          if (!t) continue;
+          const priorId = m.group.find((x) => x !== gid && monthCount(x) > 0);
+          if (priorId) {
+            t.status = 'rejected';
+            t.reasons.push(`同一月に${(byId.get(priorId) || {}).name || priorId}を算定済みのため算定不可 — グループで月1回(${rule.id})`);
+            t.ruleRefs.push(rule);
+          }
+        }
       } else if (m.type === 'condition_ng_item') {
         // 条件が真のとき算定不可(例: B009×特別の関係にある機関への紹介)
         const src = findRec(m.source);

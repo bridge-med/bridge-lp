@@ -325,5 +325,24 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('HbA1c: 同月2回目は却下', r.rejectedItems.some((x) => x.itemId === 'r08-D005-9'));
 }
 
+/* 28. 便Q: C001の1ロ(同一建物居住者)はKB点数・在医総管セル横断の月1回排他(rule-0020) */
+{
+  eq('訪問診療料(1)1ロ(同一建物居住者)=215点', pts('r08-C001-1-ro'), 215);
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'visit' },
+    procedures: [{ itemId: 'r08-C002-2-ro-2' }],
+    facilityStandards: ['r08-fs-zaishien'],
+    history: { month: { 'r08-C002-2-ro-1': 1 } },
+  });
+  ok('別の人数セルを同月に算定済みなら却下(same_month_group)', r.rejectedItems.some((x) => x.itemId === 'r08-C002-2-ro-2'));
+  const r2 = REIMB.evaluateEncounter({
+    encounter: { visitType: 'visit' },
+    procedures: [{ itemId: 'r08-C002-2-ro-2' }],
+    facilityStandards: ['r08-fs-zaishien'],
+    history: { month: {} },
+  });
+  ok('同月算定なしなら通る', r2.billableItems.some((x) => x.itemId === 'r08-C002-2-ro-2'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
