@@ -49,6 +49,14 @@
     return { itemId: ZAISOKAN.cellForCount(eff), effectiveCount: eff, rawCount: opts.count };
   };
 
+  /* 訪問診療料(C001の1)のイ/ロ選択(v51・rule-0019)。
+   * 同一建物居住者=同一の建物に居住する他の患者に同一日に訪問診療を行う場合の当該患者
+   * (告示注1)。判定は「その日に実際に訪問する集合」で行う: 繰越で建物内が1人になった日は
+   * イ(留意(4))。sameBuildingSameDayCount=その日に訪問する同一建物内の患者数(当人を含む) */
+  ZAISOKAN.visitCellFor = function (sameBuildingSameDayCount) {
+    return sameBuildingSameDayCount >= 2 ? 'r08-C001-1-ro' : 'r08-C001-1-i';
+  };
+
   if (typeof module !== 'undefined' && module.exports) module.exports = ZAISOKAN;
   else root.ZAISOKAN = ZAISOKAN;
 })(typeof self !== 'undefined' ? self : this);

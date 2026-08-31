@@ -92,5 +92,18 @@ t('在支診の届出なしでは人数セルも算定できない(required)', (
   ok('却下される', r.rejectedItems.some((b) => b.itemId === 'r08-C002-2-ro-2'));
 });
 
+/* 4. 訪問診療料のイ/ロ選択(v51・rule-0019) */
+t('同一建物で同日2人以上はロ(同一建物居住者)・1人はイ', () => {
+  eq('2人', Z.visitCellFor(2), 'r08-C001-1-ro');
+  eq('7人', Z.visitCellFor(7), 'r08-C001-1-ro');
+  eq('1人(繰越で1人になった日を含む)', Z.visitCellFor(1), 'r08-C001-1-i');
+});
+
+t('イ/ロの点数はKB由来で序列が正しい(ロ<イ)', () => {
+  const i = REIMB.pointsOf('r08-C001-1-i'), ro = REIMB.pointsOf('r08-C001-1-ro');
+  ok('両方登録済み', i != null && ro != null);
+  ok('ロ<イ', ro < i);
+});
+
 console.log(`\nzaisokan.test: ${n - failed} passed / ${failed} failed`);
 if (failed) process.exit(1);
