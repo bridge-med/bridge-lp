@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-31T03:44:06.656Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-31T03:52:21.210Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-31T03:44:06.656Z",
+ "generated_at": "2026-08-31T03:52:21.210Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -3300,6 +3300,196 @@
      "note": "11.00円/mL×10mL=110.00円→(110-15)÷10=9.5→切り上げ10+1=11点。単価は医薬品マスター641210099。使用量10mLはゲーム上の仮定として項目に明記"
     }
    ]
+  },
+  {
+   "id": "r08-A000-n10",
+   "code": "111013770",
+   "kubun": "A000注10",
+   "name": "機能強化加算",
+   "shortName": "機能強化加算",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 80,
+   "unit": "初診時1回(算定回数テーブル: 初診時・上限1)",
+   "conditions": "届出医療機関(許可病床200床未満の病院又は診療所)において初診を行った場合に初診料へ加算(告示A000注10)。施設基準はかかりつけ機能の届出が前提(地域包括診療加算/診療料・小児かかりつけ診療料・在宅時医学総合管理料届出+在宅療養支援診療所該当のいずれか=施設基準通知 第1の3-1(2)ア〜キ)。ゲームは要件カ(在医総管届出+在支診)を在宅部門の開設・届出で表す",
+   "exclusions": null,
+   "countLimitText": "初診時1回(算定回数テーブル)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "visit_first",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a000-n10"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.4",
+     "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関(許可病床数が200床未満の病院又は診療所に限る。)において初診を行った場合は、機能強化加算として、80点を所定点数に加算する。",
+     "note": "マスター突合: 111013770「機能強化加算（初診）」=80点・算定回数テーブル「初診時・上限1」で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-A000-n16-1",
+   "code": "111704070",
+   "kubun": "A000注16-イ",
+   "name": "電子的診療情報連携体制整備加算1(初診)",
+   "shortName": "電子的診療情報連携1",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 15,
+   "unit": "月1回(算定回数テーブル: 月・上限1)",
+   "conditions": "医療DX推進に係る体制の届出医療機関で初診を行った場合に加算(告示A000注16-イ)。区分1は施設基準(1)〜(11)全て(電子請求・明細書無償交付・オンライン資格確認・マイナ保険証利用率30%以上・電子処方箋・電子カルテ・診療情報共有の活用等=施設基準通知 第1の8-1)。明細書発行体制等加算とは別に算定できない(注16後段=rule-0016)",
+   "exclusions": null,
+   "countLimitText": "月1回(告示A000注16・算定回数テーブル)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a000-n16-3"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.5",
+     "quote": "16 医療DX推進に係る体制として別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関を受診した患者に対して初診を行った場合は、電子的診療情報連携体制整備加算として、月1回に限り、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。...イ 電子的診療情報連携体制整備加算1 15点 ロ 電子的診療情報連携体制整備加算2 9点 ハ 電子的診療情報連携体制整備加算3 4点",
+     "note": "【否定的確認を含む】R6の「医療DX推進体制整備加算」はR8マスターに外来向けが0件=不存在(在宅/訪問看護のDX情報活用加算のみ)。R8はこの電子的診療情報連携体制整備加算に再編。マスター突合: 111704070=15点・111704170=9点・111704270=4点・月1回で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-A000-n16-2",
+   "code": "111704170",
+   "kubun": "A000注16-ロ",
+   "name": "電子的診療情報連携体制整備加算2(初診)",
+   "shortName": "電子的診療情報連携2",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 9,
+   "unit": "月1回(算定回数テーブル: 月・上限1)",
+   "conditions": "区分2は施設基準(1)〜(8)+(9)〜(11)のいずれか(施設基準通知 第1の8-2)。明細書発行体制等加算とは別に算定できない(rule-0016)",
+   "exclusions": null,
+   "countLimitText": "月1回(告示A000注16・算定回数テーブル)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a000-n16-3"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.5",
+     "quote": "16 医療DX推進に係る体制として別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関を受診した患者に対して初診を行った場合は、電子的診療情報連携体制整備加算として、月1回に限り、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。...イ 電子的診療情報連携体制整備加算1 15点 ロ 電子的診療情報連携体制整備加算2 9点 ハ 電子的診療情報連携体制整備加算3 4点",
+     "note": "告示A000注16の区分別点数。マスター突合: 111704170=9点・月1回で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-A000-n16-3",
+   "code": "111704270",
+   "kubun": "A000注16-ハ",
+   "name": "電子的診療情報連携体制整備加算3(初診)",
+   "shortName": "電子的診療情報連携3",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 4,
+   "unit": "月1回(算定回数テーブル: 月・上限1)",
+   "conditions": "区分3は施設基準(1)〜(8)(電子請求・明細書無償交付・オンライン資格確認・マイナ保険証利用率30%以上・健康相談体制・院内掲示+ウェブ掲載=施設基準通知 第1の8-3)。明細書発行体制等加算とは別に算定できない(rule-0016)。マイナ利用率(4)と健康相談体制(6)は「満たしていればよい」=届出対象外(第1の8-4(3))だが加算自体は様式1の6の届出制",
+   "exclusions": null,
+   "countLimitText": "月1回(告示A000注16・算定回数テーブル)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a000-n16-3"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.5",
+     "quote": "16 医療DX推進に係る体制として別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関を受診した患者に対して初診を行った場合は、電子的診療情報連携体制整備加算として、月1回に限り、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。...イ 電子的診療情報連携体制整備加算1 15点 ロ 電子的診療情報連携体制整備加算2 9点 ハ 電子的診療情報連携体制整備加算3 4点",
+     "note": "告示A000注16の区分別点数。マスター突合: 111704270=4点・月1回で一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-A001-n19",
+   "code": "112709570",
+   "kubun": "A001注19",
+   "name": "電子的診療情報連携体制整備加算(再診)",
+   "shortName": "電子的診療情報連携(再診)",
+   "categoryL": "基本診療料",
+   "categoryM": "初・再診料",
+   "points": 2,
+   "unit": "月1回(算定回数テーブル: 月・上限1)",
+   "conditions": "届出医療機関で再診を行った場合に月1回2点(告示A001注19)。明細書発行体制等加算とは別に算定できない(注19後段=rule-0016)。ゲームは患者単位の月1回を集計モデルで守れないため再診分は申請しない(安全側の運用=rule-0003と同型・初診側のみ算定)",
+   "exclusions": null,
+   "countLimitText": "月1回(告示A001注19・算定回数テーブル)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-a000-n16-3"
+   ],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.7",
+     "quote": "19 医療DX推進に係る体制として別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関を受診した患者に対して再診を行った場合は、電子的診療情報連携体制整備加算として、月1回に限り2点を所定点数に加算する。この場合において、注11に規定する明細書発行体制等加算は別に算定できない。",
+     "note": "マスター突合: 112709570=2点・月1回で一致。明細書加算との排他は電子点数表same_month背反にも収載(便Hで確認済み)"
+    }
+   ]
   }
  ],
  "facilityStandards": [
@@ -3691,6 +3881,56 @@
      "note": "第34の1(1)。画像診断管理加算2以上・専従技師の(2)(3)は128列以上等CT・3T以上MRIのみ対象=1.5T機は対象外(否定的確認)。届出は様式37"
     }
    ]
+  },
+  {
+   "id": "r08-fs-a000-n10",
+   "name": "機能強化加算の施設基準",
+   "shortName": "機能強化加算",
+   "ryoType": "kihon",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "(1)診療所又は許可病床200床未満の病院 (2)かかりつけ機能の届出のいずれか: ア地域包括診療加算1 / イ同2+実績 / ウ地域包括診療料1 / エ同2+実績 / オ小児かかりつけ診療料 / カ在宅時医学総合管理料等の届出+在宅療養支援診療所(第9の1(1)(2))該当 / キ同(3)該当+往診・看取り実績。ゲームは要件カを在宅部門開設+在支診届出で代表(簡略化)",
+   "transitional": null,
+   "formNo": "様式1の3",
+   "sourceNotice": "r08-tsuchi7-kihon-todokede",
+   "sourcePage": "第1の3(機能強化加算)(PDF p.18)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "system_req",
+     "doc": "r08-tsuchi7-kihon-todokede",
+     "page": "PDF p.18(第1の3「機能強化加算」1)",
+     "quote": "カ 「C002」に掲げる在宅時医学総合管理料又は「C002-2」に掲げる施設入居時等医学総合管理料に係る届出を行っている保険医療機関であって、...第9在宅療養支援診療所の1(1)若しくは(2)に該当する診療所...であること。",
+     "note": "かかりつけ機能の届出(ア〜キ)のいずれかが前提。ゲームは要件カ(在医総管届出=v37で登録済みのr08-fs-zaishien+在宅部門開設)で代表。地域包括診療加算・小児かかりつけ等の他ルートは未実装(KB未登録)"
+    }
+   ]
+  },
+  {
+   "id": "r08-fs-a000-n16-3",
+   "name": "電子的診療情報連携体制整備加算3の施設基準",
+   "shortName": "電子的診療情報連携3",
+   "ryoType": "kihon",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "第1の8-1の(1)〜(8): 電子情報処理組織による診療報酬請求・詳細な明細書の無償交付・オンライン資格確認体制・3月前のマイナ保険証利用率30%以上((4)(6)は届出不要の「満たす」型)・マイナポータル情報に基づく健康相談体制・院内掲示(診療情報活用/医療DXの取組/明細書無償交付)+原則ウェブサイト掲載。区分2は+(9)〜(11)のいずれか・区分1は(1)〜(11)全て(電子処方箋・電子カルテ・情報共有ネットワーク活用等)",
+   "transitional": null,
+   "formNo": "様式1の6",
+   "sourceNotice": "r08-tsuchi7-kihon-todokede",
+   "sourcePage": "第1の8(電子的診療情報連携体制整備加算)(PDF p.23-24)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "system_req",
+     "doc": "r08-tsuchi7-kihon-todokede",
+     "page": "PDF p.23(第1の8「電子的診療情報連携体制整備加算」1)",
+     "quote": "(4) 電子的診療情報連携体制整備加算を算定する月の3月前のレセプト件数ベースマイナ保険証利用率...が、30%以上であること。",
+     "note": "区分3=(1)〜(8)・区分2=+(9)〜(11)のいずれか・区分1=全て。届出は様式1の6。(4)(6)は「満たしていればよく届出不要」(第1の8-4(3))。マイナ保険証利用率はゲームでは体制投資で満たした扱い(ゲーム上の仮定として実装側に明記)"
+    }
+   ]
   }
  ],
  "rules": [
@@ -4019,17 +4259,17 @@
   {
    "id": "r08-rule-0016",
    "source": "r08-A001-n11",
-   "target": "電子的診療情報連携体制整備加算(A000注16・A001注19・未登録)",
+   "target": "電子的診療情報連携体制整備加算(r08-A000-n16-1/2/3・r08-A001-n19)",
    "type": "mutually_exclusive",
-   "condition": "明細書発行体制等加算を算定する場合、電子的診療情報連携体制整備加算は別に算定できない(告示A001注11後段)。相手項目はKB未登録",
-   "period": "same_day",
+   "condition": "明細書発行体制等加算を算定する場合、電子的診療情報連携体制整備加算は別に算定できない(告示A000注16後段・A001注19後段。電子点数表same_month背反)。患者単位・同一月の排他",
+   "period": "same_month",
    "bidirectional": 1,
    "doc": "r08-kokuji69-ika",
    "page": "p.6",
    "quote": "この場合において、区分番号A000に掲げる初診料の注16及び区分番号A001に掲げる再診料の注19に規定する電子的診療情報連携体制整備加算は別に算定できない。",
    "machine": {
     "type": "handled_externally",
-    "note": "電子的診療情報連携体制整備加算はゲーム未実装・KB未登録のため判定対象なし(登録時にsame_day_ng_itemsへ昇格)"
+    "note": "両者登録済み(v48)。月単位・患者単位の排他はエンジンのsame_month pair機構が無いため、ゲームは明細書と電子的連携を同時に有効化しない(KASANの排他)+連携有効時は明細書行を発行しない運用で担保"
    }
   },
   {
