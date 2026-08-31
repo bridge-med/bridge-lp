@@ -508,6 +508,25 @@ t('実績加算は施設基準の届出なしではエンジンが却下する(r
   ok(r.billableItems.some((b) => b.itemId === 'r08-C002-2-ro-1'), '本体は算定される');
 });
 
+t('同月に人数区分が変わっても在医総管と実績加算は1回だけ(v52 PM条件1=本体セル群ゲート)', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.policy.oncall = true;
+  dept.fs.push('r08-fs-zaishien', 'r08-fs-c002-n7-jisseki2');
+  dept.sd = 1;
+  // 患者0は月初にみなし1人セル(ro-1)+実績加算(ha-1)を算定済み。その後同じ建物が4人に増えた
+  const billed = { 'r08-C002-2-ro-1': 1, 'r08-C002-n7-ha-1': 1 };
+  for (let i = 0; i < 4; i++) {
+    dept.seq++;
+    dept.pt.push({ id: 'hg' + i, pr: 'home', en: 1, nv: 25, sv: 0, mc: i === 0 ? billed : {}, wc: {}, lb: {}, fb: true, cl: 12, iv: 15, sj: 0, mv: 1, mvm: 0 });
+  }
+  const mctx = Object.assign(hcCtx(dept, 25, rng(4)), {
+    siteInfo: (i) => (i === 12 ? { x: 15, y: 15, mansion: true, units: 24 } : { x: 0, y: 0 }),
+  });
+  const agg = DEPT.runDay(HOMECARE, dept, mctx);
+  eq((agg.byItem['r08-C002-2-ro-2'] || { n: 0 }).n, 3, '本体は未算定の3人だけ(算定済み患者は再申請しない)');
+  eq((agg.byItem['r08-C002-n7-ha-2'] || { n: 0 }).n, 3, '加算も未算定の3人だけ(区分またぎの二重計上なし)');
+});
+
 t('在宅180日運用: 収益は全てエンジン算定・在医総管は月2回目の訪問後だけ申請される', () => {
   const dept = DEPT.create(HOMECARE, 1);
   dept.policy.oncall = true;

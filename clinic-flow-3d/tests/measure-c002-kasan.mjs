@@ -3,7 +3,9 @@
  *
  * シナリオ(固定): measure-c001-ro.mjsと同一(満室2棟+戸建て12地区×3人=50人・120日×10seed)。
  * レバー: 実績加算2(ハ)+データ提出を届出済みにして、加算の算定額を測る。
- * 注意: この数字はこのシナリオの値であり、ゲーム全体の点推定ではない(v51 PM条件1の型)。 */
+ * 注意: この数字はこのシナリオの値であり、ゲーム全体の点推定ではない(v51 PM条件1の型)。
+ * assignCluster=()=>nullで人口が固定されるため、月の途中の人数区分またぎ(rule-0023の穴)は
+ * このハーネスでは発生しない(v52 PM指摘)。 */
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

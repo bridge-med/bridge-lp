@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-31T13:31:32.307Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-31T23:17:53.871Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-31T13:31:32.307Z",
+ "generated_at": "2026-08-31T23:17:53.871Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -5596,6 +5596,34 @@
    "machine": {
     "type": "handled_externally",
     "note": "本ゲームは連携機関(訪看ST・薬局・ケアマネ)のオブジェクトを持たないため算定しない(否定的確認・v52便Rコミット0)。届出だけで算定させると実態要件の半分を捨てた過大計上になる(第4章)"
+   }
+  },
+  {
+   "id": "r08-rule-0023",
+   "source": "r08-C002-n7-ro-1",
+   "target": "r08-C002-n7-ro/ha全セル(実績加算の月1回・tier横断)",
+   "type": "same_month_ng",
+   "condition": "在宅療養実績加算(注7)は在医総管の所定点数への加算であり、本体と同じく患者1人につき月1回に限る。同一月に人数区分や区分(実績1/実績2)をまたいで重ねて算定することはできない",
+   "period": "same_month",
+   "bidirectional": 1,
+   "doc": "r08-ryuiji-ika",
+   "page": "p.256 (留意C002(4))",
+   "quote": "在宅時医学総合管理料又は施設入居時等医学総合管理料は、...月1回に限り算定する。",
+   "machine": {
+    "type": "same_month_group",
+    "group": [
+     "r08-C002-n7-ro-1",
+     "r08-C002-n7-ro-2",
+     "r08-C002-n7-ro-3",
+     "r08-C002-n7-ro-4",
+     "r08-C002-n7-ro-5",
+     "r08-C002-n7-ha-1",
+     "r08-C002-n7-ha-2",
+     "r08-C002-n7-ha-3",
+     "r08-C002-n7-ha-4",
+     "r08-C002-n7-ha-5"
+    ],
+    "note": "v52 PM検出: 月の途中で人数区分が変わると別セルとして二重に通る穴(rule-0020と同型)。ゲーム側も本体セル群ゲートで到達を断ち、エンジン側もこのグループで塞ぐ二重防御。充実体制(i)セルは届出不能のため対象外"
    }
   }
  ]

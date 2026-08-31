@@ -3586,9 +3586,11 @@
     const fsRows = DEPT.fsStatus(m, d).map((st) => {
       const fs = REIMB.getFacilityStandard(st.fsId);
       const name = fs ? (fs.shortName || fs.name) : st.fsId;
+      // gameNote=ゲーム独自ゲートの断り(v52 PM裁定A。missingは足りないものの名前だけに保つ)
+      const gn = st.gameNote ? `<small class="kb-cond is-note">${st.gameNote}</small>` : '';
       if (st.notified) return `<span class="kijun-badge">${name} 適用中</span>`;
-      if (st.ok) return `<button class="mini-btn plus" data-dfsnotify="${m.id}:${st.fsId}">${name} を届け出る</button>`;
-      return `<span class="kijun-badge off wrap">${name} 未(${st.missing.join('・')})</span>`;
+      if (st.ok) return `<button class="mini-btn plus" data-dfsnotify="${m.id}:${st.fsId}">${name} を届け出る</button>${gn}`;
+      return `<span class="kijun-badge off wrap">${name} 未(${st.missing.join('・')})</span>${gn}`;
     }).join(' ');
     const staffRows = (m.staffDef || []).map(([key, label, min, max, cost]) => `
       <div class="plan-step"><span>${label} <small>最大${max}・採用 ${yen(cost)}</small></span>

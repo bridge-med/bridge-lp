@@ -126,7 +126,7 @@
     for (const def of (mod.fsDefs || [])) {
       const chk = def.check(dept);
       const notified = dept.fs.includes(def.fsId);
-      out.push({ fsId: def.fsId, ok: chk.ok, missing: chk.missing || [], notified, note: def.note || null });
+      out.push({ fsId: def.fsId, ok: chk.ok, missing: chk.missing || [], notified, note: def.note || null, gameNote: def.gameNote || null });
     }
     return out;
   };
