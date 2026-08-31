@@ -83,12 +83,12 @@
         note: '通常型在支診+緊急往診4件・看取り2件/年+緩和ケア研修修了医(様式11の5)。実績はゲーム未判定' },
       { fsId: 'r08-fs-c002-n7-jisseki1',
         check(dept) {
-          return dept.fs.includes('r08-fs-c002-n7-jisseki2') ? { ok: true } : { ok: false, missing: ['在宅療養実績加算2の届出(実績を積んでから上げる=ゲーム上の段階)'] };
+          return dept.fs.includes('r08-fs-c002-n7-jisseki2') ? { ok: true } : { ok: false, missing: ['在宅療養実績加算2の届出 — ゲーム上は2から順に上げる'] };
         },
         note: '通常型在支診+緊急往診10件・看取り4件/年(様式11の5)。制度は段階制ではないがゲームは2→1の順で上げる(簡略化)' },
       { fsId: 'r08-fs-c002-n13',
         check(dept) {
-          return dept.fs.includes('r08-fs-zaishien') ? { ok: true } : { ok: false, missing: ['在宅療養支援診療所の届出(在医総管の算定が前提)'] };
+          return dept.fs.includes('r08-fs-zaishien') ? { ok: true } : { ok: false, missing: ['在宅療養支援診療所の届出'] };
         },
         note: '外来医療等調査への参加+データ提出体制(様式7の11)。提出の継続はゲームでは届出をもって続く扱い' },
     ],
