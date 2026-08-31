@@ -142,7 +142,9 @@
       }
       for (const p of seen) {
         api.countVisit();
-        // ダイアライザー(Ia型・回路含む)はセッションごとに1本(材料価格基準区分040)
+        // ダイアライザー(Ia型・回路含む)を1セッション1本で請求。材料と価格は材料価格基準040、
+        // 回路を含むのは材料留意II-040。「1回1本」という数量は制度側に定めがない
+        // (042のような本数制限も040には無い=否定的確認)ため、ゲーム上の仮定
         const report = { type: 'hd', kbActs: [{ id: 'hd' }, { id: 'dialyzer' }] };
         if (p.du > ctx.day) report.kbActs.push({ id: 'induction' });
         if (dept.fs.includes('r08-fs-j038-suishitsu')) report.kbActs.push({ id: 'waterQuality' });

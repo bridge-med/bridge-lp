@@ -141,10 +141,15 @@ if (master?.rows?.length) {
       const km = it.code ? byKizai.get(it.code) : null;
       if (!km) { warns.push(`E7 ${it.id}: code=${it.code} が特定器材マスターに存在しない`); continue; }
       if (km.price_type === '1' && Number.isFinite(Number(km.price_raw))) {
-        const expect = Math.round(Number(km.price_raw)) / 10;
+        // 材料留意I-1-(2): 材料価格を10円で除し、端数が生じた場合は四捨五入して得た点数
+        const expect = Math.round(Number(km.price_raw) / 10);
         if (it.points != null && Number(it.points) !== expect) {
           errors.push(`E7 ${it.id}: 材料点数が材料価格と不一致 (kb=${it.points} / 価格${km.price_raw}円→${expect}点)`);
         }
+      } else if (km.price_type !== '1') {
+        // 金額種別2(購入価格)・5(%加算)・9(乗算割合)は点数が価格から機械的に決まらないため
+        // 突合をスキップする(登録時はevidenceで個別に根拠を示すこと)
+        warns.push(`E7 ${it.id}: 金額種別${km.price_type}(${km.price_raw})のため材料価格突合をスキップ`);
       }
       continue;
     }

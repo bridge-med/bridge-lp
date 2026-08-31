@@ -48,6 +48,8 @@
 - qa_entries.id: `{document_id}-q{連番}` 例 `r08-qa-20260323-q005`
 - scenarios.id: `{rev}-scn-{slug}`
 - evidence: entity_type + entity_id で対象レコードを指す(entity_typeは 'item' / 'facility_standard' / 'billing_rule' / 'qa_entry' / 'scenario')
+- evidence.page はPDFの通し番号を基本とし、鑑(頭書)が無番で印刷面とずれる文書は
+  `PDF p.3(I-2-006(2))` のように「PDF」接頭辞+条番号の明示形で書く(v45制定)
 
 ## enum
 
