@@ -55,6 +55,10 @@ function Navigator() {
         <Stack.Screen name="words" options={{ headerShown: false }} />
         <Stack.Screen name="vocab" options={{ headerShown: false }} />
         <Stack.Screen name="vocab-ko" options={{ headerShown: false }} />
+        <Stack.Screen name="assets" options={{ headerShown: false }} />
+        <Stack.Screen name="asset/[id]" options={{ title: '資産候補', headerBackTitle: '戻る' }} />
+        <Stack.Screen name="weekly" options={{ headerShown: false }} />
+        <Stack.Screen name="portfolio" options={{ headerShown: false }} />
       </Stack>
       <Onboarding visible={showOnboarding} />
       <RewardModal />
