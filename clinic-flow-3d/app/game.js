@@ -167,11 +167,13 @@
     for (const lv of [1, 2, 3]) REHA_FEE[lv] = kbPts(REHA_KB_ITEM[lv], [0, 85, 170, 185][lv]) * 2 * 10;
     KIJUN.forEach((k) => { k.fee = REHA_FEE[k.lv]; });
   }
-  // 整形の手技はKB点数(G010/L104/J000-1/J119-2/J122-2/H003-2)。注射の薬剤料だけは
-  // 薬価レイヤー未整備のため概算のまま分離して計上する(medical-kb issues #10)。
-  // 概算値は旧合算(関節注180/トリガー120)からKB手技点数を引いた残り。
-  // blockは腰部硬膜外ブロックの局所麻酔剤等の概算(手技800点はKB・薬剤のみ概算)
-  const DRUG_PTS = { inj: 100, trig: 50, block: 50 };
+  // 整形の手技も薬剤もKB点数(便M・v47で薬価レイヤー確立)。
+  // inj=アルツ関節注キット1筒(G100算式66点)・trig=キシロカイン1%5mL(L200算式5点)・
+  // block=同10mL(11点)。使用量はゲーム上の仮定(KB項目に明記)。
+  // フォールバック値はKB整合(v46方針)。旧概算(100/50/50)は薬価より大きく、置換で単価が下がる
+  const DRUG_PTS = { inj: 66, trig: 5, block: 11 };
+  const DRUG_KB = { inj: 'r08-y620004641', trig: 'r08-y641210099-5ml', block: 'r08-y641210099-10ml' };
+  if (KBI) for (const k of Object.keys(DRUG_KB)) DRUG_PTS[k] = kbPts(DRUG_KB[k], DRUG_PTS[k]);
   // 部門エンジン(患者パネル型): KBと同時に初期化できたときだけ部門を動かす
   const DEPTI = (() => {
     try {
@@ -732,7 +734,7 @@
           const p = kbPts('r08-G010', 80);
           revenue += (p + DRUG_PTS.inj) * 10; T.rev.inj += (p + DRUG_PTS.inj) * 10; T.injCount++; didProcedure = true;
           rc.push({ n: '関節腔内注射', t: p, kb: 'r08-G010' });
-          rc.push({ n: '関節注入薬剤', t: DRUG_PTS.inj });
+          rc.push({ n: '関節注入薬剤(アルツ25mg)', t: DRUG_PTS.inj, kb: DRUG_KB.inj });
         }
         if (it === 'trig') {
           // 25%は腰部硬膜外ブロックへステップアップ(L100-2はKB登録済み・薬剤のみ概算=便H)
@@ -740,13 +742,13 @@
             const p = kbPts('r08-L100-2-lumbar', 800);
             revenue += (p + DRUG_PTS.block) * 10; T.rev.inj += (p + DRUG_PTS.block) * 10;
             rc.push({ n: '腰部硬膜外ブロック', t: p, kb: 'r08-L100-2-lumbar' });
-            rc.push({ n: '神経ブロック注入薬剤', t: DRUG_PTS.block });
+            rc.push({ n: 'ブロック注入薬剤(キシロカイン1%10mL)', t: DRUG_PTS.block, kb: DRUG_KB.block });
           }
           else {
             const p = kbPts('r08-L104', 70);
             revenue += (p + DRUG_PTS.trig) * 10; T.rev.inj += (p + DRUG_PTS.trig) * 10;
             rc.push({ n: 'トリガーポイント注射', t: p, kb: 'r08-L104' });
-            rc.push({ n: 'トリガー注入薬剤', t: DRUG_PTS.trig });
+            rc.push({ n: 'トリガー注入薬剤(キシロカイン1%5mL)', t: DRUG_PTS.trig, kb: DRUG_KB.trig });
           }
           T.trigCount++; didProcedure = true;
         }
@@ -4749,7 +4751,7 @@
           if (Math.random() < settings.pInj) {
             const p = kbPts('r08-G010', 80);
             rev += (p + DRUG_PTS.inj) * 10; T.rev.inj += (p + DRUG_PTS.inj) * 10; T.injCount++; proc = true;
-            acc(T, '関節腔内注射', p); acc(T, '関節注入薬剤(概算)', DRUG_PTS.inj);
+            acc(T, '関節腔内注射', p); acc(T, '関節注入薬剤(アルツ25mg)', DRUG_PTS.inj);
           }
           if (Math.random() < settings.pTrig) {
             const block = Math.random() < 0.25;
@@ -4757,12 +4759,12 @@
             if (block) {
               const pb = kbPts('r08-L100-2-lumbar', 800);
               rev += (pb + DRUG_PTS.block) * 10; T.rev.inj += (pb + DRUG_PTS.block) * 10;
-              acc(T, '腰部硬膜外ブロック', pb); acc(T, '神経ブロック注入薬剤(概算)', DRUG_PTS.block);
+              acc(T, '腰部硬膜外ブロック', pb); acc(T, 'ブロック注入薬剤(キシロカイン1%10mL)', DRUG_PTS.block);
             }
             else {
               const p = kbPts('r08-L104', 70);
               rev += (p + DRUG_PTS.trig) * 10; T.rev.inj += (p + DRUG_PTS.trig) * 10;
-              acc(T, 'トリガーポイント注射', p); acc(T, 'トリガー注入薬剤(概算)', DRUG_PTS.trig);
+              acc(T, 'トリガーポイント注射', p); acc(T, 'トリガー注入薬剤(キシロカイン1%5mL)', DRUG_PTS.trig);
             }
           }
           if (settings.physio > 0 && !G.evPhysioDown && T.physioCount < settings.physio * 35 && Math.random() < settings.pPhysio + 0.02 * bondLv('nurse')) { const p = kbPts('r08-J119-2', 35); rev += p * 10; T.rev.physio += p * 10; T.physioCount++; proc = true; kanriBlock = true; acc(T, '消炎鎮痛等処置(器具等)', p); }
