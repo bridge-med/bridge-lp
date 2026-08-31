@@ -19,13 +19,19 @@
 
   const ZAISOKAN = {};
 
+  /* 人数→区分番号(1〜5)。告示の人数区分(1/2〜9/10〜19/20〜49/50〜)そのまま */
+  const bucket = (n) => (n <= 1 ? 1 : n <= 9 ? 2 : n <= 19 ? 3 : n <= 49 ? 4 : 5);
+
   /* 人数→セルitemId(告示C002の2ロの区分そのまま) */
   ZAISOKAN.cellForCount = function (n) {
-    if (n <= 1) return 'r08-C002-2-ro-1';
-    if (n <= 9) return 'r08-C002-2-ro-2';
-    if (n <= 19) return 'r08-C002-2-ro-3';
-    if (n <= 49) return 'r08-C002-2-ro-4';
-    return 'r08-C002-2-ro-5';
+    return `r08-C002-2-ro-${bucket(n)}`;
+  };
+
+  /* 在医総管の注7加算セル(v52・#26)。tier='jisseki1'(在宅療養実績加算1・ロ)|'jisseki2'(同2・ハ)。
+   * 人数区分は在医総管本体と同じ実効人数で揃える(告示注7は本体の各区分に「更に加算」) */
+  ZAISOKAN.n7CellFor = function (tier, effCount) {
+    const br = tier === 'jisseki1' ? 'ro' : tier === 'jisseki2' ? 'ha' : null;
+    return br ? `r08-C002-n7-${br}-${bucket(effCount)}` : null;
   };
 
   /* みなし1人の例外を畳み込んだ実効人数。

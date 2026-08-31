@@ -467,6 +467,47 @@ t('繰越で建物内が1人になった日はイ(実訪問集合で判定=2パ�
   eq(agg.byItem['r08-C001-1-ro'], undefined, 'ロは使われない');
 });
 
+t('在宅療養実績加算2の届出で、在医総管と同じ人数区分の加算が乗る(v52・#26)', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.policy.oncall = true;
+  dept.fs.push('r08-fs-zaishien', 'r08-fs-c002-n7-jisseki2');
+  dept.sd = 1;
+  for (let i = 0; i < 4; i++) {
+    dept.seq++;
+    dept.pt.push({ id: 'hk' + i, pr: 'home', en: 1, nv: 20, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, cl: 12, iv: 15, sj: 0, mv: 1, mvm: 0 });
+  }
+  const mctx = Object.assign(hcCtx(dept, 20, rng(4)), {
+    siteInfo: (i) => (i === 12 ? { x: 15, y: 15, mansion: true, units: 24 } : { x: 0, y: 0 }),
+  });
+  const agg = DEPT.runDay(HOMECARE, dept, mctx);
+  const ha2 = agg.byItem['r08-C002-n7-ha-2'];
+  ok(ha2 && ha2.n === 4, `4人全員に実績加算2(2〜9人)が乗る(実際${ha2 ? ha2.n : 0}件)`);
+  eq(ha2.pts / ha2.n, REIMB.pointsOf('r08-C002-n7-ha-2'), '点数はKB由来');
+});
+
+t('実績加算1と2の両方を届け出た場合は1(点数の高い側)だけが乗る', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.policy.oncall = true;
+  dept.fs.push('r08-fs-zaishien', 'r08-fs-c002-n7-jisseki2', 'r08-fs-c002-n7-jisseki1', 'r08-fs-c002-n13');
+  dept.sd = 1;
+  dept.seq++;
+  dept.pt.push({ id: 'hk9', pr: 'home', en: 1, nv: 20, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, cl: 0, iv: 15, sj: 0, mv: 1, mvm: 0 });
+  const agg = DEPT.runDay(HOMECARE, dept, hcCtx(dept, 20, rng(4)));
+  ok(agg.byItem['r08-C002-n7-ro-1'], '実績加算1(1人)が乗る');
+  eq(agg.byItem['r08-C002-n7-ha-1'], undefined, '実績加算2は乗らない(二重計上なし)');
+  ok(agg.byItem['r08-C002-n13'], 'データ提出加算も同時に乗る');
+});
+
+t('実績加算は施設基準の届出なしではエンジンが却下する(required)', () => {
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'visit' },
+    procedures: [{ itemId: 'r08-C002-2-ro-1' }, { itemId: 'r08-C002-n7-ro-1' }],
+    facilityStandards: ['r08-fs-zaishien'], history: {},
+  });
+  ok(r.rejectedItems.some((b) => b.itemId === 'r08-C002-n7-ro-1'), '届出なしは却下');
+  ok(r.billableItems.some((b) => b.itemId === 'r08-C002-2-ro-1'), '本体は算定される');
+});
+
 t('在宅180日運用: 収益は全てエンジン算定・在医総管は月2回目の訪問後だけ申請される', () => {
   const dept = DEPT.create(HOMECARE, 1);
   dept.policy.oncall = true;

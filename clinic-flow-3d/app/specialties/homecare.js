@@ -36,6 +36,8 @@
       visit: { itemId: 'r08-C001-1-i' },
       oushin: { itemId: 'r08-C000' },
       zaiisoukan: { itemId: 'r08-C002-2-ro-1' },
+      zaisokanKasan: { itemId: 'r08-C002-n7-ha-1' }, // 実itemIdはZAISOKAN.n7CellForが上書き(v52)
+      dataKasan: { itemId: 'r08-C002-n13' },
       shijiryo: { itemId: 'r08-C007' },
     },
     buildProcedures(report) {
@@ -71,6 +73,24 @@
           return dept.policy.oncall ? { ok: true } : { ok: false, missing: ['24時間の連絡・往診体制'] };
         },
         note: '従来型=通常型(様式11・届出区分4)。強化型(常勤医3名)の在医総管セルはKB未登録のため扱わない(簡略化)' },
+      // 在宅療養実績加算(v52・#26): 制度は過去1年の緊急往診・看取り件数が要件。
+      // 実績量はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定・便N先例)。
+      // 両方届け出た場合の算定は実績1を優先(点数の高い側。二重には算定しない)
+      { fsId: 'r08-fs-c002-n7-jisseki2',
+        check(dept) {
+          return dept.fs.includes('r08-fs-zaishien') ? { ok: true } : { ok: false, missing: ['在宅療養支援診療所の届出'] };
+        },
+        note: '通常型在支診+緊急往診4件・看取り2件/年+緩和ケア研修修了医(様式11の5)。実績はゲーム未判定' },
+      { fsId: 'r08-fs-c002-n7-jisseki1',
+        check(dept) {
+          return dept.fs.includes('r08-fs-c002-n7-jisseki2') ? { ok: true } : { ok: false, missing: ['在宅療養実績加算2の届出(実績を積んでから上げる=ゲーム上の段階)'] };
+        },
+        note: '通常型在支診+緊急往診10件・看取り4件/年(様式11の5)。制度は段階制ではないがゲームは2→1の順で上げる(簡略化)' },
+      { fsId: 'r08-fs-c002-n13',
+        check(dept) {
+          return dept.fs.includes('r08-fs-zaishien') ? { ok: true } : { ok: false, missing: ['在宅療養支援診療所の届出(在医総管の算定が前提)'] };
+        },
+        note: '外来医療等調査への参加+データ提出体制(様式7の11)。提出の継続はゲームでは届出をもって続く扱い' },
     ],
 
     managementParameters: {
@@ -182,7 +202,19 @@
             soukanSel = ZAISOKAN.selectCell({ count: inBldg, units: site.units });
             cellId = soukanSel.itemId;
           }
-          if (!p.mc[cellId]) report.kbActs.push({ id: 'zaiisoukan', itemId: cellId });
+          if (!p.mc[cellId]) {
+            report.kbActs.push({ id: 'zaiisoukan', itemId: cellId });
+            // 在医総管に乗る独立加算(v52・#26): 注7実績加算(実績1優先・本体と同じ人数区分)+注13データ提出。
+            // 本体の申請と同時にだけ乗せる(注7/13は在医総管の所定点数への加算のため)
+            const eff = soukanSel ? soukanSel.effectiveCount : 1;
+            const tier = dept.fs.includes('r08-fs-c002-n7-jisseki1') ? 'jisseki1'
+              : dept.fs.includes('r08-fs-c002-n7-jisseki2') ? 'jisseki2' : null;
+            if (tier && ZAISOKAN) {
+              const n7 = ZAISOKAN.n7CellFor(tier, eff);
+              if (n7 && !p.mc[n7]) report.kbActs.push({ id: 'zaisokanKasan', itemId: n7 });
+            }
+            if (dept.fs.includes('r08-fs-c002-n13') && !p.mc['r08-C002-n13']) report.kbActs.push({ id: 'dataKasan' });
+          }
         }
         if (p.sj && !p.mc['r08-C007']) report.kbActs.push({ id: 'shijiryo' });
         const r = api.evalVisit(p, report);
