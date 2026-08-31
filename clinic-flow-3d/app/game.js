@@ -1797,7 +1797,7 @@
         const doc = ev && REIMB.docOf(ev.doc);
         if (doc && !usedDocs.includes(doc.title)) usedDocs.push(doc.title);
         return `<div class="kb-ev"><b>${it ? it.name : x.kb}</b> <small>${it && it.kubun ? `[${it.kubun}]` : ''}${ev ? ` ${pageOf(ev)}` : ''}</small>
-          ${it && it.conditions ? `<p class="kb-cond">条件: ${it.conditions}</p>` : ''}
+          ${it && it.conditions ? `<p class="kb-cond is-note">条件: ${it.conditions}</p>` : ''}
           ${ev ? `<p class="kb-quote">「${ev.quote}」</p>` : ''}
         </div>`;
       }).join('');
@@ -3596,7 +3596,7 @@
         // 型の6区分の存在とゲームの固定(仮定)を隠さない(v46・材料に共通)。
         // 表記は院内レセプト学習モードの先例(「条件: 」ラベル・引用の前)に揃える(designer裁定)
         if (it && it.categoryM === '特定保険医療材料' && it.conditions) {
-          detail = `<p class="kb-cond">条件: ${it.conditions}</p>` + detail;
+          detail = `<p class="kb-cond is-note">条件: ${it.conditions}</p>` + detail;
         }
       } else if (l.incl && KBI) {
         const rule = KB_R08.rules.find((r) => r.id === l.incl);
