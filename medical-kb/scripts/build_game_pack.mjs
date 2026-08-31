@@ -77,6 +77,12 @@ const LIMITS = {
   'r08-C002-2-ro-3': { per: 'month', max: 1 },
   'r08-C002-2-ro-4': { per: 'month', max: 1 },
   'r08-C002-2-ro-5': { per: 'month', max: 1 },
+  // C002独立加算(v52便R): 在医総管に月1回で乗る(注7/10/13/15)
+  ...Object.fromEntries(
+    ['i-1','i-2','i-3','i-4','i-5','ro-1','ro-2','ro-3','ro-4','ro-5','ha-1','ha-2','ha-3','ha-4','ha-5']
+      .map((s) => [`r08-C002-n7-${s}`, { per: 'month', max: 1 }])
+      .concat([['r08-C002-n10', { per: 'month', max: 1 }], ['r08-C002-n13', { per: 'month', max: 1 }], ['r08-C002-n15', { per: 'month', max: 1 }]])
+  ),
 };
 
 /* ---- 機械判定ヒント: 文章ルール → エンジン述語 ----

@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-31T13:09:12.782Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-31T13:21:09.478Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-31T13:09:12.782Z",
+ "generated_at": "2026-08-31T13:21:09.478Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -2201,6 +2201,776 @@
    ]
   },
   {
+   "id": "r08-C002-n7-i-1",
+   "code": "114034570",
+   "kubun": "C002注7",
+   "name": "在宅医療充実体制加算(在宅時医学総合管理料・1人)",
+   "shortName": "在宅医療充実体制加算(1人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 800,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が1人の所定点数に更に加算する(告示C002注7)。施設基準は機能強化型在支診(第9の1の(1)(2))限定(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jujitsu"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "イ 在宅医療充実体制加算 (1)単一建物診療患者が1人の場合 800点 (2)単一建物診療患者が2人以上9人以下の場合 400点 (3)単一建物診療患者が10人以上19人以下の場合 200点 (4)単一建物診療患者が20人以上49人以下の場合 170点 (5)(1)から(4)まで以外の場合 150点",
+     "note": "マスター114034570=800と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-i-2",
+   "code": "114034670",
+   "kubun": "C002注7",
+   "name": "在宅医療充実体制加算(在宅時医学総合管理料・2〜9人)",
+   "shortName": "在宅医療充実体制加算(2〜9人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 400,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が2人以上9人以下の所定点数に更に加算する(告示C002注7)。施設基準は機能強化型在支診(第9の1の(1)(2))限定(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jujitsu"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "イ 在宅医療充実体制加算 (1)単一建物診療患者が1人の場合 800点 (2)単一建物診療患者が2人以上9人以下の場合 400点 (3)単一建物診療患者が10人以上19人以下の場合 200点 (4)単一建物診療患者が20人以上49人以下の場合 170点 (5)(1)から(4)まで以外の場合 150点",
+     "note": "マスター114034670=400と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-i-3",
+   "code": "114716110",
+   "kubun": "C002注7",
+   "name": "在宅医療充実体制加算(在宅時医学総合管理料・10〜19人)",
+   "shortName": "在宅医療充実体制加算(10〜19人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 200,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が10人以上19人以下の所定点数に更に加算する(告示C002注7)。施設基準は機能強化型在支診(第9の1の(1)(2))限定(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jujitsu"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "イ 在宅医療充実体制加算 (1)単一建物診療患者が1人の場合 800点 (2)単一建物診療患者が2人以上9人以下の場合 400点 (3)単一建物診療患者が10人以上19人以下の場合 200点 (4)単一建物診療患者が20人以上49人以下の場合 170点 (5)(1)から(4)まで以外の場合 150点",
+     "note": "マスター114716110=200と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-i-4",
+   "code": "114716210",
+   "kubun": "C002注7",
+   "name": "在宅医療充実体制加算(在宅時医学総合管理料・20〜49人)",
+   "shortName": "在宅医療充実体制加算(20〜49人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 170,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が20人以上49人以下の所定点数に更に加算する(告示C002注7)。施設基準は機能強化型在支診(第9の1の(1)(2))限定(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jujitsu"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "イ 在宅医療充実体制加算 (1)単一建物診療患者が1人の場合 800点 (2)単一建物診療患者が2人以上9人以下の場合 400点 (3)単一建物診療患者が10人以上19人以下の場合 200点 (4)単一建物診療患者が20人以上49人以下の場合 170点 (5)(1)から(4)まで以外の場合 150点",
+     "note": "マスター114716210=170と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-i-5",
+   "code": "114716310",
+   "kubun": "C002注7",
+   "name": "在宅医療充実体制加算(在宅時医学総合管理料・50人〜)",
+   "shortName": "在宅医療充実体制加算(50人〜)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 150,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が50人以上(告示は「(1)から(4)まで以外の場合」)の所定点数に更に加算する(告示C002注7)。施設基準は機能強化型在支診(第9の1の(1)(2))限定(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jujitsu"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "イ 在宅医療充実体制加算 (1)単一建物診療患者が1人の場合 800点 (2)単一建物診療患者が2人以上9人以下の場合 400点 (3)単一建物診療患者が10人以上19人以下の場合 200点 (4)単一建物診療患者が20人以上49人以下の場合 170点 (5)(1)から(4)まで以外の場合 150点",
+     "note": "マスター114716310=150と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ro-1",
+   "code": "114034870",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算1(在宅時医学総合管理料・1人)",
+   "shortName": "在宅療養実績加算1(1人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 300,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が1人の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診10件以上・在宅看取り4件以上(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki1"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ロ 在宅療養実績加算1 (1)単一建物診療患者が1人の場合 300点 (2)単一建物診療患者が2人以上9人以下の場合 150点 (3)単一建物診療患者が10人以上19人以下の場合 75点 (4)単一建物診療患者が20人以上49人以下の場合 63点 (5)(1)から(4)まで以外の場合 56点",
+     "note": "マスター114034870/114034970/114716610/114716710/114716810と全一致。イ(充実体制800/400/200/170/150=114034570他)・ハ(実績2 200/100/50/43/38=114035170他)も同様に突合一致(v52コミット0)。代表セルにのみevidenceを置き他セルは同quoteを準用"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ro-2",
+   "code": "114034970",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算1(在宅時医学総合管理料・2〜9人)",
+   "shortName": "在宅療養実績加算1(2〜9人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 150,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が2人以上9人以下の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診10件以上・在宅看取り4件以上(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki1"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ロ 在宅療養実績加算1 (1)単一建物診療患者が1人の場合 300点 (2)単一建物診療患者が2人以上9人以下の場合 150点 (3)単一建物診療患者が10人以上19人以下の場合 75点 (4)単一建物診療患者が20人以上49人以下の場合 63点 (5)(1)から(4)まで以外の場合 56点",
+     "note": "マスター114034970=150と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ro-3",
+   "code": "114716610",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算1(在宅時医学総合管理料・10〜19人)",
+   "shortName": "在宅療養実績加算1(10〜19人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 75,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が10人以上19人以下の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診10件以上・在宅看取り4件以上(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki1"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ロ 在宅療養実績加算1 (1)単一建物診療患者が1人の場合 300点 (2)単一建物診療患者が2人以上9人以下の場合 150点 (3)単一建物診療患者が10人以上19人以下の場合 75点 (4)単一建物診療患者が20人以上49人以下の場合 63点 (5)(1)から(4)まで以外の場合 56点",
+     "note": "マスター114716610=75と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ro-4",
+   "code": "114716710",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算1(在宅時医学総合管理料・20〜49人)",
+   "shortName": "在宅療養実績加算1(20〜49人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 63,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が20人以上49人以下の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診10件以上・在宅看取り4件以上(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki1"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ロ 在宅療養実績加算1 (1)単一建物診療患者が1人の場合 300点 (2)単一建物診療患者が2人以上9人以下の場合 150点 (3)単一建物診療患者が10人以上19人以下の場合 75点 (4)単一建物診療患者が20人以上49人以下の場合 63点 (5)(1)から(4)まで以外の場合 56点",
+     "note": "マスター114716710=63と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ro-5",
+   "code": "114716810",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算1(在宅時医学総合管理料・50人〜)",
+   "shortName": "在宅療養実績加算1(50人〜)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 56,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が50人以上(告示は「(1)から(4)まで以外の場合」)の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診10件以上・在宅看取り4件以上(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki1"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ロ 在宅療養実績加算1 (1)単一建物診療患者が1人の場合 300点 (2)単一建物診療患者が2人以上9人以下の場合 150点 (3)単一建物診療患者が10人以上19人以下の場合 75点 (4)単一建物診療患者が20人以上49人以下の場合 63点 (5)(1)から(4)まで以外の場合 56点",
+     "note": "マスター114716810=56と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ha-1",
+   "code": "114035170",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算2(在宅時医学総合管理料・1人)",
+   "shortName": "在宅療養実績加算2(1人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 200,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が1人の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診4件以上・在宅看取り2件以上+緩和ケア研修修了の常勤医(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki2"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ハ 在宅療養実績加算2 (1)単一建物診療患者が1人の場合 200点 (2)単一建物診療患者が2人以上9人以下の場合 100点 (3)単一建物診療患者が10人以上19人以下の場合 50点 (4)単一建物診療患者が20人以上49人以下の場合 43点 (5)(1)から(4)まで以外の場合 38点",
+     "note": "マスター114035170=200と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ha-2",
+   "code": "114035270",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算2(在宅時医学総合管理料・2〜9人)",
+   "shortName": "在宅療養実績加算2(2〜9人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 100,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が2人以上9人以下の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診4件以上・在宅看取り2件以上+緩和ケア研修修了の常勤医(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki2"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ハ 在宅療養実績加算2 (1)単一建物診療患者が1人の場合 200点 (2)単一建物診療患者が2人以上9人以下の場合 100点 (3)単一建物診療患者が10人以上19人以下の場合 50点 (4)単一建物診療患者が20人以上49人以下の場合 43点 (5)(1)から(4)まで以外の場合 38点",
+     "note": "マスター114035270=100と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ha-3",
+   "code": "114717110",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算2(在宅時医学総合管理料・10〜19人)",
+   "shortName": "在宅療養実績加算2(10〜19人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 50,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が10人以上19人以下の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診4件以上・在宅看取り2件以上+緩和ケア研修修了の常勤医(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki2"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ハ 在宅療養実績加算2 (1)単一建物診療患者が1人の場合 200点 (2)単一建物診療患者が2人以上9人以下の場合 100点 (3)単一建物診療患者が10人以上19人以下の場合 50点 (4)単一建物診療患者が20人以上49人以下の場合 43点 (5)(1)から(4)まで以外の場合 38点",
+     "note": "マスター114717110=50と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ha-4",
+   "code": "114717210",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算2(在宅時医学総合管理料・20〜49人)",
+   "shortName": "在宅療養実績加算2(20〜49人)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 43,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が20人以上49人以下の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診4件以上・在宅看取り2件以上+緩和ケア研修修了の常勤医(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki2"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ハ 在宅療養実績加算2 (1)単一建物診療患者が1人の場合 200点 (2)単一建物診療患者が2人以上9人以下の場合 100点 (3)単一建物診療患者が10人以上19人以下の場合 50点 (4)単一建物診療患者が20人以上49人以下の場合 43点 (5)(1)から(4)まで以外の場合 38点",
+     "note": "マスター114717210=43と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n7-ha-5",
+   "code": "114717310",
+   "kubun": "C002注7",
+   "name": "在宅療養実績加算2(在宅時医学総合管理料・50人〜)",
+   "shortName": "在宅療養実績加算2(50人〜)",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 38,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "在宅時医学総合管理料の単一建物診療患者が50人以上(告示は「(1)から(4)まで以外の場合」)の所定点数に更に加算する(告示C002注7)。施設基準は通常型在支診(第9の1の(3))+過去1年の緊急往診4件以上・在宅看取り2件以上+緩和ケア研修修了の常勤医(届出は様式11+様式11の5=第9の4)。実績要件はゲームでは判定しない(体制を整えた扱い=ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n7-jisseki2"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "ハ 在宅療養実績加算2 (1)単一建物診療患者が1人の場合 200点 (2)単一建物診療患者が2人以上9人以下の場合 100点 (3)単一建物診療患者が10人以上19人以下の場合 50点 (4)単一建物診療患者が20人以上49人以下の場合 43点 (5)(1)から(4)まで以外の場合 38点",
+     "note": "マスター114717310=38と一致(v52コミット0で全15セル突合済み)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n10",
+   "code": "114043870",
+   "kubun": "C002注10",
+   "name": "包括的支援加算(在宅時医学総合管理料)",
+   "shortName": "包括的支援加算",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 150,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "1のイ・ロの(2)〜(5)、2のロからホまで及び3のロからホまでについて、別に厚生労働大臣が定める状態の患者(別表第八の三: 要介護3以上又はこれに準ずる状態・意思疎通の困難な認知症・頻回の訪問看護・訪問診療又は訪問看護における処置・特定施設等の看護職員による処置・麻薬の投薬・特別な医学管理を必要とする状態)に加算する。本ゲームは患者状態を入力に持たないため算定しない(rule-0021)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": null,
+   "notificationReq": null,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.143",
+     "quote": "10 1のイの(2)から(5)まで、1のロの(2)から(5)まで、2のロからホまで及び3のロからホまでについて、別に厚生労働大臣が定める状態の患者については、包括的支援加算として、150点を所定点数に加算する。",
+     "note": "マスター114043870=150と一致。適用は2のロ全体=登録済みro-1〜5の全人数セル(1人セルを含む。C002の2は注10で(2)〜(5)の限定が無い)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n13",
+   "code": "114057970",
+   "kubun": "C002注13",
+   "name": "在宅データ提出加算(在宅時医学総合管理料)",
+   "shortName": "在宅データ提出加算",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 50,
+   "unit": "月1回(在医総管に加算)",
+   "conditions": "診療報酬の請求状況・診療の内容に関するデータを継続して厚生労働省に提出している場合に加算(告示C002注13)。施設基準=外来医療等調査に参加しデータを提出する体制(様式7の11)。提出遅延3回で算定不可等の運用要件は、届出をもって体制が続く扱い(ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-c002-n13"
+   ],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.144",
+     "quote": "13 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において、当該保険医療機関における診療報酬の請求状況、診療の内容に関するデータを継続して厚生労働省に提出している場合は、在宅データ提出加算として、50点を所定点数に加算する。",
+     "note": "マスター114057970=50と一致。施設基準はtsuchi8 p.126(外来医療等調査参加+データ提出体制)・様式7の11(p.127)"
+    }
+   ]
+  },
+  {
+   "id": "r08-C002-n15",
+   "code": "114723810",
+   "kubun": "C002注15",
+   "name": "在宅医療情報連携加算(在宅時医学総合管理料)",
+   "shortName": "在宅医療情報連携加算",
+   "categoryL": "特掲診療料",
+   "categoryM": "在宅医療",
+   "points": 100,
+   "unit": "月1回",
+   "conditions": "連携する他の保険医療機関・訪問看護ステーション・保険薬局・ケアマネジャー等が電子情報処理組織等で記録した当該患者の診療情報等を活用した上で計画的な医学管理を行った場合に月1回加算(告示C002注15)。体制の届出に加えて患者単位の実態要件(ICT記録の活用)がある。本ゲームは連携機関を入力に持たないため算定しない(rule-0022)",
+   "exclusions": null,
+   "countLimitText": "月1回(告示注15)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 0,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "homecare",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.144",
+     "quote": "15 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た訪問診療を実施している保険医療機関の保険医が、...当該患者に係る診療情報等を活用した上で、計画的な医学管理を行った場合に、在宅医療情報連携加算として、月1回に限り、100点を所定点数に加算する。",
+     "note": "マスター114723810=100(月1回)と一致。体制+患者単位の実態の二要件=rule-0022"
+    }
+   ]
+  },
+  {
    "id": "r08-C007",
    "code": "114008010",
    "kubun": "C007",
@@ -4302,6 +5072,82 @@
      "note": "区分3=(1)〜(8)・区分2=+(9)〜(11)のいずれか・区分1=全て。届出は様式1の6。(4)(6)は「満たしていればよく届出不要」(第1の8-4(3))。マイナ保険証利用率はゲームでは体制投資で満たした扱い(ゲーム上の仮定として実装側に明記)"
     }
    ]
+  },
+  {
+   "id": "r08-fs-c002-n7-jujitsu",
+   "name": "在宅医療充実体制加算の施設基準",
+   "shortName": "在宅医療充実体制",
+   "ryoType": "tokkei",
+   "notificationReq": 1,
+   "staffing": "在宅医療担当の常勤換算医師3名以上かつ常勤医師2名以上",
+   "equipment": null,
+   "record": null,
+   "system": "機能強化型在支診(第9の1の(1)又は(2))であって緊急往診30件以上・看取り等30件以上/年ほか(第9の2の(3)ア〜サ)",
+   "transitional": null,
+   "formNo": "別添2 様式11+様式11の3",
+   "sourceNotice": "r08-tsuchi8-tokkei-todokede",
+   "sourcePage": "第9の2の(3)(PDF p.92-93)",
+   "confidence": "verified",
+   "evidence": []
+  },
+  {
+   "id": "r08-fs-c002-n7-jisseki1",
+   "name": "在宅療養実績加算1の施設基準",
+   "shortName": "在宅療養実績1",
+   "ryoType": "tokkei",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "通常型在支診(第9の1の(3))であって過去1年間の緊急往診10件以上かつ在宅看取り4件以上",
+   "transitional": null,
+   "formNo": "別添2 様式11+様式11の5",
+   "sourceNotice": "r08-tsuchi8-tokkei-todokede",
+   "sourcePage": "第9の2の(4)(PDF p.94)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "system_req",
+     "doc": "r08-tsuchi8-tokkei-todokede",
+     "page": "PDF p.94",
+     "quote": "(4) 往診料の加算等に規定する在宅療養実績加算1の施設基準 1の(3)に規定する在宅療養支援診療所であって、過去1年間の緊急の往診の実績を10件以上有し、かつ、過去1年間の在宅における看取りの実績を4件以上有していること。",
+     "note": "1の(3)=従来型(通常型)在支診が主体=ゲームの在支診で届出可能。実績加算2(第9の2の(5))は緊急往診4件・看取り2件+緩和ケア研修修了常勤医。充実体制(2の(3)イ)は1の(1)(2)=機能強化型限定でゲーム対象外"
+    }
+   ]
+  },
+  {
+   "id": "r08-fs-c002-n7-jisseki2",
+   "name": "在宅療養実績加算2の施設基準",
+   "shortName": "在宅療養実績2",
+   "ryoType": "tokkei",
+   "notificationReq": 1,
+   "staffing": "緩和ケア研修会を修了した常勤医師が在宅医療を担当",
+   "equipment": null,
+   "record": null,
+   "system": "通常型在支診(第9の1の(3))であって過去1年間の緊急往診4件以上かつ在宅看取り2件以上",
+   "transitional": null,
+   "formNo": "別添2 様式11+様式11の5",
+   "sourceNotice": "r08-tsuchi8-tokkei-todokede",
+   "sourcePage": "第9の2の(5)(PDF p.94)",
+   "confidence": "verified",
+   "evidence": []
+  },
+  {
+   "id": "r08-fs-c002-n13",
+   "name": "在宅データ提出加算の施設基準",
+   "shortName": "在宅データ提出",
+   "ryoType": "tokkei",
+   "notificationReq": 1,
+   "staffing": "調査事務局と連絡可能な担当者1名の指定",
+   "equipment": null,
+   "record": null,
+   "system": "外来医療等調査に適切に参加しデータを提出する体制・診療記録の保管管理と疾病別検索",
+   "transitional": null,
+   "formNo": "別添2 様式7の11",
+   "sourceNotice": "r08-tsuchi8-tokkei-todokede",
+   "sourcePage": "第15の3(PDF p.126-127)",
+   "confidence": "verified",
+   "evidence": []
   }
  ],
  "rules": [
@@ -4718,6 +5564,38 @@
      "r08-C002-2-ro-5"
     ],
     "note": "保留#27(v50 PM検出F7)の構造化。同一患者の同月二重申請は現行ゲームフローで到達不能(便Qコミット0実測)だが、エンジンが申請を通す構造穴を塞ぐ。残件: 同一受診内の複数セル同時申請は未判定(monthCountは過去履歴のみを読む)=保留#28。ゲームは1受診1セルのため到達不能"
+   }
+  },
+  {
+   "id": "r08-rule-0021",
+   "source": "r08-C002-n10",
+   "target": "(ゲームの算定判断)",
+   "type": "conditional",
+   "condition": "包括的支援加算は「別に厚生労働大臣が定める状態」(別表第八の三)の患者に限り加算する。要介護3以上又はこれに準ずる状態/日常生活に支障を来たす症状・行動や意思疎通の困難さが見られ介護を必要とする認知症/頻回の訪問看護を受けている状態/訪問診療又は訪問看護において処置を受けている状態/特定施設等の看護職員による処置/麻薬の投薬を受けている状態/その他特別な医学管理を必要とする状態",
+   "period": "same_month",
+   "bidirectional": 0,
+   "doc": "r08-kokuji71-tokkei",
+   "page": "別表第八の三(PDF p.257-258)",
+   "quote": "要介護三以上の状態又はこれに準ずる状態 日常生活に支障を来たすような症状・行動や意思疎通の困難さが見られ、介護を必要とする認知症の状態 頻回の訪問看護を受けている状態 訪問診療又は訪問看護において処置を受けている状態",
+   "machine": {
+    "type": "handled_externally",
+    "note": "本ゲームは患者状態(要介護度・認知症・処置等)を入力に持たないため算定しない(否定的確認・v52便Rコミット0)。p.sj(訪問看護指示フラグ)は指示の有無のみで「頻回」の判定材料にならない。患者状態レイヤーを将来作る場合に再判定(選定療養v48と同型)"
+   }
+  },
+  {
+   "id": "r08-rule-0022",
+   "source": "r08-C002-n15",
+   "target": "(ゲームの算定判断)",
+   "type": "conditional",
+   "condition": "在宅医療情報連携加算は、施設基準の届出(体制)に加えて、連携機関(他の保険医療機関・訪問看護ステーション・保険薬局・ケアマネジャー等)がICTで記録した当該患者の診療情報等を活用した計画的な医学管理(患者単位の実態)を要件とする",
+   "period": "same_month",
+   "bidirectional": 0,
+   "doc": "r08-kokuji69-ika",
+   "page": "PDF p.144 (C002注15)",
+   "quote": "当該患者に関わる者が電子情報処理組織を使用する方法その他の情報通信の技術を利用する方法を用いて記録した当該患者に係る診療情報等を活用した上で、計画的な医学管理を行った場合に、在宅医療情報連携加算として、月1回に限り、100点を所定点数に加算する。",
+   "machine": {
+    "type": "handled_externally",
+    "note": "本ゲームは連携機関(訪看ST・薬局・ケアマネ)のオブジェクトを持たないため算定しない(否定的確認・v52便Rコミット0)。届出だけで算定させると実態要件の半分を捨てた過大計上になる(第4章)"
    }
   }
  ]

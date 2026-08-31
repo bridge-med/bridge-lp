@@ -153,5 +153,85 @@
   "item_id": "r08-C002-2-ro-5",
   "fs_id": "r08-fs-zaishien",
   "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-1",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-2",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-3",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-4",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-5",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-1",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-2",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-3",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-4",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-5",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-1",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-2",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-3",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-4",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-5",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n13",
+  "fs_id": "r08-fs-c002-n13",
+  "relation": "required"
  }
 ]

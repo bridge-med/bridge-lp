@@ -523,5 +523,131 @@
   "relevance": "primary",
   "rationale": "マンション(同一建物)で同一日に複数患者を訪問する日の訪問診療料",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-i-1",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-i-2",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-i-3",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-i-4",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-i-5",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-1",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-2",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-3",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-4",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-5",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-1",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-2",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-3",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-4",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-5",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の体制加算(届出区分×単一建物人数)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n10",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の独立加算",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n13",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の独立加算",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-n15",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "在医総管の独立加算",
+  "confidence": "verified"
  }
 ]
