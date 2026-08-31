@@ -3493,10 +3493,11 @@
   const playerWarn = (ws) => (ws || []).filter((w) => !DEV_WARN.has(w.kind) && w.kind !== 'conditional_ok');
   const devWarn = (ws) => (ws || []).filter((w) => DEV_WARN.has(w.kind));
 
-  // 設備・体制の投資ボタン(モジュールのactions定義から。購入済みは消える)
+  // 設備・体制の投資ボタン(モジュールのactions定義から。購入済みは消える)。
+  // noteは「何が買えるか」なので購入前に見せる(v49 PM裁定A: 値段だけで選ばせない)
   function deptActionsHtml(m, d) {
     const btns = (m.actions || []).filter((a) => a.can(d))
-      .map((a) => `<button class="op-btn" data-dact="${m.id}:${a.id}">${a.label} <small>${yen(a.cost)}</small></button>`).join('');
+      .map((a) => `<button class="op-btn${a.note ? ' has-note' : ''}" data-dact="${m.id}:${a.id}"><b>${a.label}</b> <small>${yen(a.cost)}</small>${a.note ? `<small class="act-note">${a.note}</small>` : ''}</button>`).join('');
     return btns ? `<div class="op-row">${btns}</div>` : '';
   }
 
