@@ -43,6 +43,11 @@
 - 特定保険医療材料は `{rev}-t{特定器材コード}` 例 `r08-t710010929`(ダイアライザーIa型)。
   点数は「材料価格を10円で除して得た点数」(J400等)で、材料価格(円)と価格基準の別表・区分は
   conditionsとevidenceに明記する(v45制定)
+- 薬剤は `{rev}-y{医薬品コード}[-数量接尾語]` 例 `r08-y620004641`(アルツ1筒)・
+  `r08-y641210099-5ml`(キシロカイン1%を5mL使う想定のセル)。同一薬剤の使用量違いは数量接尾語で
+  分ける。項目に `yakka_yen`(使用量あたり薬価)・`yakka_units`(マスター単位の数)・
+  `yakka_formula`(G100/L200等)を持たせ、validate_kbが単価×使用量と算式で点数を検算する。
+  使用量が臨床上固定でないものは「ゲーム上の仮定」とunit/conditionsに明記する(v47制定)
 - facility_standards.id: `{rev}-fs-{slug}` 例 `r08-fs-undokiriha-1`
 - billing_rules.id: `{rev}-rule-{連番4桁}`
 - qa_entries.id: `{document_id}-q{連番}` 例 `r08-qa-20260323-q005`

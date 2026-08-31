@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-31T02:03:27.876Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-31T03:15:08.768Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-31T02:03:27.876Z",
+ "generated_at": "2026-08-31T03:15:08.768Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -281,6 +281,16 @@
    "title": "特定保険医療材料の材料価格算定に関する留意事項について(令和8年3月5日 保医発0305第1号)",
    "url": "https://www.mhlw.go.jp/content/12400000/001686844.pdf",
    "number": "保医発0305第1号"
+  },
+  "r08-kokuji72-yakka": {
+   "title": "使用薬剤の薬価(薬価基準)の一部を改正する件(令和8年厚生労働省告示第72号)",
+   "url": "https://www.mhlw.go.jp/content/12400000/001665198.pdf",
+   "number": "令和8年厚生労働省告示第72号"
+  },
+  "r08-ryuiji-yakka": {
+   "title": "使用薬剤の薬価(薬価基準)の一部改正等について(令和8年3月5日 保医発0305第10号)",
+   "url": "https://www.mhlw.go.jp/content/12400000/001666898.pdf",
+   "number": "保医発0305第10号"
   }
  },
  "specialties": [
@@ -1207,7 +1217,7 @@
    "points": 56,
    "unit": "片側につき",
    "conditions": "眼底カメラ撮影のみでは算定不可等の運用は留意事項通知で確認。両側は112点(160081130)。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、実施した日は外来管理加算不可(留意A001(7)キ)",
-   "exclusions": null,
+   "exclusions": "散瞳剤(ミドリンP点眼液=35.90円/mL)は1回使用量(約0.1mL≒3.6円)が15円以下のため検査薬剤料D500注1により算定しない(眼科モジュールが散瞳剤を計上しないのは制度上の事実=v47)",
    "countLimitText": null,
    "periodLimitText": null,
    "limit": null,
@@ -1231,6 +1241,13 @@
      "page": "PDF p.203",
      "quote": "D255 精密眼底検査(片側) 56点",
      "note": "マスター160081010=56と一致"
+    },
+    {
+     "field": "exclusions",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.212",
+     "quote": "D500 薬剤 ...注1 薬価が15円以下である場合は、算定しない。",
+     "note": "【否定的確認】検査薬剤料D500注1。散瞳剤ミドリンP点眼液は35.90円/mL(医薬品マスター620003872)で、1回使用量(両眼2滴≒0.1mL≒3.6円)は15円以下→算定しない。眼科の散瞳剤スロット(issues#10)はスロット自体が消滅。使用量の見積りはゲーム上の仮定"
     }
    ]
   },
@@ -3182,6 +3199,105 @@
      "page": "PDF p.2(I-1-(2))",
      "quote": "特掲診療料の各部において、特定保険医療材料料を算定する場合には、特定保険医療材料の材料価格を10円で除して得た点数となるが、この場合において端数が生じた場合は端数を四捨五入して得た点数とする。",
      "note": "J400の告示文に端数規定はなく、四捨五入の根拠はこの留意事項。validate_kbのE7材料突合の期待値計算(価格を10で除してから四捨五入)はこれに従う"
+    }
+   ]
+  },
+  {
+   "id": "r08-y620004641",
+   "code": "620004641",
+   "kubun": "G100/薬価基準",
+   "name": "関節注入薬剤(アルツディスポ関節注25mg 1%2.5mL)",
+   "shortName": "関節注入薬剤(アルツ25mg)",
+   "categoryL": "特掲診療料",
+   "categoryM": "薬剤",
+   "points": 66,
+   "unit": "1筒につき(関節腔内注射1回で1筒使用=キット製剤)",
+   "conditions": "精製ヒアルロン酸ナトリウムのディスポーザブル関節注キット。薬価663.00円/筒(医薬品マスター620004641・薬価基準=告示72号は数字が機械抽出不能のためマスターを数値の正とする)。第6部注射の薬剤料G100「(薬価-15円)÷10、1点未満切り上げ+1点」で66点。関節腔内注射(G010)と併せて算定",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.228",
+     "quote": "G100 薬剤 1 薬価が1回分使用量につき15円以下である場合 1点 2 薬価が1回分使用量につき15円を超える場合 薬価から15円を控除した額を10円で除して得た点数につき1点未満の端数を切り上げて得た点数に1点を加算して得た点数",
+     "note": "注射薬剤料の算式(告示G100)。(663.00-15)÷10=64.8→切り上げ65+1=66点。薬価663.00円/筒は医薬品マスター620004641で確認(薬価基準告示72号は「別表を次のように改める」の全部差し替え型だが数字が埋め込みフォントで機械抽出不能=kokuji70/71と同類。マスターを数値の正とする)"
+    }
+   ]
+  },
+  {
+   "id": "r08-y641210099-5ml",
+   "code": "641210099",
+   "kubun": "L200/薬価基準",
+   "name": "トリガーポイント注入薬剤(キシロカイン注射液1% 5mL)",
+   "shortName": "トリガー注入薬剤(キシロカイン1%5mL)",
+   "categoryL": "特掲診療料",
+   "categoryM": "薬剤",
+   "points": 5,
+   "unit": "1回につき(使用量5mLはゲーム上の仮定)",
+   "conditions": "リドカイン局所麻酔剤。薬価11.00円/mL×5mL=55.00円(医薬品マスター641210099)。第11部麻酔の薬剤料L200「(薬価-15円)÷10、1点未満切り上げ+1点」で5点(15円以下なら算定しない=注1)。使用量5mLはトリガーポイント注射のゲーム上の仮定",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.363",
+     "quote": "L200 薬剤 薬価が15円を超える場合は、薬価から15円を控除した額を10円で除して得た点数につき1点未満の端数を切り上げて得た点数に1点を加算して得た点数とする。注1 薬価が15円以下である場合は、算定しない。",
+     "note": "麻酔薬剤料の算式(告示L200)。11.00円/mL×5mL=55.00円→(55-15)÷10=4.0→4+1=5点。単価は医薬品マスター641210099。使用量5mLはゲーム上の仮定として項目に明記"
+    }
+   ]
+  },
+  {
+   "id": "r08-y641210099-10ml",
+   "code": "641210099",
+   "kubun": "L200/薬価基準",
+   "name": "神経ブロック注入薬剤(キシロカイン注射液1% 10mL)",
+   "shortName": "ブロック注入薬剤(キシロカイン1%10mL)",
+   "categoryL": "特掲診療料",
+   "categoryM": "薬剤",
+   "points": 11,
+   "unit": "1回につき(使用量10mLはゲーム上の仮定)",
+   "conditions": "リドカイン局所麻酔剤。薬価11.00円/mL×10mL=110.00円(医薬品マスター641210099)。第11部麻酔の薬剤料L200で11点。使用量10mLは腰部硬膜外ブロックのゲーム上の仮定",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "p.363",
+     "quote": "L200 薬剤 薬価が15円を超える場合は、薬価から15円を控除した額を10円で除して得た点数につき1点未満の端数を切り上げて得た点数に1点を加算して得た点数とする。",
+     "note": "11.00円/mL×10mL=110.00円→(110-15)÷10=9.5→切り上げ10+1=11点。単価は医薬品マスター641210099。使用量10mLはゲーム上の仮定として項目に明記"
     }
    ]
   }

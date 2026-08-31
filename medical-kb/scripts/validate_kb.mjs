@@ -42,11 +42,13 @@ const specialties = loadOr(join(KB_ROOT, 'data', 'kb', 'common', 'specialties.js
 const manifest = loadOr(join(KB_ROOT, 'data', 'manifest', `sources.${rev}.json`), { documents: [] });
 let master = null;
 let kizai = null;
+let iyakuhin = null;
 try {
-  const { ensureExtracted, loadIkaMaster, loadKizaiMaster } = await import('./lib/edt.mjs');
+  const { ensureExtracted, loadIkaMaster, loadKizaiMaster, loadIyakuhinMaster } = await import('./lib/edt.mjs');
   ensureExtracted(rev);
   master = loadIkaMaster(rev);
   kizai = loadKizaiMaster(rev);
+  iyakuhin = loadIyakuhinMaster(rev);
 } catch { /* 原典未取得・レイアウト未検証時はE7をスキップ */ }
 
 const errors = [];
@@ -135,7 +137,32 @@ if (existsSync(scenDir)) {
 if (master?.rows?.length) {
   const byCode = new Map(master.rows.map(m => [m.code, m]));
   const byKizai = new Map((kizai?.rows || []).map(m => [m.code, m]));
+  const byDrug = new Map((iyakuhin?.rows || []).map(m => [m.code, m]));
   for (const it of items) {
+    // 薬剤({rev}-y{医薬品コード}[-数量接尾語]): 単価×使用量とG100/L200算式で点数を検算
+    const isDrug = /^r\d\d-y\d{9}(-|$)/.test(it.id);
+    if (isDrug) {
+      const dm = it.code ? byDrug.get(it.code) : null;
+      if (!dm) { warns.push(`E7 ${it.id}: code=${it.code} が医薬品マスターに存在しない`); continue; }
+      if (it.yakka_yen != null && it.yakka_units != null && dm.price_type === '1') {
+        const expectYen = Math.round(Number(dm.price_raw) * Number(it.yakka_units) * 100) / 100;
+        if (Math.abs(expectYen - Number(it.yakka_yen)) > 0.005) {
+          errors.push(`E7 ${it.id}: 薬価が単価×使用量と不一致 (kb=${it.yakka_yen} / マスター${dm.price_raw}×${it.yakka_units}=${expectYen})`);
+        }
+        const y = Number(it.yakka_yen);
+        // G100: 15円以下=1点 / L200・D500・J300型: 15円以下=算定しない(登録自体が誤り)
+        let expectPts = null;
+        if (y <= 15) expectPts = it.yakka_formula === 'G100' ? 1 : NaN;
+        else expectPts = Math.ceil((y - 15) / 10) + 1;
+        if (Number.isNaN(expectPts)) errors.push(`E7 ${it.id}: ${it.yakka_formula}は薬価15円以下を算定しない(登録誤り)`);
+        else if (it.points != null && Number(it.points) !== expectPts) {
+          errors.push(`E7 ${it.id}: 薬剤点数が算式と不一致 (kb=${it.points} / ${it.yakka_formula}算式=${expectPts}点)`);
+        }
+      } else if (it.yakka_yen == null || it.yakka_units == null) {
+        warns.push(`E7 ${it.id}: yakka_yen/yakka_unitsが未設定のため薬剤点数の検算をスキップ`);
+      }
+      continue;
+    }
     const isMat = /^r\d\d-t\d{9}$/.test(it.id);
     if (isMat) {
       const km = it.code ? byKizai.get(it.code) : null;

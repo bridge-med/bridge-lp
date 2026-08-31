@@ -1034,6 +1034,48 @@
    "status": "retrieved",
    "verified": true,
    "notes": "実物照合済み: 頭書に「保医発0305第1号 令和8年3月5日」。改定ポータルのリンクから取得(v45便J)"
+  },
+  {
+   "id": "r08-kokuji72-yakka",
+   "category": "C",
+   "title": "使用薬剤の薬価(薬価基準)の一部を改正する件(令和8年厚生労働省告示第72号)",
+   "doc_type": "kokuji",
+   "issuer": "厚生労働省",
+   "doc_number": "令和8年厚生労働省告示第72号",
+   "doc_number_confidence": "verified",
+   "urls": [
+    {
+     "url": "https://www.mhlw.go.jp/content/12400000/001665198.pdf",
+     "kind": "official",
+     "confidence": "verified"
+    }
+   ],
+   "save_as": "mhlw/kokuji72_yakka_kijun.pdf",
+   "fetch": "direct",
+   "status": "planned",
+   "verified": true,
+   "notes": "実物照合済み: 制定文に「厚生労働省告示第七十二号」・「別表を次のように改める。」(全部差し替え型)。ただし本文の数字は埋め込みフォントで機械抽出不能(kokuji70/71と同類)。薬価の数値突合は医薬品マスター(支払基金)を正とする(v47便M)"
+  },
+  {
+   "id": "r08-ryuiji-yakka",
+   "category": "C",
+   "title": "使用薬剤の薬価(薬価基準)の一部改正等について(令和8年3月5日 保医発0305第10号)",
+   "doc_type": "tsuchi",
+   "issuer": "厚生労働省",
+   "doc_number": "保医発0305第10号",
+   "doc_number_confidence": "verified",
+   "urls": [
+    {
+     "url": "https://www.mhlw.go.jp/content/12400000/001666898.pdf",
+     "kind": "official",
+     "confidence": "verified"
+    }
+   ],
+   "save_as": "mhlw/ryuiji_yakka_0305_10.pdf",
+   "fetch": "direct",
+   "status": "planned",
+   "verified": true,
+   "notes": "実物照合済み: 頭書に「保医発0305第10号 令和8年3月5日」(v47便M)"
   }
  ]
 }

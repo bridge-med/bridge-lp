@@ -377,6 +377,20 @@
       "dest": "data/sources/r08/mhlw/ryuiji_zairyo_0305_1.pdf",
       "sha256": "25d15dbdedfd6cf1f29f7cc3b22902caca485f693444e49912c24b1c94c2fee1",
       "retrieved_at": "2026-08-31T01:31:01.796Z"
+    },
+    {
+      "id": "r08-kokuji72-yakka",
+      "url": "https://www.mhlw.go.jp/content/12400000/001665198.pdf",
+      "dest": "data/sources/r08/mhlw/kokuji72_yakka_kijun.pdf",
+      "sha256": "a47398038189434317fbd48f6d85019e794e576c4396dd3e2ab065d00dff7416",
+      "retrieved_at": "2026-08-31T03:10:34.977Z"
+    },
+    {
+      "id": "r08-ryuiji-yakka",
+      "url": "https://www.mhlw.go.jp/content/12400000/001666898.pdf",
+      "dest": "data/sources/r08/mhlw/ryuiji_yakka_0305_10.pdf",
+      "sha256": "3cf44aa06cc4680398fd0fe143ff217eef245a5d31f8bf3c517d4d5834505d3c",
+      "retrieved_at": "2026-08-31T03:10:35.768Z"
     }
   ]
 }

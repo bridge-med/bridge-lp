@@ -87,6 +87,30 @@ export function loadIkaMaster(rev) {
   };
 }
 
+/* 医薬品マスター → レコード配列(薬価の突合用) */
+export function loadIyakuhinMaster(rev) {
+  const layout = loadLayout();
+  const iy = layout.iyakuhin;
+  if (!iy || !iy.verified) {
+    throw new Error('master-layout.json の iyakuhin が未定義または verified: false。仕様書と照合するまで医薬品マスターは取込できない。');
+  }
+  const csv = findCsv(rev, 'master_iyakuhin_y_x', 'y_');
+  if (!csv) throw new Error('医薬品マスターCSVが見つからない。ensureExtracted を先に実行すること。');
+  const col = iy.columns;
+  const pick = (row, key) => (col[key] == null ? null : strip(row[col[key]] ?? null));
+  return {
+    source_file: csv.split('/').pop(),
+    rows: readSjisCsv(csv).filter(r => strip(r[col.master_type]) === 'Y').map(r => ({
+      code: pick(r, 'code'),
+      name: pick(r, 'name'),
+      unit_name: pick(r, 'unit_name'),
+      price_type: pick(r, 'price_type'),
+      price_raw: pick(r, 'price') !== null && pick(r, 'price') !== '' ? Number(pick(r, 'price')) : null,
+      kohatsu: pick(r, 'kohatsu'),
+    })),
+  };
+}
+
 /* 特定器材マスター → レコード配列(材料価格の突合用) */
 export function loadKizaiMaster(rev) {
   const layout = loadLayout();
