@@ -169,7 +169,8 @@
           }
         }
       } else if (m.type === 'same_day_ng_items') {
-        const src = findRec(m.source);
+        // sourceは単一idまたは配列(同一受診で片方しか立たないイ/ロ対=rule-0008のv51拡張)
+        const src = sources.map(findRec).find(Boolean);
         if (!src) continue;
         for (const tid of m.targetItemIds) {
           const t = findRec(tid);

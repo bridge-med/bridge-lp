@@ -428,6 +428,45 @@ t('マンション地区でも2人以下はみなし1人セル(24戸の10%以下
   ok(cell && cell.n === 2, `2人とも1人セルで算定(実際${cell ? cell.n : 0}件)`);
 });
 
+t('マンションで同日2人を回る日は訪問診療料がロ(同一建物居住者)になる(v51・#25解消)', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.policy.oncall = true;
+  dept.fs.push('r08-fs-zaishien');
+  dept.sd = 1;
+  for (let i = 0; i < 2; i++) {
+    dept.seq++;
+    dept.pt.push({ id: 'hv' + i, pr: 'home', en: 1, nv: 20, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, cl: 12, iv: 15, sj: 0, mv: 0, mvm: 0 });
+  }
+  const mctx = Object.assign(hcCtx(dept, 20, rng(4)), {
+    siteInfo: (i) => (i === 12 ? { x: 15, y: 15, mansion: true, units: 24 } : { x: 0, y: 0 }),
+  });
+  const agg = DEPT.runDay(HOMECARE, dept, mctx);
+  const ro = agg.byItem['r08-C001-1-ro'];
+  ok(ro && ro.n === 2, `2人ともロで算定(実際${ro ? ro.n : 0}件)`);
+  eq(agg.byItem['r08-C001-1-i'], undefined, 'イは使われない');
+});
+
+t('繰越で建物内が1人になった日はイ(実訪問集合で判定=2パスの境界)', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.policy.oncall = true;
+  dept.fs.push('r08-fs-zaishien');
+  dept.sd = 1;
+  for (let i = 0; i < 2; i++) {
+    dept.seq++;
+    dept.pt.push({ id: 'hd' + i, pr: 'home', en: 1, nv: 20, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, cl: 12, iv: 15, sj: 0, mv: 0, mvm: 0 });
+  }
+  // 2人目の移動時間を枠超過にして繰越させる(480分枠: 1人目は8+25分・2人目は460分で超過)
+  const mctx = Object.assign(hcCtx(dept, 20, rng(4)), {
+    siteInfo: (i) => (i === 12 ? { x: 15, y: 15, mansion: true, units: 24 } : { x: 0, y: 0 }),
+    orderByRoute: (due) => due.map((p, i) => ({ p, travelMin: i === 0 ? 8 : 460 })),
+  });
+  const agg = DEPT.runDay(HOMECARE, dept, mctx);
+  eq(agg.info.deferred, 1, '1人は繰越');
+  const iCell = agg.byItem['r08-C001-1-i'];
+  ok(iCell && iCell.n === 1, `回れた1人はイで算定(実際${iCell ? iCell.n : 0}件)`);
+  eq(agg.byItem['r08-C001-1-ro'], undefined, 'ロは使われない');
+});
+
 t('在宅180日運用: 収益は全てエンジン算定・在医総管は月2回目の訪問後だけ申請される', () => {
   const dept = DEPT.create(HOMECARE, 1);
   dept.policy.oncall = true;

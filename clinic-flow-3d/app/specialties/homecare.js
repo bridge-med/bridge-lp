@@ -10,9 +10,9 @@
  *    月2回以上訪問した患者に限り申請する(安全側の運用)。戸建て地区の患者は各1人セル、
  *    マンション地区(同一建物)は建物内の患者数で人数セルを選ぶ。
  *    施設総管(C002_2)・看取り・重症度セルはKB登録後(issues #10)
- *  - 訪問診療料はC001の1(同一建物居住者以外・890点)で固定する。同一日に同じマンションの
- *    複数患者を回った場合、制度上は「同一建物居住者の場合」(C001の2・215点。KB未登録)だが、
- *    ゲームは1に寄せている。収益を過大に見せる側の簡略化=KB登録までの保留として起票(#25)
+ *  - 訪問診療料はイ/ロ(同一建物居住者以外890点/同一建物居住者215点)をZAISOKAN.visitCellForが
+ *    「その日に実際に訪問する集合」の建物内人数で選ぶ(v51で#25解消・rule-0019。
+ *    繰越で建物内が1人になった日はイ=留意(4)。v50の簡略化と開示ラベルは撤去済み)
  *  - 移動時間・訪問枠・患者獲得・費用は managementParameters(ゲーム上の仮定) */
 (function (root) {
   'use strict';
@@ -145,27 +145,39 @@
       const due = dept.pt.filter((p) => p.nv <= ctx.day);
       const ordered = ctx.orderByRoute ? ctx.orderByRoute(due) : due;
       let minutes = 0, travel = 0, deferred = 0;
+      // パス1: 時間枠と経路で「その日に実際に訪問する集合」を確定(繰越を先に落とす)。
+      // 訪問診療料のイ/ロは実訪問集合の建物内人数で決めるため2パスが必須(v51 PM指定:
+      // 繰越で建物内が1人になった日はイ=890点が正しく、期日ベースで数えると過大計上が残る)
       const visited = [];
       for (const o of ordered) {
         const t = o.travelMin !== undefined ? o.travelMin : 5;
         if (minutes + t + P.visitMinutes > P.dayMinutes * (dept.staff.doctors || 1)) { o.p.nv = ctx.day + 1; deferred++; continue; }
         minutes += t + P.visitMinutes; travel += t;
         visited.push(o);
+      }
+      const sameDayByCl = {};
+      for (const o of visited) sameDayByCl[o.p.cl] = (sameDayByCl[o.p.cl] || 0) + 1;
+
+      // パス2: 計上(訪問診療料はマンション地区で同日2人以上ならロ=同一建物居住者215点)
+      for (const o of visited) {
         const p = o.p;
         api.countVisit();
         // 月内の訪問回数はモジュール側で数える(C001は週制限の項目でエンジンの月次カウンタに載らないため)
         const mIdx = Math.floor((ctx.day - 1) / 30);
         if (p.mvm !== mIdx) { p.mvm = mIdx; p.mv = 0; }
-        const report = { type: 'visit', kbActs: [{ id: 'visit' }] };
+        const site = ctx.siteInfo ? ctx.siteInfo(p.cl) : null;
+        const isMansion = !!(site && site.mansion);
+        // 訪問診療料のイ/ロ: 同一建物(マンション)で同日2人以上=ロ(rule-0019・v51で#25解消)
+        const visitCell = (isMansion && ZAISOKAN) ? ZAISOKAN.visitCellFor(sameDayByCl[p.cl] || 1) : 'r08-C001-1-i';
+        const report = { type: 'visit', kbActs: [{ id: 'visit', itemId: visitCell }] };
         // 月2回目の定期訪問で在医総管(「月2回以上」のセル要件を満たしてから申請する安全側の運用)。
         // セルは単一建物診療患者数から選ぶ: 戸建て地区=別建物なので各1人セル、
         // マンション地区=建物内の当院患者数でZAISOKANが選択(みなし1人例外込み)。
         // 人数は訪問時点の建物内患者数(全患者が毎月2回訪問+算定の決定的な運びのため月末確定と乖離しない)
         let soukanSel = null; // マンション地区のセル選択結果(ラベル分岐用に保持)
         if ((p.mv || 0) >= 1) {
-          const site = ctx.siteInfo ? ctx.siteInfo(p.cl) : null;
           let cellId = 'r08-C002-2-ro-1';
-          if (site && site.mansion && ZAISOKAN) {
+          if (isMansion && ZAISOKAN) {
             const inBldg = dept.pt.filter((q) => q.cl === p.cl).length;
             soukanSel = ZAISOKAN.selectCell({ count: inBldg, units: site.units });
             cellId = soukanSel.itemId;
@@ -174,18 +186,20 @@
         }
         if (p.sj && !p.mc['r08-C007']) report.kbActs.push({ id: 'shijiryo' });
         const r = api.evalVisit(p, report);
-        if (r.ev.billableItems.some((b) => b.itemId === 'r08-C001-1-i')) p.mv = (p.mv || 0) + 1;
+        // 月内訪問回数はイ・ロどちらの算定でも数える(在医総管の「月2回以上」の要件はC001通算)
+        if (r.ev.billableItems.some((b) => b.itemId.indexOf('r08-C001-1-') === 0)) p.mv = (p.mv || 0) + 1;
         agg.cost += P.perVisitCost;
         p.nv = this._nextVisit(p, ctx.day);
-        // ラベルは地区の性質と実効人数で分岐(みなし1人はセルがro-1でもマンション訪問と言う)
+        // ラベルは地区の性質と実効人数で分岐(みなし1人はセルがro-1でもマンション訪問と言う)。
+        // v50の簡略化開示3本は#25解消(イ/ロ実装)により撤去(v51 editor承認フロー)
         const soukan = r.ev.billableItems.find((b) => b.itemId.indexOf('r08-C002-2-ro') === 0);
-        // 開示の非対称は意図(v50 editor裁定): 戸建ての在医総管行は別建物=簡略化が起きないため
-        // 但し書きなし。マンション2本と汎用(マンションの月1回目もここを通る)には開示を揃えて付ける
-        let label = '定期訪問診療 — 訪問診療料は同一建物居住者以外のまま(ゲーム上の簡略化)';
+        let label = '定期訪問診療';
         if (soukan) {
           if (!soukanSel) label = '月2回目の定期訪問+在宅時医学総合管理料';
-          else if (soukanSel.effectiveCount === 1 && soukanSel.rawCount >= 2) label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料(戸数比の例外で「1人の場合」を算定) — 訪問診療料は同一建物居住者以外のまま(ゲーム上の簡略化)';
-          else label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料 — 訪問診療料は同一建物居住者以外のまま(ゲーム上の簡略化)';
+          else if (soukanSel.effectiveCount === 1 && soukanSel.rawCount >= 2) label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料(戸数比の例外で「1人の場合」を算定)';
+          else label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料';
+        } else if (visitCell === 'r08-C001-1-ro') {
+          label = '同一建物(マンション)への定期訪問(同一建物居住者の訪問診療料)';
         }
         api.setSample(label, r.lines, r.ev, soukan ? 3 : 2);
       }

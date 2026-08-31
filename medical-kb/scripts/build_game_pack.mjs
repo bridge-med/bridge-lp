@@ -101,7 +101,7 @@ const MACHINE_HINTS = {
     conditionKey: 'refraction_first_or_glasses', conditionLabel: '屈折異常の疑いで初めての検査、又は眼鏡処方箋の交付' },
   'r08-rule-0006': { type: 'included_categories', source: 'r08-J038-1-ro', targetCategories: ['薬剤(透析包括)'] },
   'r08-rule-0007': { type: 'included_categories', source: 'r08-B001-15', targetCategories: ['検査(透析包括)'] },
-  'r08-rule-0008': { type: 'same_day_ng_items', source: 'r08-C001-1-i',
+  'r08-rule-0008': { type: 'same_day_ng_items', source: ['r08-C001-1-i', 'r08-C001-1-ro'],
     targetItemIds: ['r08-A001', 'r08-A002', 'r08-C000'], direction: 'source_blocks_targets' },
 };
 

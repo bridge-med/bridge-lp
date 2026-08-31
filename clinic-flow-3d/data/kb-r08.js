@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-31T12:45:36.185Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-31T12:48:29.648Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-31T12:45:36.185Z",
+ "generated_at": "2026-08-31T12:48:29.648Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -4501,7 +4501,10 @@
    "confidence": "verified",
    "machine": {
     "type": "same_day_ng_items",
-    "source": "r08-C001-1-i",
+    "source": [
+     "r08-C001-1-i",
+     "r08-C001-1-ro"
+    ],
     "targetItemIds": [
      "r08-A001",
      "r08-A002",
