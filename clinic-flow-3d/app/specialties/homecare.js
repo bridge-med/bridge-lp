@@ -63,7 +63,7 @@
         check(dept) {
           return dept.policy.oncall ? { ok: true } : { ok: false, missing: ['24時間の連絡・往診体制'] };
         },
-        note: '通常型(様式11の2)。強化型(常勤医3名)のセルはKB未登録のため扱わない(簡略化)' },
+        note: '従来型=通常型(様式11・届出区分4)。強化型(常勤医3名)のセルはKB未登録のため扱わない(簡略化)' },
     ],
 
     managementParameters: {

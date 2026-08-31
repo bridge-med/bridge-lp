@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-31T11:17:13.693Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-31T11:57:29.902Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-31T11:17:13.693Z",
+ "generated_at": "2026-08-31T11:57:29.902Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -3825,7 +3825,7 @@
    "record": null,
    "system": "24時間連絡を受ける担当者の指定と患者・家族への文書提供(担当者・連絡先の明示。コールセンター利用時は24時間受信体制)。24時間往診可能な体制と担当医名等の文書提供(特定地域はICT代替の特例あり)",
    "transitional": null,
-   "formNo": "別添2 様式11及び様式11の3(類型(1)(2))・様式11の2(類型(3))は同節5で確認",
+   "formNo": "別添2 様式11(届出書の届出区分1〜4で類型を選択。従来型=通常型は区分4)。機能強化型(類型(1)(2))は様式11+様式11の3を併用。様式11の2は在宅療養支援病院の様式",
    "sourceNotice": "r08-tsuchi8-tokkei-todokede",
    "sourcePage": "第9(PDF p.85-95)",
    "confidence": "verified",
@@ -3841,6 +3841,13 @@
      "doc": "r08-tsuchi8-tokkei-todokede",
      "page": "第9(PDF p.95)",
      "quote": "1の(1)及び(2)の在宅療養支援診療所の施設基準に係る届出は、別添2の様式11及び様式11の3を用いること。"
+    },
+    {
+     "field": "form_no",
+     "doc": "r08-tsuchi8-tokkei-todokede",
+     "page": "PDF p.95",
+     "quote": "4 届出に関する事項 1の(1)及び(2)の在宅療養支援診療所の施設基準に係る届出は、別添2の様式11及び様式11の3を用いること。1の(3)の在宅療養支援診療所の施設基準に係る届出は、別添2の様式11を用いること。",
+     "note": "通常型(類型(3)=従来型)の届出は様式11のみ。様式11の届出区分欄「４.第９の１の(３)に規定する在宅療養支援診療所(従来型)」(PDF p.501)でも確認。様式11の2は在宅療養支援病院の届出書添付書類(p.542の記載上の留意事項1にも明記)。従前の「様式11の2(類型(3))」記載は誤りだった=保留#24の決着(v50)"
     }
    ]
   },

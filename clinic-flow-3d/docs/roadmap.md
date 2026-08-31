@@ -110,7 +110,7 @@ v33でLayer 3(Reimbursement Engine)と診療科モジュール基盤が入った
 | 20 | ~~corpStaff()のTypeError~~ **解消(v47)** | 原因特定: staff導入前の旧セーブの分院にはstaffフィールドが無く、load()のv4補完がstaffを埋めていなかった。再現手順を固定(staff無し分院を含むセーブを注入→リロード→corpStaff()で「reading 'doctors'」)→load()の分院補完にstaff+必須フィールド全部(profit7/machines等)を開設時既定値で追加し再現ゼロ化。読み取り側`||0`は不採用(PM裁定どおり) |
 | 21 | ~~.tut-boxが全幅で中央からずれ320〜768pxで最大171px画面外(初回チュートリアルの主CTAが見えない)~~ **解消(v46)** | v46 PM検出(既存債務・riseのto{transform:none}がfill-mode:bothで中央寄せを恒久上書き)。X軸を保つriseXへ差し替え。**教訓: fixedオーバーレイのあふれはscrollWidthに出ない=全要素走査をqa手順に常設** |
 | 22 | ~~.mission-bar内の#missionTextが320pxではみ出す~~ **解消(v48)** | 実態はellipsisで視覚的には切れていた(走査がクリップ済みspanを拾った)が、ミッション文の後半が読めない実害があるため、基本ルールで常時折返しに切替(≤360px限定では390px帯で再発するためブレークポイントを設けない・v48 designer実測)。走査の偽陽性も同時に消えた |
-| 24 | 様式番号表記の統一(「別添2 様式◯」vs「様式◯」)と、homecare.js fsDefs noteの「通常型(様式11の2)」断定がKB r08-fs-zaishienのform_no留保(「同節5で確認」)と食い違う件 | v49 editor検出(範囲外・プレイヤー面には未描画)。MRIヒント含む一括整理をどこかの便で。KBを確定させるかnoteを留保付きに直すか |
+| 24 | ~~様式番号表記の統一と、homecare.js fsDefs noteとKB form_no留保の食い違い~~ **解消(v50)** | v49 editor検出→v50調査で「表記ゆれ」でなく実誤りと判明: 通常型在支診の届出は様式11(第9の4・様式11の届出区分4=従来型)で、従前の「様式11の2」は在支病の様式だった。KB form_no確定+evidence追加+note訂正。表記方針も明文化(KB=「別添2 様式◯」・プレイヤー面=「様式◯」短形。data-dictionary記法メモ) |
 | 23 | ~~体制加算のゲーム側ゲーティング(届出条件ok()・明細書加算の抑止)はテスト未固定~~ **解消(v49)** | v48 PM検出。計上経路がgame.jsの通常営業とautoDayに複製されていた事故の温床ごと、app/kasan.js(純関数・UMD)に一本化。届出可否5種・初診/再診の計上行・rule-0016排他・KBフォールバックをtests/kasan.test.mjs(13件)で固定 |
 
 ## 判断メモ
