@@ -422,7 +422,9 @@
         const hx = h.x * S, hz = h.y * S;
         const hh = h.mansion ? 6.5 : 1.9;
         if (h.mansion) {
-          const mw = S * 1.4, md = S * 0.9;
+          // 足元2x1(タウンの描画・町マップテストと同じ)。幅1.4はv39以前の残置で、
+          // 2x1化(#13社長決定)の帰結として2.0に統一(v46・保留#17の決裁不要分)
+          const mw = S * 2.0, md = S * 0.9;
           const mm = new THREE.Mesh(this.geos.box, this.buildingMat(0xE8E6E0));
           mm.scale.set(mw, hh, md);
           mm.position.set(hx + mw / 2, hh / 2, hz + md / 2);

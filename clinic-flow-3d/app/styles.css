@@ -119,6 +119,10 @@ a { color: var(--blue-deep); }
 @media (max-width: 360px) {
   .speed-group { flex: 1 0 100%; flex-wrap: wrap; gap: 4px; }
   .speed-btn { flex: 1 1 calc(25% - 3px); padding: 7px 4px; }
+  /* 施設基準の長いラベル+.mini-btn(nowrap)が320pxで8pxあふれる(保留#18)。
+     行を折返し可にしてボタンを次行の右へ落とす(v46) */
+  .kijun-row { flex-wrap: wrap; }
+  .kijun-row .mini-btn { margin-left: auto; }
 }
 
 .mission-bar {
@@ -368,8 +372,8 @@ input[type="range"]::-moz-range-thumb {
   color: var(--ink-2);
   padding: 3px 0;
 }
-.pnl-row b { white-space: nowrap; } /* 「3件」等の数値を行内で割らない(v42) */
-.pnl-row b { font-family: var(--en); font-weight: 700; }
+/* 数値書体+「3件」等を行内で割らない(v42の2ルールをv46で併合=保留#19) */
+.pnl-row b { font-family: var(--en); font-weight: 700; white-space: nowrap; }
 .pnl-row.total {
   border-top: 1.5px solid var(--line);
   margin-top: 4px;
@@ -752,6 +756,9 @@ input[type="range"]::-moz-range-thumb {
   z-index: 300;
   box-shadow: 0 8px 24px rgba(34,51,61,0.3);
   transition: transform 0.3s ease;
+  /* width指定なしのleft:50%+translateは、shrink-to-fitでビューポート半分に頭打ちになり
+     max-widthに届かない(CSS2.1 10.3.7)。max-contentで自然幅→max-widthの折返しに直す(v46) */
+  width: max-content;
   max-width: calc(100vw - 30px);
   pointer-events: none;
 }
@@ -773,6 +780,7 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
   z-index: 300;
+  width: max-content; /* .bannerと同じshrink-to-fit回避(v46) */
   max-width: calc(100vw - 36px);
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }

@@ -6,7 +6,7 @@
 
 | パス | 内容 | 性質 |
 |---|---|---|
-| data/manifest/sources.{rev}.json | 取得対象の一次資料マニフェスト | 手動管理 |
+| data/manifest/sources.{rev}.json | 取得対象の一次資料マニフェスト | 手動管理。編集時は既存のインデントを保つ(全面リフォーマットは実変更を差分に埋めるため禁止=v46) |
 | data/manifest/retrieval-log.json | 取得台帳(sha256・日時・使用URL) | fetch_sources.mjs が追記 |
 | data/manifest/crawl-report.{rev}.json | ポータルから抽出したリンク候補 | 生成物 |
 | data/sources/{rev}/** | 原典(無加工) | fetch_sources.mjs が保存・上書き禁止 |
