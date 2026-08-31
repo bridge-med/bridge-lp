@@ -5,13 +5,16 @@
  * 制度とゲームの分離:
  *  - 点数・週3回制限(C001注1)・訪問診療日の再診料/往診料の併算定不可(rule-0008)・
  *    在医総管の施設基準(在支診)はKB+エンジンが判定
- *  - KBに登録済みの在医総管は「在支診等(機能強化型以外)・月2回以上・単一建物1人」の
- *    セルのみ。よってゲームでは (1)月2回以上訪問した患者に限り申請する(安全側の運用)
- *    (2)患者は全員べつべつの戸建てに住む(地区=戸建ての集まり。同一建物のセルはKB未登録のため
- *    施設・集合住宅の在宅は扱わない)。施設総管・看取り・重症度セルはKB登録後(issues #10)
+ *  - 在医総管は「在支診等(機能強化型以外)・月2回以上」の単一建物人数セル5件が
+ *    KB登録済み(v50)。セル選択はZAISOKAN(app/zaisokan.js・rule-0018のみなし1人例外込み)。
+ *    月2回以上訪問した患者に限り申請する(安全側の運用)。戸建て地区の患者は各1人セル、
+ *    マンション地区(同一建物)は建物内の患者数で人数セルを選ぶ。
+ *    施設総管(C002_2)・看取り・重症度セルはKB登録後(issues #10)
  *  - 移動時間・訪問枠・患者獲得・費用は managementParameters(ゲーム上の仮定) */
 (function (root) {
   'use strict';
+  // セル選択コア(ブラウザ=index.htmlが先に読む/Node=相対require)
+  const ZAISOKAN = root.ZAISOKAN || (typeof require === 'function' ? require('../zaisokan.js') : null);
   const M = {
     id: 'homecare',
     name: '在宅医療・訪問診療',
@@ -34,7 +37,8 @@
     },
     buildProcedures(report) {
       const map = this.reimbursementMappings; const ps = [];
-      if (report.kbActs) for (const a of report.kbActs) { const m = map[a.id]; if (m) ps.push({ itemId: m.itemId, units: a.units || 1 }); }
+      // a.itemIdの明示指定はマッピングに優先(在医総管の人数セル=ZAISOKANの選択結果)
+      if (report.kbActs) for (const a of report.kbActs) { const m = map[a.id]; if (m) ps.push({ itemId: a.itemId || m.itemId, units: a.units || 1 }); }
       return ps;
     },
 
@@ -150,15 +154,30 @@
         const mIdx = Math.floor((ctx.day - 1) / 30);
         if (p.mvm !== mIdx) { p.mvm = mIdx; p.mv = 0; }
         const report = { type: 'visit', kbActs: [{ id: 'visit' }] };
-        // 月2回目の定期訪問で在医総管(「月2回以上」のセル要件を満たしてから申請する安全側の運用)
-        if ((p.mv || 0) >= 1 && !p.mc['r08-C002-2-ro-1']) report.kbActs.push({ id: 'zaiisoukan' });
+        // 月2回目の定期訪問で在医総管(「月2回以上」のセル要件を満たしてから申請する安全側の運用)。
+        // セルは単一建物診療患者数から選ぶ: 戸建て地区=別建物なので各1人セル、
+        // マンション地区=建物内の当院患者数でZAISOKANが選択(みなし1人例外込み)。
+        // 人数は訪問時点の建物内患者数(全患者が毎月2回訪問+算定の決定的な運びのため月末確定と乖離しない)
+        if ((p.mv || 0) >= 1) {
+          const site = ctx.siteInfo ? ctx.siteInfo(p.cl) : null;
+          let cellId = 'r08-C002-2-ro-1';
+          if (site && site.mansion && ZAISOKAN) {
+            const inBldg = dept.pt.filter((q) => q.cl === p.cl).length;
+            cellId = ZAISOKAN.selectCell({ count: inBldg, units: site.units }).itemId;
+          }
+          if (!p.mc[cellId]) report.kbActs.push({ id: 'zaiisoukan', itemId: cellId });
+        }
         if (p.sj && !p.mc['r08-C007']) report.kbActs.push({ id: 'shijiryo' });
         const r = api.evalVisit(p, report);
         if (r.ev.billableItems.some((b) => b.itemId === 'r08-C001-1-i')) p.mv = (p.mv || 0) + 1;
         agg.cost += P.perVisitCost;
         p.nv = this._nextVisit(p, ctx.day);
-        const hasSoukan = r.ev.billableItems.some((b) => b.itemId === 'r08-C002-2-ro-1');
-        api.setSample(hasSoukan ? '月2回目の定期訪問+在宅時医学総合管理料' : '定期訪問診療(同一建物居住者以外)', r.lines, r.ev, hasSoukan ? 3 : 2);
+        const soukan = r.ev.billableItems.find((b) => b.itemId.indexOf('r08-C002-2-ro') === 0);
+        api.setSample(
+          soukan
+            ? (soukan.itemId === 'r08-C002-2-ro-1' ? '月2回目の定期訪問+在宅時医学総合管理料' : '同一建物(マンション)の定期訪問+在医総管の人数セル')
+            : '定期訪問診療',
+          r.lines, r.ev, soukan ? 3 : 2);
       }
 
       // 臨時往診(訪問診療の算定日はrule-0008で往診料が却下されることも、エンジンがそのまま見せる)

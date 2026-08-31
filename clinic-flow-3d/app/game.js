@@ -3430,7 +3430,7 @@
 
   /* ================= 在宅部門: ルートと街の連携 ================= */
 
-  const HOMECARE_CAP_PER_CLUSTER = 7; // 地区あたりの患者上限(ゲーム仮定。全員べつべつの戸建て)
+  const HOMECARE_CAP_PER_CLUSTER = 7; // 地区あたりの患者上限(ゲーム仮定。戸建て地区=べつべつの戸建て・マンション地区=同一建物の各戸)
   const HOMECARE_MIN_PER_TILE = 1.2;  // タウン1タイルの移動時間(分・ゲーム仮定)
 
   // 今日回る患者を地区の近い順に並べ、移動時間を付ける(同一地区内は2分)
@@ -3467,6 +3467,8 @@
       },
       releaseCluster: (i) => { counts[i] = Math.max(0, (counts[i] || 0) - 1); },
       orderByRoute: (due) => orderHomecareRoute(due),
+      // 在医総管の人数セル選択用(v50): マンション地区か・戸数をモジュールに渡す
+      siteInfo: (i) => TOWN.HOMECARE_SITES[i],
     };
   }
 

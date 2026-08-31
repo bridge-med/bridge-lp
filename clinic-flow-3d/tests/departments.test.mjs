@@ -392,6 +392,42 @@ t('在医総管は在支診の届出がないと却下・届出後は月1回算�
   ok(r3.ev.rejectedItems.some((b) => b.itemId === 'r08-C002-2-ro-1'), '同月2回目は却下');
 });
 
+t('マンション地区(同一建物)の在医総管は人数セルで算定される(v50・rule-0018)', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.policy.oncall = true;
+  dept.fs.push('r08-fs-zaishien');
+  dept.sd = 1; // シードを飛ばす
+  // マンション地区(cl=12・24戸)に4人(10%=2.4を超える→2〜9人セル)。期日は当日・月内2回目(mv=1)
+  for (let i = 0; i < 4; i++) {
+    dept.seq++;
+    dept.pt.push({ id: 'hm' + i, pr: 'home', en: 1, nv: 20, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, cl: 12, iv: 15, sj: 0, mv: 1, mvm: 0 });
+  }
+  const mctx = Object.assign(hcCtx(dept, 20, rng(4)), {
+    siteInfo: (i) => (i === 12 ? { x: 15, y: 15, mansion: true, units: 24 } : { x: 0, y: 0 }),
+  });
+  const agg = DEPT.runDay(HOMECARE, dept, mctx);
+  const cell = agg.byItem['r08-C002-2-ro-2'];
+  ok(cell && cell.n === 4, `4人全員が2〜9人セルで算定(実際${cell ? cell.n : 0}件)`);
+  eq(agg.byItem['r08-C002-2-ro-1'], undefined, '1人セルは使われない');
+});
+
+t('マンション地区でも2人以下はみなし1人セル(24戸の10%以下・rule-0018例外)', () => {
+  const dept = DEPT.create(HOMECARE, 1);
+  dept.policy.oncall = true;
+  dept.fs.push('r08-fs-zaishien');
+  dept.sd = 1;
+  for (let i = 0; i < 2; i++) {
+    dept.seq++;
+    dept.pt.push({ id: 'hm2' + i, pr: 'home', en: 1, nv: 20, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, cl: 12, iv: 15, sj: 0, mv: 1, mvm: 0 });
+  }
+  const mctx = Object.assign(hcCtx(dept, 20, rng(4)), {
+    siteInfo: (i) => (i === 12 ? { x: 15, y: 15, mansion: true, units: 24 } : { x: 0, y: 0 }),
+  });
+  const agg = DEPT.runDay(HOMECARE, dept, mctx);
+  const cell = agg.byItem['r08-C002-2-ro-1'];
+  ok(cell && cell.n === 2, `2人とも1人セルで算定(実際${cell ? cell.n : 0}件)`);
+});
+
 t('在宅180日運用: 収益は全てエンジン算定・在医総管は月2回目の訪問後だけ申請される', () => {
   const dept = DEPT.create(HOMECARE, 1);
   dept.policy.oncall = true;

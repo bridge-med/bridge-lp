@@ -30,7 +30,16 @@ for (const [i, t] of TOWN.TREES.entries()) claim(t.x, t.y, 1, 1, `tree[${i}]`);
 claim(TOWN.BILLBOARD.x, TOWN.BILLBOARD.y, 1, 1, 'billboard');
 for (const [id, s] of Object.entries(TOWN.DEPT_SPOTS)) claim(s.x, s.y, s.w, s.d, `dept:${id}`);
 for (const [id, s] of Object.entries(TOWN.BRANCH_SPOTS)) claim(s.x, s.y, s.w, s.d, `branch:${id}`);
-for (const [i, s] of TOWN.HOMECARE_SITES.entries()) claim(s.x, s.y, 1, 1, `hc[${i}]`);
+// mansion付き在宅地区は既存マンション(HOUSES)を訪問先として使い、戸建てを描かない(v50)。
+// タイルを主張しない代わりに、座標がマンション住宅と正確に一致することを要求する
+for (const [i, s] of TOWN.HOMECARE_SITES.entries()) {
+  if (s.mansion) {
+    const hit = TOWN.HOUSES.some((h) => h.mansion && h.x === s.x && h.y === s.y);
+    if (!hit) { conflicts.push(`hc[${i}](mansion)がマンション住宅と一致しない: ${s.x},${s.y}`); }
+    continue;
+  }
+  claim(s.x, s.y, 1, 1, `hc[${i}]`);
+}
 
 let bad = conflicts.length;
 if (bad) for (const c of conflicts) console.log(`  NG - 重複: ${c}`);

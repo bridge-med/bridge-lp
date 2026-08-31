@@ -105,11 +105,14 @@ const TOWN = (() => {
     psychiatry: { x: 9, y: 3, w: 2, d: 2, h: 1.3, label: 'メンタルクリニック' }
   };
 
-  // 在宅患者の地区(戸建ての集まり)。訪問診療部門があるときだけ患者数に応じて描く
+  // 在宅患者の地区(戸建ての集まり)。訪問診療部門があるときだけ患者数に応じて描く。
+  // mansion付きの地区は既存の環境建物(マンション)を訪問先として使う=同一建物。
+  // 戸建てをその座標に描き足さない(v50。屋根融合の禁止=間合いルール)。unitsは戸数(ゲーム上の仮定)
   const HOMECARE_SITES = [
     { x: 6, y: 4 }, { x: 21, y: 4 }, { x: 27, y: 3 }, { x: 1, y: 5 },
     { x: 2, y: 7 }, { x: 13, y: 10 }, { x: 24, y: 10 }, { x: 8, y: 13 },
-    { x: 16, y: 13 }, { x: 9, y: 18 }, { x: 18, y: 18 }, { x: 27, y: 19 }
+    { x: 16, y: 13 }, { x: 9, y: 18 }, { x: 18, y: 18 }, { x: 27, y: 19 },
+    { x: 15, y: 15, mansion: true, units: 24 }, { x: 27, y: 17, mansion: true, units: 24 }
   ];
 
   class TownSim {
@@ -306,7 +309,9 @@ const TOWN = (() => {
           items.push({
             depth: s.x + s.y,
             draw: () => {
-              iso.building(s.x, s.y, 1, 1, 0.8, '#FBF7EE', '#8C7BC4');
+              // マンション地区は既存の環境建物をそのまま訪問先にする(描き足すと屋根が融合する)。
+              // 患者の所在はルートのリングだけで言う
+              if (!s.mansion) iso.building(s.x, s.y, 1, 1, 0.8, '#FBF7EE', '#8C7BC4');
               if (onRoute) {
                 const c = iso.p(s.x + 0.5, s.y + 0.5, 0);
                 ctx.strokeStyle = 'rgba(44,95,130,0.9)';
