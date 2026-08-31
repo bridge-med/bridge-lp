@@ -634,7 +634,7 @@
         // staff導入前のセーブはcorpStaff()でTypeErrorになる(保留#20)。開設時と同じ既定値で
         // 明示的に補完する(読み取り側の||0は手がかりを消して誤数字を見せるため採らない=PM裁定)。
         // ほかの必須フィールドも同時に補完し、部分的な分院オブジェクトに対して堅牢にする
-        if (!br.staff) br.staff = { doctors: 1, nurses: 1, pts: 0, receptionists: 1 };
+        br.staff = Object.assign({ doctors: 1, nurses: 1, pts: 0, receptionists: 1 }, br.staff || {});
         if (!Array.isArray(br.profit7)) br.profit7 = [];
         if (br.machines === undefined) br.machines = 0;
         if (br.rehaLevel === undefined) br.rehaLevel = 0;
@@ -737,7 +737,7 @@
           rc.push({ n: '関節注入薬剤(アルツ25mg)', t: DRUG_PTS.inj, kb: DRUG_KB.inj });
         }
         if (it === 'trig') {
-          // 25%は腰部硬膜外ブロックへステップアップ(L100-2はKB登録済み・薬剤のみ概算=便H)
+          // 25%は腰部硬膜外ブロックへステップアップ(L100-2も薬剤(L200)もKB登録済み=便M)
           if (Math.random() < 0.25) {
             const p = kbPts('r08-L100-2-lumbar', 800);
             revenue += (p + DRUG_PTS.block) * 10; T.rev.inj += (p + DRUG_PTS.block) * 10;
@@ -3606,10 +3606,10 @@
           const doc = REIMB.docOf(ev.doc);
           detail = `<div class="kb-quote">「${ev.quote}」(${doc ? doc.title : ev.doc}${pageOfEv(ev.page)})</div>`;
         }
-        // 特定保険医療材料の行は価格・区分の説明(KBのconditions)を添える —
-        // 型の6区分の存在とゲームの固定(仮定)を隠さない(v46・材料に共通)。
+        // 特定保険医療材料・薬剤の行は価格・区分・使用量の説明(KBのconditions)を添える —
+        // 型の6区分や「使用量5mLはゲーム上の仮定」を画面でも隠さない(v46材料・v47薬剤)。
         // 表記は院内レセプト学習モードの先例(「条件: 」ラベル・引用の前)に揃える(designer裁定)
-        if (it && it.categoryM === '特定保険医療材料' && it.conditions) {
+        if (it && (it.categoryM === '特定保険医療材料' || it.categoryM === '薬剤') && it.conditions) {
           detail = `<p class="kb-cond is-note">条件: ${it.conditions}</p>` + detail;
         }
       } else if (l.incl && KBI) {

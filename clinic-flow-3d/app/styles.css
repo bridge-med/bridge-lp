@@ -1155,11 +1155,13 @@ input[type="range"]::-moz-range-thumb {
 .rcpt-row {
   display: flex;
   justify-content: space-between;
+  gap: 6px; /* 長い行名(薬剤名+規格)が点数と融合しない最低余白(v47 designer実測: 320pxでgap0.14pxの行があった) */
   font: 500 12px/1.7 var(--sans);
   color: var(--ink-2);
   padding: 1.5px 0;
   border-bottom: 1px dotted var(--line);
 }
+.rcpt-row span { min-width: 0; } /* 名前側を必要なら早めに折り返す */
 .rcpt-row b { font-family: var(--en); font-weight: 700; color: var(--blue-deep); }
 .rcpt-row.total { border-top: 1.5px solid var(--line); border-bottom: none; margin-top: 3px; padding-top: 5px; font-weight: 800; color: var(--ink); }
 .rcpt-row.total b { color: var(--green-deep); font-size: 14px; }
