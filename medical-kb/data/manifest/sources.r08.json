@@ -1076,6 +1076,27 @@
    "status": "retrieved",
    "verified": true,
    "notes": "実物照合済み: 頭書に「保医発0305第10号 令和8年3月5日」(v47便M)"
+  },
+  {
+   "id": "r08-tsuchi-choki-shohou",
+   "category": "C",
+   "title": "「長期収載品の処方等又は調剤について」の一部改正について(令和8年3月27日 保医発0327第9号)",
+   "doc_type": "tsuchi",
+   "issuer": "厚生労働省",
+   "doc_number": "保医発0327第9号",
+   "doc_number_confidence": "verified",
+   "urls": [
+    {
+     "url": "https://www.mhlw.go.jp/content/12400000/001681984.pdf",
+     "kind": "official",
+     "confidence": "verified"
+    }
+   ],
+   "save_as": "mhlw/tsuchi_choki_shohou_0327_9.pdf",
+   "fetch": "direct",
+   "status": "retrieved",
+   "verified": true,
+   "notes": "実物照合済み: 「長期収載品の処方等又は調剤について」の一部改正(保医発0327第9号)。調査の結果、当初の見立て(注射薬は対象外)と逆に、第1の6で院内処方も選定療養の対象であり、マスターにアルツ関節注の(選)コード(670004641)が実在する=注射薬も対象になりうる。ゲームは「医療上必要があると認められる場合は引き続き保険給付」の枝(医師判断の施行)で通常給付66点とする(v48便N)"
   }
  ]
 }

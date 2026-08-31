@@ -406,7 +406,8 @@
     doctors: 1, nurses: 1, pts: 0, receptionists: 1, rehaAides: 0,
     chairs: 6, beds: 1, machines: 0, physio: 0,
     kiosk: false, reserve: false, reviewCare: false, webIntake: false,
-    kasanMeisai: false, kasanJikangai: 0, /* kasanKohatsu はR8で加算廃止・再編に伴い削除(便H)。旧セーブの値は無視される */
+    kasanMeisai: false, kasanJikangai: 0, kasanKyoka: false, kasanRenkei: false,
+    /* kasanKohatsu はR8で加算廃止・再編に伴い削除(便H)。旧セーブの値は無視される */
     cashHelper: false,
     mri: false, dexa: false, echo: false,
     rehaLevel: 0,
@@ -719,7 +720,15 @@
       let didProcedure = false; // 処置・注射・リハ・物療のいずれかを実施したか(外来管理加算の判定)
       const rc = []; // レセプト(算定内訳・点数)
 
-      if (report.type === 'first') { revenue += FEES.first; T.rev.consult += FEES.first; T.newCount++; rc.push({ n: '初診料', t: FEES.first / 10, kb: 'r08-A000' }); }
+      if (report.type === 'first') {
+        revenue += FEES.first; T.rev.consult += FEES.first; T.newCount++;
+        rc.push({ n: '初診料', t: FEES.first / 10, kb: 'r08-A000' });
+        // 初診への体制加算(v48): 機能強化=かかりつけ機能(在宅部門+在支診が前提)。
+        // 電子的連携3は月1回/患者だが初診=新来のため自然に充足(再診2点側は集計モデルで
+        // 月1回を守れないため申請しない=安全側)
+        if (settings.kasanKyoka) { const p = kbPts('r08-A000-n10', 80); revenue += p * 10; T.rev.consult += p * 10; rc.push({ n: '機能強化加算', t: p, kb: 'r08-A000-n10' }); }
+        if (settings.kasanRenkei) { const p = kbPts('r08-A000-n16-3', 4); revenue += p * 10; T.rev.consult += p * 10; rc.push({ n: '電子的診療情報連携体制整備加算3', t: p, kb: 'r08-A000-n16-3' }); }
+      }
       if (report.type === 'revisit' || report.type === 'rehab') { revenue += FEES.revisit; T.rev.consult += FEES.revisit; rc.push({ n: '再診料', t: FEES.revisit / 10, kb: 'r08-A001' }); }
       if (report.type === 'checkup') { revenue += FEES.checkup; T.rev.checkup += FEES.checkup; rc.push({ n: '健康診断(保険外)', y: FEES.checkup }); }
 
@@ -820,7 +829,8 @@
       // 体制の加算(再診料への加算): 明細書発行体制等(A001注11)・時間外対応体制(A001注10・R8で改称/4区分)
       if (report.type === 'revisit' || report.type === 'rehab') {
         let add = 0;
-        if (settings.kasanMeisai) { const p = kbPts('r08-A001-n11', 1); add += p * 10; rc.push({ n: '明細書発行体制等加算', t: p, kb: 'r08-A001-n11' }); }
+        // 電子的連携の届出後は明細書加算を算定しない(A000注16/A001注19の併算定不可=rule-0016の運用担保)
+        if (settings.kasanMeisai && !settings.kasanRenkei) { const p = kbPts('r08-A001-n11', 1); add += p * 10; rc.push({ n: '明細書発行体制等加算', t: p, kb: 'r08-A001-n11' }); }
         if (settings.kasanJikangai === 2) { const p = kbPts('r08-A001-n10-1', 7); add += p * 10; rc.push({ n: '時間外対応体制加算1', t: p, kb: 'r08-A001-n10-1' }); }
         else if (settings.kasanJikangai === 1) { const p = kbPts('r08-A001-n10-3', 4); add += p * 10; rc.push({ n: '時間外対応体制加算3', t: p, kb: 'r08-A001-n10-3' }); }
         if (add) { revenue += add; T.rev.consult += add; }
@@ -1865,7 +1875,20 @@
     { id: 'jikangai1', name: '時間外対応体制加算1', ten: '再診ごと+7点', cost: 150000,
       req: '常時の電話等対応体制(常勤職員等・コールバック体制/様式2で届出)', gameReq: '受付2名以上(加算3から段階を上げる)',
       hint: '常時対応の体制強化で同じ再診から加算が7点に',
-      done: () => settings.kasanJikangai === 2, ok: () => settings.kasanJikangai === 1 && settings.receptionists >= 2, apply: () => { settings.kasanJikangai = 2; } }
+      done: () => settings.kasanJikangai === 2, ok: () => settings.kasanJikangai === 1 && settings.receptionists >= 2, apply: () => { settings.kasanJikangai = 2; } },
+    { id: 'kyoka', name: '機能強化加算', ten: '初診ごと+80点', cost: 200000,
+      req: 'かかりつけ機能の届出(在宅時医学総合管理料の届出+在宅療養支援診療所該当=施設基準の要件カ/様式1の3)',
+      gameReq: '在宅部門を開設し在支診の届出があること',
+      hint: 'かかりつけの入口機能を初診料で評価する加算。在宅の体制が外来の点数になる',
+      done: () => settings.kasanKyoka,
+      ok: () => !!(G.depts && G.depts.homecare && (G.depts.homecare.fs || []).includes('r08-fs-zaishien')),
+      apply: () => { settings.kasanKyoka = true; } },
+    { id: 'renkei', name: '電子的診療情報連携体制整備加算3', ten: '初診ごと+4点(患者ごと月1回)', cost: 300000,
+      req: '電子請求+明細書無償交付+オンライン資格確認+マイナ保険証利用率30%以上+院内掲示・ウェブ掲載(様式1の6)。マイナ利用率はゲームでは体制整備で満たした扱い(ゲーム上の仮定)',
+      gameReq: '明細書発行体制があること。届出後は明細書発行体制等加算(再診+1点)に代えてこちらを算定する(併算定不可)。再診側の2点は患者ごと月1回を集計で守れないため申請しない(安全側)',
+      hint: '医療DXの体制を初診料で評価する加算。再診の明細書1点と入れ替えのため、初診と再診の比率で損得が決まる',
+      done: () => settings.kasanRenkei, ok: () => settings.kasanMeisai && !settings.kasanRenkei,
+      apply: () => { settings.kasanRenkei = true; } }
   ];
 
   /* ================= 段階解放(Day1-3 / 4-7 / 8+) ================= */
@@ -4745,7 +4768,11 @@
         T.patients++;
         let rev = 0, proc = false, didReha = false, kanriBlock = false;
         if (a.type === 'checkup') { rev += FEES.checkup; T.rev.checkup += FEES.checkup; acc(T, '健康診断(保険外)', 0, FEES.checkup); }
-        else if (a.type === 'first') { rev += FEES.first; T.rev.consult += FEES.first; T.newCount++; acc(T, '初診料', FEES.first / 10); }
+        else if (a.type === 'first') {
+          rev += FEES.first; T.rev.consult += FEES.first; T.newCount++; acc(T, '初診料', FEES.first / 10);
+          if (settings.kasanKyoka) { const pk = kbPts('r08-A000-n10', 80); rev += pk * 10; T.rev.consult += pk * 10; acc(T, '機能強化加算', pk); }
+          if (settings.kasanRenkei) { const pr = kbPts('r08-A000-n16-3', 4); rev += pr * 10; T.rev.consult += pr * 10; acc(T, '電子的診療情報連携体制整備加算3', pr); }
+        }
         else { rev += FEES.revisit; T.rev.consult += FEES.revisit; acc(T, '再診料', FEES.revisit / 10); }
         if (a.type !== 'checkup') {
           if (Math.random() < settings.pInj) {
@@ -4786,7 +4813,7 @@
         if ((a.type === 'revisit' || a.type === 'rehab') && !kanriBlock) { rev += FEES.kanri; T.rev.consult += FEES.kanri; T.kanriCount++; acc(T, '外来管理加算', FEES.kanri / 10); }
         if (a.type === 'revisit' || a.type === 'rehab') {
           let add = 0;
-          if (settings.kasanMeisai) { const pm = kbPts('r08-A001-n11', 1); add += pm * 10; acc(T, '明細書発行体制等加算', pm); }
+          if (settings.kasanMeisai && !settings.kasanRenkei) { const pm = kbPts('r08-A001-n11', 1); add += pm * 10; acc(T, '明細書発行体制等加算', pm); }
           if (settings.kasanJikangai === 2) { const pj = kbPts('r08-A001-n10-1', 7); add += pj * 10; acc(T, '時間外対応体制加算1', pj); }
           else if (settings.kasanJikangai === 1) { const pj = kbPts('r08-A001-n10-3', 4); add += pj * 10; acc(T, '時間外対応体制加算3', pj); }
           if (add) { rev += add; T.rev.consult += add; }

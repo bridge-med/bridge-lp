@@ -391,6 +391,13 @@
       "dest": "data/sources/r08/mhlw/ryuiji_yakka_0305_10.pdf",
       "sha256": "3cf44aa06cc4680398fd0fe143ff217eef245a5d31f8bf3c517d4d5834505d3c",
       "retrieved_at": "2026-08-31T03:10:35.768Z"
+    },
+    {
+      "id": "r08-tsuchi-choki-shohou",
+      "url": "https://www.mhlw.go.jp/content/12400000/001681984.pdf",
+      "dest": "data/sources/r08/mhlw/tsuchi_choki_shohou_0327_9.pdf",
+      "sha256": "20404f4d5c328dfb61377fcc1f9d0d216a71193620d47a306b04070014f0ba63",
+      "retrieved_at": "2026-08-31T03:54:15.042Z"
     }
   ]
 }
