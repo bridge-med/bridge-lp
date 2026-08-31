@@ -342,6 +342,13 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
     history: { month: {} },
   });
   ok('同月算定なしなら通る', r2.billableItems.some((x) => x.itemId === 'r08-C002-2-ro-2'));
+  // rule-0008のsource配列対応: ロ(同一建物居住者)の算定日も往診料が却下される
+  const r3 = REIMB.evaluateEncounter({
+    encounter: { visitType: 'visit' },
+    procedures: [{ itemId: 'r08-C001-1-ro' }, { itemId: 'r08-C000' }],
+    facilityStandards: [], history: {},
+  });
+  ok('ロの算定日も往診料は却下(rule-0008配列source)', r3.rejectedItems.some((x) => x.itemId === 'r08-C000'));
 }
 
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
