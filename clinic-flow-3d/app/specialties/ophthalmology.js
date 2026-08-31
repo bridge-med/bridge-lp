@@ -5,8 +5,9 @@
  *  - 点数・併算定(屈折×矯正視力のrule-0005)・回数制限はKB+エンジンが判定
  *  - 水晶体再建術に届出必須の施設基準の定めがないことはKBで否定的確認済み
  *    (item r08-K282-1-ro)。手術の可否を「手術設備投資」で縛るのはゲーム上の仮定
- *  - 眼内レンズ(特定保険医療材料)の請求はKB未登録のため計上しない(materialは
- *    原価のみ概算。medical-kb issues #10で登録後に置換)
+ *  - 眼内レンズは請求しない — これは制度上の事実(v45で確定): 費用は水晶体再建術の
+ *    所定点数に含まれ別に算定できない(留意K282(2))。材料価格基準(告示73号)・
+ *    特定器材マスターにも不収載(否定的確認)。surgMaterialCostは原価のみ計上
  *  - 需要・変換率・費用は managementParameters(ゲーム上の仮定) */
 (function (root) {
   'use strict';
@@ -66,7 +67,7 @@
         note: '精密眼底検査ができるようになる(緑内障・糖尿病網膜症の管理単価が上がる)' },
       { id: 'surgery', label: '手術設備を導入(白内障日帰り)', cost: 15000000,
         can: (d) => !d.equip.surgery, apply: (d) => { d.equip.surgery = true; },
-        note: '術前検査(角膜曲率・眼軸)と水晶体再建術が始まる。眼内レンズ材料の請求はKB登録待ちで未計上' },
+        note: '術前検査(角膜曲率・眼軸)と水晶体再建術が始まる。眼内レンズの費用は手術の所定点数に含まれる(材料としては請求できない)' },
     ],
     deptBadge(d) { return d.equip.surgery ? '日帰り手術あり' : d.equip.fundusSet ? '精密眼底あり' : '基本検査のみ'; },
     infoLine(i) { return `継続 ${i.panel}人` + (i.preop !== undefined && (i.preop + i.surgeryQueue + i.postop) > 0 ? `・白内障 待ち${i.preop + i.surgeryQueue}/術後${i.postop}` : ''); },
@@ -87,7 +88,7 @@
       surgPerDay: 4,              // 手術枠/日(手術日のみ)
       queueMax: 40,               // 手術待ちの上限(超えると紹介患者は他院へ流れる)
       surgDays: [2, 5],           // 手術日(週内の曜日: 火・金)
-      surgMaterialCost: 15000,    // 手術1件の材料費概算(眼内レンズ等。請求はKB未登録のため無し)
+      surgMaterialCost: 15000,    // 手術1件の材料費概算(眼内レンズ等の購入原価。IOLは手術点数に包括=請求なしが制度どおり)
       costs: { doctorDay: 90000, nurseDay: 18000, ortDay: 15000, clerkDay: 10000, rentDay: 38000, baseDay: 8000, perVisit: 250 },
       referralSources: ['内科(糖尿病連携)', '学校健診', '高齢者施設'],
     },

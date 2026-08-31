@@ -4,8 +4,10 @@
  * 制度とゲームの分離:
  *  - 人工腎臓の点数・月14回制限・薬剤包括(rule-0006)・外来医学管理料の検査包括(rule-0007)・
  *    施設基準(区分1: 装置26台未満または患者/装置比3.5未満+安全管理体制)はKB+エンジンが判定
- *  - ダイアライザー等の材料・加算群はKB未登録のため請求せず、原価のみ概算(issues #10で置換)
- *  - 患者獲得・離脱・クール運用・費用は managementParameters(ゲーム上の仮定) */
+ *  - ダイアライザー(Ia型・回路含む161点=材料価格1,610円)はKB登録済みでセッションごとに請求(v45)。
+ *    型をIa型に固定するのはゲーム上の仮定。加算群(導入期以外)は未登録のまま
+ *  - 患者獲得・離脱・クール運用・費用は managementParameters(ゲーム上の仮定)。
+ *    materialPerSessionは穿刺針・生食等ダイアライザー以外も含む実施原価の概算 */
 (function (root) {
   'use strict';
   const M = {
@@ -28,6 +30,7 @@
       induction: { itemId: 'r08-J038-n2-i' },
       waterQuality: { itemId: 'r08-J038-n9' },
       monthlyMgmt: { itemId: 'r08-B001-15' },
+      dialyzer: { itemId: 'r08-t710010929' },
     },
     buildProcedures(report) {
       const map = this.reimbursementMappings; const ps = [];
@@ -89,7 +92,7 @@
       referBase: 0.6,               // 紹介による新規患者/日(評判・立ち上がりで変動)
       churnMonthly: 0.02,           // 月次の離脱率(転院・入院等)
       utilizationTarget: 0.85,      // クール枠に対する予約充足の上限
-      materialPerSession: 6000,     // ダイアライザー・回路等の材料原価概算(請求はKB未登録)
+      materialPerSession: 6000,     // 材料の実施原価概算(ダイアライザー実購入費+穿刺針・生食等。請求はKBのダイアライザー161点のみ)
       nursePerBedsCool: 4,          // 看護師1人あたり同時4床
       costs: { doctorDay: 90000, nurseDay: 18000, ceDay: 20000, rentPerBed: 2000, baseDay: 12000 },
       referralSources: ['腎臓内科', '総合病院'],
@@ -139,7 +142,8 @@
       }
       for (const p of seen) {
         api.countVisit();
-        const report = { type: 'hd', kbActs: [{ id: 'hd' }] };
+        // ダイアライザー(Ia型・回路含む)はセッションごとに1本(材料価格基準区分040)
+        const report = { type: 'hd', kbActs: [{ id: 'hd' }, { id: 'dialyzer' }] };
         if (p.du > ctx.day) report.kbActs.push({ id: 'induction' });
         if (dept.fs.includes('r08-fs-j038-suishitsu')) report.kbActs.push({ id: 'waterQuality' });
         // 月1回: 慢性維持透析患者外来医学管理料(検査の包括はrule-0007)

@@ -270,6 +270,19 @@ t('導入期加算1・水質確保加算はそれぞれの届出があるとき�
   ok(r2.ev.billableItems.some((b) => b.itemId === 'r08-J038-n9'), '届出後は水質確保が算定');
 });
 
+t('便J: ダイアライザー(Ia型)は材料としてセッションごとに算定される(161点=1,610円/10)', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1');
+  const p = dept.pt[0];
+  const r = DEPT.evalVisit(DIALYSIS, dept, p, { type: 'hd', kbActs: [{ id: 'hd' }, { id: 'dialyzer' }, { id: 'monthlyMgmt' }] }, 2);
+  const mat = r.ev.billableItems.find((b) => b.itemId === 'r08-t710010929');
+  ok(mat, 'ダイアライザーが算定される');
+  eq(mat.points, 161, '点数=材料価格1,610円を10円で除した161点');
+  ok(r.ev.billableItems.some((b) => b.itemId === 'r08-B001-15'), '外来医学管理料と併算定できる(検査包括の対象外)');
+  const r2 = DEPT.evalVisit(DIALYSIS, dept, p, { type: 'hd', kbActs: [{ id: 'hd' }, { id: 'dialyzer' }] }, 3);
+  ok(r2.ev.billableItems.some((b) => b.itemId === 'r08-t710010929'), '翌セッションも算定される(回数制限なし)');
+});
+
 t('透析180日運用: 収益は全てエンジン算定・外来医学管理料は患者ごと月1回', () => {
   const dept = DEPT.create(DIALYSIS, 1);
   dept.policy.explain = true; dept.equip.water = true;
