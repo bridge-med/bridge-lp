@@ -207,6 +207,41 @@ t('白内障手術の点数はKBと一致し、施設基準の定めなしでも
   eq(op.points, REIMB.pointsOf('r08-K282-1-ro'), '点数はKB由来');
 });
 
+t('OCT(眼底三次元画像解析)は月1回: 同月2回目は却下される(告示D256-2注)', () => {
+  const dept = DEPT.create(OPHTHA, 1);
+  const p = { pr: 'glaucoma', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r1 = DEPT.evalVisit(OPHTHA, dept, p, { type: 'revisit', kbActs: [{ id: 'oct' }] }, 1);
+  const oct = r1.ev.billableItems.find((b) => b.itemId === 'r08-D256-2');
+  ok(oct, '1回目は算定');
+  eq(oct.points, REIMB.pointsOf('r08-D256-2'), '点数はKB由来');
+  const r2 = DEPT.evalVisit(OPHTHA, dept, p, { type: 'revisit', kbActs: [{ id: 'oct' }] }, 8);
+  ok(r2.ev.rejectedItems.some((b) => b.itemId === 'r08-D256-2'), '同月2回目は却下');
+});
+
+t('静的量的視野検査は両眼=片側×2単位で算定される', () => {
+  const dept = DEPT.create(OPHTHA, 1);
+  const p = { pr: 'glaucoma', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
+  const r = DEPT.evalVisit(OPHTHA, dept, p, { type: 'revisit', kbActs: [{ id: 'fieldStatic', units: 2 }] }, 1);
+  const f = r.ev.billableItems.find((b) => b.itemId === 'r08-D260-2');
+  ok(f, '算定される');
+  eq(f.subtotal, REIMB.pointsOf('r08-D260-2') * 2, '両眼=片側の点数×2');
+});
+
+t('眼科学的検査(OCT・視野)の実施日は外来管理加算が却下される(A001注8・定める検査)', () => {
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n8' }, { itemId: 'r08-D256-2' }],
+    facilityStandards: [], history: {},
+  });
+  ok(r.rejectedItems.some((b) => b.itemId === 'r08-A001-n8'), 'OCT実施日は外来管理加算が却下');
+  const r2 = REIMB.evaluateEncounter({
+    encounter: { visitType: 'revisit' },
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n8' }, { itemId: 'r08-D260-2', units: 2 }],
+    facilityStandards: [], history: {},
+  });
+  ok(r2.rejectedItems.some((b) => b.itemId === 'r08-A001-n8'), '視野検査実施日も却下');
+});
+
 t('手術設備なしでは手術パイプラインが動かない(ゲーム上のゲート)', () => {
   const dept = DEPT.create(OPHTHA, 1);
   const rand = rng(5);
@@ -216,7 +251,7 @@ t('手術設備なしでは手術パイプラインが動かない(ゲーム上�
 
 t('眼科120日運用: 収益は全てエンジン算定(概算ゼロ)', () => {
   const dept = DEPT.create(OPHTHA, 1);
-  dept.equip.fundusSet = true; dept.equip.surgery = true;
+  dept.equip.fundusSet = true; dept.equip.oct = true; dept.equip.field = true; dept.equip.surgery = true;
   const rand = rng(9);
   let revenue = 0, engineYen = 0, approxYen = 0, ops = 0;
   for (let d = 1; d <= 120; d++) {

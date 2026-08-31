@@ -24,7 +24,7 @@
       { id: 'dry-eye', label: '慢性眼表面疾患', weight: 0.3 },
     ],
     workflows: ['受付→視力/屈折/眼圧→診察→(細隙灯/眼底)→(術前検査→手術→術後)→会計'],
-    equipment: ['視力表・レフラクトメーター', '眼圧計', '細隙灯', '(投資)精密眼底セット', '(投資)手術設備'],
+    equipment: ['視力表・レフラクトメーター', '眼圧計', '細隙灯', '(投資)精密眼底セット', '(投資)OCT', '(投資)視野計', '(投資)手術設備'],
     staffing: ['医師', '看護師', '視能訓練士(ORT)', '受付・医療事務'],
     reimbursementMappings: {
       first: { itemId: 'r08-A000' },
@@ -34,6 +34,8 @@
       tonometry: { itemId: 'r08-D264' },
       slitlamp: { itemId: 'r08-D257' },
       fundus: { itemId: 'r08-D255' },
+      oct: { itemId: 'r08-D256-2' },
+      fieldStatic: { itemId: 'r08-D260-2' },
       keratometry: { itemId: 'r08-D265' },
       axial: { itemId: 'r08-D269-2' },
       cataractOp: { itemId: 'r08-K282-1-ro' },
@@ -49,7 +51,7 @@
 
     deptDefaults: {
       staff: { doctors: 1, nurses: 1, orts: 1, clerks: 1 },
-      equip: { fundusSet: false, surgery: false },
+      equip: { fundusSet: false, oct: false, field: false, surgery: false },
       policy: {},
     },
     open: { cost: 12000000, repMin: 65, needPlan: true,
@@ -65,11 +67,21 @@
       { id: 'fundusSet', label: '精密眼底セットを導入', cost: 1200000,
         can: (d) => !d.equip.fundusSet, apply: (d) => { d.equip.fundusSet = true; },
         note: '精密眼底検査ができるようになる(緑内障・糖尿病網膜症の管理単価が上がる)' },
+      { id: 'octSet', label: 'OCT(眼底三次元画像解析装置)を導入', cost: 8000000,
+        can: (d) => !d.equip.oct, apply: (d) => { d.equip.oct = true; },
+        note: '緑内障・糖尿病網膜症の管理来院で眼底三次元画像解析(月1回の上限はエンジンが患者ごとに判定)。導入費はゲーム上の仮定' },
+      { id: 'fieldSet', label: '視野計を導入(静的量的視野検査)', cost: 4000000,
+        can: (d) => !d.equip.field, apply: (d) => { d.equip.field = true; },
+        note: '緑内障の視野管理が始まる(両眼=片側につき×2で算定)。導入費はゲーム上の仮定' },
       { id: 'surgery', label: '手術設備を導入(白内障日帰り)', cost: 15000000,
         can: (d) => !d.equip.surgery, apply: (d) => { d.equip.surgery = true; },
         note: '術前検査(角膜曲率・眼軸)と水晶体再建術が始まる。眼内レンズの費用は手術の所定点数に含まれる(材料としては請求できない)' },
     ],
-    deptBadge(d) { return d.equip.surgery ? '日帰り手術あり' : d.equip.fundusSet ? '精密眼底あり' : '基本検査のみ'; },
+    deptBadge(d) {
+      if (d.equip.surgery) return '日帰り手術あり';
+      const t = [d.equip.fundusSet && '精密眼底', d.equip.oct && 'OCT', d.equip.field && '視野計'].filter(Boolean);
+      return t.length ? `${t.join('・')}あり` : '基本検査のみ';
+    },
     infoLine(i) { return `継続 ${i.panel}人` + (i.preop !== undefined && (i.preop + i.surgeryQueue + i.postop) > 0 ? `・白内障 待ち${i.preop + i.surgeryQueue}/術後${i.postop}` : ''); },
     fsDefs: [],
     fsNote: '登録項目に届出必須の施設基準の定めはない(KBで否定的確認済み)',
@@ -132,6 +144,10 @@
         const isFirst = !p.fb;
         const report = { type: isFirst ? 'first' : 'revisit', kbActs: [{ id: 'tonometry' }, { id: 'slitlamp' }] };
         if (dept.equip.fundusSet && (p.pr === 'glaucoma' || p.pr === 'dm-retino') && ctx.rand() < 0.5) report.kbActs.push({ id: 'fundus' });
+        // OCTは月1回(D256-2注)。2回目以降はエンジンがp.mcの月次履歴で却下する
+        if (dept.equip.oct && (p.pr === 'glaucoma' || p.pr === 'dm-retino') && ctx.rand() < 0.4) report.kbActs.push({ id: 'oct' });
+        // 静的量的視野は片側につき290点。両眼実施=×2単位(マスターに両側セルなし)
+        if (dept.equip.field && p.pr === 'glaucoma' && ctx.rand() < 0.3) report.kbActs.push({ id: 'fieldStatic', units: 2 });
         if (ctx.rand() < 0.5) report.kbActs.push({ id: 'presc' });
         const r = api.evalVisit(p, report);
         p.nv = ctx.day + (p.iv || 30);
