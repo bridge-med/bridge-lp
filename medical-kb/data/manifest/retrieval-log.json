@@ -363,6 +363,20 @@
       "dest": "data/sources/r08/masters/table_shisetsu_kijun_r5.zip",
       "sha256": "d9dc1f25dd75c03ff437fcb87156654d0e1150bfe222af5776e0602dc266e553",
       "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-kokuji73-zairyo",
+      "url": "https://www.mhlw.go.jp/content/12400000/001665200.pdf",
+      "dest": "data/sources/r08/mhlw/kokuji73_zairyo_kakaku.pdf",
+      "sha256": "0616f4f858af1ada03a6ede97856ec63703374cdf8350c25f57ca5fade5e24db",
+      "retrieved_at": "2026-08-31T01:31:01.224Z"
+    },
+    {
+      "id": "r08-ryuiji-zairyo",
+      "url": "https://www.mhlw.go.jp/content/12400000/001686844.pdf",
+      "dest": "data/sources/r08/mhlw/ryuiji_zairyo_0305_1.pdf",
+      "sha256": "25d15dbdedfd6cf1f29f7cc3b22902caca485f693444e49912c24b1c94c2fee1",
+      "retrieved_at": "2026-08-31T01:31:01.796Z"
     }
   ]
 }

@@ -3620,13 +3620,14 @@
       if (xs.length === 1) { rejSingles.push(xs[0]); continue; }
       const names = xs.map((x) => x.name);
       const label = names.length > 3 ? `${names.slice(0, 3).join('・')} ほか${names.length - 3}件` : names.join('・');
-      const pts = xs.reduce((a, x) => a + (x.points || 0), 0);
+      // units>1の項目(リハ等)が将来グループに入っても合計が正しいようsubtotalを優先
+      const pts = xs.reduce((a, x) => a + (x.subtotal != null ? x.subtotal : (x.points || 0)), 0);
       const reason = (xs[0].reasons || [])[0] || '';
-      rejGrouped.push(`
+      rejGrouped.push({ idx: rejAll.indexOf(xs[0]), html: `
       <div class="kb-reject"><b>${label}</b>(計${pts.toLocaleString()}点) は算定していません
         ${reason ? `<div class="kb-cond">${reason}</div>` : ''}
         <div class="kb-quote">「${xs[0].rules[0].quote}」</div>
-      </div>`);
+      </div>` });
     }
     const rejRows = rejSingles.map((x) => {
       let fsLine = '';
@@ -3649,7 +3650,11 @@
         ${(x.rules || []).filter((r) => r.quote).map((r) => `<div class="kb-quote">「${r.quote}」</div>`).join('')}
         ${fsLine}
       </div>`;
-    }).join('') + rejGrouped.join('');
+    // 個別行と集約ブロックを元の却下順(初出index)で並べ直す(順序が入れ替わらないように)
+    }).map((html, i) => ({ idx: rejAll.indexOf(rejSingles[i]), html }))
+      .concat(rejGrouped)
+      .sort((a, b) => a.idx - b.idx)
+      .map((p) => p.html).join('');
     const warnRows = playerWarn(s.kb && s.kb.warnings).slice(0, 3)
       .map((w) => `<div class="kb-cond">⚠ ${w.message}</div>`).join('')
       + (G.debugMode ? devWarn(s.kb && s.kb.warnings).map((w) => `<div class="kb-cond">dev: ${w.message}</div>`).join('') : '');
