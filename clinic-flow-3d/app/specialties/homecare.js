@@ -123,7 +123,7 @@
       }
       const ramp = Math.min(1, 0.3 + (ctx.day - dept.openedDay) / 75);
       // 新規(通院困難になった患者の紹介)。空いている地区の枠まで
-      const cap = (ctx.homecareCap !== undefined ? ctx.homecareCap : 84);
+      const cap = (ctx.homecareCap !== undefined ? ctx.homecareCap : 98); // 既定=14地区×7(game.jsのhomecareCtxが正)
       let refer = api.frac(P.referBase * ramp * (0.5 + 0.5 * (ctx.rep / 100)) * (dept.staff.doctors || 1));
       while (refer-- > 0 && dept.pt.length < cap) {
         const cl = ctx.assignCluster ? ctx.assignCluster() : 0;
