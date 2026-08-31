@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-31T04:45:26.448Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-31T11:02:52.214Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-31T04:45:26.448Z",
+ "generated_at": "2026-08-31T11:02:52.214Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -1257,6 +1257,47 @@
    ]
   },
   {
+   "id": "r08-D256-2",
+   "code": "160183310",
+   "kubun": "D256-2",
+   "name": "眼底三次元画像解析",
+   "shortName": "眼底三次元(OCT)",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 190,
+   "unit": "1回につき",
+   "conditions": "緑内障・黄斑疾患等の網膜断層の解析(OCT)。併せて行った眼底カメラ撮影(通常の方法)の費用は所定点数に含まれる(告示注)。片側・両側の別の定めはなく1回につき所定点数(マスターも単一セル)。留意事項通知に本区分の項は無い=告示の注のみが運用の根拠(否定的確認)。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、実施した日は外来管理加算不可(留意A001(7)キ)",
+   "exclusions": null,
+   "countLimitText": "患者1人につき月1回(告示注・EDT算定回数テーブル: 月・上限1)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 1
+   },
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": null,
+   "notificationReq": null,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "ophthalmology",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.203",
+     "quote": "D256-2 眼底三次元画像解析 190点 注 患者1人につき月1回に限り算定する。ただし、眼底三次元画像解析と併せて行った、区分番号D256の1に掲げる眼底カメラ撮影の通常の方法の場合に係る費用は、所定点数に含まれるものとする。",
+     "note": "マスター160183310=190と一致。EDT算定回数テーブル(単位=月・上限1)とも一致。留意事項通知の検査の部にD256-2の項は無い(D256の次はD256-3)=注のみが運用の根拠(否定的確認)。包括相手のD256の1(眼底カメラ通常撮影)はKB未登録のため機械化せずconditionsに記載"
+    }
+   ]
+  },
+  {
    "id": "r08-D257",
    "code": "160081610",
    "kubun": "D257",
@@ -1291,6 +1332,89 @@
      "page": "PDF p.203",
      "quote": "D257 細隙灯顕微鏡検査(前眼部及び後眼部) 110点",
      "note": "マスター160081610=110と一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-D260-1",
+   "code": "160082010",
+   "kubun": "D260",
+   "name": "動的量的視野検査(片側)",
+   "shortName": "動的量的視野(片)",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 195,
+   "unit": "片側につき",
+   "conditions": "ゴールドマン視野計等による動的量的視野検査。両側は390点(160082130)。視野の2つ以上の部位を同時に検査した場合も所定点数のみを算定(留意D260)。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、実施した日は外来管理加算不可(留意A001(7)キ)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": null,
+   "notificationReq": null,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "ophthalmology",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.203",
+     "quote": "D260 量的視野検査(片側) 1 動的量的視野検査 195点 2 静的量的視野検査 290点",
+     "note": "マスター160082010=195(片側)・160082130=390(両側)と一致。EDT算定回数テーブルにセルなし=回数制限なし(否定的確認)"
+    }
+   ]
+  },
+  {
+   "id": "r08-D260-2",
+   "code": "160082210",
+   "kubun": "D260",
+   "name": "静的量的視野検査(片側)",
+   "shortName": "静的量的視野(片)",
+   "categoryL": "特掲診療料",
+   "categoryM": "検査",
+   "points": 290,
+   "unit": "片側につき",
+   "conditions": "ハンフリー視野計等による静的量的視野検査(緑内障の視野管理の定番)。マスターに両側のセルは無い(動的にはある=否定的確認)。視野の2つ以上の部位を同時に検査した場合も所定点数のみを算定(留意D260)。A001注8の「厚生労働大臣が定める検査」(生体検査料のうち眼科学的検査)に該当し、実施した日は外来管理加算不可(留意A001(7)キ)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": null,
+   "notificationReq": null,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "ophthalmology",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.203",
+     "quote": "D260 量的視野検査(片側) 2 静的量的視野検査 290点",
+     "note": "マスター160082210=290(片側)と一致。両側セルは動的(160082130)のみ存在し静的には無い(マスター全件走査で否定的確認)。EDT算定回数テーブルにセルなし=回数制限なし"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "PDF p.430",
+     "quote": "量的視野検査には、全視野にわたって検査する場合のほか、例えば、中心視野を特に重点的に検査する量的中心視野検査等、視野の一定部位を限定して検査する場合があるが、2つ以上の部位にわたって当該検査を同時に実施した場合においても、所定点数のみを算定する。",
+     "note": "留意D260。動的(D260-1)にも同文が適用される"
     }
    ]
   },
@@ -3980,7 +4104,10 @@
      "r08-D264",
      "r08-D265",
      "r08-D269-2",
-     "r08-D215-2-ro-3"
+     "r08-D215-2-ro-3",
+     "r08-D256-2",
+     "r08-D260-1",
+     "r08-D260-2"
     ],
     "sadamaruKensaNote": "A001注8の「厚生労働大臣が定める検査」=生体検査料のうち超音波検査等・脳波検査等・神経・筋検査・耳鼻咽喉科学的検査・眼科学的検査・負荷試験等・ラジオアイソトープを用いた諸検査・内視鏡検査(留意A001(7)キ・p.13-14)。KB登録済みの該当項目を列挙(D215超音波検査は「超音波検査等」の区分=v44で追加)。検査カテゴリで本リストに無い項目はneeds_reviewのまま",
     "clearedKensaItems": [

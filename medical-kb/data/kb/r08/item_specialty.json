@@ -467,5 +467,26 @@
   "relevance": "primary",
   "rationale": "全診療科共通の紹介の医学管理料",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-D256-2",
+  "specialty_id": "ophthalmology",
+  "relevance": "primary",
+  "rationale": "緑内障・糖尿病網膜症の管理でOCTによる網膜断層評価(月1回)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-D260-1",
+  "specialty_id": "ophthalmology",
+  "relevance": "primary",
+  "rationale": "動的量的視野検査(GP)。KB登録のみ・ゲーム未実装",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-D260-2",
+  "specialty_id": "ophthalmology",
+  "relevance": "primary",
+  "rationale": "緑内障の視野管理(ハンフリー静的)。ゲームは両眼=片側×2単位で算定",
+  "confidence": "verified"
  }
 ]
