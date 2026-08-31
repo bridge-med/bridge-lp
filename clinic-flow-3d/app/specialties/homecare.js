@@ -10,6 +10,9 @@
  *    月2回以上訪問した患者に限り申請する(安全側の運用)。戸建て地区の患者は各1人セル、
  *    マンション地区(同一建物)は建物内の患者数で人数セルを選ぶ。
  *    施設総管(C002_2)・看取り・重症度セルはKB登録後(issues #10)
+ *  - 訪問診療料はC001の1(同一建物居住者以外・890点)で固定する。同一日に同じマンションの
+ *    複数患者を回った場合、制度上は「同一建物居住者の場合」(C001の2・215点。KB未登録)だが、
+ *    ゲームは1に寄せている。収益を過大に見せる側の簡略化=KB登録までの保留として起票(#25)
  *  - 移動時間・訪問枠・患者獲得・費用は managementParameters(ゲーム上の仮定) */
 (function (root) {
   'use strict';
@@ -67,7 +70,7 @@
         check(dept) {
           return dept.policy.oncall ? { ok: true } : { ok: false, missing: ['24時間の連絡・往診体制'] };
         },
-        note: '従来型=通常型(様式11・届出区分4)。強化型(常勤医3名)のセルはKB未登録のため扱わない(簡略化)' },
+        note: '従来型=通常型(様式11・届出区分4)。強化型(常勤医3名)の在医総管セルはKB未登録のため扱わない(簡略化)' },
     ],
 
     managementParameters: {
@@ -176,11 +179,11 @@
         p.nv = this._nextVisit(p, ctx.day);
         // ラベルは地区の性質と実効人数で分岐(みなし1人はセルがro-1でもマンション訪問と言う)
         const soukan = r.ev.billableItems.find((b) => b.itemId.indexOf('r08-C002-2-ro') === 0);
-        let label = '定期訪問診療';
+        let label = '定期訪問診療(訪問診療料は同一建物居住者以外で計上=ゲーム上の簡略化)';
         if (soukan) {
           if (!soukanSel) label = '月2回目の定期訪問+在宅時医学総合管理料';
-          else if (soukanSel.effectiveCount === 1 && soukanSel.rawCount >= 2) label = '同一建物(マンション)の定期訪問+在宅時医学総合管理料(戸数比の例外で「1人の場合」を算定)';
-          else label = '同一建物(マンション)の定期訪問+在宅時医学総合管理料(単一建物診療患者の人数区分)';
+          else if (soukanSel.effectiveCount === 1 && soukanSel.rawCount >= 2) label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料(戸数比の例外で「1人の場合」を算定)';
+          else label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料(単一建物診療患者の人数区分)';
         }
         api.setSample(label, r.lines, r.ev, soukan ? 3 : 2);
       }
