@@ -138,14 +138,11 @@ a { color: var(--blue-deep); }
   border-radius: 12px 12px 0 0;
   font: 700 12px/1.5 var(--sans);
   color: var(--amber);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* ミッション文はellipsisで後半が読めなくなるため、狭幅では折返しに切り替える(保留#22)。
-   ellipsis時はクリップされたspanが全要素はみ出し走査に載る偽陽性も同時に消える */
-@media (max-width: 360px) {
-  .mission-bar { white-space: normal; overflow: visible; text-overflow: clip; }
+  /* ミッション文はellipsisだと後半(報酬額など)が読めなくなるため常時折返し(保留#22)。
+     ≤360px限定では390px帯(主要スマホ)で再発するためブレークポイントを設けない(v48 designer実測)。
+     収まる幅では従来どおり1行。ellipsis時のクリップspanが走査に載る偽陽性も全幅で消える */
+  white-space: normal;
+  overflow: visible;
 }
 
 /* ---------- タブ ---------- */
