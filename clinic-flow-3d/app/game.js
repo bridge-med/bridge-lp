@@ -629,6 +629,18 @@
       if (!G.depts) G.depts = {};
       // 旧セーブの分院にv4フィールドを補完
       for (const br of G.branches) {
+        // staff導入前のセーブはcorpStaff()でTypeErrorになる(保留#20)。開設時と同じ既定値で
+        // 明示的に補完する(読み取り側の||0は手がかりを消して誤数字を見せるため採らない=PM裁定)。
+        // ほかの必須フィールドも同時に補完し、部分的な分院オブジェクトに対して堅牢にする
+        if (!br.staff) br.staff = { doctors: 1, nurses: 1, pts: 0, receptionists: 1 };
+        if (!Array.isArray(br.profit7)) br.profit7 = [];
+        if (br.machines === undefined) br.machines = 0;
+        if (br.rehaLevel === undefined) br.rehaLevel = 0;
+        if (br.aw === undefined) br.aw = 0.12;
+        if (br.rep === undefined) br.rep = 52;
+        if (br.revisitPool === undefined) br.revisitPool = 4;
+        if (br.rehabPool === undefined) br.rehabPool = 0;
+        if (br.last === undefined) br.last = null;
         if (br.floorLv === undefined) br.floorLv = 1;
         if (br.physio === undefined) br.physio = 0;
         if (br.pInj === undefined) br.pInj = 0.2;
