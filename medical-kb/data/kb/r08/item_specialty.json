@@ -479,14 +479,14 @@
   "item_id": "r08-D260-1",
   "specialty_id": "ophthalmology",
   "relevance": "primary",
-  "rationale": "動的量的視野検査(GP)。KB登録のみ・ゲーム未実装",
+  "rationale": "動的量的視野検査(ゴールドマン視野計)。緑内障・視神経疾患の視野評価",
   "confidence": "verified"
  },
  {
   "item_id": "r08-D260-2",
   "specialty_id": "ophthalmology",
   "relevance": "primary",
-  "rationale": "緑内障の視野管理(ハンフリー静的)。ゲームは両眼=片側×2単位で算定",
+  "rationale": "緑内障の経過観察における静的量的視野検査(ハンフリー視野計等)",
   "confidence": "verified"
  }
 ]

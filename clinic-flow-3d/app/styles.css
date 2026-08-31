@@ -1382,6 +1382,9 @@ input[type="range"]::-moz-range-thumb {
 /* ===== 診療科部門(v35): 法人タブ 索引+1件展開 ===== */
 .site-row {
   display: flex; align-items: center; gap: 8px;
+  /* バッジ等が収まらない狭幅では部門名を主役に保ち、残りを次行の右へ落とす
+     (v49 designer実測: 390pxで名前が1文字に潰れていた。先例=.kijun-rowの折返し) */
+  flex-wrap: wrap; row-gap: 4px; justify-content: flex-end;
   width: 100%; text-align: left;
   border: 1px solid var(--line); background: var(--card);
   border-radius: 12px; padding: 10px 12px; margin: 6px 0;
@@ -1389,7 +1392,7 @@ input[type="range"]::-moz-range-thumb {
   min-height: 44px;
 }
 .site-row.on { border-color: rgba(62, 124, 166, 0.45); background: var(--blue-pale); }
-.site-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .site-badge {
   flex: 0 0 auto; font: 700 10px/1 var(--sans); color: var(--blue-deep);
   background: var(--blue-pale); border: 1px solid rgba(62, 124, 166, 0.25);
