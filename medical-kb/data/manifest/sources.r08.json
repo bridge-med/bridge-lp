@@ -1000,7 +1000,7 @@
    "doc_type": "kokuji",
    "issuer": "厚生労働省",
    "doc_number": "令和8年厚生労働省告示第73号",
-   "doc_number_confidence": "search-located",
+   "doc_number_confidence": "verified",
    "urls": [
     {
      "url": "https://www.mhlw.go.jp/content/12400000/001665200.pdf",
@@ -1010,9 +1010,9 @@
    ],
    "save_as": "mhlw/kokuji73_zairyo_kakaku.pdf",
    "fetch": "direct",
-   "status": "planned",
-   "verified": false,
-   "notes": "改定ポータル(portal_newpage_67729.html)のリンクから採取(v45便J)。取得後に実物で告示番号を照合しverifiedへ"
+   "status": "retrieved",
+   "verified": true,
+   "notes": "実物照合済み: 制定文に「厚生労働省告示第七十三号」・令和8年6月1日適用(令和8年3月5日)。改定ポータルのリンクから取得(v45便J)"
   },
   {
    "id": "r08-ryuiji-zairyo",
@@ -1021,7 +1021,7 @@
    "doc_type": "tsuchi",
    "issuer": "厚生労働省",
    "doc_number": "保医発0305第1号",
-   "doc_number_confidence": "search-located",
+   "doc_number_confidence": "verified",
    "urls": [
     {
      "url": "https://www.mhlw.go.jp/content/12400000/001686844.pdf",
@@ -1031,9 +1031,9 @@
    ],
    "save_as": "mhlw/ryuiji_zairyo_0305_1.pdf",
    "fetch": "direct",
-   "status": "planned",
-   "verified": false,
-   "notes": "改定ポータルのリンクから採取(v45便J)。取得後に実物で文書番号を照合しverifiedへ"
+   "status": "retrieved",
+   "verified": true,
+   "notes": "実物照合済み: 頭書に「保医発0305第1号 令和8年3月5日」。改定ポータルのリンクから取得(v45便J)"
   }
  ]
 }

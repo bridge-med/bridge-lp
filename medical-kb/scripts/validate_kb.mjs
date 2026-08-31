@@ -41,10 +41,12 @@ const evidence = loadOr(join(kbDir, 'evidence.json'), []);
 const specialties = loadOr(join(KB_ROOT, 'data', 'kb', 'common', 'specialties.json'), []);
 const manifest = loadOr(join(KB_ROOT, 'data', 'manifest', `sources.${rev}.json`), { documents: [] });
 let master = null;
+let kizai = null;
 try {
-  const { ensureExtracted, loadIkaMaster } = await import('./lib/edt.mjs');
+  const { ensureExtracted, loadIkaMaster, loadKizaiMaster } = await import('./lib/edt.mjs');
   ensureExtracted(rev);
   master = loadIkaMaster(rev);
+  kizai = loadKizaiMaster(rev);
 } catch { /* 原典未取得・レイアウト未検証時はE7をスキップ */ }
 
 const errors = [];
@@ -127,10 +129,25 @@ if (existsSync(scenDir)) {
   }
 }
 
-/* E7: マスター突合(点数識別3=点数の項目のみ数値比較) */
+/* E7: マスター突合(点数識別3=点数の項目のみ数値比較)。
+   特定保険医療材料({rev}-t{特定器材コード})は特定器材マスターの材料価格と
+   「材料価格を10円で除して得た点数」(J400等)で突合する */
 if (master?.rows?.length) {
   const byCode = new Map(master.rows.map(m => [m.code, m]));
+  const byKizai = new Map((kizai?.rows || []).map(m => [m.code, m]));
   for (const it of items) {
+    const isMat = /^r\d\d-t\d{9}$/.test(it.id);
+    if (isMat) {
+      const km = it.code ? byKizai.get(it.code) : null;
+      if (!km) { warns.push(`E7 ${it.id}: code=${it.code} が特定器材マスターに存在しない`); continue; }
+      if (km.price_type === '1' && Number.isFinite(Number(km.price_raw))) {
+        const expect = Math.round(Number(km.price_raw)) / 10;
+        if (it.points != null && Number(it.points) !== expect) {
+          errors.push(`E7 ${it.id}: 材料点数が材料価格と不一致 (kb=${it.points} / 価格${km.price_raw}円→${expect}点)`);
+        }
+      }
+      continue;
+    }
     if (it.code && it.points != null && byCode.has(it.code)) {
       const m = byCode.get(it.code);
       const mp = Number(m.points_raw);

@@ -87,6 +87,33 @@ export function loadIkaMaster(rev) {
   };
 }
 
+/* 特定器材マスター → レコード配列(材料価格の突合用) */
+export function loadKizaiMaster(rev) {
+  const layout = loadLayout();
+  const kz = layout.kizai;
+  if (!kz || !kz.verified) {
+    throw new Error('master-layout.json の kizai が未定義または verified: false。仕様書と照合するまで特定器材マスターは取込できない。');
+  }
+  const csv = findCsv(rev, 'master_kizai_t_x', 't_');
+  if (!csv) throw new Error('特定器材マスターCSVが見つからない。ensureExtracted を先に実行すること。');
+  const col = kz.columns;
+  const pick = (row, key) => (col[key] == null ? null : strip(row[col[key]] ?? null));
+  return {
+    source_file: csv.split('/').pop(),
+    rows: readSjisCsv(csv).filter(r => strip(r[col.master_type]) === 'T').map(r => ({
+      code: pick(r, 'code'),
+      name: pick(r, 'name'),
+      unit_name: pick(r, 'unit_name'),
+      price_type: pick(r, 'price_type'),
+      price_raw: pick(r, 'price') !== null && pick(r, 'price') !== '' ? Number(pick(r, 'price')) : null,
+      betsuhyo_no: pick(r, 'betsuhyo_no'),
+      kubun_no: pick(r, 'kubun_no'),
+      base_name: pick(r, 'base_name'),
+      haishi_date: pick(r, 'haishi_date'),
+    })),
+  };
+}
+
 /* 電子点数表テーブル群 → {hojo, hokatsu, haihan, nyuin, santei_kaisu} */
 export function loadEdtTables(rev) {
   const layout = loadLayout();

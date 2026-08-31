@@ -29,6 +29,30 @@
     "name_official": "idx112。初診料/乳幼児加算(初診)/心大血管疾患リハ(1)等で基本漢字名称と内容一致を確認(observed)",
     "date_cols": "idx86=20260601(全行で施行日と一致・変更年月日と推定), idx87/idx31=99999999(廃止系と推定)。項番対応が未確定のためマッピングに含めない"
   },
+  "kizai": {
+    "_source": "spec_R08rec1.pdf (5)特定器材マスター p20-22 の項番1〜38定義と t_20260529.csv 実データ(フィルム120円/ダイアライザーIa型1,610円等)での突合。2026-08-31実施",
+    "verified": true,
+    "columns": {
+      "change_kbn": 0,
+      "master_type": 1,
+      "code": 2,
+      "name": 4,
+      "unit_code": 7,
+      "unit_name": 9,
+      "price_type": 10,
+      "price": 11,
+      "haishi_date": 29,
+      "betsuhyo_no": 30,
+      "kubun_no": 31,
+      "base_name": 36
+    },
+    "price_type_map": {
+      "1": "金額",
+      "2": "購入価格",
+      "5": "%加算",
+      "9": "乗算割合"
+    }
+  },
   "code_maps": {
     "_source": "spec_R08rec1.pdf 項番11(点数識別)・項番13(入外適用区分)の定義より転記",
     "points_kbn": {

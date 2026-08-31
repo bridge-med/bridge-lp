@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-08-30T12:52:36.739Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-08-31T01:35:24.405Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-08-30T12:52:36.739Z",
+ "generated_at": "2026-08-31T01:35:24.405Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -271,6 +271,16 @@
    "title": "訪問看護療養費 施設基準テーブル",
    "url": "https://shinryohoshu.mhlw.go.jp/shinryohoshu/file/etc/r5.zip",
    "number": null
+  },
+  "r08-kokuji73-zairyo": {
+   "title": "特定保険医療材料及びその材料価格(材料価格基準)の一部を改正する件(令和8年厚生労働省告示第73号)",
+   "url": "https://www.mhlw.go.jp/content/12400000/001665200.pdf",
+   "number": "令和8年厚生労働省告示第73号"
+  },
+  "r08-ryuiji-zairyo": {
+   "title": "特定保険医療材料の材料価格算定に関する留意事項について(令和8年3月5日 保医発0305第1号)",
+   "url": "https://www.mhlw.go.jp/content/12400000/001686844.pdf",
+   "number": "保医発0305第1号"
   }
  },
  "specialties": [
@@ -1463,7 +1473,7 @@
    "points": 12100,
    "unit": "片眼(1手術)につき",
    "conditions": "縫着レンズ=17,840点/レンズ挿入なし=7,430点/計画的後嚢切開を伴う=21,780点。水晶体嚢拡張リング使用+1,600点(注1)。眼内レンズは特定保険医療材料として別途。特掲の施設基準告示・届出通知に水晶体再建術単独の施設基準の定めはない(0305-8は緑内障併用眼内ドレーン挿入術のみ規定)",
-   "exclusions": null,
+   "exclusions": "眼内レンズの費用は所定点数に含まれ、別に算定できない(留意K282(2))。材料価格基準(告示73号)・特定器材マスターに眼内レンズは不収載=特定保険医療材料として請求する余地がない(否定的確認・v45)",
    "countLimitText": null,
    "periodLimitText": null,
    "limit": null,
@@ -1494,6 +1504,13 @@
      "page": "第60の6(参照)",
      "quote": "特掲届出通知の施設基準一覧に水晶体再建術単独の項はない。水晶体再建術に関する施設基準は「緑内障手術(流出路再建術(眼内法)及び水晶体再建術併用眼内ドレーン挿入術)」(第60の6)のみに規定されている。",
      "note": "不存在の確認(2026-08-28 全文grepによる)"
+    },
+    {
+     "field": "exclusions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.624",
+     "quote": "眼内レンズの費用は所定点数に含まれ、別に算定できない。",
+     "note": "留意K282(2)。【否定的確認】材料価格基準(告示73号)全文に「眼内レンズ」は0件・特定器材マスター(1,395行)にも0件=特定保険医療材料として不収載。眼科モジュールがIOLを請求しないのは「KB未登録だから」ではなく制度上の事実(v45で格上げ)"
     }
    ]
   },
@@ -3118,6 +3135,46 @@
      "page": "p.192",
      "quote": "4 生化学的検査(I)判断料 144点",
      "note": "マスター突合: 160061910(生化学的検査（１）判断料)=144点・単位「月」上限1で一致。月1回はpackのLIMITSで機械化"
+    }
+   ]
+  },
+  {
+   "id": "r08-t710010929",
+   "code": "710010929",
+   "kubun": "J400/材料価格基準別表II-040-(1)-①",
+   "name": "ダイアライザー(Ia型)",
+   "shortName": "ダイアライザー(Ia型)",
+   "categoryL": "特掲診療料",
+   "categoryM": "特定保険医療材料",
+   "points": 161,
+   "unit": "1本につき(人工腎臓1回で1本使用のゲーム運用)",
+   "conditions": "人工腎臓用特定保険医療材料(回路を含む)のダイアライザーIa型。材料価格1,610円(告示73号別表II区分040(1)①)を、J400特定保険医療材料の「材料価格を10円で除して得た点数」で161点に換算して算定。材料価格には回路の費用が含まれ別に算定できない(材料留意I-2-006(2)・II-040)。型区分(Ia/Ib/IIa/IIb/S/特定積層)は膜面積・機能で分かれるが、ゲームはIa型に固定(ゲーム上の仮定)。特定器材コードは710010929(特定器材マスター突合済み)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji73-zairyo",
+     "page": "p.8",
+     "quote": "040 人工腎臓用特定保険医療材料(回路を含む。) (1) ダイアライザー 1 Ia型 1,610 円",
+     "note": "材料価格基準(告示73号)別表II。特定器材マスター突合: 710010929「ダイアライザー（１ａ型）」=1,610.00円・金額種別1(金額)・別表2区分040で一致。点数換算161点の根拠はJ400(告示69号p.271「材料価格を10円で除して得た点数」)"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-zairyo",
+     "page": "p.3(I-2-006(2))・p.10(II-040)",
+     "quote": "人工腎臓用特定保険医療材料の材料価格には、回路の費用が含まれ別に算定できない。",
+     "note": "材料留意(保医発0305第1号)。II-040は「Ⅰの２の006と同様であること」により同旨。ゲームの透析部門はダイアライザー161点のみ請求し回路を別請求しない"
     }
    ]
   }
