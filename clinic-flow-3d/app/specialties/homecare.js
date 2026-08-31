@@ -179,11 +179,13 @@
         p.nv = this._nextVisit(p, ctx.day);
         // ラベルは地区の性質と実効人数で分岐(みなし1人はセルがro-1でもマンション訪問と言う)
         const soukan = r.ev.billableItems.find((b) => b.itemId.indexOf('r08-C002-2-ro') === 0);
-        let label = '定期訪問診療(訪問診療料は同一建物居住者以外で計上=ゲーム上の簡略化)';
+        // 開示の非対称は意図(v50 editor裁定): 戸建ての在医総管行は別建物=簡略化が起きないため
+        // 但し書きなし。マンション2本と汎用(マンションの月1回目もここを通る)には開示を揃えて付ける
+        let label = '定期訪問診療 — 訪問診療料は同一建物居住者以外のまま(ゲーム上の簡略化)';
         if (soukan) {
           if (!soukanSel) label = '月2回目の定期訪問+在宅時医学総合管理料';
-          else if (soukanSel.effectiveCount === 1 && soukanSel.rawCount >= 2) label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料(戸数比の例外で「1人の場合」を算定)';
-          else label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料(単一建物診療患者の人数区分)';
+          else if (soukanSel.effectiveCount === 1 && soukanSel.rawCount >= 2) label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料(戸数比の例外で「1人の場合」を算定) — 訪問診療料は同一建物居住者以外のまま(ゲーム上の簡略化)';
+          else label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料 — 訪問診療料は同一建物居住者以外のまま(ゲーム上の簡略化)';
         }
         api.setSample(label, r.lines, r.ev, soukan ? 3 : 2);
       }
