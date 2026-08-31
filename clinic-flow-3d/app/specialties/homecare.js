@@ -12,7 +12,7 @@
  *    施設総管(C002_2)・看取り・重症度セルはKB登録後(issues #10)
  *  - 訪問診療料はイ/ロ(同一建物居住者以外890点/同一建物居住者215点)をZAISOKAN.visitCellForが
  *    「その日に実際に訪問する集合」の建物内人数で選ぶ(v51で#25解消・rule-0019。
- *    繰越で建物内が1人になった日はイ=留意(4)。v50の簡略化と開示ラベルは撤去済み)
+ *    繰越で建物内が1人になった日はイ=留意(4))
  *  - 移動時間・訪問枠・患者獲得・費用は managementParameters(ゲーム上の仮定) */
 (function (root) {
   'use strict';
@@ -199,7 +199,7 @@
           else if (soukanSel.effectiveCount === 1 && soukanSel.rawCount >= 2) label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料(戸数比の例外で「1人の場合」を算定)';
           else label = '同一建物(マンション)への定期訪問+在宅時医学総合管理料';
         } else if (visitCell === 'r08-C001-1-ro') {
-          label = '同一建物(マンション)への定期訪問(同一建物居住者の訪問診療料)';
+          label = '同一建物(マンション)への定期訪問 — 訪問診療料は「同一建物居住者の場合」で算定';
         }
         api.setSample(label, r.lines, r.ev, soukan ? 3 : 2);
       }
