@@ -300,7 +300,8 @@ a { color: var(--blue-deep); }
 .op-btn small { color: var(--ink-3); font-weight: 600; }
 /* noteつき投資ボタン: 全幅・左寄せで「何が買えるか」を第2行に(v49 PM裁定A) */
 .op-btn.has-note { flex: 1 1 100%; text-align: left; border-radius: 14px; padding: 10px 14px; }
-.op-btn.has-note .act-note { display: block; margin-top: 3px; font: 500 10px/1.55 var(--sans); color: var(--ink-3); }
+/* noteは購入前の判断材料なので--ink-2(6.78:1=AA)。補足の--ink-3 10px運用(.ctrl-note等)とは役割が違う(v49 designer実測) */
+.op-btn.has-note .act-note { display: block; margin-top: 3px; font: 500 10px/1.55 var(--sans); color: var(--ink-2); }
 .op-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
 .op-btn.on small { color: rgba(255,255,255,0.7); }
 
