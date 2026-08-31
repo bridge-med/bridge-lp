@@ -3593,9 +3593,10 @@
           detail = `<div class="kb-quote">「${ev.quote}」(${doc ? doc.title : ev.doc}${pageOfEv(ev.page)})</div>`;
         }
         // 特定保険医療材料の行は価格・区分の説明(KBのconditions)を添える —
-        // 型の6区分の存在とゲームの固定(仮定)を隠さない(v46・材料に共通)
+        // 型の6区分の存在とゲームの固定(仮定)を隠さない(v46・材料に共通)。
+        // 表記は院内レセプト学習モードの先例(「条件: 」ラベル・引用の前)に揃える(designer裁定)
         if (it && it.categoryM === '特定保険医療材料' && it.conditions) {
-          detail += `<div class="kb-cond">${it.conditions}</div>`;
+          detail = `<p class="kb-cond">条件: ${it.conditions}</p>` + detail;
         }
       } else if (l.incl && KBI) {
         const rule = KB_R08.rules.find((r) => r.id === l.incl);

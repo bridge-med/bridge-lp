@@ -120,9 +120,12 @@ a { color: var(--blue-deep); }
   .speed-group { flex: 1 0 100%; flex-wrap: wrap; gap: 4px; }
   .speed-btn { flex: 1 1 calc(25% - 3px); padding: 7px 4px; }
   /* 施設基準の長いラベル+.mini-btn(nowrap)が320pxで8pxあふれる(保留#18)。
-     行を折返し可にしてボタンを次行の右へ落とす(v46) */
-  .kijun-row { flex-wrap: wrap; }
-  .kijun-row .mini-btn { margin-left: auto; }
+     行を折返し可にしてボタン/バッジを次行の右へ落とす(v46)。子結合子は必須 —
+     ラベル文中のインライン.kijun-badge(適用中等)まで飛ばさないため。
+     row-gapで折返し行をラベル側に帰属させる(6/10/10のリズム=designer裁定) */
+  .kijun-row { flex-wrap: wrap; row-gap: 6px; }
+  .kijun-row > .mini-btn,
+  .kijun-row > .kijun-badge { margin-left: auto; }
 }
 
 .mission-bar {
@@ -372,8 +375,10 @@ input[type="range"]::-moz-range-thumb {
   color: var(--ink-2);
   padding: 3px 0;
 }
-/* 数値書体+「3件」等を行内で割らない(v42の2ルールをv46で併合=保留#19) */
-.pnl-row b { font-family: var(--en); font-weight: 700; white-space: nowrap; }
+/* 数値書体+「3件」等を行内で割らない(v42の2ルールをv46で併合=保留#19)。
+   nowrapは散文入りの<b>(引き継ぐもの等)を1行に強制し320pxで横スクロールさせるため、
+   keep-allに置換(数値・単位は割れず、散文は折り返せる=v46 designer実測) */
+.pnl-row b { font-family: var(--en); font-weight: 700; word-break: keep-all; }
 .pnl-row.total {
   border-top: 1.5px solid var(--line);
   margin-top: 4px;
@@ -760,6 +765,7 @@ input[type="range"]::-moz-range-thumb {
      max-widthに届かない(CSS2.1 10.3.7)。max-contentで自然幅→max-widthの折返しに直す(v46) */
   width: max-content;
   max-width: calc(100vw - 30px);
+  overflow-wrap: anywhere; /* 空白のない長いトークンでも端をはみ出さない(v46) */
   pointer-events: none;
 }
 .banner.show { transform: translate(-50%, 0); }
@@ -782,6 +788,7 @@ input[type="range"]::-moz-range-thumb {
   z-index: 300;
   width: max-content; /* .bannerと同じshrink-to-fit回避(v46) */
   max-width: calc(100vw - 36px);
+  overflow-wrap: anywhere;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
@@ -1349,7 +1356,8 @@ input[type="range"]::-moz-range-thumb {
 .rcpt-detail { margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 7px; }
 .kb-ev { padding: 7px 0; border-bottom: 1px dotted var(--line); font: 600 11px/1.5 var(--sans); color: var(--ink); }
 .kb-reject { padding: 6px 8px; border-radius: 8px; background: var(--bg-deep); border-left: 3px solid var(--ink-3); margin: 6px 0; font: 600 11px/1.5 var(--sans); color: var(--ink); }
-.kb-cond { font: 500 10.5px/1.55 var(--sans); color: var(--ink-2); margin-top: 2px; }
+/* 註釈は一次資料の引用(.kb-quote)より強くしない(v46 designer裁定・階層の維持) */
+.kb-cond { font: 500 10px/1.55 var(--sans); color: var(--ink-3); margin-top: 2px; }
 .kb-quote { font: 500 10px/1.6 var(--sans); color: var(--ink-3); margin-top: 3px; border-left: 2px solid var(--line); padding-left: 6px; }
 .kb-trace { font: 500 9px/1.4 var(--en); color: var(--ink-3); background: var(--bg); border-radius: 6px; padding: 6px; overflow-x: auto; max-height: 180px; }
 .kijun-row { align-items: flex-start; }
