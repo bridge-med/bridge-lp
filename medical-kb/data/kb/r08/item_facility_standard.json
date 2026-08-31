@@ -133,5 +133,25 @@
   "item_id": "r08-A001-n19",
   "fs_id": "r08-fs-a000-n16-3",
   "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-2",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-3",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-4",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-5",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
  }
 ]

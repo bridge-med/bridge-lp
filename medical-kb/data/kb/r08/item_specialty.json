@@ -488,5 +488,33 @@
   "relevance": "primary",
   "rationale": "緑内障の経過観察における静的量的視野検査(ハンフリー視野計等)",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-2-ro-2",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "単一建物2〜9人の在宅患者(マンション等)の月次管理",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-2-ro-3",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "単一建物10〜19人の在宅患者(マンション等)の月次管理",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-2-ro-4",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "単一建物20〜49人の在宅患者(マンション等)の月次管理",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-C002-2-ro-5",
+  "specialty_id": "homecare",
+  "relevance": "primary",
+  "rationale": "単一建物50人〜の在宅患者(マンション等)の月次管理",
+  "confidence": "verified"
  }
 ]
