@@ -142,6 +142,11 @@ a { color: var(--blue-deep); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* ミッション文はellipsisで後半が読めなくなるため、狭幅では折返しに切り替える(保留#22)。
+   ellipsis時はクリップされたspanが全要素はみ出し走査に載る偽陽性も同時に消える */
+@media (max-width: 360px) {
+  .mission-bar { white-space: normal; overflow: visible; text-overflow: clip; }
+}
 
 /* ---------- タブ ---------- */
 
