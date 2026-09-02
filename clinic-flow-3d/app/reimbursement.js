@@ -110,6 +110,7 @@
       else if (lim.per === 'week') { used = weekCount(r.item.id); label = '週'; }
       else if (lim.per === 'day') { used = 0; label = '日'; } // 同日内はunitsで判定
       else if (lim.per === 'visit_first') { used = history.firstVisitBilled ? 1 : 0; label = '同一初診'; }
+      else if (lim.per === 'year') { const ms = monthsSince(r.item.id); used = (ms !== null && ms >= 0 && ms < 12) ? 1 : 0; label = '年'; } // 患者1人につき年1回=最終算定から12月未満は却下(v53)
       const adding = lim.unit === '単位' ? r.units : 1;
       trace('limit', { item: r.item.id, per: lim.per, max: lim.max, used, adding });
       if (lim.unit === '単位' && r.units > lim.max) {
@@ -210,14 +211,21 @@
       } else if (m.type === 'same_month_group') {
         // グループ内のどれかを同月に算定済みなら、グループの別項目も算定不可
         // (例: 在医総管の人数セル横断の患者ごと月1回=rule-0020・保留#27)
-        for (const gid of m.group) {
-          const t = findRec(gid);
-          if (!t) continue;
+        let kept = null; // 同一受診内で最初に残ったグループ項目(#28: 同時申請も申請順(idx)で1件に絞る・v53)
+        const cands = m.group.map(findRec).filter(Boolean).sort((a, b) => a.idx - b.idx);
+        for (const t of cands) {
+          const gid = t.item.id;
           const priorId = m.group.find((x) => x !== gid && monthCount(x) > 0);
           if (priorId) {
             t.status = 'rejected';
             t.reasons.push(`同一月に${(byId.get(priorId) || {}).name || priorId}を算定済みのため算定不可 — グループで月1回(${rule.id})`);
             t.ruleRefs.push(rule);
+          } else if (kept) {
+            t.status = 'rejected';
+            t.reasons.push(`同一受診で${kept.item.name}を算定するため算定不可 — グループで月1回(${rule.id})`);
+            t.ruleRefs.push(rule);
+          } else {
+            kept = t;
           }
         }
       } else if (m.type === 'condition_ng_item') {

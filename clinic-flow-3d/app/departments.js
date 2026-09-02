@@ -34,6 +34,7 @@
       if (!it.limit) continue;
       if (it.limit.per === 'month' && it.limit.unit !== '単位') trackMonthly.add(it.id);
       if (it.limit.per === 'week') trackWeekly.add(it.id);
+      if (it.limit.per === 'year') trackMsSince.add(it.id); // 年1回制限は最終算定月(lb)で追跡(v53)
     }
     for (const r of kb.rules) {
       if (r.machine && r.machine.type === 'excl_window_months') {

@@ -351,5 +351,21 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('ロの算定日も往診料は却下(rule-0008配列source)', r3.rejectedItems.some((x) => x.itemId === 'r08-C000'));
 }
 
+/* 29. 便S: same_month_groupは同一受診内の同時申請も1件に絞る(#28解消・rule-0020/0023) */
+{
+  const r = REIMB.evaluateEncounter({
+    encounter: { visitType: 'visit' },
+    procedures: [{ itemId: 'r08-C002-2-ro-1' }, { itemId: 'r08-C002-2-ro-2' }],
+    facilityStandards: ['r08-fs-zaishien'], history: { month: {} },
+  });
+  ok('在医総管: 先頭セルだけ通る', r.billableItems.some((x) => x.itemId === 'r08-C002-2-ro-1') && r.rejectedItems.some((x) => x.itemId === 'r08-C002-2-ro-2'));
+  const r2 = REIMB.evaluateEncounter({
+    encounter: { visitType: 'visit' },
+    procedures: [{ itemId: 'r08-C002-2-ro-1' }, { itemId: 'r08-C002-n7-ha-1' }, { itemId: 'r08-C002-n7-ro-1' }],
+    facilityStandards: ['r08-fs-zaishien', 'r08-fs-c002-n7-jisseki1', 'r08-fs-c002-n7-jisseki2'], history: { month: {} },
+  });
+  ok('実績加算: 2区分の同時申請は先頭(ha-1)だけ通る', r2.billableItems.some((x) => x.itemId === 'r08-C002-n7-ha-1') && r2.rejectedItems.some((x) => x.itemId === 'r08-C002-n7-ro-1'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
