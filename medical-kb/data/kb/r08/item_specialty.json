@@ -789,5 +789,47 @@
   "relevance": "primary",
   "rationale": "糖尿病患者の眼科紹介の次回来院で算定(v42紹介イベントの続き)",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-I002-n11-i-1",
+  "specialty_id": "psychiatry",
+  "relevance": "secondary",
+  "rationale": "制度の写し(加算1=実績要件ゲーム未判定・加算2=病院のみ)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-I002-n11-i-2",
+  "specialty_id": "psychiatry",
+  "relevance": "secondary",
+  "rationale": "制度の写し(加算1=実績要件ゲーム未判定・加算2=病院のみ)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-I002-n11-ro-1",
+  "specialty_id": "psychiatry",
+  "relevance": "secondary",
+  "rationale": "制度の写し(加算1=実績要件ゲーム未判定・加算2=病院のみ)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-I002-n11-ro-2",
+  "specialty_id": "psychiatry",
+  "relevance": "secondary",
+  "rationale": "制度の写し(加算1=実績要件ゲーム未判定・加算2=病院のみ)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-I002-n11-ha-1",
+  "specialty_id": "psychiatry",
+  "relevance": "primary",
+  "rationale": "通院精神療法に乗る体制加算(診療所は加算3)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-I002-n11-ha-2",
+  "specialty_id": "psychiatry",
+  "relevance": "primary",
+  "rationale": "通院精神療法に乗る体制加算(診療所は加算3)",
+  "confidence": "verified"
  }
 ]

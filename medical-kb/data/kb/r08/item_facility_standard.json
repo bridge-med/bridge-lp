@@ -323,5 +323,35 @@
   "item_id": "r08-B001-3-3-n4-ha-3",
   "fs_id": "r08-fs-b001-3-n4-3",
   "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-i-1",
+  "fs_id": "r08-fs-i002-n11-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-i-2",
+  "fs_id": "r08-fs-i002-n11-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-ro-1",
+  "fs_id": "r08-fs-i002-n11-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-ro-2",
+  "fs_id": "r08-fs-i002-n11-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-ha-1",
+  "fs_id": "r08-fs-i002-n11-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-ha-2",
+  "fs_id": "r08-fs-i002-n11-3",
+  "relation": "required"
  }
 ]
