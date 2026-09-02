@@ -725,6 +725,61 @@ t('30分以上の方針は1日の診察枠を圧迫し、超えた分は翌日�
   ok(agg.info.deferred > 0, `繰越が出る(${agg.info.deferred}件)`);
 });
 
+t('早期診療体制充実加算3(v54): 届出前はfs未適用で却下・要件(PSW1名+連携病院)充足で届出でき・届出後は通院精神療法と同日にKB点数で乗る', () => {
+  const dept = DEPT.create(PSYCH, 1);
+  let st = DEPT.fsStatus(PSYCH, dept).find((x) => x.fsId === 'r08-fs-i002-n11-3');
+  ok(st && !st.ok && st.missing.length === 2 && st.gameNote, '初期はPSWと連携病院の2つが欠け、gameNoteがある');
+  const p = { pr: 'mood', mc: {}, wc: {}, lb: {}, fb: true, sv: 0, en: 1 };
+  const r0 = DEPT.evalVisit(PSYCH, dept, p, { type: 'revisit', kbActs: [{ id: 'i002Std' }, { id: 'n11ha1' }] }, 1);
+  ok(r0.ev.rejectedItems.some((b) => b.itemId === 'r08-I002-n11-ha-1' && b.fsInfo && b.fsInfo.id === 'r08-fs-i002-n11-3'), '届出前は施設基準未適用で却下(届出導線つき)');
+  dept.staff.psws = 1;
+  const act = PSYCH.actions.find((a) => a.id === 'renkei');
+  ok(act.can(dept), '協定アクションは未実施なら実行できる'); act.apply(dept); ok(!act.can(dept), '実施後は出ない');
+  st = DEPT.fsStatus(PSYCH, dept).find((x) => x.fsId === 'r08-fs-i002-n11-3');
+  ok(st.ok && !st.notified, '要件充足=届出できる');
+  dept.fs.push('r08-fs-i002-n11-3');
+  const p2 = { pr: 'anxiety', mc: {}, wc: {}, lb: {}, fb: true, sv: 0, en: 1 };
+  const r1 = DEPT.evalVisit(PSYCH, dept, p2, { type: 'revisit', kbActs: [{ id: 'i002Std' }, { id: 'n11ha1' }, { id: 'presc' }] }, 8);
+  eq(r1.ev.totalPoints, REIMB.pointsOf('r08-A001') + REIMB.pointsOf('r08-I002-1-ha-2-1') + REIMB.pointsOf('r08-I002-n11-ha-1') + REIMB.pointsOf('r08-F400-3'), '再診+通院精神療法+加算3(3年以内)+処方箋料');
+  dept.staff.psws = 0;
+  DEPT.runDay(PSYCH, dept, ctx(9, rng(1), CLOSED));
+  eq(dept.fs.includes('r08-fs-i002-n11-3'), false, 'PSWが欠けると適用から外れる(fs_broken)');
+});
+
+t('早期診療体制充実加算3(v54): 届出済みの運用では通院精神療法の全件に1セルだけ乗り、心身医学療法には乗らない。届出前は申請もしない', () => {
+  const run = (notify) => {
+    const dept = DEPT.create(PSYCH, 1);
+    dept.staff.psws = 1; dept.policy.renkei = true;
+    if (notify) dept.fs.push('r08-fs-i002-n11-3');
+    const rand = rng(21); const seen = {};
+    let lastSample = null;
+    for (let d = 1; d <= 60; d++) { const a = DEPT.runDay(PSYCH, dept, ctx(d, rand)); for (const k of Object.keys(a.byItem)) seen[k] = (seen[k] || 0) + a.byItem[k].n; if (a.sample) lastSample = a.sample; }
+    return { seen, lastSample };
+  };
+  const a = run(false);
+  ok(!Object.keys(a.seen).some((k) => k.includes('-n11-')), '届出前は加算セルが算定されない');
+  ok(!a.lastSample.kb.rejected.some((x) => x.itemId.includes('-n11-')), '届出前は申請もしない(却下行に出ない)');
+  const b = run(true);
+  const i002 = Object.keys(b.seen).filter((k) => k.startsWith('r08-I002-1-')).reduce((s, k) => s + b.seen[k], 0);
+  eq(b.seen['r08-I002-n11-ha-1'], i002, '加算3(3年以内)の件数=通院精神療法の件数(全件に1セル)');
+  eq(b.seen['r08-I002-n11-ha-2'], undefined, '60日運用では3年超のセルは出ない');
+  ok(!Object.keys(b.seen).some((k) => k.startsWith('r08-I002-n11-i') || k.startsWith('r08-I002-n11-ro')), '加算1・2のセルは出ない(写しのみ)');
+});
+
+t('早期診療体制充実加算3(v54): 最初に受診した日(p.en)から1080日(36月)以降は3年超のセルに切り替わる', () => {
+  const dept = DEPT.create(PSYCH, 1);
+  dept.staff.psws = 1; dept.policy.renkei = true; dept.fs.push('r08-fs-i002-n11-3');
+  dept.pt.length = 0;
+  const mk = (id, nv) => { dept.seq++; dept.pt.push({ id, pr: 'mood', en: 1, nv, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, iv: 14 }); };
+  mk('py1', 1079);
+  const a1 = DEPT.runDay(PSYCH, dept, ctx(1079, rng(2)));
+  ok(a1.byItem['r08-I002-n11-ha-1'] && !a1.byItem['r08-I002-n11-ha-2'], '1079日目は3年以内のセル');
+  dept.pt.length = 0; mk('py2', 1081);
+  const a2 = DEPT.runDay(PSYCH, dept, ctx(1081, rng(2)));
+  ok(a2.byItem['r08-I002-n11-ha-2'] && a2.byItem['r08-I002-n11-ha-2'].n === 1, '1081日目の当該患者は3年超のセル(同日に初来院した新規患者は3年以内のセルで別計上)');
+  eq(a2.byItem['r08-I002-n11-ha-2'].pts, REIMB.pointsOf('r08-I002-n11-ha-2'), '点数はKB由来');
+});
+
 console.log('# 法人シナジー(部門間紹介)');
 
 t('内科→眼科: 糖尿病患者の眼底紹介の意図が積まれ、B009は特別の関係で却下される(法人内に眼科あり)', () => {

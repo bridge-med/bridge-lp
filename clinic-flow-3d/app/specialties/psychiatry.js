@@ -9,7 +9,12 @@
  *  - I002算定患者に心身医学療法は算定できない(rule-0010)ため、通院精神療法の患者と
  *    心身医学療法(心身症)の患者は名簿の上でも分けて管理する
  *  - 通いやすさ・通院間隔・費用・診察所要時間はmanagementParameters(ゲーム上の仮定)。
- *    時間をかける診療は患者が治療を続けやすい(中断が減る)という効きもゲーム上の仮定 */
+ *    時間をかける診療は患者が治療を続けやすい(中断が減る)という効きもゲーム上の仮定
+ *  - 早期診療体制充実加算(I002注11・v54便T): 診療所は加算3。届出(様式44の5の3)で通院精神療法と同日に
+ *    「当該保険医療機関の精神科を最初に受診した日から3年以内」=(1)15点 / 以外=(2)10点 を1セル申請する。
+ *    最初に受診した日=部門への登録日(p.en)。3年=36月×30日=1080日(ゲーム暦)。加算1・2はKBに写しとして
+ *    登録のみ(加算2=病院・加算1=実績5%/60と精神科救急協力はゲーム未判定)。担当医・同意書・掲示は
+ *    rule-0029(handled_externally)。本体が却下された受診では加算も却下される(rule-0028=親項目ゲート) */
 (function (root) {
   'use strict';
   const M = {
@@ -39,6 +44,8 @@
       i004Revisit: { itemId: 'r08-I004-2-ro' },
       presc: { itemId: 'r08-F400-3' },
       ippanmei: { itemId: 'r08-F400-n6-i' },
+      n11ha1: { itemId: 'r08-I002-n11-ha-1' },        // 早期診療体制充実加算3(3年以内)
+      n11ha2: { itemId: 'r08-I002-n11-ha-2' },        // 同(3年超)
     },
     buildProcedures(report) {
       const map = this.reimbursementMappings; const ps = [];
@@ -51,8 +58,14 @@
     deptDefaults: {
       staff: { doctors: 1, nurses: 0, psws: 0 },
       equip: {},
-      policy: { timePlan: 'std', ippanmei: true },
+      policy: { timePlan: 'std', ippanmei: true, renkei: false },
     },
+    /* 体制アクション(ゲーム上の仮定。費用は在宅の24時間体制と同格) */
+    actions: [
+      { id: 'renkei', label: '連携病院と協定を結ぶ(時間外・緊急入院の受け皿)', cost: 300000,
+        can: (d) => !d.policy.renkei, apply: (d) => { d.policy.renkei = true; },
+        note: '精神科救急の指定病院と、時間外対応・緊急時の入院受け入れ・退院患者の受け入れを文書で取り交わし、病院名と連絡先を院内に掲示する。早期診療体制充実加算3の施設基準(オ)と、患者への時間外電話対応体制(留意(28)エ)をこれで表す。届出は下の施設基準の行から' },
+    ],
     open: { cost: 6000000, repMin: 65, needPlan: true,
       condDesc: '事業計画の策定・本院評判65以上・開設資金' },
     staffDef: [
@@ -62,8 +75,22 @@
     ],
     deptBadge(d) { return d.policy.timePlan === 'long' ? '全員30分以上' : d.policy.timePlan === 'mix' ? '必要に応じて30分以上' : '30分未満が基本'; },
     infoLine(i) { return `継続 ${i.panel}人・昨日 ${i.visits}件(診察${i.usedMin}分)` + (i.deferred ? `・翌日へ${i.deferred}件` : ''); },
-    fsDefs: [],
-    fsNote: '登録項目(精神保健指定医のセル)に届出必須の基準はない(KBで否定的確認済み。非指定医のセルには注13の施設基準がある)',
+    fsDefs: [
+      // 早期診療体制充実加算3(v54便T・診療所): ア常勤指定医1名(指定医固定で成立)・オ指定医業務年1回(体制)・
+      // カ他加算等の届出=療養生活継続支援加算の施設基準(1)「専任の精神保健福祉士1名以上」で代表・
+      // オ'連携病院との協定=actions.renkei。実績(割合2%・24件/医師)と共同指導年1回はゲームでは判定しない
+      { fsId: 'r08-fs-i002-n11-3',
+        check(dept) {
+          const missing = [];
+          if ((dept.staff.doctors || 0) < 1) missing.push('常勤の精神保健指定医');
+          if ((dept.staff.psws || 0) < 1) missing.push('精神保健福祉士1名');
+          if (!dept.policy.renkei) missing.push('連携病院との協定');
+          return missing.length ? { ok: false, missing } : { ok: true };
+        },
+        note: '診療所の加算3(様式44の5の3)。常勤指定医1名+療養生活継続支援加算等の届出(カ)+連携病院との協定又は精神科救急協力(オ)',
+        gameNote: '要件カは専任の精神保健福祉士1名(療養生活継続支援加算の施設基準)で表し、同加算(注10)自体はKB未登録のため算定しない。実績(30分以上の割合2%・24件/医師)と連携病院との共同指導年1回はゲームでは判定しない(簡略化)' },
+    ],
+    fsNote: '通院精神療法本体(精神保健指定医のセル)に届出必須の基準はない。非指定医のセルには注13の施設基準がある(KB未登録)',
 
     /* ゲーム上の仮定(制度情報ではない) */
     managementParameters: {
@@ -139,6 +166,9 @@
         } else {
           report.kbActs.push({ id: isFirst ? (long ? 'i002FirstLong' : 'i002FirstStd')
                                            : (long ? 'i002Long' : 'i002Std') });
+          // 早期診療体制充実加算3: 届出済みなら通院精神療法と同日に1セル。最初に受診した日(p.en)から
+          // 3年以内=(1)、以外=(2)。届出前は申請しない(内科の充実管理加算3と同じ安全側・決裁溜め(m))
+          if (dept.fs.includes('r08-fs-i002-n11-3')) report.kbActs.push({ id: (ctx.day - p.en) < 1080 ? 'n11ha1' : 'n11ha2' });
         }
         // 外来管理加算は精神科専門療法の算定日には算定できない(A001注8)— エンジンの却下を代表レセプトで見せる
         if (!isFirst) report.kbActs.push({ id: 'kanri' });

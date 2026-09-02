@@ -393,5 +393,22 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('(I)本体なし: 眼科連携強化加算(I)は却下(rule-0026)', rejectedIds(r3).includes('r08-B001-3-n5'));
 }
 
+/* 31. 便T: 早期診療体制充実加算は通院精神療法が同一受診で算定されないと通らない(rule-0028・親項目ゲート) */
+{
+  const r = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-I002-1-ha-2-1' }, { itemId: 'r08-I002-n11-ha-1' }],
+    facilityStandards: ['r08-fs-i002-n11-3'],
+    history: { week: { 'r08-I002-1-ha-2-1': 1 } },
+  });
+  ok('同週2回目: 通院精神療法が週1回で却下', rejectedIds(r).includes('r08-I002-1-ha-2-1'));
+  ok('同週2回目: 加算3も親不在で却下(rule-0028)', rejectedIds(r).includes('r08-I002-n11-ha-1')
+    && r.rejectedItems.find((x) => x.itemId === 'r08-I002-n11-ha-1').rules.some((x) => x.id === 'r08-rule-0028'));
+  const r2 = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-I002-1-ha-2-1' }, { itemId: 'r08-I002-n11-ha-1' }],
+    facilityStandards: ['r08-fs-i002-n11-3'], history: { week: {} },
+  });
+  ok('親あり: 加算3が算定', billedIds(r2).includes('r08-I002-n11-ha-1'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

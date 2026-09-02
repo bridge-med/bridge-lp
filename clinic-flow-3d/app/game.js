@@ -3528,6 +3528,7 @@
           <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点。診られる人数が大きく減り経営は厳しくなるが、中断は最も少ない</span>
         </button>
         ${i ? `<div class="pnl-row"><span>昨日の診察時間</span><b>${i.usedMin}分 / 枠${i.budgetMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''}</b></div>` : ''}
+        ${deptActionsHtml(m, d)}
         <div class="op-row">
           <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
           <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONの部門は整えている前提=ゲーム上の簡略化</small></p>
