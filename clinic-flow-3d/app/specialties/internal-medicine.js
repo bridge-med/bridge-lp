@@ -11,7 +11,12 @@
  *    未機械化ルール(rule-0003)に対する安全側の運用(ゲーム上の判断であり制度の断定ではない)
  *  - 需要・来院間隔・費用・検査実施の頻度は managementParameters(ゲーム上の仮定)。
  *    生化学はD007注ハ(10項目以上103点)で固定 — 「内科の定期パネルは1〜8の範囲で10項目を
- *    超える」はゲーム側の仮定であり、5〜7項目(93点)・8〜9項目(99点)のセルはKB未登録 */
+ *    超える」はゲーム側の仮定であり、5〜7項目(93点)・8〜9項目(99点)のセルはKB未登録
+ *  - 加算レイヤー(v53便S): 充実管理加算3(B001-3/B001-3-3注4ハ〜イの(3))は届出(様式7の11)で
+ *    (I)(II)×主病の該当セルを管理料と同じ日に申請。加算1・2は実績値(届出機関全体の上位20%/50%)
+ *    が要件でゲームでは判定できないため扱わない。眼科医療機関連携強化加算(注5)は紹介の
+ *    次回来院で受診状況を確認した日に申請(留意(16)イ)。年1回はエンジン(limit.per:'year')が判定。
+ *    特定疾患処方管理加算は対象疾患(別表第一)に3疾患が無いため申請しない(rule-0025) */
 (function (root) {
   'use strict';
   const M = {
@@ -40,7 +45,17 @@
       xrayDiagChest: { itemId: 'r08-E001-1-i' },
       xrayShoot: { itemId: 'r08-E002-1-ro' },
       presc: { itemId: 'r08-F400-3' },
-      tokushori: { itemId: 'r08-F400-n4' }, // 対象疾患の別表がKB未登録のため自動算定しない(unused: 登録後に運用へ)
+      tokushori: { itemId: 'r08-F400-n4' }, // 別表第一に高血圧・糖尿病・脂質異常症は無い(rule-0025)。unused: 申請しない
+      // 充実管理加算3(注4の(3))。キーは jujitsu3 + 方針(I/II) + 主病(Lipid/Ht/Dm)
+      jujitsu3ILipid: { itemId: 'r08-B001-3-n4-i-3' },
+      jujitsu3IHt: { itemId: 'r08-B001-3-n4-ro-3' },
+      jujitsu3IDm: { itemId: 'r08-B001-3-n4-ha-3' },
+      jujitsu3IILipid: { itemId: 'r08-B001-3-3-n4-i-3' },
+      jujitsu3IIHt: { itemId: 'r08-B001-3-3-n4-ro-3' },
+      jujitsu3IIDm: { itemId: 'r08-B001-3-3-n4-ha-3' },
+      // 眼科医療機関連携強化加算(注5)。(I)(II)で別項目
+      eyeLiaisonI: { itemId: 'r08-B001-3-n5' },
+      eyeLiaisonII: { itemId: 'r08-B001-3-3-n5' },
       ippanmei: { itemId: 'r08-F400-n6-i' },
       joho: { itemId: 'r08-B009-1' },
       labBlood: { itemId: 'r08-D400-1' },
@@ -105,6 +120,19 @@
           return dept.policy.keiji ? { ok: true } : { ok: false, missing: ['長期処方・リフィル対応の院内掲示等の体制整備'] };
         },
         note: '届出不要(体制要件のみ)。ゲームでは「体制を整える」の実施で充足' },
+      // 充実管理加算3(v53便S): 制度の要件は外来医療等調査への参加とデータ提出体制・
+      // 調査事務局と連絡可能な担当者1名の指定・診療記録の保管管理(第6の9の(3))。
+      // ゲームは担当者=医療事務1名以上で表し、データ提出の継続は届出をもって続く扱い
+      // (提出遅延3回で算定不可等の運用は判定しない。在宅のデータ提出加算と同じ簡略化)
+      { fsId: 'r08-fs-b001-3-n4-3',
+        check(dept) {
+          const missing = [];
+          if (!dept.policy.keiji) missing.push('生活習慣病管理料の体制(院内掲示等)');
+          if ((dept.staff.clerks || 0) < 1) missing.push('調査事務局と連絡可能な担当者(医療事務1名以上)');
+          return missing.length ? { ok: false, missing } : { ok: true };
+        },
+        note: '外来医療等調査への参加+データ提出体制+担当者1名(様式7の11)。加算1・2は実績値(上位20%/50%)が要件でゲームでは判定しない',
+        gameNote: 'データ提出の継続は届出をもって続く扱い。加算1・2(実績値が上位20%/50%)はゲームでは判定しない(簡略化)' },
     ],
 
     runDay(dept, ctx, api, agg) {
@@ -141,6 +169,10 @@
           report.kbActs.push({ id: plan === 'II' ? 'seikatsu2' : kanriKey[p.pr] });
           tryKanriRyo = true;
         }
+        // 充実管理加算3: 届出済みなら管理料と同じ日に該当セル((I)/(II)×主病)を申請。
+        // 届出前は申請しない(申請すればエンジンが施設基準未適用で却下する=テストで固定)
+        const prKey = { lipid: 'Lipid', ht: 'Ht', dm: 'Dm' };
+        if (tryKanriRyo && dept.fs.includes('r08-fs-b001-3-n4-3')) report.kbActs.push({ id: `jujitsu3${plan}${prKey[p.pr]}` });
         // 外来管理加算: (I)はエンジンが包括で却下する(rule-0002)。(II)算定日は安全側で申請しない(rule-0003未機械化)
         if (!isFirst && !(plan === 'II' && tryKanriRyo)) report.kbActs.push({ id: 'kanri' });
         report.kbActs.push({ id: 'presc' });
@@ -150,12 +182,18 @@
         // 患者1人につき一度(紹介先で継続患者になる)。診療情報提供料(I)は申請するが、
         // 紹介先が法人内の眼科なら「特別の関係」でエンジンが却下する(rule-0013)。
         // 法人内に眼科が無ければ他院への紹介となり算定できる — どちらも制度どおり
-        let refEye = false;
+        let refEye = false, eyeConfirm = false;
         if (tryKanriRyo && p.pr === 'dm' && !p.rfo && ctx.rand() < 1 / 12) {
           p.rfo = 1; refEye = true;
           report.kbActs.push({ id: 'joho' });
           report.conditions = { specialRelation: !!(ctx.hasDept && ctx.hasDept('ophthalmology')) };
           api.refer('ophthalmology', 'dm-retino', '糖尿病の定期眼底検査');
+        } else if (tryKanriRyo && p.pr === 'dm' && p.rfo === 1) {
+          // 紹介の次回来院: 眼科の受診状況を確認した日に眼科医療機関連携強化加算を申請(留意(16)イ)。
+          // 紹介先が法人内の眼科でも除外規定は無い(告示・留意・QA05問12で否定的確認・rule-0024)。
+          // 受診したことはゲーム上の仮定(紹介は法人内外いずれかで必ず成立する)
+          p.rfo = 2; eyeConfirm = true;
+          report.kbActs.push({ id: plan === 'II' ? 'eyeLiaisonII' : 'eyeLiaisonI' });
         }
 
         // 検体検査パネルは管理料の月次来院・初診時に実施(実施原価は常に発生)。
@@ -173,6 +211,7 @@
         p.nv = ctx.day + (p.iv || 28);
         const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
         if (refEye) api.setSample(`継続患者(${prLabel})の月次来院 — 定期眼底検査の紹介`, lines, r.ev, 4);
+        else if (eyeConfirm) api.setSample(`継続患者(${prLabel})の月次来院 — 眼科の受診状況を確認(連携強化加算)`, lines, r.ev, 3);
         else if (tryKanriRyo) api.setSample(`継続患者(${prLabel})の月次来院 — 管理料${plan === 'II' ? '(II)' : '(I)'}方針`, lines, r.ev, 2);
         else if (isFirst) api.setSample(`初診(${prLabel}・継続管理の開始)`, lines, r.ev, 1);
       }

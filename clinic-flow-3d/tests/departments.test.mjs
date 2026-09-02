@@ -186,6 +186,87 @@ t('点数の期待値はKBと一致する(スポット確認)', () => {
   eq(r.ev.totalPoints, want, '合計点数');
 });
 
+t('充実管理加算3(v53): 届出前は施設基準未適用で却下・届出後は(I)(II)×主病のセルで算定・担当者が欠けると適用から外れる', () => {
+  const dept = DEPT.create(INTERNAL, 1);
+  dept.policy.keiji = true; dept.fs.push('r08-fs-b001-3');
+  dept.staff.clerks = 0;
+  let st = DEPT.fsStatus(INTERNAL, dept).find((x) => x.fsId === 'r08-fs-b001-3-n4-3');
+  ok(st && !st.ok && st.missing.length === 1, '医療事務0なら担当者の要件が欠ける');
+  ok(st.gameNote, 'ゲーム独自ゲートの断り(gameNote)がある');
+  const p = DEPT.addPatient(dept, 'ht', 1); p.fb = true;
+  const r0 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: [{ id: 'seikatsu1Ht' }, { id: 'jujitsu3IHt' }] }, 1);
+  ok(r0.ev.rejectedItems.some((b) => b.itemId === 'r08-B001-3-n4-ro-3' && b.fsInfo && b.fsInfo.id === 'r08-fs-b001-3-n4-3'), '届出前は施設基準未適用で却下(届出導線つき)');
+  dept.staff.clerks = 1;
+  st = DEPT.fsStatus(INTERNAL, dept).find((x) => x.fsId === 'r08-fs-b001-3-n4-3');
+  ok(st.ok && !st.notified, '要件充足=届出できる');
+  dept.fs.push('r08-fs-b001-3-n4-3');
+  const p2 = DEPT.addPatient(dept, 'dm', 1); p2.fb = true;
+  const r1 = DEPT.evalVisit(INTERNAL, dept, p2, { type: 'revisit', kbActs: [{ id: 'seikatsu1Dm' }, { id: 'jujitsu3IDm' }] }, 1);
+  eq(r1.ev.totalPoints, REIMB.pointsOf('r08-A001') + REIMB.pointsOf('r08-B001-3-1-dm') + REIMB.pointsOf('r08-B001-3-n4-ha-3'), '(I)糖尿病+加算3の合計はKBどおり');
+  const p3 = DEPT.addPatient(dept, 'lipid', 1); p3.fb = true;
+  const r2 = DEPT.evalVisit(INTERNAL, dept, p3, { type: 'revisit', kbActs: [{ id: 'seikatsu2' }, { id: 'jujitsu3IILipid' }] }, 1);
+  ok(r2.ev.billableItems.some((b) => b.itemId === 'r08-B001-3-3-n4-i-3'), '(II)脂質のセルで算定');
+  dept.staff.clerks = 0;
+  DEPT.runDay(INTERNAL, dept, ctx(2, rng(1), CLOSED));
+  eq(dept.fs.includes('r08-fs-b001-3-n4-3'), false, '担当者が欠けると適用から外れる(fs_broken)');
+});
+
+t('充実管理加算3(v53): 届出済みの60日運用で管理料と同じ日に該当セルだけが乗り、月2回はいない。届出前は一切申請されない', () => {
+  const run = (notify, plan) => {
+    const dept = DEPT.create(INTERNAL, 1);
+    dept.policy.keiji = true; dept.fs.push('r08-fs-b001-3'); dept.policy.kanri = plan;
+    if (notify) dept.fs.push('r08-fs-b001-3-n4-3');
+    const rand = rng(11); const seen = {};
+    for (let d = 1; d <= 60; d++) { const a = DEPT.runDay(INTERNAL, dept, ctx(d, rand)); for (const k of Object.keys(a.byItem)) seen[k] = (seen[k] || 0) + a.byItem[k].n; }
+    return { dept, seen };
+  };
+  const a = run(false, 'I');
+  ok(!Object.keys(a.seen).some((k) => k.includes('-n4-')), '届出前は加算セルが一つも算定されない');
+  ok(!a.dept.last.sample.kb.rejected.some((x) => x.itemId.includes('-n4-')), '届出前は申請もしない(却下行に出ない)');
+  const b = run(true, 'I');
+  const cellsI = Object.keys(b.seen).filter((k) => k.startsWith('r08-B001-3-n4-'));
+  ok(cellsI.length > 0 && cellsI.every((k) => k.endsWith('-3')), `(I)方針は(I)側の加算3セルのみ(${cellsI.join(',')})`);
+  ok(!Object.keys(b.seen).some((k) => k.startsWith('r08-B001-3-3-n4-')), '(II)側のセルは出ない');
+  for (const p of b.dept.pt) for (const k of Object.keys(p.mc)) if (k.includes('-n4-')) ok(p.mc[k] <= 1, '月2回はいない');
+  const c = run(true, 'II');
+  const cellsII = Object.keys(c.seen).filter((k) => k.includes('-n4-'));
+  ok(cellsII.length > 0 && cellsII.every((k) => k.startsWith('r08-B001-3-3-n4-') && k.endsWith('-3')), `(II)方針は(II)側の加算3セルのみ(${cellsII.join(',')})`);
+});
+
+t('眼科医療機関連携強化加算(v53): 患者1人につき年1回 — 同年内の2回目は却下・12月後は再算定できる(limit.per:year)', () => {
+  const dept = DEPT.create(INTERNAL, 1);
+  dept.policy.keiji = true; dept.fs.push('r08-fs-b001-3');
+  const p = DEPT.addPatient(dept, 'dm', 1); p.fb = true;
+  const acts = [{ id: 'seikatsu1Dm' }, { id: 'eyeLiaisonI' }];
+  const r1 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: acts }, 1);
+  ok(r1.ev.billableItems.some((b) => b.itemId === 'r08-B001-3-n5'), '初回は算定');
+  eq(p.lb['r08-B001-3-n5'], 0, '年1回の項目はlbで最終算定月を追う');
+  const r2 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: acts }, 1 + 30 * 5);
+  ok(r2.ev.rejectedItems.some((b) => b.itemId === 'r08-B001-3-n5'), '5月後は年1回で却下');
+  const r3 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: acts }, 1 + 30 * 12);
+  ok(r3.ev.billableItems.some((b) => b.itemId === 'r08-B001-3-n5'), '12月後は再算定できる');
+  const p2 = DEPT.addPatient(dept, 'dm', 1); p2.fb = true;
+  const r4 = DEPT.evalVisit(INTERNAL, dept, p2, { type: 'revisit', kbActs: [{ id: 'seikatsu2' }, { id: 'eyeLiaisonII' }] }, 1);
+  eq(r4.ev.totalPoints, REIMB.pointsOf('r08-A001') + REIMB.pointsOf('r08-B001-3-3') + REIMB.pointsOf('r08-B001-3-3-n5'), '(II)側の連携強化加算もKBどおり');
+});
+
+t('眼科医療機関連携強化加算(v53): 紹介(rfo=1)の次回来院で受診状況を確認した日に申請し、rfoが2に進む。特定疾患処方管理加算は申請しない(rule-0025)', () => {
+  const dept = DEPT.create(INTERNAL, 1);
+  dept.policy.keiji = true; dept.fs.push('r08-fs-b001-3');
+  dept.pt.length = 0;  // 引き継ぎ患者を外し、観察対象1人だけにする
+  const p = DEPT.addPatient(dept, 'dm', 1, { iv: 28, rfo: 1 }); p.fb = true; p.nv = 1;
+  const rand = rng(3);
+  const agg = DEPT.runDay(INTERNAL, dept, ctx(1, rand));
+  ok(agg.byItem['r08-B001-3-3-n5'] && agg.byItem['r08-B001-3-3-n5'].n === 1, '(II)方針の来院で連携強化加算(II)が1回算定される');
+  eq(p.rfo, 2, '確認済み=2に進む');
+  ok(agg.sample && agg.sample.label.includes('眼科の受診状況を確認'), '代表レセプトに確認の来院が出る');
+  p.nv = 31;
+  const agg2 = DEPT.runDay(INTERNAL, dept, ctx(31, rand));
+  ok(!agg2.byItem['r08-B001-3-3-n5'], '翌月は申請しない(患者1人につき1回の運用)');
+  ok(!agg.byItem['r08-F400-n4'] && !agg2.byItem['r08-F400-n4'], '特定疾患処方管理加算は出ない');
+  ok(!agg.sample.kb.rejected.some((x) => x.itemId === 'r08-F400-n4'), '申請もしていない(却下行に出ない)');
+});
+
 console.log('# 眼科部門');
 
 t('屈折×矯正視力: 条件なしは片方却下・眼鏡処方の条件付きで併算定可(rule-0005)', () => {
