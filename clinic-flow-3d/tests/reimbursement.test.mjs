@@ -410,5 +410,21 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('親あり: 加算3が算定', billedIds(r2).includes('r08-I002-n11-ha-1'));
 }
 
+/* 32. 便U: same_month_groupのscope:'visit'(同一受診内の排他だけ)とlimit.share(月回数のセル横断合算)
+ *     KBに当該ルールが入るのはコミット2のため、ここでは合成KBで機械の挙動だけ固定する */
+{
+  const synth = JSON.parse(JSON.stringify(KB));
+  synth.rules.push({ id: 'test-visit-group', machine: { type: 'same_month_group', scope: 'visit', group: ['r08-D005-9', 'r08-D005-5'] } });
+  for (const it of synth.items) if (it.id === 'r08-D005-9' || it.id === 'r08-D005-5') it.limit = { per: 'month', max: 2, share: ['r08-D005-9', 'r08-D005-5'] };
+  REIMB.init(synth);
+  const r = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-D005-5' }, { itemId: 'r08-D005-9' }], history: { month: {} } });
+  ok('scope:visit 同一受診の2セル同時申請は申請順の先頭だけ通る', billedIds(r).includes('r08-D005-5') && rejectedIds(r).includes('r08-D005-9'));
+  const r2 = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-D005-9' }], history: { month: { 'r08-D005-5': 1 } } });
+  ok('scope:visit 同月にグループの別セルを算定済みでも別日の受診なら通る(月枠の排他はしない)', billedIds(r2).includes('r08-D005-9'));
+  const r3 = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-D005-9' }], history: { month: { 'r08-D005-5': 1, 'r08-D005-9': 1 } } });
+  ok('limit.share 月回数はセル横断で合算され上限に達すると却下', rejectedIds(r3).includes('r08-D005-9'));
+  REIMB.init(KB);
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
