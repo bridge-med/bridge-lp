@@ -649,5 +649,145 @@
   "relevance": "primary",
   "rationale": "在医総管の独立加算",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-1",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-2",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-3",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-1",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-2",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-3",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-1",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-2",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-3",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-n5",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "糖尿病患者の眼科紹介の次回来院で算定(v42紹介イベントの続き)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-1",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-2",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-3",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-1",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-2",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-3",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-1",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-2",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-3",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "生活習慣病管理料の届出加算(データ提出体制)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-B001-3-3-n5",
+  "specialty_id": "internal",
+  "relevance": "primary",
+  "rationale": "糖尿病患者の眼科紹介の次回来院で算定(v42紹介イベントの続き)",
+  "confidence": "verified"
  }
 ]

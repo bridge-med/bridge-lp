@@ -233,5 +233,95 @@
   "item_id": "r08-C002-n13",
   "fs_id": "r08-fs-c002-n13",
   "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
  }
 ]

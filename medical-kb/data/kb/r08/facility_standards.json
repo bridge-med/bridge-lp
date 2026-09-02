@@ -314,5 +314,50 @@
   "effective_from": "2026-06-01",
   "updated_at": "2026-08-31",
   "confidence": "verified"
+ },
+ {
+  "id": "r08-fs-b001-3-n4-1",
+  "name": "充実管理加算1の施設基準",
+  "short_name": "充実管理加算1",
+  "ryo_type": "tokkei",
+  "notification_req": 1,
+  "staffing_req": null,
+  "system_req": "対象疾患の管理患者について検査実施割合・受診間隔6か月以内の割合から算出した実績値が届出機関全体の上位20%(集計期間の管理患者10人以上)+外来医療等調査参加・データ提出体制・診療記録管理(第6の9の2〜4の(1)ア・イ)",
+  "form_no": "別添2 様式7の11",
+  "source_notice": "r08-tsuchi8-tokkei-todokede",
+  "source_page": "第6の9(PDF p.78-80)",
+  "effective_from": "2026-06-01",
+  "updated_at": "2026-09-01",
+  "confidence": "verified"
+ },
+ {
+  "id": "r08-fs-b001-3-n4-2",
+  "name": "充実管理加算2の施設基準",
+  "short_name": "充実管理加算2",
+  "ryo_type": "tokkei",
+  "notification_req": 1,
+  "staffing_req": null,
+  "system_req": "実績値が届出機関全体の上位50%+外来医療等調査参加・データ提出体制・診療記録管理(第6の9の2〜4の(2))",
+  "form_no": "別添2 様式7の11",
+  "source_notice": "r08-tsuchi8-tokkei-todokede",
+  "source_page": "第6の9(PDF p.78-80)",
+  "effective_from": "2026-06-01",
+  "updated_at": "2026-09-01",
+  "confidence": "verified"
+ },
+ {
+  "id": "r08-fs-b001-3-n4-3",
+  "name": "充実管理加算3の施設基準",
+  "short_name": "充実管理加算3",
+  "ryo_type": "tokkei",
+  "notification_req": 1,
+  "staffing_req": "調査事務局と連絡可能な担当者1名の指定",
+  "system_req": "外来医療等調査に適切に参加しデータを提出する体制・診療記録の保管管理と疾病別検索(第6の9の2〜4の(3)=(1)のイ。3疾患共通)",
+  "form_no": "別添2 様式7の11",
+  "source_notice": "r08-tsuchi8-tokkei-todokede",
+  "source_page": "第6の9(PDF p.78-80)",
+  "effective_from": "2026-06-01",
+  "updated_at": "2026-09-01",
+  "confidence": "verified"
  }
 ]
