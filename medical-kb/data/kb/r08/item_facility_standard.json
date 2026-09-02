@@ -353,5 +353,15 @@
   "item_id": "r08-I002-n11-ha-2",
   "fs_id": "r08-fs-i002-n11-3",
   "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-2-ro",
+  "fs_id": "r08-fs-j038-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-n13",
+  "fs_id": "r08-fs-j038-n13",
+  "relation": "required"
  }
 ]

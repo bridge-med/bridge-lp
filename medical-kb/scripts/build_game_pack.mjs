@@ -48,7 +48,10 @@ const LIMITS = {
   'r08-H002-1':      { per: 'day', max: 6, unit: '単位' },       // 1日6単位(算定回数テーブル)
   'r08-H002-2':      { per: 'day', max: 6, unit: '単位' },
   'r08-H002-3':      { per: 'day', max: 6, unit: '単位' },
-  'r08-J038-1-ro':   { per: 'month', max: 14 },                 // 月14回(告示J038注8)
+  // 人工腎臓は区分1/2/3のセル横断で「人工腎臓」として月14回(告示J038注8・v55 share)
+  'r08-J038-1-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
+  'r08-J038-2-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
+  'r08-J038-3-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
   'r08-C001-1-i':    { per: 'week', max: 3 },                   // 週3回(告示C001注1)
   'r08-C001-1-ro':   { per: 'week', max: 3 },                   // 同(イ・ロ通算はitem横断=rule-0019で記録。ゲームは月2回設計で到達しない)
   'r08-I002-1-ro-1-1': { per: 'visit_first', max: 1 },          // 初診時1回(算定回数テーブル)
@@ -112,7 +115,7 @@ const MACHINE_HINTS = {
     months: 6, targetItemIds: ['r08-B001-3-3'] },
   'r08-rule-0005': { type: 'conditional_pair', a: 'r08-D261-2', b: 'r08-D263-1',
     conditionKey: 'refraction_first_or_glasses', conditionLabel: '屈折異常の疑いで初めての検査、又は眼鏡処方箋の交付' },
-  'r08-rule-0006': { type: 'included_categories', source: 'r08-J038-1-ro', targetCategories: ['薬剤(透析包括)'] },
+  'r08-rule-0006': { type: 'included_categories', source: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'], targetCategories: ['薬剤(透析包括)'] },
   'r08-rule-0007': { type: 'included_categories', source: 'r08-B001-15', targetCategories: ['検査(透析包括)'] },
   'r08-rule-0008': { type: 'same_day_ng_items', source: ['r08-C001-1-i', 'r08-C001-1-ro'],
     targetItemIds: ['r08-A001', 'r08-A002', 'r08-C000'], direction: 'source_blocks_targets' },

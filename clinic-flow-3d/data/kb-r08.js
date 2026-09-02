@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-09-02T15:28:39.636Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-09-02T15:56:08.367Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-09-02T15:28:39.636Z",
+ "generated_at": "2026-09-02T15:56:08.367Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -2546,7 +2546,12 @@
    "periodLimitText": null,
    "limit": {
     "per": "month",
-    "max": 14
+    "max": 14,
+    "share": [
+     "r08-J038-1-ro",
+     "r08-J038-2-ro",
+     "r08-J038-3-ro"
+    ]
    },
    "inpatient": 1,
    "outpatient": 1,
@@ -5733,6 +5738,192 @@
      "note": "医科診療行為マスター 180775570=10とも一致"
     }
    ]
+  },
+  {
+   "id": "r08-J038-n1",
+   "code": "140007910",
+   "kubun": "J038注1",
+   "name": "時間外・休日加算(人工腎臓)",
+   "shortName": "時間外・休日加算(人工腎臓)",
+   "categoryL": "特掲診療料",
+   "categoryM": "処置",
+   "points": 380,
+   "unit": "1日につき(人工腎臓に加算)",
+   "conditions": "入院中の患者以外の患者に、午後5時以降に開始した場合若しくは午後9時以降に終了した場合又は休日に行った場合に所定点数に加算(告示J038注1)。緊急のため午後5時以降に開始し通則5の時間外加算等が算定できる場合は算定できない(留意(12))。算定時はA000注9・A001注7の夜間・早朝等加算は算定しない(留意(13))。休日=初診料の休日加算の対象日(日曜日である休日を除く。留意(14))。休日の午後5時以降開始等は1回のみ(留意(15))。ゲームは3クール目のセッションを午後5時以降の開始とみなす(ゲーム上の仮定)。休日は透析を休止するため休日の加算は生じない",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "dialysis",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.262",
+     "quote": "注1 入院中の患者以外の患者に対して、午後5時以降に開始した場合若しくは午後9時以降に終了した場合又は休日に行った場合は、時間外・休日加算として、380点を所定点数に加算する。",
+     "note": "マスター140007910=380と一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.565",
+     "quote": "(12) 「注1」の加算については、人工腎臓を緊急のため午後5時以降に開始した場合又は緊急のため休日に行ったため、通則5による時間外加算等が算定できる場合にあっては算定できない。 (13) 「注1」の加算を算定する場合は、「A000」初診料の「注9」及び「A001」再診料の「注7」に掲げる夜間・早朝等加算は算定しない。",
+     "note": "ゲームには緊急(通則5)も夜間・早朝等加算のセルも無い=否定的確認(v55)"
+    }
+   ]
+  },
+  {
+   "id": "r08-J038-2-ro",
+   "code": "140058210",
+   "kubun": "J038-2-ロ",
+   "name": "人工腎臓(慢性維持透析を行った場合2)(4時間以上5時間未満)",
+   "shortName": "人工腎臓(慢性維持透析2)(4-5h)",
+   "categoryL": "特掲診療料",
+   "categoryM": "処置",
+   "points": 1976,
+   "unit": "1日につき",
+   "conditions": "施設基準(第57の2の1の(2))=透析用監視装置26台以上かつ装置1台当たりのJ038(1〜3)算定外来患者数の割合が3.5以上4.0未満+水質管理+透析機器安全管理委員会(専任医師又は専任CE1名以上)。届出=様式87の4。ゲームは区分2を届け出ない(26台以上は区分3に落ちる=過小側の簡略化)。制度の写しとして登録。カニュレーション料を含む(注4)。透析液・血液凝固阻止剤・生理食塩水・定める薬剤を包括(注6・rule-0006)",
+   "exclusions": null,
+   "countLimitText": "持続緩徐式血液濾過と併せて月14回まで(注8。定める患者を除く。区分1〜3のセル横断で「人工腎臓」として数える)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 14,
+    "share": [
+     "r08-J038-1-ro",
+     "r08-J038-2-ro",
+     "r08-J038-3-ro"
+    ]
+   },
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-j038-2"
+   ],
+   "specialties": [
+    {
+     "specialty": "dialysis",
+     "relevance": "secondary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.262",
+     "quote": "2 慢性維持透析を行った場合2 ロ 4時間以上5時間未満の場合 1,976点",
+     "note": "マスター140058210=1976と一致"
+    }
+   ]
+  },
+  {
+   "id": "r08-J038-3-ro",
+   "code": "140058510",
+   "kubun": "J038-3-ロ",
+   "name": "人工腎臓(慢性維持透析を行った場合3)(4時間以上5時間未満)",
+   "shortName": "人工腎臓(慢性維持透析3)(4-5h)",
+   "categoryL": "特掲診療料",
+   "categoryM": "処置",
+   "points": 1931,
+   "unit": "1日につき",
+   "conditions": "区分1又は2の施設基準の届出を行った保険医療機関以外で算定(留意(2))=届出不要。ただし関連学会基準に基づく水質管理が望ましい(留意(2))。ゲームでは区分1の要件(26台未満 又は 患者/装置比3.5未満)を外れた部門がこのセルで算定する。カニュレーション料を含む(注4)。透析液・血液凝固阻止剤・生理食塩水・定める薬剤を包括(注6・rule-0006)",
+   "exclusions": null,
+   "countLimitText": "持続緩徐式血液濾過と併せて月14回まで(注8。定める患者を除く。区分1〜3のセル横断で「人工腎臓」として数える)",
+   "periodLimitText": null,
+   "limit": {
+    "per": "month",
+    "max": 14,
+    "share": [
+     "r08-J038-1-ro",
+     "r08-J038-2-ro",
+     "r08-J038-3-ro"
+    ]
+   },
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 0,
+   "notificationReq": 0,
+   "facilityStandards": [],
+   "specialties": [
+    {
+     "specialty": "dialysis",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.262",
+     "quote": "3 慢性維持透析を行った場合3 ロ 4時間以上5時間未満の場合 1,931点",
+     "note": "マスター140058510=1931と一致"
+    },
+    {
+     "field": "conditions",
+     "doc": "r08-ryuiji-ika",
+     "page": "p.563",
+     "quote": "「慢性維持透析を行った場合3」については、「1」又は「2」の施設基準のいずれかに該当するものとして届出を行った保険医療機関以外の保険医療機関において算定する。",
+     "note": "区分3は届出不要(v55)"
+    }
+   ]
+  },
+  {
+   "id": "r08-J038-n13",
+   "code": "140059170",
+   "kubun": "J038注13",
+   "name": "慢性維持透析濾過加算(人工腎臓)",
+   "shortName": "慢性維持透析濾過加算",
+   "categoryL": "特掲診療料",
+   "categoryM": "処置",
+   "points": 50,
+   "unit": "1日につき(人工腎臓1〜3に加算)",
+   "conditions": "届出医療機関において、1から3までの場合に慢性維持透析濾過(複雑なものに限る)を行った場合に所定点数に加算(告示J038注13)。複雑なもの=透析液から作製した置換液を用いて血液透析濾過を行うこと(留意(22))。算定時も透析液・血液凝固阻止剤等の薬剤包括は同じ(留意(7)ア・rule-0006)。施設基準・届出は透析液水質確保加算の例による(第57の2の4・様式49の3)。ゲームは水処理設備のある部門が「オンラインHDFを行う」方針を選んだ扱い(ゲーム上の仮定)",
+   "exclusions": null,
+   "countLimitText": null,
+   "periodLimitText": null,
+   "limit": null,
+   "inpatient": 1,
+   "outpatient": 1,
+   "visitType": null,
+   "facilityStandardReq": 1,
+   "notificationReq": 1,
+   "facilityStandards": [
+    "r08-fs-j038-n13"
+   ],
+   "specialties": [
+    {
+     "specialty": "dialysis",
+     "relevance": "primary"
+    }
+   ],
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "points",
+     "doc": "r08-kokuji69-ika",
+     "page": "PDF p.263",
+     "quote": "13 1から3までについては、別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において慢性維持透析濾過(複雑なものに限る。)を行った場合には、慢性維持透析濾過加算として、所定点数に50点を加算する。",
+     "note": "マスター140059170=50と一致"
+    }
+   ]
   }
  ],
  "facilityStandards": [
@@ -5893,7 +6084,7 @@
    "transitional": null,
    "formNo": "別添2 様式2の2",
    "sourceNotice": "r08-tsuchi8-tokkei-todokede",
-   "sourcePage": "第57の2の2(PDF p.229-231)",
+   "sourcePage": "第57の2の2の(1)(PDF p.230)",
    "confidence": "verified",
    "evidence": []
   },
@@ -5906,13 +6097,21 @@
    "staffing": null,
    "equipment": null,
    "record": null,
-   "system": "透析液水質確保に係る体制(詳細要件は第57の2の3。慢性維持透析濾過加算と共通の枠組み)",
+   "system": "月1回以上水質検査を実施し、関連学会から示されている基準を満たした血液透析濾過用の置換液を作製し使用していること(第57の2の3。慢性維持透析濾過加算と共通の枠組み)",
    "transitional": null,
-   "formNo": "別添2 様式49",
+   "formNo": "別添2 様式49の3",
    "sourceNotice": "r08-tsuchi8-tokkei-todokede",
    "sourcePage": "第57の2の3(PDF p.231)",
    "confidence": "verified",
-   "evidence": []
+   "evidence": [
+    {
+     "field": "form_no",
+     "doc": "r08-tsuchi8-tokkei-todokede",
+     "page": "PDF p.231",
+     "quote": "(3) 透析液水質確保加算及び慢性維持透析濾過加算の施設基準に係る届出は別添2の様式 49 の3を用いること。",
+     "note": "v55訂正: 従来の「様式49」は写し誤り"
+    }
+   ]
   },
   {
    "id": "r08-fs-zaishien",
@@ -6377,6 +6576,56 @@
      "note": "届出は別添2様式44の5の3(第47の7の7の(5)・PDF p.210。様式一覧 PDF p.439 『47の7 早期診療体制充実加算 44の5の3』)"
     }
    ]
+  },
+  {
+   "id": "r08-fs-j038-2",
+   "name": "人工腎臓(慢性維持透析を行った場合2)の施設基準",
+   "shortName": "人工腎臓2",
+   "ryoType": "tokkei",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": "透析用監視装置26台以上、かつ装置1台当たりのJ038(1〜3)算定外来患者数の割合が3.5以上4.0未満(直近12か月平均。月5回以下の患者は除外)",
+   "record": null,
+   "system": "関連学会基準に基づく水質管理の適切な実施。透析機器安全管理委員会の設置と、責任者として専任の医師又は専任の臨床工学技士1名以上",
+   "transitional": null,
+   "formNo": "別添2 様式87の4",
+   "sourceNotice": "r08-tsuchi8-tokkei-todokede",
+   "sourcePage": "第57の2の1の(2)(PDF p.229)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "equipment_req",
+     "doc": "r08-tsuchi8-tokkei-todokede",
+     "page": "PDF p.229",
+     "quote": "(2) 慢性維持透析を行った場合2の施設基準 ア 次のいずれにも該当する保険医療機関であること。 1 透析用監視装置の台数が 26 台以上であること。 2 透析用監視装置一台当たりの「J038」人工腎臓の「1」から「3」を算定した患者数(外来患者に限る。)の割合が 3.5 以上 4.0 未満であること。",
+     "note": "v55"
+    }
+   ]
+  },
+  {
+   "id": "r08-fs-j038-n13",
+   "name": "慢性維持透析濾過加算の施設基準",
+   "shortName": "慢性維持透析濾過",
+   "ryoType": "tokkei",
+   "notificationReq": 1,
+   "staffing": null,
+   "equipment": null,
+   "record": null,
+   "system": "透析液水質確保加算の例による(第57の2の4): 月1回以上の水質検査を実施し、関連学会の基準を満たした血液透析濾過用の置換液を作製し使用していること(第57の2の3)",
+   "transitional": null,
+   "formNo": "別添2 様式49の3",
+   "sourceNotice": "r08-tsuchi8-tokkei-todokede",
+   "sourcePage": "第57の2の4(PDF p.231)",
+   "confidence": "verified",
+   "evidence": [
+    {
+     "field": "system_req",
+     "doc": "r08-tsuchi8-tokkei-todokede",
+     "page": "PDF p.231",
+     "quote": "4 慢性維持透析濾過加算の施設基準 慢性維持透析濾過加算の施設基準及び届出に関する事項は、第 57 の2の「3」透析液水質確保加算の例による。 3 透析液水質確保加算の施設基準 月1回以上水質検査を実施し、関連学会から示されている基準を満たした血液透析濾過用の置換液を作製し、使用していること。",
+     "note": "届出は第57の2の6の(3)「透析液水質確保加算及び慢性維持透析濾過加算の施設基準に係る届出は別添２の様式 49 の３を用いること」(PDF p.231)"
+    }
+   ]
   }
  ],
  "rules": [
@@ -6524,10 +6773,10 @@
   },
   {
    "id": "r08-rule-0006",
-   "source": "r08-J038-1-ro",
+   "source": "r08-J038-1-ro / r08-J038-2-ro / r08-J038-3-ro",
    "target": "透析液・血液凝固阻止剤・生理食塩水・別に厚生労働大臣が定める薬剤",
    "type": "included",
-   "condition": "慢性維持透析1〜3の所定点数に包括(その他の場合(1560点)は対象外)",
+   "condition": "慢性維持透析1〜3の所定点数に包括(その他の場合(1560点)は対象外)。注13慢性維持透析濾過加算を算定する場合も同じ(留意(7)ア・v55追記)",
    "period": "same_day",
    "bidirectional": 0,
    "doc": "r08-kokuji69-ika",
@@ -6536,7 +6785,11 @@
    "confidence": "verified",
    "machine": {
     "type": "included_categories",
-    "source": "r08-J038-1-ro",
+    "source": [
+     "r08-J038-1-ro",
+     "r08-J038-2-ro",
+     "r08-J038-3-ro"
+    ],
     "targetCategories": [
      "薬剤(透析包括)"
     ]
@@ -6995,6 +7248,57 @@
    "machine": {
     "type": "handled_externally",
     "note": "ゲームは部門の医師を担当医に固定(医師1〜2名で担当医交代は起きない設計)。同意書・院内掲示は届出をもって整えた扱い、時間外電話対応体制(加算3は連携病院との体制でもよい)は「連携病院と協定を結ぶ」アクション(policy.renkei)で表す(ゲーム上の仮定・在宅データ提出加算と同じ簡略化)。注12(情報通信機器を用いた精神療法)はゲームにオンライン診療が無いため登録しない(否定的確認)"
+   }
+  },
+  {
+   "id": "r08-rule-0030",
+   "source": "r08-J038-n1 / n2-i / n9 / n13(人工腎臓の加算)",
+   "target": "r08-J038-1-ro / 2-ro / 3-ro(人工腎臓本体)",
+   "type": "conditional",
+   "condition": "人工腎臓の注1・注2・注9・注13の加算は「所定点数に加算する」加算であり、同一受診で人工腎臓本体(区分1〜3)が算定されない(月14回制限・施設基準等で却下された)場合は加算のみでは算定できない",
+   "period": "same_day",
+   "bidirectional": 0,
+   "doc": "r08-kokuji69-ika",
+   "page": "PDF p.262-263 (J038注1・2・9・13)",
+   "quote": "時間外・休日加算として、380点を所定点数に加算する。...導入期加算として、導入期1月に限り1日につき、当該基準に係る区分に従い、次に掲げる点数を所定点数に加算する。...透析液水質確保加算として、所定点数に10点を加算する。...慢性維持透析濾過加算として、所定点数に50点を加算する。",
+   "confidence": "verified",
+   "machine": {
+    "type": "requires_parent",
+    "source": [
+     "r08-J038-n1",
+     "r08-J038-n2-i",
+     "r08-J038-n9",
+     "r08-J038-n13"
+    ],
+    "parents": [
+     "r08-J038-1-ro",
+     "r08-J038-2-ro",
+     "r08-J038-3-ro"
+    ],
+    "note": "v55便U(#33透析分): 人工腎臓が月14回で却下された受診で導入期加算1・水質確保加算だけが通る構造穴をエンジンで塞ぐ"
+   }
+  },
+  {
+   "id": "r08-rule-0031",
+   "source": "r08-J038-1-ro / 2-ro / 3-ro",
+   "target": "(同一受診での区分の排他)",
+   "type": "mutually_exclusive",
+   "condition": "人工腎臓は1日につき算定し、区分1・2は届出機関で、区分3は届出のない機関で算定する(留意(2))=同一受診で複数の区分セルは算定しない。月14回は区分横断で「人工腎臓」として数える(注8)",
+   "period": "same_day",
+   "bidirectional": 1,
+   "doc": "r08-ryuiji-ika",
+   "page": "p.563 (留意J038(2))",
+   "quote": "「1」については「慢性維持透析を行った場合1」の施設基準、「2」については「慢性維持透析を行った場合2」の施設基準の届出を行った保険医療機関において算定する。「慢性維持透析を行った場合3」については、「1」又は「2」の施設基準のいずれかに該当するものとして届出を行った保険医療機関以外の保険医療機関において算定する。",
+   "confidence": "verified",
+   "machine": {
+    "type": "same_month_group",
+    "scope": "visit",
+    "group": [
+     "r08-J038-1-ro",
+     "r08-J038-2-ro",
+     "r08-J038-3-ro"
+    ],
+    "note": "v55便U(#36最小形): 同一受診に複数の区分セルを申請しても申請順の先頭1件だけ通す。月枠の排他はしない(月14回はLIMITSのshareで合算)"
    }
   }
  ]

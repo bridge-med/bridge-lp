@@ -831,5 +831,33 @@
   "relevance": "primary",
   "rationale": "通院精神療法に乗る体制加算(診療所は加算3)",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J038-n1",
+  "specialty_id": "dialysis",
+  "relevance": "primary",
+  "rationale": "3クール目(夜間)のセッションに乗る加算",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J038-2-ro",
+  "specialty_id": "dialysis",
+  "relevance": "secondary",
+  "rationale": "制度の写し(ゲームは区分2を届け出ない)",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J038-3-ro",
+  "specialty_id": "dialysis",
+  "relevance": "primary",
+  "rationale": "区分1の要件を外れた部門のセル",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J038-n13",
+  "specialty_id": "dialysis",
+  "relevance": "primary",
+  "rationale": "水処理設備に乗る届出レバー(オンラインHDF)",
+  "confidence": "verified"
  }
 ]

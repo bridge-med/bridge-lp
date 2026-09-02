@@ -87,9 +87,9 @@
   "system_req": "関連学会作成資料等に基づき、患者ごとの適応に応じて腎代替療法の必要な説明を実施(導入期に限らず病状・求めに応じ繰り返し)。腎代替療法に係る所定研修修了者の配置が望ましい",
   "form_no": "別添2 様式2の2",
   "source_notice": "r08-tsuchi8-tokkei-todokede",
-  "source_page": "第57の2の2(PDF p.229-231)",
+  "source_page": "第57の2の2の(1)(PDF p.230)",
   "effective_from": "2026-06-01",
-  "updated_at": "2026-08-28",
+  "updated_at": "2026-09-02",
   "confidence": "verified"
  },
  {
@@ -98,12 +98,12 @@
   "short_name": "透析液水質確保",
   "ryo_type": "tokkei",
   "notification_req": 1,
-  "system_req": "透析液水質確保に係る体制(詳細要件は第57の2の3。慢性維持透析濾過加算と共通の枠組み)",
-  "form_no": "別添2 様式49",
+  "system_req": "月1回以上水質検査を実施し、関連学会から示されている基準を満たした血液透析濾過用の置換液を作製し使用していること(第57の2の3。慢性維持透析濾過加算と共通の枠組み)",
+  "form_no": "別添2 様式49の3",
   "source_notice": "r08-tsuchi8-tokkei-todokede",
   "source_page": "第57の2の3(PDF p.231)",
   "effective_from": "2026-06-01",
-  "updated_at": "2026-08-28",
+  "updated_at": "2026-09-02",
   "confidence": "verified"
  },
  {
@@ -401,6 +401,35 @@
   "form_no": "別添2 様式44の5の3",
   "source_notice": "r08-tsuchi8-tokkei-todokede",
   "source_page": "第47の7の4の(3)(PDF p.207)",
+  "effective_from": "2026-06-01",
+  "updated_at": "2026-09-02",
+  "confidence": "verified"
+ },
+ {
+  "id": "r08-fs-j038-2",
+  "name": "人工腎臓(慢性維持透析を行った場合2)の施設基準",
+  "short_name": "人工腎臓2",
+  "ryo_type": "tokkei",
+  "notification_req": 1,
+  "equipment_req": "透析用監視装置26台以上、かつ装置1台当たりのJ038(1〜3)算定外来患者数の割合が3.5以上4.0未満(直近12か月平均。月5回以下の患者は除外)",
+  "system_req": "関連学会基準に基づく水質管理の適切な実施。透析機器安全管理委員会の設置と、責任者として専任の医師又は専任の臨床工学技士1名以上",
+  "form_no": "別添2 様式87の4",
+  "source_notice": "r08-tsuchi8-tokkei-todokede",
+  "source_page": "第57の2の1の(2)(PDF p.229)",
+  "effective_from": "2026-06-01",
+  "updated_at": "2026-09-02",
+  "confidence": "verified"
+ },
+ {
+  "id": "r08-fs-j038-n13",
+  "name": "慢性維持透析濾過加算の施設基準",
+  "short_name": "慢性維持透析濾過",
+  "ryo_type": "tokkei",
+  "notification_req": 1,
+  "system_req": "透析液水質確保加算の例による(第57の2の4): 月1回以上の水質検査を実施し、関連学会の基準を満たした血液透析濾過用の置換液を作製し使用していること(第57の2の3)",
+  "form_no": "別添2 様式49の3",
+  "source_notice": "r08-tsuchi8-tokkei-todokede",
+  "source_page": "第57の2の4(PDF p.231)",
   "effective_from": "2026-06-01",
   "updated_at": "2026-09-02",
   "confidence": "verified"

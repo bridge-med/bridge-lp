@@ -426,5 +426,19 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   REIMB.init(KB);
 }
 
+/* 33. 便U: 人工腎臓の区分セル家族 — 区分3は届出なしで算定・同一受診の区分排他(rule-0031)・月14回はセル横断(share)・加算は親不在で却下(rule-0030) */
+{
+  const r = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-J038-3-ro' }, { itemId: 'r08-J038-n1' }], facilityStandards: [], history: { month: {} } });
+  ok('区分3ロは施設基準の届出なしで算定でき、時間外・休日加算も乗る', billedIds(r).includes('r08-J038-3-ro') && billedIds(r).includes('r08-J038-n1'));
+  const r2 = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-J038-1-ro' }, { itemId: 'r08-J038-3-ro' }], facilityStandards: ['r08-fs-j038-1'], history: { month: {} } });
+  ok('同一受診に区分1と区分3を申請しても先頭(区分1)だけ通る(rule-0031)', billedIds(r2).includes('r08-J038-1-ro') && rejectedIds(r2).includes('r08-J038-3-ro'));
+  const r3 = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-J038-3-ro' }], facilityStandards: [], history: { month: { 'r08-J038-1-ro': 10, 'r08-J038-3-ro': 4 } } });
+  ok('月14回は区分セル横断で数える(区分1で10回+区分3で4回の後の15回目は却下)', rejectedIds(r3).includes('r08-J038-3-ro'));
+  const r4 = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-J038-1-ro' }, { itemId: 'r08-J038-n2-i' }, { itemId: 'r08-J038-n9' }, { itemId: 'r08-J038-n13' }], facilityStandards: ['r08-fs-j038-1', 'r08-fs-j038-donyuki1', 'r08-fs-j038-suishitsu', 'r08-fs-j038-n13'], history: { month: { 'r08-J038-1-ro': 14 } } });
+  ok('人工腎臓が月14回で却下された受診では導入期加算1・水質確保・濾過加算も親不在で却下(rule-0030)', ['r08-J038-1-ro', 'r08-J038-n2-i', 'r08-J038-n9', 'r08-J038-n13'].every((id) => rejectedIds(r4).includes(id)));
+  const r5 = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-J038-1-ro' }, { itemId: 'r08-J038-n13' }], facilityStandards: ['r08-fs-j038-1', 'r08-fs-j038-suishitsu'], history: { month: {} } });
+  ok('濾過加算は自身の届出(様式49の3)が無ければ却下される', rejectedIds(r5).includes('r08-J038-n13') && billedIds(r5).includes('r08-J038-1-ro'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
