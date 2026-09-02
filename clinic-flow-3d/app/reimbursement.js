@@ -136,6 +136,7 @@
         if (src) out.warnings.push({ kind: 'rule_unmachined', ruleId: rule.id, message: `${src.item.name}: ルール「${rule.condition || rule.type}」は未機械化 — 内容を確認(needs_review)`, quote: rule.quote });
         continue;
       }
+      if (m.type === 'requires_parent') continue; // 親項目ゲートは全判定の後に別パスで評価する(下)
       if (m.type === 'handled_externally') {
         // 受診単位の機械判定が不要なルール(患者単位の排他=名簿分離で運用、相手行為が同一受診内で
         // 併発しない設計等)。理由はKBのmachine.noteに記録済み。警告は出さない
@@ -236,6 +237,27 @@
           src.reasons.push(`${m.conditionLabel}のため算定不可(${rule.id})`);
           src.ruleRefs.push(rule);
         }
+      }
+    }
+
+    // ---- 親項目ゲート(requires_parent): 「所定点数に加算する」加算は、同一受診で親(本体)が
+    //      算定候補に残るときだけ通す。包括・6月窓・回数制限など他の全判定の後に評価するので、
+    //      ここで却下された加算は履歴に残らず月1回・年1回の枠を消費しない(v53 PM検出の穴)
+    for (const rule of KB.rules) {
+      const m = rule.machine;
+      if (!m || m.type !== 'requires_parent') continue;
+      const parents = Array.isArray(m.parents) ? m.parents : [m.parents];
+      if (parents.some((id) => findRec(id))) continue;
+      const sources = Array.isArray(m.source) ? m.source : [m.source];
+      for (const id of sources) {
+        const src = findRec(id);
+        if (!src) continue;
+        const pnames = parents.map((pid) => (byId.get(pid) || { name: pid }).name);
+        const label = pnames.length > 2 ? `${pnames[0]} ほか${pnames.length - 1}件` : pnames.join('・');
+        trace('parent', { item: id, parents, ok: false });
+        src.status = 'rejected';
+        src.reasons.push(`本体(${label})が同一受診で算定されないため、加算のみでは算定不可(${rule.id})`);
+        src.ruleRefs.push(rule);
       }
     }
 

@@ -367,5 +367,31 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('実績加算: 2区分の同時申請は先頭(ha-1)だけ通る', r2.billableItems.some((x) => x.itemId === 'r08-C002-n7-ha-1') && r2.rejectedItems.some((x) => x.itemId === 'r08-C002-n7-ro-1'));
 }
 
+/* 30. 便S: 「所定点数に加算する」加算は親(本体)が同一受診で算定されないと通らない(rule-0026/0027・PM検出) */
+{
+  // (I)→(II)切替直後の6月窓: (II)本体はrule-0004で却下。加算3(II)は親不在で却下される
+  const r = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-B001-3-3' }, { itemId: 'r08-B001-3-3-n4-ro-3' }],
+    facilityStandards: ['r08-fs-b001-3', 'r08-fs-b001-3-n4-3'],
+    history: { monthsSince: { 'r08-B001-3-1-ht': 2 } },
+  });
+  ok('6月窓: (II)本体が却下', rejectedIds(r).includes('r08-B001-3-3'));
+  ok('6月窓: 加算3(II)も親不在で却下(rule-0027)', rejectedIds(r).includes('r08-B001-3-3-n4-ro-3')
+    && r.rejectedItems.find((x) => x.itemId === 'r08-B001-3-3-n4-ro-3').rules.some((x) => x.id === 'r08-rule-0027'));
+  // 親が通る受診では加算も通る
+  const r2 = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-B001-3-3' }, { itemId: 'r08-B001-3-3-n4-ro-3' }, { itemId: 'r08-B001-3-3-n5' }],
+    facilityStandards: ['r08-fs-b001-3', 'r08-fs-b001-3-n4-3'],
+    history: { monthsSince: { 'r08-B001-3-1-ht': 7 } },
+  });
+  ok('親あり: 加算3(II)・眼科連携強化加算(II)とも算定', billedIds(r2).includes('r08-B001-3-3-n4-ro-3') && billedIds(r2).includes('r08-B001-3-3-n5'));
+  // (I)側: 本体が申請されていない受診(検体検査だけの日など)に眼科連携強化加算(I)だけ乗せても通らない
+  const r3 = REIMB.evaluateEncounter({
+    procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-B001-3-n5' }],
+    facilityStandards: ['r08-fs-b001-3'], history: {},
+  });
+  ok('(I)本体なし: 眼科連携強化加算(I)は却下(rule-0026)', rejectedIds(r3).includes('r08-B001-3-n5'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

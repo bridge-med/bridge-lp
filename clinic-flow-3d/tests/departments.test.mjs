@@ -241,8 +241,11 @@ t('眼科医療機関連携強化加算(v53): 患者1人につき年1回 — 同
   const r1 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: acts }, 1);
   ok(r1.ev.billableItems.some((b) => b.itemId === 'r08-B001-3-n5'), '初回は算定');
   eq(p.lb['r08-B001-3-n5'], 0, '年1回の項目はlbで最終算定月を追う');
+  p.mc = {};  // 月替わり(runDayのrolloverに相当。本体(I)を月1回で通し、加算だけを年1回で見る)
   const r2 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: acts }, 1 + 30 * 5);
+  ok(r2.ev.billableItems.some((b) => b.itemId === 'r08-B001-3-1-dm'), '本体(I)は算定');
   ok(r2.ev.rejectedItems.some((b) => b.itemId === 'r08-B001-3-n5'), '5月後は年1回で却下');
+  p.mc = {};
   const r3 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: acts }, 1 + 30 * 12);
   ok(r3.ev.billableItems.some((b) => b.itemId === 'r08-B001-3-n5'), '12月後は再算定できる');
   const p2 = DEPT.addPatient(dept, 'dm', 1); p2.fb = true;
@@ -265,6 +268,19 @@ t('眼科医療機関連携強化加算(v53): 紹介(rfo=1)の次回来院で受
   ok(!agg2.byItem['r08-B001-3-3-n5'], '翌月は申請しない(患者1人につき1回の運用)');
   ok(!agg.byItem['r08-F400-n4'] && !agg2.byItem['r08-F400-n4'], '特定疾患処方管理加算は出ない');
   ok(!agg.sample.kb.rejected.some((x) => x.itemId === 'r08-F400-n4'), '申請もしていない(却下行に出ない)');
+});
+
+t('親不在で却下された眼科医療機関連携強化加算は年1回の枠を消費しない(v53 PM条件・rule-0027)', () => {
+  const dept = DEPT.create(INTERNAL, 1);
+  dept.policy.keiji = true; dept.fs.push('r08-fs-b001-3');
+  const p = DEPT.addPatient(dept, 'dm', 1); p.fb = true;
+  p.lb['r08-B001-3-1-dm'] = 0;  // 当月に(I)を算定済み → (II)は6月窓で却下される
+  const r1 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: [{ id: 'seikatsu2' }, { id: 'eyeLiaisonII' }] }, 31);
+  ok(r1.ev.rejectedItems.some((b) => b.itemId === 'r08-B001-3-3'), '(II)本体は6月窓で却下');
+  ok(r1.ev.rejectedItems.some((b) => b.itemId === 'r08-B001-3-3-n5'), '加算も親不在で却下');
+  eq(p.lb['r08-B001-3-3-n5'], undefined, '年1回の枠は消費されない(lbに残らない)');
+  const r2 = DEPT.evalVisit(INTERNAL, dept, p, { type: 'revisit', kbActs: [{ id: 'seikatsu2' }, { id: 'eyeLiaisonII' }] }, 1 + 30 * 7);
+  ok(r2.ev.billableItems.some((b) => b.itemId === 'r08-B001-3-3') && r2.ev.billableItems.some((b) => b.itemId === 'r08-B001-3-3-n5'), '6月経過後の正当な受診で本体と加算が算定できる');
 });
 
 console.log('# 眼科部門');
