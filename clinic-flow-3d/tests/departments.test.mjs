@@ -259,7 +259,7 @@ t('眼科医療機関連携強化加算(v53): 紹介(rfo=1)の次回来院で受
   const agg = DEPT.runDay(INTERNAL, dept, ctx(1, rand));
   ok(agg.byItem['r08-B001-3-3-n5'] && agg.byItem['r08-B001-3-3-n5'].n === 1, '(II)方針の来院で連携強化加算(II)が1回算定される');
   eq(p.rfo, 2, '確認済み=2に進む');
-  ok(agg.sample && agg.sample.label.includes('眼科の受診状況を確認'), '代表レセプトに確認の来院が出る');
+  ok(agg.sample && agg.sample.label.endsWith('眼科の受診状況を確認'), '代表レセプトに確認の来院が出る');
   p.nv = 31;
   const agg2 = DEPT.runDay(INTERNAL, dept, ctx(31, rand));
   ok(!agg2.byItem['r08-B001-3-3-n5'], '翌月は申請しない(患者1人につき1回の運用)');

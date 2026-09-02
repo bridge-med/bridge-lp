@@ -127,11 +127,11 @@
       { fsId: 'r08-fs-b001-3-n4-3',
         check(dept) {
           const missing = [];
-          if (!dept.policy.keiji) missing.push('生活習慣病管理料の体制(院内掲示等)');
-          if ((dept.staff.clerks || 0) < 1) missing.push('調査事務局と連絡可能な担当者(医療事務1名以上)');
+          if (!dept.policy.keiji) missing.push('生活習慣病管理料の体制');
+          if ((dept.staff.clerks || 0) < 1) missing.push('外来医療等調査の担当者(医療事務1名)');
           return missing.length ? { ok: false, missing } : { ok: true };
         },
-        note: '外来医療等調査への参加+データ提出体制+担当者1名(様式7の11)。加算1・2は実績値(上位20%/50%)が要件でゲームでは判定しない',
+        note: '外来医療等調査への参加+データ提出体制+担当者1名(様式7の11)',
         gameNote: 'データ提出の継続は届出をもって続く扱い。加算1・2(実績値が上位20%/50%)はゲームでは判定しない(簡略化)' },
     ],
 
@@ -211,7 +211,7 @@
         p.nv = ctx.day + (p.iv || 28);
         const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
         if (refEye) api.setSample(`継続患者(${prLabel})の月次来院 — 定期眼底検査の紹介`, lines, r.ev, 4);
-        else if (eyeConfirm) api.setSample(`継続患者(${prLabel})の月次来院 — 眼科の受診状況を確認(連携強化加算)`, lines, r.ev, 3);
+        else if (eyeConfirm) api.setSample(`継続患者(${prLabel})の月次来院 — 眼科の受診状況を確認`, lines, r.ev, 3);
         else if (tryKanriRyo) api.setSample(`継続患者(${prLabel})の月次来院 — 管理料${plan === 'II' ? '(II)' : '(I)'}方針`, lines, r.ev, 2);
         else if (isFirst) api.setSample(`初診(${prLabel}・継続管理の開始)`, lines, r.ev, 1);
       }

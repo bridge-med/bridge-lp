@@ -84,7 +84,7 @@
 
   function msMap(p, curMonth) {
     const m = {};
-    for (const id of Object.keys(p.lb)) m[id] = curMonth - p.lb[id];
+    for (const id of Object.keys(p.lb || {})) m[id] = curMonth - p.lb[id]; // lb欠落セーブへの防御(v53 qa任意)
     return m;
   }
 
