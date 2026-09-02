@@ -430,15 +430,56 @@ t('透析180日運用: 収益は全てエンジン算定・外来医学管理料
   ok(dept.pt.length > 12, `患者が増える(${dept.pt.length}人)`);
 });
 
-t('装置26台で施設区分1が要件割れし、人工腎臓が算定できなくなる', () => {
+t('装置26台でも患者/装置比3.5未満なら区分1のまま。比3.5以上で区分1を外れ、人工腎臓は届出不要の区分3で算定される(v55・第57の2の1(1)ア)', () => {
   const dept = DEPT.create(DIALYSIS, 1);
   dept.fs.push('r08-fs-j038-1');
-  dept.equip.beds = 26;
-  const agg = DEPT.runDay(DIALYSIS, dept, ctx(2, rng(3)));
-  ok(agg.events.some((e) => e.kind === 'fs_broken'), '要件割れイベント');
-  eq(dept.fs.includes('r08-fs-j038-1'), false, '適用から外れる');
-  ok(!agg.byItem['r08-J038-1-ro'], '人工腎臓は算定されない');
-  ok(agg.sample === null || !agg.sample.lines.some((l) => l.kb === 'r08-J038-1-ro'), 'サンプルにも出ない');
+  dept.equip.beds = 26; dept.staff.nurses = 12;
+  let agg = DEPT.runDay(DIALYSIS, dept, ctx(2, rng(3)));
+  ok(!agg.events.some((e) => e.kind === 'fs_broken'), '12人/26台=比0.5は要件割れしない');
+  ok(agg.byItem['r08-J038-1-ro'] && !agg.byItem['r08-J038-3-ro'], '区分1で算定');
+  // 患者を増やして比3.5以上にする(26台×3.5=91人)
+  while (dept.pt.length < 100) { dept.seq++; dept.pt.push({ id: 'dz' + dept.seq, pr: 'maintenance', en: 1, nv: 1, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, du: 0, so: dept.seq % 2 }); }
+  agg = DEPT.runDay(DIALYSIS, dept, ctx(3, rng(3)));
+  ok(agg.events.some((e) => e.kind === 'fs_broken'), '比3.8で要件割れイベント');
+  eq(dept.fs.includes('r08-fs-j038-1'), false, '区分1の適用から外れる');
+  ok(!agg.byItem['r08-J038-1-ro'] && agg.byItem['r08-J038-3-ro'] && agg.byItem['r08-J038-3-ro'].n > 0, '人工腎臓は区分3で算定され続ける(算定できなくなるのではない)');
+  eq(agg.byItem['r08-J038-3-ro'].pts / agg.byItem['r08-J038-3-ro'].n, REIMB.pointsOf('r08-J038-3-ro'), '点数はKB由来(区分3ロ)');
+  eq(agg.info.kubun, 3, 'infoに区分3');
+  ok(agg.sample && agg.sample.label.includes('区分3'), '代表レセプトのラベルに区分3');
+});
+
+t('3クール運用では3クール目のセッションだけに時間外・休日加算が乗る(v55・J038注1=午後5時以降開始とみなす)', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1');
+  dept.equip.beds = 2; dept.staff.nurses = 6; dept.policy.cools = 3;
+  dept.pt.length = 0;
+  for (let i = 0; i < 8; i++) { dept.seq++; dept.pt.push({ id: 'dz' + dept.seq, pr: 'maintenance', en: 1, nv: 1, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, du: 0, so: 0 }); }
+  const agg = DEPT.runDay(DIALYSIS, dept, ctx(1, rng(5)));
+  // 枠=floor(min(2×3, 6×4×3)×0.85)=5。添字0-1=1クール目・2-3=2クール目・4=3クール目
+  eq(agg.info.seen, 5, '5セッション');
+  eq(agg.info.overtime, 1, '3クール目は1セッション');
+  ok(agg.byItem['r08-J038-n1'] && agg.byItem['r08-J038-n1'].n === 1, '時間外・休日加算は1件だけ');
+  eq(agg.byItem['r08-J038-n1'].pts, REIMB.pointsOf('r08-J038-n1'), '点数はKB由来');
+  dept.policy.cools = 2;
+  const agg2 = DEPT.runDay(DIALYSIS, dept, ctx(3, rng(5)));
+  ok(!agg2.byItem['r08-J038-n1'], '2クール運用では乗らない');
+});
+
+t('慢性維持透析濾過加算(オンラインHDF)は水処理設備で届け出られ、届出後は全セッションに乗る。届出前は申請もしない(v55・J038注13)', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1');
+  let st = DEPT.fsStatus(DIALYSIS, dept).find((x) => x.fsId === 'r08-fs-j038-n13');
+  ok(st && !st.ok && st.gameNote, '水処理設備が無いと届け出られない(gameNoteあり)');
+  const a0 = DEPT.runDay(DIALYSIS, dept, ctx(2, rng(9)));
+  ok(!a0.byItem['r08-J038-n13'] && !a0.sample.kb.rejected.some((x) => x.itemId === 'r08-J038-n13'), '届出前は算定も申請もない');
+  dept.equip.water = true;
+  st = DEPT.fsStatus(DIALYSIS, dept).find((x) => x.fsId === 'r08-fs-j038-n13');
+  ok(st.ok, '水処理設備で要件充足');
+  dept.fs.push('r08-fs-j038-suishitsu', 'r08-fs-j038-n13');
+  const a1 = DEPT.runDay(DIALYSIS, dept, ctx(3, rng(9)));
+  const hd = (a1.byItem['r08-J038-1-ro'] || { n: 0 }).n;
+  ok(hd > 0 && a1.byItem['r08-J038-n13'] && a1.byItem['r08-J038-n13'].n === hd, '全セッションに濾過加算(件数=人工腎臓の件数)');
+  ok(a1.byItem['r08-J038-n9'] && a1.byItem['r08-J038-n9'].n === hd, '水質確保加算も同数');
 });
 
 console.log('# 在宅部門');

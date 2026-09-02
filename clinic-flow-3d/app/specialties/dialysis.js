@@ -5,7 +5,15 @@
  *  - 人工腎臓の点数・月14回制限・薬剤包括(rule-0006)・外来医学管理料の検査包括(rule-0007)・
  *    施設基準(区分1: 装置26台未満または患者/装置比3.5未満+安全管理体制)はKB+エンジンが判定
  *  - ダイアライザー(Ia型・回路含む161点=材料価格1,610円)はKB登録済みでセッションごとに請求(v45)。
- *    型をIa型に固定するのはゲーム上の仮定。加算群(導入期以外)は未登録のまま
+ *    型をIa型に固定するのはゲーム上の仮定
+ *  - 区分(v55便U): 区分1の施設基準は「装置26台未満 又は 患者/装置比3.5未満」(第57の2の1(1)ア=いずれか)。
+ *    比はゲームでは名簿人数/装置台数で代表(制度は直近12か月平均・月5回以下の患者を除外)。区分1を外れた部門は
+ *    届出不要の区分3(4-5hで1,931点=区分1より85点低い)で算定する。区分2(26台以上かつ比3.5〜4.0・届出)は
+ *    KBに写しのみ=ゲームは届け出ない(過小側の簡略化)
+ *  - 加算(v55便U): 3クール目のセッションは午後5時以降の開始とみなし時間外・休日加算(注1)を申請(ゲーム上の仮定。
+ *    休日は透析休止のため休日分は生じない)。慢性維持透析濾過加算(注13=オンラインHDF)は水処理設備を持つ部門の
+ *    届出(様式49の3)で全セッションに乗る。加算は本体が却下された受診では通らない(rule-0030=親項目ゲート)。
+ *    注3障害者等・注11長時間は患者状態を持たないため申請しない。注10下肢末梢・注14運動指導は次便(roadmap 13g)
  *  - 患者獲得・離脱・クール運用・費用は managementParameters(ゲーム上の仮定)。
  *    materialPerSessionは穿刺針・生食等ダイアライザー以外も含む実施原価の概算 */
 (function (root) {
@@ -26,7 +34,10 @@
     staffing: ['医師', '看護師', '臨床工学技士(CE・安全管理責任者)'],
     reimbursementMappings: {
       revisit: { itemId: 'r08-A001' },
-      hd: { itemId: 'r08-J038-1-ro' },
+      hd: { itemId: 'r08-J038-1-ro' },                 // 区分1(届出)
+      hd3: { itemId: 'r08-J038-3-ro' },                // 区分3(届出なし。区分1の要件を外れた部門)
+      overtime: { itemId: 'r08-J038-n1' },             // 時間外・休日加算(3クール目)
+      hdf: { itemId: 'r08-J038-n13' },                 // 慢性維持透析濾過加算(オンラインHDF・届出)
       induction: { itemId: 'r08-J038-n2-i' },
       waterQuality: { itemId: 'r08-J038-n9' },
       monthlyMgmt: { itemId: 'r08-B001-15' },
@@ -54,11 +65,11 @@
     /* 設備・体制の投資(ゲーム上の仮定)。制度上の要件はfsDefs+KBが判定する */
     actions: [
       { id: 'addBed', label: '透析装置+ベッドを増設', cost: 2500000,
-        can: (d) => d.equip.beds < 25, apply: (d) => { d.equip.beds++; },
-        note: '装置は25台まで。26台以上は人工腎臓1の施設基準(装置26台未満)を外れ、透析を算定できなくなる(患者数による代替要件は簡略化)' },
+        can: () => true, apply: (d) => { d.equip.beds++; },
+        note: '26台以上でも患者/装置比が3.5未満なら区分1のまま。どちらも外れると届出不要の区分3(1回あたり85点低い)で算定する' },
       { id: 'water', label: '水処理設備を導入(水質確保の体制)', cost: 3000000,
         can: (d) => !d.equip.water, apply: (d) => { d.equip.water = true; },
-        note: '届け出ると、透析を行った日ごとに透析液水質確保加算が付く。届出は下の施設基準の行から(様式49)' },
+        note: '届け出ると、透析を行った日ごとに透析液水質確保加算が付く。同じ設備で慢性維持透析濾過加算(オンラインHDF)も届け出られる。届出は下の施設基準の行から(様式49の3)' },
       { id: 'explain', label: '腎代替療法の説明体制を整える', cost: 100000,
         can: (d) => !d.policy.explain, apply: (d) => { d.policy.explain = true; },
         note: '届け出ると、導入期の患者に最初の1月のあいだ1日ごとに導入期加算1が付く。届出は下の施設基準の行から(様式2の2)' },
@@ -70,11 +81,13 @@
       { fsId: 'r08-fs-j038-1',
         check(dept) {
           const missing = [];
-          if (dept.equip.beds >= 26) missing.push(`装置台数の要件(26台未満・現在${dept.equip.beds}台)`);
+          const ratio = dept.equip.beds > 0 ? dept.pt.length / dept.equip.beds : 0;
+          if (dept.equip.beds >= 26 && ratio >= 3.5) missing.push(`装置26台未満 又は 患者/装置比3.5未満(現在${dept.equip.beds}台・比${ratio.toFixed(1)})`);
           if ((dept.staff.ces || 0) < 1) missing.push('安全管理責任者(専任CE1名以上)');
           return { ok: missing.length === 0, missing };
         },
-        note: '患者/装置比3.5未満の代替要件はゲームでは装置台数で代表(簡略化)' },
+        note: '装置26台未満 又は 患者/装置比3.5未満のいずれか(第57の2の1(1)ア)+水質管理+安全管理委員会。外れた部門は届出不要の区分3で算定',
+        gameNote: '患者/装置比は名簿人数/装置台数で表す(制度は直近12か月平均・月5回以下の患者を除外)' },
       { fsId: 'r08-fs-j038-donyuki1',
         check(dept) {
           return dept.policy.explain ? { ok: true } : { ok: false, missing: ['腎代替療法の説明体制'] };
@@ -85,6 +98,13 @@
           return dept.equip.water ? { ok: true } : { ok: false, missing: ['水処理設備'] };
         },
         note: null },
+      // 慢性維持透析濾過加算(v55便U): 施設基準・届出は水質確保加算の例による(様式49の3)=同じ水処理設備に乗る
+      { fsId: 'r08-fs-j038-n13',
+        check(dept) {
+          return dept.equip.water ? { ok: true } : { ok: false, missing: ['水処理設備'] };
+        },
+        note: '水質確保加算の例による(第57の2の4・様式49の3)。届け出た部門は全セッションをオンラインHDFで行う扱い',
+        gameNote: '置換液の作製と実施(複雑な血液透析濾過)は届出をもって整えた扱い。実施率100%はゲーム上の仮定' },
     ],
 
     managementParameters: {
@@ -140,33 +160,41 @@
         const p = dept.pt[i];
         if (p.so === group && !seen.includes(p) && ctx.rand() < 0.05) dept.pt.splice(i, 1);
       }
-      for (const p of seen) {
+      const hdKey = dept.fs.includes('r08-fs-j038-1') ? 'hd' : 'hd3';   // 区分1の届出が無い(外れた)部門は区分3で算定
+      let overtime = 0;
+      seen.forEach((p, i) => {
         api.countVisit();
+        // クールは枠の順に埋める(1クール目→2→3)。3クール目=午後5時以降の開始とみなし時間外・休日加算(ゲーム上の仮定)
+        const evening = dept.policy.cools >= 3 && Math.floor(i / Math.max(1, dept.equip.beds)) >= 2;
         // ダイアライザー(Ia型・回路含む)を1セッション1本で請求。材料と価格は材料価格基準040、
         // 回路を含むのは材料留意II-040。「1回1本」という数量は制度側に定めがない
         // (042のような本数制限も040には無い=否定的確認)ため、ゲーム上の仮定
-        const report = { type: 'hd', kbActs: [{ id: 'hd' }, { id: 'dialyzer' }] };
+        const report = { type: 'hd', kbActs: [{ id: hdKey }, { id: 'dialyzer' }] };
+        if (evening) { report.kbActs.push({ id: 'overtime' }); overtime++; }
         if (p.du > ctx.day) report.kbActs.push({ id: 'induction' });
         if (dept.fs.includes('r08-fs-j038-suishitsu')) report.kbActs.push({ id: 'waterQuality' });
+        if (dept.fs.includes('r08-fs-j038-n13')) report.kbActs.push({ id: 'hdf' });
         // 月1回: 慢性維持透析患者外来医学管理料(検査の包括はrule-0007)
         if (!p.mc['r08-B001-15'] && p.du <= ctx.day) report.kbActs.push({ id: 'monthlyMgmt' });
         const r = api.evalVisit(p, report);
         agg.cost += P.materialPerSession;
         const hasMgmt = r.ev.billableItems.some((b) => b.itemId === 'r08-B001-15');
-        const label = p.du > ctx.day ? '導入期の透析(導入期加算1)'
-          : hasMgmt ? '維持透析+月1回の外来医学管理料'
-          : '維持透析(4時間以上5時間未満)';
-        api.setSample(label, r.lines, r.ev, hasMgmt ? 3 : 2);
-      }
+        const kubun = hdKey === 'hd' ? '' : '・区分3';
+        const label = p.du > ctx.day ? `導入期の透析(導入期加算1)${kubun}`
+          : hasMgmt ? `維持透析+月1回の外来医学管理料${kubun}`
+          : evening ? `維持透析(3クール目・時間外の加算)${kubun}`
+          : `維持透析(4時間以上5時間未満)${kubun}`;
+        api.setSample(label, r.lines, r.ev, hasMgmt ? 3 : evening ? 2.5 : 2);
+      });
 
       agg.cost += (dept.staff.doctors || 0) * C.doctorDay + (dept.staff.nurses || 0) * C.nurseDay + (dept.staff.ces || 0) * C.ceDay;
       agg.info = {
         census: dept.pt.length, beds: dept.equip.beds, cools: dept.policy.cools,
-        capacity, seen: seen.length, waitlist: Math.max(0, due.length - seen.length),
+        capacity, seen: seen.length, waitlist: Math.max(0, due.length - seen.length), overtime, kubun: hdKey === 'hd' ? 1 : 3,
       };
       // 区分1の維持が危うい時の予告(降格の前に知らせる)
-      if (dept.equip.beds >= 24 && dept.fs.includes('r08-fs-j038-1')) {
-        agg.events.push({ kind: 'fs_warn', message: `装置${dept.equip.beds}台 — 26台以上になると施設区分1の装置要件を外れます` });
+      if (dept.equip.beds >= 24 && dept.fs.includes('r08-fs-j038-1') && dept.pt.length / dept.equip.beds >= 3.0) {
+        agg.events.push({ kind: 'fs_warn', message: `装置${dept.equip.beds}台・患者/装置比${(dept.pt.length / dept.equip.beds).toFixed(1)} — 26台以上かつ比3.5以上になると区分1を外れ、区分3(1回あたり85点低い)で算定します` });
       }
     },
   };
