@@ -52,6 +52,7 @@ const LIMITS = {
   'r08-J038-1-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
   'r08-J038-2-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
   'r08-J038-3-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
+  'r08-J038-n10':    { per: 'month', max: 1 },                  // 下肢末梢動脈疾患指導管理加算 月1回(告示J038注10・v56)
   'r08-C001-1-i':    { per: 'week', max: 3 },                   // 週3回(告示C001注1)
   'r08-C001-1-ro':   { per: 'week', max: 3 },                   // 同(イ・ロ通算はitem横断=rule-0019で記録。ゲームは月2回設計で到達しない)
   'r08-I002-1-ro-1-1': { per: 'visit_first', max: 1 },          // 初診時1回(算定回数テーブル)

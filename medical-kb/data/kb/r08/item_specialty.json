@@ -859,5 +859,19 @@
   "relevance": "primary",
   "rationale": "水処理設備に乗る届出レバー(オンラインHDF)",
   "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J038-n10",
+  "specialty_id": "dialysis",
+  "relevance": "primary",
+  "rationale": "全患者のリスク評価に乗る月1回の届出レバー",
+  "confidence": "verified"
+ },
+ {
+  "item_id": "r08-J038-n14",
+  "specialty_id": "dialysis",
+  "relevance": "primary",
+  "rationale": "届出不要の体制アクションに乗る90日窓の加算",
+  "confidence": "verified"
  }
 ]

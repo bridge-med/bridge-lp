@@ -363,5 +363,10 @@
   "item_id": "r08-J038-n13",
   "fs_id": "r08-fs-j038-n13",
   "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-n10",
+  "fs_id": "r08-fs-j038-n10",
+  "relation": "required"
  }
 ]

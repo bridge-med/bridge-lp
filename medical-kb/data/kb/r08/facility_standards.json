@@ -433,5 +433,19 @@
   "effective_from": "2026-06-01",
   "updated_at": "2026-09-02",
   "confidence": "verified"
+ },
+ {
+  "id": "r08-fs-j038-n10",
+  "name": "下肢末梢動脈疾患指導管理加算の施設基準",
+  "short_name": "下肢末梢動脈疾患指導管理",
+  "ryo_type": "tokkei",
+  "notification_req": 1,
+  "system_req": "(1)慢性維持透析の全患者に下肢末梢動脈疾患のリスク評価を行い、指導管理等と臨床所見・検査実施日・検査結果・指導内容を診療録に記載 (2)ABI0.7以下又はSPP40mmHg以下の患者は同意を得て専門的な治療体制を有する保険医療機関へ紹介(自院が要件を満たす場合は院内の専門科と連携) (3)連携先(循環器内科・胸部外科又は血管外科・整形外科/皮膚科/形成外科を全て標榜する病院)をあらかじめ定めて事前に届出し院内掲示",
+  "form_no": "別添2 様式49の3の2",
+  "source_notice": "r08-tsuchi8-tokkei-todokede",
+  "source_page": "第57の2の2(PDF p.232)",
+  "effective_from": "2026-06-01",
+  "updated_at": "2026-09-03",
+  "confidence": "verified"
  }
 ]
