@@ -465,6 +465,19 @@ t('3クール運用では3クール目のセッションだけに時間外・休
   ok(!agg2.byItem['r08-J038-n1'], '2クール運用では乗らない');
 });
 
+t('3クール目の判定は同時床数(装置と看護師×4床の小さい方)で割る — 12床・看護師2・3クールで3クール目は4件(v57・13g⑧の是正)', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1');
+  dept.equip.beds = 12; dept.staff.nurses = 2; dept.policy.cools = 3;
+  dept.pt.length = 0;
+  for (let i = 0; i < 30; i++) { dept.seq++; dept.pt.push({ id: 'dz' + i, pr: 'maintenance', en: 1, nv: 1, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, du: 0, so: 0 }); }
+  const agg = DEPT.runDay(DIALYSIS, dept, ctx(1, () => 0.99));
+  // 枠=floor(min(12×3, 2×4×3)×0.85)=20、同時床数=min(12, 8)=8 → 添字16〜19の4件が3クール目
+  eq(agg.info.seen, 20, '20セッション');
+  eq(agg.info.overtime, 4, '3クール目は4件(旧実装の添字/装置台数では0件)');
+  eq(agg.byItem['r08-J038-n1'].n, 4, '時間外・休日加算も4件');
+});
+
 t('慢性維持透析濾過加算(オンラインHDF)は水処理設備で届け出られ、届出後は全セッションに乗る。届出前は申請もしない(v55・J038注13)', () => {
   const dept = DEPT.create(DIALYSIS, 1);
   dept.fs.push('r08-fs-j038-1');
