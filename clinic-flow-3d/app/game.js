@@ -3553,7 +3553,7 @@
           <b>2クール</b><span>日中のみ。看護配置に余裕を残す</span>
         </button>
         <button class="choice-row ${cools === 3 ? 'on' : ''}" data-dcool="${m.id}:3">
-          <b>3クール</b><span>夜間も回して枠1.5倍。3クール目は時間外・休日加算の対象。看護師の必要数も増える</span>
+          <b>3クール</b><span>夜間も回して枠1.5倍。3クール目は午後5時以降の開始とみなし、時間外・休日加算が付く。看護師の必要数も増える</span>
         </button>
         ${deptActionsHtml(m, d)}
       </div>`;
