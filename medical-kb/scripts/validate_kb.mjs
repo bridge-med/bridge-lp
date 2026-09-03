@@ -94,6 +94,13 @@ for (const r of rules) {
 }
 
 /* E4: 参照整合 */
+// quote が注番号で始まるなら、その番号が source_page の最初の注番号と一致するか(v58)
+const z2h = (t) => t.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+for (const r of rules) {
+  const m = /^(?:注\s*)?([0-9０-９]{1,2})\s/.exec(r.quote || '');
+  const sp = /注\s*([0-9０-９]{1,2})/.exec(r.source_page || '');
+  if (m && sp && z2h(m[1]) !== z2h(sp[1])) errors.push(`E7 rule ${r.id}: quote先頭の注番号(${m[1]})が source_page の注番号(${sp[1]})と一致しない`);
+}
 // rules.machine の項目参照(source/parents/group/targetItemIds)が items に実在するか(v57 qa申し送り)
 for (const r of rules) {
   const m = r.machine; if (!m) continue;
