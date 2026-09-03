@@ -452,5 +452,17 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('注10は届出(様式49の3の2)が無ければ却下', rejectedIds(r4).includes('r08-J038-n10'));
 }
 
+/* 35. 便W: 在宅・処方の加算も親項目ゲート(rule-0033/0034・#33残り2家族) */
+{
+  const r = REIMB.evaluateEncounter({ encounter: { visitType: 'visit' }, procedures: [{ itemId: 'r08-C002-2-ro-2' }, { itemId: 'r08-C002-n7-ha-2' }, { itemId: 'r08-C002-n13' }], facilityStandards: ['r08-fs-zaishien', 'r08-fs-c002-n7-jisseki2', 'r08-fs-c002-n13'], history: { month: { 'r08-C002-2-ro-2': 1 } } });
+  ok('在医総管が月1回で却下された受診では実績加算2・データ提出加算も却下(rule-0033)', rejectedIds(r).includes('r08-C002-n7-ha-2') && rejectedIds(r).includes('r08-C002-n13'));
+  const r2 = REIMB.evaluateEncounter({ encounter: { visitType: 'visit' }, procedures: [{ itemId: 'r08-C002-2-ro-2' }, { itemId: 'r08-C002-n7-ha-2' }, { itemId: 'r08-C002-n13' }], facilityStandards: ['r08-fs-zaishien', 'r08-fs-c002-n7-jisseki2', 'r08-fs-c002-n13'], history: { month: {} } });
+  ok('親ありなら実績加算2・データ提出加算とも算定', billedIds(r2).includes('r08-C002-n7-ha-2') && billedIds(r2).includes('r08-C002-n13'));
+  const r3 = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-F400-n6-i' }], facilityStandards: ['r08-fs-f400-n6'], history: {} });
+  ok('処方箋料なしでは一般名処方加算が却下(rule-0034)', rejectedIds(r3).includes('r08-F400-n6-i'));
+  const r4 = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-F400-3' }, { itemId: 'r08-F400-n6-i' }], facilityStandards: ['r08-fs-f400-n6'], history: {} });
+  ok('処方箋料ありなら一般名処方加算は算定', billedIds(r4).includes('r08-F400-n6-i'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
