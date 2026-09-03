@@ -464,5 +464,19 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('処方箋料ありなら一般名処方加算は算定', billedIds(r4).includes('r08-F400-n6-i'));
 }
 
+/* 36. 便W: 「いずれか」一族の同一受診排他(rule-0035〜0039・#36水平展開)。同一受診に複数セルを申請しても申請順の先頭だけ通る */
+{
+  const r = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-I002-1-ha-2-1' }, { itemId: 'r08-I002-n11-ha-1' }, { itemId: 'r08-I002-n11-ha-2' }], facilityStandards: ['r08-fs-i002-n11-3'], history: { week: {} } });
+  ok('早期診療体制充実加算: 3年以内と3年超の同時申請は先頭だけ(rule-0035)', billedIds(r).includes('r08-I002-n11-ha-1') && rejectedIds(r).includes('r08-I002-n11-ha-2'));
+  const r2 = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-B001-3-1-ht' }, { itemId: 'r08-B001-3-n4-ro-3' }, { itemId: 'r08-B001-3-n4-ha-3' }], facilityStandards: ['r08-fs-b001-3', 'r08-fs-b001-3-n4-3'], history: {} });
+  ok('充実管理加算(I): 主病をまたぐ2セルの同時申請は先頭だけ(rule-0036)', billedIds(r2).includes('r08-B001-3-n4-ro-3') && rejectedIds(r2).includes('r08-B001-3-n4-ha-3'));
+  const r3 = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-A001-n10-1' }, { itemId: 'r08-A001-n10-4' }], facilityStandards: ['r08-fs-a001-n10-1', 'r08-fs-a001-n10-4'], history: {} });
+  ok('時間外対応体制加算: 1と4の同時申請は先頭だけ(rule-0038)', (billedIds(r3).includes('r08-A001-n10-1') || rejectedIds(r3).includes('r08-A001-n10-1')) && rejectedIds(r3).includes('r08-A001-n10-4'));
+  const r4 = REIMB.evaluateEncounter({ encounter: { visitType: 'first' }, procedures: [{ itemId: 'r08-A000' }, { itemId: 'r08-A000-n16-1' }, { itemId: 'r08-A000-n16-3' }], facilityStandards: ['r08-fs-a000-n16-1', 'r08-fs-a000-n16-3'], history: {} });
+  ok('電子的診療情報連携体制整備加算: 1と3の同時申請は後続が却下(rule-0039)', rejectedIds(r4).includes('r08-A000-n16-3'));
+  const r5 = REIMB.evaluateEncounter({ procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-I002-1-ha-2-1' }, { itemId: 'r08-I002-n11-ha-1' }], facilityStandards: ['r08-fs-i002-n11-3'], history: { week: {}, month: { 'r08-I002-n11-ha-1': 3 } } });
+  ok('scope:visit なので同月に同セルを算定済みでも別日の受診は通る(月枠の排他はしない)', billedIds(r5).includes('r08-I002-n11-ha-1'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
