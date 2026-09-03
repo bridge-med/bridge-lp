@@ -873,6 +873,7 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: none;
   font-weight: 600;
   padding: 10px;
+  min-height: 44px; /* タップ領域44px(保留#38・v58)。modalの閉じる/計画の見直し/共有ボタンに効く */
 }
 .btn-cta.danger { background: linear-gradient(135deg, var(--red), #A94039); box-shadow: 0 4px 14px rgba(196,87,78,0.35); }
 

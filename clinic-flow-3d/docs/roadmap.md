@@ -308,7 +308,7 @@ v33でLayer 3(Reimbursement Engine)と診療科モジュール基盤が入った
 | 35 | ~~fsDefsが1本入るとfsNote(否定的確認)が描画されない~~ **解消(v56)**: `fsRows || m.fsNote`の分岐を廃止し、fsNoteは`.kijun-kb`(--ink-2)でブロック末尾に常時併記。fsDefsが無い科は既定文 | v54 editor検出→v56便V |
 | 36 | ~~同一受診の区分内排他がエンジンに無い~~ **解消(v57)**: same_month_group scope:'visit'(v55)を早期診療体制充実6セル・充実管理(I)(II)各9セル・時間外対応体制1〜4・電子的診療情報連携1〜3に展開(rule-0035〜0039。告示+届出様式の「1区分」を根拠に) | v54 PM検出→v55/v57 |
 | 37 | ~~`.kb-quote`(レセプトmodalの一次資料引用)がAA未達~~ **解消(v57)**: --ink-2(6.87:1)。罫線も--ink-3にして階層を名実ともに(designer承認) | v56 designer実測→v57便W |
-| 38 | レセプトmodalの「閉じる」(`.btn-cta.ghost`)の高さが40pxでタップ領域44px基準に届かない(全アプリ共通値) | v57 designer実測(便Wの差分とは無関係な既存値)。別便で min-height:44px に上げるかを判断 |
+| 38 | ~~レセプトmodalの「閉じる」(`.btn-cta.ghost`)の高さが40px~~ **解消(v58)**: `.btn-cta.ghost` に min-height:44px(全アプリ共通の5箇所に効く) | v57 designer実測→v58便X |
 
 ## 判断メモ
 
