@@ -515,6 +515,11 @@ t('透析時運動指導等加算(v56): 開始日から90日(開始日を含む)
   p.mc = {}; p.wc = {};
   const a89 = DEPT.runDay(DIALYSIS, dept, ctx(89, noRef));
   ok(a89.byItem['r08-J038-n14'] && a89.byItem['r08-J038-n14'].n === 1, 'ex+88日は申請');
+  // ex+89(境界の内側)を固定: 開始日を2にずらして91日目(同群の来院日)=diff 89
+  p.ex = 2; p.mc = {}; p.wc = {};
+  const a89b = DEPT.runDay(DIALYSIS, dept, ctx(91, noRef));
+  ok(a89b.byItem['r08-J038-n14'] && a89b.byItem['r08-J038-n14'].n === 1, 'ex+89日は申請(境界の内側)');
+  p.ex = 1; p.mc = {}; p.wc = {};
   const a91 = DEPT.runDay(DIALYSIS, dept, ctx(91, noRef));
   eq(a91.info.seen, 1, '91日目もセッションはある');
   ok(!a91.byItem['r08-J038-n14'], 'ex+90日は申請しない');
