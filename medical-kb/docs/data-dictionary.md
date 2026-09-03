@@ -77,6 +77,9 @@
 - 注の分類(v50・PM裁定): conditionsに必ず書くのは「登録した点数そのものを変える注」
   (減算・セル置換・その項目と不可分な加算)。単独で算定される加算の注は独立itemまたはruleとして
   別掲し、conditionsには「別項目として扱う」の一文だけを置く(点数の書き写しは二重管理になる)
+- 引用の忠実さと表示(v57・PM裁定): KB(billing_rules/evidence)のquoteは原典の逐語(全角数字・漢数字も原文のまま)。
+  ゲームpackは表示正規化(NFKC)して配信する=意味は変えない。一次資料の忠実さはKB側で担保する
+- rule.quoteには告示・通知の本文だけを置く(v57・PM裁定)。届出様式(用紙)の文言は evidence.json の field=condition・note に置く
 - 不明は必ず null。「0」「なし」と「不明」を混同しない
 - 複数値カラム(related_additions等)はJSON配列文字列
 - 日付は `YYYY-MM-DD`
