@@ -3641,6 +3641,12 @@
     </div>`;
   }
 
+  // modal内の <div class="kb-quote">「…」</div> の重複を初出だけ残して落とす(文字列一致・順序は保つ)
+  function dedupeQuotes(html) {
+    const seen = new Set();
+    return html.replace(/<div class="kb-quote">「([\s\S]*?)」<\/div>/g, (m0, q) => (seen.has(q) ? '' : (seen.add(q), m0)));
+  }
+
   function deptReceiptShow(m, d) {
     const s = d.last && d.last.sample;
     if (!s) { showModal(`📖 ${m.name}部門の代表レセプト`, '<p class="plan-lead">まだ会計がありません。1日進めてから開いてください。</p>', '閉じる'); return; }
@@ -3698,7 +3704,7 @@
         <div class="kb-quote">「${xs[0].rules[0].quote}」</div>
       </div>` });
     }
-    const rejRows = rejSingles.map((x) => {
+    const rejRowsRaw = rejSingles.map((x) => {
       let fsLine = '';
       if (x.fsInfo) {
         const st = fsStates.find((f) => f.fsId === x.fsInfo.id);
@@ -3724,6 +3730,9 @@
       .concat(rejGrouped)
       .sort((a, b) => a.idx - b.idx)
       .map((p) => p.html).join('');
+    // 同じ法令文をmodal内で2回読ませない(v39裁定の延長・v58 #36の水平展開で近接重複が起き得る):
+    // 最終並び順で同一quoteの2回目以降はquote行だけ落とす(理由・項目名は残す)
+    const rejRows = dedupeQuotes(rejRowsRaw);
     const warnRows = playerWarn(s.kb && s.kb.warnings).slice(0, 3)
       .map((w) => `<div class="kb-cond">⚠ ${w.message}</div>`).join('')
       + (G.debugMode ? devWarn(s.kb && s.kb.warnings).map((w) => `<div class="kb-cond">dev: ${w.message}</div>`).join('') : '');
