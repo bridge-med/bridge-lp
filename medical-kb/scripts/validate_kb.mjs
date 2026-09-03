@@ -94,6 +94,15 @@ for (const r of rules) {
 }
 
 /* E4: 参照整合 */
+// rules.machine の項目参照(source/parents/group/targetItemIds)が items に実在するか(v57 qa申し送り)
+for (const r of rules) {
+  const m = r.machine; if (!m) continue;
+  for (const key of ['source', 'parents', 'group', 'targetItemIds']) {
+    const v = m[key]; if (!v) continue;
+    for (const id of (Array.isArray(v) ? v : [v])) if (!itemIds.has(id)) errors.push(`E4 rule ${r.id}: machine.${key} の ${id} が items に無い`);
+  }
+}
+
 for (const l of itemFs) {
   if (!itemIds.has(l.item_id)) errors.push(`E4 item_facility_standard: item_id=${l.item_id} が items に無い`);
   if (!fsIds.has(l.fs_id)) errors.push(`E4 item_facility_standard: fs_id=${l.fs_id} が facility_standards に無い`);

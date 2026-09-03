@@ -1384,9 +1384,10 @@ input[type="range"]::-moz-range-thumb {
 .kb-cond { font: 500 10.5px/1.55 var(--sans); color: var(--ink-2); margin-top: 2px; }
 /* 註釈(項目のconditions説明・施設基準のgameNote)。v46 designer裁定「一次資料の引用より強くしない」は
    --ink-3(10px)でコントラスト3.19:1=AA未達だったため、v55(保留#34)で --ink-2(6.87:1)に更新。
-   引用(.kb-quote)も v57(保留#37)で --ink-2 に上げた(3.19:1=AA未達)。註釈と引用の階層は色ではなく左罫線の有無で保つ(v56 designer承認) */
+   引用(.kb-quote)も --ink-3(3.19:1=AA未達)だったため v57(保留#37)で --ink-2 に上げた。註釈と引用の階層は色ではなく字下げと「」で保ち、
+   左罫線は補助(v57で罫線を--ink-3にして名実ともに階層を担わせた。v55 designer承認・v57で引用側にも適用) */
 .kb-cond.is-note { font-size: 10px; color: var(--ink-2); }
-.kb-quote { font: 500 10px/1.6 var(--sans); color: var(--ink-2); margin-top: 3px; border-left: 2px solid var(--line); padding-left: 6px; } /* 一次資料の引用。--ink-3は10pxで3.19:1=AA未達のため--ink-2(6.87:1)へ(v57 保留#37) */
+.kb-quote { font: 500 10px/1.6 var(--sans); color: var(--ink-2); margin-top: 3px; border-left: 2px solid var(--ink-3); padding-left: 6px; } /* 一次資料の引用。--ink-3は10pxで3.19:1=AA未達のため--ink-2(6.87:1)へ(v57 保留#37) */
 .kb-trace { font: 500 9px/1.4 var(--en); color: var(--ink-3); background: var(--bg); border-radius: 6px; padding: 6px; overflow-x: auto; max-height: 180px; }
 .kijun-row { align-items: flex-start; }
 .kijun-row b { word-break: keep-all; }
