@@ -3572,7 +3572,7 @@
         </button>
         <div class="op-row">
           ${d.policy.keiji
-            ? '<span class="kijun-badge">長期処方・リフィル対応の体制あり(届出不要)</span>'
+            ? '<span class="kijun-badge wrap">長期処方・リフィル対応の体制あり(届出不要)</span>'
             : `<button class="op-btn" data-dkeiji="${m.id}">📋 体制を整える(院内掲示・長期処方対応) <small>${yen(DEPT_KEIJI_COST)}</small></button>`}
           <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
           <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONの部門は整えている前提=ゲーム上の簡略化</small></p>
@@ -3582,17 +3582,32 @@
     return '';
   }
 
+  // 施設基準の「届出済み」折りたたみの開閉状態(部門idキー。保存対象外=UI状態。innerHTML再描画で飛ぶため保持。v56 便V)
+  const FS_FOLD_OPEN = new Set();
+
+  /* 施設基準ブロック(v56 便V・designer方針): 行動(届け出る)→事実(未=足りないもの)→済み(適用中)の順に並べ、
+     済みだけを<details>に畳む。gameNoteは行に従属させ(.fs-item)、fsNote(否定的確認)は行の有無に関わらず末尾に常時出す(#35) */
+  function deptFsHtml(m, d) {
+    const sts = DEPT.fsStatus(m, d);
+    const nameOf = (st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; };
+    // gameNote=ゲーム独自ゲートの断り(v52 PM裁定A。missingは足りないものの名前だけに保つ)
+    const gn = (st) => (st.gameNote ? `<small class="kb-cond is-note">${st.gameNote}</small>` : '');
+    const act = sts.filter((st) => !st.notified && st.ok)
+      .map((st) => `<div class="fs-item${st.gameNote ? ' has-note' : ''}"><button class="mini-btn plus wrap" data-dfsnotify="${m.id}:${st.fsId}">${nameOf(st)} を届け出る</button>${gn(st)}</div>`);
+    const fact = sts.filter((st) => !st.notified && !st.ok)
+      .map((st) => `<div class="fs-item${st.gameNote ? ' has-note' : ''}"><span class="kijun-badge off wrap">${nameOf(st)} 未(${st.missing.join('・')})</span>${gn(st)}</div>`);
+    const done = sts.filter((st) => st.notified);
+    const fold = done.length
+      ? `<details class="fs-fold" data-fsfold="${m.id}"${FS_FOLD_OPEN.has(m.id) ? ' open' : ''}><summary>届出済み ${done.length}件</summary><div class="fs-fold-b">${done.map((st) => `<span class="kijun-badge">${nameOf(st)} 適用中</span>`).join('')}</div></details>`
+      : '';
+    const list = act.concat(fact).join('') + fold;
+    // fsDefsが無い科は既定文、ある科はモジュールのfsNote(否定的確認)を行と併記(#35)
+    const note = sts.length === 0 ? (m.fsNote || 'この科の登録項目に届出必須の基準はない') : (m.fsNote || '');
+    return `<div class="branch-kijun">施設基準${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
+  }
+
   function deptCard(m, d) {
     const L = d.last;
-    const fsRows = DEPT.fsStatus(m, d).map((st) => {
-      const fs = REIMB.getFacilityStandard(st.fsId);
-      const name = fs ? (fs.shortName || fs.name) : st.fsId;
-      // gameNote=ゲーム独自ゲートの断り(v52 PM裁定A。missingは足りないものの名前だけに保つ)
-      const gn = st.gameNote ? `<small class="kb-cond is-note">${st.gameNote}</small>` : '';
-      if (st.notified) return `<span class="kijun-badge">${name} 適用中</span>`;
-      if (st.ok) return `<button class="mini-btn plus" data-dfsnotify="${m.id}:${st.fsId}">${name} を届け出る</button>${gn}`;
-      return `<span class="kijun-badge off wrap">${name} 未(${st.missing.join('・')})</span>${gn}`;
-    }).join(' ');
     const staffRows = (m.staffDef || []).map(([key, label, min, max, cost]) => `
       <div class="plan-step"><span>${label} <small>最大${max}・採用 ${yen(cost)}</small></span>
         <div><button class="mini-btn" data-dfire="${m.id}:${key}">−</button><b>${d.staff[key] || 0}</b><button class="mini-btn plus" data-dhire="${m.id}:${key}">＋</button></div>
@@ -3614,7 +3629,7 @@
         return `<p class="kb-cond">本院から引き継いだ方: ${escapeHtml(last.name)}さん${last.age ? `(${last.age}${last.ch ? `・${escapeHtml(last.ch)}` : ''})` : ''}${hs.length > 1 ? ` ほか${hs.length - 1}人` : ''}</p>`;
       })() : ''}
       <div class="branch-staff">${staffRows}</div>
-      <div class="branch-kijun">施設基準: ${fsRows || `<span class="kijun-kb">${m.fsNote || 'この科の登録項目に届出必須の基準はない'}</span>`}</div>
+      ${deptFsHtml(m, d)}
       ${L && L.events.filter((e) => e.kind === 'fs_warn').map((e) => `<p class="pnl-note">⚠ ${e.message}</p>`).join('') || ''}
       <div class="op-row">
         <button class="op-btn" data-dreceipt="${m.id}">📖 昨日の代表レセプトを見る</button>
@@ -4005,6 +4020,9 @@
       d.staff[key]--;
       renderCorp(); save();
     }));
+    el.querySelectorAll('details.fs-fold').forEach((dt) => dt.addEventListener('toggle', () => {
+      if (dt.open) FS_FOLD_OPEN.add(dt.dataset.fsfold); else FS_FOLD_OPEN.delete(dt.dataset.fsfold);
+    }));
     el.querySelectorAll('[data-dfsnotify]').forEach((b) => b.addEventListener('click', () => {
       const [id, fsId] = b.dataset.dfsnotify.split(':');
       const d = G.depts[id]; const m = SPECIALTIES.get(id);
@@ -4012,6 +4030,7 @@
       const st = DEPT.fsStatus(m, d).find((x) => x.fsId === fsId);
       if (!st || !st.ok || st.notified) return;
       d.fs.push(fsId);
+      FS_FOLD_OPEN.add(id); // 届け出た直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条)
       toast('✅ 届け出ました — ゲーム上は当日から適用します(実際の適用時期は簡略化しています)');
       renderCorp(); save();
     }));

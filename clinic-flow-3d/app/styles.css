@@ -594,7 +594,19 @@ input[type="range"]::-moz-range-thumb {
   border-bottom: 1px dashed var(--line);
 }
 .branch-staff { padding: 4px 0; }
-.branch-kijun { font: 600 11px/1.9 var(--sans); color: var(--ink-2); padding-top: 8px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.branch-kijun { font: 600 11px/1.9 var(--sans); color: var(--ink-2); padding-top: 8px; display: block; }
+/* 施設基準ブロック(v56 便V): 行動→事実→済みの順。gameNoteは行に従属(.fs-item)、済みは<details>に畳む(ネイティブのまま=motion対応不要) */
+.fs-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; margin-top: 4px; }
+.fs-item { display: flex; flex-direction: column; align-items: flex-start; flex: 0 1 auto; min-width: 0; max-width: 100%; }
+.fs-item.has-note { flex: 1 1 300px; }
+.fs-item > .kb-cond.is-note { padding-left: 12px; }
+.fs-fold { flex: 1 1 100%; }
+.fs-fold > summary { font: 700 11px/1.9 var(--sans); color: var(--ink-2); cursor: pointer; list-style: none; display: flex; align-items: center; gap: 5px; min-height: 44px; }
+.fs-fold > summary::-webkit-details-marker { display: none; }
+.fs-fold > summary::before { content: '▸'; font-size: 9px; }
+.fs-fold[open] > summary::before { content: '▾'; }
+.fs-fold-b { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px; }
+.mini-btn.wrap { white-space: normal; text-align: left; }
 
 .expand-row { background: var(--green-pale); border-radius: 12px; padding: 10px 12px !important; border-bottom: none !important; margin-top: 8px; }
 .expand-row.done { background: var(--bg-deep); }
@@ -1377,10 +1389,11 @@ input[type="range"]::-moz-range-thumb {
 .kb-trace { font: 500 9px/1.4 var(--en); color: var(--ink-3); background: var(--bg); border-radius: 6px; padding: 6px; overflow-x: auto; max-height: 180px; }
 .kijun-row { align-items: flex-start; }
 .kijun-row b { word-break: keep-all; }
-.kijun-kb { font: 500 10px/1.55 var(--sans); color: var(--ink-3); margin-top: 3px; }
+/* 否定的確認の一文が載る(#35)。--ink-3(3.19:1)はAA未達=--ink-2へ(v46 PM裁定「行動につながる本文はAAを割らない」の適用・v56) */
+.kijun-kb { font: 500 10px/1.55 var(--sans); color: var(--ink-2); display: block; margin-top: 6px; }
 .kijun-kb b { color: var(--ink-2); }
 .kijun-badge.alt { color: var(--blue-deep); background: transparent; border-color: var(--blue); }
-.kijun-badge.off { color: var(--ink-3); background: transparent; border-color: var(--line); }
+.kijun-badge.off { color: var(--ink-2); background: transparent; border-color: var(--line); } /* 「未(足りないもの)」は行動につながる本文=AA(v56) */
 .kijun-badge.wrap { white-space: normal; text-align: left; border-radius: 12px; display: inline-block; max-width: 100%; }
 .spec-row { padding: 6px 2px; border-bottom: 1px dotted var(--line); font: 600 12px/1.5 var(--sans); color: var(--ink); }
 .spec-row small { display: block; font-weight: 500; color: var(--ink-3); }
