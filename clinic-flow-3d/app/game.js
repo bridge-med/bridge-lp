@@ -655,6 +655,7 @@
   }
 
   function hardReset() {
+    FS_FOLD_OPEN.clear(); // UI状態も初期化(v56 designer A2)
     try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* noop */ }
     location.reload();
   }
@@ -3600,7 +3601,8 @@
     const fold = done.length
       ? `<details class="fs-fold" data-fsfold="${m.id}"${FS_FOLD_OPEN.has(m.id) ? ' open' : ''}><summary>届出済み ${done.length}件</summary><div class="fs-fold-b">${done.map((st) => `<span class="kijun-badge">${nameOf(st)} 適用中</span>`).join('')}</div></details>`
       : '';
-    const list = act.concat(fact).join('') + fold;
+    const grp = (xs) => (xs.length ? `<div class="fs-group">${xs.join('')}</div>` : '');
+    const list = grp(act) + grp(fact) + fold;
     // fsDefsが無い科は既定文、ある科はモジュールのfsNote(否定的確認)を行と併記(#35)
     const note = sts.length === 0 ? (m.fsNote || 'この科の登録項目に届出必須の基準はない') : (m.fsNote || '');
     return `<div class="branch-kijun">施設基準${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;

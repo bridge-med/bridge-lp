@@ -599,7 +599,8 @@ input[type="range"]::-moz-range-thumb {
 .fs-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; margin-top: 4px; }
 .fs-item { display: flex; flex-direction: column; align-items: flex-start; flex: 0 1 auto; min-width: 0; max-width: 100%; }
 .fs-item.has-note { flex: 1 1 300px; }
-.fs-item > .kb-cond.is-note { padding-left: 12px; }
+.fs-item > .kb-cond.is-note { padding-left: 25px; } /* 行のテキスト開始(ボタン/バッジのpadding+border≈13px)から+12pxの段差で従属を示す(v56 designer M1) */
+.fs-group { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 6px; } /* 行動群と事実群を別行に(≥768pxで混ざらない・v56 designer A1) */
 .fs-fold { flex: 1 1 100%; }
 .fs-fold > summary { font: 700 11px/1.9 var(--sans); color: var(--ink-2); cursor: pointer; list-style: none; display: flex; align-items: center; gap: 5px; min-height: 44px; }
 .fs-fold > summary::-webkit-details-marker { display: none; }
