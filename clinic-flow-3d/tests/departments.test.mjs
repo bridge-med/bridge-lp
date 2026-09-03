@@ -482,6 +482,61 @@ t('慢性維持透析濾過加算(オンラインHDF)は水処理設備で届け
   ok(a1.byItem['r08-J038-n9'] && a1.byItem['r08-J038-n9'].n === hd, '水質確保加算も同数');
 });
 
+t('下肢末梢動脈疾患指導管理加算(v56): 届出前は申請せず、届出後は維持透析患者に月1回(導入期は除く)・親不在では通らない', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1'); dept.staff.nurses = 6;
+  let st = DEPT.fsStatus(DIALYSIS, dept).find((x) => x.fsId === 'r08-fs-j038-n10');
+  ok(st && !st.ok && st.missing.length === 1 && st.gameNote, '体制なしは要件不足(gameNoteあり)');
+  const a0 = DEPT.runDay(DIALYSIS, dept, ctx(2, rng(4)));
+  ok(!a0.byItem['r08-J038-n10'] && !a0.sample.kb.rejected.some((x) => x.itemId === 'r08-J038-n10'), '届出前は算定も申請もない');
+  DIALYSIS.actions.find((a) => a.id === 'pad').apply(dept);
+  ok(DEPT.fsStatus(DIALYSIS, dept).find((x) => x.fsId === 'r08-fs-j038-n10').ok, 'アクションで要件充足');
+  dept.fs.push('r08-fs-j038-n10');
+  const rand = rng(4); const seen = {};
+  for (let d = 3; d <= 40; d++) { const a = DEPT.runDay(DIALYSIS, dept, ctx(d, rand, d % 7 === 0 ? CLOSED : OPEN)); for (const k of Object.keys(a.byItem)) seen[k] = (seen[k] || 0) + a.byItem[k].n; }
+  ok(seen['r08-J038-n10'] > 0, '届出後は算定される');
+  for (const p of dept.pt) ok(!p.mc['r08-J038-n10'] || p.mc['r08-J038-n10'] <= 1, '患者ごと月1回まで(LIMITS経由でmcに積まれる)');
+  const induction = dept.pt.filter((p) => p.du > 40);
+  for (const p of induction) ok(!p.mc['r08-J038-n10'], '導入期の患者には申請しない');
+});
+
+t('透析時運動指導等加算(v56): 開始日から90日(開始日を含む)で切れる — ex+88日は申請・ex+90日は不申請', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1'); dept.policy.exercise = true; dept.staff.nurses = 6;
+  dept.pt.length = 0;
+  dept.seq++; dept.pt.push({ id: 'dz1', pr: 'maintenance', en: 1, nv: 1, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, du: 0, so: 0 });
+  const p = dept.pt[0];
+  const noRef = () => 0.99;  // 新規紹介・離脱が起きない乱数(観察対象を1人に保つ)
+  const a1 = DEPT.runDay(DIALYSIS, dept, ctx(1, noRef));
+  eq(p.ex, 1, '初回に開始日が付く');
+  ok(a1.byItem['r08-J038-n14'] && a1.byItem['r08-J038-n14'].n === 1 && a1.byItem['r08-J038-n14'].pts === REIMB.pointsOf('r08-J038-n14'), '開始日に算定(点数はKB)');
+  eq(dept.pt.length, 1, '観察対象は1人のまま');
+  // 隔日群so=0が来るのは ((day−1)%7)%2===0 の日: 89日目(ex+88)・91日目(ex+90)
+  p.mc = {}; p.wc = {};
+  const a89 = DEPT.runDay(DIALYSIS, dept, ctx(89, noRef));
+  ok(a89.byItem['r08-J038-n14'] && a89.byItem['r08-J038-n14'].n === 1, 'ex+88日は申請');
+  const a91 = DEPT.runDay(DIALYSIS, dept, ctx(91, noRef));
+  eq(a91.info.seen, 1, '91日目もセッションはある');
+  ok(!a91.byItem['r08-J038-n14'], 'ex+90日は申請しない');
+  ok(!a91.sample.kb.rejected.some((x) => x.itemId === 'r08-J038-n14'), '申請自体をしない(却下行にも出ない)');
+});
+
+t('透析時運動指導等加算(v56): 1日の申請は看護師×8人まで。上限に達した日は新しい患者の指導を始めない(90日窓を無駄にしない)', () => {
+  const dept = DEPT.create(DIALYSIS, 1);
+  dept.fs.push('r08-fs-j038-1'); dept.policy.exercise = true; dept.staff.nurses = 2; dept.equip.beds = 8; dept.policy.cools = 3;
+  dept.pt.length = 0;
+  for (let i = 0; i < 24; i++) { dept.seq++; dept.pt.push({ id: 'dz' + i, pr: 'maintenance', en: 1, nv: 1, sv: 0, mc: {}, wc: {}, lb: {}, fb: true, du: 0, so: 0 }); }
+  const agg = DEPT.runDay(DIALYSIS, dept, ctx(1, rng(7)));
+  // 枠=floor(min(8×3, 2×4×3)×0.85)=20セッション、上限=2×8=16
+  eq(agg.info.seen, 20, '20セッション');
+  eq(agg.info.exercise, 16, '運動指導は16件で止まる');
+  eq(agg.byItem['r08-J038-n14'].n, 16, '算定も16件');
+  eq(dept.pt.filter((p) => p.ex !== undefined).length, 16, '開始日が付くのは指導した16人だけ');
+  dept.policy.exercise = false;
+  const agg2 = DEPT.runDay(DIALYSIS, dept, ctx(3, rng(7)));
+  ok(!agg2.byItem['r08-J038-n14'], '方針OFFでは申請しない');
+});
+
 console.log('# 在宅部門');
 
 /* ゲーム側ctx(地区割当・ルート順)のスタブ */

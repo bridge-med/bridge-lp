@@ -14,7 +14,11 @@
  *    クールの割付は添字/装置台数で、同時床数が看護師で絞られるときは3クール目を過小に数える=取りこぼし側。次のエンジン便で修正。
  *    ゲームに祝日が無く、日曜は休日加算の対象外(留意(14))のため休日分は生じない)。慢性維持透析濾過加算(注13=オンラインHDF)は水処理設備を持つ部門の
  *    届出(様式49の3)で全セッションに乗る。加算は本体が却下された受診では通らない(rule-0030=親項目ゲート)。
- *    注3障害者等・注11長時間は患者状態を持たないため申請しない。注10下肢末梢・注14運動指導は次便(roadmap 13g)
+ *    注3障害者等・注11長時間は患者状態を持たないため申請しない。
+ *  - 注10・注14(v56便V): 下肢末梢動脈疾患指導管理加算(月1回・届出)は「下肢の血流評価と連携先病院の体制」アクション+届出で
+ *    維持透析患者(導入期を除く=過小側)に月1回申請。透析時運動指導等加算(届出不要・開始日から90日)は「運動指導の体制」アクションで
+ *    ON、患者フィールド ex(指導開始日)を付けて (day−ex)<90 のセッションに申請。担当者=研修受講の看護師とみなし(ゲーム上の仮定)、
+ *    1日の申請は看護師×8人まで(留意(25)の「8人程度」を8で表す)。上限に達した日は新しい患者の指導を始めない(90日窓を無駄にしない)
  *  - 患者獲得・離脱・クール運用・費用は managementParameters(ゲーム上の仮定)。
  *    materialPerSessionは穿刺針・生食等ダイアライザー以外も含む実施原価の概算 */
 (function (root) {
@@ -39,6 +43,8 @@
       hd3: { itemId: 'r08-J038-3-ro' },                // 区分3(届出なし。区分1の要件を外れた部門)
       overtime: { itemId: 'r08-J038-n1' },             // 時間外・休日加算(3クール目)
       hdf: { itemId: 'r08-J038-n13' },                 // 慢性維持透析濾過加算(オンラインHDF・届出)
+      pad: { itemId: 'r08-J038-n10' },                 // 下肢末梢動脈疾患指導管理加算(月1回・届出)
+      exercise: { itemId: 'r08-J038-n14' },            // 透析時運動指導等加算(開始日から90日・届出不要)
       induction: { itemId: 'r08-J038-n2-i' },
       waterQuality: { itemId: 'r08-J038-n9' },
       monthlyMgmt: { itemId: 'r08-B001-15' },
@@ -54,7 +60,7 @@
     deptDefaults: {
       staff: { doctors: 1, nurses: 2, ces: 1 },
       equip: { beds: 8, water: false },
-      policy: { cools: 2, explain: false },
+      policy: { cools: 2, explain: false, pad: false, exercise: false },
     },
     open: { cost: 25000000, repMin: 70, needPlan: true,
       condDesc: '事業計画の策定・本院評判70以上・開設資金(装置8台を含む)' },
@@ -74,6 +80,13 @@
       { id: 'explain', label: '腎代替療法の説明体制を整える', cost: 100000,
         can: (d) => !d.policy.explain, apply: (d) => { d.policy.explain = true; },
         note: '届け出ると、導入期の患者に最初の1月のあいだ1日ごとに導入期加算1が付く。届出は下の施設基準の行から(様式2の2)' },
+      // v56便V: 注10・注14の体制(費用はゲーム上の仮定)
+      { id: 'pad', label: '下肢の血流評価と連携先病院の体制を整える', cost: 200000,
+        can: (d) => !d.policy.pad, apply: (d) => { d.policy.pad = true; },
+        note: '維持透析の全患者に下肢の血流のリスク評価を行い、重い患者を紹介する専門の病院(循環器内科・血管外科・整形外科等を全て標榜)をあらかじめ決めて掲示する。届け出ると患者ごと月1回の加算が付く。届出は下の施設基準の行から(様式49の3の2)' },
+      { id: 'exercise', label: '透析中の運動指導の体制を整える(研修+モニター)', cost: 400000,
+        can: (d) => !d.policy.exercise, apply: (d) => { d.policy.exercise = true; },
+        note: '看護師が研修を受け、心電図やSpO2のモニターを備えて透析中に20分以上の運動指導を行う。届出は不要。患者ごとに開始から90日まで1回ごとの加算が付く(看護師1人あたり1日8人まで)' },
     ],
     deptBadge(d) { return `${d.equip.beds}床×${d.policy.cools}クール`; },
     infoLine(i) { return `患者 ${i.census}人・昨日 ${i.seen}/${i.capacity}枠` + (i.waitlist ? `・待機${i.waitlist}` : ''); },
@@ -106,6 +119,13 @@
         },
         note: '透析液水質確保加算と同じ体制で届け出る(様式49の3)。加算の対象は複雑な血液透析濾過=透析液から分離作製した置換液を用いるもの',
         gameNote: '届け出た部門は全セッションをこの方法で行う扱い(実施率100%はゲーム上の仮定)' },
+      // 下肢末梢動脈疾患指導管理加算(v56便V): 全患者のリスク評価・紹介・連携先の事前届出と院内掲示(第57の2の2)
+      { fsId: 'r08-fs-j038-n10',
+        check(dept) {
+          return dept.policy.pad ? { ok: true } : { ok: false, missing: ['下肢の血流評価と連携先病院の体制'] };
+        },
+        note: '全患者へのリスク評価と指導管理の記録・重い患者の専門病院への紹介・連携先の事前届出と院内掲示(様式49の3の2)',
+        gameNote: '評価・紹介・連携先はひとつのアクションで整えた扱い(ゲーム上の仮定)' },
     ],
 
     managementParameters: {
@@ -163,6 +183,9 @@
       }
       const hdKey = dept.fs.includes('r08-fs-j038-1') ? 'hd' : 'hd3';   // 区分1の届出が無い(外れた)部門は区分3で算定
       let overtime = 0;
+      // 透析時運動指導等加算: 1日の担当上限=研修受講の看護師×8人(留意(25))。上限に達した日は新しい患者の指導を始めない
+      const exCap = dept.policy.exercise ? (dept.staff.nurses || 0) * 8 : 0;
+      let exCount = 0;
       seen.forEach((p, i) => {
         api.countVisit();
         // クールは枠の順に埋める(1クール目→2→3)。3クール目=午後5時以降の開始とみなし時間外・休日加算(ゲーム上の仮定)
@@ -175,6 +198,13 @@
         if (p.du > ctx.day) report.kbActs.push({ id: 'induction' });
         if (dept.fs.includes('r08-fs-j038-suishitsu')) report.kbActs.push({ id: 'waterQuality' });
         if (dept.fs.includes('r08-fs-j038-n13')) report.kbActs.push({ id: 'hdf' });
+        // 下肢末梢動脈疾患指導管理加算: 届出済みなら維持透析患者(導入期を除く)に月1回(mcはエンジンのLIMITS経由で積まれる)
+        if (dept.fs.includes('r08-fs-j038-n10') && !p.mc['r08-J038-n10'] && p.du <= ctx.day) report.kbActs.push({ id: 'pad' });
+        // 透析時運動指導等加算: 開始日(p.ex)から90日(開始日を含む)。未開始の患者は上限に余裕がある日に始める
+        if (exCap > exCount && (p.ex === undefined ? true : ctx.day - p.ex < 90)) {
+          if (p.ex === undefined) p.ex = ctx.day;
+          if (ctx.day - p.ex < 90) { report.kbActs.push({ id: 'exercise' }); exCount++; }
+        }
         // 月1回: 慢性維持透析患者外来医学管理料(検査の包括はrule-0007)
         if (!p.mc['r08-B001-15'] && p.du <= ctx.day) report.kbActs.push({ id: 'monthlyMgmt' });
         const r = api.evalVisit(p, report);
@@ -191,7 +221,7 @@
       agg.cost += (dept.staff.doctors || 0) * C.doctorDay + (dept.staff.nurses || 0) * C.nurseDay + (dept.staff.ces || 0) * C.ceDay;
       agg.info = {
         census: dept.pt.length, beds: dept.equip.beds, cools: dept.policy.cools,
-        capacity, seen: seen.length, waitlist: Math.max(0, due.length - seen.length), overtime, kubun: hdKey === 'hd' ? 1 : 3,
+        capacity, seen: seen.length, waitlist: Math.max(0, due.length - seen.length), overtime, kubun: hdKey === 'hd' ? 1 : 3, exercise: exCount,
       };
       // 区分1の維持が危うい時の予告(降格の前に知らせる)
       if (dept.equip.beds >= 24 && dept.fs.includes('r08-fs-j038-1') && dept.pt.length / dept.equip.beds >= 3.0) {

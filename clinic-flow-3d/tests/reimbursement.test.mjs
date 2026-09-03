@@ -440,5 +440,17 @@ const rejectedIds = (r) => r.rejectedItems.map((x) => x.itemId).sort();
   ok('濾過加算は自身の届出(様式49の3)が無ければ却下される', rejectedIds(r5).includes('r08-J038-n13') && billedIds(r5).includes('r08-J038-1-ro'));
 }
 
+/* 34. 便V: 下肢末梢動脈疾患指導管理加算・透析時運動指導等加算も親項目ゲート(rule-0030)の対象。n10は月1回 */
+{
+  const r = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-J038-1-ro' }, { itemId: 'r08-J038-n10' }, { itemId: 'r08-J038-n14' }], facilityStandards: ['r08-fs-j038-1', 'r08-fs-j038-n10'], history: { month: { 'r08-J038-1-ro': 14 } } });
+  ok('人工腎臓が月14回で却下された受診では注10・注14も親不在で却下', rejectedIds(r).includes('r08-J038-n10') && rejectedIds(r).includes('r08-J038-n14'));
+  const r2 = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-A001' }, { itemId: 'r08-J038-1-ro' }, { itemId: 'r08-J038-n10' }, { itemId: 'r08-J038-n14' }], facilityStandards: ['r08-fs-j038-1', 'r08-fs-j038-n10'], history: { month: { 'r08-J038-1-ro': 3 } } });
+  ok('親ありなら両方算定', billedIds(r2).includes('r08-J038-n10') && billedIds(r2).includes('r08-J038-n14'));
+  const r3 = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-J038-1-ro' }, { itemId: 'r08-J038-n10' }], facilityStandards: ['r08-fs-j038-1', 'r08-fs-j038-n10'], history: { month: { 'r08-J038-1-ro': 3, 'r08-J038-n10': 1 } } });
+  ok('注10は月1回(同月2回目は却下)', rejectedIds(r3).includes('r08-J038-n10'));
+  const r4 = REIMB.evaluateEncounter({ encounter: { visitType: 'hd' }, procedures: [{ itemId: 'r08-J038-1-ro' }, { itemId: 'r08-J038-n10' }], facilityStandards: ['r08-fs-j038-1'], history: { month: {} } });
+  ok('注10は届出(様式49の3の2)が無ければ却下', rejectedIds(r4).includes('r08-J038-n10'));
+}
+
 console.log(`\nreimbursement.test: ${pass} passed / ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
