@@ -1,6 +1,6 @@
 {
-  "updated": "2026-08-29",
-  "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(現場下書き・社長確認前)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
+  "updated": "2026-08-30",
+  "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(2026-09-04 社長確認済み=便AA決裁4)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
     "稼働中": "公開中。使い続けていると社長が確認済み",
@@ -152,7 +152,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "直近の開発が最も活発",
-      "lastCommit": "2026-08-29"
+      "lastCommit": "2026-08-30"
     },
     {
       "id": "him-quiz",

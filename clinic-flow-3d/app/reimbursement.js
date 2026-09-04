@@ -106,10 +106,13 @@
         continue;
       }
       let used = 0; let label = '';
-      if (lim.per === 'month') { used = monthCount(r.item.id); label = '月'; }
-      else if (lim.per === 'week') { used = weekCount(r.item.id); label = '週'; }
+      // share: 月回数をセル横断で合算する項目群(例: 人工腎臓の区分1/2/3ロは「人工腎臓」として月14回・v55)
+      const cnt = (fn) => (Array.isArray(lim.share) ? lim.share.reduce((a, id) => a + fn(id), 0) : fn(r.item.id));
+      if (lim.per === 'month') { used = cnt(monthCount); label = '月'; }
+      else if (lim.per === 'week') { used = cnt(weekCount); label = '週'; }
       else if (lim.per === 'day') { used = 0; label = '日'; } // 同日内はunitsで判定
       else if (lim.per === 'visit_first') { used = history.firstVisitBilled ? 1 : 0; label = '同一初診'; }
+      else if (lim.per === 'year') { const ms = monthsSince(r.item.id); used = (ms !== null && ms >= 0 && ms < 12) ? 1 : 0; label = '年'; } // 患者1人につき年1回=最終算定から12月未満は却下(v53)
       const adding = lim.unit === '単位' ? r.units : 1;
       trace('limit', { item: r.item.id, per: lim.per, max: lim.max, used, adding });
       if (lim.unit === '単位' && r.units > lim.max) {
@@ -135,29 +138,43 @@
         if (src) out.warnings.push({ kind: 'rule_unmachined', ruleId: rule.id, message: `${src.item.name}: ルール「${rule.condition || rule.type}」は未機械化 — 内容を確認(needs_review)`, quote: rule.quote });
         continue;
       }
+      if (m.type === 'requires_parent') continue; // 親項目ゲートは全判定の後に別パスで評価する(下)
+      if (m.type === 'handled_externally') {
+        // 受診単位の機械判定が不要なルール(患者単位の排他=名簿分離で運用、相手行為が同一受診内で
+        // 併発しない設計等)。理由はKBのmachine.noteに記録済み。警告は出さない
+        continue;
+      }
       if (m.type === 'same_day_ng_categories') {
         const src = findRec(m.source);
         if (!src) continue;
         const blockers = known.filter((r) => r !== src && r.status === 'candidate' && inCat(r, m.targetCategories));
+        // 「厚生労働大臣が定める検査」の別表該当項目(留意A001(7)キ・機械リスト化済み)も却下対象
+        const kensaHits = (m.sadamaruKensaItems || []).length
+          ? known.filter((r) => r !== src && r.status === 'candidate' && m.sadamaruKensaItems.includes(r.item.id))
+          : [];
         // performedCategories: KB未登録の行為(ゲーム側の簡略化項目)でも実施カテゴリを申告できる
         const perfCats = (input.encounter && input.encounter.performedCategories) || [];
         const perfHit = perfCats.filter((c) => m.targetCategories.some((t) => t.indexOf(c) === 0 || c.indexOf(t) === 0));
-        trace('rule', { rule: rule.id, blockers: blockers.map((b) => b.item.id), perfHit });
-        if (blockers.length || perfHit.length) {
+        trace('rule', { rule: rule.id, blockers: blockers.map((b) => b.item.id), kensa: kensaHits.map((b) => b.item.id), perfHit });
+        if (blockers.length || kensaHits.length || perfHit.length) {
           src.status = 'rejected';
-          const names = blockers.map((b) => b.item.name).concat(perfHit);
+          const names = blockers.concat(kensaHits).map((b) => b.item.name).concat(perfHit);
           src.reasons.push(`同日に${names.join('・')}を実施しているため算定不可(${rule.id})`);
           src.ruleRefs.push(rule);
         } else if (m.reviewCategories) {
-          // 機械化できない部分条件(例: 「厚生労働大臣が定める検査」の別表)は判定せず注意喚起のみ
-          const revHits = known.filter((r) => r !== src && r.status === 'candidate' && inCat(r, m.reviewCategories));
+          // 別表の機械リストに無い同カテゴリ項目だけは判定せず注意喚起(将来の新規登録の安全網)。
+          // clearedKensaItems=別表外と一次資料で確認済みの項目(検体検査等)は安全網からも除外
+          const listed = new Set(m.sadamaruKensaItems || []);
+          const cleared = new Set(m.clearedKensaItems || []);
+          const revHits = known.filter((r) => r !== src && r.status === 'candidate' && inCat(r, m.reviewCategories) && !listed.has(r.item.id) && !cleared.has(r.item.id));
           if (revHits.length) {
             out.warnings.push({ kind: 'needs_review', ruleId: rule.id, itemId: src.item.id,
-              message: `${src.item.name}: 同日の${revHits.map((x) => x.item.name).join('・')}が「厚生労働大臣が定める検査」に該当する場合は算定不可 — 別表未登録のため要確認(needs_review)` });
+              message: `${src.item.name}: 同日の${revHits.map((x) => x.item.name).join('・')}が「厚生労働大臣が定める検査」に該当する場合は算定不可 — 別表リスト未分類のため要確認(needs_review)` });
           }
         }
       } else if (m.type === 'same_day_ng_items') {
-        const src = findRec(m.source);
+        // sourceは単一idまたは配列(同一受診で片方しか立たないイ/ロ対=rule-0008のv51拡張)
+        const src = sources.map(findRec).find(Boolean);
         if (!src) continue;
         for (const tid of m.targetItemIds) {
           const t = findRec(tid);
@@ -194,6 +211,58 @@
             b.ruleRefs.push(rule);
           }
         }
+      } else if (m.type === 'same_month_group') {
+        // グループ内のどれかを同月に算定済みなら、グループの別項目も算定不可
+        // (例: 在医総管の人数セル横断の患者ごと月1回=rule-0020・保留#27)
+        // scope:'visit' = 月内履歴は見ず、同一受診内の排他(いずれか1セル)だけ効かせる(例: 人工腎臓の区分1/2/3・v55 #36)
+        const visitOnly = m.scope === 'visit';
+        const lbl = visitOnly ? '同一受診で1件' : 'グループで月1回';
+        let kept = null; // 同一受診内で最初に残ったグループ項目(#28: 同時申請も申請順(idx)で1件に絞る・v53)
+        const cands = m.group.map(findRec).filter(Boolean).sort((a, b) => a.idx - b.idx);
+        for (const t of cands) {
+          const gid = t.item.id;
+          const priorId = visitOnly ? null : m.group.find((x) => x !== gid && monthCount(x) > 0);
+          if (priorId) {
+            t.status = 'rejected';
+            t.reasons.push(`同一月に${(byId.get(priorId) || {}).name || priorId}を算定済みのため算定不可 — グループで月1回(${rule.id})`);
+            t.ruleRefs.push(rule);
+          } else if (kept) {
+            t.status = 'rejected';
+            t.reasons.push(`同一受診で${kept.item.name}を算定するため算定不可 — ${lbl}(${rule.id})`);
+            t.ruleRefs.push(rule);
+          } else {
+            kept = t;
+          }
+        }
+      } else if (m.type === 'condition_ng_item') {
+        // 条件が真のとき算定不可(例: B009×特別の関係にある機関への紹介)
+        const src = findRec(m.source);
+        if (src && src.status === 'candidate' && conditions[m.conditionKey]) {
+          src.status = 'rejected';
+          src.reasons.push(`${m.conditionLabel}のため算定不可(${rule.id})`);
+          src.ruleRefs.push(rule);
+        }
+      }
+    }
+
+    // ---- 親項目ゲート(requires_parent): 「所定点数に加算する」加算は、同一受診で親(本体)が
+    //      算定候補に残るときだけ通す。包括・6月窓・回数制限など他の全判定の後に評価するので、
+    //      ここで却下された加算は履歴に残らず月1回・年1回の枠を消費しない(v53 PM検出の穴)
+    for (const rule of KB.rules) {
+      const m = rule.machine;
+      if (!m || m.type !== 'requires_parent') continue;
+      const parents = Array.isArray(m.parents) ? m.parents : [m.parents];
+      if (parents.some((id) => findRec(id))) continue;
+      const sources = Array.isArray(m.source) ? m.source : [m.source];
+      for (const id of sources) {
+        const src = findRec(id);
+        if (!src) continue;
+        const pnames = parents.map((pid) => (byId.get(pid) || { name: pid }).name);
+        const label = pnames.length > 2 ? `${pnames[0]} ほか${pnames.length - 1}件` : pnames.join('・');
+        trace('parent', { item: id, parents, ok: false });
+        src.status = 'rejected';
+        src.reasons.push(`本体(${label})が同一受診で算定されないため、加算のみでは算定不可(${rule.id})`);
+        src.ruleRefs.push(rule);
       }
     }
 

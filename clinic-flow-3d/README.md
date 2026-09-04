@@ -10,16 +10,16 @@
 - 点数の唯一の情報源: `data/kb-r08.js`(medical-kbからの生成物。
   再生成: `node medical-kb/scripts/build_game_pack.mjs`)
 - 算定可否の判定: `app/reimbursement.js`(Reimbursement Engine。UI/3Dから独立)
-- 診療科モジュール: `app/specialties/`(整形外科=完全、一般内科・眼科・透析・在宅=基本構造)
+- 診療科モジュール: `app/specialties/`(各科の実装状態は `docs/specialty-module.md` と `docs/roadmap.md` を正とする)
 - レシートの「📖 算定詳細」/「🎓 学習モード」で、算定理由・未算定の理由・条文引用・出典・
   施設基準の増収余地が見られる。`?debug=1` で評価トレース(Reimbursement Debugger)
-- テスト: `node clinic-flow-3d/tests/reimbursement.test.mjs`(32件)
+- テスト: `node clinic-flow-3d/tests/<name>.test.mjs`(reimbursement/departments/kasan/zaisokan/town-map。件数は各ファイルの出力を正とする)
 
 構造の詳細は `docs/architecture.md`、エンジン仕様は `docs/reimbursement-engine.md`、
 診療科の追加方法は `docs/specialty-module.md`、データ出典は `docs/data-sources.md`。
 
 ## 開発メモ
 
-- 出荷時は `sw.js` の `VER` を上げる(network-first PWA)
+- `sw.js` の `VER` の扱いは `docs/data-sources.md` を正とする(network-first PWA。KB更新でVERを上げる必要はない)
 - 点数・施設基準をUIコードに書かない。KB未登録の項目は「概算」タグで明示する
 - 動作確認: リポジトリルートで `python3 -m http.server` → `/clinic-flow-3d/`

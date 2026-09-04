@@ -11,6 +11,7 @@
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/clinic-flow-3d/">
 <meta name="theme-color" content="#EAF4F8">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -84,7 +85,7 @@
           <button class="view-btn" id="lineBtn">〰 導線ライン</button>
         </div>
       </div>
-      <div class="panic" id="panic" hidden>🚨 待合パンク! 立ち待ち発生 — 椅子と「回転(受付・診察)」を見直して</div>
+      <div class="panic" id="panic" hidden>🚨 待合がパンクし、立ち待ちが出ています。椅子と「回転(受付・診察)」を見直してください</div>
     </div>
 
     <div class="staff-strip" id="staffStrip"></div>
@@ -310,12 +311,15 @@
 <script src="vendor/three.min.js"></script>
 <script src="data/kb-r08.js"></script>
 <script src="app/reimbursement.js"></script>
+<script src="app/kasan.js"></script>
+<script src="app/zaisokan.js"></script>
 <script src="app/departments.js"></script>
 <script src="app/specialties/registry.js"></script>
 <script src="app/specialties/orthopedics.js"></script>
 <script src="app/specialties/internal-medicine.js"></script>
 <script src="app/specialties/ophthalmology.js"></script>
 <script src="app/specialties/dialysis.js"></script>
+<script src="app/specialties/psychiatry.js"></script>
 <script src="app/specialties/homecare.js"></script>
 <script src="app/iso.js"></script>
 <script src="app/clinic.js"></script>

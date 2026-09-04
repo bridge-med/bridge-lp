@@ -48,12 +48,15 @@ const TOWN = (() => {
   // 住宅(認知が広がる対象)。weight = 世帯数の重み
   const HOUSES = [
     { x: 1, y: 15, weight: 1 }, { x: 3, y: 15, weight: 1 }, { x: 5, y: 15, weight: 1 },
-    { x: 7, y: 15, weight: 1 }, { x: 9, y: 15, weight: 1 }, { x: 11, y: 15, weight: 1 },
+    { x: 7, y: 15, weight: 1 }, { x: 9, y: 15, weight: 1 }, { x: 24, y: 15, weight: 1 },
     { x: 13, y: 15, weight: 1 }, { x: 18, y: 15, weight: 1 }, { x: 20, y: 15, weight: 1 },
     { x: 22, y: 15, weight: 1 },
-    { x: 15, y: 15, weight: 6, mansion: true },   // マンション
-    { x: 21, y: 5, weight: 1 }, { x: 21, y: 3, weight: 1 },
-    { x: 6, y: 3, weight: 1 }, { x: 6, y: 5, weight: 1 }, { x: 14, y: 3, weight: 1 },
+    { x: 15, y: 15, weight: 6, mansion: true },   // マンション(足元2x1)
+    { x: 19, y: 3, weight: 1 }, { x: 21, y: 3, weight: 1 },
+    // (6,5)はshop1(6,6)と辺で接し屋根が融合して見えた(保留#17)。(19,1)へ移設(v46) —
+    // 北の住宅ペア(19,3)(21,3)の縦2タイルピッチに合流し全周1タイル以上空く(機械探索で確認)。
+    // 空いた(6,5)は埋めない(余白の原則)
+    { x: 6, y: 3, weight: 1 }, { x: 19, y: 1, weight: 1 }, { x: 14, y: 3, weight: 1 },
     // 南の新しい住宅街
     { x: 1, y: 17, weight: 1 }, { x: 3, y: 17, weight: 1 }, { x: 8, y: 17, weight: 1 },
     { x: 10, y: 17, weight: 1 }, { x: 13, y: 17, weight: 1 }, { x: 15, y: 17, weight: 1 },
@@ -65,7 +68,7 @@ const TOWN = (() => {
   const TOTAL_HOUSEHOLDS = HOUSES.reduce((a, h) => a + h.weight, 0); // 35
 
   const TREES = [
-    { x: 5, y: 1 }, { x: 13, y: 1 }, { x: 22, y: 1 }, { x: 17, y: 7 },
+    { x: 5, y: 1 }, { x: 13, y: 1 }, { x: 24, y: 2 }, { x: 17, y: 7 },
     { x: 2, y: 12 }, { x: 10, y: 12 }, { x: 14, y: 11 }, { x: 17, y: 12 },
     { x: 16, y: 17 }, { x: 23, y: 5 }, { x: 24, y: 12 }, { x: 29, y: 18 },
     { x: 5, y: 19 }, { x: 12, y: 18 }, { x: 18, y: 19 }, { x: 24, y: 4 }, { x: 22, y: 19 }
@@ -98,14 +101,18 @@ const TOWN = (() => {
   const DEPT_SPOTS = {
     internal: { x: 15, y: 10, w: 2, d: 2, h: 1.3, label: '内科クリニック' },
     ophthalmology: { x: 16, y: 3, w: 2, d: 2, h: 1.3, label: '眼科クリニック' },
-    dialysis: { x: 23, y: 6, w: 2, d: 2, h: 1.4, label: '透析クリニック' }
+    dialysis: { x: 23, y: 6, w: 2, d: 2, h: 1.4, label: '透析クリニック' },
+    psychiatry: { x: 9, y: 3, w: 2, d: 2, h: 1.3, label: 'メンタルクリニック' }
   };
 
-  // 在宅患者の地区(戸建ての集まり)。訪問診療部門があるときだけ患者数に応じて描く
+  // 在宅患者の地区(戸建ての集まり、またはマンション1棟)。訪問診療部門があるときだけ患者数に応じて描く。
+  // mansion付きの地区は既存の環境建物(マンション)を訪問先として使う=同一建物。
+  // 戸建てをその座標に描き足さない(v50。屋根融合の禁止=間合いルール)。unitsは戸数(ゲーム上の仮定)
   const HOMECARE_SITES = [
     { x: 6, y: 4 }, { x: 21, y: 4 }, { x: 27, y: 3 }, { x: 1, y: 5 },
     { x: 2, y: 7 }, { x: 13, y: 10 }, { x: 24, y: 10 }, { x: 8, y: 13 },
-    { x: 16, y: 13 }, { x: 9, y: 18 }, { x: 18, y: 18 }, { x: 27, y: 19 }
+    { x: 16, y: 13 }, { x: 9, y: 18 }, { x: 18, y: 18 }, { x: 27, y: 19 },
+    { x: 15, y: 15, mansion: true, units: 24 }, { x: 27, y: 17, mansion: true, units: 24 }
   ];
 
   class TownSim {
@@ -277,9 +284,11 @@ const TOWN = (() => {
         };
         seg(0, cut, []);
         seg(cut, hp.length - 1, [4, 4]);
-        // 道路から患者宅へのスパー(線が家に届いて、街と診療が交差する)
+        // 道路から患者宅へのスパー(線が家に届いて、街と診療が交差する)。
+        // マンション地区には引かない(壁の裏で不可視=死んだ描画になる。終点は足元のリングが受ける・v50 designer実測)
         for (const ci of this.homecare.route) {
           const s = HOMECARE_SITES[ci];
+          if (s.mansion) continue;
           const road = nearestRoad(s.x, s.y);
           const idx = hp.findIndex((t) => t.x === road.x && t.y === road.y);
           ctx.setLineDash(idx >= 0 && idx <= cut ? [] : [4, 4]);
@@ -299,16 +308,21 @@ const TOWN = (() => {
           const n = this.homecare.clusters[i] || 0;
           if (!n) return;
           const onRoute = (this.homecare.route || []).includes(i);
+          // マンション地区は既存の環境建物(足元2x1)をそのまま訪問先にする(描き足すと屋根が融合する)。
+          // 患者の所在はリングで言う。リングが壁の裏に隠れないよう、深度をマンションの直後に
+          // 置き、中心と半径を足元2x1に合わせる(v50 designer実測: 従来の深度x+yでは1pxも見えない)
+          const mw = s.mansion ? 2 : 1;
           items.push({
-            depth: s.x + s.y,
+            depth: s.mansion ? s.x + mw / 2 + s.y + 0.5 + 0.01 : s.x + s.y,
             draw: () => {
-              iso.building(s.x, s.y, 1, 1, 0.8, '#FBF7EE', '#8C7BC4');
+              if (!s.mansion) iso.building(s.x, s.y, 1, 1, 0.8, '#FBF7EE', '#8C7BC4');
               if (onRoute) {
-                const c = iso.p(s.x + 0.5, s.y + 0.5, 0);
+                const c = iso.p(s.x + mw / 2, s.y + 0.5, 0);
+                const rr = s.mansion ? 1.5 : 1;
                 ctx.strokeStyle = 'rgba(44,95,130,0.9)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.ellipse(c.x, c.y, iso.tw * 0.42, iso.tw * 0.21, 0, 0, Math.PI * 2);
+                ctx.ellipse(c.x, c.y, iso.tw * 0.42 * rr, iso.tw * 0.21 * rr, 0, 0, Math.PI * 2);
                 ctx.stroke();
               }
             }
@@ -337,7 +351,7 @@ const TOWN = (() => {
       // 住宅
       HOUSES.forEach((h, i) => {
         const aware = this.isAware(i);
-        const w = h.mansion ? 2 : 1, d = h.mansion ? 2 : 1, hh = h.mansion ? 2.4 : 0.9;
+        const w = h.mansion ? 2 : 1, d = 1, hh = h.mansion ? 2.4 : 0.9;
         items.push({
           depth: h.x + w / 2 + h.y + d / 2,
           draw: () => {
@@ -418,5 +432,6 @@ const TOWN = (() => {
     }
   }
 
-  return { W, H, TownSim, TOTAL_HOUSEHOLDS, CLINIC_ENTRANCE, ROADS, BUILDINGS, HOUSES, TREES, BILLBOARD, HOMECARE_SITES };
+  return { W, H, TownSim, TOTAL_HOUSEHOLDS, CLINIC_ENTRANCE, ROADS, BUILDINGS, HOUSES, TREES, BILLBOARD, HOMECARE_SITES, DEPT_SPOTS, BRANCH_SPOTS };
 })();
+if (typeof module !== 'undefined' && module.exports) module.exports = TOWN;

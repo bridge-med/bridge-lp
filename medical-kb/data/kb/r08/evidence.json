@@ -1,494 +1,1917 @@
 [
-  {
-    "entity_type": "item",
-    "entity_id": "r08-A000",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.3",
-    "quote": "Ａ０００ 初診料 291点",
-    "note": "医科診療行為マスター(s_20260731) 111000110=291.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-A000",
-    "field": "conditions",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.3",
-    "quote": "注１ 保険医療機関において初診を行った場合に算定する。ただし、別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において、情報通信機器を用いた初診を行った場合には、253点を算定する。"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-A001",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.5",
-    "quote": "Ａ００１ 再診料 76点",
-    "note": "マスター112007410=76.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-A001",
-    "field": "conditions",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.5",
-    "quote": "注１ 保険医療機関（許可病床のうち一般病床に係るものの数が200以上のものを除く。）において再診を行った場合（別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において情報通信機器を用いた再診を行った場合を含む。）に算定する。"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-A001-n8",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.6",
-    "quote": "…別に厚生労働大臣が定める計画的な医学管理を行った場合は、外来管理加算として、52点を所定点数に加算する。",
-    "note": "マスター112011010=52.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-A001-n8",
-    "field": "exclusions",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.6",
-    "quote": "慢性疼痛疾患管理並びに別に厚生労働大臣が定める検査並びに第７部リハビリテーション、第８部精神科専門療法、第９部処置、第10部手術、第11部麻酔及び第12部放射線治療を行わないものとして"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-A002",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.7",
-    "quote": "Ａ００２ 外来診療料 77点",
-    "note": "マスター112011310=77.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-H002-1",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.58",
-    "quote": "１ 運動器リハビリテーション料（Ⅰ）（１単位） イ 理学療法士による場合 185点 ロ 作業療法士による場合 185点 ハ 医師による場合 185点",
-    "note": "マスター180755710/180755810/180755910=185.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-H002-1",
-    "field": "period_limit",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.58",
-    "quote": "それぞれ発症、手術若しくは急性増悪又は最初に診断された日から150日を限度として所定点数を算定する。ただし、別に厚生労働大臣が定める患者について、治療を継続することにより状態の改善が期待できると医学的に判断される場合その他の別に厚生労働大臣が定める場合には、150日を超えて所定点数を算定することができる。"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-H002-1",
-    "field": "count_limit",
-    "document_id": "r08-ssk-edt-ika",
-    "page": "05 算定回数テーブル.csv",
-    "quote": "180755710,運動器リハビリテーション料（１）（理学療法士による場合),単位,6 / 日,6",
-    "note": "公式機械可読データ(算定単位コード別上限)より"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-H002-2",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.58",
-    "quote": "２ 運動器リハビリテーション料（Ⅱ）（１単位） イ 理学療法士による場合 170点 ロ 作業療法士による場合 170点 ハ 医師による場合 170点",
-    "note": "マスター180756010/180756110/180756210=170.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-H002-3",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.58",
-    "quote": "３ 運動器リハビリテーション料（Ⅲ）（１単位） イ 理学療法士による場合 85点 ロ 作業療法士による場合 85点 ハ 医師による場合 85点 ニ イからハまで以外の場合 85点",
-    "note": "マスター180756310〜180756610=85.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-J116",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.269",
-    "quote": "Ｊ１１６ 関節穿刺（片側） 144点",
-    "note": "マスター140023010=144.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-E001-1-i",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.214",
-    "quote": "Ｅ００１ 写真診断 １ 単純撮影 イ 頭部、胸部、腹部又は脊椎 85点",
-    "note": "マスター170000410=85.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-E001-1-ro",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.214",
-    "quote": "ロ その他 43点",
-    "note": "マスター170000510=43.00とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-E002-1-ro",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.214",
-    "quote": "Ｅ００２ 撮影 １ 単純撮影 イ アナログ撮影 60点 ロ デジタル撮影 68点",
-    "note": "マスター170027910=68.00とも一致"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-h002-1",
-    "field": "staffing_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第42・p.188",
-    "quote": "(１) 当該保険医療機関において、運動器リハビリテーションの経験を有する専任の常勤医師が１名以上勤務していること。… (２) 専従の常勤理学療法士又は専従の常勤作業療法士が合わせて４名以上勤務していること。"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-h002-1",
-    "field": "equipment_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第42・p.188-189",
-    "quote": "(３) 治療・訓練を十分実施し得る専用の機能訓練室（少なくとも、病院については内法による測定で100平方メートル以上、診療所については内法による測定で45平方メートル以上。）を有していること。… (５) …各種測定用器具（角度計、握力計等）、血圧計、平行棒、姿勢矯正用鏡、各種車椅子、各種歩行補助具等"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-h002-1",
-    "field": "form_no",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第42の5・p.189-190",
-    "quote": "運動器リハビリテーション料(Ⅰ)及び「注５」の施設基準に係る届出は、別添２の様式42を用いること。… 従事者の氏名、勤務の態様…を別添２の様式44の２を用いて提出すること。… 専用の機能訓練室の平面図を添付すること。"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-h002-2",
-    "field": "staffing_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第42の2・p.190",
-    "quote": "ア 専従の常勤理学療法士が２名以上勤務していること。イ 専従の常勤作業療法士が２名以上勤務していること。ウ 専従の常勤理学療法士及び専従の常勤作業療法士が合わせて２名以上勤務していること。"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-h002-3",
-    "field": "staffing_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第43・p.190-191",
-    "quote": "(１) 当該保険医療機関において、専任の常勤医師が１名以上勤務していること。… (２) 専従の常勤理学療法士又は常勤作業療法士がいずれか１名以上勤務していること。"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-h002-3",
-    "field": "equipment_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第43・p.191",
-    "quote": "(３) 治療・訓練を十分実施し得る専用の機能訓練室（少なくとも、内法による測定で45平方メートル以上とする。）を有していること。"
-  },
-  {
-    "entity_type": "billing_rule",
-    "entity_id": "r08-rule-0001",
-    "field": null,
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.6",
-    "quote": "(A001注8全文はbilling_rules.quoteに記載)"
-  },
-  {
-    "entity_type": "scenario",
-    "entity_id": "r08-scn-ortho-knee-first",
-    "field": null,
-    "document_id": "r08-kokuji69-ika",
-    "page": "p.3,5,6,58,214,269",
-    "quote": "算定候補の点数はitemsの各evidenceを参照"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-B001-3-1-lipid",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.113",
-    "quote": "Ｂ００１－３ 生活習慣病管理料（Ⅰ） １ 脂質異常症を主病とする場合 610点 ２ 高血圧症を主病とする場合 660点 ３ 糖尿病を主病とする場合 760点",
-    "note": "マスター113041710/113041810/113041910=610/660/760とも一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-B001-3-1-lipid",
-    "field": "conditions",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.113",
-    "quote": "注１ 別に厚生労働大臣が定める施設基準を満たす保険医療機関（許可病床数が200床未満の病院又は診療所に限る。）において、脂質異常症、高血圧症又は糖尿病を主病とする患者（入院中の患者を除く。）に対して、当該患者の同意を得て治療計画を策定し、当該治療計画に基づき、生活習慣に関する総合的な治療管理を行った場合に、月１回に限り算定する。"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-B001-3-1-ht",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.113",
-    "quote": "２ 高血圧症を主病とする場合 660点",
-    "note": "マスター113041810=660と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-B001-3-1-dm",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.113",
-    "quote": "３ 糖尿病を主病とする場合 760点",
-    "note": "マスター113041910=760と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-B001-3-1-dm",
-    "field": "exclusions",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.113",
-    "quote": "ただし、糖尿病を主病とする場合にあっては、別に厚生労働大臣が定める薬剤を投与している場合であって、区分番号Ｃ１０１に掲げる在宅自己注射指導管理料を算定しているときは、算定できない。"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-B001-3-3",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.114",
-    "quote": "Ｂ００１－３－３ 生活習慣病管理料（Ⅱ） 333点",
-    "note": "マスター113707110=333と一致。情報通信機器290点(注8)=113707210"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-F400-3",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.223",
-    "quote": "３ １及び２以外の場合 60点",
-    "note": "マスター120002910=60と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-F400-n4",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.223",
-    "quote": "診療所又は許可病床数が200床未満の病院である保険医療機関において、入院中の患者以外の患者（別に厚生労働大臣が定める疾患を主病とするものに限る。）に対して薬剤の処方期間が28日以上の処方（リフィル処方箋の複数回の使用による合計の処方期間が28日以上の処方を含む。）を行った場合は、特定疾患処方管理加算として、月１回に限り、１処方につき56点を所定点数に加算する。",
-    "note": "マスター120005710=56と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-F400-n6-i",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.224",
-    "quote": "イ 一般名処方加算１ ８点 ロ 一般名処方加算２ ６点",
-    "note": "マスター120004270=8/120003570=6と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-D255",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.203",
-    "quote": "Ｄ２５５ 精密眼底検査（片側） 56点",
-    "note": "マスター160081010=56と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-D257",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.203",
-    "quote": "Ｄ２５７ 細隙灯顕微鏡検査（前眼部及び後眼部） 110点",
-    "note": "マスター160081610=110と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-D261-2",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.204",
-    "quote": "Ｄ２６１ 屈折検査 １ ６歳未満の場合 69点 ２ １以外の場合 69点",
-    "note": "マスター160208010=69と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-D263-1",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.204",
-    "quote": "Ｄ２６３ 矯正視力検査 １ 眼鏡処方箋の交付を行う場合 69点 ２ １以外の場合 69点",
-    "note": "マスター160082810=69と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-D264",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.204",
-    "quote": "Ｄ２６４ 精密眼圧測定 82点",
-    "note": "マスター160082910=82と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-D265",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.204",
-    "quote": "Ｄ２６５ 角膜曲率半径計測 84点",
-    "note": "マスター160083150=84と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-D269-2",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.204",
-    "quote": "Ｄ２６９－２ 光学的眼軸長測定 150点",
-    "note": "マスター160187310=150と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-K282-1-ro",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.305",
-    "quote": "Ｋ２８２ 水晶体再建術 １ 眼内レンズを挿入する場合 イ 縫着レンズを挿入するもの 17,840点 ロ その他のもの 12,100点 ２ 眼内レンズを挿入しない場合 7,430点 ３ 計画的後嚢切開を伴う場合 21,780点",
-    "note": "マスター150253010=12100等と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-K282-1-ro",
-    "field": "facility_standard_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第60の6(参照)",
-    "quote": "特掲届出通知の施設基準一覧に水晶体再建術単独の項はない。水晶体再建術に関する施設基準は「緑内障手術（流出路再建術（眼内法）及び水晶体再建術併用眼内ドレーン挿入術）」(第60の6)のみに規定されている。",
-    "note": "不存在の確認(2026-08-28 全文grepによる)"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-J038-1-ro",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.262",
-    "quote": "１ 慢性維持透析を行った場合１ イ ４時間未満の場合 1,856点 ロ ４時間以上５時間未満の場合 2,016点 ハ ５時間以上の場合 2,151点",
-    "note": "マスター140057910=2016等と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-J038-1-ro",
-    "field": "count_limit",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.262",
-    "quote": "区分番号Ｊ０３８－２に掲げる持続緩徐式血液濾過の実施回数と併せて１月に14回に限り算定する。ただし、別に厚生労働大臣が定める患者にあってはこの限りでない。"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-J038-n2-i",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.262",
-    "quote": "導入期加算として、導入期１月に限り１日につき、当該基準に係る区分に従い、次に掲げる点数を所定点数に加算する。イ 導入期加算１ 200点 ロ 導入期加算２ 410点 ハ 導入期加算３ 810点",
-    "note": "マスター140058770=200等と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-J038-n9",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.262",
-    "quote": "透析液水質確保加算として、所定点数に10点を加算する。",
-    "note": "マスター140058970=10と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-B001-15",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.100",
-    "quote": "15 慢性維持透析患者外来医学管理料 2,211点",
-    "note": "マスター113002510=2211と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-C000",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.135",
-    "quote": "Ｃ０００ 往診料 720点",
-    "note": "マスター114000110=720と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-C001-1-i",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.136",
-    "quote": "１ 在宅患者訪問診療料１ イ 同一建物居住者以外の場合 890点 ロ 同一建物居住者の場合 215点",
-    "note": "マスター114001110=890等と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-C001-1-i",
-    "field": "count_limit",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.136-137",
-    "quote": "当該患者１人につき週３回（同一の患者について、イ及びロを併せて算定する場合において同じ。）に限り（別に厚生労働大臣が定める疾病等の患者に対する場合を除く。）算定する。"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-C002-2-ro-1",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.141",
-    "quote": "（２に規定する在宅療養支援診療所等の場合）ロ 月２回以上訪問診療を行っている場合（イの場合を除く。） （１） 単一建物診療患者が１人の場合 3,685点",
-    "note": "マスター114032810=3685と一致"
-  },
-  {
-    "entity_type": "item",
-    "entity_id": "r08-C007",
-    "field": "points",
-    "document_id": "r08-kokuji69-ika",
-    "page": "PDF p.158",
-    "quote": "Ｃ００７ 訪問看護指示料 300点",
-    "note": "マスター114008010=300と一致"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-b001-3",
-    "field": "system_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第6の9(PDF p.78)",
-    "quote": "(１) 生活習慣に関する総合的な治療管理ができる体制を有していること。… (２) 患者の状態に応じ、28日以上の長期の投薬を行うこと又はリフィル処方箋を交付することについて、当該対応が可能であることを当該保険医療機関の見やすい場所に掲示すること。(３) 特定健康診査や健康診断の結果、医療機関での治療や精密検査が必要と判定された者に対する診療を実施するなど、保険者、都道府県、市町村等が実施する地域の生活習慣病の早期発見及び重症化予防のための取組との連携を行うこと。"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-j038-1",
-    "field": "equipment_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第57の2(PDF p.229)",
-    "quote": "ア 次のいずれかに該当する保険医療機関であること。① 透析用監視装置の台数が26台未満であること。② 透析用監視装置一台当たりの「Ｊ０３８」人工腎臓の「１」から「３」を算定した患者数（外来患者に限る。）の割合が3.5未満であること。イ 関連学会から示されている基準に基づき、水質管理が適切に実施されていること。ウ 透析機器安全管理委員会を設置し、その責任者として専任の医師又は専任の臨床工学技士が１名以上配置されていること。"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-j038-1",
-    "field": "form_no",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第57の2の6(PDF p.231)",
-    "quote": "人工腎臓の施設基準に係る届出は別添２の様式87の４を用いること。"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-zaishien",
-    "field": "staffing_req",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第9(PDF p.85)",
-    "quote": "(１) 診療所であって、当該診療所単独で以下の要件のいずれにも該当し、緊急時の連絡体制及び24時間往診できる体制等を確保していること。ア 在宅医療を担当する常勤の医師が３名以上配置されていること。"
-  },
-  {
-    "entity_type": "facility_standard",
-    "entity_id": "r08-fs-zaishien",
-    "field": "form_no",
-    "document_id": "r08-tsuchi8-tokkei-todokede",
-    "page": "第9(PDF p.95)",
-    "quote": "１の(１)及び(２)の在宅療養支援診療所の施設基準に係る届出は、別添２の様式11及び様式11の３を用いること。"
-  }
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A000",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.3",
+  "quote": "Ａ０００ 初診料 291点",
+  "note": "医科診療行為マスター(s_20260731) 111000110=291.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A000",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.3",
+  "quote": "注１ 保険医療機関において初診を行った場合に算定する。ただし、別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において、情報通信機器を用いた初診を行った場合には、253点を算定する。"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.5",
+  "quote": "Ａ００１ 再診料 76点",
+  "note": "マスター112007410=76.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.5",
+  "quote": "注１ 保険医療機関（許可病床のうち一般病床に係るものの数が200以上のものを除く。）において再診を行った場合（別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において情報通信機器を用いた再診を行った場合を含む。）に算定する。"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n8",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "８ 入院中の患者以外の患者に対して、慢性疼痛疾患管理並びに別に厚生労働大臣が定める検査並びに第７部リハビリテーション、第８部精神科専門療法、第９部処置、第10部手術、第11部麻酔及び第12部放射線治療を行わないものとして別に厚生労働大臣が定める計画的な医学管理を行った場合は、外来管理加算として、52点を所定点数に加算する。",
+  "note": "マスター112011010=52.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n8",
+  "field": "exclusions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "慢性疼痛疾患管理並びに別に厚生労働大臣が定める検査並びに第７部リハビリテーション、第８部精神科専門療法、第９部処置、第10部手術、第11部麻酔及び第12部放射線治療を行わないものとして"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A002",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.7",
+  "quote": "Ａ００２ 外来診療料 77点",
+  "note": "マスター112011310=77.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H002-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.58",
+  "quote": "１ 運動器リハビリテーション料（Ⅰ）（１単位） イ 理学療法士による場合 185点 ロ 作業療法士による場合 185点 ハ 医師による場合 185点",
+  "note": "マスター180755710/180755810/180755910=185.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H002-1",
+  "field": "period_limit",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.58",
+  "quote": "それぞれ発症、手術若しくは急性増悪又は最初に診断された日から150日を限度として所定点数を算定する。ただし、別に厚生労働大臣が定める患者について、治療を継続することにより状態の改善が期待できると医学的に判断される場合その他の別に厚生労働大臣が定める場合には、150日を超えて所定点数を算定することができる。"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H002-1",
+  "field": "count_limit",
+  "document_id": "r08-ssk-edt-ika",
+  "page": "05 算定回数テーブル.csv",
+  "quote": "180755710,運動器リハビリテーション料（１）（理学療法士による場合),単位,6 / 日,6",
+  "note": "公式機械可読データ(算定単位コード別上限)より"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H002-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.58",
+  "quote": "２ 運動器リハビリテーション料（Ⅱ）（１単位） イ 理学療法士による場合 170点 ロ 作業療法士による場合 170点 ハ 医師による場合 170点",
+  "note": "マスター180756010/180756110/180756210=170.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H002-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.58",
+  "quote": "３ 運動器リハビリテーション料（Ⅲ）（１単位） イ 理学療法士による場合 85点 ロ 作業療法士による場合 85点 ハ 医師による場合 85点 ニ イからハまで以外の場合 85点",
+  "note": "マスター180756310〜180756610=85.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J116",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.269",
+  "quote": "Ｊ１１６ 関節穿刺（片側） 144点",
+  "note": "マスター140023010=144.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-E001-1-i",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.214",
+  "quote": "Ｅ００１ 写真診断 １ 単純撮影 イ 頭部、胸部、腹部又は脊椎 85点",
+  "note": "マスター170000410=85.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-E001-1-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.214",
+  "quote": "ロ その他 43点",
+  "note": "マスター170000510=43.00とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-E002-1-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.214",
+  "quote": "Ｅ００２ 撮影 １ 単純撮影 イ アナログ撮影 60点 ロ デジタル撮影 68点",
+  "note": "マスター170027910=68.00とも一致"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-h002-1",
+  "field": "staffing_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第42・p.188",
+  "quote": "(１) 当該保険医療機関において、運動器リハビリテーションの経験を有する専任の常勤医師が１名以上勤務していること。なお、週３日以上常態として勤務しており、かつ、所定労働時間が週 22 時間以上の勤務を行っている運動器リハビリテーションの経験を有する専任の非常勤医師を、第 38 の１の(11)の例により、専任の常勤医師数に算入することができる。なお、運動器リハビリテーションの経験を有する医師とは、運動器リハビリテーションの経験を３年以上有する医師又は適切な運動器リハビリテーションに係る研修を修了した医師であることが望ましい。 (２) 専従の常勤理学療法士又は専従の常勤作業療法士が合わせて４名以上勤務していること。"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-h002-1",
+  "field": "equipment_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第42・p.188-189",
+  "quote": "(３) 治療・訓練を十分実施し得る専用の機能訓練室（少なくとも、病院については内法による測定で 100 平方メートル以上、診療所については内法による測定で 45 平方メートル以上。）を有していること。なお、専用の機能訓練室に係る面積以外の規定は、第 40 の１の（３）の例による。 (４) 平成 26 年３月 31 日において、現に当該リハビリテーション料の届出を行っている保険医療機関については、当該機能訓練室等の増築又は全面的な改築を行うまでの間は、(３)の内法の規定を満たしているものとする。 (５) 治療・訓練を行うための以下の器具等を具備していること。これらの器械等については、当該保険医療機関が、指定通所リハビリテーション又は自立訓練（機能訓練）を実施する場合については、第 40 の１の（４）の例によること。各種測定用器具（角度計、握力計等）、血圧計、平行棒、姿勢矯正用鏡、各種車椅子、各種歩行補助具等"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-h002-1",
+  "field": "form_no",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第42の5・p.189-190",
+  "quote": "(１) 運動器リハビリテーション料(Ⅰ)及び「注５」の施設基準に係る届出は、別添２の様式 42 を用いること。 (２) 当該治療に従事する医師、理学療法士、作業療法士その他の従事者の氏名、勤務の態様（常勤・非常勤、専従・非専従、専任・非専任の別）等を別添２の様式 44 の２を用いて提出すること。 (３) 当該治療が行われる専用の機能訓練室の平面図を添付すること。"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-h002-2",
+  "field": "staffing_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第42の2・p.190",
+  "quote": "ア 専従の常勤理学療法士が２名以上勤務していること。イ 専従の常勤作業療法士が２名以上勤務していること。ウ 専従の常勤理学療法士及び専従の常勤作業療法士が合わせて２名以上勤務していること。"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-h002-3",
+  "field": "staffing_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第43・p.190-191",
+  "quote": "(１) 当該保険医療機関において、専任の常勤医師が１名以上勤務していること。なお、週３日以上常態として勤務しており、かつ、所定労働時間が週 22 時間以上の勤務を行っている専任の非常勤医師を、第 38 の１の(11)の例により、専任の常勤医師数に算入することができる。 (２) 専従の常勤理学療法士又は常勤作業療法士がいずれか１名以上勤務していること。"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-h002-3",
+  "field": "equipment_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第43・p.191",
+  "quote": "(３) 治療・訓練を十分実施し得る専用の機能訓練室（少なくとも、内法による測定で45平方メートル以上とする。）を有していること。"
+ },
+ {
+  "entity_type": "billing_rule",
+  "entity_id": "r08-rule-0001",
+  "field": null,
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "(A001注8全文はbilling_rules.quoteに記載)"
+ },
+ {
+  "entity_type": "scenario",
+  "entity_id": "r08-scn-ortho-knee-first",
+  "field": null,
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.3,5,6,58,214,269",
+  "quote": "算定候補の点数はitemsの各evidenceを参照"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-1-lipid",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113",
+  "quote": "Ｂ００１－３ 生活習慣病管理料（Ⅰ） １ 脂質異常症を主病とする場合 610点 ２ 高血圧症を主病とする場合 660点 ３ 糖尿病を主病とする場合 760点",
+  "note": "マスター113041710/113041810/113041910=610/660/760とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-1-lipid",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113",
+  "quote": "注１ 別に厚生労働大臣が定める施設基準を満たす保険医療機関（許可病床数が200床未満の病院又は診療所に限る。）において、脂質異常症、高血圧症又は糖尿病を主病とする患者（入院中の患者を除く。）に対して、当該患者の同意を得て治療計画を策定し、当該治療計画に基づき、生活習慣に関する総合的な治療管理を行った場合に、月１回に限り算定する。"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-1-ht",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113",
+  "quote": "２ 高血圧症を主病とする場合 660点",
+  "note": "マスター113041810=660と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-1-dm",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113",
+  "quote": "３ 糖尿病を主病とする場合 760点",
+  "note": "マスター113041910=760と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-1-dm",
+  "field": "exclusions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113",
+  "quote": "ただし、糖尿病を主病とする場合にあっては、別に厚生労働大臣が定める薬剤を投与している場合であって、区分番号Ｃ１０１に掲げる在宅自己注射指導管理料を算定しているときは、算定できない。"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.114",
+  "quote": "Ｂ００１－３－３ 生活習慣病管理料（Ⅱ） 333点",
+  "note": "マスター113707110=333と一致。情報通信機器290点(注8)=113707210"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-F400-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.223",
+  "quote": "３ １及び２以外の場合 60点",
+  "note": "マスター120002910=60と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-F400-n4",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.223",
+  "quote": "診療所又は許可病床数が200床未満の病院である保険医療機関において、入院中の患者以外の患者（別に厚生労働大臣が定める疾患を主病とするものに限る。）に対して薬剤の処方期間が28日以上の処方（リフィル処方箋の複数回の使用による合計の処方期間が28日以上の処方を含む。）を行った場合は、特定疾患処方管理加算として、月１回に限り、１処方につき56点を所定点数に加算する。",
+  "note": "マスター120005710=56と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-F400-n6-i",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.224",
+  "quote": "イ 一般名処方加算１ ８点 ロ 一般名処方加算２ ６点",
+  "note": "マスター120004270=8/120003570=6と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D255",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.203",
+  "quote": "Ｄ２５５ 精密眼底検査（片側） 56点",
+  "note": "マスター160081010=56と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D257",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.203",
+  "quote": "Ｄ２５７ 細隙灯顕微鏡検査（前眼部及び後眼部） 110点",
+  "note": "マスター160081610=110と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D261-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.204",
+  "quote": "Ｄ２６１ 屈折検査 １ ６歳未満の場合 69点 ２ １以外の場合 69点",
+  "note": "マスター160208010=69と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D263-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.204",
+  "quote": "Ｄ２６３ 矯正視力検査 １ 眼鏡処方箋の交付を行う場合 69点 ２ １以外の場合 69点",
+  "note": "マスター160082810=69と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D264",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.204",
+  "quote": "Ｄ２６４ 精密眼圧測定 82点",
+  "note": "マスター160082910=82と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D265",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.204",
+  "quote": "Ｄ２６５ 角膜曲率半径計測 84点",
+  "note": "マスター160083150=84と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D269-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.204",
+  "quote": "Ｄ２６９－２ 光学的眼軸長測定 150点",
+  "note": "マスター160187310=150と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-K282-1-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.305",
+  "quote": "Ｋ２８２ 水晶体再建術 １ 眼内レンズを挿入する場合 イ 縫着レンズを挿入するもの 17,840点 ロ その他のもの 12,100点 ２ 眼内レンズを挿入しない場合 7,430点 ３ 計画的後嚢切開を伴う場合 21,780点",
+  "note": "マスター150253010=12100等と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-K282-1-ro",
+  "field": "facility_standard_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第60の6(参照)",
+  "quote": "特掲届出通知の施設基準一覧に水晶体再建術単独の項はない。水晶体再建術に関する施設基準は「緑内障手術（流出路再建術（眼内法）及び水晶体再建術併用眼内ドレーン挿入術）」(第60の6)のみに規定されている。",
+  "note": "不存在の確認(2026-08-28 全文grepによる)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-1-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.262",
+  "quote": "１ 慢性維持透析を行った場合１ イ ４時間未満の場合 1,856点 ロ ４時間以上５時間未満の場合 2,016点 ハ ５時間以上の場合 2,151点",
+  "note": "マスター140057910=2016等と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-1-ro",
+  "field": "count_limit",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.262",
+  "quote": "区分番号Ｊ０３８－２に掲げる持続緩徐式血液濾過の実施回数と併せて１月に14回に限り算定する。ただし、別に厚生労働大臣が定める患者にあってはこの限りでない。"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n2-i",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.262",
+  "quote": "導入期加算として、導入期１月に限り１日につき、当該基準に係る区分に従い、次に掲げる点数を所定点数に加算する。イ 導入期加算１ 200点 ロ 導入期加算２ 410点 ハ 導入期加算３ 810点",
+  "note": "マスター140058770=200等と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n9",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.262",
+  "quote": "透析液水質確保加算として、所定点数に10点を加算する。",
+  "note": "マスター140058970=10と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-15",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.100",
+  "quote": "15 慢性維持透析患者外来医学管理料 2,211点",
+  "note": "マスター113002510=2211と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C000",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.135",
+  "quote": "Ｃ０００ 往診料 720点",
+  "note": "マスター114000110=720と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C001-1-i",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.136",
+  "quote": "１ 在宅患者訪問診療料１ イ 同一建物居住者以外の場合 890点 ロ 同一建物居住者の場合 215点",
+  "note": "マスター114001110=890等と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C001-1-i",
+  "field": "count_limit",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.136-137",
+  "quote": "当該患者１人につき週３回（同一の患者について、イ及びロを併せて算定する場合において同じ。）に限り（別に厚生労働大臣が定める疾病等の患者に対する場合を除く。）算定する。"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-2-ro-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.141",
+  "quote": "（２に規定する在宅療養支援診療所等の場合）ロ 月２回以上訪問診療を行っている場合（イの場合を除く。） （１） 単一建物診療患者が１人の場合 3,685点",
+  "note": "マスター114032810=3685と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C007",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.158",
+  "quote": "Ｃ００７ 訪問看護指示料 300点",
+  "note": "マスター114008010=300と一致"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-b001-3",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第6の9(PDF p.78)",
+  "quote": "(１) 生活習慣に関する総合的な治療管理ができる体制を有していること。なお、治療計画に基づく総合的な治療管理は、歯科医師、看護師、薬剤師、管理栄養士等の多職種と連携して実施することが望ましい。 (２) 患者の状態に応じ、28 日以上の長期の投薬を行うこと又はリフィル処方箋を交付することについて、当該対応が可能であることを当該保険医療機関の見やすい場所に掲示すること。 (３) 特定健康診査や健康診断の結果、医療機関での治療や精密検査が必要と判定された者に対する診療を実施するなど、保険者、都道府県、市町村等が実施する地域の生活習慣病の早期発見及び重症化予防のための取組との連携を行うこと。"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-j038-1",
+  "field": "equipment_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第57の2(PDF p.229)",
+  "quote": "ア 次のいずれかに該当する保険医療機関であること。① 透析用監視装置の台数が26台未満であること。② 透析用監視装置一台当たりの「Ｊ０３８」人工腎臓の「１」から「３」を算定した患者数（外来患者に限る。）の割合が3.5未満であること。イ 関連学会から示されている基準に基づき、水質管理が適切に実施されていること。ウ 透析機器安全管理委員会を設置し、その責任者として専任の医師又は専任の臨床工学技士が１名以上配置されていること。"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-j038-1",
+  "field": "form_no",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第57の2の6(PDF p.231)",
+  "quote": "人工腎臓の施設基準に係る届出は別添２の様式87の４を用いること。"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-zaishien",
+  "field": "staffing_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第9(PDF p.85)",
+  "quote": "(１) 診療所であって、当該診療所単独で以下の要件のいずれにも該当し、緊急時の連絡体制及び24時間往診できる体制等を確保していること。ア 在宅医療を担当する常勤の医師が３名以上配置されていること。"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-1-ro-1-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.239",
+  "quote": "ロ 区分番号Ａ０００に掲げる初診料を算定する初診の日に行った場合 (１) 60分以上の場合 ① 精神保健指定医による場合 650点",
+  "note": "医科診療行為マスター 180070310=650とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-1-ro-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.239",
+  "quote": "(２) 精神保健指定医による30分以上60分未満の場合 550点",
+  "note": "医科診療行為マスター 180774810=550とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-1-ha-1-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.239",
+  "quote": "ハ イ及びロ以外の場合 (１) 30分以上の場合 ① 精神保健指定医による場合 410点",
+  "note": "医科診療行為マスター 180070410=410とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-1-ha-2-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.239",
+  "quote": "(２) 30分未満の場合 ① 精神保健指定医による場合 315点",
+  "note": "医科診療行為マスター 180070510=315とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I004-2-i",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.243",
+  "quote": "Ｉ００４ 心身医学療法（１回につき） １ 入院中の患者 150点 ２ 入院中の患者以外の患者 イ 初診時 110点",
+  "note": "医科診療行為マスター 180020610=110とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I004-2-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.243",
+  "quote": "ロ 再診時 80点",
+  "note": "医科診療行為マスター 180020010=80とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-1-ha-1-1",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.517",
+  "quote": "通院・在宅精神療法とは、入院中の患者以外の患者であって、精神疾患又は精神症状を伴う脳器質性障害があるもの（患者の著しい病状改善に資すると考えられる場合にあっては当該患者の家族）に対して、精神科を担当する医師（研修医を除く。 以下この区分において同じ。）が一定の治療計画のもとに危機介入、対人関係の改善、社会適応能力の向上を図るための指示、助言等の働きかけを継続的に行う治療方法をいう。",
+  "note": "対象患者と治療の性質(留意I002(1))"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-1-ha-1-1",
+  "field": "count_limit",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.240",
+  "quote": "注１ 入院中の患者以外の患者について、退院後４週間以内の期間に行われる場合にあっては１と２を合わせて週２回、その他の場合にあっては１と２を合わせて週１回に限り算定する。",
+  "note": "週1回制限の根拠(ゲームは安全側で週1のみ使用)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I004-2-i",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.529",
+  "quote": "心身医学療法とは、心身症の患者について、一定の治療計画に基づいて、身体的傷病と心理・社会的要因との関連を明らかにするとともに、当該患者に対して心理的影響を与えることにより、症状の改善又は傷病からの回復を図る治療方法をいう。",
+  "note": "留意I004(1)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-G010",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.227",
+  "quote": "Ｇ０１０ 関節腔内注射 80点",
+  "note": "医科診療行為マスター130005310の80点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-G010",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.585",
+  "quote": "関節穿刺を左右両側に行った場合は、それぞれ算定できるが、同一側の関節に対して、「Ｄ４０５」関節穿刺、「Ｇ０１０」関節腔内注射を同一日に行った場合は、主たるもののみ算定する。",
+  "note": "D405留意。電子点数表same_day背反(130005310×140023010/160097010・主たるもの)とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-L104",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.363",
+  "quote": "Ｌ１０４ トリガーポイント注射 70点",
+  "note": "医科診療行為マスター150266010の70点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-L104",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.702",
+  "quote": "トリガーポイント注射は、圧痛点に局所麻酔剤あるいは局所麻酔剤を主剤とする薬剤を注射する手技であり、施行した回数及び部位にかかわらず、１日につき１回算定できる。",
+  "note": "留意L104(1)。(2)神経幹内注射と同時算定不可"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J000-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.257",
+  "quote": "Ｊ０００ 創傷処置 １ 100平方センチメートル未満 52点",
+  "note": "医科診療行為マスター140000610の52点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J000-1",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.257",
+  "quote": "１については、入院中の患者以外の患者及び手術後の患者（入院中の患者に限る。）についてのみ算定する。",
+  "note": "告示J000注1"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J000-1",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.554",
+  "quote": "同一部位に対して創傷処置、皮膚科軟膏処置、面皰圧出法又は湿布処置が行われた場合はいずれか１つのみにより算定し、併せて算定できない。",
+  "note": "留意J000(3)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J119-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.270",
+  "quote": "Ｊ１１９ 消炎鎮痛等処置（１日につき） ２ 器具等による療法 35点",
+  "note": "医科診療行為マスター140040310の35点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J119-2",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.586",
+  "quote": "「２」の器具等による療法とは、電気療法、赤外線治療、熱気浴、ホットパック、超音波療法、マイクロレーダー等による療法をいう。",
+  "note": "留意J119(2)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J122-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.271",
+  "quote": "Ｊ１２２ 四肢ギプス包帯 ２ 手指及び手、足（片側） 490点",
+  "note": "医科診療行為マスター140040510の490点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J122-2",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.588",
+  "quote": "ギプスシーネは、ギプス包帯の点数（ギプス包帯をギプスシャーレとして切割使用した場合の各区分の所定点数の 100 分の 20 に相当する点数を算定する場合を除く。）により算定する。",
+  "note": "留意ギプス通則(5)。シーネ固定をこの区分で算定する根拠"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H003-2-1-i",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.236",
+  "quote": "Ｈ００３－２ リハビリテーション総合計画評価料 １ リハビリテーション総合計画評価料１ イ 初回の場合 300点",
+  "note": "医科診療行為マスター180024710の300点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H003-2-1-i",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.236",
+  "quote": "注１ １について、心大血管疾患リハビリテーション料（Ⅰ）、脳血管疾患等リハビリテーション料（Ⅰ）、脳血管疾患等リハビリテーション料（Ⅱ）、廃用症候群リハビリテーション料（Ⅰ）、廃用症候群リハビリテーション料（Ⅱ）、運動器リハビリテーション料（Ⅰ）、運動器リハビリテーション料（Ⅱ）、呼吸器リハビリテーション料（Ⅰ）、がん患者リハビリテーション料又は認知症患者リハビリテーション料に係る別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届出を行った保険医療機関において、医師、看護師、理学療法士、作業療法士、言語聴覚士等の多職種が共同してリハビリテーション計画を策定し、当該計画に基づき心大血管疾患リハビリテーション料、呼吸器リハビリテーション料、がん患者リハビリテーション料若しくは認知症患者リハビリテーション料を算定すべきリハビリテーションを行った場合又は介護リハビリテーションの利用を予定している患者以外の患者に対し、脳血管疾患等リハビリテーション料、廃用症候群リハビリテーション料又は運動器リハビリテーション料を算定すべきリハビリテーションを行った場合に、患者１人につき１月に１回に限り算定する。",
+  "note": "告示注1。列挙に運動器(III)は無い=否定的確認"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H003-2-1-i",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.508",
+  "quote": "リハビリテーション総合計画評価料は、定期的な医師の診察及び運動機能検査又は作業能力検査等の結果に基づき医師、看護師、理学療法士、作業療法士、言語聴覚士、社会福祉士等の多職種が共同してリハビリテーション総合実施計画書を作成し、これに基づいて行ったリハビリテーションの効果、実施方法等について共同して評価を行った場合に算定する。",
+  "note": "留意H003-2(1)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-H003-2-1-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.236",
+  "quote": "ロ ２回目以降の場合 240点",
+  "note": "医科診療行為マスター180774210の240点と突合一致"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0001",
+  "field": "machine",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.13-14",
+  "quote": "「注８」の厚生労働大臣が別に定める検査とは、第２章第３部第３節生体検査料のうち、次の各区分に掲げるものをいう。超音波検査等 脳波検査等 神経・筋検査 耳鼻咽喉科学的検査 眼科学的検査 負荷試験等 ラジオアイソトープを用いた諸検査 内視鏡検査",
+  "note": "留意A001(7)キ。KB登録済みの眼科学的検査7項目を機械リスト化した根拠"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-f400-n6",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "p.175",
+  "quote": "一般名処方の趣旨を患者に十分に説明することについて、当該保険医療機関の見やすい場所に掲示していること。(２) （１）の掲示事項について、原則として、ウェブサイトに掲載していること。",
+  "note": "0305-8 第36の4 一般名処方加算に関する施設基準(1)(2)"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-f400-n6",
+  "field": "form_no",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "p.175",
+  "quote": "一般名処方加算の施設基準に係る取扱いについては、当該基準を満たしていればよく、特に地方厚生（支）局長に対して、届出を行う必要はないこと。",
+  "note": "届出不要の否定的確認"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B009-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.128",
+  "quote": "Ｂ００９ 診療情報提供料（Ⅰ） 250点",
+  "note": "医科診療行為マスター180016110の250点と突合一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B009-1",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.128",
+  "quote": "保険医療機関が、診療に基づき、別の保険医療機関での診療の必要を認め、これに対して、患者の同意を得て、診療状況を示す文書を添えて患者の紹介を行った場合に、紹介先保険医療機関ごとに患者１人につき月１回に限り算定する。",
+  "note": "告示B009注1"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0013",
+  "field": "condition",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.229",
+  "quote": "当該情報を提供する保険医療機関と特別の関係にある機関に情報提供が行われた場合や、市町村等が開設主体である保険医療機関が当該市町村等に対して情報提供を行った場合は算定できない。",
+  "note": "留意B009(4)。同一法人内(開設者同一)の紹介はB009を算定できない根拠"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0013",
+  "field": "condition",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.27",
+  "quote": "「特別の関係」とは、次に掲げる関係をいう。 ア 当該保険医療機関等と他の保険医療機関等の関係が以下のいずれかに該当する場合に、当該保険医療機関等と当該他の保険医療機関等は特別の関係にあると認められる。 (イ) 当該保険医療機関等の開設者が、当該他の保険医療機関等の開設者と同一の場合",
+  "note": "第2部通則7(3)の定義。法人内の分院・部門は開設者同一=特別の関係に該当"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n10-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関（診療所に限る。）において再診を行った場合には、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。イ 時間外対応体制加算１ ７点 ロ 時間外対応体制加算２ ５点 ハ 時間外対応体制加算３ ４点 ニ 時間外対応体制加算４ ２点",
+  "note": "R8で「時間外対応加算」から「時間外対応体制加算」に改称・4区分に再編。マスター突合: 112016070=7点・112708370=5点・112708470=4点・112708570=2点で全区分一致"
+ },
+ {
+  "entity_type": "fs",
+  "entity_id": "r08-fs-a001-n10-1",
+  "field": "system_req",
+  "document_id": "r08-tsuchi7-kihon-todokede",
+  "page": "PDF p.24(第2「時間外対応体制加算」2)",
+  "quote": "診療所を継続的に受診している患者からの電話等による問い合わせに対し、原則として当該診療所において、当該診療所の常勤の医師、看護職員又は事務職員等により、常時対応できる体制がとられていること。",
+  "note": "週3日以上・週22時間以上勤務の非常勤による常時対応でも可(みなし)。コールバック体制も要件"
+ },
+ {
+  "entity_type": "fs",
+  "entity_id": "r08-fs-a001-n10-3",
+  "field": "system_req",
+  "document_id": "r08-tsuchi7-kihon-todokede",
+  "page": "PDF p.25(第2「時間外対応体制加算」4)",
+  "quote": "標榜時間外の夜間の数時間は、原則として当該診療所において、当該診療所の常勤の医師、看護職員又は事務職員等により、対応できる体制がとられていること。",
+  "note": "休診日・深夜・休日は留守番電話等により地域の救急医療機関等の連絡先案内を行うなどの配慮"
+ },
+ {
+  "entity_type": "fs",
+  "entity_id": "r08-fs-a001-n10-4",
+  "field": "system_req",
+  "document_id": "r08-tsuchi7-kihon-todokede",
+  "page": "PDF p.25(第2「時間外対応体制加算」5)",
+  "quote": "複数の診療所の連携により対応する場合、連携する診療所の数は、当該診療所を含め最大で３つまでとすること。",
+  "note": "区分4は連携・当番日対応の体制"
+ },
+ {
+  "entity_type": "fs",
+  "entity_id": "r08-fs-a001-n10-1",
+  "field": "form_no",
+  "document_id": "r08-tsuchi7-kihon-todokede",
+  "page": "PDF p.25(第2「時間外対応体制加算」6)",
+  "quote": "時間外対応体制加算に係る届出は、別添７の様式２を用いること。なお、当該加算の届出については実績を要しない。",
+  "note": "4区分共通の届出様式。実績不要"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n11",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "11 個別の費用の計算の基礎となった項目ごとに記載した明細書の発行等につき別に厚生労働大臣が定める施設基準を満たす保険医療機関（診療所に限る。）を受診した患者については、明細書発行体制等加算として、１点を所定点数に加算する。",
+  "note": "マスター突合: 112015770=1点で一致。「届け出た」でなく「満たす」型=届出不要(施設基準通知で確認)"
+ },
+ {
+  "entity_type": "fs",
+  "entity_id": "r08-fs-a001-n11",
+  "field": "form_no",
+  "document_id": "r08-tsuchi7-kihon-todokede",
+  "page": "PDF p.26(第2の2「明細書発行体制等加算」2)",
+  "quote": "明細書発行体制等加算の施設基準に係る取扱いについては、当該基準を満たしていればよく、特に地方厚生（支）局長に対して、届出を行う必要はないこと。",
+  "note": "届出不要の否定的確認(体制要件のみ)"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0016",
+  "field": "condition",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "この場合において、区分番号Ａ０００に掲げる初診料の注16及び区分番号Ａ００１に掲げる再診料の注19に規定する電子的診療情報連携体制整備加算は別に算定できない。",
+  "note": "明細書発行体制等加算との併算定不可(A001注11後段)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-L100-2-lumbar",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.363",
+  "quote": "２ 眼神経ブロック、上顎神経ブロック、下顎神経ブロック、舌咽神経ブロック、蝶形口蓋神経節ブロック、腰部硬膜外ブロック 800点",
+  "note": "L100神経ブロック(局所麻酔剤又はボツリヌス毒素使用)の区分2。マスター突合: 150235510「腰部硬膜外ブロック（局所麻酔剤又はボツリヌス毒素使用）」=800点で一致。算定回数テーブル非収載(回数制限の定めなし=否定的確認)。上記以外の神経ブロックはL102神経幹内注射で算定(注)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-L100-2-lumbar",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.702",
+  "quote": "同一名称の神経ブロックを複数か所に行った場合は、主たるもののみ算定する。また、２種類以上の神経ブロックを行った場合においても、主たるもののみ算定する。",
+  "note": "留意L100(4)。(7)の同一日トリガーポイント注射併算定不可はrule-0012に機械化"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D215-2-ro-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.197",
+  "quote": "（３） その他（頭頸部、四肢、体表、末梢血管等） 350点",
+  "note": "D215-2断層撮影法(心臓超音波検査を除く)-ロその他の場合。マスター突合: 160165010=350点で一致。算定回数テーブル非収載。ゲームの運動器エコー概算350点と同値(概算がKB実点数に置換)"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0015",
+  "field": "condition",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.197",
+  "quote": "区分番号Ｄ２１５（３のニの場合を除く。）及びＤ２１６に掲げる超音波検査等について、同一患者につき同一月において同一検査を２回以上実施した場合における２回目以降の当該検査の費用は、所定点数の100分の90に相当する点数により算定する。",
+  "note": "生体検査料(超音波検査等)の通則。逓減はエンジン未対応=handled_externally"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-E202-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.219",
+  "quote": "２ 1.5テスラ以上３テスラ未満の機器による場合 1,330点",
+  "note": "E202磁気共鳴コンピューター断層撮影(MRI撮影)(一連につき)。注1: 1及び2は届出医療機関に限り算定。マスター突合: 170020110=1330点・単位「一連」上限1で一致"
+ },
+ {
+  "entity_type": "fs",
+  "entity_id": "r08-fs-e202",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "第34(PDF p.170)",
+  "quote": "128 列以上、64 列以上 128 列未満、16 列以上 64 列未満若しくは４列以上 16 列未満のマルチスライスＣＴ装置又は３テスラ以上若しくは 1.5 テスラ以上３テスラ未満のＭＲＩ装置のいずれかを有していること。",
+  "note": "第34の1(1)。画像診断管理加算2以上・専従技師の(2)(3)は128列以上等CT・3T以上MRIのみ対象=1.5T機は対象外(否定的確認)。届出は様式37"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-E203",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.220",
+  "quote": "Ｅ２０３ コンピューター断層診断 450点 注 コンピューター断層撮影の種類又は回数にかかわらず、月１回に限り算定できるものとする。",
+  "note": "マスター突合: 170015410=450点・単位「月」上限1で一致。月1回制限はpackのLIMITSで機械化"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0014",
+  "field": "condition",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.218",
+  "quote": "区分番号Ｅ２００に掲げるコンピューター断層撮影（ＣＴ撮影）及び区分番号Ｅ２０２に掲げる磁気共鳴コンピューター断層撮影（ＭＲＩ撮影）を同一月に２回以上行った場合は、当該月の２回目以降の断層撮影については、所定点数にかかわらず、一連につき所定点数の100分の80に相当する点数により算定する。",
+  "note": "コンピューター断層撮影診断料通則2。逓減はエンジン未対応=handled_externally"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-E-denshi-ct",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.218",
+  "quote": "撮影した画像を電子化して管理及び保存した場合においては、電子画像管理加算として、前２号により算定した点数に、一連の撮影について１回に限り、120点を所定点数に加算する。ただし、この場合において、フィルムの費用は算定できない。",
+  "note": "コンピューター断層撮影診断料通則3。マスター突合: 170028810=120点・単位「一連」上限1で一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-E-denshi-tanjun",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.214",
+  "quote": "撮影した画像を電子化して管理及び保存した場合においては、電子画像管理加算として、前３号までにより算定した点数に、一連の撮影について次の点数を加算する。ただし、この場合において、フィルムの費用は、算定できない。イ 単純撮影の場合 57点",
+  "note": "エックス線診断料通則4。マスター突合: 170000210=57点・単位「一連」上限1で一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n10-1",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.222",
+  "quote": "８ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において投薬を行った場合には、地域支援・外来医薬品供給対応体制加算として、当該基準に係る区分に従い、１処方につき次に掲げる点数をそれぞれ所定点数に加算する。イ 地域支援・外来医薬品供給対応体制加算１ ８点",
+  "note": "【否定的確認・便Hのゲーム置換根拠】R8マスターに「外来後発医薬品使用体制加算」は0件=不存在。F100処方料注8の地域支援・外来医薬品供給対応体制加算(8/7/5点)に再編され、対象は「投薬を行った場合」=院内処方のみ。F400処方箋料の注に同名・同種の供給対応体制加算はない。院外処方の診療所が後発医薬品を後押しして取れるのはF400注6の一般名処方加算1(8点)・2(6点)=KB登録済み(r08-F400-n6-i)。ゲームの外来後発医薬品使用体制加算(8点)は削除が正しい置換"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n10-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関（診療所に限る。）において再診を行った場合には、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。イ 時間外対応体制加算１ ７点 ロ 時間外対応体制加算２ ５点 ハ 時間外対応体制加算３ ４点 ニ 時間外対応体制加算４ ２点",
+  "note": "告示A001注10の区分別点数。マスター突合: 112708370=5点で一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n10-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関（診療所に限る。）において再診を行った場合には、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。イ 時間外対応体制加算１ ７点 ロ 時間外対応体制加算２ ５点 ハ 時間外対応体制加算３ ４点 ニ 時間外対応体制加算４ ２点",
+  "note": "告示A001注10の区分別点数。マスター突合: 112708470=4点で一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n10-4",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.6",
+  "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関（診療所に限る。）において再診を行った場合には、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。イ 時間外対応体制加算１ ７点 ロ 時間外対応体制加算２ ５点 ハ 時間外対応体制加算３ ４点 ニ 時間外対応体制加算４ ２点",
+  "note": "告示A001注10の区分別点数。マスター突合: 112708570=2点で一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D400-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.210",
+  "quote": "Ｄ４００ 血液採取（１日につき） １ 静脈 40点 注１ 入院中の患者以外の患者についてのみ算定する。",
+  "note": "マスター突合: 160095710=40点・単位「日」上限1で一致。注3「血液回路から採血した場合は算定しない」=透析部門が採血を算定しない根拠"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D005-5",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.176",
+  "quote": "５ 末梢血液一般検査 21点",
+  "note": "マスター突合: 160008010=21点で一致。算定回数テーブル非収載(回数制限の定めなし=否定的確認)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D005-9",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.176",
+  "quote": "９ ヘモグロビンＡ１ｃ（ＨｂＡ１ｃ） 49点",
+  "note": "マスター突合: 160010010=49点・単位「月」上限1で一致。same_month背反: グリコアルブミン(160151050)・160142350(=rule-0017)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D007-n1-ha",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.181",
+  "quote": "注 患者から１回に採取した血液を用いて本区分の１から８までに掲げる検査を５項目以上行った場合は、所定点数にかかわらず、検査の項目数に応じて次に掲げる点数により算定する。イ ５項目以上７項目以下 93点 ロ ８項目又は９項目 99点 ハ 10項目以上 103点",
+  "note": "【まるめのマスター確認】医科マスターに項目数まるめの集約コードは存在しない(「血液化学検査」で引けるのは入院時初回加算160161510のみ=否定的確認)。個別項目(グルコース160019410=11点・クレアチニン160019210=11点・HDL160023410=17点・LDL160167250=18点・中性脂肪160020910=11点等)は実在し、まるめは電算処理。KBは告示注のハ(10項目以上103点)をセルとして登録"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D026-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.192",
+  "quote": "３ 血液学的検査判断料 125点 ４ 生化学的検査（Ⅰ）判断料 144点 ５ 生化学的検査（Ⅱ）判断料 144点 ６ 免疫学的検査判断料 144点 ７ 微生物学的検査判断料 150点 注１ 検体検査判断料は該当する検体検査の種類又は回数にかかわらずそれぞれ月１回に限り算定できるものとする。",
+  "note": "マスター突合: 160061810=125点・単位「月」上限1で一致。月1回はpackのLIMITSで機械化"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D026-4",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.192",
+  "quote": "４ 生化学的検査（Ⅰ）判断料 144点",
+  "note": "マスター突合: 160061910(生化学的検査（１）判断料)=144点・単位「月」上限1で一致。月1回はpackのLIMITSで機械化"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0001",
+  "field": "machine",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.13-14",
+  "quote": "「注８」の厚生労働大臣が別に定める検査とは、第２章第３部第３節生体検査料のうち、次の各区分に掲げるものをいう。超音波検査等 脳波検査等 神経・筋検査 耳鼻咽喉科学的検査 眼科学的検査 負荷試験等 ラジオアイソトープを用いた諸検査 内視鏡検査",
+  "note": "【clearedKensaItemsの根拠・否定的確認】「定める検査」は生体検査料(第3節)の8区分に限定列挙。第1節検体検査料(D005/D007/D026等)・第4節診断穿刺検体採取料(D400)は含まれない=外来管理加算を妨げない。便Iで登録した検体検査6項目をneeds_review安全網から除外"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0017",
+  "field": "condition",
+  "document_id": "r08-ssk-edt-ika",
+  "page": "背反テーブル(same_month)",
+  "quote": null,
+  "note": "HbA1c(160010010)×グリコアルブミン(160151050)・×160142350がsame_month背反として収載されていることを確認(2026-08-30)"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0001",
+  "field": "machine",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.13-14",
+  "quote": "「注８」の厚生労働大臣が別に定める検査とは、第２章第３部第３節生体検査料のうち、次の各区分に掲げるものをいう。 超音波検査等 脳波検査等 神経・筋検査 耳鼻咽喉科学的検査 眼科学的検査 負荷試験等 ラジオアイソトープを用いた諸検査 内視鏡検査",
+  "note": "【v44追加】r08-D215-2-ro-3(超音波検査・断層撮影法)は第3節生体検査料の「超音波検査等」区分に属する=「定める検査」に該当し、算定日は外来管理加算を妨げる側。v43登録時に未分類だった穴をsadamaruKensaItemsへ追加して閉じた"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-t710010929",
+  "field": "points",
+  "document_id": "r08-kokuji73-zairyo",
+  "page": "p.8",
+  "quote": "040 人工腎臓用特定保険医療材料（回路を含む。） (１) ダイアライザー ① Ⅰａ型 1,610 円",
+  "note": "材料価格基準(平20告示61号)の改正告示(73号)別表II。制定文は「別表を次のように改める。」=別表全体の差し替えのため、改正告示への全文検索が不収載の否定的確認として成立する。特定器材マスター突合: 710010929「ダイアライザー（１ａ型）」=1,610.00円・金額種別1(金額)・別表2区分040で一致。点数換算161点の根拠はJ400(告示69号PDF p.271)+端数四捨五入(材料留意I-1-(2))"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-t710010929",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-zairyo",
+  "page": "PDF p.3(I-2-006(2))・PDF p.10(II-040)",
+  "quote": "人工腎臓用特定保険医療材料の材料価格には、回路の費用が含まれ別に算定できない。",
+  "note": "材料留意(保医発0305第1号)。II-040は「Ⅰの２の006と同様であること」により同旨。ゲームの透析部門はダイアライザー161点のみ請求し回路を別請求しない"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-K282-1-ro",
+  "field": "exclusions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.624",
+  "quote": "眼内レンズの費用は所定点数に含まれ、別に算定できない。",
+  "note": "留意K282(2)。【否定的確認】材料価格基準(告示73号)全文に「眼内レンズ」は0件・特定器材マスター(1,395行)にも0件=特定保険医療材料として不収載。眼科モジュールがIOLを請求しないのは「KB未登録だから」ではなく制度上の事実(v45で格上げ)。告示73号の制定文「別表を次のように改める。」=別表全体差し替えのため全文0件が否定的確認として成立"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-t710010929",
+  "field": "points",
+  "document_id": "r08-ryuiji-zairyo",
+  "page": "PDF p.2(I-1-(2))",
+  "quote": "特掲診療料の各部において、特定保険医療材料料を算定する場合には、特定保険医療材料の材料価格を10円で除して得た点数となるが、この場合において端数が生じた場合は端数を四捨五入して得た点数とする。",
+  "note": "J400の告示文に端数規定はなく、四捨五入の根拠はこの留意事項。validate_kbのE7材料突合の期待値計算(価格を10で除してから四捨五入)はこれに従う"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-y620004641",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.228",
+  "quote": "Ｇ１００ 薬剤 １ 薬価が１回分使用量につき15円以下である場合 １点 ２ 薬価が１回分使用量につき15円を超える場合 薬価から15円を控除した額を10円で除して得た点数につき１点未満の端数を切り上げて得た点数に１点を加算して得た点数",
+  "note": "注射薬剤料の算式(告示G100)。(663.00-15)÷10=64.8→切り上げ65+1=66点。薬価663.00円/筒は医薬品マスター620004641で確認。薬価基準告示72号は「別表を次のように改める」の全部差し替え型で、本文の数字が埋め込みフォントで別字に写像されている(350,533字中数字408字のみ)が、写像は1対1(灸=0 吸=1 宮=2 弓=3 急=4 救=5 朽=6 求=7 汲=8 泣=9)で復号でき、アルツ663円・キシロカイン1%10mLバイアル110円・エピレナミン含有3種(118/119/153円)の5品目で告示原典とマスターの一致を確認した(ミドリンP35.90円はD255側evidenceに記録・こちらも一致)(2026-08-31)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-y641210099-5ml",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.363",
+  "quote": "Ｌ２００ 薬剤 薬価が15円を超える場合は、薬価から15円を控除した額を10円で除して得た点数につき１点未満の端数を切り上げて得た点数に１点を加算して得た点数とする。注１ 薬価が15円以下である場合は、算定しない。",
+  "note": "麻酔薬剤料の算式(告示L200)。11.00円/mL×5mL=55.00円→(55-15)÷10=4.0→4+1=5点。単価は医薬品マスター641210099。使用量5mLはゲーム上の仮定として項目に明記"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-y641210099-10ml",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.363",
+  "quote": "Ｌ２００ 薬剤 薬価が15円を超える場合は、薬価から15円を控除した額を10円で除して得た点数につき１点未満の端数を切り上げて得た点数に１点を加算して得た点数とする。",
+  "note": "11.00円/mL×10mL=110.00円→(110-15)÷10=9.5→切り上げ10+1=11点。単価は医薬品マスター641210099。使用量10mLはゲーム上の仮定として項目に明記"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D255",
+  "field": "exclusions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.212",
+  "quote": "Ｄ５００ 薬剤 薬価が15円を超える場合は、薬価から15円を控除した額を10円で除して得た点数につき１点未満の端数を切り上げて得た点数に１点を加算して得た点数とする。 注１ 薬価が15円以下である場合は、算定しない。",
+  "note": "【否定的確認】検査薬剤料D500注1。散瞳剤ミドリンP点眼液は35.90円/mL(医薬品マスター620003872)で、1回使用量が0.417mL(15円相当)を超えない限り15円以下→算定しない。両眼2滴≒0.1mL≒3.6円は余裕をもって下回る(使用量の見積りはゲーム上の仮定だが、常識的な点眼量で結論は動かない)。眼科の散瞳剤スロット(issues#10)はスロット自体が消滅"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A000-n10",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.4",
+  "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関（許可病床数が200床未満の病院又は診療所に限る。）において初診を行った場合は、機能強化加算として、80点を所定点数に加算する。",
+  "note": "マスター突合: 111013770「機能強化加算（初診）」=80点・算定回数テーブル「初診時・上限1」で一致"
+ },
+ {
+  "entity_type": "fs",
+  "entity_id": "r08-fs-a000-n10",
+  "field": "system_req",
+  "document_id": "r08-tsuchi7-kihon-todokede",
+  "page": "PDF p.18(第1の3「機能強化加算」1)",
+  "quote": "キ 「Ｃ００２」に掲げる在宅時医学総合管理料又は「Ｃ００２－２」に掲げる施設入居時等医学総合管理料に係る届出を行っている保険医療機関であって、特掲診療料施設基準通知の別添１の第９在宅療養支援診療所の１(３)に該当する診療所並びに第 14 の２在宅療養支援病院の１(３)に該当する病院であり、以下のいずれかを満たしていること。 (イ) 第９在宅療養支援診療所の１(３)に該当する診療所であって、以下のいずれかを満たしていること。なお、緊急の往診の実績及び在宅における看取りの実績等の取扱いについては、第９在宅療養支援診療所と同様である。 ① 第９在宅療養支援診療所の１(１)ケに掲げる過去１年間の緊急の往診の実績が３件以上 ② 第９在宅療養支援診療所の１(１)コに掲げる過去１年間の在宅における看取りの実績が１件以上又は過去１年間の 15 歳未満の超重症児及び準超重症児に対する在宅医療の実績が１件以上",
+  "note": "かかりつけ機能の届出(ア〜キ)+(3)〜(7)が前提。ゲームは要件キ(在医総管届出=r08-fs-zaishien+在宅部門開設・在支診は通常型)で代表し、実績要件と(3)〜(7)は判定しない。要件カ(機能強化型)はゲームの在支診が通常型のため対象外(v48照合で当てはめをカ→キに訂正)。quoteは(イ)①②まで((ロ)在支病は割愛=ゲームの対象は診療所)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A000-n16-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.5",
+  "quote": "16 医療ＤＸ推進に係る体制として別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関を受診した患者に対して初診を行った場合は、電子的診療情報連携体制整備加算として、月１回に限り、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。この場合において、区分番号Ａ００１に掲げる再診料の注11に規定する明細書発行体制等加算は別に算定できない。 イ 電子的診療情報連携体制整備加算１ 15点 ロ 電子的診療情報連携体制整備加算２ ９点 ハ 電子的診療情報連携体制整備加算３ ４点",
+  "note": "【否定的確認】R6の「医療DX推進体制整備加算」は、R8の医科点数表告示(69号)・基本診療料の施設基準通知(7号)・特掲診療料の施設基準通知(8号)のいずれにも名称が現れず、R8マスターにも外来向け0件(在宅・訪問看護のDX情報活用加算のみ)。R8では医療DX推進に係る体制がA000注16・A001注19の電子的診療情報連携体制整備加算として評価されている。両者の対応関係(再編)を明示した一次資料は未確認=当てはめは推定。マスター突合: 111704070=15点・111704170=9点・111704270=4点・月1回で一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A001-n19",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.7",
+  "quote": "19 医療ＤＸ推進に係る体制として別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関を受診した患者に対して再診を行った場合は、電子的診療情報連携体制整備加算として、月１回に限り２点を所定点数に加算する。この場合において、注11に規定する明細書発行体制等加算は別に算定できない。",
+  "note": "マスター突合: 112709570=2点・月1回で一致。明細書加算との排他は電子点数表same_month背反にも収載(便Hで確認済み)"
+ },
+ {
+  "entity_type": "fs",
+  "entity_id": "r08-fs-a000-n16-3",
+  "field": "system_req",
+  "document_id": "r08-tsuchi7-kihon-todokede",
+  "page": "PDF p.23(第1の8「電子的診療情報連携体制整備加算」1)",
+  "quote": "(４) 電子的診療情報連携体制整備加算を算定する月の３月前のレセプト件数ベースマイナ保険証利用率（同月におけるマイナ保険証利用者数を、同月の患者数で除した割合であって、社会保険診療報酬支払基金から報告されるものをいう。以下同じ。）が、30％以上であること。",
+  "note": "区分3=(1)〜(8)・区分2=+(9)〜(11)のいずれか・区分1=全て。届出は様式1の6。(4)(6)は「満たしていればよく届出不要」(第1の8-4(3))。マイナ保険証利用率はゲームでは体制投資で満たした扱い(ゲーム上の仮定として実装側に明記)"
+ },
+ {
+  "entity_type": "rule",
+  "entity_id": "r08-rule-0016",
+  "field": "condition",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.5",
+  "quote": "この場合において、区分番号Ａ００１に掲げる再診料の注11に規定する明細書発行体制等加算は別に算定できない。",
+  "note": "v48で相手項目(電子的連携)を登録し当てはめを更新。月単位・患者単位の排他はKASANの排他+連携有効時に明細書行を発行しない運用で担保(machine note参照)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A000-n16-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.5",
+  "quote": "16 医療ＤＸ推進に係る体制として別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関を受診した患者に対して初診を行った場合は、電子的診療情報連携体制整備加算として、月１回に限り、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。この場合において、区分番号Ａ００１に掲げる再診料の注11に規定する明細書発行体制等加算は別に算定できない。 イ 電子的診療情報連携体制整備加算１ 15点 ロ 電子的診療情報連携体制整備加算２ ９点 ハ 電子的診療情報連携体制整備加算３ ４点",
+  "note": "告示A000注16の区分別点数。マスター突合: 111704170=9点・月1回で一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-A000-n16-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.5",
+  "quote": "16 医療ＤＸ推進に係る体制として別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関を受診した患者に対して初診を行った場合は、電子的診療情報連携体制整備加算として、月１回に限り、当該基準に係る区分に従い、次に掲げる点数をそれぞれ所定点数に加算する。この場合において、区分番号Ａ００１に掲げる再診料の注11に規定する明細書発行体制等加算は別に算定できない。 イ 電子的診療情報連携体制整備加算１ 15点 ロ 電子的診療情報連携体制整備加算２ ９点 ハ 電子的診療情報連携体制整備加算３ ４点",
+  "note": "告示A000注16の区分別点数。マスター突合: 111704270=4点・月1回で一致。併算定不可の一文はゲームの安全側運用(届出後は明細書加算を一律取り下げ)の根拠"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-y620004641",
+  "field": "conditions",
+  "document_id": "r08-tsuchi-choki-shohou",
+  "page": "PDF p.4(第1の6)・p.2(第1の2(1))",
+  "quote": "長期収載品を院内処方する場合においても、医療上必要があると認められる場合及び後発医薬品を提供することが困難な場合は引き続き保険給付としつつ、それ以外の場合に患者が長期収載品を希望する場合は選定療養の対象とすること。",
+  "note": "【調査結果=当初見立ての棄却】「注射薬は選定療養の対象外」の否定的確認を試みたが、院内処方も対象であり(第1の6)、マスターに(選)コード(670004641=631.50円)が実在=注射薬も対象になりうる。選定療養は「患者が長期収載品を希望した場合」に発動する仕組みのため、患者希望の入力を持たない本ゲームは通常の保険給付(663円/66点)で算定し選定療養を扱わない。「医師施行の注射が第1の6の院内処方に当たるか」は原典から確定できず論点として残す(決裁溜め(j))"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D256-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.203",
+  "quote": "Ｄ２５６－２ 眼底三次元画像解析 190点 注 患者１人につき月１回に限り算定する。ただし、眼底三次元画像解析と併せて行った、区分番号Ｄ２５６の１に掲げる眼底カメラ撮影の通常の方法の場合に係る費用は、所定点数に含まれるものとする。",
+  "note": "マスター160183310=190と一致。EDT算定回数テーブル(単位=月・上限1)とも一致。留意事項通知の検査の部にD256-2の項は無い(D256の次はD256-3)=注のみが運用の根拠(否定的確認)。包括相手のD256の1(眼底カメラ通常撮影)はKB未登録のため機械化せずconditionsに記載"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D260-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.203",
+  "quote": "Ｄ２６０ 量的視野検査（片側） １ 動的量的視野検査 195点 ２ 静的量的視野検査 290点",
+  "note": "マスター160082010=195(片側)・160082130=390(両側)と一致。EDT算定回数テーブルにセルなし=回数制限なし(否定的確認)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D260-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.203",
+  "quote": "Ｄ２６０ 量的視野検査（片側） １ 動的量的視野検査 195点 ２ 静的量的視野検査 290点",
+  "note": "マスター160082210=290(片側)と一致。両側セルは動的(160082130)のみ存在し静的には無い(マスター全件走査で否定的確認)。EDT算定回数テーブルにセルなし=回数制限なし"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D260-2",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.430",
+  "quote": "量的視野検査には、全視野にわたって検査する場合のほか、例えば、中心視野を特に重点的に検査する量的中心視野検査等、視野の一定部位を限定して検査する場合があるが、２つ以上の部位にわたって当該検査を同時に実施した場合においても、所定点数のみを算定する。",
+  "note": "留意D260。動的(D260-1)にも同文が適用される"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-D260-1",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.430",
+  "quote": "量的視野検査には、全視野にわたって検査する場合のほか、例えば、中心視野を特に重点的に検査する量的中心視野検査等、視野の一定部位を限定して検査する場合があるが、２つ以上の部位にわたって当該検査を同時に実施した場合においても、所定点数のみを算定する。",
+  "note": "留意D260。区分全体(動的・静的)を対象とする記述"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-zaishien",
+  "field": "form_no",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "PDF p.95",
+  "quote": "４ 届出に関する事項 １の(１)及び(２)の在宅療養支援診療所の施設基準に係る届出は、別添２の様式11及び様式11の３を用いること。１の(３)の在宅療養支援診療所の施設基準に係る届出は、別添２の様式11を用いること。",
+  "note": "通常型(類型(3)=従来型)の届出は様式11のみ。様式11の届出区分欄「４.第９の１の(３)に規定する在宅療養支援診療所(従来型)」(PDF p.501)でも確認。様式11の2は在宅療養支援病院の届出書添付書類(p.542の記載上の留意事項1にも明記)。従前の「様式11の2(類型(3))」記載は誤りだった=保留#24の決着(v50)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-2-ro-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.141",
+  "quote": "（２に規定する在宅療養支援診療所等の場合）ロ 月２回以上訪問診療を行っている場合（イの場合を除く。） （１）単一建物診療患者が１人の場合 3,685点 （２）単一建物診療患者が２人以上９人以下の場合 1,985点 （３）単一建物診療患者が10人以上19人以下の場合 985点 （4）単一建物診療患者が20人以上49人以下の場合 875点 （5）（１）から（4）まで以外の場合 745点",
+  "note": "マスター114032910=1985と一致(マスター名「在宅時医学総合管理料(在宅療養支援診療所等(1に規定するものを除く))(月2回以上・2人〜9人)」)。1人セル(114032810=3,685)は登録済みと一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-2-ro-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.141",
+  "quote": "（２に規定する在宅療養支援診療所等の場合）ロ 月２回以上訪問診療を行っている場合（イの場合を除く。） （１）単一建物診療患者が１人の場合 3,685点 （２）単一建物診療患者が２人以上９人以下の場合 1,985点 （３）単一建物診療患者が10人以上19人以下の場合 985点 （4）単一建物診療患者が20人以上49人以下の場合 875点 （5）（１）から（4）まで以外の場合 745点",
+  "note": "マスター114711810=985と一致(マスター名「在宅時医学総合管理料(在宅療養支援診療所等(1に規定するものを除く))(月2回以上・10人〜19人)」)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-2-ro-4",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.141",
+  "quote": "（２に規定する在宅療養支援診療所等の場合）ロ 月２回以上訪問診療を行っている場合（イの場合を除く。） （１）単一建物診療患者が１人の場合 3,685点 （２）単一建物診療患者が２人以上９人以下の場合 1,985点 （３）単一建物診療患者が10人以上19人以下の場合 985点 （4）単一建物診療患者が20人以上49人以下の場合 875点 （5）（１）から（4）まで以外の場合 745点",
+  "note": "マスター114711910=875と一致(マスター名「在宅時医学総合管理料(在宅療養支援診療所等(1に規定するものを除く))(月2回以上・20人〜49人)」)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-2-ro-5",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.141",
+  "quote": "（２に規定する在宅療養支援診療所等の場合）ロ 月２回以上訪問診療を行っている場合（イの場合を除く。） （１）単一建物診療患者が１人の場合 3,685点 （２）単一建物診療患者が２人以上９人以下の場合 1,985点 （３）単一建物診療患者が10人以上19人以下の場合 985点 （4）単一建物診療患者が20人以上49人以下の場合 875点 （5）（１）から（4）まで以外の場合 745点",
+  "note": "マスター114712010=745と一致(マスター名「在宅時医学総合管理料(在宅療養支援診療所等(1に規定するものを除く))(月2回以上・50人〜)」)"
+ },
+ {
+  "entity_type": "billing_rule",
+  "entity_id": "r08-rule-0018",
+  "field": "condition",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.257",
+  "quote": "１つの患家に在宅時医学総合管理料又は施設入居時等医学総合管理料の対象となる同居する同一世帯の患者が２人以上いる場合の在宅時医学総合管理料又は施設入居時等医学総合管理料は、患者ごとに「単一建物診療患者が１人の場合」を算定すること。また、在宅時医学総合管理料について、当該建築物において当該保険医療機関が在宅医学管理を行う患者数が、当該建築物の戸数の10％以下の場合又は当該建築物の戸数が20戸未満であって、当該保険医療機関が在宅医学管理を行う患者が２人以下の場合には、それぞれ「単一建物診療患者が１人の場合」を算定すること。",
+  "note": "みなし1人の例外3種(留意(11))。②③は「在宅時医学総合管理料について」の限定付き=施設総管には掛からない"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-2-ro-3",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.144",
+  "quote": "14 １のイの（１）の③から⑤まで、１のイの（２）の③から⑤まで、１のイの（３）の③から⑤まで、１のイの（４）の③から⑤まで、１のイの（５）の③から⑤まで、１のロの（１）の③から⑤まで、１のロの（２）の③から⑤まで、１のロの（３）の③から⑤まで、１のロの（４）の③から⑤まで、１のロの（５）の③から⑤まで、２のイの（３）から（５）まで、２のロの（３）から（５）まで、２のハの（３）から（５）まで、２のニの（３）から（５）まで、２のホの（３）から（５）まで、３のイの（３）から（５）まで、３のロの（３）から（５）まで、３のハの（３）から（５）まで、３のニの（３）から（５）まで及び３のホの（３）から（５）までについて、別に厚生労働大臣が定める基準を満たさない場合には、それぞれ所定点数の100分の60に相当する点数を算定する。",
+  "note": "4割減算。2のロの(3)〜(5)=ro-3/ro-4/ro-5に掛かる(ro-1/ro-2は対象外)。長い列挙は中略(v50 PM検出F1)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-2-ro-1",
+  "field": "conditions",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.144",
+  "quote": "16 １のイの（２）、１のイの（３）､１のロの（２）､１のロの（３）、２のロ、２のハ、３のロ及び３のハについて、別に厚生労働大臣が定める基準を満たさない場合には、それぞれ１のイの（４）、１のイの（４）､１のロの（４）､１のロの（４）、２のニ、２のニ、３のニ及び３のニを算定する。",
+  "note": "セル置換。2のロ全体=ro-1〜ro-5に掛かる。基準未達なら月1回の行(2のニ)で算定。長い列挙は中略(v50 PM検出F1)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C001-1-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.136",
+  "quote": "１ 在宅患者訪問診療料１ イ 同一建物居住者以外の場合 890点 ロ 同一建物居住者の場合 215点",
+  "note": "マスター114030310=215と一致。定義は同注1「当該患者が同一建物居住者（当該患者と同一の建物に居住する他の患者に対して当該保険医療機関が同一日に訪問診療を行う場合の当該患者をいう。以下この区分番号において同じ。）」に内蔵"
+ },
+ {
+  "entity_type": "billing_rule",
+  "entity_id": "r08-rule-0019",
+  "field": "condition",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.250",
+  "quote": "同一建物居住者とは、基本的には、建築基準法（昭和25年法律第201号）第２条第１号に掲げる建築物に居住する複数の者（往診を実施した患者、末期の悪性腫瘍と診断した後に訪問診療を行い始めた日及びその翌日以後59日以内（計60日間）の患者、又は死亡日及び死亡日前29日以内（計30日間）の患者を除く。）のことをいう。",
+  "note": "留意(3)。(4)=1人のみ訪問は「以外」・(5)=同一患家2人以上は1人目「以外」+2人目以降は初診料・再診料・外来診療料と第2章特掲診療料のみ、はp.250-251にまたがる。(5)はゲームの1戸1患者配置で発動しない(否定的確認)"
+ },
+ {
+  "entity_type": "billing_rule",
+  "entity_id": "r08-rule-0020",
+  "field": "condition",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.256",
+  "quote": "在宅時医学総合管理料又は施設入居時等医学総合管理料は、別に厚生労働大臣の定める施設基準に適合しているものとして地方厚生（支）局長に届け出た保険医療機関の保険医が、在宅療養計画に基づき診療を行った場合に月１回に限り算定する。",
+  "note": "患者単位の月1回はセル(人数区分)横断。LIMITSのitem単位月1回では塞げないためsame_month_group機械化(v51)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ro-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ロ 在宅療養実績加算１ （１）単一建物診療患者が１人の場合 300点 （２）単一建物診療患者が２人以上９人以下の場合 150点 （３）単一建物診療患者が10人以上19人以下の場合 75点 （4）単一建物診療患者が20人以上49人以下の場合 63点 （5）（１）から（4）まで以外の場合 56点",
+  "note": "マスター114034870/114034970/114716610/114716710/114716810と全一致。イ(充実体制800/400/200/170/150=114034570他)・ハ(実績2 200/100/50/43/38=114035170他)も同様に突合一致(v52コミット0)。代表セルにのみevidenceを置き他セルは同quoteを準用"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-c002-n7-jisseki1",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "PDF p.94",
+  "quote": "(４) 往診料の加算等に規定する在宅療養実績加算１の施設基準 １の(３)に規定する在宅療養支援診療所であって、過去１年間の緊急の往診の実績を10件以上有し、かつ、過去１年間の在宅における看取りの実績を４件以上有していること。",
+  "note": "1の(3)=従来型(通常型)在支診が主体=ゲームの在支診で届出可能。実績加算2(第9の2の(5))は緊急往診4件・看取り2件+緩和ケア研修修了常勤医。充実体制(2の(3)イ)は1の(1)(2)=機能強化型限定でゲーム対象外"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n10",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "10 １のイの（２）から（５）まで、１のロの（２）から（５）まで、２のロからホまで及び３のロからホまでについて、別に厚生労働大臣が定める状態の患者については、包括的支援加算として、150点を所定点数に加算する。",
+  "note": "マスター114043870=150と一致。適用は2のロ全体=登録済みro-1〜5の全人数セル(1人セルを含む。C002の2は注10で(2)〜(5)の限定が無い)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n13",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.144",
+  "quote": "13 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において、当該保険医療機関における診療報酬の請求状況、診療の内容に関するデータを継続して厚生労働省に提出している場合は、在宅データ提出加算として、50点を所定点数に加算する。",
+  "note": "マスター114057970=50と一致。施設基準はtsuchi8 p.126(外来医療等調査参加+データ提出体制)・様式7の11(p.127)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n15",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.144",
+  "quote": "15 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た訪問診療を実施している保険医療機関の保険医が、在宅での療養を行っている患者であって通院が困難なものの同意を得て、当該保険医療機関と連携する他の保険医療機関の保険医、歯科訪問診療を実施している保険医療機関の保険医である歯科医師等、訪問薬剤管理指導を実施している保険薬局の保険薬剤師、訪問看護ステーションの保健師、助産師、看護師、理学療法士、作業療法士若しくは言語聴覚士、管理栄養士、介護支援専門員又は相談支援専門員等であって当該患者に関わる者が電子情報処理組織を使用する方法その他の情報通信の技術を利用する方法を用いて記録した当該患者に係る診療情報等を活用した上で、計画的な医学管理を行った場合に、在宅医療情報連携加算として、月１回に限り、100点を所定点数に加算する。",
+  "note": "マスター114723810=100(月1回)と一致。体制+患者単位の実態の二要件=rule-0022"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-i-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "イ 在宅医療充実体制加算 （１）単一建物診療患者が１人の場合 800点 （２）単一建物診療患者が２人以上９人以下の場合 400点 （３）単一建物診療患者が10人以上19人以下の場合 200点 （4）単一建物診療患者が20人以上49人以下の場合 170点 （5）（１）から（4）まで以外の場合 150点",
+  "note": "マスター114034570=800と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-i-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "イ 在宅医療充実体制加算 （１）単一建物診療患者が１人の場合 800点 （２）単一建物診療患者が２人以上９人以下の場合 400点 （３）単一建物診療患者が10人以上19人以下の場合 200点 （4）単一建物診療患者が20人以上49人以下の場合 170点 （5）（１）から（4）まで以外の場合 150点",
+  "note": "マスター114034670=400と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-i-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "イ 在宅医療充実体制加算 （１）単一建物診療患者が１人の場合 800点 （２）単一建物診療患者が２人以上９人以下の場合 400点 （３）単一建物診療患者が10人以上19人以下の場合 200点 （4）単一建物診療患者が20人以上49人以下の場合 170点 （5）（１）から（4）まで以外の場合 150点",
+  "note": "マスター114716110=200と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-i-4",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "イ 在宅医療充実体制加算 （１）単一建物診療患者が１人の場合 800点 （２）単一建物診療患者が２人以上９人以下の場合 400点 （３）単一建物診療患者が10人以上19人以下の場合 200点 （4）単一建物診療患者が20人以上49人以下の場合 170点 （5）（１）から（4）まで以外の場合 150点",
+  "note": "マスター114716210=170と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-i-5",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "イ 在宅医療充実体制加算 （１）単一建物診療患者が１人の場合 800点 （２）単一建物診療患者が２人以上９人以下の場合 400点 （３）単一建物診療患者が10人以上19人以下の場合 200点 （4）単一建物診療患者が20人以上49人以下の場合 170点 （5）（１）から（4）まで以外の場合 150点",
+  "note": "マスター114716310=150と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ro-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ロ 在宅療養実績加算１ （１）単一建物診療患者が１人の場合 300点 （２）単一建物診療患者が２人以上９人以下の場合 150点 （３）単一建物診療患者が10人以上19人以下の場合 75点 （4）単一建物診療患者が20人以上49人以下の場合 63点 （5）（１）から（4）まで以外の場合 56点",
+  "note": "マスター114034970=150と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ro-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ロ 在宅療養実績加算１ （１）単一建物診療患者が１人の場合 300点 （２）単一建物診療患者が２人以上９人以下の場合 150点 （３）単一建物診療患者が10人以上19人以下の場合 75点 （4）単一建物診療患者が20人以上49人以下の場合 63点 （5）（１）から（4）まで以外の場合 56点",
+  "note": "マスター114716610=75と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ro-4",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ロ 在宅療養実績加算１ （１）単一建物診療患者が１人の場合 300点 （２）単一建物診療患者が２人以上９人以下の場合 150点 （３）単一建物診療患者が10人以上19人以下の場合 75点 （4）単一建物診療患者が20人以上49人以下の場合 63点 （5）（１）から（4）まで以外の場合 56点",
+  "note": "マスター114716710=63と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ro-5",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ロ 在宅療養実績加算１ （１）単一建物診療患者が１人の場合 300点 （２）単一建物診療患者が２人以上９人以下の場合 150点 （３）単一建物診療患者が10人以上19人以下の場合 75点 （4）単一建物診療患者が20人以上49人以下の場合 63点 （5）（１）から（4）まで以外の場合 56点",
+  "note": "マスター114716810=56と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ha-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ハ 在宅療養実績加算２ （１）単一建物診療患者が１人の場合 200点 （２）単一建物診療患者が２人以上９人以下の場合 100点 （３）単一建物診療患者が10人以上19人以下の場合 50点 （4）単一建物診療患者が20人以上49人以下の場合 43点 （5）（１）から（4）まで以外の場合 38点",
+  "note": "マスター114035170=200と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ha-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ハ 在宅療養実績加算２ （１）単一建物診療患者が１人の場合 200点 （２）単一建物診療患者が２人以上９人以下の場合 100点 （３）単一建物診療患者が10人以上19人以下の場合 50点 （4）単一建物診療患者が20人以上49人以下の場合 43点 （5）（１）から（4）まで以外の場合 38点",
+  "note": "マスター114035270=100と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ha-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ハ 在宅療養実績加算２ （１）単一建物診療患者が１人の場合 200点 （２）単一建物診療患者が２人以上９人以下の場合 100点 （３）単一建物診療患者が10人以上19人以下の場合 50点 （4）単一建物診療患者が20人以上49人以下の場合 43点 （5）（１）から（4）まで以外の場合 38点",
+  "note": "マスター114717110=50と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ha-4",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ハ 在宅療養実績加算２ （１）単一建物診療患者が１人の場合 200点 （２）単一建物診療患者が２人以上９人以下の場合 100点 （３）単一建物診療患者が10人以上19人以下の場合 50点 （4）単一建物診療患者が20人以上49人以下の場合 43点 （5）（１）から（4）まで以外の場合 38点",
+  "note": "マスター114717210=43と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-C002-n7-ha-5",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.143",
+  "quote": "ハ 在宅療養実績加算２ （１）単一建物診療患者が１人の場合 200点 （２）単一建物診療患者が２人以上９人以下の場合 100点 （３）単一建物診療患者が10人以上19人以下の場合 50点 （4）単一建物診療患者が20人以上49人以下の場合 43点 （5）（１）から（4）まで以外の場合 38点",
+  "note": "マスター114717310=38と一致(v52コミット0で全15セル突合済み)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-i-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113712470=30と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-i-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113712870=20と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-i-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113712670=10と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-ro-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113712570=30と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-ro-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113712970=20と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-ro-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113713070=10と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-ha-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113712370=30と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-ha-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113712270=20と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n4-ha-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.113-114",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113712770=10と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-n5",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.114",
+  "quote": "５ 糖尿病を主病とする患者に対して、診療に基づき、糖尿病合併症の予防、診断又は治療を目的とする眼科診療の必要を認め、患者の同意を得て、患者が眼科を標榜する他の保険医療機関への受診を行うに当たり必要な連携を行った場合は、眼科医療機関連携強化加算として、患者１人につき年１回に限り所定点数に60点を加算する。",
+  "note": "マスター113713170=60と一致(v53コミット0で20コード突合)。生活習慣病管理料(I)(B001-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-i-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113708970=30と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-i-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113708870=20と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-i-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113709070=10と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-ro-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113709170=30と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-ro-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113709270=20と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-ro-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113709370=10と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-ha-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113716370=30と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-ha-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113709570=20と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n4-ha-3",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "４ 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関においては、当該基準に係る区分及び患者の主病に応じて、以下に掲げる点数を所定点数に加算する。 イ 充実管理加算（脂質異常症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ロ 充実管理加算（高血圧症を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点 ハ 充実管理加算（糖尿病を主病とする場合） （１）充実管理加算１ 30点 （２）充実管理加算２ 20点 （3）充実管理加算３ 10点",
+  "note": "マスター113709670=10と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-B001-3-3-n5",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.115",
+  "quote": "５ 糖尿病を主病とする患者に対して、診療に基づき、糖尿病合併症の予防、診断又は治療を目的とする眼科診療の必要を認め、患者の同意を得て、患者が眼科を標榜する他の保険医療機関への受診を行うに当たり必要な連携を行った場合は、眼科医療機関連携強化加算として、患者１人につき年１回に限り所定点数に60点を加算する。",
+  "note": "マスター113709770=60と一致(v53コミット0で20コード突合)。生活習慣病管理料(II)(B001-3-3)の注"
+ },
+ {
+  "entity_type": "billing_rule",
+  "entity_id": "r08-rule-0024",
+  "field": "condition",
+  "document_id": "r08-qa-05",
+  "page": "PDF p.5 (医-3 問12)",
+  "quote": "問12 生活習慣病管理料（Ⅱ）に新設された、眼科医療機関連携強化加算と歯科医療機関連携強化加算について、当該加算の対象となる眼科や歯科への紹介に当たって、診療情報提供料（Ⅰ）を併せて算定することは可能か。また、これらの算定が同月であっても算定可能か。（答）算定可能。",
+  "note": "同答は「眼科医療機関連携強化加算及び歯科医療機関連携強化加算は、次回診療時に、当該他の保険医療機関への受診状況について確認した場合に算定することとなる」とも明記。「同一の保険医療機関」の文は紹介先の眼科・歯科が同一機関である場合の話で、紹介元との関係(特別の関係)ではない"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-F400-n4",
+  "field": "conditions",
+  "document_id": "r08-kokuji71-tokkei",
+  "page": "PDF p.238-239",
+  "quote": "別表第一 特定疾患療養管理料並びに処方料及び処方箋料の特定疾患処方管理加算に規定する疾患 結核 悪性新生物 甲状腺障害 処置後甲状腺機能低下症 スフィンゴリピド代謝障害及びその他の脂質蓄積障害 ムコ脂質症 リポ蛋白代謝障害及びその他の脂（質）血症（家族性高コレステロール血症等の遺伝性疾患に限る。） リポジストロフィー ローノア・ベンソード腺脂肪腫症 虚血性心疾患 不整脈 心不全 脳血管疾患 一過性脳虚血発作及び関連症候群",
+  "note": "縦書きPDFをpypdfでp.238-240抽出し別表第一の全文(別表第二の前まで)を走査: 「高血圧」「糖尿病」「脂質異常症」の語は含まれない(否定的確認・v53)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-n11-i-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.241-242",
+  "quote": "イ 早期診療体制充実加算1 （１） 当該保険医療機関の精神科を最初に受診した日から３年以内の期間に行った場合 50点 （２） （１）以外の場合 15点",
+  "note": "医科診療行為マスター 180761570=50とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-n11-i-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.241-242",
+  "quote": "イ 早期診療体制充実加算1 （１） 当該保険医療機関の精神科を最初に受診した日から３年以内の期間に行った場合 50点 （２） （１）以外の場合 15点",
+  "note": "医科診療行為マスター 180761670=15とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-n11-ro-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.241-242",
+  "quote": "ロ 早期診療体制充実加算2 （１） 当該保険医療機関の精神科を最初に受診した日から３年以内の期間に行った場合 20点 （２） （１）以外の場合 15点",
+  "note": "医科診療行為マスター 180761370=20とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-n11-ro-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.241-242",
+  "quote": "ロ 早期診療体制充実加算2 （１） 当該保険医療機関の精神科を最初に受診した日から３年以内の期間に行った場合 20点 （２） （１）以外の場合 15点",
+  "note": "医科診療行為マスター 180761470=15とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-n11-ha-1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.241-242",
+  "quote": "ハ 早期診療体制充実加算3 （１） 当該保険医療機関の精神科を最初に受診した日から３年以内の期間に行った場合 15点 （２） （１）以外の場合 10点",
+  "note": "医科診療行為マスター 180775670=15とも一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-I002-n11-ha-2",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "p.241-242",
+  "quote": "ハ 早期診療体制充実加算3 （１） 当該保険医療機関の精神科を最初に受診した日から３年以内の期間に行った場合 15点 （２） （１）以外の場合 10点",
+  "note": "医科診療行為マスター 180775570=10とも一致"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-i002-n11-1",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "PDF p.205-207",
+  "quote": "(１) 早期診療体制充実加算１の施設基準 ア 常勤の精神保健指定医が１名以上配置されていること。 イ 当該保険医療機関が過去６か月間に実施した通院・在宅精神療法の算定回数に占める、通院・在宅精神療法の「１」のロ若しくはハの（１）又は「２」のロ若しくはハの（１）若しくは（２）の算定回数の合計の割合が５％以上であること。",
+  "note": "届出は別添2様式44の5の3(第47の7の7の(5)・PDF p.210。様式一覧 PDF p.439 『47の7 早期診療体制充実加算 44の5の3』)"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-i002-n11-2",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "p.207",
+  "quote": "(２) 早期診療体制充実加算２の施設基準 ア 病院であること。 イ （１）のア、イ及びエからカまでを満たしていること。",
+  "note": "届出は別添2様式44の5の3(第47の7の7の(5)・PDF p.210。様式一覧 PDF p.439 『47の7 早期診療体制充実加算 44の5の3』)"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-i002-n11-3",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "p.207",
+  "quote": "(３) 早期診療体制充実加算３の施設基準 ア 診療所であること。 イ （１）のア、オ及びカを満たしていること。 ウ 当該保険医療機関が過去６か月間に実施した通院・在宅精神療法の算定回数に占める、通院・在宅精神療法の「１」のロ若しくはハの（１）又は「２」のロ若しくはハの（１）若しくは（２）の算定回数の合計の割合が２％以上であること。 エ 当該保険医療機関が過去６か月間に実施した通院・在宅精神療法の「１」のロの（１）又は「２」のロの（１）の算定回数及び「１」のロの（２）又は「２」のロの（２）の算定回数を２で除した回数の合計算定回数を、当該保険医療機関に勤務する精神科を担当する医師の数で除した数が 24 以上であること。 オ 以下のいずれかを満たすこと。 (イ) 精神科救急医療確保事業において常時対応型施設若しくは病院群輪番型施設として指定を受けている又は身体合併症救急医療確保事業において指定を受けている病院（以下この項において連携病院という。）と連携し、以下の①から③までを満たしていること。 ① １年に１回以上、連携病院に入院中の患者に対して共同指導を行うことで、退院時共同指導料１又は精神科退院時共同指導料１を算定していること。 ② 当該診療所に通院している患者への時間外や休日の対応及び緊急時の入院受け入れを連携病院が行うこと、連携病院から退院した患者を当該診療所において受け入れること等、相互に連携しており、緊急患者の受け入れに当たっては、連携病院が当該診療所に対して、常時連絡できる連絡先を伝えていること。当該内容を含め、明確に連携していることを示す文書を取り交わしていること。なお、当該診療所は必要に応じて、連携病院からの問い合わせ等に対応すること。 ③ 連携している病院名及び連絡先を当該診療所内に掲示していること。 (ロ) （１）のエを満たしていること。",
+  "note": "届出は別添2様式44の5の3(第47の7の7の(5)・PDF p.210。様式一覧 PDF p.439 『47の7 早期診療体制充実加算 44の5の3』)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n1",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.262",
+  "quote": "注１ 入院中の患者以外の患者に対して、午後５時以降に開始した場合若しくは午後９時以降に終了した場合又は休日に行った場合は、時間外・休日加算として、380点を所定点数に加算する。",
+  "note": "マスター140007910=380と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n1",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.565",
+  "quote": "(12) 「注１」の加算については、人工腎臓を緊急のため午後５時以降に開始したため又は緊急のため休日に行ったため、通則５による時間外加算等が算定できる場合にあっては、併せて算定できない。 (13) 「注１」の加算を算定する場合は、「Ａ０００」初診料の「注９」及び「Ａ００１」再診料の「注７」に掲げる夜間・早朝等加算は算定しない。",
+  "note": "ゲームには緊急(通則5)も夜間・早朝等加算のセルも無い=否定的確認(v55)"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-2-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.262",
+  "quote": "2 慢性維持透析を行った場合2 ロ ４時間以上５時間未満の場合 1,976点",
+  "note": "マスター140058210=1976と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-3-ro",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.262",
+  "quote": "3 慢性維持透析を行った場合3 ロ ４時間以上５時間未満の場合 1,931点",
+  "note": "マスター140058510=1931と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-3-ro",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.563",
+  "quote": "「慢性維持透析を行った場合３」については、「１」又は「２」の施設基準のいずれかに該当するものとして届出を行った保険医療機関以外の保険医療機関において算定する。",
+  "note": "区分3は届出不要(v55)"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-j038-2",
+  "field": "equipment_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "PDF p.229",
+  "quote": "(２) 慢性維持透析を行った場合２の施設基準 ア 次のいずれにも該当する保険医療機関であること。 ① 透析用監視装置の台数が 26 台以上であること。 ② 透析用監視装置一台当たりの「Ｊ０３８」人工腎臓の「１」から「３」を算定した患者数（外来患者に限る。）の割合が 3.5 以上 4.0 未満であること。",
+  "note": "v55"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n13",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.263",
+  "quote": "13 １から３までについては、別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において慢性維持透析濾過（複雑なものに限る。）を行った場合には、慢性維持透析濾過加算として、所定点数に50点を加算する。",
+  "note": "マスター140059170=50と一致"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-j038-n13",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "PDF p.231",
+  "quote": "４ 慢性維持透析濾過加算の施設基準 慢性維持透析濾過加算の施設基準及び届出に関する事項は、第 57 の２の「３」透析液水質確保加算の例による。 ３ 透析液水質確保加算の施設基準 月１回以上水質検査を実施し、関連学会から示されている基準を満たした血液透析濾過用の置換液を作製し、使用していること。",
+  "note": "届出は第57の2の6の(3)「透析液水質確保加算及び慢性維持透析濾過加算の施設基準に係る届出は別添２の様式 49 の３を用いること」(PDF p.231)"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-j038-suishitsu",
+  "field": "form_no",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "PDF p.231",
+  "quote": "(３) 透析液水質確保加算及び慢性維持透析濾過加算の施設基準に係る届出は別添２の様式 49 の３を用いること。",
+  "note": "v55訂正: 従来の「様式49」は写し誤り"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n10",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.263",
+  "quote": "10 別に厚生労働大臣が定める施設基準に適合しているものとして地方厚生局長等に届け出た保険医療機関において、人工腎臓を実施している患者に係る下肢末梢動脈疾患の重症度等を評価し、療養上必要な指導管理を行った場合には、下肢末梢動脈疾患指導管理加算として、月１回に限り所定点数に100点を加算する。",
+  "note": "マスター140055970=100と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n10",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.566-567",
+  "quote": "「注 10」の下肢末梢動脈疾患指導管理加算は、当該保険医療機関において慢性維持透析を実施している全ての患者に対しリスク評価等を行った場合に算定できる。その際「血液透析患者における心血管合併症の評価と治療に関するガイドライン」等に基づき、下肢動脈の触診や下垂試験・挙上試験等を実施した上で、下肢末梢動脈の虚血性病変が疑われる場合には足関節上腕血圧比（ＡＢＩ）検査又は皮膚組織灌流圧（ＳＰＰ）検査によるリスク評価を行っていること。また、ＡＢＩ検査 0.7 以下又はＳＰＰ検査 40mmHg 以下の患者については、専門的な治療体制を有している保険医療機関へ紹介を行うこと。当該保険医療機関が専門的な治療体制を有している保険医療機関の要件を満たしている場合は、当該保険医療機関内の専門科と連携を行っていること。",
+  "note": "v56"
+ },
+ {
+  "entity_type": "facility_standard",
+  "entity_id": "r08-fs-j038-n10",
+  "field": "system_req",
+  "document_id": "r08-tsuchi8-tokkei-todokede",
+  "page": "PDF p.232",
+  "quote": "第 57 の２の２ 下肢末梢動脈疾患指導管理加算 １ 下肢末梢動脈疾患指導管理加算に関する施設基準 (１) 当該保険医療機関において慢性維持透析を実施している全ての患者に対し、下肢末梢動脈疾患に関するリスク評価を行っていること。また、当該内容をもとに当該保険医療機関において慢性維持透析を実施している全ての患者に指導管理等を行い、臨床所見、検査実施日、検査結果及び指導内容等を診療録に記載していること。 (２) 検査の結果、ＡＢＩ検査 0.7 以下又はＳＰＰ検査 40mmHg 以下の患者については、患者や家族に説明を行い、同意を得た上で、専門的な治療体制を有している保険医療機関へ紹介を行っていること。また、当該保険医療機関が専門的な治療体制を有している保険医療機関の要件を満たしている場合は、当該保険医療機関内の専門科と連携を行っていること。 (３) 専門的な治療体制を有している連携先の保険医療機関をあらかじめ定めた上で、当該保険医療機関について事前に届出を行っていること。また、連携先の保険医療機関について、院内掲示をすること。なお、専門的な治療体制を有している保険医療機関とは、次に掲げるアからウまでの全ての診療科を標榜している病院のことをいう。 ア 循環器内科 イ 胸部外科又は血管外科 ウ 整形外科、皮膚科又は形成外科",
+  "note": "v56"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n14",
+  "field": "points",
+  "document_id": "r08-kokuji69-ika",
+  "page": "PDF p.263",
+  "quote": "14 人工腎臓を実施している患者に対して、医師、看護師、理学療法士又は作業療法士が、療養上必要な訓練等について指導を行った場合には、透析時運動指導等加算として、当該指導を開始した日から起算して90日を限度として、75点を所定点数に加算する。",
+  "note": "マスター140062870=75と一致"
+ },
+ {
+  "entity_type": "item",
+  "entity_id": "r08-J038-n14",
+  "field": "conditions",
+  "document_id": "r08-ryuiji-ika",
+  "page": "p.567",
+  "quote": "「注 14」に掲げる透析時運動指導等加算については、透析患者の運動指導に係る研修を受講した医師、理学療法士、作業療法士又は医師に具体的指示を受けた当該研修を受講した看護師が１回の血液透析中に、連続して 20 分以上患者の病状及び療養環境等を踏まえ療養上必要な指導等を実施した場合に算定できる。実施した指導等の内容を実施した医師本人又は指導等を実施した理学療法士等から報告を受けた医師が診療録に記録すること。なお、入院中の患者については、当該療法を担当する医師、理学療法士又は作業療法士の１人当たりの患者数は１回 15 人程度、当該療法を担当する看護師の１人当たりの患者数は１回５人程度を上限とし、入院中の患者以外の患者については、それぞれ、１回 20 人程度、１回８人程度を上限とする。",
+  "note": "v56"
+ }
 ]

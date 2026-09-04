@@ -48,8 +48,52 @@ const LIMITS = {
   'r08-H002-1':      { per: 'day', max: 6, unit: '単位' },       // 1日6単位(算定回数テーブル)
   'r08-H002-2':      { per: 'day', max: 6, unit: '単位' },
   'r08-H002-3':      { per: 'day', max: 6, unit: '単位' },
-  'r08-J038-1-ro':   { per: 'month', max: 14 },                 // 月14回(告示J038注8)
+  // 人工腎臓は区分1/2/3のセル横断で「人工腎臓」として月14回(告示J038注8・v55 share)
+  'r08-J038-1-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
+  'r08-J038-2-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
+  'r08-J038-3-ro':   { per: 'month', max: 14, share: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'] },
+  'r08-J038-n10':    { per: 'month', max: 1 },                  // 下肢末梢動脈疾患指導管理加算 月1回(告示J038注10・v56)
   'r08-C001-1-i':    { per: 'week', max: 3 },                   // 週3回(告示C001注1)
+  'r08-C001-1-ro':   { per: 'week', max: 3 },                   // 同(イ・ロ通算はitem横断=rule-0019で記録。ゲームは月2回設計で到達しない)
+  'r08-I002-1-ro-1-1': { per: 'visit_first', max: 1 },          // 初診時1回(算定回数テーブル)
+  'r08-I002-1-ro-2': { per: 'visit_first', max: 1 },
+  'r08-I002-1-ha-1-1': { per: 'week', max: 1 },                 // 1・2合わせて週1回(告示I002注1。退院4週の週2特例は安全側で未使用)
+  'r08-I002-1-ha-2-1': { per: 'week', max: 1 },
+  'r08-I004-2-i':    { per: 'visit_first', max: 1 },            // 初診時1回(算定回数テーブル)
+  'r08-I004-2-ro':   { per: 'week', max: 1 },                   // 週1回(告示I004注4。初診4週の週2特例は安全側で未使用)
+  'r08-L104':        { per: 'day', max: 1 },                    // 1日1回(算定回数テーブル: 日・上限1)
+  'r08-J119-2':      { per: 'day', max: 1 },                    // 1日につき(算定回数テーブル: 日・上限1)
+  'r08-H003-2-1-i':  { per: 'month', max: 1 },                  // 月1回(告示H003-2注1・算定回数テーブル)
+  'r08-H003-2-1-ro': { per: 'month', max: 1 },
+  'r08-B009-1':      { per: 'month', max: 1 },                  // 紹介先ごと月1回(告示B009注1・算定回数テーブル)
+  'r08-E203':        { per: 'month', max: 1 },                  // 月1回(告示E203注・算定回数テーブル: 月・上限1)
+  'r08-D005-9':      { per: 'month', max: 1 },                  // HbA1c 月1回(算定回数テーブル: 月・上限1)
+  'r08-D026-3':      { per: 'month', max: 1 },                  // 判断料 月1回(告示D026注1・算定回数テーブル)
+  'r08-D026-4':      { per: 'month', max: 1 },
+  'r08-D400-1':      { per: 'day', max: 1 },                    // 血液採取 1日につき(算定回数テーブル: 日・上限1)
+  'r08-A000-n10':    { per: 'visit_first', max: 1 },            // 機能強化加算 初診時1回(算定回数テーブル)
+  'r08-A000-n16-1':  { per: 'month', max: 1 },                  // 電子的診療情報連携(初診) 月1回(告示A000注16)
+  'r08-A000-n16-2':  { per: 'month', max: 1 },
+  'r08-A000-n16-3':  { per: 'month', max: 1 },
+  'r08-A001-n19':    { per: 'month', max: 1 },                  // 同(再診) 月1回(告示A001注19)
+  'r08-D256-2':      { per: 'month', max: 1 },                  // 眼底三次元画像解析 月1回(告示D256-2注・算定回数テーブル: 月・上限1)
+  'r08-C002-2-ro-2': { per: 'month', max: 1 },                  // 在医総管 人数セルも月1回(留意(4)。1人セルはC002-2-ro-1で登録済み)
+  'r08-C002-2-ro-3': { per: 'month', max: 1 },
+  'r08-C002-2-ro-4': { per: 'month', max: 1 },
+  'r08-C002-2-ro-5': { per: 'month', max: 1 },
+  // C002独立加算(v52便R): 在医総管に月1回で乗る(注7/10/13/15)
+  ...Object.fromEntries(
+    ['i-1','i-2','i-3','i-4','i-5','ro-1','ro-2','ro-3','ro-4','ro-5','ha-1','ha-2','ha-3','ha-4','ha-5']
+      .map((s) => [`r08-C002-n7-${s}`, { per: 'month', max: 1 }])
+      .concat([['r08-C002-n10', { per: 'month', max: 1 }], ['r08-C002-n13', { per: 'month', max: 1 }], ['r08-C002-n15', { per: 'month', max: 1 }]])
+  ),
+  // B001-3/B001-3-3 充実管理加算(v53便S): 本体が月1回(告示注1)なので加算も月1回。(I)(II)×主病イロハ×1〜3
+  ...Object.fromEntries(
+    ['i-1','i-2','i-3','ro-1','ro-2','ro-3','ha-1','ha-2','ha-3']
+      .flatMap((s) => [[`r08-B001-3-n4-${s}`, { per: 'month', max: 1 }], [`r08-B001-3-3-n4-${s}`, { per: 'month', max: 1 }]])
+  ),
+  'r08-B001-3-n5':   { per: 'year', max: 1 },                   // 眼科医療機関連携強化加算 患者1人につき年1回(告示B001-3注5)
+  'r08-B001-3-3-n5': { per: 'year', max: 1 },                   // 同((II)側。告示B001-3-3注5)
 };
 
 /* ---- 機械判定ヒント: 文章ルール → エンジン述語 ----
@@ -61,17 +105,20 @@ const LIMITS = {
 const MACHINE_HINTS = {
   'r08-rule-0001': { type: 'same_day_ng_categories', source: 'r08-A001-n8',
     targetCategories: ['リハビリテーション', '処置', '手術', '麻酔', '放射線治療', '精神科専門療法'],
-    // 「別に厚生労働大臣が定める検査」は別表がKB未登録のため機械判定しない(needs_review警告のみ)
+    // 「別に厚生労働大臣が定める検査」の該当項目リストはbilling_rules.json側のmachine
+    // (sadamaruKensaItems)からマージされる。リスト未分類の検査カテゴリだけwarning
     reviewCategories: ['検査'] },
+  // 判定は受診単位。制度は月単位(留意B001-3(3)=同月の別日の検査もKB上は包括。ただし別日の
+  // 外来管理加算は算定可)。内科モジュールは検査を(I)算定日にしか出さないため乖離は表に出ない
   'r08-rule-0002': { type: 'included_categories', source: ['r08-B001-3-1-lipid', 'r08-B001-3-1-ht', 'r08-B001-3-1-dm'],
     targetCategories: ['検査', '注射', '病理診断'], targetItemIds: ['r08-A001-n8'] },
   'r08-rule-0004': { type: 'excl_window_months', source: ['r08-B001-3-1-lipid', 'r08-B001-3-1-ht', 'r08-B001-3-1-dm'],
     months: 6, targetItemIds: ['r08-B001-3-3'] },
   'r08-rule-0005': { type: 'conditional_pair', a: 'r08-D261-2', b: 'r08-D263-1',
     conditionKey: 'refraction_first_or_glasses', conditionLabel: '屈折異常の疑いで初めての検査、又は眼鏡処方箋の交付' },
-  'r08-rule-0006': { type: 'included_categories', source: 'r08-J038-1-ro', targetCategories: ['薬剤(透析包括)'] },
+  'r08-rule-0006': { type: 'included_categories', source: ['r08-J038-1-ro', 'r08-J038-2-ro', 'r08-J038-3-ro'], targetCategories: ['薬剤(透析包括)'] },
   'r08-rule-0007': { type: 'included_categories', source: 'r08-B001-15', targetCategories: ['検査(透析包括)'] },
-  'r08-rule-0008': { type: 'same_day_ng_items', source: 'r08-C001-1-i',
+  'r08-rule-0008': { type: 'same_day_ng_items', source: ['r08-C001-1-i', 'r08-C001-1-ro'],
     targetItemIds: ['r08-A001', 'r08-A002', 'r08-C000'], direction: 'source_blocks_targets' },
 };
 
@@ -135,7 +182,9 @@ const pack = {
     bidirectional: r.bidirectional ?? 1,
     doc: r.source_document, page: r.source_page || null, quote: normQuote(r.quote) || null,
     confidence: r.confidence,
-    machine: MACHINE_HINTS[r.id] || null,
+    // billing_rules.json側のmachine(handled_externally・定める検査リスト等)をヒント表にマージ。
+    // 同キーはJSON側が優先(KBが唯一の情報源・ヒント表は型の既定値)
+    machine: (MACHINE_HINTS[r.id] || r.machine) ? Object.assign({}, MACHINE_HINTS[r.id] || {}, r.machine || {}) : null,
   })),
 };
 

@@ -1,57 +1,372 @@
 [
-  {
-    "item_id": "r08-H002-1",
-    "fs_id": "r08-fs-h002-1",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-H002-2",
-    "fs_id": "r08-fs-h002-2",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-H002-3",
-    "fs_id": "r08-fs-h002-3",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-B001-3-1-lipid",
-    "fs_id": "r08-fs-b001-3",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-B001-3-1-ht",
-    "fs_id": "r08-fs-b001-3",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-B001-3-1-dm",
-    "fs_id": "r08-fs-b001-3",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-B001-3-3",
-    "fs_id": "r08-fs-b001-3",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-J038-1-ro",
-    "fs_id": "r08-fs-j038-1",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-J038-n2-i",
-    "fs_id": "r08-fs-j038-donyuki1",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-J038-n9",
-    "fs_id": "r08-fs-j038-suishitsu",
-    "relation": "required"
-  },
-  {
-    "item_id": "r08-C002-2-ro-1",
-    "fs_id": "r08-fs-zaishien",
-    "relation": "required"
-  }
+ {
+  "item_id": "r08-H002-1",
+  "fs_id": "r08-fs-h002-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-H002-2",
+  "fs_id": "r08-fs-h002-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-H002-3",
+  "fs_id": "r08-fs-h002-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-1-lipid",
+  "fs_id": "r08-fs-b001-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-1-ht",
+  "fs_id": "r08-fs-b001-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-1-dm",
+  "fs_id": "r08-fs-b001-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3",
+  "fs_id": "r08-fs-b001-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-1-ro",
+  "fs_id": "r08-fs-j038-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-n2-i",
+  "fs_id": "r08-fs-j038-donyuki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-n9",
+  "fs_id": "r08-fs-j038-suishitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-1",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-H003-2-1-i",
+  "fs_id": "r08-fs-h002-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-H003-2-1-i",
+  "fs_id": "r08-fs-h002-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-H003-2-1-ro",
+  "fs_id": "r08-fs-h002-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-H003-2-1-ro",
+  "fs_id": "r08-fs-h002-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-F400-n6-i",
+  "fs_id": "r08-fs-f400-n6",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n10-1",
+  "fs_id": "r08-fs-a001-n10-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n10-2",
+  "fs_id": "r08-fs-a001-n10-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n10-3",
+  "fs_id": "r08-fs-a001-n10-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n10-4",
+  "fs_id": "r08-fs-a001-n10-4",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n11",
+  "fs_id": "r08-fs-a001-n11",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-E202-2",
+  "fs_id": "r08-fs-e202",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A000-n10",
+  "fs_id": "r08-fs-a000-n10",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A000-n16-1",
+  "fs_id": "r08-fs-a000-n16-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A000-n16-2",
+  "fs_id": "r08-fs-a000-n16-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A000-n16-3",
+  "fs_id": "r08-fs-a000-n16-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-A001-n19",
+  "fs_id": "r08-fs-a000-n16-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-2",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-3",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-4",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-2-ro-5",
+  "fs_id": "r08-fs-zaishien",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-1",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-2",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-3",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-4",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-i-5",
+  "fs_id": "r08-fs-c002-n7-jujitsu",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-1",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-2",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-3",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-4",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ro-5",
+  "fs_id": "r08-fs-c002-n7-jisseki1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-1",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-2",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-3",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-4",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n7-ha-5",
+  "fs_id": "r08-fs-c002-n7-jisseki2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-C002-n13",
+  "fs_id": "r08-fs-c002-n13",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-i-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ro-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-n4-ha-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-i-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ro-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-1",
+  "fs_id": "r08-fs-b001-3-n4-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-2",
+  "fs_id": "r08-fs-b001-3-n4-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-B001-3-3-n4-ha-3",
+  "fs_id": "r08-fs-b001-3-n4-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-i-1",
+  "fs_id": "r08-fs-i002-n11-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-i-2",
+  "fs_id": "r08-fs-i002-n11-1",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-ro-1",
+  "fs_id": "r08-fs-i002-n11-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-ro-2",
+  "fs_id": "r08-fs-i002-n11-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-ha-1",
+  "fs_id": "r08-fs-i002-n11-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-I002-n11-ha-2",
+  "fs_id": "r08-fs-i002-n11-3",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-2-ro",
+  "fs_id": "r08-fs-j038-2",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-n13",
+  "fs_id": "r08-fs-j038-n13",
+  "relation": "required"
+ },
+ {
+  "item_id": "r08-J038-n10",
+  "fs_id": "r08-fs-j038-n10",
+  "relation": "required"
+ }
 ]

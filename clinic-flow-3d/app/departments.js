@@ -34,6 +34,7 @@
       if (!it.limit) continue;
       if (it.limit.per === 'month' && it.limit.unit !== '単位') trackMonthly.add(it.id);
       if (it.limit.per === 'week') trackWeekly.add(it.id);
+      if (it.limit.per === 'year') trackMsSince.add(it.id); // 年1回制限は最終算定月(lb)で追跡(v53)
     }
     for (const r of kb.rules) {
       if (r.machine && r.machine.type === 'excl_window_months') {
@@ -83,7 +84,7 @@
 
   function msMap(p, curMonth) {
     const m = {};
-    for (const id of Object.keys(p.lb)) m[id] = curMonth - p.lb[id];
+    for (const id of Object.keys(p.lb || {})) m[id] = curMonth - p.lb[id]; // lb欠落セーブへの防御(v53 qa任意)
     return m;
   }
 
@@ -101,7 +102,9 @@
         performedCategories: report.performedCategories || [],
       },
       procedures: mod.buildProcedures(report),
-      facilityStandards: dept.fs || [],
+      // 一般名処方加算の施設基準(掲示+ウェブ掲載)は届出不要(0305-8 第36の4)。
+      // 一般名処方をONにしている部門は掲示等を整えている扱い(ゲーム上の仮定)
+      facilityStandards: (dept.fs || []).concat(dept.policy && dept.policy.ippanmei ? ['r08-fs-f400-n6'] : []),
       history: { month: p.mc, week: p.wc, monthsSince: msMap(p, curMonth), firstVisitBilled: !!p.fb },
     });
     const lines = [];
@@ -124,7 +127,7 @@
     for (const def of (mod.fsDefs || [])) {
       const chk = def.check(dept);
       const notified = dept.fs.includes(def.fsId);
-      out.push({ fsId: def.fsId, ok: chk.ok, missing: chk.missing || [], notified, note: def.note || null });
+      out.push({ fsId: def.fsId, ok: chk.ok, missing: chk.missing || [], notified, note: def.note || null, gameNote: def.gameNote || null });
     }
     return out;
   };
@@ -147,6 +150,7 @@
     const agg = {
       day: ctx.day, revenue: 0, cost: 0, profit: 0, visits: 0, points: 0,
       byItem: {}, approx: [], sample: null, warnings: [], events: [],
+      referrals: [],          // 部門間紹介の意図({to, from, profile, reason, extra})。経路付けはゲーム側
       info: {},
     };
     for (const b of broken) {
@@ -184,6 +188,9 @@
         }
       },
       countVisit: () => { agg.visits++; },
+      /* 紹介の意図を積む。モジュールは紹介先の部門を知らない(受け皿の有無・容量は
+         ゲーム側が判定し、法人内に無ければ他院へ=ケアは必ず成立する) */
+      refer: (to, profile, reason, extra) => { agg.referrals.push({ to, from: dept.id, profile, reason, extra: extra || null }); },
       frac: (x) => { const n = Math.floor(x); return n + (ctx.rand() < (x - n) ? 1 : 0); },
       month: DEPT.monthIdx(ctx.day),
     };

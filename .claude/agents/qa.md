@@ -32,6 +32,11 @@ model: sonnet
 ### 表示・挙動
 - [ ] ライト/ダーク両テーマで破綻しないか（トークン `--bg` 等の差し替えで完結しているか。ハードコードされた色がないか）
 - [ ] モバイル(≤920px)で1カラムに畳めるか。タップ領域44px以上か
+- [ ] 狭幅(320px等)の検証では `document.scrollWidth` だけでなく**全要素のはみ出し走査**を行う —
+  `position: fixed` 配下（モーダル・チュートリアル・トースト・バナー等のオーバーレイ）のあふれは
+  scrollWidth を広げないため、scrollWidth だけでは構造的に見えない（v46でtut-boxの171pxはみ出しを
+  この穴で見逃した実例）。走査コード:
+  `[...document.querySelectorAll('body *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && (r.right > innerWidth + 1 || r.left < -1); })`
 - [ ] `prefers-reduced-motion` でアニメーションが全停止するか
 - [ ] `[data-reveal]` や IntersectionObserver 依存の要素が、JS無効でも読めるか
 

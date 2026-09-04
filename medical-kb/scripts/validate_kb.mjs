@@ -15,6 +15,8 @@
    E6 enum: confidence / relevance / rule_type の値が定義内か
    E7 マスター突合: items.master.json がある場合、code一致の点数が
       itemsの点数と食い違えばエラー(告示転記ミスの検出補助)
+   E8 quote先頭の注番号: quoteが注番号で始まるとき、その番号が source_page の注番号と一致するか(v58)
+   E9 quoteの中略と合成: 「…」(U+2026)はエラー(billing_rules.quote・evidence.quote・evidence.note)、注番号らしき先頭トークンが2つ以上は警告(billing_rulesのみ)(v60〜v62)
 
    機械化できない検査(留意事項の取りこぼし・解釈の妥当性)は
    docs/update-guide.md の人手レビュー手順に定める。
@@ -41,10 +43,14 @@ const evidence = loadOr(join(kbDir, 'evidence.json'), []);
 const specialties = loadOr(join(KB_ROOT, 'data', 'kb', 'common', 'specialties.json'), []);
 const manifest = loadOr(join(KB_ROOT, 'data', 'manifest', `sources.${rev}.json`), { documents: [] });
 let master = null;
+let kizai = null;
+let iyakuhin = null;
 try {
-  const { ensureExtracted, loadIkaMaster } = await import('./lib/edt.mjs');
+  const { ensureExtracted, loadIkaMaster, loadKizaiMaster, loadIyakuhinMaster } = await import('./lib/edt.mjs');
   ensureExtracted(rev);
   master = loadIkaMaster(rev);
+  kizai = loadKizaiMaster(rev);
+  iyakuhin = loadIyakuhinMaster(rev);
 } catch { /* 原典未取得・レイアウト未検証時はE7をスキップ */ }
 
 const errors = [];
@@ -89,7 +95,36 @@ for (const r of rules) {
   if (!RULE_TYPES.has(r.rule_type)) errors.push(`E6 ${r.id}: rule_type値が不正 (${r.rule_type})`);
 }
 
+/* E8: quote先頭の注番号と source_page の一致(v58)。番号なし(途中から起こした引用)は違反にしない */
+const z2h = (t) => t.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+for (const r of rules) {
+  const m = /^(?:注\s*)?([0-9０-９]{1,2})\s/.exec(r.quote || '');
+  const sp = /注\s*([0-9０-９]{1,2})/.exec(r.source_page || '');
+  if (m && sp && z2h(m[1]) !== z2h(sp[1])) errors.push(`E8 ${r.id}: quote先頭の注番号(${m[1]})が source_page の注番号(${sp[1]})と一致しない(注の冒頭から起こすときは原文の番号を写す。途中から起こすなら番号を付けない)`);
+}
+/* E9: quoteの中略と合成(v59 編集長裁定・v60)。①「…」(U+2026)は原文の三点リーダと区別がつかない=エラー(中略は「（中略）」で示す)
+   ②注番号らしき「行頭または句点直後の数字+空白」が2つ以上=複数の注の合成の疑い=警告(番号を持たない合成は拾えず、最終判定はeditor)
+   ①は evidence.quote(v61)と evidence.note(v62)にも掛ける。②は号(1)(2)…を続けて写す evidence には掛けない */
+for (const r of rules) {
+  const q = r.quote || '';
+  if (q.includes('\u2026')) errors.push(`E9 ${r.id}: quoteに「…」が含まれる(中略は「（中略）」で示す。冒頭・末尾の省略は無標)`);
+  const heads = q.match(/(?:^|。)\s*(?:注\s*)?[0-9０-９]{1,2}\s/g) || [];
+  if (heads.length >= 2) warns.push(`E9 ${r.id}: 注番号らしき先頭トークンが${heads.length}個ある=複数の注を1本のquoteに合成していないか確認(quoteは原典の一箇所から連続して取れる文に限る)`);
+}
+for (const e of evidence) {
+  if ((e.quote || '').includes('\u2026')) errors.push(`E9 evidence ${e.entity_type}:${e.entity_id}/${e.field}: quoteに「…」が含まれる(中略は「（中略）」で示す。冒頭・末尾の省略は無標)`);
+  if ((e.note || '').includes('\u2026')) errors.push(`E9 evidence ${e.entity_type}:${e.entity_id}/${e.field}: noteに「…」が含まれる(noteの「」内の引用も原典の一箇所から連続して写す。v62)`);
+}
 /* E4: 参照整合 */
+// rules.machine の項目参照(source/parents/group/targetItemIds)が items に実在するか(v57 qa申し送り)
+for (const r of rules) {
+  const m = r.machine; if (!m) continue;
+  for (const key of ['source', 'parents', 'group', 'targetItemIds']) {
+    const v = m[key]; if (!v) continue;
+    for (const id of (Array.isArray(v) ? v : [v])) if (!itemIds.has(id)) errors.push(`E4 rule ${r.id}: machine.${key} の ${id} が items に無い`);
+  }
+}
+
 for (const l of itemFs) {
   if (!itemIds.has(l.item_id)) errors.push(`E4 item_facility_standard: item_id=${l.item_id} が items に無い`);
   if (!fsIds.has(l.fs_id)) errors.push(`E4 item_facility_standard: fs_id=${l.fs_id} が facility_standards に無い`);
@@ -127,10 +162,55 @@ if (existsSync(scenDir)) {
   }
 }
 
-/* E7: マスター突合(点数識別3=点数の項目のみ数値比較) */
+/* E7: マスター突合(点数識別3=点数の項目のみ数値比較)。
+   特定保険医療材料({rev}-t{特定器材コード})は特定器材マスターの材料価格と
+   「材料価格を10円で除して得た点数」(J400等)で突合する */
 if (master?.rows?.length) {
   const byCode = new Map(master.rows.map(m => [m.code, m]));
+  const byKizai = new Map((kizai?.rows || []).map(m => [m.code, m]));
+  const byDrug = new Map((iyakuhin?.rows || []).map(m => [m.code, m]));
   for (const it of items) {
+    // 薬剤({rev}-y{医薬品コード}[-数量接尾語]): 単価×使用量とG100/L200算式で点数を検算
+    const isDrug = /^r\d\d-y\d{9}(-|$)/.test(it.id);
+    if (isDrug) {
+      const dm = it.code ? byDrug.get(it.code) : null;
+      if (!dm) { warns.push(`E7 ${it.id}: code=${it.code} が医薬品マスターに存在しない`); continue; }
+      if (it.yakka_yen != null && it.yakka_units != null && dm.price_type === '1') {
+        const expectYen = Math.round(Number(dm.price_raw) * Number(it.yakka_units) * 100) / 100;
+        if (Math.abs(expectYen - Number(it.yakka_yen)) > 0.005) {
+          errors.push(`E7 ${it.id}: 薬価が単価×使用量と不一致 (kb=${it.yakka_yen} / マスター${dm.price_raw}×${it.yakka_units}=${expectYen})`);
+        }
+        const y = Number(it.yakka_yen);
+        // G100: 15円以下=1点 / L200・D500・J300型: 15円以下=算定しない(登録自体が誤り)
+        let expectPts = null;
+        if (y <= 15) expectPts = it.yakka_formula === 'G100' ? 1 : NaN;
+        else expectPts = Math.ceil((y - 15) / 10) + 1;
+        if (Number.isNaN(expectPts)) errors.push(`E7 ${it.id}: ${it.yakka_formula}は薬価15円以下を算定しない(登録誤り)`);
+        else if (it.points != null && Number(it.points) !== expectPts) {
+          errors.push(`E7 ${it.id}: 薬剤点数が算式と不一致 (kb=${it.points} / ${it.yakka_formula}算式=${expectPts}点)`);
+        }
+      } else if (it.yakka_yen == null || it.yakka_units == null) {
+        warns.push(`E7 ${it.id}: yakka_yen/yakka_unitsが未設定のため薬剤点数の検算をスキップ`);
+      }
+      continue;
+    }
+    const isMat = /^r\d\d-t\d{9}$/.test(it.id);
+    if (isMat) {
+      const km = it.code ? byKizai.get(it.code) : null;
+      if (!km) { warns.push(`E7 ${it.id}: code=${it.code} が特定器材マスターに存在しない`); continue; }
+      if (km.price_type === '1' && Number.isFinite(Number(km.price_raw))) {
+        // 材料留意I-1-(2): 材料価格を10円で除し、端数が生じた場合は四捨五入して得た点数
+        const expect = Math.round(Number(km.price_raw) / 10);
+        if (it.points != null && Number(it.points) !== expect) {
+          errors.push(`E7 ${it.id}: 材料点数が材料価格と不一致 (kb=${it.points} / 価格${km.price_raw}円→${expect}点)`);
+        }
+      } else if (km.price_type !== '1') {
+        // 金額種別2(購入価格)・5(%加算)・9(乗算割合)は点数が価格から機械的に決まらないため
+        // 突合をスキップする(登録時はevidenceで個別に根拠を示すこと)
+        warns.push(`E7 ${it.id}: 金額種別${km.price_type}(${km.price_raw})のため材料価格突合をスキップ`);
+      }
+      continue;
+    }
     if (it.code && it.points != null && byCode.has(it.code)) {
       const m = byCode.get(it.code);
       const mp = Number(m.points_raw);

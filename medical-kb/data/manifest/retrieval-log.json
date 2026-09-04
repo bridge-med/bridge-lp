@@ -363,6 +363,41 @@
       "dest": "data/sources/r08/masters/table_shisetsu_kijun_r5.zip",
       "sha256": "d9dc1f25dd75c03ff437fcb87156654d0e1150bfe222af5776e0602dc266e553",
       "retrieved_at": "2026-08-28T22:52:43.201876+00:00"
+    },
+    {
+      "id": "r08-kokuji73-zairyo",
+      "url": "https://www.mhlw.go.jp/content/12400000/001665200.pdf",
+      "dest": "data/sources/r08/mhlw/kokuji73_zairyo_kakaku.pdf",
+      "sha256": "0616f4f858af1ada03a6ede97856ec63703374cdf8350c25f57ca5fade5e24db",
+      "retrieved_at": "2026-08-31T01:31:01.224Z"
+    },
+    {
+      "id": "r08-ryuiji-zairyo",
+      "url": "https://www.mhlw.go.jp/content/12400000/001686844.pdf",
+      "dest": "data/sources/r08/mhlw/ryuiji_zairyo_0305_1.pdf",
+      "sha256": "25d15dbdedfd6cf1f29f7cc3b22902caca485f693444e49912c24b1c94c2fee1",
+      "retrieved_at": "2026-08-31T01:31:01.796Z"
+    },
+    {
+      "id": "r08-kokuji72-yakka",
+      "url": "https://www.mhlw.go.jp/content/12400000/001665198.pdf",
+      "dest": "data/sources/r08/mhlw/kokuji72_yakka_kijun.pdf",
+      "sha256": "a47398038189434317fbd48f6d85019e794e576c4396dd3e2ab065d00dff7416",
+      "retrieved_at": "2026-08-31T03:10:34.977Z"
+    },
+    {
+      "id": "r08-ryuiji-yakka",
+      "url": "https://www.mhlw.go.jp/content/12400000/001666898.pdf",
+      "dest": "data/sources/r08/mhlw/ryuiji_yakka_0305_10.pdf",
+      "sha256": "3cf44aa06cc4680398fd0fe143ff217eef245a5d31f8bf3c517d4d5834505d3c",
+      "retrieved_at": "2026-08-31T03:10:35.768Z"
+    },
+    {
+      "id": "r08-tsuchi-choki-shohou",
+      "url": "https://www.mhlw.go.jp/content/12400000/001681984.pdf",
+      "dest": "data/sources/r08/mhlw/tsuchi_choki_shohou_0327_9.pdf",
+      "sha256": "20404f4d5c328dfb61377fcc1f9d0d216a71193620d47a306b04070014f0ba63",
+      "retrieved_at": "2026-08-31T03:54:15.042Z"
     }
   ]
 }
