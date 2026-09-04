@@ -93,14 +93,14 @@ for (const r of rules) {
   if (!RULE_TYPES.has(r.rule_type)) errors.push(`E6 ${r.id}: rule_type値が不正 (${r.rule_type})`);
 }
 
-/* E4: 参照整合 */
-// quote が注番号で始まるなら、その番号が source_page の最初の注番号と一致するか(v58)
+/* E7: quote先頭の注番号と source_page の一致(v58)。番号なし(途中から起こした引用)は違反にしない */
 const z2h = (t) => t.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
 for (const r of rules) {
   const m = /^(?:注\s*)?([0-9０-９]{1,2})\s/.exec(r.quote || '');
   const sp = /注\s*([0-9０-９]{1,2})/.exec(r.source_page || '');
-  if (m && sp && z2h(m[1]) !== z2h(sp[1])) errors.push(`E7 rule ${r.id}: quote先頭の注番号(${m[1]})が source_page の注番号(${sp[1]})と一致しない`);
+  if (m && sp && z2h(m[1]) !== z2h(sp[1])) errors.push(`E7 ${r.id}: quote先頭の注番号(${m[1]})が source_page の注番号(${sp[1]})と一致しない(注の冒頭から起こすときは原文の番号を写す。途中から起こすなら番号を付けない)`);
 }
+/* E4: 参照整合 */
 // rules.machine の項目参照(source/parents/group/targetItemIds)が items に実在するか(v57 qa申し送り)
 for (const r of rules) {
   const m = r.machine; if (!m) continue;
