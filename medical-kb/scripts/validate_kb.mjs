@@ -14,6 +14,7 @@
       (令和6年度情報の誤混入検出の代理指標)
    E6 enum: confidence / relevance / rule_type の値が定義内か
    E7 マスター突合: items.master.json がある場合、code一致の点数が
+   E8 quote先頭の注番号: quoteが注番号で始まるとき、その番号が source_page の注番号と一致するか(v58)
       itemsの点数と食い違えばエラー(告示転記ミスの検出補助)
 
    機械化できない検査(留意事項の取りこぼし・解釈の妥当性)は
@@ -93,12 +94,12 @@ for (const r of rules) {
   if (!RULE_TYPES.has(r.rule_type)) errors.push(`E6 ${r.id}: rule_type値が不正 (${r.rule_type})`);
 }
 
-/* E7: quote先頭の注番号と source_page の一致(v58)。番号なし(途中から起こした引用)は違反にしない */
+/* E8: quote先頭の注番号と source_page の一致(v58)。番号なし(途中から起こした引用)は違反にしない */
 const z2h = (t) => t.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
 for (const r of rules) {
   const m = /^(?:注\s*)?([0-9０-９]{1,2})\s/.exec(r.quote || '');
   const sp = /注\s*([0-9０-９]{1,2})/.exec(r.source_page || '');
-  if (m && sp && z2h(m[1]) !== z2h(sp[1])) errors.push(`E7 ${r.id}: quote先頭の注番号(${m[1]})が source_page の注番号(${sp[1]})と一致しない(注の冒頭から起こすときは原文の番号を写す。途中から起こすなら番号を付けない)`);
+  if (m && sp && z2h(m[1]) !== z2h(sp[1])) errors.push(`E8 ${r.id}: quote先頭の注番号(${m[1]})が source_page の注番号(${sp[1]})と一致しない(注の冒頭から起こすときは原文の番号を写す。途中から起こすなら番号を付けない)`);
 }
 /* E4: 参照整合 */
 // rules.machine の項目参照(source/parents/group/targetItemIds)が items に実在するか(v57 qa申し送り)
