@@ -14,8 +14,8 @@
       (令和6年度情報の誤混入検出の代理指標)
    E6 enum: confidence / relevance / rule_type の値が定義内か
    E7 マスター突合: items.master.json がある場合、code一致の点数が
-   E8 quote先頭の注番号: quoteが注番号で始まるとき、その番号が source_page の注番号と一致するか(v58)
       itemsの点数と食い違えばエラー(告示転記ミスの検出補助)
+   E8 quote先頭の注番号: quoteが注番号で始まるとき、その番号が source_page の注番号と一致するか(v58)
 
    機械化できない検査(留意事項の取りこぼし・解釈の妥当性)は
    docs/update-guide.md の人手レビュー手順に定める。
