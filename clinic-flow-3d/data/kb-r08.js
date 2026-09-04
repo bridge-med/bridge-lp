@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-09-04T12:46:13.467Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-09-04T12:46:43.035Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-09-04T12:46:13.467Z",
+ "generated_at": "2026-09-04T12:46:43.035Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -7041,7 +7041,7 @@
    "bidirectional": 0,
    "doc": "r08-ryuiji-ika",
    "page": "p.229(留意B009(4))・p.27(通則7(3)定義)",
-   "quote": "当該情報を提供する保険医療機関と特別の関係にある機関に情報提供が行われた場合...は算定できない。",
+   "quote": "当該情報を提供する保険医療機関と特別の関係にある機関に情報提供が行われた場合や、市町村等が開設主体である保険医療機関が当該市町村等に対して情報提供を行った場合は算定できない。",
    "machine": {
     "type": "condition_ng_item",
     "source": "r08-B009-1",
