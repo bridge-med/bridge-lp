@@ -16,7 +16,7 @@
    E7 マスター突合: items.master.json がある場合、code一致の点数が
       itemsの点数と食い違えばエラー(告示転記ミスの検出補助)
    E8 quote先頭の注番号: quoteが注番号で始まるとき、その番号が source_page の注番号と一致するか(v58)
-   E9 quoteの中略と合成: 「…」(U+2026)はエラー、注番号らしき先頭トークンが2つ以上は警告(v60)
+   E9 quoteの中略と合成: 「…」(U+2026)はエラー(billing_rules・evidence)、注番号らしき先頭トークンが2つ以上は警告(billing_rulesのみ)(v60・v61)
 
    機械化できない検査(留意事項の取りこぼし・解釈の妥当性)は
    docs/update-guide.md の人手レビュー手順に定める。
@@ -104,12 +104,15 @@ for (const r of rules) {
 }
 /* E9: quoteの中略と合成(v59 編集長裁定・v60)。①「…」(U+2026)は原文の三点リーダと区別がつかない=エラー(中略は「（中略）」で示す)
    ②注番号らしき「行頭または句点直後の数字+空白」が2つ以上=複数の注の合成の疑い=警告(番号を持たない合成は拾えず、最終判定はeditor)
-   対象は billing_rules.quote のみ。evidence.quote(同じ記法が掛かる)への適用は「…」28本の是正便(roadmap 13l②)で足す */
+   ①は evidence.quote にも掛ける(v61 便Z'で28本を是正済み)。②は号(1)(2)…を続けて写す evidence には掛けない */
 for (const r of rules) {
   const q = r.quote || '';
   if (q.includes('\u2026')) errors.push(`E9 ${r.id}: quoteに「…」が含まれる(中略は「（中略）」で示す。冒頭・末尾の省略は無標)`);
   const heads = q.match(/(?:^|。)\s*(?:注\s*)?[0-9０-９]{1,2}\s/g) || [];
   if (heads.length >= 2) warns.push(`E9 ${r.id}: 注番号らしき先頭トークンが${heads.length}個ある=複数の注を1本のquoteに合成していないか確認(quoteは原典の一箇所から連続して取れる文に限る)`);
+}
+for (const e of evidence) {
+  if ((e.quote || '').includes('\u2026')) errors.push(`E9 evidence ${e.entity_type}:${e.entity_id}/${e.field}: quoteに「…」が含まれる(中略は「（中略）」で示す。冒頭・末尾の省略は無標)`);
 }
 /* E4: 参照整合 */
 // rules.machine の項目参照(source/parents/group/targetItemIds)が items に実在するか(v57 qa申し送り)
