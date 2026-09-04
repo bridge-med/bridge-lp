@@ -308,6 +308,13 @@ v33でLayer 3(Reimbursement Engine)と診療科モジュール基盤が入った
     残債(qa申し送り・既存設計で本便の範囲外): facilityStandards[].evidenceはパックに載る(build_game_pack 177行)がgame.jsが読むのはitems[].evidenceのみ(1818/3659行・field=points優先)。
     施設基準ブロックはfs.note/staffing/formNoで描く(4326行)ため、最長3本(idx200/212/77)は現行の画面に出ない。evidenceの表示経路の拡張は単独のUX便にせず、
     施設基準ブロックを組み替える13m(#9根治の実装便)の設計入力に足す(同じブロックを二度触らない)。noteの「…」2本(idx148/190・E9はquoteのみ検査・idx148はパックにも載るが未描画)は便Z''で。
+13l③. ~~便Z''(v62 極小の編集便・evidence.noteの「…」2本)~~ → v62で出荷(決裁ゼロ・実装コミット1=撤退線ちょうど・照合2件=editor sonnet/qa sonnet・designer対象外=noteは未描画・CSS不変)。
+    結果: noteの「」内の引用2本(idx148=告示C001注1の同一建物居住者の定義を括弧内の「以下この区分番号において同じ。」まで全文/idx190=疑義解釈その5問12の答の1文を逐語)を原典から取り直し、
+    validate_kb E9①をevidence.noteにも適用(記法メモ・冒頭ドキュメント更新)。これで「…」の是正(13l)はKB全体で閉じた(billing_rules.quote 10本・evidence.quote 29本(一意28)・evidence.note 2本=41本。packの「…」0本)。
+    以後の再発はE9①(quote 2種+note)で機械的に止まる。idx148はpackに載る(未描画)・idx190のnoteはpackに載らない。
+    学び: (a)noteの「」内の引用もquoteと同じ規律(データ層の誠実は項目名に依らない=v61(f)の延長) (b)裁定を含まない逐語一致の照合はeditor sonnetで足りた(原典との突合=sonnet・記法の裁定=opus、の采配先例)
+    (c)残債は撤退線3→3→1と縮めて閉じた(13l→13l②→13l③)=大きな是正の尻尾は極小便で切る。
+    残債: なし(evidenceの表示経路の拡張は13l②の記録どおり13mの設計入力)。
 14. **便L(v45 PM整理・v46訂正)**: 精神科まとめ(指定医決裁後)。
     ~~count_limit月次機械化の先行(便L')~~は**前提が誤りと判明し中止(v46検証)**:
     J038月14回はpackのLIMITS({per:month,max:14})で機械化済みで、15回目は患者単位で却下される
