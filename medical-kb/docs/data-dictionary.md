@@ -91,7 +91,7 @@
   冒頭・末尾の省略は無標。括弧の内側は原則として中略せず全文写す。ただし括弧の中身が同種の列挙(「Ａ、Ｂ、…及びＺを除く。」)で、
   先頭と末尾を残して「〜を除く。）」の枠が保たれる場合に限り「（中略）」を用いてよい(v60・編集長補正: 列挙の一部を落としても残した語の意味は
   変わらず、別表の中略と同じ理屈。先例rule-0003)。引用を括弧の手前で切って文が成立しなくなる形は採らない。
-  既存分の是正: billing_rules 10本は便Z(v60・roadmap 13l)、evidence 29本(一意28)は便Z'(v61・13l②)で完了。validate_kb E9①は両方に掛かる
+  既存分の是正: billing_rules 10本は便Z(v60・roadmap 13l)、evidence 29本(一意28)は便Z'(v61・13l②)、evidence.noteの「」内2本は便Z''(v62)で完了。validate_kb E9①はquote 2種とevidence.noteに掛かる
 - rule.quoteには告示・通知の本文だけを置く(v57・PM裁定)。届出様式(用紙)の文言は evidence.json の field=condition・note に置く
 - 不明は必ず null。「0」「なし」と「不明」を混同しない
 - 複数値カラム(related_additions等)はJSON配列文字列

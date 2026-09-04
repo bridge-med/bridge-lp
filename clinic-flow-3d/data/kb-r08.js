@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-09-04T13:39:30.877Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-09-04T13:46:57.916Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-09-04T13:39:30.877Z",
+ "generated_at": "2026-09-04T13:46:57.916Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -2835,7 +2835,7 @@
      "doc": "r08-kokuji69-ika",
      "page": "PDF p.136",
      "quote": "1 在宅患者訪問診療料1 イ 同一建物居住者以外の場合 890点 ロ 同一建物居住者の場合 215点",
-     "note": "マスター114030310=215と一致。定義は同注1「当該患者が同一建物居住者（当該患者と同一の建物に居住する他の患者に対して当該保険医療機関が同一日に訪問診療を行う場合の当該患者をいう。…）」に内蔵"
+     "note": "マスター114030310=215と一致。定義は同注1「当該患者が同一建物居住者（当該患者と同一の建物に居住する他の患者に対して当該保険医療機関が同一日に訪問診療を行う場合の当該患者をいう。以下この区分番号において同じ。）」に内蔵"
     }
    ]
   },
