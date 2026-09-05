@@ -4575,10 +4575,50 @@
     $('textbook').innerHTML = TEXTBOOK.map((c) => `<details class="tb-card"><summary>${c.t}</summary><p>${c.b}</p></details>`).join('');
   }
 
+  /* ================= 開始選択(v66): 引き継ぐクリニックを選ぶ ================= */
+  // セーブが無いときだけ出る扉。選ぶまでシムを動かさない(loop/skipBtnが gateOpen を見る)。
+  // 候補=SPECIALTIESのうち mainStart を持つモジュール(院内シムが回る外来型)。データ駆動で1枚ずつ足す。
+  let gateOpen = false;
+  let afterGate = null;
+  function mainSpecName() {
+    const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
+    return m ? (m.short || m.name) : '整形外科';
+  }
+  function startCandidates() {
+    return (typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.list() : []).filter((m) => m.mainStart);
+  }
+  function showStartGate(done) {
+    const cands = startCandidates();
+    if (!cands.length) { done(); return; }
+    gateOpen = true; afterGate = done;
+    $('gateText').innerHTML = GATE_TEXT;
+    $('gateHead').textContent = GATE_HEAD;
+    $('gateCards').innerHTML = cands.map((m) => `<button class="gate-card" data-gate="${m.id}"><b>${m.icon} ${m.name}</b><small>${m.desc}</small></button>`).join('');
+    $('startGate').classList.add('show');
+  }
+  function chooseStart(id) {
+    if (!gateOpen) return;
+    const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(id) : null;
+    if (!m || !m.mainStart) return;
+    settings.specialty = id;
+    gateOpen = false;
+    $('startGate').classList.remove('show');
+    save();
+    const fn = afterGate; afterGate = null;
+    if (fn) fn();
+  }
+  $('gateCards').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-gate]');
+    if (b) chooseStart(b.dataset.gate);
+  });
+  // 文言はeditor原稿で差し替える(v66 コミット3)
+  const GATE_TEXT = '経営者が引退するクリニックを、あなたが引き継ぎます。患者も、スタッフも、評判も、そのまま。';
+  const GATE_HEAD = '引き継ぐクリニック';
+
   /* ================= チュートリアル ================= */
 
   const TUTORIAL = [
-    { tab: null, sel: null, text: 'ようこそ。あなたは整形外科クリニックの新オーナー。<b>①1日進める → ②結果を見る → ③1つ改善する</b> — これだけで街いちばん、やがて<b>全国いちばんの医療法人</b>を目指せます。' },
+    { tab: null, sel: null, text: 'ようこそ。あなたは{科名}クリニックの新オーナー。<b>①1日進める → ②結果を見る → ③1つ改善する</b> — これだけで街いちばん、やがて<b>全国いちばんの医療法人</b>を目指せます。' },
     { tab: null, sel: '.hud', text: '<b>資金・評判・認知</b>が経営の体温計。右の <b>⏩1日</b> で1日まるごとスキップもOK。まずは今日1日、患者さんの流れを眺めてみましょう。' },
     { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。「今日やること」にミッション・スタッフからの依頼・詰まりの診断と打ち手が常に出ています。ボタンでその画面へ飛べます。' },
     { tab: 'clinic', sel: '#shopCard', text: '最初に触れるのは<b>受付と椅子</b>。Day 4、Day 8と進むごとに採用・リハ・大型投資・分院…と打ち手がどんどん解放されます。' },
@@ -4591,7 +4631,7 @@
     const st = TUTORIAL[tutIdx];
     if (!st) { endTutorial(); return; }
     if (st.tab) switchTab(st.tab);
-    $('tutText').innerHTML = st.text;
+    $('tutText').innerHTML = st.text.replace('{科名}', mainSpecName());
     $('tutStep').textContent = `${tutIdx + 1} / ${TUTORIAL.length}`;
     $('tutorial').classList.add('show');
     document.querySelectorAll('.tut-focus').forEach((el) => el.classList.remove('tut-focus'));
@@ -4719,7 +4759,7 @@
     if (activeTab === 'clinic' && ++frameN % 150 === 0) renderStaffStrip();
     const dtReal = Math.min(0.1, (ts - lastTs) / 1000);
     lastTs = ts;
-    if (G.speed > 0 && tutIdx < 0) {
+    if (G.speed > 0 && tutIdx < 0 && !gateOpen) {
       let dt = dtReal * G.speed * 3;
       while (dt > 0) {
         const step = Math.min(0.5, dt);
@@ -4929,7 +4969,7 @@
     getWalk: () => walk3d
   };
   $('skipBtn').addEventListener('click', () => {
-    if (tutIdx >= 0) return;
+    if (tutIdx >= 0 || gateOpen) return;
     autoDay();
     banner(`⏩ Day ${G.day - 1} を自動運営でスキップしました`);
   });
@@ -5025,20 +5065,24 @@
   window.addEventListener('resize', () => { clinicIso.resize(); townIso.resize(); });
 
   switchTab('clinic');
-  if (prestigeApplied) {
-    save();
-    const lg = prestigeApplied.legacy;
-    showModal(`🏛 ${prestigeApplied.count + 1}周目スタート`, `
-      <p>殿堂入りおめでとうございます。実績連動ボーナスを適用して、新しい経営を始めます。</p>
-      <div class="pnl-row"><span>開始資金</span><b>${yen(lg.money)}</b></div>
-      <div class="pnl-row"><span>初期評判 / 初期認知</span><b>${lg.rep} / ${Math.round(lg.aw * 100)}%</b></div>
-      <div class="pnl-row"><span>開始コイン</span><b>🪙 ${lg.coins}</b></div>
-      <div class="pnl-row"><span>実績・累計・施設・院名</span><b>引き継ぎ済み</b></div>
-      <p class="modal-note">📖 2周目のテーマは「再現性」。前回うまくいった打ち手が、初期条件が違っても通用するか — それが経営の腕です。</p>`,
-      `${prestigeApplied.count + 1}周目の経営へ`);
-  } else if (!G.tutorialDone) startTutorial();
-  else if (hasSave) banner(`おかえりなさい — Day ${G.day} から再開します`);
-  if (G.tutorialDone && !$('modal').classList.contains('show')) checkDailyLogin();
+  const afterStart = () => {
+    if (prestigeApplied) {
+      save();
+      const lg = prestigeApplied.legacy;
+      showModal(`🏛 ${prestigeApplied.count + 1}周目スタート`, `
+        <p>殿堂入りおめでとうございます。実績連動ボーナスを適用して、新しい経営を始めます。</p>
+        <div class="pnl-row"><span>開始資金</span><b>${yen(lg.money)}</b></div>
+        <div class="pnl-row"><span>初期評判 / 初期認知</span><b>${lg.rep} / ${Math.round(lg.aw * 100)}%</b></div>
+        <div class="pnl-row"><span>開始コイン</span><b>🪙 ${lg.coins}</b></div>
+        <div class="pnl-row"><span>実績・累計・施設・院名</span><b>引き継ぎ済み</b></div>
+        <p class="modal-note">📖 2周目のテーマは「再現性」。前回うまくいった打ち手が、初期条件が違っても通用するか — それが経営の腕です。</p>`,
+        `${prestigeApplied.count + 1}周目の経営へ`);
+    } else if (!G.tutorialDone) startTutorial();
+    renderCorp();
+  };
+  if (!hasSave) showStartGate(afterStart);
+  else banner(`おかえりなさい — Day ${G.day} から再開します`);
+  if (G.tutorialDone && !gateOpen && !$('modal').classList.contains('show')) checkDailyLogin();
   renderPrestige();
   updateSpeedButtons();
   const sb = $('soundBtn');

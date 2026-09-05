@@ -10,6 +10,7 @@
     icon: '🦴',
     status: 'full',
     desc: 'リハ・注射・画像の複合単価。施設基準(運動器リハ)が経営の天井を決める',
+    mainStart: true, // 本院として引き継げる(開始選択の候補。院内シムが回る外来型のみ・v66)
 
     patientProfiles: [
       { id: 'senior', label: '高齢者', majors: ['変形性膝関節症', '腰部脊柱管狭窄症', '骨粗鬆症'] },
