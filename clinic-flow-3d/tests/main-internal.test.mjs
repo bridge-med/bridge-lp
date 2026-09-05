@@ -77,5 +77,20 @@ t('planVisit は部門 runDay と同じ判断(充実管理加算3は届出済み
   const b2 = INTERNAL.planVisit({ ...rec, mc: {} }, pol, ['r08-fs-b001-3', 'r08-fs-b001-3-n4-3'], never, () => false);
   ok(b2.report.kbActs.some((x) => x.id === 'jujitsu3IIHt'), '届出済み=申請');
 });
+t('本院shimの施設基準(v67): 体制なし=未・体制あり=ok。届出前は notified=false', () => {
+  const pol = { kanri: 'II', ippanmei: true, keiji: false };
+  const a = DEPT.fsStatus(INTERNAL, shim(pol, []));
+  const b1 = a.find((x) => x.fsId === 'r08-fs-b001-3'); ok(b1 && !b1.ok && !b1.notified, '体制なし=未');
+  pol.keiji = true;
+  const b2 = DEPT.fsStatus(INTERNAL, shim(pol, ['r08-fs-b001-3'])).find((x) => x.fsId === 'r08-fs-b001-3'); ok(b2 && b2.ok && b2.notified, '体制あり・届出済み');
+});
+t('fsEnforce は dept.fs を差し替える(別参照)=本院では settings.mainFs へ書き戻しが要る', () => {
+  const fs = ['r08-fs-b001-3', 'r08-fs-b001-3-n4-3'];
+  const d = shim({ kanri: 'II', ippanmei: true, keiji: true }, fs);
+  d.staff.clerks = 0; // 医療事務0=充実管理加算3の要件割れ
+  const broken = DEPT.fsEnforce(INTERNAL, d);
+  eq(broken.length, 1); eq(broken[0].fsId, 'r08-fs-b001-3-n4-3');
+  ok(d.fs !== fs, 'fsEnforce は新しい配列を代入する(元配列は不変)'); eq(fs.length, 2); eq(d.fs.length, 1);
+});
 console.log(`main-internal.test: ${n - failed} passed / ${failed} failed`);
 process.exit(failed ? 1 : 0);
