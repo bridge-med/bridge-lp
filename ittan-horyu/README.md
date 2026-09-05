@@ -64,7 +64,7 @@ python3 -m http.server 8000
 # → http://localhost:8000 をスマホ幅（〜440px）で開く
 ```
 
-GitHub Pages では `https://bridge-med.github.io/bridge-lp/ittan-horyu/` で公開されます。
+GitHub Pages では `https://bridge-med.jp/ittan-horyu/` で公開されます。
 
 > Service Worker は `http://localhost` か `https` 配信時のみ有効です（`file://` 直開きでは無効）。
 

@@ -9,7 +9,7 @@
   var APP = {
     name: 'ごきげん回復ガチャ',
     subcopy: '疲れたときに押すだけ。\n今の自分にちょうどいい回復行動が出てくる。',
-    url: 'https://bridge-med.github.io/bridge-lp/gokigen-gacha/',
+    url: 'https://bridge-med.jp/gokigen-gacha/',
     disclaimer: 'このアプリは医学的な診断や治療を目的としたものではありません。日常の疲れや気分の重さを、少し整えるためのセルフケアアプリです。つらさが続くときは、無理せず信頼できる人や専門の窓口に相談してください。'
   };
 

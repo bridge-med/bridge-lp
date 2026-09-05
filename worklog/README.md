@@ -14,7 +14,7 @@
 
 静的ファイルのみ。ビルド不要。
 
-- **公開URL**: <https://bridge-med.github.io/bridge-lp/worklog/>
+- **公開URL**: <https://bridge-med.jp/worklog/>
 - **ローカル**: このリポジトリを clone し、`worklog/index.html` をブラウザで直接開く（`file://` でも動作します）。
   - うまく動かない場合はリポジトリ直下で簡易サーバを起動：
     ```bash

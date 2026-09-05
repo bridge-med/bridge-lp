@@ -23,7 +23,7 @@ export const SITE = {
   description: 'クリニック統合、管理医師変更、採用、業務分担。医療管理職が迷いやすい実務を、担当者・期限・確認先まで整理したテンプレートと進め方にまとめています。',
 
   /* URL(GitHub Pages) */
-  baseUrl: 'https://bridge-med.github.io/bridge-lp/medops/',
+  baseUrl: 'https://bridge-med.jp/medops/',
   parent: {
     name: 'BRIDGE',
     href: '../index.html',

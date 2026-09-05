@@ -32,7 +32,7 @@
 `navigator.sendBeacon` で次のJSONがPOSTされる。
 
 ```json
-{ "p": "/bridge-lp/products/index.html", "r": "https://参照元" }
+{ "p": "/products/index.html", "r": "https://参照元" }
 ```
 
 受け口(Cloudflare Workers等)は自作が必要。手順Aより重いので、独自の集計要件が

@@ -15,7 +15,7 @@
 ## はじめかた（3通り）
 
 **A. WEBアプリで使う（URLを開くだけ・スマホ可）**
-https://bridge-med.github.io/bridge-lp/my-ai-partner/webapp/ を開く。
+https://bridge-med.jp/my-ai-partner/webapp/ を開く。
 初回だけ「設定」でAPIキー（AIの鍵）を貼れば、以後はブックマークから開くだけ。
 費用は使った分だけ（軽い利用で月数百円ほど）。鍵の作り方はアプリの設定画面に書いてある。
 

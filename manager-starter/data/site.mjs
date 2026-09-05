@@ -26,7 +26,7 @@ export const SITE = {
   description: '看護師・リハビリ職・医療事務など、医療専門職から初めて管理職になった人のための実務サービスです。1on1、会議、業務分担、上司報告を、すぐ使えるシートと進め方に整理しています。',
 
   /* URL(GitHub Pages) */
-  baseUrl: 'https://bridge-med.github.io/bridge-lp/manager-starter/',
+  baseUrl: 'https://bridge-med.jp/manager-starter/',
   parent: {
     name: 'BRIDGE',
     href: '../index.html',

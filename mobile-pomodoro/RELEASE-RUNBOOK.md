@@ -84,7 +84,7 @@ eas build --platform android --profile production
 - [x] アプリ内課金なし（設定不要）
 - [x] Error Boundary あり（`components/ErrorBoundary.tsx`）
 - [x] バージョン `1.0.0`、Bundle ID/パッケージ＝本番値
-- [ ] プライバシーURLを公開（例: https://bridge-med.github.io/bridge-lp/legal/focus-privacy.html）
+- [ ] プライバシーURLを公開（例: https://bridge-med.jp/legal/focus-privacy.html）
 - [ ] スクショ（iOS 6.7" / Android 1080×1920、+ Feature graphic）
 - [ ] 年齢レーティング、輸出コンプライアンス（標準暗号のみ）
 

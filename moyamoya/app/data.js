@@ -14,7 +14,7 @@ const MOYA_APP = {
   subcopy: 'そのしんどさ、どこから来ている?',
   lead: '頑張っているのに報われない。上司に振り回される。成長できている気がしない。そんな職場のモヤモヤを、10問の診断で言語化します。',
   minutes: 3,
-  url: 'https://bridge-med.github.io/bridge-lp/moyamoya/',
+  url: 'https://bridge-med.jp/moyamoya/',
   disclaimer: 'この診断は、医療的な診断ではなく、働き方の相性や職場で感じる違和感を整理するためのものです。',
   story: [
     '職場のモヤモヤは、はっきりした理由があるときばかりではありません。',
