@@ -26,6 +26,20 @@
     icon: '🩺',
     status: 'full',
     desc: '生活習慣病の継続管理が柱。管理料(I)/(II)の選択が収益設計の中心',
+    // 開始の扉の候補=本院として引き継げる(v66)。preset は本院の settings に上書きする整形専用レバーのゼロ化と方針の初期値
+    main: {
+      line: '生活習慣病の継続管理。柱は管理料', order: 2,
+      preset: {
+        settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0.12, examMean: 8, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, dexa: false, echo: false },
+        policy: { kanri: 'II', ippanmei: true, keiji: false },
+        shopHide: ['pt', 'rehaAide', 'machines', 'physio'], // 整形専用の採用・設備は出さない(第14条=ロック行にもしない)
+        keywords: [
+          { name: '「◯◯町 内科」', hint: '指名度が高く CV率10%。ただし検索数は少ない', reha: false },
+          { name: '「血圧・血糖・コレステロール」', hint: '検索数は多いが、比較検討層で CV率3.5%', reha: false },
+          { name: '「健診で異常 内科」', hint: '継続管理に乗りやすい患者層', reha: false },
+        ],
+      },
+    },
     patientProfiles: [
       { id: 'ht', label: '高血圧症', weight: 0.42 },
       { id: 'dm', label: '2型糖尿病', weight: 0.32 },
@@ -135,13 +149,70 @@
         gameNote: 'データ提出の継続は届出をもって続く扱い。加算1・2(実績値が上位20%/50%)はゲームでは判定しない(簡略化)' },
     ],
 
+    /* 主病の割り付け(patientProfiles の weight)。部門の新規登録と本院(v66)の常連で共用 */
+    pickProfile(rand) {
+      let r = rand(); let pr = 'lipid';
+      for (const pf of this.patientProfiles) { if (r < pf.weight) { pr = pf.id; break; } r -= pf.weight; }
+      return pr;
+    },
+    /* 継続患者1人の1回の来院を report に組む(部門の runDay と本院(v66)で共用)。
+       p: {pr, mc, wc, lb, fb, rfo?} / policy: {kanri, ippanmei, keiji} / fs: 届出済みfsId[]
+       戻り: { report, isFirst, plan, tryKanriRyo, refEye, eyeConfirm, doLab, prLabel } */
+    planVisit(p, policy, fs, rand, hasDept) {
+      const kanriKey = { lipid: 'seikatsu1Lipid', ht: 'seikatsu1Ht', dm: 'seikatsu1Dm' };
+      const kanriItem = { lipid: 'r08-B001-3-1-lipid', ht: 'r08-B001-3-1-ht', dm: 'r08-B001-3-1-dm' };
+      const isFirst = !p.fb;
+      const plan = policy.kanri;
+      const report = { type: isFirst ? 'first' : 'revisit', kbActs: [] };
+      let tryKanriRyo = false;
+      if (!isFirst && plan !== 'none' && !p.mc[plan === 'II' ? 'r08-B001-3-3' : kanriItem[p.pr]]) {
+        report.kbActs.push({ id: plan === 'II' ? 'seikatsu2' : kanriKey[p.pr] });
+        tryKanriRyo = true;
+      }
+      // 充実管理加算3: 届出済みなら管理料と同じ日に該当セル((I)/(II)×主病)を申請。
+      // 届出前は申請しない(申請すればエンジンが施設基準未適用で却下する=テストで固定)
+      const prKey = { lipid: 'Lipid', ht: 'Ht', dm: 'Dm' };
+      if (tryKanriRyo && (fs || []).includes('r08-fs-b001-3-n4-3')) report.kbActs.push({ id: `jujitsu3${plan}${prKey[p.pr]}` });
+      // 外来管理加算: (I)はエンジンが包括で却下する(rule-0002)。(II)算定日は安全側で申請しない(rule-0003未機械化)
+      if (!isFirst && !(plan === 'II' && tryKanriRyo)) report.kbActs.push({ id: 'kanri' });
+      report.kbActs.push({ id: 'presc' });
+      if (policy.ippanmei) report.kbActs.push({ id: 'ippanmei' });
+
+      // 糖尿病の定期眼底検査への紹介: 年1回の推奨頻度を月次来院×約1/12で表現(ゲーム上の仮定)。
+      // 患者1人につき一度(紹介先で継続患者になる)。診療情報提供料(I)は申請するが、
+      // 紹介先が法人内の眼科なら「特別の関係」でエンジンが却下する(rule-0013)。
+      // 法人内に眼科が無ければ他院への紹介となり算定できる — どちらも制度どおり
+      let refEye = false, eyeConfirm = false;
+      if (tryKanriRyo && p.pr === 'dm' && !p.rfo && rand() < 1 / 12) {
+        p.rfo = 1; refEye = true;
+        report.kbActs.push({ id: 'joho' });
+        report.conditions = { specialRelation: !!(hasDept && hasDept('ophthalmology')) };
+      } else if (tryKanriRyo && p.pr === 'dm' && p.rfo === 1) {
+        // 紹介の次回来院: 眼科の受診状況を確認した日に眼科医療機関連携強化加算を申請(留意(16)イ)。
+        // 紹介先が法人内の眼科でも除外規定は無い(告示・留意・QA05問12で否定的確認・rule-0024)。
+        // 受診したことはゲーム上の仮定(紹介は法人内外いずれかで必ず成立する)
+        p.rfo = 2; eyeConfirm = true;
+        report.kbActs.push({ id: plan === 'II' ? 'eyeLiaisonII' : 'eyeLiaisonI' });
+      }
+
+      // 検体検査パネルは管理料の月次来院・初診時に実施(実施原価は常に発生)。
+      // 採血+血算+生化学まるめ+判断料2種、dmはHbA1c(月1回)を追加。
+      // (I)方針の日はエンジンが包括で却下する(rule-0002) — レセプトに条文つきで出る
+      const doLab = tryKanriRyo || isFirst;
+      if (doLab) {
+        report.kbActs.push({ id: 'labBlood' }, { id: 'labCbc' }, { id: 'labChem' },
+          { id: 'labJudgeHem' }, { id: 'labJudgeBio' });
+        if (p.pr === 'dm') report.kbActs.push({ id: 'labHba1c' });
+      }
+      const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
+      return { report, isFirst, plan, tryKanriRyo, refEye, eyeConfirm, doLab, prLabel };
+    },
+
     runDay(dept, ctx, api, agg) {
       const P = this.managementParameters;
       const C = P.costs;
       if (ctx.spec.kind === 'closed') { agg.cost += C.rentDay + C.baseDay; return; }
 
-      const kanriKey = { lipid: 'seikatsu1Lipid', ht: 'seikatsu1Ht', dm: 'seikatsu1Dm' };
-      const kanriItem = { lipid: 'r08-B001-3-1-lipid', ht: 'r08-B001-3-1-ht', dm: 'r08-B001-3-1-dm' };
       const ramp = Math.min(1, 0.25 + (ctx.day - dept.openedDay) / 90);
       const pull = 0.6 + 0.4 * (ctx.rep / 100);
 
@@ -149,8 +220,7 @@
       const cap = P.panelPerDoctor * dept.staff.doctors;
       let enroll = api.frac(P.enrollBase * dept.staff.doctors * ramp * pull);
       while (enroll-- > 0 && dept.pt.length < cap) {
-        let r = ctx.rand(); let pr = 'lipid';
-        for (const pf of this.patientProfiles) { if (r < pf.weight) { pr = pf.id; break; } r -= pf.weight; }
+        const pr = this.pickProfile(ctx.rand);
         api.addPatient(pr, { iv: P.revisitDays[0] + Math.floor(ctx.rand() * (P.revisitDays[1] - P.revisitDays[0] + 1)) });
       }
 
@@ -161,55 +231,14 @@
         if (p.nv > ctx.day) continue;
         if (seen >= capV) { p.nv = ctx.day + 1; continue; }
         seen++; api.countVisit();
-        const isFirst = !p.fb;
-        const plan = dept.policy.kanri;
-        const report = { type: isFirst ? 'first' : 'revisit', kbActs: [] };
-        let tryKanriRyo = false;
-        if (!isFirst && plan !== 'none' && !p.mc[plan === 'II' ? 'r08-B001-3-3' : kanriItem[p.pr]]) {
-          report.kbActs.push({ id: plan === 'II' ? 'seikatsu2' : kanriKey[p.pr] });
-          tryKanriRyo = true;
-        }
-        // 充実管理加算3: 届出済みなら管理料と同じ日に該当セル((I)/(II)×主病)を申請。
-        // 届出前は申請しない(申請すればエンジンが施設基準未適用で却下する=テストで固定)
-        const prKey = { lipid: 'Lipid', ht: 'Ht', dm: 'Dm' };
-        if (tryKanriRyo && dept.fs.includes('r08-fs-b001-3-n4-3')) report.kbActs.push({ id: `jujitsu3${plan}${prKey[p.pr]}` });
-        // 外来管理加算: (I)はエンジンが包括で却下する(rule-0002)。(II)算定日は安全側で申請しない(rule-0003未機械化)
-        if (!isFirst && !(plan === 'II' && tryKanriRyo)) report.kbActs.push({ id: 'kanri' });
-        report.kbActs.push({ id: 'presc' });
-        if (dept.policy.ippanmei) report.kbActs.push({ id: 'ippanmei' });
-
-        // 糖尿病の定期眼底検査への紹介: 年1回の推奨頻度を月次来院×約1/12で表現(ゲーム上の仮定)。
-        // 患者1人につき一度(紹介先で継続患者になる)。診療情報提供料(I)は申請するが、
-        // 紹介先が法人内の眼科なら「特別の関係」でエンジンが却下する(rule-0013)。
-        // 法人内に眼科が無ければ他院への紹介となり算定できる — どちらも制度どおり
-        let refEye = false, eyeConfirm = false;
-        if (tryKanriRyo && p.pr === 'dm' && !p.rfo && ctx.rand() < 1 / 12) {
-          p.rfo = 1; refEye = true;
-          report.kbActs.push({ id: 'joho' });
-          report.conditions = { specialRelation: !!(ctx.hasDept && ctx.hasDept('ophthalmology')) };
-          api.refer('ophthalmology', 'dm-retino', '糖尿病の定期眼底検査');
-        } else if (tryKanriRyo && p.pr === 'dm' && p.rfo === 1) {
-          // 紹介の次回来院: 眼科の受診状況を確認した日に眼科医療機関連携強化加算を申請(留意(16)イ)。
-          // 紹介先が法人内の眼科でも除外規定は無い(告示・留意・QA05問12で否定的確認・rule-0024)。
-          // 受診したことはゲーム上の仮定(紹介は法人内外いずれかで必ず成立する)
-          p.rfo = 2; eyeConfirm = true;
-          report.kbActs.push({ id: plan === 'II' ? 'eyeLiaisonII' : 'eyeLiaisonI' });
-        }
-
-        // 検体検査パネルは管理料の月次来院・初診時に実施(実施原価は常に発生)。
-        // 採血+血算+生化学まるめ+判断料2種、dmはHbA1c(月1回)を追加。
-        // (I)方針の日はエンジンが包括で却下する(rule-0002) — レセプトに条文つきで出る
-        const doLab = tryKanriRyo || isFirst;
-        if (doLab) {
-          agg.cost += P.labCost;
-          report.kbActs.push({ id: 'labBlood' }, { id: 'labCbc' }, { id: 'labChem' },
-            { id: 'labJudgeHem' }, { id: 'labJudgeBio' });
-          if (p.pr === 'dm') report.kbActs.push({ id: 'labHba1c' });
-        }
+        const v = this.planVisit(p, dept.policy, dept.fs, ctx.rand, ctx.hasDept);
+        const { report, isFirst, tryKanriRyo, refEye, eyeConfirm, plan } = v;
+        if (refEye) api.refer('ophthalmology', 'dm-retino', '糖尿病の定期眼底検査');
+        if (v.doLab) agg.cost += P.labCost;
         const r = api.evalVisit(p, report);
         const lines = r.lines.slice();
         p.nv = ctx.day + (p.iv || 28);
-        const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
+        const prLabel = v.prLabel;
         if (refEye) api.setSample(`継続患者(${prLabel})の月次来院 — 定期眼底検査の紹介`, lines, r.ev, 4);
         else if (eyeConfirm) api.setSample(`継続患者(${prLabel})の月次来院 — 眼科の受診状況を確認`, lines, r.ev, 3);
         else if (tryKanriRyo) api.setSample(`継続患者(${prLabel})の月次来院 — 管理料${plan === 'II' ? '(II)' : '(I)'}方針`, lines, r.ev, 2);

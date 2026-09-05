@@ -251,7 +251,7 @@
     { name: 'ひまわり整形外科', tier: '町', rev: 8000000 },
     { name: '中央せぼねクリニック', tier: '市', rev: 15000000 },
     { name: 'みなと関節クリニック', tier: '市', rev: 25000000 },
-    { name: '医療法人 桜台会', tier: '市', rev: 40000000, title: '🥇 市でいちばんの整形外科グループ', reward: 2000000, coin: 5 },
+    { name: '医療法人 桜台会', tier: '市', rev: 40000000, title: '🥇 市でいちばんの{科名}グループ', reward: 2000000, coin: 5 },
     { name: '大和田整形グループ', tier: '県', rev: 60000000 },
     { name: '医療法人 青葉会', tier: '県', rev: 90000000 },
     { name: '医療法人 白鳳会', tier: '県', rev: 130000000, title: '🏅 県でいちばんの医療法人', reward: 5000000, coin: 8 },
@@ -272,17 +272,17 @@
       lesson: '評判は患者体験の積分。待ち時間を削り、丁寧に診る — 地味な積み上げが、いちばん安い集患になる。' },
     { id: 'web', title: 'Web問診・事前受付を導入する', reward: 80000,
       lesson: '受付は院内導線の最初の関門。受付処理を軽くすると、同じ人数でも待ちが減り評判が守れる。「人を増やす前に仕事を減らす」が改善の原則。' },
-    { id: 'physio10', title: '物療(消炎鎮痛)を10件/日 実施する', reward: 100000,
+    { id: 'physio10', spec: 'orthopedics', title: '物療(消炎鎮痛)を10件/日 実施する', reward: 100000,
       lesson: '物療は低単価(¥350)だが高回転で、再診の受け皿になる。整形外来の単価は「初再診料+注射+物療+画像+リハ」の複合で作る。' },
     { id: 'black3', title: '3日連続で黒字にする(法人)', reward: 150000,
       lesson: '外来は固定費型ビジネス。人件費・家賃は患者0人でも出ていく。損益分岐点(1日何人で黒字か)を頭に入れると、打ち手の優先順位が見える。' },
-    { id: 'reha10', title: '運動器リハを届け出て、リハ実施10件/日', reward: 200000,
+    { id: 'reha10', spec: 'orthopedics', title: '運動器リハを届け出て、リハ実施10件/日', reward: 200000,
       lesson: 'リハは整形外来の柱。施設基準で単価が変わる: (III)¥1,700→(II)¥3,400→(I)¥3,700(2単位換算)。専従PTの人数と面積が壁。' },
     { id: 'tie', title: '病院・ケアマネの両方と関係を作る(Lv1以上)', reward: 200000,
       lesson: '紹介は最強の新患チャネル。ただし関係は「作って終わり」ではない — 30日放置すると冷める。定期訪問は資産のメンテナンス。' },
     { id: 'month300k', title: '月間利益(直近30日・法人)¥300,000', reward: 300000,
       lesson: '日次の黒字が「点」なら、月間利益は「線」。バリューアップの順番は ①守り(待ち・評判)→②回転→③単価→④新患。' },
-    { id: 'expand', title: '院を増築する(リハ室100㎡・診察室4)', reward: 300000,
+    { id: 'expand', spec: 'orthopedics', title: '院を増築する(リハ室100㎡・診察室4)', reward: 300000,
       lesson: '設備投資は「回収期間」で考える。増築もMRIも、1日あたりの増収×稼働日数でいつ回収できるかを先に計算する。' },
     { id: 'revenue', title: '本院の月商(直近30日)¥8,000,000', reward: 500000,
       lesson: '月商800万 = 1日30万×27診療日。患者数×単価に分解すると「あと何人」「あと何円」が見える — 分解できる目標だけが実行できる。' },
@@ -292,7 +292,7 @@
       lesson: '分院経営は「見えない現場」のマネジメント。数字(稼働・評判・人件費率)で異変に気づく仕組みがないと、分院は静かに沈む。' },
     { id: 'corp', title: '法人月商(全拠点・直近30日)¥25,000,000', reward: 1000000,
       lesson: '経営者の仕事は「自分がいなくても回る仕組み」を作ること。ここからは地域リーグ — 市・県・地方・全国の頂点を目指す。' },
-    { id: 'cityTop', title: '市でいちばんの整形外科グループになる', reward: 1000000,
+    { id: 'cityTop', title: '市でいちばんの{科名}グループになる', reward: 1000000,
       lesson: '規模の拡大は「同じ質を保てる範囲」でしか意味がない。シェアは 評判×拠点数×単価 の総合点で決まる。' },
     { id: 'prefTop', title: '県でいちばんの医療法人になる', reward: 2000000,
       lesson: '県レベルの競争は採用力の勝負。診療の質は「人が辞めない仕組み」でしか維持できない。' },
@@ -414,7 +414,7 @@
     examMean: 6, pTreat: 0.15, pReha: 0.35, pInj: 0.2, pTrig: 0.12, pPhysio: 0.35,
     selfReha: false, selfRehaPrice: 8000, goods: false,
     prpOn: false, prpPrice: 55000, agaOn: false, agaPrice: 6000,
-    learnMode: false, specialty: 'orthopedics',
+    learnMode: false, specialty: 'orthopedics', mainPolicy: null, mainFs: [],
     schedule: ['full', 'full', 'full', 'am', 'full', 'am', 'closed'] // 月〜日
   };
 
@@ -565,7 +565,7 @@
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
           specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
-          regulars: (G.regulars || []).slice(-80), personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30),
+          regulars: (G.regulars || []).slice(-80), mainMi: G.mainMi, mainWi: G.mainWi, personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30),
           med: G.med, referLog: (G.referLog || []).slice(-120), referSeen: G.referSeen, handoverLog: (G.handoverLog || []).slice(-30)
         }
       }));
@@ -686,12 +686,78 @@
     }
     G.personaSeq = (G.personaSeq || 0) + 1;
     const p = PERSONA.genPatient(G.personaSeq, seg);
-    G.regulars.push({ p, seg, visits: 1, lastDay: G.day, rid: 'r' + G.personaSeq });
+    G.regulars.push({ p, seg, visits: 1, lastDay: G.day, rid: 'r' + G.personaSeq, mc: {}, wc: {}, lb: {}, fb: false, pr: null });
     if (G.regulars.length > 80) {
       G.regulars.sort((a, b) => a.lastDay - b.lastDay);
       G.regulars.splice(0, G.regulars.length - 80);
     }
     return Object.assign({}, p, { visits: 1 });
+  }
+
+  /* ===== 他科本院の会計(v66・便AD): 分院と同じエンジン経路(モジュールの planVisit→DEPT.evalVisit) =====
+     整形本院の直書き経路(onDischarge本体)には触れない。本院患者の履歴は G.regulars の mc/wc/lb/fb/pr に持つ。 */
+  function mainPolicyNow(mod) {
+    if (!settings.mainPolicy) settings.mainPolicy = Object.assign({}, (mod.main && mod.main.preset && mod.main.preset.policy) || (mod.deptDefaults && mod.deptDefaults.policy) || {});
+    return settings.mainPolicy;
+  }
+  function mainDeptShim(mod) {
+    return { id: mod.id, policy: mainPolicyNow(mod), fs: settings.mainFs || (settings.mainFs = []),
+      staff: { doctors: settings.doctors, nurses: settings.nurses, clerks: settings.receptionists }, equip: {}, pt: [] };
+  }
+  function ensureHist(rec, mod) {
+    if (!rec.mc) rec.mc = {}; if (!rec.wc) rec.wc = {}; if (!rec.lb) rec.lb = {};
+    if (rec.fb === undefined) rec.fb = false;
+    if (!rec.pr && mod.pickProfile) rec.pr = mod.pickProfile(Math.random);
+    return rec;
+  }
+  function onDischargeDept(p, report) {
+    const T = G.today;
+    const seg = report.seg || 'senior';
+    T.segCounts[seg] = (T.segCounts[seg] || 0) + 1;
+    const mod = SPECIALTIES.get(settings.specialty);
+    const rc = [];
+    let revenue = 0;
+    let kbEval = null;
+    if (report.type === 'checkup' || !mod || !mod.planVisit) {
+      revenue += FEES.checkup; T.rev.checkup += FEES.checkup; rc.push({ n: '健康診断(保険外)', y: FEES.checkup });
+    } else {
+      const rec = (p.persona && p.persona.rid) ? G.regulars.find((r) => r.rid === p.persona.rid) : null;
+      const hist = rec ? ensureHist(rec, mod) : { pr: mod.pickProfile ? mod.pickProfile(Math.random) : null, mc: {}, wc: {}, lb: {}, fb: false, sv: 0 };
+      const shim = mainDeptShim(mod);
+      const v = mod.planVisit(hist, shim.policy, shim.fs, Math.random, (id) => !!(G.depts && G.depts[id]));
+      if (v.refEye) routeReferral({ from: 'main', to: 'ophthalmology', kind: 'dm-retino', label: '糖尿病の定期眼底検査' });
+      if (v.doLab && mod.managementParameters && mod.managementParameters.labCost) T.labCogs = (T.labCogs || 0) + mod.managementParameters.labCost;
+      const r = DEPT.evalVisit(mod, shim, hist, v.report, G.day);
+      kbEval = r.ev;
+      for (const line of r.lines) { rc.push(line); revenue += line.t * 10; T.rev.consult += line.t * 10; if (line.kb === 'r08-A001-n8') T.kanriCount++; }
+      if (v.isFirst) T.newCount++;
+      // 体制の加算(初再診への加算)は科に依らない=整形本院と同じ計上(KASAN_CORE)
+      const kas = v.isFirst ? KASAN_CORE.firstVisitLines(settings, kbPts) : KASAN_CORE.revisitLines(settings, kbPts);
+      for (const k of kas) { revenue += k.t * 10; T.rev.consult += k.t * 10; rc.push({ n: k.n, t: k.t, kb: k.kb }); }
+      if (G.med && devWarn(kbEval.warnings).length) T._medWarn = true;
+    }
+    rc.forEach((x) => acc(T, x.n, x.t, x.t ? undefined : x.y));
+    G.lastReceipt = {
+      type: report.type, seg, rc,
+      ten: rc.reduce((a, r) => a + (r.t || 0), 0), yen: revenue,
+      kb: kbEval ? { rejected: kbEval.rejectedItems.map((x) => ({ itemId: x.itemId, name: x.name, points: x.points, reasons: x.reasons, rules: x.rules, fsInfo: x.fsInfo })), warnings: kbEval.warnings, trace: kbEval.trace } : null
+    };
+    if (activeTab === 'clinic' && G.speed <= 4) renderReceipt();
+    if (G.speed <= 2 && revenue > 0) SND.cash();
+    T.revenue += revenue; T.patients++;
+    T.waitSum += report.wait; T.waitN++;
+    const feltWait = report.wait * (report.soothed ? 0.65 : 1);
+    let sat = clamp(1.25 - feltWait * waitFeel() / 40, 0, 1);
+    if (G.deco.cafe) sat = Math.min(1, sat + 0.05);
+    G.rep += (sat * 100 - G.rep) * 0.01;
+    G.rep = Math.max(G.rep, repDailyFloor());
+    // 継続管理の次回来院(月1回ペース=モジュールの revisitDays。定着は満足度で決まる=ゲーム上の仮定)
+    const P = (mod && mod.managementParameters) || {};
+    const iv = P.revisitDays ? P.revisitDays[0] + Math.floor(Math.random() * (P.revisitDays[1] - P.revisitDays[0] + 1)) : 28;
+    const loyalty = { senior: 0.7, worker: 0.5, sports: 0.5 }[seg] || 0.55;
+    if ((report.type === 'first' || report.type === 'revisit') && Math.random() < loyalty * sat + (settings.reserve ? 0.05 : 0)) addSchedule(G.day + iv, 'revisit');
+    updateHeader();
+    return revenue;
   }
 
   const clinic = new CLINIC.ClinicSim(settings, {
@@ -714,6 +780,7 @@
           if (clinic.floats) clinic.floats.push({ x: p.x, y: p.y - 0.6, text: '🎓', t: 0 });
         }
       }
+      if (settings.specialty !== 'orthopedics' && KBI && DEPTI) return onDischargeDept(p, report);
       let revenue = 0;
       const T = G.today;
       const seg = report.seg || 'senior';
@@ -970,6 +1037,12 @@
   function relLv(key) { return G.relations[key] ? G.relations[key].lv : 0; }
 
   function planDay() {
+    // 本院の常連の月次/週次カウンタ(v66: 他科本院の管理料・検査の回数制限に使う)。30日=1月・7日=1週(部門と同じ区切り)
+    if (typeof DEPT !== 'undefined') {
+      const mi = DEPT.monthIdx(G.day), wi = DEPT.weekIdx(G.day);
+      if (G.mainMi !== mi) { for (const r of (G.regulars || [])) if (r.mc) r.mc = {}; G.mainMi = mi; }
+      if (G.mainWi !== wi) { for (const r of (G.regulars || [])) if (r.wc) r.wc = {}; G.mainWi = wi; }
+    }
     const spec = specOf(G.day);
     G.daySpec = spec;
     G.today = newToday();
@@ -1256,7 +1329,7 @@
     if (settings.mri) c += COSTS.mriMaint;
     c += loanInterestDay();
     c += (G.today ? G.today.patients : 0) * COSTS.perPatient;
-    c += G.today ? G.today.goodsCogs + G.today.jihiCogs : 0;
+    c += G.today ? G.today.goodsCogs + G.today.jihiCogs + (G.today.labCogs || 0) : 0;
     return Math.round(c);
   }
 
@@ -1922,6 +1995,7 @@
       if (el) { const w = el.closest('.ctrl'); if (w) w.style.display = stage >= need ? '' : 'none'; }
     };
     slider('pInj', 2); slider('pTrig', 2); slider('pPhysio', 2); slider('pTreat', 2); slider('pReha', 3);
+    renderPolicyCard();
   }
 
   function announceStage(stage) {
@@ -2749,7 +2823,10 @@
 
   /* ================= ミッション ================= */
 
+  const missionApplies = (m) => !m.spec || m.spec === settings.specialty;
+  function skipSpecMissions() { while (MISSIONS[G.missionIdx] && !missionApplies(MISSIONS[G.missionIdx])) G.missionIdx++; }
   function checkMission(T) {
+    skipSpecMissions();
     const m = MISSIONS[G.missionIdx];
     if (!m) return;
     let done = false;
@@ -2818,7 +2895,8 @@
   function updateMissionBar() {
     const m = MISSIONS[G.missionIdx];
     const lap = G.prestige && G.prestige.count > 0 ? `🏛${G.prestige.count + 1}周目 ` : '';
-    $('missionText').textContent = lap + (m ? `MISSION ${G.missionIdx + 1}/${MISSIONS.length}: ${m.title}` : '🏆 全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
+    const vis = MISSIONS.filter(missionApplies);
+    $('missionText').textContent = lap + (m ? `MISSION ${vis.indexOf(m) + 1}/${vis.length}: ${m.title}` : '🏆 全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
   }
 
   let bannerTimer = null;
@@ -2937,7 +3015,10 @@
 
   function renderShop() {
     const stage = unlockStage();
+    const mm = SPECIALTIES.get(settings.specialty);
+    const hide = (mm && mm.main && mm.main.preset && mm.main.preset.shopHide) || [];
     const rows = Object.entries(SHOP).map(([key, item]) => {
+      if (hide.includes(key)) return '';
       const need = STAGE_SHOP[key] || 1;
       if (need > stage) {
         return `
@@ -3754,6 +3835,52 @@
     }));
   }
 
+  // 部門と本院(他科・v66)で共用する方針レバーの配線。本院は id===settings.specialty のとき mainDeptShim を dept として扱う
+  function deptOf(id) {
+    if (id === settings.specialty) { const m = SPECIALTIES.get(id); return m ? mainDeptShim(m) : null; }
+    return G.depts[id];
+  }
+  function afterLeverChange() { renderCorp(); renderPolicyCard(); updateHeader(); save(); }
+  function bindDeptLeverHandlers(el) {
+    el.querySelectorAll('[data-dkanri]').forEach((b) => b.addEventListener('click', () => {
+      const [id, plan] = b.dataset.dkanri.split(':');
+      const d = deptOf(id);
+      if (!d || d.policy.kanri === plan) return;
+      d.policy.kanri = plan;
+      toast(plan === 'I'
+        ? '管理料(I)の方針に変更 — 検査・注射は管理料に含まれ、別に算定しなくなります'
+        : '管理料(II)の方針に変更 — (I)を算定した患者は、その月から6月以内は算定できません');
+      afterLeverChange();
+    }));
+    el.querySelectorAll('[data-dkeiji]').forEach((b) => b.addEventListener('click', () => {
+      const d = deptOf(b.dataset.dkeiji);
+      if (!d || d.policy.keiji) return;
+      if (G.money < DEPT_KEIJI_COST) { toast('資金が足りません'); return; }
+      G.money -= DEPT_KEIJI_COST;
+      d.policy.keiji = true;
+      if (!d.fs.includes('r08-fs-b001-3')) d.fs.push('r08-fs-b001-3');
+      toast('📋 院内掲示と長期処方の体制を整えました — 生活習慣病管理料は届出不要(体制の要件のみ)');
+      afterLeverChange();
+    }));
+    el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
+      const d = deptOf(b.dataset.dippan);
+      if (!d) return;
+      d.policy.ippanmei = !d.policy.ippanmei;
+      afterLeverChange();
+    }));
+  }
+  // 診療方針カード(v66): 整形本院は従来のスライダー(.ctrl-grid)、他科本院はモジュールのレバー(部門と同じHTML)を #mainLever に描く
+  function renderPolicyCard() {
+    const card = $('policyCard'); if (!card) return;
+    const grid = card.querySelector('.ctrl-grid');
+    let lever = $('mainLever');
+    if (!lever) { lever = document.createElement('div'); lever.id = 'mainLever'; card.appendChild(lever); }
+    const m = SPECIALTIES.get(settings.specialty);
+    const ortho = settings.specialty === 'orthopedics' || !m || !m.main;
+    if (grid) grid.style.display = ortho ? '' : 'none';
+    lever.innerHTML = ortho ? '' : deptLeverHtml(m, mainDeptShim(m));
+    if (!ortho) bindDeptLeverHandlers(lever);
+  }
   function renderCorp() {
     const el = $('corpBody');
     if (!el) return;
@@ -3958,7 +4085,7 @@
     if (open === 'newsite') rows.push(`<div class="site-detail">${openSection}${G.hospital ? '' : hospSection}</div>`);
 
     el.innerHTML = summary
-      + '<h3 class="sub-title">🏥 同じ診療科を増やす <small>— 整形外科の分院とグループ病院</small></h3>'
+      + '<h3 class="sub-title">🏥 同じ診療科を増やす <small>— ${mainSpecName()}の分院とグループ病院</small></h3>'
       + rows.join('')
       + referSection
       + specialtySection;
@@ -3984,32 +4111,7 @@
       toast(`🎉 ${m.name}部門を開設しました — 明日から診療開始`);
       renderCorp(); updateHeader(); save();
     }));
-    el.querySelectorAll('[data-dkanri]').forEach((b) => b.addEventListener('click', () => {
-      const [id, plan] = b.dataset.dkanri.split(':');
-      const d = G.depts[id];
-      if (!d || d.policy.kanri === plan) return;
-      d.policy.kanri = plan;
-      toast(plan === 'I'
-        ? '管理料(I)の方針に変更 — 検査・注射は管理料に含まれ、別に算定しなくなります'
-        : '管理料(II)の方針に変更 — (I)を算定した患者は、その月から6月以内は算定できません');
-      renderCorp(); save();
-    }));
-    el.querySelectorAll('[data-dkeiji]').forEach((b) => b.addEventListener('click', () => {
-      const d = G.depts[b.dataset.dkeiji];
-      if (!d || d.policy.keiji) return;
-      if (G.money < DEPT_KEIJI_COST) { toast('資金が足りません'); return; }
-      G.money -= DEPT_KEIJI_COST;
-      d.policy.keiji = true;
-      if (!d.fs.includes('r08-fs-b001-3')) d.fs.push('r08-fs-b001-3');
-      toast('📋 院内掲示と長期処方の体制を整えました — 生活習慣病管理料は届出不要(体制の要件のみ)');
-      renderCorp(); updateHeader(); save();
-    }));
-    el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
-      const d = G.depts[b.dataset.dippan];
-      if (!d) return;
-      d.policy.ippanmei = !d.policy.ippanmei;
-      renderCorp(); save();
-    }));
+    bindDeptLeverHandlers(el);
     el.querySelectorAll('[data-dhire]').forEach((b) => b.addEventListener('click', () => {
       const [id, key] = b.dataset.dhire.split(':');
       const d = G.depts[id]; const m = SPECIALTIES.get(id);
@@ -4245,7 +4347,7 @@
       G.money -= HOSP_NAIKA_COST;
       G.hospital.naika = true;
       G.hospital.internists = Math.max(1, G.hospital.internists);
-      toast('🩺 内科を開設 — 整形以外の診療科で外来の裾野が広がります');
+      toast(`🩺 内科を開設 — ${mainSpecName()}以外の診療科で外来の裾野が広がります`);
       renderCorp(); updateHeader(); save();
     });
     const ho = el.querySelector('[data-hope]');
@@ -4566,6 +4668,7 @@
 
   function renderMissions() {
     $('missionList').innerHTML = MISSIONS.map((m, i) => {
+      if (!missionApplies(m)) return '';
       const st = i < G.missionIdx ? 'done' : i === G.missionIdx ? 'now' : 'locked';
       return `<div class="mission-row ${st}">
         <span class="mission-mark">${st === 'done' ? '✅' : st === 'now' ? '🎯' : '🔒'}</span>
@@ -4615,10 +4718,27 @@
     renderGateList(cands);
     $('startGate').classList.add('show');
   }
+  // 自院を名指しする語を本院の科に合わせる(広告キーワード・称号)。テンプレートは {科名}
+  function applyMainWords() {
+    const name = mainSpecName();
+    const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
+    const kws = m && m.main && m.main.preset && m.main.preset.keywords;
+    KEYWORDS.forEach((kw, i) => {
+      if (!kw._o) kw._o = { name: kw.name, hint: kw.hint, reha: kw.reha };
+      Object.assign(kw, kw._o, kws && kws[i] ? kws[i] : {});
+    });
+    for (const x of MISSIONS.concat(LEAGUE)) { if (x.title) { x._t = x._t || x.title; x.title = x._t.replace('{科名}', name); } }
+  }
   function applyMainSpecialty(id) {
     const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(id) : null;
     if (!m || !m.main) return false;
     settings.specialty = id;
+    const pre = m.main.preset || {};
+    if (pre.settings) Object.assign(settings, pre.settings);
+    settings.mainPolicy = pre.policy ? Object.assign({}, pre.policy) : null;
+    settings.mainFs = [];
+    applyMainWords();
+    skipSpecMissions();
     return true;
   }
   function closeStartGate() {
@@ -4865,6 +4985,13 @@
           if (Math.random() < Math.min(0.9, 0.7 + 0.05 * bondLv('reha'))) addSchedule(G.day + 1, 'rehab'); // 離脱(信頼で減)
           continue;
         }
+        if (settings.specialty !== 'orthopedics' && KBI && DEPTI) {
+          // 他科本院(v66): 期待値の再実装はせず、到着1件ずつ同じエンジン経路(onDischargeDept)を通す。待ち時間は負荷の期待値
+          const wait = clamp(7 + (examServed / examCapDay) * 26, 5, 45);
+          const persona = assignPersona(a.type, a.seg || 'senior');
+          onDischargeDept({ persona, refer: a.refer, x: 0, y: 0 }, { type: a.type, items: [], didReha: false, wait, seg: a.seg || 'senior', soothed: false });
+          continue;
+        }
         const seg = a.seg || 'senior';
         T.segCounts[seg] = (T.segCounts[seg] || 0) + 1;
         T.patients++;
@@ -5000,6 +5127,7 @@
   /* ================= 起動 ================= */
 
   const hasSave = load();
+  applyMainWords();
   let prestigeApplied = null;
   if (!hasSave) {
     // 殿堂入り直後(セーブなし+殿堂記録あり)なら、実績連動ボーナスを適用して2周目開始
@@ -5101,7 +5229,7 @@
         <p class="modal-note">📖 2周目のテーマは「再現性」。前回うまくいった打ち手が、初期条件が違っても通用するか — それが経営の腕です。</p>`,
         `${prestigeApplied.count + 1}周目の経営へ`);
     } else if (!G.tutorialDone) startTutorial();
-    renderCorp();
+    applyUnlocks(); renderShop(); renderMissions(); updateMissionBar(); renderCorp(); updateHeader();
   };
   if (!hasSave) openStartGate(afterStart);
   else banner(`おかえりなさい — Day ${G.day} から再開します`);
