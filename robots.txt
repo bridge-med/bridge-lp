@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bridge-med.github.io/bridge-lp/sitemap.xml
+Sitemap: https://bridge-med.jp/sitemap.xml
