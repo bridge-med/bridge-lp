@@ -15,6 +15,8 @@
     get(id) { return this._mods[id] || null; },
     list() { return Object.values(this._mods); },
     playable() { return this.list().filter((m) => m.status === 'full' || m.status === 'basic'); },
+    // 本院として引き継げる科(開始の扉の候補)。main:{line,order} を持つモジュールだけ(status では選別できない)。v66
+    mainCandidates() { return this.list().filter((m) => m.main).sort((a, b) => (a.main.order || 0) - (b.main.order || 0)); },
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = SPECIALTIES;
   else root.SPECIALTIES = SPECIALTIES;

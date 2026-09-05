@@ -4575,45 +4575,68 @@
     $('textbook').innerHTML = TEXTBOOK.map((c) => `<details class="tb-card"><summary>${c.t}</summary><p>${c.b}</p></details>`).join('');
   }
 
-  /* ================= 開始選択(v66): 引き継ぐクリニックを選ぶ ================= */
-  // セーブが無いときだけ出る扉。選ぶまでシムを動かさない(loop/skipBtnが gateOpen を見る)。
-  // 候補=SPECIALTIESのうち mainStart を持つモジュール(院内シムが回る外来型)。データ駆動で1枚ずつ足す。
+  /* ================= 開始の扉(v66): 引き継ぐクリニック ================= */
+  // セーブが無いときだけ出る。選ぶまでシムを動かさない(loop/skipBtn/checkDailyLoginが gateOpen を見る)。
+  // 候補=SPECIALTIES.mainCandidates()(main:{line,order} を持つ外来型)。1枚なら提示(.spec-row)、2枚以上なら排他選択(.choice-row)。
+  // 準備中の科は出さない(第14条)。文言は承継版(editor原稿・語は社長決定で差し替え可)。
   let gateOpen = false;
   let afterGate = null;
+  let gatePick = null;
+  const GATE = {
+    lead1: '前の院長が診てきた患者と、少しの運転資金。あなたはその続きから始める。',
+    lead2: 'どの科を継ぐかで、経営の勝負どころが変わる。',
+    go: 'この院を引き継ぐ',
+    goPick: (name) => `${name}を引き継ぐ`,
+  };
   function mainSpecName() {
     const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
     return m ? (m.short || m.name) : '整形外科';
   }
-  function startCandidates() {
-    return (typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.list() : []).filter((m) => m.mainStart);
+  function gateCandidates() {
+    return typeof SPECIALTIES !== 'undefined' && SPECIALTIES.mainCandidates ? SPECIALTIES.mainCandidates() : [];
   }
-  function showStartGate(done) {
-    const cands = startCandidates();
-    if (!cands.length) { done(); return; }
-    gateOpen = true; afterGate = done;
-    $('gateText').innerHTML = GATE_TEXT;
-    $('gateHead').textContent = GATE_HEAD;
-    $('gateCards').innerHTML = cands.map((m) => `<button class="gate-card" data-gate="${m.id}"><b>${m.icon} ${m.name}</b><small>${m.desc}</small></button>`).join('');
+  function renderGateList(cands) {
+    if (cands.length === 1) {
+      const m = cands[0];
+      $('gateList').innerHTML = `<div class="spec-row"><b>${m.name}</b><small>${m.main.line}</small></div>`;
+      $('gateGo').textContent = GATE.go;
+      return;
+    }
+    $('gateList').innerHTML = cands.map((m) => `<button class="choice-row${m.id === gatePick ? ' on' : ''}" data-gate="${m.id}"><b>${m.name}</b><small>${m.main.line}</small></button>`).join('');
+    const pm = cands.find((m) => m.id === gatePick) || cands[0];
+    $('gateGo').textContent = GATE.goPick(pm.short || pm.name);
+  }
+  function openStartGate(onDone) {
+    const cands = gateCandidates();
+    if (!cands.length) { onDone(); return; }
+    gateOpen = true; afterGate = onDone;
+    gatePick = cands.some((m) => m.id === settings.specialty) ? settings.specialty : cands[0].id;
+    $('gateLead').textContent = cands.length === 1 ? GATE.lead1 : `${GATE.lead1} ${GATE.lead2}`;
+    renderGateList(cands);
     $('startGate').classList.add('show');
   }
-  function chooseStart(id) {
-    if (!gateOpen) return;
+  function applyMainSpecialty(id) {
     const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(id) : null;
-    if (!m || !m.mainStart) return;
+    if (!m || !m.main) return false;
     settings.specialty = id;
+    return true;
+  }
+  function closeStartGate() {
+    if (!gateOpen) return;
+    if (!applyMainSpecialty(gatePick)) return;
     gateOpen = false;
     $('startGate').classList.remove('show');
     save();
     const fn = afterGate; afterGate = null;
     if (fn) fn();
   }
-  $('gateCards').addEventListener('click', (e) => {
+  $('gateList').addEventListener('click', (e) => {
     const b = e.target.closest('[data-gate]');
-    if (b) chooseStart(b.dataset.gate);
+    if (!b || !gateOpen) return;
+    gatePick = b.dataset.gate;
+    renderGateList(gateCandidates());
   });
-  // 文言はeditor原稿で差し替える(v66 コミット3)
-  const GATE_TEXT = '経営者が引退するクリニックを、あなたが引き継ぎます。患者も、スタッフも、評判も、そのまま。';
-  const GATE_HEAD = '引き継ぐクリニック';
+  $('gateGo').addEventListener('click', closeStartGate);
 
   /* ================= チュートリアル ================= */
 
@@ -5080,7 +5103,7 @@
     } else if (!G.tutorialDone) startTutorial();
     renderCorp();
   };
-  if (!hasSave) showStartGate(afterStart);
+  if (!hasSave) openStartGate(afterStart);
   else banner(`おかえりなさい — Day ${G.day} から再開します`);
   if (G.tutorialDone && !gateOpen && !$('modal').classList.contains('show')) checkDailyLogin();
   renderPrestige();

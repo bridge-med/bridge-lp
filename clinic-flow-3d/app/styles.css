@@ -912,12 +912,13 @@ input[type="range"]::-moz-range-thumb {
 .tut-skip { border: none; background: none; color: var(--ink-3); font: 600 12px/1 var(--sans); flex: 0 0 auto; padding: 10px 6px; }
 .tut-btns .btn-cta { flex: 1; }
 
-/* 開始選択(v66): 引き継ぐクリニックのカード。.spec-row の顔をボタンに */
-.gate-card { display: block; width: 100%; min-height: 44px; text-align: left; padding: 10px 12px; margin-top: 8px;
-  border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font: 600 13px/1.5 var(--sans); cursor: pointer; }
-.gate-card small { display: block; font-weight: 500; color: var(--ink-2); }
-.gate-card:hover, .gate-card:focus-visible { border-color: var(--blue); }
-#startGate .tut-text { min-height: 0; }
+/* ===== 開始の扉(v66): .tut-box の器を縦長・スクロール可にするだけ。1枚=.spec-row(提示)/2枚以上=.choice-row(排他) ===== */
+.gate-box { max-height: calc(100dvh - 36px); overflow-y: auto; }
+.gate-box .tut-text { min-height: 0; margin-bottom: 10px; }
+.gate-box .spec-row { padding: 8px 2px; }
+.gate-box .spec-row small { color: var(--ink-2); } /* 判断の材料になる本文はAAを割らない(v56) */
+.gate-box .choice-row { margin-top: 6px; }
+@media (prefers-reduced-motion: reduce) { .tut-box { animation: none; } }
 
 .tut-focus {
   position: relative;
