@@ -3711,7 +3711,7 @@
     // 体制の操作場所(院内›診療方針)への道筋を1行添える(ここに出るのは結果)
     if (main) {
       const title = (m.main && m.main.fsTitle) || `${m.name}の施設基準`;
-      return `<h3 class="sub-title">📋 ${title}</h3><div class="branch-kijun"><p class="kijun-kb">体制は「🏥 院内 › 診療方針」で整えます。ここに出るのは、その結果です</p>${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
+      return `<h3 class="sub-title">📋 ${title}</h3><div class="branch-kijun"><p class="kijun-kb">体制は 🏥 院内 › 診療方針 で整える。ここに出るのは結果</p>${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
     }
     return `<div class="branch-kijun">施設基準${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
   }
@@ -3907,8 +3907,8 @@
       // 体制が整って新たに届け出られるようになった基準を、その場所(経営タブ/この部門)ごと1行で示す(v67 designer M2)
       const dm = SPECIALTIES.get(b.dataset.dkeiji);
       const opened = dm ? DEPT.fsStatus(dm, d).filter((st) => st.ok && !st.notified).map((st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; }) : [];
-      const where = b.dataset.dkeiji === settings.specialty ? '📊 経営の施設基準' : 'この部門';
-      toast('📋 体制を整えました — 生活習慣病管理料は届出不要(体制の要件のみ)' + (opened.length ? `。続けて「${opened.join('・')}」を届け出られます(${where})` : ''));
+      const where = b.dataset.dkeiji === settings.specialty ? '📊 経営 › 施設基準' : 'この部門';
+      toast('📋 体制を整えました。管理料は届出不要' + (opened.length ? `。次は「${opened.join('・')}」の届出(${where})` : '')); // 375幅で2行以内(PM v67)
       afterLeverChange();
     }));
     el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
