@@ -119,13 +119,6 @@ a { color: var(--blue-deep); }
 @media (max-width: 360px) {
   .speed-group { flex: 1 0 100%; flex-wrap: wrap; gap: 4px; }
   .speed-btn { flex: 1 1 calc(25% - 3px); padding: 7px 4px; }
-  /* 施設基準の長いラベル+.mini-btn(nowrap)が320pxで8pxあふれる(保留#18)。
-     行を折返し可にしてボタン/バッジを次行の右へ落とす(v46)。子結合子は必須 —
-     ラベル文中のインライン.kijun-badge(適用中等)まで飛ばさないため。
-     row-gapで折返し行をラベル側に帰属させる(6/10/10のリズム=designer裁定) */
-  .kijun-row { flex-wrap: wrap; row-gap: 6px; }
-  .kijun-row > .mini-btn,
-  .kijun-row > .kijun-badge { margin-left: auto; }
 }
 
 .mission-bar {
@@ -488,7 +481,13 @@ input[type="range"]::-moz-range-thumb {
   border-bottom: 1px dashed var(--line);
   font: 500 12.5px/1.6 var(--sans);
   color: var(--ink-2);
+  /* 長いラベル+.mini-btn(nowrap)の折返し。v46(保留#18)は320px以下だけだったが、375/390でもボタンが幅44pxまで潰れて
+     文字が欠けていた(保留#39・v67 designer実測)ので全幅で有効に。子結合子は必須 — ラベル文中のインライン.kijun-badge
+     (適用中等)まで飛ばさないため。row-gapで折返し行をラベル側に帰属させる(6/10/10のリズム=designer裁定) */
+  flex-wrap: wrap; row-gap: 6px;
 }
+.kijun-row > .mini-btn,
+.kijun-row > .kijun-badge { margin-left: auto; }
 .kijun-row b { color: var(--ink); }
 .kijun-row small { color: var(--ink-3); }
 .kijun-row.ok b { color: var(--green-deep); }
