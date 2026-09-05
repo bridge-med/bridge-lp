@@ -3908,7 +3908,7 @@
       const dm = SPECIALTIES.get(b.dataset.dkeiji);
       const opened = dm ? DEPT.fsStatus(dm, d).filter((st) => st.ok && !st.notified).map((st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; }) : [];
       const where = b.dataset.dkeiji === settings.specialty ? '📊 経営 › 施設基準' : 'この部門';
-      toast('📋 体制を整えました。管理料は届出不要' + (opened.length ? `。次は「${opened.join('・')}」の届出(${where})` : '')); // 375幅で2行以内(PM v67)
+      toast('📋 体制を整えました。生活習慣病管理料は届出不要' + (opened.length ? `。次は「${opened.join('・')}」の届出(${where})` : '')); // 正式名称ベース(社長決定 2026-09-05)。375幅で3行になるが名称は削らない
       afterLeverChange();
     }));
     el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
