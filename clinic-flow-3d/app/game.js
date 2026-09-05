@@ -1963,27 +1963,25 @@
   });
   const KASAN = [
     { id: 'meisai', name: '明細書発行体制等加算', ten: '再診ごと+1点', cost: 0,
-      req: '電子レセプト請求+明細書の無料発行+院内掲示(基準を満たせば届出不要)', hint: '月1,000再診なら+1万円。体制を整えるだけで取れる加算の代表',
+      req: '電子請求+詳細な明細書の無償交付+院内掲示(届出不要)',
       verb: '体制を整える', doneLabel: '体制あり',
       done: () => settings.kasanMeisai, ok: () => KASAN_CORE.ok.meisai(kasanCtx()), apply: () => { settings.kasanMeisai = true; } },
     { id: 'jikangai3', name: '時間外対応体制加算3', ten: '再診ごと+4点', cost: 50000,
-      req: '標榜時間外の夜間の数時間の電話対応体制(様式2で届出)', hint: 'かかりつけ機能の入口。患者の安心=再診の定着にも効く',
+      req: '標榜時間外の夜間の数時間の電話等対応体制(様式2)',
       done: () => settings.kasanJikangai >= 1, ok: () => KASAN_CORE.ok.jikangai3(kasanCtx()), apply: () => { settings.kasanJikangai = 1; } },
     { id: 'jikangai1', name: '時間外対応体制加算1', ten: '再診ごと+7点', cost: 150000,
-      req: '常時の電話等対応体制(常勤職員等・コールバック体制/様式2で届出)', gameReq: '受付2名以上(加算3から段階を上げる)',
-      hint: '常時対応の体制強化で同じ再診から加算が7点に',
+      req: '常勤職員等による常時の電話等対応体制(様式2)', gameReq: '受付2名以上・時間外対応体制加算3を届出済み',
       done: () => settings.kasanJikangai === 2, ok: () => KASAN_CORE.ok.jikangai1(kasanCtx()), apply: () => { settings.kasanJikangai = 2; } },
     { id: 'kyoka', name: '機能強化加算', ten: '初診ごと+80点', cost: 200000,
-      req: 'かかりつけ機能に係る届出((2)ア〜キのいずれか)ほか、地域活動を行う常勤医師の配置・かかりつけ医機能の掲示・業務継続計画の策定等((3)〜(7))/様式1の3',
-      gameReq: '在宅部門を開設し在支診の届出があること(制度の要件キ=在医総管の届出+在支診(通常型)に相当。緊急往診3件以上等の実績要件と(3)〜(7)はゲームでは判定しない)',
-      hint: '在宅で24時間を引き受けている診療所を、初診料で評価する加算',
+      req: 'かかりつけ機能に係る届出((2)ア〜キのいずれか)ほか、常勤医師の配置・掲示・業務継続計画の策定等(様式1の3)',
+      gameReq: '在宅部門を開設し在支診の届出があること(制度の要件キに相当)。実績要件と(3)〜(7)はゲームでは判定しない',
       done: () => settings.kasanKyoka,
       ok: () => KASAN_CORE.ok.kyoka(kasanCtx()),
       apply: () => { settings.kasanKyoka = true; } },
     { id: 'renkei', name: '電子的診療情報連携体制整備加算3', ten: '初診ごと+4点(患者ごと月1回)', cost: 300000,
-      req: '電子請求+明細書の無償交付+オンライン資格確認+マイナ保険証利用率30%以上+マイナポータル情報に基づく健康相談体制+院内掲示とウェブ掲載(第1の8の3=区分3は(1)〜(8)/様式1の6)。明細書発行体制等加算とは同一の患者・同一月に併せて算定できない(A000注16・A001注19)',
-      gameReq: '明細書発行体制があること(無償交付の体制は届出後も続ける)。ゲームは患者ごとの月管理を持たないため、届出後は明細書発行体制等加算(再診+1点)を一律に取り下げる(安全側)。再診の2点も同じ理由で申請しない。マイナ保険証利用率30%は体制整備で満たした扱い(ゲーム上の仮定)',
-      hint: '医療DXの体制を初診料で評価する加算。ゲームでは再診の明細書1点を手放して取るため、初診と再診の比率で損得が決まる',
+      req: '医療DX推進に係る体制(第1の8-3=区分3/様式1の6)。明細書発行体制等加算とは併算定できない(A000注16)',
+      gameReq: '明細書発行体制が前提。マイナ保険証利用率30%は満たした扱い、届出後は明細書1点を一律に取り下げる(安全側/ゲーム上の仮定)',
+      hint: '初診+4点と再診+1点の入れ替え。初診と再診の比率で損得が変わる', // hintはこの行だけ残す(損得の向きが逆転しうる唯一の行=第8条・editor v69)
       done: () => settings.kasanRenkei, ok: () => KASAN_CORE.ok.renkei(kasanCtx()),
       apply: () => { settings.kasanRenkei = true; } }
   ];
@@ -3701,7 +3699,7 @@
       .map((st) => `<div class="fs-item${st.gameNote ? ' has-note' : ''}"><span class="kijun-badge off wrap">${nameOf(st)} 未(${st.missing.join('・')})</span>${gn(st)}</div>`);
     const done = sts.filter((st) => st.notified);
     const fold = done.length
-      ? `<details class="fs-fold" data-fsfold="${m.id}"${FS_FOLD_OPEN.has(m.id) ? ' open' : ''}><summary>届出済み ${done.length}件</summary><div class="fs-fold-b">${done.map((st) => `<span class="kijun-badge">${nameOf(st)} 適用中</span>`).join('')}</div></details>`
+      ? `<details class="fs-fold" data-fsfold="${m.id}"${FS_FOLD_OPEN.has(m.id) ? ' open' : ''}><summary>適用中 ${done.length}件</summary><div class="fs-fold-b">${done.map((st) => `<span class="kijun-badge">${nameOf(st)} 適用中</span>`).join('')}</div></details>`
       : '';
     const grp = (xs) => (xs.length ? `<div class="fs-group">${xs.join('')}</div>` : '');
     const list = grp(act) + grp(fact) + fold;
@@ -3880,7 +3878,7 @@
       const st = DEPT.fsStatus(m, d).find((x) => x.fsId === fsId);
       if (!st || !st.ok || st.notified) return;
       d.fs.push(fsId);
-      FS_FOLD_OPEN.add(id); // 届け出た直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条)
+      FS_FOLD_OPEN.add(id); // 届け出た直後は「適用中」を開いて見せる(閉じた箱へ消えない=第27条)
       toast('✅ 届け出ました — ゲーム上は当日から適用します(実際の適用時期は簡略化しています)');
       renderCorp(); renderPnl(); save();
     }));
@@ -3903,7 +3901,7 @@
       G.money -= DEPT_KEIJI_COST;
       d.policy.keiji = true;
       if (!d.fs.includes('r08-fs-b001-3')) d.fs.push('r08-fs-b001-3');
-      FS_FOLD_OPEN.add(b.dataset.dkeiji); // 整えた直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条・v67 designer M1)
+      FS_FOLD_OPEN.add(b.dataset.dkeiji); // 整えた直後は「適用中」を開いて見せる(閉じた箱へ消えない=第27条・v67 designer M1)
       // 体制が整って新たに届け出られるようになった基準を、その場所(経営タブ/この部門)ごと1行で示す(v67 designer M2)
       const dm = SPECIALTIES.get(b.dataset.dkeiji);
       const opened = dm ? DEPT.fsStatus(dm, d).filter((st) => st.ok && !st.notified).map((st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; }) : [];
@@ -4455,30 +4453,33 @@
       if (KBI) {
         const fs = REIMB.getFacilityStandard(REHA_KB_FS[k.lv]);
         if (fs) {
-          const staffing = (fs.staffing || '').split('。')[0];
+          // 制度上の要件はゲーム内要件(専従PT数)と同じものを指す文を選ぶ(第1文=医師要件では噛み合わない・editor v69 方針A)。様式は番号だけ(方針B)
+          const sents = (fs.staffing || '').split('。');
+          const staffing = sents.find((x) => x.includes('専従')) || sents[0];
+          const formNo = (fs.formNo || '').split('。')[0].replace(/別添\d+\s*/, '').replace(/\([^)]*\)/g, '');
           let est = '';
           if (!active && settings.rehaLevel > 0 && k.lv > settings.rehaLevel && rehaMo > 0) {
             const d = (kbPts(REHA_KB_ITEM[k.lv], 0) - kbPts(REHA_KB_ITEM[settings.rehaLevel], 0)) * 2 * rehaMo;
             est = `<br><b>推定月間増収 約${yen(d * 10)}</b>(現在のリハ${rehaMo}回/月ベースの試算・確定収益ではない)`;
           }
-          kbInfo = `<div class="kijun-kb">制度上の要件: ${staffing}${fs.formNo ? ` / 届出: ${fs.formNo.split('。')[0]}` : ''}${est}</div>`;
+          kbInfo = `<div class="kijun-kb">制度上の要件: ${staffing}${formNo ? ` / 届出: ${formNo}` : ''}${est}</div>`;
         }
       }
       return `<div class="kijun-row ${active ? 'ok' : ''}">
         <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
         ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
-    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。※届出→即日適用はゲーム上の簡略化(実制度では届出受理・月初適用等の手続きがある)。制度上の要件全文はレシートの学習モード・medical-kbを参照。</p>`;
+    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。制度上の要件全文はレシートの🎓学習モードで読める。</p>`;
     // 他科本院(v67): 施設基準は部門カードと同じ3状態(届け出る/未/届出済み)で描く。運動器リハの段は整形本院だけ(第14条)
     const mainMod = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
     const orthoMain = settings.specialty === 'orthopedics' || !mainMod || !mainMod.main;
     $('kijunBody').innerHTML = (orthoMain ? `<h3 class="sub-title">📋 運動器リハの施設基準</h3>${kijunOrtho}` : deptFsHtml(mainMod, mainDeptShim(mainMod), true))
-      + `<h3 class="sub-title">📮 その他の体制・届出 <small>— 1点=10円。小さくても「仕組み」で毎回積み上がる(点数は令和8年度KBに同期)</small></h3>`
+      + `<h3 class="sub-title">📮 その他の体制・届出 <small>— 1点=10円(点数は令和8年度KBに同期)</small></h3>`
       + KASAN.map((k) => {
         const done = k.done();
         const can = !done && k.ok();
         return `<div class="kijun-row ${done ? 'ok' : ''}">
-          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}<br>${k.hint}</small></div>
+          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}${k.hint ? `<br>${k.hint}` : ''}</small></div>
           ${done ? `<span class="kijun-badge">${k.doneLabel || '届出済'}</span>` : `<button class="mini-btn ${can ? 'plus' : ''}" data-kasan="${k.id}" ${can ? '' : 'disabled'}>${k.verb || '届け出る'}${k.cost ? ` ${yen(k.cost)}` : '(無料)'}</button>`}
         </div>`;
       }).join('');
