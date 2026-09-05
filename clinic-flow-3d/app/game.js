@@ -1136,9 +1136,11 @@
     // 営業関係からの紹介(関係レベル依存・チャネルごとに客層が違う)
     for (let i = 0; i < (G.evExtraRefer || 0); i++) push('first', 'hospital', true, 'senior');
     for (let i = 0; i < relLv('hospital'); i++) push('first', 'hospital', true, Math.random() < 0.7 ? 'senior' : 'worker');
-    if (settings.rehaLevel > 0) {
-      for (let i = 0; i < frac(relLv('caremane') * 0.7); i++) push('first', 'caremane', true, 'senior');
-      for (let i = 0; i < frac(relLv('rouken') * 0.7); i++) push('first', 'caremane', true, 'senior');
+    // ケアマネ・老健の紹介: 整形本院はリハ体制が前提。他科本院(v67)はリハ需要の無い高齢の新患として来る
+    if (settings.rehaLevel > 0 || settings.specialty !== 'orthopedics') {
+      const wantsReha = settings.specialty === 'orthopedics';
+      for (let i = 0; i < frac(relLv('caremane') * 0.7); i++) push('first', 'caremane', wantsReha, 'senior');
+      for (let i = 0; i < frac(relLv('rouken') * 0.7); i++) push('first', 'caremane', wantsReha, 'senior');
     }
     for (let i = 0; i < frac(relLv('company') * 1.5); i++) push('checkup', 'station', false, 'worker');
     for (let i = 0; i < frac(relLv('sports') * 0.6); i++) push('first', 'station', true, 'sports');
@@ -1609,11 +1611,13 @@
     };
   }
 
+  // 湊(リハ・物療担当)は整形本院だけ(v67): 内科本院には彼が翻訳すべきボトルネックが無い=肩書だけ残す中間は取らない(第14条)
+  const staffVisible = (k) => k !== 'reha' || settings.specialty === 'orthopedics';
   function renderStaffStrip() {
     const el = $('staffStrip');
     if (!el || typeof STAFF_UI === 'undefined') return;
     const c = staffCtx();
-    el.innerHTML = Object.entries(STAFF_UI.STAFF).map(([k, st]) => {
+    el.innerHTML = Object.entries(STAFF_UI.STAFF).filter(([k]) => staffVisible(k)).map(([k, st]) => {
       const mood = st.mood(c);
       const lv = bondLv(k);
       const pts = (G.bonds && G.bonds[k]) || 0;
@@ -1629,6 +1633,7 @@
     const recent = new Set(G.voiceLog.filter((v) => v.day > G.day - 5).map((v) => v.id));
     let best = null;
     for (const [k, st] of Object.entries(STAFF_UI.STAFF)) {
+      if (!staffVisible(k)) continue;
       for (const cm of st.comments) {
         if (recent.has(cm.id)) continue;
         let ok = false;
@@ -1647,7 +1652,7 @@
   function renderVoice() {
     const card = $('voiceCard');
     if (!card || typeof STAFF_UI === 'undefined') return;
-    const feed = G.voiceFeed || [];
+    const feed = (G.voiceFeed || []).filter((v) => staffVisible(v.char));
     card.hidden = feed.length === 0;
     const c = staffCtx();
     $('voiceBody').innerHTML = feed.map((v) => {
@@ -3357,7 +3362,7 @@
   function visitRelation(key) {
     const def = REL_DEF[key];
     const r = G.relations[key];
-    if (def.needsReha && settings.rehaLevel === 0) {
+    if (def.needsReha && settings.specialty === 'orthopedics' && settings.rehaLevel === 0) {
       showModal(def.name, '<p>「リハビリの体制がないと、ご紹介できません」<br>まず院内でリハ(専従PT・機器・施設基準)を立ち上げましょう。</p><p class="modal-note">📖 連携営業は「提供できる医療」が先。</p>', '出直す');
       return;
     }
@@ -3490,7 +3495,7 @@
         <p>${def.desc}</p>
         <p>関係レベル: <b class="rel-stars">${stars(r.lv, def.max)}</b>${r.lv > 0 ? `(最終訪問 Day ${r.last} / 30日放置で冷える)` : ''}</p>
         <p><b>効果:</b> ${def.effect}</p>
-        ${def.needsReha && settings.rehaLevel === 0 ? '<p class="modal-note">⚠️ リハ体制がないと紹介は始まりません</p>' : ''}
+        ${def.needsReha && settings.specialty === 'orthopedics' && settings.rehaLevel === 0 ? '<p class="modal-note">⚠️ リハ体制がないと紹介は始まりません</p>' : ''}
         <div class="modal-actions"><button class="btn-cta" id="relGo">${r.lv === 0 ? '挨拶に行く' : r.lv < def.max ? '関係を深める' : '定期訪問する'}(${yen(def.cost)})</button></div>`,
         'やめておく');
       $('relGo').addEventListener('click', () => {
@@ -4753,6 +4758,8 @@
       Object.assign(kw, kw._o, kws && kws[i] ? kws[i] : {});
     });
     for (const x of MISSIONS.concat(LEAGUE)) { if (x.title) { x._t = x._t || x.title; x.title = x._t.replace('{科名}', name); } }
+    const rel = m && m.main && m.main.preset && m.main.preset.rel;
+    for (const [k, def] of Object.entries(REL_DEF)) { if (!def._o) def._o = { effect: def.effect, desc: def.desc }; Object.assign(def, def._o, rel && rel[k] ? rel[k] : {}); }
     const ks = $('kijunSub'); if (ks) ks.textContent = (settings.specialty === 'orthopedics' ? '— 運動器リハ+加算。' : '— 施設基準+加算。') + '算定の土台は「体制」と「届出」';
   }
   function applyMainSpecialty(id) {

@@ -33,6 +33,11 @@
         settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0.12, examMean: 8, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, dexa: false, echo: false },
         policy: { kanri: 'II', ippanmei: true, keiji: false },
         shopHide: ['pt', 'rehaAide', 'machines', 'physio'], // 整形専用の採用・設備は出さない(第14条=ロック行にもしない)
+        // 営業先の文言(整形はリハ紹介前提)。効果の数値は同じ=文言だけ(v67・editor照合対象)
+        rel: {
+          caremane: { effect: '高齢の新患 +Lv×0.7人/日', desc: '担当者会議に顔を出し、通院できる持病の管理先として覚えてもらう。' },
+          rouken: { effect: '高齢の新患 +Lv×0.7人/日', desc: '退所後の生活習慣病の管理先として連携する。' },
+        },
         keywords: [
           { name: '「◯◯町 内科」', hint: '指名度が高く CV率10%。ただし検索数に上限', reha: false },
           { name: '「血圧・血糖・コレステロール」', hint: '検索数は多いが、比較検討層で CV率3.5%', reha: false },

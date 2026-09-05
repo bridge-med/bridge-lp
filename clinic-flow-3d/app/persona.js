@@ -376,8 +376,9 @@ const PERSONA = (() => {
     { a: ['nurse', '榊', '午後、ギプスの方が2件入ります'], b: ['doctor', '剣持', 'シーネの在庫、確認しておいて'] }
   ];
 
-  function crossTalk(variant) {
-    const c = CROSS_TALK[Math.abs(variant || 0) % CROSS_TALK.length];
+  function crossTalk(variant, excludeRoles) {
+    const pool = excludeRoles && excludeRoles.length ? CROSS_TALK.filter((x) => !excludeRoles.includes(x.a[0]) && !excludeRoles.includes(x.b[0])) : CROSS_TALK;
+    const c = pool[Math.abs(variant || 0) % pool.length];
     return { aRole: c.a[0], aName: c.a[1], aText: c.a[2], bRole: c.b[0], bName: c.b[1], bText: c.b[2] };
   }
 
