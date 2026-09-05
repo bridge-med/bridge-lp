@@ -918,6 +918,8 @@ input[type="range"]::-moz-range-thumb {
 .gate-box .spec-row { padding: 8px 2px; }
 .gate-box .spec-row small { color: var(--ink-2); } /* 判断の材料になる本文はAAを割らない(v56) */
 .gate-box .choice-row { margin-top: 6px; }
+.gate-box .choice-row small { font-size: 10px; line-height: 1.5; color: var(--ink-2); } /* 判断材料は製品の最小運用10px・AA(designer v66) */
+#mainLever .pnl-note { text-align: left; }
 @media (prefers-reduced-motion: reduce) { .tut-box { animation: none; } }
 
 .tut-focus {

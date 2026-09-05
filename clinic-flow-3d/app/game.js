@@ -1990,11 +1990,12 @@
     const lock = $('mgmtLock');
     if (lock) lock.hidden = stage >= 3;
     ['opWeb', 'opKiosk', 'opReview'].forEach((id) => vis(id, 2));
-    const slider = (id, need) => {
+    const orthoMain = settings.specialty === 'orthopedics';
+    const slider = (id, need, orthoOnly) => {
       const el = $(id);
-      if (el) { const w = el.closest('.ctrl'); if (w) w.style.display = stage >= need ? '' : 'none'; }
+      if (el) { const w = el.closest('.ctrl'); if (w) w.style.display = (stage >= need && (!orthoOnly || orthoMain)) ? '' : 'none'; }
     };
-    slider('pInj', 2); slider('pTrig', 2); slider('pPhysio', 2); slider('pTreat', 2); slider('pReha', 3);
+    slider('pInj', 2, true); slider('pTrig', 2, true); slider('pPhysio', 2, true); slider('pTreat', 2, true); slider('pReha', 3, true);
     renderPolicyCard();
   }
 
@@ -3613,7 +3614,7 @@
         ${deptActionsHtml(m, d) || '<span class="kijun-badge">連携病院との協定あり</span>'}
         <div class="op-row">
           <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
-          <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONの部門は整えている前提=ゲーム上の簡略化</small></p>
+          <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONにすると整えている前提=ゲーム上の簡略化</small></p>
         </div>
       </div>`;
     }
@@ -3657,7 +3658,7 @@
             ? '<span class="kijun-badge wrap">長期処方・リフィル対応の体制あり(届出不要)</span>'
             : `<button class="op-btn" data-dkeiji="${m.id}">📋 体制を整える(院内掲示・長期処方対応) <small>${yen(DEPT_KEIJI_COST)}</small></button>`}
           <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
-          <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONの部門は整えている前提=ゲーム上の簡略化</small></p>
+          <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONにすると整えている前提=ゲーム上の簡略化</small></p>
         </div>
       </div>`;
     }
@@ -3877,7 +3878,6 @@
     if (!lever) { lever = document.createElement('div'); lever.id = 'mainLever'; card.appendChild(lever); }
     const m = SPECIALTIES.get(settings.specialty);
     const ortho = settings.specialty === 'orthopedics' || !m || !m.main;
-    if (grid) grid.style.display = ortho ? '' : 'none';
     lever.innerHTML = ortho ? '' : deptLeverHtml(m, mainDeptShim(m));
     if (!ortho) bindDeptLeverHandlers(lever);
   }
@@ -3911,6 +3911,7 @@
     const deptParts = [];
     for (const m of (typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.playable() : [])) {
       if (m.id === settings.specialty) continue;
+      if (!m.open && !(G.depts && G.depts[m.id])) continue; // 部門として開設できない科(整形=本院専用)は並べない(第14条)
       const d = G.depts[m.id];
       if (d && DEPTI && m.status === 'full') {
         const L = d.last;
@@ -4085,7 +4086,7 @@
     if (open === 'newsite') rows.push(`<div class="site-detail">${openSection}${G.hospital ? '' : hospSection}</div>`);
 
     el.innerHTML = summary
-      + '<h3 class="sub-title">🏥 同じ診療科を増やす <small>— ${mainSpecName()}の分院とグループ病院</small></h3>'
+      + `<h3 class="sub-title">🏥 ${mainSpecName()}を増やす <small>— 分院とグループ病院</small></h3>`
       + rows.join('')
       + referSection
       + specialtySection;
@@ -4714,7 +4715,7 @@
     if (!cands.length) { onDone(); return; }
     gateOpen = true; afterGate = onDone;
     gatePick = cands.some((m) => m.id === settings.specialty) ? settings.specialty : cands[0].id;
-    $('gateLead').textContent = cands.length === 1 ? GATE.lead1 : `${GATE.lead1} ${GATE.lead2}`;
+    $('gateLead').textContent = cands.length === 1 ? GATE.lead1 : GATE.lead1 + GATE.lead2;
     renderGateList(cands);
     $('startGate').classList.add('show');
   }
@@ -4761,7 +4762,7 @@
   /* ================= チュートリアル ================= */
 
   const TUTORIAL = [
-    { tab: null, sel: null, text: 'ようこそ。あなたは{科名}クリニックの新オーナー。<b>①1日進める → ②結果を見る → ③1つ改善する</b> — これだけで街いちばん、やがて<b>全国いちばんの医療法人</b>を目指せます。' },
+    { tab: null, sel: null, text: 'ようこそ。今日からこの{科名}はあなたの院です。前の院長が診てきた患者は、明日も来ます。まずは<b>①1日進める → ②結果を見る → ③1つ直す</b>。最初はこれだけで十分です。' },
     { tab: null, sel: '.hud', text: '<b>資金・評判・認知</b>が経営の体温計。右の <b>⏩1日</b> で1日まるごとスキップもOK。まずは今日1日、患者さんの流れを眺めてみましょう。' },
     { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。「今日やること」にミッション・スタッフからの依頼・詰まりの診断と打ち手が常に出ています。ボタンでその画面へ飛べます。' },
     { tab: 'clinic', sel: '#shopCard', text: '最初に触れるのは<b>受付と椅子</b>。Day 4、Day 8と進むごとに採用・リハ・大型投資・分院…と打ち手がどんどん解放されます。' },
