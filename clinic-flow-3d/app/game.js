@@ -1981,7 +1981,7 @@
     { id: 'renkei', name: '電子的診療情報連携体制整備加算3', ten: '初診ごと+4点(患者ごと月1回)', cost: 300000,
       req: '医療DX推進に係る体制(第1の8-3=区分3/様式1の6)。明細書発行体制等加算とは併算定できない(A000注16)',
       gameReq: '明細書発行体制が前提。マイナ保険証利用率30%は満たした扱い、届出後は明細書1点を一律に取り下げる(安全側/ゲーム上の仮定)',
-      hint: '初診+4点と再診+1点の入れ替え。初診と再診の比率で損得が変わる', // hintはこの行だけ残す(損得の向きが逆転しうる唯一の行=第8条・editor v69)
+      hint: '損得: 初診+4点と再診+1点の入れ替え。初診と再診の比率で変わる', // hintはこの行だけ残す(損得の向きが逆転しうる唯一の行=第8条・editor v69)
       done: () => settings.kasanRenkei, ok: () => KASAN_CORE.ok.renkei(kasanCtx()),
       apply: () => { settings.kasanRenkei = true; } }
   ];
@@ -3699,7 +3699,7 @@
       .map((st) => `<div class="fs-item${st.gameNote ? ' has-note' : ''}"><span class="kijun-badge off wrap">${nameOf(st)} 未(${st.missing.join('・')})</span>${gn(st)}</div>`);
     const done = sts.filter((st) => st.notified);
     const fold = done.length
-      ? `<details class="fs-fold" data-fsfold="${m.id}"${FS_FOLD_OPEN.has(m.id) ? ' open' : ''}><summary>適用中 ${done.length}件</summary><div class="fs-fold-b">${done.map((st) => `<span class="kijun-badge">${nameOf(st)} 適用中</span>`).join('')}</div></details>`
+      ? `<details class="fs-fold" data-fsfold="${m.id}"${FS_FOLD_OPEN.has(m.id) ? ' open' : ''}><summary>適用中 ${done.length}件</summary><div class="fs-fold-b">${done.map((st) => `<span class="kijun-badge">${nameOf(st)}</span>`).join('')}</div></details>`
       : '';
     const grp = (xs) => (xs.length ? `<div class="fs-group">${xs.join('')}</div>` : '');
     const list = grp(act) + grp(fact) + fold;
