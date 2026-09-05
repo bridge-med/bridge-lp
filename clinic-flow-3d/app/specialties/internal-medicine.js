@@ -28,11 +28,16 @@
     desc: '生活習慣病の継続管理が柱。管理料(I)/(II)の選択が収益設計の中心',
     // 開始の扉の候補=本院として引き継げる(v66)。preset は本院の settings に上書きする整形専用レバーのゼロ化と方針の初期値
     main: {
-      line: '生活習慣病を長く診る。柱は管理料', order: 2,
+      line: '生活習慣病を長く診る。柱は管理料', order: 2, fsTitle: '生活習慣病管理料の体制',
       preset: {
         settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0.12, examMean: 8, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, dexa: false, echo: false },
         policy: { kanri: 'II', ippanmei: true, keiji: false },
         shopHide: ['pt', 'rehaAide', 'machines', 'physio'], // 整形専用の採用・設備は出さない(第14条=ロック行にもしない)
+        // 営業先の文言(整形はリハ紹介前提)。効果の数値は同じ=文言だけ(v67・editor照合対象)
+        rel: {
+          caremane: { effect: '高齢の新患 +Lv×0.7人/日', desc: '担当者会議に顔を出し、通院できる持病の管理先として覚えてもらう。' },
+          rouken: { effect: '高齢の新患 +Lv×0.7人/日', desc: '退所後の生活習慣病の管理先として連携する。' },
+        },
         keywords: [
           { name: '「◯◯町 内科」', hint: '指名度が高く CV率10%。ただし検索数に上限', reha: false },
           { name: '「血圧・血糖・コレステロール」', hint: '検索数は多いが、比較検討層で CV率3.5%', reha: false },

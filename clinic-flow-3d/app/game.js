@@ -183,6 +183,7 @@
   })();
   // 現在適用中の施設基準ID群(エンジンへ渡す)
   function activeFsIds() {
+    if (settings.specialty !== 'orthopedics') return (settings.mainFs || []).slice(); // 他科本院(v67)。会計は evalVisit が shim.fs を渡すのでここは説明の対称性
     const ids = [];
     if (settings.rehaLevel > 0) ids.push(REHA_KB_FS[settings.rehaLevel]);
     return ids;
@@ -1135,9 +1136,11 @@
     // 営業関係からの紹介(関係レベル依存・チャネルごとに客層が違う)
     for (let i = 0; i < (G.evExtraRefer || 0); i++) push('first', 'hospital', true, 'senior');
     for (let i = 0; i < relLv('hospital'); i++) push('first', 'hospital', true, Math.random() < 0.7 ? 'senior' : 'worker');
-    if (settings.rehaLevel > 0) {
-      for (let i = 0; i < frac(relLv('caremane') * 0.7); i++) push('first', 'caremane', true, 'senior');
-      for (let i = 0; i < frac(relLv('rouken') * 0.7); i++) push('first', 'caremane', true, 'senior');
+    // ケアマネ・老健の紹介: 整形本院はリハ体制が前提。他科本院(v67)はリハ需要の無い高齢の新患として来る
+    if (settings.rehaLevel > 0 || settings.specialty !== 'orthopedics') {
+      const wantsReha = settings.specialty === 'orthopedics';
+      for (let i = 0; i < frac(relLv('caremane') * 0.7); i++) push('first', 'caremane', wantsReha, 'senior');
+      for (let i = 0; i < frac(relLv('rouken') * 0.7); i++) push('first', 'caremane', wantsReha, 'senior');
     }
     for (let i = 0; i < frac(relLv('company') * 1.5); i++) push('checkup', 'station', false, 'worker');
     for (let i = 0; i < frac(relLv('sports') * 0.6); i++) push('first', 'station', true, 'sports');
@@ -1493,6 +1496,20 @@
       toast(`⚠️ 施設基準の要件割れ — ${REHA_NAMES[settings.rehaLevel]}に降格しました`);
       if (G.med) G.med.fsBroken++; // 医療評価: 本院の要件割れも数える(部門・分院と同じ範囲)
     }
+    // 他科本院(v67): 届出済みの施設基準が要件を割れば適用から外す(部門と同じ fsEnforce)。fsEnforce は dept.fs を差し替えるので settings に書き戻す
+    if (settings.specialty !== 'orthopedics' && DEPTI) {
+      const mm = SPECIALTIES.get(settings.specialty);
+      if (mm && mm.main && mm.fsDefs) {
+        const shim = mainDeptShim(mm);
+        const broken = DEPT.fsEnforce(mm, shim);
+        settings.mainFs = shim.fs;
+        for (const b of broken) {
+          const fsx = REIMB.getFacilityStandard(b.fsId);
+          toast(`⚠️ 施設基準の要件割れ — ${fsx ? (fsx.shortName || fsx.name) : b.fsId}を適用から外しました(${b.missing.join('・')})`);
+          if (G.med) G.med.fsBroken++;
+        }
+      }
+    }
 
     G.rep = clamp(G.rep, Math.max(15, repStart - 3), 97);
     if (spec.kind !== 'closed') G.blackStreak = (T.profit + T.brProfit) > 0 ? (G.blackStreak || 0) + 1 : 0;
@@ -1594,11 +1611,13 @@
     };
   }
 
+  // 湊(リハ・物療担当)は整形本院だけ(v67): 内科本院には彼が翻訳すべきボトルネックが無い=肩書だけ残す中間は取らない(第14条)
+  const staffVisible = (k) => k !== 'reha' || settings.specialty === 'orthopedics';
   function renderStaffStrip() {
     const el = $('staffStrip');
     if (!el || typeof STAFF_UI === 'undefined') return;
     const c = staffCtx();
-    el.innerHTML = Object.entries(STAFF_UI.STAFF).map(([k, st]) => {
+    el.innerHTML = Object.entries(STAFF_UI.STAFF).filter(([k]) => staffVisible(k)).map(([k, st]) => {
       const mood = st.mood(c);
       const lv = bondLv(k);
       const pts = (G.bonds && G.bonds[k]) || 0;
@@ -1614,6 +1633,7 @@
     const recent = new Set(G.voiceLog.filter((v) => v.day > G.day - 5).map((v) => v.id));
     let best = null;
     for (const [k, st] of Object.entries(STAFF_UI.STAFF)) {
+      if (!staffVisible(k)) continue;
       for (const cm of st.comments) {
         if (recent.has(cm.id)) continue;
         let ok = false;
@@ -1632,7 +1652,7 @@
   function renderVoice() {
     const card = $('voiceCard');
     if (!card || typeof STAFF_UI === 'undefined') return;
-    const feed = G.voiceFeed || [];
+    const feed = (G.voiceFeed || []).filter((v) => staffVisible(v.char));
     card.hidden = feed.length === 0;
     const c = staffCtx();
     $('voiceBody').innerHTML = feed.map((v) => {
@@ -3342,7 +3362,7 @@
   function visitRelation(key) {
     const def = REL_DEF[key];
     const r = G.relations[key];
-    if (def.needsReha && settings.rehaLevel === 0) {
+    if (def.needsReha && settings.specialty === 'orthopedics' && settings.rehaLevel === 0) {
       showModal(def.name, '<p>「リハビリの体制がないと、ご紹介できません」<br>まず院内でリハ(専従PT・機器・施設基準)を立ち上げましょう。</p><p class="modal-note">📖 連携営業は「提供できる医療」が先。</p>', '出直す');
       return;
     }
@@ -3475,7 +3495,7 @@
         <p>${def.desc}</p>
         <p>関係レベル: <b class="rel-stars">${stars(r.lv, def.max)}</b>${r.lv > 0 ? `(最終訪問 Day ${r.last} / 30日放置で冷える)` : ''}</p>
         <p><b>効果:</b> ${def.effect}</p>
-        ${def.needsReha && settings.rehaLevel === 0 ? '<p class="modal-note">⚠️ リハ体制がないと紹介は始まりません</p>' : ''}
+        ${def.needsReha && settings.specialty === 'orthopedics' && settings.rehaLevel === 0 ? '<p class="modal-note">⚠️ リハ体制がないと紹介は始まりません</p>' : ''}
         <div class="modal-actions"><button class="btn-cta" id="relGo">${r.lv === 0 ? '挨拶に行く' : r.lv < def.max ? '関係を深める' : '定期訪問する'}(${yen(def.cost)})</button></div>`,
         'やめておく');
       $('relGo').addEventListener('click', () => {
@@ -3670,7 +3690,7 @@
 
   /* 施設基準ブロック(v56 便V・designer方針): 行動(届け出る)→事実(未=足りないもの)→済み(適用中)の順に並べ、
      済みだけを<details>に畳む。gameNoteは行に従属させ(.fs-item)、fsNote(否定的確認)は行の有無に関わらず末尾に常時出す(#35) */
-  function deptFsHtml(m, d) {
+  function deptFsHtml(m, d, main) {
     const sts = DEPT.fsStatus(m, d);
     const nameOf = (st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; };
     // gameNote=ゲーム独自ゲートの断り(v52 PM裁定A。missingは足りないものの名前だけに保つ)
@@ -3687,6 +3707,12 @@
     const list = grp(act) + grp(fact) + fold;
     // fsDefsが無い科は既定文、ある科はモジュールのfsNote(否定的確認)を行と併記(#35)
     const note = sts.length === 0 ? (m.fsNote || 'この科の登録項目に届出必須の基準はない') : (m.fsNote || '');
+    // 本院(経営タブ・v67 designer M2/M3): 下段「📮 その他の体制・届出」と同格の見出しを立て、裸の「施設基準」ラベルは出さない。
+    // 体制の操作場所(院内›診療方針)への道筋を1行添える(ここに出るのは結果)
+    if (main) {
+      const title = (m.main && m.main.fsTitle) || `${m.name}の施設基準`;
+      return `<h3 class="sub-title">📋 ${title}</h3><div class="branch-kijun"><p class="kijun-kb">体制は 🏥 院内 › 診療方針 で整える。ここに出るのは結果</p>${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
+    }
     return `<div class="branch-kijun">施設基準${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
   }
 
@@ -3841,7 +3867,24 @@
     if (id === settings.specialty) { const m = SPECIALTIES.get(id); return m ? mainDeptShim(m) : null; }
     return G.depts[id];
   }
-  function afterLeverChange() { renderCorp(); renderPolicyCard(); updateHeader(); save(); }
+  function afterLeverChange() { renderCorp(); renderPolicyCard(); renderPnl(); updateHeader(); save(); }
+  // 施設基準の届出/折りたたみの配線。部門カード(法人タブ)と他科本院の施設基準カード(経営タブ・v67)で共用
+  function bindDeptFsHandlers(el) {
+    el.querySelectorAll('details.fs-fold').forEach((dt) => dt.addEventListener('toggle', () => {
+      if (dt.open) FS_FOLD_OPEN.add(dt.dataset.fsfold); else FS_FOLD_OPEN.delete(dt.dataset.fsfold);
+    }));
+    el.querySelectorAll('[data-dfsnotify]').forEach((b) => b.addEventListener('click', () => {
+      const [id, fsId] = b.dataset.dfsnotify.split(':');
+      const d = deptOf(id); const m = SPECIALTIES.get(id);
+      if (!d || !m) return;
+      const st = DEPT.fsStatus(m, d).find((x) => x.fsId === fsId);
+      if (!st || !st.ok || st.notified) return;
+      d.fs.push(fsId);
+      FS_FOLD_OPEN.add(id); // 届け出た直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条)
+      toast('✅ 届け出ました — ゲーム上は当日から適用します(実際の適用時期は簡略化しています)');
+      renderCorp(); renderPnl(); save();
+    }));
+  }
   function bindDeptLeverHandlers(el) {
     el.querySelectorAll('[data-dkanri]').forEach((b) => b.addEventListener('click', () => {
       const [id, plan] = b.dataset.dkanri.split(':');
@@ -3860,7 +3903,12 @@
       G.money -= DEPT_KEIJI_COST;
       d.policy.keiji = true;
       if (!d.fs.includes('r08-fs-b001-3')) d.fs.push('r08-fs-b001-3');
-      toast('📋 院内掲示と長期処方の体制を整えました — 生活習慣病管理料は届出不要(体制の要件のみ)');
+      FS_FOLD_OPEN.add(b.dataset.dkeiji); // 整えた直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条・v67 designer M1)
+      // 体制が整って新たに届け出られるようになった基準を、その場所(経営タブ/この部門)ごと1行で示す(v67 designer M2)
+      const dm = SPECIALTIES.get(b.dataset.dkeiji);
+      const opened = dm ? DEPT.fsStatus(dm, d).filter((st) => st.ok && !st.notified).map((st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; }) : [];
+      const where = b.dataset.dkeiji === settings.specialty ? '📊 経営 › 施設基準' : 'この部門';
+      toast('📋 体制を整えました。管理料は届出不要' + (opened.length ? `。次は「${opened.join('・')}」の届出(${where})` : '')); // 375幅で2行以内(PM v67)
       afterLeverChange();
     }));
     el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
@@ -4134,20 +4182,7 @@
       d.staff[key]--;
       renderCorp(); save();
     }));
-    el.querySelectorAll('details.fs-fold').forEach((dt) => dt.addEventListener('toggle', () => {
-      if (dt.open) FS_FOLD_OPEN.add(dt.dataset.fsfold); else FS_FOLD_OPEN.delete(dt.dataset.fsfold);
-    }));
-    el.querySelectorAll('[data-dfsnotify]').forEach((b) => b.addEventListener('click', () => {
-      const [id, fsId] = b.dataset.dfsnotify.split(':');
-      const d = G.depts[id]; const m = SPECIALTIES.get(id);
-      if (!d || !m) return;
-      const st = DEPT.fsStatus(m, d).find((x) => x.fsId === fsId);
-      if (!st || !st.ok || st.notified) return;
-      d.fs.push(fsId);
-      FS_FOLD_OPEN.add(id); // 届け出た直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条)
-      toast('✅ 届け出ました — ゲーム上は当日から適用します(実際の適用時期は簡略化しています)');
-      renderCorp(); save();
-    }));
+    bindDeptFsHandlers(el);
     el.querySelectorAll('[data-dreceipt]').forEach((b) => b.addEventListener('click', () => {
       const id = b.dataset.dreceipt;
       const m = SPECIALTIES.get(id);
@@ -4409,7 +4444,7 @@
       if (!hs.length) return 0;
       return Math.round(hs.reduce((a, h) => a + (h.rehaCount || 0), 0) / hs.length * 30);
     })();
-    $('kijunBody').innerHTML = KIJUN.map((k) => {
+    const kijunOrtho = KIJUN.map((k) => {
       const ok = k.ok(settings.pts, settings.floorLv);
       const active = settings.rehaLevel === k.lv;
       const badge = active ? '<span class="kijun-badge">適用中</span>'
@@ -4433,7 +4468,11 @@
         <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
         ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
-    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。※届出→即日適用はゲーム上の簡略化(実制度では届出受理・月初適用等の手続きがある)。制度上の要件全文はレシートの学習モード・medical-kbを参照。</p>`
+    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。※届出→即日適用はゲーム上の簡略化(実制度では届出受理・月初適用等の手続きがある)。制度上の要件全文はレシートの学習モード・medical-kbを参照。</p>`;
+    // 他科本院(v67): 施設基準は部門カードと同じ3状態(届け出る/未/届出済み)で描く。運動器リハの段は整形本院だけ(第14条)
+    const mainMod = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
+    const orthoMain = settings.specialty === 'orthopedics' || !mainMod || !mainMod.main;
+    $('kijunBody').innerHTML = (orthoMain ? `<h3 class="sub-title">📋 運動器リハの施設基準</h3>${kijunOrtho}` : deptFsHtml(mainMod, mainDeptShim(mainMod), true))
       + `<h3 class="sub-title">📮 その他の体制・届出 <small>— 1点=10円。小さくても「仕組み」で毎回積み上がる(点数は令和8年度KBに同期)</small></h3>`
       + KASAN.map((k) => {
         const done = k.done();
@@ -4460,6 +4499,7 @@
       toast(`📮 ${k.name} を届け出ました(${k.ten})`);
       renderPnl(); updateHeader(); save();
     }));
+    if (!orthoMain) bindDeptFsHandlers($('kijunBody'));
   }
 
   function blackDays7() {
@@ -4729,6 +4769,8 @@
       Object.assign(kw, kw._o, kws && kws[i] ? kws[i] : {});
     });
     for (const x of MISSIONS.concat(LEAGUE)) { if (x.title) { x._t = x._t || x.title; x.title = x._t.replace('{科名}', name); } }
+    const rel = m && m.main && m.main.preset && m.main.preset.rel;
+    for (const [k, def] of Object.entries(REL_DEF)) { if (!def._o) def._o = { effect: def.effect, desc: def.desc }; Object.assign(def, def._o, rel && rel[k] ? rel[k] : {}); }
   }
   function applyMainSpecialty(id) {
     const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(id) : null;

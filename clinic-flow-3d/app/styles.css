@@ -615,10 +615,10 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- 現場スタッフ(キャラクター) ---------- */
 
-.staff-strip {
-  display: flex;
+.staff-strip { /* grid: 奇数枚でも最後の1枚が全幅に伸びない(v67 designer N1)。130px=320幅でも2列 */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 8px;
-  flex-wrap: wrap;
 }
 .staff-chip {
   flex: 1 1 auto;
