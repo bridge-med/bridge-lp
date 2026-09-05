@@ -4456,7 +4456,8 @@
           // 制度上の要件はゲーム内要件(専従PT数)と同じものを指す文を選ぶ(第1文=医師要件では噛み合わない・editor v69 方針A)。様式は番号だけ(方針B)
           const sents = (fs.staffing || '').split('。');
           const staffing = sents.find((x) => x.includes('専従')) || sents[0];
-          const formNo = (fs.formNo || '').split('。')[0].replace(/別添\d+\s*/, '').replace(/\([^)]*\)/g, '');
+          let formNo = (fs.formNo || '').split('。')[0].replace(/別添\d+\s*/, '');
+          while (/\([^()]*\)/.test(formNo)) formNo = formNo.replace(/\([^()]*\)/g, ''); // 括弧の入れ子((I)の届出事項と同様)も消し切る(qa v69)
           let est = '';
           if (!active && settings.rehaLevel > 0 && k.lv > settings.rehaLevel && rehaMo > 0) {
             const d = (kbPts(REHA_KB_ITEM[k.lv], 0) - kbPts(REHA_KB_ITEM[settings.rehaLevel], 0)) * 2 * rehaMo;
