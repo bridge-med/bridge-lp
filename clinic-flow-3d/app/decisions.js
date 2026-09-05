@@ -390,7 +390,7 @@
         for (const d of (ch.fx && typeof ch.fx !== 'function' && ch.fx.delayed) || []) if (!d.days || !d.fx) errs.push(`${at}/${ch.id} delayed に days/fx が無い`);
         if (/!/.test(ch.label)) errs.push(`${at}/${ch.id} label に「!」`);
       }
-      if (/[。!]$/.test(c.title)) errs.push(`${at} title の末尾に句点/「!」`);
+      if (/[。!]/.test(c.title || '')) errs.push(`${at} title に句点/「!」(見出しに句点を付けない=第19条)`);
       if (c.chainOnly && !list.some((x) => (x.choices || []).some((ch) => ch.fx && typeof ch.fx !== 'function' && ch.fx.next && ch.fx.next.id === c.id))) errs.push(`${at} chainOnly だが誰からも参照されない`);
     }
     return { errs, count: list.length, cats };

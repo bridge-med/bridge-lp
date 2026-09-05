@@ -50,7 +50,7 @@
       lesson: '教育は投資。負担を誰が持つかを決めないと、頑張った人が先に消える', point: '教育負担の配分'
     },
     {
-      id: 'ST-01c', cat: 1, title: '新人が独り立ちした。次は定着', tier: 1, spec: ['any'], who: 'nurse', chainOnly: true, cool: 999,
+      id: 'ST-01c', cat: 1, title: '独り立ちの先に、定着をどう作るか', tier: 1, spec: ['any'], who: 'nurse', chainOnly: true, cool: 999,
       say: '一人で処置室を任せられるようになりました。ここからが本当の勝負だと思います。',
       bg: (c) => `教育期間が終わった。看護師${c.staff.nurses}人。仕事は回っているが、新人は「ここで続けられるか」を見ている。`,
       ask: '独り立ちの節目に何をするか',
@@ -91,7 +91,7 @@
       lesson: '一時的な欠員は恒久の能力低下ではない。期限がある費用として考える', point: '一時欠員の穴埋め。費用と負担と患者への影響'
     },
     {
-      id: 'ST-03', cat: 1, title: '受付を増やす。常勤か、午前だけの人か', tier: 1, spec: ['any'], who: 'front', cool: 120,
+      id: 'ST-03', cat: 1, title: '受付を増やすなら常勤か、午前だけの人か', tier: 1, spec: ['any'], who: 'front', cool: 120,
       cond: (c) => c.staff.receptionists <= 1 && c.load >= 0.5,
       prio: (c) => (c.load >= 0.85 ? 2 : 0),
       say: '受付を一人で回すのがきつくなってきました。常勤を採るか、午前だけの人を入れるか、決めてほしいです。',
@@ -214,7 +214,7 @@
       lesson: '専門職の採用は、需要と届出と教育の3つの時計を合わせる', point: '専門職の採用時期(整形)'
     },
     {
-      id: 'ST-07', cat: 1, title: '医師を補う。常勤か非常勤か', tier: 2, spec: ['any'], who: 'doctor', cool: 150,
+      id: 'ST-07', cat: 1, title: '医師を補うなら常勤か非常勤か', tier: 2, spec: ['any'], who: 'doctor', cool: 150,
       cond: (c) => c.staff.doctors === 1 && c.load >= 0.75,
       prio: (c) => (c.load >= 0.9 ? 2 : 1),
       say: '私一人で診るのが限界に近い。常勤を採るほどの資金と患者数か、非常勤で週2日補うか、決めたい。',
@@ -334,7 +334,7 @@
       lesson: '経験は帳簿に載らない資産。辞め方と残り方を本人と設計する', point: '高齢職員の再雇用と世代交代'
     },
     {
-      id: 'ST-10', cat: 1, title: '応募が2人。紹介の人と公募の経験者', tier: 2, spec: ['any'], who: 'doctor', cool: 150,
+      id: 'ST-10', cat: 1, title: '応募は2人、紹介の人と公募の経験者', tier: 2, spec: ['any'], who: 'doctor', cool: 150,
       cond: (c) => c.load >= 0.6 && c.staff.nurses <= 2,
       say: '看護師の応募が2人。師長の知人で人柄は確かな人と、公募で来た経験豊富だが条件の高い人。どちらにするか。',
       bg: (c) => `看護師${c.staff.nurses}人。知人は採用費¥50,000、日給は基準通り。経験者は採用費¥150,000、手当¥2,000/日を希望。`,
