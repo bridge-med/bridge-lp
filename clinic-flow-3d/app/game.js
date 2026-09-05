@@ -3690,7 +3690,7 @@
 
   /* 施設基準ブロック(v56 便V・designer方針): 行動(届け出る)→事実(未=足りないもの)→済み(適用中)の順に並べ、
      済みだけを<details>に畳む。gameNoteは行に従属させ(.fs-item)、fsNote(否定的確認)は行の有無に関わらず末尾に常時出す(#35) */
-  function deptFsHtml(m, d) {
+  function deptFsHtml(m, d, main) {
     const sts = DEPT.fsStatus(m, d);
     const nameOf = (st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; };
     // gameNote=ゲーム独自ゲートの断り(v52 PM裁定A。missingは足りないものの名前だけに保つ)
@@ -3707,6 +3707,12 @@
     const list = grp(act) + grp(fact) + fold;
     // fsDefsが無い科は既定文、ある科はモジュールのfsNote(否定的確認)を行と併記(#35)
     const note = sts.length === 0 ? (m.fsNote || 'この科の登録項目に届出必須の基準はない') : (m.fsNote || '');
+    // 本院(経営タブ・v67 designer M2/M3): 下段「📮 その他の体制・届出」と同格の見出しを立て、裸の「施設基準」ラベルは出さない。
+    // 体制の操作場所(院内›診療方針)への道筋を1行添える(ここに出るのは結果)
+    if (main) {
+      const title = (m.main && m.main.fsTitle) || `${m.name}の施設基準`;
+      return `<h3 class="sub-title">📋 ${title}</h3><div class="branch-kijun"><p class="kijun-kb">体制は「🏥 院内 › 診療方針」で整えます。ここに出るのは、その結果です</p>${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
+    }
     return `<div class="branch-kijun">施設基準${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
   }
 
@@ -3897,7 +3903,12 @@
       G.money -= DEPT_KEIJI_COST;
       d.policy.keiji = true;
       if (!d.fs.includes('r08-fs-b001-3')) d.fs.push('r08-fs-b001-3');
-      toast('📋 院内掲示と長期処方の体制を整えました — 生活習慣病管理料は届出不要(体制の要件のみ)');
+      FS_FOLD_OPEN.add(b.dataset.dkeiji); // 整えた直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条・v67 designer M1)
+      // 体制が整って新たに届け出られるようになった基準を、その場所(経営タブ/この部門)ごと1行で示す(v67 designer M2)
+      const dm = SPECIALTIES.get(b.dataset.dkeiji);
+      const opened = dm ? DEPT.fsStatus(dm, d).filter((st) => st.ok && !st.notified).map((st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; }) : [];
+      const where = b.dataset.dkeiji === settings.specialty ? '📊 経営の施設基準' : 'この部門';
+      toast('📋 体制を整えました — 生活習慣病管理料は届出不要(体制の要件のみ)' + (opened.length ? `。続けて「${opened.join('・')}」を届け出られます(${where})` : ''));
       afterLeverChange();
     }));
     el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
@@ -4461,7 +4472,7 @@
     // 他科本院(v67): 施設基準は部門カードと同じ3状態(届け出る/未/届出済み)で描く。運動器リハの段は整形本院だけ(第14条)
     const mainMod = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
     const orthoMain = settings.specialty === 'orthopedics' || !mainMod || !mainMod.main;
-    $('kijunBody').innerHTML = (orthoMain ? kijunOrtho : deptFsHtml(mainMod, mainDeptShim(mainMod)))
+    $('kijunBody').innerHTML = (orthoMain ? `<h3 class="sub-title">📋 運動器リハの施設基準</h3>${kijunOrtho}` : deptFsHtml(mainMod, mainDeptShim(mainMod), true))
       + `<h3 class="sub-title">📮 その他の体制・届出 <small>— 1点=10円。小さくても「仕組み」で毎回積み上がる(点数は令和8年度KBに同期)</small></h3>`
       + KASAN.map((k) => {
         const done = k.done();
@@ -4760,7 +4771,6 @@
     for (const x of MISSIONS.concat(LEAGUE)) { if (x.title) { x._t = x._t || x.title; x.title = x._t.replace('{科名}', name); } }
     const rel = m && m.main && m.main.preset && m.main.preset.rel;
     for (const [k, def] of Object.entries(REL_DEF)) { if (!def._o) def._o = { effect: def.effect, desc: def.desc }; Object.assign(def, def._o, rel && rel[k] ? rel[k] : {}); }
-    const ks = $('kijunSub'); if (ks) ks.textContent = (settings.specialty === 'orthopedics' ? '— 運動器リハ+加算。' : '— 施設基準+加算。') + '算定の土台は「体制」と「届出」';
   }
   function applyMainSpecialty(id) {
     const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(id) : null;

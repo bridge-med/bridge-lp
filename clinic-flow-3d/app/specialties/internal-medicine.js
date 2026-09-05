@@ -28,7 +28,7 @@
     desc: '生活習慣病の継続管理が柱。管理料(I)/(II)の選択が収益設計の中心',
     // 開始の扉の候補=本院として引き継げる(v66)。preset は本院の settings に上書きする整形専用レバーのゼロ化と方針の初期値
     main: {
-      line: '生活習慣病を長く診る。柱は管理料', order: 2,
+      line: '生活習慣病を長く診る。柱は管理料', order: 2, fsTitle: '生活習慣病管理料の体制',
       preset: {
         settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0.12, examMean: 8, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, dexa: false, echo: false },
         policy: { kanri: 'II', ippanmei: true, keiji: false },

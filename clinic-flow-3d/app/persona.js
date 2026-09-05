@@ -366,18 +366,19 @@ const PERSONA = (() => {
   /* ---------- スタッフ同士の掛け合い(視察中に聞こえる会話) ---------- */
 
   const CROSS_TALK = [
-    { a: ['front', '松岡', 'リハ室、あと2人お送りしまーす!'], b: ['pt', '湊', '了解です! 機器、空けておきます!'] },
+    { a: ['front', '松岡', 'リハ室、あと2人お送りしまーす!'], b: ['pt', '湊', '了解です! 機器、空けておきます!'], s: 'orthopedics' },
     { a: ['front', '松岡', '初診の方、問診お願いします!'], b: ['nurse', '榊', 'はい、お預かりします'] },
     { a: ['nurse', '榊', '処置室、次の方どうぞ'], b: ['front', '松岡', 'ご案内しまーす'] },
     { a: ['cash', '佐伯', '本日の外来管理加算、算定漏れゼロです'], b: ['doctor', '剣持', 'さすが。医事は経営の砦だな'] },
-    { a: ['doctor', '剣持', '3番の方、リハ計画の評価を今月中に'], b: ['pt', '湊', '計画書、今日中に仕上げます!'] },
-    { a: ['pt', '湊', '午後のリハ枠、1つ空きが出ました'], b: ['front', '松岡', 'キャンセル待ちの方にお電話します!'] },
+    { a: ['doctor', '剣持', '3番の方、リハ計画の評価を今月中に'], b: ['pt', '湊', '計画書、今日中に仕上げます!'], s: 'orthopedics' },
+    { a: ['pt', '湊', '午後のリハ枠、1つ空きが出ました'], b: ['front', '松岡', 'キャンセル待ちの方にお電話します!'], s: 'orthopedics' },
     { a: ['cash', '佐伯', '明細書のお問い合わせ、丁寧にいきましょう'], b: ['front', '松岡', '説明カード、窓口に置きました!'] },
-    { a: ['nurse', '榊', '午後、ギプスの方が2件入ります'], b: ['doctor', '剣持', 'シーネの在庫、確認しておいて'] }
+    { a: ['nurse', '榊', '午後、ギプスの方が2件入ります'], b: ['doctor', '剣持', 'シーネの在庫、確認しておいて'], s: 'orthopedics' }
   ];
 
-  function crossTalk(variant, excludeRoles) {
-    const pool = excludeRoles && excludeRoles.length ? CROSS_TALK.filter((x) => !excludeRoles.includes(x.a[0]) && !excludeRoles.includes(x.b[0])) : CROSS_TALK;
+  // s=その科の本院だけで流れる掛け合い(リハ室・リハ計画・ギプス/シーネは整形の中身。役割ではなく中身で切る・v67 designer M4)
+  function crossTalk(variant, spec) {
+    const pool = spec ? CROSS_TALK.filter((x) => !x.s || x.s === spec) : CROSS_TALK;
     const c = pool[Math.abs(variant || 0) % pool.length];
     return { aRole: c.a[0], aName: c.a[1], aText: c.a[2], bRole: c.b[0], bName: c.b[1], bText: c.b[2] };
   }

@@ -694,7 +694,7 @@
     // スタッフ同士の掛け合い: 現場の連携が「聞こえる」
     spawnCross() {
       if (typeof PERSONA === 'undefined' || this.cross) return;
-      const t = PERSONA.crossTalk(Math.floor(this._fn / 300) + (this.clinic.s.doctors || 1), this.clinic.s.specialty && this.clinic.s.specialty !== 'orthopedics' ? ['pt'] : []);
+      const t = PERSONA.crossTalk(Math.floor(this._fn / 300) + (this.clinic.s.doctors || 1), this.clinic.s.specialty || 'orthopedics');
       const gA = this.staffByRole && this.staffByRole[t.aRole];
       const gB = this.staffByRole && this.staffByRole[t.bRole];
       if (!gA || !gB) return;
