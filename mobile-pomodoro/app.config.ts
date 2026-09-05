@@ -47,9 +47,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ],
     experiments: {
       typedRoutes: true,
-      // Served at https://bridge-med.github.io/bridge-lp/pomodoro-app/ for the
+      // Served at https://bridge-med.jp/pomodoro-app/ for the
       // web preview. Adjust for any other host.
-      baseUrl: '/bridge-lp/pomodoro-app',
+      baseUrl: '/pomodoro-app',
     },
     owner: EAS_OWNER || undefined,
     extra: {

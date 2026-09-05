@@ -72,9 +72,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     plugins,
     experiments: {
       typedRoutes: true,
-      // Served at https://bridge-med.github.io/bridge-lp/daily-app/ for the
+      // Served at https://bridge-med.jp/daily-app/ for the
       // web preview. Remove/adjust for any other host.
-      baseUrl: '/bridge-lp/daily-app',
+      baseUrl: '/daily-app',
     },
     owner: EAS_OWNER || undefined,
     extra: {

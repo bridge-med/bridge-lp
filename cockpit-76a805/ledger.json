@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30",
+  "updated": "2026-09-05",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(2026-09-04 社長確認済み=便AA決裁4)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -576,7 +576,8 @@
     "madoakari/index.htmlのog:imageが製品サムネ流用の.webpで、一部スクレイパー(X/Slack等)が展開しない。twitter:cardとog:image:width/heightも欠落。scripts/make-ogp.mjsのCARDS配列に1行足して家族の顔に差し替える候補(designer起票2026-08-09)",
     "既存OGP9枚(思想ハブ)の小見出しが--dawn #A98F63のままで、タイムライン縮小時にほぼ消える。新規5枚は--dawn-deep #7D6845を採用(canonのトークン注記準拠)。9枚を焼き直して揃えるかは社長の審美判断(designer起票2026-08-09)",
     "Growth OS(growth-76a805)のtodayFocusとworklog「今日の3つ」(2026-08-11出荷)が「朝、今日やることを決める」という同じ問いに答えており、書き分けが未決。書き分け案: worklog=今日の実行(日付キー・完了・3件・繰り越さない)/Growth OS=事業の台帳の付箋(日付キーなしの設定値)。将来Growth OSを日常のホームにするなら、todayFocusを「今日の3つ」の設計に置き換えて統合する。今回の出荷ではGrowth OSに触れていない(2026-08-11 PM判定)",
-    "worklog/app/styles.css に prefers-reduced-motion 対応が皆無(既存の.btnや2026-08-11追加の.f3-*のtransition 0.12sが対象)。keyframeアニメーションは無く体感影響は小さいが、アプリ全体の既存課題として起票(2026-08-11 qa指摘。今回の後退ではない)"
+    "worklog/app/styles.css に prefers-reduced-motion 対応が皆無(既存の.btnや2026-08-11追加の.f3-*のtransition 0.12sが対象)。keyframeアニメーションは無く体感影響は小さいが、アプリ全体の既存課題として起票(2026-08-11 qa指摘。今回の後退ではない)",
+    "daily-app/(Expoの静的書き出し)は独自ドメイン移行(2026-09-05)の際、再エクスポートができない環境だったため、書き出し済みファイル内の /bridge-lp/ パスを機械置換した(橋渡し措置)。mobile/app.config.ts の baseUrl は '/daily-app' に修正済みのため、次回Expoを触れる環境で `npx expo export` を実行して daily-app/ を上書きし、この置換を恒久解消すること。再エクスポートを忘れると次の書き出しで旧パスは出ないが、置換漏れの検査(grep '/bridge-lp' daily-app/)は再エクスポートまで毎回の出荷で不要"
   ],
   "issueGroups": {
     "subpage.css系9ページの基盤未追従": {
