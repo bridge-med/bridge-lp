@@ -912,6 +912,16 @@ input[type="range"]::-moz-range-thumb {
 .tut-skip { border: none; background: none; color: var(--ink-3); font: 600 12px/1 var(--sans); flex: 0 0 auto; padding: 10px 6px; }
 .tut-btns .btn-cta { flex: 1; }
 
+/* ===== 開始の扉(v66): .tut-box の器を縦長・スクロール可にするだけ。1枚=.spec-row(提示)/2枚以上=.choice-row(排他) ===== */
+.gate-box { max-height: calc(100dvh - 36px); overflow-y: auto; }
+.gate-box .tut-text { min-height: 0; margin-bottom: 10px; }
+.gate-box .spec-row { padding: 8px 2px; }
+.gate-box .spec-row small { color: var(--ink-2); } /* 判断の材料になる本文はAAを割らない(v56) */
+.gate-box .choice-row { margin-top: 6px; }
+.gate-box .choice-row small { font-size: 10px; line-height: 1.5; color: var(--ink-2); } /* 判断材料は製品の最小運用10px・AA(designer v66) */
+#mainLever .pnl-note { text-align: left; }
+@media (prefers-reduced-motion: reduce) { .tut-box { animation: none; } }
+
 .tut-focus {
   position: relative;
   z-index: 501 !important;
