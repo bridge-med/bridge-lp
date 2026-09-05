@@ -125,13 +125,13 @@ npx eas-cli build --platform ios --profile production
 ## フェーズ5：掲載情報を埋めて提出（🌐）
 配信 → バージョン1.0：
 - **概要(説明)/プロモーション文/キーワード**：`store/listing-ja.md` から
-- **サポートURL**：`https://bridge-med.github.io/bridge-lp/legal/support.html`
+- **サポートURL**：`https://bridge-med.jp/legal/support.html`
 - **著作権**：`2026 Wataru Hashimoto`（年＋名・©不要）
 - **ビルド**：1.0.0(最新) を選択
 - **スクショ**：4でアップ
 
 アプリ情報／左メニュー：
-- **プライバシーポリシーURL**：`https://bridge-med.github.io/bridge-lp/legal/privacy.html`（**綴り注意**）
+- **プライバシーポリシーURL**：`https://bridge-med.jp/legal/privacy.html`（**綴り注意**）
 - **プライマリカテゴリ**：仕事効率化（必須）
 - **アプリのプライバシー**：データを収集していません
 - **年齢レーティング**：全て「なし」→4+

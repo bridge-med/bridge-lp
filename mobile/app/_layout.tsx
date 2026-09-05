@@ -75,7 +75,7 @@ export default function RootLayout() {
     ZenMaruGothic_700Bold,
     ZenMaruGothic_900Black,
     // Preload the icon font through the asset pipeline so it resolves under a
-    // subpath deploy (e.g. GitHub Pages /bridge-lp/daily-app/) on web too.
+    // subpath deploy (e.g. GitHub Pages /daily-app/) on web too.
     ...Feather.font,
   });
 

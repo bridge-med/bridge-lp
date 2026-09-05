@@ -23,7 +23,7 @@ Suggested screens to show: Home, Work-log entry, Timeline, Reflection, Career ou
 - [ ] Name, subtitle/short description, full description (see listing-ja.md / listing-en.md)
 - [ ] Keywords (App Store)
 - [ ] Support URL + Marketing URL
-- [x] Privacy policy URL — hosted at https://bridge-med.github.io/bridge-lp/legal/privacy.html
+- [x] Privacy policy URL — hosted at https://bridge-med.jp/legal/privacy.html
 
 ## Compliance
 - [x] No ads / no tracking SDK → App Store Privacy: "Data not collected"

@@ -10,7 +10,7 @@
 - `eas.json` / `app.config.ts`（env対応）
 - ストア掲載文・プライバシーポリシー・審査メモ・素材チェックリスト（`store/`）
 - 公開プライバシーページ：`legal/focus-privacy.html`（リポジトリ側、GitHub Pagesで配信）
-- Web プレビュー：`https://bridge-med.github.io/bridge-lp/pomodoro-app/`
+- Web プレビュー：`https://bridge-med.jp/pomodoro-app/`
 
 ## あなたがやること（要アカウント/支払い）
 0. アカウント：Expo（無料）/ Apple Developer（$99/年）/ Google Play（$25 買い切り）

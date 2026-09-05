@@ -28,7 +28,7 @@ Shown: Focus, Log, Settings, Immersive mode. (Wrap-up sheet can be added.)
 - [ ] Keywords (App Store)
 - [ ] Support URL + Marketing URL
 - [ ] Privacy policy URL — host store/privacy.html (e.g.
-      https://bridge-med.github.io/bridge-lp/legal/focus-privacy.html)
+      https://bridge-med.jp/legal/focus-privacy.html)
 
 ## Compliance
 - [x] No ads / no tracking SDK → App Store Privacy: "Data not collected".

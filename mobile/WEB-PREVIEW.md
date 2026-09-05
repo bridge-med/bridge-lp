@@ -66,6 +66,6 @@ cp dist/+not-found.html dist/404.html        # ルーティング用フォール
 
 ## このリポジトリ（bridge-worklog）の現状
 
-- 既存の公開先：`https://bridge-med.github.io/bridge-lp/daily-app/`
-  （`master` の `daily-app/` に手動デプロイ。`baseUrl='/bridge-lp/daily-app'`）
+- 既存の公開先：`https://bridge-med.jp/daily-app/`
+  （`master` の `daily-app/` に手動デプロイ。`baseUrl='/daily-app'`）
 - 新規アプリでは上の**方式A**を使うのがおすすめ（自動・つまずき少）。

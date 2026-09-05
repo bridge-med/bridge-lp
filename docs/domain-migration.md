@@ -1,6 +1,8 @@
 # 独自ドメイン移行手順(憲法・未決事項#5)
 
-**状態: ドメイン取得待ち(運営者アクション)**
+**状態: `bridge-med.jp` 取得済み(2026-09-05)・リポジトリ側の対応済み。残りはDNS設定(§3)→マージ→§6チェックリスト、メール(§5)は未着手**
+
+移行時の記録の扱い: 過去の記録(cockpit-76a805のshiplog・ledger・公開済みnote原稿)内の旧URLは書き換えない(記録の改変を避ける。旧URLはリダイレクトされるため実害なし)。未公開のnote下書きは「これから出す物」なので、公開時に新URLへ差し替えて出す。
 
 ## 1. ドメイン名の決定(運営者)
 
@@ -30,14 +32,14 @@ A  @  185.199.111.153
 CNAME  www  bridge-med.github.io.
 ```
 
-## 4. リポジトリ側(Claude が実施)
+## 4. リポジトリ側(Claude が実施 → 2026-09-05 完了)
 
-1. リポジトリ直下に `CNAME` ファイル(中身はドメイン名1行)を追加
-2. GitHub Pages 設定で custom domain を確認+「Enforce HTTPS」を有効化(証明書発行に最大24時間)
-3. 全ページの canonical / OGP / JSON-LD / sitemap.xml / robots.txt のURLを新ドメインへ一括置換
-4. `404.html` と `bridge.js` の絶対パス(`/bridge-lp/`)を `/` へ変更
-   ※ custom domain ではサイトがルート直下で配信されるため
-5. Search Console に新ドメインのプロパティを追加(所有権確認タグは既存を流用可)+サイトマップ再送信
+1. リポジトリ直下に `CNAME` ファイル(中身はドメイン名1行)を追加 — 済
+2. GitHub Pages 設定で custom domain を確認+「Enforce HTTPS」を有効化(証明書発行に最大24時間) — マージ後に実施
+3. 全ページの canonical / OGP / JSON-LD / sitemap.xml / robots.txt のURLを新ドメインへ一括置換 — 済(check-site.mjs に旧URL残存の検査を追加)
+4. `404.html` の絶対パス(`/bridge-lp/`)を `/` へ変更 — 済
+   ※ custom domain ではサイトがルート直下で配信されるため。`bridge.js` はベースパスを動的算出しており修正不要だった(本文書の旧記載を訂正)。Expo書き出しの `daily-app/` は機械置換で対応(恒久対応は台帳のknownIssues参照)
+5. Search Console に新ドメインのプロパティを追加(所有権確認タグは既存を流用可)+サイトマップ再送信 — マージ後に実施
 6. 旧URL(bridge-med.github.io/bridge-lp/…)はGitHub Pagesが自動で新ドメインへリダイレクトするため、既存リンク・ブックマークは壊れない
 
 ## 5. 独自ドメインメール(運営者+Claude)

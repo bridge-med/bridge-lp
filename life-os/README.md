@@ -5,7 +5,7 @@
 毎日30秒の入力から、5つの状態（ENERGY / FOCUS / MOOD / BODY / SOCIAL）を割り出して表示する
 パーソナルダッシュボードです。登録不要・端末内保存・オフライン対応。
 
-公開URL: https://bridge-med.github.io/bridge-lp/life-os/
+公開URL: https://bridge-med.jp/life-os/
 
 ---
 
