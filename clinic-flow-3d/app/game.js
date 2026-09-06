@@ -757,7 +757,7 @@
       G.lastReceipt = { type: 'revisit', seg: 'senior', rc: best.rc, ten: best.rc.reduce((a, r) => a + (r.t || 0), 0), yen: best.rev,
         kb: { rejected: best.ev.rejectedItems.map((x) => ({ itemId: x.itemId, name: x.name, points: x.points, reasons: x.reasons, rules: x.rules, fsInfo: x.fsInfo })), warnings: best.ev.warnings, trace: best.ev.trace } };
     }
-    if (out.ops > 0 && G.speed <= 4) toast(`👁 水晶体再建術 ${out.ops}件(日帰り)。術後の経過観察へ`);
+    if (out.ops > 0 && G.speed <= 4) toast(`👁 水晶体再建術(眼内レンズ挿入・日帰り) ${out.ops}件。術後の経過観察へ`);
     return out;
   }
   function ensureHist(rec, mod) {
@@ -4477,7 +4477,7 @@
     $('pnlToday').innerHTML = `
       <div class="pnl-row"><span>外来収益(初再診・外来管理${T.kanriCount}件・処方箋)</span><b>${yen(T.rev.consult)}</b></div>
       <div class="pnl-row"><span>注射(関節注・トリガー等 ${T.injCount + T.trigCount}件)</span><b>${yen(T.rev.inj)}</b></div>
-      <div class="pnl-row"><span>${T.surgCount ? `手術(水晶体再建術 ${T.surgCount}件)・` : ''}処置(${T.treatCount}件)・物療(${T.physioCount}件)</span><b>${yen(T.rev.treat + T.rev.physio)}</b></div>
+      <div class="pnl-row"><span>${T.surgCount ? `手術(水晶体再建術・眼内レンズ挿入 ${T.surgCount}件)・` : ''}処置(${T.treatCount}件)・物療(${T.physioCount}件)</span><b>${yen(T.rev.treat + T.rev.physio)}</b></div>
       <div class="pnl-row"><span>画像(X線${T.xrayCount}・MRI${T.mriCount})</span><b>${yen(T.rev.img)}</b></div>
       <div class="pnl-row"><span>リハビリ(${T.rehaCount}件・${REHA_NAMES[settings.rehaLevel]})</span><b>${yen(T.rev.reha)}</b></div>
       ${settings.dexa ? `<div class="pnl-row"><span>骨粗鬆症プログラム(${T.osteoVisits}件・登録${Math.round(G.osteoPool)}人)</span><b>${yen(T.rev.osteo)}</b></div>` : ''}

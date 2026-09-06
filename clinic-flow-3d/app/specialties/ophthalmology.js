@@ -60,7 +60,7 @@
         shopHide: ['pt', 'rehaAide', 'machines', 'physio', 'echo', 'dexa', 'mri'],
         relHide: ['sports'],
         rel: {
-          hospital: { effect: '紹介患者 +Lv人/日(術後の経過観察・糖尿病の眼底検査)', desc: '地域連携室との関係。病院で手術した人の経過観察と、糖尿病の定期眼底検査の受け皿になる。' },
+          hospital: { effect: '紹介患者 +Lv人/日(術後の経過観察・糖尿病の定期眼底検査)', desc: '地域連携室との関係。病院で手術した人の経過観察と、糖尿病の定期眼底検査の受け皿になる。' },
           company: { desc: '従業員の定期健診。画面作業で目が疲れる人の相談先になる。' },
           caremane: { effect: '高齢の新患 +Lv×0.7人/日', desc: '担当者会議に出て、点眼が続かない人の相談先になる。' },
           rouken: { effect: '高齢の新患 +Lv×0.7人/日', desc: '退所後も眼圧と点眼を診る先として連携する。' },
