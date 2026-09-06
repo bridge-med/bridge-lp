@@ -5247,6 +5247,7 @@
       updateHeader(); renderStaffStrip(); if (activeTab === 'mgmt') renderDecCard();
     }
     if (!G.tutorialDone || tutIdx >= 0 || gateOpen || decOpen || G.day < 5) return;
+    if ($('modal').classList.contains('show')) return; // ミッション達成などの modal が開いている日は重ねない(翌日の締めで開く・qa v72 指摘)
     const picked = DECISIONS.pick(decCtx(), st);
     if (picked) openDecision(picked.c, picked.viaChain);
   }
