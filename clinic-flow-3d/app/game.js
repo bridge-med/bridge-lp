@@ -3680,7 +3680,8 @@
       <div class="dept-lever">
         <span class="ctrl-head">検査設備への投資 <small>— 設備が検査可能範囲と単価を決める</small></span>
         ${deptActionsHtml(m, d) || '<span class="kijun-badge">導入済みの設備で診療中</span>'}
-        ${d.equip.surgery && q ? `<div class="pnl-row"><span>${m.queueLine(q)}</span><b>手術日 ${P.surgDays.map((w) => WEEKDAYS[w]).join('・')}・枠${P.surgPerDay * d.staff.doctors}件/日</b></div>` : ''}
+        ${d.equip.surgery && q ? `<div class="pnl-row"><span>白内障</span><b>${m.queueLine(q)}</b></div>
+        <div class="pnl-row"><span>手術日</span><b>${P.surgDays.map((w) => WEEKDAYS[w]).join('・')}・枠${P.surgPerDay * d.staff.doctors}件/日</b></div>` : ''}
       </div>`;
     }
     if (m.id === 'psychiatry') {

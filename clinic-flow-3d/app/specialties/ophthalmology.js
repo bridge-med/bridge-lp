@@ -204,7 +204,7 @@
     /* 待ちの1行(部門カード・本院レバー共用) */
     queueLine(q) {
       if (!q) return '';
-      return `白内障: 術前待ち${q.preop}人・手術待ち${q.surgery}人・術後${q.postop.length}人`;
+      return `術前${q.preop}人・手術${q.surgery}人・術後${q.postop.length}人`;
     },
 
     deptInit(dept, day) {
