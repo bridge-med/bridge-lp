@@ -249,8 +249,12 @@
       <div id="acctBody"></div>
     </div>
 
+    <div class="card" id="decCard">
+      <h2 class="card-title">🔀 経営の分岐点 <small>— 相談が届く。決めた結果は数字と履歴に残る</small></h2>
+      <div id="decCardBody"></div>
+    </div>
     <div class="card" id="kijunCard">
-      <h2 class="card-title">📋 施設基準・届出 <small id="kijunSub">— 算定の土台は「体制」と「届出」</small></h2>
+      <h2 class="card-title">📋 施設基準・届出 <small id="kijunSub">— 算定の土台は体制と届出</small></h2>
       <div id="kijunBody"></div>
     </div>
 
@@ -297,6 +301,12 @@
 </div>
 
 <!-- ===== チュートリアル ===== -->
+<div class="tutorial" id="decisionGate" role="dialog" aria-modal="true" aria-labelledby="decTitle">
+  <div class="tut-box gate-box dec-box">
+    <div class="dec-head"><span class="dec-face" id="decFace"></span><div class="dec-whobox"><small id="decWho"></small><b id="decTitle"></b></div><span class="tut-step" id="decStep"></span></div>
+    <div id="decBody"></div>
+  </div>
+</div>
 <div class="tutorial" id="startGate">
   <div class="tut-box gate-box">
     <p class="tut-text" id="gateLead"></p>
@@ -334,6 +344,17 @@
 <script src="app/staff.js"></script>
 <script src="app/persona.js"></script>
 <script src="app/walk3d.js"></script>
+<script src="app/decisions.js"></script>
+<script src="app/decisions/cases-01-staffing.js"></script>
+<script src="app/decisions/cases-02-operations.js"></script>
+<script src="app/decisions/cases-03-pay.js"></script>
+<script src="app/decisions/cases-04-sales.js"></script>
+<script src="app/decisions/cases-05-patients.js"></script>
+<script src="app/decisions/cases-06-finance.js"></script>
+<script src="app/decisions/cases-07-network.js"></script>
+<script src="app/decisions/cases-08-safety.js"></script>
+<script src="app/decisions/cases-09-equipment.js"></script>
+<script src="app/decisions/cases-10-organization.js"></script>
 <script src="app/game.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

@@ -549,9 +549,8 @@
 
   /* ================= セーブ/ロード ================= */
 
-  function save() {
-    try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({
+  function savePayload() {
+    return {
         settings, g: {
           money: G.money, rep: G.rep, aw: G.aw, day: G.day,
           billboard: G.billboard, relations: G.relations,
@@ -567,10 +566,13 @@
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
           specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
           regulars: (G.regulars || []).slice(-80), mainMi: G.mainMi, mainWi: G.mainWi, personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30),
-          med: G.med, referLog: (G.referLog || []).slice(-120), referSeen: G.referSeen, handoverLog: (G.handoverLog || []).slice(-30)
+          med: G.med, referLog: (G.referLog || []).slice(-120), referSeen: G.referSeen, handoverLog: (G.handoverLog || []).slice(-30),
+          dec: G.dec // 経営の分岐点(v70): 余力・信頼・履歴・予約した遅延効果・継続効果・開いている相談
         }
-      }));
-    } catch (e) { /* noop */ }
+      };
+  }
+  function save() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(savePayload())); } catch (e) { /* noop */ }
   }
 
   function load() {
@@ -657,7 +659,10 @@
 
   function hardReset() {
     FS_FOLD_OPEN.clear(); // UI状態も初期化(v56 designer A2)
-    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* noop */ }
+    try {
+      localStorage.removeItem(SAVE_KEY);
+      for (const k of Object.keys(localStorage)) if (k.startsWith(SAVE_KEY + '_dec') || k === SAVE_KEY + '_keep') localStorage.removeItem(k); // 分岐点のやり直し用スナップショット(v70)
+    } catch (e) { /* noop */ }
     location.reload();
   }
 
@@ -1071,6 +1076,7 @@
     // ブースト: 業務改善コンサル(診察回転UP)+ 院長(剣持)との信頼(診察が手際よく)
     if (boostActive('ops')) G.evExamDelta = (G.evExamDelta || 0) - 1.2;
     if (bondLv('doctor') > 0) G.evExamDelta = (G.evExamDelta || 0) - 0.15 * bondLv('doctor');
+    if (DECI && G.dec) G.evExamDelta = (G.evExamDelta || 0) + DECISIONS.examDelta(G.dec, G.day); // 分岐点: 職員の余力と期間つき効果
     settings.evExamDelta = G.evExamDelta || 0;
 
     if (spec.kind === 'closed') {
@@ -1104,7 +1110,8 @@
     // 自然新患(天気・流行イベントで増減)
     const share = G.rep / (G.rep + rivalRepNow());
     const campMul = boostActive('campaign') ? 1.5 : 1;
-    const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost * wx.newMul * (G.evArrivalMul || 1) * campMul + (Math.random() * 4 - 2)));
+    const decMul = DECI && G.dec ? DECISIONS.newMul(G.dec, G.day) : 1; // 分岐点: 期間つきの新患倍率+地域の信頼(±2%/段)
+    const nNew = Math.max(0, Math.round(52 * G.aw * share * spec.arr * sundayBoost * wx.newMul * (G.evArrivalMul || 1) * campMul * decMul + (Math.random() * 4 - 2)));
     for (let i = 0; i < nNew; i++) push('first', 'house');
     // 天気による転倒・外傷の初診(雨は少し、凍結は多い)
     for (let i = 0; i < frac(wx.falls * spec.arr); i++) push('first', 'house', false, Math.random() < 0.7 ? 'senior' : 'worker');
@@ -1136,6 +1143,8 @@
     // 営業関係からの紹介(関係レベル依存・チャネルごとに客層が違う)
     for (let i = 0; i < (G.evExtraRefer || 0); i++) push('first', 'hospital', true, 'senior');
     for (let i = 0; i < relLv('hospital'); i++) push('first', 'hospital', true, Math.random() < 0.7 ? 'senior' : 'worker');
+    // 地域の信頼(分岐点): 正のときだけ紹介が増える(0.3人/日/段の期待値)
+    if (DECI && G.dec) for (let i = 0; i < frac(DECISIONS.trustReferrals(G.dec) * spec.arr); i++) push('first', 'hospital', true, 'senior');
     // ケアマネ・老健の紹介: 整形本院はリハ体制が前提。他科本院(v67)はリハ需要の無い高齢の新患として来る
     if (settings.rehaLevel > 0 || settings.specialty !== 'orthopedics') {
       const wantsReha = settings.specialty === 'orthopedics';
@@ -1331,6 +1340,7 @@
     if (G.billboard) c += COSTS.billboardDay;
     if (settings.mri) c += COSTS.mriMaint;
     c += loanInterestDay();
+    if (DECI && G.dec) c += DECISIONS.dailyCost(G.dec, G.day); // 分岐点の継続費(手当・保守など。負なら削減)
     c += (G.today ? G.today.patients : 0) * COSTS.perPatient;
     c += G.today ? G.today.goodsCogs + G.today.jihiCogs + (G.today.labCogs || 0) : 0;
     return Math.round(c);
@@ -1552,6 +1562,7 @@
     G.t = 0;
     clinic.rehaToday = 0;
     updateHomecareTown();
+    decisionAfterDay(); // 🔀 経営の分岐点: 期日の来た遅延効果→相談を開く(開いている間はシムが止まる)
     if (G.day === 366 && !G.annualDone) {
       G.annualDone = true;
       G.coins += 10;
@@ -1963,27 +1974,25 @@
   });
   const KASAN = [
     { id: 'meisai', name: '明細書発行体制等加算', ten: '再診ごと+1点', cost: 0,
-      req: '電子レセプト請求+明細書の無料発行+院内掲示(基準を満たせば届出不要)', hint: '月1,000再診なら+1万円。体制を整えるだけで取れる加算の代表',
+      req: '電子請求+詳細な明細書の無償交付+院内掲示(届出不要)',
       verb: '体制を整える', doneLabel: '体制あり',
       done: () => settings.kasanMeisai, ok: () => KASAN_CORE.ok.meisai(kasanCtx()), apply: () => { settings.kasanMeisai = true; } },
     { id: 'jikangai3', name: '時間外対応体制加算3', ten: '再診ごと+4点', cost: 50000,
-      req: '標榜時間外の夜間の数時間の電話対応体制(様式2で届出)', hint: 'かかりつけ機能の入口。患者の安心=再診の定着にも効く',
+      req: '標榜時間外の夜間の数時間の電話等対応体制(様式2)',
       done: () => settings.kasanJikangai >= 1, ok: () => KASAN_CORE.ok.jikangai3(kasanCtx()), apply: () => { settings.kasanJikangai = 1; } },
     { id: 'jikangai1', name: '時間外対応体制加算1', ten: '再診ごと+7点', cost: 150000,
-      req: '常時の電話等対応体制(常勤職員等・コールバック体制/様式2で届出)', gameReq: '受付2名以上(加算3から段階を上げる)',
-      hint: '常時対応の体制強化で同じ再診から加算が7点に',
+      req: '常勤職員等による常時の電話等対応体制(様式2)', gameReq: '受付2名以上・時間外対応体制加算3を届出済み',
       done: () => settings.kasanJikangai === 2, ok: () => KASAN_CORE.ok.jikangai1(kasanCtx()), apply: () => { settings.kasanJikangai = 2; } },
     { id: 'kyoka', name: '機能強化加算', ten: '初診ごと+80点', cost: 200000,
-      req: 'かかりつけ機能に係る届出((2)ア〜キのいずれか)ほか、地域活動を行う常勤医師の配置・かかりつけ医機能の掲示・業務継続計画の策定等((3)〜(7))/様式1の3',
-      gameReq: '在宅部門を開設し在支診の届出があること(制度の要件キ=在医総管の届出+在支診(通常型)に相当。緊急往診3件以上等の実績要件と(3)〜(7)はゲームでは判定しない)',
-      hint: '在宅で24時間を引き受けている診療所を、初診料で評価する加算',
+      req: 'かかりつけ機能に係る届出((2)ア〜キのいずれか)ほか、常勤医師の配置・掲示・業務継続計画の策定等(様式1の3)',
+      gameReq: '在宅部門を開設し在支診の届出があること(制度の要件キに相当)。実績要件と(3)〜(7)はゲームでは判定しない',
       done: () => settings.kasanKyoka,
       ok: () => KASAN_CORE.ok.kyoka(kasanCtx()),
       apply: () => { settings.kasanKyoka = true; } },
     { id: 'renkei', name: '電子的診療情報連携体制整備加算3', ten: '初診ごと+4点(患者ごと月1回)', cost: 300000,
-      req: '電子請求+明細書の無償交付+オンライン資格確認+マイナ保険証利用率30%以上+マイナポータル情報に基づく健康相談体制+院内掲示とウェブ掲載(第1の8の3=区分3は(1)〜(8)/様式1の6)。明細書発行体制等加算とは同一の患者・同一月に併せて算定できない(A000注16・A001注19)',
-      gameReq: '明細書発行体制があること(無償交付の体制は届出後も続ける)。ゲームは患者ごとの月管理を持たないため、届出後は明細書発行体制等加算(再診+1点)を一律に取り下げる(安全側)。再診の2点も同じ理由で申請しない。マイナ保険証利用率30%は体制整備で満たした扱い(ゲーム上の仮定)',
-      hint: '医療DXの体制を初診料で評価する加算。ゲームでは再診の明細書1点を手放して取るため、初診と再診の比率で損得が決まる',
+      req: '医療DX推進に係る体制(第1の8-3=区分3/様式1の6)。明細書発行体制等加算とは併算定できない(A000注16)',
+      gameReq: '明細書発行体制が前提。マイナ保険証利用率30%は満たした扱い、届出後は明細書1点を一律に取り下げる(安全側/ゲーム上の仮定)',
+      hint: '損得: 初診+4点と再診+1点の入れ替え。初診と再診の比率で変わる', // hintはこの行だけ残す(損得の向きが逆転しうる唯一の行=第8条・editor v69)
       done: () => settings.kasanRenkei, ok: () => KASAN_CORE.ok.renkei(kasanCtx()),
       apply: () => { settings.kasanRenkei = true; } }
   ];
@@ -2958,7 +2967,7 @@
     if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); renderReceipt(); renderPulse(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
-    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); renderAcct(); }
+    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); renderAcct(); renderDecCard(); }
   }
 
   /* ================= UI: 診療時間 ================= */
@@ -3701,7 +3710,7 @@
       .map((st) => `<div class="fs-item${st.gameNote ? ' has-note' : ''}"><span class="kijun-badge off wrap">${nameOf(st)} 未(${st.missing.join('・')})</span>${gn(st)}</div>`);
     const done = sts.filter((st) => st.notified);
     const fold = done.length
-      ? `<details class="fs-fold" data-fsfold="${m.id}"${FS_FOLD_OPEN.has(m.id) ? ' open' : ''}><summary>届出済み ${done.length}件</summary><div class="fs-fold-b">${done.map((st) => `<span class="kijun-badge">${nameOf(st)} 適用中</span>`).join('')}</div></details>`
+      ? `<details class="fs-fold" data-fsfold="${m.id}"${FS_FOLD_OPEN.has(m.id) ? ' open' : ''}><summary>適用中 ${done.length}件</summary><div class="fs-fold-b">${done.map((st) => `<span class="kijun-badge">${nameOf(st)}</span>`).join('')}</div></details>`
       : '';
     const grp = (xs) => (xs.length ? `<div class="fs-group">${xs.join('')}</div>` : '');
     const list = grp(act) + grp(fact) + fold;
@@ -3880,7 +3889,7 @@
       const st = DEPT.fsStatus(m, d).find((x) => x.fsId === fsId);
       if (!st || !st.ok || st.notified) return;
       d.fs.push(fsId);
-      FS_FOLD_OPEN.add(id); // 届け出た直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条)
+      FS_FOLD_OPEN.add(id); // 届け出た直後は「適用中」を開いて見せる(閉じた箱へ消えない=第27条)
       toast('✅ 届け出ました — ゲーム上は当日から適用します(実際の適用時期は簡略化しています)');
       renderCorp(); renderPnl(); save();
     }));
@@ -3903,12 +3912,12 @@
       G.money -= DEPT_KEIJI_COST;
       d.policy.keiji = true;
       if (!d.fs.includes('r08-fs-b001-3')) d.fs.push('r08-fs-b001-3');
-      FS_FOLD_OPEN.add(b.dataset.dkeiji); // 整えた直後は「届出済み」を開いて見せる(閉じた箱へ消えない=第27条・v67 designer M1)
+      FS_FOLD_OPEN.add(b.dataset.dkeiji); // 整えた直後は「適用中」を開いて見せる(閉じた箱へ消えない=第27条・v67 designer M1)
       // 体制が整って新たに届け出られるようになった基準を、その場所(経営タブ/この部門)ごと1行で示す(v67 designer M2)
       const dm = SPECIALTIES.get(b.dataset.dkeiji);
       const opened = dm ? DEPT.fsStatus(dm, d).filter((st) => st.ok && !st.notified).map((st) => { const fs = REIMB.getFacilityStandard(st.fsId); return fs ? (fs.shortName || fs.name) : st.fsId; }) : [];
       const where = b.dataset.dkeiji === settings.specialty ? '📊 経営 › 施設基準' : 'この部門';
-      toast('📋 体制を整えました。管理料は届出不要' + (opened.length ? `。次は「${opened.join('・')}」の届出(${where})` : '')); // 375幅で2行以内(PM v67)
+      toast('📋 体制を整えました。生活習慣病管理料は届出不要' + (opened.length ? `。次は「${opened.join('・')}」の届出(${where})` : '')); // 正式名称ベース(社長決定 2026-09-05)。375幅で3行になるが名称は削らない
       afterLeverChange();
     }));
     el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
@@ -4455,30 +4464,34 @@
       if (KBI) {
         const fs = REIMB.getFacilityStandard(REHA_KB_FS[k.lv]);
         if (fs) {
-          const staffing = (fs.staffing || '').split('。')[0];
+          // 制度上の要件はゲーム内要件(専従PT数)と同じものを指す文を選ぶ(第1文=医師要件では噛み合わない・editor v69 方針A)。様式は番号だけ(方針B)
+          const sents = (fs.staffing || '').split('。');
+          const staffing = sents.find((x) => x.includes('専従')) || sents[0];
+          let formNo = (fs.formNo || '').split('。')[0].replace(/別添\d+\s*/, '');
+          while (/\([^()]*\)/.test(formNo)) formNo = formNo.replace(/\([^()]*\)/g, ''); // 括弧の入れ子((I)の届出事項と同様)も消し切る(qa v69)
           let est = '';
           if (!active && settings.rehaLevel > 0 && k.lv > settings.rehaLevel && rehaMo > 0) {
             const d = (kbPts(REHA_KB_ITEM[k.lv], 0) - kbPts(REHA_KB_ITEM[settings.rehaLevel], 0)) * 2 * rehaMo;
             est = `<br><b>推定月間増収 約${yen(d * 10)}</b>(現在のリハ${rehaMo}回/月ベースの試算・確定収益ではない)`;
           }
-          kbInfo = `<div class="kijun-kb">制度上の要件: ${staffing}${fs.formNo ? ` / 届出: ${fs.formNo.split('。')[0]}` : ''}${est}</div>`;
+          kbInfo = `<div class="kijun-kb">制度上の要件: ${staffing}${formNo ? ` / 届出: ${formNo}` : ''}${est}</div>`;
         }
       }
       return `<div class="kijun-row ${active ? 'ok' : ''}">
         <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
         ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
-    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院の基準は分院のPTだけで数えます(専従)。※届出→即日適用はゲーム上の簡略化(実制度では届出受理・月初適用等の手続きがある)。制度上の要件全文はレシートの学習モード・medical-kbを参照。</p>`;
+    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。制度上の要件全文はレシートの🎓学習モードで読める。</p>`;
     // 他科本院(v67): 施設基準は部門カードと同じ3状態(届け出る/未/届出済み)で描く。運動器リハの段は整形本院だけ(第14条)
     const mainMod = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
     const orthoMain = settings.specialty === 'orthopedics' || !mainMod || !mainMod.main;
     $('kijunBody').innerHTML = (orthoMain ? `<h3 class="sub-title">📋 運動器リハの施設基準</h3>${kijunOrtho}` : deptFsHtml(mainMod, mainDeptShim(mainMod), true))
-      + `<h3 class="sub-title">📮 その他の体制・届出 <small>— 1点=10円。小さくても「仕組み」で毎回積み上がる(点数は令和8年度KBに同期)</small></h3>`
+      + `<h3 class="sub-title">📮 その他の体制・届出 <small>— 1点=10円(点数は令和8年度KBに同期)</small></h3>`
       + KASAN.map((k) => {
         const done = k.done();
         const can = !done && k.ok();
         return `<div class="kijun-row ${done ? 'ok' : ''}">
-          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}<br>${k.hint}</small></div>
+          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}${k.hint ? `<br>${k.hint}` : ''}</small></div>
           ${done ? `<span class="kijun-badge">${k.doneLabel || '届出済'}</span>` : `<button class="mini-btn ${can ? 'plus' : ''}" data-kasan="${k.id}" ${can ? '' : 'disabled'}>${k.verb || '届け出る'}${k.cost ? ` ${yen(k.cost)}` : '(無料)'}</button>`}
         </div>`;
       }).join('');
@@ -4945,7 +4958,7 @@
     if (activeTab === 'clinic' && ++frameN % 150 === 0) renderStaffStrip();
     const dtReal = Math.min(0.1, (ts - lastTs) / 1000);
     lastTs = ts;
-    if (G.speed > 0 && tutIdx < 0 && !gateOpen) {
+    if (G.speed > 0 && tutIdx < 0 && !gateOpen && !decOpen) {
       let dt = dtReal * G.speed * 3;
       while (dt > 0) {
         const step = Math.min(0.5, dt);
@@ -5004,7 +5017,7 @@
   /* ================= 1日スキップ(自動運営・期待値ベース) ================= */
 
   function autoDay() {
-    if (tutIdx >= 0) return;
+    if (tutIdx >= 0 || decOpen) return;
     const spec = G.daySpec || specOf(G.day);
     const T = G.today;
     if (spec.kind !== 'closed') {
@@ -5162,10 +5175,253 @@
     getWalk: () => walk3d
   };
   $('skipBtn').addEventListener('click', () => {
-    if (tutIdx >= 0 || gateOpen) return;
+    if (tutIdx >= 0 || gateOpen || decOpen) return;
     autoDay();
     banner(`⏩ Day ${G.day - 1} を自動運営でスキップしました`);
   });
+
+  /* ================= 🔀 経営の分岐点(意思決定イベント・v70) =================
+   * エンジンは app/decisions.js。ここは接続(状況の読み取り・画面・履歴・やり直し)だけ。
+   * 開いている間は開始の扉と同じく decOpen でシムと日送りを止める。見込みと確定は同じ outcome を使う */
+  const DECI = typeof DECISIONS !== 'undefined';
+  let decOpen = false, decBusy = false, decPick = null, decCur = null;
+  const DEC_SNAP_MAX = 8;
+
+  if (DECI) { const nm = {}, mx = {}; for (const [k, d] of Object.entries(REL_DEF)) { nm[k] = d.name; mx[k] = d.max; } DECISIONS.setRelNames(nm); DECISIONS.setRelMax(mx); }
+  function decState() {
+    if (!DECI) return null;
+    G.dec = DECISIONS.ensureState(G.dec, `${Date.now().toString(36)}`);
+    return G.dec;
+  }
+  // 判断に使う「今の状況」。ケースの cond/prio/bg/when がこれを読む(docs/decisions.md に一覧)
+  function decCtx() {
+    const st = decState();
+    const open7 = G.history.filter((h) => h.kind !== 'closed').slice(-7);
+    const avg = (k) => (open7.length ? open7.reduce((a, h) => a + (h[k] || 0), 0) / open7.length : 0);
+    const patients7 = Math.round(avg('patients'));
+    const examCap = Math.max(10, settings.doctors * (DAY_SPECS.full.min / (settings.examMean + 1.5)) * 0.72);
+    const mh = G.history.slice(-30);
+    const monthProfit = Math.round(mh.reduce((a, h) => a + h.profit + (h.brProfit || 0), 0));
+    const monthRevenue = Math.round(mh.reduce((a, h) => a + h.revenue + (h.brRevenue || 0), 0));
+    const dailyCostNow = Math.round(COSTS.rent[settings.floorLv] + COSTS.base[settings.floorLv] + mainStaffCost() + (st ? DECISIONS.dailyCost(st, G.day) : 0));
+    const staff = { doctors: settings.doctors, nurses: settings.nurses, receptionists: settings.receptionists, pts: settings.pts, rehaAides: settings.rehaAides || 0 };
+    const rel = {}; for (const k of Object.keys(G.relations || {})) rel[k] = G.relations[k].lv;
+    return {
+      day: G.day, money: Math.round(G.money), rep: G.rep, aw: G.aw, staff,
+      staffTotal: staff.doctors + staff.nurses + staff.receptionists + staff.pts + staff.rehaAides,
+      specialty: settings.specialty, stage: unlockStage(), depts: Object.keys(G.depts || {}), branches: (G.branches || []).length, hospital: !!G.hospital,
+      rehaLevel: settings.rehaLevel || 0, flags: st ? st.flags : {}, slack: st ? st.slack : 0, trust: st ? st.trust : 0,
+      load: Math.round(Math.min(1.2, patients7 / examCap) * 100) / 100, patients7, newp7: Math.round(avg('newCount')),
+      refer7: Math.round((relLv('hospital') + 0.7 * (relLv('caremane') + relLv('rouken')) + (st ? DECISIONS.trustReferrals(st) : 0)) * 10) / 10,
+      waitAvg: Math.round(avg('avgWait')), balked7: Math.round(avg('balked')),
+      monthProfit, monthRevenue, dailyCost: dailyCostNow, runway: Math.max(0, Math.round(G.money / Math.max(1, dailyCostNow))),
+      rentDay: COSTS.rent[settings.floorLv], examMean: settings.examMean, relations: rel, kaitei: G.kaitei ? G.kaitei.count : 0
+    };
+  }
+  const decWho = (c) => (typeof c.who === 'string' ? DECISIONS.WHO[c.who] || { name: c.who, title: '', emoji: '💬' } : Object.assign({ emoji: '💬' }, c.who));
+  const decFace = (c) => (typeof c.who === 'string' && typeof STAFF_UI !== 'undefined' && STAFF_UI.STAFF[c.who] ? STAFF_UI.faceSVG(c.who, 'normal', 40) : `<span class="dec-emoji">${decWho(c).emoji}</span>`);
+  const fnv = (v, ctx) => (typeof v === 'function' ? v(ctx) : v);
+
+  // 1日の締め(G.day++ の後)から呼ぶ
+  function decisionAfterDay() {
+    if (!DECI) return;
+    const st = decState();
+    const fired = DECISIONS.tick({ G, settings }, st, G.day);
+    if (fired.length) {
+      banner(`🔀 前の判断の結果 — ${fired.map((f) => `${f.label || ''}${f.fx ? `(${DECISIONS.summarizeFx(f.fx)})` : ''}`).join(' / ')}`);
+      for (const f of fired) (G.voiceFeed = G.voiceFeed || []).push({ kind: 'event', char: 'advisor', text: `${f.label}: ${DECISIONS.summarizeFx(f.fx)}`, day: G.day });
+      updateHeader(); renderStaffStrip(); if (activeTab === 'mgmt') renderDecCard();
+    }
+    if (!G.tutorialDone || tutIdx >= 0 || gateOpen || decOpen || G.day < 5) return;
+    const picked = DECISIONS.pick(decCtx(), st);
+    if (picked) openDecision(picked.c, picked.viaChain);
+  }
+
+  function openDecision(c, viaChain) {
+    const st = decState();
+    st.open = { id: c.id, day: G.day, chain: viaChain ? { id: viaChain.id, day: viaChain.day } : null };
+    decOpen = true; decBusy = false; decPick = null;
+    const ctx = decCtx();
+    decCur = { c, viaChain: st.open.chain, ctx, outcomes: {} };
+    for (const ch of c.choices) decCur.outcomes[ch.id] = DECISIONS.evaluate(c, ch, ctx, st);
+    renderDecision();
+    $('decisionGate').classList.add('show');
+    $('decisionGate').scrollTop = 0;
+    save();
+  }
+
+  function decLinesHtml(lines) {
+    if (!lines.length) return '<p class="dec-none">数字はすぐには動かない</p>';
+    return lines.map((l) => `<div class="pnl-row dec-line${l.later ? ' later' : ''}"><span>${l.label}</span><b class="${l.neg ? 'neg' : l.later ? '' : 'pos'}">${l.val}</b>${l.sub ? `<small class="dec-sub">${l.sub}</small>` : ''}</div>`).join('');
+  }
+
+  function renderDecision() {
+    const { c, ctx, outcomes } = decCur;
+    const who = decWho(c);
+    const st = decState();
+    const facts = c.facts ? fnv(c.facts, ctx) : [];
+    const choices = c.choices.map((ch) => {
+      const o = outcomes[ch.id];
+      const on = decPick === ch.id;
+      return `<button class="choice-row dec-choice${on ? ' on' : ''}${o.ok ? '' : ' blocked'}" data-dec="${ch.id}" ${o.ok ? '' : 'aria-disabled="true"'}>
+        <b>${ch.label}</b><small>${fnv(ch.note, ctx) || ''}${o.ok ? '' : `<br><i class="dec-block">選べない: ${o.blocked.join('・')}</i>`}</small></button>`;
+    }).join('');
+    let preview = '<p class="dec-hint">選択肢を押すと見込みが出る。確定するまで変えられる</p>';
+    if (decPick) {
+      const o = outcomes[decPick];
+      const rollHtml = o.roll ? `<p class="dec-why">🎲 ${o.roll.label}: ${Math.round(o.roll.p * 100)}%。起きれば ${DECISIONS.summarizeFx(o.roll.hitFx) || '数字は動かない'} / 起きなければ ${DECISIONS.summarizeFx(o.roll.missFx) || '数字は動かない'}</p>` : '';
+      const whyHtml = o.why.length ? `<p class="dec-why">${o.why.map((w) => `※ ${w}`).join('<br>')}</p>` : '';
+      // 見込み: 確率つきの行は「確定側」を伏せて幅で見せる(確定後に同じ outcome で結果を出す)
+      const shown = o.roll ? DECISIONS.lines(DECISIONS.resolveFx(c.choices.find((x) => x.id === decPick).fx, ctx), ctx) : o.lines;
+      preview = `<div class="dec-preview"><small class="dec-plabel">見込み</small>${decLinesHtml(shown)}${rollHtml}${whyHtml}</div>`;
+    }
+    $('decFace').innerHTML = decFace(c);
+    $('decWho').textContent = `${who.title ? who.title + ' ' : ''}${who.name}からの相談`;
+    $('decTitle').textContent = c.title;
+    $('decStep').textContent = `Day ${ctx.day} · ${DECISIONS.CATS[c.cat]}`;
+    $('decBody').innerHTML = `
+      <p class="dec-say">「${fnv(c.say, ctx)}」</p>
+      <p class="dec-bg">${fnv(c.bg, ctx)}</p>
+      ${facts.length ? `<div class="dec-facts">${facts.map((f) => `<span class="kijun-badge alt">${f.label} ${f.val}</span>`).join('')}<span class="kijun-badge alt">余力 ${st.slack > 0 ? '+' : ''}${st.slack}</span><span class="kijun-badge alt">信頼 ${st.trust > 0 ? '+' : ''}${st.trust}</span></div>` : ''}
+      <p class="dec-ask"><b>決めること:</b> ${c.ask}</p>
+      <div class="dec-choices">${choices}</div>
+      ${preview}
+      <div class="tut-btns"><button class="btn-cta" id="decGo" ${decPick && outcomes[decPick].ok ? '' : 'disabled'}>この方針で決める</button></div>`;
+    $('decBody').querySelectorAll('[data-dec]').forEach((b) => b.addEventListener('click', () => {
+      if (decBusy) return;
+      const id = b.dataset.dec;
+      if (!outcomes[id].ok) { toast(`選べない: ${outcomes[id].blocked.join('・')}`); return; }
+      decPick = id;
+      const box = $('decisionGate').querySelector('.dec-box'); const keep = box ? box.scrollTop : 0;
+      renderDecision();
+      if (box) { box.scrollTop = keep; const pv = box.querySelector('.dec-preview'); if (pv && pv.scrollIntoView) pv.scrollIntoView({ block: 'nearest' }); } // 再描画で先頭へ戻さない・見込みを視界に(designer A)
+    }));
+    const go = $('decGo'); if (go) go.addEventListener('click', confirmDecision);
+  }
+
+  // 分岐前の状態を丸ごと残す(やり直し用。直近 DEC_SNAP_MAX 件)
+  function decSnapshot(n) {
+    try {
+      const key = `${SAVE_KEY}_dec${n}`;
+      localStorage.setItem(key, JSON.stringify(savePayload()));
+      for (const k of Object.keys(localStorage)) {
+        const m = k.match(new RegExp(`^${SAVE_KEY}_dec(\\d+)$`));
+        if (m && Number(m[1]) <= n - DEC_SNAP_MAX) localStorage.removeItem(k);
+      }
+      return key;
+    } catch (e) { return null; }
+  }
+
+  function confirmDecision() {
+    if (!decOpen || decBusy || !decPick) return;
+    decBusy = true; // 連続タップの二重処理を防ぐ
+    const { c, ctx, viaChain } = decCur;
+    const ch = c.choices.find((x) => x.id === decPick);
+    const st = decState();
+    const outcome = decCur.outcomes[ch.id]; // 見込みに使ったものと同じ
+    if (!outcome.ok) { decBusy = false; return; }
+    const snap = decSnapshot(st.count + 1);
+    const entry = DECISIONS.commit(c, ch, outcome, { G, settings }, st, { viaChain, snap });
+    entry.reflect = DECISIONS.reflect(c, ch, outcome, ctx);
+    applyUnlocks(); renderShop(); renderStaffStrip(); updateHeader(); if (activeTab === 'corp') renderCorp();
+    pushVoice(typeof c.who === 'string' && STAFF_UI.STAFF[c.who] ? c.who : 'advisor', `${c.title} → ${ch.label}`, 'event');
+    renderDecisionResult(entry, c, ch, outcome);
+    save();
+  }
+
+  function renderDecisionResult(entry, c, ch, outcome) {
+    const who = decWho(c);
+    const d = (a, b) => (b - a);
+    const dm = entry.after.money - entry.before.money;
+    const moneyLine = dm ? `<div class="pnl-row dec-line"><span>資金</span><b class="${dm < 0 ? 'neg' : 'pos'}">${dm < 0 ? '−' : '+'}${yen(Math.abs(dm))}<small class="dec-sub">${yen(entry.before.money)} → ${yen(entry.after.money)}</small></b></div>` : '';
+    const stRow = (label, a, b) => (a === b ? '' : `<div class="pnl-row dec-line"><span>${label}</span><b class="${b < a ? 'neg' : 'pos'}">${a} → ${b}</b></div>`);
+    const stLine = stRow('職員の余力', entry.before.slack, entry.after.slack) + stRow('地域の信頼', entry.before.trust, entry.after.trust);
+    const later = outcome.lines.filter((l) => l.later);
+    $('decWho').textContent = `${who.title ? who.title + ' ' : ''}${who.name}に方針を伝えた`;
+    $('decBody').innerHTML = `
+      <p class="dec-ask"><b>決めた方針:</b> ${ch.label}</p>
+      <div class="dec-preview"><small class="dec-plabel">変わった数字</small>${moneyLine}${stLine}${decLinesHtml(outcome.lines.filter((l) => !l.later && l.k !== 'money' && l.k !== 'slack' && l.k !== 'trust'))}
+      ${later.length ? `<small class="dec-plabel">あとで</small>${decLinesHtml(later)}` : ''}</div>
+      <div class="dec-reflect">${entry.reflect.map((r) => `<p>${r}</p>`).join('')}</div>
+      <div class="tut-btns"><button class="btn-cta" id="decClose">続ける</button></div>`;
+    $('decClose').addEventListener('click', closeDecision);
+  }
+
+  function closeDecision() {
+    if (!decOpen) return;
+    decOpen = false; decBusy = false; decPick = null; decCur = null;
+    $('decisionGate').classList.remove('show');
+    if (G.dec) G.dec.open = null;
+    save();
+    if (activeTab === 'mgmt') renderDecCard();
+  }
+
+  /* 経営タブのカード: 余力・信頼の今、予定している効果、履歴とやり直し */
+  function renderDecCard() {
+    const el = $('decCardBody');
+    if (!el || !DECI) return;
+    const st = decState();
+    const day = G.day;
+    const meaning = (v, pos, neg) => (v > 0 ? pos : v < 0 ? neg : '中立');
+    const mods = st.mods.filter((m) => m.until == null || m.until > day);
+    const pend = st.pending.slice().sort((a, b) => a.due - b.due);
+    const keep = (() => { try { return !!localStorage.getItem(SAVE_KEY + '_keep'); } catch (e) { return false; } })();
+    const log = st.log.slice().reverse().slice(0, 10);
+    el.innerHTML = `
+      <div class="dec-facts">
+        <span class="kijun-badge ${st.slack < 0 ? 'off' : st.slack > 0 ? '' : 'alt'}">職員の余力 ${st.slack > 0 ? '+' : ''}${st.slack} · ${meaning(st.slack, '診察が速い', '診察が延びる')}</span>
+        <span class="kijun-badge ${st.trust < 0 ? 'off' : st.trust > 0 ? '' : 'alt'}">地域の信頼 ${st.trust > 0 ? '+' : ''}${st.trust} · ${meaning(st.trust, '紹介が増える', '新患が減る')}</span>
+      </div>
+      <p class="kijun-kb">余力は1段で診察1人あたり±0.3分。信頼は1段で新患±2%、正なら紹介+0.3人/日。相談は Day 5 から4〜7日おき。判断中は時間が止まる</p>
+      ${mods.length ? `<h3 class="sub-title">続いている効果</h3>${(() => {
+        const perm = mods.filter((m) => m.kind === 'dailyCost' && m.until == null);
+        const rest = mods.filter((m) => !(m.kind === 'dailyCost' && m.until == null));
+        const permSum = perm.reduce((a, m) => a + m.v, 0);
+        const permRow = perm.length ? `<div class="pnl-row dec-line"><span>ずっと続く継続費 <small>(${perm.length}件: ${perm.map((m) => m.label || '').filter(Boolean).join('・')})</small></span><b class="${permSum > 0 ? 'neg' : 'pos'}">${permSum > 0 ? '−' : '+'}${yen(Math.abs(permSum))}/日</b></div>` : '';
+        return permRow + rest.map((m) => `<div class="pnl-row dec-line"><span>${m.label || m.kind}</span><b>${m.kind === 'dailyCost' ? `${m.v > 0 ? '−' : '+'}${yen(Math.abs(m.v))}/日` : m.kind === 'newMul' ? `新患×${m.v}` : `診察${m.v > 0 ? '+' : ''}${m.v}分`}${m.until ? ` · Day ${m.until}まで` : ''}</b></div>`).join('');
+      })()}` : ''}
+      ${pend.length ? `<h3 class="sub-title">あとで来る結果</h3>${pend.map((p) => `<div class="pnl-row dec-line later"><span>Day ${p.due} ${p.label}</span><b>${DECISIONS.summarizeFx(p.fx) || '—'}</b></div>`).join('')}` : ''}
+      <h3 class="sub-title">判断の履歴 <small>— ${st.log.length}件</small></h3>
+      ${log.length ? log.map((e) => `<div class="dec-log">
+          <div><b>Day ${e.day}</b> ${e.title} → <b>${e.choiceLabel}</b><br><small>${e.lines.filter((l) => !l.later).map((l) => `${l.label} ${l.val}`).join('・') || '数字は動かなかった'}${e.roll ? ` · 🎲${e.roll.hit ? '起きた' : '起きなかった'}` : ''}</small></div>
+          ${e.snap && localStorage.getItem(e.snap) ? `<button class="mini-btn" data-decrewind="${e.n}">別の方針を試す</button>` : ''}
+        </div>`).join('') : '<p class="pnl-empty">まだ相談は届いていない(Day 5 から)</p>'}
+      ${keep ? '<div class="op-row"><button class="op-btn" id="decKeepBack">🔁 控えに残した進行に戻る</button></div>' : ''}`;
+    el.querySelectorAll('[data-decrewind]').forEach((b) => b.addEventListener('click', () => decAskRewind(Number(b.dataset.decrewind))));
+    const kb = $('decKeepBack'); if (kb) kb.addEventListener('click', decRestoreKeep);
+  }
+
+  function decAskRewind(n) {
+    const e = (G.dec.log || []).find((x) => x.n === n);
+    if (!e) return;
+    showModal('🔀 この分岐から別の方針を試す', `
+      <p><b>Day ${e.day}「${e.title}」</b>の直前に戻ります。資金・職員・患者・あとで来る結果・履歴もその時点に戻り、同じ相談が同じ見込みで開きます。</p>
+      <p>いまの進行(Day ${G.day})をどうしますか。</p>
+      <div class="op-row dec-rewind">
+        <button class="op-btn has-note" id="decRwKeep">🗂 控えに残して戻る<span class="act-note">控えは1つだけ。経営タブの分岐点カードから戻れる</span></button>
+        <button class="op-btn has-note" id="decRwDrop">↩️ いまの進行を捨てて戻る<span class="act-note">Day ${e.day} 以降の進行は消える</span></button>
+      </div>`, 'やめる');
+    const fin = (keep) => {
+      try {
+        const raw = localStorage.getItem(e.snap);
+        if (!raw) { toast('この分岐の記録は残っていない'); return; }
+        if (keep) localStorage.setItem(SAVE_KEY + '_keep', JSON.stringify(savePayload()));
+        localStorage.setItem(SAVE_KEY, raw);
+        location.reload();
+      } catch (err) { toast('やり直しに失敗した'); }
+    };
+    $('decRwKeep').addEventListener('click', () => fin(true));
+    $('decRwDrop').addEventListener('click', () => fin(false));
+  }
+  function decRestoreKeep() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY + '_keep');
+      if (!raw) return;
+      localStorage.setItem(SAVE_KEY, raw);
+      localStorage.removeItem(SAVE_KEY + '_keep');
+      location.reload();
+    } catch (e) { toast('戻せなかった'); }
+  }
 
   /* ================= 起動 ================= */
 
@@ -5274,9 +5530,11 @@
     } else if (!G.tutorialDone) startTutorial();
     applyUnlocks(); renderShop(); renderMissions(); updateMissionBar(); renderCorp(); updateHeader();
   };
+  decState();
   if (!hasSave) openStartGate(afterStart);
   else banner(`おかえりなさい — Day ${G.day} から再開します`);
-  if (G.tutorialDone && !gateOpen && !$('modal').classList.contains('show')) checkDailyLogin();
+  if (hasSave && G.dec && G.dec.open) { const oc = DECISIONS.byId(G.dec.open.id); if (oc) openDecision(oc, G.dec.open.chain); else G.dec.open = null; } // 判断の途中で閉じた/やり直しで戻った相談を再表示
+  if (G.tutorialDone && !gateOpen && !decOpen && !$('modal').classList.contains('show')) checkDailyLogin();
   renderPrestige();
   updateSpeedButtons();
   const sb = $('soundBtn');
