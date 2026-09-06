@@ -252,11 +252,11 @@
   /* ================= 🏆 地域リーグ(町→市→県→地方→全国) ================= */
   // 架空のNPC医療法人。目標は法人月商(直近30日)。ライバルの月商も日々成長する
   const LEAGUE = [
-    { name: 'ひまわり整形外科', tier: '町', rev: 8000000 },
-    { name: '中央せぼねクリニック', tier: '市', rev: 15000000 },
-    { name: 'みなと関節クリニック', tier: '市', rev: 25000000 },
+    { name: 'ひまわりクリニック', tier: '町', rev: 8000000 }, // ライバル名は科に依らない(v73 便AF)
+    { name: '中央クリニック', tier: '市', rev: 15000000 },
+    { name: 'みなとクリニック', tier: '市', rev: 25000000 },
     { name: '医療法人 桜台会', tier: '市', rev: 40000000, title: '🥇 市でいちばんの{科名}グループ', reward: 2000000, coin: 5 },
-    { name: '大和田整形グループ', tier: '県', rev: 60000000 },
+    { name: '大和田医療グループ', tier: '県', rev: 60000000 },
     { name: '医療法人 青葉会', tier: '県', rev: 90000000 },
     { name: '医療法人 白鳳会', tier: '県', rev: 130000000, title: '🏅 県でいちばんの医療法人', reward: 5000000, coin: 8 },
     { name: '広域医療 コスモス会', tier: '地方', rev: 180000000 },
@@ -1773,12 +1773,12 @@
 
   // 現実の改定でよくある方向性をパターン化。年次決算の2日後に2つ抽選して施行
   const KAITEI_POOL = [
-    { name: 'リハビリテーション料の適正化', fx: { reha: 0.96 }, note: '運動器リハの評価引き下げ。量から質(アウトカム)への圧力' },
+    { name: 'リハビリテーション料の適正化', spec: 'orthopedics', fx: { reha: 0.96 }, note: '運動器リハの評価引き下げ。量から質(アウトカム)への圧力' },
     { name: '外来機能・かかりつけの評価強化', fx: { consult: 1.02 }, note: '初再診・継続管理への評価が引き上げ' },
     { name: '画像診断の適正化', fx: { img: 0.94 }, note: 'MRI・X線の評価引き下げ。「必要性の説明」がより重要に' },
     { name: '注射・処置の見直し', fx: { inj: 0.97, treat: 0.98 }, note: '注射・処置の一部が引き下げ' },
-    { name: '物理療法の包括化圧力', fx: { physio: 0.95 }, note: '消炎鎮痛等処置の評価見直し' },
-    { name: '運動器リハの評価引き上げ', fx: { reha: 1.03 }, note: 'アウトカム実績のあるリハへの評価アップ' },
+    { name: '物理療法の包括化圧力', spec: 'orthopedics', fx: { physio: 0.95 }, note: '消炎鎮痛等処置の評価見直し' },
+    { name: '運動器リハの評価引き上げ', spec: 'orthopedics', fx: { reha: 1.03 }, note: 'アウトカム実績のあるリハへの評価アップ' },
     { name: '地域連携・紹介の加算拡充', fx: { consult: 1.015 }, note: '紹介・情報連携への評価が上がる' },
     { name: '検査の包括範囲拡大', fx: { img: 0.97, inj: 0.99 }, note: '出来高だった項目の一部が包括に' }
   ];
@@ -1787,7 +1787,7 @@
   function applyKaitei() {
     const k = G.kaitei;
     const picks = [];
-    const pool = KAITEI_POOL.slice();
+    const pool = KAITEI_POOL.filter((x) => !x.spec || x.spec === settings.specialty); // 科に無いカテゴリの改定は出さない(v73)
     for (let i = 0; i < 2 && pool.length; i++) picks.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
     const changes = [];
     picks.forEach((p) => {
@@ -2040,8 +2040,8 @@
     const body = stage === 2
       ? `<p>Day 4 — 現場が回り始めたので、打ち手が増えます。</p>
          <ul class="unlock-list">
-           <li>🧑‍⚕️ <b>採用</b>(医師・看護師)とベッド・物療機器</li>
-           <li>💉 <b>診療方針</b>(注射・物療・処置)— 単価はここで作る</li>
+           <li>🧑‍⚕️ <b>採用</b>(医師・看護師)と設備</li>
+           <li>💉 <b>診療方針</b> — 単価はここで作る</li>
            <li>📱 <b>Web問診・自動精算機・クチコミ返信</b> — 受付の詰まり対策</li>
            <li>🤝 <b>営業まわり・ターゲット客層</b>(タウン)</li>
            <li>🪙 <b>アイテム・プレミアム施設・実績</b> — コインはミッションと実績で獲得</li>
@@ -2049,12 +2049,12 @@
          <p class="modal-note">📖 打ち手は「詰まっている所」に打つのが原則。院内タブの「今日やること」が案内します。</p>`
       : `<p>Day 8 — ここからが経営の本番です。</p>
          <ul class="unlock-list">
-           <li>🏃 <b>運動器リハ</b>(PT採用・リハ機器・施設基準の届出)</li>
+           ${settings.specialty === 'orthopedics' ? '<li>🏃 <b>運動器リハ</b>(PT採用・リハ機器・施設基準の届出)</li>' : '<li>📋 <b>施設基準・届出</b>(経営タブ)</li>'}
            <li>📊 <b>P&L・KPIピン留め・事業計画・銀行融資</b>(経営タブ)</li>
            <li>🏢 <b>分院展開</b>(法人タブ)</li>
            <li>🪙 <b>自費メニュー</b>(PRP・AGAほか)と<b>大型投資</b>(MRI・DEXA・増築)</li>
          </ul>
-         <p class="modal-note">📖 リハは整形外来の柱。施設基準(専従PT数×面積)で1回の単価が¥1,700→¥3,700まで変わります。</p>`;
+         ${settings.specialty === 'orthopedics' ? '<p class="modal-note">📖 リハは整形外来の柱。施設基準(専従PT数×面積)で1回の単価が¥1,700→¥3,700まで変わります。</p>' : '<p class="modal-note">📖 体制と届出が算定の土台。経営タブの施設基準カードで確かめられます。</p>'}`;
     if ($('modal').classList.contains('show')) {
       banner('🔓 新しい打ち手が解放されました。院内・経営タブをチェック');
       return;
@@ -3495,7 +3495,7 @@
       return;
     }
     if (b.id === 'rival') {
-      showModal('ライバル整形外科', `<p>開業15年、評判 ${Math.round(rivalRepNow())}(年々力をつけています)。新患は評判の比で分け合っています。リスティングを出しすぎると入札を強めてきます。</p><p class="modal-note">📖 相手を下げる手はない。自院の評判・認知・提供価値を上げるだけ。</p>`, '閉じる');
+      showModal(`ライバル${mainSpecName()}`, `<p>開業15年、評判 ${Math.round(rivalRepNow())}(年々力をつけています)。新患は評判の比で分け合っています。リスティングを出しすぎると入札を強めてきます。</p><p class="modal-note">📖 相手を下げる手はない。自院の評判・認知・提供価値を上げるだけ。</p>`, '閉じる');
       return;
     }
     if (b.id === 'clinic') {
@@ -4834,7 +4834,7 @@
     { tab: null, sel: null, text: 'ようこそ。今日からこの{科名}はあなたの院です。前の院長が診てきた患者は、明日も来ます。まずは<b>①1日進める → ②結果を見る → ③1つ直す</b>。最初はこれだけで十分です。' },
     { tab: null, sel: '.hud', text: '<b>資金・評判・認知</b>が経営の体温計。右の <b>⏩1日</b> で1日まるごとスキップもOK。まずは今日1日、患者さんの流れを眺めてみましょう。' },
     { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。「今日やること」にミッション・スタッフからの依頼・詰まりの診断と打ち手が常に出ています。ボタンでその画面へ飛べます。' },
-    { tab: 'clinic', sel: '#shopCard', text: '最初に触れるのは<b>受付と椅子</b>。Day 4、Day 8と進むごとに採用・リハ・大型投資・分院…と打ち手がどんどん解放されます。' },
+    { tab: 'clinic', sel: '#shopCard', text: '最初に触れるのは<b>受付と椅子</b>。Day 4、Day 8と進むごとに採用・設備・大型投資・分院…と打ち手がどんどん解放されます。' },
     { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。それでは初日の診療、スタートです。' }
   ];
   let tutIdx = -1;
