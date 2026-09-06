@@ -418,7 +418,7 @@
     examMean: 6, pTreat: 0.15, pReha: 0.35, pInj: 0.2, pTrig: 0.12, pPhysio: 0.35,
     selfReha: false, selfRehaPrice: 8000, goods: false,
     prpOn: false, prpPrice: 55000, agaOn: false, agaPrice: 6000,
-    learnMode: false, specialty: 'orthopedics', mainPolicy: null, mainFs: [],
+    learnMode: false, specialty: 'orthopedics', mainPolicy: null, mainFs: [], mainEquip: null, // mainEquip=他科本院の設備(v73 便AF・眼科の検査設備投資)
     schedule: ['full', 'full', 'full', 'am', 'full', 'am', 'closed'] // 月〜日
   };
 
@@ -709,9 +709,14 @@
     if (!settings.mainPolicy) settings.mainPolicy = Object.assign({}, (mod.main && mod.main.preset && mod.main.preset.policy) || (mod.deptDefaults && mod.deptDefaults.policy) || {});
     return settings.mainPolicy;
   }
+  function mainEquipNow(mod) {
+    if (!settings.mainEquip) settings.mainEquip = Object.assign({}, (mod.deptDefaults && mod.deptDefaults.equip) || {});
+    return settings.mainEquip;
+  }
   function mainDeptShim(mod) {
-    return { id: mod.id, policy: mainPolicyNow(mod), fs: settings.mainFs || (settings.mainFs = []),
-      staff: { doctors: settings.doctors, nurses: settings.nurses, clerks: settings.receptionists }, equip: {}, pt: [] };
+    // equip は settings.mainEquip への参照(部門の dept.equip と同じ形)。dact で a.apply(d) が書くとそのまま保存対象になる(v73)
+    return { id: mod.id, isMain: true, policy: mainPolicyNow(mod), fs: settings.mainFs || (settings.mainFs = []),
+      staff: { doctors: settings.doctors, nurses: settings.nurses, clerks: settings.receptionists }, equip: mainEquipNow(mod), pt: [] };
   }
   function ensureHist(rec, mod) {
     if (!rec.mc) rec.mc = {}; if (!rec.wc) rec.wc = {}; if (!rec.lb) rec.lb = {};
@@ -733,7 +738,7 @@
       const rec = (p.persona && p.persona.rid) ? G.regulars.find((r) => r.rid === p.persona.rid) : null;
       const hist = rec ? ensureHist(rec, mod) : { pr: mod.pickProfile ? mod.pickProfile(Math.random) : null, mc: {}, wc: {}, lb: {}, fb: false, sv: 0 };
       const shim = mainDeptShim(mod);
-      const v = mod.planVisit(hist, shim.policy, shim.fs, Math.random, (id) => !!(G.depts && G.depts[id]));
+      const v = mod.planVisit(hist, shim.policy, shim.fs, Math.random, (id) => !!(G.depts && G.depts[id]), shim.equip);
       if (v.refEye) routeReferral({ from: 'main', to: 'ophthalmology', kind: 'dm-retino', label: '糖尿病の定期眼底検査' });
       if (v.doLab && mod.managementParameters && mod.managementParameters.labCost) T.labCogs = (T.labCogs || 0) + mod.managementParameters.labCost;
       const r = DEPT.evalVisit(mod, shim, hist, v.report, G.day);
@@ -3359,7 +3364,7 @@
   function renderRelations() {
     const el = $('relList');
     if (!el) return;
-    el.innerHTML = Object.entries(REL_DEF).map(([k, def]) => {
+    el.innerHTML = Object.entries(REL_DEF).filter(([, def]) => !def.hidden).map(([k, def]) => { // 科に合わない営業先は出さない(preset.relHide・v73)
       const r = G.relations[k];
       const stale = r.lv > 0 ? Math.max(0, 30 - (G.day - r.last)) : null;
       return `<div class="rel-row">
@@ -3613,7 +3618,9 @@
   // 設備・体制の投資ボタン(モジュールのactions定義から。購入済みは消える)。
   // noteは「何が買えるか」なので購入前に見せる(v49 PM裁定A: 値段だけで選ばせない)
   function deptActionsHtml(m, d) {
-    const btns = (m.actions || []).filter((a) => a.can(d))
+    // 本院では preset.actionHide の行動を出さない(眼科の手術設備は便AF-2まで本院に流さない=押せない部屋を作らない・第14条)
+    const hide = d.isMain && m.main && m.main.preset && m.main.preset.actionHide ? m.main.preset.actionHide : [];
+    const btns = (m.actions || []).filter((a) => a.can(d) && !hide.includes(a.id))
       .map((a) => `<button class="op-btn${a.note ? ' has-note' : ''}" data-dact="${m.id}:${a.id}"><b>${a.label}</b> <small>${yen(a.cost)}</small>${a.note ? `<small class="act-note">${a.note}</small>` : ''}</button>`).join('');
     return btns ? `<div class="op-row">${btns}</div>` : '';
   }
@@ -3723,7 +3730,8 @@
     // 体制の操作場所(院内›診療方針)への道筋を1行添える(ここに出るのは結果)
     if (main) {
       const title = (m.main && m.main.fsTitle) || `${m.name}の施設基準`;
-      return `<h3 class="sub-title">📋 ${title}</h3><div class="branch-kijun"><p class="kijun-kb">体制は 🏥 院内 › 診療方針 で整える。ここに出るのは結果</p>${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
+      const hasLever = d.policy && Object.keys(d.policy).length > 0; // 診療方針レバーが無い科(眼科)では道筋を出さない(案内先が無い・v73)
+      return `<h3 class="sub-title">📋 ${title}</h3><div class="branch-kijun">${hasLever ? '<p class="kijun-kb">体制は 🏥 院内 › 診療方針 で整える。ここに出るのは結果</p>' : ''}${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
     }
     return `<div class="branch-kijun">施設基準${list ? `<div class="fs-list">${list}</div>` : ''}${note ? `<p class="kijun-kb">${note}</p>` : ''}</div>`;
   }
@@ -3898,6 +3906,19 @@
     }));
   }
   function bindDeptLeverHandlers(el) {
+    // 設備投資などの行動(actions)。部門は G.depts、本院は mainDeptShim(equip=settings.mainEquip)に効く(v73 便AF)
+    el.querySelectorAll('[data-dact]').forEach((b) => b.addEventListener('click', () => {
+      const [id, actId] = b.dataset.dact.split(':');
+      const d = deptOf(id); const m = SPECIALTIES.get(id);
+      const a = m ? (m.actions || []).find((x) => x.id === actId) : null;
+      if (!d || !a || !a.can(d)) return;
+      if (G.money < a.cost) { toast('資金が足りません'); return; }
+      G.money -= a.cost;
+      a.apply(d);
+      SND.click();
+      toast(`✅ ${a.label} — ${a.note || '整いました'}`);
+      if (id === settings.specialty) afterLeverChange(); else { renderCorp(); updateHeader(); save(); }
+    }));
     el.querySelectorAll('[data-dkanri]').forEach((b) => b.addEventListener('click', () => {
       const [id, plan] = b.dataset.dkanri.split(':');
       const d = deptOf(id);
@@ -4199,18 +4220,6 @@
       const id = b.dataset.dreceipt;
       const m = SPECIALTIES.get(id);
       if (m && G.depts[id]) deptReceiptShow(m, G.depts[id]);
-    }));
-    el.querySelectorAll('[data-dact]').forEach((b) => b.addEventListener('click', () => {
-      const [id, actId] = b.dataset.dact.split(':');
-      const d = G.depts[id]; const m = SPECIALTIES.get(id);
-      const a = m ? (m.actions || []).find((x) => x.id === actId) : null;
-      if (!d || !a || !a.can(d)) return;
-      if (G.money < a.cost) { toast('資金が足りません'); return; }
-      G.money -= a.cost;
-      a.apply(d);
-      SND.click();
-      toast(`✅ ${a.label} — ${a.note || '整いました'}`);
-      renderCorp(); updateHeader(); save();
     }));
     el.querySelectorAll('[data-dtime]').forEach((b) => b.addEventListener('click', () => {
       const [id, plan] = b.dataset.dtime.split(':');
@@ -4786,7 +4795,8 @@
     });
     for (const x of MISSIONS.concat(LEAGUE)) { if (x.title) { x._t = x._t || x.title; x.title = x._t.replace('{科名}', name); } }
     const rel = m && m.main && m.main.preset && m.main.preset.rel;
-    for (const [k, def] of Object.entries(REL_DEF)) { if (!def._o) def._o = { effect: def.effect, desc: def.desc }; Object.assign(def, def._o, rel && rel[k] ? rel[k] : {}); }
+    const relHide = (m && m.main && m.main.preset && m.main.preset.relHide) || [];
+    for (const [k, def] of Object.entries(REL_DEF)) { if (!def._o) def._o = { name: def.name, effect: def.effect, desc: def.desc }; Object.assign(def, def._o, rel && rel[k] ? rel[k] : {}); def.hidden = relHide.includes(k); }
   }
   function applyMainSpecialty(id) {
     const m = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(id) : null;
@@ -4796,6 +4806,7 @@
     if (pre.settings) Object.assign(settings, pre.settings);
     settings.mainPolicy = pre.policy ? Object.assign({}, pre.policy) : null;
     settings.mainFs = [];
+    settings.mainEquip = Object.assign({}, (m.deptDefaults && m.deptDefaults.equip) || {}, pre.equip || {}); // 設備は科の既定から(v73)
     applyMainWords();
     skipSpecMissions();
     return true;

@@ -49,6 +49,29 @@
       return ps;
     },
 
+    /* 本院候補(v73 便AF)。外来(継続管理・一見・眼鏡処方)+検査設備投資まで。白内障手術は本院では出さない(actionHide・便AF-2)。
+     * 文言は editor(opus)原稿。keywords の hint は内科と同じ数値(名前と説明だけ科別) */
+    main: {
+      line: '緑内障を長く診る。単価は検査設備', order: 3, fsTitle: '眼科の届出',
+      preset: {
+        settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0.05, examMean: 7, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, dexa: false, echo: false },
+        policy: {},
+        shopHide: ['pt', 'rehaAide', 'machines', 'physio'],
+        actionHide: ['surgery'],
+        relHide: ['sports'],
+        rel: {
+          caremane: { effect: '高齢の新患 +Lv×0.7人/日', desc: '担当者会議に出て、点眼が続かない人の相談先になる。' },
+          rouken: { effect: '高齢の新患 +Lv×0.7人/日', desc: '退所後も眼圧と点眼を診る先として連携する。' },
+          school: { name: '高校(学校健診)', effect: '学校健診の二次検査 +Lv×0.5人/日', desc: '学校健診で視力の再検査になった生徒を引き受ける。' },
+          houkatsu: { effect: '高齢の新患 +Lv×0.5人/日', desc: '介護予防教室に出て、見えにくさの相談を受ける。' }
+        },
+        keywords: [
+          { name: '「◯◯町 眼科」', hint: '指名度が高く CV率10%。ただし検索数に上限', reha: false },
+          { name: '「目のかすみ・見えにくい」', hint: '検索数は多いが、比較検討層で CV率3.5%', reha: false },
+          { name: '「緑内障 検査」', hint: 'CV率6%。駅前広告が要るぶん、拾える数は少ない', reha: false }
+        ]
+      }
+    },
     deptDefaults: {
       staff: { doctors: 1, nurses: 1, orts: 1, clerks: 1 },
       equip: { fundusSet: false, oct: false, field: false, surgery: false },
