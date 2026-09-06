@@ -523,7 +523,7 @@
   function newToday() {
     return {
       revenue: 0, cost: 0, profit: 0, patients: 0, waitSum: 0, waitN: 0,
-      rehaCount: 0, goodsCogs: 0, jihiCogs: 0,
+      rehaCount: 0, goodsCogs: 0, jihiCogs: 0, surgCogs: 0, surgCount: 0,
       newCount: 0, injCount: 0, trigCount: 0, physioCount: 0, xrayCount: 0, mriCount: 0, prpCount: 0, osteoVisits: 0, treatCount: 0, kanriCount: 0,
       segCounts: { senior: 0, worker: 0, sports: 0 },
       rev: { consult: 0, inj: 0, treat: 0, physio: 0, img: 0, reha: 0, osteo: 0, checkup: 0, jihi: 0 },
@@ -570,7 +570,8 @@
           specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
           regulars: (G.regulars || []).slice(-80), mainMi: G.mainMi, mainWi: G.mainWi, personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30),
           med: G.med, referLog: (G.referLog || []).slice(-120), referSeen: G.referSeen, handoverLog: (G.handoverLog || []).slice(-30),
-          dec: G.dec // 経営の分岐点(v70): 余力・信頼・履歴・予約した遅延効果・継続効果・開いている相談
+          dec: G.dec, // 経営の分岐点(v70): 余力・信頼・履歴・予約した遅延効果・継続効果・開いている相談
+          mainQueue: G.mainQueue // 本院眼科の白内障パイプライン(v74 便AF-2): 術前待ち・手術待ち・術後の残回数
         }
       };
   }
@@ -718,6 +719,47 @@
     return { id: mod.id, isMain: true, policy: mainPolicyNow(mod), fs: settings.mainFs || (settings.mainFs = []),
       staff: { doctors: settings.doctors, nurses: settings.nurses, clerks: settings.receptionists }, equip: mainEquipNow(mod), pt: [] };
   }
+  /* 本院の白内障パイプライン(v74 便AF-2)。部門の dept.queue と同形。科を替えたら空にする */
+  function mainQueueNow() {
+    if (!G.mainQueue || !Array.isArray(G.mainQueue.postop)) G.mainQueue = { preop: 0, surgery: 0, postop: [] };
+    return G.mainQueue;
+  }
+  /* 本院の日次(1日の締め)で回す科固有の経路。いまは眼科の術前検査→手術(手術日)→術後管理だけ。
+     会計は onDischargeDept と同じ(DEPT.evalVisit+体制の加算)。材料費は T.surgCogs に積み、dayCost が拾う */
+  function mainSpecialtyDay() {
+    const mod = SPECIALTIES.get(settings.specialty);
+    if (!mod || !mod.cataractDay || settings.specialty === 'orthopedics') return;
+    const spec = G.daySpec || specOf(G.day);
+    if (spec.kind === 'closed') return;
+    const T = G.today;
+    const shim = mainDeptShim(mod);
+    if (!shim.equip || !shim.equip.surgery) return;
+    let best = null;
+    const out = mod.cataractDay(mainQueueNow(), shim.equip, shim.staff, G.day, {
+      frac, rand: Math.random,
+      visit: (tmp, report, label, slot) => {
+        const r = DEPT.evalVisit(mod, shim, tmp, report, G.day);
+        const rc = [];
+        let rev = 0;
+        for (const line of r.lines) { rc.push(line); rev += line.t * 10; }
+        for (const k of KASAN_CORE.revisitLines(settings, kbPts)) { rc.push({ n: k.n, t: k.t, kb: k.kb }); rev += k.t * 10; }
+        rc.forEach((x) => acc(T, x.n, x.t));
+        const isOp = report.kbActs.some((a) => a.id === 'cataractOp');
+        T.revenue += rev; if (isOp) { T.rev.treat += rev; T.surgCount++; } else T.rev.consult += rev;
+        T.patients++;
+        if (G.med && devWarn(r.ev.warnings).length) T._medWarn = true;
+        if (label && (!best || best.slot < slot)) best = { slot, label, rc, rev, ev: r.ev };
+        return r;
+      },
+      cost: (yen) => { T.surgCogs += yen; },
+    });
+    if (best) {
+      G.lastReceipt = { type: 'revisit', seg: 'senior', rc: best.rc, ten: best.rc.reduce((a, r) => a + (r.t || 0), 0), yen: best.rev,
+        kb: { rejected: best.ev.rejectedItems.map((x) => ({ itemId: x.itemId, name: x.name, points: x.points, reasons: x.reasons, rules: x.rules, fsInfo: x.fsInfo })), warnings: best.ev.warnings, trace: best.ev.trace } };
+    }
+    if (out.ops > 0 && G.speed <= 4) toast(`👁 水晶体再建術 ${out.ops}件(日帰り)。術後の経過観察へ`);
+    return out;
+  }
   function ensureHist(rec, mod) {
     if (!rec.mc) rec.mc = {}; if (!rec.wc) rec.wc = {}; if (!rec.lb) rec.lb = {};
     if (rec.fb === undefined) rec.fb = false;
@@ -745,6 +787,8 @@
       kbEval = r.ev;
       for (const line of r.lines) { rc.push(line); revenue += line.t * 10; T.rev.consult += line.t * 10; if (line.kb === 'r08-A001-n8') T.kanriCount++; }
       if (v.isFirst) T.newCount++;
+      // 白内障の候補化(眼科・手術設備がある本院だけ。分院の runDay と同じ関数・v74)。本院の初診は分院の一見(acute)に相当させる
+      if (mod.cataractOnVisit) mod.cataractOnVisit(mainQueueNow(), shim.equip, Math.random, v.isFirst ? 'acute' : hist.pr);
       // 体制の加算(初再診への加算)は科に依らない=整形本院と同じ計上(KASAN_CORE)
       const kas = v.isFirst ? KASAN_CORE.firstVisitLines(settings, kbPts) : KASAN_CORE.revisitLines(settings, kbPts);
       for (const k of kas) { revenue += k.t * 10; T.rev.consult += k.t * 10; rc.push({ n: k.n, t: k.t, kb: k.kb }); }
@@ -1350,7 +1394,7 @@
     c += loanInterestDay();
     if (DECI && G.dec) c += DECISIONS.dailyCost(G.dec, G.day); // 分岐点の継続費(手当・保守など。負なら削減)
     c += (G.today ? G.today.patients : 0) * COSTS.perPatient;
-    c += G.today ? G.today.goodsCogs + G.today.jihiCogs + (G.today.labCogs || 0) : 0;
+    c += G.today ? G.today.goodsCogs + G.today.jihiCogs + (G.today.labCogs || 0) + (G.today.surgCogs || 0) : 0;
     return Math.round(c);
   }
 
@@ -1393,6 +1437,7 @@
     const repStart = G.repDayStart !== undefined ? G.repDayStart : G.rep;
     const prevOpen = G.history.filter((h) => h.kind !== 'closed').slice(-1)[0] || null;
     accrueDailyPrograms();
+    if (DEPTI) mainSpecialtyDay(); // 本院眼科の白内障パイプライン(v74)
     // 医事課(佐伯)との信頼: 算定の取りこぼしを拾う(売上+0.3%/Lv)
     if (spec.kind !== 'closed' && bondLv('billing') > 0) {
       const pick = Math.round(T.revenue * 0.003 * bondLv('billing'));
@@ -3085,30 +3130,31 @@
       </div>`;
     }).join('');
 
+    const bigNames = [!hide.includes('mri') && 'MRI', !hide.includes('dexa') && 'DEXA', '増築'].filter(Boolean).join('・');
     const bigTicket = stage < 3 ? `
       <div class="shop-row locked">
         <div class="shop-info">
-          <span class="shop-name">🔒 大型投資(MRI・DEXA・増築)</span>
+          <span class="shop-name">🔒 大型投資(${bigNames})</span>
           <span class="shop-hint">Day 8 で解放 — 大型投資は「何日で回収できるか」で判断する世界</span>
         </div>
       </div>` : `
-      <div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
+      ${hide.includes('mri') ? '' : `<div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
         <span class="shop-hint">MRI検査 1件1,900点=¥19,000(撮影1,330+断層診断450+電子画像管理120)。断層診断450点は同一患者・同一月に1回だけ。維持費¥12,000/日・1日最大8件はゲーム上の設定。導入時に施設基準(様式37)の届出まで整える前提</span>
         ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('advisor', 'normal', 17)} 白瀬「${STAFF_UI.STAFF.advisor.invest.mri}」</span>` : ''}</div>
         ${settings.mri ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="mriBtn">🧲 ${yen(MRI_COST)}</button></div>`}
-      </div>
-      <div class="shop-row ${settings.dexa ? 'expand-row done' : 'expand-row'}">
+      </div>`}
+      ${hide.includes('dexa') ? '' : `<div class="shop-row ${settings.dexa ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🦴 骨密度測定装置(DEXA)${settings.dexa ? ' 導入済み' : ''}</span>
         <span class="shop-hint">骨塩定量検査(DEXA法)360点+管理で1受診¥3,800。初診の一部が骨粗鬆症の定期通院に</span></div>
         ${settings.dexa ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="dexaBtn">🦴 ${yen(DEXA_COST)}</button></div>`}
-      </div>
-      <div class="shop-row ${settings.echo ? 'expand-row done' : 'expand-row'}">
+      </div>`}
+      ${hide.includes('echo') ? '' : `<div class="shop-row ${settings.echo ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">📡 超音波診断装置(運動器エコー)${settings.echo ? ' 導入済み' : ''}</span>
         <span class="shop-hint">超音波検査(運動器)350点。初診の約3割(スポーツ層4.5割)で算定。いまの整形の単価トレンド</span>
         ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('doctor', 'normal', 17)} 剣持「エコーは診断の質も説明力も上がる。導入するなら使い倒す」</span>` : ''}</div>
         ${settings.echo ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="echoBtn">📡 ${yen(ECHO_COST)}</button></div>`}
-      </div>
+      </div>`}
       ${settings.floorLv === 1
         ? `<div class="shop-row expand-row">
             <div class="shop-info"><span class="shop-name">🏗 院を増築する(Lv2)</span>
@@ -3618,7 +3664,7 @@
   // 設備・体制の投資ボタン(モジュールのactions定義から。購入済みは消える)。
   // noteは「何が買えるか」なので購入前に見せる(v49 PM裁定A: 値段だけで選ばせない)
   function deptActionsHtml(m, d) {
-    // 本院では preset.actionHide の行動を出さない(眼科の手術設備は便AF-2まで本院に流さない=押せない部屋を作らない・第14条)
+    // 本院では preset.actionHide の行動を出さない(本院で意味を持たない投資は押せない部屋を作らない・第14条。v74で眼科の手術設備は本院にも開いた)
     const hide = d.isMain && m.main && m.main.preset && m.main.preset.actionHide ? m.main.preset.actionHide : [];
     const btns = (m.actions || []).filter((a) => a.can(d) && !hide.includes(a.id))
       .map((a) => `<button class="op-btn${a.note ? ' has-note' : ''}" data-dact="${m.id}:${a.id}"><b>${a.label}</b> <small>${yen(a.cost)}</small>${a.note ? `<small class="act-note">${a.note}</small>` : ''}</button>`).join('');
@@ -3628,10 +3674,13 @@
   // 主役レバー(科ごとに1つ)。制度上の数値は全てKB(kbPts)から読む
   function deptLeverHtml(m, d) {
     if (m.id === 'ophthalmology') {
+      const q = d.isMain ? mainQueueNow() : d.queue;
+      const P = m.managementParameters;
       return `
       <div class="dept-lever">
         <span class="ctrl-head">検査設備への投資 <small>— 設備が検査可能範囲と単価を決める</small></span>
         ${deptActionsHtml(m, d) || '<span class="kijun-badge">導入済みの設備で診療中</span>'}
+        ${d.equip.surgery && q ? `<div class="pnl-row"><span>${m.queueLine(q)}</span><b>手術日 ${P.surgDays.map((w) => WEEKDAYS[w]).join('・')}・枠${P.surgPerDay * d.staff.doctors}件/日</b></div>` : ''}
       </div>`;
     }
     if (m.id === 'psychiatry') {
@@ -4428,7 +4477,7 @@
     $('pnlToday').innerHTML = `
       <div class="pnl-row"><span>外来収益(初再診・外来管理${T.kanriCount}件・処方箋)</span><b>${yen(T.rev.consult)}</b></div>
       <div class="pnl-row"><span>注射(関節注・トリガー等 ${T.injCount + T.trigCount}件)</span><b>${yen(T.rev.inj)}</b></div>
-      <div class="pnl-row"><span>処置(${T.treatCount}件)・物療(${T.physioCount}件)</span><b>${yen(T.rev.treat + T.rev.physio)}</b></div>
+      <div class="pnl-row"><span>${T.surgCount ? `手術(水晶体再建術 ${T.surgCount}件)・` : ''}処置(${T.treatCount}件)・物療(${T.physioCount}件)</span><b>${yen(T.rev.treat + T.rev.physio)}</b></div>
       <div class="pnl-row"><span>画像(X線${T.xrayCount}・MRI${T.mriCount})</span><b>${yen(T.rev.img)}</b></div>
       <div class="pnl-row"><span>リハビリ(${T.rehaCount}件・${REHA_NAMES[settings.rehaLevel]})</span><b>${yen(T.rev.reha)}</b></div>
       ${settings.dexa ? `<div class="pnl-row"><span>骨粗鬆症プログラム(${T.osteoVisits}件・登録${Math.round(G.osteoPool)}人)</span><b>${yen(T.rev.osteo)}</b></div>` : ''}
@@ -4438,7 +4487,7 @@
       <div class="pnl-row"><span>人件費${spec.kind === 'am' ? '(半日0.6)' : weekdayOf(G.day) === 6 && spec.kind !== 'closed' ? '(日曜手当1.4)' : ''}</span><b>−${yen(staffCost)}</b></div>
       <div class="pnl-row"><span>家賃・固定費${settings.mri ? '(MRI維持含む)' : ''}</span><b>−${yen(COSTS.rent[settings.floorLv] + COSTS.base[settings.floorLv] + (settings.mri ? COSTS.mriMaint : 0))}</b></div>
       <div class="pnl-row"><span>広告費(本日消化)</span><b>−${yen(G.adSpendToday + (G.billboard ? COSTS.billboardDay : 0))}</b></div>
-      <div class="pnl-row"><span>変動費(材料・自費原価)</span><b>−${yen(T.patients * COSTS.perPatient + T.goodsCogs + T.jihiCogs)}</b></div>
+      <div class="pnl-row"><span>変動費(材料・自費原価${T.surgCogs ? '・手術材料' : ''})</span><b>−${yen(T.patients * COSTS.perPatient + T.goodsCogs + T.jihiCogs + (T.labCogs || 0) + (T.surgCogs || 0))}</b></div>
       ${(() => {
         const k = G.kaitei;
         if (!k || !k.count) return '';
@@ -4807,6 +4856,7 @@
     settings.mainPolicy = pre.policy ? Object.assign({}, pre.policy) : null;
     settings.mainFs = [];
     settings.mainEquip = Object.assign({}, (m.deptDefaults && m.deptDefaults.equip) || {}, pre.equip || {}); // 設備は科の既定から(v73)
+    if (typeof G !== 'undefined' && G) G.mainQueue = { preop: 0, surgery: 0, postop: [] }; // 科を替えたら手術待ちは空(v74)
     applyMainWords();
     skipSpecMissions();
     return true;
