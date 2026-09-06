@@ -120,6 +120,7 @@ a { color: var(--blue-deep); }
 /* 320px級: 8ボタンは1行に収まらない。圧縮せず折り返す(幅を削るとWCAG AAの24pxを割る) */
 @media (max-width: 360px) {
   .head-btns { gap: 4px; }
+  .eyebrow { letter-spacing: 0.14em; } /* v75: ボタン44px化で brand が104px幅になり「CLINIC TOWN 3D」が2行に折れた。字間を詰めて1行に戻す(題は元から2行) */
   .speed-group { flex: 1 0 100%; flex-wrap: wrap; gap: 4px; }
   .speed-btn { flex: 1 1 calc(25% - 3px); padding: 7px 4px; }
 }
