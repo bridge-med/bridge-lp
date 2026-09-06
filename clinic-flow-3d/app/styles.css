@@ -1457,12 +1457,12 @@ input[type="range"]::-moz-range-thumb {
 .spec-open .mini-btn { flex: 0 0 auto; }
 
 /* ===== 🔀 経営の分岐点(v70): 開始の扉と同じ器(.tut-box.gate-box)。新色なし・既存トークンのみ ===== */
-.dec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.dec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
 .dec-face svg, .dec-emoji { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; background: var(--bg-deep); display: inline-flex; align-items: center; justify-content: center; font-size: 22px; }
 .dec-whobox { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
 .dec-whobox small { font: 600 10.5px/1.4 var(--sans); color: var(--ink-3); }
 .dec-whobox b { font: 800 14px/1.4 var(--sans); color: var(--ink); }
-.dec-head .tut-step { flex: 0 0 auto; text-align: right; max-width: 40%; white-space: normal; line-height: 1.4; }
+.dec-head .tut-step { order: 3; flex: 1 1 100%; max-width: none; text-align: left; white-space: normal; line-height: 1.5; margin-top: 4px; padding-left: 50px; letter-spacing: 0; font-family: var(--sans); } /* 題より分類が幅を取らない(designer D)。分類名は和文 */
 .dec-say { font: 600 13px/1.8 var(--sans); color: var(--ink); margin: 0 0 6px; }
 .dec-bg { font: 500 11.5px/1.7 var(--sans); color: var(--ink-2); margin: 0 0 6px; }
 .dec-facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
@@ -1471,11 +1471,16 @@ input[type="range"]::-moz-range-thumb {
 .dec-choices { display: flex; flex-direction: column; }
 .dec-choice { flex-direction: column; gap: 2px; }
 .dec-choice small { font: 500 10.5px/1.5 var(--sans); color: var(--ink-2); }
-.dec-choice.blocked { opacity: 0.6; border-style: dashed; }
+.dec-choice.blocked { border-style: dashed; background: var(--bg); } /* 押せないことは色の後退で示す。理由の本文はAAを割らない(designer B) */
+.dec-choice.blocked b { color: var(--ink-2); }
 .dec-block { color: var(--red); font-style: normal; }
-.dec-preview { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--bg-deep); }
-.dec-plabel { display: block; font: 700 10px/1.4 var(--sans); color: var(--ink-3); letter-spacing: 0.06em; margin: 2px 0 4px; }
-.dec-line { padding: 3px 0; font-size: 11.5px; }
+.dec-preview { margin-top: 10px; padding: 8px 0 0; border-top: 1.5px solid var(--line); } /* 塗りの器に載せると数字がAAを割る(designer C)。罫で区切る */
+.dec-plabel { display: block; font: 700 10px/1.4 var(--sans); color: var(--ink-2); letter-spacing: 0.06em; margin: 2px 0 4px; }
+.dec-line { padding: 3px 0; font-size: 11.5px; flex-wrap: wrap; }
+.dec-sub { flex: 1 1 100%; display: block; text-align: right; font: 500 10.5px/1.5 var(--sans); color: var(--ink-2); }
+.dec-line b .dec-sub { font-weight: 500; }
+/* 選択肢を押すと器が伸びて確定が枠外へ出る(375×667実測)。確定は常に見えている(designer A) */
+.dec-box .tut-btns { position: sticky; bottom: 0; z-index: 1; margin: 10px -18px -14px; padding: 10px 18px 14px; background: var(--card); box-shadow: 0 -8px 12px -8px rgba(34,51,61,0.18); }
 .dec-line b.pos { color: var(--green-deep); }
 .dec-line b.neg { color: var(--red); }
 .dec-line.later span::before { content: '⏳ '; }
@@ -1483,9 +1488,9 @@ input[type="range"]::-moz-range-thumb {
 .dec-why { font: 500 10.5px/1.6 var(--sans); color: var(--ink-2); margin: 6px 0 0; }
 .dec-reflect { margin-top: 10px; padding-left: 10px; border-left: 3px solid var(--blue); }
 .dec-reflect p { font: 500 12px/1.8 var(--sans); color: var(--ink-2); margin: 0 0 4px; }
-.dec-log { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--line); font: 500 12px/1.6 var(--sans); color: var(--ink-2); }
-.dec-log > div { flex: 1 1 auto; min-width: 0; }
-.dec-log small { color: var(--ink-3); font-size: 10.5px; }
-.dec-log .mini-btn { flex: 0 0 auto; }
+.dec-log { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 6px 8px; padding: 8px 0; border-bottom: 1px dashed var(--line); font: 500 12px/1.6 var(--sans); color: var(--ink-2); }
+.dec-log > div { flex: 1 1 100%; min-width: 0; }
+.dec-log small { color: var(--ink-2); font-size: 10.5px; }
+.dec-log .mini-btn { flex: 0 0 auto; margin-left: auto; } /* 題を折らず次行の右へ(designer N・.kijun-row の先例) */
 .dec-rewind { flex-direction: column; }
 .dec-rewind .op-btn { width: 100%; }

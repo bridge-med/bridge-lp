@@ -5187,7 +5187,7 @@
   let decOpen = false, decBusy = false, decPick = null, decCur = null;
   const DEC_SNAP_MAX = 8;
 
-  if (DECI) { const nm = {}; for (const [k, d] of Object.entries(REL_DEF)) nm[k] = d.name; DECISIONS.setRelNames(nm); }
+  if (DECI) { const nm = {}, mx = {}; for (const [k, d] of Object.entries(REL_DEF)) { nm[k] = d.name; mx[k] = d.max; } DECISIONS.setRelNames(nm); DECISIONS.setRelMax(mx); }
   function decState() {
     if (!DECI) return null;
     G.dec = DECISIONS.ensureState(G.dec, `${Date.now().toString(36)}`);
@@ -5252,7 +5252,7 @@
 
   function decLinesHtml(lines) {
     if (!lines.length) return '<p class="dec-none">数字はすぐには動かない</p>';
-    return lines.map((l) => `<div class="pnl-row dec-line${l.later ? ' later' : ''}"><span>${l.label}</span><b class="${l.neg ? 'neg' : l.later ? '' : 'pos'}">${l.val}</b></div>`).join('');
+    return lines.map((l) => `<div class="pnl-row dec-line${l.later ? ' later' : ''}"><span>${l.label}</span><b class="${l.neg ? 'neg' : l.later ? '' : 'pos'}">${l.val}</b>${l.sub ? `<small class="dec-sub">${l.sub}</small>` : ''}</div>`).join('');
   }
 
   function renderDecision() {
@@ -5291,7 +5291,10 @@
       if (decBusy) return;
       const id = b.dataset.dec;
       if (!outcomes[id].ok) { toast(`選べない: ${outcomes[id].blocked.join('・')}`); return; }
-      decPick = id; renderDecision();
+      decPick = id;
+      const box = $('decisionGate').querySelector('.dec-box'); const keep = box ? box.scrollTop : 0;
+      renderDecision();
+      if (box) { box.scrollTop = keep; const pv = box.querySelector('.dec-preview'); if (pv && pv.scrollIntoView) pv.scrollIntoView({ block: 'nearest' }); } // 再描画で先頭へ戻さない・見込みを視界に(designer A)
     }));
     const go = $('decGo'); if (go) go.addEventListener('click', confirmDecision);
   }
@@ -5330,8 +5333,10 @@
   function renderDecisionResult(entry, c, ch, outcome) {
     const who = decWho(c);
     const d = (a, b) => (b - a);
-    const moneyLine = `<div class="pnl-row dec-line"><span>資金</span><b>${yen(entry.before.money)} → ${yen(entry.after.money)}</b></div>`;
-    const stLine = `<div class="pnl-row dec-line"><span>職員の余力 / 地域の信頼</span><b>${entry.before.slack} → ${entry.after.slack} / ${entry.before.trust} → ${entry.after.trust}</b></div>`;
+    const dm = entry.after.money - entry.before.money;
+    const moneyLine = dm ? `<div class="pnl-row dec-line"><span>資金</span><b class="${dm < 0 ? 'neg' : 'pos'}">${dm < 0 ? '−' : '+'}${yen(Math.abs(dm))}<small class="dec-sub">${yen(entry.before.money)} → ${yen(entry.after.money)}</small></b></div>` : '';
+    const stRow = (label, a, b) => (a === b ? '' : `<div class="pnl-row dec-line"><span>${label}</span><b class="${b < a ? 'neg' : 'pos'}">${a} → ${b}</b></div>`);
+    const stLine = stRow('職員の余力', entry.before.slack, entry.after.slack) + stRow('地域の信頼', entry.before.trust, entry.after.trust);
     const later = outcome.lines.filter((l) => l.later);
     $('decWho').textContent = `${who.title ? who.title + ' ' : ''}${who.name}に方針を伝えた`;
     $('decBody').innerHTML = `
@@ -5369,12 +5374,18 @@
         <span class="kijun-badge ${st.trust < 0 ? 'off' : st.trust > 0 ? '' : 'alt'}">地域の信頼 ${st.trust > 0 ? '+' : ''}${st.trust} · ${meaning(st.trust, '紹介が増える', '新患が減る')}</span>
       </div>
       <p class="kijun-kb">余力は1段で診察1人あたり±0.3分。信頼は1段で新患±2%、正なら紹介+0.3人/日。相談は Day 5 から4〜7日おき。判断中は時間が止まる</p>
-      ${mods.length ? `<h3 class="sub-title">続いている効果</h3>${mods.map((m) => `<div class="pnl-row dec-line"><span>${m.label || m.kind}</span><b>${m.kind === 'dailyCost' ? `${m.v > 0 ? '−' : '+'}${yen(Math.abs(m.v))}/日` : m.kind === 'newMul' ? `新患×${m.v}` : `診察${m.v > 0 ? '+' : ''}${m.v}分`}${m.until ? ` · Day ${m.until}まで` : ''}</b></div>`).join('')}` : ''}
+      ${mods.length ? `<h3 class="sub-title">続いている効果</h3>${(() => {
+        const perm = mods.filter((m) => m.kind === 'dailyCost' && m.until == null);
+        const rest = mods.filter((m) => !(m.kind === 'dailyCost' && m.until == null));
+        const permSum = perm.reduce((a, m) => a + m.v, 0);
+        const permRow = perm.length ? `<div class="pnl-row dec-line"><span>ずっと続く継続費 <small>(${perm.length}件: ${perm.map((m) => m.label || '').filter(Boolean).join('・')})</small></span><b class="${permSum > 0 ? 'neg' : 'pos'}">${permSum > 0 ? '−' : '+'}${yen(Math.abs(permSum))}/日</b></div>` : '';
+        return permRow + rest.map((m) => `<div class="pnl-row dec-line"><span>${m.label || m.kind}</span><b>${m.kind === 'dailyCost' ? `${m.v > 0 ? '−' : '+'}${yen(Math.abs(m.v))}/日` : m.kind === 'newMul' ? `新患×${m.v}` : `診察${m.v > 0 ? '+' : ''}${m.v}分`}${m.until ? ` · Day ${m.until}まで` : ''}</b></div>`).join('');
+      })()}` : ''}
       ${pend.length ? `<h3 class="sub-title">あとで来る結果</h3>${pend.map((p) => `<div class="pnl-row dec-line later"><span>Day ${p.due} ${p.label}</span><b>${DECISIONS.summarizeFx(p.fx) || '—'}</b></div>`).join('')}` : ''}
       <h3 class="sub-title">判断の履歴 <small>— ${st.log.length}件</small></h3>
       ${log.length ? log.map((e) => `<div class="dec-log">
           <div><b>Day ${e.day}</b> ${e.title} → <b>${e.choiceLabel}</b><br><small>${e.lines.filter((l) => !l.later).map((l) => `${l.label} ${l.val}`).join('・') || '数字は動かなかった'}${e.roll ? ` · 🎲${e.roll.hit ? '起きた' : '起きなかった'}` : ''}</small></div>
-          ${e.snap && localStorage.getItem(e.snap) ? `<button class="mini-btn" data-decrewind="${e.n}">ここからやり直す</button>` : ''}
+          ${e.snap && localStorage.getItem(e.snap) ? `<button class="mini-btn" data-decrewind="${e.n}">別の方針を試す</button>` : ''}
         </div>`).join('') : '<p class="pnl-empty">まだ相談は届いていない(Day 5 から)</p>'}
       ${keep ? '<div class="op-row"><button class="op-btn" id="decKeepBack">🔁 控えに残した進行に戻る</button></div>' : ''}`;
     el.querySelectorAll('[data-decrewind]').forEach((b) => b.addEventListener('click', () => decAskRewind(Number(b.dataset.decrewind))));
@@ -5384,8 +5395,8 @@
   function decAskRewind(n) {
     const e = (G.dec.log || []).find((x) => x.n === n);
     if (!e) return;
-    showModal('🔀 この分岐からやり直す', `
-      <p><b>Day ${e.day}「${e.title}」</b>の直前に戻り、別の方針を試します。資金・職員・患者・あとで来る結果・履歴・乱数も、その時点の状態に戻ります。</p>
+    showModal('🔀 この分岐から別の方針を試す', `
+      <p><b>Day ${e.day}「${e.title}」</b>の直前に戻ります。資金・職員・患者・あとで来る結果・履歴もその時点に戻り、同じ相談が同じ見込みで開きます。</p>
       <p>いまの進行(Day ${G.day})をどうしますか。</p>
       <div class="op-row dec-rewind">
         <button class="op-btn has-note" id="decRwKeep">🗂 控えに残して戻る<span class="act-note">控えは1つだけ。経営タブの分岐点カードから戻れる</span></button>

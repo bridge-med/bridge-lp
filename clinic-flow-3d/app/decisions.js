@@ -237,14 +237,17 @@
 
   const STAFF_LABEL = { doctors: '医師', nurses: '看護師', receptionists: '受付', pts: '理学療法士', rehaAides: 'リハ助手' };
   const REL_NAMES = {}; // 営業先の表示名(game.js の REL_DEF から setRelNames で渡す)
+  const REL_MAX = {};   // 営業先の関係Lvの上限(REL_DEF.max。無ければ3)
   function setRelNames(map) { for (const [k, v] of Object.entries(map || {})) REL_NAMES[k] = v; }
+  function setRelMax(map) { for (const [k, v] of Object.entries(map || {})) REL_MAX[k] = v; }
   function yen(n) { const s = Math.abs(Math.round(n)).toLocaleString('ja-JP'); return (n < 0 ? '−¥' : '¥') + s; }
   function sgn(n, unit) { return (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n) + (unit || ''); }
 
   // 表示用の行(見込み・結果で共用)。数字は「今すぐ」「毎日」「あとで」を分けて出す
-  function lines(fx, ctx) {
+  function lines(fx, ctx, opts) {
     const L = [];
-    if (fx.money) L.push({ k: 'money', label: '資金(今すぐ)', val: yen(fx.money), neg: fx.money < 0 });
+    const later = opts && opts.later; // 遅延効果の中身を出すとき(「今すぐ」と書かない)
+    if (fx.money) L.push({ k: 'money', label: later ? '資金' : '資金(今すぐ)', val: yen(fx.money), neg: fx.money < 0 });
     if (fx.dailyCost && fx.dailyCost.yen) {
       const d = fx.dailyCost;
       L.push({ k: 'daily', label: d.days ? `継続費(${d.days}日間)` : '継続費(ずっと)', val: `${d.yen > 0 ? '−' : '+'}${yen(Math.abs(d.yen))}/日${d.label ? ` ${d.label}` : ''}`, neg: d.yen > 0 });
@@ -258,13 +261,13 @@
     if (fx.examDelta) L.push({ k: 'exam', label: `診察1人あたり(${fx.examDelta.days}日間)`, val: `${sgn(fx.examDelta.d, '分')}`, neg: fx.examDelta.d > 0 });
     if (fx.rel) for (const [k, v] of Object.entries(fx.rel)) if (v) L.push({ k: 'rel', label: `関係(${REL_NAMES[k] || k})`, val: sgn(v, 'Lv'), neg: v < 0 });
     if (fx.coins) L.push({ k: 'coins', label: 'コイン', val: sgn(fx.coins), neg: fx.coins < 0 });
-    for (const d of fx.delayed || []) L.push({ k: 'later', label: `${d.days}日後`, val: d.label || summarizeFx(d.fx), later: true });
+    for (const d of fx.delayed || []) L.push({ k: 'later', label: `${d.days}日後`, val: d.label || summarizeFx(d.fx), sub: d.label ? summarizeFx(d.fx) : '', later: true });
     if (fx.next) L.push({ k: 'next', label: `${fx.next.days}日後`, val: '続きの相談が届く', later: true });
     return L;
   }
   function summarizeFx(fx) {
     if (!fx) return '';
-    return lines(fx, null).map((l) => `${l.label} ${l.val}`).join('・');
+    return lines(fx, null, { later: true }).map((l) => `${l.label} ${l.val}`).join('・');
   }
 
   /* ---------- 適用(見込みと同じ outcome を渡す) ---------- */
@@ -276,14 +279,14 @@
     if (fx.money) { G.money += fx.money; changed.push('money'); }
     if (fx.dailyCost && fx.dailyCost.yen) { st.mods.push({ kind: 'dailyCost', v: fx.dailyCost.yen, until: fx.dailyCost.days ? day + fx.dailyCost.days : null, label: fx.dailyCost.label || '', src }); changed.push('daily'); } // 負=削減
     if (fx.staff) for (const [k, v] of Object.entries(fx.staff)) { if (!v) continue; const min = k === 'doctors' ? 1 : 0; s[k] = Math.max(min, (s[k] || 0) + v); changed.push('staff'); }
-    if (fx.slack) { st.slack = clamp(st.slack + fx.slack, -3, 3); changed.push('slack'); }
-    if (fx.trust) { st.trust = clamp(st.trust + fx.trust, -3, 3); changed.push('trust'); }
+    if (fx.slack) { st.slack = Math.round(clamp(st.slack + fx.slack, -3, 3) * 10) / 10; changed.push('slack'); }
+    if (fx.trust) { st.trust = Math.round(clamp(st.trust + fx.trust, -3, 3) * 10) / 10; changed.push('trust'); }
     if (fx.rep) { G.rep = clamp(G.rep + fx.rep, 15, 97); changed.push('rep'); }
     if (fx.aw) { G.aw = clamp(G.aw + fx.aw, 0.05, 0.95); changed.push('aw'); }
     if (fx.coins) { G.coins = Math.max(0, (G.coins || 0) + fx.coins); changed.push('coins'); }
     if (fx.newMul) { st.mods.push({ kind: 'newMul', v: fx.newMul.mul, until: day + fx.newMul.days, label: fx.newMul.label || '', src }); changed.push('new'); }
     if (fx.examDelta) { st.mods.push({ kind: 'examDelta', v: fx.examDelta.d, until: day + fx.examDelta.days, label: fx.examDelta.label || '', src }); changed.push('exam'); }
-    if (fx.rel && G.relations) for (const [k, v] of Object.entries(fx.rel)) { const r = G.relations[k]; if (r) { r.lv = clamp(r.lv + v, 0, 3); r.last = day; changed.push('rel'); } }
+    if (fx.rel && G.relations) for (const [k, v] of Object.entries(fx.rel)) { const r = G.relations[k]; if (r) { r.lv = clamp(r.lv + v, 0, REL_MAX[k] == null ? 3 : REL_MAX[k]); r.last = day; changed.push('rel'); } }
     if (fx.flag) st.flags[fx.flag] = day;
     if (fx.unflag) delete st.flags[fx.unflag];
     for (const d of fx.delayed || []) st.pending.push({ due: day + d.days, label: d.label || '', fx: d.fx, src, n: st.count });
@@ -397,7 +400,7 @@
   }
 
   const DECISIONS = {
-    resolveFx, setRelNames,
+    resolveFx, setRelNames, setRelMax,
     CATS, WHO, register, all, byId, newState, ensureState, tierOf, needsOk, eligible, pick, evaluate, reqCheck, applyFx, commit, tick,
     dailyCost, newMul, examDelta, trustReferrals, reflect, lines, summarizeFx, validate, rng, hash32, yen, STAFF_LABEL
   };
