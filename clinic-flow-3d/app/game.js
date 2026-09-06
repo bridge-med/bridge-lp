@@ -130,12 +130,15 @@
   const SEG_NAMES = { senior: '高齢者', worker: '勤労者', sports: 'スポーツ' };
   // 運動器リハ: 1回=2単位で計算。(III)85点/(II)170点/(I)185点 ×2単位×10円
   const REHA_FEE = [0, 1700, 3400, 3700];
+  // 名称は正式名称ベース(社長決定 2026-09-05)。A層=初めて名指しする場所(施設基準カードの行名・届出/要件割れのトースト・レセプト行)は REHA_FULL、
+  // B層=同じ画面に正式名称が一度出ている狭い場所(バッジ・P&L・分院一覧)は通用略称 REHA_NAMES(KBの shortName と同じ形・社長決定 2026-09-06「3.残す」)
   const REHA_NAMES = ['未届出', '運動器リハ(III)', '運動器リハ(II)', '運動器リハ(I)'];
+  const REHA_FULL = ['未届出', '運動器リハビリテーション料(III)', '運動器リハビリテーション料(II)', '運動器リハビリテーション料(I)'];
 
   const KIJUN = [
-    { lv: 1, name: '運動器リハ(III)', fee: REHA_FEE[1], reqText: '専従の理学療法士等 1名以上', ok: (pts, fl) => pts >= 1 },
-    { lv: 2, name: '運動器リハ(II)', fee: REHA_FEE[2], reqText: '専従の常勤PT 2名以上・45㎡以上', ok: (pts, fl) => pts >= 2 },
-    { lv: 3, name: '運動器リハ(I)', fee: REHA_FEE[3], reqText: '専従の常勤PT 4名以上・100㎡以上(要増築)', ok: (pts, fl) => pts >= 4 && fl >= 2 }
+    { lv: 1, name: REHA_FULL[1], fee: REHA_FEE[1], reqText: '専従の理学療法士等 1名以上', ok: (pts, fl) => pts >= 1 },
+    { lv: 2, name: REHA_FULL[2], fee: REHA_FEE[2], reqText: '専従の常勤PT 2名以上・45㎡以上', ok: (pts, fl) => pts >= 2 },
+    { lv: 3, name: REHA_FULL[3], fee: REHA_FEE[3], reqText: '専従の常勤PT 4名以上・100㎡以上(要増築)', ok: (pts, fl) => pts >= 4 && fl >= 2 }
   ];
 
   /* ===== 診療報酬KB統合(令和8年度・一次資料照合済み) =====
@@ -896,7 +899,7 @@
         if (report._doRehaAct && settings.rehaLevel > 0) {
           const f = REHA_FEE[settings.rehaLevel];
           revenue += f; T.rev.reha += f;
-          rc.push({ n: `${REHA_NAMES[settings.rehaLevel]}×2単位`, t: f / 10 });
+          rc.push({ n: `${REHA_FULL[settings.rehaLevel]}×2単位`, t: f / 10 });
         }
       }
       // 体制の加算(再診料への加算): 明細書発行体制等(A001注11)・時間外対応体制(A001注10・R8で改称/4区分)。
@@ -1503,7 +1506,7 @@
     if (cur && !cur.ok(settings.pts, settings.floorLv)) {
       const next = [...KIJUN].reverse().find((k) => k.lv < settings.rehaLevel && k.ok(settings.pts, settings.floorLv));
       settings.rehaLevel = next ? next.lv : 0;
-      toast(`⚠️ 施設基準の要件割れ — ${REHA_NAMES[settings.rehaLevel]}に降格しました`);
+      toast(`⚠️ 施設基準の要件割れ — ${REHA_FULL[settings.rehaLevel]}に降格しました`);
       if (G.med) G.med.fsBroken++; // 医療評価: 本院の要件割れも数える(部門・分院と同じ範囲)
     }
     // 他科本院(v67): 届出済みの施設基準が要件を割れば適用から外す(部門と同じ fsEnforce)。fsEnforce は dept.fs を差し替えるので settings に書き戻す
@@ -4337,7 +4340,7 @@
       const [bi, lv] = b.dataset.brkijun.split(':').map(Number);
       const br = G.branches[bi];
       br.rehaLevel = lv;
-      toast(`✅ ${br.name}: ${REHA_NAMES[lv]}を届け出ました`);
+      toast(`✅ ${br.name}: ${REHA_FULL[lv]}を届け出ました`);
       renderCorp(); save();
     }));
 
@@ -4497,7 +4500,7 @@
       }).join('');
     $('kijunBody').querySelectorAll('[data-kijun]').forEach((b) => b.addEventListener('click', () => {
       settings.rehaLevel = Number(b.dataset.kijun);
-      toast(`✅ ${REHA_NAMES[settings.rehaLevel]}を届け出ました(リハ1回 ${yen(REHA_FEE[settings.rehaLevel])})`);
+      toast(`✅ ${REHA_FULL[settings.rehaLevel]}を届け出ました(リハ1回 ${yen(REHA_FEE[settings.rehaLevel])})`);
       renderPnl(); save();
     }));
     $('kijunBody').querySelectorAll('[data-kasan]').forEach((b) => b.addEventListener('click', () => {
@@ -5085,7 +5088,7 @@
             rehaAvail--; didReha = true; proc = true; kanriBlock = true;
             const fr = REHA_FEE[settings.rehaLevel];
             rev += fr; T.rev.reha += fr; T.rehaCount++;
-            acc(T, `${REHA_NAMES[settings.rehaLevel]}×2単位`, fr / 10);
+            acc(T, `${REHA_FULL[settings.rehaLevel]}×2単位`, fr / 10);
           } else if (clinic.usableBeds() > 0 && Math.random() < settings.pTreat) {
             const gips = Math.random() < 0.3;
             const p = gips ? kbPts('r08-J122-2', 490) : kbPts('r08-J000-1', 52);

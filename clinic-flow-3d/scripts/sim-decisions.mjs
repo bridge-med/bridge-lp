@@ -24,7 +24,10 @@ function run(strategy, seed, specialty) {
   for (let day = 1; day <= 200; day++) {
     // 簡略の1日: 新患は認知×評判、再診は評判、能力は医師数と診察時間、余力で診察時間が変わる
     const examDelta = D.examDelta(st, day);
-    const cap = Math.max(10, s.doctors * (480 / (s.examMean + examDelta + 1.5)) * 0.72);
+    // 能力: 医師数×診察時間(planDay の examCapDay と同形)に、看護(処置ベッド=看護師数)と受付(会計・予約の回転)の薄さを掛ける。
+    // 本体では看護師数がベッド稼働・受付数が窓口数に効くので、その簡略。1人で0.8・2人以上で1.0(v72・PM指摘=採用が売上に効かない計器の偏り)
+    const support = Math.min(1, 0.8 + 0.2 * Math.min(1, Math.max(0, s.nurses - 1))) * Math.min(1, 0.8 + 0.2 * Math.min(1, Math.max(0, s.receptionists - 1)));
+    const cap = Math.max(10, s.doctors * (480 / (s.examMean + examDelta + 1.5)) * 0.72) * support;
     const demand = (52 * G.aw * (G.rep / (G.rep + 55)) + 14 + D.trustReferrals(st)) * D.newMul(st, day) * (0.9 + rnd() * 0.2);
     const patients = Math.round(Math.min(demand, cap * 1.1));
     const revenue = patients * (5200 + (s.pts ? 900 : 0));
