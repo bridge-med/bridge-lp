@@ -5323,7 +5323,6 @@
     const snap = decSnapshot(st.count + 1);
     const entry = DECISIONS.commit(c, ch, outcome, { G, settings }, st, { viaChain, snap });
     entry.reflect = DECISIONS.reflect(c, ch, outcome, ctx);
-    if (G.money < 0 && !ctx.money < 0) { /* 資金が負になる判断は req で防ぐ。ここでは何もしない */ }
     applyUnlocks(); renderShop(); renderStaffStrip(); updateHeader(); if (activeTab === 'corp') renderCorp();
     pushVoice(typeof c.who === 'string' && STAFF_UI.STAFF[c.who] ? c.who : 'advisor', `${c.title} → ${ch.label}`, 'event');
     renderDecisionResult(entry, c, ch, outcome);
