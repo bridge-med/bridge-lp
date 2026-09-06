@@ -245,7 +245,7 @@
           fx: { money: -15000, slack: -1, rep: 0.3 },
           chance: { p: 0.25, label: '待合で熱中症の患者が出る', hit: { rep: -1.5, trust: -1 }, miss: {} },
           reflect: '応急の対策。暑さそのものは変わらない' },
-        { id: 'asis', label: '夏が終わるまで様子を見る', note: '応急の手当てが¥500/日で60日。急変の確率が高い',
+        { id: 'asis', label: '夏が終わるまで様子を見る', note: '扇風機と飲料水が¥500/日で60日。急変の確率が高い',
           fx: { dailyCost: { yen: 500, days: 60, label: '扇風機と飲料水' } },
           chance: { p: 0.4, label: '待合で熱中症の患者が出る', hit: { rep: -2, trust: -1 }, miss: {} },
           reflect: '様子見は季節に賭けること' }

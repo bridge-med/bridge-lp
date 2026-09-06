@@ -39,7 +39,7 @@
         { id: 'window', label: '窓口で当日回収を徹底する', note: '費用なし。受付の負担が増える。新しい未収は減る',
           fx: (c) => ({ slack: -1, delayed: [{ days: 14, label: '当日回収が定着', fx: { money: Math.round(c.patients7 * 400), slack: 1 } }] }),
           reflect: '人の対応で減らした。過去の分は残る' },
-        { id: 'ignore', label: '少額なので放置する', note: '未収が¥600/日で90日積む。回収できないまま増える',
+        { id: 'ignore', label: '少額なので放置する', note: '未収が¥600/日で90日積み上がる。回収できないまま増える',
           fx: { dailyCost: { yen: 600, days: 90, label: '積み上がる未収金' } },
           chance: { p: 0.5, label: '半年後に回収不能が確定', hit: { delayed: [{ days: 60, label: '未収金の一部が回収不能', fx: (c) => ({ money: -Math.round(c.patients7 * 600) }) }] }, miss: {} },
           reflect: 'データが見えたのに動かなかった。見える化の価値は動くこと' }
