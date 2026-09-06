@@ -1,12 +1,12 @@
 /* クリニックタウン3D — 診療報酬KBゲームパック(生成物)
- * 生成: 2026-09-04T13:46:57.916Z / 生成元: medical-kb/data/kb/r08/
+ * 生成: 2026-09-06T01:46:20.181Z / 生成元: medical-kb/data/kb/r08/
  * 再生成: node medical-kb/scripts/build_game_pack.mjs --rev r08
  * このファイルを手で編集しないこと。点数・条件・根拠の一次データはmedical-kbにある。 */
 (function (root, data) {
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
   else root.KB_R08 = data;
 })(typeof self !== 'undefined' ? self : this, {
- "generated_at": "2026-09-04T13:46:57.916Z",
+ "generated_at": "2026-09-06T01:46:20.181Z",
  "generator": "medical-kb/scripts/build_game_pack.mjs",
  "note": "生成物。手で編集しない。点数・条件・根拠は medical-kb/data/kb の正規データ由来",
  "revision": {
@@ -596,7 +596,7 @@
    "code": null,
    "kubun": "H002-1",
    "name": "運動器リハビリテーション料(I)",
-   "shortName": "運動器リハI",
+   "shortName": "運動器リハ(I)",
    "categoryL": "特掲診療料",
    "categoryM": "リハビリテーション",
    "points": 185,
@@ -653,7 +653,7 @@
    "code": null,
    "kubun": "H002-2",
    "name": "運動器リハビリテーション料(II)",
-   "shortName": "運動器リハII",
+   "shortName": "運動器リハ(II)",
    "categoryL": "特掲診療料",
    "categoryM": "リハビリテーション",
    "points": 170,
@@ -697,7 +697,7 @@
    "code": null,
    "kubun": "H002-3",
    "name": "運動器リハビリテーション料(III)",
-   "shortName": "運動器リハIII",
+   "shortName": "運動器リハ(III)",
    "categoryL": "特掲診療料",
    "categoryM": "リハビリテーション",
    "points": 85,
@@ -2669,7 +2669,7 @@
    "code": "113002510",
    "kubun": "B001-15",
    "name": "慢性維持透析患者外来医学管理料",
-   "shortName": "慢維透外来医学管理",
+   "shortName": "慢性維持透析患者外来医学管理料",
    "categoryL": "特掲診療料",
    "categoryM": "医学管理等",
    "points": 2211,
@@ -6025,7 +6025,7 @@
   {
    "id": "r08-fs-h002-1",
    "name": "運動器リハビリテーション料(I)の施設基準",
-   "shortName": "運I",
+   "shortName": "運動器リハ(I)",
    "ryoType": "tokkei",
    "notificationReq": 1,
    "staffing": "運動器リハビリテーションの経験を有する専任常勤医師1名以上(週22時間以上の専任非常勤医師の常勤換算算入可)。専従の常勤理学療法士又は常勤作業療法士が合わせて4名以上(専従非常勤の常勤換算算入は各1名まで)",
@@ -6061,7 +6061,7 @@
   {
    "id": "r08-fs-h002-2",
    "name": "運動器リハビリテーション料(II)の施設基準",
-   "shortName": "運II",
+   "shortName": "運動器リハ(II)",
    "ryoType": "tokkei",
    "notificationReq": 1,
    "staffing": "専任常勤医師1名以上((I)と同じ)。専従の常勤PT2名以上/常勤OT2名以上/PT・OT合わせて2名以上のいずれか。当分の間、研修修了した看護師・准看護師・あん摩マッサージ指圧師・柔道整復師の専従常勤職員を医師の監督下でPT扱いで届出可(経過措置的規定)",
@@ -6085,7 +6085,7 @@
   {
    "id": "r08-fs-h002-3",
    "name": "運動器リハビリテーション料(III)の施設基準",
-   "shortName": "運III",
+   "shortName": "運動器リハ(III)",
    "ryoType": "tokkei",
    "notificationReq": 1,
    "staffing": "専任常勤医師1名以上(リハ経験要件なし)。専従の常勤理学療法士又は常勤作業療法士いずれか1名以上",
