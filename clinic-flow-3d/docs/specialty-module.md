@@ -39,6 +39,18 @@
 | runDay(dept, ctx, api, agg) | 日次シム本体。収益は必ず `api.evalVisit`(エンジン)か `api.approx`(概算明示)で計上 |
 | deptBadge(d) | 索引行に出す方針バッジ(任意) |
 
+### 本院候補にするための追加フィールド(開始の扉に出す・v66〜v73)
+
+| フィールド | 内容 |
+|---|---|
+| main | `{ line, order, fsTitle, preset }`。あれば `SPECIALTIES.mainCandidates()` に載り、開始の扉に並ぶ(order 順)。line=扉の1行(16字目安・制度上の事実だけ・手術など後便の機能を約束しない)。fsTitle=経営タブ施設基準カード上段の見出し(既定=「{科名}の施設基準」) |
+| main.preset | `settings`(整形専用レバーのゼロ化など。settings に上書き)/`policy`(settings.mainPolicy の初期値)/`equip`(settings.mainEquip の初期値。無ければ deptDefaults.equip)/`shopHide`(SHOPで出さない項目キー)/`actionHide`(本院では出さない actions の id。例: 眼科の手術)/`relHide`(本院では出さない営業先キー)/`rel`(営業先の name/effect/desc の科別上書き。数値は既定と同じにし文言だけ)/`keywords`(広告キーワード3本。hint の数値は既定と同じ) |
+| pickProfile(rand) | 常連の主病の抽選。本院の常連レコード(G.regulars の mc/wc/lb/fb/pr)に pr を与える |
+| planVisit(p, policy, fs, rand, hasDept, equip) | 1回の来院で何をするかを決める(会計はしない)。`{ report, isFirst, ... }` を返し、部門の runDay と本院の onDischargeDept が同じ経路で `DEPT.evalVisit` へ渡す。乱数を引く順を旧 runDay と同じにして同値をテストで固定する(tests/main-*.test.mjs) |
+
+本院側の状態は `settings.specialty / mainPolicy / mainFs / mainEquip` だけ。`mainDeptShim(mod)` がそれらを部門と同じ形(`{policy, fs, staff, equip, pt, isMain}`)に見せるので、`deptLeverHtml`/`deptActionsHtml`/`deptFsHtml`/`[data-dact]` は部門と共用(`deptOf(id)` が本院なら shim を返す)。
+日ごとのキュー(眼科の白内障パイプラインなど)は per-visit の planVisit に乗らないので、本院に流すなら別の日次フックが要る(便AF-2)。
+
 ## してはいけないこと
 
 - モジュール内に点数・施設基準の内容を書く(KB経由のみ)
@@ -47,9 +59,9 @@
 
 ## 現在の実装状態
 
-- 整形外科: full(本院。3D会計・施設基準・学習モードまで統合)
-- 一般内科: full(部門。患者パネル・管理料(I)/(II)の方針・体制要件・代表レセプト)
-- 眼科: full(部門。検査設備投資→検査範囲、白内障の術前→手術→術後パイプライン、
+- 整形外科: full(本院。3D会計・施設基準・学習モードまで統合)。開始の扉1枚目
+- 一般内科: full(部門+本院候補2枚目 v66。患者パネル・管理料(I)/(II)の方針・体制要件・代表レセプト)
+- 眼科: full(部門+本院候補3枚目 v73=外来と検査設備投資まで。白内障の術前→手術→術後パイプラインは部門のみ(本院は便AF-2)、
   屈折×矯正視力の条件付き併算定はエンジン判定)
 - 人工透析: full(部門。ベッド×クール×稼働率、施設区分1・導入期加算1・水質確保の
   届出ゲート、月14回/外来医学管理料月1回は患者単位でエンジン判定)
