@@ -105,6 +105,37 @@
       referralSources: ['内科(糖尿病連携)', '学校健診', '高齢者施設'],
     },
 
+    /* 主病の抽選(継続管理の3プロファイル)。本院(v73)と部門で共用 */
+    pickProfile(rand) {
+      let r = rand(); let pr = 'dry-eye';
+      for (const pf of this.patientProfiles) { if (r < pf.weight) { pr = pf.id; break; } r -= pf.weight; }
+      return pr;
+    },
+    /* 1回の来院で何をするかを決める(会計はしない)。部門の runDay と本院の onDischargeDept が同じ経路を通る(v73 便AF)。
+     * p.pr: 継続管理(glaucoma/dm-retino/dry-eye)=眼圧+細隙灯(+設備がある場合の精密眼底/OCT/視野)+処方(1/2)
+     *       'acute'=一見(初診・細隙灯+処方) / 'glasses'=眼鏡処方(屈折+矯正視力・条件付き併算定 rule-0005)
+     * equip: 設備(部門は dept.equip、本院は settings.mainEquip)。乱数の引く順は旧 runDay と同じ(同値をテストで固定) */
+    planVisit(p, policy, fs, rand, hasDept, equip) {
+      const eq = equip || {};
+      if (p.pr === 'acute') {
+        return { report: { type: 'first', kbActs: [{ id: 'slitlamp' }, { id: 'presc' }] }, isFirst: true, prLabel: '急性', sample: '急性の一見患者(初診)', slot: 1 };
+      }
+      if (p.pr === 'glasses') {
+        return { report: { type: 'first', kbActs: [{ id: 'refraction' }, { id: 'vision' }], conditions: { refraction_first_or_glasses: true } },
+          isFirst: true, prLabel: '眼鏡処方', sample: '眼鏡処方の来院(屈折・矯正視力の条件付き併算定)', slot: 3 };
+      }
+      const isFirst = !p.fb;
+      const report = { type: isFirst ? 'first' : 'revisit', kbActs: [{ id: 'tonometry' }, { id: 'slitlamp' }] };
+      if (eq.fundusSet && (p.pr === 'glaucoma' || p.pr === 'dm-retino') && rand() < 0.5) report.kbActs.push({ id: 'fundus' });
+      // OCTは月1回(D256-2注)。2回目以降はエンジンがp.mcの月次履歴で却下する
+      if (eq.oct && (p.pr === 'glaucoma' || p.pr === 'dm-retino') && rand() < 0.4) report.kbActs.push({ id: 'oct' });
+      // 静的量的視野は片側につき290点。両眼実施=×2単位(マスターに両側セルなし)
+      if (eq.field && p.pr === 'glaucoma' && rand() < 0.3) report.kbActs.push({ id: 'fieldStatic', units: 2 });
+      if (rand() < 0.5) report.kbActs.push({ id: 'presc' });
+      const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
+      return { report, isFirst, prLabel, sample: `継続管理(${prLabel})の来院`, slot: 2 };
+    },
+
     deptInit(dept, day) {
       const P = this.managementParameters;
       dept.queue = { preop: 0, surgery: 0, postop: [] }; // 白内障パイプライン(人数)
@@ -131,8 +162,7 @@
       const cap = P.panelPerDoctor * dept.staff.doctors;
       let enroll = api.frac(P.enrollBase * dept.staff.doctors * ramp * pull);
       while (enroll-- > 0 && dept.pt.length < cap) {
-        let r = ctx.rand(); let pr = 'dry-eye';
-        for (const pf of this.patientProfiles) { if (r < pf.weight) { pr = pf.id; break; } r -= pf.weight; }
+        const pr = this.pickProfile(ctx.rand);
         api.addPatient(pr, { iv: P.revisitDays[0] + Math.floor(ctx.rand() * (P.revisitDays[1] - P.revisitDays[0] + 1)) });
       }
 
@@ -141,18 +171,10 @@
         if (p.nv > ctx.day) continue;
         if (examUsed >= examCap) { p.nv = ctx.day + 1; continue; }
         examUsed++; api.countVisit();
-        const isFirst = !p.fb;
-        const report = { type: isFirst ? 'first' : 'revisit', kbActs: [{ id: 'tonometry' }, { id: 'slitlamp' }] };
-        if (dept.equip.fundusSet && (p.pr === 'glaucoma' || p.pr === 'dm-retino') && ctx.rand() < 0.5) report.kbActs.push({ id: 'fundus' });
-        // OCTは月1回(D256-2注)。2回目以降はエンジンがp.mcの月次履歴で却下する
-        if (dept.equip.oct && (p.pr === 'glaucoma' || p.pr === 'dm-retino') && ctx.rand() < 0.4) report.kbActs.push({ id: 'oct' });
-        // 静的量的視野は片側につき290点。両眼実施=×2単位(マスターに両側セルなし)
-        if (dept.equip.field && p.pr === 'glaucoma' && ctx.rand() < 0.3) report.kbActs.push({ id: 'fieldStatic', units: 2 });
-        if (ctx.rand() < 0.5) report.kbActs.push({ id: 'presc' });
-        const r = api.evalVisit(p, report);
+        const v = this.planVisit(p, dept.policy, dept.fs, ctx.rand, ctx.hasDept, dept.equip);
+        const r = api.evalVisit(p, v.report);
         p.nv = ctx.day + (p.iv || 30);
-        const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
-        api.setSample(`継続管理(${prLabel})の来院`, r.lines, r.ev, 2);
+        api.setSample(v.sample, r.lines, r.ev, v.slot);
         // 高齢層の一部が白内障の手術候補へ(月次換算の確率)
         if (dept.equip.surgery && dept.queue.preop + dept.queue.surgery < P.queueMax && ctx.rand() < P.cataractConvert) dept.queue.preop++;
       }
@@ -165,18 +187,18 @@
       for (let i = 0; i < acute; i++) {
         api.countVisit();
         const tmp = { pr: 'acute', mc: {}, wc: {}, lb: {}, fb: false, sv: 0 };
-        const r = api.evalVisit(tmp, { type: 'first', kbActs: [{ id: 'slitlamp' }, { id: 'presc' }] });
-        api.setSample('急性の一見患者(初診)', r.lines, r.ev, 1);
+        const v = this.planVisit(tmp, dept.policy, dept.fs, ctx.rand, ctx.hasDept, dept.equip);
+        const r = api.evalVisit(tmp, v.report);
+        api.setSample(v.sample, r.lines, r.ev, v.slot);
         if (dept.equip.surgery && dept.queue.preop + dept.queue.surgery < P.queueMax && ctx.rand() < P.cataractQueueFromAcute) dept.queue.preop++;
       }
       for (let i = 0; i < glasses; i++) {
         api.countVisit();
         const tmp = { pr: 'glasses', mc: {}, wc: {}, lb: {}, fb: false, sv: 0 };
-        // 屈折×矯正視力の併算定は「眼鏡処方箋の交付」の条件付きで可(rule-0005)。エンジンに条件を渡す
-        const r = api.evalVisit(tmp, { type: 'first',
-          kbActs: [{ id: 'refraction' }, { id: 'vision' }],
-          conditions: { refraction_first_or_glasses: true } });
-        api.setSample('眼鏡処方の来院(屈折・矯正視力の条件付き併算定)', r.lines, r.ev, 3);
+        // 屈折×矯正視力の併算定は「眼鏡処方箋の交付」の条件付きで可(rule-0005)。planVisit がエンジンに条件を渡す
+        const v = this.planVisit(tmp, dept.policy, dept.fs, ctx.rand, ctx.hasDept, dept.equip);
+        const r = api.evalVisit(tmp, v.report);
+        api.setSample(v.sample, r.lines, r.ev, v.slot);
       }
 
       // 白内障パイプライン: 術前検査 → 手術(手術日のみ) → 術後3回
