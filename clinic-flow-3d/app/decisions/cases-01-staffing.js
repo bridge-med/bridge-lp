@@ -43,8 +43,8 @@
           fx: { examDelta: { d: 1.0, days: 10, label: '院長が教育に入る' }, slack: 1, next: { id: 'ST-01c', days: 20 } },
           when: [{ if: (c) => c.load >= 0.85, fx: { rep: -1 }, why: '混んでいる時期に診察を遅らせると、待ち時間の不満が出る' }],
           reflect: '医師の時間は最も高い資源。使う場所を選んだ判断' },
-        { id: 'asis', label: '今のまま見守る', note: '費用なし。先輩の疲れは続く。新人の独り立ちで自然に解けることもある',
-          fx: {}, chance: { p: 0.35, label: '先輩が体調を崩して休む', hit: { slack: -1, examDelta: { d: 0.6, days: 7, label: '看護1人欠け' } }, miss: { slack: 0 } },
+        { id: 'asis', label: '今のまま見守る', note: '時間外が¥1,500/日で20日続く。新人の独り立ちで自然に解けることもある',
+          fx: { dailyCost: { yen: 1500, days: 20, label: '教える側の時間外' } }, chance: { p: 0.35, label: '先輩が体調を崩して休む', hit: { slack: -1, examDelta: { d: 0.6, days: 7, label: '看護1人欠け' } }, miss: { slack: 0 } },
           reflect: '見守るなら、限界の前に声をかける約束が要る' }
       ],
       lesson: '教育は投資。負担を誰が持つかを決めないと、頑張った人が先に消える', point: '教育負担の配分'
@@ -61,8 +61,8 @@
         { id: 'raise', label: '独り立ちに合わせて手当を上げる', note: '¥1,000/日がずっと続く(月約¥30,000)。定着は強いが固定費になる',
           fx: { dailyCost: { yen: 1000, days: null, label: '看護師の手当' }, slack: 1 },
           reflect: '毎日続く費用は、患者が減った月にも残る' },
-        { id: 'none', label: '特に何もしない', note: '費用なし。放っておいても続く人はいる。辞める人もいる',
-          fx: {}, chance: { p: 0.3, label: '半年以内に転職の相談', hit: { delayed: [{ days: 45, label: '看護師が1人退職', fx: { staff: { nurses: -1 }, slack: -1 } }] }, miss: {} },
+        { id: 'none', label: '特に何もしない', note: '費用なし。余力−1。放っておいても続く人はいる。辞める人もいる',
+          fx: { slack: -1 }, chance: { p: 0.3, label: '半年以内に転職の相談', hit: { delayed: [{ days: 45, label: '看護師が1人退職', fx: { staff: { nurses: -1 }, slack: -1 } }] }, miss: {} },
           reflect: '「何もしない」も選択。結果を引き受ける覚悟が要る' }
       ],
       lesson: '採用→教育→定着は一続き。最後の一手を省くと、最初の採用費が消える', point: '定着の設計'
@@ -179,8 +179,8 @@
           fx: { delayed: [{ days: 30, label: '看護師が退職。採用を始める', fx: { staff: { nurses: -1 }, slack: -1, money: -150000 } }, { days: 45, label: '新しい看護師が入る', fx: { staff: { nurses: 1 } } }] },
           when: [{ if: (c) => c.load >= 0.85, fx: { rep: -1 }, why: '混んでいる時期の穴は、待ち時間と不満に直結した' }],
           reflect: '穴を空ける判断。空く時期が谷なら安く、山なら高い' },
-        { id: 'retain', label: '事情を聞き、残れる形を探す', note: '費用なし。非常勤で残る道もある。断られることもある。採用は始めない',
-          fx: {},
+        { id: 'retain', label: '事情を聞き、残れる形を探す', note: '費用なし。余力−1。採用は始めない。非常勤で残る道も、断られることも',
+          fx: { slack: -1 },
           chance: { p: (c) => (c.slack >= 1 ? 0.5 : 0.3), label: '非常勤で午前だけ残ることになる', hit: { delayed: [{ days: 30, label: '非常勤化。処置は午前だけ', fx: { dailyCost: { yen: -6000, days: null, label: '非常勤化で日給が下がる' }, slack: -1 } }] }, miss: { delayed: [{ days: 30, label: '退職。採用はこれから', fx: { staff: { nurses: -1 }, slack: -1 } }] } },
           reflect: '残る形を探すのは誠実。外れた時の30日を失う覚悟もいる' }
       ],
@@ -222,9 +222,9 @@
       ask: '医師をどう補うか',
       facts: (c) => [{ label: '資金', val: yen(c.money) }, { label: '1日平均', val: `${c.patients7}人` }, { label: '混み具合', val: `${Math.round(c.load * 100)}%` }],
       choices: [
-        { id: 'part', label: '非常勤医師を週2日入れる', note: '紹介料¥150,000。¥30,000/日相当が続く。診察1人あたり−1分。診療の仕方は人による',
+        { id: 'part', label: '非常勤医師を週2日入れる', note: '¥30,000/日相当が続く。診察1人あたり−1分。診療の仕方は人による',
           req: { money: 150000 },
-          fx: { money: -150000, dailyCost: { yen: 30000, days: null, label: '非常勤医師(週2日・日割り)' }, examDelta: { d: -1.0, days: 60, label: '非常勤医の日' }, slack: 1, next: { id: 'ST-07b', days: 12 } },
+          fx: { dailyCost: { yen: 30000, days: null, label: '非常勤医師(週2日・日割り)' }, examDelta: { d: -1.0, days: 60, label: '非常勤医の日' }, slack: 1, next: { id: 'ST-07b', days: 12 } },
           when: [{ if: (c) => c.load >= 0.9, fx: { rep: 1 }, why: '混んでいる時期に枠が増え、待ち時間の不満がすぐ減った' }],
           reflect: '非常勤は変動費に近い。揃わない診療という別の費用がつく' },
         { id: 'full', label: '常勤医師を採用する', note: '採用費¥500,000。日給¥80,000が毎日。診察室が1つ増える。患者が少ないと重い',
@@ -277,8 +277,8 @@
           fx: { money: -300000, staff: { doctors: 1 }, dailyCost: { yen: -30000, days: null, label: '非常勤医師の終了' }, slack: 1, rep: 0.5 },
           when: [{ if: (c) => c.patients7 >= 35, fx: { trust: 1 }, why: '受け入れの枠が広がり、紹介元に「すぐ診られる」と伝えられた' }],
           reflect: '合う人を常勤にするのは、募集より確実で安い採用' },
-        { id: 'keep', label: '今の週2日のままにする', note: '費用なし。本人の希望に応えられず、他院に軸を移す可能性がある',
-          fx: {},
+        { id: 'keep', label: '今の週2日のままにする', note: '費用なし。余力−1。本人の希望に応えられず、他院に軸を移す可能性',
+          fx: { slack: -1 },
           chance: { p: 0.35, label: '非常勤医が他院を主にし、うちは週1日に', hit: { examDelta: { d: 0.5, days: 60, label: '非常勤医の日が減る' }, dailyCost: { yen: -15000, days: null, label: '非常勤医(週1日)' }, slack: -1 }, miss: {} },
           reflect: '現状維持は相手の事情で崩れる。相手にも選択肢がある' }
       ],
@@ -436,10 +436,10 @@
       ask: '透析室の機器管理の体制',
       facts: (c) => [{ label: '資金', val: yen(c.money) }, { label: '月の利益', val: yen(c.monthProfit) }],
       choices: [
-        { id: 'hire', label: '臨床工学技士を1人採用する', note: '採用費¥200,000。¥17,000/日相当が続く。休みが回り、点検が二重になる。応募は少ない',
+        { id: 'hire', label: '臨床工学技士を1人採用する', note: '¥17,000/日相当が続く。休みが回り、点検が二重になる。応募は少ない',
           req: { money: 200000 },
-          fx: { money: -200000, dailyCost: { yen: 17000, days: null, label: '臨床工学技士(2人目)' }, slack: 2, rep: 0.5 },
-          chance: { p: 0.25, label: '応募が無く紹介料が上がる', hit: { money: -100000 }, miss: {} },
+          fx: { dailyCost: { yen: 17000, days: null, label: '臨床工学技士(2人目)' }, slack: 2, rep: 0.5 },
+          chance: { p: 0.25, label: '応募が無く紹介料がかかる', hit: { money: -100000 }, miss: {} },
           reflect: '一人体制を解いた。固定費は部門が持ち続ける' },
         { id: 'part', label: '非常勤の技士を週2日入れる', note: '¥8,000/日相当が続く。休みは週2日分だけ確保。急な欠勤には弱い',
           fx: { dailyCost: { yen: 8000, days: null, label: '非常勤の臨床工学技士' }, slack: 1 },

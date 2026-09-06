@@ -21,8 +21,8 @@
           req: { money: 20000 },
           fx: { money: -20000, rel: { caremane: 1 }, trust: 1, newMul: { mul: 1.05, days: 45, label: 'ケアマネからの紹介' } },
           reflect: '細く長い紹介を選んだ。数字はすぐ動かない' },
-        { id: 'prepare', label: '先に受け入れ体制を整える', note: '費用なし。今は増やさず、20日後から受けられる形にする',
-          fx: { slack: 1, delayed: [{ days: 20, label: '体制が整い紹介を受け始める', fx: { newMul: { mul: 1.1, days: 30, label: '準備後の紹介' }, rel: { hospital: 1 } } }] },
+        { id: 'prepare', label: '先に受け入れ体制を整える', note: '準備の時間外が¥1,000/日で20日。20日後から受けられる形にする',
+          fx: { slack: 1, dailyCost: { yen: 1000, days: 20, label: '準備の時間外' }, delayed: [{ days: 20, label: '体制が整い紹介を受け始める', fx: { newMul: { mul: 1.1, days: 30, label: '準備後の紹介' }, rel: { hospital: 1 } } }] },
           reflect: '機会を20日遅らせて、負担を先に払った' }
       ],
       lesson: '営業強化は余力があれば成長、過負荷なら負担。順番の問題', point: '紹介獲得の時期と、受ける体制の順番'
@@ -60,8 +60,8 @@
         { id: 'slots', label: '予約枠を再設計して山を崩す', note: '費用なし。診察1人あたり−0.3分がずっと。導入の14日は現場負担',
           fx: { slack: -1, examDelta: { d: -0.3, days: 180, label: '予約枠の再設計' }, delayed: [{ days: 14, label: '新しい枠が定着', fx: { slack: 2 } }] },
           reflect: '人を増やさず流し方で受けた。導入負担を先に払った' },
-        { id: 'keep', label: '今の体制のまま様子を見る', note: '費用なし。紹介が続けば負担も続く',
-          fx: {},
+        { id: 'keep', label: '今の体制のまま様子を見る', note: '時間外が¥1,500/日で30日。紹介が続けば負担も続く',
+          fx: { dailyCost: { yen: 1500, days: 30, label: '受け入れの時間外' } },
           chance: { p: (c) => (c.load >= 0.85 ? 0.5 : 0.2), label: '待ち時間の悪化で紹介が減る', hit: { rep: -1, newMul: { mul: 0.9, days: 30, label: '紹介減' } }, miss: {} },
           reflect: '様子見は無料ではない。混み具合が判断の代わりをする' }
       ],
@@ -106,8 +106,8 @@
           fx: { examDelta: { d: 0.2, days: 90, label: '健診枠' }, newMul: { mul: 1.04, days: 90, label: '健診受診(分散)' }, rel: { company: 1 }, next: { id: 'SL-03b', days: 40 } },
           when: [{ if: (c) => c.load < 0.6, fx: { slack: 1 }, why: '空きの多い午後が埋まり、診療の山は増えない' }],
           reflect: '期間で薄めた。会社を待たせた分、現場は守れた' },
-        { id: 'decline', label: '今回は受けず、次の機会に', note: '費用なし。関係は進まない。他院に流れることがある',
-          fx: {},
+        { id: 'decline', label: '今回は受けず、次の機会に', note: '新患×0.97が30日。関係は進まない。他院に流れることがある',
+          fx: { newMul: { mul: 0.97, days: 30, label: '健診の機会を逃す' } },
           chance: { p: 0.5, label: '他院と契約され次の話が来なくなる', hit: { rel: { company: -1 } }, miss: {} },
           reflect: '見送った。まとまった話は次も来るとは限らない' }
       ],
@@ -175,8 +175,8 @@
           fx: { money: -90000, rel: { hospital: 1, caremane: 1 }, newMul: { mul: 1.05, days: 120, label: '紹介の積み上げ' }, trust: 1 },
           when: [{ if: (c) => c.relations.hospital >= 2, fx: { newMul: { mul: 1.08, days: 120, label: '紹介の積み上げ(関係が厚い)' } }, why: '既に関係の厚い先への訪問は、紹介に早く変わる' }],
           reflect: '遅い入口に投じた。数字はすぐ動かないが、切れにくい' },
-        { id: 'none', label: 'どちらもせず口コミに任せる', note: '費用なし。増え方は今の評判次第',
-          fx: {},
+        { id: 'none', label: 'どちらもせず口コミに任せる', note: '新患×0.95が60日。増え方は今の評判次第',
+          fx: { newMul: { mul: 0.95, days: 60, label: '打ち手なし' } },
           chance: { p: (c) => (c.rep >= 70 ? 0.6 : 0.3), label: '口コミで新患が増える', hit: { newMul: { mul: 1.05, days: 60, label: '口コミ' } }, miss: {} },
           reflect: '待った。評判が高いときだけ、待つのは戦略になる' }
       ],
@@ -306,8 +306,8 @@
           fx: { money: -30000, rel: { sports: 1 }, newMul: { mul: 1.03, days: 90, label: 'スポーツ外傷(緩やか)' } },
           when: [{ if: (c) => (c.relations.sports || 0) >= 1, fx: { newMul: { mul: 1.05, days: 90, label: 'スポーツ外傷(関係あり)' } }, why: '既に関係のあるクラブなら、訪問だけでも紹介が動く' }],
           reflect: '枠を渡さず関係だけ作った。数字は緩い' },
-        { id: 'decline', label: '今の患者層を優先して見送る', note: '費用なし。若い患者層への入口を閉じる',
-          fx: {},
+        { id: 'decline', label: '今の患者層を優先して見送る', note: '新患×0.95が60日。若い患者層への入口を閉じる',
+          fx: { newMul: { mul: 0.95, days: 60, label: '若い層の入口を閉じる' } },
           chance: { p: 0.4, label: '他院が提携し、クラブ周辺の新患が減る', hit: { newMul: { mul: 0.97, days: 60, label: '競合の提携' } }, miss: {} },
           reflect: '見送った。入口は他院が使う' }
       ],
@@ -419,8 +419,8 @@
           fx: { rel: { hospital: 1 }, newMul: { mul: 1.02, days: 90, label: '透析の転院(一部)' }, trust: 1 },
           when: [{ if: (c) => (c.relations.hospital || 0) >= 2, fx: { trust: 1 }, why: '関係が厚ければ、一部の受け入れでも病院は次も相談してくる' }],
           reflect: '席の範囲で受けた。関係を守って規模を抑えた' },
-        { id: 'decline', label: '席が無いので断る', note: '費用なし。病院は他院へ。次の相談は減る',
-          fx: {},
+        { id: 'decline', label: '席が無いので断る', note: '新患×0.97が30日。病院は他院へ。次の相談は減る',
+          fx: { newMul: { mul: 0.97, days: 30, label: '病院の紹介が減る' } },
           chance: { p: 0.5, label: '病院の紹介先の順が下がる', hit: { rel: { hospital: -1 } }, miss: {} },
           reflect: '断った。席が無いのは事実でも、伝え方で次が変わる' }
       ],

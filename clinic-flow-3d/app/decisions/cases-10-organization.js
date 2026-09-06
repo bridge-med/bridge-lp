@@ -19,8 +19,8 @@
           req: { money: 100000 },
           fx: { money: -100000, slack: 1, trust: 0 },
           reflect: '効果の小さい方を選んだ。負担を避けた分、固定費は残る' },
-        { id: 'no', label: '見送る', note: '費用なし。分院の固定費は続く',
-          fx: {},
+        { id: 'no', label: '見送る', note: '重複分が¥2,000/日で90日。分院の固定費は続く',
+          fx: { dailyCost: { yen: 2000, days: 90, label: '受付と医事の重複' } },
           reflect: '見送りも判断。次に検討する条件を書いておく' }
       ],
       lesson: '統合の効果は数字で見える。負担は数字に出にくい。両方を並べて決める', point: '拠点統合の是非'
@@ -76,8 +76,8 @@
         { id: 'round', label: '院長が2週間、両拠点を回る', note: '費用なし。14日間、診察1人あたり+1分。院長が見ることで収まる',
           fx: { examDelta: { d: 1.0, days: 14, label: '院長の巡回' }, slack: 1, delayed: [{ days: 14, label: '運用が落ち着く', fx: { slack: 1 } }] },
           reflect: '院長の時間で収めた。統合の全費用に、この時間を足して考える' },
-        { id: 'wait', label: '慣れるのを待つ', note: '費用なし。収まることもある。患者の取り違えが起きれば大きい',
-          fx: {},
+        { id: 'wait', label: '慣れるのを待つ', note: '費用なし。余力−1。収まることもある。取り違えが起きれば大きい',
+          fx: { slack: -1 },
           chance: { p: 0.4, label: '問い合わせの取り違えで苦情', hit: { rep: -2, trust: -1 }, miss: { slack: 1 } },
           reflect: '待った。混乱は時間で薄まるが、事故は時間を待たない' }
       ],
@@ -119,8 +119,8 @@
           fx: { flag: 'or_mission', rep: 0.5 },
           chance: { p: 0.35, label: '「言葉だけ」と職員が感じる', hit: { slack: -1 }, miss: { trust: 1 } },
           reflect: '速く掲げた。言葉を守るのは、これからの判断' },
-        { id: 'later', label: '今は診療に集中する', note: '費用なし。判断は院長に集まり続ける',
-          fx: {},
+        { id: 'later', label: '今は診療に集中する', note: '費用なし。余力−1。判断は院長に集まり続ける',
+          fx: { slack: -1 },
           when: [{ if: (c) => c.staffTotal >= 5, fx: { slack: -1 }, why: '人数が増えるほど、物差しの無い判断は院長に集まる' }],
           reflect: '先送りした。人数が増える前に戻ってくる問い' }
       ],
@@ -140,8 +140,8 @@
         { id: 'locum', label: '月2回、代診医を入れて休む', note: '¥7,000/日相当がずっと。院長は月2回休める。先生が変わる日がある',
           fx: { dailyCost: { yen: 7000, days: null, label: '月2回の代診医(日割り)' }, slack: 1, rep: -0.5 },
           reflect: '金で休みを買った。代診の日を患者にどう伝えるかが次' },
-        { id: 'none', label: '今は休まない', note: '費用なし。続く限りは回る。倒れれば5日止まる',
-          fx: {},
+        { id: 'none', label: '今は休まない', note: '費用なし。余力−1。続く限りは回る。倒れれば5日止まる',
+          fx: { slack: -1 },
           when: [{ if: (c) => c.staff.doctors >= 2, fx: { slack: 1 }, why: '医師が2人いれば、院長が休む日も診療は止まらない' }],
           chance: { p: (c) => (c.load >= 0.85 ? 0.4 : 0.2), label: '院長が体調を崩して5日休診', hit: { newMul: { mul: 0.5, days: 5, label: '院長の急な休診' }, rep: -1, slack: -1 }, miss: {} },
           reflect: '賭けた。院長の体は医院で最も替えのきかない設備' }
@@ -212,8 +212,8 @@
           fx: { slack: -1, delayed: [{ days: 30, label: '月例会議で課題が整理される', fx: { slack: 1, trust: 1 } }] },
           chance: { p: 0.3, label: '日々の伝達漏れは続く', hit: { rep: -0.5 }, miss: {} },
           reflect: '深さを選んだ。日々の漏れは別の手当てが要る' },
-        { id: 'note', label: '連絡ノートで回す', note: '費用なし。集まらない。読まない人がいる',
-          fx: {},
+        { id: 'note', label: '連絡ノートで回す', note: '費用なし。余力−1。集まらない。読まない人がいる',
+          fx: { slack: -1 },
           chance: { p: 0.4, label: '読まれず、伝達漏れで患者に迷惑', hit: { rep: -1, slack: -1 }, miss: { slack: 1 } },
           reflect: '書いた。読まれるかは、書く側では決められない' }
       ],
@@ -247,9 +247,9 @@
       bg: (c) => `架空の経営上の条件。法人化は¥500,000と顧問¥3,000/日。個人のままでも診療は続く。分院${c.branches}か所、部門${c.depts.length}つ。`,
       ask: '経営の形',
       choices: [
-        { id: 'corp', label: '法人にする', note: '¥500,000と¥3,000/日。拠点を増やす前提が整う。当面の利益は減る',
+        { id: 'corp', label: '法人にする', note: '顧問費¥3,000/日。拠点を増やす前提が整う。当面の利益は減る',
           req: { money: 500000 },
-          fx: { money: -500000, dailyCost: { yen: 3000, days: null, label: '法人の顧問費(架空の条件)' }, flag: 'or_corp' },
+          fx: { dailyCost: { yen: 3000, days: null, label: '法人の顧問費(架空の条件)' }, flag: 'or_corp' },
           when: [
             { if: (c) => c.branches > 0 || c.depts.length > 0, fx: { slack: 1 }, why: '既に拠点があれば、手続きの効果がすぐ現場に出る' },
             { if: (c) => !!c.flags.or_vision_solo, fx: { slack: -1 }, why: '一人の医院として深める方針と、法人の形は噛み合わない' }
@@ -274,9 +274,9 @@
       bg: (c) => `在宅部門は無い。準備は¥1,000,000と看護師1人、車¥3,000/日。ケアマネジャーとの関係Lv${(c.relations && c.relations.caremane) || 0}。`,
       ask: '在宅部門の準備',
       choices: [
-        { id: 'start', label: '立ち上げの準備を始める', note: '¥1,000,000と看護師+1、車¥3,000/日。60日間は余力−2。地域の信頼+1',
+        { id: 'start', label: '立ち上げの準備を始める', note: '¥1,000,000と看護師+1。60日間は余力−2。地域の信頼+1',
           req: { money: 1000000 },
-          fx: { money: -1000000, staff: { nurses: 1 }, dailyCost: { yen: 3000, days: null, label: '訪問用の車' }, slack: -2, trust: 1, rel: { caremane: 1 }, flag: 'or_homecare_prep', delayed: [{ days: 60, label: '在宅の体制が整う', fx: { slack: 2 } }] },
+          fx: { money: -1000000, staff: { nurses: 1 }, slack: -2, trust: 1, rel: { caremane: 1 }, flag: 'or_homecare_prep', delayed: [{ days: 60, label: '在宅の体制が整う', fx: { slack: 2 } }] },
           when: [{ if: (c) => c.staff.doctors < 2, fx: { slack: -1, rep: -0.5 }, why: '医師が1人だと、訪問の間は外来が止まる' }],
           reflect: '大きく踏み出した。医師の時間をどう分けるかが、この先の日々' },
         { id: 'small', label: '院長が月に数件だけ往診する', note: '費用なし。90日間、診察+0.5分。信頼+1。部門にはならない',
@@ -365,9 +365,9 @@
       ask: '分院開設',
       facts: (c) => [{ label: '資金', val: yen(c.money) }, { label: '手元で持てる日数', val: `${c.runway}日` }, { label: '直近30日の利益', val: yen(c.monthProfit) }],
       choices: [
-        { id: 'open', label: '開設を決める', note: '¥3,000,000と家賃¥20,000/日。14日後に分院長の人選。軌道に乗るまで赤字',
+        { id: 'open', label: '開設を決める', note: '家賃¥20,000/日。14日後に分院長の人選。軌道に乗るまで赤字',
           req: { money: 3000000 },
-          fx: { money: -3000000, dailyCost: { yen: 20000, days: null, label: '分院の家賃(架空の条件)' }, slack: -1, flag: 'or_branch_open', next: { id: 'OR-13b', days: 14 } },
+          fx: { dailyCost: { yen: 20000, days: null, label: '分院の家賃(架空の条件)' }, slack: -1, flag: 'or_branch_open', next: { id: 'OR-13b', days: 14 } },
           when: [
             { if: (c) => c.monthProfit < 0, fx: { slack: -1, trust: -1 }, why: '本院が赤字のまま分院を出すと、職員も地域も「大丈夫か」と見る' },
             { if: (c) => !!c.flags.or_corp, fx: { slack: 1 }, why: '法人の形を先に整えていれば、手続きの負担が小さい' }
