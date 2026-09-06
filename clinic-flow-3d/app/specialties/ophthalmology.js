@@ -58,6 +58,7 @@
         settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0.05, examMean: 7, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, dexa: false, echo: false },
         policy: {},
         shopHide: ['pt', 'rehaAide', 'machines', 'physio', 'echo', 'dexa', 'mri'],
+        jihiHide: ['selfReha'], // 自費リハ延長は整形のリハ完了者が前提(v76 保留#43)
         relHide: ['sports'],
         rel: {
           hospital: { effect: '紹介患者 +Lv人/日(術後の経過観察・糖尿病の定期眼底検査)', desc: '地域連携室との関係。病院で手術した人の経過観察と、糖尿病の定期眼底検査の受け皿になる。' },

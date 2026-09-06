@@ -586,6 +586,8 @@
       const d = JSON.parse(raw);
       Object.assign(settings, d.settings);
       Object.assign(G, d.g);
+      // 本院の科で隠す自費メニューは稼がない(v76 保留#43。旧セーブで selfReha が残っていても落とす)
+      if (typeof SPECIALTIES !== 'undefined') { const mm = SPECIALTIES.get(settings.specialty); for (const k of (mm && mm.main && mm.main.preset && mm.main.preset.jihiHide) || []) settings[k] = false; }
       Object.keys(REL_DEF).forEach((k) => { if (!G.relations[k]) G.relations[k] = { lv: 0, last: 0 }; });
       if (!G.cum) G.cum = { revenue: 0, profit: 0 };
       if (d.g.blackStreak === undefined) G.blackStreak = 0;
@@ -3223,6 +3225,12 @@
     renderJihi();
   }
 
+  // 本院の科で意味を持たない自費メニューは出さない(v76 保留#43: 自費リハ延長は整形のリハ完了者が前提。preset.jihiHide)
+  function jihiHidden(key) {
+    const mm = SPECIALTIES.get(settings.specialty);
+    const hide = (mm && mm.main && mm.main.preset && mm.main.preset.jihiHide) || [];
+    return hide.includes(key);
+  }
   function renderJihi() {
     const el = $('jihiList');
     if (!el) return;
@@ -3230,12 +3238,12 @@
     const prpDemand = clamp((G.rep - 58) / 12, 0, 2.2) * clamp(1.55 - settings.prpPrice / 100000, 0.15, 1.3) * (1 + 0.25 * relLv('sports'));
     const agaJoin = 0.5 * clamp(G.aw * 1.5, 0.3, 1.2) * clamp(1.6 - settings.agaPrice / 12000, 0.2, 1.3);
     el.innerHTML = `
-      <div class="jihi-item">
+      ${jihiHidden('selfReha') ? '' : `<div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.selfReha ? 'on' : ''}" data-jihi="selfReha">🏃 自費リハ延長</button>
         <span class="jihi-stat">想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)</span></div>
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.selfRehaPrice)}</b></span>
         <input type="range" data-jprice="selfRehaPrice" min="4000" max="15000" step="1000" value="${settings.selfRehaPrice}"></label>
-      </div>
+      </div>`}
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>
         <span class="jihi-stat">想定 ${prpDemand.toFixed(1)}件/日(評判・スポーツ連携で増)・原価 ${yen(FEES.prpCogs)}/件</span></div>
@@ -4858,6 +4866,7 @@
     settings.mainFs = [];
     settings.mainEquip = Object.assign({}, (m.deptDefaults && m.deptDefaults.equip) || {}, pre.equip || {}); // 設備は科の既定から(v73)
     if (typeof G !== 'undefined' && G) G.mainQueue = { preop: 0, surgery: 0, postop: [] }; // 科を替えたら手術待ちは空(v74)
+    for (const k of pre.jihiHide || []) settings[k] = false; // 隠した自費メニューは稼がない(v76 保留#43)
     applyMainWords();
     skipSpecMissions();
     return true;
