@@ -1,0 +1,458 @@
+/* 経営の分岐点 — 分類3: 給与・待遇・育成・定着 */
+(function (root) {
+  'use strict';
+  const yen = (n) => '¥' + Math.round(n).toLocaleString('ja-JP');
+  const CASES = [
+    {
+      id: 'PY-01', cat: 3, title: '私たちの頑張りは、どう返ってくるのでしょうか', tier: 2, spec: ['any'], who: 'staff', cool: 120,
+      cond: (c) => c.monthProfit >= 300000 && c.slack <= 0,
+      prio: (c) => (c.slack <= -1 ? 2 : 0),
+      say: '忙しいのは分かっています。ただ、この頑張りがどう返ってくるのか、みんな気にしています。',
+      bg: (c) => `直近30日の利益 ${yen(c.monthProfit)}。職員の余力は${c.slack}。給与は開業時のまま。`,
+      ask: '職員への還元をどう示すか',
+      facts: (c) => [{ label: '月間利益', val: yen(c.monthProfit) }, { label: '職員数', val: `${c.staffTotal}人` }, { label: '余力', val: `${c.slack}` }],
+      choices: [
+        { id: 'allowance', label: '継続的な手当を増やす', note: (c) => `職員1人¥1,500/日がずっと続く(月約${yen(c.staffTotal * 1500 * 30)})。定着は強い。固定費になる`,
+          fx: (c) => ({ dailyCost: { yen: c.staffTotal * 1500, days: null, label: '職員手当' }, slack: 2, flag: 'py_allowance' }),
+          when: [{ if: (c) => c.monthProfit < 600000, fx: { slack: -1 }, why: '利益に対して手当が重く、次の投資が遠のく不安が職員にも伝わる' }],
+          reflect: '毎月の約束は、患者が減った月にも守る約束' },
+        { id: 'talk', label: '面談と業務分担の見直しを行う', note: '費用なし。分担が変わるまで14日。金銭より「聞かれた」ことが効く',
+          fx: { slack: 1, delayed: [{ days: 14, label: '分担の見直しが定着', fx: { slack: 1 } }] },
+          reflect: '負担の原因を一緒に見た。金銭を使わない還元もある' },
+        { id: 'later', label: '還元の条件と時期を示し、当面は資金を確保する', note: '費用なし。30日後に利益が続けば手当。届かなければ信頼が下がる',
+          fx: { flag: 'py_promise' },
+          chance: { p: (c) => (c.monthProfit >= 500000 ? 0.7 : 0.4), label: '約束の時期に利益が続いた', hit: { delayed: [{ days: 30, label: '約束どおり手当を開始', fx: { dailyCost: { yen: 1000, days: null, label: '職員手当(約束分)' }, slack: 2 } }] }, miss: { delayed: [{ days: 30, label: '利益が届かず約束を延期', fx: { slack: -2 } }] } },
+          reflect: '条件つきの約束は、条件を職員も見られる形にしないと約束にならない' }
+      ],
+      lesson: '待遇は継続費用。業務改善は導入負担。還元の形で払う時期が変わる', point: '還元の形。手当・分担・約束の時間差'
+    },
+    {
+      id: 'PY-02', cat: 3, title: '有給休暇が取れていない', tier: 1, spec: ['any'], who: 'nurse', cool: 90,
+      cond: (c) => c.day >= 30,
+      say: '有給の取得が進んでいません。取ると現場が薄くなるので、みんな言い出せないのだと思います。',
+      bg: (c) => `職員${c.staffTotal}人。1人休むと処置と受付が同時に薄くなる日がある。1日平均${c.patients7}人。`,
+      ask: '休みを取れる形をどう作るか',
+      choices: [
+        { id: 'rotate', label: '交代で取り、診察枠は維持する', note: '費用なし。30日間、診察1人あたり+0.3分。休める',
+          fx: { examDelta: { d: 0.3, days: 30, label: '交代休' }, slack: 1 },
+          reflect: '枠を守って休ませた。回転は少し落ちる' },
+        { id: 'month', label: '取得月を決めて新患を少し絞る', note: '費用なし。30日間、新患×0.85。休みは確実に取れる',
+          fx: { newMul: { mul: 0.85, days: 30, label: '有給取得月' }, slack: 2 },
+          when: [{ if: (c) => c.monthProfit < 200000, fx: { slack: -1 }, why: '利益が薄い月に入りを絞るのは、職員も不安に感じる' }],
+          reflect: '入りを絞って休みを作った。利益の月だからできた判断かどうか' },
+        { id: 'postpone', label: '繁忙が落ち着くまで先送りする', note: '費用なし。忙しさが続けば、辞める理由になる',
+          fx: { slack: -1 },
+          chance: { p: 0.3, label: '職員から退職の相談', hit: { delayed: [{ days: 30, label: '受付が1人退職', fx: { staff: { receptionists: -1 }, slack: -1 } }] }, miss: {} },
+          reflect: '先送りは、忙しさが続く限り解けない' }
+      ],
+      lesson: '休みは待遇の一部。取れる仕組みが無い職場では、給与を上げても定着しない', point: '休暇取得と診療量の交換'
+    },
+    {
+      id: 'PY-03', cat: 3, title: '看護師から資格取得の支援を頼まれた', tier: 2, spec: ['any'], who: 'nurse', cool: 150,
+      cond: (c) => c.staff.nurses >= 2,
+      say: '看護師の一人が、専門の資格を取りたいと言っています。講習は週1日で2か月、費用は¥200,000ほどです。',
+      bg: (c) => `講習は週1日、60日間。費用¥200,000。看護師${c.staff.nurses}人、混み具合${Math.round(c.load * 100)}%。取得後は処置の幅が広がる。`,
+      ask: '資格取得をどう支援するか',
+      facts: (c) => [{ label: '資金', val: yen(c.money) }, { label: '看護師', val: `${c.staff.nurses}人` }, { label: '混み具合', val: `${Math.round(c.load * 100)}%` }],
+      choices: [
+        { id: 'full', label: '費用を全額負担し、講習日は勤務扱いにする', note: '¥200,000。60日間、週1日の不在で診察1人あたり+0.4分。取得後に力になる',
+          req: { money: 200000 },
+          fx: { money: -200000, examDelta: { d: 0.4, days: 60, label: '講習日の不在' }, slack: 1, flag: 'py_cert_full', next: { id: 'PY-03b', days: 60 } },
+          when: [{ if: (c) => c.load >= 0.85, fx: { slack: -1, rep: -0.5 }, why: '混んでいる時期の週1日不在は、待ち時間と残る職員の負担に出る' }],
+          reflect: '費用と診療枠の両方を先に払った。返ってくるのは取得の後' },
+        { id: 'half', label: '費用は半額、講習は休みの日に行ってもらう', note: '¥100,000。診療枠は守れる。本人の休みが消え、途中でやめる人もいる',
+          req: { money: 100000 },
+          fx: { money: -100000 },
+          chance: { p: 0.25, label: '負担が重く講習を途中でやめる', hit: { slack: -1 }, miss: { next: { id: 'PY-03b', days: 60 } } },
+          reflect: '枠を守って本人の休みで払わせた。続いたかどうかは本人次第だった' },
+        { id: 'none', label: '今は支援せず、希望として聞いておく', note: '費用なし。取る人は自分で取る。学べる職場へ移る理由にもなる',
+          fx: {},
+          when: [{ if: (c) => c.slack <= -1, fx: { slack: -1 }, why: '余力の無い職場では、学びの希望を断ることが辞める理由に重なる' }],
+          chance: { p: 0.3, label: '学べる職場への転職を考え始める', hit: { slack: -1, delayed: [{ days: 45, label: '看護師が1人退職', fx: { staff: { nurses: -1 } } }] }, miss: {} },
+          reflect: '支援しないのも判断。学びたい人ほど外を見る' }
+      ],
+      lesson: '資格支援は費用と診療枠の両方で払う。返ってくるのは取得後', point: '資格取得支援の費用と時間'
+    },
+    {
+      id: 'PY-03b', cat: 3, title: '資格を取った職員の処遇', tier: 2, spec: ['any'], who: 'doctor', chainOnly: true, cool: 999,
+      say: '資格を取ってくれた。院として、これをどう処遇に映すか決めたい。他の職員も見ている。',
+      bg: (c) => `取得までの支援を院が出した。看護師${c.staff.nurses}人。処置の幅は広がる。職員の余力は${c.slack}。`,
+      ask: '取得後の処遇の形',
+      choices: [
+        { id: 'allowance', label: '資格手当を付ける', note: '¥1,500/日がずっと(月約¥45,000)。他の職員への説明が要る',
+          fx: { dailyCost: { yen: 1500, days: null, label: '資格手当' }, slack: 1, flag: 'py_cert_allow', next: { id: 'PY-03c', days: 20 } },
+          when: [{ if: (c) => c.monthProfit < 200000, fx: { slack: -1 }, why: '利益が薄い月に固定の手当を足すと、次の還元の余地が消える' }],
+          reflect: '手当で応えた。固定費として毎月残る' },
+        { id: 'role', label: '手当は付けず、専門の役割と枠を任せる', note: '費用なし。分担の組み替えに14日の現場負担。役割は定着に効く',
+          fx: { slack: -1, rep: 0.5, delayed: [{ days: 14, label: '新しい役割が定着', fx: { slack: 2 } }], next: { id: 'PY-03c', days: 20 } },
+          when: [{ if: (c) => c.load >= 0.85, fx: { slack: -1 }, why: '混んでいる時期の分担の組み替えは現場に重い' }],
+          reflect: '金銭ではなく役割で応えた。任された仕事は続ける理由になる' },
+        { id: 'nothing', label: '処遇は変えず、支援したことで応えたとする', note: '費用なし。支援は先に払った。本人がどう受け取るかは分からない',
+          fx: { next: { id: 'PY-03c', days: 20 } },
+          chance: { p: (c) => (c.flags.py_cert_full ? 0.25 : 0.5), label: '評価されていないと感じて転職を考える', hit: { slack: -1, delayed: [{ days: 45, label: '看護師が1人退職', fx: { staff: { nurses: -1 } } }] }, miss: {} },
+          reflect: '支援で終わりにした。支援の厚さで受け取り方が変わった' }
+      ],
+      lesson: '育成の出口は処遇。取った後に何が変わるかを、取る前に決めておく', point: '資格取得後の処遇'
+    },
+    {
+      id: 'PY-03c', cat: 3, title: '他の職員からも資格取得の支援を求められた', tier: 2, spec: ['any'], who: 'staff', chainOnly: true, cool: 999,
+      say: '前の人の話を聞いて、私も資格を取りたいと思いました。同じように支援してもらえますか。',
+      bg: (c) => `支援の例が1つできた。職員${c.staffTotal}人。全員に同じ支援をすると年¥600,000ほど。資金 ${yen(c.money)}。`,
+      ask: '支援を制度にするか',
+      facts: (c) => [{ label: '資金', val: yen(c.money) }, { label: '職員数', val: `${c.staffTotal}人` }, { label: '月間利益', val: yen(c.monthProfit) }],
+      choices: [
+        { id: 'rule', label: '年1人・上限¥200,000の制度にする', note: '積立¥600/日が続く。順番を待つ人が出る。基準は全員に公開する',
+          fx: { dailyCost: { yen: 600, days: null, label: '資格支援の積立' }, slack: 1, flag: 'py_cert_rule' },
+          when: [{ if: (c) => c.staffTotal >= 6, fx: { slack: -1 }, why: '職員が多いと年1人では順番が遠く、不満が残る' }],
+          reflect: '制度にした。原資に上限を付けたので、順番の説明ができる' },
+        { id: 'case', label: '個別に判断し、今回も支援する', note: '¥200,000。基準の無い2例目。次からも断りにくい',
+          req: { money: 200000 },
+          fx: { money: -200000, slack: 1 },
+          chance: { p: 0.4, label: '3人目の申し出が続く', hit: { delayed: [{ days: 30, label: '次の申し出を断って不満が残る', fx: { slack: -1 } }] }, miss: {} },
+          reflect: '個別に支援した。基準が無いまま例が増えた' },
+        { id: 'pause', label: '院の資金を見て、今は見送る', note: '費用なし。1例目との差を説明できないと不公平感が残る',
+          fx: { slack: -1 },
+          when: [{ if: (c) => c.monthProfit >= 400000, fx: { slack: -1 }, why: '利益が出ているのに見送ると、支援の基準が院長の気分に見える' }, { if: (c) => c.monthProfit < 0, fx: { slack: 1 }, why: '赤字の月の見送りは職員にも分かる' }],
+          reflect: '見送った。理由が数字で示せたかどうかで受け取り方が変わった' }
+      ],
+      lesson: '1例目は好意、2例目から制度。基準の無い支援は不公平の入口', point: '支援の制度化と原資の上限'
+    },
+    {
+      id: 'PY-04', cat: 3, title: '他院から声がかかっています', tier: 1, spec: ['any'], who: 'staff', cool: 150,
+      cond: (c) => c.staff.nurses >= 1,
+      prio: (c) => (c.slack <= -1 ? 2 : 0),
+      say: '看護師の私に、他院から声がかかっています。今より月¥40,000高い条件です。正直、迷っています。',
+      bg: (c) => `看護師${c.staff.nurses}人。1人抜けると処置が回らない日が出る。職員の余力は${c.slack}。直近30日の利益 ${yen(c.monthProfit)}。`,
+      ask: '退職の申し出への答え方',
+      facts: (c) => [{ label: '看護師', val: `${c.staff.nurses}人` }, { label: '余力', val: `${c.slack}` }, { label: '月間利益', val: yen(c.monthProfit) }],
+      choices: [
+        { id: 'match', label: '条件を合わせて引き止める', note: '¥1,500/日がずっと(月約¥45,000)。他の職員に知られると説明が要る',
+          fx: { dailyCost: { yen: 1500, days: null, label: '引き止めの昇給' }, slack: 1, flag: 'py_counter', next: { id: 'PY-04b', days: 15 } },
+          when: [{ if: (c) => c.monthProfit < 100000, fx: { slack: -1 }, why: '利益が薄い中の個別昇給は、次の昇給の余地を消す' }],
+          reflect: '1人の条件に応えた。給与差は院の中で必ず伝わる' },
+        { id: 'reason', label: '理由を聞き、待遇以外の不満を先に直す', note: '費用なし。給与差は残る。残るかは本人と職場次第',
+          fx: { slack: 1 },
+          chance: { p: (c) => (c.slack >= 1 ? 0.6 : 0.35), label: '働き方の改善で残ることにした', hit: {}, miss: { delayed: [{ days: 20, label: '看護師が1人退職', fx: { staff: { nurses: -1 }, slack: -1 } }] } },
+          reflect: '金銭以外の理由を探した。余力のある職場ほど、話は通じた' },
+        { id: 'sendoff', label: '引き止めず、引き継ぎをして送り出す', note: '費用なし。30日後に看護師−1。良い形で終われば戻ることもある',
+          fx: { slack: -1, delayed: [{ days: 30, label: '引き継ぎを終えて退職', fx: { staff: { nurses: -1 } } }] },
+          when: [{ if: (c) => c.load >= 0.8, fx: { slack: -1 }, why: '混んでいる時期の欠員は現場に直接響く' }, { if: (c) => c.load < 0.6, fx: { slack: 1 }, why: '患者が少ない時期なら人件費が減る面もある' }],
+          reflect: '送り出した。欠員の重さは混み具合で変わった' }
+      ],
+      lesson: '引き止めは1人の話で終わらない。応え方が院の給与の基準になる', point: '退職の申し出への対応'
+    },
+    {
+      id: 'PY-04b', cat: 3, title: '引き止めの条件が、他の職員に伝わった', tier: 2, spec: ['any'], who: 'staff', chainOnly: true, cool: 999,
+      say: '辞めると言った人だけ上がったと聞きました。私たちは黙っていた方が損なのでしょうか。',
+      bg: (c) => `引き止めから15日。職員${c.staffTotal}人。個別昇給は月約¥45,000。職員の余力は${c.slack}。`,
+      ask: '個別対応の後をどう収めるか',
+      choices: [
+        { id: 'table', label: '給与の基準を作り、全員に説明する', note: '費用なし。引き止め分も基準に沿って整える。作るのに20日の負担',
+          fx: { slack: -1, flag: 'py_grade_table', delayed: [{ days: 20, label: '給与の基準を全員に説明', fx: { slack: 2 } }] },
+          when: [{ if: (c) => c.staffTotal >= 6, fx: { slack: -1 }, why: '人数が多いほど基準作りの調整に時間がかかる' }],
+          reflect: '例外を基準に変えた。作る間の負担は院長が持った' },
+        { id: 'all', label: '全員の手当を少し上げて差を縮める', note: (c) => `職員1人¥800/日がずっと(月約${yen(c.staffTotal * 800 * 30)})。固定費が増える`,
+          fx: (c) => ({ dailyCost: { yen: c.staffTotal * 800, days: null, label: '全員の手当' }, slack: 1 }),
+          when: [{ if: (c) => c.monthProfit < 200000, fx: { slack: -1 }, why: '利益に対して手当が重く、次の投資が遠のく不安が職員にも伝わる' }],
+          reflect: '全員を上げて差を薄めた。基準は作っていない' },
+        { id: 'explain', label: '個別の事情だと説明し、基準は作らない', note: '費用なし。納得する人としない人が分かれる',
+          fx: {},
+          chance: { p: 0.45, label: '別の職員も「他院から声が」と言い始める', hit: { slack: -2 }, miss: {} },
+          reflect: '例外のままにした。交渉する人が得をする院になっていないか' }
+      ],
+      lesson: '個別の例外は次の基準になる。基準が無ければ交渉の強い人が得をする', point: '個別昇給の後始末と基準'
+    },
+    {
+      id: 'PY-05', cat: 3, title: '非常勤看護師の募集に応募が来ない', tier: 1, spec: ['any'], who: 'nurse', cool: 120,
+      cond: (c) => c.load >= 0.6,
+      say: '非常勤の看護師を募集していますが、応募がありません。近隣より時給が¥200低いようです。',
+      bg: (c) => `募集して30日。近隣の時給は当院より¥200高い。看護師${c.staff.nurses}人、混み具合${Math.round(c.load * 100)}%。`,
+      ask: '非常勤の時給と条件',
+      choices: [
+        { id: 'raise', label: '時給を近隣より¥100上げて募集する', note: '募集費¥80,000。採用後は看護師の日給が続く。応募は来やすい',
+          req: { money: 80000 },
+          fx: { money: -80000 },
+          chance: { p: 0.75, label: '応募があり採用できた', hit: { delayed: [{ days: 14, label: '非常勤看護師が入る', fx: { staff: { nurses: 1 }, slack: 1 } }] }, miss: { slack: -1 } },
+          reflect: '時給で答えた。募集の速さは金額に出た' },
+        { id: 'flex', label: '時給は据え置き、勤務の融通を条件にする', note: '募集費¥40,000。応募は五分。来れば長く続きやすい',
+          req: { money: 40000 },
+          fx: { money: -40000 },
+          when: [{ if: (c) => c.load >= 0.85, fx: { slack: -1 }, why: '混んでいる院では融通の効く勤務が組みにくく、来ても続きにくい' }],
+          chance: { p: 0.5, label: '融通を求める人が応募した', hit: { delayed: [{ days: 21, label: '非常勤看護師が入る', fx: { staff: { nurses: 1 }, slack: 1 } }], trust: 1 }, miss: { slack: -1 } },
+          reflect: '時給の代わりに働き方を出した。来る人は限られるが続く' },
+        { id: 'none', label: '募集を止め、今の人数で回す', note: '費用なし。募集費は止まる。忙しさは続く',
+          fx: { slack: -1 },
+          when: [{ if: (c) => c.load < 0.7, fx: { slack: 1 }, why: '患者が落ち着いている時期なら今の人数で足りる' }],
+          reflect: '募集を止めた。混み具合が上がれば同じ相談が戻ってくる' }
+      ],
+      lesson: '時給の差は募集の速さに出る。融通は時給の代わりになることがある', point: '非常勤の時給と条件'
+    },
+    {
+      id: 'PY-06', cat: 3, title: '受付から産休・育休の申し出', tier: 1, spec: ['any'], who: 'front', cool: 200,
+      say: '受付の一人が妊娠を報告してくれました。来月から1年ほど不在になります。席は残したいです。',
+      bg: (c) => `受付${c.staff.receptionists}人。来月から1年ほどの不在。復帰の意思あり。1日平均${c.patients7}人。`,
+      ask: '不在の間をどう埋めるか',
+      facts: (c) => [{ label: '受付', val: `${c.staff.receptionists}人` }, { label: '1日平均', val: `${c.patients7}人` }, { label: '資金', val: yen(c.money) }],
+      choices: [
+        { id: 'hire', label: '期間を限って受付を1人採用する', note: '採用費¥60,000。今から日給¥10,000。復帰時に人が重なる可能性',
+          req: { money: 60000 },
+          fx: { money: -60000, staff: { receptionists: 1 }, delayed: [{ days: 30, label: '産休に入る(受付−1)', fx: { staff: { receptionists: -1 } } }] },
+          when: [{ if: (c) => c.load < 0.5, fx: { slack: 1 }, why: '空いている時期に採用すると、引き継ぎの余裕がある' }],
+          reflect: '席を守って人を入れた。復帰のときの配置は先に考える' },
+        { id: 'part', label: '不在の間は午前だけ非常勤で補う', note: '募集費¥30,000。継続費¥5,000/日が1年。午後は薄くなる',
+          req: { money: 30000 },
+          fx: { money: -30000, delayed: [{ days: 30, label: '産休に入り、午前は非常勤で補う', fx: { staff: { receptionists: -1 }, dailyCost: { yen: 5000, days: 365, label: '午前の非常勤受付' }, slack: -1 } }] },
+          when: [{ if: (c) => c.load >= 0.75, fx: { rep: -0.5 }, why: '混んでいる院では午後の受付が薄いと待ち時間に出る' }],
+          reflect: '半分だけ補った。午後の忙しさを残る人が持つ' },
+        { id: 'cover', label: '残るメンバーでカバーする', note: '費用なし。30日後から受付−1が1年。混む日は待ちが延びる',
+          fx: { delayed: [{ days: 30, label: '産休に入る(受付−1)', fx: { staff: { receptionists: -1 }, slack: -2 } }] },
+          when: [{ if: (c) => c.load >= 0.75, fx: { rep: -1 }, why: '混んでいる院で受付が1人減ると、待ち時間に直結する' }],
+          chance: { p: 0.3, label: '残った受付が疲れて退職を考える', hit: { slack: -1 }, miss: {} },
+          reflect: 'カバーで乗り切ろうとした。1年は短くない' }
+      ],
+      lesson: '休みの権利は職員のもの。埋め方を決めるのは経営の仕事', point: '産休育休の穴埋め'
+    },
+    {
+      id: 'PY-07', cat: 3, title: '勉強会の時間をどこに置くか', tier: 1, spec: ['any'], who: 'nurse', cool: 120,
+      say: '院内で勉強会をやりたいです。ただ昼休みだと休めないし、終業後だと残業になります。',
+      bg: (c) => `職員${c.staffTotal}人。月2回・30分を想定。診療時間内なら枠が減り、終業後なら手当が要る。`,
+      ask: '勉強会の時間と扱い',
+      choices: [
+        { id: 'inhours', label: '診療時間内に30分の枠を取る', note: '費用なし。60日間、診察1人あたり+0.3分。全員が参加できる',
+          fx: { examDelta: { d: 0.3, days: 60, label: '勉強会の枠' }, slack: 1 },
+          when: [{ if: (c) => c.load >= 0.85, fx: { rep: -0.5 }, why: '混んでいる時期に枠を削ると待ち時間に出る' }],
+          reflect: '診療枠で払った。学びの時間を院の時間にした' },
+        { id: 'after', label: '終業後に行い、時間分の手当を出す', note: (c) => `職員1人¥1,000×月2回(日割り約${yen(c.staffTotal * 2000 / 30)}/日)が続く。参加は任意になりがち`,
+          fx: (c) => ({ dailyCost: { yen: Math.round(c.staffTotal * 2000 / 30), days: null, label: '勉強会の手当' } }),
+          chance: { p: 0.5, label: '参加が集まらず形だけになる', hit: { slack: -1 }, miss: { slack: 1, rep: 0.5 } },
+          reflect: '手当で払った。集まるかどうかは金額では決まらなかった' },
+        { id: 'material', label: '資料の回覧と院長の短い解説にする', note: '費用なし。負担は軽い。学びは浅く、人数が多いと抜ける',
+          fx: { delayed: [{ days: 30, label: '回覧が定着し確認の手間が減る', fx: { slack: 1 } }] },
+          when: [{ if: (c) => c.staffTotal >= 6, fx: { slack: -1 }, why: '人数が多いと回覧だけでは共有が抜け、確認の手間が増える' }],
+          reflect: '軽い形にした。人数が増えると同じ形では届かない' }
+      ],
+      lesson: '学びの時間は診療枠か手当で払う。無料の勉強会は誰かの休みで払っている', point: '勉強会の時間と手当'
+    },
+    {
+      id: 'PY-08', cat: 3, title: '終業後の片付けが毎日残業になっている', tier: 1, spec: ['any'], who: 'front', cool: 120,
+      cond: (c) => c.load >= 0.6,
+      say: '診療が終わってからの片付けと会計の締めで、毎日30分ほど残業になっています。',
+      bg: (c) => `職員${c.staffTotal}人。残業は毎日約30分。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。`,
+      ask: '残業をどう扱うか',
+      choices: [
+        { id: 'pay', label: '残業として払い、今の形を続ける', note: (c) => `職員1人¥1,000/日相当(月約${yen(c.staffTotal * 1000 * 30)})が続く。時間は減らない`,
+          fx: (c) => ({ dailyCost: { yen: c.staffTotal * 1000, days: null, label: '残業手当' } }),
+          when: [{ if: (c) => c.slack <= -1, fx: { slack: -1 }, why: '払っても時間は戻らない。余力の無い職場では疲れが残る' }],
+          reflect: '費用で払った。時間の問題は残っている' },
+        { id: 'close', label: '受付終了を15分早め、時間内に終える', note: '費用なし。180日間、新患×0.95。残業は消える',
+          fx: { newMul: { mul: 0.95, days: 180, label: '受付終了の前倒し' }, slack: 1 },
+          when: [{ if: (c) => c.load < 0.7, fx: { slack: 1 }, why: '空いている時間帯を削るので売上への影響は小さい' }, { if: (c) => c.load >= 0.9, fx: { rep: -0.5 }, why: '混んでいる院では受付時間の短縮が断りになる' }],
+          reflect: '時間で払った。売上を少し削って残業を消した' },
+        { id: 'shift', label: '早番・遅番の交代制にする', note: '費用なし。組み替えに14日。職員5人以上でないと組めない',
+          req: { cond: (c) => c.staffTotal >= 5, condWhy: '職員5人以上でないと交代が組めない' },
+          fx: { slack: -1, delayed: [{ days: 14, label: '交代制が定着', fx: { slack: 2 } }] },
+          reflect: '体制で払った。人数がそろっていたからできた' }
+      ],
+      lesson: '残業は費用か時間か体制で払う。放置は職員が払っている', point: '残業の常態化への対応'
+    },
+    {
+      id: 'PY-09', cat: 3, title: '職員から副業の申し出', tier: 1, spec: ['any'], who: 'staff', cool: 150,
+      say: '休みの日に、別のクリニックで非常勤をしたいです。収入を少し足したいのが本音です。',
+      bg: (c) => `職員${c.staffTotal}人。休みの日の勤務。疲れが本業に出る心配と、収入への不満の両方がある。`,
+      ask: '副業をどう扱うか',
+      choices: [
+        { id: 'allow', label: '休息日の確保を条件に認める', note: '費用なし。競合先は除く。他の職員も申し出る。疲れが出ることもある',
+          fx: { slack: 1, flag: 'py_sidejob_ok' },
+          when: [{ if: (c) => c.staffTotal >= 6, fx: { slack: -1 }, why: '人数が多いと申し出が続き、条件の管理が院長の負担になる' }],
+          chance: { p: 0.3, label: '疲れが本業に出て遅刻やミスが増える', hit: { slack: -1, rep: -0.5 }, miss: {} },
+          reflect: '認めた。条件を付けたことが、疲れの歯止めになったか' },
+        { id: 'raise', label: '認めず、代わりに手当を出す', note: '¥1,000/日の手当がずっと。収入の不満には答える',
+          fx: { dailyCost: { yen: 1000, days: null, label: '手当(副業の代替)' }, slack: 1 },
+          when: [{ if: (c) => c.monthProfit < 100000, fx: { slack: -1 }, why: '利益が薄いのに手当を増やすと、他の投資が止まる' }],
+          reflect: '収入の不満に院が答えた。他の職員にも同じ問いが来る' },
+        { id: 'deny', label: '認めない', note: '費用なし。理由の説明は要る。不満は残る',
+          fx: { slack: -1 },
+          chance: { p: 0.25, label: '収入を理由に転職を考える', hit: { slack: -1 }, miss: {} },
+          reflect: '断った。断る理由が院の都合だけなら、不満は消えない' }
+      ],
+      lesson: '副業の申し出は収入の不満の別の顔。禁止だけでは答えにならない', point: '副業の許可と収入の不満'
+    },
+    {
+      id: 'PY-10', cat: 3, title: '子育て中の看護師から時短勤務の申し出', tier: 1, spec: ['any'], who: 'nurse', cool: 150,
+      say: '看護師の一人が、子どもの送迎で勤務を1時間短くしたいと言っています。',
+      bg: (c) => `看護師${c.staff.nurses}人。1時間短縮で夕方の処置が薄くなる。1日平均${c.patients7}人。`,
+      ask: '時短勤務をどう受け入れるか',
+      choices: [
+        { id: 'cover', label: '認め、夕方は残る職員でカバーする', note: '費用なし。90日間、診察1人あたり+0.3分。定着は強い',
+          fx: { examDelta: { d: 0.3, days: 90, label: '夕方の看護が薄い' }, slack: 1 },
+          when: [{ if: (c) => c.staff.nurses <= 1, fx: { slack: -2, rep: -0.5 }, why: '看護師が1人だと夕方に処置ができる人がいなくなる' }],
+          reflect: '認めて現場で吸収した。人数が少ないほど夕方が薄い' },
+        { id: 'hire', label: '認め、夕方だけの非常勤を入れる', note: '募集費¥60,000。継続費¥5,000/日。夕方が回る',
+          req: { money: 60000 },
+          fx: { money: -60000, dailyCost: { yen: 5000, days: null, label: '夕方の非常勤看護師' }, slack: 1 },
+          when: [{ if: (c) => c.load < 0.6, fx: { slack: -1 }, why: '患者が少ない時期の非常勤は、人件費が先に立つ' }],
+          reflect: '融通を人で補った。固定費は増えた' },
+        { id: 'refuse', label: 'フルタイムを維持してもらう', note: '費用なし。続けられなければ退職になる',
+          fx: {},
+          chance: { p: 0.5, label: '両立できず退職', hit: { slack: -1, delayed: [{ days: 30, label: '看護師が1人退職', fx: { staff: { nurses: -1 } } }] }, miss: {} },
+          reflect: '形を変えなかった。人が変わるか、人が去るか' }
+      ],
+      lesson: '働き方の融通は待遇の一部。断れば採用費で払うことになる', point: '時短勤務と診療枠'
+    },
+    {
+      id: 'PY-11', cat: 3, title: '初めての賞与をどう出すか', tier: 2, spec: ['any'], who: 'advisor', cool: 180,
+      cond: (c) => c.monthProfit >= 200000,
+      say: '利益が出始めました。賞与を考える時期です。原資と配り方を決めましょう。',
+      bg: (c) => `直近30日の利益 ${yen(c.monthProfit)}。職員${c.staffTotal}人。資金 ${yen(c.money)}。一度出すと次も期待される。`,
+      ask: '賞与の原資と配り方',
+      facts: (c) => [{ label: '月間利益', val: yen(c.monthProfit) }, { label: '資金', val: yen(c.money) }, { label: '職員数', val: `${c.staffTotal}人` }],
+      choices: [
+        { id: 'fixed', label: '全員一律、1人¥100,000を出す', note: (c) => `${yen(c.staffTotal * 100000)}を今すぐ。分かりやすい。頑張りの差は映らない`,
+          req: { money: 500000 },
+          fx: (c) => ({ money: -c.staffTotal * 100000, slack: 2 }),
+          when: [{ if: (c) => c.money - c.staffTotal * 100000 < 500000, fx: { slack: -1 }, why: '賞与の後の手元資金が薄く、翌月の支払いの不安が職員にも見える' }],
+          reflect: '一律で出した。基準は「今回は」のまま' },
+        { id: 'share', label: '利益の20%を原資にする方式を決める', note: '今回は利益の20%。利益が無い月は出ない。基準が見える',
+          fx: (c) => ({ money: -Math.max(0, Math.round(c.monthProfit * 0.2)), slack: 1, flag: 'py_bonus_rule' }),
+          when: [{ if: (c) => c.monthProfit < 300000, fx: { slack: -1 }, why: '割合方式は利益が小さいと額も小さく、期待とずれる' }],
+          reflect: '原資の決め方を制度にした。額は利益に連動して動く' },
+        { id: 'defer', label: '留保し、60日後に業績で決めると伝える', note: '費用なし。資金は残る。届かなければ信頼が下がる',
+          fx: { flag: 'py_bonus_defer' },
+          chance: { p: (c) => (c.money >= 1500000 ? 0.7 : 0.45), label: '60日後に賞与を出せた', hit: { delayed: [{ days: 60, label: '業績を見て賞与を支給', fx: (c) => ({ money: -c.staffTotal * 60000, slack: 2 }) }] }, miss: { delayed: [{ days: 60, label: '賞与を見送る', fx: { slack: -2 } }] } },
+          reflect: '約束にした。約束は資金の厚さで守れるかが決まった' }
+      ],
+      lesson: '賞与は原資の決め方が制度。額より基準が次の年を作る', point: '賞与の原資と基準'
+    },
+    {
+      id: 'PY-12', cat: 3, title: '院長自身の報酬をどうするか', tier: 2, spec: ['any'], who: 'advisor', cool: 180,
+      say: '院長の報酬が開業時のままです。職員の待遇と一緒に、ご自身の分も決めましょう。',
+      bg: (c) => `直近30日の利益 ${yen(c.monthProfit)}。職員の手当は${c.flags.py_allowance || c.flags.py_grade_table ? '見直し済み' : '開業時のまま'}。職員${c.staffTotal}人。`,
+      ask: '院長報酬の扱い',
+      choices: [
+        { id: 'up', label: '院長報酬を月¥200,000上げる', note: '¥6,700/日がずっと。職員より先に上げる形になる',
+          fx: { dailyCost: { yen: 6700, days: null, label: '院長報酬の増額' } },
+          when: [{ if: (c) => !c.flags.py_allowance && !c.flags.py_grade_table, fx: { slack: -1 }, why: '職員の待遇を動かす前に院長だけ上げると、見ている人には分かる' }, { if: (c) => c.monthProfit < 300000, fx: { slack: -1 }, why: '利益が薄い月の院長の増額は、職員の目に重く映る' }],
+          reflect: '院長を先に上げた。順番は職員へのメッセージになった' },
+        { id: 'hold', label: '据え置き、利益は院に残す', note: '費用なし。資金は厚くなる。院長の疲れは報酬に映らない',
+          fx: {},
+          chance: { p: 0.3, label: '院長の疲れが診療に出る', hit: { examDelta: { d: 0.3, days: 30, label: '院長の疲れ' }, rep: -0.5 }, miss: {} },
+          reflect: '据え置いた。院長の消耗は数字に出にくいだけで、無いわけではない' },
+        { id: 'together', label: '職員の手当と同率で上げる', note: (c) => `院長¥3,000/日+職員1人¥500/日(月約${yen((3000 + c.staffTotal * 500) * 30)})が続く`,
+          fx: (c) => ({ dailyCost: { yen: 3000 + c.staffTotal * 500, days: null, label: '院長・職員の同率増額' }, slack: 1 }),
+          when: [{ if: (c) => c.monthProfit < 300000, fx: { slack: -1 }, why: '利益に対して固定費が重く、次の投資が遠のく' }],
+          reflect: '同じ率で上げた。額の差は残るが、順番の不満は出にくい' }
+      ],
+      lesson: '院長報酬は隠せない待遇。順番と割合が職員へのメッセージになる', point: '院長報酬の順番と割合'
+    },
+    {
+      id: 'PY-13', cat: 3, title: '退職金の積立を始めるか', tier: 2, spec: ['any'], who: 'bank', cool: 240,
+      cond: (c) => c.day >= 30,
+      say: '職員の退職金を、毎月積み立てる仕組みがあります。定着にも効くと聞きます。ご検討を。',
+      bg: (c) => `職員${c.staffTotal}人。1人月¥10,000の積立で年約${yen(c.staffTotal * 120000)}。資金 ${yen(c.money)}、手元で持てる日数${c.runway}日。`,
+      ask: '退職金の積立を始めるか',
+      facts: (c) => [{ label: '資金', val: yen(c.money) }, { label: '持てる日数', val: `${c.runway}日` }, { label: '職員数', val: `${c.staffTotal}人` }],
+      choices: [
+        { id: 'start', label: '全員分を毎月積み立てる', note: (c) => `職員1人¥330/日(月約¥10,000)がずっと(日額約${yen(c.staffTotal * 330)})。途中でやめにくい`,
+          fx: (c) => ({ dailyCost: { yen: c.staffTotal * 330, days: null, label: '退職金の積立' }, slack: 1, flag: 'py_retire_fund' }),
+          when: [{ if: (c) => c.runway < 60, fx: { slack: -1 }, why: '手元資金が薄い時期に固定の積立を増やすと、資金繰りが先に苦しくなる' }],
+          reflect: '長く居る理由に投資した。効くのは辞めない人にだけ' },
+        { id: 'later', label: '勤続1年を超えた職員から始める', note: (c) => `日額約${yen(Math.round(c.staffTotal * 330 * 0.5))}から。新しい人には見えにくい`,
+          fx: (c) => ({ dailyCost: { yen: Math.round(c.staffTotal * 330 * 0.5), days: null, label: '退職金の積立(勤続1年以上)' }, delayed: [{ days: 30, label: '対象者に説明', fx: { slack: 1 } }] }),
+          when: [{ if: (c) => c.staffTotal >= 6, fx: { slack: -1 }, why: '人数が多いと対象外の職員が目立ち、線引きの説明が要る' }],
+          reflect: '対象を絞って始めた。線の引き方は説明が要る' },
+        { id: 'none', label: '積立はせず、賞与で還元する方針にする', note: '費用なし。長く働く理由は薄い',
+          fx: {},
+          chance: { p: 0.25, label: '中堅職員が長期の見通しを理由に転職', hit: { slack: -1, delayed: [{ days: 45, label: '看護師が1人退職', fx: { staff: { nurses: -1 } } }] }, miss: {} },
+          reflect: '積立はしない。定着は他の手で作ることになる' }
+      ],
+      lesson: '退職金は「長く居る理由」への投資。効くのは辞めない人にだけ', point: '退職金の積立と固定費'
+    },
+    {
+      id: 'PY-14', cat: 3, title: '分院と本院の給与に差がある', tier: 3, spec: ['any'], who: 'branch', cool: 200, needs: { branches: 1 },
+      say: '分院の看護師から、本院と給与が違うと聞かれました。同じ法人なのに、と。',
+      bg: (c) => `分院${c.branches}か所。分院の看護師は本院より日給¥1,000低い。職員の余力は${c.slack}。直近30日の利益 ${yen(c.monthProfit)}。`,
+      ask: '拠点間の給与差をどうするか',
+      choices: [
+        { id: 'unify', label: '本院の水準に合わせて上げる', note: '¥3,000/日がずっと(分院の看護師3人分)。差は消える。固定費が増える',
+          fx: { dailyCost: { yen: 3000, days: null, label: '分院の給与を本院水準に' }, slack: 1 },
+          when: [{ if: (c) => c.monthProfit < 300000, fx: { slack: -1 }, why: '利益が薄い中で拠点全体の固定費を上げると、次の投資が止まる' }],
+          reflect: '差を消した。拠点が増えるほど固定費の段が上がる' },
+        { id: 'explain', label: '地域差として差を残し、理由を説明する', note: '費用なし。納得は分かれる。分院の定着に響く',
+          fx: {},
+          chance: { p: 0.4, label: '分院で退職が出て本院から応援を出す', hit: { slack: -2, examDelta: { d: 0.3, days: 20, label: '本院から分院へ応援' } }, miss: {} },
+          reflect: '差を残した。理由が本人に届いたかどうかで結果が分かれた' },
+        { id: 'table', label: '法人共通の給与基準を作り、段階的に揃える', note: '費用なし。作るのに30日。90日後から¥1,500/日',
+          fx: { slack: -1, flag: 'py_group_table', delayed: [{ days: 30, label: '共通基準を全拠点に説明', fx: { slack: 2 } }, { days: 90, label: '段階的な調整を開始', fx: { dailyCost: { yen: 1500, days: null, label: '拠点間の給与調整' } } }] },
+          when: [{ if: (c) => c.branches >= 2, fx: { slack: -1 }, why: '拠点が多いほど基準の調整に時間がかかる' }],
+          reflect: '基準で揃える道を選んだ。時間で費用を薄めた' }
+      ],
+      lesson: '拠点が増えると待遇の差は必ず比べられる。差を残すなら理由を先に', point: '拠点間の給与差'
+    },
+    {
+      id: 'PY-15', cat: 3, title: '夜間オンコールの手当が決まっていない', tier: 3, spec: ['any'], who: 'homecare', cool: 200, needs: { depts: ['homecare'] },
+      say: '訪問の夜間待機が、手当なしの善意で回っています。続けるなら決めてほしいです。',
+      bg: (c) => `在宅部門あり。夜間の待機は看護師が交代で持つ。呼び出しは月に数回。職員の余力は${c.slack}。`,
+      ask: '待機の手当と体制',
+      choices: [
+        { id: 'allow', label: '待機1回¥3,000と呼び出し分を払う', note: '¥3,000/日程度が続く。続けられる体制になる',
+          fx: { dailyCost: { yen: 3000, days: null, label: 'オンコール手当' }, slack: 1 },
+          when: [{ if: (c) => c.slack <= -1, fx: { slack: 1 }, why: '余力の無い部門では、待機が認められたことが効く' }],
+          reflect: '待機を仕事として認めた。善意を費用に置き換えた' },
+        { id: 'outsource', label: '夜間の一次対応を外部の窓口に委ねる', note: '¥4,000/日が続く。職員は休める。患者の安心は少し落ちる',
+          fx: { dailyCost: { yen: 4000, days: null, label: '夜間対応の委託' }, slack: 2, trust: -1 },
+          when: [{ if: (c) => c.trust >= 2, fx: { trust: 1 }, why: '関係の厚い地域では、外部窓口でも紹介元が理解する' }],
+          reflect: '職員の夜を守った。患者の安心をどこで補うか' },
+        { id: 'volunteer', label: '今のまま善意で続けてもらう', note: '費用なし。続く間は問題が見えない',
+          fx: { slack: -1 },
+          chance: { p: 0.45, label: '待機を断る人が出て夜間の受け方が崩れる', hit: { slack: -1, trust: -1 }, miss: {} },
+          reflect: '善意に頼り続けた。止まる日まで費用は見えなかった' }
+      ],
+      lesson: '善意で回る仕組みは、止まる日まで費用が見えない', point: 'オンコール手当と夜間体制'
+    },
+    {
+      id: 'PY-16', cat: 3, title: '理学療法士の手当を実施件数に連動させるか', tier: 3, spec: ['orthopedics'], who: 'reha', cool: 200, needs: { rehaLevel: 1, minStaff: { pts: 1 } },
+      say: '理学療法士から、1日の実施件数に応じた手当の話が出ています。数を追うと質が落ちる心配もあります。',
+      bg: (c) => `理学療法士${c.staff.pts}人。1日の実施件数は人により差がある。運動器リハビリテーション料の届出あり。`,
+      ask: '手当の連動の形',
+      choices: [
+        { id: 'volume', label: '実施件数に連動した手当を付ける', note: '¥1,500/日程度が続く。件数は増える。丁寧さは測られない',
+          fx: { dailyCost: { yen: 1500, days: null, label: 'リハ実施手当' }, slack: 1 },
+          chance: { p: 0.4, label: '件数を追って1回の説明が短くなり不満が出る', hit: { rep: -1 }, miss: { rep: 0.5 } },
+          reflect: '数で払った。数は増え、質は運に任せた' },
+        { id: 'quality', label: '件数ではなく、患者の目標到達で評価する', note: '費用なし。評価の仕組み作りに30日。件数は増えない',
+          fx: { slack: -1, delayed: [{ days: 30, label: '評価の仕組みが定着', fx: { slack: 2, rep: 0.5 } }] },
+          when: [{ if: (c) => c.staff.pts >= 2, fx: { slack: -1 }, why: '人数がいると評価の基準合わせに時間がかかる' }],
+          reflect: '測るものを変えた。仕組みを作る時間を先に払った' },
+        { id: 'flat', label: '一律の手当にして件数は問わない', note: '¥1,000/日が続く。公平だが、頑張る人の不満は残る',
+          fx: { dailyCost: { yen: 1000, days: null, label: 'リハ手当(一律)' } },
+          when: [{ if: (c) => c.staff.pts >= 2, fx: { slack: -1 }, why: '人数がいると件数の差が見え、一律は頑張る人に不公平に映る' }, { if: (c) => c.staff.pts <= 1, fx: { slack: 1 }, why: '1人なら比べる相手がおらず、一律で十分に伝わる' }],
+          reflect: '一律にした。人数がいれば比べられる' }
+      ],
+      lesson: '数で払えば数が増える。何を測るかが待遇の設計', point: '成果連動の手当と質'
+    },
+    {
+      id: 'PY-17', cat: 3, title: '給与テーブルを公開してほしい', tier: 3, spec: ['any'], who: 'staff', cool: 200,
+      cond: (c) => c.staffTotal >= 5,
+      say: '誰がいくらか分からないまま、頑張れと言われても難しいです。基準を見せてもらえませんか。',
+      bg: (c) => `職員${c.staffTotal}人。給与は個別に決めてきた。人数が増え、差が見え始めた。職員の余力は${c.slack}。`,
+      ask: '給与の基準をどこまで見せるか',
+      choices: [
+        { id: 'open', label: '等級と金額を作って全員に公開する', note: '作るのに30日。調整で¥2,000/日ほど増える見込み。下がる人は出さない',
+          fx: { slack: -1, flag: 'py_grade_table', delayed: [{ days: 30, label: '給与テーブルを公開', fx: { slack: 2, dailyCost: { yen: 2000, days: null, label: '給与テーブルの調整分' } } }] },
+          when: [{ if: (c) => !!c.flags.py_counter, fx: { slack: 1 }, why: '引き止め昇給の説明がつき、残っていた不満が収まる' }],
+          reflect: '全部見せた。見せた後は基準どおりに動くしかない' },
+        { id: 'criteria', label: '金額は出さず、評価の基準だけ公開する', note: '費用なし。基準は見える。金額の差は残る',
+          fx: { slack: 1 },
+          chance: { p: 0.35, label: '金額が見えず不満が残る', hit: { slack: -1 }, miss: {} },
+          reflect: '手順だけ見せた。金額の話はいつか戻ってくる' },
+        { id: 'closed', label: '公開せず、個別面談で説明する', note: '費用なし。院長の面談時間が増える(診察1人あたり+0.2分が30日)',
+          fx: { examDelta: { d: 0.2, days: 30, label: '個別面談' } },
+          when: [{ if: (c) => c.staffTotal >= 8, fx: { slack: -1 }, why: '人数が多いほど個別説明は追いつかず、噂が先に回る' }],
+          reflect: '個別に説明した。人数が増えるほど同じ形では回らない' }
+      ],
+      lesson: '見せない待遇は噂で決まる。公開は金額より手順の話', point: '給与テーブルの公開'
+    }
+  ];
+  if (typeof module !== 'undefined' && module.exports) module.exports = CASES;
+  else root.DECISIONS.register(CASES);
+})(typeof self !== 'undefined' ? self : this);

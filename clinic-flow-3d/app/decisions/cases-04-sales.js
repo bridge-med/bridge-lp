@@ -1,0 +1,456 @@
+/* 経営の分岐点 — 分類4: 営業・紹介獲得・受け入れ拡大(=紹介を得る判断) */
+(function (root) {
+  'use strict';
+  const yen = (n) => '¥' + Math.round(n).toLocaleString('ja-JP');
+  const CASES = [
+    {
+      id: 'SL-01', cat: 4, title: '退院後の受け入れ相談を増やせそう', tier: 1, spec: ['any'], who: 'hospital', cool: 90,
+      cond: (c) => c.load <= 0.9,
+      prio: (c) => (c.load <= 0.6 ? 2 : 0),
+      say: '退院後の外来を受けてくれる先を探しています。御院なら、もう少し相談を回せそうです。',
+      bg: (c) => `市民総合病院との関係 Lv${c.relations.hospital || 0}。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。`,
+      ask: '紹介を増やす動き方',
+      facts: (c) => [{ label: '混み具合', val: `${Math.round(c.load * 100)}%` }, { label: '病院との関係', val: `Lv${c.relations.hospital || 0}` }, { label: '資金', val: yen(c.money) }],
+      choices: [
+        { id: 'visit', label: '退院支援室への訪問を増やす', note: '訪問費¥50,000。30日間、新患×1.15。増えた分を受ける体制は今のまま',
+          req: { money: 50000 },
+          fx: { money: -50000, rel: { hospital: 1 }, newMul: { mul: 1.15, days: 30, label: '病院からの紹介' }, next: { id: 'SL-01b', days: 15 } },
+          when: [{ if: (c) => c.load >= 0.8, fx: { slack: -1 }, why: '既に混んでいる状態で紹介を増やすと、現場の負担が先に来る' }],
+          reflect: '紹介は増やせる。受ける側の余力を先に見たか' },
+        { id: 'caremane', label: '既存のケアマネとの関係を深める', note: '¥20,000。増え方は緩いが、途切れにくい紹介になる',
+          req: { money: 20000 },
+          fx: { money: -20000, rel: { caremane: 1 }, trust: 1, newMul: { mul: 1.05, days: 45, label: 'ケアマネからの紹介' } },
+          reflect: '細く長い紹介を選んだ。数字はすぐ動かない' },
+        { id: 'prepare', label: '先に受け入れ体制を整える', note: '費用なし。今は増やさず、20日後から受けられる形にする',
+          fx: { slack: 1, delayed: [{ days: 20, label: '体制が整い紹介を受け始める', fx: { newMul: { mul: 1.1, days: 30, label: '準備後の紹介' }, rel: { hospital: 1 } } }] },
+          reflect: '機会を20日遅らせて、負担を先に払った' }
+      ],
+      lesson: '営業強化は余力があれば成長、過負荷なら負担。順番の問題', point: '紹介獲得の時期と、受ける体制の順番'
+    },
+    {
+      id: 'SL-01b', cat: 4, title: '紹介が増えて受付が追いつかない', tier: 1, spec: ['any'], who: 'front', chainOnly: true, cool: 999,
+      say: '病院からの紹介、ありがたいです。ただ紹介状の確認と予約調整で、受付が詰まっています。',
+      bg: (c) => `紹介を増やして15日。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%、平均待ち${Math.round(c.waitAvg)}分。`,
+      ask: '増えた紹介をどう受け止めるか',
+      choices: [
+        { id: 'recep', label: '受付を1人増やす', note: '採用費¥60,000。日給¥10,000が毎日続く。予約調整が回る',
+          req: { money: 60000 },
+          fx: { money: -60000, staff: { receptionists: 1 }, slack: 1, next: { id: 'SL-01c', days: 20 } },
+          reflect: '入りを増やしたら、受ける側を増やす。順番が逆にならないように' },
+        { id: 'cap', label: '紹介元に受け入れ上限を伝える', note: '費用なし。新患×0.9が30日。正直に伝えた分、信頼は保てる',
+          fx: { newMul: { mul: 0.9, days: 30, label: '受け入れ上限' }, trust: 1, slack: 1, next: { id: 'SL-01c', days: 20 } },
+          reflect: '断り方を先に決めた。関係は数より約束で続く' },
+        { id: 'faster', label: '診察を短くして回す', note: '費用なし。診察1人あたり−1分が30日。説明が薄くなり評判は下がる',
+          fx: { examDelta: { d: -1.0, days: 30, label: '診察短縮' }, rep: -1.5, slack: -1, next: { id: 'SL-01c', days: 20 } },
+          reflect: '回転で受けた。診療の質を代償にしたことを忘れない' }
+      ],
+      lesson: '紹介が増えたときの逼迫は、営業の成果であって失敗ではない。体制で答える', point: '受け入れ逼迫への対応'
+    },
+    {
+      id: 'SL-01c', cat: 4, title: '受け入れ体制を作り直す', tier: 2, spec: ['any'], who: 'doctor', chainOnly: true, cool: 999,
+      say: '紹介が定着してきた。この量を前提に、診療の枠と人の配置を作り直したい。',
+      bg: (c) => `1日平均${c.patients7}人、医師${c.staff.doctors}人、看護師${c.staff.nurses}人、受付${c.staff.receptionists}人。資金 ${yen(c.money)}。`,
+      ask: '体制再編の軸をどこに置くか',
+      choices: [
+        { id: 'doctor', label: '医師を採用して診察室を増やす', note: '採用費¥500,000。日給¥80,000が毎日続く。能力は大きく上がる',
+          req: { money: 500000 },
+          fx: { money: -500000, staff: { doctors: 1 }, slack: 1 },
+          when: [{ if: (c) => c.patients7 < 30, fx: { slack: 0 }, why: 'この患者数では医師2人目の人件費が利益を圧迫する' }],
+          reflect: '最も高い一手。患者数がその人件費を支えるかを見て決めた' },
+        { id: 'slots', label: '予約枠を再設計して山を崩す', note: '費用なし。診察1人あたり−0.3分がずっと。導入の14日は現場負担',
+          fx: { slack: -1, examDelta: { d: -0.3, days: 180, label: '予約枠の再設計' }, delayed: [{ days: 14, label: '新しい枠が定着', fx: { slack: 2 } }] },
+          reflect: '人を増やさず流し方で受けた。導入負担を先に払った' },
+        { id: 'keep', label: '今の体制のまま様子を見る', note: '費用なし。紹介が続けば負担も続く',
+          fx: {},
+          chance: { p: (c) => (c.load >= 0.85 ? 0.5 : 0.2), label: '待ち時間の悪化で紹介が減る', hit: { rep: -1, newMul: { mul: 0.9, days: 30, label: '紹介減' } }, miss: {} },
+          reflect: '様子見は無料ではない。混み具合が判断の代わりをする' }
+      ],
+      lesson: '紹介増加→受け入れ逼迫→体制再編。3つ目まで来て初めて成長になる', point: '体制再編の軸'
+    },
+    {
+      id: 'SL-02', cat: 4, title: '施設から入所者の診療をまとめて頼まれた', tier: 2, spec: ['any'], who: 'facility', cool: 120,
+      cond: (c) => c.day >= 20,
+      say: '入所者18人の外来受診を、まとめてお願いできませんか。今の先が遠くて、送迎が大変なんです。',
+      bg: (c) => `18人はほぼ高齢の方。定期の通院になる。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%、看護師${c.staff.nurses}人。`,
+      ask: '18人の受け入れ方',
+      facts: (c) => [{ label: '混み具合', val: `${Math.round(c.load * 100)}%` }, { label: '看護師', val: `${c.staff.nurses}人` }, { label: '余力', val: `${c.slack}` }],
+      choices: [
+        { id: 'all', label: '全員を受け入れる', note: '費用なし。新患×1.25が30日、その後も通院が続く。現場の負担は大きい',
+          fx: { newMul: { mul: 1.25, days: 30, label: '施設からの受診' }, trust: 1, slack: -2 },
+          when: [{ if: (c) => c.load >= 0.8 || c.staff.nurses <= 1, fx: { rep: -1, slack: -1 }, why: '余力の無い状態で18人を受けると、既存の患者の待ちが延びる' }, { if: (c) => c.load < 0.6, fx: { slack: 1 }, why: '空きがある時期なので、まとまった受診は経営を支える' }],
+          reflect: '全員受けた。余力があったかどうかで、同じ判断の結果が変わる' },
+        { id: 'partial', label: 'まず一部から段階的に受け入れる', note: '費用なし。新患×1.1が30日、30日後に残りも受ける',
+          fx: { newMul: { mul: 1.1, days: 30, label: '施設からの受診(一部)' }, slack: -1, trust: 1, delayed: [{ days: 30, label: '残りの入所者も受け入れ', fx: { newMul: { mul: 1.1, days: 30, label: '施設からの受診(残り)' } } }] },
+          reflect: '段階的に受けた。施設の送迎の手間は残るが、関係は続く' },
+        { id: 'decline', label: '今回は見送り、他院につなぐ', note: '費用なし。断り方次第で関係は残る。機会は逃す',
+          fx: { trust: 0 },
+          chance: { p: 0.6, label: '丁寧に断ったので次の相談が来る', hit: { trust: 1 }, miss: { trust: -1 } },
+          reflect: '断るときは、次の窓口を示せたか' }
+      ],
+      lesson: '大きな受け入れは売上より先に負担が来る。段階は時間を買う方法', point: '大口受け入れの規模と時期'
+    },
+    {
+      id: 'SL-03', cat: 4, title: '運送会社から従業員健診の問い合わせ', tier: 1, spec: ['any'], who: 'front', cool: 150,
+      cond: (c) => c.day >= 10,
+      prio: (c) => (c.load <= 0.6 ? 1 : 0),
+      say: '近くの運送会社から、従業員40人の健診をまとめて受けられるかと問い合わせです。',
+      bg: (c) => `40人を1か月で。健診は診察より1人の時間が長い。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。運送会社との関係 Lv${c.relations.company || 0}。`,
+      ask: '健診の受け方',
+      facts: (c) => [{ label: '混み具合', val: `${Math.round(c.load * 100)}%` }, { label: '1日平均', val: `${c.patients7}人` }, { label: '運送会社', val: `Lv${c.relations.company || 0}` }],
+      choices: [
+        { id: 'all', label: '40人を1か月で受ける', note: '費用なし。30日間、診察1人あたり+0.5分。新患×1.1。関係+1',
+          fx: { examDelta: { d: 0.5, days: 30, label: '健診対応' }, newMul: { mul: 1.1, days: 30, label: '健診受診' }, rel: { company: 1 }, next: { id: 'SL-03b', days: 25 } },
+          when: [{ if: (c) => c.load >= 0.8, fx: { rep: -1, slack: -1 }, why: '混んでいる時期に健診を重ねると一般の待ち時間が延びる' }],
+          reflect: '一気に受けた。売上と待ち時間が同時に来た' },
+        { id: 'slot', label: '週1日の午後を健診枠にして3か月かける', note: '費用なし。90日間、診察1人あたり+0.2分。待たせるが確実に受けられる',
+          fx: { examDelta: { d: 0.2, days: 90, label: '健診枠' }, newMul: { mul: 1.04, days: 90, label: '健診受診(分散)' }, rel: { company: 1 }, next: { id: 'SL-03b', days: 40 } },
+          when: [{ if: (c) => c.load < 0.6, fx: { slack: 1 }, why: '空きの多い午後が埋まり、診療の山は増えない' }],
+          reflect: '期間で薄めた。会社を待たせた分、現場は守れた' },
+        { id: 'decline', label: '今回は受けず、次の機会に', note: '費用なし。関係は進まない。他院に流れることがある',
+          fx: {},
+          chance: { p: 0.5, label: '他院と契約され次の話が来なくなる', hit: { rel: { company: -1 } }, miss: {} },
+          reflect: '見送った。まとまった話は次も来るとは限らない' }
+      ],
+      lesson: '健診は一度に来る売上。診療枠を先に割るか、期間で薄めるか', point: '企業健診の受け入れ方'
+    },
+    {
+      id: 'SL-03b', cat: 4, title: '健診で二次検査が必要な人が多い', tier: 1, spec: ['any'], who: 'doctor', chainOnly: true, cool: 999,
+      say: '健診の結果、精密検査が必要な人が12人出た。当院で受けるか、専門の先へ回すか決めたい。',
+      bg: (c) => `二次検査12人。当院で受けられる検査と、病院に頼む検査がある。1日平均${c.patients7}人。病院との関係 Lv${c.relations.hospital || 0}。`,
+      ask: '二次検査の受け皿',
+      choices: [
+        { id: 'inhouse', label: '当院で受けられる分は全部受ける', note: '費用なし。30日間、新患×1.08。検査枠が詰まり、診察1人あたり+0.3分',
+          fx: { newMul: { mul: 1.08, days: 30, label: '二次検査' }, examDelta: { d: 0.3, days: 30, label: '検査枠' }, rel: { company: 1 }, next: { id: 'SL-03c', days: 30 } },
+          when: [{ if: (c) => c.load >= 0.85, fx: { slack: -1 }, why: '混んでいる院で検査を重ねると、現場の負担が先に来る' }],
+          reflect: '自院で受けた。健診の後の売上を取り、枠で払った' },
+        { id: 'refer', label: '病院へ紹介し、結果の説明は当院で行う', note: '費用なし。病院との関係+1。売上は小さい。患者の手間は増える',
+          fx: { rel: { hospital: 1 }, trust: 1, next: { id: 'SL-03c', days: 30 } },
+          when: [{ if: (c) => (c.relations.hospital || 0) >= 2, fx: { trust: 1 }, why: '関係の厚い病院への紹介は、退院後の紹介で返ってくる' }],
+          reflect: '受け皿を病院に置いた。関係と信頼で返ってくる形' },
+        { id: 'list', label: '会社に結果を渡し、受診は本人に任せる', note: '費用なし。フォローが抜けると健診の信頼が落ちる',
+          fx: {},
+          chance: { p: 0.4, label: '未受診のまま悪化した人が出て会社が不安になる', hit: { rel: { company: -1 }, trust: -1 }, miss: { next: { id: 'SL-03c', days: 30 } } },
+          reflect: '本人任せにした。健診の価値は結果の後にあった' }
+      ],
+      lesson: '健診の価値は結果の後にある。受け皿の無い健診は不安を配る', point: '二次検査の受け皿'
+    },
+    {
+      id: 'SL-03c', cat: 4, title: '健診の依頼が来年分と他社からも来た', tier: 2, spec: ['any'], who: 'advisor', chainOnly: true, cool: 999,
+      say: '運送会社から来年の契約の話と、その紹介で別の会社からも問い合わせです。健診をどこまで広げますか。',
+      bg: (c) => `健診は診療より1人の時間が長い。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。職員の余力は${c.slack}。`,
+      ask: '健診の受け入れ枠の設計',
+      facts: (c) => [{ label: '混み具合', val: `${Math.round(c.load * 100)}%` }, { label: '余力', val: `${c.slack}` }, { label: '資金', val: yen(c.money) }],
+      choices: [
+        { id: 'season', label: '健診の月を決め、その月は一般の新患を絞る', note: '費用なし。30日間、新患×0.85。健診は確実に受けられる。関係+1',
+          fx: { newMul: { mul: 0.85, days: 30, label: '健診月' }, rel: { company: 1 }, trust: 1, flag: 'sl_kenshin_season' },
+          when: [{ if: (c) => c.load < 0.6, fx: { slack: 1 }, why: '空きのある院では健診月の絞り込みが負担にならない' }, { if: (c) => c.load >= 0.85, fx: { rep: -0.5 }, why: '混んでいる院では新患を絞る月に断りが増える' }],
+          reflect: '季節で受けた。売上の山と谷を先に決めた' },
+        { id: 'staff', label: '健診担当の看護師を入れて通年で受ける', note: '採用費¥150,000。日給¥18,000。健診の無い月は手が余る',
+          req: { money: 150000 },
+          fx: { money: -150000, staff: { nurses: 1 }, rel: { company: 1 }, newMul: { mul: 1.05, days: 90, label: '健診の通年受け入れ' } },
+          when: [{ if: (c) => c.monthProfit < 200000, fx: { slack: -1 }, why: '利益に対して人件費が先に立ち、健診の無い月が重い' }],
+          reflect: '人で受けた。健診の無い月の人件費をどう使うか' },
+        { id: 'limit', label: '1社に絞り、他社は断る', note: '費用なし。関係は1社だけ深まる。広がりは止まる',
+          fx: { rel: { company: 1 } },
+          chance: { p: 0.3, label: '断った会社の話が地域に回る', hit: { rep: -0.5 }, miss: {} },
+          reflect: '広げなかった。1社との関係は深く、外への広がりは無い' }
+      ],
+      lesson: '受け入れ枠は先に決める。売上は枠の外では作れない', point: '健診の受け入れ枠と季節'
+    },
+    {
+      id: 'SL-04', cat: 4, title: 'ウェブ広告に出すか、紹介に回すか', tier: 1, spec: ['any'], who: 'advisor', cool: 150,
+      cond: (c) => c.money >= 90000,
+      prio: (c) => (c.load <= 0.5 ? 2 : 0),
+      say: '月¥90,000で検索広告の提案が来ています。同じ額を営業訪問に回す手もあります。',
+      bg: (c) => `認知${Math.round(c.aw * 100)}%。新患1日${c.newp7}人、うち紹介${c.refer7}人。資金 ${yen(c.money)}。`,
+      ask: '新患の入口をどこに置くか',
+      facts: (c) => [{ label: '認知', val: `${Math.round(c.aw * 100)}%` }, { label: '新患/日', val: `${c.newp7}人` }, { label: '紹介/日', val: `${c.refer7}人` }],
+      choices: [
+        { id: 'ads', label: '検索広告を3か月出す', note: '¥3,000/日が90日(約¥270,000)。認知+5%、新患×1.12。来る人は紹介より続かない',
+          fx: { dailyCost: { yen: 3000, days: 90, label: '検索広告' }, aw: 0.05, newMul: { mul: 1.12, days: 90, label: '広告からの新患' }, next: { id: 'SL-04b', days: 30 } },
+          when: [{ if: (c) => c.aw >= 0.6, fx: { aw: -0.03 }, why: '認知が既に高い地域では、広告の上乗せは小さい' }],
+          reflect: '速い入口を買った。続く人かどうかは30日後に分かる' },
+        { id: 'visits', label: '同じ額で紹介元への訪問を増やす', note: '¥90,000。病院・ケアマネの関係+1。効果は緩やかで長い',
+          req: { money: 90000 },
+          fx: { money: -90000, rel: { hospital: 1, caremane: 1 }, newMul: { mul: 1.05, days: 120, label: '紹介の積み上げ' }, trust: 1 },
+          when: [{ if: (c) => c.relations.hospital >= 2, fx: { newMul: { mul: 1.08, days: 120, label: '紹介の積み上げ(関係が厚い)' } }, why: '既に関係の厚い先への訪問は、紹介に早く変わる' }],
+          reflect: '遅い入口に投じた。数字はすぐ動かないが、切れにくい' },
+        { id: 'none', label: 'どちらもせず口コミに任せる', note: '費用なし。増え方は今の評判次第',
+          fx: {},
+          chance: { p: (c) => (c.rep >= 70 ? 0.6 : 0.3), label: '口コミで新患が増える', hit: { newMul: { mul: 1.05, days: 60, label: '口コミ' } }, miss: {} },
+          reflect: '待った。評判が高いときだけ、待つのは戦略になる' }
+      ],
+      lesson: '広告は速くて短い。紹介は遅くて長い。比率は資金の期限で決める', point: '広告と紹介の比率'
+    },
+    {
+      id: 'SL-04b', cat: 4, title: '広告で来た新患が再診に続かない', tier: 2, spec: ['any'], who: 'billing', chainOnly: true, cool: 999,
+      say: '広告で新患は増えました。ただ再診に来ない人が多く、初診だけで終わっています。',
+      bg: (c) => `広告開始から30日。新患1日${c.newp7}人。再診に続く割合が落ちている。広告は残り60日、¥3,000/日。`,
+      ask: '広告の続け方',
+      choices: [
+        { id: 'stop', label: '広告を止め、初診の説明を厚くする', note: '継続費−¥3,000/日(広告停止)。30日間、診察1人あたり+0.5分。評判+1',
+          fx: { dailyCost: { yen: -3000, days: 60, label: '広告停止' }, examDelta: { d: 0.5, days: 30, label: '初診の説明を厚く' }, rep: 1 },
+          when: [{ if: (c) => c.load >= 0.85, fx: { slack: -1 }, why: '混んでいる院で説明を厚くすると、待ち時間の負担が現場に来る' }],
+          reflect: '入口を閉じて定着に回した。数は落ち、続く人が残る' },
+        { id: 'retarget', label: '広告の文言を絞り、対象を近隣に限る', note: '費用は同じ。60日間、新患×0.95。続く人の割合は上がる見込み',
+          fx: { newMul: { mul: 0.95, days: 60, label: '広告の絞り込み' }, rep: 0.5 },
+          chance: { p: 0.5, label: '定着率が改善する', hit: { rep: 0.5, aw: 0.02 }, miss: {} },
+          reflect: '広告の向きを変えた。数を減らして続く人を狙った' },
+        { id: 'continue', label: '数は数。広告をそのまま続ける', note: '費用なし。初診中心の忙しさが続く',
+          fx: { slack: -1 },
+          when: [{ if: (c) => c.load >= 0.85, fx: { rep: -0.5 }, why: '初診ばかりで待ち時間が延び、口コミに出る' }],
+          reflect: '続けた。初診の数と院の疲れが一緒に増えた' }
+      ],
+      lesson: '新患の数と定着は別の指標。入口によって続く人が違う', point: '広告の定着率と見直し'
+    },
+    {
+      id: 'SL-05', cat: 4, title: '門前薬局から相互紹介の提案', tier: 1, spec: ['any'], who: 'pharmacy', cool: 150,
+      say: '店頭で健康相談を受けることが増えました。受診が要る方を御院にお繋ぎしてもいいですか。',
+      bg: (c) => `薬局との関係 Lv${c.relations.pharmacy || 0}。1日平均${c.patients7}人。薬局に来る人は処方箋の患者が中心。`,
+      ask: '薬局との紹介の形',
+      choices: [
+        { id: 'mutual', label: '受け、処方の相談も薬局に返す双方向に', note: '費用なし。月1回の情報交換に院長の時間。関係+1、90日間新患×1.04',
+          fx: { rel: { pharmacy: 1 }, trust: 1, newMul: { mul: 1.04, days: 90, label: '薬局からの受診相談' }, examDelta: { d: 0.1, days: 90, label: '薬局との情報交換' } },
+          when: [{ if: (c) => c.specialty === 'internal', fx: { newMul: { mul: 1.06, days: 90, label: '薬局からの受診相談(内科)' } }, why: '内科は薬局の相談から受診につながる人が多い' }],
+          reflect: '双方向にした。紹介は返す方が先' },
+        { id: 'oneway', label: '紹介は受けるが、こちらからは今のまま', note: '費用なし。60日間新患×1.02。関係は薄く、途切れやすい',
+          fx: { newMul: { mul: 1.02, days: 60, label: '薬局からの受診相談' } },
+          chance: { p: 0.4, label: '一方向で薬局側の熱が冷める', hit: { trust: -1 }, miss: { rel: { pharmacy: 1 } } },
+          reflect: '受けるだけにした。好意は使えば減る' },
+        { id: 'decline', label: '診療の独立性を理由に断る', note: '費用なし。誘導と見られる心配は消える。関係は進まない',
+          fx: { rel: { pharmacy: -1 } },
+          when: [{ if: (c) => (c.relations.pharmacy || 0) >= 2, fx: { trust: -1 }, why: '関係が深い相手ほど、断りは重く受け取られる' }],
+          reflect: '断った。線を引く理由は相手にも伝えたか' }
+      ],
+      lesson: '紹介は双方向で続く。一方向の紹介は好意の消費', point: '薬局との相互紹介'
+    },
+    {
+      id: 'SL-06', cat: 4, title: '低い評価の口コミが目立つ', tier: 1, spec: ['any'], who: 'front', cool: 120,
+      cond: (c) => c.rep < 75 || c.waitAvg >= 30,
+      prio: (c) => (c.rep < 55 ? 2 : 0),
+      say: '「待たされた」という口コミが上位に出ています。新患の問い合わせで、それを見たと言われました。',
+      bg: (c) => `評判${Math.round(c.rep)}。平均待ち${Math.round(c.waitAvg)}分。新患1日${c.newp7}人。`,
+      ask: '口コミへの向き合い方',
+      facts: (c) => [{ label: '評判', val: `${Math.round(c.rep)}` }, { label: '平均待ち', val: `${Math.round(c.waitAvg)}分` }, { label: '新患/日', val: `${c.newp7}人` }],
+      choices: [
+        { id: 'reply', label: '事実に基づいて返信し、改善点を書く', note: '費用なし。院長の時間(診察1人あたり+0.1分が30日)。読む人への説明になる',
+          fx: { examDelta: { d: 0.1, days: 30, label: '口コミへの返信' }, rep: 1, trust: 1 },
+          when: [{ if: (c) => c.waitAvg >= 30, fx: { rep: -0.5 }, why: '待ち時間が実際に長いままだと、返信だけでは説得力が無い' }],
+          reflect: '言葉で答えた。中身が変わっていなければ、言葉は薄い' },
+        { id: 'ask', label: '満足した患者に評価の投稿をお願いする', note: '費用なし。数で薄める。頼まれた投稿と見られる恐れ',
+          fx: { rep: 1, aw: 0.02 },
+          chance: { p: 0.3, label: '依頼した投稿が不自然と指摘される', hit: { rep: -2, trust: -1 }, miss: {} },
+          reflect: '数で薄めた。見る人は数より自然さを見る' },
+        { id: 'fix', label: '口コミには触れず、待ち時間の原因を直す', note: '費用なし。14日は現場の負担。評価は遅れて上がる',
+          fx: { slack: -1, delayed: [{ days: 14, label: '待ち時間の改善が定着', fx: { rep: 1, slack: 2 } }] },
+          when: [{ if: (c) => c.load >= 0.9, fx: { slack: -1 }, why: '限界まで混んでいる院では、原因を直す時間がまず取れない' }],
+          reflect: '映るものを変えた。鏡はあとから追いついてくる' }
+      ],
+      lesson: '口コミは結果の鏡。鏡を磨くか、映るものを変えるか', point: '口コミ対策の向き'
+    },
+    {
+      id: 'SL-07', cat: 4, title: '近くの高校から学校医の依頼', tier: 1, spec: ['any'], who: 'doctor', cool: 200,
+      cond: (c) => c.day >= 10,
+      say: '高校から、学校医を引き受けてほしいと依頼があった。年数回の健診と、部活のけがの相談窓口になる。',
+      bg: (c) => `高校との関係 Lv${c.relations.school || 0}。健診の日は半日、診療枠が減る。1日平均${c.patients7}人。`,
+      ask: '学校医を引き受けるか',
+      choices: [
+        { id: 'accept', label: '引き受ける', note: '費用なし。90日間、診察1人あたり+0.2分。関係+1、認知+3%。部活のけがが来る',
+          fx: { rel: { school: 1 }, aw: 0.03, examDelta: { d: 0.2, days: 90, label: '学校健診の日' }, newMul: { mul: 1.05, days: 120, label: '部活のけがと家族の受診' } },
+          when: [{ if: (c) => c.specialty === 'orthopedics', fx: { newMul: { mul: 1.08, days: 120, label: '部活のけが' } }, why: '整形外科はけがの相談が直接受診につながる' }, { if: (c) => c.load >= 0.85, fx: { slack: -1 }, why: '混んでいる院では半日の不在が現場に重い' }],
+          reflect: '地域の役を引き受けた。売上にならない時間が入口になった' },
+        { id: 'partial', label: '健診は断り、部活の健康チェックだけ受ける', note: '費用なし。年1回の半日。関係は緩く進む',
+          fx: { rel: { school: 1 }, newMul: { mul: 1.02, days: 90, label: '部活のけが' } },
+          reflect: '一部だけ受けた。関係は薄く始まる' },
+        { id: 'decline', label: '断る', note: '費用なし。院長の時間は守れる。地域の役から遠ざかる',
+          fx: { trust: -1 },
+          when: [{ if: (c) => c.trust >= 2, fx: { trust: 1 }, why: '既に地域の信頼が厚ければ、断っても影響は小さい' }],
+          reflect: '断った。地域の役は断ると次が来にくい' }
+      ],
+      lesson: '地域の役は売上にならない時間。認知と信頼で返ってくる', point: '学校医の引き受け'
+    },
+    {
+      id: 'SL-08', cat: 4, title: '休日診療の当番に加わってほしい', tier: 2, spec: ['any'], who: 'health', cool: 200,
+      say: '地区の休日診療の当番に加わってもらえませんか。年に数回、日曜の半日です。',
+      bg: (c) => `年に数回の日曜半日。院長と職員の休みが減る。認知${Math.round(c.aw * 100)}%、職員の余力は${c.slack}。`,
+      ask: '休日診療への参加',
+      choices: [
+        { id: 'join', label: '参加する', note: '費用なし。職員の余力−1。認知+3%、地域の信頼+1',
+          fx: { slack: -1, aw: 0.03, trust: 1, rep: 0.5 },
+          when: [{ if: (c) => c.slack <= -1, fx: { slack: -1 }, why: '余力の無い状態で休日を削ると、疲れが平日に出る' }],
+          reflect: '当番に入った。払ったのは職員の休日' },
+        { id: 'join_pay', label: '参加し、出た職員に休日手当を上乗せする', note: '継続費換算¥300/日。負担を金銭で認める。認知+3%',
+          fx: { dailyCost: { yen: 300, days: null, label: '休日診療の手当' }, aw: 0.03, trust: 1 },
+          when: [{ if: (c) => c.slack >= 1, fx: { slack: 1 }, why: '余力のある職場では、手当つきの当番は前向きに受け止められる' }],
+          reflect: '当番と手当を一緒に決めた。休日の価値を院が認めた' },
+        { id: 'decline', label: '今回は見送る', note: '費用なし。地区からの見え方は少し変わる',
+          fx: {},
+          chance: { p: 0.3, label: '地区の会合で名前が出て紹介が鈍る', hit: { trust: -1 }, miss: {} },
+          reflect: '見送った。地区の役は断った記憶が残る' }
+      ],
+      lesson: '地域の当番は認知の入口。払うのは職員の休日', point: '休日診療と職員の休み'
+    },
+    {
+      id: 'SL-09', cat: 4, title: 'スポーツクラブから提携の話', tier: 2, spec: ['orthopedics'], who: 'reha', cool: 200,
+      say: 'スポーツクラブのトレーナーから、けがの受け皿になってほしいと。夕方に選手が来る形になります。',
+      bg: (c) => `スポーツクラブとの関係 Lv${c.relations.sports || 0}。夕方は既に混む。理学療法士${c.staff.pts}人、混み具合${Math.round(c.load * 100)}%。`,
+      ask: '提携の形',
+      choices: [
+        { id: 'full', label: '提携し、夕方に選手用の枠を作る', note: '¥30,000。90日間、新患×1.06。夕方の一般枠が減る。関係+1、認知+2%',
+          req: { money: 30000 },
+          fx: { money: -30000, rel: { sports: 1 }, newMul: { mul: 1.06, days: 90, label: 'スポーツ外傷' }, aw: 0.02 },
+          when: [{ if: (c) => c.load >= 0.85, fx: { rep: -0.5, slack: -1 }, why: '夕方が既に混んでいる院では枠の取り合いになる' }, { if: (c) => c.staff.pts >= 2, fx: { rep: 0.5 }, why: '理学療法士が複数いると、選手の受け皿として選ばれやすい' }],
+          reflect: '枠を渡して提携した。患者層が変わる入口' },
+        { id: 'visit', label: '提携するが、月1回の現場訪問だけにする', note: '¥30,000。枠は作らない。紹介は緩やか',
+          req: { money: 30000 },
+          fx: { money: -30000, rel: { sports: 1 }, newMul: { mul: 1.03, days: 90, label: 'スポーツ外傷(緩やか)' } },
+          when: [{ if: (c) => (c.relations.sports || 0) >= 1, fx: { newMul: { mul: 1.05, days: 90, label: 'スポーツ外傷(関係あり)' } }, why: '既に関係のあるクラブなら、訪問だけでも紹介が動く' }],
+          reflect: '枠を渡さず関係だけ作った。数字は緩い' },
+        { id: 'decline', label: '今の患者層を優先して見送る', note: '費用なし。若い患者層への入口を閉じる',
+          fx: {},
+          chance: { p: 0.4, label: '他院が提携し、クラブ周辺の新患が減る', hit: { newMul: { mul: 0.97, days: 60, label: '競合の提携' } }, miss: {} },
+          reflect: '見送った。入口は他院が使う' }
+      ],
+      lesson: 'スポーツ提携は患者層を変える判断。枠を渡す覚悟が要る', point: 'スポーツチームとの提携'
+    },
+    {
+      id: 'SL-10', cat: 4, title: '新患を絞るか', tier: 2, spec: ['any'], who: 'doctor', cool: 120,
+      cond: (c) => c.load >= 0.85 && c.waitAvg >= 30,
+      prio: (c) => (c.balked7 >= 2 ? 3 : 1),
+      say: '待ち時間が伸びて常連にも迷惑が出ている。新患の受け方を一度見直したい。',
+      bg: (c) => `混み具合${Math.round(c.load * 100)}%、平均待ち${Math.round(c.waitAvg)}分、待てず帰った人1日${c.balked7}人。新患1日${c.newp7}人、うち紹介${c.refer7}人。`,
+      ask: '新患の受け入れ方針',
+      facts: (c) => [{ label: '平均待ち', val: `${Math.round(c.waitAvg)}分` }, { label: '帰った人/日', val: `${c.balked7}人` }, { label: '紹介/日', val: `${c.refer7}人` }],
+      choices: [
+        { id: 'refer_only', label: '新患は紹介のみに限る', note: '費用なし。60日間、新患×0.75。紹介元は守る。飛び込みは断る',
+          fx: { newMul: { mul: 0.75, days: 60, label: '紹介のみ' }, slack: 2, rep: -1 },
+          when: [{ if: (c) => c.trust >= 1, fx: { rep: 0.5 }, why: '紹介元の多い院では、紹介だけでも新患は途切れない' }],
+          reflect: '入口を紹介に絞った。紹介元との関係が院の入口になった' },
+        { id: 'cap', label: '1日の新患枠に上限を置く', note: '費用なし。60日間、新患×0.9。予約待ちが出る',
+          fx: { newMul: { mul: 0.9, days: 60, label: '新患枠の上限' }, slack: 1 },
+          when: [{ if: (c) => c.balked7 >= 2, fx: { rep: 0.5 }, why: '待てず帰る人が減る。予約待ちの不満は、帰る人の不満より軽い' }],
+          reflect: '上限で受けた。待たせる形を「帰らせる」から「予約」に変えた' },
+        { id: 'keep', label: '絞らず、受け続ける', note: '費用なし。待ち時間で自然に減る。評判で減った分は戻りにくい',
+          fx: { slack: -1 },
+          chance: { p: 0.5, label: '待ち時間の口コミで紹介も減る', hit: { rep: -1.5, trust: -1 }, miss: {} },
+          reflect: '絞らなかった。絞る方法を選ばないと、評判が選ぶ' }
+      ],
+      lesson: '絞るのは営業の失敗ではなく、成功の後の設計。方法を選ばないと評判が選ぶ', point: '新患を絞る判断'
+    },
+    {
+      id: 'SL-11', cat: 4, title: '近隣の開業医から紹介の会に誘われた', tier: 2, spec: ['any'], who: 'doctor', cool: 200,
+      say: '近くの開業医から、互いに専門外の患者を紹介し合う会に誘われた。月1回の夕方、会費もある。',
+      bg: (c) => `会は月1回の夕方。会費¥10,000/月。互いに専門外の患者を紹介し合う。1日平均${c.patients7}人。`,
+      ask: '会への関わり方',
+      choices: [
+        { id: 'join', label: '参加し、こちらからも紹介する', note: '会費¥330/日。院長の夕方が月1回消える。120日間、新患×1.04',
+          fx: { dailyCost: { yen: 330, days: null, label: '開業医の会の会費' }, trust: 1, newMul: { mul: 1.04, days: 120, label: '開業医からの紹介' }, examDelta: { d: 0.1, days: 120, label: '会への参加' } },
+          when: [{ if: (c) => c.trust >= 1, fx: { trust: 1 }, why: '既に地域に顔があると、会でも紹介が早く動く' }],
+          reflect: '出す方から始めた。紹介は返す人に集まる' },
+        { id: 'individual', label: '会には入らず、近隣2院に個別に挨拶する', note: '¥10,000。関係は狭いが深い。相互紹介が始まれば大きい',
+          req: { money: 10000 },
+          fx: { money: -10000, trust: 1, newMul: { mul: 1.02, days: 90, label: '近隣院との紹介' } },
+          chance: { p: 0.5, label: '相互紹介が始まる', hit: { newMul: { mul: 1.05, days: 90, label: '近隣院との相互紹介' } }, miss: {} },
+          reflect: '個別に作った。狭く深い関係は、始まるかどうかが運' },
+        { id: 'none', label: '入らない', note: '費用なし。専門外の患者は自院で抱えるか病院へ',
+          fx: {},
+          when: [{ if: (c) => c.load >= 0.85, fx: { slack: -1 }, why: '専門外を抱え続けると、混みがさらに増す' }, { if: (c) => c.load < 0.6, fx: { slack: 1 }, why: '空きのある院では、専門外も自院で診る余裕がある' }],
+          reflect: '入らなかった。紹介の出口が無い院は、混みを抱え込む' }
+      ],
+      lesson: '開業医同士の紹介は出す方が先。受けるだけの会員は続かない', point: '開業医の紹介ネットワーク'
+    },
+    {
+      id: 'SL-12', cat: 4, title: '本院の紹介元を分院にも紹介するか', tier: 3, spec: ['any'], who: 'branch', cool: 200, needs: { branches: 1 },
+      say: '分院の新患が伸びません。本院の紹介元、特に病院と施設を分院にも紹介してもらえませんか。',
+      bg: (c) => `分院${c.branches}か所。本院の病院との関係 Lv${c.relations.hospital || 0}。本院の混み具合${Math.round(c.load * 100)}%。分院は別の地域に別の紹介元。`,
+      ask: '紹介元の共有の仕方',
+      facts: (c) => [{ label: '本院の混み具合', val: `${Math.round(c.load * 100)}%` }, { label: '病院との関係', val: `Lv${c.relations.hospital || 0}` }, { label: '資金', val: yen(c.money) }],
+      choices: [
+        { id: 'share', label: '紹介元に分院を紹介し、振り分けは任せる', note: '同行訪問¥50,000。60日間、本院の新患×0.95。分院が伸びる。関係+1',
+          req: { money: 50000 },
+          fx: { money: -50000, newMul: { mul: 0.95, days: 60, label: '分院への振り分け' }, rel: { hospital: 1 }, trust: 1 },
+          when: [{ if: (c) => c.load >= 0.85, fx: { slack: 1 }, why: '本院が混んでいるなら、分院への振り分けは負担軽減でもある' }, { if: (c) => c.load < 0.6, fx: { slack: -1 }, why: '本院に空きがあるのに分けると、本院の売上を削る' }],
+          reflect: '紹介元を法人で共有した。本院の空きが結果を決めた' },
+        { id: 'own', label: '分院は自分で開拓する。本院の紹介元は守る', note: '費用なし。分院の伸びは遅い。本院の関係は薄まらない',
+          fx: {},
+          chance: { p: 0.4, label: '分院の新患が伸びず分院長が疲れる', hit: { slack: -1 }, miss: { trust: 1 } },
+          reflect: '分けなかった。分院の入口は分院が作る' },
+        { id: 'rule', label: '症状で振り分ける基準を作り紹介元と共有', note: '費用なし。基準作りに20日。紹介元の手間が増える',
+          fx: { slack: -1, delayed: [{ days: 20, label: '振り分けの基準を紹介元と共有', fx: { trust: 1, rel: { hospital: 1 }, slack: 1 } }] },
+          when: [{ if: (c) => (c.relations.hospital || 0) < 1, fx: { trust: -1 }, why: '関係の浅い紹介元に基準を渡しても、手間だけが増えて使われない' }],
+          reflect: '基準を作って渡した。紹介元の手間を院が引き取った' }
+      ],
+      lesson: '紹介元は法人ではなく院に付く。分けるなら基準と手間を先に渡す', point: '拠点間の紹介元の共有'
+    },
+    {
+      id: 'SL-13', cat: 4, title: '訪問診療の新規依頼が上限に近い', tier: 3, spec: ['any'], who: 'homecare', cool: 150, needs: { depts: ['homecare'] },
+      prio: (c) => ((c.relations.caremane || 0) >= 2 ? 1 : 0),
+      say: '訪問の依頼が続いています。今の医師の訪問枠だと、あと3人が限界です。',
+      bg: (c) => `在宅部門あり。訪問枠はほぼ埋まっている。ケアマネとの関係 Lv${c.relations.caremane || 0}。医師${c.staff.doctors}人。`,
+      ask: '在宅の受け入れ上限',
+      choices: [
+        { id: 'cap', label: '上限を決め、紹介元に空き状況を毎月伝える', note: '費用なし。断る人が出るが関係は保てる。上限は見えるようにする',
+          fx: { trust: 1, rel: { caremane: 1 }, slack: 1, flag: 'sl_home_cap' },
+          when: [{ if: (c) => (c.relations.caremane || 0) < 1, fx: { trust: -1 }, why: '関係の浅い紹介元には、上限が断りとしてだけ届く' }],
+          reflect: '上限を数字で渡した。紹介元が予定を組める数字になった' },
+        { id: 'expand', label: '訪問の曜日を増やして受け続ける', note: '費用なし。90日間、外来の診察1人あたり+0.5分。医師の負担が増す。新患×1.05',
+          fx: { examDelta: { d: 0.5, days: 90, label: '訪問日の増加' }, slack: -1, newMul: { mul: 1.05, days: 90, label: '在宅の新規' } },
+          when: [{ if: (c) => c.staff.doctors >= 2, fx: { examDelta: { d: 0.2, days: 90, label: '訪問日の増加(医師2人)' }, slack: 1 }, why: '医師が2人いれば外来への影響は小さい' }],
+          reflect: '受け続けた。払ったのは外来の時間と医師の体力' },
+        { id: 'hire', label: '在宅担当の医師を非常勤で入れる', note: '採用費¥500,000。日給¥80,000。訪問枠が倍になる',
+          req: { money: 500000 },
+          fx: { money: -500000, staff: { doctors: 1 }, newMul: { mul: 1.1, days: 90, label: '在宅の受け入れ拡大' } },
+          when: [{ if: (c) => c.patients7 < 30, fx: { slack: -1 }, why: '患者数に対して人件費が先に立つ' }],
+          reflect: '人で上限を上げた。最も高い一手' }
+      ],
+      lesson: '上限は断るための数字ではなく、紹介元が予定を組むための数字', point: '受け入れ上限の設定と伝え方'
+    },
+    {
+      id: 'SL-14', cat: 4, title: '病院から透析患者の転院をまとめて打診された', tier: 3, spec: ['any'], who: 'dialysis', cool: 200, needs: { depts: ['dialysis'] },
+      say: '市民総合病院から、安定した透析患者6人を当院に移せないかと相談です。今の回では席が足りません。',
+      bg: (c) => `透析部門あり。既存の回はほぼ満席。6人を受けるには夜の回を開ける必要がある。病院との関係 Lv${c.relations.hospital || 0}。`,
+      ask: '転院の受け方',
+      choices: [
+        { id: 'night', label: '夜の回を開けて6人を受ける', note: '継続費¥25,000/日(夜間の人員と光熱)。売上は増える。職員の余力−1',
+          fx: { dailyCost: { yen: 25000, days: null, label: '透析の夜間回' }, newMul: { mul: 1.05, days: 90, label: '透析の転院受け入れ' }, rel: { hospital: 1 }, slack: -1 },
+          when: [{ if: (c) => c.slack <= -1, fx: { slack: -1, rep: -0.5 }, why: '余力の無い部門で回を増やすと、安全確認が薄くなる' }],
+          reflect: '回を増やして受けた。売上より先に固定費と夜勤が増えた' },
+        { id: 'partial', label: '空きの範囲で3人受け、残りは待ってもらう', note: '費用なし。関係は保てる。3人は他院へ',
+          fx: { rel: { hospital: 1 }, newMul: { mul: 1.02, days: 90, label: '透析の転院(一部)' }, trust: 1 },
+          when: [{ if: (c) => (c.relations.hospital || 0) >= 2, fx: { trust: 1 }, why: '関係が厚ければ、一部の受け入れでも病院は次も相談してくる' }],
+          reflect: '席の範囲で受けた。関係を守って規模を抑えた' },
+        { id: 'decline', label: '席が無いので断る', note: '費用なし。病院は他院へ。次の相談は減る',
+          fx: {},
+          chance: { p: 0.5, label: '病院の紹介先の順が下がる', hit: { rel: { hospital: -1 } }, miss: {} },
+          reflect: '断った。席が無いのは事実でも、伝え方で次が変わる' }
+      ],
+      lesson: '受け入れ拡大は回と人の話。売上より先に固定費が増える', point: '透析の受け入れ枚数と回'
+    },
+    {
+      id: 'SL-15', cat: 4, title: '紹介患者の優先枠を設けてほしい', tier: 3, spec: ['any'], who: 'hospital', cool: 200,
+      cond: (c) => (c.relations.hospital || 0) >= 1,
+      say: '退院した患者を、退院後1週間以内に診てほしいのです。優先の枠を作ってもらえませんか。',
+      bg: (c) => `病院との関係 Lv${c.relations.hospital || 0}。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。優先枠は一般の予約を後ろに回す。`,
+      ask: '優先枠の作り方',
+      facts: (c) => [{ label: '混み具合', val: `${Math.round(c.load * 100)}%` }, { label: '病院との関係', val: `Lv${c.relations.hospital || 0}` }, { label: '余力', val: `${c.slack}` }],
+      choices: [
+        { id: 'fixed', label: '毎日1枠を紹介患者の優先枠にする', note: '費用なし。関係+1。埋まらない日は空く(90日間、新患×0.97)。埋まれば一般の待ちが延びる',
+          fx: { rel: { hospital: 1 }, trust: 1, newMul: { mul: 0.97, days: 90, label: '優先枠の空き' } },
+          when: [{ if: (c) => c.load >= 0.85, fx: { rep: -0.5 }, why: '混んでいる院では、優先枠が一般患者の不満になる' }, { if: (c) => c.load < 0.6, fx: { newMul: { mul: 1.03, days: 90, label: '優先枠で紹介が増える' } }, why: '空きの多い院では、優先枠が紹介を呼んで空きを埋める' }],
+          reflect: '枠を固定した。空きも混みも、枠が引き受けた' },
+        { id: 'flexible', label: '枠は固定せず、3日以内の調整を約束する', note: '費用なし。受付の調整負担が増える。関係+1',
+          fx: { rel: { hospital: 1 }, slack: -1, trust: 1 },
+          when: [{ if: (c) => c.slack >= 1, fx: { slack: 1 }, why: '余力のある受付なら、調整の約束は負担にならない' }],
+          chance: { p: 0.35, label: '調整が重なり約束を守れない日が出る', hit: { rel: { hospital: -1 }, trust: -1 }, miss: {} },
+          reflect: '約束で受けた。守れなかった日は関係で払う' },
+        { id: 'decline', label: '一般患者と同じ順で受ける', note: '費用なし。公平だが、病院は早い院へ回す',
+          fx: {},
+          chance: { p: 0.5, label: '紹介が他院へ流れる', hit: { newMul: { mul: 0.95, days: 60, label: '紹介減' } }, miss: {} },
+          reflect: '公平を選んだ。紹介元は早い院を選ぶ' }
+      ],
+      lesson: '優先枠は紹介元との約束。守れる約束だけが関係になる', point: '紹介患者の優先枠'
+    }
+  ];
+  if (typeof module !== 'undefined' && module.exports) module.exports = CASES;
+  else root.DECISIONS.register(CASES);
+})(typeof self !== 'undefined' ? self : this);

@@ -1,0 +1,486 @@
+/* 経営の分岐点 — 分類7: 地域連携・多職種連携・情報共有(=関係者と診療をつなぐ判断) */
+(function (root) {
+  'use strict';
+  const yen = (n) => '¥' + Math.round(n).toLocaleString('ja-JP');
+  const CASES = [
+    {
+      id: 'LK-01', cat: 7, title: 'サービス担当者会議に来てほしい', tier: 1, spec: ['any'], who: 'caremane', cool: 60,
+      cond: (c) => c.day >= 10,
+      say: '通院されている方の担当者会議があります。主治医の先生に15分だけでも出てもらえると、支援の方向がそろいます。',
+      bg: (c) => `ケアマネ事業所との関係 Lv${c.relations.caremane || 0}。会議は平日の診療時間中。医師${c.staff.doctors}人。`,
+      ask: '会議への関わり方',
+      choices: [
+        { id: 'doctor', label: '院長が出席する', note: '費用なし。7日間、診察1人あたり+0.5分。関係は確実に深まる',
+          fx: { examDelta: { d: 0.5, days: 7, label: '担当者会議' }, trust: 1, rel: { caremane: 1 } },
+          reflect: '医師の時間で信頼を買った。診察の回転で払った' },
+        { id: 'nurse', label: '看護師長が代理で出席する', note: '費用なし。看護の余力を使う。医師でないと伝わらない部分は残る',
+          fx: { slack: -1, trust: 1 },
+          when: [{ if: (c) => c.staff.nurses <= 1, fx: { slack: -1 }, why: '看護師1人の日に外出させると処置室が止まる' }],
+          reflect: '代理で出た。看護の余力で払った' },
+        { id: 'paper', label: '書面で意見を送る', note: '費用なし。関係は動かない。断ったことにはならない',
+          fx: {},
+          chance: { p: 0.4, label: '次の相談も来る', hit: { trust: 0 }, miss: { trust: -1 } },
+          reflect: '書面は最小の関わり。次が来るかは相手次第' }
+      ],
+      lesson: '連携は時間で払う。誰の時間で払うかを決めるのが経営', point: '多職種会議への関わり方'
+    },
+    {
+      id: 'LK-02', cat: 7, title: '診療情報提供書の返事が遅いと言われた', tier: 2, spec: ['any'], who: 'hospital', cool: 90,
+      cond: (c) => (c.relations.hospital || 0) >= 1 || c.refer7 >= 1,
+      say: '紹介した患者さんの経過を病院側でも追いたいのですが、返書が届くまでに時間がかかっています。',
+      bg: (c) => `市民総合病院との関係 Lv${c.relations.hospital || 0}。返書は院長が空き時間に書いている。1日平均${c.patients7}人。`,
+      ask: '情報共有の仕組み',
+      choices: [
+        { id: 'template', label: '返書の定型を作って半分を医事が埋める', note: '¥20,000。10日で運用開始。医師の負担は減り、返書は早くなる',
+          req: { money: 20000 },
+          fx: { money: -20000, delayed: [{ days: 10, label: '返書の定型運用が始まる', fx: { trust: 1, rel: { hospital: 1 } } }] },
+          reflect: '仕組みで払った。医師の時間を守りながら関係も守る' },
+        { id: 'clerk', label: '医事に連携担当の手当を付けて任せる', note: '¥1,500/日がずっと続く。返書だけでなく問い合わせも一元化',
+          fx: { dailyCost: { yen: 1500, days: null, label: '連携担当手当' }, trust: 1, slack: 1 },
+          reflect: '人に役割を渡した。継続費になる' },
+        { id: 'asis', label: '今のまま院長が書く', note: '費用なし。遅れは続く。紹介が減るかもしれない',
+          fx: {},
+          chance: { p: 0.4, label: '病院からの紹介が減る', hit: { trust: -1, newMul: { mul: 0.92, days: 30, label: '紹介減' } }, miss: {} },
+          reflect: '情報共有の遅れは、相手からは「関心が薄い」と見える' }
+      ],
+      lesson: '連携の質は書類の速さに出る。医師の時間を守る仕組みが要る', point: '情報共有の仕組みと担当'
+    },
+    {
+      id: 'LK-03', cat: 7, title: '疑義照会の電話が診察を止めている', tier: 1, spec: ['any'], who: 'pharmacy', cool: 90,
+      cond: (c) => c.patients7 >= 8,
+      say: '疑義照会の電話が診察中につながらず、患者さんを薬局で待たせています。受け方を決めさせてください。',
+      bg: (c) => `門前薬局との関係 Lv${c.relations.pharmacy || 0}。疑義照会は1日2〜3件。電話は診察を止めて院長が出ている。`,
+      ask: '疑義照会の受け方',
+      choices: [
+        { id: 'phone', label: '診察を止めて院長が都度出る', note: '費用なし。30日間、診察1人あたり+0.3分。薬局で待つ時間は最短',
+          fx: { examDelta: { d: 0.3, days: 30, label: '疑義照会の電話' }, rel: { pharmacy: 1 } },
+          when: [{ if: (c) => c.load >= 0.85, fx: { rep: -0.5 }, why: '混んでいる日は診察の中断が待ち時間に出る' }],
+          reflect: '医師の時間で薬局の待ちを買った。混雑の日ほど高い' },
+        { id: 'sheet', label: '照会票を作り看護師が一次受けする', note: '¥10,000。看護の余力を使う。医師の確認は診察の合間にまとめる',
+          req: { money: 10000 },
+          fx: { money: -10000, slack: -1, rel: { pharmacy: 1 }, delayed: [{ days: 14, label: '照会票の運用が定着', fx: { slack: 1 } }] },
+          when: [{ if: (c) => c.staff.nurses <= 1, fx: { slack: -1 }, why: '看護師1人だと電話対応で処置室が止まる' }],
+          reflect: '受け口を看護に移した。看護が薄い日は逆に止まる' },
+        { id: 'batch', label: '昼と夕方の2回にまとめて返す', note: '費用なし。薬局で待つ患者が出る。急ぐ照会が遅れる確率',
+          fx: {},
+          chance: { p: 0.35, label: '患者が薬局で待てず不満', hit: { rep: -1, rel: { pharmacy: -1 } }, miss: {} },
+          reflect: '院の回転は守った。待ちは薬局と患者に移った' }
+      ],
+      lesson: '疑義照会は安全の仕組み。誰の時間で受けるかが経営の判断', point: '疑義照会の受け口'
+    },
+    {
+      id: 'LK-04', cat: 7, title: '訪問看護からの電話が毎日鳴る', tier: 1, spec: ['any'], who: 'nurse', cool: 90,
+      cond: (c) => c.day >= 12,
+      say: '訪問看護から毎日電話が来ます。指示の確認も報告も電話だけだと、こちらも向こうも抜けが出そうです。',
+      bg: '訪問看護ステーション2か所から1日3〜4件の電話。記録はメモ書きで、カルテには後で転記している。',
+      ask: '訪問看護との情報共有の手段',
+      choices: [
+        { id: 'form', label: '連絡票の定型を作りFAXで往復する', note: '¥5,000。電話は急ぎだけに。記録は残るが即時性は落ちる',
+          req: { money: 5000 },
+          fx: { money: -5000, slack: 1, trust: 1 },
+          reflect: '記録が残る手段に寄せた。急ぎの線引きが要る' },
+        { id: 'time', label: '電話の受付時間を決める', note: '費用なし。看護の中断は減る。時間外の急ぎが漏れる確率',
+          fx: { slack: 1 },
+          when: [{ if: (c) => c.load >= 0.85, fx: { slack: 1 }, why: '混んでいる時期ほど中断を減らす効果が大きい' }],
+          chance: { p: 0.3, label: '時間外の連絡が漏れ、対応が遅れる', hit: { trust: -1, rep: -0.5 }, miss: {} },
+          reflect: '時間で区切った。漏れる側の手当てが無いと信頼で払う' },
+        { id: 'cloud', label: '連携用の共有システムを使う', note: '¥30,000+¥1,200/日がずっと。定着に14日。入力の習慣が要る',
+          req: { money: 30000 },
+          fx: { money: -30000, dailyCost: { yen: 1200, days: null, label: '連携システム' }, slack: -1, delayed: [{ days: 14, label: '共有システムが定着', fx: { slack: 2, trust: 1 } }] },
+          when: [{ if: (c) => c.depts.includes('homecare'), fx: { trust: 1 }, why: '在宅部門があると共有の効果が大きい' }],
+          reflect: '仕組みに払った。使われるまでは負担が先' },
+        { id: 'asis', label: '電話のままにする', note: '費用なし。抜けの確率が残る',
+          fx: {},
+          chance: { p: 0.3, label: '指示の伝達漏れで訪問看護から苦情', hit: { trust: -1, slack: -1 }, miss: {} },
+          reflect: '現状維持は選択。抜けは相手側に見える' }
+      ],
+      lesson: '共有の手段は速さと記録の交換。急ぎの線引きが要る', point: '訪問看護との共有手段'
+    },
+    {
+      id: 'LK-05', cat: 7, title: '退院前カンファレンスに出てほしい', tier: 1, spec: ['any'], who: 'hospital', cool: 120,
+      cond: (c) => (c.relations.hospital || 0) >= 1 || c.refer7 >= 1,
+      say: '退院前カンファレンスを来週開きます。退院後の主治医として出ていただけると、在宅の段取りが決まります。',
+      bg: (c) => `市民総合病院との関係 Lv${c.relations.hospital || 0}。会議は平日午後、往復で2時間。医師${c.staff.doctors}人。`,
+      ask: '退院前カンファレンスへの関わり方',
+      choices: [
+        { id: 'attend', label: '院長が病院に出向く', note: '費用なし。2日間、新患×0.85(午後を空ける)。方針が共有できる',
+          fx: { newMul: { mul: 0.85, days: 2, label: '退院前カンファレンス' }, trust: 1, rel: { hospital: 1 }, next: { id: 'LK-05b', days: 12 } },
+          when: [{ if: (c) => c.staff.doctors >= 2, fx: { newMul: { mul: 0.95, days: 2, label: '退院前カンファレンス(2人体制)' } }, why: '医師2人なので外来は大きく減らない' }],
+          reflect: '会って決めた。退院後の食い違いが減る' },
+        { id: 'online', label: 'オンラインで15分だけ参加する', note: '費用なし。1日、診察1人あたり+0.5分。細かい条件は伝わりにくい',
+          fx: { examDelta: { d: 0.5, days: 1, label: 'オンライン参加' }, trust: 1, next: { id: 'LK-05b', days: 12 } },
+          chance: { p: 0.3, label: '条件が伝わらず退院後に確認が増える', hit: { slack: -1 }, miss: {} },
+          reflect: '短く参加した。伝わらなかった分は後で払う' },
+        { id: 'nurse', label: '看護師長が出席する', note: '費用なし。看護の余力を使う。処方の方針は持ち帰りになる',
+          fx: { slack: -1, trust: 1, rel: { hospital: 1 }, next: { id: 'LK-05b', days: 12 } },
+          when: [{ if: (c) => c.staff.nurses <= 1, fx: { slack: -1 }, why: '看護師1人の日に外出させると処置が止まる' }],
+          reflect: '看護でつないだ。医師の判断が要る部分は宿題になった' },
+        { id: 'paper', label: '書面で診療の条件を伝える', note: '費用なし。関係は動かない。退院後に食い違う確率',
+          fx: {},
+          chance: { p: 0.4, label: '退院後に方針が食い違い、病院から問い合わせ', hit: { trust: -1, rel: { hospital: -1 } }, miss: {} },
+          reflect: '書面だけでは段取りに入れない' }
+      ],
+      lesson: '退院前の2時間は、退院後の何日分の手戻りか。その比較で決める', point: '退院前カンファレンスへの参加'
+    },
+    {
+      id: 'LK-05b', cat: 7, title: '退院後、決めた方針と家族の希望がずれた', tier: 1, spec: ['any'], who: 'caremane', chainOnly: true, cool: 999,
+      say: '退院前に決めたリハの方針と、家族の希望がずれています。先生からも一言もらえると、支援がそろいます。',
+      bg: '退院から12日。家族は通院回数を減らしたい。病院・ケアマネ・訪問看護は決めた方針で動いている。',
+      ask: 'ずれをどう戻すか',
+      choices: [
+        { id: 'meet', label: '家族を呼んで方針を再確認する', note: '費用なし。3日間、診察1人あたり+0.5分。結果は関係者に書面で返す',
+          fx: { examDelta: { d: 0.5, days: 3, label: '家族との面談' }, trust: 1, rel: { caremane: 1 } },
+          reflect: '面談で戻した。合意は一度で終わらない' },
+        { id: 'paper', label: 'ケアマネ経由で書面だけ返す', note: '費用なし。家族の納得は相手任せ。ずれが残る確率',
+          fx: {},
+          chance: { p: 0.4, label: '家族が通院をやめ、病院から問い合わせ', hit: { trust: -1, rel: { hospital: -1 } }, miss: {} },
+          reflect: '書面は手離れが良い。納得は届かないことがある' },
+        { id: 'change', label: '家族の希望に合わせて方針を変える', note: '費用なし。家族の満足は上がる。関係者への変更連絡が要る',
+          fx: { rep: 0.5, slack: -1 },
+          when: [{ if: (c) => (c.relations.hospital || 0) >= 2, fx: { trust: 1 }, why: '病院との関係が深いので方針変更の連絡が通りやすい' }],
+          chance: { p: 0.3, label: '変更が伝わらず訪問看護と食い違う', hit: { trust: -1 }, miss: {} },
+          reflect: '相手の希望を採った。変更の共有を怠ると次のずれになる' }
+      ],
+      lesson: '合意は動く。ずれを戻す窓口を決めておくのが連携', point: '退院後の方針のずれの戻し方'
+    },
+    {
+      id: 'LK-06', cat: 7, title: '施設から夜間の連絡先を聞かれた', tier: 2, spec: ['any'], who: 'facility', cool: 150,
+      cond: (c) => c.patients7 >= 10,
+      say: '入所者の急変時、夜や休日にどこへ連絡すればいいか決めておきたいです。先生の携帯でよいでしょうか。',
+      bg: (c) => `施設の入所者が数人通院している。夜間・休日の連絡先は決まっていない。老健施設との関係 Lv${c.relations.rouken || 0}。`,
+      ask: '緊急時の連絡ルール',
+      choices: [
+        { id: 'mobile', label: '院長の携帯を伝える', note: '費用なし。関係は深まる。夜間の呼び出しが院長の負担になる',
+          fx: { trust: 1, rel: { rouken: 1 }, flag: 'lk_night_mobile', next: { id: 'LK-06b', days: 10 } },
+          chance: { p: 0.4, label: '週に何度も夜間の電話が来る', hit: { slack: -1 }, miss: {} },
+          reflect: '院長の私生活で買った信頼。続くかは呼び出しの頻度次第' },
+        { id: 'rule', label: '日中は院、夜間は救急の目安を文書で渡す', note: '費用なし。判断基準を紙にする手間。施設の安心はやや低い',
+          fx: { flag: 'lk_night_rule', next: { id: 'LK-06b', days: 10 } },
+          when: [{ if: (c) => (c.relations.rouken || 0) >= 1, fx: { trust: 1 }, why: '関係がある施設なら書面の基準でも納得される' }],
+          chance: { p: 0.25, label: '施設が別の医院を主治医に切り替える', hit: { trust: -1, newMul: { mul: 0.95, days: 30, label: '施設からの紹介減' } }, miss: {} },
+          reflect: '線を引いた。相手の納得は関係の深さ次第' },
+        { id: 'oncall', label: '看護師が一次対応する当番を置く', note: '¥2,000/日がずっと(当番手当)。看護師2人以上が前提',
+          req: { staff: { nurses: 2 } },
+          fx: { dailyCost: { yen: 2000, days: null, label: '夜間連絡の当番手当' }, slack: -1, trust: 1, rel: { rouken: 1 }, flag: 'lk_night_nurse', next: { id: 'LK-06b', days: 10 } },
+          reflect: '費用と看護の余力で受けた。当番の設計が次の課題' }
+      ],
+      lesson: '緊急連絡は信頼の要。誰の夜に置くかで費用の形が変わる', point: '施設との緊急連絡ルール'
+    },
+    {
+      id: 'LK-06b', cat: 7, title: '夜間に初めて施設から連絡が来た', tier: 2, spec: ['any'], who: 'nurse', chainOnly: true, cool: 999,
+      say: '昨夜、施設から発熱の連絡が来ました。救急には行かずに済みましたが、誰がどう判断したか記録が残っていません。',
+      bg: (c) => `連絡ルールを決めて10日。初めての夜間対応。翌朝の申し送りは口頭だけ。職員の余力は${c.slack}。`,
+      ask: '夜間対応の記録と共有',
+      choices: [
+        { id: 'record', label: '夜間対応の記録票を作り施設と共有する', note: '¥3,000。記録の手間は増える。次の対応の質が上がる',
+          req: { money: 3000 },
+          fx: { money: -3000, trust: 1, rel: { rouken: 1 }, next: { id: 'LK-06c', days: 20 } },
+          reflect: '記録にした。次に受ける人も同じ判断ができる' },
+        { id: 'verbal', label: '朝の申し送りで口頭共有する', note: '費用なし。手間は最小。抜けが出る確率',
+          fx: { next: { id: 'LK-06c', days: 20 } },
+          chance: { p: 0.35, label: '前回の対応を知らずに違う指示が出る', hit: { trust: -1, rep: -0.5 }, miss: {} },
+          reflect: '口頭は速いが、残らない' },
+        { id: 'review', label: '院長と施設で対応を振り返る場を持つ', note: '費用なし。3日間、診察1人あたり+0.3分。基準が施設と揃う',
+          fx: { examDelta: { d: 0.3, days: 3, label: '施設との振り返り' }, trust: 1, rel: { rouken: 1 }, next: { id: 'LK-06c', days: 20 } },
+          when: [{ if: (c) => !!c.flags.lk_night_rule, fx: { trust: 1 }, why: '書面の基準を渡していたので振り返りが基準の更新になる' }],
+          reflect: '施設と一緒に振り返った。基準が2者のものになる' }
+      ],
+      lesson: '1回目の対応は前例になる。記録するかで前例の質が決まる', point: '夜間対応の記録と共有'
+    },
+    {
+      id: 'LK-06c', cat: 7, title: '夜間対応の負担を誰が持つか', tier: 2, spec: ['any'], who: 'doctor', chainOnly: true, cool: 999,
+      say: '夜間の連絡が月に数回になった。今は私が受けているが、個人の負担で続けるか、体制にするか決めたい。',
+      bg: (c) => `連絡ルールから30日。夜間対応は月3〜4件。医師${c.staff.doctors}人、看護師${c.staff.nurses}人。`,
+      ask: '夜間対応の体制',
+      choices: [
+        { id: 'rota', label: '医師と看護師で当番制にし手当を出す', note: '¥3,000/日がずっと。負担は分散。看護師2人以上が前提',
+          req: { staff: { nurses: 2 } },
+          fx: { dailyCost: { yen: 3000, days: null, label: '夜間当番手当' }, slack: 1, trust: 1 },
+          when: [{ if: (c) => c.staff.doctors >= 2, fx: { slack: 1 }, why: '医師2人で当番が回ると1人の負担が半分になる' }],
+          reflect: '体制にした。費用は毎日、負担は分散' },
+        { id: 'solo', label: '院長が引き続き受ける', note: '費用なし。負担は院長に集中。疲労が診療に出る確率',
+          fx: {},
+          chance: { p: (c) => (c.flags.lk_night_mobile ? 0.5 : 0.35), label: '疲労で日中の診察が遅れる', hit: { examDelta: { d: 0.5, days: 14, label: '院長の疲労' }, rep: -0.5 }, miss: {} },
+          reflect: '院長の体力で続けた。限界は数字より先に来る' },
+        { id: 'stop', label: '夜間の受け付けをやめ救急への案内に戻す', note: '費用なし。負担は消える。施設との関係は下がる',
+          fx: { trust: -1, rel: { rouken: -1 }, slack: 1 },
+          when: [{ if: (c) => (c.relations.rouken || 0) >= 2, fx: { trust: 1 }, why: '関係が深い施設には事情を説明でき、信頼は保てる' }],
+          reflect: 'やめるのも判断。信頼で払った' }
+      ],
+      lesson: '善意で始めた対応は、体制にするか、やめるかを決める日が来る', point: '夜間対応の体制化'
+    },
+    {
+      id: 'LK-07', cat: 7, title: '病院へ紹介する線引きが揺れている', tier: 1, spec: ['any'], who: 'doctor', cool: 120,
+      cond: (c) => c.patients7 >= 8,
+      say: '自院で診続けるか、早めに病院へ紹介するか。その線引きが私の気分で揺れている。基準を決めたい。',
+      bg: (c) => `1日平均${c.patients7}人、紹介は1日${c.refer7}人ほど。長く診れば再診は増えるが、病院との関係は紹介の質で決まる。`,
+      ask: '紹介の基準',
+      choices: [
+        { id: 'early', label: '基準を明文化し早めに紹介する', note: '費用なし。30日間、新患×0.95。病院との信頼は上がる',
+          fx: { newMul: { mul: 0.95, days: 30, label: '早期紹介' }, trust: 1, rel: { hospital: 1 }, flag: 'lk_refer_std' },
+          when: [{ if: (c) => (c.relations.hospital || 0) >= 1, fx: { delayed: [{ days: 30, label: '病院から患者が戻ってくる', fx: { trust: 1, rep: 1 } }] }, why: '関係のある病院は紹介の質を見て患者を戻してくる' }],
+          reflect: '患者を手放す基準を持った。戻ってくる流れは関係次第' },
+        { id: 'keep', label: '自院で診られる範囲を広げる', note: '費用なし。30日間、新患×1.03。見逃しの確率が残る',
+          fx: { newMul: { mul: 1.03, days: 30, label: '自院で継続' } },
+          chance: { p: (c) => (c.load >= 0.85 ? 0.35 : 0.2), label: '紹介が遅れ、病院から指摘', hit: { rep: -1, trust: -1, rel: { hospital: -1 } }, miss: {} },
+          reflect: '抱える判断。混んでいる日ほど見逃す' },
+        { id: 'consult', label: '迷う症例は病院に相談する枠を作る', note: '費用なし。30日間、診察1人あたり+0.3分。基準は相談の中で育つ',
+          fx: { examDelta: { d: 0.3, days: 30, label: '病院への相談' }, trust: 1, rel: { hospital: 1 } },
+          reflect: '相談で基準を育てた。医師の時間で払う' }
+      ],
+      lesson: '紹介の基準は収益の基準でもある。決めないと気分が決める', point: '他院への紹介の基準'
+    },
+    {
+      id: 'LK-08', cat: 7, title: '保健所から健康調査への協力依頼', tier: 1, spec: ['any'], who: 'health', cool: 150,
+      cond: (c) => c.day >= 10,
+      say: '地域の健康調査に協力をお願いしています。8週間、週1回2時間ほど職員の方に来ていただけないでしょうか。',
+      bg: (c) => `期間は8週間、診療時間内。職員${c.staffTotal}人。協力は任意で、断っても不利益は無い(架空の経営上の条件)。`,
+      ask: '協力の受け方',
+      choices: [
+        { id: 'nurse', label: '看護師を週1回出す', note: '費用なし。8週間、看護の余力を使う。行政との関係ができる',
+          fx: { slack: -1, trust: 1, delayed: [{ days: 56, label: '調査協力が終わり余力が戻る', fx: { slack: 1 } }] },
+          when: [
+            { if: (c) => c.staff.nurses <= 1, fx: { slack: -1 }, why: '看護師1人だと不在の日に処置が止まる' },
+            { if: (c) => c.load >= 0.85, fx: { rep: -0.5 }, why: '混雑期は不在の影響が待ち時間に出る' }
+          ],
+          reflect: '公共に時間を出した。混雑期は高い' },
+        { id: 'doctor', label: '院長が短時間だけ関わる', note: '費用なし。8週間、診察1人あたり+0.3分。行政との顔ができる',
+          fx: { examDelta: { d: 0.3, days: 56, label: '健康調査への協力' }, trust: 1, aw: 0.02 },
+          reflect: '医師の時間で顔をつないだ' },
+        { id: 'later', label: '繁忙期を外して協力を申し出る', note: '費用なし。相手の予定次第。受けてもらえる確率',
+          fx: {},
+          chance: { p: 0.5, label: '時期をずらして協力が成立', hit: { trust: 1, delayed: [{ days: 30, label: '時期をずらした調査協力', fx: { slack: -1 } }] }, miss: {} },
+          reflect: '条件を付けて受けた。相手の都合が先' },
+        { id: 'decline', label: '今回は断る', note: '費用なし。関係は動かない。次の依頼が来ない確率',
+          fx: {},
+          chance: { p: 0.3, label: '行政経由の相談が来なくなる', hit: { trust: -1 }, miss: {} },
+          reflect: '断るのも判断。次の窓口は細くなることがある' }
+      ],
+      lesson: '行政との関係は、急ぎでない依頼の受け方で作られる', point: '行政からの協力依頼'
+    },
+    {
+      id: 'LK-09', cat: 7, title: '地域の勉強会を主催してほしいと言われた', tier: 2, spec: ['any'], who: 'doctor', cool: 180,
+      cond: (c) => c.day >= 20,
+      say: '薬局と訪問看護から、地域の勉強会をうちが主催してくれないかと言われた。準備は要るが、顔がつながる。',
+      bg: (c) => `会場と資料で¥40,000。準備に職員の時間が要る。参加見込みは15〜20人。地域の信頼 ${c.trust}。`,
+      ask: '勉強会への関わり方',
+      facts: (c) => [{ label: '資金', val: yen(c.money) }, { label: '地域の信頼', val: String(c.trust) }, { label: '職員の余力', val: String(c.slack) }],
+      choices: [
+        { id: 'host', label: '主催する', note: '¥40,000。準備で余力−1。認知が上がる。人が集まらない確率',
+          req: { money: 40000 },
+          fx: { money: -40000, slack: -1, aw: 0.02 },
+          chance: { p: (c) => (c.trust >= 1 ? 0.15 : 0.35), label: '参加が5人以下で終わる', hit: {}, miss: { trust: 1, rel: { pharmacy: 1 } } },
+          reflect: '場を作った。集まるかは今までの信頼で決まる' },
+        { id: 'cohost', label: '会場だけ貸し、進行は薬局に任せる', note: '費用なし。閉院後の使用で余力−1。薬局との関係は深まる',
+          fx: { slack: -1, rel: { pharmacy: 1 } },
+          when: [{ if: (c) => c.trust >= 1, fx: { trust: 1 }, why: '既に信頼がある地域では場所を出すだけでも認められる' }],
+          reflect: '主役を譲った。負担も成果も小さい' },
+        { id: 'attend', label: '参加者として出る', note: '費用なし。1日、診察1人あたり+0.5分。関係は薄く広がる',
+          fx: { examDelta: { d: 0.5, days: 1, label: '勉強会に参加' }, aw: 0.01 },
+          reflect: '参加は最小の関わり。顔は覚えられない' },
+        { id: 'decline', label: '今回は見送る', note: '費用なし。次の声が別の医院に行く確率',
+          fx: {},
+          chance: { p: 0.3, label: '次の依頼が別の医院に行く', hit: { trust: -1 }, miss: {} },
+          reflect: '見送りは自由。地域の輪の外側に立つ選択' }
+      ],
+      lesson: '主催は費用より準備の時間。集客は当日でなく、それまでの信頼で決まる', point: '地域の勉強会の主催'
+    },
+    {
+      id: 'LK-10', cat: 7, title: '電話で患者の受診状況を聞かれる', tier: 1, spec: ['any'], who: 'front', cool: 120,
+      cond: (c) => c.patients7 >= 10,
+      say: 'ケアマネさんから電話で患者さんの受診状況を聞かれます。本人の了解をどう確認するか、手順がありません。',
+      bg: '照会は週に数件。今は受付がその場で判断している。同意の確認の手順は院内で決めていない。',
+      ask: '同意確認の手順',
+      choices: [
+        { id: 'form', label: '同意書を初診時にとり受付が照合する', note: '¥8,000。14日間、初診の説明で診察1人あたり+0.3分。照会は即答',
+          req: { money: 8000 },
+          fx: { money: -8000, examDelta: { d: 0.3, days: 14, label: '同意書の説明' }, trust: 1, flag: 'lk_consent_form' },
+          reflect: '前もって同意をとった。手間は初診に寄せた' },
+        { id: 'doctor', label: '照会は院長が本人に確認してから返す', note: '費用なし。返答は遅れる。30日間、診察1人あたり+0.2分',
+          fx: { examDelta: { d: 0.2, days: 30, label: '本人への確認' } },
+          chance: { p: 0.3, label: 'ケアマネから返答が遅いと不満', hit: { rel: { caremane: -1 } }, miss: {} },
+          reflect: '慎重だが遅い。相手の時間で払う' },
+        { id: 'callback', label: '文書で受け、本人に電話確認して返す', note: '費用なし。受付の余力−1。記録が残る',
+          fx: { slack: -1, trust: 1 },
+          when: [{ if: (c) => c.staff.receptionists >= 2, fx: { slack: 1 }, why: '受付2人なら電話確認の手間を吸収できる' }],
+          reflect: '記録と確認を両立させた。人手で払う' },
+        { id: 'asis', label: '受付の判断に任せる', note: '費用なし。速いが、本人が知らない共有が起きる確率',
+          fx: {},
+          chance: { p: 0.3, label: '本人から「勝手に話した」と苦情', hit: { rep: -1.5, trust: -1 }, miss: {} },
+          reflect: '速さと引き換えに、本人の知らない共有が残る' }
+      ],
+      lesson: '情報共有の速さは、本人の同意の取り方で決まる。先に手順を作る', point: '患者情報の共有と同意'
+    },
+    {
+      id: 'LK-11', cat: 7, title: '高校の養護教諭から連絡窓口を聞かれた', tier: 2, spec: ['any'], who: 'front', cool: 150,
+      cond: (c) => c.day >= 20,
+      say: '高校の養護教諭から、生徒のけがや体調の相談をどこに連絡すればいいかと聞かれました。窓口を決めたいです。',
+      bg: (c) => `高校(部活動)との関係 Lv${c.relations.school || 0}。学校からの相談は月に数件。保護者を通さない連絡もある。`,
+      ask: '学校との連携窓口',
+      choices: [
+        { id: 'window', label: '受付を窓口にし連絡票を作る', note: '¥5,000。受付の手間が続く。保護者への確認を必ず通す',
+          req: { money: 5000 },
+          fx: { money: -5000, slack: -1, trust: 1, rel: { school: 1 } },
+          when: [{ if: (c) => c.staff.receptionists >= 2, fx: { slack: 1 }, why: '受付2人なら窓口業務を吸収できる' }],
+          reflect: '窓口を作った。保護者を通す手順が信頼になる' },
+        { id: 'doctor', label: '院長が直接受ける', note: '費用なし。30日間、診察1人あたり+0.3分。学校の安心は大きい',
+          fx: { examDelta: { d: 0.3, days: 30, label: '学校からの相談' }, trust: 1, rel: { school: 1 } },
+          reflect: '院長の顔で受けた。続けるほど時間が削れる' },
+        { id: 'parent', label: '保護者経由の受診に限る', note: '費用なし。手順は簡単。学校からの信頼は育たない',
+          fx: {},
+          chance: { p: 0.3, label: '学校が別の医院を紹介先にする', hit: { rel: { school: -1 }, trust: -1 }, miss: {} },
+          reflect: '線を引いた。育たない関係もある' }
+      ],
+      lesson: '学校との連携は保護者を挟む手順で決まる。窓口を決めれば続く', point: '学校との連携窓口'
+    },
+    {
+      id: 'LK-12', cat: 7, title: 'ケアマネから看護師の電話対応に苦情', tier: 2, spec: ['any'], who: 'caremane', cool: 150,
+      cond: (c) => c.day >= 20,
+      say: '正直にお伝えします。お電話したときの看護師さんの対応がきつくて、事業所の若い担当が電話をためらっています。',
+      bg: (c) => `ケアマネ事業所との関係 Lv${c.relations.caremane || 0}。看護師は混雑時に電話を受けている。職員の余力は${c.slack}。`,
+      ask: '苦情への対応',
+      choices: [
+        { id: 'talk', label: '職員と事実を確認し、対応の基準を決める', note: '費用なし。職員が責められたと感じる確率。基準は残る',
+          fx: { trust: 1, rel: { caremane: 1 } },
+          chance: { p: (c) => (c.slack <= -1 ? 0.4 : 0.2), label: '看護師が不満を持ち余力が下がる', hit: { slack: -1 }, miss: {} },
+          reflect: '事実から入った。忙しさの背景も一緒に見る' },
+        { id: 'window', label: '連携の電話は受付が受け、看護師に回さない', note: '費用なし。受付の負担が増える。看護の負担は減る',
+          fx: { rel: { caremane: 1 } },
+          when: [
+            { if: (c) => c.staff.receptionists >= 2, fx: { slack: 1 }, why: '受付2人なら電話の受け口を分けられる' },
+            { if: (c) => c.staff.receptionists <= 1, fx: { slack: -1 }, why: '受付1人だと連携の電話で会計が止まる' }
+          ],
+          reflect: '受け口を変えた。人数で結果が分かれる' },
+        { id: 'apology', label: '院長が謝罪し、看護師には伝えない', note: '費用なし。関係は保てる。同じことが起きる確率',
+          fx: { rel: { caremane: 1 } },
+          chance: { p: 0.4, label: '同じ苦情が別の事業所から来る', hit: { trust: -1, rel: { caremane: -1 } }, miss: {} },
+          reflect: '表面は収めた。原因はそのまま' },
+        { id: 'explain', label: '混雑の事情を説明し理解を求める', note: '費用なし。相手の理解は関係の深さ次第',
+          fx: {},
+          when: [
+            { if: (c) => (c.relations.caremane || 0) >= 2, fx: { trust: 1 }, why: '関係が深い相手には事情が通る' },
+            { if: (c) => (c.relations.caremane || 0) < 2, fx: { rel: { caremane: -1 } }, why: '関係が浅い相手には言い訳に聞こえる' }
+          ],
+          reflect: '説明は関係の残高で通る' }
+      ],
+      lesson: '連携先の苦情は職員の余力の警報でもある。両方を見る', point: '連携先からの苦情'
+    },
+    {
+      id: 'LK-13', cat: 7, title: '訪問先で本院の処方が見えない', tier: 3, spec: ['any'], who: 'homecare', cool: 150,
+      needs: { depts: ['homecare'] },
+      say: '訪問先で本院の処方や検査結果がすぐ見えません。先週、重複した検査を出しそうになりました。',
+      bg: '在宅部門と本院のカルテは別。共有は紙と電話。在宅の訪問は週に数十件。',
+      ask: '在宅と本院の情報共有',
+      choices: [
+        { id: 'ehr', label: '同じ電子カルテを在宅でも使う', note: '¥300,000。移行に14日、その間は余力−1。重複は無くなる',
+          req: { money: 300000 },
+          fx: { money: -300000, slack: -1, delayed: [{ days: 14, label: 'カルテ共有が定着', fx: { slack: 2, trust: 1 } }] },
+          reflect: '一本にした。移行の谷を越えれば効く' },
+        { id: 'meeting', label: '週1回の合同カンファレンスを置く', note: '費用なし。90日間、診察1人あたり+0.3分。人で共有する',
+          fx: { examDelta: { d: 0.3, days: 90, label: '在宅との合同カンファレンス' }, slack: -1, trust: 1 },
+          when: [{ if: (c) => c.load >= 0.85, fx: { rep: -0.5 }, why: '混雑期は会議の時間が待ち時間に出る' }],
+          reflect: '人で共有した。回数を守れるかが鍵' },
+        { id: 'sheet', label: '訪問前に本院の要点を紙で渡す', note: '費用なし。医事の手間で余力−1。抜けの確率が残る',
+          fx: { slack: -1 },
+          chance: { p: 0.3, label: '情報の抜けで重複検査が起きる', hit: { rep: -1, money: -20000 }, miss: {} },
+          reflect: '紙でつないだ。抜けたときの代償は患者に出る' }
+      ],
+      lesson: '拠点が増えると情報は分かれる。共有の形を先に決める', point: '在宅部門との情報共有'
+    },
+    {
+      id: 'LK-14', cat: 7, title: '分院から本院へ送る基準が無い', tier: 3, spec: ['any'], who: 'branch', cool: 150,
+      needs: { branches: 1 },
+      say: '分院に来た患者を本院に送るとき、基準がありません。分院で診られるのに送っている例も、逆もあります。',
+      bg: (c) => `分院${c.branches}か所。分院から本院への紹介は週に数件。患者は移動を嫌う。本院の混み具合${Math.round(c.load * 100)}%。`,
+      ask: '分院と本院の紹介ルール',
+      choices: [
+        { id: 'criteria', label: '症状と設備で振り分ける基準を作る', note: '費用なし。14日間、診察1人あたり+0.3分(作成)。迷いが減る',
+          fx: { examDelta: { d: 0.3, days: 14, label: '紹介基準の作成' }, trust: 1, slack: 1 },
+          reflect: '基準で迷いを消した。運用の見直しが要る' },
+        { id: 'patient', label: '患者の希望を優先する', note: '費用なし。満足は上がる。設備の無い所で診る確率',
+          fx: { rep: 0.5 },
+          chance: { p: 0.3, label: '分院で対応できず、本院へ再受診', hit: { rep: -1, trust: -1 }, miss: {} },
+          reflect: '希望に寄せた。安全側に倒れないときがある' },
+        { id: 'hub', label: '迷ったら本院に送る', note: '費用なし。30日間、診察1人あたり+0.2分(流入)。分院の力が育たない',
+          fx: { examDelta: { d: 0.2, days: 30, label: '分院からの流入' } },
+          when: [{ if: (c) => c.load >= 0.85, fx: { rep: -1 }, why: '本院が混んでいると流入が待ち時間に出る' }],
+          reflect: '本院に寄せた。混雑を本院で払う' }
+      ],
+      lesson: '拠点間の紹介は患者の移動を伴う。基準が無いと迷いが患者に出る', point: '分院との紹介ルール'
+    },
+    {
+      id: 'LK-15', cat: 7, title: '医師会から委員の役を頼まれた', tier: 2, spec: ['any'], who: 'doctor', cool: 200,
+      cond: (c) => c.day >= 20,
+      say: '地域の医師会から委員の役を頼まれた。月2回、午後の会合がある。地域の情報は入るが、外来を空けることになる。',
+      bg: (c) => `会合は月2回、各半日。任期は1年。地域の信頼 ${c.trust}。医師${c.staff.doctors}人。`,
+      ask: '役を受けるか',
+      choices: [
+        { id: 'accept', label: '役を受ける', note: '費用なし。90日間、新患×0.97(午後の枠減)。信頼と認知が上がる',
+          fx: { newMul: { mul: 0.97, days: 90, label: '医師会の会合' }, trust: 1, aw: 0.03 },
+          when: [{ if: (c) => c.staff.doctors >= 2, fx: { newMul: { mul: 0.99, days: 90, label: '医師会の会合(2人体制)' } }, why: '医師2人なら会合の日も外来はほぼ空かない' }],
+          reflect: '地域の輪に入った。外来の午後で払う' },
+        { id: 'partial', label: '委員は断り、会合には出席だけする', note: '費用なし。30日間、新患×0.98。関係は薄く保てる',
+          fx: { newMul: { mul: 0.98, days: 30, label: '医師会の会合' }, aw: 0.01 },
+          chance: { p: 0.3, label: '役を断ったことで依頼が細る', hit: { trust: -1 }, miss: {} },
+          reflect: '距離を測った。輪の中には入らない' },
+        { id: 'decline', label: '断る', note: '費用なし。外来は守れる。地域の情報は入りにくくなる',
+          fx: {},
+          chance: { p: 0.35, label: '地域の連携の話が回ってこなくなる', hit: { trust: -1, aw: -0.01 }, miss: {} },
+          reflect: '外来を守った。情報の流れは細る' }
+      ],
+      lesson: '地域活動は時間で払う投資。回収は紹介でなく情報と信頼で来る', point: '医師会活動への参加時間'
+    },
+    {
+      id: 'LK-16', cat: 7, title: '地域の連携ネットワークに参加しないか', tier: 3, spec: ['any'], who: 'advisor', cool: 200,
+      cond: (c) => c.patients7 >= 10,
+      say: '地域の医療介護連携ネットワークへの参加を打診されています。月額と入力の手間は要りますが、紙とFAXの往復は減ります。',
+      bg: (c) => `参加費は¥800/日相当。病院・ケアマネ・訪問看護の一部が参加済み。市民総合病院との関係 Lv${c.relations.hospital || 0}。`,
+      ask: '連携ネットワークへの参加',
+      facts: (c) => [{ label: '資金', val: yen(c.money) }, { label: '手元で持てる日数', val: `${c.runway}日` }],
+      choices: [
+        { id: 'join', label: '参加し、医事が入力を担う', note: '¥50,000+¥800/日がずっと。導入14日は余力−1。定着すれば速い',
+          req: { money: 50000 },
+          fx: { money: -50000, dailyCost: { yen: 800, days: null, label: '連携ネットワーク' }, slack: -1, delayed: [{ days: 14, label: '入力が定着し連携が速くなる', fx: { slack: 2, trust: 1 } }] },
+          when: [{ if: (c) => (c.relations.hospital || 0) >= 1, fx: { rel: { hospital: 1 } }, why: '病院が参加済みなので共有の相手がすぐいる' }],
+          reflect: '仕組みに乗った。相手がいるかで価値が決まる' },
+        { id: 'trial', label: '一部の患者だけで試す', note: '¥800/日を60日。効果は小さく、判断の材料は得られる',
+          fx: { dailyCost: { yen: 800, days: 60, label: '連携ネットワーク(試行)' } },
+          chance: { p: 0.5, label: '試行で効果が見え、連携先の信頼が上がる', hit: { trust: 1 }, miss: {} },
+          reflect: '小さく試した。材料は得たが効果は限定' },
+        { id: 'wait', label: '今は見送る', note: '費用なし。紙とFAXが続く。周りが進むと置かれる確率',
+          fx: {},
+          chance: { p: (c) => ((c.relations.hospital || 0) >= 1 ? 0.4 : 0.2), label: '連携先から「共有が遅い」と言われる', hit: { trust: -1, rel: { hospital: -1 } }, miss: {} },
+          reflect: '待った。周りの進み方次第で置かれる' }
+      ],
+      lesson: '連携ツールの価値は相手の数。自院の都合だけで決まらない', point: '連携ネットワークの導入'
+    },
+    {
+      id: 'LK-17', cat: 7, title: '透析患者が他院で合わない薬をもらった', tier: 3, spec: ['any'], who: 'dialysis', cool: 150,
+      needs: { depts: ['dialysis'] },
+      say: '透析の患者さんが他院で薬をもらい、透析条件に合わない薬でした。他院への情報の渡し方を決めたいです。',
+      bg: '透析患者は複数の医療機関にかかる。透析条件と処方は透析室が把握。他院への情報提供は求められたときだけ。',
+      ask: '他院との情報共有',
+      choices: [
+        { id: 'card', label: '透析条件の携帯カードを渡す', note: '¥15,000。更新の手間は透析室が持つ。他院がその場で確認できる',
+          req: { money: 15000 },
+          fx: { money: -15000, trust: 1, rep: 0.5, slack: -1 },
+          reflect: '患者が情報を運ぶ形にした。更新を止めると古くなる' },
+        { id: 'letter', label: '他院に定期的に情報提供書を送る', note: '費用なし。30日間、診察1人あたり+0.3分。医師の書類が増える',
+          fx: { examDelta: { d: 0.3, days: 30, label: '他院への情報提供書' }, trust: 1, rel: { hospital: 1 } },
+          reflect: '医師の書類で共有した。相手が読むかは別' },
+        { id: 'pharmacy', label: '門前薬局に一元管理を頼む', note: '費用なし。薬局との関係が前提。院外の薬は把握できないことがある',
+          req: { cond: (c) => (c.relations.pharmacy || 0) >= 1, condWhy: '門前薬局との関係が要る' },
+          fx: { rel: { pharmacy: 1 }, trust: 1 },
+          chance: { p: 0.2, label: '院外の薬が把握できず行き違い', hit: { rep: -1 }, miss: {} },
+          reflect: '薬局に任せた。届かない薬もある' },
+        { id: 'onrequest', label: '求められたときだけ渡す', note: '費用なし。今回のような行き違いが再発する確率',
+          fx: {},
+          chance: { p: 0.35, label: '他院の処方で透析後に体調不良', hit: { rep: -1.5, trust: -1 }, miss: {} },
+          reflect: '受け身の共有。事故は相手側で起きる' }
+      ],
+      lesson: '複数の医療機関にかかる患者ほど、情報の運び方が安全になる', point: '透析患者の情報共有'
+    }
+  ];
+  if (typeof module !== 'undefined' && module.exports) module.exports = CASES;
+  else root.DECISIONS.register(CASES);
+})(typeof self !== 'undefined' ? self : this);
