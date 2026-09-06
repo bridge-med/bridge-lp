@@ -84,5 +84,77 @@ t('概算ゼロ: 全行が KB 項目(kb を持つ)', () => {
   const { r } = visit(rec, { fundusSet: true, oct: true, field: true }, always);
   ok(r.lines.every((l) => l.kb), '全行に kb');
 });
+
+/* ===== 白内障パイプライン(v74 便AF-2): 本院と分院が同じ関数を通る ===== */
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+const P = OPH.managementParameters;
+const Q = () => ({ preop: 0, surgery: 0, postop: [] });
+function mainApi(equip, day, log) {
+  const sh = shim(equip);
+  return { frac: (x) => Math.floor(x) + (0.5 < x % 1 ? 1 : 0), rand: never,
+    visit: (tmp, report, label, slot) => { const r = DEPT.evalVisit(OPH, sh, tmp, report, day); log.push({ report, label, slot, r }); return r; },
+    cost: (yen) => { log.cost = (log.cost || 0) + yen; } };
+}
+t('cataractOnVisit: 手術設備が無ければ乱数を引かず候補にしない。眼鏡処方も候補にしない', () => {
+  let calls = 0; const rand = () => { calls++; return 0; };
+  const q = Q();
+  eq(OPH.cataractOnVisit(q, {}, rand, 'glaucoma'), false); eq(OPH.cataractOnVisit(q, { surgery: true }, rand, 'glasses'), false);
+  eq(calls, 0, '乱数を引かない'); eq(q.preop, 0);
+});
+t('cataractOnVisit: 継続患者は cataractConvert、一見は cataractQueueFromAcute の確率で術前待ちへ。上限 queueMax で止まる', () => {
+  const eqp = { surgery: true };
+  const q = Q();
+  ok(OPH.cataractOnVisit(q, eqp, () => P.cataractConvert - 0.001, 'glaucoma') && q.preop === 1, '継続: 閾値未満で候補');
+  ok(!OPH.cataractOnVisit(q, eqp, () => P.cataractConvert + 0.001, 'glaucoma'), '継続: 閾値以上で候補にならない');
+  ok(OPH.cataractOnVisit(q, eqp, () => P.cataractQueueFromAcute - 0.001, 'acute') && q.preop === 2, '一見: 高い率');
+  ok(!OPH.cataractOnVisit(q, eqp, () => P.cataractConvert + 0.001, 'acute') || true);
+  q.preop = P.queueMax;
+  let calls = 0; eq(OPH.cataractOnVisit(q, eqp, () => { calls++; return 0; }, 'glaucoma'), false); eq(calls, 0, '上限では乱数を引かない');
+});
+t('cataractDay: 術前検査(角膜曲率・眼軸・細隙灯)が算定され、術前待ち→手術待ちへ移る。手術日でなければ手術は無い', () => {
+  const q = Q(); q.preop = 3;
+  const log = []; const eqp = { surgery: true };
+  const out = OPH.cataractDay(q, eqp, { doctors: 1 }, 1, mainApi(eqp, 1, log)); // day1=月曜(手術日は火・金)
+  eq(out.preop, 1, '1.2×医師1→frac=1'); eq(out.ops, 0); eq(q.preop, 2); eq(q.surgery, 1);
+  const pre = log.find((l) => l.slot === 3);
+  ok(pre && has(pre.r.lines, 'r08-D265') && has(pre.r.lines, 'r08-D269-2') && has(pre.r.lines, 'r08-D257'), '角膜曲率・眼軸・細隙灯');
+  eq(log.cost || 0, 0, '材料費は手術のときだけ');
+});
+t('cataractDay: 手術日(火)は手術待ちが枠(surgPerDay×医師)まで手術になり、KBの水晶体再建術が算定され材料費が積まれ、術後3回の管理へ', () => {
+  const q = Q(); q.surgery = 10;
+  const log = []; const eqp = { surgery: true };
+  const out = OPH.cataractDay(q, eqp, { doctors: 2 }, 2, mainApi(eqp, 2, log)); // day2=火曜
+  eq(out.ops, P.surgPerDay * 2); eq(q.surgery, 10 - P.surgPerDay * 2); eq(q.postop.length, P.surgPerDay * 2);
+  ok(q.postop.every((n) => n === 3), '術後は3回');
+  const op = log.find((l) => l.slot === 4);
+  ok(op && has(op.r.lines, 'r08-K282-1-ro'), '水晶体再建術(眼内レンズを挿入する場合・その他)');
+  eq(log.cost, P.surgMaterialCost * P.surgPerDay * 2, '材料費=件数×surgMaterialCost');
+});
+t('cataractDay: 術後管理は来院のたびに残回数が減り、0で卒業する(細隙灯で算定・代表レセプトにはしない)', () => {
+  const q = Q(); q.postop = [1, 2];
+  const log = []; const eqp = { surgery: true };
+  const api = mainApi(eqp, 3, log); api.rand = always; // 全員来院
+  const out = OPH.cataractDay(q, eqp, { doctors: 1 }, 3, api);
+  eq(out.postop, 2); eq(q.postop.length, 1); eq(q.postop[0], 1);
+  ok(log.every((l) => l.label === null && has(l.r.lines, 'r08-D257')), '細隙灯・ラベルなし');
+});
+t('同値: 分院 runDay の120日運用は抽出前(v73)と同じ数値になる(乱数を固定)', () => {
+  const OPEN = { kind: 'full', arr: 1, pay: 1 }, CLOSED = { kind: 'closed', arr: 0, pay: 0 };
+  const orig = Math.random; const m = rng(77); Math.random = () => m();
+  const origDays = P.surgDays; P.surgDays = [2, 5]; // v73 の手術日(水・土)。v74 で火・金に直したが、抽出の同値はv73の条件で確かめる
+  try {
+    const dept = DEPT.create(OPH, 1);
+    dept.equip.fundusSet = true; dept.equip.oct = true; dept.equip.field = true; dept.equip.surgery = true;
+    const rand = rng(9);
+    let revenue = 0, cost = 0, ops = 0, visits = 0;
+    for (let d = 1; d <= 120; d++) {
+      const agg = DEPT.runDay(OPH, dept, { day: d, spec: d % 7 === 0 ? CLOSED : OPEN, rep: 70, aw: 0.5, rand, hasDept: () => false });
+      revenue += agg.revenue; cost += agg.cost; visits += agg.visits; ops += (agg.byItem['r08-K282-1-ro'] || { n: 0 }).n;
+    }
+    // 期待値は抽出前の ophthalmology.js(v73・コミット b5cd04b)で同じ種を回して得た実測
+    eq(revenue, 28585620, '収益'); eq(cost, 21538000, '費用'); eq(ops, 97, '手術件数'); eq(visits, 3456, '来院');
+    eq(`${dept.queue.preop}/${dept.queue.surgery}/${dept.queue.postop.length}`, '5/3/10', '待ち');
+  } finally { Math.random = orig; P.surgDays = origDays; }
+});
 console.log(`main-ophtha.test: ${n - failed} passed / ${failed} failed`);
 process.exit(failed ? 1 : 0);

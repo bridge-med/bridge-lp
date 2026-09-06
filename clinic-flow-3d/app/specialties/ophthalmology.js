@@ -49,17 +49,19 @@
       return ps;
     },
 
-    /* 本院候補(v73 便AF)。外来(継続管理・一見・眼鏡処方)+検査設備投資まで。白内障手術は本院では出さない(actionHide・便AF-2)。
+    /* 本院候補(v73 便AF)。外来(継続管理・一見・眼鏡処方)+検査設備投資。白内障の日帰り手術は v74(便AF-2)で本院にも開いた
+     * (術前→手術日→術後の経路は cataractOnVisit/cataractDay を分院の runDay と共用)。
      * 文言は editor(opus)原稿。keywords の hint は内科と同じ数値(名前と説明だけ科別) */
     main: {
       line: '緑内障を長く診る。単価は検査設備', order: 3, fsTitle: '眼科の届出',
       preset: {
         settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0.05, examMean: 7, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, dexa: false, echo: false },
         policy: {},
-        shopHide: ['pt', 'rehaAide', 'machines', 'physio'],
-        actionHide: ['surgery'],
+        shopHide: ['pt', 'rehaAide', 'machines', 'physio', 'echo', 'dexa', 'mri'],
         relHide: ['sports'],
         rel: {
+          hospital: { effect: '紹介患者 +Lv人/日(術後の経過観察・糖尿病の眼底検査)', desc: '地域連携室との関係。病院で手術した人の経過観察と、糖尿病の定期眼底検査の受け皿になる。' },
+          company: { desc: '従業員の定期健診。画面作業で目が疲れる人の相談先になる。' },
           caremane: { effect: '高齢の新患 +Lv×0.7人/日', desc: '担当者会議に出て、点眼が続かない人の相談先になる。' },
           rouken: { effect: '高齢の新患 +Lv×0.7人/日', desc: '退所後も眼圧と点眼を診る先として連携する。' },
           school: { name: '高校(学校健診)', effect: '学校健診の二次検査 +Lv×0.5人/日', desc: '学校健診で視力の再検査になった生徒を引き受ける。' },
@@ -122,7 +124,7 @@
       cataractQueueFromAcute: 0.08, // 一見から手術候補への変換率
       surgPerDay: 4,              // 手術枠/日(手術日のみ)
       queueMax: 40,               // 手術待ちの上限(超えると紹介患者は他院へ流れる)
-      surgDays: [2, 5],           // 手術日(週内の曜日: 火・金)
+      surgDays: [1, 4],           // 手術日(週内の曜日 0=月: 1=火・4=金。v73までは [2,5]=水・土になっていた=注釈と実装のずれを v74 で火・金に揃えた)
       surgMaterialCost: 15000,    // 手術1件の材料費概算(眼内レンズ等の購入原価。IOLは手術点数に包括=請求なしが制度どおり)
       costs: { doctorDay: 90000, nurseDay: 18000, ortDay: 15000, clerkDay: 10000, rentDay: 38000, baseDay: 8000, perVisit: 250 },
       referralSources: ['内科(糖尿病連携)', '学校健診', '高齢者施設'],
@@ -157,6 +159,52 @@
       if (rand() < 0.5) report.kbActs.push({ id: 'presc' });
       const prLabel = (this.patientProfiles.find((x) => x.id === p.pr) || {}).label || '';
       return { report, isFirst, prLabel, sample: `継続管理(${prLabel})の来院`, slot: 2 };
+    },
+
+    /* 白内障の候補化(来院1回ごと)。pr が 'acute'(一見)なら cataractQueueFromAcute、'glasses' は候補にしない、それ以外(継続患者)は cataractConvert。
+     * queue: { preop, surgery, postop: [] }(部門は dept.queue、本院は G.mainQueue)。手術設備が無い・待ちが上限なら乱数を引かない(旧 runDay と同じ引き順) */
+    cataractOnVisit(queue, equip, rand, pr) {
+      const P = this.managementParameters;
+      if (!equip || !equip.surgery || !queue || pr === 'glasses') return false;
+      if (queue.preop + queue.surgery >= P.queueMax) return false;
+      if (rand() < (pr === 'acute' ? P.cataractQueueFromAcute : P.cataractConvert)) { queue.preop++; return true; }
+      return false;
+    },
+    /* 白内障パイプラインの1日分: 術前検査 → 手術(手術日のみ) → 術後管理(3回で卒業)。部門の runDay と本院の endDay が同じ経路を通る(v74 便AF-2)。
+     * api: { frac(x), rand(), visit(hist, report, label, slot) → r, cost(yen) }。戻り値は当日の件数 { preop, ops, postop } */
+    cataractDay(queue, equip, staff, day, api) {
+      const P = this.managementParameters;
+      const out = { preop: 0, ops: 0, postop: 0 };
+      if (!equip || !equip.surgery || !queue) return out;
+      const mk = () => ({ pr: 'cataract', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 });
+      const preopToday = Math.min(queue.preop, api.frac(1.2 * staff.doctors));
+      for (let i = 0; i < preopToday; i++) {
+        api.visit(mk(), { type: 'revisit', kbActs: [{ id: 'keratometry' }, { id: 'axial' }, { id: 'slitlamp' }] }, '白内障の術前検査(角膜曲率・眼軸)', 3);
+        queue.preop--; queue.surgery++; out.preop++;
+      }
+      const wd = (day - 1) % 7;
+      if (P.surgDays.includes(wd)) {
+        const ops = Math.min(queue.surgery, P.surgPerDay * staff.doctors);
+        for (let i = 0; i < ops; i++) {
+          api.visit(mk(), { type: 'revisit', kbActs: [{ id: 'cataractOp' }] }, '水晶体再建術(眼内レンズ挿入・日帰り)', 4);
+          api.cost(P.surgMaterialCost);
+          queue.surgery--; queue.postop.push(3); out.ops++;
+        }
+      }
+      const post = queue.postop;
+      for (let i = post.length - 1; i >= 0; i--) {
+        if (api.rand() < 0.35) {
+          api.visit(mk(), { type: 'revisit', kbActs: [{ id: 'slitlamp' }] }, null, 0);
+          post[i]--; out.postop++;
+          if (post[i] <= 0) post.splice(i, 1);
+        }
+      }
+      return out;
+    },
+    /* 待ちの1行(部門カード・本院レバー共用) */
+    queueLine(q) {
+      if (!q) return '';
+      return `白内障: 術前待ち${q.preop}人・手術待ち${q.surgery}人・術後${q.postop.length}人`;
     },
 
     deptInit(dept, day) {
@@ -199,7 +247,7 @@
         p.nv = ctx.day + (p.iv || 30);
         api.setSample(v.sample, r.lines, r.ev, v.slot);
         // 高齢層の一部が白内障の手術候補へ(月次換算の確率)
-        if (dept.equip.surgery && dept.queue.preop + dept.queue.surgery < P.queueMax && ctx.rand() < P.cataractConvert) dept.queue.preop++;
+        this.cataractOnVisit(dept.queue, dept.equip, ctx.rand, p.pr);
       }
 
       // 一見(急性)+眼鏡処方
@@ -213,7 +261,7 @@
         const v = this.planVisit(tmp, dept.policy, dept.fs, ctx.rand, ctx.hasDept, dept.equip);
         const r = api.evalVisit(tmp, v.report);
         api.setSample(v.sample, r.lines, r.ev, v.slot);
-        if (dept.equip.surgery && dept.queue.preop + dept.queue.surgery < P.queueMax && ctx.rand() < P.cataractQueueFromAcute) dept.queue.preop++;
+        this.cataractOnVisit(dept.queue, dept.equip, ctx.rand, 'acute');
       }
       for (let i = 0; i < glasses; i++) {
         api.countVisit();
@@ -224,40 +272,12 @@
         api.setSample(v.sample, r.lines, r.ev, v.slot);
       }
 
-      // 白内障パイプライン: 術前検査 → 手術(手術日のみ) → 術後3回
-      if (dept.equip.surgery) {
-        const preopToday = Math.min(dept.queue.preop, api.frac(1.2 * dept.staff.doctors));
-        for (let i = 0; i < preopToday; i++) {
-          api.countVisit();
-          const tmp = { pr: 'cataract', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
-          const r = api.evalVisit(tmp, { type: 'revisit', kbActs: [{ id: 'keratometry' }, { id: 'axial' }, { id: 'slitlamp' }] });
-          api.setSample('白内障の術前検査(角膜曲率・眼軸)', r.lines, r.ev, 3);
-          dept.queue.preop--; dept.queue.surgery++;
-        }
-        const wd = (ctx.day - 1) % 7;
-        if (P.surgDays.includes(wd)) {
-          const ops = Math.min(dept.queue.surgery, P.surgPerDay * dept.staff.doctors);
-          for (let i = 0; i < ops; i++) {
-            api.countVisit();
-            const tmp = { pr: 'cataract', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
-            const r = api.evalVisit(tmp, { type: 'revisit', kbActs: [{ id: 'cataractOp' }] });
-            api.setSample('水晶体再建術(眼内レンズ挿入・日帰り)', r.lines, r.ev, 4);
-            agg.cost += P.surgMaterialCost;
-            dept.queue.surgery--; dept.queue.postop.push(3);
-          }
-        }
-        // 術後管理(3回で卒業)
-        const post = dept.queue.postop;
-        for (let i = post.length - 1; i >= 0; i--) {
-          if (ctx.rand() < 0.35) {
-            api.countVisit();
-            const tmp = { pr: 'cataract', mc: {}, wc: {}, lb: {}, fb: true, sv: 0 };
-            api.evalVisit(tmp, { type: 'revisit', kbActs: [{ id: 'slitlamp' }] });
-            post[i]--;
-            if (post[i] <= 0) post.splice(i, 1);
-          }
-        }
-      }
+      // 白内障パイプライン: 術前検査 → 手術(手術日のみ) → 術後3回(本院と共用の cataractDay)
+      this.cataractDay(dept.queue, dept.equip, dept.staff, ctx.day, {
+        frac: api.frac, rand: ctx.rand,
+        visit: (tmp, report, label, slot) => { api.countVisit(); const r = api.evalVisit(tmp, report); if (label) api.setSample(label, r.lines, r.ev, slot); return r; },
+        cost: (yen) => { agg.cost += yen; },
+      });
 
       agg.cost += dept.staff.doctors * C.doctorDay + dept.staff.nurses * C.nurseDay
         + (dept.staff.orts || 0) * C.ortDay + (dept.staff.clerks || 0) * C.clerkDay
