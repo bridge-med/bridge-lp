@@ -479,6 +479,7 @@ v33でLayer 3(Reimbursement Engine)と診療科モジュール基盤が入った
 | 38 | ~~レセプトmodalの「閉じる」(`.btn-cta.ghost`)の高さが40px~~ **解消(v58)**: `.btn-cta.ghost` に min-height:44px(同クラスの5箇所に及ぶ。quizXはflex stretchのため見た目は不変=designer実測) | v57 designer実測→v58便X |
 | 39 | `.kijun-row` の `flex-wrap: wrap` が `@media (max-width:360px)` にしかなく、375/390で下段の `.mini-btn`(nowrap)が幅44pxまで潰れて「体制を整える(無…」「届け出る ¥50,0…」と欠ける(整形・内科とも同一・行のscrollWidth 341〜379 vs clientWidth 309) | v67 designer責任外指摘。無条件化は1行だが360以下の折返しリズム(v46 designer裁定 row-gap 6/10/10)を375/390に広げる=見た目変更なのでdesigner照合つきの小便(v68候補)か便AFの3照合反映に相乗り |
 | 40 | 法人タブ出現後(4タブ)に `documentElement.scrollWidth` が375で412・390で427(37pxはみ出す)。**タブバー自体は収まっている**(最終タブの右端365/380・スクショで欠けなし=視認できる欠陥ではない)。原因要素は未特定 | v67 designer責任外指摘→PM「視認できる欠陥かを先に確認」→スクショで欠けなし。原因要素の特定から(便AFの3照合反映に相乗り) |
+| 41 | ヘッダー常設ボタン(notifyBtn/soundBtn/helpBtn/resetBtn=34×34px・速度⏸=28×44px)が44px未満(全幅) | v73 qa 実測。便A0(v37)のタップ領域一括化の漏れ。ヘッダー1行の高さに影響するので designer 照合つきの小便で |
 
 ## 判断メモ
 
