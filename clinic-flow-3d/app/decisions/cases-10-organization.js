@@ -76,7 +76,7 @@
         { id: 'round', label: '院長が2週間、両拠点を回る', note: '費用なし。14日間、診察1人あたり+1分。院長が見ることで収まる',
           fx: { examDelta: { d: 1.0, days: 14, label: '院長の巡回' }, slack: 1, delayed: [{ days: 14, label: '運用が落ち着く', fx: { slack: 1 } }] },
           reflect: '院長の時間で収めた。統合の全費用に、この時間を足して考える' },
-        { id: 'wait', label: '慣れるのを待つ', note: '費用なし。余力−1。収まることもある。取り違えが起きれば大きい',
+        { id: 'wait', label: '慣れるのを待つ', note: '費用なし。余力−1。収まることもある。患者の取り違えが起きれば大きい',
           fx: { slack: -1 },
           chance: { p: 0.4, label: '問い合わせの取り違えで苦情', hit: { rep: -2, trust: -1 }, miss: { slack: 1 } },
           reflect: '待った。混乱は時間で薄まるが、事故は時間を待たない' }

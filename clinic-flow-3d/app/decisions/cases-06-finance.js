@@ -67,7 +67,7 @@
           fx: { money: -145000, dailyCost: { yen: -5000, days: 30, label: '1か月分の先買い' } },
           chance: { p: 0.6, label: '値上げが実施される', hit: { delayed: [{ days: 30, label: '値上げ後の消耗品費', fx: { dailyCost: { yen: 400, days: null, label: '消耗品の値上げ' } } }] }, miss: {} },
           reflect: '中間を取った。割引は薄く、値上げは受ける' },
-        { id: 'none', label: '通常通り毎月買う', note: '割高分が¥300/日で90日。現金は手元に残る。値上げなら毎日¥400増える',
+        { id: 'none', label: '通常通り毎月買う', note: '割高分が¥300/日で90日。現金は手元に残る。値上げがあれば毎日¥400増える',
           fx: { dailyCost: { yen: 300, days: 90, label: 'まとめ買いをしない割高分' } },
           chance: { p: 0.6, label: '値上げが実施される', hit: { dailyCost: { yen: 400, days: null, label: '消耗品の値上げ' } }, miss: {} },
           reflect: '手元を守った。値上げは固定費として毎日残る' }
@@ -436,7 +436,7 @@
           fx: { money: -50000, slack: -1, rel: { caremane: 1 }, delayed: [{ days: 30, label: '訪問件数が増える', fx: { dailyCost: { yen: -5000, days: 180, label: '在宅の増収' } } }] },
           chance: { p: (c) => (c.trust >= 1 ? 0.7 : 0.45), label: '紹介が実際に増える', hit: { trust: 0.5 }, miss: { trust: -0.3 } },
           reflect: '件数で直そうとした。紹介は関係の深さで返ってきた' },
-        { id: 'whole', label: '本院と一体で見て今のまま続ける', note: '赤字が¥3,000/日で90日。在宅は外来の受け皿でもある。赤字は本院が持つ',
+        { id: 'whole', label: '本院と一体で見て今のまま続ける', note: '赤字が¥3,000/日で90日。在宅は外来の患者の受け皿でもある。赤字は本院が持つ',
           fx: { trust: 0.5, dailyCost: { yen: 3000, days: 90, label: '在宅部門の赤字' } },
           when: [{ if: (c) => c.monthProfit < 0, fx: { slack: -1 }, why: '法人全体が赤字の月に部門の赤字も持ち、職員に「どこを削るのか」の空気が出た' }],
           reflect: '一体で見た。全体が赤字の月には説明が要る' }

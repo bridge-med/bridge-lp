@@ -21,7 +21,7 @@
           req: { money: 20000 },
           fx: { money: -20000, rel: { caremane: 1 }, trust: 1, newMul: { mul: 1.05, days: 45, label: 'ケアマネからの紹介' } },
           reflect: '細く長い紹介を選んだ。数字はすぐ動かない' },
-        { id: 'prepare', label: '先に受け入れ体制を整える', note: '準備の時間外が¥1,000/日で20日。20日後から受けられる形にする',
+        { id: 'prepare', label: '先に受け入れ体制を整える', note: '準備の時間外が¥1,000/日で20日。今は増やさず、20日後から受けられる形にする',
           fx: { slack: 1, dailyCost: { yen: 1000, days: 20, label: '準備の時間外' }, delayed: [{ days: 20, label: '体制が整い紹介を受け始める', fx: { newMul: { mul: 1.1, days: 30, label: '準備後の紹介' }, rel: { hospital: 1 } } }] },
           reflect: '機会を20日遅らせて、負担を先に払った' }
       ],

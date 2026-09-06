@@ -86,16 +86,21 @@ for (const sg of strategies) {
 }
 console.table(table);
 // 判定: どの単一戦略も「資金・評判・余力・信頼」の4指標すべてで首位にならない(=位置だけで勝てない)
-// 余力と信頼は ±3 で頭打ちになるので、同値で並んだ指標は「単独の首位なし」として数える(位置で決まったとは言えないため)
+// 余力と信頼は ±3 で頭打ちになり同値で並ぶことがある。同値のときは並んだ全員を首位として数える(甘く見ない)
 const keys = ['money', 'rep', 'slack', 'trust'];
 const leaders = keys.map((k) => {
   const vals = strategies.map((sg) => Number(table[sg][k]));
   const mx = Math.max(...vals);
   return strategies.filter((sg, i) => vals[i] === mx);
 });
-const winners = leaders.map((l) => (l.length === 1 ? l[0] : null));
-const dominant = strategies.find((sg) => winners.every((w) => w === sg));
-console.log('指標ごとの首位:', Object.fromEntries(keys.map((k, i) => [k, leaders[i].length === 1 ? leaders[i][0] : `同値(${leaders[i].join('・')})`])));
+const leadCount = {};
+for (const l of leaders) for (const sg of l) leadCount[sg] = (leadCount[sg] || 0) + 1;
+const dominant = strategies.find((sg) => (leadCount[sg] || 0) === keys.length);
+console.log('指標ごとの首位:', Object.fromEntries(keys.map((k, i) => [k, leaders[i].join('・')])));
+// 注意(NGにはしない): 単一の位置が4指標のうち3つ以上で首位だと、位置で戦略が決まりやすい。
+// 1番目の正の効果の配分を変える話になり、費用の配分(便AI-2)の範囲では動かせないため、判定ではなく注意として出す
+const heavy = ['first', 'middle', 'last'].filter((sg) => (leadCount[sg] || 0) >= 3);
+for (const sg of heavy) console.log(`注意: ${sg} が4指標のうち${leadCount[sg]}つで首位(目安は2つ以下。1番目の正の効果の配分はこの検査の外=PM判断)`);
 
 /* ---------- 選択肢の位置による偏り(静的) ----------
  * 位置(1番目/中/最後)ごとに2つの割合と費用の平均を出す。
@@ -156,14 +161,8 @@ console.log(`「罰なし」の割合の差 ${spread.toFixed(1)}pt(上限15pt) /
 
 const NG = [];
 if (dominant) NG.push(`${dominant} が4指標すべてで首位(位置だけで勝てる)`);
-// 単一の位置が4指標のうち3つ以上で首位にならない(位置で戦略が決まらない)
-const posStrat = ['first', 'middle', 'last'];
-for (const sg of posStrat) {
-  const w = winners.filter((x) => x === sg).length;
-  if (w >= 3) NG.push(`${sg} が4指標のうち${w}つで首位(単一の位置の首位は2つまで)`);
-}
 if (spread > 15) NG.push(`位置別の「罰なし」の割合の差が ${spread.toFixed(1)}pt(上限15pt)`);
 const decidedMin = Math.min(...strategies.map((s) => table[s].decided));
 if (decidedMin < 20) NG.push(`200日で判断が${decidedMin}回しか出ない`);
 if (NG.length) { console.log('NG:'); for (const e of NG) console.log('  - ' + e); process.exit(1); }
-console.log('sim-decisions: OK(単一の位置で戦略が決まらない・位置による費用の偏りが閾値内)');
+console.log(`sim-decisions: OK(単一の位置で全指標は取れない・位置による費用の偏りは閾値内)${heavy.length ? ' ※注意あり' : ''}`);

@@ -43,7 +43,7 @@
           fx: { examDelta: { d: 1.0, days: 10, label: '院長が教育に入る' }, slack: 1, next: { id: 'ST-01c', days: 20 } },
           when: [{ if: (c) => c.load >= 0.85, fx: { rep: -1 }, why: '混んでいる時期に診察を遅らせると、待ち時間の不満が出る' }],
           reflect: '医師の時間は最も高い資源。使う場所を選んだ判断' },
-        { id: 'asis', label: '今のまま見守る', note: '時間外が¥1,500/日で20日続く。新人の独り立ちで自然に解けることもある',
+        { id: 'asis', label: '今のまま見守る', note: '時間外が¥1,500/日で20日。先輩の疲れは続く。新人の独り立ちで解けることも',
           fx: { dailyCost: { yen: 1500, days: 20, label: '教える側の時間外' } }, chance: { p: 0.35, label: '先輩が体調を崩して休む', hit: { slack: -1, examDelta: { d: 0.6, days: 7, label: '看護1人欠け' } }, miss: { slack: 0 } },
           reflect: '見守るなら、限界の前に声をかける約束が要る' }
       ],
@@ -179,7 +179,7 @@
           fx: { delayed: [{ days: 30, label: '看護師が退職。採用を始める', fx: { staff: { nurses: -1 }, slack: -1, money: -150000 } }, { days: 45, label: '新しい看護師が入る', fx: { staff: { nurses: 1 } } }] },
           when: [{ if: (c) => c.load >= 0.85, fx: { rep: -1 }, why: '混んでいる時期の穴は、待ち時間と不満に直結した' }],
           reflect: '穴を空ける判断。空く時期が谷なら安く、山なら高い' },
-        { id: 'retain', label: '事情を聞き、残れる形を探す', note: '費用なし。余力−1。採用は始めない。非常勤で残る道も、断られることも',
+        { id: 'retain', label: '事情を聞き、残れる形を探す', note: '費用なし。余力−1。採用は始めない。非常勤で残る道もあれば、断られることも',
           fx: { slack: -1 },
           chance: { p: (c) => (c.slack >= 1 ? 0.5 : 0.3), label: '非常勤で午前だけ残ることになる', hit: { delayed: [{ days: 30, label: '非常勤化。処置は午前だけ', fx: { dailyCost: { yen: -6000, days: null, label: '非常勤化で日給が下がる' }, slack: -1 } }] }, miss: { delayed: [{ days: 30, label: '退職。採用はこれから', fx: { staff: { nurses: -1 }, slack: -1 } }] } },
           reflect: '残る形を探すのは誠実。外れた時の30日を失う覚悟もいる' }
@@ -277,7 +277,7 @@
           fx: { money: -300000, staff: { doctors: 1 }, dailyCost: { yen: -30000, days: null, label: '非常勤医師の終了' }, slack: 1, rep: 0.5 },
           when: [{ if: (c) => c.patients7 >= 35, fx: { trust: 1 }, why: '受け入れの枠が広がり、紹介元に「すぐ診られる」と伝えられた' }],
           reflect: '合う人を常勤にするのは、募集より確実で安い採用' },
-        { id: 'keep', label: '今の週2日のままにする', note: '費用なし。余力−1。本人の希望に応えられず、他院に軸を移す可能性',
+        { id: 'keep', label: '今の週2日のままにする', note: '費用なし。余力−1。本人の希望に応えられず、他院に軸を移す可能性がある',
           fx: { slack: -1 },
           chance: { p: 0.35, label: '非常勤医が他院を主にし、うちは週1日に', hit: { examDelta: { d: 0.5, days: 60, label: '非常勤医の日が減る' }, dailyCost: { yen: -15000, days: null, label: '非常勤医(週1日)' }, slack: -1 }, miss: {} },
           reflect: '現状維持は相手の事情で崩れる。相手にも選択肢がある' }

@@ -155,7 +155,7 @@
           req: { money: 80000 },
           fx: { money: -80000, dailyCost: { yen: 1000, days: null, label: '予約確認の自動連絡' }, slack: 1 },
           reflect: '小さく変えた。無断キャンセルは減り、電話は減らない' },
-        { id: 'keep', label: '電話と台帳のまま', note: '電話対応の時間外が¥1,000/日で60日。書き間違いも増える',
+        { id: 'keep', label: '電話と台帳のまま', note: '電話対応の時間外が¥1,000/日で60日。混むほど台帳の書き間違いが増える',
           fx: { dailyCost: { yen: 1000, days: 60, label: '電話対応の時間外' } },
           chance: { p: (c) => (c.load >= 0.85 ? 0.5 : 0.25), label: '予約の重複で待合が混乱する', hit: { rep: -1, slack: -1 }, miss: {} },
           reflect: '変えない費用は、混んだ日に確率で払う' }

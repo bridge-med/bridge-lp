@@ -217,7 +217,7 @@
           fx: { dailyCost: { yen: 500, days: null, label: '優先供給の契約' } },
           chance: { p: 0.25, label: '流行時に業者も供給できない', hit: { money: -60000, slack: -2 }, miss: {} },
           reflect: '在庫を約束に替えた。約束は相手の都合で破れる' },
-        { id: 'd7', label: '今のままにする', note: '小口購入が¥800/日で30日。流行が来れば品切れと防護不足の確率',
+        { id: 'd7', label: '今のままにする', note: '小口購入が¥800/日で30日。流行が来れば品切れ。高値調達と防護不足の確率',
           fx: { dailyCost: { yen: 800, days: 30, label: '都度の小口購入' } },
           when: [{ if: (c) => c.load >= 0.85, fx: { slack: -1 }, why: '混んでいる院ほど消耗が速く、切れる日が早い' }],
           chance: { p: 0.35, label: '流行で品切れになり職員が防護具無しで対応', hit: { money: -80000, slack: -2, rep: -1 }, miss: {} },
