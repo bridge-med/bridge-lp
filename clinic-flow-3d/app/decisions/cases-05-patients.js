@@ -448,7 +448,7 @@
       ask: '点眼継続の支援策',
       facts: (c) => [{ label: 'ケアマネジャーとの関係', val: `Lv${c.relations.caremane || 0}` }],
       choices: [
-        { id: 'aid', label: '点眼補助具と点眼表を渡す', note: '¥2,000相当の道具代。次回受診まで様子を見る。効果は本人の実行次第',
+        { id: 'aid', label: '点眼補助具と点眼表を渡す', note: '¥2,000の道具代。渡すだけでは続かないことがある',
           req: { money: 2000 },
           fx: { money: -2000, flag: 'pt_dropaid' },
           chance: { p: 0.5, label: '点眼が続くようになる', hit: { trust: 1 }, miss: {} },
@@ -462,7 +462,7 @@
           chance: { p: 0.35, label: '緑内障が進行し、家族から相談が来る', hit: { trust: -1, rep: -0.5 }, miss: {} },
           reflect: '様子を見た。進む病気は、見ている間も進む' }
       ],
-      lesson: '点眼の継続は、道具でも精神論でもなく続く仕組みで支える', point: '点眼アドヒアランスの支援'
+      lesson: '点眼が続くかは、本人の意思でなく、誰が見ているかで決まる', point: '点眼の継続支援'
     }
   ];
   if (typeof module !== 'undefined' && module.exports) module.exports = CASES;

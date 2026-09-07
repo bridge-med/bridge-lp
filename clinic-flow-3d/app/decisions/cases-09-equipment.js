@@ -468,14 +468,14 @@
       lesson: '大型機器の更新は、金額より止まる日数と依頼先で決まる', point: '透析装置の更新と稼働'
     },
     {
-      id: 'EQ-18', cat: 9, title: 'OCT導入後の検査の回し方', tier: 2, spec: ['ophthalmology'], who: 'ort', cool: 200,
+      id: 'EQ-18', cat: 9, title: '眼底三次元画像解析の回し方', tier: 2, spec: ['ophthalmology'], who: 'ort', cool: 200,
       cond: (c) => !!(c.mainEquip && c.mainEquip.oct),
-      say: '早坂です。眼底三次元画像解析(OCT)は月1回までしか算定できません。撮る順番、どう決めますか。',
-      bg: (c) => `告示上、OCTの算定は患者1人につき月1回まで。継続患者1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。`,
-      ask: 'OCTの検査枠の回し方',
-      facts: (c) => [{ label: '算定の回数', val: '患者1人につき月1回まで' }, { label: '資金', val: yen(c.money) }],
+      say: '眼底三次元画像解析は月1回までの算定です。撮る順番、どう決めますか。',
+      bg: (c) => `眼底三次元画像解析(OCT)を導入済み。継続患者1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。`,
+      ask: '眼底三次元画像解析の検査枠',
+      facts: (c) => [{ label: '算定の回数', val: '患者1人につき月1回まで(告示)' }, { label: '資金', val: yen(c.money) }],
       choices: [
-        { id: 'schedule', label: 'システムで来院間隔を管理する', note: '¥40,000。来院間隔を記録し、月1回の枠を自動で管理する',
+        { id: 'schedule', label: 'システムで来院間隔を管理する', note: '¥40,000。来院間隔を記録して月1回の枠を管理。余力+1',
           req: { money: 40000 },
           fx: { money: -40000, slack: 1, flag: 'eq_oct_sched' },
           when: [{ if: (c) => c.staffTotal >= 4, fx: { rep: 0.5 }, why: '職員が多いほど、記録の運用がすぐ定着した' }],
@@ -489,7 +489,7 @@
           chance: { p: 0.35, label: '算定できない撮影で材料費相当が無駄になる', hit: { money: -20000 }, miss: {} },
           reflect: '撮ってから選んだ。算定できない撮影は、患者にも職員にも重い' }
       ],
-      lesson: 'OCTは撮る枠より、いつ撮るかの管理が価値を決める', point: 'OCT検査の回し方'
+      lesson: '眼底三次元画像解析は、撮る枠より いつ撮るかで価値が決まる', point: '眼底三次元画像解析の運用'
     }
   ];
   if (typeof module !== 'undefined' && module.exports) module.exports = CASES;

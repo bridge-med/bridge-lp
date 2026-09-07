@@ -454,11 +454,11 @@
       id: 'SL-16', cat: 4, title: '学校健診の二次検査を引き受けるか', tier: 1, spec: ['ophthalmology'], who: 'doctor', cool: 150,
       cond: (c) => c.day >= 8,
       say: '高校から、視力の再検査になった生徒をまとめて診てほしいと連絡がありました。',
-      bg: (c) => `学校健診の二次検査。高校との関係 Lv${c.relations.school || 0}。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。`,
+      bg: (c) => `高校との関係 Lv${c.relations.school || 0}。1日平均${c.patients7}人、混み具合${Math.round(c.load * 100)}%。`,
       ask: '二次検査の受け方',
       facts: (c) => [{ label: '高校との関係', val: `Lv${c.relations.school || 0}` }, { label: '1日平均', val: `${c.patients7}人` }],
       choices: [
-        { id: 'batch', label: 'まとめて受け入れ日を作る', note: '費用なし。関係+1、生徒の新患が増える。当日は混み合う',
+        { id: 'batch', label: 'まとめて受け入れ日を作る', note: '費用なし。当日は混み合う。関係+1、生徒の新患が増える',
           fx: { rel: { school: 1 }, newMul: { mul: 1.05, days: 30, label: '学校健診の二次検査' } },
           when: [{ if: (c) => c.load >= 0.75, fx: { rep: -0.5 }, why: '混んでいる時期にまとめて受けると、一般患者の待ちが伸びた' }],
           reflect: 'まとめて受けた。関係は深まり、当日の混雑は残る' },
