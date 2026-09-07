@@ -2,6 +2,7 @@
  * 実行: node clinic-flow-3d/scripts/sim-decisions.mjs
  * 200日間、簡略化した経営モデル(患者数・売上・費用)の上で相談を回し、固定の選び方
  * (常に1番目/2番目/3番目・最安・最高額・ランダム)で結果を比べる。特定の位置だけで勝てる設計になっていないかを見る。
+ * 併せて、選択肢の位置ごとの「費用も負効果もない選択肢」の割合と90日換算費用の平均を静的に出す(便AI-2)。
  * ここでの経済は game.js の簡略版(検査用)。数字はゲーム本体の値ではない */
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -85,11 +86,83 @@ for (const sg of strategies) {
 }
 console.table(table);
 // 判定: どの単一戦略も「資金・評判・余力・信頼」の4指標すべてで首位にならない(=位置だけで勝てない)
+// 余力と信頼は ±3 で頭打ちになり同値で並ぶことがある。同値のときは並んだ全員を首位として数える(甘く見ない)
 const keys = ['money', 'rep', 'slack', 'trust'];
-const winners = keys.map((k) => strategies.slice().sort((a, b) => Number(table[b][k]) - Number(table[a][k]))[0]);
-const dominant = strategies.find((sg) => winners.every((w) => w === sg));
-console.log('指標ごとの首位:', Object.fromEntries(keys.map((k, i) => [k, winners[i]])));
-if (dominant) { console.log(`NG: ${dominant} が4指標すべてで首位(位置だけで勝てる)`); process.exit(1); }
+const leaders = keys.map((k) => {
+  const vals = strategies.map((sg) => Number(table[sg][k]));
+  const mx = Math.max(...vals);
+  return strategies.filter((sg, i) => vals[i] === mx);
+});
+const leadCount = {};
+for (const l of leaders) for (const sg of l) leadCount[sg] = (leadCount[sg] || 0) + 1;
+const dominant = strategies.find((sg) => (leadCount[sg] || 0) === keys.length);
+console.log('指標ごとの首位:', Object.fromEntries(keys.map((k, i) => [k, leaders[i].join('・')])));
+// 注意(NGにはしない): 単一の位置が4指標のうち3つ以上で首位だと、位置で戦略が決まりやすい。
+// 1番目の正の効果の配分を変える話になり、費用の配分(便AI-2)の範囲では動かせないため、判定ではなく注意として出す
+const heavy = ['first', 'middle', 'last'].filter((sg) => (leadCount[sg] || 0) >= 3);
+for (const sg of heavy) console.log(`注意: ${sg} が4指標のうち${leadCount[sg]}つで首位(目安は2つ以下。1番目の正の効果の配分はこの検査の外=PM判断)`);
+
+/* ---------- 選択肢の位置による偏り(静的) ----------
+ * 位置(1番目/中/最後)ごとに2つの割合と費用の平均を出す。
+ *  罰なし   = 確実に起きる効果に、費用(一時費用・継続費)も職員減も、余力・信頼・評判・認知・関係・コインの減も、
+ *             新患倍率<1 も診察時間の増も、遅延効果の負も無い選択肢。判定はこの列で行う
+ *  費用なし = そのうち費用(一時費用・継続費)と職員減だけを見た割合(参考)
+ *  90日換算費用 = 一時費用 + 継続費×min(日数,90)。「ずっと」の継続費は90日分で数える
+ * 確率(chance)と条件(when)は起きるとは限らないので、この静的検査では base の効果だけを見る */
+function fxCosty(fx) {
+  if ((fx.money || 0) < 0) return true;
+  if (fx.dailyCost && fx.dailyCost.yen > 0) return true;
+  if (fx.staff && Object.values(fx.staff).some((v) => v < 0)) return true;
+  return false;
+}
+function fxBad(fx) {
+  if (fxCosty(fx)) return true;
+  for (const k of ['slack', 'trust', 'rep', 'aw', 'coins']) if ((fx[k] || 0) < 0) return true;
+  if (fx.rel && Object.values(fx.rel).some((v) => v < 0)) return true;
+  if (fx.newMul && fx.newMul.mul < 1) return true;
+  if (fx.examDelta && fx.examDelta.d > 0) return true;
+  for (const d of fx.delayed || []) if (fxBad(d.fx || {})) return true;
+  return false;
+}
+function cost90(fx) {
+  let m = -Math.min(0, fx.money || 0);
+  if (fx.dailyCost && fx.dailyCost.yen > 0) m += fx.dailyCost.yen * Math.min(fx.dailyCost.days == null ? 90 : fx.dailyCost.days, 90);
+  return m;
+}
+// 判定用の中立な状況(この表は状況をずらしても動かないことを確認済み)
+const posCtx = {
+  day: 40, money: 1500000, rep: 60, aw: 0.4,
+  staff: { doctors: 1, nurses: 2, receptionists: 1, pts: 1, rehaAides: 0 }, staffTotal: 5,
+  specialty: 'orthopedics', stage: 3, depts: [], branches: 0, hospital: false, rehaLevel: 1, flags: {},
+  slack: 0, trust: 0, load: 0.7, patients7: 28, newp7: 8, refer7: 4, waitAvg: 25, balked7: 0,
+  monthProfit: 800000, monthRevenue: 5000000, dailyCost: 120000, runway: 12, rentDay: 25000, examMean: 6,
+  relations: { hospital: 1, caremane: 1, rouken: 0, pharmacy: 0, company: 0, sports: 0, school: 0, shoutengai: 0, houkatsu: 0 }, kaitei: 0
+};
+const POSK = ['1番目', '中', '最後'];
+const acc = { '1番目': { n: 0, free: 0, nocost: 0, yen: 0 }, '中': { n: 0, free: 0, nocost: 0, yen: 0 }, '最後': { n: 0, free: 0, nocost: 0, yen: 0 } };
+for (const c of D.all()) {
+  const n = c.choices.length;
+  c.choices.forEach((ch, i) => {
+    const fx = D.resolveFx(ch.fx, posCtx) || {};
+    const a = acc[i === 0 ? '1番目' : i === n - 1 ? '最後' : '中'];
+    a.n++; if (!fxBad(fx)) a.free++; if (!fxCosty(fx)) a.nocost++; a.yen += cost90(fx);
+  });
+}
+const posTable = {};
+for (const k of POSK) {
+  const a = acc[k];
+  posTable[k] = { 選択肢: a.n, 罰なし: `${a.free} (${(a.free / a.n * 100).toFixed(1)}%)`, 費用なし: `${a.nocost} (${(a.nocost / a.n * 100).toFixed(1)}%)`, '90日換算費用の平均': '¥' + Math.round(a.yen / a.n).toLocaleString('ja-JP') };
+}
+console.table(posTable);
+const freeRates = POSK.map((k) => acc[k].free / acc[k].n * 100);
+const spread = Math.max(...freeRates) - Math.min(...freeRates);
+const yens = POSK.map((k) => acc[k].yen / acc[k].n);
+console.log(`「罰なし」の割合の差 ${spread.toFixed(1)}pt(上限15pt) / 90日換算費用の最大÷最小 ${(Math.max(...yens) / Math.max(1, Math.min(...yens))).toFixed(1)}倍(目安2倍)`);
+
+const NG = [];
+if (dominant) NG.push(`${dominant} が4指標すべてで首位(位置だけで勝てる)`);
+if (spread > 15) NG.push(`位置別の「罰なし」の割合の差が ${spread.toFixed(1)}pt(上限15pt)`);
 const decidedMin = Math.min(...strategies.map((s) => table[s].decided));
-if (decidedMin < 20) { console.log(`NG: 200日で判断が${decidedMin}回しか出ない`); process.exit(1); }
-console.log('sim-decisions: OK(単一の位置で全指標を取る戦略は無い)');
+if (decidedMin < 20) NG.push(`200日で判断が${decidedMin}回しか出ない`);
+if (NG.length) { console.log('NG:'); for (const e of NG) console.log('  - ' + e); process.exit(1); }
+console.log(`sim-decisions: OK(単一の位置で全指標は取れない・位置による費用の偏りは閾値内)${heavy.length ? ' ※注意あり' : ''}`);

@@ -77,9 +77,10 @@ a { color: var(--blue-deep); }
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.head-btns { display: flex; gap: 6px; }
+.head-btns { display: flex; gap: 6px; flex: 0 0 auto; }
+.brand { min-width: 0; }
 .icon-btn {
-  width: 34px; height: 34px;
+  width: 44px; height: 44px; /* v75(保留#41): ヘッダー常設ボタンもタップ領域44px(保留#1 v34 の一括化基準に揃える) */
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--card);
@@ -110,13 +111,16 @@ a { color: var(--blue-deep); }
   color: var(--ink-2);
   font: 700 11px/1 var(--sans);
   border-radius: 999px;
-  padding: 7px 10px;
+  padding: 7px 8px; /* v75(保留#41): 横paddingを10→8に詰めて、⏸ を44px幅にしても375pxで1行を保つ(A案) */
   min-height: 44px; /* 44px化はまず高さ(v33 qa指摘の33px)。幅はHUD 8ボタンが390px幅に収まらないため自然幅のまま(WCAG AAの24pxは満たす)。≤360pxは折返し側で上書き */
 }
+.speed-btn[data-speed="0"] { min-width: 44px; } /* v75(保留#41): ⏸ は文字が1つで28px幅だった。タップ領域44px */
 .speed-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
 .speed-btn.skip { background: var(--amber-pale); border-color: rgba(201,138,45,0.4); color: var(--amber); font-weight: 800; }
 /* 320px級: 8ボタンは1行に収まらない。圧縮せず折り返す(幅を削るとWCAG AAの24pxを割る) */
 @media (max-width: 360px) {
+  .head-btns { gap: 4px; }
+  .eyebrow { letter-spacing: 0.14em; } /* v75: ボタン44px化で brand が104px幅になり「CLINIC TOWN 3D」が2行に折れた。字間を詰めて1行に戻す(題は元から2行) */
   .speed-group { flex: 1 0 100%; flex-wrap: wrap; gap: 4px; }
   .speed-btn { flex: 1 1 calc(25% - 3px); padding: 7px 4px; }
 }
