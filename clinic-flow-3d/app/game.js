@@ -4852,6 +4852,9 @@
       Object.assign(kw, kw._o, kws && kws[i] ? kws[i] : {});
     });
     for (const x of MISSIONS.concat(LEAGUE)) { if (x.title) { x._t = x._t || x.title; x.title = x._t.replace('{科名}', name); } }
+    // キホン集の科別上書き(v77 保留#42): preset.textbook = { index: { t, b } }。整形前提の項目だけ差し替える。制度上の数値は書かない(KB のみ)
+    const tb = m && m.main && m.main.preset && m.main.preset.textbook;
+    TEXTBOOK.forEach((c, i) => { if (!c._o) c._o = { t: c.t, b: c.b }; Object.assign(c, c._o, tb && tb[i] ? tb[i] : {}); });
     const rel = m && m.main && m.main.preset && m.main.preset.rel;
     const relHide = (m && m.main && m.main.preset && m.main.preset.relHide) || [];
     for (const [k, def] of Object.entries(REL_DEF)) { if (!def._o) def._o = { name: def.name, effect: def.effect, desc: def.desc }; Object.assign(def, def._o, rel && rel[k] ? rel[k] : {}); def.hidden = relHide.includes(k); }
