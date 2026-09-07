@@ -5292,7 +5292,8 @@
       refer7: Math.round((relLv('hospital') + 0.7 * (relLv('caremane') + relLv('rouken')) + (st ? DECISIONS.trustReferrals(st) : 0)) * 10) / 10,
       waitAvg: Math.round(avg('avgWait')), balked7: Math.round(avg('balked')),
       monthProfit, monthRevenue, dailyCost: dailyCostNow, runway: Math.max(0, Math.round(G.money / Math.max(1, dailyCostNow))),
-      rentDay: COSTS.rent[settings.floorLv], examMean: settings.examMean, relations: rel, kaitei: G.kaitei ? G.kaitei.count : 0
+      rentDay: COSTS.rent[settings.floorLv], examMean: settings.examMean, relations: rel, kaitei: G.kaitei ? G.kaitei.count : 0,
+      mainEquip: settings.mainEquip || null // 他科本院の設備(眼科の検査・手術設備。v79 便AI-3・眼科固有ケースの存在条件)
     };
   }
   const decWho = (c) => (typeof c.who === 'string' ? DECISIONS.WHO[c.who] || { name: c.who, title: '', emoji: '💬' } : Object.assign({ emoji: '💬' }, c.who));

@@ -33,6 +33,7 @@
     front: { name: '松岡', title: '受付リーダー', emoji: '🧑‍💼' },
     billing: { name: '佐伯', title: '医事課', emoji: '🧾' },
     reha: { name: '湊', title: 'リハ・物療担当', emoji: '🏃' },
+    ort: { name: '早坂', title: '視能訓練士', emoji: '👁' },
     advisor: { name: '白瀬', title: '経営アドバイザー(本部)', emoji: '📊' },
     family: { name: '患者の家族', title: '', emoji: '👨‍👩‍👧' },
     patient: { name: '患者', title: '', emoji: '🧓' },
@@ -125,6 +126,7 @@
     // 話者の存在
     const who = typeof c.who === 'string' ? c.who : null;
     if (who === 'reha' && ctx.specialty !== 'orthopedics') return { ok: false, why: '湊は整形本院だけ' };
+    if (who === 'ort' && ctx.specialty !== 'ophthalmology') return { ok: false, why: '早坂は眼科本院だけ' };
     if (who === 'branch' && ctx.branches < 1 && ctx.depts.length < 1) return { ok: false, why: '分院・部門が無い' };
     if (who === 'homecare' && !ctx.depts.includes('homecare')) return { ok: false, why: '在宅部門が無い' };
     if (who === 'dialysis' && !ctx.depts.includes('dialysis')) return { ok: false, why: '透析部門が無い' };
