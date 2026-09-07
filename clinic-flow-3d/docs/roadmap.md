@@ -506,7 +506,9 @@ v33でLayer 3(Reimbursement Engine)と診療科モジュール基盤が入った
 13ab. **v80 AA トークン小便(計画・計測コミット0)**: 13s 保留①「--green-deep/--red が白地でも AA 未達。トークンを沈めるか」(社長未回答)を styles.css だけで閉じる便。PM 13aa の順序=AI-3 の次。
     計測(2026-09-07・現場・WCAG 相対輝度で計算): 白地(--card)でのコントラスト比=--green-deep #3A8A70 4.16/--red #C4574E 4.36/--ink-3 #7C929E 3.25/--amber #C98A2D 2.93/--green #4FA98C 2.84/--blue #3E7CA6 4.53/--ink-2 6.87/--blue-deep 6.85。--bg・--bg-deep・各 pale 地ではさらに低い(green-deep は green-pale 上で 3.57、red は red-pale 上で 3.66)。使用箇所(styles.css)=green-deep 29・red 21・amber 21・ink-3 62・green 9・blue 13。
     色相・彩度を保ち明度だけ下げて全ての地で 4.5:1 以上になる最小の暗さ: --green-deep→#31745F(白 5.54・green-pale 4.75)/--red→#B5453C(白 5.41・red-pale 4.54)/--ink-3→#596D78(白 5.41)/--amber→#8D611F(白 5.44)。
-    designer(opus・判定のみ・数値先渡し)に A(トークン値を沈める)/B(AA が要る用途だけ個別に濃い色へ)/C(本文用の新トークン)の推奨と、--ink-3(補足の薄い字62箇所)の扱い、社長への1問の文案を諮った(結果待ち)。
+    designer(opus・判定のみ・数値先渡し)=**A(トークン値を沈める)**。対象4つ=--ink-3 #596D78・--green-deep #31745F・--red #B5453C・--amber #8D611F(--green は文字色での使用ゼロ=塗りだけなので据え置き)。C(本文用の新トークン)は同じ色が2値で並び第22条に反する。B(部品ごと)は置換118箇所で不整合が残る。--ink-3 の文字色59箇所は最大12px=大きな文字基準に該当ゼロ→全数沈める。--amber は文字色18箇所すべて AA 未達(.diag.warn/.staff-chip.under/.mission-row.now b/.rel-stars 等)・.lg-tier.t-you の白抜き 2.93 も同時に解消。副作用=amber のハードコード(rgba(201,138,45,*) 3箇所・#DBA95B)を追随。pale 地は 4.54〜4.75 と余裕が薄いので pale 側は触らない。ダーク非対応(保留#2)はこの便では解かない。
+    実装(worktree aa-local=ai3-local の上・01f17d5・未push): 4トークン+ハードコード3箇所+sw v80。前後スクショ(390・Day12・整形本院): scratchpad/aa_before|after_{1_mgmt,2_clinic_top,3_todo,4_decision}.png。
+    **社長への1問(designer 文案)**: 「読みにくい薄字(補足文・警告の橙・数字の赤緑)を、色味はそのままに一段だけ濃くします。ゲーム全体の印象がわずかに引き締まる方向に変わりますが、進めてよいですか」(13s 保留①の回答に相当)。
 14. **便L(v45 PM整理・v46訂正)**: 精神科まとめ(指定医決裁後)。
     ~~count_limit月次機械化の先行(便L')~~は**前提が誤りと判明し中止(v46検証)**:
     J038月14回はpackのLIMITS({per:month,max:14})で機械化済みで、15回目は患者単位で却下される
