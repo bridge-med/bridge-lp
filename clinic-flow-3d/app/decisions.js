@@ -165,7 +165,8 @@
     });
     const maxP = Math.max(...scored.map((s) => s.w));
     // 状況優先度が高いものがあれば、その層から選ぶ(人員不足・資金不足・紹介増に応じる)
-    const top = scored.filter((s) => s.w >= Math.max(1, maxP - 1.5));
+    const top0 = scored.filter((s) => s.w >= Math.max(1, maxP - 1.5));
+    const top = top0.length ? top0 : scored; // 候補が全て既出(0.35)で層が空になると top[-1] を読んで落ちる(v79 qa が957日目で発見)。層が空なら全候補から選ぶ
     const tot = top.reduce((a, s) => a + s.w, 0);
     let x = r() * tot;
     for (const s of top) { x -= s.w; if (x <= 0) return { c: s.c }; }
