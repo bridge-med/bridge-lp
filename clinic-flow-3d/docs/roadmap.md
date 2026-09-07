@@ -511,6 +511,11 @@ v33でLayer 3(Reimbursement Engine)と診療科モジュール基盤が入った
     実装(worktree aa-local=ai3-local の上・01f17d5・未push): 4トークン+ハードコード3箇所+sw v80。前後スクショ(390・Day12・整形本院): scratchpad/aa_before|after_{1_mgmt,2_clinic_top,3_todo,4_decision}.png。
     qa(sonnet・worktree 8771)=出荷可(不合格0): check-site・tests 8ファイル・実測コントラスト(描画色と合成背景から計算)= P&L の負値 5.41・pnl-note/ctrl-note/shop-hint 5.41(green-pale 上 4.64)・staff-chip under 4.82/over 4.54/ok 4.75・mission-row.now 5.44・todo-tag 4.82・dec-line pos 5.54/neg 5.41・lg-tier.t-you(白抜き)5.44・rel-stars 5.44=12px 以下の文字は全て 4.5 以上。4タブで横はみ出し0・amber のグラデ/枠は新系統で描画・エラー0・sw v80。未検証=.dec-block/.dec-none の実描画(同トークンの比で類推可)。参考=canvas/SVG/3D の装飾色(受付ドット・屋根・脈拍グラフ等)は旧値のまま(テキストのコントラスト対象外・本便の範囲外。ダーク対応の便で一緒に)。
     **社長への1問(designer 文案)**: 「読みにくい薄字(補足文・警告の橙・数字の赤緑)を、色味はそのままに一段だけ濃くします。ゲーム全体の印象がわずかに引き締まる方向に変わりますが、進めてよいですか」(13s 保留①の回答に相当)。
+13ac. **便AF-3(v81・精神科・心療内科を本院候補の4枚目に)— 設計先行(designer opus・docs/af3-design.md)**: 論点=診察時間の二重操作系。結論=**A案**(本院精神科では examMean スライダーを出さず、通院精神療法の「診察時間の方針」3択(std/mix/long)が唯一の時間レバー。examMean は3択から導出)。根拠=本院キャパ doctors×480/(examMean+1.5)×0.72 は「1日の診察分数の予算」そのもので timePlan と同一の量(単位違いの同じレバー=第27条)。C案(スライダーに統合)は 30分の段を表現できず制度を誤って伝える。第8条・第14条は3択の各行に「1日に診られる目安 約N人」(std 約25/mix 約19/long 約12)を出して満たす。
+    副作用(重要): 分院は「長く診る→中断が減る」、本院は「診察が長い→待ち↑→満足↓→定着↓」で符号が逆=このままだと long は選ぶ意味のない分岐→`mod.mainLoyalty(policy)` を onDischargeDept の定着に掛ける(効き幅は計測で)。行き止まり=本院 shim に psws(精神保健福祉士)が無く早期診療体制充実加算3 の要件行が永久に埋まらない→settings.psws+SHOP 1行+mainStaffCost+shim の4点。情報行=shim に last が無いので「昨日の診察時間/翌日へN件」が本院で消える→本院は「診られず帰ったK人」(前日 balked)に置き換える。
+    扉の1行案=「話を聴いて診る。点数は時間の区分」(推奨)/「一人に長く向き合う。分かれ目は30分」。preset=内科・眼科と同形(差分: jihiHide に prpOn・relHide sports)。抽出=psychiatry.js の runDay から「1回の来院で何をするか」と「1日の分数予算」を分ける(v73 眼科の planVisit/pickProfile と同型)。
+    着手前の計測6項目(§5)は本院精神科の試作が要るため v81 着手時の計測コミット0で(基準線・examCap 実測・timePlan 3値×Day30 の月商比と定着比=long/std が60%を割れば補正・#policyCard の高さ・加算3の要件行・A001注8 の却下)。
+    保留(社長): ①扉の1行(案1/案2) ②「長く診るほど定着が上がる」というゲーム上の仮定を本院に足すか(足さないと3択が成立しない) ③prpOn の jihiHide を精神科だけにするか眼科・内科にも同時に。
 14. **便L(v45 PM整理・v46訂正)**: 精神科まとめ(指定医決裁後)。
     ~~count_limit月次機械化の先行(便L')~~は**前提が誤りと判明し中止(v46検証)**:
     J038月14回はpackのLIMITS({per:month,max:14})で機械化済みで、15回目は患者単位で却下される
