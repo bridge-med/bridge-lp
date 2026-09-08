@@ -27,7 +27,7 @@
     desc: '診察時間の配分が柱。時間区分がそのまま点数になり、1日の使い方が経営を決める',
     // 開始の扉の候補=本院として引き継げる(v82 便AF-3・4枚目)。preset は本院の settings に上書きする整形専用レバーのゼロ化と方針の初期値
     main: {
-      line: '気分障害と不安障害。点数は時間の区分', order: 4, fsTitle: '精神科の届出',
+      line: '気分障害と不安障害。点は時間区分', order: 4, fsTitle: '精神科の届出',
       preset: {
         // examMean は診察時間の方針(timePlan)から導く(mainExamMean)。std の値を初期値に置く
         settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0, examMean: 12, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, psws: 0, dexa: false, echo: false },
