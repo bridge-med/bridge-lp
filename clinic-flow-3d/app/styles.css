@@ -189,6 +189,18 @@ a { color: var(--blue-deep); }
 .card-title small { font: 500 11px/1.5 var(--sans); color: var(--ink-3); font-weight: 500; }
 .sub-title { font: 800 12.5px/1.4 var(--sans); color: var(--ink-2); margin: 14px 0 8px; }
 
+/* ===== 📖 くわしく(v81 便AJ-2): カード見出し行の右に置く統一部品。1カード1個・44px・新色なし ===== */
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.card-head .card-title { flex: 1 1 auto; min-width: 0; margin-bottom: 0; }
+.card-tools { flex: 0 0 auto; display: flex; gap: 6px; }
+.mini-btn.learn-toggle { font-weight: 700; padding: 9px 10px; }
+.mini-btn.learn-toggle.on { border-color: rgba(62,124,166,0.45); color: var(--blue-deep); background: var(--blue-pale); }
+.learn-row { display: flex; justify-content: flex-end; margin: 8px 0 4px; }
+[data-learn-fold][hidden] { display: none !important; }
+/* 文中の切り替えリンク(レーンの既定) */
+.link-btn { border: none; background: none; padding: 6px 0; font: 600 11px/1.6 var(--sans); color: var(--blue-deep); text-decoration: underline; }
+.lane-line { text-align: left; }
+
 /* ---------- ステージ ---------- */
 
 .stage-wrap {

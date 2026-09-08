@@ -418,7 +418,7 @@
     examMean: 6, pTreat: 0.15, pReha: 0.35, pInj: 0.2, pTrig: 0.12, pPhysio: 0.35,
     selfReha: false, selfRehaPrice: 8000, goods: false,
     prpOn: false, prpPrice: 55000, agaOn: false, agaPrice: 6000,
-    learnMode: false, specialty: 'orthopedics', mainPolicy: null, mainFs: [], mainEquip: null, // mainEquip=他科本院の設備(v73 便AF・眼科の検査設備投資)
+    lane: 'play', specialty: 'orthopedics', mainPolicy: null, mainFs: [], mainEquip: null, // mainEquip=他科本院の設備(v73 便AF・眼科の検査設備投資)
     schedule: ['full', 'full', 'full', 'am', 'full', 'am', 'closed'] // 月〜日
   };
 
@@ -427,7 +427,7 @@
     day: 1, t: 0, speed: 2,
     // Reimbursement Debugger: ?debug=1 で算定詳細に評価トレースを表示
     debugMode: typeof location !== 'undefined' && /[?&]debug=1/.test(location.search),
-    receiptDetailOpen: false,
+    learnOpen: {}, // 「📖 くわしく」の開閉(カードid -> bool。未設定のカードは settings.lane の既定に従う)
     corpOpen: null, // 法人タブで展開中の拠点(索引+1件展開)
     billboard: false,
     relations: {}, // key -> {lv, last}
@@ -564,7 +564,7 @@
           branches: G.branches, depts: G.depts, missionIdx: G.missionIdx, missionDone: G.missionDone,
           tutorialDone: G.tutorialDone, plan: G.plan,
           lastStage: G.lastStage, blackStreak: G.blackStreak,
-          coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
+          coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone, learnOpen: G.learnOpen,
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
           specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
@@ -590,6 +590,10 @@
       if (typeof SPECIALTIES !== 'undefined') { const mm = SPECIALTIES.get(settings.specialty); for (const k of (mm && mm.main && mm.main.preset && mm.main.preset.jihiHide) || []) settings[k] = false; }
       Object.keys(REL_DEF).forEach((k) => { if (!G.relations[k]) G.relations[k] = { lv: 0, last: 0 }; });
       if (!G.cum) G.cum = { revenue: 0, profit: 0 };
+      // v81 便AJ-2: 旧セーブの 🎓 学習モードを2レーンへ引き継ぐ(learnMode:true → 'learn'、それ以外・無しは 'play')
+      if (settings.lane !== 'play' && settings.lane !== 'learn') settings.lane = settings.learnMode === true ? 'learn' : 'play';
+      delete settings.learnMode;
+      if (!G.learnOpen || typeof G.learnOpen !== 'object') G.learnOpen = {};
       if (d.g.blackStreak === undefined) G.blackStreak = 0;
       // 旧セーブは進行度から解放段階を復元(演出なしで全解放)
       if (d.g.lastStage === undefined) G.lastStage = G.day >= 8 ? 3 : G.day >= 4 ? 2 : 1;
@@ -1948,6 +1952,46 @@
     });
   }
 
+  /* ================= 📖 くわしく(v81 便AJ-2): 説明文を1タップで開く統一部品 =================
+   * レーンで変えるのは説明文の初期状態(開/閉)だけ。カードの有無・名称と数値・タブ構成は両レーンで同じ。
+   * 部品はカード見出し行の右の .mini-btn.learn-toggle(1カード1個)。畳む側の要素には data-learn-fold を付ける。
+   * settings.lane = 'play'(まず動かす) | 'learn'(根拠から読む)。カードごとの開閉は G.learnOpen[cardId] に保存する。 */
+
+  function learnIsOpen(id) {
+    if (G.learnOpen && Object.prototype.hasOwnProperty.call(G.learnOpen, id)) return !!G.learnOpen[id];
+    return settings.lane === 'learn';
+  }
+  // 畳む側の要素に付ける属性。閉じているときは hidden(高さ0)
+  function foldAttr(id) { return ` data-learn-fold="${id}"${learnIsOpen(id) ? '' : ' hidden'}`; }
+  // 見出し行の右に置く統一部品。title は「何が開くか」(第14条)
+  function learnBtn(id, title) {
+    const o = learnIsOpen(id);
+    return `<button class="mini-btn learn-toggle${o ? ' on' : ''}" data-learn="${id}" aria-expanded="${o}"${title ? ` title="${title}"` : ''}>${o ? '📖 とじる' : '📖 くわしく'}</button>`;
+  }
+  function learnRow(id, title) { return `<div class="learn-row">${learnBtn(id, title)}</div>`; }
+  // 開閉を DOM に反映(描画しなおさない側)。ボタンの文言も同時に合わせる
+  function applyLearn() {
+    document.querySelectorAll('[data-learn-fold]').forEach((el) => { el.hidden = !learnIsOpen(el.dataset.learnFold); });
+    document.querySelectorAll('[data-learn]').forEach((b) => {
+      const o = learnIsOpen(b.dataset.learn);
+      b.textContent = o ? '📖 とじる' : '📖 くわしく';
+      b.classList.toggle('on', o);
+      b.setAttribute('aria-expanded', String(o));
+    });
+  }
+  // 中身を描き直さないと出せないカードだけ、再描画関数を登録する
+  const LEARN_RERENDER = {};
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('[data-learn]') : null;
+    if (!b) return;
+    const id = b.dataset.learn;
+    if (!G.learnOpen || typeof G.learnOpen !== 'object') G.learnOpen = {};
+    G.learnOpen[id] = !learnIsOpen(id);
+    save();
+    if (LEARN_RERENDER[id]) LEARN_RERENDER[id]();
+    applyLearn();
+  });
+
   /* ================= 🧾 レセプト表示・加算届出(算定の学び) ================= */
 
   const TYPE_NAMES = { first: '初診', revisit: '再診', rehab: 'リハ再診', checkup: '健診' };
@@ -1959,15 +2003,14 @@
     const r = G.lastReceipt;
     if (!r) { card.hidden = true; return; }
     card.hidden = false;
-    const learn = !!settings.learnMode;
-    const open = KBI && (learn || G.receiptDetailOpen);
+    const open = KBI && learnIsOpen('receipt'); // 算定詳細=このカードの「📖 くわしく」の中(v81 便AJ-2)
 
     // 明細行: KB読込済みかつKB項目の行だけを「実点数(出典あり)」として扱う。
     // それ以外の点数行は教育用概算(KB未読込時は全行が概算表示になる)
     const isKb = (x) => KBI && x.kb;
     const rows = r.rc.map((x) => `<div class="rcpt-row${isKb(x) ? ' kb' : ''}"><span>${x.n}${isKb(x) ? '' : (x.t ? ' <i class="sim-tag">概算</i>' : '')}</span><b>${x.t ? `${x.t.toLocaleString()}点` : yen(x.y)}</b></div>`).join('');
 
-    // 算定詳細(学習モード/トグルで展開): 根拠・未算定とその理由
+    // 算定詳細(「📖 くわしく」で展開): 根拠・未算定とその理由
     let detail = '';
     if (open) {
       const pageOf = (ev) => (ev && ev.page ? String(ev.page).replace(/^PDF\s*/, '') : '');
@@ -1997,25 +2040,30 @@
         ${dwarn.length ? `<p class="kb-cond">dev: ${dwarn.map((w) => w.message).join(' / ')}</p>` : ''}
         <p class="rcpt-note">出典: ${usedDocs.join(' / ') || '令和8年度診療報酬KB'}。「概算」の行はKB未登録の教育用簡略値</p>
         ${G.debugMode && r.kb ? `<pre class="kb-trace">${JSON.stringify(r.kb.trace, null, 1)}</pre>` : ''}
+        <p class="rcpt-note lane-line"><button class="link-btn" id="laneDefaultBtn">${settings.lane === 'learn' ? '押したときだけ開くようにする(まず動かす)' : 'これからも開いたままにする(根拠から読む)'}</button></p>
       </div>`;
     }
 
     el.innerHTML = `
-      <div class="rcpt-head"><span class="rcpt-head-t"><b>${TYPE_NAMES[r.type] || r.type}</b> <small>${SEG_NAMES[r.seg] || ''}の患者さん</small></span>
-        <span class="rcpt-tools">
-          <button class="mini-btn${learn ? ' plus' : ''}" id="learnModeBtn" title="診療報酬の根拠を常に表示">🎓 学習モード${learn ? 'ON' : ''}</button>
-          ${learn || !KBI ? '' : `<button class="mini-btn" id="rcptDetailBtn">${open ? '閉じる' : '📖 算定詳細'}</button>`}
-        </span>
-      </div>
+      <div class="rcpt-head"><span class="rcpt-head-t"><b>${TYPE_NAMES[r.type] || r.type}</b> <small>${SEG_NAMES[r.seg] || ''}の患者さん</small></span></div>
       ${rows}
       <div class="rcpt-row total"><span>合計${r.ten ? `(${r.ten.toLocaleString()}点)` : ''}</span><b>${yen(r.yen)}</b></div>
       ${detail}
       ${open ? '' : `<p class="rcpt-note">1点=10円・全国一律の公定価格${KBI ? '。点数は令和8年度診療報酬KB(告示・通知の一次資料照合済み)に同期' : '(教育用の概算)'}</p>`}`;
-    const lb = $('learnModeBtn');
-    if (lb) lb.addEventListener('click', () => { settings.learnMode = !settings.learnMode; save(); renderReceipt(); });
-    const db = $('rcptDetailBtn');
-    if (db) db.addEventListener('click', () => { G.receiptDetailOpen = !G.receiptDetailOpen; renderReceipt(); });
+    const tools = $('receiptTools');
+    if (tools) tools.innerHTML = KBI ? learnBtn('receipt', '算定の根拠・未算定の理由・出典') : '';
+    // レーンの既定はこの1行で切り替える(設定画面は作らない=第14条)
+    const ld = $('laneDefaultBtn');
+    if (ld) ld.addEventListener('click', () => {
+      settings.lane = settings.lane === 'learn' ? 'play' : 'learn';
+      G.learnOpen = {};
+      save();
+      renderReceipt();
+      applyLearn();
+      toast(settings.lane === 'learn' ? '📖 根拠から読む — 説明は最初から開きます' : '▶ まず動かす — 説明は押したときだけ開きます');
+    });
   }
+  LEARN_RERENDER.receipt = () => renderReceipt();
 
   // 施設基準・届出(運動器リハ以外の加算): 小さな点数も「仕組み」で積み上がる。
   // 点数・区分は令和8年度KBに同期(時間外対応体制加算はR8で改称・4区分。ゲームは3と1の2段を採用)。
