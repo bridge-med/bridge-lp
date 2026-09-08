@@ -3770,10 +3770,11 @@
       const i = d.last && d.last.info;
       // 本院は診察時間スライダーを出さない代わりに、3択の各行に1日の診察キャパを常時出す(v82 便AF-3・第8条)
       const showCap = d.isMain && m.mainExamMean;
-      // 目安は各行末尾に同じ形(<small class="dt-cap">)で統一し、CSSの改行で3行の位置を揃える(v82 便AF-3 designer照合)
+      // 目安は各行の末尾に同じ形(<small class="dt-cap">)で統一し、行を折り返して3行とも同じ x に揃える(v82 便AF-3 designer照合)
       const cap = showCap
         ? (plan) => `<small class="dt-cap">目安 約${mainExamCap(d.staff.doctors, m.mainExamMean({ timePlan: plan }))}人</small>`
         : () => '';
+      const rowCls = showCap ? ' has-cap' : '';
       // 本院の shim は d.last を持たない。前日の「診られず帰った人数」を代わりに出す(判断を変える値=常時)
       const lastDay = d.isMain ? [...G.history].reverse().find((x) => x.kind !== 'closed') : null;
       // 注記(協定の内訳・一般名処方の要件)は「くわしく」に畳む。判断を変える値(点数・目安人数・価格)は常時のまま(本院だけ・便AJ-2の畳み規則B)
@@ -3781,14 +3782,14 @@
       return `
       <div class="dept-lever">
         <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)。中断の増減はゲーム上の仮定${showCap ? '。各行の末尾は1日に診られる目安' : ''}</small></span>
-        <button class="choice-row ${cur === 'std' ? 'on' : ''}" data-dtime="${m.id}:std">
-          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点。多く診られるが中断は起きやすい${cap('std')}</span>
+        <button class="choice-row ${cur === 'std' ? 'on' : ''}${rowCls}" data-dtime="${m.id}:std">
+          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点。多く診られるが中断は起きやすい</span>${cap('std')}
         </button>
-        <button class="choice-row ${cur === 'mix' ? 'on' : ''}" data-dtime="${m.id}:mix">
-          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点。収益と治療の継続の間を取る${cap('mix')}</span>
+        <button class="choice-row ${cur === 'mix' ? 'on' : ''}${rowCls}" data-dtime="${m.id}:mix">
+          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点。収益と治療の継続の間を取る</span>${cap('mix')}
         </button>
-        <button class="choice-row ${cur === 'long' ? 'on' : ''}" data-dtime="${m.id}:long">
-          <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点。人数は減るが中断は最も少ない${cap('long')}</span>
+        <button class="choice-row ${cur === 'long' ? 'on' : ''}${rowCls}" data-dtime="${m.id}:long">
+          <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点。人数は減るが中断は最も少ない</span>${cap('long')}
         </button>
         ${lastDay ? `<div class="pnl-row"><span>昨日 混雑で帰った</span><b>${lastDay.balked || 0}人</b></div>` : ''}
         ${i ? `<div class="pnl-row"><span>昨日の診察時間</span><b>${i.usedMin}分 / 枠${i.budgetMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''}</b></div>` : ''}
