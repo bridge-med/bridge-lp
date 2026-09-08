@@ -2416,7 +2416,7 @@
       <div class="shop-row">
         <div class="shop-info">
           <span class="shop-name">${item.label}${act ? ` <span class="boost-on">実施中(Day ${G.boosts[id]}まで)</span>` : ''}</span>
-          <span class="shop-hint"${foldAttr('item')}>${item.hint}</span>
+          <span class="shop-hint">${item.hint}</span>
         </div>
         <div class="shop-btns"><button class="mini-btn ${G.coins >= item.coin && !act ? 'plus' : ''}" data-item="${id}" ${act ? 'disabled' : ''}>🪙 ${item.coin}</button></div>
       </div>`;
@@ -2425,7 +2425,7 @@
       <div class="shop-row ${G.deco[id] ? 'expand-row done' : ''}">
         <div class="shop-info">
           <span class="shop-name">${f.label}${G.deco[id] ? ' <small>設置済み</small>' : ''}</span>
-          <span class="shop-hint"${foldAttr('item')}>${f.hint}</span>
+          <span class="shop-hint">${f.hint}</span>
         </div>
         ${G.deco[id] ? '' : `<div class="shop-btns"><button class="mini-btn ${G.coins >= f.coin ? 'plus' : ''}" data-fac="${id}">🪙 ${f.coin}</button></div>`}
       </div>`).join('');
@@ -2433,8 +2433,6 @@
       <p class="plan-lead">🪙コインは<b>ミッション・実績・年次決算</b>で獲得(現在 <b>🪙 ${G.coins}</b>)。アプリ版なら課金ポイントになる部分を、ゲーム内通貨で体験する設計です。</p>
       <h3 class="sub-title">⚡ ブースト(期間限定)</h3>${boostRows}
       <h3 class="sub-title">🏛 プレミアム施設(買い切り・院内ビューに表示)</h3>${facRows}`;
-    const itemTools = $('itemTools');
-    if (itemTools) itemTools.innerHTML = learnBtn('item', '各アイテムの効果の内訳');
     el.querySelectorAll('[data-item]').forEach((b) => b.addEventListener('click', () => buyItem(b.dataset.item)));
     el.querySelectorAll('[data-fac]').forEach((b) => b.addEventListener('click', () => buyFacility(b.dataset.fac)));
   }
@@ -3088,8 +3086,6 @@
       </button>`).join('');
     const openMin = settings.schedule.reduce((a, k) => a + DAY_SPECS[k].min, 0);
     $('scheduleNote').innerHTML = `週<b>${(openMin / 60).toFixed(0)}時間</b> / 午前=人件費6割 / 日曜=手当1.4倍・新患1.3倍`;
-    const schTools = $('scheduleTools');
-    if (schTools) schTools.innerHTML = learnBtn('schedule', '週の診療時間と人件費・手当の関係');
     el.querySelectorAll('[data-sch]').forEach((b) => b.addEventListener('click', () => {
       const i = Number(b.dataset.sch);
       const order = ['full', 'am', 'closed'];
@@ -3175,7 +3171,7 @@
       <div class="shop-row">
         <div class="shop-info">
           <span class="shop-name">${item.label} <b class="shop-count">${cur}${item.day ? '人' : ''}</b> <small class="shop-max">/ 最大${max}</small></span>
-          <span class="shop-hint"${foldAttr('shop')}>${item.hint}</span>
+          <span class="shop-hint">${item.hint}</span>
           ${vt ? `<span class="shop-voice">${STAFF_UI.faceSVG(vc, 'normal', 17)} ${STAFF_UI.STAFF[vc].name}「${vt}」</span>` : ''}
         </div>
         <div class="shop-btns">
@@ -3296,28 +3292,26 @@
     el.innerHTML = `
       ${jihiHidden('selfReha') ? '' : `<div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.selfReha ? 'on' : ''}" data-jihi="selfReha">🏃 自費リハ延長</button>
-        <span class="jihi-stat"${foldAttr('jihi')}>想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)</span></div>
+        <span class="jihi-stat">想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)</span></div>
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.selfRehaPrice)}</b></span>
         <input type="range" data-jprice="selfRehaPrice" min="4000" max="15000" step="1000" value="${settings.selfRehaPrice}"></label>
       </div>`}
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>
-        <span class="jihi-stat"${foldAttr('jihi')}>想定 ${prpDemand.toFixed(1)}件/日・原価 ${yen(FEES.prpCogs)}/件</span></div>
+        <span class="jihi-stat">想定 ${prpDemand.toFixed(1)}件/日・原価 ${yen(FEES.prpCogs)}/件</span></div>
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.prpPrice)}</b></span>
         <input type="range" data-jprice="prpPrice" min="30000" max="165000" step="5000" value="${settings.prpPrice}"></label>
       </div>
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.agaOn ? 'on' : ''}" data-jihi="agaOn">💇 AGA外来(継続課金)</button>
-        <span class="jihi-stat"${foldAttr('jihi')}>会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日・原価率35%</span></div>
+        <span class="jihi-stat">会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日・原価率35%</span></div>
         <label class="ctrl"><span class="ctrl-head">月額 <b>${yen(settings.agaPrice)}</b></span>
         <input type="range" data-jprice="agaPrice" min="3000" max="15000" step="1000" value="${settings.agaPrice}"></label>
       </div>
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.goods ? 'on' : ''}" data-jihi="goods">🦵 物販(サポーター等)<small> 原価60%</small></button>
-        <span class="jihi-stat"${foldAttr('jihi')}>一部が購入・¥3,500</span></div>
+        <span class="jihi-stat">一部が購入・¥3,500</span></div>
       </div>`;
-    const jihiTools = $('jihiTools');
-    if (jihiTools) jihiTools.innerHTML = learnBtn('jihi', '想定件数と原価の内訳');
     el.querySelectorAll('[data-jihi]').forEach((b) => b.addEventListener('click', () => {
       const k = b.dataset.jihi;
       if (k === 'prpOn' && !settings.prpOn) {
@@ -4073,8 +4067,6 @@
   // 診療方針カード(v66): 整形本院は従来のスライダー(.ctrl-grid)、他科本院はモジュールのレバー(部門と同じHTML)を #mainLever に描く
   function renderPolicyCard() {
     const card = $('policyCard'); if (!card) return;
-    const policyTools = $('policyTools');
-    if (policyTools) policyTools.innerHTML = learnBtn('policy', '点数の根拠と診察への影響');
     const grid = card.querySelector('.ctrl-grid');
     let lever = $('mainLever');
     if (!lever) { lever = document.createElement('div'); lever.id = 'mainLever'; card.appendChild(lever); }
@@ -4611,7 +4603,7 @@
         }
       }
       return `<div class="kijun-row ${active ? 'ok' : ''}">
-        <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small${foldAttr('kijun')}>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
+        <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
         ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
     }).join('') + `<p class="pnl-note"${foldAttr('kijun')}>要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。告示・通知の引用は直近の会計の「📖 くわしく」で読める。</p>`;
@@ -4624,7 +4616,7 @@
         const done = k.done();
         const can = !done && k.ok();
         return `<div class="kijun-row ${done ? 'ok' : ''}">
-          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small${foldAttr('kijun')}>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}${k.hint ? `<br>${k.hint}` : ''}</small></div>
+          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}${k.hint ? `<br>${k.hint}` : ''}</small></div>
           ${done ? `<span class="kijun-badge">${k.doneLabel || '届出済'}</span>` : `<button class="mini-btn ${can ? 'plus' : ''}" data-kasan="${k.id}" ${can ? '' : 'disabled'}>${k.verb || '届け出る'}${k.cost ? ` ${yen(k.cost)}` : '(無料)'}</button>`}
         </div>`;
       }).join('');
@@ -4911,8 +4903,8 @@
     const el = $('lanePick');
     if (!el) return;
     el.innerHTML = LANES.map((l) => `<button class="lane-chip${l.id === lanePick ? ' on' : ''}" data-lane="${l.id}" aria-pressed="${l.id === lanePick}">${l.label}</button>`).join('');
-    const cur = LANES.find((l) => l.id === lanePick) || LANES[0];
-    $('laneNote').innerHTML = `${cur.note}<br>${LANE_BACK}`;
+    // v81 便AJ-2 PM裁定B: 選択中の1行だけでなく、2レーンの1行を2段で常時表示(選択中=--ink-2・他方=--ink-3)
+    $('laneNote').innerHTML = LANES.map((l) => `<span class="lane-note-row${l.id === lanePick ? ' cur' : ''}">${l.note}</span>`).join('') + `<br>${LANE_BACK}`;
   }
   function openStartGate(onDone) {
     const cands = gateCandidates();

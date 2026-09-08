@@ -115,7 +115,7 @@
     <div class="card" id="scheduleCard">
       <div class="card-head"><h2 class="card-title">🗓 診療時間 <small>タップで 終日→午前→休診</small></h2><span class="card-tools" id="scheduleTools"></span></div>
       <div class="sch-row" id="scheduleRow"></div>
-      <p class="ctrl-note" id="scheduleNote" data-learn-fold="schedule" hidden></p>
+      <p class="ctrl-note" id="scheduleNote"></p>
     </div>
 
     <div class="card" id="shopCard">
@@ -135,32 +135,32 @@
         <label class="ctrl">
           <span class="ctrl-head">診察時間(平均) <b id="vExamMean">6分</b></span>
           <input type="range" id="examMean" min="3" max="12" step="1" value="6">
-          <small class="ctrl-note" data-learn-fold="policy" hidden>短い=回転UP / 長い=待ち時間UP</small>
+          <small class="ctrl-note">短い=回転UP / 長い=待ち時間UP</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">関節注・ハイドロ方針 <b id="vPInj">20%</b></span>
           <input type="range" id="pInj" min="0" max="50" step="5" value="20">
-          <small class="ctrl-note" data-learn-fold="policy" hidden>関節腔内注射80点+薬剤 ≈180点・診察やや延長</small>
+          <small class="ctrl-note">関節腔内注射80点+薬剤 ≈180点・診察やや延長</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">トリガー/ブロック方針 <b id="vPTrig">12%</b></span>
           <input type="range" id="pTrig" min="0" max="40" step="4" value="12">
-          <small class="ctrl-note" data-learn-fold="policy" hidden>トリガーポイント注射70点+薬剤 ≈120点</small>
+          <small class="ctrl-note">トリガーポイント注射70点+薬剤 ≈120点</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">物療の案内方針 <b id="vPPhysio">35%</b></span>
           <input type="range" id="pPhysio" min="0" max="70" step="5" value="35">
-          <small class="ctrl-note" data-learn-fold="policy" hidden>消炎鎮痛等処置35点・物療機器が必要</small>
+          <small class="ctrl-note">消炎鎮痛等処置35点・物療機器が必要</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">処置の実施方針 <b id="vPTreat">15%</b></span>
           <input type="range" id="pTreat" min="0" max="50" step="5" value="15">
-          <small class="ctrl-note" data-learn-fold="policy" hidden>創傷処置・ギプス等 ≈150点・看護師とベッド</small>
+          <small class="ctrl-note">創傷処置・ギプス等 ≈150点・看護師とベッド</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">運動器リハビリテーション料の提案方針 <b id="vPReha">35%</b></span>
           <input type="range" id="pReha" min="0" max="70" step="5" value="35">
-          <small class="ctrl-note" data-learn-fold="policy" hidden>(III)85点〜(I)185点/単位・届出後</small>
+          <small class="ctrl-note">(III)85点〜(I)185点/単位・届出後</small>
         </label>
       </div>
     </div>
@@ -196,7 +196,7 @@
     </div>
 
     <div class="card" id="salesCard">
-      <div class="card-head"><h2 class="card-title">🤝 営業先と関係レベル <small>30日放置で冷める</small></h2><span class="card-tools" id="salesTools"></span></div>
+      <div class="card-head has-tool"><h2 class="card-title">🤝 営業先と関係レベル <small>30日放置で冷める</small></h2><span class="card-tools" id="salesTools"></span></div>
       <div id="relList"></div>
     </div>
   </section>
@@ -265,7 +265,7 @@
     </div>
 
     <div class="card" id="missionCard">
-      <div class="card-head"><h2 class="card-title">🎯 ミッション <small>全19</small></h2><span class="card-tools" id="missionTools"></span></div>
+      <div class="card-head has-tool"><h2 class="card-title">🎯 ミッション <small>全19</small></h2><span class="card-tools" id="missionTools"></span></div>
       <div id="missionList"></div>
     </div>
 
