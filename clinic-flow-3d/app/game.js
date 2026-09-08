@@ -3313,12 +3313,12 @@
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.selfRehaPrice)}</b></span>
         <input type="range" data-jprice="selfRehaPrice" min="4000" max="15000" step="1000" value="${settings.selfRehaPrice}"></label>
       </div>`}
-      <div class="jihi-item">
+      ${jihiHidden('prpOn') ? '' : `<div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>
         <span class="jihi-stat">想定 ${prpDemand.toFixed(1)}件/日・原価 ${yen(FEES.prpCogs)}/件</span></div>
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.prpPrice)}</b></span>
         <input type="range" data-jprice="prpPrice" min="30000" max="165000" step="5000" value="${settings.prpPrice}"></label>
-      </div>
+      </div>`}
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.agaOn ? 'on' : ''}" data-jihi="agaOn">💇 AGA外来(継続課金)</button>
         <span class="jihi-stat">会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日・原価率35%</span></div>
@@ -3769,7 +3769,7 @@
       const i = d.last && d.last.info;
       // 本院は診察時間スライダーを出さない代わりに、3択の各行に1日の診察キャパを常時出す(v82 便AF-3・第8条)
       const cap = d.isMain && m.mainExamMean
-        ? (plan) => `・1日に診られる目安 約${mainExamCap(d.staff.doctors, m.mainExamMean({ timePlan: plan }))}人`
+        ? (plan, head) => `・${head ? '1日に診られる目安' : '目安'} 約${mainExamCap(d.staff.doctors, m.mainExamMean({ timePlan: plan }))}人`
         : () => '';
       // 本院の shim は d.last を持たない。前日の「診られず帰った人数」を代わりに出す(判断を変える値=常時)
       const lastDay = d.isMain ? [...G.history].reverse().find((x) => x.kind !== 'closed') : null;
@@ -3777,10 +3777,10 @@
       <div class="dept-lever">
         <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)。続けやすさはゲーム上の仮定</small></span>
         <button class="choice-row ${cur === 'std' ? 'on' : ''}" data-dtime="${m.id}:std">
-          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点${cap('std')}。多く診られるが治療の中断は起きやすい</span>
+          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点${cap('std', true)}。多く診られるが中断は起きやすい</span>
         </button>
         <button class="choice-row ${cur === 'mix' ? 'on' : ''}" data-dtime="${m.id}:mix">
-          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('mix')}。収益と継続のあいだを取る</span>
+          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('mix')}。収益と継続のあいだ</span>
         </button>
         <button class="choice-row ${cur === 'long' ? 'on' : ''}" data-dtime="${m.id}:long">
           <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('long')}。人数は減るが中断は最も少ない</span>
