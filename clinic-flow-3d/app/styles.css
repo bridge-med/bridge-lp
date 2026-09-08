@@ -192,6 +192,9 @@ a { color: var(--blue-deep); }
 /* ===== 📖 くわしく(v81 便AJ-2): カード見出し行の右に置く統一部品。1カード1個・44px・新色なし ===== */
 .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .card-head .card-title { flex: 1 1 auto; min-width: 0; margin-bottom: 0; }
+/* 部品(44px)と題が同じ行を奪い合うと題が句の途中で折返す(375/390 実測)。副題を次行へ落として
+   題そのものは折らない。行数は部品の44pxに収まるので高さは増えない(.kijun-row の折返しの先例) */
+.card-head .card-title small { display: block; }
 .card-tools { flex: 0 0 auto; display: flex; gap: 6px; }
 .mini-btn.learn-toggle { font-weight: 700; padding: 9px 10px; }
 .mini-btn.learn-toggle.on { border-color: rgba(62,124,166,0.45); color: var(--blue-deep); background: var(--blue-pale); }

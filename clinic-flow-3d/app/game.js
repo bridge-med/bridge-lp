@@ -2141,7 +2141,7 @@
            <li>🤝 <b>営業まわり・ターゲット客層</b>(タウン)</li>
            <li>🪙 <b>アイテム・プレミアム施設・実績</b> — コインはミッションと実績で獲得</li>
          </ul>
-         <p class="modal-note">📖 打ち手は詰まっている所に。案内は「今日やること」</p>`
+         ${learnRow('unlock', '打ち手の選びかた')}<p class="modal-note"${foldAttr('unlock')}>📖 打ち手は詰まっている所に。案内は「今日やること」</p>`
       : `<p>Day 8 — ここからが経営の本番です。</p>
          <ul class="unlock-list">
            ${settings.specialty === 'orthopedics' ? '<li>🏃 <b>運動器リハ</b>(PT採用・リハ機器・施設基準の届出)</li>' : '<li>📋 <b>施設基準・届出</b>(経営タブ)</li>'}
@@ -2149,7 +2149,7 @@
            <li>🏢 <b>分院展開</b>(法人タブ)</li>
            ${settings.specialty === 'orthopedics' ? '<li>🪙 <b>自費メニュー</b>(PRP・AGAほか)と<b>大型投資</b>(MRI・DEXA・増築)</li>' : '<li>🪙 <b>自費メニュー</b>と<b>大型投資</b>(増築)</li>'}
          </ul>
-         ${settings.specialty === 'orthopedics' ? '<p class="modal-note">📖 施設基準(専従PT数×面積)で運動器リハビリテーション料の1回単価が¥1,700→¥3,700</p>' : '<p class="modal-note">📖 施設基準カード(経営タブ)で確認できます</p>'}`;
+         ${learnRow('unlock', '施設基準と単価の関係')}${settings.specialty === 'orthopedics' ? `<p class="modal-note"${foldAttr('unlock')}>📖 施設基準(専従PT数×面積)で運動器リハビリテーション料の1回単価が¥1,700→¥3,700</p>` : `<p class="modal-note"${foldAttr('unlock')}>📖 施設基準カード(経営タブ)で確認できます</p>`}`;
     if ($('modal').classList.contains('show')) {
       banner('🔓 新しい打ち手が解放されました。院内・経営タブをチェック');
       return;
@@ -2415,7 +2415,7 @@
       <div class="shop-row">
         <div class="shop-info">
           <span class="shop-name">${item.label}${act ? ` <span class="boost-on">実施中(Day ${G.boosts[id]}まで)</span>` : ''}</span>
-          <span class="shop-hint">${item.hint}</span>
+          <span class="shop-hint"${foldAttr('item')}>${item.hint}</span>
         </div>
         <div class="shop-btns"><button class="mini-btn ${G.coins >= item.coin && !act ? 'plus' : ''}" data-item="${id}" ${act ? 'disabled' : ''}>🪙 ${item.coin}</button></div>
       </div>`;
@@ -2424,7 +2424,7 @@
       <div class="shop-row ${G.deco[id] ? 'expand-row done' : ''}">
         <div class="shop-info">
           <span class="shop-name">${f.label}${G.deco[id] ? ' <small>設置済み</small>' : ''}</span>
-          <span class="shop-hint">${f.hint}</span>
+          <span class="shop-hint"${foldAttr('item')}>${f.hint}</span>
         </div>
         ${G.deco[id] ? '' : `<div class="shop-btns"><button class="mini-btn ${G.coins >= f.coin ? 'plus' : ''}" data-fac="${id}">🪙 ${f.coin}</button></div>`}
       </div>`).join('');
@@ -2432,6 +2432,8 @@
       <p class="plan-lead">🪙コインは<b>ミッション・実績・年次決算</b>で獲得(現在 <b>🪙 ${G.coins}</b>)。アプリ版なら課金ポイントになる部分を、ゲーム内通貨で体験する設計です。</p>
       <h3 class="sub-title">⚡ ブースト(期間限定)</h3>${boostRows}
       <h3 class="sub-title">🏛 プレミアム施設(買い切り・院内ビューに表示)</h3>${facRows}`;
+    const itemTools = $('itemTools');
+    if (itemTools) itemTools.innerHTML = learnBtn('item', '各アイテムの効果の内訳');
     el.querySelectorAll('[data-item]').forEach((b) => b.addEventListener('click', () => buyItem(b.dataset.item)));
     el.querySelectorAll('[data-fac]').forEach((b) => b.addEventListener('click', () => buyFacility(b.dataset.fac)));
   }
@@ -3085,6 +3087,8 @@
       </button>`).join('');
     const openMin = settings.schedule.reduce((a, k) => a + DAY_SPECS[k].min, 0);
     $('scheduleNote').innerHTML = `週<b>${(openMin / 60).toFixed(0)}時間</b> / 午前=人件費6割 / 日曜=手当1.4倍・新患1.3倍`;
+    const schTools = $('scheduleTools');
+    if (schTools) schTools.innerHTML = learnBtn('schedule', '週の診療時間と人件費・手当の関係');
     el.querySelectorAll('[data-sch]').forEach((b) => b.addEventListener('click', () => {
       const i = Number(b.dataset.sch);
       const order = ['full', 'am', 'closed'];
@@ -3170,7 +3174,7 @@
       <div class="shop-row">
         <div class="shop-info">
           <span class="shop-name">${item.label} <b class="shop-count">${cur}${item.day ? '人' : ''}</b> <small class="shop-max">/ 最大${max}</small></span>
-          <span class="shop-hint">${item.hint}</span>
+          <span class="shop-hint"${foldAttr('shop')}>${item.hint}</span>
           ${vt ? `<span class="shop-voice">${STAFF_UI.faceSVG(vc, 'normal', 17)} ${STAFF_UI.STAFF[vc].name}「${vt}」</span>` : ''}
         </div>
         <div class="shop-btns">
@@ -3291,26 +3295,28 @@
     el.innerHTML = `
       ${jihiHidden('selfReha') ? '' : `<div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.selfReha ? 'on' : ''}" data-jihi="selfReha">🏃 自費リハ延長</button>
-        <span class="jihi-stat">想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)</span></div>
+        <span class="jihi-stat"${foldAttr('jihi')}>想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)</span></div>
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.selfRehaPrice)}</b></span>
         <input type="range" data-jprice="selfRehaPrice" min="4000" max="15000" step="1000" value="${settings.selfRehaPrice}"></label>
       </div>`}
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>
-        <span class="jihi-stat">想定 ${prpDemand.toFixed(1)}件/日・原価 ${yen(FEES.prpCogs)}/件</span></div>
+        <span class="jihi-stat"${foldAttr('jihi')}>想定 ${prpDemand.toFixed(1)}件/日・原価 ${yen(FEES.prpCogs)}/件</span></div>
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.prpPrice)}</b></span>
         <input type="range" data-jprice="prpPrice" min="30000" max="165000" step="5000" value="${settings.prpPrice}"></label>
       </div>
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.agaOn ? 'on' : ''}" data-jihi="agaOn">💇 AGA外来(継続課金)</button>
-        <span class="jihi-stat">会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日・原価率35%</span></div>
+        <span class="jihi-stat"${foldAttr('jihi')}>会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日・原価率35%</span></div>
         <label class="ctrl"><span class="ctrl-head">月額 <b>${yen(settings.agaPrice)}</b></span>
         <input type="range" data-jprice="agaPrice" min="3000" max="15000" step="1000" value="${settings.agaPrice}"></label>
       </div>
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.goods ? 'on' : ''}" data-jihi="goods">🦵 物販(サポーター等)<small> 原価60%</small></button>
-        <span class="jihi-stat">一部が購入・¥3,500</span></div>
+        <span class="jihi-stat"${foldAttr('jihi')}>一部が購入・¥3,500</span></div>
       </div>`;
+    const jihiTools = $('jihiTools');
+    if (jihiTools) jihiTools.innerHTML = learnBtn('jihi', '想定件数と原価の内訳');
     el.querySelectorAll('[data-jihi]').forEach((b) => b.addEventListener('click', () => {
       const k = b.dataset.jihi;
       if (k === 'prpOn' && !settings.prpOn) {
@@ -4066,6 +4072,8 @@
   // 診療方針カード(v66): 整形本院は従来のスライダー(.ctrl-grid)、他科本院はモジュールのレバー(部門と同じHTML)を #mainLever に描く
   function renderPolicyCard() {
     const card = $('policyCard'); if (!card) return;
+    const policyTools = $('policyTools');
+    if (policyTools) policyTools.innerHTML = learnBtn('policy', '点数の根拠と診察への影響');
     const grid = card.querySelector('.ctrl-grid');
     let lever = $('mainLever');
     if (!lever) { lever = document.createElement('div'); lever.id = 'mainLever'; card.appendChild(lever); }
@@ -4598,14 +4606,14 @@
             const d = (kbPts(REHA_KB_ITEM[k.lv], 0) - kbPts(REHA_KB_ITEM[settings.rehaLevel], 0)) * 2 * rehaMo;
             est = `<br><b>推定月間増収 約${yen(d * 10)}</b>(現在のリハ${rehaMo}回/月ベースの試算・確定収益ではない)`;
           }
-          kbInfo = `<div class="kijun-kb">制度上の要件: ${staffing}${formNo ? ` / 届出: ${formNo}` : ''}${est}</div>`;
+          kbInfo = `<div class="kijun-kb"${foldAttr('kijun')}>制度上の要件: ${staffing}${formNo ? ` / 届出: ${formNo}` : ''}${est}</div>`;
         }
       }
       return `<div class="kijun-row ${active ? 'ok' : ''}">
-        <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
+        <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small${foldAttr('kijun')}>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
         ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
-    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。制度上の要件全文はレシートの🎓学習モードで読める。</p>`;
+    }).join('') + `<p class="pnl-note"${foldAttr('kijun')}>要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。制度上の要件全文は直近の会計の「📖 くわしく」で読める。</p>`;
     // 他科本院(v67): 施設基準は部門カードと同じ3状態(届け出る/未/届出済み)で描く。運動器リハの段は整形本院だけ(第14条)
     const mainMod = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
     const orthoMain = settings.specialty === 'orthopedics' || !mainMod || !mainMod.main;
@@ -4615,10 +4623,12 @@
         const done = k.done();
         const can = !done && k.ok();
         return `<div class="kijun-row ${done ? 'ok' : ''}">
-          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}${k.hint ? `<br>${k.hint}` : ''}</small></div>
+          <div><b>${k.name}</b> — <b class="kasan-ten">${k.ten}</b><br><small${foldAttr('kijun')}>制度上の要件: ${k.req}${k.cost ? ` / 整備費 ${yen(k.cost)}` : ''}${k.gameReq ? `<br>ゲーム内要件: ${k.gameReq}` : ''}${k.hint ? `<br>${k.hint}` : ''}</small></div>
           ${done ? `<span class="kijun-badge">${k.doneLabel || '届出済'}</span>` : `<button class="mini-btn ${can ? 'plus' : ''}" data-kasan="${k.id}" ${can ? '' : 'disabled'}>${k.verb || '届け出る'}${k.cost ? ` ${yen(k.cost)}` : '(無料)'}</button>`}
         </div>`;
       }).join('');
+    const kijunTools = $('kijunTools');
+    if (kijunTools) kijunTools.innerHTML = learnBtn('kijun', '制度上の要件とゲーム内要件');
     $('kijunBody').querySelectorAll('[data-kijun]').forEach((b) => b.addEventListener('click', () => {
       settings.rehaLevel = Number(b.dataset.kijun);
       toast(`✅ ${REHA_FULL[settings.rehaLevel]}を届け出ました(リハ1回 ${yen(REHA_FEE[settings.rehaLevel])})`);
@@ -5477,7 +5487,8 @@
       <p class="dec-ask"><b>決めた方針:</b> ${ch.label}</p>
       <div class="dec-preview"><small class="dec-plabel">変わった数字</small>${moneyLine}${stLine}${decLinesHtml(outcome.lines.filter((l) => !l.later && l.k !== 'money' && l.k !== 'slack' && l.k !== 'trust'))}
       ${later.length ? `<small class="dec-plabel">あとで</small>${decLinesHtml(later)}` : ''}</div>
-      <div class="dec-reflect">${entry.reflect.map((r) => `<p>${r}</p>`).join('')}</div>
+      <div class="dec-reflect">${entry.reflect.filter((r) => r !== c.lesson).map((r) => `<p>${r}</p>`).join('')}
+      ${c.lesson ? `${learnRow('dec', 'この判断の学び')}<p class="dec-lesson"${foldAttr('dec')}>${c.lesson}</p>` : ''}</div>
       <div class="tut-btns"><button class="btn-cta" id="decClose">続ける</button></div>`;
     $('decClose').addEventListener('click', closeDecision);
   }
@@ -5644,6 +5655,8 @@
   $('pTrig').value = Math.round(settings.pTrig * 100);
   $('vPPhysio').textContent = `${Math.round(settings.pPhysio * 100)}%`;
   $('pPhysio').value = Math.round(settings.pPhysio * 100);
+
+  applyLearn(); // レーンの既定と保存済みの開閉を DOM へ(v81 便AJ-2)
 
   clinicIso.resize();
   townIso.resize();
