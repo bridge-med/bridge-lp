@@ -2061,7 +2061,7 @@
       save();
       renderReceipt();
       applyLearn();
-      toast(settings.lane === 'learn' ? '📖 根拠から読む — 説明は最初から開きます' : '▶ まず動かす — 説明は押したときだけ開きます');
+      toast(settings.lane === 'learn' ? '📖 根拠から読む — 説明は最初から開きます' : '📖 まず動かす — 説明は押したときだけ開きます');
     });
   }
   LEARN_RERENDER.receipt = () => renderReceipt();
@@ -3487,7 +3487,7 @@
       </div>`;
     }).join('');
     const salesTools = $('salesTools');
-    if (salesTools) salesTools.innerHTML = learnBtn('rel', 'この営業先について');
+    if (salesTools) salesTools.innerHTML = learnBtn('rel', 'この営業先で何をするか');
     el.querySelectorAll('[data-rel]').forEach((b) => b.addEventListener('click', () => visitRelation(b.dataset.rel)));
   }
 
@@ -4614,7 +4614,7 @@
         <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small${foldAttr('kijun')}>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
         ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
-    }).join('') + `<p class="pnl-note"${foldAttr('kijun')}>要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。制度上の要件全文は直近の会計の「📖 くわしく」で読める。</p>`;
+    }).join('') + `<p class="pnl-note"${foldAttr('kijun')}>要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。告示・通知の引用は直近の会計の「📖 くわしく」で読める。</p>`;
     // 他科本院(v67): 施設基準は部門カードと同じ3状態(届け出る/未/届出済み)で描く。運動器リハの段は整形本院だけ(第14条)
     const mainMod = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
     const orthoMain = settings.specialty === 'orthopedics' || !mainMod || !mainMod.main;
@@ -4878,10 +4878,10 @@
   let gatePick = null;
   // レーン(v81 便AJ-2): 世界の選択ではなく「詳しさ」の設定。科の選択の下に小チップ2つで置く
   const LANES = [
-    { id: 'play', label: 'まず動かす', note: '数字は出る。制度の説明は開いたときだけ' },
+    { id: 'play', label: 'まず動かす', note: '点数と金額は見える。制度の説明は開いたときだけ' },
     { id: 'learn', label: '根拠から読む', note: '点数の根拠と施設基準を最初から開く' }
   ];
-  const LANE_BACK = 'あとから会計カードで切り替えられる';
+  const LANE_BACK = 'あとから直近の会計カードで切り替えられる';
   let lanePick = 'play';
   const GATE = {
     lead1: '前の院長が診てきた患者と、少しの運転資金。あなたはその続きから始める。',
