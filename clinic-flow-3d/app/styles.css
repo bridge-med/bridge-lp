@@ -1488,6 +1488,7 @@ input[type="range"]::-moz-range-thumb {
 .choice-row b { flex: 0 0 auto; font: 800 12px/1.4 var(--sans); color: var(--ink); }
 .choice-row.on { border-left-color: var(--blue); background: var(--blue-pale); color: var(--ink); }
 .choice-row.on b { color: var(--blue-deep); }
+.choice-row span .dt-cap { display: block; } /* 本院精神科の3択: 目安を末尾で必ず改行し3行の位置を揃える(v82 便AF-3) */
 .spec-open { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; }
 .spec-open small { flex: 1 1 100%; font: 500 10px/1.5 var(--sans); color: var(--ink-3); }
 .spec-open .mini-btn { flex: 0 0 auto; }

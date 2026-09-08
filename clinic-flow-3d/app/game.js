@@ -3743,11 +3743,12 @@
 
   // 設備・体制の投資ボタン(モジュールのactions定義から。購入済みは消える)。
   // noteは「何が買えるか」なので購入前に見せる(v49 PM裁定A: 値段だけで選ばせない)
-  function deptActionsHtml(m, d) {
+  // foldId を渡すと note を「📖 くわしく」に畳む(v82 便AF-3・本院精神科だけ)。ラベル+価格は常時
+  function deptActionsHtml(m, d, foldId) {
     // 本院では preset.actionHide の行動を出さない(本院で意味を持たない投資は押せない部屋を作らない・第14条。v74で眼科の手術設備は本院にも開いた)
     const hide = d.isMain && m.main && m.main.preset && m.main.preset.actionHide ? m.main.preset.actionHide : [];
     const btns = (m.actions || []).filter((a) => a.can(d) && !hide.includes(a.id))
-      .map((a) => `<button class="op-btn${a.note ? ' has-note' : ''}" data-dact="${m.id}:${a.id}"><b>${a.label}</b> <small>${yen(a.cost)}</small>${a.note ? `<small class="act-note">${a.note}</small>` : ''}</button>`).join('');
+      .map((a) => `<button class="op-btn${a.note ? ' has-note' : ''}" data-dact="${m.id}:${a.id}"><b>${a.label}</b> <small>${yen(a.cost)}</small>${a.note ? `<small class="act-note"${foldId ? foldAttr(foldId) : ''}>${a.note}</small>` : ''}</button>`).join('');
     return btns ? `<div class="op-row">${btns}</div>` : '';
   }
 
@@ -3768,29 +3769,33 @@
       const cur = d.policy.timePlan;
       const i = d.last && d.last.info;
       // 本院は診察時間スライダーを出さない代わりに、3択の各行に1日の診察キャパを常時出す(v82 便AF-3・第8条)
-      const cap = d.isMain && m.mainExamMean
-        ? (plan, head) => `・${head ? '1日に診られる目安' : '目安'} 約${mainExamCap(d.staff.doctors, m.mainExamMean({ timePlan: plan }))}人`
+      const showCap = d.isMain && m.mainExamMean;
+      // 目安は各行末尾に同じ形(<small class="dt-cap">)で統一し、CSSの改行で3行の位置を揃える(v82 便AF-3 designer照合)
+      const cap = showCap
+        ? (plan) => `<small class="dt-cap">目安 約${mainExamCap(d.staff.doctors, m.mainExamMean({ timePlan: plan }))}人</small>`
         : () => '';
       // 本院の shim は d.last を持たない。前日の「診られず帰った人数」を代わりに出す(判断を変える値=常時)
       const lastDay = d.isMain ? [...G.history].reverse().find((x) => x.kind !== 'closed') : null;
+      // 注記(協定の内訳・一般名処方の要件)は「くわしく」に畳む。判断を変える値(点数・目安人数・価格)は常時のまま(本院だけ・便AJ-2の畳み規則B)
+      const foldId = d.isMain ? 'mainPolicy' : null;
       return `
       <div class="dept-lever">
-        <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)。中断の増減はゲーム上の仮定</small></span>
+        <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)。中断の増減はゲーム上の仮定${showCap ? '。各行の末尾は1日に診られる目安' : ''}</small></span>
         <button class="choice-row ${cur === 'std' ? 'on' : ''}" data-dtime="${m.id}:std">
-          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点${cap('std', true)}。多く診られるが中断は起きやすい</span>
+          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点。多く診られるが中断は起きやすい${cap('std')}</span>
         </button>
         <button class="choice-row ${cur === 'mix' ? 'on' : ''}" data-dtime="${m.id}:mix">
-          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('mix')}。収益と治療の継続の間を取る</span>
+          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点。収益と治療の継続の間を取る${cap('mix')}</span>
         </button>
         <button class="choice-row ${cur === 'long' ? 'on' : ''}" data-dtime="${m.id}:long">
-          <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('long')}。人数は減るが中断は最も少ない</span>
+          <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点。人数は減るが中断は最も少ない${cap('long')}</span>
         </button>
         ${lastDay ? `<div class="pnl-row"><span>昨日 混雑で帰った</span><b>${lastDay.balked || 0}人</b></div>` : ''}
         ${i ? `<div class="pnl-row"><span>昨日の診察時間</span><b>${i.usedMin}分 / 枠${i.budgetMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''}</b></div>` : ''}
-        ${deptActionsHtml(m, d) || '<span class="kijun-badge">連携病院との協定あり</span>'}
+        ${deptActionsHtml(m, d, foldId) || '<span class="kijun-badge">連携病院との協定あり</span>'}
         <div class="op-row">
           <button class="op-btn" data-dippan="${m.id}">一般名処方 <span class="kijun-badge${d.policy.ippanmei ? '' : ' off'}">${d.policy.ippanmei ? 'ON' : 'OFF'}</span></button>
-          <p class="pnl-note"><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONにすると整えている前提=ゲーム上の簡略化</small></p>
+          <p class="pnl-note"${foldId ? foldAttr(foldId) : ''}><small>一般名処方加算の要件は院内掲示とウェブ掲載(届出は不要)。ONにすると整えている前提=ゲーム上の簡略化</small></p>
         </div>
       </div>`;
     }
@@ -4120,6 +4125,9 @@
     const ortho = settings.specialty === 'orthopedics' || !m || !m.main;
     lever.innerHTML = ortho ? '' : deptLeverHtml(m, mainDeptShim(m));
     if (!ortho) bindDeptLeverHandlers(lever);
+    // 本院精神科だけ: 協定の内訳・一般名処方の要件を畳む「📖 くわしく」(v82 便AF-3・便AJ-2の部品を流用)
+    const tools = $('policyTools');
+    if (tools) tools.innerHTML = (!ortho && m.id === 'psychiatry') ? learnBtn('mainPolicy', '協定の内訳と一般名処方の要件') : '';
   }
   function renderCorp() {
     const el = $('corpBody');
