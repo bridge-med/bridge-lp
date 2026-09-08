@@ -776,6 +776,9 @@ input[type="range"]::-moz-range-thumb {
 .rel-info { display: flex; flex-direction: column; min-width: 0; font: 700 12.5px/1.5 var(--sans); color: var(--ink); }
 .rel-info small { font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); font-weight: 500; }
 .rel-desc { margin-top: 2px; }
+/* 説明を開くと情報側が伸び、nowrap のボタンが最小幅より潰れて横にはみ出す(v81 実測)。
+   ボタンは縮ませない(.dec-log .mini-btn の先例) */
+.rel-row > .mini-btn { flex: 0 0 auto; }
 .rel-stars { color: var(--amber); letter-spacing: 0.1em; font-size: 12px; }
 
 /* ---------- 自費メニュー ---------- */
