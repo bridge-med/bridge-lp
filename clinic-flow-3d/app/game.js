@@ -789,8 +789,8 @@
       kbEval = r.ev;
       for (const line of r.lines) { rc.push(line); revenue += line.t * 10; T.rev.consult += line.t * 10; if (line.kb === 'r08-A001-n8') T.kanriCount++; }
       if (v.isFirst) T.newCount++;
-      // 白内障の候補化(眼科・手術設備がある本院だけ。分院の runDay と同じ関数・v74)。本院の初診は分院の一見(acute)に相当させる
-      if (mod.cataractOnVisit) mod.cataractOnVisit(mainQueueNow(), shim.equip, Math.random, v.isFirst ? 'acute' : hist.pr);
+      // 白内障の候補化(眼科・手術設備がある本院だけ。分院の runDay と同じ関数・v74)。本院は初診も継続と同じ率 cataractConvert(社長決定 2026-09-06「b」。v74〜76 は初診を分院の一見 0.08 に相当させ、手術が本院売上の6割になっていた)
+      if (mod.cataractOnVisit) mod.cataractOnVisit(mainQueueNow(), shim.equip, Math.random, hist.pr);
       // 体制の加算(初再診への加算)は科に依らない=整形本院と同じ計上(KASAN_CORE)
       const kas = v.isFirst ? KASAN_CORE.firstVisitLines(settings, kbPts) : KASAN_CORE.revisitLines(settings, kbPts);
       for (const k of kas) { revenue += k.t * 10; T.rev.consult += k.t * 10; rc.push({ n: k.n, t: k.t, kb: k.kb }); }
@@ -2099,7 +2099,7 @@
            ${settings.specialty === 'orthopedics' ? '<li>🏃 <b>運動器リハ</b>(PT採用・リハ機器・施設基準の届出)</li>' : '<li>📋 <b>施設基準・届出</b>(経営タブ)</li>'}
            <li>📊 <b>P&L・KPIピン留め・事業計画・銀行融資</b>(経営タブ)</li>
            <li>🏢 <b>分院展開</b>(法人タブ)</li>
-           <li>🪙 <b>自費メニュー</b>(PRP・AGAほか)と<b>大型投資</b>(MRI・DEXA・増築)</li>
+           ${settings.specialty === 'orthopedics' ? '<li>🪙 <b>自費メニュー</b>(PRP・AGAほか)と<b>大型投資</b>(MRI・DEXA・増築)</li>' : '<li>🪙 <b>自費メニュー</b>と<b>大型投資</b>(増築)</li>'}
          </ul>
          ${settings.specialty === 'orthopedics' ? '<p class="modal-note">📖 リハは整形外来の柱。施設基準(専従PT数×面積)で1回の単価が¥1,700→¥3,700まで変わります。</p>' : '<p class="modal-note">📖 体制と届出が算定の土台。経営タブの施設基準カードで確かめられます。</p>'}`;
     if ($('modal').classList.contains('show')) {
@@ -4852,6 +4852,9 @@
       Object.assign(kw, kw._o, kws && kws[i] ? kws[i] : {});
     });
     for (const x of MISSIONS.concat(LEAGUE)) { if (x.title) { x._t = x._t || x.title; x.title = x._t.replace('{科名}', name); } }
+    // キホン集の科別上書き(v77 保留#42): preset.textbook = { index: { t, b } }。整形前提の項目だけ差し替える。制度上の数値は書かない(KB のみ)
+    const tb = m && m.main && m.main.preset && m.main.preset.textbook;
+    TEXTBOOK.forEach((c, i) => { if (!c._o) c._o = { t: c.t, b: c.b }; Object.assign(c, c._o, tb && tb[i] ? tb[i] : {}); });
     const rel = m && m.main && m.main.preset && m.main.preset.rel;
     const relHide = (m && m.main && m.main.preset && m.main.preset.relHide) || [];
     for (const [k, def] of Object.entries(REL_DEF)) { if (!def._o) def._o = { name: def.name, effect: def.effect, desc: def.desc }; Object.assign(def, def._o, rel && rel[k] ? rel[k] : {}); def.hidden = relHide.includes(k); }

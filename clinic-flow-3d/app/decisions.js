@@ -188,7 +188,7 @@
   function reqCheck(ch, ctx) {
     const r = ch.req || {};
     const why = [];
-    if (r.money !== undefined && ctx.money < r.money) why.push(`資金 ${yen(r.money)} 以上が要る`);
+    if (r.money !== undefined && ctx.money < r.money) why.push(`手元資金 ${yen(r.money)} 以上が要る(継続費の裏付け)`); // req は選べるかの門で、選んでも引かない(v77・PM判断 13x)
     if (r.staff) for (const [k, v] of Object.entries(r.staff)) if ((ctx.staff[k] || 0) < v) why.push(`${STAFF_LABEL[k] || k} ${v}人以上が要る`);
     if (r.depts && !r.depts.every((d) => ctx.depts.includes(d))) why.push('その部門が無い');
     if (r.branches && ctx.branches < r.branches) why.push('分院が無い');
