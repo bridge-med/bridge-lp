@@ -943,7 +943,7 @@ input[type="range"]::-moz-range-thumb {
 .gate-box .spec-row small { color: var(--ink-2); } /* 判断の材料になる本文はAAを割らない(v56) */
 .gate-box .choice-row { margin-top: 6px; }
 .gate-box .choice-row small { font-size: 10px; line-height: 1.5; color: var(--ink-2); } /* 判断材料は製品の最小運用10px・AA(designer v66) */
-@media (max-width: 360px) { .gate-box .choice-row { flex-wrap: wrap; row-gap: 2px; } .gate-box .choice-row small { flex: 0 0 100%; } } /* 320px: 科名の幅で1行が折れる科が出るので、4枚とも科名の下に1行を置いて高さを揃える(v82 便AF-3 qa) */
+@media (max-width: 360px) { #gateList .choice-row { flex-wrap: wrap; row-gap: 2px; } #gateList .choice-row small { flex: 0 0 100%; } } /* 320px: 科名の幅で1行が折れる科が出るので、4枚とも科名の下に1行を置いて高さを揃える(v82 便AF-3 qa) */
 /* ===== 扉のレーン2択(v81 便AJ-2): 科カードの後に置く小チップ2つ。科の選択と同じ顔にしない
    (角丸カードのグリッドを2段作らない=第24条)。寸法は .fix-chip 流用・色は既存トークンのみ ===== */
 .lane-pick { margin-top: 12px; }
