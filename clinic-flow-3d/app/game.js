@@ -591,7 +591,8 @@
       Object.keys(REL_DEF).forEach((k) => { if (!G.relations[k]) G.relations[k] = { lv: 0, last: 0 }; });
       if (!G.cum) G.cum = { revenue: 0, profit: 0 };
       // v81 便AJ-2: 旧セーブの 🎓 学習モードを2レーンへ引き継ぐ(learnMode:true → 'learn'、それ以外・無しは 'play')
-      if (settings.lane !== 'play' && settings.lane !== 'learn') settings.lane = settings.learnMode === true ? 'learn' : 'play';
+      const savedLane = d.settings && d.settings.lane;
+      if (savedLane !== 'play' && savedLane !== 'learn') settings.lane = d.settings && d.settings.learnMode === true ? 'learn' : 'play';
       delete settings.learnMode;
       if (!G.learnOpen || typeof G.learnOpen !== 'object') G.learnOpen = {};
       if (d.g.blackStreak === undefined) G.blackStreak = 0;
@@ -4875,6 +4876,13 @@
   let gateOpen = false;
   let afterGate = null;
   let gatePick = null;
+  // レーン(v81 便AJ-2): 世界の選択ではなく「詳しさ」の設定。科の選択の下に小チップ2つで置く
+  const LANES = [
+    { id: 'play', label: 'まず動かす', note: '数字は出る。制度の説明は開いたときだけ' },
+    { id: 'learn', label: '根拠から読む', note: '点数の根拠と施設基準を最初から開く' }
+  ];
+  const LANE_BACK = 'あとから会計カードで切り替えられる';
+  let lanePick = 'play';
   const GATE = {
     lead1: '前の院長が診てきた患者と、少しの運転資金。あなたはその続きから始める。',
     lead2: 'どの科を継ぐかで、経営の勝負どころが変わる。',
@@ -4899,6 +4907,13 @@
     const pm = cands.find((m) => m.id === gatePick) || cands[0];
     $('gateGo').textContent = GATE.goPick(pm.short || pm.name);
   }
+  function renderLanePick() {
+    const el = $('lanePick');
+    if (!el) return;
+    el.innerHTML = LANES.map((l) => `<button class="lane-chip${l.id === lanePick ? ' on' : ''}" data-lane="${l.id}" aria-pressed="${l.id === lanePick}">${l.label}</button>`).join('');
+    const cur = LANES.find((l) => l.id === lanePick) || LANES[0];
+    $('laneNote').innerHTML = `${cur.note}<br>${LANE_BACK}`;
+  }
   function openStartGate(onDone) {
     const cands = gateCandidates();
     if (!cands.length) { onDone(); return; }
@@ -4906,6 +4921,8 @@
     gatePick = cands.some((m) => m.id === settings.specialty) ? settings.specialty : cands[0].id;
     $('gateLead').textContent = cands.length === 1 ? GATE.lead1 : GATE.lead1 + GATE.lead2;
     renderGateList(cands);
+    lanePick = settings.lane === 'learn' ? 'learn' : 'play';
+    renderLanePick();
     $('startGate').classList.add('show');
   }
   // 自院を名指しする語を本院の科に合わせる(広告キーワード・称号)。テンプレートは {科名}
@@ -4943,9 +4960,12 @@
   function closeStartGate() {
     if (!gateOpen) return;
     if (!applyMainSpecialty(gatePick)) return;
+    settings.lane = lanePick === 'learn' ? 'learn' : 'play'; // 扉でレーンを確定(以後は直近の会計カードで切り替える)
+    G.learnOpen = {};
     gateOpen = false;
     $('startGate').classList.remove('show');
     save();
+    applyLearn();
     const fn = afterGate; afterGate = null;
     if (fn) fn();
   }
@@ -4954,6 +4974,12 @@
     if (!b || !gateOpen) return;
     gatePick = b.dataset.gate;
     renderGateList(gateCandidates());
+  });
+  $('lanePick').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-lane]');
+    if (!b || !gateOpen) return;
+    lanePick = b.dataset.lane;
+    renderLanePick();
   });
   $('gateGo').addEventListener('click', closeStartGate);
 
