@@ -121,6 +121,56 @@ t('概算ゼロ: 全行が KB 項目(kb を持つ)', () => {
   ok(r.lines.length > 0 && r.lines.every((l) => l.kb), '全行に kb');
 });
 
+/* ===== 本院(main)の経路 — v82 便AF-3 工程3 ===== */
+t('main候補: line は16字以内・order 4・preset に整形レバーのゼロ化と精神科の差分がある', () => {
+  ok(PSY.main && PSY.main.line.length <= 16, `line=${PSY.main && PSY.main.line}`);
+  eq(PSY.main.order, 4); eq(PSY.main.fsTitle, '精神科の届出');
+  const pre = PSY.main.preset;
+  eq(pre.settings.pInj, 0); eq(pre.settings.pReha, 0); eq(pre.settings.rehaLevel, 0); eq(pre.settings.pts, 0);
+  ok(pre.shopHide.includes('pt') && pre.shopHide.includes('machines'), '整形の採用・設備は出さない');
+  ok(pre.shopShow.includes('psw'), '精神保健福祉士は精神科の本院だけに出す');
+  ok(pre.jihiHide.includes('selfReha') && pre.jihiHide.includes('prpOn'), '運動器の自費は出さない');
+  ok(pre.relHide.includes('sports'), 'スポーツクラブは出さない');
+  eq(pre.policy.timePlan, 'std'); eq(pre.policy.ippanmei, true); eq(pre.policy.renkei, false);
+  ok(Object.keys(pre.textbook).length === 5, 'キホン集は差し替え可能な5項目だけ');
+  ok(pre.keywords.length === 3, '広告キーワード3本');
+});
+t('本院の経路: 常連レコード(mc/wc/lb/fb/pr/en)で planVisit→DEPT.evalVisit が通り、全行がKB項目', () => {
+  const p = rec('mood', true, 5);
+  const v = PSY.planVisit(p, { timePlan: 'std', ippanmei: true }, [], always, () => false, {}, { day: 40 });
+  const r = DEPT.evalVisit(PSY, shim({ timePlan: 'std' }, []), p, v.report, 40);
+  ok(r.lines.length > 0 && r.lines.every((l) => l.kb), '全行に kb');
+  ok(has(r.lines, 'r08-A001') && has(r.lines, 'r08-I002-1-ha-2-1'), '再診料+通院精神療法(30分未満)');
+  ok(r.ev.rejectedItems.some((x) => x.itemId === 'r08-A001-n8'), '本院でも外来管理加算はA001注8で却下される');
+});
+t('早期診療体制充実加算3: 本院の shim でも精神保健福祉士0なら要件が欠け、1で埋まって届け出られる', () => {
+  const noPsw = DEPT.fsStatus(PSY, shim({ timePlan: 'std', renkei: true }, [], { psws: 0 }))[0];
+  ok(!noPsw.ok && noPsw.missing.includes('精神保健福祉士1名'), '0人では欠ける');
+  const noRenkei = DEPT.fsStatus(PSY, shim({ timePlan: 'std', renkei: false }, [], { psws: 1 }))[0];
+  ok(!noRenkei.ok && noRenkei.missing.includes('連携病院との協定'), '協定がなければ欠ける');
+  const done = DEPT.fsStatus(PSY, shim({ timePlan: 'std', renkei: true }, [], { psws: 1 }))[0];
+  ok(done.ok && done.missing.length === 0, '1人+協定で埋まる');
+  ok(done.gameNote && /精神保健福祉士/.test(done.gameNote), 'ゲーム上の表し方であることを開示している');
+});
+t('mainLoyalty: std=1.0 で long>mix>1.0。値は churnMonthly から導く(独立変数を増やさない)', () => {
+  const C = P.churnMonthly;
+  eq(PSY.mainLoyalty({ timePlan: 'std' }), 1);
+  eq(PSY.mainLoyalty({ timePlan: 'mix' }), C.std / C.mix);
+  eq(PSY.mainLoyalty({ timePlan: 'long' }), C.std / C.long);
+  ok(PSY.mainLoyalty({ timePlan: 'long' }) > PSY.mainLoyalty({ timePlan: 'mix' }), 'long>mix');
+  ok(PSY.mainLoyalty({ timePlan: 'mix' }) > 1, 'mix>1.0');
+  eq(PSY.mainLoyalty({}), 1, '方針が無ければ std と同じ');
+});
+t('mainExamMean: 3択で単調に増え、本院のキャパ比が分院の分数予算の来院比とほぼ一致する', () => {
+  const em = (plan) => PSY.mainExamMean({ timePlan: plan });
+  ok(em('std') < em('mix') && em('mix') < em('long'), '長く診るほど1人あたりの分数が増える');
+  eq(em(), em('std'), '方針が無ければ std と同じ');
+  const capOf = (plan) => 1 * (480 / (em(plan) + 1.5)) * 0.72;   // game.js の examCapDay と同じ式(医師1人)
+  const ratio = (plan) => capOf(plan) / capOf('std');
+  ok(Math.abs(ratio('mix') - 0.77) < 0.05, `mix のキャパ比 ${ratio('mix').toFixed(2)}`);
+  ok(Math.abs(ratio('long') - 0.47) < 0.05, `long のキャパ比 ${ratio('long').toFixed(2)}`);
+});
+
 /* ===== 同値: 抽出前(39f5be3)の runDay と同じ数値になる(乱数を固定) ===== */
 function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let x = Math.imul(a ^ (a >>> 15), 1 | a); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
 t('同値: 分院 runDay の120日運用は抽出前(39f5be3)と同じ数値になる(3方針・乱数を固定)', () => {
