@@ -193,7 +193,7 @@
   }
 
   const COSTS = {
-    doctorDay: 80000, nurseDay: 18000, ptDay: 16000, recepDay: 10000,
+    doctorDay: 80000, nurseDay: 18000, ptDay: 16000, recepDay: 10000, pswDay: 14000,
     rent: [0, 25000, 55000, 120000], base: [0, 8000, 14000, 30000],
     perPatient: 300, billboardDay: 3000, mriMaint: 12000,
     branchRent: 35000, branchBase: 6000
@@ -208,7 +208,9 @@
     beds:    { label: '処置ベッドを増設', costs: null, flat: 150000, hint: '処置1件+¥1,500・看護師とセット' },
     machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2+助手)・面積要件は増築' },
     physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置1件¥350・PT不要・1台35件/日' },
-    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000, 100000, 100000, 110000, 110000], day: 10000, hint: 'PT単位上限+4/人・機器稼働+1・日給¥10,000' }
+    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000, 100000, 100000, 110000, 110000], day: 10000, hint: 'PT単位上限+4/人・機器稼働+1・日給¥10,000' },
+    // 精神科の本院だけに出す(preset.shopShow)。早期診療体制充実加算3の要件の表し方はモジュールの gameNote が開示する
+    psw:     { label: '精神保健福祉士を採用', costs: [120000], day: COSTS.pswDay, hint: '早期診療体制充実加算3の届出に要る(ゲーム上の表し方)・日給¥14,000' }
   };
 
   const EXPAND_COST = 5000000;
@@ -407,7 +409,7 @@
 
   const settings = {
     floorLv: 1,
-    doctors: 1, nurses: 1, pts: 0, receptionists: 1, rehaAides: 0,
+    doctors: 1, nurses: 1, pts: 0, receptionists: 1, rehaAides: 0, psws: 0, // psws=精神保健福祉士(精神科の本院だけ・v82 便AF-3)
     chairs: 6, beds: 1, machines: 0, physio: 0,
     kiosk: false, reserve: false, reviewCare: false, webIntake: false,
     kasanMeisai: false, kasanJikangai: 0, kasanKyoka: false, kasanRenkei: false,
@@ -724,7 +726,7 @@
   function mainDeptShim(mod) {
     // equip は settings.mainEquip への参照(部門の dept.equip と同じ形)。dact で a.apply(d) が書くとそのまま保存対象になる(v73)
     return { id: mod.id, isMain: true, policy: mainPolicyNow(mod), fs: settings.mainFs || (settings.mainFs = []),
-      staff: { doctors: settings.doctors, nurses: settings.nurses, clerks: settings.receptionists }, equip: mainEquipNow(mod), pt: [] };
+      staff: { doctors: settings.doctors, nurses: settings.nurses, clerks: settings.receptionists, psws: settings.psws || 0 }, equip: mainEquipNow(mod), pt: [] };
   }
   /* 本院の白内障パイプライン(v74 便AF-2)。部門の dept.queue と同形。科を替えたら空にする */
   function mainQueueNow() {
@@ -787,7 +789,8 @@
       const rec = (p.persona && p.persona.rid) ? G.regulars.find((r) => r.rid === p.persona.rid) : null;
       const hist = rec ? ensureHist(rec, mod) : { pr: mod.pickProfile ? mod.pickProfile(Math.random) : null, mc: {}, wc: {}, lb: {}, fb: false, sv: 0 };
       const shim = mainDeptShim(mod);
-      const v = mod.planVisit(hist, shim.policy, shim.fs, Math.random, (id) => !!(G.depts && G.depts[id]), shim.equip);
+      if (hist.en === undefined) hist.en = G.day; // 最初に受診した日(加算の年数窓の起点。分院の p.en と同じ)
+      const v = mod.planVisit(hist, shim.policy, shim.fs, Math.random, (id) => !!(G.depts && G.depts[id]), shim.equip, { day: G.day });
       if (v.refEye) routeReferral({ from: 'main', to: 'ophthalmology', kind: 'dm-retino', label: '糖尿病の定期眼底検査' });
       if (v.doLab && mod.managementParameters && mod.managementParameters.labCost) T.labCogs = (T.labCogs || 0) + mod.managementParameters.labCost;
       const r = DEPT.evalVisit(mod, shim, hist, v.report, G.day);
@@ -819,7 +822,9 @@
     // 継続管理の次回来院(月1回ペース=モジュールの revisitDays。定着は満足度で決まる=ゲーム上の仮定)
     const P = (mod && mod.managementParameters) || {};
     const iv = P.revisitDays ? P.revisitDays[0] + Math.floor(Math.random() * (P.revisitDays[1] - P.revisitDays[0] + 1)) : 28;
-    const loyalty = { senior: 0.7, worker: 0.5, sports: 0.5 }[seg] || 0.55;
+    // 診療方針が定着に効く科(精神科=長く診るほど中断が減る)はモジュールの倍率を掛ける(v82 便AF-3・ゲーム上の仮定)
+    const loyalty = ({ senior: 0.7, worker: 0.5, sports: 0.5 }[seg] || 0.55)
+      * (mod && mod.mainLoyalty ? mod.mainLoyalty(mainPolicyNow(mod)) : 1);
     if ((report.type === 'first' || report.type === 'revisit') && Math.random() < loyalty * sat + (settings.reserve ? 0.05 : 0)) addSchedule(G.day + iv, 'revisit');
     updateHeader();
     return revenue;
@@ -1384,7 +1389,8 @@
   /* ================= 日次決算 ================= */
 
   function mainStaffCost() {
-    return (settings.doctors - 1) * COSTS.doctorDay + settings.nurses * COSTS.nurseDay + settings.pts * COSTS.ptDay + settings.receptionists * COSTS.recepDay + (settings.rehaAides || 0) * 10000;
+    return (settings.doctors - 1) * COSTS.doctorDay + settings.nurses * COSTS.nurseDay + settings.pts * COSTS.ptDay + settings.receptionists * COSTS.recepDay + (settings.rehaAides || 0) * 10000
+      + (shopShown('psw') ? (settings.psws || 0) * COSTS.pswDay : 0); // 出していない職種は雇えないので費用に載せない
   }
 
   function loanInterestDay() {
@@ -2104,7 +2110,7 @@
   /* ================= 段階解放(Day1-3 / 4-7 / 8+) ================= */
 
   function unlockStage() { return G.day >= 8 ? 3 : G.day >= 4 ? 2 : 1; }
-  const STAGE_SHOP = { recep: 1, chairs: 1, doctor: 2, nurse: 2, beds: 2, physio: 2, pt: 3, machines: 3, rehaAide: 3 };
+  const STAGE_SHOP = { recep: 1, chairs: 1, doctor: 2, nurse: 2, beds: 2, physio: 2, psw: 2, pt: 3, machines: 3, rehaAide: 3 };
 
   function applyUnlocks() {
     const stage = unlockStage();
@@ -2129,6 +2135,10 @@
       if (el) { const w = el.closest('.ctrl'); if (w) w.style.display = (stage >= need && (!orthoOnly || orthoMain)) ? '' : 'none'; }
     };
     slider('pInj', 2, true); slider('pTrig', 2, true); slider('pPhysio', 2, true); slider('pTreat', 2, true); slider('pReha', 3, true);
+    // 診察時間を方針から導く科(精神科)ではスライダーを出さない — 同じ量を二度置かない(v82 便AF-3)
+    const mm = SPECIALTIES.get(settings.specialty);
+    const examEl = $('examMean');
+    if (examEl) { const w = examEl.closest('.ctrl'); if (w) w.style.display = mm && mm.mainExamMean && mm.main ? 'none' : ''; }
     renderPolicyCard();
   }
 
@@ -3099,6 +3109,12 @@
 
   /* ================= UI: 院内(ショップ・自費) ================= */
 
+  // 科を指定したときだけ出すSHOPの行(preset.shopShow)。既定では出さない=雇えないものを費用に載せない
+  const SHOP_OPT_IN = ['psw'];
+  function shopShown(key) {
+    const mm = SPECIALTIES.get(settings.specialty);
+    return ((mm && mm.main && mm.main.preset && mm.main.preset.shopShow) || []).includes(key);
+  }
   function shopCost(key) {
     const item = SHOP[key];
     if (item.flat) return item.flat;
@@ -3107,10 +3123,10 @@
   }
   function shopMax(key) {
     const M = clinic.L.MAX;
-    return { doctor: M.doctors, nurse: M.nurses, pt: M.pts, recep: M.receptionists, chairs: M.chairs, beds: M.beds, machines: M.machines, physio: settings.floorLv >= 3 ? 12 : 8, rehaAide: 8 }[key];
+    return { doctor: M.doctors, nurse: M.nurses, pt: M.pts, recep: M.receptionists, chairs: M.chairs, beds: M.beds, machines: M.machines, physio: settings.floorLv >= 3 ? 12 : 8, rehaAide: 8, psw: 1 }[key];
   }
   function settingValue(key) {
-    return { doctor: settings.doctors, nurse: settings.nurses, pt: settings.pts, recep: settings.receptionists, chairs: settings.chairs, beds: settings.beds, machines: settings.machines, physio: settings.physio, rehaAide: settings.rehaAides }[key];
+    return { doctor: settings.doctors, nurse: settings.nurses, pt: settings.pts, recep: settings.receptionists, chairs: settings.chairs, beds: settings.beds, machines: settings.machines, physio: settings.physio, rehaAide: settings.rehaAides, psw: settings.psws || 0 }[key];
   }
   function setSettingValue(key, v) {
     if (key === 'doctor') settings.doctors = v;
@@ -3118,6 +3134,7 @@
     else if (key === 'pt') settings.pts = v;
     else if (key === 'recep') settings.receptionists = v;
     else if (key === 'rehaAide') settings.rehaAides = v;
+    else if (key === 'psw') settings.psws = v;
     else settings[key] = v;
   }
 
@@ -3137,7 +3154,7 @@
   }
   function fire(key) {
     const cur = settingValue(key);
-    const min = { doctor: 1, nurse: 0, pt: 0, recep: 1, chairs: 2, beds: 0, machines: 0, physio: 0, rehaAide: 0 }[key];
+    const min = { doctor: 1, nurse: 0, pt: 0, recep: 1, chairs: 2, beds: 0, machines: 0, physio: 0, rehaAide: 0, psw: 0 }[key];
     const step = SHOP[key].step || 1;
     if (cur - step < min) { toast('これ以上は減らせません'); return; }
     setSettingValue(key, cur - step);
@@ -3152,7 +3169,7 @@
     const mm = SPECIALTIES.get(settings.specialty);
     const hide = (mm && mm.main && mm.main.preset && mm.main.preset.shopHide) || [];
     const rows = Object.entries(SHOP).map(([key, item]) => {
-      if (hide.includes(key)) return '';
+      if (hide.includes(key) || (SHOP_OPT_IN.includes(key) && !shopShown(key))) return '';
       const need = STAGE_SHOP[key] || 1;
       if (need > stage) {
         return `
@@ -3750,18 +3767,25 @@
     if (m.id === 'psychiatry') {
       const cur = d.policy.timePlan;
       const i = d.last && d.last.info;
+      // 本院は診察時間スライダーを出さない代わりに、3択の各行に1日の診察キャパを常時出す(v82 便AF-3・第8条)
+      const cap = d.isMain && m.mainExamMean
+        ? (plan) => `・1日に診られる目安 約${mainExamCap(d.staff.doctors, m.mainExamMean({ timePlan: plan }))}人`
+        : () => '';
+      // 本院の shim は d.last を持たない。前日の「診られず帰った人数」を代わりに出す(判断を変える値=常時)
+      const lastDay = d.isMain ? [...G.history].reverse().find((x) => x.kind !== 'closed') : null;
       return `
       <div class="dept-lever">
-        <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)</small></span>
+        <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)。続けやすさはゲーム上の仮定</small></span>
         <button class="choice-row ${cur === 'std' ? 'on' : ''}" data-dtime="${m.id}:std">
-          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点。多くの患者を診られるが、治療の中断は起きやすい(中断率はゲーム上の仮定)</span>
+          <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点${cap('std')}。多く診られるが治療の中断は起きやすい</span>
         </button>
         <button class="choice-row ${cur === 'mix' ? 'on' : ''}" data-dtime="${m.id}:mix">
-          <b>必要に応じて30分以上</b><span>約3割の診察に時間をかける(${kbPts('r08-I002-1-ha-1-1', 0)}点)。収益と治療の継続のあいだを取る</span>
+          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('mix')}。収益と継続のあいだを取る</span>
         </button>
         <button class="choice-row ${cur === 'long' ? 'on' : ''}" data-dtime="${m.id}:long">
-          <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点。診られる人数が大きく減り経営は厳しくなるが、中断は最も少ない</span>
+          <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('long')}。人数は減るが中断は最も少ない</span>
         </button>
+        ${lastDay ? `<div class="pnl-row"><span>昨日 診られず帰った</span><b>${lastDay.balked || 0}人</b></div>` : ''}
         ${i ? `<div class="pnl-row"><span>昨日の診察時間</span><b>${i.usedMin}分 / 枠${i.budgetMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''}</b></div>` : ''}
         ${deptActionsHtml(m, d) || '<span class="kijun-badge">連携病院との協定あり</span>'}
         <div class="op-row">
@@ -4000,7 +4024,18 @@
     if (id === settings.specialty) { const m = SPECIALTIES.get(id); return m ? mainDeptShim(m) : null; }
     return G.depts[id];
   }
-  function afterLeverChange() { renderCorp(); renderPolicyCard(); renderPnl(); updateHeader(); save(); }
+  /* 本院の平均診察分を診療方針から導く(v82 便AF-3・A案)。診察時間スライダーを出す科は何もしない。
+     精神科=通院精神療法の時間区分(3択)が唯一の時間レバーで、キャパの式が読む examMean はそこから決まる */
+  function syncMainExamMean() {
+    const m = SPECIALTIES.get(settings.specialty);
+    if (!m || !m.mainExamMean || !m.main) return;
+    settings.examMean = m.mainExamMean(mainPolicyNow(m));
+  }
+  // 本院の医師数と方針で決まる1日の診察キャパ(表示用。式は日次決算の examCapDay と同じ)
+  function mainExamCap(doctors, examMean) {
+    return Math.floor(Math.max(10, (doctors || 1) * (480 / (examMean + 1.5)) * 0.72));
+  }
+  function afterLeverChange() { syncMainExamMean(); renderCorp(); renderPolicyCard(); renderPnl(); updateHeader(); save(); }
   // 施設基準の届出/折りたたみの配線。部門カード(法人タブ)と他科本院の施設基準カード(経営タブ・v67)で共用
   function bindDeptFsHandlers(el) {
     el.querySelectorAll('details.fs-fold').forEach((dt) => dt.addEventListener('toggle', () => {
@@ -4057,11 +4092,22 @@
       toast('📋 体制を整えました。生活習慣病管理料は届出不要' + (opened.length ? `。次は「${opened.join('・')}」の届出(${where})` : '')); // 正式名称ベース(社長決定 2026-09-05)。375幅で3行になるが名称は削らない
       afterLeverChange();
     }));
+    el.querySelectorAll('[data-dtime]').forEach((b) => b.addEventListener('click', () => {
+      const [id, plan] = b.dataset.dtime.split(':');
+      const d = deptOf(id);
+      if (!d || d.policy.timePlan === plan) return;
+      d.policy.timePlan = plan;
+      toast(plan === 'long' ? '全員30分以上の方針へ — 診られる人数は減りますが、治療の中断は最も少なくなります'
+        : plan === 'mix' ? '必要に応じて30分以上の方針へ — 約3割の診察に時間をかけます'
+        : '30分未満が基本の方針へ — 診られる人数は増えますが、治療の中断は起きやすくなります');
+      if (id === settings.specialty) afterLeverChange(); else { renderCorp(); save(); }
+    }));
     el.querySelectorAll('[data-dippan]').forEach((b) => b.addEventListener('click', () => {
-      const d = deptOf(b.dataset.dippan);
+      const [id] = b.dataset.dippan.split(':');
+      const d = deptOf(id);
       if (!d) return;
       d.policy.ippanmei = !d.policy.ippanmei;
-      afterLeverChange();
+      if (id === settings.specialty) afterLeverChange(); else { renderCorp(); save(); }
     }));
   }
   // 診療方針カード(v66): 整形本院は従来のスライダー(.ctrl-grid)、他科本院はモジュールのレバー(部門と同じHTML)を #mainLever に描く
@@ -4333,16 +4379,6 @@
       const id = b.dataset.dreceipt;
       const m = SPECIALTIES.get(id);
       if (m && G.depts[id]) deptReceiptShow(m, G.depts[id]);
-    }));
-    el.querySelectorAll('[data-dtime]').forEach((b) => b.addEventListener('click', () => {
-      const [id, plan] = b.dataset.dtime.split(':');
-      const d = G.depts[id];
-      if (!d || d.policy.timePlan === plan) return;
-      d.policy.timePlan = plan;
-      toast(plan === 'long' ? '全員30分以上の方針へ — 診られる人数は減りますが、治療の中断は最も少なくなります'
-        : plan === 'mix' ? '必要に応じて30分以上の方針へ — 約3割の診察に時間をかけます'
-        : '30分未満が基本の方針へ — 診られる人数は増えますが、治療の中断は起きやすくなります');
-      renderCorp(); save();
     }));
     el.querySelectorAll('[data-dcool]').forEach((b) => b.addEventListener('click', () => {
       const [id, n] = b.dataset.dcool.split(':');
@@ -4945,6 +4981,7 @@
     settings.mainEquip = Object.assign({}, (m.deptDefaults && m.deptDefaults.equip) || {}, pre.equip || {}); // 設備は科の既定から(v73)
     if (typeof G !== 'undefined' && G) G.mainQueue = { preop: 0, surgery: 0, postop: [] }; // 科を替えたら手術待ちは空(v74)
     for (const k of pre.jihiHide || []) settings[k] = false; // 隠した自費メニューは稼がない(v76 保留#43)
+    syncMainExamMean(); // 診察時間を方針から導く科(精神科)は preset の初期値をここで確定させる(v82)
     applyMainWords();
     skipSpecMissions();
     return true;
@@ -5590,6 +5627,7 @@
   /* ================= 起動 ================= */
 
   const hasSave = load();
+  syncMainExamMean(); // 保存された方針から本院の平均診察分を戻す(v82 便AF-3)
   applyMainWords();
   let prestigeApplied = null;
   if (!hasSave) {
