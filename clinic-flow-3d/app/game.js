@@ -1662,6 +1662,7 @@
 
     save();
     renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip(); renderStaffStrip(); renderTodo(); renderItems();
+    renderPolicyCard(); // 本院レバーの情報行(昨日 混雑で帰った・白内障の待ち人数)は日次で更新する(v82 便AF-3 qa)
     updateHeader();
   }
 
