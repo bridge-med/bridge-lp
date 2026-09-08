@@ -210,7 +210,7 @@
     physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置1件¥350・PT不要・1台35件/日' },
     rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000, 100000, 100000, 110000, 110000], day: 10000, hint: 'PT単位上限+4/人・機器稼働+1・日給¥10,000' },
     // 精神科の本院だけに出す(preset.shopShow)。早期診療体制充実加算3の要件の表し方はモジュールの gameNote が開示する
-    psw:     { label: '精神保健福祉士を採用', costs: [120000], day: COSTS.pswDay, hint: '早期診療体制充実加算3の届出に要る(ゲーム上の表し方)・日給¥14,000' }
+    psw:     { label: '精神保健福祉士を採用', costs: [120000], day: COSTS.pswDay, hint: '早期診療体制充実加算3の届出に要る(要件の表し方はゲーム上の仮定)・日給¥14,000' }
   };
 
   const EXPAND_COST = 5000000;
@@ -3775,17 +3775,17 @@
       const lastDay = d.isMain ? [...G.history].reverse().find((x) => x.kind !== 'closed') : null;
       return `
       <div class="dept-lever">
-        <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)。続けやすさはゲーム上の仮定</small></span>
+        <span class="ctrl-head">診察時間の方針 <small>— 時間区分がそのまま点数になる(通院精神療法)。中断の増減はゲーム上の仮定</small></span>
         <button class="choice-row ${cur === 'std' ? 'on' : ''}" data-dtime="${m.id}:std">
           <b>30分未満が基本</b><span>${kbPts('r08-I002-1-ha-2-1', 0)}点${cap('std', true)}。多く診られるが中断は起きやすい</span>
         </button>
         <button class="choice-row ${cur === 'mix' ? 'on' : ''}" data-dtime="${m.id}:mix">
-          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('mix')}。収益と継続のあいだ</span>
+          <b>必要に応じて30分以上</b><span>約3割が${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('mix')}。収益と治療の継続の間を取る</span>
         </button>
         <button class="choice-row ${cur === 'long' ? 'on' : ''}" data-dtime="${m.id}:long">
           <b>全員30分以上</b><span>${kbPts('r08-I002-1-ha-1-1', 0)}点${cap('long')}。人数は減るが中断は最も少ない</span>
         </button>
-        ${lastDay ? `<div class="pnl-row"><span>昨日 診られず帰った</span><b>${lastDay.balked || 0}人</b></div>` : ''}
+        ${lastDay ? `<div class="pnl-row"><span>昨日 混雑で帰った</span><b>${lastDay.balked || 0}人</b></div>` : ''}
         ${i ? `<div class="pnl-row"><span>昨日の診察時間</span><b>${i.usedMin}分 / 枠${i.budgetMin}分${i.deferred ? `・翌日へ${i.deferred}件` : ''}</b></div>` : ''}
         ${deptActionsHtml(m, d) || '<span class="kijun-badge">連携病院との協定あり</span>'}
         <div class="op-row">
@@ -4098,7 +4098,7 @@
       if (!d || d.policy.timePlan === plan) return;
       d.policy.timePlan = plan;
       toast(plan === 'long' ? '全員30分以上の方針へ — 診られる人数は減りますが、治療の中断は最も少なくなります'
-        : plan === 'mix' ? '必要に応じて30分以上の方針へ — 約3割の診察に時間をかけます'
+        : plan === 'mix' ? '必要に応じて30分以上の方針へ — 約3割の診察に時間をかけ、収益と治療の継続の間を取ります'
         : '30分未満が基本の方針へ — 診られる人数は増えますが、治療の中断は起きやすくなります');
       if (id === settings.specialty) afterLeverChange(); else { renderCorp(); save(); }
     }));
