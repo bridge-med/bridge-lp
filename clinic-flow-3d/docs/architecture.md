@@ -12,7 +12,7 @@ Layer 3  Reimbursement      app/reimbursement.js + data/kb-r08.js
 Layer 3.5 Departments       app/departments.js(診療科部門の共通基盤: 患者パネル型日次シム。
                             患者ごとに月/週回数・6月窓・初診済みを追跡し、全収益をLayer 3で算定)
 Layer 4  Management Sim     game.js のP&L・KPI・スタッフ・施設基準・法人・リーグ・部門カード
-Layer 5  Learning           レシートの算定詳細・学習モード・教科書・クイズ・Reimbursement Debugger
+Layer 5  Learning           レシートの算定詳細・「📖 くわしく」(2レーン)・教科書・クイズ・Reimbursement Debugger
 ```
 
 ## データの流れ(会計1件)
@@ -38,7 +38,8 @@ Layer 5  Learning           レシートの算定詳細・学習モード・教�
 
 v32までの全機能(3D視察・ペルソナ・常連・天気・リーグ・分院・ミッション)は無変更。
 変更したのは会計の点数源(ハードコード→KB)・レシートUI(詳細追加)・施設基準UI(KB要件表示)のみ。
-セーブ互換: 新フィールド(settings.learnMode / settings.specialty)は未定義時デフォルトで補完。
+セーブ互換: 新フィールド(settings.lane / settings.specialty)は未定義時デフォルトで補完
+(旧セーブの settings.learnMode===true は lane='learn' に読み替える。v81 便AJ-2)。
 
 ## 診療科部門(v35)
 
