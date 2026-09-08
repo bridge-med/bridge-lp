@@ -3190,7 +3190,8 @@
       </div>` : `
       ${hide.includes('mri') ? '' : `<div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
-        <span class="shop-hint">MRI検査 1件1,900点=¥19,000(撮影1,330+断層診断450+電子画像管理120)。断層診断450点は同一患者・同一月に1回だけ。維持費¥12,000/日・1日最大8件はゲーム上の設定。導入時に施設基準(様式37)の届出まで整える前提</span>
+        <span class="shop-hint">MRI検査1件1,900点=¥19,000・維持費¥12,000/日</span>
+        <span class="shop-hint"${foldAttr('shop')}>撮影1,330+断層診断450+電子画像管理120 / 断層診断450点は同一患者・同一月に1回 / 1日最大8件はゲーム上の設定 / 導入時に施設基準(様式37)の届出まで整える前提</span>
         ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('advisor', 'normal', 17)} 白瀬「${STAFF_UI.STAFF.advisor.invest.mri}」</span>` : ''}</div>
         ${settings.mri ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="mriBtn">🧲 ${yen(MRI_COST)}</button></div>`}
       </div>`}
@@ -3220,6 +3221,8 @@
           : `<div class="shop-row expand-row done"><div class="shop-info"><span class="shop-name">🏙 別館まで増築済み(診察室6・リハ室150㎡)</span></div></div>`}`;
 
     $('shopList').innerHTML = rows + bigTicket;
+    const shopTools = $('shopTools');
+    if (shopTools) shopTools.innerHTML = learnBtn('shop', '各行の内訳と算定ルール');
     $('shopList').querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
     $('shopList').querySelectorAll('[data-fire]').forEach((b) => b.addEventListener('click', () => fire(b.dataset.fire)));
     const ex = $('expandBtn');
@@ -3471,10 +3474,13 @@
       const stale = r.lv > 0 ? Math.max(0, 30 - (G.day - r.last)) : null;
       return `<div class="rel-row">
         <div class="rel-info"><b>${def.name}</b> <span class="rel-stars">${stars(r.lv, def.max)}</span>
-        <small>${def.effect}${stale !== null ? ` / あと${stale}日で関係が冷える` : ''}</small></div>
+        <small>${def.effect}${stale !== null ? ` / あと${stale}日で関係が冷える` : ''}</small>
+        <small class="rel-desc"${foldAttr('rel')}>${def.desc}</small></div>
         <button class="mini-btn plus" data-rel="${k}">${r.lv === 0 ? '挨拶に行く' : r.lv < def.max ? '関係を深める' : '定期訪問'} ${yen(def.cost)}</button>
       </div>`;
     }).join('');
+    const salesTools = $('salesTools');
+    if (salesTools) salesTools.innerHTML = learnBtn('rel', 'この営業先について');
     el.querySelectorAll('[data-rel]').forEach((b) => b.addEventListener('click', () => visitRelation(b.dataset.rel)));
   }
 
@@ -4844,9 +4850,11 @@
       const st = i < G.missionIdx ? 'done' : i === G.missionIdx ? 'now' : 'locked';
       return `<div class="mission-row ${st}">
         <span class="mission-mark">${st === 'done' ? '✅' : st === 'now' ? '🎯' : '🔒'}</span>
-        <div><b>${m.title}</b>${st === 'done' ? `<p class="mission-lesson">${m.lesson}</p>` : ''}</div>
+        <div><b>${m.title}</b>${st === 'done' ? `<p class="mission-lesson"${foldAttr('missions')}>${m.lesson}</p>` : ''}</div>
       </div>`;
     }).join('');
+    const missionTools = $('missionTools');
+    if (missionTools) missionTools.innerHTML = learnBtn('missions', 'このミッションの学び');
     $('textbook').innerHTML = TEXTBOOK.map((c) => `<details class="tb-card"><summary>${c.t}</summary><p>${c.b}</p></details>`).join('');
   }
 
