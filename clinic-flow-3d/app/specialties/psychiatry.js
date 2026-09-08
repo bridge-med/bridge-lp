@@ -25,6 +25,41 @@
     icon: '🌙',
     status: 'full',
     desc: '診察時間の配分が柱。時間区分がそのまま点数になり、1日の使い方が経営を決める',
+    // 開始の扉の候補=本院として引き継げる(v82 便AF-3・4枚目)。preset は本院の settings に上書きする整形専用レバーのゼロ化と方針の初期値
+    main: {
+      line: '話を聴いて診る。点数は時間の区分', order: 4, fsTitle: '精神科の届出',
+      preset: {
+        // examMean は診察時間の方針(timePlan)から導く(mainExamMean)。std の値を初期値に置く
+        settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0, examMean: 12, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, psws: 0, dexa: false, echo: false },
+        policy: { timePlan: 'std', ippanmei: true, renkei: false },
+        shopHide: ['pt', 'rehaAide', 'machines', 'physio', 'echo', 'dexa', 'mri'],
+        shopShow: ['psw'], // 精神保健福祉士は精神科の本院だけに出す(早期診療体制充実加算3の要件の表し方=下の fsDefs の gameNote)
+        jihiHide: ['selfReha', 'prpOn'], // 自費リハ延長・PRP療法は運動器の自費(v82 保留#45 のPRP側を閉じる)
+        // キホン集(TEXTBOOK)の科別差し替え。整形前提の③⑥⑨⑩⑫だけ。制度上の数値は書かない
+        textbook: {
+          2: { t: '③ 単価は複合で作る', b: '精神科の単価は初再診料+通院精神療法+処方の組み合わせ。通院精神療法は診察にかけた時間の区分で点数が変わる。' },
+          5: { t: '⑥ 継続管理はLTVで考える', b: '精神科の通院は年単位で続く。1回の単価より、治療が途切れないことが生涯価値をいちばん動かす。' },
+          9: { t: '⑨ 施設基準は経営の土台', b: '通院精神療法そのものに届出必須の基準はない。届出で増えるのは加算で、体制と記録を続けることがその土台になる。' },
+          10: { t: '⑩ 分院は専従の壁', b: '分院の体制要件は施設ごとに満たす必要がある。本院の精神保健福祉士を分院に兼務させることはできない。分院展開のボトルネックは資金より採用になる。' },
+          12: { t: '⑫ 設備投資は回収期間で決める', b: '精神科で増やせるのは機器ではなく診察の時間と人。判断基準は「欲しい」ではなく、投資が何日の診療で回収できるかという期間になる。' },
+        },
+        relHide: ['sports'],
+        // 営業先の文言(整形はリハ紹介前提)。効果の数値は同じ=文言だけ
+        rel: {
+          hospital: { effect: '紹介患者 +Lv人/日(退院後の通院)', desc: '精神科の病院との関係。入院した人の退院後の通院先になる。' },
+          company: { desc: '産業医との関係。休職や職場復帰の相談先になる。' },
+          caremane: { effect: '高齢の新患 +Lv×0.7人/日', desc: '担当者会議に出て、眠れない・気分が落ち込む相談を受ける。' },
+          rouken: { effect: '高齢の新患 +Lv×0.7人/日', desc: '退所後も通院を続けられる先として連携する。' },
+          school: { name: '高校(スクールカウンセラー)', effect: '思春期の新患 +Lv×0.5人/日', desc: 'スクールカウンセラーと連携し、受診が要る生徒を引き受ける。' },
+          houkatsu: { effect: '高齢の新患 +Lv×0.5人/日', desc: '介護予防教室に出て、閉じこもりや不眠の相談を受ける。' },
+        },
+        keywords: [
+          { name: '「◯◯町 心療内科」', hint: '指名度が高く CV率10%。ただし検索数に上限', reha: false },
+          { name: '「眠れない・気分が落ち込む」', hint: '検索数は多いが、比較検討層で CV率3.5%', reha: false },
+          { name: '「職場復帰 精神科」', hint: 'CV率6%。駅前広告が要るぶん、拾える数は少ない', reha: false },
+        ],
+      },
+    },
     patientProfiles: [
       { id: 'mood', label: '気分障害', weight: 0.5, kind: 'i002' },
       { id: 'anxiety', label: '不安障害', weight: 0.32, kind: 'i002' },
@@ -125,6 +160,26 @@
       const plan = (policy && policy.timePlan) || 'std';
       return Math.max(0.005, (P.churnMonthly[plan] !== undefined ? P.churnMonthly[plan] : P.churnMonthly.std)
         - ((staff && staff.psws) || 0) * P.pswChurnRelief);
+    },
+
+    /* ---- 本院(main)だけが使う導出。値の置き場所はここ1箇所(v82 便AF-3) ---- */
+    /* 本院の1回あたりの平均診察分(settings.examMean)を診察時間の方針から導く。
+       本院の診察キャパ doctors×480/(examMean+1.5)×0.72 は分院の1日の分数予算と同じ量なので、
+       スライダーは出さず3択から導く(同じ量を二度置かない)。値は分院の来院比(std 1.00/mix 0.77/long 0.47)に
+       キャパ比が一致するように置いた=ゲーム上の仮定 */
+    mainExamMean(policy) {
+      const plan = (policy && policy.timePlan) || 'std';
+      return { std: 12, mix: 16, long: 27 }[plan] || 12;
+    },
+    /* 本院の定着(再来の起きやすさ)にかかる倍率。ゲーム上の仮定。
+       分院は「時間をかけるほど治療の中断が減る」(churnMonthly)。本院は中断率を持たず待ち時間由来の
+       満足度だけで再来が決まるため、同じ方針が逆向きに働いてしまう。そこで分院の中断率の比を
+       そのまま定着の倍率にする: std を 1.0 として std/plan(= mix 約1.43・long 2.5)。
+       新しい変数は増やさない(値は churnMonthly から導出) */
+    mainLoyalty(policy) {
+      const C = this.managementParameters.churnMonthly;
+      const plan = (policy && policy.timePlan) || 'std';
+      return C.std / (C[plan] !== undefined ? C[plan] : C.std);
     },
 
     /* 1回の来院で何をするかを決める(会計はしない)。部門の runDay と本院が同じ経路を通る(v82 便AF-3)。

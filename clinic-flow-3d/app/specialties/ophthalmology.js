@@ -58,7 +58,7 @@
         settings: { pInj: 0, pTrig: 0, pPhysio: 0, pReha: 0, pTreat: 0.05, examMean: 7, rehaLevel: 0, machines: 0, physio: 0, pts: 0, rehaAides: 0, dexa: false, echo: false },
         policy: {},
         shopHide: ['pt', 'rehaAide', 'machines', 'physio', 'echo', 'dexa', 'mri'],
-        jihiHide: ['selfReha'], // 自費リハ延長は整形のリハ完了者が前提(v76 保留#43)
+        jihiHide: ['selfReha', 'prpOn'], // 自費リハ延長・PRP療法は運動器の自費(v76 保留#43・v82 保留#45)
         // キホン集(TEXTBOOK)の科別差し替え(v77 保留#42・editor 原稿)。整形前提の③⑥⑨⑩⑫だけ。制度上の数値は書かない
         textbook: {
           2: { t: '③ 単価は複合で作る', b: '眼科の単価は初再診料+検査(眼圧・細隙灯・精密眼底・OCT・視野)+処方の組み合わせ。導入した設備の分だけ検査でできる範囲が広がる。' },
