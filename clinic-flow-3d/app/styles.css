@@ -325,6 +325,7 @@ a { color: var(--blue-deep); }
 .ctrl { display: flex; flex-direction: column; gap: 5px; }
 .ctrl-head { font: 600 12.5px/1.5 var(--sans); color: var(--ink-2); }
 .ctrl-head b { color: var(--blue-deep); font-weight: 800; margin-left: 4px; }
+.branch-card .ctrl-grid .ctrl-head b { display: block; margin-left: 0; } /* 分院の操作パネル: 見出しと値を常に2段に揃える(正式名称で折れる見出しと折れない見出しの非対称を無くす。v83 便AK designer) */
 .ctrl-note { font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); }
 
 input[type="range"] {
