@@ -4238,7 +4238,7 @@
         <div class="ctrl-grid">
           <label class="ctrl"><span class="ctrl-head">注射方針 <b>${Math.round((br.pInj || 0.2) * 100)}%</b></span>
             <input type="range" data-brpinj="${bi}" min="0" max="50" step="5" value="${Math.round((br.pInj || 0.2) * 100)}"></label>
-          <label class="ctrl"><span class="ctrl-head">運動器リハビリテーション方針 <b>${Math.round((br.pReha || 0.35) * 100)}%</b></span>
+          <label class="ctrl"><span class="ctrl-head">運動器リハビリテーション料の提案方針 <b>${Math.round((br.pReha || 0.35) * 100)}%</b></span>
             <input type="range" data-brpreha="${bi}" min="0" max="70" step="5" value="${Math.round((br.pReha || 0.35) * 100)}"></label>
         </div>
         <div class="op-row">
