@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 /* 精神科・心療内科(v82 便AF-3)の planVisit 抽出テスト: モジュールの planVisit → DEPT.evalVisit を
  * 本院の常連レコードと同じ形(mc/wc/lb/fb/pr/en)で回す。
  * 実行: node clinic-flow-3d/tests/main-psych.test.mjs。点数はKBパック経由で読み、このファイルに書かない。 */
@@ -132,7 +133,14 @@ t('main候補: line は16字以内・order 4・preset に整形レバーのゼ�
   ok(pre.jihiHide.includes('selfReha') && pre.jihiHide.includes('prpOn') && pre.jihiHide.includes('goods'), '運動器の自費(自費リハ延長・PRP療法・物販)は出さない');
   ok(pre.relHide.includes('sports'), 'スポーツクラブは出さない');
   eq(pre.policy.timePlan, 'std'); eq(pre.policy.ippanmei, true); eq(pre.policy.renkei, false);
-  ok(Object.keys(pre.textbook).length === 7 && [2, 5, 9, 10, 12, 14, 16].every((i) => pre.textbook[i]), 'キホン集は整形前提の7項目(③⑥⑨⑩⑫⑮⑰)だけ差し替える');
+  ok(Object.keys(pre.textbook).length === 7 && [2, 5, 9, 10, 12, 15, 17].every((i) => pre.textbook[i]), 'キホン集は整形前提の7項目(③⑥⑨⑩⑫⑮⑰)だけ差し替える');
+  // 差し替え先の index が game.js の TEXTBOOK の同じ丸数字を指すこと(⑧の後に「⑧+」が挟まるので ⑨以降は丸数字−1 ではない。v83 便AK qa で発見)
+  {
+    const src = fs.readFileSync(new URL('../app/game.js', import.meta.url), 'utf8');
+    const block = src.slice(src.indexOf('const TEXTBOOK = ['), src.indexOf('];', src.indexOf('const TEXTBOOK = [')));
+    const titles = [...block.matchAll(/\{ t: '([^']+)'/g)].map((m) => m[1]);
+    ok(titles.length >= 18 && Object.entries(pre.textbook).every(([i, c]) => titles[+i] && titles[+i].slice(0, 1) === c.t.slice(0, 1)), '科別差し替えの index は TEXTBOOK の同じ丸数字を指す');
+  }
   ok(pre.keywords.length === 3, '広告キーワード3本');
 });
 t('本院の経路: 常連レコード(mc/wc/lb/fb/pr/en)で planVisit→DEPT.evalVisit が通り、全行がKB項目', () => {
