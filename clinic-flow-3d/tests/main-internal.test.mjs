@@ -1,6 +1,7 @@
 /* 本院=内科(v66 便AD)のエンジン経路テスト: モジュールの planVisit → DEPT.evalVisit を本院の常連レコード(mc/wc/lb/fb/pr)で回す。
  * 実行: node clinic-flow-3d/tests/main-internal.test.mjs
  * 点数はKBパック経由(REIMB.pointsOf)で読み、このファイルに書かない。 */
+import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -92,5 +93,16 @@ t('fsEnforce は dept.fs を差し替える(別参照)=本院では settings.mai
   eq(broken.length, 1); eq(broken[0].fsId, 'r08-fs-b001-3-n4-3');
   ok(d.fs !== fs, 'fsEnforce は新しい配列を代入する(元配列は不変)'); eq(fs.length, 2); eq(d.fs.length, 1);
 });
+
+// キホン集の差し替え index が game.js の TEXTBOOK の同じ丸数字を指す(⑧の後に「⑧+」が挟まる。v83 便AK qa 発見・3科で固定)
+t('preset.textbook の index は TEXTBOOK の同じ丸数字を指す(③⑥⑨⑩⑫⑮⑰)', () => {
+  const pre = INTERNAL.main.preset.textbook;
+  ok([2, 5, 9, 10, 12, 15, 17].every((i) => pre[i]) && Object.keys(pre).length === 7, '7項目');
+  const src = fs.readFileSync(join(ROOT, 'app', 'game.js'), 'utf8');
+  const start = src.indexOf('const TEXTBOOK = [');
+  const titles = [...src.slice(start, src.indexOf('];', start)).matchAll(/\{ t: '([^']+)'/g)].map((m) => m[1]);
+  ok(titles.length >= 18 && Object.entries(pre).every(([i, c]) => titles[+i] && titles[+i].slice(0, 1) === c.t.slice(0, 1)), '丸数字が一致');
+});
+
 console.log(`main-internal.test: ${n - failed} passed / ${failed} failed`);
 process.exit(failed ? 1 : 0);
