@@ -129,10 +129,10 @@ t('main候補: line は16字以内・order 4・preset に整形レバーのゼ�
   eq(pre.settings.pInj, 0); eq(pre.settings.pReha, 0); eq(pre.settings.rehaLevel, 0); eq(pre.settings.pts, 0);
   ok(pre.shopHide.includes('pt') && pre.shopHide.includes('machines'), '整形の採用・設備は出さない');
   ok(pre.shopShow.includes('psw'), '精神保健福祉士は精神科の本院だけに出す');
-  ok(pre.jihiHide.includes('selfReha') && pre.jihiHide.includes('prpOn'), '運動器の自費は出さない');
+  ok(pre.jihiHide.includes('selfReha') && pre.jihiHide.includes('prpOn') && pre.jihiHide.includes('goods'), '運動器の自費(自費リハ延長・PRP療法・物販)は出さない');
   ok(pre.relHide.includes('sports'), 'スポーツクラブは出さない');
   eq(pre.policy.timePlan, 'std'); eq(pre.policy.ippanmei, true); eq(pre.policy.renkei, false);
-  ok(Object.keys(pre.textbook).length === 5, 'キホン集は差し替え可能な5項目だけ');
+  ok(Object.keys(pre.textbook).length === 7 && [2, 5, 9, 10, 12, 14, 16].every((i) => pre.textbook[i]), 'キホン集は整形前提の7項目(③⑥⑨⑩⑫⑮⑰)だけ差し替える');
   ok(pre.keywords.length === 3, '広告キーワード3本');
 });
 t('本院の経路: 常連レコード(mc/wc/lb/fb/pr/en)で planVisit→DEPT.evalVisit が通り、全行がKB項目', () => {
