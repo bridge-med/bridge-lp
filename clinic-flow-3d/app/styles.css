@@ -1151,6 +1151,7 @@ input[type="range"]::-moz-range-thumb {
 
 @media (min-width: 720px) {
   .ctrl-grid { grid-template-columns: repeat(3, 1fr); }
+  .branch-card .ctrl-grid { grid-template-columns: repeat(2, 1fr); } /* 分院の操作パネルは2列: 正式名称の見出し(18字)が3列幅では折れて末尾1字が孤立する(v83 便AK designer) */
   .tabs { top: 108px; }
   .hud { gap: 8px 22px; }
   .hud-val { font-size: 17px; }
