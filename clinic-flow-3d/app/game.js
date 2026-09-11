@@ -1019,12 +1019,12 @@
       if (report.didReha) sat = Math.min(1, sat + 0.1);
 
       // 自費リハ延長(価格弾力性)
-      if (report.didReha && settings.selfReha) {
+      if (report.didReha && settings.selfReha && !jihiByBranch('selfReha')) { // 分院の自費として戻した項目は本院で稼がない(v84)
         const pJihi = clamp((G.rep - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
         if (Math.random() < pJihi) { revenue += settings.selfRehaPrice; T.rev.jihi += settings.selfRehaPrice; rc.push({ n: '自費リハ延長(保険外)', y: settings.selfRehaPrice }); }
       }
       // 物販(原価60%)
-      if (settings.goods && (report.items.includes('treat') || report.items.includes('reha'))) {
+      if (settings.goods && !jihiByBranch('goods') && (report.items.includes('treat') || report.items.includes('reha'))) {
         if (Math.random() < 0.12 * clamp(G.rep / 70, 0.6, 1.3)) {
           revenue += FEES.goods; T.rev.jihi += FEES.goods; T.goodsCogs += FEES.goodsCogs;
           rc.push({ n: '物販: サポーター等(保険外)', y: FEES.goods });
@@ -5347,11 +5347,11 @@
         const mriMul = seg === 'sports' ? 1.6 : seg === 'worker' ? 1.1 : 0.85;
         if (settings.mri && T.mriCount < 8 && (a.type === 'first' || a.refer) && Math.random() < 0.3 * mriMul) { rev += FEES.mri; T.rev.img += FEES.mri; T.mriCount++; acc(T, 'MRI撮影(1.5テスラ以上3テスラ未満)+断層診断+電子画像管理', FEES.mri / 10); }
         if (settings.dexa && a.type === 'first' && Math.random() < (seg === 'senior' ? 0.25 : 0.05)) G.osteoPool++;
-        if (didReha && settings.selfReha) {
+        if (didReha && settings.selfReha && !jihiByBranch('selfReha')) {
           const pJ = clamp((G.rep - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
           if (Math.random() < pJ) { rev += settings.selfRehaPrice; T.rev.jihi += settings.selfRehaPrice; acc(T, '自費リハ延長(保険外)', 0, settings.selfRehaPrice); }
         }
-        if (settings.goods && proc && Math.random() < 0.12 * clamp(G.rep / 70, 0.6, 1.3)) { rev += FEES.goods; T.rev.jihi += FEES.goods; T.goodsCogs += FEES.goodsCogs; acc(T, '物販: サポーター等(保険外)', 0, FEES.goods); }
+        if (settings.goods && !jihiByBranch('goods') && proc && Math.random() < 0.12 * clamp(G.rep / 70, 0.6, 1.3)) { rev += FEES.goods; T.rev.jihi += FEES.goods; T.goodsCogs += FEES.goodsCogs; acc(T, '物販: サポーター等(保険外)', 0, FEES.goods); }
         T.revenue += rev;
         const loyalty = { senior: 0.55, worker: 0.32, sports: 0.42 }[seg] || 0.45;
         if ((a.type === 'first' || a.type === 'revisit') && !didReha && Math.random() < loyalty * 0.85 + 0.02 * relLv('pharmacy')) addSchedule(G.day + 2 + Math.floor(Math.random() * 6), 'revisit');
