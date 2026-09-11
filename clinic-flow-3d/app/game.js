@@ -589,7 +589,7 @@
       Object.assign(settings, d.settings);
       Object.assign(G, d.g);
       // 本院の科で隠す自費メニューは稼がない(v76 保留#43。旧セーブで selfReha が残っていても落とす)
-      if (typeof SPECIALTIES !== 'undefined') { const mm = SPECIALTIES.get(settings.specialty); for (const k of (mm && mm.main && mm.main.preset && mm.main.preset.jihiHide) || []) settings[k] = false; }
+      if (typeof SPECIALTIES !== 'undefined') { const mm = SPECIALTIES.get(settings.specialty); for (const k of (mm && mm.main && mm.main.preset && mm.main.preset.jihiHide) || []) { if (jihiHidden(k)) settings[k] = false; } } // 整形外科の分院があれば分院の自費として残す(v84)
       Object.keys(REL_DEF).forEach((k) => { if (!G.relations[k]) G.relations[k] = { lv: 0, last: 0 }; });
       if (!G.cum) G.cum = { revenue: 0, profit: 0 };
       // v81 便AJ-2: 旧セーブの 🎓 学習モードを2レーンへ引き継ぐ(learnMode:true → 'learn'、それ以外・無しは 'play')
@@ -1342,17 +1342,36 @@
       physioN * FEES.physio + mriN * FEES.mri
     );
     const visits = Math.round(visitsExam + rehaVisits);
-    const cost = Math.round(branchStaffCost(br.staff) * spec.pay + branchRent(br) + COSTS.branchBase + (br.mri ? COSTS.mriMaint : 0) + visits * COSTS.perPatient);
-    const profit = revenue - cost;
+    // 分院の自費(v84 便AL): 本院が運動器の自費を隠す科でも、整形外科の分院があれば分院で稼ぐ。式は本院の同名の式と同型で、評判は分院の br.rep(営業先 sports は掛けない=ゲーム上の仮定)
+    let jihi = 0, jihiCogs = 0;
+    const jihiBy = { selfReha: 0, goods: 0, prpOn: 0 };
+    if (settings.selfReha && jihiByBranch('selfReha')) {
+      const pJ = clamp((br.rep - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
+      jihiBy.selfReha = rehaVisits * pJ * settings.selfRehaPrice; jihi += jihiBy.selfReha;
+    }
+    if (settings.goods && jihiByBranch('goods')) {
+      const n = (treats + rehaVisits) * 0.12 * clamp(br.rep / 70, 0.6, 1.3);
+      jihiBy.goods = n * FEES.goods; jihi += jihiBy.goods; jihiCogs += n * FEES.goodsCogs;
+    }
+    if (settings.prpOn && jihiByBranch('prpOn')) {
+      // 分院は来院数に比例(本院の式は評判だけで件数が出るが、分院の規模は本院の1/4程度=来院の約1.2%×評判係数。ゲーム上の仮定)
+      const demand = visitsExam * 0.012 * clamp((br.rep - 58) / 12, 0, 2.2) * clamp(1.55 - settings.prpPrice / 100000, 0.15, 1.3);
+      const cases = demand * (0.7 + Math.random() * 0.6);
+      jihiBy.prpOn = cases * settings.prpPrice; jihi += jihiBy.prpOn; jihiCogs += cases * FEES.prpCogs;
+    }
+    jihi = Math.round(jihi); jihiCogs = Math.round(jihiCogs);
+    const revenueAll = revenue + jihi;
+    const cost = Math.round(branchStaffCost(br.staff) * spec.pay + branchRent(br) + COSTS.branchBase + (br.mri ? COSTS.mriMaint : 0) + visits * COSTS.perPatient) + jihiCogs;
+    const profit = revenueAll - cost;
 
     br.revisitPool = br.revisitPool * 0.55 + visitsExam * 0.45 * sat;
     br.rehabPool = Math.max(0, br.rehabPool - rehaVisits + starts * 7);
     br.rep = clamp(br.rep + (sat * 100 - br.rep) * 0.025, 20, 95);
     br.aw = clamp(br.aw + (br.rep >= 70 ? 0.006 : 0.0025) - 0.0045, 0.05, 0.95);
-    br.last = { revenue, cost, profit, visits, reha: Math.round(rehaVisits) };
+    br.last = { revenue: revenueAll, cost, profit, visits, reha: Math.round(rehaVisits), jihi, jihiBy };
     br.profit7.push(profit);
     if (br.profit7.length > 7) br.profit7.shift();
-    return { revenue, cost, profit };
+    return { revenue: revenueAll, cost, profit };
   }
 
   // 病院(マクロ): 入院は「病床が埋まっている毎日」が売上。配置基準がそのまま稼働上限になる
@@ -1423,7 +1442,7 @@
       T.rev.osteo += visits * FEES.osteo;
       G.osteoPool = Math.max(0, G.osteoPool * 0.998);
     }
-    if (settings.prpOn) {
+    if (settings.prpOn && !jihiByBranch('prpOn')) { // 本院が隠す科では分院側(branchDay)で稼ぐ(v84)
       const demand = clamp((G.rep - 58) / 12, 0, 2.2) * clamp(1.55 - settings.prpPrice / 100000, 0.15, 1.3) * (1 + 0.25 * relLv('sports')) * spec.arr;
       const cases = frac(demand * (0.7 + Math.random() * 0.6));
       if (cases > 0) {
@@ -3296,26 +3315,38 @@
   }
 
   // 本院の科で意味を持たない自費メニューは出さない(v76 保留#43: 自費リハ延長は整形のリハ完了者が前提。preset.jihiHide)
-  function jihiHidden(key) {
+  function jihiPresetHides(key) {
     const mm = SPECIALTIES.get(settings.specialty);
     const hide = (mm && mm.main && mm.main.preset && mm.main.preset.jihiHide) || [];
     return hide.includes(key);
   }
+  // 隠した運動器の自費は、法人に整形外科の分院があれば「分院の自費」として戻る(v84 便AL・社長決裁③ 2026-09-11「隠した上で何かをすれば復活するならOK」)
+  function hasOrthoBranch() { return typeof G !== 'undefined' && !!G && Array.isArray(G.branches) && G.branches.length > 0; }
+  function jihiByBranch(key) { return jihiPresetHides(key) && hasOrthoBranch(); }
+  function jihiHidden(key) { return jihiPresetHides(key) && !hasOrthoBranch(); }
   function renderJihi() {
     const el = $('jihiList');
     if (!el) return;
-    const uptakeReha = clamp((G.rep - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
-    const prpDemand = clamp((G.rep - 58) / 12, 0, 2.2) * clamp(1.55 - settings.prpPrice / 100000, 0.15, 1.3) * (1 + 0.25 * relLv('sports'));
+    // 分院の自費として出す項目は、想定値も分院の評判(最大)で(v84)
+    const repFor = (k) => jihiByBranch(k) ? Math.max(...G.branches.map((b) => b.rep)) : G.rep;
+    const uptakeReha = clamp((repFor('selfReha') - 55) / 80, 0, 0.35) * clamp(1.7 - settings.selfRehaPrice / 9000, 0.15, 1.2);
+    const brVisits = jihiByBranch('prpOn') ? G.branches.reduce((a, b) => a + (b.last ? b.last.visits : 0), 0) : 0;
+    const prpDemand = jihiByBranch('prpOn')
+      ? brVisits * 0.012 * clamp((repFor('prpOn') - 58) / 12, 0, 2.2) * clamp(1.55 - settings.prpPrice / 100000, 0.15, 1.3)
+      : clamp((G.rep - 58) / 12, 0, 2.2) * clamp(1.55 - settings.prpPrice / 100000, 0.15, 1.3) * (1 + 0.25 * relLv('sports'));
+    const brTag = (k) => jihiByBranch(k) ? ' <span class="kijun-badge">整形外科の分院で提供</span>' : '';
+    const hiddenKeys = ['selfReha', 'prpOn', 'goods'].filter((k) => jihiHidden(k));
+    const hiddenNote = hiddenKeys.length ? `<p class="pnl-note"><small>自費リハ延長・PRP療法・物販は、整形外科の分院を開設すると使える</small></p>` : '';
     const agaJoin = 0.5 * clamp(G.aw * 1.5, 0.3, 1.2) * clamp(1.6 - settings.agaPrice / 12000, 0.2, 1.3);
     el.innerHTML = `
       ${jihiHidden('selfReha') ? '' : `<div class="jihi-item">
-        <div class="jihi-head"><button class="op-btn ${settings.selfReha ? 'on' : ''}" data-jihi="selfReha">🏃 自費リハ延長</button>
+        <div class="jihi-head"><button class="op-btn ${settings.selfReha ? 'on' : ''}" data-jihi="selfReha">🏃 自費リハ延長</button>${brTag('selfReha')}
         <span class="jihi-stat">想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)</span></div>
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.selfRehaPrice)}</b></span>
         <input type="range" data-jprice="selfRehaPrice" min="4000" max="15000" step="1000" value="${settings.selfRehaPrice}"></label>
       </div>`}
       ${jihiHidden('prpOn') ? '' : `<div class="jihi-item">
-        <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>
+        <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>${brTag('prpOn')}
         <span class="jihi-stat">想定 ${prpDemand.toFixed(1)}件/日・原価 ${yen(FEES.prpCogs)}/件</span></div>
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.prpPrice)}</b></span>
         <input type="range" data-jprice="prpPrice" min="30000" max="165000" step="5000" value="${settings.prpPrice}"></label>
@@ -3327,9 +3358,9 @@
         <input type="range" data-jprice="agaPrice" min="3000" max="15000" step="1000" value="${settings.agaPrice}"></label>
       </div>
       ${jihiHidden('goods') ? '' : `<div class="jihi-item">
-        <div class="jihi-head"><button class="op-btn ${settings.goods ? 'on' : ''}" data-jihi="goods">🦵 物販(サポーター等)<small> 原価60%</small></button>
+        <div class="jihi-head"><button class="op-btn ${settings.goods ? 'on' : ''}" data-jihi="goods">🦵 物販(サポーター等)<small> 原価60%</small></button>${brTag('goods')}
         <span class="jihi-stat">一部が購入・¥3,500</span></div>
-      </div>`}`;
+      </div>`}${hiddenNote}`;
     el.querySelectorAll('[data-jihi]').forEach((b) => b.addEventListener('click', () => {
       const k = b.dataset.jihi;
       if (k === 'prpOn' && !settings.prpOn) {
@@ -4222,7 +4253,7 @@
           <b>🏥 ${br.name}${(br.floorLv || 1) >= 3 ? ' <small>🏙150㎡</small>' : (br.floorLv || 1) >= 2 ? ' <small>🏗100㎡</small>' : ''}${br.mri ? ' <small>🧲MRI</small>' : ''}</b>
           <span class="branch-stat">評判 ${Math.round(br.rep)} / 認知 ${Math.round(br.aw * 100)}% / ${REHA_NAMES[br.rehaLevel]}</span>
         </div>
-        ${br.last ? `<div class="branch-pnl">昨日: 患者${br.last.visits}人(リハ${br.last.reha}) 売上${yen(br.last.revenue)} 損益 <b class="${br.last.profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(br.last.profit)}</b> / 直近7日計 <b class="${p7 >= 0 ? 'pos-t' : 'neg-t'}">${yen(p7)}</b></div>` : '<div class="branch-pnl">開院準備中 — 明日から診療開始</div>'}
+        ${br.last ? `<div class="branch-pnl">昨日: 患者${br.last.visits}人(リハ${br.last.reha}) 売上${yen(br.last.revenue)}${br.last.jihi ? `(自費${yen(br.last.jihi)})` : ''} 損益 <b class="${br.last.profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(br.last.profit)}</b> / 直近7日計 <b class="${p7 >= 0 ? 'pos-t' : 'neg-t'}">${yen(p7)}</b></div>` : '<div class="branch-pnl">開院準備中 — 明日から診療開始</div>'}
         <div class="branch-staff">
           ${BR_ROLES.map(([key, label, min, max]) => `
             <div class="plan-step"><span>${label} <small>最大${max}</small></span>
@@ -4413,7 +4444,7 @@
       });
       town.setBranches(G.branches.map((x) => x.siteId));
       toast(`🎉 ${name} を開設しました`);
-      renderCorp(); updateHeader(); save();
+      renderCorp(); renderJihi(); updateHeader(); save(); // 整形外科の分院ができると運動器の自費が分院の自費として戻る(v84)
     }));
     el.querySelectorAll('[data-brhire]').forEach((b) => b.addEventListener('click', () => {
       const [bi, key] = b.dataset.brhire.split(':');
@@ -4990,7 +5021,7 @@
     settings.mainFs = [];
     settings.mainEquip = Object.assign({}, (m.deptDefaults && m.deptDefaults.equip) || {}, pre.equip || {}); // 設備は科の既定から(v73)
     if (typeof G !== 'undefined' && G) G.mainQueue = { preop: 0, surgery: 0, postop: [] }; // 科を替えたら手術待ちは空(v74)
-    for (const k of pre.jihiHide || []) settings[k] = false; // 隠した自費メニューは稼がない(v76 保留#43)
+    for (const k of pre.jihiHide || []) { if (jihiHidden(k)) settings[k] = false; } // 隠した自費メニューは稼がない(v76 保留#43)。整形外科の分院があれば分院の自費として残す(v84)
     syncMainExamMean(); // 診察時間を方針から導く科(精神科)は preset の初期値をここで確定させる(v82)
     applyMainWords();
     skipSpecMissions();
