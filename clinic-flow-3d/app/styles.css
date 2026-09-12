@@ -289,7 +289,6 @@ a { color: var(--blue-deep); }
 .cer > span { min-width: 0; }
 .jihi-item .cer { margin-top: -4px; }
 .jihi-item .cer + .cer { margin-top: -6px; }
-@media (max-width: 400px) { .shop-row { flex-wrap: wrap; } .shop-info { flex: 1 1 100%; } .shop-btns { flex: 0 0 100%; justify-content: flex-end; margin-top: 4px; } } /* v92 designer: ボタン列が本文を圧迫して3行に折れる→狭い幅ではボタンを下段へ */
 .shop-btns { display: flex; gap: 6px; flex: 0 0 auto; }
 
 .mini-btn {
