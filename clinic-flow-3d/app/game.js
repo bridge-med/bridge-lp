@@ -3999,6 +3999,7 @@
       const kijun = document.querySelector('.branch-kijun');
       if (kijun) {
         const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (window.UI_FOLD) window.UI_FOLD.reveal(kijun); // 分院カードは既定で畳む(v93 designer B)
         kijun.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
         kijun.classList.add('kijun-flash');
         setTimeout(() => kijun.classList.remove('kijun-flash'), 1200);

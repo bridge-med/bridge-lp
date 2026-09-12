@@ -458,7 +458,7 @@ input[type="range"]::-moz-range-thumb {
 .diag b { font-weight: 800; }
 .diag.info { background: var(--bg-deep); color: var(--ink-2); }
 .diag.good { background: var(--green-pale); color: var(--green-deep); }
-.diag.warn { background: var(--red-pale); color: var(--ink-2); }
+.diag.warn { background: var(--bg-deep); color: var(--ink-2); } /* 注意=中立地(危険の赤地と区別・designer C) */
 .diag.bad { background: var(--red-pale); color: var(--red); }
 
 .pv-head { margin-bottom: 10px; }
@@ -494,7 +494,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 7px 11px;
 }
 .staff-chip.ok { background: var(--green-pale); color: var(--green-deep); }
-.staff-chip.under { background: var(--red-pale); color: var(--ink-2); }
+.staff-chip.under { background: var(--bg-deep); color: var(--ink-2); }
 .staff-chip.over { background: var(--red-pale); color: var(--red); }
 .pv-rate.good { color: var(--green-deep); }
 .pv-rate.warn { color: var(--ink-2); }
@@ -667,7 +667,7 @@ input[type="range"]::-moz-range-thumb {
 .staff-meta b { font: 700 11.5px/1.35 var(--sans); color: var(--ink); white-space: nowrap; }
 .staff-chip.mood-warn { border-color: rgba(196, 87, 78, 0.5); background: #FDF6F5; }
 .staff-chip.mood-warn .staff-meta b { color: var(--red); }
-.staff-chip.mood-tired { border-color: rgba(196, 87, 78, 0.5); background: var(--red-pale); }
+.staff-chip.mood-tired { border-color: var(--line); background: var(--bg-deep); }
 .staff-chip.mood-tired .staff-meta b, .staff-chip.mood-busy .staff-meta b { color: var(--ink-2); }
 .staff-chip.mood-good .staff-meta b { color: var(--green-deep); }
 .staff-chip.mood-idea { border-color: rgba(62, 124, 166, 0.4); }
@@ -967,7 +967,7 @@ input[type="range"]::-moz-range-thumb {
 .lane-note-row { display: block; } /* v81 便AJ-2 PM裁定B: 2レーンの1行を2段で常時表示 */
 .lane-note-row.cur { color: var(--ink-2); }
 #mainLever .pnl-note { text-align: left; }
-@media (prefers-reduced-motion: reduce) { .tut-box { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .tut-box { animation: none; } .fold-head i { transition: none; } }
 
 .tut-focus {
   position: relative;
@@ -1578,7 +1578,7 @@ input[type="range"]::-moz-range-thumb {
 .fold-head { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: inherit; }
 .fold-head b { font: 800 14.5px/1.5 var(--sans); color: var(--blue-deep); }
 .fold-head small { flex: 1 1 auto; font: 500 11px/1.5 var(--sans); color: var(--ink-3); }
-.fold-head i { font-style: normal; color: var(--ink-3); transition: transform 0.15s ease; }
+.fold-head i { font-style: normal; color: var(--ink-3); margin-left: auto; transition: transform 0.15s ease; } /* 副題が無い札でも ▸ は右端(designer A) */
 .fold.open .fold-head i { transform: rotate(90deg); }
 .fold-body[hidden] { display: none; }
 .fold .fold-body > .card-title, .fold .fold-body > .card-head > .card-title { display: none; } /* 題は fold-head が持つ */
