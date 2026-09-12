@@ -1584,3 +1584,12 @@ input[type="range"]::-moz-range-thumb {
 .fold .fold-body > .card-title, .fold .fold-body > .card-head > .card-title { display: none; } /* 題は fold-head が持つ */
 .fold .fold-body > .card-head { justify-content: flex-end; }
 @media (prefers-reduced-motion: reduce) { .fold-head i { transition: none; } } /* 基底の .fold-head i より後ろに置く(同じ詳細度なので順序で決まる・qa v93) */
+
+/* ---------- v94 便AN-1: 線画アイコン(app/ui/icons.js)。絵文字の代わり ---------- */
+.ic { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: -0.22em; margin-right: 0.28em; flex: 0 0 auto; }
+.ic:last-child { margin-right: 0; }
+.ic.fill g { fill: currentColor; }
+.tab-btn .ic { display: block; width: 22px; height: 22px; margin: 0 auto 3px; }
+.icon-btn .ic, .speed-btn .ic, .mini-btn .ic, .fix-chip .ic { margin-right: 0.2em; }
+.card-title .ic, .fold-head b .ic { width: 1.1em; height: 1.1em; color: var(--blue-deep); }
+.td-num .ic { width: 20px; height: 20px; margin: 0; }
