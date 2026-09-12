@@ -290,13 +290,13 @@
       lesson: '紹介は最強の新患チャネル。ただし関係は「作って終わり」ではない — 30日放置すると冷める。定期訪問は資産のメンテナンス。' },
     { id: 'month300k', goto: 'mgmt|#pnlCard', prog: () => `直近30日 ${yen(G.history.slice(-30).reduce((a, x) => a + x.profit + (x.brProfit || 0), 0))}`, title: '月間利益(直近30日・法人)¥300,000', reward: 300000,
       lesson: '日次の黒字が「点」なら、月間利益は「線」。バリューアップの順番は ①守り(待ち・評判)→②回転→③単価→④新患。' },
-    { id: 'expand', goto: 'clinic|#shopCard', spec: 'orthopedics', title: '院を増築する(リハ室100㎡・診察室4)', reward: 300000,
+    { id: 'expand', goto: 'mgmt|#investCard', spec: 'orthopedics', title: '院を増築する(リハ室100㎡・診察室4)', reward: 300000,
       lesson: '設備投資は「回収期間」で考える。増築もMRIも、1日あたりの増収×稼働日数でいつ回収できるかを先に計算する。' },
     { id: 'revenue', goto: 'mgmt|#pnlCard', prog: () => `直近30日 ${yen(monthRevenueMain())}`, title: '本院の月商(直近30日)¥8,000,000', reward: 500000,
       lesson: '月商800万 = 1日30万×27診療日。患者数×単価に分解すると「あと何人」「あと何円」が見える — 分解できる目標だけが実行できる。' },
-    { id: 'branch', goto: 'corp|#corpCard', title: '分院1号店を開設する', reward: 500000,
+    { id: 'branch', goto: 'mgmt|#corpCard', title: '分院1号店を開設する', reward: 500000,
       lesson: '分院は「成功した仕組みのコピー」でしか成功しない。施設基準の専従要件は分院ごと — 採用が分院展開の本当の壁。' },
-    { id: 'branchProfit', goto: 'corp|#corpCard', title: '分院の直近7日を黒字にする', reward: 500000,
+    { id: 'branchProfit', goto: 'mgmt|#corpCard', title: '分院の直近7日を黒字にする', reward: 500000,
       lesson: '分院経営は「見えない現場」のマネジメント。数字(稼働・評判・人件費率)で異変に気づく仕組みがないと、分院は静かに沈む。' },
     { id: 'corp', goto: 'mgmt|#pnlCard', prog: () => `直近30日 ${yen(monthRevenueAll())}`, title: '法人月商(全拠点・直近30日)¥25,000,000', reward: 1000000,
       lesson: '経営者の仕事は「自分がいなくても回る仕組み」を作ること。ここからは地域リーグ — 市・県・地方・全国の頂点を目指す。' },
@@ -306,7 +306,7 @@
       lesson: '県レベルの競争は採用力の勝負。診療の質は「人が辞めない仕組み」でしか維持できない。' },
     { id: 'regionTop', goto: 'mgmt|#leagueCard', prog: () => `勝ち越し ${G.league ? G.league.beaten : 0}`, title: '地方でいちばんの医療グループになる', reward: 3000000,
       lesson: 'ここまで来ると経営は「資本配分」の仕事。どの拠点に投資し、どこを守り、どこを畳むか。' },
-    { id: 'hospital', goto: 'corp|#corpCard', title: 'グループ病院を開設する(回復期リハ病棟)', reward: 5000000,
+    { id: 'hospital', goto: 'mgmt|#corpCard', title: 'グループ病院を開設する(回復期リハ病棟)', reward: 5000000,
       lesson: '外来は「来た日」だけの売上、入院は「病床が埋まっている毎日」が売上。回復期リハ病棟入院料1(2,229点/日)×稼働率 — 病院経営は配置基準(PT・看護)と稼働率のゲーム。' },
     { id: 'nationTop', goto: 'mgmt|#leagueCard', prog: () => `勝ち越し ${G.league ? G.league.beaten : 0}`, title: '全国いちばんの医療法人になる', reward: 5000000,
       lesson: '頂点の景色。患者に選ばれ続ける組織だけがこの位置に立てる — 次は現実で。' }
@@ -2147,7 +2147,12 @@
   function applyUnlocks() {
     const stage = unlockStage();
     const vis = (id, need) => { const el = $(id); if (el) el.style.display = stage >= need ? '' : 'none'; };
-    UI_NAV_I.setTabVisible('corp', stage >= 3);
+    // タブの開く日(v88 便AM-4): クリニックは常時・学びは Day 2・スタッフとタウンは Day 4(stage2)・経営は Day 8(stage3)。unlockStage の 1/2/3 は不変
+    UI_NAV_I.setTabOpen('clinic', true, 1);
+    UI_NAV_I.setTabOpen('learn', G.day >= 2, 2);
+    UI_NAV_I.setTabOpen('staff', stage >= 2, 4);
+    UI_NAV_I.setTabOpen('town', stage >= 2, 4);
+    UI_NAV_I.setTabOpen('mgmt', stage >= 3, 8);
     const head = document.querySelector('.head'); if (head) head.classList.toggle('stage2', stage >= 2); // ×4 以上の速度は Day 4 から(v87 決裁③)
     vis('jihiCard', 3);
     vis('salesCard', 2);
@@ -2189,12 +2194,12 @@
          <ul class="unlock-list">
            ${settings.specialty === 'orthopedics' ? '<li>🏃 <b>運動器リハ</b>(PT採用・リハ機器・施設基準の届出)</li>' : '<li>📋 <b>施設基準・届出</b>(経営タブ)</li>'}
            <li>📊 <b>P&L・KPIピン留め・事業計画・銀行融資</b>(経営タブ)</li>
-           <li>🏢 <b>分院展開</b>(法人タブ)</li>
+           <li>🏢 <b>分院展開</b>(経営タブ)</li>
            ${settings.specialty === 'orthopedics' ? '<li>🪙 <b>自費メニュー</b>(PRP・AGAほか)と<b>大型投資</b>(MRI・DEXA・増築)</li>' : '<li>🪙 <b>自費メニュー</b>と<b>大型投資</b>(増築)</li>'}
          </ul>
          ${learnRow('unlock', '施設基準と単価の関係')}${settings.specialty === 'orthopedics' ? `<p class="modal-note"${foldAttr('unlock')}>📖 施設基準(専従PT数×面積)で運動器リハビリテーション料の1回単価が¥1,700→¥3,700</p>` : `<p class="modal-note"${foldAttr('unlock')}>📖 施設基準カード(経営タブ)で確認できます</p>`}`;
     if ($('modal').classList.contains('show')) {
-      banner('🔓 新しい打ち手が解放されました。院内・経営タブをチェック');
+      banner('🔓 新しい打ち手が解放されました。タブをチェック');
       return;
     }
     showModal('🔓 打ち手が解放されました', body, 'やってみる');
@@ -2220,7 +2225,7 @@
           F('待合椅子を増やす', 'clinic', '#shopCard'),
           stage >= 2 ? F('Web問診で受付を短縮', 'clinic', '#shopCard') : F('受付を増員する', 'clinic', '#shopCard'),
           F('予約制で来院を平準化', 'clinic', '#shopCard'),
-          stage >= 2 ? F('医師を採用(診察の回転)', 'clinic', '#shopCard') : null
+          stage >= 2 ? F('医師を採用(診察の回転)', 'staff', '#hireCard') : null
         ].filter(Boolean)
       };
     }
@@ -2228,7 +2233,7 @@
       return {
         text: `診察が詰まっています(医師キャパの${Math.round(load * 100)}%稼働)。待ち時間の主因はここ`,
         fixes: [
-          stage >= 2 ? F('医師を採用する', 'clinic', '#shopCard') : null,
+          stage >= 2 ? F('医師を採用する', 'staff', '#hireCard') : null,
           F('診察時間を短くする', 'clinic', '#policyCard'),
           F('予約制で来院を平準化', 'clinic', '#shopCard')
         ].filter(Boolean)
@@ -2247,7 +2252,7 @@
     if (settings.rehaLevel > 0 && rehaUtil >= 0.92) {
       return {
         text: `リハ枠が満杯です(稼働${Math.round(rehaUtil * 100)}%)。予約が取れず、リハ患者が離れ始めます`,
-        fixes: [F('PTを採用する', 'clinic', '#shopCard'), F('リハ助手を配置する', 'clinic', '#shopCard'), F('リハ機器を増設する', 'clinic', '#shopCard')]
+        fixes: [F('PTを採用する', 'staff', '#hireCard'), F('リハ助手を配置する', 'staff', '#hireCard'), F('リハ機器を増設する', 'clinic', '#shopCard')]
       };
     }
     if (stage >= 2 && settings.physio === 0) {
@@ -3034,11 +3039,13 @@
   const UI_NAV_I = UI_NAV.create({
     onSwitch(tab) {
       activeTab = tab;
-    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); renderReceipt(); renderPulse(); }
+    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderVoice(); renderReceipt(); renderPulse(); renderShop(); }
+    if (tab === 'staff') { renderStaffStrip(); renderShop(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
-    if (tab === 'corp') renderCorp();
-    if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); renderAcct(); renderDecCard(); }
-    }
+    if (tab === 'mgmt') { renderPnl(); renderPlanner(); renderBank(); renderKpiPicker(); renderLeague(); renderAcct(); renderDecCard(); renderCorp(); renderShop(); renderJihi(); renderItems(); }
+    if (tab === 'learn') { renderMissions(); renderAch(); renderPrestige(); }
+    },
+    onLocked(tab, day) { toast(`このタブは Day ${day} から開きます`); }
   });
   function switchTab(tab) { UI_NAV_I.switchTab(tab); }
 
@@ -3127,10 +3134,12 @@
     const mm = SPECIALTIES.get(settings.specialty);
     const hide = (mm && mm.main && mm.main.preset && mm.main.preset.shopHide) || [];
     const lockedCount = {};
-    const rows = Object.entries(SHOP).map(([key, item]) => {
+    const STAFF_KEYS = ['doctor', 'nurse', 'pt', 'rehaAide', 'psw']; // 採用はスタッフタブ、それ以外(受付・椅子・設備)は院内の打ち手(v88)
+    const lockedStaff = {};
+    const rowOf = ([key, item]) => {
       if (hide.includes(key) || (SHOP_OPT_IN.includes(key) && !shopShown(key))) return '';
       const need = STAGE_SHOP[key] || 1;
-      if (need > stage) { lockedCount[need] = (lockedCount[need] || 0) + 1; return ''; } // 🔒行は並べず1行に数える(v87・第14条)
+      if (need > stage) { const tgt = STAFF_KEYS.includes(key) ? lockedStaff : lockedCount; tgt[need] = (tgt[need] || 0) + 1; return ''; } // 🔒行は並べず1行に数える(v87・第14条)
       const cur = settingValue(key);
       const max = shopMax(key);
       const vc = SHOP_VOICE[key];
@@ -3147,11 +3156,14 @@
           <button class="mini-btn plus" data-buy="${key}">＋ ${yen(shopCost(key))}</button>
         </div>
       </div>`;
-    }).join('');
+    };
+    const entries = Object.entries(SHOP);
+    const rows = entries.filter(([k]) => !STAFF_KEYS.includes(k)).map(rowOf).join('');
+    const hireRows = entries.filter(([k]) => STAFF_KEYS.includes(k)).map(rowOf).join('');
 
     const bigNames = [!hide.includes('mri') && 'MRI', !hide.includes('dexa') && 'DEXA', '増築'].filter(Boolean).join('・');
-    if (stage < 3) lockedCount[3] = (lockedCount[3] || 0) + 1; // 大型投資(${bigNames})も1行に数える
-    const lockedLine = (lockedCount[2] || lockedCount[3]) ? `<p class="shop-locked">🔒 ${[lockedCount[2] ? `Day 4 で ${lockedCount[2]}つ` : '', lockedCount[3] ? `Day 8 で ${lockedCount[3]}つ` : ''].filter(Boolean).join('・')} の打ち手が増える</p>` : '';
+    const lockLine = (lc) => (lc[2] || lc[3]) ? `<p class="shop-locked">🔒 ${[lc[2] ? `Day 4 で ${lc[2]}つ` : '', lc[3] ? `Day 8 で ${lc[3]}つ` : ''].filter(Boolean).join('・')} の打ち手が増える</p>` : '';
+    const lockedLine = lockLine(lockedCount);
     const bigTicket = stage < 3 ? '' : `
       ${hide.includes('mri') ? '' : `<div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
@@ -3185,7 +3197,9 @@
             </div>`
           : `<div class="shop-row expand-row done"><div class="shop-info"><span class="shop-name">🏙 別館まで増築済み(診察室6・リハ室150㎡)</span></div></div>`}`;
 
-    $('shopList').innerHTML = rows + bigTicket + lockedLine;
+    $('shopList').innerHTML = rows + lockedLine;
+    const hl = $('hireList'); if (hl) hl.innerHTML = hireRows + lockLine(lockedStaff);
+    const il = $('investList'); if (il) il.innerHTML = bigTicket || '<p class="shop-locked">🔒 Day 8 で開く</p>';
     const shopTools = $('shopTools');
     if (shopTools) shopTools.innerHTML = learnBtn('shop', '各行の内訳と算定ルール');
     $('shopList').querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
@@ -4087,7 +4101,8 @@
     if (!ortho) bindDeptLeverHandlers(lever);
     // 本院精神科だけ: 協定の内訳・一般名処方の要件を畳む「📖 くわしく」(v82 便AF-3・便AJ-2の部品を流用)
     const tools = $('policyTools');
-    if (tools) tools.innerHTML = (!ortho && m.id === 'psychiatry') ? learnBtn('mainPolicy', '協定の内訳と一般名処方の要件') : '';
+    // 点数と条件の注記は Level3=「くわしく」に畳む(v88 便AM-4)。精神科本院は協定・一般名処方の注記も同じボタン
+    if (tools) tools.innerHTML = (!ortho && m.id === 'psychiatry') ? learnBtn('mainPolicy', '協定の内訳と一般名処方の要件') : learnBtn('policy', '各方針の点数と条件');
   }
   function renderCorp() {
     const el = $('corpBody');
@@ -4986,8 +5001,8 @@
     { tab: null, sel: null, text: '今日からこの{科名}はあなたの院です。まずは<b>①1日進める → ②結果を見る → ③1つ直す</b>。' },
     { tab: null, sel: '.hud', text: '<b>資金・評判・医療</b>が経営の体温計。<b>⏩1日</b> で1日スキップできます。' },
     { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。ミッション・依頼・詰まりの打ち手が出ます。' },
-    { tab: 'clinic', sel: '#shopCard', text: '最初は<b>受付と椅子</b>。Day 4・Day 8 で打ち手が増えます。' },
-    { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。では初日をどうぞ。' }
+    { tab: 'clinic', sel: '#shopCard', text: '最初は<b>受付と椅子</b>。Day 4 でスタッフとタウン、Day 8 で経営のタブが開きます。' },
+    { tab: null, sel: null, text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。では初日をどうぞ。' }
   ];
   let tutIdx = -1;
 
@@ -5122,7 +5137,7 @@
   function loop(ts) {
     clinicIso.time = ts;
     townIso.time = ts;
-    if (activeTab === 'clinic' && ++frameN % 150 === 0) renderStaffStrip();
+    if (activeTab === 'staff' && ++frameN % 150 === 0) renderStaffStrip();
     const dtReal = Math.min(0.1, (ts - lastTs) / 1000);
     lastTs = ts;
     if (G.speed > 0 && tutIdx < 0 && !gateOpen && !decOpen) {
@@ -5492,7 +5507,7 @@
     const snap = decSnapshot(st.count + 1);
     const entry = DECISIONS.commit(c, ch, outcome, { G, settings }, st, { viaChain, snap });
     entry.reflect = DECISIONS.reflect(c, ch, outcome, ctx);
-    applyUnlocks(); renderShop(); renderStaffStrip(); updateHeader(); if (activeTab === 'corp') renderCorp();
+    applyUnlocks(); renderShop(); renderStaffStrip(); updateHeader(); if (activeTab === 'mgmt') renderCorp();
     pushVoice(typeof c.who === 'string' && STAFF_UI.STAFF[c.who] ? c.who : 'advisor', `${c.title} → ${ch.label}`, 'event');
     renderDecisionResult(entry, c, ch, outcome);
     save();
