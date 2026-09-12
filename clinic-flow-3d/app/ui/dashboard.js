@@ -12,9 +12,11 @@
     $('hDay').title = `天気: ${wxh.label}${wxh.note ? ' — ' + wxh.note : ''}`;
     $('hClock').textContent = spec.kind === 'closed' ? '' : fmtClock(G.t);
     $('hMoney').textContent = yenShort(G.money);
+    $('hMoney').title = yen(G.money);
     $('hMoney').classList.toggle('neg', G.money < 0);
     $('hPatients').textContent = `${G.today ? G.today.patients : 0}人`;
     $('hToday').textContent = yenShort(G.today ? G.today.revenue : 0);
+    $('hToday').title = yen(G.today ? G.today.revenue : 0);
     $('hRep').textContent = Math.round(G.rep);
     const ms = ctx.medScoreNow();
     $('hMed').textContent = `${ms.score}`;
@@ -57,9 +59,9 @@
     const rows = [];
     if (m) rows.push({ tag: '🎯', text: m.title, sub: m.prog ? m.prog(h) : '', goto: m.goto || 'mgmt|#missionCard', now: true });
     if (bn.fixes.length) rows.push({ tag: '🔍', text: bn.fixes[0].label, sub: firstSentence(bn.text), goto: `${bn.fixes[0].tab}|${bn.fixes[0].sel}` });
-    const NUM = ['①', '②', '③'];
-    const rowHtml = rows.map((r, i) => `<button class="td-row${r.now ? ' now' : ''}" data-goto="${r.goto}"><span class="td-num">${NUM[i]}</span><span class="td-body"><span class="td-text">${r.tag} ${r.text}</span>${r.sub ? `<small class="td-sub">${r.sub}</small>` : ''}</span><span class="td-go">→</span></button>`).join('');
-    const reqHtml = `<div class="td-row td-req"><span class="td-num">${NUM[rows.length]}</span><div class="td-body"><span class="todo-tag daily">📅 依頼</span><div class="req-body">${reqRow}</div></div></div>`;
+    // 行の識別は番号でなくタグ(🎯/🔍/📅)。番号は詰まりの有無で日ごとに動くため置かない(designer v87)
+    const rowHtml = rows.map((r) => `<button class="td-row${r.now ? ' now' : ''}" data-goto="${r.goto}"><span class="td-num">${r.tag}</span><span class="td-body"><span class="td-text">${r.text}</span>${r.sub ? `<small class="td-sub">${r.sub}</small>` : ''}</span><span class="td-go">→</span></button>`).join('');
+    const reqHtml = `<div class="td-row td-req"><span class="td-num">📅</span><div class="td-body"><span class="todo-tag daily">依頼</span><div class="req-body">${reqRow}</div></div></div>`;
     el.innerHTML = `${rowHtml}${reqHtml}<div class="td-foot"><span class="todo-tag quiz">🧠 クイズ</span>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</div>`;
     bindGoto(el);
     const qb = $('quizBtn');

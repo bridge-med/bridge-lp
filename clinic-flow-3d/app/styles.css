@@ -984,7 +984,7 @@ input[type="range"]::-moz-range-thumb {
 /* 今日の経営(v87 便AM-3): 1〜3行。各行=目標+進捗+タップ先。行全体が data-goto のボタン */
 .td-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 10px; margin: 6px 0 0; border: 1px solid var(--line); border-radius: 12px; background: var(--card); text-align: left; font: inherit; color: var(--ink); }
 .td-row.now { border-color: rgba(141,97,31,0.45); background: var(--amber-pale); }
-.td-num { flex: 0 0 auto; font: 800 15px/1 var(--en); color: var(--blue-deep); }
+.td-num { flex: 0 0 auto; font: 800 15px/1 var(--en); color: var(--blue-deep); width: 22px; text-align: center; }
 .td-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .td-text { font: 700 13px/1.45 var(--sans); color: var(--ink); }
 .td-sub { font: 500 11px/1.5 var(--sans); color: var(--ink-2); }

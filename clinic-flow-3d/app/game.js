@@ -3151,7 +3151,7 @@
 
     const bigNames = [!hide.includes('mri') && 'MRI', !hide.includes('dexa') && 'DEXA', '増築'].filter(Boolean).join('・');
     if (stage < 3) lockedCount[3] = (lockedCount[3] || 0) + 1; // 大型投資(${bigNames})も1行に数える
-    const lockedLine = (lockedCount[2] || lockedCount[3]) ? `<p class="shop-locked">🔒 ${[lockedCount[2] ? `Day 4 で ${lockedCount[2]}つ` : '', lockedCount[3] ? `Day 8 で ${lockedCount[3]}つ` : ''].filter(Boolean).join('・')} の打ち手が開く</p>` : '';
+    const lockedLine = (lockedCount[2] || lockedCount[3]) ? `<p class="shop-locked">🔒 ${[lockedCount[2] ? `Day 4 で ${lockedCount[2]}つ` : '', lockedCount[3] ? `Day 8 で ${lockedCount[3]}つ` : ''].filter(Boolean).join('・')} の打ち手が増える</p>` : '';
     const bigTicket = stage < 3 ? '' : `
       ${hide.includes('mri') ? '' : `<div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
