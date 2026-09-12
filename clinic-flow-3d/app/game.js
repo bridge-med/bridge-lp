@@ -1688,8 +1688,8 @@
     UI_EVENTS_I.flushDay({ skipResult: decOpen });
 
     save();
-    renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip(); renderStaffStrip(); renderTodo(); renderYesterday(); renderItems();
-    renderPolicyCard(); // 本院レバーの情報行(昨日 混雑で帰った・白内障の待ち人数)は日次で更新する(v82 便AF-3 qa)
+    applyUnlocks(); // タブの開く日(学び=Day 2)は stage 遷移と無関係なので毎日評価する(v88 qa)
+    renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip(); renderStaffStrip(); renderTodo(); renderYesterday(); renderItems(); // 本院レバーの情報行(昨日 混雑で帰った・白内障の待ち人数)は日次で更新する(v82 便AF-3 qa)
     updateHeader();
   }
 
