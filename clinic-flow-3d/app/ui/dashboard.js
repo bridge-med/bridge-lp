@@ -2,34 +2,43 @@
 (function (root) {
   'use strict';
   function create(ctx) {
-    const { $, yen, G, MISSIONS, WEEKDAYS, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND } = ctx;
+    const { $, yen, yenShort, G, MISSIONS, WEEKDAYS, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND } = ctx;
   function updateHeader() {
     if (G.speed > 4) ctx.enforceSpeedPass();
-    $('hMoney').textContent = yen(G.money);
-    $('hMoney').classList.toggle('neg', G.money < 0);
-    const hm = $('hMedal');
-    if (hm) hm.textContent = `🪙 ${G.coins || 0}`;
     const spec = G.daySpec || specOf(G.day);
     const wxh = ensureWeather();
-    $('hDay').textContent = `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}${spec.kind === 'am' ? '·午前' : spec.kind === 'closed' ? '·休診' : ''}) ${wxh.icon}`;
+    $('hDay').textContent = `${G.day} ${WEEKDAYS[weekdayOf(G.day)]}${spec.kind === 'am' ? '·午前' : spec.kind === 'closed' ? '·休' : ''}`;
+  const dl = $('hDayLabel'); if (dl) dl.textContent = `Day ${wxh.icon}`;
     $('hDay').title = `天気: ${wxh.label}${wxh.note ? ' — ' + wxh.note : ''}`;
-    $('hClock').textContent = spec.kind === 'closed' ? '—' : fmtClock(G.t);
+    $('hClock').textContent = spec.kind === 'closed' ? '' : fmtClock(G.t);
+    $('hMoney').textContent = yenShort(G.money);
+    $('hMoney').classList.toggle('neg', G.money < 0);
+    $('hPatients').textContent = `${G.today ? G.today.patients : 0}人`;
+    $('hToday').textContent = yenShort(G.today ? G.today.revenue : 0);
     $('hRep').textContent = Math.round(G.rep);
-    $('hAw').textContent = `${Math.round(G.aw * 100)}%`;
-    $('hToday').textContent = yen(G.today ? G.today.revenue : 0);
+    const ms = ctx.medScoreNow();
+    $('hMed').textContent = `${ms.score}`;
+    $('hMed').title = `医療(適切な算定)スコア ${ms.score}点 ${ms.grade}(月内・要件どおりの算定 ${ms.proper}/60・判定の保留 ${ms.clean}/20・理解 ${ms.quiz}/20)`;
+    const hm = $('hMedal'); if (hm) hm.textContent = `🪙 ${G.coins || 0}`;
+    const ha = $('hAw'); if (ha) ha.textContent = `${Math.round(G.aw * 100)}%`;
   }
 
   function updateMissionBar() {
+    if (!$('missionText')) return; // v87: ミッション帯は廃止(決裁②)。ミッションは「今日の経営」の1行目
     const m = MISSIONS[G.missionIdx];
     const lap = G.prestige && G.prestige.count > 0 ? `🏛${G.prestige.count + 1}周目 ` : '';
     const vis = MISSIONS.filter(missionApplies);
     $('missionText').textContent = lap + (m ? `MISSION ${vis.indexOf(m) + 1}/${vis.length}: ${m.title}` : '🏆 全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
   }
 
+  // 今日の経営(v87 便AM-3): 1〜3行。①ミッション(進捗+タップ先) ②いまの詰まりの打ち手 ③依頼。クイズは末尾のチップ
+  function firstSentence(t) { const m = String(t).split(/[。(]/)[0]; return m.length > 44 ? m.slice(0, 44) + '…' : m; }
   function renderTodo() {
     const el = $('todoBody');
     if (!el) return;
     const m = MISSIONS[G.missionIdx];
+    const opens = G.history.filter((h) => h.kind !== 'closed');
+    const h = opens[opens.length - 1];
     const bn = bottleneckInfo();
     const today = todayKey();
     const ch = pickChallenge(today);
@@ -45,12 +54,13 @@
     } else {
       reqRow = `<p>${requestHtml(ch, 20)}</p><div class="fix-row"><button class="fix-chip" data-chact="ok">受ける</button><button class="fix-chip ghost" data-chact="pass">今日はパス</button></div>`;
     }
-    el.innerHTML = `
-      ${m ? `<div class="todo-row"><span class="todo-tag mission">🎯 ミッション</span><p>${m.title}</p></div>` : ''}
-      <div class="todo-row"><span class="todo-tag daily">📅 依頼</span><div class="req-body">${reqRow}</div></div>
-      <div class="todo-row"><span class="todo-tag quiz">🧠 クイズ</span><p>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</p></div>
-      <div class="todo-row"><span class="todo-tag">🔍 いまの詰まり</span><p>${bn.text}</p></div>
-      ${bn.fixes.length ? `<div class="fix-row">${bn.fixes.map((f) => `<button class="fix-chip" data-goto="${f.tab}|${f.sel}">${f.label} →</button>`).join('')}</div>` : ''}`;
+    const rows = [];
+    if (m) rows.push({ tag: '🎯', text: m.title, sub: m.prog ? m.prog(h) : '', goto: m.goto || 'mgmt|#missionCard', now: true });
+    if (bn.fixes.length) rows.push({ tag: '🔍', text: bn.fixes[0].label, sub: firstSentence(bn.text), goto: `${bn.fixes[0].tab}|${bn.fixes[0].sel}` });
+    const NUM = ['①', '②', '③'];
+    const rowHtml = rows.map((r, i) => `<button class="td-row${r.now ? ' now' : ''}" data-goto="${r.goto}"><span class="td-num">${NUM[i]}</span><span class="td-body"><span class="td-text">${r.tag} ${r.text}</span>${r.sub ? `<small class="td-sub">${r.sub}</small>` : ''}</span><span class="td-go">→</span></button>`).join('');
+    const reqHtml = `<div class="td-row td-req"><span class="td-num">${NUM[rows.length]}</span><div class="td-body"><span class="todo-tag daily">📅 依頼</span><div class="req-body">${reqRow}</div></div></div>`;
+    el.innerHTML = `${rowHtml}${reqHtml}<div class="td-foot"><span class="todo-tag quiz">🧠 クイズ</span>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</div>`;
     bindGoto(el);
     const qb = $('quizBtn');
     if (qb) qb.addEventListener('click', () => { SND.click(); showQuizModal(); });
