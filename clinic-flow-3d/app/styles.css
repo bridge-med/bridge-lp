@@ -108,7 +108,7 @@ a { color: var(--blue-deep); }
 .hud-item { display: flex; flex-direction: column; align-items: center; line-height: 1.2; min-width: 0; }
 .hud-label { font: 600 9.5px/1.3 var(--sans); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hud-label span { font-family: var(--en); font-weight: 700; color: var(--ink-3); }
-.hud-val { font: 700 14px/1.3 var(--en); color: var(--ink); white-space: nowrap; letter-spacing: -0.01em; overflow: hidden; text-overflow: clip; }
+.hud-val { font: 700 20px/1.3 var(--en); color: var(--ink); white-space: nowrap; letter-spacing: -0.01em; overflow: hidden; text-overflow: clip; }
 .head-more { display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
 .speed-fast { flex: 0 0 auto; }
 .head-more[hidden] { display: none; }
@@ -139,7 +139,7 @@ a { color: var(--blue-deep); }
 .speed-btn.skip .ic { margin-right: 2px; }
 /* 320px級: 8ボタンは1行に収まらない。圧縮せず折り返す(幅を削るとWCAG AAの24pxを割る) */
 @media (max-width: 360px) {
-  .hud-val { font-size: 14px; }
+  .hud-val { font-size: 16px; } /* v95: 320px 級は 16px(20px は 5列に収まらない・計測値) */
   .tab-btn { font-size: 10px; padding: 11px 1px; }
   .speed-btn { min-width: 44px; padding: 7px 6px; } /* v91: 38→44。v88 で ×8〜×32 が ⚙ の行へ移り、Day 4 以降も5ボタン+⚙ で 320px に収まる */
   .head-btns { gap: 4px; }
@@ -1179,7 +1179,6 @@ input[type="range"]::-moz-range-thumb {
 @media (max-width: 719px) {
   #hClock { display: none; } /* 時計は PC 幅だけ(Level2) */
   .brand { display: none; } /* v87: 画面の27%を占めたヘッダーを2段に。名は扉と PWA 名が持つ */
-  .hud-val { font-size: 16px; }
   .tabs {
     position: fixed;
     top: auto;
@@ -1207,7 +1206,7 @@ input[type="range"]::-moz-range-thumb {
   .branch-card .ctrl-grid { grid-template-columns: repeat(2, 1fr); } /* 分院の操作パネルは2列: 正式名称の見出し(18字)が3列幅では折れて末尾1字が孤立する(v83 便AK designer) */
   .tabs { top: 108px; }
   .hud { gap: 8px 22px; }
-  .hud-val { font-size: 17px; }
+  .hud-val { font-size: 20px; } /* v95: 361px 以上は 20px(決裁 c・計測値) */
   .card { padding: 20px 24px; }
 }
 
@@ -1590,6 +1589,7 @@ input[type="range"]::-moz-range-thumb {
 .dec-rewind .op-btn { width: 100%; }
 
 /* ---------- v93 便AM-9: カード単位の畳み(経営タブ)。開閉は保存しない ---------- */
+.fold-h { margin: 0; font: inherit; } /* v95 保留#50: 見出し構造を保つ(畳んだ札の h2 は fold-head を包む) */
 .fold-head { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: inherit; }
 .fold-head b { font: 800 14.5px/1.5 var(--sans); color: var(--blue-deep); }
 .fold-head small { flex: 1 1 auto; font: 500 11px/1.5 var(--sans); color: var(--ink-3); }
