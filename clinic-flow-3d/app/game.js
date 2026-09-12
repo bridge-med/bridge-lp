@@ -202,17 +202,17 @@
   };
 
   const SHOP = {
-    doctor:  { label: '医師を採用', costs: [0, 500000, 800000, 1200000, 2000000, 3000000], day: COSTS.doctorDay, hint: '診察室+1(診察の詰まりに効く)', risk: '日給は患者0人でも出る。採用費は人数ごとに上がる' },
-    nurse:   { label: '看護師を採用', costs: [120000, 120000, 150000, 180000, 220000, 260000], day: COSTS.nurseDay, hint: '処置ベッドが看護師の人数だけ動く', risk: 'ベッドが無ければ動かない。日給は患者0人でも出る' },
-    pt:      { label: 'PTを採用', costs: [150000, 150000, 180000, 180000, 220000, 220000, 250000, 250000, 300000, 300000, 350000, 350000, 400000, 400000, 450000, 450000, 500000, 550000, 600000, 650000], day: COSTS.ptDay, hint: 'リハの単位を作る。施設基準の専従要件', risk: '機器が無ければ稼働しない。専従の人数で施設基準が決まる' },
-    recep:   { label: '受付窓口を増やす', costs: [60000, 60000, 80000, 100000], day: COSTS.recepDay, hint: '受付窓口+1(受付の詰まりに効く)', risk: '詰まりが受付でなければ待ち時間は減らない' },
+    doctor:  { label: '医師を採用', costs: [0, 500000, 800000, 1200000, 2000000, 3000000], day: COSTS.doctorDay, hint: '診察室+1(診察の詰まりに効く)', costNote: '人数ごとに上がる', risk: '患者0人でも日給は出る' },
+    nurse:   { label: '看護師を採用', costs: [120000, 120000, 150000, 180000, 220000, 260000], day: COSTS.nurseDay, hint: '処置ベッドが看護師の人数だけ動く', risk: 'ベッドが無ければ動かない。患者0人でも日給は出る' },
+    pt:      { label: 'PTを採用', costs: [150000, 150000, 180000, 180000, 220000, 220000, 250000, 250000, 300000, 300000, 350000, 350000, 400000, 400000, 450000, 450000, 500000, 550000, 600000, 650000], day: COSTS.ptDay, hint: 'リハの単位を作る', risk: '機器が無ければ稼働しない。運動器リハビリテーション料の区分は専従の常勤理学療法士数で決まる(制度)' },
+    recep:   { label: '受付窓口を増やす', costs: [60000, 60000, 80000, 100000], day: COSTS.recepDay, hint: '受付窓口+1', risk: '詰まりが受付でなければ待ち時間は減らない' },
     chairs:  { label: '待合椅子を+2脚', costs: null, flat: 40000, step: 2, hint: '立ち待ちが減り、帰ってしまう人が減る', risk: '待ち時間そのものは減らない' },
     beds:    { label: '処置ベッドを増設', costs: null, flat: 150000, hint: '処置1件+¥1,500(処置室の詰まりに効く)', risk: '看護師が居ないベッドは動かない' },
-    machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2+助手)', risk: 'PT×2+助手を超えた台数は動かない。面積の上限は増築で' },
-    physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置1件¥350・PT不要・1台35件/日', risk: '再診の受け皿。新患は増えない' },
-    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000, 100000, 100000, 110000, 110000], day: 10000, hint: 'PT単位上限+4/人・機器稼働+1', risk: 'PT が居なければ単位は作れない。日給は患者0人でも出る' },
+    machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2+助手)', risk: 'PT×2+助手を超えた台数は動かない' },
+    physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置1件¥350・PT不要・1台35件/日', risk: '新患は増えない' },
+    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000, 100000, 100000, 110000, 110000], day: 10000, hint: 'PT単位上限+4/人・機器稼働+1', risk: 'PT が居なければ単位は作れない。患者0人でも日給は出る' },
     // 精神科の本院だけに出す(preset.shopShow)。早期診療体制充実加算3の要件の表し方はモジュールの gameNote が開示する
-    psw:     { label: '精神保健福祉士を採用', costs: [120000], day: COSTS.pswDay, hint: '早期診療体制充実加算3の届出に要る', risk: '届出まで効果が出ない(要件の表し方はゲーム上の仮定)。日給は患者0人でも出る' }
+    psw:     { label: '精神保健福祉士を採用', costs: [120000], day: COSTS.pswDay, hint: '早期診療体制充実加算3の届出に要る', risk: '届出まで算定できない。患者0人でも日給は出る' }
   };
 
   const EXPAND_COST = 5000000;
@@ -2439,7 +2439,7 @@
       <div class="shop-row ${G.deco[id] ? 'expand-row done' : ''}">
         <div class="shop-info">
           <span class="shop-name">${f.label}${G.deco[id] ? ' <small>設置済み</small>' : ''}</span>
-          ${G.deco[id] ? `<span class="shop-hint">${f.hint}</span>` : cerHtml(`🪙 ${f.coin}・買い切り`, f.hint, 'コインは戻らない。効果は日々の来院で見る')}
+          ${G.deco[id] ? `<span class="shop-hint">${f.hint}</span>` : cerHtml(`🪙 ${f.coin}・買い切り`, f.hint, 'コインは戻らない。効果はまだ判定できない')}
         </div>
         ${G.deco[id] ? '' : `<div class="shop-btns"><button class="mini-btn ${G.coins >= f.coin ? 'plus' : ''}" data-fac="${id}">🪙 ${f.coin}</button></div>`}
       </div>`).join('');
@@ -3155,7 +3155,7 @@
       <div class="shop-row">
         <div class="shop-info">
           <span class="shop-name">${item.label} <b class="shop-count">${cur}${item.day ? '人' : ''}</b> <small class="shop-max">/ 最大${max}</small></span>
-          ${cerHtml(`${yen(shopCost(key))}${item.day ? `・日給 ${yen(item.day)}` : ''}`, item.hint, item.risk)}
+          ${cerHtml(`${yen(shopCost(key))}${item.costNote ? `(${item.costNote})` : ''}${item.day ? `・日給 ${yen(item.day)}` : ''}`, item.hint, item.risk)}
           ${vt ? `<span class="shop-voice">${STAFF_UI.faceSVG(vc, 'normal', 17)} ${STAFF_UI.STAFF[vc].name}「${vt}」</span>` : ''}
         </div>
         <div class="shop-btns">
@@ -3199,7 +3199,7 @@
         : settings.floorLv === 2
           ? `<div class="shop-row expand-row">
               <div class="shop-info"><span class="shop-name">🏙 別館を建てる(Lv3)</span>
-              ${cerHtml(`${yen(EXPAND2_COST)}・家賃 ${yen(COSTS.rent[3])}/日(いま ${yen(COSTS.rent[settings.floorLv])})`, '診察室6・リハ室150㎡(機器18)・椅子28・受付4・ベッド6・PT20名', '家賃は埋まらなくても上がる')}</div>
+              ${cerHtml(`${yen(EXPAND2_COST)}・家賃 ${yen(COSTS.rent[3])}/日(いま ${yen(COSTS.rent[settings.floorLv])})`, '診察室6・リハ室150㎡(機器18)・受付4・ベッド6', '家賃は埋まらなくても上がる')}</div>
               <div class="shop-btns"><button class="mini-btn plus" id="expand2Btn">🏙 ${yen(EXPAND2_COST)}</button></div>
             </div>`
           : `<div class="shop-row expand-row done"><div class="shop-info"><span class="shop-name">🏙 別館まで増築済み(診察室6・リハ室150㎡)</span></div></div>`}`;
@@ -3289,19 +3289,19 @@
     el.innerHTML = `
       ${jihiHidden('selfReha') ? '' : `<div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.selfReha ? 'on' : ''}" data-jihi="selfReha">🏃 自費リハ延長</button>${brTag('selfReha')}</div>
-        ${cerHtml('追加の費用なし(リハ完了者に提案)', `想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)・1件 ${yen(settings.selfRehaPrice)}`, '評判が低いと利用されない。価格を上げるほど利用率が下がる')}
+        ${cerHtml('追加の費用なし', `想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)`, '評判が低いと利用されない。高いほど利用率は下がる')}
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.selfRehaPrice)}</b></span>
         <input type="range" data-jprice="selfRehaPrice" min="4000" max="15000" step="1000" value="${settings.selfRehaPrice}"></label>
       </div>`}
       ${jihiHidden('prpOn') ? '' : `<div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>${brTag('prpOn')}</div>
-        ${cerHtml(`${settings.prpOn ? '' : `認定 ${yen(PRP_CERT_COST)}(1回)・`}原価 ${yen(FEES.prpCogs)}/件`, `想定 ${prpDemand.toFixed(1)}件/日・1件 ${yen(settings.prpPrice)}`, '評判が低いと需要が出ない。価格を上げるほど件数は減る')}
+        ${cerHtml(`${settings.prpOn ? '' : `認定 ${yen(PRP_CERT_COST)}(1回)・`}原価 ${yen(FEES.prpCogs)}/件`, `想定 ${prpDemand.toFixed(1)}件/日`, '評判が低いと需要が出ない。価格を上げるほど件数は減る')}
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.prpPrice)}</b></span>
         <input type="range" data-jprice="prpPrice" min="30000" max="165000" step="5000" value="${settings.prpPrice}"></label>
       </div>`}
       <div class="jihi-item">
         <div class="jihi-head"><button class="op-btn ${settings.agaOn ? 'on' : ''}" data-jihi="agaOn">💇 AGA外来(継続課金)</button></div>
-        ${cerHtml('原価率35%', `会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日・月額 ${yen(settings.agaPrice)}`, '会員は認知で増える。月額を上げるほど加入が減る')}
+        ${cerHtml('原価率35%', `会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日`, '会員は毎日1.5%が解約する。月額を上げるほど加入が減る')}
         <label class="ctrl"><span class="ctrl-head">月額 <b>${yen(settings.agaPrice)}</b></span>
         <input type="range" data-jprice="agaPrice" min="3000" max="15000" step="1000" value="${settings.agaPrice}"></label>
       </div>
@@ -5430,7 +5430,7 @@
       // 見込み: 確率つきの行は「確定側」を伏せて幅で見せる(確定後に同じ outcome で結果を出す)
       const shown = o.roll ? DECISIONS.lines(DECISIONS.resolveFx(c.choices.find((x) => x.id === decPick).fx, ctx), ctx) : o.lines;
       // 費用=減る側・効果=増える側・リスク=確率と但し書き(v92・社長⑥)
-      preview = `<div class="dec-preview"><small class="dec-plabel">費用</small>${decLinesHtml(shown.filter((l) => l.neg), '資金は減らない')}<small class="dec-plabel">効果</small>${decLinesHtml(shown.filter((l) => !l.neg))}<small class="dec-plabel">リスク</small>${rollHtml || whyHtml ? rollHtml + whyHtml : '<p class="dec-none">確率の要素なし</p>'}</div>`;
+      preview = `<div class="dec-preview"><small class="dec-plabel">費用</small>${decLinesHtml(shown.filter((l) => l.neg), '資金は減らない')}<small class="dec-plabel">効果</small>${decLinesHtml(shown.filter((l) => !l.neg))}<small class="dec-plabel">リスク</small>${rollHtml || '<p class="dec-none">確率の要素なし</p>'}${whyHtml}</div>`;
     }
     $('decFace').innerHTML = decFace(c);
     $('decWho').textContent = `${who.title ? who.title + ' ' : ''}${who.name}からの相談`;
