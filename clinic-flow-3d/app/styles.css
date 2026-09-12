@@ -989,6 +989,8 @@ input[type="range"]::-moz-range-thumb {
 .onb-list li.now { color: var(--ink); font-weight: 700; }
 .onb-list li.past { opacity: 0.6; }
 .shop-locked { margin: 8px 0 0; font: 600 11.5px/1.5 var(--sans); color: var(--ink-3); }
+.yesterday-card .rs-grid.rs-3 { grid-template-columns: repeat(3, 1fr); }
+.yesterday-card .rs-more { margin-top: 8px; }
 .td-foot { margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .todo-row { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0; }
 .todo-tag {

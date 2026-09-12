@@ -1467,6 +1467,8 @@
   }
 
   function endDay() {
+    UI_EVENTS_I.beginDay(); // 締めのモーダルは集めて1つだけ出す(v90)
+    G._achBanner = null;
     const T = G.today;
     const spec = G.daySpec || specOf(G.day);
     const endedDay = G.day;
@@ -1561,7 +1563,7 @@
       physioCount: T.physioCount, mriCount: T.mriCount, kanriCount: T.kanriCount,
       segS: T.segCounts.senior, segW: T.segCounts.worker, segP: T.segCounts.sports, balked: T.balked || 0, acct: T.acct,
       jihi: T.rev.jihi, staffCost: Math.round(mainStaffCost() * spec.pay), pts: settings.pts,
-      brRevenue: T.brRevenue, brProfit: T.brProfit
+      brRevenue: T.brRevenue, brProfit: T.brProfit, rep: Math.round(G.rep)
     });
 
     if (spec.kind !== 'closed') {
@@ -1637,13 +1639,13 @@
     if (G.money < -300000) {
       G.money += 1000000;
       G.loans.push({ principal: 1000000, dailyRate: 0.001, label: '緊急融資(高金利)' });
-      showModal('🏦 緊急融資', `<p>資金がショートしました。銀行から <b>¥1,000,000</b> の緊急融資(日利0.1%)を受けました。</p><p class="modal-note">📖 追い込まれてからの借入は高くつく。事業計画があれば通常融資(低金利)を計画的に使えます。</p>`, '経営を続ける');
+      queueModal('critical', 100, '🏦 緊急融資', `<p>資金がショートしました。銀行から <b>¥1,000,000</b> の緊急融資(日利0.1%)を受けました。</p><p class="modal-note">📖 追い込まれてからの借入は高くつく。事業計画があれば通常融資(低金利)を計画的に使えます。</p>`, '経営を続ける');
     }
 
     const corpProfit = T.profit + T.brProfit;
     if (spec.kind !== 'closed' && G.speed <= 2) SND.day();
     const wdName = WEEKDAYS[weekdayOf(G.day)];
-    banner(spec.kind === 'closed'
+    banner(G._achBanner ? G._achBanner : spec.kind === 'closed'
       ? `Day ${G.day}(${wdName}) — 🌙 休診日(固定費 ${yen(Math.abs(corpProfit))})`
       : `Day ${G.day}(${wdName}) 終了 — 本院 ${yen(T.revenue)}${G.branches.length ? ` / 分院 ${yen(T.brRevenue)}` : ''} / 法人損益 <b class="${corpProfit >= 0 ? 'pos' : 'neg'}">${corpProfit >= 0 ? '+' : ''}${yen(corpProfit)}</b>`);
 
@@ -1651,14 +1653,13 @@
     G.t = 0;
     clinic.rehaToday = 0;
     updateHomecareTown();
-    decisionAfterDay(); // 🔀 経営の分岐点: 期日の来た遅延効果→相談を開く(開いている間はシムが止まる)
     if (G.day === 366 && !G.annualDone) {
       G.annualDone = true;
       G.coins += 10;
       const title = G.cum.revenue >= 250000000 ? '👑 地域医療の帝王(殿堂入り)'
         : G.cum.revenue >= 150000000 ? '🏆 名経営者'
         : G.cum.revenue >= 80000000 ? '🛡️ 堅実経営者' : '🎗️ 一年を生き抜いた経営者';
-      showModal('🎊 Day 365 到達 — 年次決算', `
+      queueModal('critical', 100, '🎊 Day 365 到達 — 年次決算', `
         <p class="modal-note">🎁 年次ボーナス: 🪙コイン+10</p>
         <div class="pnl-row"><span>年商(法人・365日)</span><b>${yen(G.cum.revenue)}</b></div>
         <div class="pnl-row"><span>年間損益</span><b>${G.cum.profit >= 0 ? '+' : ''}${yen(G.cum.profit)}</b></div>
@@ -1678,13 +1679,16 @@
       applyUnlocks();
       renderShop();
       announceStage(stg);
-    } else if (spec.kind !== 'closed' && G.speed <= 2 && tutIdx < 0 && !$('modal').classList.contains('show')) {
-      // 1日の結果画面(ミッション達成・週次サマリーの演出があるときは譲る)
-      showResult(T, spec, prevOpen, endedDay, Math.round(G.rep - repStart));
     }
+    // 1日の結果(v90): 常に「昨日の結果」カードに出す。モーダルは速度 ×2 以下のときだけ候補に入れ、優先度の高い演出(解放・決算・週次)がある日は譲る
+    G.lastResult = { repDelta: Math.round(G.rep - repStart), day: endedDay, wx: G.weather ? { icon: G.weather.icon, label: G.weather.label, note: G.weather.note } : null };
+    if (spec.kind !== 'closed' && G.speed <= 2) showResult(T, spec, prevOpen, endedDay, Math.round(G.rep - repStart));
+    // 🔀 経営の分岐点: 上位の演出が無い日だけ開く(開いた日は結果モーダルを出さない=カードで読める)
+    if (!UI_EVENTS_I.pendingAbove(10)) decisionAfterDay();
+    UI_EVENTS_I.flushDay({ skipResult: decOpen });
 
     save();
-    renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip(); renderStaffStrip(); renderTodo(); renderItems();
+    renderPnl(); renderPlanner(); renderCorp(); renderAds(); renderKpiStrip(); renderStaffStrip(); renderTodo(); renderYesterday(); renderItems();
     renderPolicyCard(); // 本院レバーの情報行(昨日 混雑で帰った・白内障の待ち人数)は日次で更新する(v82 便AF-3 qa)
     updateHeader();
   }
@@ -1882,7 +1886,7 @@
     k.count++;
     k.log.push({ day: G.day, names: picks.map((p) => p.name) });
     SND.day();
-    showModal(`📜 診療報酬改定(第${k.count}次)`, `
+    queueModal('kaitei', 85, `📜 診療報酬改定(第${k.count}次)`, `
       <p>2年に一度、<b>診療報酬(点数)は国が改定します</b>。今回の改定内容:</p>
       ${picks.map((p) => `<div class="pnl-row"><span>📌 ${p.name}</span></div><p class="pnl-note">${p.note}</p>`).join('')}
       <div class="pnl-row"><span>単価への影響</span><b>${changes.join(' / ')}</b></div>
@@ -2200,11 +2204,7 @@
            ${settings.specialty === 'orthopedics' ? '<li>🪙 <b>自費メニュー</b>(PRP・AGAほか)と<b>大型投資</b>(MRI・DEXA・増築)</li>' : '<li>🪙 <b>自費メニュー</b>と<b>大型投資</b>(増築)</li>'}
          </ul>
          ${learnRow('unlock', '施設基準と単価の関係')}${settings.specialty === 'orthopedics' ? `<p class="modal-note"${foldAttr('unlock')}>📖 施設基準(専従PT数×面積)で運動器リハビリテーション料の1回単価が¥1,700→¥3,700</p>` : `<p class="modal-note"${foldAttr('unlock')}>📖 施設基準カード(経営タブ)で確認できます</p>`}`;
-    if ($('modal').classList.contains('show')) {
-      banner('🔓 新しい打ち手が解放されました。タブをチェック');
-      return;
-    }
-    showModal('🔓 打ち手が解放されました', body, 'やってみる');
+    queueModal('stage', 90, '🔓 打ち手が解放されました', body, 'やってみる');
   }
 
   /* ================= ボトルネック診断と改善候補 ================= */
@@ -2301,6 +2301,7 @@
   }
 
   function renderTodo() { UI_DASH_I.renderTodo(); }
+  function renderYesterday() { UI_DASH_I.renderYesterday(); }
 
   /* ================= 1日の結果画面 ================= */
 
@@ -2318,7 +2319,7 @@
     const dv = (G.voiceFeed || []).filter((v) => v.kind === 'daily').slice(-1)[0];
     const st = dv && typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[dv.char] : null;
     const m = MISSIONS[G.missionIdx];
-    showModal(`📋 Day ${dayNum}(${WEEKDAYS[weekdayOf(dayNum)]})の結果`, `
+    queueModal('result', 10, `📋 Day ${dayNum}(${WEEKDAYS[weekdayOf(dayNum)]})の結果`, `
       <div class="rs-grid">
         <div class="rs-item"><small>患者数</small><b>${T.patients}人</b>${delta(T.patients, prev ? prev.patients : 0, false, true)}</div>
         <div class="rs-item"><small>売上(本院)</small><b>${yen(T.revenue)}</b>${delta(T.revenue, prev ? prev.revenue : 0, true, true)}</div>
@@ -2336,7 +2337,6 @@
         : m ? `<p class="rs-next"><b>明日のおすすめ:</b> 🎯 ${m.title}</p>` : ''}
       <div class="rs-learn">📖 <b>今日の学び</b> ${TEXTBOOK[(dayNum - 1) % TEXTBOOK.length].t}<br><small>${TEXTBOOK[(dayNum - 1) % TEXTBOOK.length].b}</small></div>
     `, '明日へ →');
-    bindGoto($('modalBody'));
   }
 
   /* ================= 🪙コイン経済: アイテム・実績・自由度 ================= */
@@ -2783,7 +2783,7 @@
     G.coins += 10;
     G.money += 300000;
     const st = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[char] : { name: 'スタッフ', title: '' };
-    showModal(`💫 ${sp.title}`, `
+    queueModal('special', 50, `💫 ${sp.title}`, `
       <div class="voice-row rs-voice">${typeof STAFF_UI !== 'undefined' ? STAFF_UI.faceSVG(char, 'good', 56) : ''}<div class="voice-txt"><small>${st.title} ${st.name} — 信頼Lv3 スペシャル</small><p>${sp.text}</p></div></div>
       <div class="pnl-row"><span>スペシャル報酬</span><b>💰${yen(300000)} + 🪙10</b></div>
       <p class="modal-note">${sp.note}</p>`,
@@ -2820,7 +2820,7 @@
     // 紹介(直近30日): 対比を1行で(designer裁定)
     const refWin = (G.referLog || []).filter((l) => l.day > G.day - 30);
     const refIn = refWin.filter((l) => l.ok).length, refOut = refWin.length - refIn;
-    showModal(`📆 月間決算(第${G.season.months}期) — 経営評価 ${grade}`, `
+    queueModal('monthly', 80, `📆 月間決算(第${G.season.months}期) — 経営評価 ${grade}`, `
       <div class="pnl-row"><span>今月の利益(直近30日・法人)</span><b class="${profit >= 0 ? 'pos-t' : 'neg-t'}">${yen(profit)}</b></div>
       <div class="pnl-row"><span>自己ベスト</span><b>${yen(G.season.bestProfit)}(第${G.season.bestMonth}期)${isBest && G.season.months > 1 ? ' 🏆 記録更新' : ''}</b></div>
       ${planHtml}
@@ -2849,7 +2849,7 @@
         G.money += L.reward;
         G.coins += L.coin;
         SND.fanfare();
-        showModal(`🏆 ${L.title}`, `
+        queueModal('league', 60, `🏆 ${L.title}`, `
           <p><b>${L.name}</b>(月商 ${yen(leagueRev(i))})を追い抜き、<b>${L.tier}の頂点</b>に立ちました。</p>
           <div class="pnl-row"><span>あなたの法人月商</span><b>${yen(my)}</b></div>
           <div class="pnl-row"><span>制覇ボーナス</span><b>💰${yen(L.reward)} + 🪙${L.coin}</b></div>
@@ -2934,7 +2934,7 @@
     };
     const f0 = (v) => Math.round(v).toLocaleString();
     const f1 = (v) => (Math.round(v * 10) / 10).toLocaleString();
-    showModal(`📅 週次サマリー(Day ${G.day - 6}〜${G.day})`, `
+    queueModal('weekly', 70, `📅 週次サマリー(Day ${G.day - 6}〜${G.day})`, `
       <div class="wk-table">
         ${row('来院数/日', thisW.visits, lastW && lastW.visits, f1, true)}
         ${row('新患数/日', thisW.newp, lastW && lastW.newp, f1, true)}
@@ -2960,7 +2960,7 @@
       B: '未達。計画が高すぎたのか、実行が足りなかったのか — 区別することが大事。',
       C: '大幅未達。目標を下げるのは敗北ではなく、計画の修正は経営の仕事そのものです。'
     };
-    showModal(`📋 30日レビュー — 評価 ${grade}`,
+    queueModal('review', 75, `📋 30日レビュー — 評価 ${grade}`,
       `<p>目標月商 ${yen(G.plan.revenue)} に対して、実績 <b>${yen(monthRevenueAll())}</b>(達成率 ${(rate * 100).toFixed(0)}%)。</p><div class="lesson-box"><b>📖 経営の学び</b><p>${comments[grade]}</p></div>`,
       '次の30日へ');
   }
@@ -3002,9 +3002,8 @@
       const md = 1 + Math.floor(G.missionIdx / 5);
       G.coins += md;
       G.missionDone.push(m.id);
-      showModal(`🎉 ミッション達成: ${m.title}`,
-        `<p>達成ボーナス <b>${yen(m.reward)}</b> + <b>🪙コイン×${md}</b> を獲得しました。</p><div class="lesson-box"><b>📖 経営の学び</b><p>${m.lesson}</p></div>`,
-        G.missionIdx + 1 < MISSIONS.length ? '次のミッションへ' : 'クリニックタウンの覇者だ');
+      // 達成はバナー(5秒)で。学びは 📚学び のミッション一覧に残る(v90: モーダルにしない)
+      G._achBanner = `🎉 ミッション達成: <b>${m.title}</b> — ${yen(m.reward)} + 🪙×${md}`;
       G.missionIdx++;
       renderMissions();
       updateMissionBar();
@@ -3022,7 +3021,7 @@
 
   const UI_ONBOARD_I = UI_ONBOARD.create({ G });
   const UI_DASH_I = UI_DASH.create({
-    $, yen, yenShort, G, MISSIONS, WEEKDAYS, onboard: UI_ONBOARD_I, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND,
+    $, yen, yenShort, G, MISSIONS, WEEKDAYS, onboard: UI_ONBOARD_I, TEXTBOOK, learnBtn, foldAttr, applyLearn, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND,
     enforceSpeedPass: () => { if (typeof enforceSpeedPass === 'function') enforceSpeedPass(); },
     medScoreNow: () => medScoreParts(G.med),
   });
@@ -3030,11 +3029,12 @@
 
   function updateMissionBar() { UI_DASH_I.updateMissionBar(); }
 
-  const UI_EVENTS_I = UI_EVENTS.create({ $ });
+  const UI_EVENTS_I = UI_EVENTS.create({ $, bindGoto });
   function banner(html) { UI_EVENTS_I.banner(html); }
   function toast(msg) { UI_EVENTS_I.toast(msg); }
 
   function showModal(title, bodyHtml, btnLabel) { UI_EVENTS_I.showModal(title, bodyHtml, btnLabel); }
+  function queueModal(kind, pri, title, bodyHtml, btnLabel) { UI_EVENTS_I.queueModal(kind, pri, title, bodyHtml, btnLabel); }
 
   /* ================= UI: タブ ================= */
 
@@ -3042,7 +3042,7 @@
   const UI_NAV_I = UI_NAV.create({
     onSwitch(tab) {
       activeTab = tab;
-    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderVoice(); renderReceipt(); renderPulse(); renderShop(); }
+    if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderVoice(); renderReceipt(); renderPulse(); renderShop(); renderYesterday(); }
     if (tab === 'staff') { renderStaffStrip(); renderShop(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'mgmt') { renderPnl(); renderPlanner(); renderBank(); renderKpiPicker(); renderLeague(); renderAcct(); renderDecCard(); renderCorp(); renderShop(); renderJihi(); renderItems(); }
@@ -5384,7 +5384,7 @@
       updateHeader(); renderStaffStrip(); if (activeTab === 'mgmt') renderDecCard();
     }
     if (!G.tutorialDone || tutIdx >= 0 || gateOpen || decOpen || G.day < 5) return;
-    if ($('modal').classList.contains('show')) return; // ミッション達成などの modal が開いている日は重ねない(翌日の締めで開く・qa v72 指摘)
+    if (UI_EVENTS_I.modalOpen() || UI_EVENTS_I.pendingAbove(10)) return; // 上位の演出がある日は重ねない(翌日の締めで開く・qa v72 指摘)
     const picked = DECISIONS.pick(decCtx(), st);
     if (picked) openDecision(picked.c, picked.viaChain);
   }
