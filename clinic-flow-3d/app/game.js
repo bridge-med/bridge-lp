@@ -11,6 +11,8 @@
 (function () {
   const $ = (id) => document.getElementById(id);
   const yen = (n) => `¥${Math.round(n).toLocaleString()}`;
+  // HUD 用の短い円表記(v87): 1万未満はそのまま・1億未満は万・以上は億。P&L・明細は yen のまま
+  const yenShort = (n) => { const a = Math.abs(n); const sg = n < 0 ? '−' : ''; if (a < 10000) return `${sg}¥${Math.round(a).toLocaleString()}`; if (a < 100000000) { const m = a / 10000; return `${sg}¥${m < 10 ? m.toFixed(1) : Math.round(m).toLocaleString()}万`; } return `${sg}¥${(a / 100000000).toFixed(1)}億`; };
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   // 期待値xを整数化(端数は確率で切り上げ)
   const frac = (x) => Math.floor(x) + (Math.random() < x % 1 ? 1 : 0);
@@ -268,45 +270,45 @@
   function leagueRev(i) { return Math.round(LEAGUE[i].rev * (1 + G.day * 0.0006)); }
 
   const MISSIONS = [
-    { id: 'firstday', title: '初日の診療を完了する', reward: 50000,
+    { id: 'firstday', goto: 'clinic|#skipBtn', prog: (h) => h ? '' : '⏩1日 を押す(⏸〜×2 の速度で)', title: '初日の診療を完了する', reward: 50000,
       lesson: 'このゲームの回し方: ①1日進める → ②結果を見る → ③スタッフの声を聞く → ④1つ改善する。この繰り返しで数字は必ず動く。' },
-    { id: 'wait40', title: '平均待ち時間40分未満の日をつくる(来院8人以上)', reward: 50000,
+    { id: 'wait40', goto: 'clinic|#shopCard', prog: (h) => h ? `昨日 平均待ち ${Math.round(h.avgWait)}分・来院 ${h.patients}人` : '', title: '平均待ち時間40分未満の日をつくる(来院8人以上)', reward: 50000,
       lesson: '待ち時間は最大の離反要因。医療の質は見えにくいが、待ち時間は誰にでも見える。詰まりは受付か診察か — 1か所ずつ潰す。' },
-    { id: 'rev50k', title: '1日の売上¥50,000を超える', reward: 50000,
+    { id: 'rev50k', goto: 'clinic|#policyCard', prog: (h) => h ? `昨日 ${yen(h.revenue)}` : '', title: '1日の売上¥50,000を超える', reward: 50000,
       lesson: 'いちばん大事な式: 売上 = 患者数 × 単価。すべての打ち手はどちらか(または両方)を動かす。「今日の一手はどちらを動かしたか?」を毎日問う。' },
-    { id: 'rep60', title: '評判を60にする', reward: 80000,
+    { id: 'rep60', goto: 'clinic|#shopCard', prog: () => `いま ${Math.round(G.rep)}`, title: '評判を60にする', reward: 80000,
       lesson: '評判は患者体験の積分。待ち時間を削り、丁寧に診る — 地味な積み上げが、いちばん安い集患になる。' },
-    { id: 'web', title: 'Web問診・事前受付を導入する', reward: 80000,
+    { id: 'web', goto: 'clinic|#opWeb', prog: () => settings.webIntake ? '導入済み' : '未導入(¥200,000)', title: 'Web問診・事前受付を導入する', reward: 80000,
       lesson: '受付は院内導線の最初の関門。受付処理を軽くすると、同じ人数でも待ちが減り評判が守れる。「人を増やす前に仕事を減らす」が改善の原則。' },
-    { id: 'physio10', spec: 'orthopedics', title: '物療(消炎鎮痛)を10件/日 実施する', reward: 100000,
+    { id: 'physio10', goto: 'clinic|#shopCard', prog: (h) => h ? `昨日 ${h.physioCount || 0}件` : '', spec: 'orthopedics', title: '物療(消炎鎮痛)を10件/日 実施する', reward: 100000,
       lesson: '物療は低単価(¥350)だが高回転で、再診の受け皿になる。整形外来の単価は「初再診料+注射+物療+画像+リハ」の複合で作る。' },
-    { id: 'black3', title: '3日連続で黒字にする(法人)', reward: 150000,
+    { id: 'black3', goto: 'mgmt|#pnlCard', prog: () => `${G.blackStreak || 0}日連続`, title: '3日連続で黒字にする(法人)', reward: 150000,
       lesson: '外来は固定費型ビジネス。人件費・家賃は患者0人でも出ていく。損益分岐点(1日何人で黒字か)を頭に入れると、打ち手の優先順位が見える。' },
-    { id: 'reha10', spec: 'orthopedics', title: '運動器リハを届け出て、リハ実施10件/日', reward: 200000,
+    { id: 'reha10', goto: 'mgmt|#kijunCard', prog: (h) => settings.rehaLevel >= 1 ? `昨日 ${h ? h.rehaCount || 0 : 0}件` : '届出が先', spec: 'orthopedics', title: '運動器リハを届け出て、リハ実施10件/日', reward: 200000,
       lesson: 'リハは整形外来の柱。施設基準で単価が変わる: (III)¥1,700→(II)¥3,400→(I)¥3,700(2単位換算)。専従PTの人数と面積が壁。' },
-    { id: 'tie', title: '病院・ケアマネの両方と関係を作る(Lv1以上)', reward: 200000,
+    { id: 'tie', goto: 'town|#salesCard', prog: () => `病院 Lv${relLv('hospital')}・ケアマネ Lv${relLv('caremane')}`, title: '病院・ケアマネの両方と関係を作る(Lv1以上)', reward: 200000,
       lesson: '紹介は最強の新患チャネル。ただし関係は「作って終わり」ではない — 30日放置すると冷める。定期訪問は資産のメンテナンス。' },
-    { id: 'month300k', title: '月間利益(直近30日・法人)¥300,000', reward: 300000,
+    { id: 'month300k', goto: 'mgmt|#pnlCard', prog: () => `直近30日 ${yen(G.history.slice(-30).reduce((a, x) => a + x.profit + (x.brProfit || 0), 0))}`, title: '月間利益(直近30日・法人)¥300,000', reward: 300000,
       lesson: '日次の黒字が「点」なら、月間利益は「線」。バリューアップの順番は ①守り(待ち・評判)→②回転→③単価→④新患。' },
-    { id: 'expand', spec: 'orthopedics', title: '院を増築する(リハ室100㎡・診察室4)', reward: 300000,
+    { id: 'expand', goto: 'clinic|#shopCard', spec: 'orthopedics', title: '院を増築する(リハ室100㎡・診察室4)', reward: 300000,
       lesson: '設備投資は「回収期間」で考える。増築もMRIも、1日あたりの増収×稼働日数でいつ回収できるかを先に計算する。' },
-    { id: 'revenue', title: '本院の月商(直近30日)¥8,000,000', reward: 500000,
+    { id: 'revenue', goto: 'mgmt|#pnlCard', prog: () => `直近30日 ${yen(monthRevenueMain())}`, title: '本院の月商(直近30日)¥8,000,000', reward: 500000,
       lesson: '月商800万 = 1日30万×27診療日。患者数×単価に分解すると「あと何人」「あと何円」が見える — 分解できる目標だけが実行できる。' },
-    { id: 'branch', title: '分院1号店を開設する', reward: 500000,
+    { id: 'branch', goto: 'corp|#corpCard', title: '分院1号店を開設する', reward: 500000,
       lesson: '分院は「成功した仕組みのコピー」でしか成功しない。施設基準の専従要件は分院ごと — 採用が分院展開の本当の壁。' },
-    { id: 'branchProfit', title: '分院の直近7日を黒字にする', reward: 500000,
+    { id: 'branchProfit', goto: 'corp|#corpCard', title: '分院の直近7日を黒字にする', reward: 500000,
       lesson: '分院経営は「見えない現場」のマネジメント。数字(稼働・評判・人件費率)で異変に気づく仕組みがないと、分院は静かに沈む。' },
-    { id: 'corp', title: '法人月商(全拠点・直近30日)¥25,000,000', reward: 1000000,
+    { id: 'corp', goto: 'mgmt|#pnlCard', prog: () => `直近30日 ${yen(monthRevenueAll())}`, title: '法人月商(全拠点・直近30日)¥25,000,000', reward: 1000000,
       lesson: '経営者の仕事は「自分がいなくても回る仕組み」を作ること。ここからは地域リーグ — 市・県・地方・全国の頂点を目指す。' },
-    { id: 'cityTop', title: '市でいちばんの{科名}グループになる', reward: 1000000,
+    { id: 'cityTop', goto: 'mgmt|#leagueCard', prog: () => `勝ち越し ${G.league ? G.league.beaten : 0}`, title: '市でいちばんの{科名}グループになる', reward: 1000000,
       lesson: '規模の拡大は「同じ質を保てる範囲」でしか意味がない。シェアは 評判×拠点数×単価 の総合点で決まる。' },
-    { id: 'prefTop', title: '県でいちばんの医療法人になる', reward: 2000000,
+    { id: 'prefTop', goto: 'mgmt|#leagueCard', prog: () => `勝ち越し ${G.league ? G.league.beaten : 0}`, title: '県でいちばんの医療法人になる', reward: 2000000,
       lesson: '県レベルの競争は採用力の勝負。診療の質は「人が辞めない仕組み」でしか維持できない。' },
-    { id: 'regionTop', title: '地方でいちばんの医療グループになる', reward: 3000000,
+    { id: 'regionTop', goto: 'mgmt|#leagueCard', prog: () => `勝ち越し ${G.league ? G.league.beaten : 0}`, title: '地方でいちばんの医療グループになる', reward: 3000000,
       lesson: 'ここまで来ると経営は「資本配分」の仕事。どの拠点に投資し、どこを守り、どこを畳むか。' },
-    { id: 'hospital', title: 'グループ病院を開設する(回復期リハ病棟)', reward: 5000000,
+    { id: 'hospital', goto: 'corp|#corpCard', title: 'グループ病院を開設する(回復期リハ病棟)', reward: 5000000,
       lesson: '外来は「来た日」だけの売上、入院は「病床が埋まっている毎日」が売上。回復期リハ病棟入院料1(2,229点/日)×稼働率 — 病院経営は配置基準(PT・看護)と稼働率のゲーム。' },
-    { id: 'nationTop', title: '全国いちばんの医療法人になる', reward: 5000000,
+    { id: 'nationTop', goto: 'mgmt|#leagueCard', prog: () => `勝ち越し ${G.league ? G.league.beaten : 0}`, title: '全国いちばんの医療法人になる', reward: 5000000,
       lesson: '頂点の景色。患者に選ばれ続ける組織だけがこの位置に立てる — 次は現実で。' }
   ];
 
@@ -1784,7 +1786,7 @@
       ctx.fillStyle = '#7C929E';
       ctx.font = '600 11.5px "Noto Sans JP", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('リアルタイム運転中(×1〜×4)に描画されます', cssW / 2, cssH / 2);
+      ctx.fillText('診療が始まると動きます(×1〜×4)', cssW / 2, cssH / 2);
       if (lg) lg.innerHTML = '';
       return;
     }
@@ -2129,14 +2131,24 @@
 
   /* ================= 段階解放(Day1-3 / 4-7 / 8+) ================= */
 
+  // 医療(適切な算定)スコアの式(v41)。月次締めと HUD(v87)が同じ式を使う=式は1つ
+  function medScoreParts(med) {
+    const m = med || { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 };
+    const proper = Math.max(0, 60 - m.fsBroken * 10);
+    const clean = m.days ? Math.round(20 * (1 - m.warnDays / m.days)) : 20;
+    const quiz = m.quizTotal ? Math.round(20 * (m.quizOk / m.quizTotal)) : 0;
+    const score = proper + clean + quiz;
+    const grade = score >= 90 ? 'S' : score >= 70 ? 'A' : score >= 50 ? 'B' : 'C';
+    return { proper, clean, quiz, score, grade };
+  }
   function unlockStage() { return G.day >= 8 ? 3 : G.day >= 4 ? 2 : 1; }
   const STAGE_SHOP = { recep: 1, chairs: 1, doctor: 2, nurse: 2, beds: 2, physio: 2, psw: 2, pt: 3, machines: 3, rehaAide: 3 };
 
   function applyUnlocks() {
     const stage = unlockStage();
     const vis = (id, need) => { const el = $(id); if (el) el.style.display = stage >= need ? '' : 'none'; };
-    const corpBtn = document.querySelector('.tab-btn[data-tab="corp"]');
-    if (corpBtn) corpBtn.style.display = stage >= 3 ? '' : 'none';
+    UI_NAV_I.setTabVisible('corp', stage >= 3);
+    const head = document.querySelector('.head'); if (head) head.classList.toggle('stage2', stage >= 2); // ×4 以上の速度は Day 4 から(v87 決裁③)
     vis('jihiCard', 3);
     vis('salesCard', 2);
     vis('adTarget', 2);
@@ -2281,42 +2293,7 @@
     }));
   }
 
-  function renderTodo() {
-    const el = $('todoBody');
-    if (!el) return;
-    const m = MISSIONS[G.missionIdx];
-    const bn = bottleneckInfo();
-    const today = todayKey();
-    const ch = pickChallenge(today);
-    const chDone = G.daily && G.daily.chDone === today;
-    const chState = G.daily && G.daily.chDay === today ? G.daily.chState : '';
-    let reqRow;
-    if (chDone) {
-      reqRow = `<p>${requestHtml(ch, 20)} — <b class="daily-done">✅ クリア済み</b></p>`;
-    } else if (chState === 'ok') {
-      reqRow = `<p>${requestHtml(ch, 20)} — <b class="req-on">📋 受注中(今日の診療で達成を)</b></p>`;
-    } else if (chState === 'pass') {
-      reqRow = `<p class="req-passed">今日はパスしました。${typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : ''}「わかりました、また明日相談しますね」</p>`;
-    } else {
-      reqRow = `<p>${requestHtml(ch, 20)}</p><div class="fix-row"><button class="fix-chip" data-chact="ok">受ける</button><button class="fix-chip ghost" data-chact="pass">今日はパス</button></div>`;
-    }
-    el.innerHTML = `
-      ${m ? `<div class="todo-row"><span class="todo-tag mission">🎯 ミッション</span><p>${m.title}</p></div>` : ''}
-      <div class="todo-row"><span class="todo-tag daily">📅 依頼</span><div class="req-body">${reqRow}</div></div>
-      <div class="todo-row"><span class="todo-tag quiz">🧠 クイズ</span><p>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</p></div>
-      <div class="todo-row"><span class="todo-tag">🔍 いまの詰まり</span><p>${bn.text}</p></div>
-      ${bn.fixes.length ? `<div class="fix-row">${bn.fixes.map((f) => `<button class="fix-chip" data-goto="${f.tab}|${f.sel}">${f.label} →</button>`).join('')}</div>` : ''}`;
-    bindGoto(el);
-    const qb = $('quizBtn');
-    if (qb) qb.addEventListener('click', () => { SND.click(); showQuizModal(); });
-    el.querySelectorAll('[data-chact]').forEach((b) => b.addEventListener('click', () => {
-      G.daily.chDay = today;
-      G.daily.chState = b.dataset.chact;
-      const name = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : 'スタッフ';
-      toast(b.dataset.chact === 'ok' ? `📋 ${name}「ありがとうございます! お願いします!」` : `💬 ${name}「了解です、無理は禁物ですから」`);
-      renderTodo(); save();
-    }));
-  }
+  function renderTodo() { UI_DASH_I.renderTodo(); }
 
   /* ================= 1日の結果画面 ================= */
 
@@ -2826,11 +2803,7 @@
     }
     // 医療(適切な算定)スコア: 制度上の事実(要件割れ日・KB整備メモ)+理解(クイズ)。配点はゲーム上の仮定
     const med = G.med || { fsBroken: 0, warnDays: 0, days: 0, quizOk: 0, quizTotal: 0 };
-    const medProper = Math.max(0, 60 - med.fsBroken * 10);
-    const medClean = med.days ? Math.round(20 * (1 - med.warnDays / med.days)) : 20;
-    const medQuiz = med.quizTotal ? Math.round(20 * (med.quizOk / med.quizTotal)) : 0;
-    const medScore = medProper + medClean + medQuiz;
-    const medGrade = medScore >= 90 ? 'S' : medScore >= 70 ? 'A' : medScore >= 50 ? 'B' : 'C';
+    const { proper: medProper, clean: medClean, quiz: medQuiz, score: medScore, grade: medGrade } = medScoreParts(med);
     const medDetail = [
       `要件どおりの算定 ${medProper}/60${med.fsBroken ? `(要件割れで適用が外れた${med.fsBroken}件)` : ''}`,
       `判定の保留 ${medClean}/20${med.warnDays ? `(保留した日${med.warnDays})` : ''}`,
@@ -3040,69 +3013,34 @@
     return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
   }
 
-  function updateHeader() {
-    if (typeof enforceSpeedPass === 'function' && G.speed > 4) enforceSpeedPass();
-    $('hMoney').textContent = yen(G.money);
-    $('hMoney').classList.toggle('neg', G.money < 0);
-    const hm = $('hMedal');
-    if (hm) hm.textContent = `🪙 ${G.coins || 0}`;
-    const spec = G.daySpec || specOf(G.day);
-    const wxh = ensureWeather();
-    $('hDay').textContent = `Day ${G.day}(${WEEKDAYS[weekdayOf(G.day)]}${spec.kind === 'am' ? '·午前' : spec.kind === 'closed' ? '·休診' : ''}) ${wxh.icon}`;
-    $('hDay').title = `天気: ${wxh.label}${wxh.note ? ' — ' + wxh.note : ''}`;
-    $('hClock').textContent = spec.kind === 'closed' ? '—' : fmtClock(G.t);
-    $('hRep').textContent = Math.round(G.rep);
-    $('hAw').textContent = `${Math.round(G.aw * 100)}%`;
-    $('hToday').textContent = yen(G.today ? G.today.revenue : 0);
-  }
+  const UI_DASH_I = UI_DASH.create({
+    $, yen, yenShort, G, MISSIONS, WEEKDAYS, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND,
+    enforceSpeedPass: () => { if (typeof enforceSpeedPass === 'function') enforceSpeedPass(); },
+    medScoreNow: () => medScoreParts(G.med),
+  });
+  function updateHeader() { UI_DASH_I.updateHeader(); }
 
-  function updateMissionBar() {
-    const m = MISSIONS[G.missionIdx];
-    const lap = G.prestige && G.prestige.count > 0 ? `🏛${G.prestige.count + 1}周目 ` : '';
-    const vis = MISSIONS.filter(missionApplies);
-    $('missionText').textContent = lap + (m ? `MISSION ${vis.indexOf(m) + 1}/${vis.length}: ${m.title}` : '🏆 全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
-  }
+  function updateMissionBar() { UI_DASH_I.updateMissionBar(); }
 
-  let bannerTimer = null;
-  function banner(html) {
-    const el = $('banner');
-    el.innerHTML = html;
-    el.classList.add('show');
-    clearTimeout(bannerTimer);
-    bannerTimer = setTimeout(() => el.classList.remove('show'), 5000);
-  }
-  let toastTimer = null;
-  function toast(msg) {
-    const el = $('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
-  }
+  const UI_EVENTS_I = UI_EVENTS.create({ $ });
+  function banner(html) { UI_EVENTS_I.banner(html); }
+  function toast(msg) { UI_EVENTS_I.toast(msg); }
 
-  function showModal(title, bodyHtml, btnLabel) {
-    $('modalTitle').textContent = title;
-    $('modalBody').innerHTML = bodyHtml;
-    $('modalBtn').textContent = btnLabel || 'OK';
-    $('modal').classList.add('show');
-  }
-  $('modalBtn').addEventListener('click', () => $('modal').classList.remove('show'));
+  function showModal(title, bodyHtml, btnLabel) { UI_EVENTS_I.showModal(title, bodyHtml, btnLabel); }
 
   /* ================= UI: タブ ================= */
 
   let activeTab = 'clinic';
-  document.querySelectorAll('.tab-btn').forEach((b) => {
-    b.addEventListener('click', () => switchTab(b.dataset.tab));
-  });
-  function switchTab(tab) {
-    activeTab = tab;
-    document.querySelectorAll('.tab-btn').forEach((x) => x.classList.toggle('on', x.dataset.tab === tab));
-    document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('show', p.id === `tab-${tab}`));
+  const UI_NAV_I = UI_NAV.create({
+    onSwitch(tab) {
+      activeTab = tab;
     if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderStaffStrip(); renderVoice(); renderReceipt(); renderPulse(); }
     if (tab === 'town') { townIso.resize(); renderAds(); }
     if (tab === 'corp') renderCorp();
     if (tab === 'mgmt') { renderPnl(); renderMissions(); renderPlanner(); renderBank(); renderKpiPicker(); renderAch(); renderPrestige(); renderLeague(); renderAcct(); renderDecCard(); }
-  }
+    }
+  });
+  function switchTab(tab) { UI_NAV_I.switchTab(tab); }
 
   /* ================= UI: 診療時間 ================= */
 
@@ -3188,18 +3126,11 @@
     const stage = unlockStage();
     const mm = SPECIALTIES.get(settings.specialty);
     const hide = (mm && mm.main && mm.main.preset && mm.main.preset.shopHide) || [];
+    const lockedCount = {};
     const rows = Object.entries(SHOP).map(([key, item]) => {
       if (hide.includes(key) || (SHOP_OPT_IN.includes(key) && !shopShown(key))) return '';
       const need = STAGE_SHOP[key] || 1;
-      if (need > stage) {
-        return `
-        <div class="shop-row locked">
-          <div class="shop-info">
-            <span class="shop-name">🔒 ${item.label}</span>
-            <span class="shop-hint">Day ${need === 2 ? 4 : 8} で解放</span>
-          </div>
-        </div>`;
-      }
+      if (need > stage) { lockedCount[need] = (lockedCount[need] || 0) + 1; return ''; } // 🔒行は並べず1行に数える(v87・第14条)
       const cur = settingValue(key);
       const max = shopMax(key);
       const vc = SHOP_VOICE[key];
@@ -3219,13 +3150,9 @@
     }).join('');
 
     const bigNames = [!hide.includes('mri') && 'MRI', !hide.includes('dexa') && 'DEXA', '増築'].filter(Boolean).join('・');
-    const bigTicket = stage < 3 ? `
-      <div class="shop-row locked">
-        <div class="shop-info">
-          <span class="shop-name">🔒 大型投資(${bigNames})</span>
-          <span class="shop-hint">Day 8 で解放</span>
-        </div>
-      </div>` : `
+    if (stage < 3) lockedCount[3] = (lockedCount[3] || 0) + 1; // 大型投資(${bigNames})も1行に数える
+    const lockedLine = (lockedCount[2] || lockedCount[3]) ? `<p class="shop-locked">🔒 ${[lockedCount[2] ? `Day 4 で ${lockedCount[2]}つ` : '', lockedCount[3] ? `Day 8 で ${lockedCount[3]}つ` : ''].filter(Boolean).join('・')} の打ち手が増える</p>` : '';
+    const bigTicket = stage < 3 ? '' : `
       ${hide.includes('mri') ? '' : `<div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
         <span class="shop-hint">MRI検査1件1,900点=¥19,000・維持費¥12,000/日</span>
@@ -3258,7 +3185,7 @@
             </div>`
           : `<div class="shop-row expand-row done"><div class="shop-info"><span class="shop-name">🏙 別館まで増築済み(診察室6・リハ室150㎡)</span></div></div>`}`;
 
-    $('shopList').innerHTML = rows + bigTicket;
+    $('shopList').innerHTML = rows + bigTicket + lockedLine;
     const shopTools = $('shopTools');
     if (shopTools) shopTools.innerHTML = learnBtn('shop', '各行の内訳と算定ルール');
     $('shopList').querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
@@ -3454,7 +3381,7 @@
     if (!el) return;
     const opens = G.history.filter((h) => h.kind !== 'closed');
     const last = opens[opens.length - 1];
-    if (!last) { el.innerHTML = '<span class="kpi-tile empty">KPI: 1日終えると表示(経営タブで指標を選べます)</span>'; return; }
+    if (!last) { el.innerHTML = ''; return; } // 実績が無い日は空(v87: 空室の注記を置かない)
     const prior = opens.slice(-8, -1);
     el.innerHTML = G.kpiPins.map((id) => {
       const k = KPIS.find((x) => x.id === id);
@@ -5057,7 +4984,7 @@
 
   const TUTORIAL = [
     { tab: null, sel: null, text: '今日からこの{科名}はあなたの院です。まずは<b>①1日進める → ②結果を見る → ③1つ直す</b>。' },
-    { tab: null, sel: '.hud', text: '<b>資金・評判・認知</b>が経営の体温計。<b>⏩1日</b> で1日スキップできます。' },
+    { tab: null, sel: '.hud', text: '<b>資金・評判・医療</b>が経営の体温計。<b>⏩1日</b> で1日スキップできます。' },
     { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。ミッション・依頼・詰まりの打ち手が出ます。' },
     { tab: 'clinic', sel: '#shopCard', text: '最初は<b>受付と椅子</b>。Day 4・Day 8 で打ち手が増えます。' },
     { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。では初日をどうぞ。' }
@@ -5093,6 +5020,7 @@
   $('tutNext').addEventListener('click', () => { tutIdx++; showTutStep(); });
   $('tutSkip').addEventListener('click', endTutorial);
   $('helpBtn').addEventListener('click', startTutorial);
+  $('moreBtn').addEventListener('click', () => { const m = $('headMore'); m.hidden = !m.hidden; $('moreBtn').setAttribute('aria-expanded', String(!m.hidden)); });
   $('resetBtn').addEventListener('click', () => {
     showModal('はじめからやり直す', '<p>セーブデータを消して、Day 1 からやり直します。よろしいですか?</p><div class="modal-actions"><button class="btn-cta danger" id="resetGo">全部消してやり直す</button></div>', 'やめておく');
     $('resetGo').addEventListener('click', hardReset);

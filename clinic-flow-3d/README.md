@@ -1,9 +1,32 @@
 # クリニックタウン3D
 
+現在地は [docs/status.md](docs/status.md)
+
+## 動作確認
+
+静的サイト(ビルドなし)。手順:
+
+1. リポジトリルートで `python3 -m http.server`
+2. ブラウザで `/clinic-flow-3d/` を開く
+
+## テスト
+
+- `node clinic-flow-3d/tests/*.test.mjs`
+- `node scripts/check-site.mjs`(リポジトリ直下)
+- `node clinic-flow-3d/scripts/check-decisions.mjs`
+
+## 主要ドキュメント
+
+- 現在地・ファイル一覧・テスト: `docs/status.md`
+- 出荷履歴: `ROADMAP.md`(〜v32)/`docs/roadmap.md`(v33以降。ともに履歴ログ)
+- 構造: `docs/architecture.md` / デザイン方針: `docs/game-design.md` / 診療科の追加方法: `docs/specialty-module.md`
+
+## 履歴(v33 時点の記述・当時のまま)
+
 遊ぶだけで外来経営が身につくSimCity風シミュレーション。静的Web(ビルドなし)+PWA。
 遊びの柱・出荷履歴・PM判断ログは `ROADMAP.md`、拡張計画は `docs/roadmap.md`。
 
-## v33: 診療報酬Knowledge Base統合
+### v33: 診療報酬Knowledge Base統合
 
 会計の点数がハードコードから**令和8年度診療報酬KB(告示・通知の一次資料照合済み)**に切り替わった。
 
@@ -21,7 +44,7 @@
 構造の詳細は `docs/architecture.md`、エンジン仕様は `docs/reimbursement-engine.md`、
 診療科の追加方法は `docs/specialty-module.md`、データ出典は `docs/data-sources.md`。
 
-## 開発メモ
+### 開発メモ
 
 - `sw.js` の `VER` の扱いは `docs/data-sources.md` を正とする(network-first PWA。KB更新でVERを上げる必要はない)
 - 点数・施設基準をUIコードに書かない。KB未登録の項目は「概算」タグで明示する
