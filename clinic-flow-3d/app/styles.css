@@ -102,13 +102,13 @@ a { color: var(--blue-deep); }
   max-width: 920px;
   margin: 6px auto 0;
   display: grid;
-  grid-template-columns: 1.15fr 1.4fr 1fr 1.2fr 0.65fr 0.9fr; /* Day は「Day 午前/休診」のラベルが入る幅・資金・売上は桁が多いので広め */
-  gap: 4px 6px;
+  grid-template-columns: repeat(5, minmax(0, 1fr)); /* v94: 資金は上段へ。残り5値を等分 */
+  gap: 4px;
 }
-.hud-item { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.hud-item { display: flex; flex-direction: column; align-items: center; line-height: 1.2; min-width: 0; }
 .hud-label { font: 600 9.5px/1.3 var(--sans); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hud-label span { font-family: var(--en); font-weight: 700; color: var(--ink-3); }
-.hud-val { font: 700 15px/1.3 var(--en); color: var(--ink); white-space: nowrap; letter-spacing: -0.01em; overflow: hidden; text-overflow: clip; }
+.hud-val { font: 700 14px/1.3 var(--en); color: var(--ink); white-space: nowrap; letter-spacing: -0.01em; overflow: hidden; text-overflow: clip; }
 .head-more { display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
 .speed-fast { flex: 0 0 auto; }
 .head-more[hidden] { display: none; }
@@ -196,7 +196,8 @@ a { color: var(--blue-deep); }
   box-shadow: var(--shadow);
   padding: 14px 14px 14px;
 }
-.card-title { font: 900 15px/1.35 var(--sans); color: var(--ink); margin: 0 0 10px -14px; padding-left: 10px; border-left: 4px solid var(--blue-deep); letter-spacing: 0.01em; }
+.card-title { font: 900 15px/1.35 var(--sans); color: var(--ink); margin: 0 0 10px -14px; padding: 2px 0 2px 10px; border-left: 4px solid var(--blue-deep); letter-spacing: 0.01em; }
+.lv3 > .card-title { margin: 0 0 10px; padding-left: 0; border-left: 0; } /* 枠なしの面にはレールを付けない(designer v94) */
 .card-title small { font: 500 11px/1.5 var(--sans); color: var(--ink-3); font-weight: 500; }
 .sub-title { font: 800 12.5px/1.4 var(--sans); color: var(--ink-2); margin: 14px 0 8px; }
 
@@ -281,18 +282,19 @@ a { color: var(--blue-deep); }
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  padding: 9px 0;
-  border-bottom: 1px dashed var(--line);
+  min-height: 56px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
 }
 .shop-info { display: flex; flex-direction: column; min-width: 0; }
-.shop-name { font: 700 13px/1.5 var(--sans); color: var(--ink); }
+.shop-name { font: 700 14px/1.5 var(--sans); color: var(--ink); }
 .shop-count { color: var(--blue-deep); font-family: var(--en); margin-left: 4px; }
-.shop-hint { font: 500 10.5px/1.5 var(--sans); color: var(--ink-3); }
-.cer { display: flex; gap: 6px; font: 500 10.5px/1.5 var(--sans); color: var(--ink-3); } /* v92: 費用/効果/リスクの3行型(社長⑥) */
-.cer > b { flex: 0 0 3.3em; font-weight: 700; color: var(--ink-2); } /* 「リスク」3字が折れない幅 */
-.cer > span { min-width: 0; }
-.jihi-item .cer { margin-top: -4px; }
-.jihi-item .cer + .cer { margin-top: -6px; }
+.shop-hint { font: 400 12px/1.5 var(--sans); color: var(--ink-3); }
+.cer { display: grid; grid-template-columns: 48px minmax(0, 1fr); column-gap: 6px; row-gap: 2px; margin-top: 2px; font: 400 13px/1.6 var(--sans); color: var(--ink-2); } /* v92: 費用/効果/リスクの3行型(社長⑥)。v94: 定義リスト型(designer B) */
+.cer > b { font: 500 11px/1.6 var(--sans); color: var(--ink-3); }
+.cer > span { min-width: 0; display: flex; gap: 4px; align-items: flex-start; }
+.cer.cost > span { color: var(--gold); font-weight: 700; }
+.cer.risk .ic { width: 14px; height: 14px; color: var(--red); margin: 4px 2px 0 0; }
 .shop-btns { display: flex; gap: 6px; flex: 0 0 auto; }
 
 .mini-btn {
@@ -306,7 +308,8 @@ a { color: var(--blue-deep); }
   min-height: 44px;
   min-width: 44px;
 }
-.mini-btn.plus { border-color: var(--blue-deep); color: #fff; background: var(--blue-deep); }
+.mini-btn.plus { border-color: var(--blue-deep); color: var(--blue-deep); background: var(--card); } /* v94: 塗りは「今日の1手/受ける」だけ。価格は金 */
+.mini-btn.plus .gold { color: var(--gold); }
 .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .op-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
@@ -441,7 +444,7 @@ input[type="range"]::-moz-range-thumb {
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; }
 .bar { width: 100%; max-width: 26px; border-radius: 4px 4px 0 0; }
 .bar.pos { background: linear-gradient(180deg, var(--green), var(--green-deep)); }
-.bar.neg { background: linear-gradient(180deg, #D98079, var(--red)); }
+.bar.neg { background: var(--red); }
 .bar-col span { font: 600 9px/1 var(--en); color: var(--ink-3); }
 
 /* 事業計画 */
@@ -487,7 +490,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .pv-track.big { height: 14px; margin-top: 5px; }
 .pv-track i { display: block; height: 100%; border-radius: 999px; transition: width 0.4s ease; }
-.pv-track i.low { background: linear-gradient(90deg, #D98079, var(--red)); }
+.pv-track i.low { background: var(--red); }
 .pv-track i.mid { background: linear-gradient(90deg, var(--blue), var(--blue-deep)); }
 .pv-track i.full { background: linear-gradient(90deg, var(--blue), var(--green)); }
 .pv-row {
@@ -805,7 +808,13 @@ input[type="range"]::-moz-range-thumb {
 /* 説明を開くと情報側が伸び、nowrap のボタンが最小幅より潰れて横にはみ出す(v81 実測)。
    ボタンは縮ませない(.dec-log .mini-btn の先例) */
 .rel-row > .mini-btn { flex: 0 0 auto; }
-.rel-stars { color: var(--blue); letter-spacing: 0.1em; font-size: 12px; }
+.rel-stars { color: var(--gold); letter-spacing: 0; font-size: 12px; display: inline-flex; gap: 2px; }
+.rel-stars .ic { width: 14px; height: 14px; margin: 0; }
+.rel-stars .ic.fill g { fill: var(--gold); stroke: var(--gold); }
+.rel-stars .ic:not(.fill) g { stroke: var(--line); }
+.mini-btn.two { flex-direction: column; gap: 2px; width: 88px; height: 44px; padding: 0 6px; line-height: 1.2; }
+.mini-btn.two small { font: 500 11px/1.2 var(--sans); }
+.mini-btn.two .num { font: 700 13px/1.2 var(--en); color: var(--gold); }
 
 /* ---------- 自費メニュー ---------- */
 
@@ -911,9 +920,10 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 12px;
   padding: 13px 18px;
   font: 700 14px/1.4 var(--sans);
-  background: linear-gradient(135deg, var(--blue) 0%, var(--green) 120%);
+  background: var(--blue-deep);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(62, 124, 166, 0.35);
+  box-shadow: none;
+  border-radius: 10px;
 }
 .btn-cta.ghost {
   background: transparent;
@@ -923,7 +933,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 10px;
   min-height: 44px; /* タップ領域44px(保留#38・v58)。modalの閉じる/計画の見直し/共有ボタンに効く */
 }
-.btn-cta.danger { background: linear-gradient(135deg, var(--red), #A94039); box-shadow: 0 4px 14px rgba(196,87,78,0.35); }
+.btn-cta.danger { background: var(--red); box-shadow: none; }
 
 /* ---------- チュートリアル ---------- */
 
@@ -1178,22 +1188,14 @@ input[type="range"]::-moz-range-thumb {
     right: 0;
     max-width: none;
     z-index: 90;
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 -4px 20px rgba(34,51,61,0.12);
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-    gap: 6px;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    box-shadow: none;
+    padding: 0 4px calc(6px + env(safe-area-inset-bottom));
+    gap: 0;
   }
-  .tab-btn {
-    border: none;
-    border-radius: 12px;
-    margin-right: 0;
-    padding: 11px 4px;
-    background: transparent;
-  }
-  .tab-btn.on { background: var(--blue-pale); box-shadow: none; }
-  .tab-btn { font-size: 11px; padding: 11px 2px; }
+  .tab-btn { border-top: 3px solid transparent; border-radius: 0; margin-right: 0; padding: 8px 4px 6px; background: transparent; min-height: 56px; font-size: 10.5px; }
+  .tab-btn.on { background: transparent; border-top-color: var(--blue-deep); box-shadow: none; }
   .main { padding-bottom: 96px; }
   .toast { bottom: 88px; }
 }
@@ -1211,7 +1213,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- v10: 倍速パス・キャラ信頼度・依頼の受諾 ---------- */
 
-.bond-hearts { font-style: normal; color: #E05C7A; font-size: 10px; letter-spacing: 1px; margin-left: 2px; }
+.bond-hearts { font-style: normal; color: var(--red); font-size: 10px; letter-spacing: 1px; margin-left: 2px; }
 .chain-tag {
   font: 800 10px/1.4 var(--sans);
   color: var(--blue-deep);
@@ -1382,7 +1384,7 @@ input[type="range"]::-moz-range-thumb {
 .acct-yen { font: 700 12px/1.3 var(--en); color: var(--blue-deep); flex: 0 0 auto; min-width: 84px; text-align: right; }
 
 /* ===== v20: 算定クイズ・応援配置 ===== */
-.todo-tag.quiz { background: #EEE6F7; color: #6B4E9B; }
+.todo-tag.quiz { background: var(--blue-pale); color: var(--blue-deep); }
 .quiz-q { font-weight: 700; line-height: 1.6; margin: 4px 0 10px; }
 .quiz-actions { display: flex; gap: 10px; }
 .quiz-actions .btn-cta { flex: 1; }
@@ -1462,9 +1464,9 @@ input[type="range"]::-moz-range-thumb {
 
 /* ===== v25: ペルソナ(人格)+📸現場の一コマ ===== */
 .persona-speech {
-  background: #FBF6EA; border: 1px solid #EAD9B8; border-radius: 12px;
+  background: var(--amber-pale); border: 1px solid var(--edge); border-radius: 12px;
   padding: 10px 14px; margin: 2px 0 12px;
-  font: 600 13.5px/1.65 var(--sans); color: #5A4A2E;
+  font: 600 13.5px/1.65 var(--sans); color: var(--amber);
   display: flex; align-items: center; gap: 9px;
 }
 .persona-speech svg { flex: 0 0 auto; }

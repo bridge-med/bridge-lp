@@ -90,6 +90,11 @@
     chev: '<path d="M9 6l6 6-6 6"/>',
     minus: '<path d="M6 12h12"/>',
     pencil: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M13 7l3 3"/>',
+    door: '<path d="M5 21V4h11v17"/><path d="M16 4l3 1v17l-3-1M13 12v.5"/>',
+    window: '<rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M12 4v16M4 12h16"/>',
+    dice: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 8.5v.5M15.5 8.5v.5M12 12v.5M8.5 15.5v.5M15.5 15.5v.5"/>',
+    box: '<path d="M3 8l9-4 9 4v9l-9 4-9-4z"/><path d="M3 8l9 4 9-4M12 12v9"/>',
+    camera: '<path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
     brain: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3h3V4zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3h-3V4z"/>',
     moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
     briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/>',
@@ -107,7 +112,7 @@
     '📌': 'pin', '📍': 'pin', '🧰': 'toolbox', '🧑‍⚕️': 'doctor', '👨‍⚕️': 'doctor', '👩‍⚕️': 'doctor', '🔊': 'sound', '⚙': 'gear', '⚙️': 'gear', '☀': 'sun', '☀️': 'sun', '🌤': 'sun', '⛅': 'cloud', '☁': 'cloud', '☁️': 'cloud', '🌧': 'rain', '☔': 'rain', '🌦': 'rain', '❄': 'cloud',
     '💇': 'scissors', '💊': 'pill', '🍀': 'clover', '📡': 'radar', '⏰': 'clock', '⏱': 'clock', '🕐': 'clock', '👑': 'crown', '🩹': 'bandage', '❤': 'heart', '❤️': 'heart', '💙': 'heart', '🚩': 'flag', '🔑': 'key', '🚀': 'rocket', '🚚': 'truck',
     '➡': 'arrow', '➡️': 'arrow', '☆': 'star', '★': 'star:fill',
-    '✦': 'star:fill', '✏': 'pencil', '✏️': 'pencil', '🧠': 'brain', '📮': 'chat', '🌱': 'clover', '🫘': 'pill', '🌙': 'moon', '👴': 'person', '👵': 'person', '💼': 'briefcase', '🧑‍🤝‍🧑': 'staff', '🛏': 'bed', '🩻': 'radar', '🧪': 'pill', '🏋': 'run',
+    '✦': 'star:fill', '♥': 'heart:fill', '✏': 'pencil', '✏️': 'pencil', '🥵': 'sun', '🥶': 'cloud', '📤': 'arrow', '🛡': 'med', '🛡️': 'med', '🎗': 'heart', '🎗️': 'heart', '🎊': 'star', '🎉': 'star', '🚪': 'door', '🔗': 'branch', '🏧': 'money', '🍵': 'cafe', '🪟': 'window', '🪧': 'flag', '🕵': 'search', '🕵️': 'search', '🔪': 'alert', '💸': 'money', '⏳': 'clock', '🎲': 'dice', '🗂': 'clipboard', '🧓': 'person', '🏘': 'home', '🙋': 'person', '📦': 'box', '💢': 'alert', '😮‍💨': 'clock', '😮': 'clock', '😊': 'check', '😌': 'check', '🗣': 'chat', '💴': 'money', '👨‍👩‍👧': 'staff', '🧑‍🤝‍🧑': 'staff', '📸': 'camera', '🕹': 'gear', '📵': 'belloff', '🔇': 'belloff', '🧠': 'brain', '📮': 'chat', '🌱': 'clover', '🫘': 'pill', '🌙': 'moon', '👴': 'person', '👵': 'person', '💼': 'briefcase', '🧑‍🤝‍🧑': 'staff', '🛏': 'bed', '🩻': 'radar', '🧪': 'pill', '🏋': 'run',
   };
   function svg(name, cls) {
     if (name && name.indexOf(':') > 0) { const a = name.split(':'); name = a[0]; cls = cls ? cls + ' ' + a[1] : a[1]; }
@@ -121,7 +126,8 @@
     return t.content.firstChild;
   }
   // 絵文字の検出: 記号・絵文字ブロック+異体字セレクタ+ZWJ の連結
-  const RE = /(?:[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2300}-\u{23FF}\u{FE0F}\u{200D}\u{20E3}★☆]|\u{1F3FB}|\u{1F3FC}|\u{1F3FD}|\u{1F3FE}|\u{1F3FF})+/gu;
+  const BASE = '[\\u{1F000}-\\u{1FAFF}\\u{2600}-\\u{27BF}\\u{2B00}-\\u{2BFF}\\u{2300}-\\u{23FF}★☆♥]';
+  const RE = new RegExp(`${BASE}(?:\\u{FE0F}|[\\u{1F3FB}-\\u{1F3FF}])?(?:\\u{200D}${BASE}(?:\\u{FE0F})?)*\\u{20E3}?`, 'gu'); // 1つずつ(★★☆ は3個)
   const SKIP = new Set(['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'CANVAS', 'SVG', 'svg']);
   let sweeping = false;
   function iconFor(seq) {

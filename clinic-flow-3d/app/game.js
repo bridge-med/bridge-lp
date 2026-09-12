@@ -3135,7 +3135,7 @@
 
   // 経営判断の3行(費用/効果/リスク・v92 便AM-8・社長⑥)。数値は既存の算出だけを使い、測れないものは「まだ判定できない」
   function cerHtml(cost, effect, risk) {
-    return `<span class="cer"><b>費用</b><span>${cost || 'なし'}</span></span><span class="cer"><b>効果</b><span>${effect || 'まだ判定できない'}</span></span><span class="cer risk"><b>リスク</b><span>${risk || 'まだ判定できない'}</span></span>`;
+    return `<span class="cer cost"><b>費用</b><span class="num">${cost || 'なし'}</span></span><span class="cer"><b>効果</b><span>${effect || 'まだ判定できない'}</span></span><span class="cer risk"><b>リスク</b><span><i data-ic="alert"></i>${risk || 'まだ判定できない'}</span></span>`;
   }
   function renderShop() {
     const stage = unlockStage();
@@ -3161,7 +3161,7 @@
         </div>
         <div class="shop-btns">
           <button class="mini-btn" data-fire="${key}">−</button>
-          <button class="mini-btn plus" data-buy="${key}">＋ ${yen(shopCost(key))}</button>
+          <button class="mini-btn plus" data-buy="${key}">＋ <span class="num gold">${yen(shopCost(key))}</span></button>
         </div>
       </div>`;
     };
@@ -3475,7 +3475,7 @@
         <div class="rel-info"><b>${def.name}</b> <span class="rel-stars">${stars(r.lv, def.max)}</span>
         <small>${def.effect}${stale !== null ? ` / あと${stale}日で関係が冷える` : ''}</small>
         <small class="rel-desc"${foldAttr('rel')}>${def.desc}</small></div>
-        <button class="mini-btn plus" data-rel="${k}">${r.lv === 0 ? '挨拶に行く' : r.lv < def.max ? '関係を深める' : '定期訪問'} ${yen(def.cost)}</button>
+        <button class="mini-btn plus two" data-rel="${k}"><small>${r.lv === 0 ? '挨拶に行く' : r.lv < def.max ? '関係を深める' : '定期訪問'}</small><span class="num">${yen(def.cost)}</span></button>
       </div>`;
     }).join('');
     const salesTools = $('salesTools');
