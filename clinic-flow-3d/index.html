@@ -89,12 +89,18 @@
     </div>
 
     <div class="staff-strip" id="staffStrip"></div>
+
+    <div class="card todo-card" id="todoCard">
+      <h2 class="card-title">📌 今日やること <small>— 迷ったらここ</small></h2>
+      <div id="todoBody"></div>
+    </div>
+
     <div class="card voice-card" id="voiceCard" hidden>
       <div id="voiceBody"></div>
     </div>
 
     <div class="card receipt-card" id="receiptCard" hidden>
-      <h2 class="card-title">🧾 直近の会計</h2>
+      <div class="card-head"><h2 class="card-title">🧾 直近の会計</h2><span class="card-tools" id="receiptTools"></span></div>
       <div id="receiptBody"></div>
     </div>
 
@@ -106,19 +112,14 @@
 
     <div class="kpi-strip" id="kpiStrip"></div>
 
-    <div class="card todo-card" id="todoCard">
-      <h2 class="card-title">📌 今日やること <small>— 迷ったらここ</small></h2>
-      <div id="todoBody"></div>
-    </div>
-
     <div class="card" id="scheduleCard">
-      <h2 class="card-title">🗓 診療時間 <small>— タップで 終日→午前→休診</small></h2>
+      <div class="card-head"><h2 class="card-title">🗓 診療時間 <small>タップで 終日→午前→休診</small></h2><span class="card-tools" id="scheduleTools"></span></div>
       <div class="sch-row" id="scheduleRow"></div>
       <p class="ctrl-note" id="scheduleNote"></p>
     </div>
 
     <div class="card" id="shopCard">
-      <h2 class="card-title">🧰 スタッフ &amp; 設備 &amp; 大型投資</h2>
+      <div class="card-head"><h2 class="card-title">🧰 スタッフ &amp; 設備 &amp; 大型投資</h2><span class="card-tools" id="shopTools"></span></div>
       <div id="shopList"></div>
       <div class="op-row">
         <button class="op-btn" id="opReserve">📅 予約制 <small>¥50,000</small></button>
@@ -129,7 +130,7 @@
     </div>
 
     <div class="card" id="policyCard">
-      <h2 class="card-title">🩺 診療方針 <small>— 医学的必要性が前提</small></h2>
+      <div class="card-head"><h2 class="card-title">🩺 診療方針 <small>医学的必要性が前提</small></h2><span class="card-tools" id="policyTools"></span></div>
       <div class="ctrl-grid">
         <label class="ctrl">
           <span class="ctrl-head">診察時間(平均) <b id="vExamMean">6分</b></span>
@@ -165,12 +166,12 @@
     </div>
 
     <div class="card" id="jihiCard">
-      <h2 class="card-title">💰 自費メニュー <small>— 価格を自分で決める領域</small></h2>
+      <div class="card-head"><h2 class="card-title">💰 自費メニュー <small>価格を自分で決める領域</small></h2><span class="card-tools" id="jihiTools"></span></div>
       <div id="jihiList"></div>
     </div>
 
     <div class="card" id="itemCard">
-      <h2 class="card-title">🪙 アイテム &amp; プレミアム施設</h2>
+      <div class="card-head"><h2 class="card-title">🪙 アイテム &amp; プレミアム施設</h2><span class="card-tools" id="itemTools"></span></div>
       <div id="itemList"></div>
     </div>
   </section>
@@ -195,7 +196,7 @@
     </div>
 
     <div class="card" id="salesCard">
-      <h2 class="card-title">🤝 営業先と関係レベル <small>— 30日放置で冷める</small></h2>
+      <div class="card-head has-tool"><h2 class="card-title">🤝 営業先と関係レベル <small>30日放置で冷める</small></h2><span class="card-tools" id="salesTools"></span></div>
       <div id="relList"></div>
     </div>
   </section>
@@ -254,7 +255,7 @@
       <div id="decCardBody"></div>
     </div>
     <div class="card" id="kijunCard">
-      <h2 class="card-title">📋 施設基準・届出</h2>
+      <div class="card-head"><h2 class="card-title">📋 施設基準・届出</h2><span class="card-tools" id="kijunTools"></span></div>
       <div id="kijunBody"></div>
     </div>
 
@@ -264,7 +265,7 @@
     </div>
 
     <div class="card" id="missionCard">
-      <h2 class="card-title">🎯 ミッション <small>— 全19</small></h2>
+      <div class="card-head has-tool"><h2 class="card-title">🎯 ミッション <small>全19</small></h2><span class="card-tools" id="missionTools"></span></div>
       <div id="missionList"></div>
     </div>
 
@@ -311,6 +312,11 @@
   <div class="tut-box gate-box">
     <p class="tut-text" id="gateLead"></p>
     <div id="gateList"></div>
+    <div class="lane-pick">
+      <p class="lane-lead">はじめかたを選ぶ</p>
+      <div class="lane-chips" id="lanePick"></div>
+      <p class="lane-note" id="laneNote"></p>
+    </div>
     <div class="tut-btns"><button class="btn-cta" id="gateGo"></button></div>
   </div>
 </div>

@@ -189,6 +189,23 @@ a { color: var(--blue-deep); }
 .card-title small { font: 500 11px/1.5 var(--sans); color: var(--ink-3); font-weight: 500; }
 .sub-title { font: 800 12.5px/1.4 var(--sans); color: var(--ink-2); margin: 14px 0 8px; }
 
+/* ===== 📖 くわしく(v81 便AJ-2): カード見出し行の右に置く統一部品。1カード1個・44px・新色なし ===== */
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.card-head .card-title { flex: 1 1 auto; min-width: 0; margin-bottom: 0; }
+/* 部品(44px)と題が同じ行を奪い合うと題が句の途中で折返す(375/390 実測)。副題を次行へ落として
+   題そのものは折らない。行数は部品の44pxに収まるので高さは増えない(.kijun-row の折返しの先例)
+   対象は部品(.learn-toggle)が残るカードだけ(v81 便AJ-2 PM裁定B)。畳むものが無くなったカードは
+   ボタンごと外すので、副題は元の行に戻ってよい */
+.card-head.has-tool .card-title small { display: block; }
+.card-tools { flex: 0 0 auto; display: flex; gap: 6px; }
+.mini-btn.learn-toggle { font-weight: 700; padding: 9px 10px; }
+.mini-btn.learn-toggle.on { border-color: rgba(62,124,166,0.45); color: var(--blue-deep); background: var(--blue-pale); }
+.learn-row { display: flex; justify-content: flex-end; margin: 8px 0 4px; }
+[data-learn-fold][hidden] { display: none !important; }
+/* 文中の切り替えリンク(レーンの既定) */
+.link-btn { border: none; background: none; padding: 6px 0; font: 600 11px/1.6 var(--sans); color: var(--blue-deep); text-decoration: underline; }
+.lane-line { text-align: left; }
+
 /* ---------- ステージ ---------- */
 
 .stage-wrap {
@@ -760,6 +777,10 @@ input[type="range"]::-moz-range-thumb {
 }
 .rel-info { display: flex; flex-direction: column; min-width: 0; font: 700 12.5px/1.5 var(--sans); color: var(--ink); }
 .rel-info small { font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); font-weight: 500; }
+.rel-desc { margin-top: 2px; }
+/* 説明を開くと情報側が伸び、nowrap のボタンが最小幅より潰れて横にはみ出す(v81 実測)。
+   ボタンは縮ませない(.dec-log .mini-btn の先例) */
+.rel-row > .mini-btn { flex: 0 0 auto; }
 .rel-stars { color: var(--amber); letter-spacing: 0.1em; font-size: 12px; }
 
 /* ---------- 自費メニュー ---------- */
@@ -922,6 +943,17 @@ input[type="range"]::-moz-range-thumb {
 .gate-box .spec-row small { color: var(--ink-2); } /* 判断の材料になる本文はAAを割らない(v56) */
 .gate-box .choice-row { margin-top: 6px; }
 .gate-box .choice-row small { font-size: 10px; line-height: 1.5; color: var(--ink-2); } /* 判断材料は製品の最小運用10px・AA(designer v66) */
+/* ===== 扉のレーン2択(v81 便AJ-2): 科カードの後に置く小チップ2つ。科の選択と同じ顔にしない
+   (角丸カードのグリッドを2段作らない=第24条)。寸法は .fix-chip 流用・色は既存トークンのみ ===== */
+.lane-pick { margin-top: 12px; }
+.lane-lead { font: 700 11.5px/1.6 var(--sans); color: var(--ink-2); }
+.lane-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.lane-chip { border: 1.5px solid var(--line); background: var(--card); color: var(--ink-2); font: 700 12px/1.3 var(--sans); border-radius: 999px; padding: 9px 14px; min-height: 44px; }
+.lane-chip.on { border-color: var(--blue-deep); background: var(--blue-pale); color: var(--blue-deep); } /* v81 designer: 科カードの選択(blue-pale+左罫)より重くしない。.choice-row.on と同じ流儀 */
+.lane-chip:active { transform: scale(0.97); }
+.lane-note { font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); margin-top: 6px; }
+.lane-note-row { display: block; } /* v81 便AJ-2 PM裁定B: 2レーンの1行を2段で常時表示 */
+.lane-note-row.cur { color: var(--ink-2); }
 #mainLever .pnl-note { text-align: left; }
 @media (prefers-reduced-motion: reduce) { .tut-box { animation: none; } }
 

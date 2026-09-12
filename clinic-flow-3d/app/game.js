@@ -418,7 +418,7 @@
     examMean: 6, pTreat: 0.15, pReha: 0.35, pInj: 0.2, pTrig: 0.12, pPhysio: 0.35,
     selfReha: false, selfRehaPrice: 8000, goods: false,
     prpOn: false, prpPrice: 55000, agaOn: false, agaPrice: 6000,
-    learnMode: false, specialty: 'orthopedics', mainPolicy: null, mainFs: [], mainEquip: null, // mainEquip=他科本院の設備(v73 便AF・眼科の検査設備投資)
+    lane: 'play', specialty: 'orthopedics', mainPolicy: null, mainFs: [], mainEquip: null, // mainEquip=他科本院の設備(v73 便AF・眼科の検査設備投資)
     schedule: ['full', 'full', 'full', 'am', 'full', 'am', 'closed'] // 月〜日
   };
 
@@ -427,7 +427,7 @@
     day: 1, t: 0, speed: 2,
     // Reimbursement Debugger: ?debug=1 で算定詳細に評価トレースを表示
     debugMode: typeof location !== 'undefined' && /[?&]debug=1/.test(location.search),
-    receiptDetailOpen: false,
+    learnOpen: {}, // 「📖 くわしく」の開閉(カードid -> bool。未設定のカードは settings.lane の既定に従う)
     corpOpen: null, // 法人タブで展開中の拠点(索引+1件展開)
     billboard: false,
     relations: {}, // key -> {lv, last}
@@ -564,7 +564,7 @@
           branches: G.branches, depts: G.depts, missionIdx: G.missionIdx, missionDone: G.missionDone,
           tutorialDone: G.tutorialDone, plan: G.plan,
           lastStage: G.lastStage, blackStreak: G.blackStreak,
-          coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone,
+          coins: G.coins, boosts: G.boosts, deco: G.deco, achDone: G.achDone, learnOpen: G.learnOpen,
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
           specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
@@ -590,6 +590,11 @@
       if (typeof SPECIALTIES !== 'undefined') { const mm = SPECIALTIES.get(settings.specialty); for (const k of (mm && mm.main && mm.main.preset && mm.main.preset.jihiHide) || []) settings[k] = false; }
       Object.keys(REL_DEF).forEach((k) => { if (!G.relations[k]) G.relations[k] = { lv: 0, last: 0 }; });
       if (!G.cum) G.cum = { revenue: 0, profit: 0 };
+      // v81 便AJ-2: 旧セーブの 🎓 学習モードを2レーンへ引き継ぐ(learnMode:true → 'learn'、それ以外・無しは 'play')
+      const savedLane = d.settings && d.settings.lane;
+      if (savedLane !== 'play' && savedLane !== 'learn') settings.lane = d.settings && d.settings.learnMode === true ? 'learn' : 'play';
+      delete settings.learnMode;
+      if (!G.learnOpen || typeof G.learnOpen !== 'object') G.learnOpen = {};
       if (d.g.blackStreak === undefined) G.blackStreak = 0;
       // 旧セーブは進行度から解放段階を復元(演出なしで全解放)
       if (d.g.lastStage === undefined) G.lastStage = G.day >= 8 ? 3 : G.day >= 4 ? 2 : 1;
@@ -1948,6 +1953,46 @@
     });
   }
 
+  /* ================= 📖 くわしく(v81 便AJ-2): 説明文を1タップで開く統一部品 =================
+   * レーンで変えるのは説明文の初期状態(開/閉)だけ。カードの有無・名称と数値・タブ構成は両レーンで同じ。
+   * 部品はカード見出し行の右の .mini-btn.learn-toggle(1カード1個)。畳む側の要素には data-learn-fold を付ける。
+   * settings.lane = 'play'(まず動かす) | 'learn'(根拠から読む)。カードごとの開閉は G.learnOpen[cardId] に保存する。 */
+
+  function learnIsOpen(id) {
+    if (G.learnOpen && Object.prototype.hasOwnProperty.call(G.learnOpen, id)) return !!G.learnOpen[id];
+    return settings.lane === 'learn';
+  }
+  // 畳む側の要素に付ける属性。閉じているときは hidden(高さ0)
+  function foldAttr(id) { return ` data-learn-fold="${id}"${learnIsOpen(id) ? '' : ' hidden'}`; }
+  // 見出し行の右に置く統一部品。title は「何が開くか」(第14条)
+  function learnBtn(id, title) {
+    const o = learnIsOpen(id);
+    return `<button class="mini-btn learn-toggle${o ? ' on' : ''}" data-learn="${id}" aria-expanded="${o}"${title ? ` title="${title}"` : ''}>${o ? '📖 とじる' : '📖 くわしく'}</button>`;
+  }
+  function learnRow(id, title) { return `<div class="learn-row">${learnBtn(id, title)}</div>`; }
+  // 開閉を DOM に反映(描画しなおさない側)。ボタンの文言も同時に合わせる
+  function applyLearn() {
+    document.querySelectorAll('[data-learn-fold]').forEach((el) => { el.hidden = !learnIsOpen(el.dataset.learnFold); });
+    document.querySelectorAll('[data-learn]').forEach((b) => {
+      const o = learnIsOpen(b.dataset.learn);
+      b.textContent = o ? '📖 とじる' : '📖 くわしく';
+      b.classList.toggle('on', o);
+      b.setAttribute('aria-expanded', String(o));
+    });
+  }
+  // 中身を描き直さないと出せないカードだけ、再描画関数を登録する
+  const LEARN_RERENDER = {};
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('[data-learn]') : null;
+    if (!b) return;
+    const id = b.dataset.learn;
+    if (!G.learnOpen || typeof G.learnOpen !== 'object') G.learnOpen = {};
+    G.learnOpen[id] = !learnIsOpen(id);
+    save();
+    if (LEARN_RERENDER[id]) LEARN_RERENDER[id]();
+    applyLearn();
+  });
+
   /* ================= 🧾 レセプト表示・加算届出(算定の学び) ================= */
 
   const TYPE_NAMES = { first: '初診', revisit: '再診', rehab: 'リハ再診', checkup: '健診' };
@@ -1959,15 +2004,14 @@
     const r = G.lastReceipt;
     if (!r) { card.hidden = true; return; }
     card.hidden = false;
-    const learn = !!settings.learnMode;
-    const open = KBI && (learn || G.receiptDetailOpen);
+    const open = KBI && learnIsOpen('receipt'); // 算定詳細=このカードの「📖 くわしく」の中(v81 便AJ-2)
 
     // 明細行: KB読込済みかつKB項目の行だけを「実点数(出典あり)」として扱う。
     // それ以外の点数行は教育用概算(KB未読込時は全行が概算表示になる)
     const isKb = (x) => KBI && x.kb;
     const rows = r.rc.map((x) => `<div class="rcpt-row${isKb(x) ? ' kb' : ''}"><span>${x.n}${isKb(x) ? '' : (x.t ? ' <i class="sim-tag">概算</i>' : '')}</span><b>${x.t ? `${x.t.toLocaleString()}点` : yen(x.y)}</b></div>`).join('');
 
-    // 算定詳細(学習モード/トグルで展開): 根拠・未算定とその理由
+    // 算定詳細(「📖 くわしく」で展開): 根拠・未算定とその理由
     let detail = '';
     if (open) {
       const pageOf = (ev) => (ev && ev.page ? String(ev.page).replace(/^PDF\s*/, '') : '');
@@ -1997,25 +2041,30 @@
         ${dwarn.length ? `<p class="kb-cond">dev: ${dwarn.map((w) => w.message).join(' / ')}</p>` : ''}
         <p class="rcpt-note">出典: ${usedDocs.join(' / ') || '令和8年度診療報酬KB'}。「概算」の行はKB未登録の教育用簡略値</p>
         ${G.debugMode && r.kb ? `<pre class="kb-trace">${JSON.stringify(r.kb.trace, null, 1)}</pre>` : ''}
+        <p class="rcpt-note lane-line"><button class="link-btn" id="laneDefaultBtn">${settings.lane === 'learn' ? '押したときだけ開くようにする(まず動かす)' : 'これからも開いたままにする(根拠から読む)'}</button></p>
       </div>`;
     }
 
     el.innerHTML = `
-      <div class="rcpt-head"><span class="rcpt-head-t"><b>${TYPE_NAMES[r.type] || r.type}</b> <small>${SEG_NAMES[r.seg] || ''}の患者さん</small></span>
-        <span class="rcpt-tools">
-          <button class="mini-btn${learn ? ' plus' : ''}" id="learnModeBtn" title="診療報酬の根拠を常に表示">🎓 学習モード${learn ? 'ON' : ''}</button>
-          ${learn || !KBI ? '' : `<button class="mini-btn" id="rcptDetailBtn">${open ? '閉じる' : '📖 算定詳細'}</button>`}
-        </span>
-      </div>
+      <div class="rcpt-head"><span class="rcpt-head-t"><b>${TYPE_NAMES[r.type] || r.type}</b> <small>${SEG_NAMES[r.seg] || ''}の患者さん</small></span></div>
       ${rows}
       <div class="rcpt-row total"><span>合計${r.ten ? `(${r.ten.toLocaleString()}点)` : ''}</span><b>${yen(r.yen)}</b></div>
       ${detail}
       ${open ? '' : `<p class="rcpt-note">1点=10円・全国一律の公定価格${KBI ? '。点数は令和8年度診療報酬KB(告示・通知の一次資料照合済み)に同期' : '(教育用の概算)'}</p>`}`;
-    const lb = $('learnModeBtn');
-    if (lb) lb.addEventListener('click', () => { settings.learnMode = !settings.learnMode; save(); renderReceipt(); });
-    const db = $('rcptDetailBtn');
-    if (db) db.addEventListener('click', () => { G.receiptDetailOpen = !G.receiptDetailOpen; renderReceipt(); });
+    const tools = $('receiptTools');
+    if (tools) tools.innerHTML = KBI ? learnBtn('receipt', '算定の根拠・未算定の理由・出典') : '';
+    // レーンの既定はこの1行で切り替える(設定画面は作らない=第14条)
+    const ld = $('laneDefaultBtn');
+    if (ld) ld.addEventListener('click', () => {
+      settings.lane = settings.lane === 'learn' ? 'play' : 'learn';
+      G.learnOpen = {};
+      save();
+      renderReceipt();
+      applyLearn();
+      toast(settings.lane === 'learn' ? '📖 根拠から読む — 説明は最初から開きます' : '📖 まず動かす — 説明は押したときだけ開きます');
+    });
   }
+  LEARN_RERENDER.receipt = () => renderReceipt();
 
   // 施設基準・届出(運動器リハ以外の加算): 小さな点数も「仕組み」で積み上がる。
   // 点数・区分は令和8年度KBに同期(時間外対応体制加算はR8で改称・4区分。ゲームは3と1の2段を採用)。
@@ -2093,7 +2142,7 @@
            <li>🤝 <b>営業まわり・ターゲット客層</b>(タウン)</li>
            <li>🪙 <b>アイテム・プレミアム施設・実績</b> — コインはミッションと実績で獲得</li>
          </ul>
-         <p class="modal-note">📖 打ち手は詰まっている所に。案内は「今日やること」</p>`
+         ${learnRow('unlock', '打ち手の選びかた')}<p class="modal-note"${foldAttr('unlock')}>📖 打ち手は詰まっている所に。案内は「今日やること」</p>`
       : `<p>Day 8 — ここからが経営の本番です。</p>
          <ul class="unlock-list">
            ${settings.specialty === 'orthopedics' ? '<li>🏃 <b>運動器リハ</b>(PT採用・リハ機器・施設基準の届出)</li>' : '<li>📋 <b>施設基準・届出</b>(経営タブ)</li>'}
@@ -2101,7 +2150,7 @@
            <li>🏢 <b>分院展開</b>(法人タブ)</li>
            ${settings.specialty === 'orthopedics' ? '<li>🪙 <b>自費メニュー</b>(PRP・AGAほか)と<b>大型投資</b>(MRI・DEXA・増築)</li>' : '<li>🪙 <b>自費メニュー</b>と<b>大型投資</b>(増築)</li>'}
          </ul>
-         ${settings.specialty === 'orthopedics' ? '<p class="modal-note">📖 施設基準(専従PT数×面積)で運動器リハビリテーション料の1回単価が¥1,700→¥3,700</p>' : '<p class="modal-note">📖 施設基準カード(経営タブ)で確認できます</p>'}`;
+         ${learnRow('unlock', '施設基準と単価の関係')}${settings.specialty === 'orthopedics' ? `<p class="modal-note"${foldAttr('unlock')}>📖 施設基準(専従PT数×面積)で運動器リハビリテーション料の1回単価が¥1,700→¥3,700</p>` : `<p class="modal-note"${foldAttr('unlock')}>📖 施設基準カード(経営タブ)で確認できます</p>`}`;
     if ($('modal').classList.contains('show')) {
       banner('🔓 新しい打ち手が解放されました。院内・経営タブをチェック');
       return;
@@ -3142,7 +3191,8 @@
       </div>` : `
       ${hide.includes('mri') ? '' : `<div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
-        <span class="shop-hint">MRI検査 1件1,900点=¥19,000(撮影1,330+断層診断450+電子画像管理120)。断層診断450点は同一患者・同一月に1回だけ。維持費¥12,000/日・1日最大8件はゲーム上の設定。導入時に施設基準(様式37)の届出まで整える前提</span>
+        <span class="shop-hint">MRI検査1件1,900点=¥19,000・維持費¥12,000/日</span>
+        <span class="shop-hint"${foldAttr('shop')}>撮影1,330+断層診断450+電子画像管理120 / 断層診断450点は同一患者・同一月に1回 / 1日最大8件はゲーム上の設定 / 導入時に施設基準(様式37)の届出まで整える前提</span>
         ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('advisor', 'normal', 17)} 白瀬「${STAFF_UI.STAFF.advisor.invest.mri}」</span>` : ''}</div>
         ${settings.mri ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="mriBtn">🧲 ${yen(MRI_COST)}</button></div>`}
       </div>`}
@@ -3172,6 +3222,8 @@
           : `<div class="shop-row expand-row done"><div class="shop-info"><span class="shop-name">🏙 別館まで増築済み(診察室6・リハ室150㎡)</span></div></div>`}`;
 
     $('shopList').innerHTML = rows + bigTicket;
+    const shopTools = $('shopTools');
+    if (shopTools) shopTools.innerHTML = learnBtn('shop', '各行の内訳と算定ルール');
     $('shopList').querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
     $('shopList').querySelectorAll('[data-fire]').forEach((b) => b.addEventListener('click', () => fire(b.dataset.fire)));
     const ex = $('expandBtn');
@@ -3423,10 +3475,13 @@
       const stale = r.lv > 0 ? Math.max(0, 30 - (G.day - r.last)) : null;
       return `<div class="rel-row">
         <div class="rel-info"><b>${def.name}</b> <span class="rel-stars">${stars(r.lv, def.max)}</span>
-        <small>${def.effect}${stale !== null ? ` / あと${stale}日で関係が冷える` : ''}</small></div>
+        <small>${def.effect}${stale !== null ? ` / あと${stale}日で関係が冷える` : ''}</small>
+        <small class="rel-desc"${foldAttr('rel')}>${def.desc}</small></div>
         <button class="mini-btn plus" data-rel="${k}">${r.lv === 0 ? '挨拶に行く' : r.lv < def.max ? '関係を深める' : '定期訪問'} ${yen(def.cost)}</button>
       </div>`;
     }).join('');
+    const salesTools = $('salesTools');
+    if (salesTools) salesTools.innerHTML = learnBtn('rel', 'この営業先で何をするか');
     el.querySelectorAll('[data-rel]').forEach((b) => b.addEventListener('click', () => visitRelation(b.dataset.rel)));
   }
 
@@ -4544,14 +4599,14 @@
             const d = (kbPts(REHA_KB_ITEM[k.lv], 0) - kbPts(REHA_KB_ITEM[settings.rehaLevel], 0)) * 2 * rehaMo;
             est = `<br><b>推定月間増収 約${yen(d * 10)}</b>(現在のリハ${rehaMo}回/月ベースの試算・確定収益ではない)`;
           }
-          kbInfo = `<div class="kijun-kb">制度上の要件: ${staffing}${formNo ? ` / 届出: ${formNo}` : ''}${est}</div>`;
+          kbInfo = `<div class="kijun-kb"${foldAttr('kijun')}>制度上の要件: ${staffing}${formNo ? ` / 届出: ${formNo}` : ''}${est}</div>`;
         }
       }
       return `<div class="kijun-row ${active ? 'ok' : ''}">
         <div><b>${k.name}</b> ${badge} — リハ1回(2単位) ${yen(k.fee)}<br><small>ゲーム内要件: ${k.reqText} ${ok ? '✅' : '❌'}</small>${kbInfo}</div>
         ${active ? '' : `<button class="mini-btn ${ok ? 'plus' : ''}" data-kijun="${k.lv}" ${ok ? '' : 'disabled'}>届け出る</button>`}
       </div>`;
-    }).join('') + `<p class="pnl-note">要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。制度上の要件全文はレシートの🎓学習モードで読める。</p>`;
+    }).join('') + `<p class="pnl-note"${foldAttr('kijun')}>要件(専従PT数・面積)を割ると自動降格。分院は分院の専従PTだけで数える。届出→即日適用はゲーム上の簡略化。告示・通知の引用は直近の会計の「📖 くわしく」で読める。</p>`;
     // 他科本院(v67): 施設基準は部門カードと同じ3状態(届け出る/未/届出済み)で描く。運動器リハの段は整形本院だけ(第14条)
     const mainMod = typeof SPECIALTIES !== 'undefined' ? SPECIALTIES.get(settings.specialty) : null;
     const orthoMain = settings.specialty === 'orthopedics' || !mainMod || !mainMod.main;
@@ -4565,6 +4620,8 @@
           ${done ? `<span class="kijun-badge">${k.doneLabel || '届出済'}</span>` : `<button class="mini-btn ${can ? 'plus' : ''}" data-kasan="${k.id}" ${can ? '' : 'disabled'}>${k.verb || '届け出る'}${k.cost ? ` ${yen(k.cost)}` : '(無料)'}</button>`}
         </div>`;
       }).join('');
+    const kijunTools = $('kijunTools');
+    if (kijunTools) kijunTools.innerHTML = learnBtn('kijun', '制度上の要件とゲーム内要件');
     $('kijunBody').querySelectorAll('[data-kijun]').forEach((b) => b.addEventListener('click', () => {
       settings.rehaLevel = Number(b.dataset.kijun);
       toast(`✅ ${REHA_FULL[settings.rehaLevel]}を届け出ました(リハ1回 ${yen(REHA_FEE[settings.rehaLevel])})`);
@@ -4796,9 +4853,11 @@
       const st = i < G.missionIdx ? 'done' : i === G.missionIdx ? 'now' : 'locked';
       return `<div class="mission-row ${st}">
         <span class="mission-mark">${st === 'done' ? '✅' : st === 'now' ? '🎯' : '🔒'}</span>
-        <div><b>${m.title}</b>${st === 'done' ? `<p class="mission-lesson">${m.lesson}</p>` : ''}</div>
+        <div><b>${m.title}</b>${st === 'done' ? `<p class="mission-lesson"${foldAttr('missions')}>${m.lesson}</p>` : ''}</div>
       </div>`;
     }).join('');
+    const missionTools = $('missionTools');
+    if (missionTools) missionTools.innerHTML = learnBtn('missions', 'このミッションの学び');
     $('textbook').innerHTML = TEXTBOOK.map((c) => `<details class="tb-card"><summary>${c.t}</summary><p>${c.b}</p></details>`).join('');
   }
 
@@ -4809,6 +4868,13 @@
   let gateOpen = false;
   let afterGate = null;
   let gatePick = null;
+  // レーン(v81 便AJ-2): 世界の選択ではなく「詳しさ」の設定。科の選択の下に小チップ2つで置く
+  const LANES = [
+    { id: 'play', label: 'まず動かす', note: '点数と金額は見える。制度の説明は開いたときだけ' },
+    { id: 'learn', label: '根拠から読む', note: '点数の根拠と施設基準を最初から開く' }
+  ];
+  const LANE_BACK = 'あとから直近の会計カードで切り替えられる';
+  let lanePick = 'play';
   const GATE = {
     lead1: '前の院長が診てきた患者と、少しの運転資金。あなたはその続きから始める。',
     lead2: 'どの科を継ぐかで、経営の勝負どころが変わる。',
@@ -4833,6 +4899,13 @@
     const pm = cands.find((m) => m.id === gatePick) || cands[0];
     $('gateGo').textContent = GATE.goPick(pm.short || pm.name);
   }
+  function renderLanePick() {
+    const el = $('lanePick');
+    if (!el) return;
+    el.innerHTML = LANES.map((l) => `<button class="lane-chip${l.id === lanePick ? ' on' : ''}" data-lane="${l.id}" aria-pressed="${l.id === lanePick}">${l.label}</button>`).join('');
+    // v81 便AJ-2 PM裁定B: 選択中の1行だけでなく、2レーンの1行を2段で常時表示(選択中=--ink-2・他方=--ink-3)
+    $('laneNote').innerHTML = LANES.map((l) => `<span class="lane-note-row${l.id === lanePick ? ' cur' : ''}">${l.note}</span>`).join('') + `<br>${LANE_BACK}`;
+  }
   function openStartGate(onDone) {
     const cands = gateCandidates();
     if (!cands.length) { onDone(); return; }
@@ -4840,6 +4913,8 @@
     gatePick = cands.some((m) => m.id === settings.specialty) ? settings.specialty : cands[0].id;
     $('gateLead').textContent = cands.length === 1 ? GATE.lead1 : GATE.lead1 + GATE.lead2;
     renderGateList(cands);
+    lanePick = settings.lane === 'learn' ? 'learn' : 'play';
+    renderLanePick();
     $('startGate').classList.add('show');
   }
   // 自院を名指しする語を本院の科に合わせる(広告キーワード・称号)。テンプレートは {科名}
@@ -4877,9 +4952,12 @@
   function closeStartGate() {
     if (!gateOpen) return;
     if (!applyMainSpecialty(gatePick)) return;
+    settings.lane = lanePick === 'learn' ? 'learn' : 'play'; // 扉でレーンを確定(以後は直近の会計カードで切り替える)
+    G.learnOpen = {};
     gateOpen = false;
     $('startGate').classList.remove('show');
     save();
+    applyLearn();
     const fn = afterGate; afterGate = null;
     if (fn) fn();
   }
@@ -4888,6 +4966,12 @@
     if (!b || !gateOpen) return;
     gatePick = b.dataset.gate;
     renderGateList(gateCandidates());
+  });
+  $('lanePick').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-lane]');
+    if (!b || !gateOpen) return;
+    lanePick = b.dataset.lane;
+    renderLanePick();
   });
   $('gateGo').addEventListener('click', closeStartGate);
 
@@ -5421,7 +5505,8 @@
       <p class="dec-ask"><b>決めた方針:</b> ${ch.label}</p>
       <div class="dec-preview"><small class="dec-plabel">変わった数字</small>${moneyLine}${stLine}${decLinesHtml(outcome.lines.filter((l) => !l.later && l.k !== 'money' && l.k !== 'slack' && l.k !== 'trust'))}
       ${later.length ? `<small class="dec-plabel">あとで</small>${decLinesHtml(later)}` : ''}</div>
-      <div class="dec-reflect">${entry.reflect.map((r) => `<p>${r}</p>`).join('')}</div>
+      <div class="dec-reflect">${entry.reflect.filter((r) => r !== c.lesson).map((r) => `<p>${r}</p>`).join('')}
+      ${c.lesson ? `${learnRow('dec', 'この判断の学び')}<p class="dec-lesson"${foldAttr('dec')}>${c.lesson}</p>` : ''}</div>
       <div class="tut-btns"><button class="btn-cta" id="decClose">続ける</button></div>`;
     $('decClose').addEventListener('click', closeDecision);
   }
@@ -5588,6 +5673,8 @@
   $('pTrig').value = Math.round(settings.pTrig * 100);
   $('vPPhysio').textContent = `${Math.round(settings.pPhysio * 100)}%`;
   $('pPhysio').value = Math.round(settings.pPhysio * 100);
+
+  applyLearn(); // レーンの既定と保存済みの開閉を DOM へ(v81 便AJ-2)
 
   clinicIso.resize();
   townIso.resize();
