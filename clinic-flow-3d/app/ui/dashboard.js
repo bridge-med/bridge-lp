@@ -59,7 +59,7 @@
     const rows = [];
     const ob = onboard && onboard.row(); // 導入 Day1〜7 の1行(新規セーブだけ・v89)
     if (ob) rows.push(ob);
-    if (m) rows.push({ tag: '🎯', text: m.title, sub: m.prog ? m.prog(h) : '', goto: m.goto || 'mgmt|#missionCard', now: true });
+    if (m) rows.push({ tag: '🎯', text: m.title, sub: m.prog ? m.prog(h) : '', goto: m.goto || 'mgmt|#missionCard', now: !ob }); // 導入行があるときは導入行だけが「今日の本命」(designer v89)
     if (bn.fixes.length) rows.push({ tag: '🔍', text: bn.fixes[0].label, sub: firstSentence(bn.text), goto: `${bn.fixes[0].tab}|${bn.fixes[0].sel}` });
     // 行の識別は番号でなくタグ(🎯/🔍/📅)。番号は詰まりの有無で日ごとに動くため置かない(designer v87)
     const onb = !!(onboard && onboard.active());

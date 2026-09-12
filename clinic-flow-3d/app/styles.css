@@ -981,7 +981,7 @@ input[type="range"]::-moz-range-thumb {
 .td-sub { font: 500 11px/1.5 var(--sans); color: var(--ink-2); }
 .td-go { flex: 0 0 auto; font: 800 16px/1 var(--en); color: var(--blue-deep); }
 .td-row.td-req { cursor: default; }
-.td-row.done { border-color: rgba(49,116,95,0.35); background: var(--green-pale); }
+.td-row.done { border-color: var(--line); background: var(--card); opacity: 0.85; } /* 達成は ✅ だけで示す。緑地は使わない(designer v89・第22条) */
 .onb-list { margin: 0; padding-left: 1.4em; display: grid; gap: 6px; }
 .onb-list li { font: 500 12.5px/1.5 var(--sans); color: var(--ink-2); }
 .onb-list li b { color: var(--blue-deep); margin-right: 4px; }
