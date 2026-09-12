@@ -3019,7 +3019,7 @@
     return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
   }
 
-  const UI_ONBOARD_I = UI_ONBOARD.create({ G });
+  const UI_ONBOARD_I = UI_ONBOARD.create({ G, renderTodo: () => renderTodo() });
   const UI_DASH_I = UI_DASH.create({
     $, yen, yenShort, G, MISSIONS, WEEKDAYS, onboard: UI_ONBOARD_I, TEXTBOOK, learnBtn, foldAttr, applyLearn, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND,
     enforceSpeedPass: () => { if (typeof enforceSpeedPass === 'function') enforceSpeedPass(); },
