@@ -325,6 +325,7 @@ a { color: var(--blue-deep); }
 .ctrl { display: flex; flex-direction: column; gap: 5px; }
 .ctrl-head { font: 600 12.5px/1.5 var(--sans); color: var(--ink-2); }
 .ctrl-head b { color: var(--blue-deep); font-weight: 800; margin-left: 4px; }
+.branch-card .ctrl-grid .ctrl-head b { display: block; margin-left: 0; } /* 分院の操作パネル: 見出しと値を常に2段に揃える(正式名称で折れる見出しと折れない見出しの非対称を無くす。v83 便AK designer) */
 .ctrl-note { font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); }
 
 input[type="range"] {
@@ -943,6 +944,7 @@ input[type="range"]::-moz-range-thumb {
 .gate-box .spec-row small { color: var(--ink-2); } /* 判断の材料になる本文はAAを割らない(v56) */
 .gate-box .choice-row { margin-top: 6px; }
 .gate-box .choice-row small { font-size: 10px; line-height: 1.5; color: var(--ink-2); } /* 判断材料は製品の最小運用10px・AA(designer v66) */
+@media (max-width: 360px) { #gateList .choice-row { flex-wrap: wrap; row-gap: 2px; } #gateList .choice-row small { flex: 0 0 100%; } } /* 320px: 科名の幅で1行が折れる科が出るので、4枚とも科名の下に1行を置いて高さを揃える(v82 便AF-3 qa) */
 /* ===== 扉のレーン2択(v81 便AJ-2): 科カードの後に置く小チップ2つ。科の選択と同じ顔にしない
    (角丸カードのグリッドを2段作らない=第24条)。寸法は .fix-chip 流用・色は既存トークンのみ ===== */
 .lane-pick { margin-top: 12px; }
@@ -1149,6 +1151,7 @@ input[type="range"]::-moz-range-thumb {
 
 @media (min-width: 720px) {
   .ctrl-grid { grid-template-columns: repeat(3, 1fr); }
+  .branch-card .ctrl-grid { grid-template-columns: repeat(2, 1fr); } /* 分院の操作パネルは2列: 正式名称の見出し(18字)が3列幅では折れて末尾1字が孤立する(v83 便AK designer) */
   .tabs { top: 108px; }
   .hud { gap: 8px 22px; }
   .hud-val { font-size: 17px; }
@@ -1488,6 +1491,9 @@ input[type="range"]::-moz-range-thumb {
 .choice-row b { flex: 0 0 auto; font: 800 12px/1.4 var(--sans); color: var(--ink); }
 .choice-row.on { border-left-color: var(--blue); background: var(--blue-pale); color: var(--ink); }
 .choice-row.on b { color: var(--blue-deep); }
+.choice-row.has-cap { flex-wrap: wrap; row-gap: 2px; } /* 本院精神科の3択: 目安は行を折り返して末尾に置き、3行とも同じ x に揃える(v82 便AF-3 designer照合) */
+.choice-row.has-cap span { flex: 1 1 0; min-width: 0; } /* 説明は見出しの横に留める(折り返すのは目安だけ) */
+.choice-row.has-cap .dt-cap { flex: 0 0 100%; }
 .spec-open { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; }
 .spec-open small { flex: 1 1 100%; font: 500 10px/1.5 var(--sans); color: var(--ink-3); }
 .spec-open .mini-btn { flex: 0 0 auto; }

@@ -44,9 +44,11 @@
 | フィールド | 内容 |
 |---|---|
 | main | `{ line, order, fsTitle, preset }`。あれば `SPECIALTIES.mainCandidates()` に載り、開始の扉に並ぶ(order 順)。line=扉の1行(16字目安・制度上の事実だけ・手術など後便の機能を約束しない)。fsTitle=経営タブ施設基準カード上段の見出し(既定=「{科名}の施設基準」) |
-| main.preset | `settings`(整形専用レバーのゼロ化など。settings に上書き)/`policy`(settings.mainPolicy の初期値)/`equip`(settings.mainEquip の初期値。無ければ deptDefaults.equip)/`shopHide`(SHOPで出さない項目キー)/`actionHide`(本院では出さない actions の id。例: 眼科の手術)/`relHide`(本院では出さない営業先キー)/`rel`(営業先の name/effect/desc の科別上書き。数値は既定と同じにし文言だけ)/`keywords`(広告キーワード3本。hint の数値は既定と同じ) |
+| `mainExamMean(policy)` / `mainLoyalty(policy)`(任意・v82) | 本院だけが使う導出。`mainExamMean` があると本院の `settings.examMean` を方針から導き、診察時間スライダーを出さない(精神科=通院精神療法の時間区分が唯一の時間レバー)。`mainLoyalty` は本院の再来(定着)に掛ける倍率で、分院の中断率(churnMonthly)から導く。どちらも値はモジュール内の1箇所に置く |
+| main.preset | `settings`(整形専用レバーのゼロ化など。settings に上書き)/`policy`(settings.mainPolicy の初期値)/`equip`(settings.mainEquip の初期値。無ければ deptDefaults.equip)/`shopHide`(SHOPで出さない項目キー)/`actionHide`(本院では出さない actions の id。例: 眼科の手術)/`relHide`(本院では出さない営業先キー)/`rel`(営業先の name/effect/desc の科別上書き。数値は既定と同じにし文言だけ)/`keywords`(広告キーワード3本。hint の数値は既定と同じ)/`shopShow`(その科の本院にだけ出すSHOPの行。既定は出さない。例: 精神科の精神保健福祉士)/`textbook`(キホン集の科別差し替え。index→{t,b}) |
 | pickProfile(rand) | 常連の主病の抽選。本院の常連レコード(G.regulars の mc/wc/lb/fb/pr)に pr を与える |
 | planVisit(p, policy, fs, rand, hasDept, equip) | 1回の来院で何をするかを決める(会計はしない)。`{ report, isFirst, ... }` を返し、部門の runDay と本院の onDischargeDept が同じ経路で `DEPT.evalVisit` へ渡す。乱数を引く順を旧 runDay と同じにして同値をテストで固定する(tests/main-*.test.mjs) |
+| planVisit の第7引数 env(任意・v82) | 1回の来院の決定に日付や枠の情報が要る科だけが受ける `{ day, fits(needMin) }`。精神科は day=加算の年数窓の判定、fits=1日の診察分数の予算に収まるかの判定に使い、収まらない来院は `{ deferred: true, needMin }` を返して以降の乱数を引かない(予算そのものは呼び出し側が持つ)。他科は渡さない |
 | cataractOnVisit(queue, equip, rand, pr) / cataractDay(queue, equip, staff, day, api) / queueLine(q) | 日ごとのキュー(眼科の白内障パイプライン・v74)。来院1回ごとの候補化と、1日の締めの術前→手術(手術日)→術後を、部門の runDay と本院の endDay(`mainSpecialtyDay`)が同じ関数で回す。api=`{ frac, rand, visit(hist, report, label, slot), cost(yen) }`。本院のキューは `G.mainQueue`(部門の dept.queue と同形・保存・科を替えたら空)。本院の初診は分院の一見(acute)に相当させる |
 
 本院側の状態は `settings.specialty / mainPolicy / mainFs / mainEquip` だけ。`mainDeptShim(mod)` がそれらを部門と同じ形(`{policy, fs, staff, equip, pt, isMain}`)に見せるので、`deptLeverHtml`/`deptActionsHtml`/`deptFsHtml`/`[data-dact]` は部門と共用(`deptOf(id)` が本院なら shim を返す)。
