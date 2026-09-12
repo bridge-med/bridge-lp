@@ -76,16 +76,16 @@
 
   <!-- ===== 院内タブ ===== -->
   <section class="tab-panel show" id="tab-clinic">
-    <div class="card todo-card lv1" id="todoCard">
+    <div class="card lv1" id="todoCard">
       <h2 class="card-title">📌 今日の経営</h2>
       <div id="todoBody"></div>
     </div>
-    <div class="card yesterday-card" id="yesterdayCard" hidden>
+    <div class="card lv2 yesterday-card" id="yesterdayCard" hidden>
       <div class="card-head has-tool"><h2 class="card-title" id="yesterdayTitle">📋 昨日の結果</h2><span class="card-tools" id="yesterdayTools"></span></div>
       <div id="yesterdayBody"></div>
     </div>
 
-    <div class="stage-wrap">
+    <div class="stage-wrap lv3">
       <canvas id="clinicStage"></canvas>
       <div class="stage-overlay">
         <div class="stage-badges">
@@ -102,16 +102,16 @@
       <div class="panic" id="panic" hidden>🚨 待合がパンク。椅子と回転(受付・診察)を見直す</div>
     </div>
 
-    <div class="card voice-card" id="voiceCard" hidden>
+    <div class="card lv2 voice-card" id="voiceCard" hidden>
       <div id="voiceBody"></div>
     </div>
 
-    <div class="card receipt-card" id="receiptCard" hidden>
+    <div class="card lv2 receipt-card" id="receiptCard" hidden>
       <div class="card-head"><h2 class="card-title">🧾 直近の会計</h2><span class="card-tools" id="receiptTools"></span></div>
       <div id="receiptBody"></div>
     </div>
 
-    <div class="card pulse-card" id="pulseCard">
+    <div class="card lv2 pulse-card" id="pulseCard">
       <h2 class="card-title">📈 ライブモニター <small>— 患者はタップで声かけ</small></h2>
       <canvas id="pulseChart" height="110"></canvas>
       <div class="pulse-legend" id="pulseLegend"></div>
@@ -119,13 +119,13 @@
 
     <div class="kpi-strip" id="kpiStrip"></div>
 
-    <div class="card" id="scheduleCard">
+    <div class="card lv2" id="scheduleCard">
       <div class="card-head"><h2 class="card-title">🗓 診療時間 <small>タップで 終日→午前→休診</small></h2><span class="card-tools" id="scheduleTools"></span></div>
       <div class="sch-row" id="scheduleRow"></div>
       <p class="ctrl-note" id="scheduleNote"></p>
     </div>
 
-    <div class="card" id="shopCard">
+    <div class="card lv2" id="shopCard">
       <div class="card-head"><h2 class="card-title">🧰 院内の打ち手 <small>受付・椅子・設備</small></h2><span class="card-tools" id="shopTools"></span></div>
       <div id="shopList"></div>
       <div class="op-row">
@@ -136,7 +136,7 @@
       </div>
     </div>
 
-    <div class="card" id="policyCard">
+    <div class="card lv2" id="policyCard">
       <div class="card-head"><h2 class="card-title">🩺 診療方針 <small>医学的必要性が前提</small></h2><span class="card-tools" id="policyTools"></span></div>
       <div class="ctrl-grid">
         <label class="ctrl">
@@ -177,7 +177,7 @@
   <!-- ===== スタッフタブ(v88 便AM-4) ===== -->
   <section class="tab-panel" id="tab-staff">
     <div class="staff-strip" id="staffStrip"></div>
-    <div class="card" id="hireCard">
+    <div class="card lv1" id="hireCard">
       <div class="card-head"><h2 class="card-title">🧑‍⚕️ 採用 <small>医師・看護師・PT・助手</small></h2><span class="card-tools" id="hireTools"></span></div>
       <div id="hireList"></div>
     </div>
@@ -185,7 +185,7 @@
 
   <!-- ===== タウンタブ ===== -->
   <section class="tab-panel" id="tab-town">
-    <div class="stage-wrap">
+    <div class="stage-wrap lv3">
       <canvas id="townStage"></canvas>
       <div class="stage-overlay">
         <div class="stage-badges"><span class="badge">🏢 建物をタップすると営業アクション</span><span class="badge" id="hcLegend" hidden>🚗 藍の線=本日の訪問ルート(実線=済・点線=これから)</span></div>
@@ -195,22 +195,22 @@
       </div>
     </div>
 
-    <div class="card" id="marketingCard">
+    <div class="card lv1" id="salesCard">
+      <div class="card-head has-tool"><h2 class="card-title">🤝 営業先と関係レベル <small>30日放置で冷める</small></h2><span class="card-tools" id="salesTools"></span></div>
+      <div id="relList"></div>
+    </div>
+
+    <div class="card lv2" id="marketingCard">
       <h2 class="card-title">📣 集患戦略 <small>— CPAをLTVと比べる</small></h2>
       <div id="adTarget"></div>
       <div id="adsList"></div>
       <div class="ad-summary" id="adSummary"></div>
     </div>
-
-    <div class="card" id="salesCard">
-      <div class="card-head has-tool"><h2 class="card-title">🤝 営業先と関係レベル <small>30日放置で冷める</small></h2><span class="card-tools" id="salesTools"></span></div>
-      <div id="relList"></div>
-    </div>
   </section>
 
   <!-- ===== 経営タブ ===== -->
   <section class="tab-panel" id="tab-mgmt">
-    <div class="card formula" id="formulaCard">
+    <div class="card formula lv3" id="formulaCard">
       <h2 class="card-title">🧭 外来経営の基本式</h2>
       <div class="formula-line">売上 <span>=</span> 患者数 <span>×</span> 診療単価</div>
       <div class="formula-sub">
@@ -220,75 +220,105 @@
       </div>
     </div>
 
-    <div class="card" id="plannerCard">
-      <h2 class="card-title">📝 事業計画 <small>— 30日ごとにレビュー</small></h2>
-      <div id="plannerBody"></div>
+    <div class="card lv2 fold" id="plannerCard">
+      <button class="fold-head" aria-expanded="false"><b>📝 事業計画</b><small>30日ごとにレビュー</small><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <h2 class="card-title">📝 事業計画 <small>— 30日ごとにレビュー</small></h2>
+        <div id="plannerBody"></div>
+      </div>
     </div>
 
-    <div class="card" id="bankCard">
-      <h2 class="card-title">🏦 銀行 <small>— 金利は計画の質で決まる</small></h2>
-      <div id="bankBody"></div>
+    <div class="card lv2 fold" id="bankCard">
+      <button class="fold-head" aria-expanded="false"><b>🏦 銀行</b><small>金利は計画の質で決まる</small><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <h2 class="card-title">🏦 銀行 <small>— 金利は計画の質で決まる</small></h2>
+        <div id="bankBody"></div>
+      </div>
     </div>
 
-    <div class="card" id="pnlCard">
+    <div class="card lv2" id="pnlCard">
       <h2 class="card-title">📊 本日のP&amp;L <small>— 月商(直近30日): <b id="pnlMonth">¥0</b></small></h2>
       <div id="pnlToday"></div>
       <h3 class="sub-title">法人損益の推移(直近14日)</h3>
       <div class="pnl-chart" id="pnlChart"></div>
     </div>
 
-    <div class="card" id="acctCard">
-      <h2 class="card-title">🧾 月間レセプト集計 <small>— 算定項目ランキング(直近30日)</small></h2>
-      <div id="acctBody"></div>
+    <div class="card lv2 fold" id="acctCard">
+      <button class="fold-head" aria-expanded="false"><b>🧾 月間レセプト集計</b><small>算定項目ランキング(直近30日)</small><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <h2 class="card-title">🧾 月間レセプト集計 <small>— 算定項目ランキング(直近30日)</small></h2>
+        <div id="acctBody"></div>
+      </div>
     </div>
 
-    <div class="card" id="decCard">
-      <h2 class="card-title">🔀 経営の分岐点 <small>— 決めた結果は数字と履歴に残る</small></h2>
-      <div id="decCardBody"></div>
+    <div class="card lv2 fold" id="decCard">
+      <button class="fold-head" aria-expanded="false"><b>🔀 経営の分岐点</b><small>決めた結果は数字と履歴に残る</small><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <h2 class="card-title">🔀 経営の分岐点 <small>— 決めた結果は数字と履歴に残る</small></h2>
+        <div id="decCardBody"></div>
+      </div>
     </div>
-    <div class="card" id="kijunCard">
-      <div class="card-head"><h2 class="card-title">📋 施設基準・届出</h2><span class="card-tools" id="kijunTools"></span></div>
-      <div id="kijunBody"></div>
+    <div class="card lv2 fold" id="kijunCard">
+      <button class="fold-head" aria-expanded="false"><b>📋 施設基準・届出</b><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <div class="card-head"><h2 class="card-title">📋 施設基準・届出</h2><span class="card-tools" id="kijunTools"></span></div>
+        <div id="kijunBody"></div>
+      </div>
     </div>
 
-    <div class="card" id="leagueCard">
-      <h2 class="card-title">🏆 地域リーグ <small>— 町→市→県→地方→全国</small></h2>
-      <div id="leagueBody"></div>
+    <div class="card lv2 fold" id="leagueCard">
+      <button class="fold-head" aria-expanded="false"><b>🏆 地域リーグ</b><small>町→市→県→地方→全国</small><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <h2 class="card-title">🏆 地域リーグ <small>— 町→市→県→地方→全国</small></h2>
+        <div id="leagueBody"></div>
+      </div>
     </div>
-    <div class="card" id="corpCard">
-      <h2 class="card-title">🏢 医療法人 — 分院展開 <small>— 専従要件は分院ごと</small></h2>
-      <div id="corpBody"></div>
+    <div class="card lv2 fold" id="corpCard">
+      <button class="fold-head" aria-expanded="false"><b>🏢 医療法人 — 分院展開</b><small>専従要件は分院ごと</small><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <h2 class="card-title">🏢 医療法人 — 分院展開 <small>— 専従要件は分院ごと</small></h2>
+        <div id="corpBody"></div>
+      </div>
     </div>
-    <div class="card" id="investCard">
-      <div class="card-head"><h2 class="card-title">🏗 大型投資 <small>MRI・DEXA・増築</small></h2><span class="card-tools" id="investTools"></span></div>
-      <div id="investList"></div>
+    <div class="card lv2 fold" id="investCard">
+      <button class="fold-head" aria-expanded="false"><b>🏗 大型投資</b><small>MRI・DEXA・増築</small><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <div class="card-head"><h2 class="card-title">🏗 大型投資 <small>MRI・DEXA・増築</small></h2><span class="card-tools" id="investTools"></span></div>
+        <div id="investList"></div>
+      </div>
     </div>
-    <div class="card" id="jihiCard">
-      <div class="card-head"><h2 class="card-title">💰 自費メニュー <small>価格を自分で決める領域</small></h2><span class="card-tools" id="jihiTools"></span></div>
-      <div id="jihiList"></div>
+    <div class="card lv2 fold" id="jihiCard">
+      <button class="fold-head" aria-expanded="false"><b>💰 自費メニュー</b><small>価格を自分で決める領域</small><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <div class="card-head"><h2 class="card-title">💰 自費メニュー <small>価格を自分で決める領域</small></h2><span class="card-tools" id="jihiTools"></span></div>
+        <div id="jihiList"></div>
+      </div>
     </div>
-    <div class="card" id="itemCard">
-      <div class="card-head"><h2 class="card-title">🪙 アイテム &amp; プレミアム施設</h2><span class="card-tools" id="itemTools"></span></div>
-      <div id="itemList"></div>
+    <div class="card lv2 fold" id="itemCard">
+      <button class="fold-head" aria-expanded="false"><b>🪙 アイテム &amp; プレミアム施設</b><i>▸</i></button>
+      <div class="fold-body" hidden>
+        <div class="card-head"><h2 class="card-title">🪙 アイテム &amp; プレミアム施設</h2><span class="card-tools" id="itemTools"></span></div>
+        <div id="itemList"></div>
+      </div>
     </div>
 
   </section>
 
   <!-- ===== 学びタブ(v88 便AM-4) ===== -->
   <section class="tab-panel" id="tab-learn">
-    <div class="card" id="missionCard">
+    <div class="card lv1" id="missionCard">
       <div class="card-head has-tool"><h2 class="card-title">🎯 ミッション <small>全19</small></h2><span class="card-tools" id="missionTools"></span></div>
       <div id="missionList"></div>
     </div>
-    <div class="card" id="achCard">
+    <div class="card lv2" id="achCard">
       <h2 class="card-title">🏅 実績 <small>— 解除で💰資金+🪙コイン</small></h2>
       <div id="achList"></div>
     </div>
-    <div class="card" id="prestigeCard">
+    <div class="card lv2" id="prestigeCard">
       <h2 class="card-title">🏛 殿堂(プレステージ) <small>— 実績を引き継いで2周目へ</small></h2>
       <div id="prestigeBody"></div>
     </div>
-    <div class="card">
+    <div class="card lv3" id="basicsCard">
       <h2 class="card-title">📖 外来経営のキホン集(全20条)</h2>
       <div id="textbook"></div>
     </div>
@@ -363,6 +393,7 @@
 <script src="app/ui/onboarding.js"></script>
 <script src="app/ui/dashboard.js"></script>
 <script src="app/ui/nav.js"></script>
+<script src="app/ui/fold.js"></script>
 <script src="app/game.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

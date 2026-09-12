@@ -1837,7 +1837,7 @@
     evs.forEach((ev) => {
       const ex = x(ev.t);
       ctx.setLineDash([3, 3]);
-      ctx.strokeStyle = 'rgba(201,138,45,0.5)';
+      ctx.strokeStyle = 'rgba(62,124,166,0.5)'; // v93: 打ち手マーカーは .pulse-ev と同じ青
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(ex, 12);
@@ -2283,7 +2283,7 @@
         ].filter(Boolean)
       };
     }
-    return { text: '大きな詰まりはありません。次の一手(集患・単価・新メニュー)を仕込むチャンス', fixes: [] };
+    return { text: '大きな詰まりはありません。次の一手(集患・単価・新メニュー)を仕込むチャンス', fixes: [F('集患の一手を見る', 'town', '#marketingCard')] }; // 行き止まりにしない(v93 designer・第26条)
   }
 
   function bindGoto(root) {
@@ -2293,6 +2293,7 @@
       switchTab(tab);
       const target = document.querySelector(sel);
       if (target) {
+        if (window.UI_FOLD) window.UI_FOLD.reveal(target); // 畳んだカードの中なら開く(v93)
         setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
         target.classList.add('tut-focus');
         setTimeout(() => target.classList.remove('tut-focus'), 2400);
