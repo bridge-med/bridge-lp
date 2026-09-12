@@ -971,7 +971,8 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- v6: 今日やること ---------- */
 
-.todo-card { border-left: 4px solid var(--green); }
+.todo-card { border-left: 4px solid var(--blue); background: var(--blue-pale); } /* Level1=今日の面(藍レール+淡藍地)。緑は依頼色と衝突するため外す(designer v90) */
+.todo-card .td-row { background: var(--card); }
 /* 今日の経営(v87 便AM-3): 1〜3行。各行=目標+進捗+タップ先。行全体が data-goto のボタン */
 .td-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 10px; margin: 6px 0 0; border: 1px solid var(--line); border-radius: 12px; background: var(--card); text-align: left; font: inherit; color: var(--ink); }
 .td-row.now { border-color: rgba(141,97,31,0.45); background: var(--amber-pale); }
@@ -990,6 +991,7 @@ input[type="range"]::-moz-range-thumb {
 .onb-list li.past { opacity: 0.6; }
 .shop-locked { margin: 8px 0 0; font: 600 11.5px/1.5 var(--sans); color: var(--ink-3); }
 .yesterday-card .rs-grid.rs-3 { grid-template-columns: repeat(3, 1fr); }
+.yesterday-card .rs-item > b { font-weight: 700; font-size: 13px; } /* Level2 は今日の行(13px/700)より格上げしない(designer v90) */
 .yesterday-card .rs-more { margin-top: 8px; }
 .td-foot { margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .todo-row { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0; }
