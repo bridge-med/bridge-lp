@@ -165,6 +165,7 @@ a { color: var(--blue-deep); }
 }
 .tab-btn:last-child { margin-right: 0; }
 .tab-btn.on { background: var(--card); color: var(--blue-deep); box-shadow: 0 -4px 12px rgba(62,124,166,0.08); }
+.tab-btn { white-space: nowrap; }
 .tab-btn.locked { color: var(--ink-3); font-weight: 600; } /* 開く前のタブ: 名の代わりに「Day N」(v88) */
 
 /* ---------- レイアウト ---------- */

@@ -205,7 +205,7 @@
     doctor:  { label: '医師を採用', costs: [0, 500000, 800000, 1200000, 2000000, 3000000], day: COSTS.doctorDay, hint: '診察室+1・日給¥80,000(採用費は逓増)' },
     nurse:   { label: '看護師を採用', costs: [120000, 120000, 150000, 180000, 220000, 260000], day: COSTS.nurseDay, hint: '処置ベッド稼働=看護師数・日給¥18,000' },
     pt:      { label: 'PTを採用', costs: [150000, 150000, 180000, 180000, 220000, 220000, 250000, 250000, 300000, 300000, 350000, 350000, 400000, 400000, 450000, 450000, 500000, 550000, 600000, 650000], day: COSTS.ptDay, hint: '施設基準の専従要件・日給¥16,000' },
-    recep:   { label: '受付を増員', costs: [60000, 60000, 80000, 100000], day: COSTS.recepDay, hint: '受付窓口+1・日給¥10,000' },
+    recep:   { label: '受付窓口を増やす', costs: [60000, 60000, 80000, 100000], day: COSTS.recepDay, hint: '受付窓口+1・日給¥10,000' },
     chairs:  { label: '待合椅子を+2脚', costs: null, flat: 40000, step: 2, hint: '' },
     beds:    { label: '処置ベッドを増設', costs: null, flat: 150000, hint: '処置1件+¥1,500・看護師とセット' },
     machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2+助手)・面積要件は増築' },
@@ -2223,7 +2223,7 @@
         text: `待合がパンクして${h.balked}人が帰りました。容量(椅子)と回転(受付・診察)の両面で受け皿を`,
         fixes: [
           F('待合椅子を増やす', 'clinic', '#shopCard'),
-          stage >= 2 ? F('Web問診で受付を短縮', 'clinic', '#shopCard') : F('受付を増員する', 'clinic', '#shopCard'),
+          stage >= 2 ? F('Web問診で受付を短縮', 'clinic', '#shopCard') : F('受付窓口を増やす', 'clinic', '#shopCard'),
           F('予約制で来院を平準化', 'clinic', '#shopCard'),
           stage >= 2 ? F('医師を採用(診察の回転)', 'staff', '#hireCard') : null
         ].filter(Boolean)
@@ -2244,7 +2244,7 @@
         text: `受付が詰まっています(平均待ち${Math.round(h.avgWait)}分)。人を増やす前に、受付の仕事を軽くするのが先`,
         fixes: [
           stage >= 2 ? F('Web問診を導入する', 'clinic', '#shopCard') : null,
-          F('受付を増員する', 'clinic', '#shopCard'),
+          F('受付窓口を増やす', 'clinic', '#shopCard'),
           stage >= 2 ? F('自動精算機を置く', 'clinic', '#shopCard') : null
         ].filter(Boolean)
       };
