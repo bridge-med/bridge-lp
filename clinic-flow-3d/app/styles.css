@@ -284,6 +284,11 @@ a { color: var(--blue-deep); }
 .shop-name { font: 700 13px/1.5 var(--sans); color: var(--ink); }
 .shop-count { color: var(--blue-deep); font-family: var(--en); margin-left: 4px; }
 .shop-hint { font: 500 10.5px/1.5 var(--sans); color: var(--ink-3); }
+.cer { display: flex; gap: 6px; font: 500 10.5px/1.5 var(--sans); color: var(--ink-3); } /* v92: 費用/効果/リスクの3行型(社長⑥) */
+.cer > b { flex: 0 0 3.3em; font-weight: 700; color: var(--ink-2); } /* 「リスク」3字が折れない幅 */
+.cer > span { min-width: 0; }
+.jihi-item .cer { margin-top: -4px; }
+.jihi-item .cer + .cer { margin-top: -6px; }
 .shop-btns { display: flex; gap: 6px; flex: 0 0 auto; }
 
 .mini-btn {
