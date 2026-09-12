@@ -132,6 +132,7 @@
         g.add(dot);
       }
       g.userData.torso = torso;
+      if (this.LK) this.LK.PROPS.blob(g, 0.26);
       if (o.tappable) {
         const hit = new THREE.Mesh(this.geos.hit, this.hitMat);
         hit.position.y = 0.87;
@@ -177,6 +178,8 @@
       document.body.appendChild(ov);
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      this.LK = window.WALK_LOOK || null; // 見た目のモジュール(v96)。無ければ旧描画
+      if (this.LK) this.LK.setupRenderer(this.renderer);
       this.renderer.domElement.className = 'walk-canvas';
       ov.insertBefore(this.renderer.domElement, ov.firstChild);
       this.camera = new THREE.PerspectiveCamera(72, 1, 0.1, 140);
@@ -184,10 +187,13 @@
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xDCEAF2);
       this.scene.fog = new THREE.Fog(0xDCEAF2, 34, 90);
-      const hemi = new THREE.HemisphereLight(0xFFFFFF, 0xCFC4B2, 0.95);
-      const dir = new THREE.DirectionalLight(0xFFF4E0, 0.5);
-      dir.position.set(12, 20, 8);
-      this.scene.add(hemi, dir);
+      if (this.LK) { this.rig = this.LK.lightRig(this.scene); this.renderer.shadowMap.autoUpdate = false; }
+      else {
+        const hemi = new THREE.HemisphereLight(0xFFFFFF, 0xCFC4B2, 0.95);
+        const dir = new THREE.DirectionalLight(0xFFF4E0, 0.5);
+        dir.position.set(12, 20, 8);
+        this.scene.add(hemi, dir);
+      }
       this.staticGroup = new THREE.Group();
       this.staffGroup = new THREE.Group();
       this.patGroup = new THREE.Group();
@@ -267,6 +273,7 @@
       const sky = { sunny: 0xDCEAF2, cloudy: 0xC9D3D9, rain: 0xAEBBC4, heat: 0xF3E9D2, ice: 0xE9EEF3 }[kind] || 0xDCEAF2;
       this.scene.background.setHex(sky);
       this.scene.fog.color.setHex(sky);
+      if (this.LK && this.rig) { this.LK.applyLight(this.rig, this.scene, this.renderer, kind, this.hooks.getHour ? this.hooks.getHour() : 0.4, this.mode === 'clinic'); this.renderer.shadowMap.needsUpdate = true; }
       if (this.wx.points) { this.scene.remove(this.wx.points); this.wx.points = null; }
       if ((kind === 'rain' || kind === 'ice') && this.mode === 'town') {
         const n = kind === 'rain' ? 420 : 300;
@@ -314,7 +321,10 @@
 
     buildStatic() {
       if (this.mode === 'town') this.buildTownStatic();
+      else if (this.LK) this.buildClinicStaticLook();
       else this.buildClinicStatic();
+      if (this.renderer) this.renderer.shadowMap.needsUpdate = true; // 静物の影は建て直しのときだけ焼く
+      this.camera.fov = this.mode === 'town' ? 72 : 65; this.camera.updateProjectionMatrix();
     }
 
     clearScene() {
@@ -621,6 +631,142 @@
       // 入口: 近づくと「街へ出る」
       if (this.town) this.addAnchor(L.DOOR.x + 0.5, L.H - 0.7, { kind: 'door' }, 3.5);
 
+      this.staticSig = this.stateSig();
+    }
+
+    /* ---------- 院内(v96 便AN-3・見た目のモジュール): 天井と壁で閉じ、床材で部屋を示し、什器を形で読ませる ---------- */
+    buildClinicStaticLook() {
+      const L = this.clinic.L;
+      const s = this.clinic.s;
+      const deco = (this.hooks.getDeco && this.hooks.getDeco()) || {};
+      const LK = this.LK, P = LK.PROPS, M = LK.MAT;
+      this.S = 1;
+      this.bounds = { w: L.W, h: L.H };
+      this.ensureGeos();
+      this.clearScene();
+      const G3 = this.staticGroup;
+      const H = 2.7;
+      if (this.rig) LK.fitShadow(this.rig, L.W, L.H, L.W / 2, L.H / 2);
+
+      // 地面(外)・床A(長尺)・床B(木: 待合とリハ室)
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), M.grass());
+      ground.rotation.x = -Math.PI / 2; ground.position.set(L.W / 2, -0.02, L.H / 2); ground.receiveShadow = true; G3.add(ground);
+      const fl = new THREE.Mesh(new THREE.PlaneGeometry(L.W, L.H), M.floor());
+      fl.material.map.repeat.set(L.W / 1.82, L.H / 1.82);
+      fl.rotation.x = -Math.PI / 2; fl.position.set(L.W / 2, 0, L.H / 2); fl.receiveShadow = true; G3.add(fl);
+      for (const z of L.ZONES) {
+        if (!z.need(s) || (z.key !== 'wait' && z.key !== 'reha')) continue;
+        const wz = z.x1 - z.x0 + 1, dz = z.y1 - z.y0 + 1;
+        const pl = new THREE.Mesh(new THREE.PlaneGeometry(wz, dz), M.woodFloor());
+        pl.material.map.repeat.set(wz / 1.8, dz / 1.8);
+        pl.rotation.x = -Math.PI / 2; pl.position.set(z.x0 + wz / 2, 0.006, z.y0 + dz / 2); pl.receiveShadow = true; G3.add(pl);
+      }
+      // 天井(下向き)と照明パネル(0.6×1.2 を 3m 間隔)
+      const ce = new THREE.Mesh(new THREE.PlaneGeometry(L.W, L.H), M.ceiling());
+      ce.material.map.repeat.set(L.W / 1.2, L.H / 1.2);
+      ce.rotation.x = Math.PI / 2; ce.position.set(L.W / 2, H, L.H / 2); G3.add(ce);
+      for (let x = 1.5; x < L.W - 0.6; x += 3) for (let z = 1.2; z < L.H - 0.6; z += 3) P.lightPanel(G3, x, z, 0.6, 1.2, H - 0.02);
+
+      // 外周壁(南面は入口の開口)+巾木
+      const t = 0.14, doorX = L.DOOR.x;
+      P.wallSeg(G3, 0, 0, L.W, 0, H);            // 北
+      P.wallSeg(G3, 0, 0, 0, L.H, H);            // 西
+      P.wallSeg(G3, L.W, 0, L.W, L.H, H);        // 東
+      P.wallSeg(G3, 0, L.H, L.W, L.H, H, { opening: { at: doorX + 0.5, w: 2.2 } }); // 南(入口)
+      P.door(G3, doorX - 0.6, L.H, 2.2);
+      const mat = new THREE.Mesh(new THREE.PlaneGeometry(3, 1.4), M.plastic(0x9AA9B4));
+      mat.rotation.x = -Math.PI / 2; mat.position.set(doorX + 0.5, 0.012, L.H - 0.75); mat.receiveShadow = true; G3.add(mat);
+      // 待合の腰壁(西面)
+      LK.box(G3, 0.07, 0.09, 7, 0.03, 0.81, 5, M.wainscot(), { noCast: true });
+
+      // 部屋(診察室・処置室・リハ室): 間仕切り壁+開口+ガラス帯+壁付けサイン
+      const rooms = L.ZONES.filter((z) => z.need(s) && /^exam|^treat|^reha/.test(z.key));
+      for (const z of rooms) {
+        const x0 = z.x0, x1 = z.x1 + 1, y0 = z.y0, y1 = z.y1 + 1;
+        const isReha = z.key === 'reha';
+        if (!isReha) {
+          // 北は外周。西・東・南(廊下側=開口+ガラス帯)
+          if (x0 > 0) P.wallSeg(G3, x0, y0, x0, y1, H);
+          if (x1 < L.W) P.wallSeg(G3, x1, y0, x1, y1, H);
+          P.wallSeg(G3, x0, y1, x1, y1, H, { opening: { at: (x1 - x0) / 2, w: 1.2 }, glass: true });
+          P.sign(G3, (x0 + x1) / 2, 2.32, y1 + 0.075, z.label, 0.9, 0);
+          this.colliders.push({ x0: x0 - 0.1, z0: y1 - 0.1, x1: (x0 + x1) / 2 - 0.6, z1: y1 + 0.1 }, { x0: (x0 + x1) / 2 + 0.6, z0: y1 - 0.1, x1: x1 + 0.1, z1: y1 + 0.1 });
+          if (x0 > 0) this.colliders.push({ x0: x0 - 0.1, z0: y0, x1: x0 + 0.1, z1: y1 });
+          if (x1 < L.W) this.colliders.push({ x0: x1 - 0.1, z0: y0, x1: x1 + 0.1, z1: y1 });
+        } else {
+          // リハ室: 北(廊下側=開口)と西に壁。ガラス帯で中が見える
+          P.wallSeg(G3, x0, y0, x1, y0, H, { opening: { at: 1.5, w: 1.4 }, glass: true });
+          P.wallSeg(G3, x0, y0, x0, y1, H, { glass: true });
+          P.sign(G3, x0 + 1.5, 2.32, y0 - 0.075, z.label, 0.9, Math.PI);
+          this.colliders.push({ x0: x0 + 2.2, z0: y0 - 0.1, x1: x1, z1: y0 + 0.1 }, { x0: x0 - 0.1, z0: y0, x1: x0 + 0.1, z1: y1 });
+        }
+      }
+      // 受付・会計・待合のサイン(カウンター上に吊る・両面)
+      const hang = (x, z, text) => { P.sign(G3, x, 2.25, z, text, 1.0, 0); P.sign(G3, x, 2.25, z - 0.01, text, 1.0, Math.PI); };
+      const rc = L.RECEP.counter, cc = L.CASH.counter;
+      hang(rc.x + rc.w / 2, rc.y + rc.d + 0.02, '受付');
+      hang(cc.x + cc.w / 2, cc.y + cc.d + 0.02, '会計');
+      const wz = L.ZONES.find((z) => z.key === 'wait');
+      if (wz) hang(wz.x0 + (wz.x1 - wz.x0 + 1) / 2, wz.y0 + 0.3, '待合');
+
+      // 什器
+      const nChairs = Math.min(s.chairs, L.CHAIRS.length);
+      for (let i = 0; i < nChairs; i++) { const c = L.CHAIRS[i]; P.chair(G3, c.x, c.y); }
+      P.counter(G3, rc.x, rc.y, rc.w, rc.d, 0x2C5F82); this.colliders.push({ x0: rc.x - 0.22, z0: rc.y - 0.22, x1: rc.x + rc.w + 0.22, z1: rc.y + rc.d + 0.22 });
+      P.counter(G3, cc.x, cc.y, cc.w, cc.d, 0x7D5A12); this.colliders.push({ x0: cc.x - 0.22, z0: cc.y - 0.22, x1: cc.x + cc.w + 0.22, z1: cc.y + cc.d + 0.22 });
+      if (s.kiosk) { LK.box(G3, L.CASH.kiosk.x + 0.25, 0, L.CASH.kiosk.y + 0.25, 0.5, 1.35, 0.5, M.plastic(0xE6EAEC)); LK.box(G3, L.CASH.kiosk.x + 0.3, 0.95, L.CASH.kiosk.y + 0.22, 0.4, 0.3, 0.03, M.screen(), { noCast: true }); }
+      for (let i = 0; i < Math.min(s.doctors, L.EXAM.length); i++) {
+        const d = L.EXAM[i].desk; const z = rooms.find((r) => r.key === 'exam' + (i + 1));
+        P.desk(G3, d.x, d.y, d.w, d.d); this.colliders.push({ x0: d.x - 0.15, z0: d.y - 0.15, x1: d.x + d.w + 0.15, z1: d.y + d.d + 0.15 });
+        LK.cyl(G3, d.x + d.w / 2, 0, d.y - 0.55, 0.22, 0.45, M.plastic(0x3A4248), true); // 医師の椅子
+        if (z) { P.bed(G3, z.x0 + 0.15, z.y0 + 0.15, 0.8, 1.6); this.colliders.push({ x0: z.x0, z0: z.y0, x1: z.x0 + 1.1, z1: z.y0 + 1.9 }); }
+      }
+      for (let i = 0; i < Math.min(s.beds, L.BEDS.length); i++) {
+        const b = L.BEDS[i].bed;
+        P.bed(G3, b.x, b.y, 1, 1.7); this.colliders.push({ x0: b.x - 0.2, z0: b.y - 0.2, x1: b.x + 1.2, z1: b.y + 1.9 });
+        P.curtain(G3, b.x - 0.05, b.y - 0.15, 1.1, 1.7);
+      }
+      const usable = this.clinic.usableMachines();
+      for (let i = 0; i < Math.min(s.machines, L.MACHINES.length); i++) {
+        const m = L.MACHINES[i].m;
+        P.machine(G3, m.x, m.y, i % 3, i < usable); this.colliders.push({ x0: m.x - 0.2, z0: m.y - 0.2, x1: m.x + 1.2, z1: m.y + 1.2 });
+        if (i >= usable) { const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.56, 24), new THREE.MeshBasicMaterial({ color: 0xA93F36, side: THREE.DoubleSide })); ring.rotation.x = -Math.PI / 2; ring.position.set(m.x + 0.5, 0.014, m.y + 0.5); G3.add(ring); }
+      }
+      P.plant(G3, 0.05, L.H - 1.2); P.plant(G3, L.W - 1.05, 4.05); P.plant(G3, 11.05, L.H - 1.2);
+      P.bin(G3, rc.x + rc.w + 0.1, rc.y + 0.1);
+      P.board(G3, 0.08, 1.6, L.H - 3.2, Math.PI / 2);
+      if (L.DECO) {
+        const names = { cafe: 'カフェ', kids: 'キッズ', signage: 'サイネージ', bus: '送迎バス' };
+        Object.keys(L.DECO).forEach((k) => {
+          if (!deco[k]) return;
+          const d = L.DECO[k];
+          LK.box(G3, d.x, 0, d.y, d.w || 1, 0.9, 1, M.plastic(0xD8C8E8));
+          P.sign(G3, d.x + (d.w || 1) / 2, 1.6, d.y + 1.02, names[k] || d.label, 0.7, 0);
+        });
+      }
+      this.staticGroup.traverse((o) => { if (o.isMesh && o.material && o.material.transparent !== true) o.receiveShadow = true; });
+
+      /* --- スタッフ --- */
+      this.staffByRole = {};
+      const addStaff = (pos, bodyHex, o, tap, role) => {
+        if (tap) (o = o || {}).tappable = true;
+        const f = this.makeFigure(bodyHex, o);
+        f.position.set(pos.x + 0.5, 0, pos.y + 0.5);
+        if (o && o.face !== undefined) f.rotation.y = o.face;
+        this.staffGroup.add(f);
+        if (tap) { f.userData.tap = tap; this.staffTappable.push(f); }
+        if (role && !this.staffByRole[role]) this.staffByRole[role] = f;
+        return f;
+      };
+      const nWin = this.clinic.recepWindows();
+      for (let w = 0; w < nWin; w++) addStaff(L.RECEP.staff[w], 0xE9EFF2, { hair: 0x4A3B2E, dot: 0x2C5F82, face: Math.PI }, { kind: 'staff', staffKind: 'recep' }, w === 0 ? 'front' : null);
+      addStaff(L.CASH.staff, 0xE9EFF2, { hair: 0x3A342C, dot: 0x7D5A12, face: Math.PI }, { kind: 'staff', staffKind: 'cash' }, 'cash');
+      if (s.cashHelper) addStaff({ x: L.CASH.kiosk.x, y: L.CASH.kiosk.y - 0.55 }, 0xE9EFF2, { hair: 0x4A3B2E, dot: 0x7D5A12, face: Math.PI }, { kind: 'staff', staffKind: 'cash' });
+      for (let i = 0; i < Math.min(s.doctors, L.EXAM.length); i++) addStaff(L.EXAM[i].doctor, 0xFAFAF8, { hair: 0x30302E, dot: 0x2C5F82 }, { kind: 'floorstaff', role: 'doctor', idx: i }, i === 0 ? 'doctor' : null);
+      for (let n = 0; n < Math.min(s.nurses, 6); n++) addStaff(L.NURSE_ROW(n), 0xEAF2F0, { hair: 0x4A3B2E, dot: 0xA93F36 }, { kind: 'floorstaff', role: 'nurse', idx: n }, n === 0 ? 'nurse' : null);
+      const ptVis = Math.min(s.pts, L.PT_VIS || 10);
+      for (let n = 0; n < ptVis; n++) addStaff(L.PT_ROW(n), 0x4F6B7A, { hair: 0x3A342C, dot: 0x286B55 }, { kind: 'floorstaff', role: 'pt', idx: n }, n === 0 ? 'pt' : null);
+      if (this.town) this.addAnchor(L.DOOR.x + 0.5, L.H - 0.7, { kind: 'door' }, 3.5);
       this.staticSig = this.stateSig();
     }
 
@@ -1055,6 +1201,7 @@
       this.placePlayer();
       this.active = true;
       this._fn = 0;
+      window.WALK3D_LAST = this; // 検証用の取っ手(qa スクリプトが影や fps を読む)
       this.target = null;
       this._rotateDismissed = false;
       this.ov.style.display = 'block';

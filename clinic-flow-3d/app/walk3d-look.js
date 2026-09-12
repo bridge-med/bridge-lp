@@ -31,11 +31,10 @@
   const TEX = {
     // 長尺ビニル床(60cm 目地・淡いグレージュ)
     floor: () => canvasTex('floor', 256, 256, (c, w, h) => {
-      c.fillStyle = '#E8E3D9'; c.fillRect(0, 0, w, h);
-      noise(c, w, h, 0.05, 900);
-      c.strokeStyle = 'rgba(120,110,95,0.22)'; c.lineWidth = 2;
-      for (let i = 0; i <= 2; i++) { c.beginPath(); c.moveTo(0, i * 128); c.lineTo(w, i * 128); c.stroke(); }
-      for (let i = 0; i <= 4; i++) { c.beginPath(); c.moveTo(i * 64, 0); c.lineTo(i * 64, h); c.stroke(); }
+      c.fillStyle = '#EDEAE3'; c.fillRect(0, 0, w, h);
+      noise(c, w, h, 0.02, 700);
+      c.strokeStyle = 'rgba(0,0,0,0.06)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(0, 0.5); c.lineTo(w, 0.5); c.moveTo(0.5, 0); c.lineTo(0.5, h); c.stroke(); // 継ぎ目(1枚=1.82m)
     }, [1, 1]),
     // ゾーンの床(色つきの長尺)
     floorTint: (hex) => canvasTex('floorTint' + hex, 256, 256, (c, w, h) => {
@@ -46,20 +45,34 @@
       for (let i = 0; i <= 4; i++) { c.beginPath(); c.moveTo(i * 64, 0); c.lineTo(i * 64, h); c.stroke(); }
     }, [1, 1]),
     // 壁(塗装・わずかな粒)
-    wall: () => canvasTex('wall', 128, 128, (c, w, h) => { c.fillStyle = '#F4F1EA'; c.fillRect(0, 0, w, h); noise(c, w, h, 0.035, 300); }, [1, 1]),
+    wall: () => canvasTex('wall', 128, 128, (c, w, h) => { c.fillStyle = '#F2F1EC'; c.fillRect(0, 0, w, h); noise(c, w, h, 0.03, 300); }, [1, 1]),
+    // 木目の床(待合・リハ): 板幅 0.15m × 長さ 1.8m(1枚=1.8m 角)
+    woodFloor: () => canvasTex('woodFloor', 256, 256, (c, w, h) => {
+      c.fillStyle = '#C8A87C'; c.fillRect(0, 0, w, h);
+      const pw = Math.round(256 * 0.15 / 1.8);
+      for (let x = 0; x < w; x += pw) {
+        const shade = (Math.random() - 0.5) * 18;
+        c.fillStyle = `rgb(${200 + shade},${168 + shade},${124 + shade})`; c.fillRect(x, 0, pw, h);
+        c.strokeStyle = 'rgba(0,0,0,0.08)'; c.lineWidth = 1; c.beginPath(); c.moveTo(x + 0.5, 0); c.lineTo(x + 0.5, h); c.stroke();
+        const off = Math.floor(Math.random() * h); c.beginPath(); c.moveTo(x, off + 0.5); c.lineTo(x + pw, off + 0.5); c.stroke();
+      }
+      noise(c, w, h, 0.03, 300);
+    }, [1, 1]),
+    // ブロブ影(人物の足元)
+    blob: () => canvasTex('blob', 64, 64, (c, w, h) => { const g = c.createRadialGradient(32, 32, 4, 32, 32, 30); g.addColorStop(0, 'rgba(0,0,0,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(0, 0, w, h); }),
     // 天井(システム天井 60cm 角)
     ceiling: () => canvasTex('ceiling', 256, 256, (c, w, h) => {
-      c.fillStyle = '#F6F6F3'; c.fillRect(0, 0, w, h);
-      c.strokeStyle = 'rgba(140,140,135,0.35)'; c.lineWidth = 3;
+      c.fillStyle = '#F7F8F8'; c.fillRect(0, 0, w, h);
+      c.strokeStyle = '#DFE3E4'; c.lineWidth = 2;
       for (let i = 0; i <= 2; i++) { c.beginPath(); c.moveTo(0, i * 128); c.lineTo(w, i * 128); c.moveTo(i * 128, 0); c.lineTo(i * 128, h); c.stroke(); }
     }, [1, 1]),
     // 木(カウンター・デスク)
     wood: () => canvasTex('wood', 256, 128, (c, w, h) => {
-      c.fillStyle = '#C9A57A'; c.fillRect(0, 0, w, h);
+      c.fillStyle = '#B99A6B'; c.fillRect(0, 0, w, h);
       for (let y = 0; y < h; y += 3) { c.strokeStyle = `rgba(110,75,40,${0.06 + Math.random() * 0.1})`; c.lineWidth = 1 + Math.random(); c.beginPath(); c.moveTo(0, y + Math.sin(y * 0.3) * 2); c.bezierCurveTo(w * 0.3, y + Math.random() * 3, w * 0.6, y - Math.random() * 3, w, y + Math.sin(y * 0.2) * 2); c.stroke(); }
     }, [1, 1]),
     // 布(椅子)
-    fabric: (hex) => canvasTex('fabric' + hex, 64, 64, (c, w, h) => { c.fillStyle = hex; c.fillRect(0, 0, w, h); noise(c, w, h, 0.09, 260); }, [2, 2]),
+    fabric: (hex) => canvasTex('fabric' + hex, 128, 128, (c, w, h) => { c.fillStyle = hex; c.fillRect(0, 0, w, h); noise(c, w, h, 0.03, 500); }, [1, 1]),
     // アスファルト(街)・芝・歩道
     asphalt: () => canvasTex('asphalt', 128, 128, (c, w, h) => { c.fillStyle = '#8F979D'; c.fillRect(0, 0, w, h); noise(c, w, h, 0.08, 700); }, [1, 1]),
     grass: () => canvasTex('grass', 128, 128, (c, w, h) => { c.fillStyle = '#9DB88F'; c.fillRect(0, 0, w, h); for (let i = 0; i < 900; i++) { c.fillStyle = Math.random() < 0.5 ? 'rgba(70,110,60,0.25)' : 'rgba(190,215,160,0.25)'; c.fillRect(Math.random() * w, Math.random() * h, 1, 2 + Math.random() * 3); } }, [1, 1]),
@@ -76,9 +89,8 @@
     // 壁付けサイン(白地に濃紺の文字)
     sign: (text, opts) => canvasTex('sign|' + text, 512, 128, (c, w, h) => {
       const o = opts || {};
-      c.fillStyle = o.bg || '#FFFFFF'; c.fillRect(0, 0, w, h);
-      c.fillStyle = o.bar || '#2C5F82'; c.fillRect(0, 0, 14, h);
-      c.fillStyle = o.color || '#1B2C36'; c.font = `700 ${o.size || 64}px 'Zen Kaku Gothic New','Noto Sans JP',sans-serif`;
+      c.fillStyle = o.bg || '#2C5F82'; c.fillRect(0, 0, w, h);
+      c.fillStyle = o.color || '#FFFFFF'; c.font = `700 ${o.size || 64}px 'Zen Kaku Gothic New','Noto Sans JP',sans-serif`;
       c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, w / 2 + 7, h / 2 + 2, w - 40);
     }),
   };
@@ -92,21 +104,25 @@
     return m;
   }
   const MAT = {
-    floor: () => mat('floor', { map: TEX.floor(), roughness: 0.55 }),
+    floor: () => mat('floor', { map: TEX.floor(), roughness: 0.75 }),
+    woodFloor: () => mat('woodFloor', { map: TEX.woodFloor(), roughness: 0.8 }),
+    blob: () => mat('blob', { map: TEX.blob(), transparent: true, opacity: 0.28, depthWrite: false }),
     floorTint: (hex) => mat('floorTint' + hex, { map: TEX.floorTint(hex), roughness: 0.55 }),
     wall: () => mat('wall', { map: TEX.wall(), roughness: 0.92 }),
     wallIn: () => mat('wallIn', { color: 0xF7F5F0, roughness: 0.92 }),
     ceiling: () => mat('ceiling', { map: TEX.ceiling(), roughness: 0.95 }),
-    baseboard: () => mat('baseboard', { color: 0xB9B3A6, roughness: 0.7 }),
-    lightPanel: () => mat('lightPanel', { color: 0xFFFFFF, emissive: 0xFFF7E6, emissiveIntensity: 0.9, roughness: 0.4 }),
-    wood: () => mat('wood', { map: TEX.wood(), roughness: 0.5 }),
-    top: () => mat('top', { color: 0xFAFAF7, roughness: 0.35 }),
-    metal: () => mat('metal', { color: 0xB8BEC4, roughness: 0.35, metalness: 0.7 }),
-    darkMetal: () => mat('darkMetal', { color: 0x4A525A, roughness: 0.45, metalness: 0.6 }),
+    baseboard: () => mat('baseboard', { color: 0xD9D4C8, roughness: 0.7 }),
+    wainscot: () => mat('wainscot', { color: 0xDCE4E8, roughness: 0.85 }),
+    lightPanel: () => mat('lightPanel', { color: 0xFFFFFF, emissive: 0xFFFDF5, emissiveIntensity: 0.9, roughness: 0.4 }),
+    wood: () => mat('wood', { color: 0xB99A6B, roughness: 0.8 }), // 箱の UV は面ごとに伸びるので木目は貼らない(色だけ)
+    top: () => mat('top', { color: 0xF6F4EF, roughness: 0.35 }),
+    metal: () => mat('metal', { color: 0xC9CED2, roughness: 0.35, metalness: 0.6 }),
+    darkMetal: () => mat('darkMetal', { color: 0x3A4248, roughness: 0.45, metalness: 0.5 }),
+    bedFrame: () => mat('bedFrame', { color: 0xE8EAEA, roughness: 0.4, metalness: 0.5 }),
     plastic: (hex) => mat('plastic' + hex, { color: hex, roughness: 0.6 }),
     fabric: (hex) => mat('fabric' + hex, { map: TEX.fabric('#' + hex.toString(16).padStart(6, '0')), roughness: 0.95 }),
-    glass: () => mat('glass', { color: 0xBFD8E6, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.35 }),
-    sheet: () => mat('sheet', { color: 0xBFD9CE, roughness: 0.9 }),
+    glass: () => mat('glass', { color: 0xDDE9EE, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.22, depthWrite: false }),
+    sheet: () => mat('sheet', { color: 0xCFE0E6, roughness: 0.9 }),
     white: () => mat('white', { color: 0xFFFFFF, roughness: 0.8 }),
     screen: () => mat('screen', { color: 0x1E2A33, emissive: 0x2A4A63, emissiveIntensity: 0.6, roughness: 0.3 }),
     leaf: () => mat('leaf', { color: 0x5F9A6A, roughness: 0.9 }),
@@ -157,7 +173,7 @@
     // 待合椅子(連結ベンチ型: 座面・背・脚2本・肘)
     chair: (parent, x, z, hex) => {
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
-      const fab = MAT.fabric(hex || 0x4F7C9E);
+      const fab = MAT.fabric(hex || 0x6E8794);
       box(g, 0.12, 0.40, 0.14, 0.76, 0.10, 0.62, fab);          // 座面
       box(g, 0.12, 0.50, 0.66, 0.76, 0.46, 0.10, fab);          // 背
       box(g, 0.16, 0.0, 0.20, 0.06, 0.40, 0.50, MAT.darkMetal(), { noCast: true }); // 脚
@@ -169,7 +185,7 @@
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
       box(g, 0, 0, 0, w, 0.95, d, MAT.wood());
       box(g, -0.04, 0.95, -0.04, w + 0.08, 0.06, d + 0.08, MAT.top());
-      box(g, 0, 1.01, d - 0.12, w, 0.18, 0.12, MAT.plastic(accentHex || 0x2C5F82)); // 患者側の縁(意味色)
+      box(g, 0, 0.98, d - 0.03, w, 0.05, 0.05, MAT.plastic(accentHex || 0x2C5F82)); // 患者側の縁(意味色・細く)
       box(g, 0.35, 1.01, 0.15, 0.42, 0.30, 0.03, MAT.screen(), { noCast: true }); // モニター
       box(g, 0.53, 1.01, 0.18, 0.06, 0.12, 0.08, MAT.darkMetal(), { noCast: true });
       return g;
@@ -188,7 +204,7 @@
     // 処置ベッド(脚+マット+シーツ+枕+カーテンレール)
     bed: (parent, x, z, w, d) => {
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
-      box(g, 0.08, 0, 0.08, w - 0.16, 0.45, d - 0.16, MAT.metal(), { noCast: true });
+      box(g, 0.08, 0, 0.08, w - 0.16, 0.45, d - 0.16, MAT.bedFrame(), { noCast: true });
       box(g, 0, 0.45, 0, w, 0.16, d, MAT.white());
       box(g, 0.05, 0.61, 0.05, w - 0.10, 0.03, d - 0.10, MAT.sheet(), { noCast: true });
       box(g, 0.15, 0.63, 0.10, w - 0.30, 0.10, 0.34, MAT.white(), { noCast: true }); // 枕
@@ -270,6 +286,28 @@
       parent.add(m);
       return m;
     },
+    // 足元のブロブ影(人物用。実影は使わない)
+    blob: (parent, r) => { const m = new T.Mesh(GEO.plane, MAT.blob()); m.rotation.x = -Math.PI / 2; m.position.y = 0.012; const d = (r || 0.25) * 2; m.scale.set(d, d, 1); m.renderOrder = 1; parent.add(m); return m; },
+    // 間仕切り壁(x0,z0)→(x1,z1) 直線・厚 0.12・高 H。opening={at(中心の距離),w} で開口、glass=true で y1.4〜2.1 をガラス帯に
+    wallSeg: (parent, x0, z0, x1, z1, H, o) => {
+      o = o || {}; const th = 0.12; const along = Math.abs(x1 - x0) >= Math.abs(z1 - z0) ? 'x' : 'z';
+      const len = along === 'x' ? Math.abs(x1 - x0) : Math.abs(z1 - z0);
+      const sx = Math.min(x0, x1), sz = Math.min(z0, z1);
+      const seg = (from, to, y0, y1, m) => {
+        if (to - from <= 0.001 || y1 - y0 <= 0.001) return;
+        if (along === 'x') box(parent, sx + from, y0, sz - th / 2, to - from, y1 - y0, th, m);
+        else box(parent, sx - th / 2, y0, sz + from, th, y1 - y0, to - from, m);
+      };
+      const wallM = MAT.wall();
+      const parts = o.opening ? [[0, o.opening.at - o.opening.w / 2], [o.opening.at + o.opening.w / 2, len]] : [[0, len]];
+      for (const [a, b] of parts) {
+        if (o.glass) { seg(a, b, 0, 1.4, wallM); seg(a, b, 2.1, H, wallM); const gl = new T.Mesh(GEO.box, MAT.glass()); if (along === 'x') { gl.scale.set(b - a, 0.7, 0.02); gl.position.set(sx + (a + b) / 2, 1.75, sz); } else { gl.scale.set(0.02, 0.7, b - a); gl.position.set(sx, 1.75, sz + (a + b) / 2); } parent.add(gl); seg(a, b, 1.38, 1.42, MAT.metal()); seg(a, b, 2.08, 2.12, MAT.metal()); }
+        else seg(a, b, 0, H, wallM);
+        seg(a, b, 0, 0.09, MAT.baseboard());
+      }
+      if (o.opening) seg(o.opening.at - o.opening.w / 2, o.opening.at + o.opening.w / 2, 2.1, H, wallM); // 開口の上
+      return { along, len, sx, sz };
+    },
     // ゴミ箱・掲示板・番号表示
     bin: (parent, x, z) => cyl(parent, x + 0.5, 0, z + 0.5, 0.16, 0.55, MAT.plastic(0x8C949B), true),
     board: (parent, x, y, z, rotY) => { const m = new T.Mesh(GEO.plane, MAT.plastic(0xE9E0C8)); m.scale.set(1.2, 0.8, 1); m.position.set(x, y, z); m.rotation.y = rotY || 0; parent.add(m); return m; },
@@ -339,9 +377,9 @@
     sun.shadow.mapSize.set(2048, 2048);
     sun.shadow.bias = -0.0008;
     sun.shadow.normalBias = 0.02;
-    const cam = sun.shadow.camera; cam.near = 1; cam.far = 80; cam.left = -24; cam.right = 24; cam.top = 24; cam.bottom = -24;
+    const cam = sun.shadow.camera; cam.near = 1; cam.far = 60; cam.left = -14; cam.right = 14; cam.top = 14; cam.bottom = -14; cam.updateProjectionMatrix();
     const amb = new T.AmbientLight(0xFFFFFF, 0.18);
-    scene.add(hemi, sun, amb);
+    scene.add(hemi, sun, sun.target, amb); // target をシーンに入れないと向きが効かない
     return { hemi, sun, amb };
   }
   // 天気と時刻(0〜1=朝〜夕)で空・太陽・露出を決める
@@ -351,15 +389,26 @@
     scene.background.setHex(sky); scene.fog.color.setHex(sky);
     const cloudy = kind === 'cloudy' || kind === 'rain' || kind === 'ice';
     const h = hour == null ? 0.4 : hour; // 0=朝 0.5=昼 1=夕
-    const ang = Math.PI * (0.15 + h * 0.7);
-    rig.sun.position.set(Math.cos(ang) * 18, 6 + Math.sin(ang) * 16, 10);
-    rig.sun.intensity = (cloudy ? 0.35 : 0.9) * (indoor ? 0.75 : 1);
-    rig.sun.color.setHex(h > 0.8 ? 0xFFD9B0 : cloudy ? 0xE8EEF2 : 0xFFF3DF);
-    rig.hemi.intensity = cloudy ? 0.7 : 0.55;
-    rig.amb.intensity = indoor ? 0.32 : 0.18;
+    // 仰角 40°(朝)→62°(昼)→15°(夕)。真上からだと影が什器の真下に隠れて読めない
+    const elev = h < 0.5 ? 0.70 + h * 0.7 : 1.05 - (h - 0.5) * 1.6;
+    const az = Math.PI * (0.2 + h * 0.6); // 東→南→西
+    const R = 20, c = rig.center || { x: 10, z: 7 };
+    rig.sun.position.set(c.x + Math.cos(elev) * Math.cos(az) * R, Math.sin(elev) * R, c.z + Math.cos(elev) * Math.sin(az) * R);
+    // 院内は天井照明が主光源=天気で暗くしない(影が読める強さを保つ)。街は天気に従う
+    rig.sun.intensity = indoor ? 0.95 : (cloudy ? 0.35 : 0.9);
+    rig.sun.color.setHex(indoor ? 0xFFF6E8 : h > 0.8 ? 0xFFD9B0 : cloudy ? 0xE8EEF2 : 0xFFF3DF);
+    rig.hemi.intensity = indoor ? 0.5 : cloudy ? 0.7 : 0.55;
+    rig.amb.intensity = indoor ? 0.22 : 0.18;
     renderer.toneMappingExposure = cloudy ? 0.95 : 1.0;
-    rig.sun.target.position.set(10, 0, 7); rig.sun.target.updateMatrixWorld();
+    rig.sun.target.position.set(c.x, 0, c.z); rig.sun.target.updateMatrixWorld();
   }
 
-  root.WALK_LOOK = { TEX, MAT, GEO, box, cyl, PROPS, figure, animateFigure, sitFigure, setupRenderer, lightRig, applyLight };
+  // 影の範囲をシーン(幅 w・奥行 d・中心)に合わせる。建て直しのたびに呼ぶ
+  function fitShadow(rig, w, d, cx, cz) {
+    const cam = rig.sun.shadow.camera; const r = Math.max(w, d) / 2 + 2;
+    cam.left = -r; cam.right = r; cam.top = r; cam.bottom = -r; cam.updateProjectionMatrix();
+    rig.center = { x: cx, z: cz };
+    rig.sun.target.position.set(cx, 0, cz); rig.sun.target.updateMatrixWorld();
+  }
+  root.WALK_LOOK = { fitShadow, TEX, MAT, GEO, box, cyl, PROPS, figure, animateFigure, sitFigure, setupRenderer, lightRig, applyLight };
 })(window);

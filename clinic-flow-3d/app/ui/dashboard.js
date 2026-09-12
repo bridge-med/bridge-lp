@@ -21,16 +21,16 @@
     const ms = ctx.medScoreNow();
     $('hMed').textContent = `${ms.score}`;
     $('hMed').title = `医療(適切な算定)スコア ${ms.score}点 ${ms.grade}(月内・要件どおりの算定 ${ms.proper}/60・判定の保留 ${ms.clean}/20・理解 ${ms.quiz}/20)`;
-    const hm = $('hMedal'); if (hm) hm.textContent = `🪙 ${G.coins || 0}`;
+    const hm = $('hMedal'); if (hm) hm.textContent = `<i data-ic="coin"></i>${G.coins || 0}`;
     const ha = $('hAw'); if (ha) ha.textContent = `${Math.round(G.aw * 100)}%`;
   }
 
   function updateMissionBar() {
     if (!$('missionText')) return; // v87: ミッション帯は廃止(決裁②)。ミッションは「今日の経営」の1行目
     const m = MISSIONS[G.missionIdx];
-    const lap = G.prestige && G.prestige.count > 0 ? `🏛${G.prestige.count + 1}周目 ` : '';
+    const lap = G.prestige && G.prestige.count > 0 ? `<i data-ic="hall"></i>${G.prestige.count + 1}周目 ` : '';
     const vis = MISSIONS.filter(missionApplies);
-    $('missionText').textContent = lap + (m ? `MISSION ${vis.indexOf(m) + 1}/${vis.length}: ${m.title}` : '🏆 全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
+    $('missionText').textContent = lap + (m ? `MISSION ${vis.indexOf(m) + 1}/${vis.length}: ${m.title}` : '<i data-ic="trophy"></i>全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
   }
 
   // 今日の経営(v87 便AM-3): 1〜3行。①ミッション(進捗+タップ先) ②いまの詰まりの打ち手 ③依頼。クイズは末尾のチップ
@@ -48,9 +48,9 @@
     const chState = G.daily && G.daily.chDay === today ? G.daily.chState : '';
     let reqRow;
     if (chDone) {
-      reqRow = `<p>${requestHtml(ch, 20)} — <b class="daily-done">✅ クリア済み</b></p>`;
+      reqRow = `<p>${requestHtml(ch, 20)} — <b class="daily-done"><i data-ic="check"></i>クリア済み</b></p>`;
     } else if (chState === 'ok') {
-      reqRow = `<p>${requestHtml(ch, 20)} — <b class="req-on">📋 受注中(今日の診療で達成を)</b></p>`;
+      reqRow = `<p>${requestHtml(ch, 20)} — <b class="req-on"><i data-ic="clipboard"></i>受注中(今日の診療で達成を)</b></p>`;
     } else if (chState === 'pass') {
       reqRow = `<p class="req-passed">今日はパスしました。${typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : ''}「わかりました、また明日相談しますね」</p>`;
     } else {
@@ -61,13 +61,13 @@
     if (ob) rows.push(ob);
     if (m) rows.push({ tag: '<i data-ic="target"></i>', text: m.title, sub: m.prog ? m.prog(h) : '', goto: m.goto || 'mgmt|#missionCard', now: !ob }); // 導入行があるときは導入行だけが「今日の本命」(designer v89)
     if (bn.fixes.length) rows.push({ tag: '<i data-ic="search"></i>', text: bn.fixes[0].label, sub: firstSentence(bn.text), goto: `${bn.fixes[0].tab}|${bn.fixes[0].sel}` });
-    // 行の識別は番号でなくタグ(🎯/🔍/📅)。番号は詰まりの有無で日ごとに動くため置かない(designer v87)
+    // 行の識別は番号でなくタグ(<i data-ic="target"></i>/<i data-ic="search"></i>/<i data-ic="calendar"></i>)。番号は詰まりの有無で日ごとに動くため置かない(designer v87)
     const onb = !!(onboard && onboard.active());
     const shown = rows.slice(0, onb ? 3 : 2); // 行は最大3(導入中は3・通常は2+依頼)
     const rowHtml = shown.map((r) => `<button class="td-row${r.now ? ' now' : ''}${r.done ? ' done' : ''}" data-goto="${r.goto}"><span class="td-num">${r.tag}</span><span class="td-body"><span class="td-text">${r.text}</span>${r.sub ? `<small class="td-sub">${r.sub}</small>` : ''}</span><span class="td-go">→</span></button>`).join('');
     const reqHtml = `<div class="td-row td-req"><span class="td-num"><i data-ic="calendar"></i></span><div class="td-body"><span class="todo-tag daily">依頼</span><div class="req-body">${reqRow}</div></div></div>`;
     // 導入中(Day1〜7)は依頼とクイズを出さない=1日1つに絞る(文字量・第8条)
-    el.innerHTML = onb ? rowHtml : `${rowHtml}${reqHtml}<div class="td-foot"><span class="todo-tag quiz">🧠 クイズ</span>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</div>`;
+    el.innerHTML = onb ? rowHtml : `${rowHtml}${reqHtml}<div class="td-foot"><span class="todo-tag quiz"><i data-ic="brain"></i>クイズ</span>${G.daily && G.daily.quizDone === today ? '<b class="daily-done"><i data-ic="check"></i>本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(<i data-ic="coin"></i>+1)</button>'}</div>`;
     bindGoto(el);
     const qb = $('quizBtn');
     if (qb) qb.addEventListener('click', () => { SND.click(); showQuizModal(); });
@@ -75,7 +75,7 @@
       G.daily.chDay = today;
       G.daily.chState = b.dataset.chact;
       const name = typeof STAFF_UI !== 'undefined' ? STAFF_UI.STAFF[ch.char].name : 'スタッフ';
-      toast(b.dataset.chact === 'ok' ? `📋 ${name}「ありがとうございます! お願いします!」` : `💬 ${name}「了解です、無理は禁物ですから」`);
+      toast(b.dataset.chact === 'ok' ? `<i data-ic="clipboard"></i>${name}「ありがとうございます! お願いします!」` : `<i data-ic="chat"></i>${name}「了解です、無理は禁物ですから」`);
       renderTodo(); save();
     }));
   }
@@ -102,7 +102,7 @@
       const lr = G.lastResult && G.lastResult.day === h.day ? G.lastResult : null;
       const tb = TEXTBOOK[(h.day - 1) % TEXTBOOK.length];
       const tools = $('yesterdayTools'); if (tools) tools.innerHTML = learnBtn('result', '損益・評判・新患・詰まり・スタッフの声・学び');
-      $('yesterdayTitle').textContent = `📋 昨日の結果 Day ${h.day}(${WEEKDAYS[weekdayOf(h.day)]})`;
+      $('yesterdayTitle').textContent = `<i data-ic="clipboard"></i>昨日の結果 Day ${h.day}(${WEEKDAYS[weekdayOf(h.day)]})`;
       el.innerHTML = `
         <div class="rs-grid rs-3">
           <div class="rs-item"><small>患者数</small><b>${h.patients}人</b>${delta(h.patients, prev ? prev.patients : 0, false, true)}</div>
@@ -116,7 +116,7 @@
             <div class="rs-item"><small>新患</small><b>${h.newCount || 0}人</b>${delta(h.newCount || 0, prev ? prev.newCount || 0 : 0, false, true)}</div>
           </div>
           ${lr && lr.wx && lr.wx.note ? `<div class="rs-bottle">${lr.wx.icon} <b>${lr.wx.label}</b> — ${lr.wx.note}</div>` : ''}
-          ${h.balked ? `<div class="rs-bottle rs-balk">🚪 混雑で <b>${h.balked}人</b> が入口で帰った(機会損失 約${yen(h.balked * 3500)})</div>` : ''}
+          ${h.balked ? `<div class="rs-bottle rs-balk"><i data-ic="door"></i>混雑で <b>${h.balked}人</b> が入口で帰った(機会損失 約${yen(h.balked * 3500)})</div>` : ''}
           <div class="rs-bottle"><i data-ic="search"></i>${bn.text}</div>
           ${st ? `<div class="voice-row rs-voice">${STAFF_UI.faceSVG(dv.char, 'normal', 40)}<div class="voice-txt"><small>${st.title} ${st.name}</small><p>${dv.text}</p></div></div>` : ''}
           ${bn.fixes.length ? `<div class="fix-row">${bn.fixes.map((f) => `<button class="fix-chip" data-goto="${f.tab}|${f.sel}">${f.label} →</button>`).join('')}</div>` : ''}

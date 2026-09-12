@@ -111,7 +111,7 @@
     '🔕': 'belloff', '🔔': 'bell', '👥': 'staff', '👨‍👩‍👧': 'staff', '📚': 'book', '📈': 'trend', '📉': 'trend', '🚗': 'car', '🚑': 'car', '📝': 'note', '⚡': 'bolt', '👁': 'eye', '👁️': 'eye', '🏠': 'home', '💉': 'syringe',
     '📌': 'pin', '📍': 'pin', '🧰': 'toolbox', '🧑‍⚕️': 'doctor', '👨‍⚕️': 'doctor', '👩‍⚕️': 'doctor', '🔊': 'sound', '⚙': 'gear', '⚙️': 'gear', '☀': 'sun', '☀️': 'sun', '🌤': 'sun', '⛅': 'cloud', '☁': 'cloud', '☁️': 'cloud', '🌧': 'rain', '☔': 'rain', '🌦': 'rain', '❄': 'cloud',
     '💇': 'scissors', '💊': 'pill', '🍀': 'clover', '📡': 'radar', '⏰': 'clock', '⏱': 'clock', '🕐': 'clock', '👑': 'crown', '🩹': 'bandage', '❤': 'heart', '❤️': 'heart', '💙': 'heart', '🚩': 'flag', '🔑': 'key', '🚀': 'rocket', '🚚': 'truck',
-    '➡': 'arrow', '➡️': 'arrow', '☆': 'star', '★': 'star:fill',
+    '➡': 'arrow', '➡️': 'arrow', '☆': 'star', '★': 'star:fill', '✓': 'check', '✔': 'check', '✔️': 'check',
     '✦': 'star:fill', '♥': 'heart:fill', '✏': 'pencil', '✏️': 'pencil', '🥵': 'sun', '🥶': 'cloud', '📤': 'arrow', '🛡': 'med', '🛡️': 'med', '🎗': 'heart', '🎗️': 'heart', '🎊': 'star', '🎉': 'star', '🚪': 'door', '🔗': 'branch', '🏧': 'money', '🍵': 'cafe', '🪟': 'window', '🪧': 'flag', '🕵': 'search', '🕵️': 'search', '🔪': 'alert', '💸': 'money', '⏳': 'clock', '🎲': 'dice', '🗂': 'clipboard', '🧓': 'person', '🏘': 'home', '🙋': 'person', '📦': 'box', '💢': 'alert', '😮‍💨': 'clock', '😮': 'clock', '😊': 'check', '😌': 'check', '🗣': 'chat', '💴': 'money', '👨‍👩‍👧': 'staff', '🧑‍🤝‍🧑': 'staff', '📸': 'camera', '🕹': 'gear', '📵': 'belloff', '🔇': 'belloff', '🧠': 'brain', '📮': 'chat', '🌱': 'clover', '🫘': 'pill', '🌙': 'moon', '👴': 'person', '👵': 'person', '💼': 'briefcase', '🧑‍🤝‍🧑': 'staff', '🛏': 'bed', '🩻': 'radar', '🧪': 'pill', '🏋': 'run',
   };
   function svg(name, cls) {
@@ -156,7 +156,7 @@
       if (s[last] === ' ') last += 1;
     }
     if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
-    node.parentNode.replaceChild(frag, node);
+    if (node.parentNode) node.parentNode.replaceChild(frag, node);
   }
   function sweep(rootEl) {
     if (sweeping) return;
@@ -181,8 +181,10 @@
     const mo = new MutationObserver((muts) => {
       if (sweeping) return;
       for (const m of muts) {
-        if (m.type === 'characterData') { if (m.target.parentNode && !SKIP.has(m.target.parentNode.nodeName)) sweepText(m.target); }
-        else for (const n of m.addedNodes) { if (n.nodeType === 3) { if (n.parentNode && !SKIP.has(n.parentNode.nodeName)) sweepText(n); } else if (n.nodeType === 1 && !SKIP.has(n.nodeName)) { mount(n); sweep(n); } }
+        try { // 連続する innerHTML= で古いノードが親を失っていても、次のノードの掃除を止めない(qa v94)
+          if (m.type === 'characterData') { if (m.target.parentNode && !SKIP.has(m.target.parentNode.nodeName)) sweepText(m.target); }
+          else for (const n of m.addedNodes) { try { if (n.nodeType === 3) { if (n.parentNode && !SKIP.has(n.parentNode.nodeName)) sweepText(n); } else if (n.nodeType === 1 && !SKIP.has(n.nodeName) && n.isConnected) { mount(n); sweep(n); } } catch (e) { if (root.console) console.warn('[icons] sweep', e); } }
+        } catch (e) { if (root.console) console.warn('[icons] sweep', e); }
       }
     });
     mo.observe(document.body, { childList: true, subtree: true, characterData: true });
