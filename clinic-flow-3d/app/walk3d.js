@@ -328,7 +328,7 @@
     }
 
     buildStatic() {
-      if (this.mode === 'town') this.buildTownStatic();
+      if (this.mode === 'town') { if (this.LK) this.buildTownStaticLook(); else this.buildTownStatic(); }
       else if (this.LK) this.buildClinicStaticLook();
       else this.buildClinicStatic();
       if (this.renderer) this.renderer.shadowMap.needsUpdate = true; // 静物の影は建て直しのときだけ焼く
@@ -489,12 +489,133 @@
       this.staticSig = this.stateSig();
     }
 
+    /* ---------- 街のシーン(v96 見た目モジュール版) ---------- */
+    buildTownStaticLook() {
+      const LK = this.LK, T = TOWN, THREE_ = THREE;
+      const t = (this.hooks.getTown && this.hooks.getTown()) || {};
+      const S = 2;
+      this.S = S;
+      this.bounds = { w: T.W * S, h: T.H * S };
+      this.ensureGeos();
+      this.clearScene();
+      const G3 = this.staticGroup;
+      const road = (x, y) => T.ROADS.has(`${x},${y}`);
+      if (!this.rig.dome) this.rig.dome = LK.PROPS.skyDome(this.scene, T.W * S / 2, T.H * S / 2);
+
+      // 地面: 芝(全面)
+      const gtex = LK.TEX.grass(); gtex.repeat.set(210, 210);
+      const ground = new THREE_.Mesh(new THREE_.PlaneGeometry(420, 420), LK.MAT.grass());
+      ground.rotation.x = -Math.PI / 2; ground.position.set(T.W * S / 2, -0.02, T.H * S / 2); ground.receiveShadow = true;
+      G3.add(ground);
+
+      // 道路(アスファルト)・歩道(道路に接する側だけ 0.6m・縁石ぶん 0.08m 高い)・中央の破線 — それぞれ1メッシュに束ねる
+      const M4 = new THREE_.Matrix4(), Q = new THREE_.Quaternion(), V = new THREE_.Vector3(), SC = new THREE_.Vector3();
+      const inst = (mat, items) => {
+        if (!items.length) return;
+        const im = new THREE_.InstancedMesh(LK.GEO.box, mat, items.length);
+        items.forEach((it, i) => { V.set(it.x, it.y, it.z); SC.set(it.w, it.h, it.d); M4.compose(V, Q, SC); im.setMatrixAt(i, M4); });
+        im.receiveShadow = true; im.castShadow = false;
+        G3.add(im);
+      };
+      const roads = [], walks = [], lines = [], lamps = [];
+      const CURB = 0.08, SW = 0.6;
+      T.ROADS.forEach((k) => {
+        const [x, y] = k.split(',').map(Number);
+        const x0 = x * S, z0 = y * S;
+        roads.push({ x: x0 + S / 2, y: -0.005, z: z0 + S / 2, w: S, h: 0.02, d: S });
+        // 中央の破線(1タイルに1本 1.4m): 1タイル幅なら中央、2タイル幅なら境界。交差点(四方が道路)には引かない
+        const up = road(x, y - 1), dn = road(x, y + 1), lf = road(x - 1, y), rt = road(x + 1, y);
+        if (lf || rt) {
+          if (!up && !dn) lines.push({ x: x0 + S / 2, y: 0.008, z: z0 + S / 2, w: 1.4, h: 0.01, d: 0.12 });
+          else if (up && !dn) lines.push({ x: x0 + S / 2, y: 0.008, z: z0, w: 1.4, h: 0.01, d: 0.12 });
+        }
+        if (up || dn) {
+          if (!lf && !rt) lines.push({ x: x0 + S / 2, y: 0.008, z: z0 + S / 2, w: 0.12, h: 0.01, d: 1.4 });
+          else if (lf && !rt) lines.push({ x: x0, y: 0.008, z: z0 + S / 2, w: 0.12, h: 0.01, d: 1.4 });
+        }
+        const hz = lf || rt;
+        // 歩道: 隣が道路でない辺に、隣タイル側へ 0.6m
+        if (!up) walks.push({ x: x0 + S / 2, y: CURB / 2, z: z0 - SW / 2, w: S, h: CURB, d: SW });
+        if (!dn) walks.push({ x: x0 + S / 2, y: CURB / 2, z: z0 + S + SW / 2, w: S, h: CURB, d: SW });
+        if (!lf) walks.push({ x: x0 - SW / 2, y: CURB / 2, z: z0 + S / 2, w: SW, h: CURB, d: S });
+        if (!rt) walks.push({ x: x0 + S + SW / 2, y: CURB / 2, z: z0 + S / 2, w: SW, h: CURB, d: S });
+        // 街灯: 横の道路の北側の歩道に 4 タイルおき
+        if (hz && !up && x % 4 === 2) lamps.push({ x: x0 + S / 2, z: z0 - SW / 2, rot: 0 });
+      });
+      // 角の歩道(道路タイルの斜め隣で、上下左右とも道路でない角)を埋める
+      T.ROADS.forEach((k) => {
+        const [x, y] = k.split(',').map(Number);
+        for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+          if (!road(x + dx, y) && !road(x, y + dy) && !road(x + dx, y + dy)) {
+            walks.push({ x: x * S + (dx < 0 ? -SW / 2 : S + SW / 2), y: CURB / 2, z: y * S + (dy < 0 ? -SW / 2 : S + SW / 2), w: SW, h: CURB, d: SW });
+          }
+        }
+      });
+      inst(LK.MAT.asphalt(), roads);
+      inst(LK.MAT.sidewalk(), walks);
+      inst(LK.MAT.roadLine(), lines);
+      for (const l of lamps) { LK.PROPS.lamp(G3, l.x, l.z, l.rot); this.colliders.push({ x0: l.x - 0.25, z0: l.z - 0.25, x1: l.x + 0.25, z1: l.z + 0.25 }); }
+
+      // 建物(本院・分院・営業先・その他): 階数=高さ/3m
+      const buildings = [...T.BUILDINGS, ...((this.town && this.town.branchBuildings) || [])];
+      const clinicName = (this.hooks.getClinicName && this.hooks.getClinicName()) || '';
+      for (const b of buildings) {
+        const bx = b.x * S, bz = b.y * S, bw = b.w * S, bd = b.d * S;
+        const floors = Math.max(1, Math.round(b.h * S * 1.6 / 3));
+        const wallHex = parseInt(b.wall.slice(1), 16), roofHex = parseInt(b.roof.slice(1), 16);
+        const label = b.mine && clinicName ? clinicName : b.label;
+        LK.PROPS.building(G3, bx, bz, bw, bd, floors, wallHex, roofHex, { label });
+        this.colliders.push({ x0: bx - 0.22, z0: bz - 0.22, x1: bx + bw + 0.22, z1: bz + bd + 0.55 });
+        if (b.action || b.mine) {
+          this.addAnchor(bx + bw / 2, bz + bd + 0.9, { kind: 'building', b }, Math.max(6.5, (bw + bd) / 2 + 2.5));
+        }
+      }
+
+      // 住宅(認知の広がる家々)・マンション
+      const HOUSE_HEX = [0xF6F1E6, 0xEFE9DC, 0xF1EDE4, 0xE9EEEA], ROOF_HEX = [0x8C6A4A, 0x6E7F8C, 0x7B5F4E, 0x5E6E78];
+      T.HOUSES.forEach((h, i) => {
+        const hx = h.x * S, hz = h.y * S;
+        if (h.mansion) {
+          const mw = S * 2.0, md = S * 0.9;
+          LK.PROPS.building(G3, hx, hz, mw, md, 3, 0xE8E6E0, 0x9AA0A4, {});
+          this.colliders.push({ x0: hx - 0.22, z0: hz - 0.22, x1: hx + mw + 0.22, z1: hz + md + 0.55 });
+        } else {
+          const w = 2.6, d = 1.5, x0 = hx + S / 2 - w / 2, z0 = hz + S / 2 - d / 2;
+          LK.PROPS.house(G3, x0, z0, w, d, HOUSE_HEX[i % 4], ROOF_HEX[i % 4]);
+          this.colliders.push({ x0: x0 - 0.22, z0: z0 - 0.22, x1: x0 + w + 0.22, z1: z0 + d + 0.22 });
+        }
+      });
+
+      // 樹木(大きさは位置で決める=毎回同じ)
+      T.TREES.forEach((tr, i) => {
+        const tx = tr.x * S + S / 2, tz = tr.y * S + S / 2;
+        LK.PROPS.tree(G3, tx, tz, 0.9 + (i % 3) * 0.2);
+        this.colliders.push({ x0: tx - 0.5, z0: tz - 0.5, x1: tx + 0.5, z1: tz + 0.5 });
+      });
+
+      // 駅前看板(掲出中のみ): 柱+白い板+院名のサイン
+      if (t.billboard) {
+        const bx = T.BILLBOARD.x * S + S / 2, bz = T.BILLBOARD.y * S + S / 2;
+        LK.cyl(G3, bx, 0, bz, 0.09, 2.6, LK.MAT.darkMetal(), true);
+        LK.box(G3, bx - 1.3, 2.55, bz - 0.08, 2.6, 1.5, 0.16, LK.MAT.white());
+        LK.PROPS.sign(G3, bx, 3.3, bz + 0.09, clinicName || 'クリニック', 2.3);
+      }
+
+      if (this.rig) {
+        LK.fitShadow(this.rig, T.W * S, T.H * S, T.W * S / 2, T.H * S / 2);
+        // 街は広いので影の地図を粗くしない: 中心から ±22m だけ焼く(遠くは環境光で見せる)
+        const cam = this.rig.sun.shadow.camera; cam.left = -22; cam.right = 22; cam.top = 22; cam.bottom = -22; cam.updateProjectionMatrix();
+      }
+      this.staticSig = this.stateSig();
+    }
+
     /* ---------- 🚶 街の通行人 ---------- */
     syncWalkers() {
       const walkers = (this.town && this.town.walkers) || [];
       const S = this.S;
       while (this.walkerMeshes.length < walkers.length) {
-        const m = this.makeFigure(0x9AA7B0, {});
+        const i = this.walkerMeshes.length;
+        const m = this.makeFigure(0x9AA7B0, { hair: [0x3A342C, 0x5A4636, 0x2B2B2B, 0x7A6A5A][i % 4], pants: [0x53606A, 0x3F4A55, 0x6E6A62][i % 3] });
         this.patGroup.add(m);
         this.walkerMeshes.push(m);
       }

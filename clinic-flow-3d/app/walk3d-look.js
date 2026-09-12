@@ -24,7 +24,8 @@
   }
   function noise(c, w, h, alpha, n) {
     for (let i = 0; i < n; i++) {
-      c.fillStyle = `rgba(${Math.random() < 0.5 ? 0 : 255},${Math.random() < 0.5 ? 0 : 255},${Math.random() < 0.5 ? 0 : 255},${alpha})`;
+      const v = Math.random() < 0.5 ? 0 : 255;
+      c.fillStyle = `rgba(${v},${v},${v},${alpha})`;
       c.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 2, 1 + Math.random() * 2);
     }
   }
@@ -86,6 +87,31 @@
         c.strokeStyle = 'rgba(60,70,80,0.35)'; c.lineWidth = 1; c.strokeRect(x, y, 16, 18);
       }
     }, [1, 1]),
+    // 建物の外壁: 1枚=1階(3m×3m)。窓2つと階の帯。repeat を (幅/3, 階数) にして貼る
+    facadeFloor: (hex) => canvasTex('facadeFloor' + hex, 256, 256, (c, w, h) => {
+      c.fillStyle = hex; c.fillRect(0, 0, w, h); noise(c, w, h, 0.035, 500);
+      for (const x of [40, 152]) {
+        c.fillStyle = '#7F9DB4'; c.fillRect(x, 68, 64, 116);
+        const g = c.createLinearGradient(x, 68, x + 64, 184); g.addColorStop(0, 'rgba(255,255,255,0.45)'); g.addColorStop(0.5, 'rgba(255,255,255,0.05)'); g.addColorStop(1, 'rgba(40,60,80,0.25)');
+        c.fillStyle = g; c.fillRect(x, 68, 64, 116);
+        c.strokeStyle = '#4A5560'; c.lineWidth = 3; c.strokeRect(x, 68, 64, 116);
+        c.beginPath(); c.moveTo(x + 32, 68); c.lineTo(x + 32, 184); c.stroke(); // 中桟
+        c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(x - 4, 184, 72, 6); // 窓台
+      }
+      c.fillStyle = 'rgba(0,0,0,0.10)'; c.fillRect(0, 248, w, 8); // 階の帯
+    }, [1, 1]),
+    // 住宅の外壁(1面=1枚): 窓1つと玄関
+    houseWall: (hex, door) => canvasTex('houseWall' + hex + (door ? 'd' : ''), 128, 128, (c, w, h) => {
+      c.fillStyle = hex; c.fillRect(0, 0, w, h); noise(c, w, h, 0.05, 250);
+      c.fillStyle = 'rgba(120,150,175,0.85)'; c.fillRect(door ? 14 : 48, 40, 32, 36);
+      c.strokeStyle = 'rgba(60,70,80,0.45)'; c.lineWidth = 2; c.strokeRect(door ? 14 : 48, 40, 32, 36);
+      if (door) { c.fillStyle = '#6E5A44'; c.fillRect(78, 52, 30, 76); c.fillStyle = 'rgba(255,255,255,0.5)'; c.fillRect(98, 88, 4, 4); }
+    }, [1, 1]),
+    // 空: 上→地平のグラデ(天球の内側に貼る)
+    sky: (top, horizon) => canvasTex('sky' + top + horizon, 4, 256, (c, w, h) => {
+      const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, top); g.addColorStop(0.5, top); g.addColorStop(0.88, horizon); g.addColorStop(1, horizon);
+      c.fillStyle = g; c.fillRect(0, 0, w, h);
+    }),
     // 壁付けサイン(白地に濃紺の文字)
     sign: (text, opts) => canvasTex('sign|' + text, 512, 128, (c, w, h) => {
       const o = opts || {};
@@ -133,6 +159,16 @@
     sidewalk: () => mat('sidewalk', { map: TEX.sidewalk(), roughness: 0.9 }),
     facade: (hex) => mat('facade' + hex, { map: TEX.facade('#' + hex.toString(16).padStart(6, '0')), roughness: 0.8 }),
     roof: (hex) => mat('roof' + hex, { color: hex, roughness: 0.9 }),
+    facadeFloor: (hex, rx, ry) => {
+      const key = 'facadeFloor' + hex + '|' + rx.toFixed(1) + '|' + ry;
+      if (matCache.has(key)) return matCache.get(key);
+      const tex = TEX.facadeFloor('#' + hex.toString(16).padStart(6, '0')).clone(); tex.needsUpdate = true; tex.repeat.set(rx, ry);
+      return mat(key, { map: tex, roughness: 0.85 });
+    },
+    houseWall: (hex, door) => mat('houseWall' + hex + (door ? 'd' : ''), { map: TEX.houseWall('#' + hex.toString(16).padStart(6, '0'), door), roughness: 0.9 }),
+    roadLine: () => mat('roadLine', { color: 0xEDEDE6, roughness: 0.9 }),
+    lampHead: () => mat('lampHead', { color: 0xFFF6DC, emissive: 0xFFE9B8, emissiveIntensity: 0.5, roughness: 0.4 }),
+    sky: (top, horizon) => { const key = 'sky' + top + horizon; if (matCache.has(key)) return matCache.get(key); const m = new T.MeshBasicMaterial({ map: TEX.sky(top, horizon), side: T.BackSide, fog: false, depthWrite: false }); matCache.set(key, m); return m; },
     skin: () => mat('skin', { color: 0xF1C9A5, roughness: 0.7 }),
     hair: (hex) => mat('hair' + hex, { color: hex, roughness: 0.8 }),
     cloth: (hex) => mat('cloth' + hex, { color: hex, roughness: 0.9 }),
@@ -148,6 +184,8 @@
     sphere: new T.SphereGeometry(0.5, 14, 12),
     sphereLow: new T.SphereGeometry(0.5, 9, 8),
     plane: new T.PlaneGeometry(1, 1),
+    cone: new T.ConeGeometry(0.5, 1, 9),
+    dome: new T.SphereGeometry(1, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.55),
   };
 
   /* ---------- 箱の部品 ---------- */
@@ -309,6 +347,69 @@
       return { along, len, sx, sz };
     },
     // ゴミ箱・掲示板・番号表示
+    /* ---------- 街の部品 ---------- */
+    // 建物: 階層ファサード(面ごとに repeat を合わせる)+屋根スラブ+入口のくぼみと庇+上端の看板
+    building: (parent, x, z, w, d, floors, hex, roofHex, o) => {
+      o = o || {};
+      const H = floors * 3;
+      const side = MAT.facadeFloor(hex, d / 3, floors), front = MAT.facadeFloor(hex, w / 3, floors), roof = MAT.roof(roofHex);
+      const body = new T.Mesh(GEO.box, [side, side, roof, roof, front, front]);
+      body.scale.set(w, H, d); body.position.set(x + w / 2, H / 2, z + d / 2);
+      body.castShadow = true; body.receiveShadow = true; parent.add(body);
+      box(parent, x - 0.15, H, z - 0.15, w + 0.3, 0.3, d + 0.3, roof); // 屋根スラブ
+      if (floors >= 2) box(parent, x + w * 0.62, H + 0.3, z + d * 0.2, Math.min(2, w * 0.3), 1.1, Math.min(1.6, d * 0.4), MAT.plastic(0xC9CBCB)); // 屋上の機械室
+      // 入口(南面の中央): 枠+ガラス2枚(中桟)+庇
+      const ex = x + w / 2, ew = Math.min(2.2, w * 0.5);
+      box(parent, ex - ew / 2, 0, z + d - 0.02, ew, 2.5, 0.18, MAT.plastic(0x8D959B), { noCast: true }); // 枠
+      box(parent, ex - ew / 2 + 0.1, 0.05, z + d + 0.1, ew - 0.2, 2.3, 0.05, MAT.plastic(0x5C7C92), { noCast: true }); // ガラスの奥行き(暗めの青灰)
+      box(parent, ex - 0.03, 0.05, z + d + 0.15, 0.06, 2.3, 0.02, MAT.white(), { noCast: true }); // 中桟
+      box(parent, ex - ew / 2 - 0.3, 2.55, z + d, ew + 0.6, 0.1, 0.8, MAT.plastic(0x5A6670)); // 庇
+      if (o.label) PROPS.sign(parent, ex, H - 0.7, z + d + 0.02, o.label, Math.min(w - 0.6, 0.62 * o.label.length + 1.2));
+      return body;
+    },
+    // 戸建て: 壁4面(南に玄関)+切妻屋根
+    house: (parent, x, z, w, d, hex, roofHex) => {
+      const wall = MAT.houseWall(hex), door = MAT.houseWall(hex, true);
+      const body = new T.Mesh(GEO.box, [wall, wall, wall, wall, door, wall]);
+      body.scale.set(w, 2.7, d); body.position.set(x + w / 2, 1.35, z + d / 2);
+      body.castShadow = true; body.receiveShadow = true; parent.add(body);
+      const rm = MAT.roof(roofHex), pitch = 0.62, len = Math.hypot(w / 2 + 0.25, 1.05);
+      for (const sgn of [-1, 1]) {
+        const m = new T.Mesh(GEO.box, rm); m.scale.set(len, 0.14, d + 0.5);
+        m.position.set(x + w / 2 + sgn * (w / 4 + 0.05), 2.7 + 0.5, z + d / 2); m.rotation.z = -sgn * pitch;
+        m.castShadow = true; m.receiveShadow = true; parent.add(m);
+      }
+      const gable = new T.Mesh(GEO.box, MAT.plastic(hex)); gable.scale.set(w * 0.98, 1.0, d * 0.98); gable.position.set(x + w / 2, 2.7 + 0.5, z + d / 2); gable.castShadow = true; parent.add(gable);
+      return body;
+    },
+    // 樹木: 幹+葉2〜3段(段ごとに色を変える)
+    tree: (parent, x, z, size) => {
+      const k = size || 1;
+      cyl(parent, x, 0, z, 0.14 * k, 1.4 * k, MAT.trunk(), true);
+      const tiers = k > 1.15 ? 3 : 2;
+      for (let i = 0; i < tiers; i++) {
+        const r = (1.25 - i * 0.32) * k, y = (1.2 + i * 0.75) * k;
+        const m = new T.Mesh(GEO.sphereLow, i % 2 ? MAT.leaf() : MAT.leafDark());
+        m.scale.set(r * 2, r * 1.5, r * 2); m.position.set(x, y + r * 0.6, z);
+        m.castShadow = true; m.receiveShadow = true; parent.add(m);
+      }
+    },
+    // 街灯: 柱4m+腕+灯具
+    lamp: (parent, x, z, rotY) => {
+      const g = new T.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
+      cyl(g, 0, 0, 0, 0.06, 4.0, MAT.darkMetal(), true);
+      box(g, -0.04, 3.85, -0.04, 0.08, 0.08, 0.9, MAT.darkMetal());
+      box(g, -0.14, 3.72, 0.55, 0.28, 0.14, 0.42, MAT.lampHead(), { noCast: true });
+      parent.add(g);
+      return g;
+    },
+    // 天球(内側にグラデ)。街でも院内の窓越しにも見える
+    skyDome: (scene, cx, cz) => {
+      const m = new T.Mesh(GEO.dome, MAT.sky('#8FB6D8', '#DCE8EE'));
+      m.scale.set(120, 120, 120); m.position.set(cx || 0, -2, cz || 0); m.renderOrder = -1;
+      scene.add(m);
+      return m;
+    },
     bin: (parent, x, z) => cyl(parent, x + 0.5, 0, z + 0.5, 0.16, 0.55, MAT.plastic(0x8C949B), true),
     board: (parent, x, y, z, rotY) => { const m = new T.Mesh(GEO.plane, MAT.plastic(0xE9E0C8)); m.scale.set(1.2, 0.8, 1); m.position.set(x, y, z); m.rotation.y = rotY || 0; parent.add(m); return m; },
   };
@@ -383,10 +484,13 @@
     return { hemi, sun, amb };
   }
   // 天気と時刻(0〜1=朝〜夕)で空・太陽・露出を決める
-  const SKY = { sunny: 0xCFE3F1, cloudy: 0xC7D1D8, rain: 0xA9B7C2, heat: 0xEFE6D0, ice: 0xE6ECF2 };
+  const SKY = { sunny: 0xDCE8EE, cloudy: 0xC7D1D8, rain: 0xA9B7C2, heat: 0xEFE6D0, ice: 0xE6ECF2 };
+  const SKY_TOP = { sunny: 0x8FB6D8, cloudy: 0x9CACB8, rain: 0x7E8C99, heat: 0xB6C2CC, ice: 0xB9C8D4 };
+  const hexStr = (n) => '#' + n.toString(16).padStart(6, '0');
   function applyLight(rig, scene, renderer, kind, hour, indoor) {
     const sky = SKY[kind] || SKY.sunny;
     scene.background.setHex(sky); scene.fog.color.setHex(sky);
+    if (rig.dome) rig.dome.material = MAT.sky(hexStr(SKY_TOP[kind] || SKY_TOP.sunny), hexStr(sky));
     const cloudy = kind === 'cloudy' || kind === 'rain' || kind === 'ice';
     const h = hour == null ? 0.4 : hour; // 0=朝 0.5=昼 1=夕
     // 仰角 40°(朝)→62°(昼)→15°(夕)。真上からだと影が什器の真下に隠れて読めない
