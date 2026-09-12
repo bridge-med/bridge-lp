@@ -2,7 +2,7 @@
 (function (root) {
   'use strict';
   function create(ctx) {
-    const { $, yen, yenShort, G, MISSIONS, WEEKDAYS, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND } = ctx;
+    const { $, yen, yenShort, G, MISSIONS, onboard, WEEKDAYS, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND } = ctx;
   function updateHeader() {
     if (G.speed > 4) ctx.enforceSpeedPass();
     const spec = G.daySpec || specOf(G.day);
@@ -57,12 +57,17 @@
       reqRow = `<p>${requestHtml(ch, 20)}</p><div class="fix-row"><button class="fix-chip" data-chact="ok">受ける</button><button class="fix-chip ghost" data-chact="pass">今日はパス</button></div>`;
     }
     const rows = [];
+    const ob = onboard && onboard.row(); // 導入 Day1〜7 の1行(新規セーブだけ・v89)
+    if (ob) rows.push(ob);
     if (m) rows.push({ tag: '🎯', text: m.title, sub: m.prog ? m.prog(h) : '', goto: m.goto || 'mgmt|#missionCard', now: true });
     if (bn.fixes.length) rows.push({ tag: '🔍', text: bn.fixes[0].label, sub: firstSentence(bn.text), goto: `${bn.fixes[0].tab}|${bn.fixes[0].sel}` });
     // 行の識別は番号でなくタグ(🎯/🔍/📅)。番号は詰まりの有無で日ごとに動くため置かない(designer v87)
-    const rowHtml = rows.map((r) => `<button class="td-row${r.now ? ' now' : ''}" data-goto="${r.goto}"><span class="td-num">${r.tag}</span><span class="td-body"><span class="td-text">${r.text}</span>${r.sub ? `<small class="td-sub">${r.sub}</small>` : ''}</span><span class="td-go">→</span></button>`).join('');
+    const onb = !!(onboard && onboard.active());
+    const shown = rows.slice(0, onb ? 3 : 2); // 行は最大3(導入中は3・通常は2+依頼)
+    const rowHtml = shown.map((r) => `<button class="td-row${r.now ? ' now' : ''}${r.done ? ' done' : ''}" data-goto="${r.goto}"><span class="td-num">${r.tag}</span><span class="td-body"><span class="td-text">${r.text}</span>${r.sub ? `<small class="td-sub">${r.sub}</small>` : ''}</span><span class="td-go">→</span></button>`).join('');
     const reqHtml = `<div class="td-row td-req"><span class="td-num">📅</span><div class="td-body"><span class="todo-tag daily">依頼</span><div class="req-body">${reqRow}</div></div></div>`;
-    el.innerHTML = `${rowHtml}${reqHtml}<div class="td-foot"><span class="todo-tag quiz">🧠 クイズ</span>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</div>`;
+    // 導入中(Day1〜7)は依頼とクイズを出さない=1日1つに絞る(文字量・第8条)
+    el.innerHTML = onb ? rowHtml : `${rowHtml}${reqHtml}<div class="td-foot"><span class="todo-tag quiz">🧠 クイズ</span>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</div>`;
     bindGoto(el);
     const qb = $('quizBtn');
     if (qb) qb.addEventListener('click', () => { SND.click(); showQuizModal(); });

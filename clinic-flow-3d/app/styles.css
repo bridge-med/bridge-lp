@@ -981,6 +981,13 @@ input[type="range"]::-moz-range-thumb {
 .td-sub { font: 500 11px/1.5 var(--sans); color: var(--ink-2); }
 .td-go { flex: 0 0 auto; font: 800 16px/1 var(--en); color: var(--blue-deep); }
 .td-row.td-req { cursor: default; }
+.td-row.done { border-color: rgba(49,116,95,0.35); background: var(--green-pale); }
+.onb-list { margin: 0; padding-left: 1.4em; display: grid; gap: 6px; }
+.onb-list li { font: 500 12.5px/1.5 var(--sans); color: var(--ink-2); }
+.onb-list li b { color: var(--blue-deep); margin-right: 4px; }
+.onb-list li small { display: block; color: var(--ink-3); }
+.onb-list li.now { color: var(--ink); font-weight: 700; }
+.onb-list li.past { opacity: 0.6; }
 .shop-locked { margin: 8px 0 0; font: 600 11.5px/1.5 var(--sans); color: var(--ink-3); }
 .td-foot { margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .todo-row { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0; }

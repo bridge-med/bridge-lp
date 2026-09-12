@@ -465,6 +465,7 @@
     sound: true,
     notify: false,
     regulars: [], personaSeq: 0, graduLog: [],
+    onboard: { step: 0, marks: {} }, // 導入シナリオ Day1〜7 の進み(v89 便AM-5)。旧セーブは load() で step=7
     hospital: null,
     kaitei: { count: 0, consult: 1, inj: 1, treat: 1, physio: 1, reha: 1, img: 1, log: [] }
   };
@@ -572,7 +573,7 @@
           stats: G.stats, clinicName: G.clinicName,
           daily: G.daily, prestige: G.prestige, speedPass: G.speedPass, bonds: G.bonds,
           specialDone: G.specialDone, season: G.season, league: G.league, sound: G.sound, notify: G.notify, hospital: G.hospital, kaitei: G.kaitei,
-          regulars: (G.regulars || []).slice(-80), mainMi: G.mainMi, mainWi: G.mainWi, personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30),
+          onboard: G.onboard, regulars: (G.regulars || []).slice(-80), mainMi: G.mainMi, mainWi: G.mainWi, personaSeq: G.personaSeq || 0, graduLog: (G.graduLog || []).slice(-30),
           med: G.med, referLog: (G.referLog || []).slice(-120), referSeen: G.referSeen, handoverLog: (G.handoverLog || []).slice(-30),
           dec: G.dec, // 経営の分岐点(v70): 余力・信頼・履歴・予約した遅延効果・継続効果・開いている相談
           mainQueue: G.mainQueue // 本院眼科の白内障パイプライン(v74 便AF-2): 術前待ち・手術待ち・術後の残回数
@@ -590,6 +591,7 @@
       const d = JSON.parse(raw);
       Object.assign(settings, d.settings);
       Object.assign(G, d.g);
+      if (!d.g.onboard) G.onboard = { step: 7, marks: {} }; // 既存セーブには導入を出さない(v89)
       // 本院の科で隠す自費メニューは稼がない(v76 保留#43。旧セーブで selfReha が残っていても落とす)
       if (typeof SPECIALTIES !== 'undefined') { const mm = SPECIALTIES.get(settings.specialty); for (const k of (mm && mm.main && mm.main.preset && mm.main.preset.jihiHide) || []) { if (jihiHidden(k)) settings[k] = false; } } // 整形外科の分院があれば分院の自費として残す(v84)
       Object.keys(REL_DEF).forEach((k) => { if (!G.relations[k]) G.relations[k] = { lv: 0, last: 0 }; });
@@ -1629,7 +1631,7 @@
     // リーグ称号はミッションより後(同日ならより大きな瞬間を前面に)
     if (spec.kind !== 'closed') checkLeague();
 
-    if (G.day % 7 === 0 && G.history.length >= 8 && spec.kind !== 'closed') weeklyDigest();
+    if (G.day % 7 === 0 && G.history.length >= 7) weeklyDigest(); // 週の最終日(日曜は休診でも)に出す。Day 7 の夜が初回=導入の締め(v89。旧条件は日曜休診の既定では一度も出なかった)
     if (G.day % 30 === 0 && G.history.length >= 25) monthlyClose();
 
     if (G.money < -300000) {
@@ -3018,8 +3020,9 @@
     return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
   }
 
+  const UI_ONBOARD_I = UI_ONBOARD.create({ G });
   const UI_DASH_I = UI_DASH.create({
-    $, yen, yenShort, G, MISSIONS, WEEKDAYS, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND,
+    $, yen, yenShort, G, MISSIONS, WEEKDAYS, onboard: UI_ONBOARD_I, weekdayOf, specOf, ensureWeather, fmtClock, missionApplies, bottleneckInfo, todayKey, pickChallenge, requestHtml, bindGoto, showQuizModal, toast, save, SND,
     enforceSpeedPass: () => { if (typeof enforceSpeedPass === 'function') enforceSpeedPass(); },
     medScoreNow: () => medScoreParts(G.med),
   });
@@ -4997,44 +5000,9 @@
 
   /* ================= チュートリアル ================= */
 
-  const TUTORIAL = [
-    { tab: null, sel: null, text: '今日からこの{科名}はあなたの院です。まずは<b>①1日進める → ②結果を見る → ③1つ直す</b>。' },
-    { tab: null, sel: '.hud', text: '<b>資金・評判・医療</b>が経営の体温計。<b>⏩1日</b> で1日スキップできます。' },
-    { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。ミッション・依頼・詰まりの打ち手が出ます。' },
-    { tab: 'clinic', sel: '#shopCard', text: '最初は<b>受付と椅子</b>。Day 4 でスタッフとタウン、Day 8 で経営のタブが開きます。' },
-    { tab: null, sel: null, text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。では初日をどうぞ。' }
-  ];
-  let tutIdx = -1;
-
-  function startTutorial() { tutIdx = 0; showTutStep(); }
-  function showTutStep() {
-    const st = TUTORIAL[tutIdx];
-    if (!st) { endTutorial(); return; }
-    if (st.tab) switchTab(st.tab);
-    $('tutText').innerHTML = st.text.replace('{科名}', mainSpecName());
-    $('tutStep').textContent = `${tutIdx + 1} / ${TUTORIAL.length}`;
-    $('tutorial').classList.add('show');
-    document.querySelectorAll('.tut-focus').forEach((el) => el.classList.remove('tut-focus'));
-    if (st.sel) {
-      const el = document.querySelector(st.sel);
-      if (el) {
-        el.classList.add('tut-focus');
-        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
-      }
-    }
-    $('tutNext').textContent = tutIdx === TUTORIAL.length - 1 ? '経営を始める' : '次へ →';
-  }
-  function endTutorial() {
-    tutIdx = -1;
-    $('tutorial').classList.remove('show');
-    document.querySelectorAll('.tut-focus').forEach((el) => el.classList.remove('tut-focus'));
-    G.tutorialDone = true;
-    switchTab('clinic');
-    save();
-  }
-  $('tutNext').addEventListener('click', () => { tutIdx++; showTutStep(); });
-  $('tutSkip').addEventListener('click', endTutorial);
-  $('helpBtn').addEventListener('click', startTutorial);
+  // 導入は「今日の経営」の1行目(app/ui/onboarding.js・v89)。5段のチュートリアルモーダルは廃止(決裁⑤)。tutIdx は互換のため -1 固定
+  const tutIdx = -1;
+  $('helpBtn').addEventListener('click', () => showModal('🧭 はじめの7日', UI_ONBOARD_I.guideHtml(), 'とじる'));
   $('moreBtn').addEventListener('click', () => { const m = $('headMore'); m.hidden = !m.hidden; $('moreBtn').setAttribute('aria-expanded', String(!m.hidden)); });
   $('resetBtn').addEventListener('click', () => {
     showModal('はじめからやり直す', '<p>セーブデータを消して、Day 1 からやり直します。よろしいですか?</p><div class="modal-actions"><button class="btn-cta danger" id="resetGo">全部消してやり直す</button></div>', 'やめておく');
@@ -5638,6 +5606,7 @@
         Object.keys(pr.speedUnlocked).forEach((k) => { if (pr.speedUnlocked[k]) G.coins += OLD_PRICE[k] || 0; });
       }
       G.tutorialDone = true; // 2周目はチュートリアル不要
+      G.onboard = { step: 7, marks: {} }; // 導入も出さない(v89)
     }
     [8, 7, 7, 6, 6, 5, 5, 4, 4, 3].forEach((n, i) => {
       for (let k = 0; k < n; k++) addSchedule(i + 1, 'revisit');
@@ -5715,7 +5684,7 @@
         <div class="pnl-row"><span>実績・累計・施設・院名</span><b>引き継ぎ済み</b></div>
         <p class="modal-note">📖 2周目のテーマは「再現性」。前回うまくいった打ち手が、初期条件が違っても通用するか — それが経営の腕です。</p>`,
         `${prestigeApplied.count + 1}周目の経営へ`);
-    } else if (!G.tutorialDone) startTutorial();
+    } else if (!G.tutorialDone) { G.tutorialDone = true; save(); }
     applyUnlocks(); renderShop(); renderMissions(); updateMissionBar(); renderCorp(); updateHeader();
   };
   decState();
