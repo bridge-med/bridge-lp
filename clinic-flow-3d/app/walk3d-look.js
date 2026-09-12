@@ -341,7 +341,7 @@
     [legL, legR, hip, torso, armL, armR, head].forEach((m) => { m.castShadow = true; });
     g.add(legL, legR, shoeL, shoeR, hip, torso, armL, armR, head);
     if (o.hair !== undefined) { const hair = new T.Mesh(FIG.hair, MAT.hair(o.hair)); hair.position.y = 1.565; hair.scale.set(1, 0.75, 1); hair.castShadow = true; g.add(hair); }
-    if (o.dot !== undefined) { const tag = new T.Mesh(FIG.tag, MAT.plastic(o.dot)); tag.position.set(0.08, 1.28, 0.19); g.add(tag); } // 名札
+    if (o.dot !== undefined) { const tag = new T.Mesh(FIG.tag, MAT.plastic(o.dot)); tag.position.set(0.08, 1.28, 0.19); g.add(tag); g.userData.tag = tag; } // 名札(段階・役割の色)
     g.userData.torso = torso; g.userData.limbs = { legL, legR, armL, armR };
     return g;
   }

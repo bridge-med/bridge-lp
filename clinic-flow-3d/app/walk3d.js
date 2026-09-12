@@ -112,6 +112,12 @@
     makeFigure(bodyHex, o) {
       o = o || {};
       this.ensureGeos();
+      if (this.LK) {
+        const f = this.LK.figure({ body: bodyHex, pants: o.pants, hair: o.hair, dot: o.dot });
+        this.LK.PROPS.blob(f, 0.26);
+        if (o.tappable) { const hit = new THREE.Mesh(this.geos.hit, this.hitMat); hit.position.y = 0.87; f.add(hit); }
+        return f;
+      }
       const g = new THREE.Group();
       const legs = new THREE.Mesh(this.geos.legs, this.mat(o.pants || 0x6B7A85));
       legs.position.y = 0.25;
@@ -246,10 +252,12 @@
         const sp = Math.min(dist, 4.2 * dt * Math.max(1, dist * 0.8));
         b.x += (dx / dist) * sp;
         b.z += (dz / dist) * sp;
-        b.y = Math.abs(Math.sin(performance.now() * 0.012)) * 0.04;
+        b.y = Math.abs(Math.sin(performance.now() * 0.0114)) * (this.LK ? 0.02 : 0.04);
+        if (this.LK) this.LK.animateFigure(this.buddy, performance.now() * 0.0114, true);
         this.buddy.rotation.y = Math.atan2(dx, dz);
       } else {
         b.y = 0;
+        if (this.LK) this.LK.animateFigure(this.buddy, 0, false);
         this.buddy.rotation.y = this.yaw + Math.PI; // プレイヤーと同じ向き
       }
       // 解説(状況を読んで一言)
@@ -501,7 +509,8 @@
           m.userData.torso.material = this.mat(hex);
           m.userData.colHex = hex;
         }
-        const bob = Math.sin(performance.now() * 0.012 + i * 3) * 0.05;
+        const bob = Math.abs(Math.sin(performance.now() * 0.0114 + i * 3)) * (this.LK ? 0.02 : 0.05);
+        if (this.LK) this.LK.animateFigure(m, performance.now() * 0.0114 + i * 3, true);
         m.position.set(w.x * S + S / 2, Math.max(0, bob), w.y * S + S / 2);
         if (w.path && w.path.length) {
           const tg = w.path[0];
@@ -777,18 +786,21 @@
         seen.add(p.id);
         let g = this.patMeshes.get(p.id);
         if (!g) {
-          g = this.makeFigure(PHASE_COL3[p.phase] || 0x9AA7B0, { hair: SEG_HAIR3[p.seg], tappable: true });
+          const CLOTH = [0x7C8B96, 0x8E7F72, 0x6E7A63, 0x9A8AA0, 0xA98F63, 0x5E6B78];
+          g = this.makeFigure(this.LK ? CLOTH[p.id % CLOTH.length] : (PHASE_COL3[p.phase] || 0x9AA7B0), { hair: SEG_HAIR3[p.seg], tappable: true, dot: this.LK ? (PHASE_COL3[p.phase] || 0x9AA7B0) : undefined, pants: this.LK ? [0x3F4A52, 0x5B5148, 0x4A5560][p.id % 3] : undefined });
           g.userData.tap = { kind: 'patient', pid: p.id };
           g.userData.phase = p.phase;
           this.patMeshes.set(p.id, g);
           this.patGroup.add(g);
         }
         if (g.userData.phase !== p.phase) {
-          g.userData.torso.material = this.mat(PHASE_COL3[p.phase] || 0x9AA7B0);
+          if (this.LK) { const tg = g.userData.tag; if (tg) tg.material = this.LK.MAT.plastic(PHASE_COL3[p.phase] || 0x9AA7B0); }
+          else g.userData.torso.material = this.mat(PHASE_COL3[p.phase] || 0x9AA7B0);
           g.userData.phase = p.phase;
         }
         const walking = p.path.length > 0;
-        const bob = walking ? Math.sin(performance.now() * 0.012 + p.id * 3) * 0.05 : 0;
+        const bob = walking ? Math.abs(Math.sin(performance.now() * 0.0114 + p.id * 3)) * (this.LK ? 0.02 : 0.05) : 0;
+        if (this.LK) this.LK.animateFigure(g, performance.now() * 0.0114 + p.id * 3, walking);
         g.position.set(p.x + 0.5, Math.max(0, bob), p.y + 0.5);
         if (walking && p.path.length) {
           const tgt = p.path[0];
