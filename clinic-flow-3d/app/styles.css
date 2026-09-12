@@ -812,7 +812,7 @@ input[type="range"]::-moz-range-thumb {
 .rel-stars .ic { width: 14px; height: 14px; margin: 0; }
 .rel-stars .ic.fill g { fill: var(--gold); stroke: var(--gold); }
 .rel-stars .ic:not(.fill) g { stroke: var(--line); }
-.mini-btn.two { flex-direction: column; gap: 2px; width: 88px; height: 44px; padding: 0 6px; line-height: 1.2; }
+.mini-btn.two { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 92px; height: 44px; padding: 0 6px; line-height: 1.2; }
 .mini-btn.two small { font: 500 11px/1.2 var(--sans); }
 .mini-btn.two .num { font: 700 13px/1.2 var(--en); color: var(--gold); }
 
