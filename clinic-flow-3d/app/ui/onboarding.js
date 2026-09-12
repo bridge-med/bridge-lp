@@ -6,14 +6,14 @@
   // 7日の割り当ては既存の解放日に合わせる(Day 4=stage2 でタウン・スタッフが開く、Day 7=週次サマリー)
   const ONBOARD = [
     { day: 1, title: '⏩1日 を押して患者を診る', sub: '売上が入り、夜に結果が出る', goto: 'clinic|#skipBtn', done: (c) => !!c.last },
-    { day: 2, title: '待ちが出たら受付か椅子を1つ増やす', sub: '3D 視察で詰まりを見る', goto: 'clinic|#shopCard', done: (c) => c.marks.shop >= 2 || c.marks.walk >= 2 },
-    { day: 3, title: '診療方針で単価を作る', sub: '患者数だけでは利益は伸びない', goto: 'clinic|#policyCard', done: (c) => c.marks.policy >= 3 },
-    { day: 4, title: '病院か薬局へ営業に行く', sub: '新患は待っていても来ない', goto: 'town|#salesCard', done: (c) => c.marks.sales >= 4 },
-    { day: 5, title: 'ライブモニターで戻ってきた患者をタップ', sub: '患者との関係が経営になる', goto: 'clinic|#pulseCard', done: (c) => c.marks.pulse >= 5 || c.marks.walk >= 5 },
-    { day: 6, title: 'スタッフ・設備・診療時間を1つ整える', sub: '待ち時間と利益の両立', goto: 'clinic|#scheduleCard', done: (c) => ['shop', 'hire', 'policy', 'schedule'].some((k) => c.marks[k] >= 6) },
-    { day: 7, title: '週の振り返りを読む', sub: '売上・利益・患者数・待ち時間・評判', goto: 'learn|#missionCard', done: (c) => c.day >= 8 },
+    { day: 2, title: '待ちが出たら受付窓口を1つ増やす', sub: '視察(3D)で詰まりが見える', goto: 'clinic|#shopCard', done: (c) => c.marks.shop >= 2 || c.marks.walk >= 2 },
+    { day: 3, title: '診療方針で診察時間を決める', sub: '同じ人数でも、単価は変えられる', goto: 'clinic|#policyCard', done: (c) => c.marks.policy >= 3 },
+    { day: 4, title: '市民総合病院へ営業に行く', sub: '紹介が新患になって返ってくる', goto: 'town|#salesCard', done: (c) => c.marks.sales >= 4 },
+    { day: 5, title: 'ライブモニターで患者に声をかける', sub: '声をかけた人は、離れずにまた来る', goto: 'clinic|#pulseCard', done: (c) => c.marks.pulse >= 5 || c.marks.walk >= 5 },
+    { day: 6, title: '診療時間を1コマ変えてみる', sub: '休診日が待ち時間と利益を動かす', goto: 'clinic|#scheduleCard', done: (c) => c.marks.schedule >= 6 },
+    { day: 7, title: '週次サマリーを読む', sub: '来院数・診療単価・週間損益', goto: 'learn|#missionCard', done: (c) => c.day >= 8 },
   ];
-  const FREE = { title: 'ここからは自由経営', sub: 'ミッションが次の目標。迷ったらこのカード', goto: 'learn|#missionCard' };
+  const FREE = { title: 'ここからは自由経営', sub: '次の目標は🎯ミッションに。どれからでも', goto: 'learn|#missionCard' };
   const LAST = 7;
 
   function create(ctx) {
@@ -41,12 +41,12 @@
       if (s.step >= LAST) return null;
       const e = ONBOARD[Math.min(G.day, LAST) - 1];
       const done = e.done(ctxNow());
-      return { tag: '🧭', text: `Day ${e.day} ${e.title}`, sub: done ? '✅ できた。明日は次の1手' : e.sub, goto: e.goto, now: !done, done };
+      return { tag: '🧭', text: `Day ${e.day} ${e.title}`, sub: done ? '✅ できた。次の1手は明日の朝に' : e.sub, goto: e.goto, now: !done, done };
     }
     // ❓: 7日の一覧(Level2・押したときだけ)
     function guideHtml() {
       const s = state();
-      return `<ol class="onb-list">${ONBOARD.map((e) => `<li class="${G.day === e.day ? 'now' : G.day > e.day ? 'past' : ''}"><b>Day ${e.day}</b> ${e.title}<small>${e.sub}</small></li>`).join('')}</ol><p class="modal-note">${s.step >= LAST || G.day > LAST ? FREE.title + '。' : '1日1つ。終わると次の日に進む。'}</p>`;
+      return `<ol class="onb-list">${ONBOARD.map((e) => `<li class="${G.day === e.day ? 'now' : G.day > e.day ? 'past' : ''}"><b>Day ${e.day}</b> ${e.title}<small>${e.sub}</small></li>`).join('')}</ol><p class="modal-note">${s.step >= LAST || G.day > LAST ? FREE.title + '。' : '1日1つ。できたら、次の日の1手が出る'}</p>`;
     }
     // 痕跡の収集(描画側に手を入れない)
     document.addEventListener('click', (e) => {
