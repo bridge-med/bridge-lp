@@ -9,6 +9,7 @@
 
   /* ---------- 手続きテクスチャ(Canvas) ---------- */
   const texCache = new Map();
+  let maxAniso = 4; // setupRenderer で renderer の上限(最大8)に更新
   function canvasTex(key, w, h, draw, repeat) {
     if (texCache.has(key)) return texCache.get(key);
     const cv = document.createElement('canvas');
@@ -17,7 +18,7 @@
     const tex = new T.CanvasTexture(cv);
     tex.wrapS = tex.wrapT = T.RepeatWrapping;
     tex.encoding = T.sRGBEncoding;
-    tex.anisotropy = 4;
+    tex.anisotropy = maxAniso;
     if (repeat) tex.repeat.set(repeat[0], repeat[1]);
     texCache.set(key, tex);
     return tex;
@@ -121,6 +122,7 @@
     }),
   };
 
+  const lighten = (hex, k) => { const r = hex >> 16 & 255, g = hex >> 8 & 255, b = hex & 255; const f = (v) => Math.round(v + (255 - v) * k); return (f(r) << 16) | (f(g) << 8) | f(b); };
   /* ---------- 材質(色ごとにキャッシュ) ---------- */
   const matCache = new Map();
   function mat(key, props) {
@@ -133,6 +135,7 @@
     floor: () => mat('floor', { map: TEX.floor(), roughness: 0.75 }),
     woodFloor: () => mat('woodFloor', { map: TEX.woodFloor(), roughness: 0.8 }),
     blob: () => mat('blob', { map: TEX.blob(), transparent: true, opacity: 0.28, depthWrite: false }),
+    blobSoft: (op) => mat('blobSoft' + op, { map: TEX.blob(), transparent: true, opacity: op, depthWrite: false }),
     floorTint: (hex) => mat('floorTint' + hex, { map: TEX.floorTint(hex), roughness: 0.55 }),
     wall: () => mat('wall', { map: TEX.wall(), roughness: 0.92 }),
     wallIn: () => mat('wallIn', { color: 0xF7F5F0, roughness: 0.92 }),
@@ -211,16 +214,21 @@
     // 待合椅子(連結ベンチ型: 座面・背・脚2本・肘)
     chair: (parent, x, z, hex) => {
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
-      const fab = MAT.fabric(hex || 0x6E8794);
-      box(g, 0.12, 0.40, 0.14, 0.76, 0.10, 0.62, fab);          // 座面
+      const h = hex || 0x6E8794;
+      const fab = MAT.fabric(h), seat = MAT.fabric(lighten(h, 0.12)); // 座面は背より一段明るく(designer v96-4)
+      PROPS.blobRect(g, 0.12, 0.08, 0.76, 0.68);
+      box(g, 0.12, 0.40, 0.08, 0.76, 0.10, 0.62, seat);         // 座面(背より 0.06 前へ)
       box(g, 0.12, 0.50, 0.66, 0.76, 0.46, 0.10, fab);          // 背
       box(g, 0.16, 0.0, 0.20, 0.06, 0.40, 0.50, MAT.darkMetal(), { noCast: true }); // 脚
       box(g, 0.78, 0.0, 0.20, 0.06, 0.40, 0.50, MAT.darkMetal(), { noCast: true });
+      box(g, 0.06, 0.50, 0.14, 0.05, 0.16, 0.56, MAT.darkMetal(), { noCast: true }); // 肘掛け
+      box(g, 0.89, 0.50, 0.14, 0.05, 0.16, 0.56, MAT.darkMetal(), { noCast: true });
       return g;
     },
     // 受付/会計カウンター(下段の腰壁+白天板+上段の受付台+モニター)
     counter: (parent, x, z, w, d, accentHex) => {
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
+      PROPS.blobRect(g, 0, 0, w, d);
       box(g, 0, 0, 0, w, 0.95, d, MAT.wood());
       box(g, -0.04, 0.95, -0.04, w + 0.08, 0.06, d + 0.08, MAT.top());
       box(g, 0, 0.98, d - 0.03, w, 0.05, 0.05, MAT.plastic(accentHex || 0x2C5F82)); // 患者側の縁(意味色・細く)
@@ -231,6 +239,7 @@
     // 診察デスク(天板+脚+モニター+椅子)
     desk: (parent, x, z, w, d) => {
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
+      PROPS.blobRect(g, 0, 0, w, d);
       box(g, 0, 0.70, 0, w, 0.05, d, MAT.wood());
       box(g, 0.04, 0, 0.04, 0.05, 0.70, d - 0.08, MAT.darkMetal(), { noCast: true });
       box(g, w - 0.09, 0, 0.04, 0.05, 0.70, d - 0.08, MAT.darkMetal(), { noCast: true });
@@ -242,6 +251,7 @@
     // 処置ベッド(脚+マット+シーツ+枕+カーテンレール)
     bed: (parent, x, z, w, d) => {
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
+      PROPS.blobRect(g, 0, 0, w, d);
       box(g, 0.08, 0, 0.08, w - 0.16, 0.45, d - 0.16, MAT.bedFrame(), { noCast: true });
       box(g, 0, 0.45, 0, w, 0.16, d, MAT.white());
       box(g, 0.05, 0.61, 0.05, w - 0.10, 0.03, d - 0.10, MAT.sheet(), { noCast: true });
@@ -262,6 +272,7 @@
     // リハ機器: 0=平行棒 1=エルゴメーター 2=牽引台(位置で種類を回す)
     machine: (parent, x, z, kind, active) => {
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
+      PROPS.blobRect(g, 0.12, 0.12, 0.76, 0.76);
       const acc = MAT.plastic(active ? 0x3E7CA6 : 0xB9C6C0);
       if (kind === 0) { // 平行棒
         for (const dx of [0.1, 0.9]) { cyl(g, dx, 0, 0.1, 0.03, 0.85, MAT.metal(), true); cyl(g, dx, 0, 0.9, 0.03, 0.85, MAT.metal(), true); box(g, dx - 0.02, 0.85, 0.08, 0.04, 0.04, 0.86, MAT.metal(), { noCast: true }); }
@@ -282,6 +293,7 @@
     // 観葉植物
     plant: (parent, x, z) => {
       const g = new T.Group(); g.position.set(x, 0, z); parent.add(g);
+      PROPS.blobRect(g, 0.28, 0.28, 0.44, 0.44);
       cyl(g, 0.5, 0, 0.5, 0.18, 0.32, MAT.plastic(0xE7E2D8), true);
       cyl(g, 0.5, 0.3, 0.5, 0.03, 0.6, MAT.trunk(), true);
       const s1 = new T.Mesh(GEO.sphereLow, MAT.leaf()); s1.scale.set(0.7, 0.55, 0.7); s1.position.set(0.5, 1.0, 0.5); s1.castShadow = true; g.add(s1);
@@ -325,6 +337,8 @@
       return m;
     },
     // 足元のブロブ影(人物用。実影は使わない)
+    // 什器の接地影(矩形)。x,z,w,d は什器の接地面。0.10m 大きく敷く(designer v96-3)
+    blobRect: (parent, x, z, w, d, op) => { const m = new T.Mesh(GEO.plane, MAT.blobSoft(op || 0.13)); m.rotation.x = -Math.PI / 2; m.position.set(x + w / 2, 0.011, z + d / 2); m.scale.set(w + 0.2, d + 0.2, 1); m.renderOrder = 1; parent.add(m); return m; },
     blob: (parent, r) => { const m = new T.Mesh(GEO.plane, MAT.blob()); m.rotation.x = -Math.PI / 2; m.position.y = 0.012; const d = (r || 0.25) * 2; m.scale.set(d, d, 1); m.renderOrder = 1; parent.add(m); return m; },
     // 間仕切り壁(x0,z0)→(x1,z1) 直線・厚 0.12・高 H。opening={at(中心の距離),w} で開口、glass=true で y1.4〜2.1 をガラス帯に
     wallSeg: (parent, x0, z0, x1, z1, H, o) => {
@@ -463,6 +477,8 @@
 
   /* ---------- 光(時間帯と天気) ---------- */
   function setupRenderer(renderer) {
+    maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 4);
+    texCache.forEach((t) => { t.anisotropy = maxAniso; t.needsUpdate = true; });
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;

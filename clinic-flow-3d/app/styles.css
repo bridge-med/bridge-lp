@@ -1409,7 +1409,7 @@ input[type="range"]::-moz-range-thumb {
 .walk-exit {
   pointer-events: auto; border: none; border-radius: 12px;
   background: rgba(34,51,61,0.85); color: #fff;
-  font: 700 13px/1 var(--sans); padding: 12px 16px;
+  font: 700 13px/1 var(--sans); padding: 12px 16px; white-space: nowrap; /* v96 qa: 320px で「視察を終える」が5行に折れた */
   box-shadow: 0 4px 14px rgba(34,51,61,0.35);
 }
 .walk-hint {
@@ -1469,7 +1469,9 @@ input[type="range"]::-moz-range-thumb {
   display: flex; align-items: center; gap: 9px;
 }
 .persona-speech svg { flex: 0 0 auto; }
-.walk-hud-right { display: flex; gap: 8px; pointer-events: auto; }
+.walk-hud-right { display: flex; gap: 8px; pointer-events: auto; flex: 0 0 auto; }
+.walk-hud-top .walk-info { min-width: 0; flex: 1 1 auto; } /* 縮むのは情報札の側 */
+@media (max-width: 400px) { .walk-hud-top { flex-wrap: wrap; } .walk-hud-right { margin-left: auto; } .walk-hud-top .walk-info { flex: 1 1 100%; order: 2; } } /* 狭い幅はボタン行→情報札の2段 */
 .walk-cam { font-size: 17px; padding: 12px 14px; }
 
 /* ===== 診療報酬KB統合(v33): 会計詳細・学習モード ===== */

@@ -188,7 +188,7 @@
       if (this.LK) this.LK.setupRenderer(this.renderer);
       this.renderer.domElement.className = 'walk-canvas';
       ov.insertBefore(this.renderer.domElement, ov.firstChild);
-      this.camera = new THREE.PerspectiveCamera(72, 1, 0.1, 140);
+      this.camera = new THREE.PerspectiveCamera(72, 1, 0.1, 220);
       this.camera.rotation.order = 'YXZ';
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xDCEAF2);
@@ -333,6 +333,7 @@
       else this.buildClinicStatic();
       if (this.renderer) this.renderer.shadowMap.needsUpdate = true; // 静物の影は建て直しのときだけ焼く
       this.camera.fov = this.mode === 'town' ? 72 : 65; this.camera.updateProjectionMatrix();
+      if (this.LK) { this.scene.fog.near = this.mode === 'town' ? 70 : 34; this.scene.fog.far = this.mode === 'town' ? 190 : 90; } // 街は遠くまで見せる(道の突き当たりが白く抜けない・designer v96-5)
     }
 
     clearScene() {
@@ -831,13 +832,13 @@
           this.colliders.push({ x0: x0 + 2.2, z0: y0 - 0.1, x1: x1, z1: y0 + 0.1 }, { x0: x0 - 0.1, z0: y0, x1: x0 + 0.1, z1: y1 });
         }
       }
-      // 受付・会計・待合のサイン(カウンター上に吊る・両面)
-      const hang = (x, z, text) => { P.sign(G3, x, 2.25, z, text, 1.0, 0); P.sign(G3, x, 2.25, z - 0.01, text, 1.0, Math.PI); };
+      // 受付・会計・待合のサイン(v96 designer 2: 浮く天吊りを廃止)。カウンターの背面は廊下で壁が無いので、
+      // 受付・会計はカウンター前面(y 0.62)に、待合は待合の西壁(腰壁の上 y 2.05)に付ける
       const rc = L.RECEP.counter, cc = L.CASH.counter;
-      hang(rc.x + rc.w / 2, rc.y + rc.d + 0.02, '受付');
-      hang(cc.x + cc.w / 2, cc.y + cc.d + 0.02, '会計');
+      P.sign(G3, rc.x + rc.w / 2, 0.62, rc.y + rc.d + 0.012, '受付', 0.9, 0);
+      P.sign(G3, cc.x + cc.w / 2, 0.62, cc.y + cc.d + 0.012, '会計', 0.9, 0);
       const wz = L.ZONES.find((z) => z.key === 'wait');
-      if (wz) hang(wz.x0 + (wz.x1 - wz.x0 + 1) / 2, wz.y0 + 0.3, '待合');
+      if (wz) P.sign(G3, wz.x0 + 0.105, 2.05, wz.y0 + (wz.y1 - wz.y0 + 1) / 2, '待合', 1.0, Math.PI / 2);
 
       // 什器
       const nChairs = Math.min(s.chairs, L.CHAIRS.length);
