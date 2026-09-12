@@ -4984,7 +4984,7 @@
 
   const TUTORIAL = [
     { tab: null, sel: null, text: '今日からこの{科名}はあなたの院です。まずは<b>①1日進める → ②結果を見る → ③1つ直す</b>。' },
-    { tab: null, sel: '.hud', text: '<b>資金・評判・認知</b>が経営の体温計。<b>⏩1日</b> で1日スキップできます。' },
+    { tab: null, sel: '.hud', text: '<b>資金・評判・医療</b>が経営の体温計。<b>⏩1日</b> で1日スキップできます。' },
     { tab: 'clinic', sel: '#todoCard', text: '<b>迷ったらここ</b>。ミッション・依頼・詰まりの打ち手が出ます。' },
     { tab: 'clinic', sel: '#shopCard', text: '最初は<b>受付と椅子</b>。Day 4・Day 8 で打ち手が増えます。' },
     { tab: 'mgmt', sel: '#formulaCard', text: 'いちばん大事な式は <b>売上 = 患者数 × 単価</b>。では初日をどうぞ。' }

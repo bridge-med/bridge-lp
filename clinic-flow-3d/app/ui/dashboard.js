@@ -7,8 +7,8 @@
     if (G.speed > 4) ctx.enforceSpeedPass();
     const spec = G.daySpec || specOf(G.day);
     const wxh = ensureWeather();
-    $('hDay').textContent = `${G.day} ${WEEKDAYS[weekdayOf(G.day)]}${spec.kind === 'am' ? '·午前' : spec.kind === 'closed' ? '·休' : ''}`;
-  const dl = $('hDayLabel'); if (dl) dl.textContent = `Day ${wxh.icon}`;
+    $('hDay').textContent = `${G.day} ${WEEKDAYS[weekdayOf(G.day)]}`; // 値は「N 曜」だけ(午前/休診はラベル側。列幅に収める・qa v87)
+    const dl = $('hDayLabel'); if (dl) dl.textContent = spec.kind === 'am' ? 'Day 午前' : spec.kind === 'closed' ? 'Day 休診' : `Day ${wxh.icon}`; // 午前/休診の日は天気の代わりに区分(列幅に収める)
     $('hDay').title = `天気: ${wxh.label}${wxh.note ? ' — ' + wxh.note : ''}`;
     $('hClock').textContent = spec.kind === 'closed' ? '' : fmtClock(G.t);
     $('hMoney').textContent = yenShort(G.money);
