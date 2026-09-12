@@ -2001,7 +2001,7 @@
   // 見出し行の右に置く統一部品。title は「何が開くか」(第14条)
   function learnBtn(id, title) {
     const o = learnIsOpen(id);
-    return `<button class="mini-btn learn-toggle${o ? ' on' : ''}" data-learn="${id}" aria-expanded="${o}"${title ? ` title="${title}"` : ''}>${o ? '📖 とじる' : '📖 くわしく'}</button>`;
+    return `<button class="mini-btn learn-toggle${o ? ' on' : ''}" data-learn="${id}" aria-expanded="${o}"${title ? ` title="${title}"` : ''}>${o ? '<i data-ic="book"></i>とじる' : '<i data-ic="book"></i>くわしく'}</button>`;
   }
   function learnRow(id, title) { return `<div class="learn-row">${learnBtn(id, title)}</div>`; }
   // 開閉を DOM に反映(描画しなおさない側)。ボタンの文言も同時に合わせる
@@ -2009,7 +2009,7 @@
     document.querySelectorAll('[data-learn-fold]').forEach((el) => { el.hidden = !learnIsOpen(el.dataset.learnFold); });
     document.querySelectorAll('[data-learn]').forEach((b) => {
       const o = learnIsOpen(b.dataset.learn);
-      b.textContent = o ? '📖 とじる' : '📖 くわしく';
+      b.innerHTML = o ? '<i data-ic="book"></i>とじる' : '<i data-ic="book"></i>くわしく'; if (window.ICONS) ICONS.mount(b);
       b.classList.toggle('on', o);
       b.setAttribute('aria-expanded', String(o));
     });
@@ -5099,7 +5099,7 @@
     const qs = clinic.queueSummary();
     qs.sort((a, b) => b[1] - a[1]);
     const [name, n] = qs[0];
-    $('bottleneck').textContent = n >= 3 ? `ボトルネック: ${name}(${n}人)` : 'ボトルネック: なし 😌';
+    $('bottleneck').textContent = n >= 3 ? `ボトルネック: ${name}(${n}人)` : 'ボトルネック: なし';
     $('bottleneck').classList.toggle('hot', n >= 3);
     $('panic').hidden = clinic.standingCount() === 0;
     const T = G.today;

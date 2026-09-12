@@ -22,7 +22,8 @@
       state[tab] = { open, day };
       btn.classList.toggle('locked', !open);
       btn.setAttribute('aria-disabled', open ? 'false' : 'true');
-      btn.textContent = open ? `${btn.dataset.icon} ${btn.dataset.label}` : `${btn.dataset.icon} Day ${day}`;
+      btn.innerHTML = `<i data-ic="${btn.dataset.icon}"></i>${open ? btn.dataset.label : `Day ${day}`}`; // 絵文字でなく線画(v94)
+      if (window.ICONS) ICONS.mount(btn);
       btn.title = open ? btn.dataset.label : `${btn.dataset.label}は Day ${day} から`;
     }
     function setTabVisible(tab, visible) {

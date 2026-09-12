@@ -89,6 +89,11 @@
     arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
     chev: '<path d="M9 6l6 6-6 6"/>',
     minus: '<path d="M6 12h12"/>',
+    pencil: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M13 7l3 3"/>',
+    brain: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3h3V4zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3h-3V4z"/>',
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/>',
+    bed: '<path d="M3 18V8M3 14h18v4M3 14V11a2 2 0 0 1 2-2h6v5M21 14v-2a3 3 0 0 0-3-3h-7"/>',
     plus: '<path d="M12 6v12M6 12h12"/>',
   };
   // 絵文字→アイコン(対応表にない絵文字は除去)
@@ -102,6 +107,7 @@
     '📌': 'pin', '📍': 'pin', '🧰': 'toolbox', '🧑‍⚕️': 'doctor', '👨‍⚕️': 'doctor', '👩‍⚕️': 'doctor', '🔊': 'sound', '⚙': 'gear', '⚙️': 'gear', '☀': 'sun', '☀️': 'sun', '🌤': 'sun', '⛅': 'cloud', '☁': 'cloud', '☁️': 'cloud', '🌧': 'rain', '☔': 'rain', '🌦': 'rain', '❄': 'cloud',
     '💇': 'scissors', '💊': 'pill', '🍀': 'clover', '📡': 'radar', '⏰': 'clock', '⏱': 'clock', '🕐': 'clock', '👑': 'crown', '🩹': 'bandage', '❤': 'heart', '❤️': 'heart', '💙': 'heart', '🚩': 'flag', '🔑': 'key', '🚀': 'rocket', '🚚': 'truck',
     '➡': 'arrow', '➡️': 'arrow', '☆': 'star', '★': 'star:fill',
+    '✦': 'star:fill', '✏': 'pencil', '✏️': 'pencil', '🧠': 'brain', '📮': 'chat', '🌱': 'clover', '🫘': 'pill', '🌙': 'moon', '👴': 'person', '👵': 'person', '💼': 'briefcase', '🧑‍🤝‍🧑': 'staff', '🛏': 'bed', '🩻': 'radar', '🧪': 'pill', '🏋': 'run',
   };
   function svg(name, cls) {
     if (name && name.indexOf(':') > 0) { const a = name.split(':'); name = a[0]; cls = cls ? cls + ' ' + a[1] : a[1]; }
@@ -138,6 +144,7 @@
       if (m.index > last) frag.appendChild(document.createTextNode(s.slice(last, m.index)));
       const name = iconFor(m[0]);
       if (name) frag.appendChild(el(name));
+      else if (!dropped.has(m[0])) { dropped.add(m[0]); if (root.console) console.info('[icons] 未対応の絵文字を除去:', m[0]); }
       last = m.index + m[0].length;
       // 絵文字の後ろの半角空白は詰める(アイコン+文字の間隔は CSS で)
       if (s[last] === ' ') last += 1;
@@ -157,18 +164,24 @@
       nodes.forEach(sweepText);
     } finally { sweeping = false; }
   }
+  const dropped = new Set();
+  // 源流の書き方: <i data-ic="name"></i> を SVG に展開する(絵文字を書かない)
+  function mount(rootEl) {
+    (rootEl || document).querySelectorAll('i[data-ic]').forEach((i) => { const e = el(i.dataset.ic); if (e) i.replaceWith(e); else i.remove(); });
+  }
   function start() {
+    mount(document);
     sweep(document.body);
     const mo = new MutationObserver((muts) => {
       if (sweeping) return;
       for (const m of muts) {
         if (m.type === 'characterData') { if (m.target.parentNode && !SKIP.has(m.target.parentNode.nodeName)) sweepText(m.target); }
-        else for (const n of m.addedNodes) { if (n.nodeType === 3) { if (n.parentNode && !SKIP.has(n.parentNode.nodeName)) sweepText(n); } else if (n.nodeType === 1 && !SKIP.has(n.nodeName)) sweep(n); }
+        else for (const n of m.addedNodes) { if (n.nodeType === 3) { if (n.parentNode && !SKIP.has(n.parentNode.nodeName)) sweepText(n); } else if (n.nodeType === 1 && !SKIP.has(n.nodeName)) { mount(n); sweep(n); } }
       }
     });
     mo.observe(document.body, { childList: true, subtree: true, characterData: true });
     return mo;
   }
-  root.ICONS = { svg, el, sweep, start, MAP, names: Object.keys(P) };
+  root.ICONS = { svg, el, sweep, mount, start, MAP, dropped, names: Object.keys(P) };
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 })(window);

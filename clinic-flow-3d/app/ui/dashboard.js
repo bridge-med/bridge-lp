@@ -59,13 +59,13 @@
     const rows = [];
     const ob = onboard && onboard.row(); // 導入 Day1〜7 の1行(新規セーブだけ・v89)
     if (ob) rows.push(ob);
-    if (m) rows.push({ tag: '🎯', text: m.title, sub: m.prog ? m.prog(h) : '', goto: m.goto || 'mgmt|#missionCard', now: !ob }); // 導入行があるときは導入行だけが「今日の本命」(designer v89)
-    if (bn.fixes.length) rows.push({ tag: '🔍', text: bn.fixes[0].label, sub: firstSentence(bn.text), goto: `${bn.fixes[0].tab}|${bn.fixes[0].sel}` });
+    if (m) rows.push({ tag: '<i data-ic="target"></i>', text: m.title, sub: m.prog ? m.prog(h) : '', goto: m.goto || 'mgmt|#missionCard', now: !ob }); // 導入行があるときは導入行だけが「今日の本命」(designer v89)
+    if (bn.fixes.length) rows.push({ tag: '<i data-ic="search"></i>', text: bn.fixes[0].label, sub: firstSentence(bn.text), goto: `${bn.fixes[0].tab}|${bn.fixes[0].sel}` });
     // 行の識別は番号でなくタグ(🎯/🔍/📅)。番号は詰まりの有無で日ごとに動くため置かない(designer v87)
     const onb = !!(onboard && onboard.active());
     const shown = rows.slice(0, onb ? 3 : 2); // 行は最大3(導入中は3・通常は2+依頼)
     const rowHtml = shown.map((r) => `<button class="td-row${r.now ? ' now' : ''}${r.done ? ' done' : ''}" data-goto="${r.goto}"><span class="td-num">${r.tag}</span><span class="td-body"><span class="td-text">${r.text}</span>${r.sub ? `<small class="td-sub">${r.sub}</small>` : ''}</span><span class="td-go">→</span></button>`).join('');
-    const reqHtml = `<div class="td-row td-req"><span class="td-num">📅</span><div class="td-body"><span class="todo-tag daily">依頼</span><div class="req-body">${reqRow}</div></div></div>`;
+    const reqHtml = `<div class="td-row td-req"><span class="td-num"><i data-ic="calendar"></i></span><div class="td-body"><span class="todo-tag daily">依頼</span><div class="req-body">${reqRow}</div></div></div>`;
     // 導入中(Day1〜7)は依頼とクイズを出さない=1日1つに絞る(文字量・第8条)
     el.innerHTML = onb ? rowHtml : `${rowHtml}${reqHtml}<div class="td-foot"><span class="todo-tag quiz">🧠 クイズ</span>${G.daily && G.daily.quizDone === today ? '<b class="daily-done">✅ 本日の算定クイズはクリア済み</b>' : '<button class="fix-chip" id="quizBtn">算定◯×クイズに挑戦(🪙+1)</button>'}</div>`;
     bindGoto(el);
@@ -117,10 +117,10 @@
           </div>
           ${lr && lr.wx && lr.wx.note ? `<div class="rs-bottle">${lr.wx.icon} <b>${lr.wx.label}</b> — ${lr.wx.note}</div>` : ''}
           ${h.balked ? `<div class="rs-bottle rs-balk">🚪 混雑で <b>${h.balked}人</b> が入口で帰った(機会損失 約${yen(h.balked * 3500)})</div>` : ''}
-          <div class="rs-bottle">🔍 ${bn.text}</div>
+          <div class="rs-bottle"><i data-ic="search"></i>${bn.text}</div>
           ${st ? `<div class="voice-row rs-voice">${STAFF_UI.faceSVG(dv.char, 'normal', 40)}<div class="voice-txt"><small>${st.title} ${st.name}</small><p>${dv.text}</p></div></div>` : ''}
           ${bn.fixes.length ? `<div class="fix-row">${bn.fixes.map((f) => `<button class="fix-chip" data-goto="${f.tab}|${f.sel}">${f.label} →</button>`).join('')}</div>` : ''}
-          <div class="rs-learn">📖 <b>${tb.t}</b><br><small>${tb.b}</small></div>
+          <div class="rs-learn"><i data-ic="book"></i><b>${tb.t}</b><br><small>${tb.b}</small></div>
         </div>`;
       bindGoto(el);
     }
