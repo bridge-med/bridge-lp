@@ -967,7 +967,7 @@ input[type="range"]::-moz-range-thumb {
 .lane-note-row { display: block; } /* v81 便AJ-2 PM裁定B: 2レーンの1行を2段で常時表示 */
 .lane-note-row.cur { color: var(--ink-2); }
 #mainLever .pnl-note { text-align: left; }
-@media (prefers-reduced-motion: reduce) { .tut-box { animation: none; } .fold-head i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .tut-box { animation: none; } }
 
 .tut-focus {
   position: relative;
@@ -1583,3 +1583,4 @@ input[type="range"]::-moz-range-thumb {
 .fold-body[hidden] { display: none; }
 .fold .fold-body > .card-title, .fold .fold-body > .card-head > .card-title { display: none; } /* 題は fold-head が持つ */
 .fold .fold-body > .card-head { justify-content: flex-end; }
+@media (prefers-reduced-motion: reduce) { .fold-head i { transition: none; } } /* 基底の .fold-head i より後ろに置く(同じ詳細度なので順序で決まる・qa v93) */
