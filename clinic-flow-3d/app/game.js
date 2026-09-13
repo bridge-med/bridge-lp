@@ -202,17 +202,17 @@
   };
 
   const SHOP = {
-    doctor:  { label: '医師を採用', costs: [0, 500000, 800000, 1200000, 2000000, 3000000], day: COSTS.doctorDay, hint: '診察室+1・日給¥80,000(採用費は逓増)' },
-    nurse:   { label: '看護師を採用', costs: [120000, 120000, 150000, 180000, 220000, 260000], day: COSTS.nurseDay, hint: '処置ベッド稼働=看護師数・日給¥18,000' },
-    pt:      { label: 'PTを採用', costs: [150000, 150000, 180000, 180000, 220000, 220000, 250000, 250000, 300000, 300000, 350000, 350000, 400000, 400000, 450000, 450000, 500000, 550000, 600000, 650000], day: COSTS.ptDay, hint: '施設基準の専従要件・日給¥16,000' },
-    recep:   { label: '受付窓口を増やす', costs: [60000, 60000, 80000, 100000], day: COSTS.recepDay, hint: '受付窓口+1・日給¥10,000' },
-    chairs:  { label: '待合椅子を+2脚', costs: null, flat: 40000, step: 2, hint: '' },
-    beds:    { label: '処置ベッドを増設', costs: null, flat: 150000, hint: '処置1件+¥1,500・看護師とセット' },
-    machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2+助手)・面積要件は増築' },
-    physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置1件¥350・PT不要・1台35件/日' },
-    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000, 100000, 100000, 110000, 110000], day: 10000, hint: 'PT単位上限+4/人・機器稼働+1・日給¥10,000' },
+    doctor:  { label: '医師を採用', costs: [0, 500000, 800000, 1200000, 2000000, 3000000], day: COSTS.doctorDay, hint: '診察室+1(診察の詰まりに効く)', costNote: '人数ごとに上がる', risk: '患者0人でも日給は出る' },
+    nurse:   { label: '看護師を採用', costs: [120000, 120000, 150000, 180000, 220000, 260000], day: COSTS.nurseDay, hint: '処置ベッドが看護師の人数だけ動く', risk: 'ベッドが無ければ動かない。患者0人でも日給は出る' },
+    pt:      { label: 'PTを採用', costs: [150000, 150000, 180000, 180000, 220000, 220000, 250000, 250000, 300000, 300000, 350000, 350000, 400000, 400000, 450000, 450000, 500000, 550000, 600000, 650000], day: COSTS.ptDay, hint: 'リハの単位を作る', risk: '機器が無ければ稼働しない。運動器リハビリテーション料の区分は専従の常勤理学療法士数で決まる(制度)' },
+    recep:   { label: '受付窓口を増やす', costs: [60000, 60000, 80000, 100000], day: COSTS.recepDay, hint: '受付窓口+1', risk: '詰まりが受付でなければ待ち時間は減らない' },
+    chairs:  { label: '待合椅子を+2脚', costs: null, flat: 40000, step: 2, hint: '立ち待ちが減り、帰ってしまう人が減る', risk: '待ち時間そのものは減らない' },
+    beds:    { label: '処置ベッドを増設', costs: null, flat: 150000, hint: '処置1件+¥1,500(処置室の詰まりに効く)', risk: '看護師が居ないベッドは動かない' },
+    machines:{ label: 'リハ機器を増設', costs: null, flat: 300000, hint: 'リハ稼働=min(機器, PT×2+助手)', risk: 'PT×2+助手を超えた台数は動かない' },
+    physio:  { label: '物療機器を増設', costs: null, flat: 80000, hint: '消炎鎮痛等処置1件¥350・PT不要・1台35件/日', risk: '新患は増えない' },
+    rehaAide:{ label: 'リハ助手を採用', costs: [80000, 80000, 90000, 90000, 100000, 100000, 110000, 110000], day: 10000, hint: 'PT単位上限+4/人・機器稼働+1', risk: 'PT が居なければ単位は作れない。患者0人でも日給は出る' },
     // 精神科の本院だけに出す(preset.shopShow)。早期診療体制充実加算3の要件の表し方はモジュールの gameNote が開示する
-    psw:     { label: '精神保健福祉士を採用', costs: [120000], day: COSTS.pswDay, hint: '早期診療体制充実加算3の届出に要る(要件の表し方はゲーム上の仮定)・日給¥14,000' }
+    psw:     { label: '精神保健福祉士を採用', costs: [120000], day: COSTS.pswDay, hint: '早期診療体制充実加算3の届出に要る', risk: '届出まで算定できない。患者0人でも日給は出る' }
   };
 
   const EXPAND_COST = 5000000;
@@ -319,7 +319,7 @@
     ops: { label: '⚡ 業務改善コンサル', coin: 4, days: 3, hint: '3日間 診察時間-1.2分' },
     training: { label: '🎓 接遇研修(即時)', coin: 3, days: 0, hint: '即時 評判+3' },
     lucky: { label: '🍀 ラッキー看板', coin: 3, days: 7, hint: '7日間 認知+0.7%/日・重ねがけ可' },
-    skip7: { label: '⏩ 7日パック(自動運営)', coin: 3, days: 0, hint: '7日を一括で自動運営' }
+    skip7: { label: '⏩ 7日パック(自動運営)', coin: 3, days: 0, hint: '7日を一括で自動運営', risk: '7日分の判断を手放す。途中で止められない' }
   };
 
   const FACILITIES = {
@@ -1837,7 +1837,7 @@
     evs.forEach((ev) => {
       const ex = x(ev.t);
       ctx.setLineDash([3, 3]);
-      ctx.strokeStyle = 'rgba(201,138,45,0.5)';
+      ctx.strokeStyle = 'rgba(62,124,166,0.5)'; // v93: 打ち手マーカーは .pulse-ev と同じ青
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(ex, 12);
@@ -2283,7 +2283,7 @@
         ].filter(Boolean)
       };
     }
-    return { text: '大きな詰まりはありません。次の一手(集患・単価・新メニュー)を仕込むチャンス', fixes: [] };
+    return { text: '大きな詰まりはありません。次の一手(集患・単価・新メニュー)を仕込むチャンス', fixes: [F('集患の一手を見る', 'town', '#marketingCard')] }; // 行き止まりにしない(v93 designer・第26条)
   }
 
   function bindGoto(root) {
@@ -2293,6 +2293,7 @@
       switchTab(tab);
       const target = document.querySelector(sel);
       if (target) {
+        if (window.UI_FOLD) window.UI_FOLD.reveal(target); // 畳んだカードの中なら開く(v93)
         setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
         target.classList.add('tut-focus');
         setTimeout(() => target.classList.remove('tut-focus'), 2400);
@@ -2430,7 +2431,7 @@
       <div class="shop-row">
         <div class="shop-info">
           <span class="shop-name">${item.label}${act ? ` <span class="boost-on">実施中(Day ${G.boosts[id]}まで)</span>` : ''}</span>
-          <span class="shop-hint">${item.hint}</span>
+          ${cerHtml(`🪙 ${item.coin}`, item.hint, item.risk || (item.days > 0 ? `${item.days}日で切れる。コインは戻らない` : 'コインは戻らない'))}
         </div>
         <div class="shop-btns"><button class="mini-btn ${G.coins >= item.coin && !act ? 'plus' : ''}" data-item="${id}" ${act ? 'disabled' : ''}>🪙 ${item.coin}</button></div>
       </div>`;
@@ -2439,7 +2440,7 @@
       <div class="shop-row ${G.deco[id] ? 'expand-row done' : ''}">
         <div class="shop-info">
           <span class="shop-name">${f.label}${G.deco[id] ? ' <small>設置済み</small>' : ''}</span>
-          <span class="shop-hint">${f.hint}</span>
+          ${G.deco[id] ? `<span class="shop-hint">${f.hint}</span>` : cerHtml(`🪙 ${f.coin}・買い切り`, f.hint, 'コインは戻らない。効果はまだ判定できない')}
         </div>
         ${G.deco[id] ? '' : `<div class="shop-btns"><button class="mini-btn ${G.coins >= f.coin ? 'plus' : ''}" data-fac="${id}">🪙 ${f.coin}</button></div>`}
       </div>`).join('');
@@ -3132,6 +3133,10 @@
 
   const SHOP_VOICE = { doctor: 'doctor', nurse: 'nurse', beds: 'nurse', pt: 'reha', machines: 'reha', physio: 'reha', rehaAide: 'reha', recep: 'front', chairs: 'front' };
 
+  // 経営判断の3行(費用/効果/リスク・v92 便AM-8・社長⑥)。数値は既存の算出だけを使い、測れないものは「まだ判定できない」
+  function cerHtml(cost, effect, risk) {
+    return `<span class="cer"><b>費用</b><span>${cost || 'なし'}</span></span><span class="cer"><b>効果</b><span>${effect || 'まだ判定できない'}</span></span><span class="cer risk"><b>リスク</b><span>${risk || 'まだ判定できない'}</span></span>`;
+  }
   function renderShop() {
     const stage = unlockStage();
     const mm = SPECIALTIES.get(settings.specialty);
@@ -3151,7 +3156,7 @@
       <div class="shop-row">
         <div class="shop-info">
           <span class="shop-name">${item.label} <b class="shop-count">${cur}${item.day ? '人' : ''}</b> <small class="shop-max">/ 最大${max}</small></span>
-          <span class="shop-hint">${item.hint}</span>
+          ${cerHtml(`${yen(shopCost(key))}${item.costNote ? `(${item.costNote})` : ''}${item.day ? `・日給 ${yen(item.day)}` : ''}`, item.hint, item.risk)}
           ${vt ? `<span class="shop-voice">${STAFF_UI.faceSVG(vc, 'normal', 17)} ${STAFF_UI.STAFF[vc].name}「${vt}」</span>` : ''}
         </div>
         <div class="shop-btns">
@@ -3170,32 +3175,32 @@
     const bigTicket = stage < 3 ? '' : `
       ${hide.includes('mri') ? '' : `<div class="shop-row ${settings.mri ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🧲 MRI ${settings.mri ? '導入済み(維持費¥12,000/日)' : 'を導入する'}</span>
-        <span class="shop-hint">MRI検査1件1,900点=¥19,000・維持費¥12,000/日</span>
+        ${settings.mri ? '' : cerHtml(`${yen(MRI_COST)}・維持費 ${yen(COSTS.mriMaint)}/日`, 'MRI検査1件1,900点=¥19,000', '維持費は撮影0件でも出る')}
         <span class="shop-hint"${foldAttr('shop')}>撮影1,330+断層診断450+電子画像管理120 / 断層診断450点は同一患者・同一月に1回 / 1日最大8件はゲーム上の設定 / 導入時に施設基準(様式37)の届出まで整える前提</span>
         ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('advisor', 'normal', 17)} 白瀬「${STAFF_UI.STAFF.advisor.invest.mri}」</span>` : ''}</div>
         ${settings.mri ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="mriBtn">🧲 ${yen(MRI_COST)}</button></div>`}
       </div>`}
       ${hide.includes('dexa') ? '' : `<div class="shop-row ${settings.dexa ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">🦴 骨密度測定装置(DEXA)${settings.dexa ? ' 導入済み' : ''}</span>
-        <span class="shop-hint">骨塩定量検査(DEXA法)360点+管理で1受診¥3,800</span></div>
+        ${settings.dexa ? '' : cerHtml(yen(DEXA_COST), '骨塩定量検査(DEXA法)360点+管理で1受診¥3,800', '使う患者が少なければ回収が遅い')}</div>
         ${settings.dexa ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="dexaBtn">🦴 ${yen(DEXA_COST)}</button></div>`}
       </div>`}
       ${hide.includes('echo') ? '' : `<div class="shop-row ${settings.echo ? 'expand-row done' : 'expand-row'}">
         <div class="shop-info"><span class="shop-name">📡 超音波診断装置(運動器エコー)${settings.echo ? ' 導入済み' : ''}</span>
-        <span class="shop-hint">超音波検査(運動器)350点・初診の約3割(スポーツ層4.5割)</span>
+        ${settings.echo ? '' : cerHtml(yen(ECHO_COST), '超音波検査(運動器)350点・初診の約3割(スポーツ層4.5割)', '対象は初診の一部。再診では増えない')}
         ${typeof STAFF_UI !== 'undefined' ? `<span class="shop-voice">${STAFF_UI.faceSVG('doctor', 'normal', 17)} 剣持「エコーは診断の質も説明力も上がる。導入するなら使い倒す」</span>` : ''}</div>
         ${settings.echo ? '' : `<div class="shop-btns"><button class="mini-btn plus" id="echoBtn">📡 ${yen(ECHO_COST)}</button></div>`}
       </div>`}
       ${settings.floorLv === 1
         ? `<div class="shop-row expand-row">
             <div class="shop-info"><span class="shop-name">🏗 院を増築する(Lv2)</span>
-            <span class="shop-hint">診察室4・リハ室100㎡(機器12)・椅子20に上限UP</span></div>
+            ${cerHtml(`${yen(EXPAND_COST)}・家賃 ${yen(COSTS.rent[2])}/日(いま ${yen(COSTS.rent[settings.floorLv])})`, '診察室4・リハ室100㎡(機器12)・椅子20に上限UP', '家賃は埋まらなくても上がる')}</div>
             <div class="shop-btns"><button class="mini-btn plus" id="expandBtn">🏗 ${yen(EXPAND_COST)}</button></div>
           </div>`
         : settings.floorLv === 2
           ? `<div class="shop-row expand-row">
               <div class="shop-info"><span class="shop-name">🏙 別館を建てる(Lv3)</span>
-              <span class="shop-hint">診察室6・リハ室150㎡(機器18)・椅子28・受付4・ベッド6・PT20名/家賃¥120,000/日</span></div>
+              ${cerHtml(`${yen(EXPAND2_COST)}・家賃 ${yen(COSTS.rent[3])}/日(いま ${yen(COSTS.rent[settings.floorLv])})`, '診察室6・リハ室150㎡(機器18)・受付4・ベッド6', '家賃は埋まらなくても上がる')}</div>
               <div class="shop-btns"><button class="mini-btn plus" id="expand2Btn">🏙 ${yen(EXPAND2_COST)}</button></div>
             </div>`
           : `<div class="shop-row expand-row done"><div class="shop-info"><span class="shop-name">🏙 別館まで増築済み(診察室6・リハ室150㎡)</span></div></div>`}`;
@@ -3284,26 +3289,26 @@
     const agaJoin = 0.5 * clamp(G.aw * 1.5, 0.3, 1.2) * clamp(1.6 - settings.agaPrice / 12000, 0.2, 1.3);
     el.innerHTML = `
       ${jihiHidden('selfReha') ? '' : `<div class="jihi-item">
-        <div class="jihi-head"><button class="op-btn ${settings.selfReha ? 'on' : ''}" data-jihi="selfReha">🏃 自費リハ延長</button>${brTag('selfReha')}
-        <span class="jihi-stat">想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)</span></div>
+        <div class="jihi-head"><button class="op-btn ${settings.selfReha ? 'on' : ''}" data-jihi="selfReha">🏃 自費リハ延長</button>${brTag('selfReha')}</div>
+        ${cerHtml('追加の費用なし', `想定利用率 ${(uptakeReha * 100).toFixed(0)}%(リハ完了者)`, '評判が低いと利用されない。高いほど利用率は下がる')}
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.selfRehaPrice)}</b></span>
         <input type="range" data-jprice="selfRehaPrice" min="4000" max="15000" step="1000" value="${settings.selfRehaPrice}"></label>
       </div>`}
       ${jihiHidden('prpOn') ? '' : `<div class="jihi-item">
-        <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>${brTag('prpOn')}
-        <span class="jihi-stat">想定 ${prpDemand.toFixed(1)}件/日・原価 ${yen(FEES.prpCogs)}/件</span></div>
+        <div class="jihi-head"><button class="op-btn ${settings.prpOn ? 'on' : ''}" data-jihi="prpOn">💉 PRP療法(再生医療)${settings.prpOn ? '' : ` <small>要認定 ${yen(PRP_CERT_COST)}</small>`}</button>${brTag('prpOn')}</div>
+        ${cerHtml(`${settings.prpOn ? '' : `認定 ${yen(PRP_CERT_COST)}(1回)・`}原価 ${yen(FEES.prpCogs)}/件`, `想定 ${prpDemand.toFixed(1)}件/日`, '評判が低いと需要が出ない。価格を上げるほど件数は減る')}
         <label class="ctrl"><span class="ctrl-head">価格 <b>${yen(settings.prpPrice)}</b></span>
         <input type="range" data-jprice="prpPrice" min="30000" max="165000" step="5000" value="${settings.prpPrice}"></label>
       </div>`}
       <div class="jihi-item">
-        <div class="jihi-head"><button class="op-btn ${settings.agaOn ? 'on' : ''}" data-jihi="agaOn">💇 AGA外来(継続課金)</button>
-        <span class="jihi-stat">会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日・原価率35%</span></div>
+        <div class="jihi-head"><button class="op-btn ${settings.agaOn ? 'on' : ''}" data-jihi="agaOn">💇 AGA外来(継続課金)</button></div>
+        ${cerHtml('原価率35%', `会員 ${Math.round(G.agaPool)}人・加入 ${agaJoin.toFixed(1)}人/日`, '会員は毎日1.5%が解約する。月額を上げるほど加入が減る')}
         <label class="ctrl"><span class="ctrl-head">月額 <b>${yen(settings.agaPrice)}</b></span>
         <input type="range" data-jprice="agaPrice" min="3000" max="15000" step="1000" value="${settings.agaPrice}"></label>
       </div>
       ${jihiHidden('goods') ? '' : `<div class="jihi-item">
-        <div class="jihi-head"><button class="op-btn ${settings.goods ? 'on' : ''}" data-jihi="goods">🦵 物販(サポーター等)<small> 原価60%</small></button>${brTag('goods')}
-        <span class="jihi-stat">一部が購入・¥3,500</span></div>
+        <div class="jihi-head"><button class="op-btn ${settings.goods ? 'on' : ''}" data-jihi="goods">🦵 物販(サポーター等)</button>${brTag('goods')}</div>
+        ${cerHtml(`原価 ${yen(FEES.goodsCogs)}/個(原価60%)`, `処置・リハの一部が購入・1個 ${yen(FEES.goods)}`, '買う人は一部。単価は小さい')}
       </div>`}${hiddenNote}`;
     el.querySelectorAll('[data-jihi]').forEach((b) => b.addEventListener('click', () => {
       const k = b.dataset.jihi;
@@ -3994,6 +3999,7 @@
       const kijun = document.querySelector('.branch-kijun');
       if (kijun) {
         const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (window.UI_FOLD) window.UI_FOLD.reveal(kijun); // 分院カードは既定で畳む(v93 designer B)
         kijun.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
         kijun.classList.add('kijun-flash');
         setTimeout(() => kijun.classList.remove('kijun-flash'), 1200);
@@ -5402,8 +5408,8 @@
     save();
   }
 
-  function decLinesHtml(lines) {
-    if (!lines.length) return '<p class="dec-none">数字はすぐには動かない</p>';
+  function decLinesHtml(lines, empty) {
+    if (!lines.length) return `<p class="dec-none">${empty || '数字はすぐには動かない'}</p>`;
     return lines.map((l) => `<div class="pnl-row dec-line${l.later ? ' later' : ''}"><span>${l.label}</span><b class="${l.neg ? 'neg' : l.later ? '' : 'pos'}">${l.val}</b>${l.sub ? `<small class="dec-sub">${l.sub}</small>` : ''}</div>`).join('');
   }
 
@@ -5425,7 +5431,8 @@
       const whyHtml = o.why.length ? `<p class="dec-why">${o.why.map((w) => `※ ${w}`).join('<br>')}</p>` : '';
       // 見込み: 確率つきの行は「確定側」を伏せて幅で見せる(確定後に同じ outcome で結果を出す)
       const shown = o.roll ? DECISIONS.lines(DECISIONS.resolveFx(c.choices.find((x) => x.id === decPick).fx, ctx), ctx) : o.lines;
-      preview = `<div class="dec-preview"><small class="dec-plabel">見込み</small>${decLinesHtml(shown)}${rollHtml}${whyHtml}</div>`;
+      // 費用=減る側・効果=増える側・リスク=確率と但し書き(v92・社長⑥)
+      preview = `<div class="dec-preview"><small class="dec-plabel">費用</small>${decLinesHtml(shown.filter((l) => l.neg), '資金は減らない')}<small class="dec-plabel">効果</small>${decLinesHtml(shown.filter((l) => !l.neg))}<small class="dec-plabel">リスク</small>${rollHtml || '<p class="dec-none">確率の要素なし</p>'}${whyHtml}</div>`;
     }
     $('decFace').innerHTML = decFace(c);
     $('decWho').textContent = `${who.title ? who.title + ' ' : ''}${who.name}からの相談`;

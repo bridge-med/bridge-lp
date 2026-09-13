@@ -121,22 +121,20 @@ a { color: var(--blue-deep); }
   padding: 7px 8px; /* v75(保留#41): 横paddingを10→8に詰めて、⏸ を44px幅にしても375pxで1行を保つ(A案) */
   min-height: 44px; /* 44px化はまず高さ(v33 qa指摘の33px)。幅はHUD 8ボタンが390px幅に収まらないため自然幅のまま(WCAG AAの24pxは満たす)。≤360pxは折返し側で上書き */
 }
-.speed-btn[data-speed="0"] { min-width: 44px; } /* v75(保留#41): ⏸ は文字が1つで28px幅だった。タップ領域44px */
+.speed-btn { min-width: 44px; } /* v75(保留#41)は ⏸ だけ 44px 幅。v91: ×1/×2 も 31px 幅だったので全部 44px(320px も 44px=下の ≤360px 側で同値) */
 .speed-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
-.speed-btn.skip { background: var(--amber-pale); border-color: rgba(141,97,31,0.4); color: var(--amber); font-weight: 800; }
+.speed-btn.skip { background: var(--blue-pale); border-color: rgba(62,124,166,0.45); color: var(--blue-deep); font-weight: 800; }
 /* 320px級: 8ボタンは1行に収まらない。圧縮せず折り返す(幅を削るとWCAG AAの24pxを割る) */
 @media (max-width: 360px) {
   .hud-val { font-size: 14px; }
   .tab-btn { font-size: 10px; padding: 11px 1px; }
-  .speed-btn { min-width: 38px; padding: 7px 6px; }
+  .speed-btn { min-width: 44px; padding: 7px 6px; } /* v91: 38→44。v88 で ×8〜×32 が ⚙ の行へ移り、Day 4 以降も5ボタン+⚙ で 320px に収まる */
   .head-btns { gap: 4px; }
   .head-inner { gap: 6px; }
   .head-btns { gap: 4px; }
   .eyebrow { letter-spacing: 0.14em; } /* v75: ボタン44px化で brand が104px幅になり「CLINIC TOWN 3D」が2行に折れた。字間を詰めて1行に戻す(題は元から2行) */
   .speed-group { flex: 1 1 auto; flex-wrap: nowrap; gap: 3px; } /* v87: 速度は4ボタンなので折り返さず1行(v48 の8ボタン折返しを解除) */
   .speed-btn { flex: 0 0 auto; padding: 7px 5px; }
-  .head.stage2 .head-inner { flex-wrap: wrap; }
-  .head.stage2 .speed-group { flex: 1 0 100%; flex-wrap: wrap; } /* Day 4 以降の8ボタンは v48 と同じく折り返す(qa v87: 320px で 42px はみ出た)。ヘッダー高は記録値(v88 で ×8〜×32 を ⚙ の行へ) */
 }
 
 
@@ -208,16 +206,7 @@ a { color: var(--blue-deep); }
 
 /* ---------- ステージ ---------- */
 
-.stage-wrap {
-  position: relative;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 0 0 var(--radius) var(--radius);
-  border-top: none;
-  box-shadow: var(--shadow);
-  padding: 8px;
-  overflow: hidden;
-}
+.stage-wrap { position: relative; overflow: hidden; } /* v93: 3D はカード枠から出す(.lv3 が枠なしを持つ) */
 #clinicStage, #townStage { display: block; width: 100%; }
 
 .stage-overlay {
@@ -286,6 +275,11 @@ a { color: var(--blue-deep); }
 .shop-name { font: 700 13px/1.5 var(--sans); color: var(--ink); }
 .shop-count { color: var(--blue-deep); font-family: var(--en); margin-left: 4px; }
 .shop-hint { font: 500 10.5px/1.5 var(--sans); color: var(--ink-3); }
+.cer { display: flex; gap: 6px; font: 500 10.5px/1.5 var(--sans); color: var(--ink-3); } /* v92: 費用/効果/リスクの3行型(社長⑥) */
+.cer > b { flex: 0 0 3.3em; font-weight: 700; color: var(--ink-2); } /* 「リスク」3字が折れない幅 */
+.cer > span { min-width: 0; }
+.jihi-item .cer { margin-top: -4px; }
+.jihi-item .cer + .cer { margin-top: -6px; }
 .shop-btns { display: flex; gap: 6px; flex: 0 0 auto; }
 
 .mini-btn {
@@ -299,7 +293,7 @@ a { color: var(--blue-deep); }
   min-height: 44px;
   min-width: 44px;
 }
-.mini-btn.plus { border-color: rgba(79,169,140,0.5); color: var(--green-deep); background: var(--green-pale); }
+.mini-btn.plus { border-color: rgba(62,124,166,0.45); color: var(--blue-deep); background: var(--blue-pale); }
 .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .op-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
@@ -333,15 +327,27 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
+  height: 44px; /* v91: 当たり判定は 44px(社長⑨)。見た目の溝は下の track で 6px のまま */
+  margin: 0;
+  border-radius: 999px;
+  background: transparent;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
   border-radius: 999px;
   background: rgba(62, 124, 166, 0.18);
-  outline: none;
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(62, 124, 166, 0.18);
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 22px; height: 22px;
+  margin-top: -8px; /* (22-6)/2: 溝の中心に */
   border-radius: 50%;
   background: linear-gradient(135deg, var(--blue), var(--green));
   border: 2.5px solid #fff;
@@ -452,7 +458,7 @@ input[type="range"]::-moz-range-thumb {
 .diag b { font-weight: 800; }
 .diag.info { background: var(--bg-deep); color: var(--ink-2); }
 .diag.good { background: var(--green-pale); color: var(--green-deep); }
-.diag.warn { background: var(--amber-pale); color: var(--amber); }
+.diag.warn { background: var(--bg-deep); color: var(--ink-2); } /* 注意=中立地(危険の赤地と区別・designer C) */
 .diag.bad { background: var(--red-pale); color: var(--red); }
 
 .pv-head { margin-bottom: 10px; }
@@ -469,7 +475,7 @@ input[type="range"]::-moz-range-thumb {
 .pv-track.big { height: 14px; margin-top: 5px; }
 .pv-track i { display: block; height: 100%; border-radius: 999px; transition: width 0.4s ease; }
 .pv-track i.low { background: linear-gradient(90deg, #D98079, var(--red)); }
-.pv-track i.mid { background: linear-gradient(90deg, #B58330, var(--amber)); }
+.pv-track i.mid { background: linear-gradient(90deg, var(--blue), var(--blue-deep)); }
 .pv-track i.full { background: linear-gradient(90deg, var(--blue), var(--green)); }
 .pv-row {
   display: flex;
@@ -488,10 +494,10 @@ input[type="range"]::-moz-range-thumb {
   padding: 7px 11px;
 }
 .staff-chip.ok { background: var(--green-pale); color: var(--green-deep); }
-.staff-chip.under { background: var(--amber-pale); color: var(--amber); }
+.staff-chip.under { background: var(--bg-deep); color: var(--ink-2); }
 .staff-chip.over { background: var(--red-pale); color: var(--red); }
 .pv-rate.good { color: var(--green-deep); }
-.pv-rate.warn { color: var(--amber); }
+.pv-rate.warn { color: var(--ink-2); }
 .pv-rate.bad { color: var(--red); }
 .pnl-note { font: 500 11px/1.7 var(--sans); color: var(--ink-3); margin-top: 6px; text-align: right; }
 
@@ -536,7 +542,7 @@ input[type="range"]::-moz-range-thumb {
 .mission-row.done { opacity: 0.85; }
 .mission-row.done b { color: var(--green-deep); }
 .mission-row.locked { opacity: 0.45; }
-.mission-row.now b { color: var(--amber); }
+.mission-row.now b { color: var(--blue-deep); }
 .mission-mark { flex: 0 0 auto; }
 .mission-lesson { font: 500 11px/1.8 var(--sans); color: var(--ink-3); margin-top: 3px; }
 
@@ -551,6 +557,7 @@ input[type="range"]::-moz-range-thumb {
 .tb-card p { font: 500 12px/1.9 var(--sans); color: var(--ink-2); margin-top: 6px; }
 
 .note { font: 500 11px/1.9 var(--sans); color: var(--ink-3); text-align: center; }
+.note a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; } /* v91: 12px 高のリンクに 44px の当たり判定 */
 
 /* ---------- 広告(キーワード入札) ---------- */
 
@@ -631,7 +638,7 @@ input[type="range"]::-moz-range-thumb {
 .fs-fold-b { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px; }
 .mini-btn.wrap { white-space: normal; text-align: left; }
 
-.expand-row { background: var(--green-pale); border-radius: 12px; padding: 10px 12px !important; border-bottom: none !important; margin-top: 8px; }
+.expand-row { background: var(--blue-pale); border-radius: 12px; padding: 10px 12px !important; border-bottom: none !important; margin-top: 8px; }
 .expand-row.done { background: var(--bg-deep); }
 .shop-max { font: 600 10px/1 var(--sans); color: var(--ink-3); }
 
@@ -660,10 +667,10 @@ input[type="range"]::-moz-range-thumb {
 .staff-meta b { font: 700 11.5px/1.35 var(--sans); color: var(--ink); white-space: nowrap; }
 .staff-chip.mood-warn { border-color: rgba(196, 87, 78, 0.5); background: #FDF6F5; }
 .staff-chip.mood-warn .staff-meta b { color: var(--red); }
-.staff-chip.mood-tired { border-color: rgba(201, 138, 45, 0.45); background: #FDFAF2; }
-.staff-chip.mood-tired .staff-meta b, .staff-chip.mood-busy .staff-meta b { color: var(--amber); }
+.staff-chip.mood-tired { border-color: var(--line); background: var(--bg-deep); }
+.staff-chip.mood-tired .staff-meta b, .staff-chip.mood-busy .staff-meta b { color: var(--ink-2); }
 .staff-chip.mood-good .staff-meta b { color: var(--green-deep); }
-.staff-chip.mood-idea { border-color: rgba(201, 138, 45, 0.4); }
+.staff-chip.mood-idea { border-color: rgba(62, 124, 166, 0.4); }
 
 .voice-card { padding: 12px 14px !important; }
 .voice-row {
@@ -693,10 +700,12 @@ input[type="range"]::-moz-range-thumb {
 .sch-btn {
   flex: 1;
   min-width: 42px;
+  min-height: 44px; /* v91: 43px だった */
   border: 1.5px solid var(--line);
   border-radius: 12px;
   padding: 8px 4px;
   display: flex;
+  justify-content: center;
   flex-direction: column;
   align-items: center;
   gap: 2px;
@@ -706,8 +715,8 @@ input[type="range"]::-moz-range-thumb {
 .sch-btn .sch-kind { font: 600 10px/1 var(--sans); color: var(--ink-3); }
 .sch-btn.full { background: var(--green-pale); border-color: rgba(79,169,140,0.4); }
 .sch-btn.full .sch-kind { color: var(--green-deep); }
-.sch-btn.am { background: var(--amber-pale); border-color: rgba(141,97,31,0.35); }
-.sch-btn.am .sch-kind { color: var(--amber); }
+.sch-btn.am { background: var(--blue-pale); border-color: rgba(62,124,166,0.45); }
+.sch-btn.am .sch-kind { color: var(--blue-deep); }
 .sch-btn.closed { opacity: 0.6; }
 
 /* ---------- KPI ---------- */
@@ -783,7 +792,7 @@ input[type="range"]::-moz-range-thumb {
 /* 説明を開くと情報側が伸び、nowrap のボタンが最小幅より潰れて横にはみ出す(v81 実測)。
    ボタンは縮ませない(.dec-log .mini-btn の先例) */
 .rel-row > .mini-btn { flex: 0 0 auto; }
-.rel-stars { color: var(--amber); letter-spacing: 0.1em; font-size: 12px; }
+.rel-stars { color: var(--blue); letter-spacing: 0.1em; font-size: 12px; }
 
 /* ---------- 自費メニュー ---------- */
 
@@ -971,8 +980,11 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- v6: 今日やること ---------- */
 
-.todo-card { border-left: 4px solid var(--blue); background: var(--blue-pale); } /* Level1=今日の面(藍レール+淡藍地)。緑は依頼色と衝突するため外す(designer v90) */
-.todo-card .td-row { background: var(--card); }
+/* Level クラス(v93 便AM-9): lv1=そのタブで今日最初にタップする1枚(藍レール+淡藍地・1タブ1枚) / lv2=白カード(既定) / lv3=操作の無い面(枠なし) */
+.lv1 { border-left: 4px solid var(--blue); background: var(--blue-pale); }
+.lv1 .td-row, .lv1 .rel-row, .lv1 .shop-row, .lv1 .mission-row { background: var(--card); }
+.lv3 { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.lv3 > canvas { border-radius: var(--radius); display: block; }
 /* 今日の経営(v87 便AM-3): 1〜3行。各行=目標+進捗+タップ先。行全体が data-goto のボタン */
 .td-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 10px; margin: 6px 0 0; border: 1px solid var(--line); border-radius: 12px; background: var(--card); text-align: left; font: inherit; color: var(--ink); }
 .td-row.now { border-color: rgba(141,97,31,0.45); background: var(--amber-pale); }
@@ -1005,17 +1017,18 @@ input[type="range"]::-moz-range-thumb {
   margin-top: 2px;
   white-space: nowrap;
 }
-.todo-tag.mission { color: var(--amber); background: var(--amber-pale); }
+.todo-tag.mission { color: var(--blue-deep); background: var(--blue-pale); }
 .todo-row p { font: 500 12.5px/1.75 var(--sans); color: var(--ink-2); }
 
 .fix-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .fix-chip {
-  border: 1.5px solid rgba(79,169,140,0.5);
-  background: var(--green-pale);
-  color: var(--green-deep);
+  border: 1.5px solid rgba(62,124,166,0.45);
+  background: var(--card);
+  color: var(--blue-deep);
   font: 700 12px/1.3 var(--sans);
   border-radius: 999px;
   padding: 9px 14px;
+  min-height: 44px; /* v91: 36px だった。タップ領域 44px(社長⑨) */
 }
 .fix-chip:active { transform: scale(0.97); }
 
@@ -1060,7 +1073,7 @@ input[type="range"]::-moz-range-thumb {
 .rs-delta.down { color: var(--red); }
 .rs-flat { font: 600 10px/1.4 var(--sans); color: var(--ink-3); }
 .rs-bottle {
-  background: var(--amber-pale);
+  background: var(--red-pale);
   border-radius: 10px;
   padding: 9px 12px;
   font: 600 12.5px/1.7 var(--sans);
@@ -1073,7 +1086,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- v7: メダル経済・実績・改名 ---------- */
 
-.hud-val.medal { color: var(--amber); }
+.hud-val.medal { color: var(--ink); }
 
 .badge-btn { cursor: pointer; pointer-events: auto; }
 .badge-btn:active { transform: scale(0.97); }
@@ -1110,12 +1123,12 @@ input[type="range"]::-moz-range-thumb {
 }
 .ach-chip b { color: var(--ink-3); font-weight: 700; margin-left: 2px; }
 .ach-chip.done {
-  color: var(--amber);
-  background: var(--amber-pale);
-  border-color: rgba(141,97,31,0.4);
+  color: var(--blue-deep);
+  background: var(--blue-pale);
+  border-color: rgba(62,124,166,0.45);
   font-weight: 700;
 }
-.ach-chip.done b { color: var(--amber); }
+.ach-chip.done b { color: var(--blue-deep); }
 
 /* ---------- v8: デイリー・殿堂 ---------- */
 
@@ -1124,14 +1137,14 @@ input[type="range"]::-moz-range-thumb {
 .daily-streak {
   font: 700 15px/1.7 var(--sans);
   color: var(--ink);
-  background: var(--amber-pale);
+  background: var(--blue-pale);
   border-radius: 12px;
   padding: 10px 14px;
   text-align: center;
   margin-bottom: 8px;
 }
-.daily-streak b { color: var(--amber); font-size: 17px; }
-#prestigeCard { border-top: 4px solid transparent; border-image: linear-gradient(90deg, var(--amber), var(--blue)) 1; }
+.daily-streak b { color: var(--blue-deep); font-size: 17px; }
+#prestigeCard { border-top: 4px solid transparent; border-image: linear-gradient(90deg, var(--blue), var(--green)) 1; }
 
 /* ---------- v9: コイン・倍速解放・キャラ依頼 ---------- */
 
@@ -1170,7 +1183,6 @@ input[type="range"]::-moz-range-thumb {
   .tab-btn.on { background: var(--blue-pale); box-shadow: none; }
   .tab-btn { font-size: 11px; padding: 11px 2px; }
   .main { padding-bottom: 96px; }
-  .stage-wrap { border-radius: var(--radius); border-top: 1px solid var(--line); }
   .toast { bottom: 88px; }
 }
 
@@ -1206,7 +1218,7 @@ input[type="range"]::-moz-range-thumb {
 /* ---------- v11: 混雑離脱・スペシャル・月間決算 ---------- */
 
 .rs-bottle.rs-balk { background: var(--red-pale); color: var(--red); font-weight: 700; }
-.sp-star { font-style: normal; color: var(--amber); font-size: 11px; margin-left: 2px; }
+.sp-star { font-style: normal; color: var(--blue); font-size: 11px; margin-left: 2px; }
 
 /* ---------- v12: 地域リーグ ---------- */
 
@@ -1223,8 +1235,8 @@ input[type="range"]::-moz-range-thumb {
 .lg-row b.lg-name { font-weight: 700; color: var(--ink-2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lg-row.beaten { opacity: 0.55; }
 .lg-row.beaten .lg-name { text-decoration: line-through; }
-.lg-row.you { background: var(--amber-pale); border-radius: 10px; border-bottom: none; padding: 9px 8px; }
-.lg-row.you .lg-name { color: var(--amber); }
+.lg-row.you { background: var(--blue-pale); border-left: 4px solid var(--blue); border-radius: 10px; border-bottom: none; padding: 9px 8px; }
+.lg-row.you .lg-name { color: var(--blue-deep); }
 .lg-tier {
   flex: 0 0 auto;
   font: 800 9.5px/1.4 var(--sans);
@@ -1233,10 +1245,10 @@ input[type="range"]::-moz-range-thumb {
   background: var(--bg-deep);
   color: var(--ink-3);
 }
-.lg-tier.t-you { background: var(--amber); color: #fff; }
+.lg-tier.t-you { background: var(--blue-deep); color: #fff; }
 .lg-rev { font: 700 11px/1.4 var(--en); color: var(--ink-2); white-space: nowrap; }
 .lg-check { font: 700 10.5px/1.4 var(--sans); color: var(--green-deep); font-style: normal; white-space: nowrap; }
-.lg-gap { font: 800 11px/1.4 var(--sans); color: var(--amber); margin-left: 6px; }
+.lg-gap { font: 800 11px/1.4 var(--sans); color: var(--blue-deep); margin-left: 6px; }
 
 /* ---------- v13: シェア ---------- */
 
@@ -1322,7 +1334,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- v17: ライブモニター ---------- */
 
-#pulseChart { display: block; width: 100%; }
+#pulseChart { display: block; width: 100%; max-width: 100%; } /* v91: renderPulse が px 幅を inline で書くため、画面が狭くなった直後(回転)に右へはみ出た */
 .pulse-legend {
   display: flex;
   flex-wrap: wrap;
@@ -1336,8 +1348,8 @@ input[type="range"]::-moz-range-thumb {
 
 .pulse-ev {
   font: 600 10px/1.5 var(--sans);
-  color: var(--amber);
-  background: var(--amber-pale);
+  color: var(--blue-deep);
+  background: var(--blue-pale);
   border-radius: 999px;
   padding: 2px 8px;
 }
@@ -1533,7 +1545,7 @@ input[type="range"]::-moz-range-thumb {
 .dec-say { font: 600 13px/1.8 var(--sans); color: var(--ink); margin: 0 0 6px; }
 .dec-bg { font: 500 11.5px/1.7 var(--sans); color: var(--ink-2); margin: 0 0 6px; }
 .dec-facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
-.dec-ask { font: 600 12px/1.6 var(--sans); color: var(--ink-2); margin: 0 0 6px; }
+.dec-ask { font: 600 12px/1.6 var(--sans); color: var(--ink-2); margin: 0 0 6px; padding: 6px 10px; border-left: 4px solid var(--amber); background: var(--amber-pale); border-radius: 0 8px 8px 0; } /* v93: --amber は「いま決める場所」だけ(.td-row.now と ここ) */
 .dec-ask b { color: var(--blue-deep); }
 .dec-choices { display: flex; flex-direction: column; }
 .dec-choice { flex-direction: column; gap: 2px; }
@@ -1561,3 +1573,14 @@ input[type="range"]::-moz-range-thumb {
 .dec-log .mini-btn { flex: 0 0 auto; margin-left: auto; } /* 題を折らず次行の右へ(designer N・.kijun-row の先例) */
 .dec-rewind { flex-direction: column; }
 .dec-rewind .op-btn { width: 100%; }
+
+/* ---------- v93 便AM-9: カード単位の畳み(経営タブ)。開閉は保存しない ---------- */
+.fold-head { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: inherit; }
+.fold-head b { font: 800 14.5px/1.5 var(--sans); color: var(--blue-deep); }
+.fold-head small { flex: 1 1 auto; font: 500 11px/1.5 var(--sans); color: var(--ink-3); }
+.fold-head i { font-style: normal; color: var(--ink-3); margin-left: auto; transition: transform 0.15s ease; } /* 副題が無い札でも ▸ は右端(designer A) */
+.fold.open .fold-head i { transform: rotate(90deg); }
+.fold-body[hidden] { display: none; }
+.fold .fold-body > .card-title, .fold .fold-body > .card-head > .card-title { display: none; } /* 題は fold-head が持つ */
+.fold .fold-body > .card-head { justify-content: flex-end; }
+@media (prefers-reduced-motion: reduce) { .fold-head i { transition: none; } } /* 基底の .fold-head i より後ろに置く(同じ詳細度なので順序で決まる・qa v93) */
