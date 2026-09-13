@@ -5789,7 +5789,7 @@
           getWeather: () => ensureWeather(),
           onStep: () => SND.step(),
           onAmbience: (kind) => SND.ambience(kind === 'rain' ? 'rain' : kind === 'ice' ? 'wind' : null),
-          onLite: (fps) => toast(`動きを軽くしました(影を省略・${fps}fps)`), // v98: 実機が 30fps 未満のとき
+          onLite: () => toast('動きを軽くしました(影を省略)'), // v98: 実機が 30fps 未満のとき(数値は出さない・designer)
           getBuddyLine: (mode) => {
             const wx = ensureWeather();
             const cands = [];

@@ -811,8 +811,10 @@
       const wzz = L.ZONES.find((z) => z.key === 'wait');
       if (wzz) {
         LK.box(G3, 0.07, 0.09, wzz.y0 - 0.5, 0.03, 0.81, L.H - wzz.y0 + 0.4, M.wainscot(), { noCast: true });
+        LK.box(G3, 0.07, 0.86, wzz.y0 - 0.5, 0.05, 0.045, L.H - wzz.y0 + 0.4, M.capRail(), { noCast: true }); // 見切り縁
         LK.box(G3, 0, 0.09, L.H - 0.1, Math.max(1, doorX - 1.2), 0.81, 0.03, M.wainscot(), { noCast: true });
-        P.board(G3, Math.max(1.5, doorX - 3.2), 1.6, L.H - 0.09, 0);
+        LK.box(G3, 0, 0.86, L.H - 0.12, Math.max(1, doorX - 1.2), 0.045, 0.05, M.capRail(), { noCast: true });
+        P.board(G3, Math.max(1.5, doorX - 3.2), 1.6, L.H - 0.09, Math.PI); // 室内側を向く(plane は片面)
       }
 
       // 部屋(診察室・処置室・リハ室): 間仕切り壁+開口+ガラス帯+壁付けサイン

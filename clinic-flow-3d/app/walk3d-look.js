@@ -143,6 +143,7 @@
     ceiling: () => mat('ceiling', { map: TEX.ceiling(), roughness: 0.95 }),
     baseboard: () => mat('baseboard', { color: 0xD9D4C8, roughness: 0.7 }),
     wainscot: () => mat('wainscot', { color: 0xDCE4E8, roughness: 0.85 }),
+    capRail: () => mat('capRail', { color: 0xAEBAC4, roughness: 0.7 }), // 腰壁の見切り縁(壁に高さの基準線を1本・designer v98-5)
     lightPanel: () => mat('lightPanel', { color: 0xFFFFFF, emissive: 0xFFFDF5, emissiveIntensity: 0.9, roughness: 0.4 }),
     wood: () => mat('wood', { color: 0xB99A6B, roughness: 0.8 }), // 箱の UV は面ごとに伸びるので木目は貼らない(色だけ)
     top: () => mat('top', { color: 0xF6F4EF, roughness: 0.35 }),
@@ -373,19 +374,20 @@
       body.castShadow = true; body.receiveShadow = true; parent.add(body);
       box(parent, x - 0.15, H, z - 0.15, w + 0.3, 0.3, d + 0.3, roof); // 屋根スラブ
       if (floors >= 2) box(parent, x + w * 0.62, H + 0.3, z + d * 0.2, Math.min(2, w * 0.3), 1.1, Math.min(1.6, d * 0.4), MAT.plastic(0xC9CBCB)); // 屋上の機械室
-      // 入口(面の中央): くぼみ 0.3m+枠+ガラス2枚(中桟)+庇。o.faces で街路に面する複数の面に(既定は南)
+      // 入口(面の中央): 0.3m の差し掛け(側壁2枚+天井)+ガラス2枚(中桟)+庇。本体は1枚の箱で穴を開けられないので、くぼみではなく張り出しで影の線を作る(designer v98-3)
+      // o.faces で街路に面する複数の面に(既定は南)
       const ex = x + w / 2, ew = Math.min(2.2, w * 0.5);
       for (const f of (o.faces || ['s'])) {
         const g = new T.Group(); parent.add(g);
-        if (f === 'n') { g.position.set(x + w, 0, z); g.rotation.y = Math.PI; } else g.position.set(x, 0, z);
-        // 以下は「南面(+z)・原点=建物の左手前」のローカル座標。北面は 180° 回して同じ部品を使う
+        // 「南面(+z)・原点=建物の左手前」のローカル座標で組み、北面は原点を右奥(x+w, z+d)に置いて 180° 回す
+        if (f === 'n') { g.position.set(x + w, 0, z + d); g.rotation.y = Math.PI; } else g.position.set(x, 0, z);
         const lx = w / 2;
-        box(g, lx - ew / 2 - 0.12, 0, d - 0.3, 0.12, 2.6, 0.3, MAT.plastic(0x8D959B), { noCast: true }); // くぼみの側壁
-        box(g, lx + ew / 2, 0, d - 0.3, 0.12, 2.6, 0.3, MAT.plastic(0x8D959B), { noCast: true });
-        box(g, lx - ew / 2 - 0.12, 2.5, d - 0.3, ew + 0.24, 0.1, 0.3, MAT.plastic(0x8D959B), { noCast: true }); // くぼみの天井
-        box(g, lx - ew / 2, 0.05, d - 0.3, ew, 2.3, 0.05, MAT.plastic(0x5C7C92), { noCast: true }); // ガラス戸(奥)
-        box(g, lx - 0.03, 0.05, d - 0.26, 0.06, 2.3, 0.02, MAT.white(), { noCast: true }); // 中桟
-        box(g, lx - ew / 2 - 0.3, 2.6, d - 0.02, ew + 0.6, 0.1, 0.8, MAT.plastic(0x5A6670)); // 庇
+        box(g, lx - ew / 2 - 0.12, 0, d, 0.12, 2.6, 0.3, MAT.plastic(0x8D959B)); // 差し掛けの側壁
+        box(g, lx + ew / 2, 0, d, 0.12, 2.6, 0.3, MAT.plastic(0x8D959B));
+        box(g, lx - ew / 2 - 0.12, 2.5, d, ew + 0.24, 0.1, 0.3, MAT.plastic(0x8D959B), { noCast: true }); // 差し掛けの天井
+        box(g, lx - ew / 2, 0.05, d + 0.05, ew, 2.3, 0.05, MAT.plastic(0x5C7C92), { noCast: true }); // ガラス戸
+        box(g, lx - 0.03, 0.05, d + 0.09, 0.06, 2.3, 0.02, MAT.white(), { noCast: true }); // 中桟
+        box(g, lx - ew / 2 - 0.3, 2.6, d + 0.28, ew + 0.6, 0.1, 0.8, MAT.plastic(0x5A6670)); // 庇
         if (o.label) PROPS.sign(g, lx, H - 0.7, d + 0.02, o.label, Math.min(w - 0.6, 0.62 * o.label.length + 1.2));
       }
       return body;
@@ -437,7 +439,7 @@
     board: (parent, x, y, z, rotY) => { const m = new T.Mesh(GEO.plane, MAT.plastic(0xE9E0C8)); m.scale.set(1.2, 0.8, 1); m.position.set(x, y, z); m.rotation.y = rotY || 0; parent.add(m); return m; },
   };
 
-  /* ---------- 人物(身長 1.65m: 頭 0.24・胴 0.62・脚 0.78。腕と脚は振れる) ---------- */
+  /* ---------- 人物(身長 1.71m: 頭 0.24・首 0.08・胴 0.60・脚 0.78。腕と脚は振れる) ---------- */
   const FIG = {
     head: new T.SphereGeometry(0.12, 14, 12),
     hair: new T.SphereGeometry(0.128, 14, 10),
@@ -461,8 +463,8 @@
     const hip = new T.Mesh(FIG.hip, pants); hip.position.y = 0.78;
     const torso = new T.Mesh(FIG.torso, cloth); torso.position.y = 1.13;
     const sleeve = MAT.cloth(shade(o.body !== undefined ? o.body : 0xF3F3F1, 0.14)); // 腕は袖色(胴より一段暗い)
-    const armL = new T.Mesh(FIG.arm, sleeve); armL.position.set(-0.235, 1.12, 0);
-    const armR = new T.Mesh(FIG.arm, sleeve); armR.position.set(0.235, 1.12, 0);
+    const armL = new T.Mesh(FIG.arm, sleeve); armL.position.set(-0.20, 1.15, 0); // 肩に付く(胴の半幅 0.17・上端 1.43)
+    const armR = new T.Mesh(FIG.arm, sleeve); armR.position.set(0.20, 1.15, 0);
     const neck = new T.Mesh(FIG.neck, MAT.skin()); neck.position.y = 1.45;
     const head = new T.Mesh(FIG.head, MAT.skin()); head.position.y = 1.58;
     [legL, legR, hip, torso, armL, armR, head].forEach((m) => { m.castShadow = true; });
