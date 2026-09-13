@@ -173,7 +173,9 @@
   const dropped = new Set();
   // 源流の書き方: <i data-ic="name"></i> を SVG に展開する(絵文字を書かない)
   function mount(rootEl) {
-    (rootEl || document).querySelectorAll('i[data-ic]').forEach((i) => { const e = el(i.dataset.ic); if (e) i.replaceWith(e); else i.remove(); });
+    const r = rootEl || document;
+    if (r.nodeType === 1 && r.matches && r.matches('i[data-ic]')) { const e = el(r.dataset.ic); if (e) r.replaceWith(e); else r.remove(); return; } // 追加されたのが <i> 自身のとき(querySelectorAll は自身を含まない)
+    r.querySelectorAll('i[data-ic]').forEach((i) => { const e = el(i.dataset.ic); if (e) i.replaceWith(e); else i.remove(); });
   }
   function start() {
     mount(document);

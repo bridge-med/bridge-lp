@@ -1176,6 +1176,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- v6: スマホは下部ナビ(親指ファースト) ---------- */
 
+@media (min-width: 361px) and (max-width: 374px) { .hud-val { font-size: 18px; } } /* v95 qa: 20px では「¥150万」が列幅 64px を 3px 超える。375px 以上は 20px */
 @media (max-width: 719px) {
   #hClock { display: none; } /* 時計は PC 幅だけ(Level2) */
   .brand { display: none; } /* v87: 画面の27%を占めたヘッダーを2段に。名は扉と PWA 名が持つ */

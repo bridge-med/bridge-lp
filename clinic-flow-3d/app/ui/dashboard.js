@@ -21,7 +21,7 @@
     const ms = ctx.medScoreNow();
     $('hMed').textContent = `${ms.score}`;
     $('hMed').title = `医療(適切な算定)スコア ${ms.score}点 ${ms.grade}(月内・要件どおりの算定 ${ms.proper}/60・判定の保留 ${ms.clean}/20・理解 ${ms.quiz}/20)`;
-    const hm = $('hMedal'); if (hm) hm.textContent = `<i data-ic="coin"></i>${G.coins || 0}`;
+    const hm = $('hMedal'); if (hm) hm.innerHTML = `<i data-ic="coin"></i>${G.coins || 0}`;
     const ha = $('hAw'); if (ha) ha.textContent = `${Math.round(G.aw * 100)}%`;
   }
 
@@ -30,7 +30,7 @@
     const m = MISSIONS[G.missionIdx];
     const lap = G.prestige && G.prestige.count > 0 ? `<i data-ic="hall"></i>${G.prestige.count + 1}周目 ` : '';
     const vis = MISSIONS.filter(missionApplies);
-    $('missionText').textContent = lap + (m ? `MISSION ${vis.indexOf(m) + 1}/${vis.length}: ${m.title}` : '<i data-ic="trophy"></i>全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
+    $('missionText').innerHTML = lap + (m ? `MISSION ${vis.indexOf(m) + 1}/${vis.length}: ${m.title}` : '<i data-ic="trophy"></i>全ミッション制覇。街いちばんの医療法人だ — 殿堂入りはいつでも(経営タブ)');
   }
 
   // 今日の経営(v87 便AM-3): 1〜3行。①ミッション(進捗+タップ先) ②いまの詰まりの打ち手 ③依頼。クイズは末尾のチップ
@@ -102,7 +102,7 @@
       const lr = G.lastResult && G.lastResult.day === h.day ? G.lastResult : null;
       const tb = TEXTBOOK[(h.day - 1) % TEXTBOOK.length];
       const tools = $('yesterdayTools'); if (tools) tools.innerHTML = learnBtn('result', '損益・評判・新患・詰まり・スタッフの声・学び');
-      $('yesterdayTitle').textContent = `<i data-ic="clipboard"></i>昨日の結果 Day ${h.day}(${WEEKDAYS[weekdayOf(h.day)]})`;
+      $('yesterdayTitle').innerHTML = `<i data-ic="clipboard"></i>昨日の結果 Day ${h.day}(${WEEKDAYS[weekdayOf(h.day)]})`;
       el.innerHTML = `
         <div class="rs-grid rs-3">
           <div class="rs-item"><small>患者数</small><b>${h.patients}人</b>${delta(h.patients, prev ? prev.patients : 0, false, true)}</div>
