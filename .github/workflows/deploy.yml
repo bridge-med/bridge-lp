@@ -23,8 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v4
+        id: pages
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare URLs for the configured Pages domain
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: node scripts/prepare-pages.mjs "$PAGES_BASE_URL" "$RUNNER_TEMP/bridge-pages-${{ github.run_id }}-${{ github.run_attempt }}"
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: ${{ runner.temp }}/bridge-pages-${{ github.run_id }}-${{ github.run_attempt }}
       - id: deployment
         uses: actions/deploy-pages@v4
