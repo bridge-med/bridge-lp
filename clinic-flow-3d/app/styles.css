@@ -4,40 +4,42 @@
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* v94 便AN-1: ゲーム独自のデザイン系 B「板とパネル」(社長決裁 2026-09-12・憲法第22〜24条の外)。
+ * 地は板を浮かせるため一段沈める。意味色=決断(藍)/お金(金)/警告(赤)/良い結果(緑)。
+ * 文字色は「実際の地色の全組合せ」で 4.5:1 以上(ink-3 #53656D は --bg-deep 上 4.73・gold #7D5A12 4.88・good #286B55 4.91・red #A93F36 4.73) */
 :root {
-  --bg: #F4F9FB;
-  --bg-deep: #EAF4F8;
+  --bg: #E9EFF2;
+  --bg-deep: #DCE4E9;
   --card: #FFFFFF;
-  --ink: #22333D;
-  --ink-2: #4A5D68;
-  --ink-3: #596D78; /* v80: 補足の薄字。旧 #7C929E は白地 3.25:1 で AA 未達→5.41(色相・彩度は保つ) */
+  --edge: #C8D6DE; /* 板の下辺(厚み) */
+  --ink: #1B2C36;
+  --ink-2: #45585F;
+  --ink-3: #53656D;
   --blue: #3E7CA6;
-  --blue-deep: #2C5F82;
+  --blue-deep: #2C5F82; /* 決断(これから押す) */
   --blue-pale: #DCEDF6;
   --green: #4FA98C;
-  --green-deep: #31745F; /* v80: 旧 #3A8A70 は白地 4.16→5.54・green-pale 上 4.75 */
+  --green-deep: #286B55; /* 良い結果 */
   --green-pale: #DFF2EA;
-  --amber: #8D611F; /* v80: 旧 #C98A2D は白地 2.93→5.44(文字色18箇所が AA 未達だった) */
-  --amber-pale: #FBF0DC;
-  --red: #B5453C; /* v80: 旧 #C4574E は白地 4.36→5.41・red-pale 上 4.54 */
+  --amber: #7D5A12; /* お金(金)。v93 の「いま決める場所」もこの色 */
+  --amber-pale: #F6EEDC;
+  --gold: var(--amber);
+  --red: #A93F36;
   --red-pale: #FAE7E5;
-  --line: rgba(62, 124, 166, 0.16);
-  --shadow: 0 1px 2px rgba(34, 51, 61, 0.05), 0 6px 20px rgba(62, 124, 166, 0.10);
-  --radius: 16px;
-  --sans: 'Noto Sans JP', sans-serif;
-  --en: 'Inter', sans-serif;
+  --line: #D4DFE5;
+  --shadow: 0 4px 10px rgba(27, 44, 54, 0.08);
+  --radius: 12px;
+  --sans: 'Zen Kaku Gothic New', 'Noto Sans JP', 'Hiragino Sans', system-ui, sans-serif;
+  --en: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 html { -webkit-font-smoothing: antialiased; }
 
 body {
   font-family: var(--sans);
-  background:
-    radial-gradient(circle at 15% 0%, var(--green-pale) 0%, transparent 45%),
-    radial-gradient(circle at 90% 12%, var(--blue-pale) 0%, transparent 50%),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   color: var(--ink);
+  font-variant-numeric: tabular-nums;
   line-height: 1.8;
   min-height: 100dvh;
   font-feature-settings: "palt" 1;
@@ -52,17 +54,22 @@ a { color: var(--blue-deep); }
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(244, 249, 251, 0.92);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--line);
-  padding: 6px 12px 6px;
+  background: var(--card);
+  border-bottom: 2px solid var(--edge);
+  padding: 8px 12px 6px;
 }
+/* HUD 上段(v94): 資金を大きく・速度は3つの区切りボタン・⚙ */
+.hud-money { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
+.hud-money > .ic { width: 22px; height: 22px; color: var(--gold); margin: 0; }
+.hud-money .hud-label { display: block; font: 500 9.5px/1.1 var(--sans); color: var(--ink-3); }
+.hud-money .hud-val { display: block; font: 700 22px/1.15 var(--en); color: var(--ink); }
 .head-inner {
   max-width: 920px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 .eyebrow {
   font: 700 9.5px/1 var(--en);
@@ -84,49 +91,55 @@ a { color: var(--blue-deep); }
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--card);
+  color: var(--ink-2);
   font-size: 15px;
-  box-shadow: var(--shadow);
+  display: inline-flex; align-items: center; justify-content: center;
 }
+.icon-btn .ic { width: 20px; height: 20px; margin: 0; }
 
 /* HUD(v87 便AM-3): 1段6値=Day/現金/今日の患者/今日の売上/評判/医療スコア。数値を主役に(designer) */
 .hud {
   max-width: 920px;
   margin: 6px auto 0;
   display: grid;
-  grid-template-columns: 1.15fr 1.4fr 1fr 1.2fr 0.65fr 0.9fr; /* Day は「Day 午前/休診」のラベルが入る幅・資金・売上は桁が多いので広め */
-  gap: 4px 6px;
+  grid-template-columns: repeat(5, minmax(0, 1fr)); /* v94: 資金は上段へ。残り5値を等分 */
+  gap: 4px;
 }
-.hud-item { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.hud-item { display: flex; flex-direction: column; align-items: center; line-height: 1.2; min-width: 0; }
 .hud-label { font: 600 9.5px/1.3 var(--sans); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hud-label span { font-family: var(--en); font-weight: 700; color: var(--ink-3); }
-.hud-val { font: 800 17px/1.15 var(--en); color: var(--blue-deep); white-space: nowrap; letter-spacing: -0.01em; overflow: hidden; text-overflow: clip; }
+.hud-val { font: 700 20px/1.3 var(--en); color: var(--ink); white-space: nowrap; letter-spacing: -0.01em; overflow: hidden; text-overflow: clip; }
 .head-more { display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
 .speed-fast { flex: 0 0 auto; }
 .head-more[hidden] { display: none; }
 .icon-btn.wide { width: auto; padding: 0 12px; font: 700 12px/1 var(--sans); }
-.speed-group { flex: 1 1 auto; min-width: 0; }
 .head:not(.stage2) .speed-btn[data-speed="4"], .head:not(.stage2) .speed-btn[data-speed="8"], .head:not(.stage2) .speed-btn[data-speed="16"], .head:not(.stage2) .speed-btn[data-speed="32"] { display: none; } /* ×4 以上は Day 4 から(決裁③) */
 .hud-val.neg { color: var(--red); }
 .hud-time { margin-left: auto; text-align: right; }
 .hud-time b { font: 800 13px/1.2 var(--en); color: var(--ink); display: block; }
 .hud-time span { font: 700 12px/1.2 var(--en); color: var(--ink-3); }
 
-.speed-group { display: flex; gap: 4px; }
+.speed-group { display: inline-flex; gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--card); flex: 0 0 auto; }
 .speed-btn {
-  border: 1px solid var(--line);
+  border: 0;
+  border-left: 1px solid var(--line);
   background: var(--card);
   color: var(--ink-2);
-  font: 700 11px/1 var(--sans);
-  border-radius: 999px;
+  font: 700 12px/1 var(--sans);
+  border-radius: 0;
+  white-space: nowrap;
   padding: 7px 8px; /* v75(保留#41): 横paddingを10→8に詰めて、⏸ を44px幅にしても375pxで1行を保つ(A案) */
   min-height: 44px; /* 44px化はまず高さ(v33 qa指摘の33px)。幅はHUD 8ボタンが390px幅に収まらないため自然幅のまま(WCAG AAの24pxは満たす)。≤360pxは折返し側で上書き */
 }
 .speed-btn { min-width: 44px; } /* v75(保留#41)は ⏸ だけ 44px 幅。v91: ×1/×2 も 31px 幅だったので全部 44px(320px も 44px=下の ≤360px 側で同値) */
-.speed-btn.on { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; }
-.speed-btn.skip { background: var(--blue-pale); border-color: rgba(62,124,166,0.45); color: var(--blue-deep); font-weight: 800; }
+.speed-btn:first-child { border-left: 0; }
+.speed-btn.on { background: var(--blue-deep); color: #fff; }
+.speed-btn.skip { color: var(--blue-deep); font-weight: 800; }
+.speed-btn .ic { width: 16px; height: 16px; margin: 0; }
+.speed-btn.skip .ic { margin-right: 2px; }
 /* 320px級: 8ボタンは1行に収まらない。圧縮せず折り返す(幅を削るとWCAG AAの24pxを割る) */
 @media (max-width: 360px) {
-  .hud-val { font-size: 14px; }
+  .hud-val { font-size: 16px; } /* v95: 320px 級は 16px(20px は 5列に収まらない・計測値) */
   .tab-btn { font-size: 10px; padding: 11px 1px; }
   .speed-btn { min-width: 44px; padding: 7px 6px; } /* v91: 38→44。v88 で ×8〜×32 が ⚙ の行へ移り、Day 4 以降も5ボタン+⚙ で 320px に収まる */
   .head-btns { gap: 4px; }
@@ -151,18 +164,17 @@ a { color: var(--blue-deep); }
 }
 .tab-btn {
   flex: 1;
-  border: 1px solid var(--line);
-  border-bottom: none;
-  background: rgba(255,255,255,0.72);
+  border: 0;
+  border-top: 3px solid transparent;
+  background: transparent;
   color: var(--ink-3);
-  font: 700 13.5px/1 var(--sans);
-  padding: 12px 8px;
-  border-radius: 12px 12px 0 0;
-  margin-right: 4px;
-  min-height: 44px;
+  font: 700 10.5px/1 var(--sans);
+  padding: 8px 4px 6px;
+  border-radius: 0;
+  margin-right: 0;
+  min-height: 56px;
 }
-.tab-btn:last-child { margin-right: 0; }
-.tab-btn.on { background: var(--card); color: var(--blue-deep); box-shadow: 0 -4px 12px rgba(62,124,166,0.08); }
+.tab-btn.on { background: transparent; color: var(--blue-deep); border-top-color: var(--blue-deep); }
 .tab-btn { white-space: nowrap; }
 .tab-btn.locked { color: var(--ink-3); font-weight: 600; } /* 開く前のタブ: 名の代わりに「Day N」(v88) */
 
@@ -179,11 +191,13 @@ a { color: var(--blue-deep); }
 .card {
   background: var(--card);
   border: 1px solid var(--line);
+  border-bottom: 2px solid var(--edge);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 16px 18px;
+  padding: 14px 14px 14px;
 }
-.card-title { font: 800 14.5px/1.5 var(--sans); color: var(--blue-deep); margin-bottom: 12px; }
+.card-title { font: 900 15px/1.35 var(--sans); color: var(--ink); margin: 0 0 10px -14px; padding: 2px 0 2px 10px; border-left: 4px solid var(--blue-deep); letter-spacing: 0.01em; }
+.lv3 > .card-title { margin: 0 0 10px; padding-left: 0; border-left: 0; } /* 枠なしの面にはレールを付けない(designer v94) */
 .card-title small { font: 500 11px/1.5 var(--sans); color: var(--ink-3); font-weight: 500; }
 .sub-title { font: 800 12.5px/1.4 var(--sans); color: var(--ink-2); margin: 14px 0 8px; }
 
@@ -268,18 +282,19 @@ a { color: var(--blue-deep); }
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  padding: 9px 0;
-  border-bottom: 1px dashed var(--line);
+  min-height: 56px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
 }
 .shop-info { display: flex; flex-direction: column; min-width: 0; }
-.shop-name { font: 700 13px/1.5 var(--sans); color: var(--ink); }
+.shop-name { font: 700 14px/1.5 var(--sans); color: var(--ink); }
 .shop-count { color: var(--blue-deep); font-family: var(--en); margin-left: 4px; }
-.shop-hint { font: 500 10.5px/1.5 var(--sans); color: var(--ink-3); }
-.cer { display: flex; gap: 6px; font: 500 10.5px/1.5 var(--sans); color: var(--ink-3); } /* v92: 費用/効果/リスクの3行型(社長⑥) */
-.cer > b { flex: 0 0 3.3em; font-weight: 700; color: var(--ink-2); } /* 「リスク」3字が折れない幅 */
-.cer > span { min-width: 0; }
-.jihi-item .cer { margin-top: -4px; }
-.jihi-item .cer + .cer { margin-top: -6px; }
+.shop-hint { font: 400 12px/1.5 var(--sans); color: var(--ink-3); }
+.cer { display: grid; grid-template-columns: 48px minmax(0, 1fr); column-gap: 6px; row-gap: 2px; margin-top: 2px; font: 400 13px/1.6 var(--sans); color: var(--ink-2); } /* v92: 費用/効果/リスクの3行型(社長⑥)。v94: 定義リスト型(designer B) */
+.cer > b { font: 500 11px/1.6 var(--sans); color: var(--ink-3); }
+.cer > span { min-width: 0; display: flex; gap: 4px; align-items: flex-start; }
+.cer.cost > span { color: var(--gold); font-weight: 700; }
+.cer.risk .ic { width: 14px; height: 14px; color: var(--red); margin: 4px 2px 0 0; }
 .shop-btns { display: flex; gap: 6px; flex: 0 0 auto; }
 
 .mini-btn {
@@ -287,13 +302,14 @@ a { color: var(--blue-deep); }
   background: var(--card);
   color: var(--ink-2);
   font: 700 12px/1 var(--sans);
-  border-radius: 9px;
+  border-radius: 10px;
   padding: 9px 11px;
   white-space: nowrap;
   min-height: 44px;
   min-width: 44px;
 }
-.mini-btn.plus { border-color: rgba(62,124,166,0.45); color: var(--blue-deep); background: var(--blue-pale); }
+.mini-btn.plus { border-color: var(--blue-deep); color: var(--blue-deep); background: var(--card); } /* v94: 塗りは「今日の1手/受ける」だけ。価格は金 */
+.mini-btn.plus .gold { color: var(--gold); }
 .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .op-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
@@ -428,7 +444,7 @@ input[type="range"]::-moz-range-thumb {
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; }
 .bar { width: 100%; max-width: 26px; border-radius: 4px 4px 0 0; }
 .bar.pos { background: linear-gradient(180deg, var(--green), var(--green-deep)); }
-.bar.neg { background: linear-gradient(180deg, #D98079, var(--red)); }
+.bar.neg { background: var(--red); }
 .bar-col span { font: 600 9px/1 var(--en); color: var(--ink-3); }
 
 /* 事業計画 */
@@ -474,7 +490,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .pv-track.big { height: 14px; margin-top: 5px; }
 .pv-track i { display: block; height: 100%; border-radius: 999px; transition: width 0.4s ease; }
-.pv-track i.low { background: linear-gradient(90deg, #D98079, var(--red)); }
+.pv-track i.low { background: var(--red); }
 .pv-track i.mid { background: linear-gradient(90deg, var(--blue), var(--blue-deep)); }
 .pv-track i.full { background: linear-gradient(90deg, var(--blue), var(--green)); }
 .pv-row {
@@ -792,7 +808,13 @@ input[type="range"]::-moz-range-thumb {
 /* 説明を開くと情報側が伸び、nowrap のボタンが最小幅より潰れて横にはみ出す(v81 実測)。
    ボタンは縮ませない(.dec-log .mini-btn の先例) */
 .rel-row > .mini-btn { flex: 0 0 auto; }
-.rel-stars { color: var(--blue); letter-spacing: 0.1em; font-size: 12px; }
+.rel-stars { color: var(--gold); letter-spacing: 0; font-size: 12px; display: inline-flex; gap: 2px; }
+.rel-stars .ic { width: 14px; height: 14px; margin: 0; }
+.rel-stars .ic.fill g { fill: var(--gold); stroke: var(--gold); }
+.rel-stars .ic:not(.fill) g { stroke: var(--line); }
+.mini-btn.two { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 92px; height: 44px; padding: 0 6px; line-height: 1.2; }
+.mini-btn.two small { font: 500 11px/1.2 var(--sans); }
+.mini-btn.two .num { font: 700 13px/1.2 var(--en); color: var(--gold); }
 
 /* ---------- 自費メニュー ---------- */
 
@@ -898,9 +920,10 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 12px;
   padding: 13px 18px;
   font: 700 14px/1.4 var(--sans);
-  background: linear-gradient(135deg, var(--blue) 0%, var(--green) 120%);
+  background: var(--blue-deep);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(62, 124, 166, 0.35);
+  box-shadow: none;
+  border-radius: 10px;
 }
 .btn-cta.ghost {
   background: transparent;
@@ -910,7 +933,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 10px;
   min-height: 44px; /* タップ領域44px(保留#38・v58)。modalの閉じる/計画の見直し/共有ボタンに効く */
 }
-.btn-cta.danger { background: linear-gradient(135deg, var(--red), #A94039); box-shadow: 0 4px 14px rgba(196,87,78,0.35); }
+.btn-cta.danger { background: var(--red); box-shadow: none; }
 
 /* ---------- チュートリアル ---------- */
 
@@ -981,17 +1004,16 @@ input[type="range"]::-moz-range-thumb {
 /* ---------- v6: 今日やること ---------- */
 
 /* Level クラス(v93 便AM-9): lv1=そのタブで今日最初にタップする1枚(藍レール+淡藍地・1タブ1枚) / lv2=白カード(既定) / lv3=操作の無い面(枠なし) */
-.lv1 { border-left: 4px solid var(--blue); background: var(--blue-pale); }
-.lv1 .td-row, .lv1 .rel-row, .lv1 .shop-row, .lv1 .mission-row { background: var(--card); }
+.lv1 { } /* v94: B では板と同じ。起点は見出しの藍レールと最上段の位置が示す */
 .lv3 { background: transparent; border: 0; box-shadow: none; padding: 0; }
 .lv3 > canvas { border-radius: var(--radius); display: block; }
 /* 今日の経営(v87 便AM-3): 1〜3行。各行=目標+進捗+タップ先。行全体が data-goto のボタン */
-.td-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 10px; margin: 6px 0 0; border: 1px solid var(--line); border-radius: 12px; background: var(--card); text-align: left; font: inherit; color: var(--ink); }
-.td-row.now { border-color: rgba(141,97,31,0.45); background: var(--amber-pale); }
-.td-num { flex: 0 0 auto; font: 800 15px/1 var(--en); color: var(--blue-deep); width: 22px; text-align: center; }
+.td-row { display: flex; align-items: center; gap: 10px; width: calc(100% + 28px); min-height: 56px; padding: 10px 14px; margin: 0 -14px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; text-align: left; font: inherit; color: var(--ink); }
+.td-row.now { background: var(--blue-pale); } /* いま押す行=決断の淡藍(v94。amber はお金へ) */
+.td-num { flex: 0 0 auto; font: 800 15px/1 var(--en); color: var(--blue-deep); width: 22px; text-align: center; display: inline-flex; justify-content: center; }
 .td-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.td-text { font: 700 13px/1.45 var(--sans); color: var(--ink); }
-.td-sub { font: 500 11px/1.5 var(--sans); color: var(--ink-2); }
+.td-text { font: 700 14px/1.4 var(--sans); color: var(--ink); }
+.td-sub { font: 400 12px/1.5 var(--sans); color: var(--ink-2); }
 .td-go { flex: 0 0 auto; font: 800 16px/1 var(--en); color: var(--blue-deep); }
 .td-row.td-req { cursor: default; }
 .td-row.done { border-color: var(--line); background: var(--card); opacity: 0.85; } /* 達成は ✅ だけで示す。緑地は使わない(designer v89・第22条) */
@@ -1022,11 +1044,11 @@ input[type="range"]::-moz-range-thumb {
 
 .fix-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .fix-chip {
-  border: 1.5px solid rgba(62,124,166,0.45);
+  border: 1px solid var(--blue-deep);
   background: var(--card);
   color: var(--blue-deep);
-  font: 700 12px/1.3 var(--sans);
-  border-radius: 999px;
+  font: 700 13px/1.3 var(--sans);
+  border-radius: 10px;
   padding: 9px 14px;
   min-height: 44px; /* v91: 36px だった。タップ領域 44px(社長⑨) */
 }
@@ -1154,10 +1176,10 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- v6: スマホは下部ナビ(親指ファースト) ---------- */
 
+@media (min-width: 361px) and (max-width: 374px) { .hud-val { font-size: 18px; } } /* v95 qa: 20px では「¥150万」が列幅 64px を 3px 超える。375px 以上は 20px */
 @media (max-width: 719px) {
   #hClock { display: none; } /* 時計は PC 幅だけ(Level2) */
   .brand { display: none; } /* v87: 画面の27%を占めたヘッダーを2段に。名は扉と PWA 名が持つ */
-  .hud-val { font-size: 16px; }
   .tabs {
     position: fixed;
     top: auto;
@@ -1166,22 +1188,14 @@ input[type="range"]::-moz-range-thumb {
     right: 0;
     max-width: none;
     z-index: 90;
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 -4px 20px rgba(34,51,61,0.12);
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-    gap: 6px;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    box-shadow: none;
+    padding: 0 4px calc(6px + env(safe-area-inset-bottom));
+    gap: 0;
   }
-  .tab-btn {
-    border: none;
-    border-radius: 12px;
-    margin-right: 0;
-    padding: 11px 4px;
-    background: transparent;
-  }
-  .tab-btn.on { background: var(--blue-pale); box-shadow: none; }
-  .tab-btn { font-size: 11px; padding: 11px 2px; }
+  .tab-btn { border-top: 3px solid transparent; border-radius: 0; margin-right: 0; padding: 8px 4px 6px; background: transparent; min-height: 56px; font-size: 10.5px; }
+  .tab-btn.on { background: transparent; border-top-color: var(--blue-deep); box-shadow: none; }
   .main { padding-bottom: 96px; }
   .toast { bottom: 88px; }
 }
@@ -1193,13 +1207,13 @@ input[type="range"]::-moz-range-thumb {
   .branch-card .ctrl-grid { grid-template-columns: repeat(2, 1fr); } /* 分院の操作パネルは2列: 正式名称の見出し(18字)が3列幅では折れて末尾1字が孤立する(v83 便AK designer) */
   .tabs { top: 108px; }
   .hud { gap: 8px 22px; }
-  .hud-val { font-size: 17px; }
+  .hud-val { font-size: 20px; } /* v95: 361px 以上は 20px(決裁 c・計測値) */
   .card { padding: 20px 24px; }
 }
 
 /* ---------- v10: 倍速パス・キャラ信頼度・依頼の受諾 ---------- */
 
-.bond-hearts { font-style: normal; color: #E05C7A; font-size: 10px; letter-spacing: 1px; margin-left: 2px; }
+.bond-hearts { font-style: normal; color: var(--red); font-size: 10px; letter-spacing: 1px; margin-left: 2px; }
 .chain-tag {
   font: 800 10px/1.4 var(--sans);
   color: var(--blue-deep);
@@ -1213,7 +1227,8 @@ input[type="range"]::-moz-range-thumb {
 .req-on { color: var(--blue-deep); }
 .req-passed { color: var(--ink-3); }
 .req-note { display: block; font: 500 10.5px/1.6 var(--sans); color: var(--ink-3); margin-top: 2px; }
-.fix-chip.ghost { background: var(--card); color: var(--ink-3); border-color: var(--line); }
+.fix-chip.ghost { background: var(--card); color: var(--ink-2); border-color: var(--line); }
+.td-req .fix-chip:not(.ghost) { background: var(--blue-deep); color: #fff; } /* 依頼の「受ける」=塗り */
 
 /* ---------- v11: 混雑離脱・スペシャル・月間決算 ---------- */
 
@@ -1369,7 +1384,7 @@ input[type="range"]::-moz-range-thumb {
 .acct-yen { font: 700 12px/1.3 var(--en); color: var(--blue-deep); flex: 0 0 auto; min-width: 84px; text-align: right; }
 
 /* ===== v20: 算定クイズ・応援配置 ===== */
-.todo-tag.quiz { background: #EEE6F7; color: #6B4E9B; }
+.todo-tag.quiz { background: var(--blue-pale); color: var(--blue-deep); }
 .quiz-q { font-weight: 700; line-height: 1.6; margin: 4px 0 10px; }
 .quiz-actions { display: flex; gap: 10px; }
 .quiz-actions .btn-cta { flex: 1; }
@@ -1395,7 +1410,7 @@ input[type="range"]::-moz-range-thumb {
 .walk-exit {
   pointer-events: auto; border: none; border-radius: 12px;
   background: rgba(34,51,61,0.85); color: #fff;
-  font: 700 13px/1 var(--sans); padding: 12px 16px;
+  font: 700 13px/1 var(--sans); padding: 12px 16px; white-space: nowrap; /* v96 qa: 320px で「視察を終える」が5行に折れた */
   box-shadow: 0 4px 14px rgba(34,51,61,0.35);
 }
 .walk-hint {
@@ -1449,13 +1464,15 @@ input[type="range"]::-moz-range-thumb {
 
 /* ===== v25: ペルソナ(人格)+📸現場の一コマ ===== */
 .persona-speech {
-  background: #FBF6EA; border: 1px solid #EAD9B8; border-radius: 12px;
+  background: var(--amber-pale); border: 1px solid var(--edge); border-radius: 12px;
   padding: 10px 14px; margin: 2px 0 12px;
-  font: 600 13.5px/1.65 var(--sans); color: #5A4A2E;
+  font: 600 13.5px/1.65 var(--sans); color: var(--amber);
   display: flex; align-items: center; gap: 9px;
 }
 .persona-speech svg { flex: 0 0 auto; }
-.walk-hud-right { display: flex; gap: 8px; pointer-events: auto; }
+.walk-hud-right { display: flex; gap: 8px; pointer-events: auto; flex: 0 0 auto; }
+.walk-hud-top .walk-info { min-width: 0; flex: 1 1 auto; } /* 縮むのは情報札の側 */
+@media (max-width: 400px) { .walk-hud-top { flex-wrap: wrap; } .walk-hud-right { margin-left: auto; } .walk-hud-top .walk-info { flex: 1 1 100%; order: 2; } } /* 狭い幅はボタン行→情報札の2段 */
 .walk-cam { font-size: 17px; padding: 12px 14px; }
 
 /* ===== 診療報酬KB統合(v33): 会計詳細・学習モード ===== */
@@ -1575,6 +1592,7 @@ input[type="range"]::-moz-range-thumb {
 .dec-rewind .op-btn { width: 100%; }
 
 /* ---------- v93 便AM-9: カード単位の畳み(経営タブ)。開閉は保存しない ---------- */
+.fold-h { margin: 0; font: inherit; } /* v95 保留#50: 見出し構造を保つ(畳んだ札の h2 は fold-head を包む) */
 .fold-head { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: inherit; }
 .fold-head b { font: 800 14.5px/1.5 var(--sans); color: var(--blue-deep); }
 .fold-head small { flex: 1 1 auto; font: 500 11px/1.5 var(--sans); color: var(--ink-3); }
@@ -1584,3 +1602,16 @@ input[type="range"]::-moz-range-thumb {
 .fold .fold-body > .card-title, .fold .fold-body > .card-head > .card-title { display: none; } /* 題は fold-head が持つ */
 .fold .fold-body > .card-head { justify-content: flex-end; }
 @media (prefers-reduced-motion: reduce) { .fold-head i { transition: none; } } /* 基底の .fold-head i より後ろに置く(同じ詳細度なので順序で決まる・qa v93) */
+
+/* ---------- v94 便AN-1: 線画アイコン(app/ui/icons.js)。絵文字の代わり ---------- */
+.ic { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: -0.22em; margin-right: 0.28em; flex: 0 0 auto; }
+.ic:last-child { margin-right: 0; }
+.ic.fill g { fill: currentColor; }
+.tab-btn .ic { display: block; width: 22px; height: 22px; margin: 0 auto 3px; }
+.icon-btn .ic, .speed-btn .ic, .mini-btn .ic, .fix-chip .ic { margin-right: 0.2em; }
+.card-title .ic, .fold-head b .ic { width: 1.1em; height: 1.1em; color: var(--blue-deep); }
+.td-num .ic { width: 20px; height: 20px; margin: 0; }
+
+/* ---------- v94 便AN-1: 数字は等幅(桁が揃う) ---------- */
+.shop-count, .pnl-row b, .jihi-stat b, .kpi b, .rs-item b, .lg-rev, .hud-val, .dec-line b, .cer > span, .fold-head small, .num { font-family: var(--en); font-variant-numeric: tabular-nums; }
+.cer > b { font-family: var(--sans); }

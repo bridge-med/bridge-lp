@@ -14,7 +14,7 @@
     // Day 7 は既定の日程では日曜休診で朝が無く、行としては出ない(週次サマリーのモーダルが夜に出る)。❓の一覧にだけ載せる(qa v89)
     { day: 7, title: '週次サマリーを読む', sub: '日曜の夜にモーダルで出る', goto: 'learn|#missionCard', done: (c) => c.day >= 8, guideOnly: true },
   ];
-  const FREE = { title: 'ここからは自由経営', sub: '次の目標は🎯ミッションに。どれからでも', goto: 'learn|#missionCard' };
+  const FREE = { title: 'ここからは自由経営', sub: '次の目標はミッションに。どれからでも', goto: 'learn|#missionCard' };
   const LAST = 7;
 
   function create(ctx) {
@@ -40,14 +40,14 @@
     function row() {
       const s = state();
       if (G.day > LAST) {
-        if (s.step < LAST) { s.step = LAST; return { tag: '🧭', text: FREE.title, sub: FREE.sub, goto: FREE.goto, now: true, free: true }; }
+        if (s.step < LAST) { s.step = LAST; return { tag: '<i data-ic="compass"></i>', text: FREE.title, sub: FREE.sub, goto: FREE.goto, now: true, free: true }; }
         return null;
       }
       if (s.step >= LAST) return null;
       const e = ONBOARD[Math.min(G.day, LAST) - 1];
       if (e.guideOnly) return null;
       const done = e.done(ctxNow());
-      return { tag: '🧭', text: `Day ${e.day} ${e.title}`, sub: done ? '✅ できた。次の1手は明日の朝に' : e.sub, goto: e.goto, now: !done, done };
+      return { tag: '<i data-ic="compass"></i>', text: `Day ${e.day} ${e.title}`, sub: done ? '<i data-ic="check"></i>できた。次の1手は明日の朝に' : e.sub, goto: e.goto, now: !done, done };
     }
     // ❓: 7日の一覧(Level2・押したときだけ)
     function guideHtml() {

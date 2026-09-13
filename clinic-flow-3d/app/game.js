@@ -2001,7 +2001,7 @@
   // 見出し行の右に置く統一部品。title は「何が開くか」(第14条)
   function learnBtn(id, title) {
     const o = learnIsOpen(id);
-    return `<button class="mini-btn learn-toggle${o ? ' on' : ''}" data-learn="${id}" aria-expanded="${o}"${title ? ` title="${title}"` : ''}>${o ? '📖 とじる' : '📖 くわしく'}</button>`;
+    return `<button class="mini-btn learn-toggle${o ? ' on' : ''}" data-learn="${id}" aria-expanded="${o}"${title ? ` title="${title}"` : ''}>${o ? '<i data-ic="book"></i>とじる' : '<i data-ic="book"></i>くわしく'}</button>`;
   }
   function learnRow(id, title) { return `<div class="learn-row">${learnBtn(id, title)}</div>`; }
   // 開閉を DOM に反映(描画しなおさない側)。ボタンの文言も同時に合わせる
@@ -2009,7 +2009,7 @@
     document.querySelectorAll('[data-learn-fold]').forEach((el) => { el.hidden = !learnIsOpen(el.dataset.learnFold); });
     document.querySelectorAll('[data-learn]').forEach((b) => {
       const o = learnIsOpen(b.dataset.learn);
-      b.textContent = o ? '📖 とじる' : '📖 くわしく';
+      b.innerHTML = o ? '<i data-ic="book"></i>とじる' : '<i data-ic="book"></i>くわしく'; if (window.ICONS) ICONS.mount(b);
       b.classList.toggle('on', o);
       b.setAttribute('aria-expanded', String(o));
     });
@@ -3135,7 +3135,7 @@
 
   // 経営判断の3行(費用/効果/リスク・v92 便AM-8・社長⑥)。数値は既存の算出だけを使い、測れないものは「まだ判定できない」
   function cerHtml(cost, effect, risk) {
-    return `<span class="cer"><b>費用</b><span>${cost || 'なし'}</span></span><span class="cer"><b>効果</b><span>${effect || 'まだ判定できない'}</span></span><span class="cer risk"><b>リスク</b><span>${risk || 'まだ判定できない'}</span></span>`;
+    return `<span class="cer cost"><b>費用</b><span class="num">${cost || 'なし'}</span></span><span class="cer"><b>効果</b><span>${effect || 'まだ判定できない'}</span></span><span class="cer risk"><b>リスク</b><span><i data-ic="alert"></i>${risk || 'まだ判定できない'}</span></span>`;
   }
   function renderShop() {
     const stage = unlockStage();
@@ -3161,7 +3161,7 @@
         </div>
         <div class="shop-btns">
           <button class="mini-btn" data-fire="${key}">−</button>
-          <button class="mini-btn plus" data-buy="${key}">＋ ${yen(shopCost(key))}</button>
+          <button class="mini-btn plus" data-buy="${key}">＋ <span class="num gold">${yen(shopCost(key))}</span></button>
         </div>
       </div>`;
     };
@@ -3475,7 +3475,7 @@
         <div class="rel-info"><b>${def.name}</b> <span class="rel-stars">${stars(r.lv, def.max)}</span>
         <small>${def.effect}${stale !== null ? ` / あと${stale}日で関係が冷える` : ''}</small>
         <small class="rel-desc"${foldAttr('rel')}>${def.desc}</small></div>
-        <button class="mini-btn plus" data-rel="${k}">${r.lv === 0 ? '挨拶に行く' : r.lv < def.max ? '関係を深める' : '定期訪問'} ${yen(def.cost)}</button>
+        <button class="mini-btn plus two" data-rel="${k}"><small>${r.lv === 0 ? '挨拶に行く' : r.lv < def.max ? '関係を深める' : '定期訪問'}</small><span class="num">${yen(def.cost)}</span></button>
       </div>`;
     }).join('');
     const salesTools = $('salesTools');
@@ -5099,7 +5099,7 @@
     const qs = clinic.queueSummary();
     qs.sort((a, b) => b[1] - a[1]);
     const [name, n] = qs[0];
-    $('bottleneck').textContent = n >= 3 ? `ボトルネック: ${name}(${n}人)` : 'ボトルネック: なし 😌';
+    $('bottleneck').textContent = n >= 3 ? `ボトルネック: ${name}(${n}人)` : 'ボトルネック: なし';
     $('bottleneck').classList.toggle('hot', n >= 3);
     $('panic').hidden = clinic.standingCount() === 0;
     const T = G.today;
@@ -5559,7 +5559,7 @@
       <p>いまの進行(Day ${G.day})をどうしますか。</p>
       <div class="op-row dec-rewind">
         <button class="op-btn has-note" id="decRwKeep">🗂 控えに残して戻る<span class="act-note">控えは1つだけ。経営タブの分岐点カードから戻れる</span></button>
-        <button class="op-btn has-note" id="decRwDrop">↩️ いまの進行を捨てて戻る<span class="act-note">Day ${e.day} 以降の進行は消える</span></button>
+        <button class="op-btn has-note" id="decRwDrop"><i data-ic="reset"></i> いまの進行を捨てて戻る<span class="act-note">Day ${e.day} 以降の進行は消える</span></button>
       </div>`, 'やめる');
     const fin = (keep) => {
       try {
