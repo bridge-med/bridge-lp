@@ -5677,12 +5677,24 @@
 
   clinicIso.resize();
   // v97 タウン C: 狭い幅では街を親の 1.7 倍で描き、横スクロールで見せる(本院の入口を中央に)。720px 以上は等倍
+  let heroNudged = false;
   function fitTownHero() {
     const narrow = window.innerWidth < 720;
     townIso.zoom = narrow ? 1.7 : 1;
+    townIso.topPad = narrow ? 1.0 : 1.6; // 狭い幅は街の奥をガラスの見出しの下へ潜らせる(designer v97 ⑤・zoom は据え置き。0.4 では本院のラベルが見出しに隠れた)
     townIso.resize();
     const sc = $('townHeroScroll');
-    if (sc && narrow) { const e = TOWN.CLINIC_ENTRANCE; const c = townIso.p(e.x + 0.5, e.y - 1); sc.scrollLeft = Math.max(0, c.x - sc.clientWidth / 2); sc.scrollTop = Math.max(0, c.y - sc.clientHeight * 0.6); }
+    if (sc && narrow) {
+      const e = TOWN.CLINIC_ENTRANCE; const c = townIso.p(e.x + 0.5, e.y - 1);
+      const target = Math.max(0, c.x - sc.clientWidth / 2);
+      sc.scrollLeft = target; sc.scrollTop = Math.max(0, c.y - sc.clientHeight * 0.6);
+      // 初回だけ 20px ずらして戻す(横に動かせる合図・designer v97 ③)。動きを減らす設定では出さない
+      if (!heroNudged && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        heroNudged = true; const t0 = performance.now();
+        const step = (t) => { const k = Math.min(1, (t - t0) / 500); sc.scrollLeft = target + 20 * (1 - k); if (k < 1) requestAnimationFrame(step); };
+        requestAnimationFrame(step);
+      }
+    }
   }
   // 見出しの高さを CSS 変数に(街のヒーローを見出しの下まで広げるため)
   const headEl = document.querySelector('.head');
