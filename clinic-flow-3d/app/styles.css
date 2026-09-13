@@ -227,7 +227,7 @@ a { color: var(--blue-deep); }
 .hero-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .hero-scroll::-webkit-scrollbar { display: none; }
 .hero-scroll canvas { display: block; }
-@media (max-width: 719px) {
+@media (max-width: 899px) {
   #tab-town.show { gap: 0; }
   #tab-town.show > .stage-wrap.hero { margin: calc(-1 * var(--head-h, 106px)) -14px 0; }
   #tab-town.show > .stage-wrap.hero .hero-scroll { max-height: 420px; }

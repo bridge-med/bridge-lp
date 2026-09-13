@@ -565,7 +565,7 @@
         const floors = Math.max(1, Math.round(b.h * S * 1.6 / 3));
         const wallHex = parseInt(b.wall.slice(1), 16), roofHex = parseInt(b.roof.slice(1), 16);
         const label = b.mine && clinicName ? clinicName : b.label;
-        LK.PROPS.building(G3, bx, bz, bw, bd, floors, wallHex, roofHex, { label });
+        LK.PROPS.building(G3, bx, bz, bw, bd, floors, wallHex, roofHex, { label, faces: b.mine ? ['s', 'n'] : ['s'] }); // 本院は街路に面する2面(北=メインストリート側)に入口と看板(designer v98)
         this.colliders.push({ x0: bx - 0.22, z0: bz - 0.22, x1: bx + bw + 0.22, z1: bz + bd + 0.55 });
         if (b.action || b.mine) {
           this.addAnchor(bx + bw / 2, bz + bd + 0.9, { kind: 'building', b }, Math.max(6.5, (bw + bd) / 2 + 2.5));
@@ -807,8 +807,13 @@
       P.door(G3, doorX - 0.6, L.H, 2.2);
       const mat = new THREE.Mesh(new THREE.PlaneGeometry(3, 1.4), M.plastic(0x9AA9B4));
       mat.rotation.x = -Math.PI / 2; mat.position.set(doorX + 0.5, 0.012, L.H - 0.75); mat.receiveShadow = true; G3.add(mat);
-      // 待合の腰壁(西面)
-      LK.box(G3, 0.07, 0.09, 7, 0.03, 0.81, 5, M.wainscot(), { noCast: true });
+      // 待合の腰壁: 西面(待合の全長)と南面(入口の手前まで)。掲示板は2枚(designer v98)
+      const wzz = L.ZONES.find((z) => z.key === 'wait');
+      if (wzz) {
+        LK.box(G3, 0.07, 0.09, wzz.y0 - 0.5, 0.03, 0.81, L.H - wzz.y0 + 0.4, M.wainscot(), { noCast: true });
+        LK.box(G3, 0, 0.09, L.H - 0.1, Math.max(1, doorX - 1.2), 0.81, 0.03, M.wainscot(), { noCast: true });
+        P.board(G3, Math.max(1.5, doorX - 3.2), 1.6, L.H - 0.09, 0);
+      }
 
       // 部屋(診察室・処置室・リハ室): 間仕切り壁+開口+ガラス帯+壁付けサイン
       const rooms = L.ZONES.filter((z) => z.need(s) && /^exam|^treat|^reha/.test(z.key));
@@ -1315,7 +1320,30 @@
         if (el) el.innerHTML = `<b>${h.line1}</b><br>${h.line2}`;
       }
       this.renderer.render(this.scene, this.camera);
+      this.measureFps(ts);
       this._raf = requestAnimationFrame((t) => this.frame(t));
+    }
+
+    // 実機の fps: 入って 1 秒後から 3 秒間の平均が 30 未満なら軽量化(影なし・解像度 1・霧を近く)。headless では測らない
+    measureFps(ts) {
+      const f = this._fps; if (!f || f.done) return;
+      const el = ts - f.t0;
+      if (el < 1000) return;
+      f.n++;
+      if (el >= 4000) {
+        f.done = true; const fps = f.n / ((el - 1000) / 1000);
+        this.lastFps = Math.round(fps);
+        if (fps < 30 && !(navigator.webdriver)) { Walk3D.lite = true; this.applyLite(); if (this.hooks.onLite) this.hooks.onLite(this.lastFps); }
+      }
+    }
+    applyLite() {
+      if (!this.renderer || this.liteApplied) return;
+      this.liteApplied = true;
+      this.renderer.setPixelRatio(1);
+      this.renderer.shadowMap.enabled = false;
+      if (this.rig) this.rig.sun.castShadow = false;
+      this.scene.fog.near = Math.min(this.scene.fog.near, 24); this.scene.fog.far = Math.min(this.scene.fog.far, 70);
+      this.scene.traverse((o) => { if (o.material && o.material.needsUpdate !== undefined) o.material.needsUpdate = true; });
     }
 
     resize() {
@@ -1335,6 +1363,8 @@
       this.placePlayer();
       this.active = true;
       this._fn = 0;
+      this._fps = { t0: performance.now(), n: 0, done: !!Walk3D.lite }; // 実機の fps 計測(1〜4 秒)。軽量化は1ページ内で覚える
+      if (Walk3D.lite) this.applyLite();
       window.WALK3D_LAST = this; // 検証用の取っ手(qa スクリプトが影や fps を読む)
       this.target = null;
       this._rotateDismissed = false;

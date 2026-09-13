@@ -92,12 +92,12 @@
     facadeFloor: (hex) => canvasTex('facadeFloor' + hex, 256, 256, (c, w, h) => {
       c.fillStyle = hex; c.fillRect(0, 0, w, h); noise(c, w, h, 0.035, 500);
       for (const x of [40, 152]) {
-        c.fillStyle = '#7F9DB4'; c.fillRect(x, 68, 64, 116);
-        const g = c.createLinearGradient(x, 68, x + 64, 184); g.addColorStop(0, 'rgba(255,255,255,0.45)'); g.addColorStop(0.5, 'rgba(255,255,255,0.05)'); g.addColorStop(1, 'rgba(40,60,80,0.25)');
-        c.fillStyle = g; c.fillRect(x, 68, 64, 116);
-        c.strokeStyle = '#4A5560'; c.lineWidth = 3; c.strokeRect(x, 68, 64, 116);
-        c.beginPath(); c.moveTo(x + 32, 68); c.lineTo(x + 32, 184); c.stroke(); // 中桟
-        c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(x - 4, 184, 72, 6); // 窓台
+        c.fillStyle = '#7F9DB4'; c.fillRect(x, 60, 64, 110);
+        const g = c.createLinearGradient(x, 60, x + 64, 170); g.addColorStop(0, 'rgba(255,255,255,0.45)'); g.addColorStop(0.5, 'rgba(255,255,255,0.05)'); g.addColorStop(1, 'rgba(40,60,80,0.25)');
+        c.fillStyle = g; c.fillRect(x, 60, 64, 110);
+        c.strokeStyle = '#4A5560'; c.lineWidth = 3; c.strokeRect(x, 60, 64, 110);
+        c.beginPath(); c.moveTo(x + 32, 60); c.lineTo(x + 32, 170); c.stroke(); // 中桟
+        c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(x - 4, 170, 72, 6); // 窓台(下端=地上 1.0m・designer v98)
       }
       c.fillStyle = 'rgba(0,0,0,0.10)'; c.fillRect(0, 248, w, 8); // 階の帯
     }, [1, 1]),
@@ -122,6 +122,7 @@
     }),
   };
 
+  const shade = (hex, k) => { const r = hex >> 16 & 255, g = hex >> 8 & 255, b = hex & 255; const f = (v) => Math.round(v * (1 - k)); return (f(r) << 16) | (f(g) << 8) | f(b); };
   const lighten = (hex, k) => { const r = hex >> 16 & 255, g = hex >> 8 & 255, b = hex & 255; const f = (v) => Math.round(v + (255 - v) * k); return (f(r) << 16) | (f(g) << 8) | f(b); };
   /* ---------- 材質(色ごとにキャッシュ) ---------- */
   const matCache = new Map();
@@ -372,13 +373,21 @@
       body.castShadow = true; body.receiveShadow = true; parent.add(body);
       box(parent, x - 0.15, H, z - 0.15, w + 0.3, 0.3, d + 0.3, roof); // 屋根スラブ
       if (floors >= 2) box(parent, x + w * 0.62, H + 0.3, z + d * 0.2, Math.min(2, w * 0.3), 1.1, Math.min(1.6, d * 0.4), MAT.plastic(0xC9CBCB)); // 屋上の機械室
-      // 入口(南面の中央): 枠+ガラス2枚(中桟)+庇
+      // 入口(面の中央): くぼみ 0.3m+枠+ガラス2枚(中桟)+庇。o.faces で街路に面する複数の面に(既定は南)
       const ex = x + w / 2, ew = Math.min(2.2, w * 0.5);
-      box(parent, ex - ew / 2, 0, z + d - 0.02, ew, 2.5, 0.18, MAT.plastic(0x8D959B), { noCast: true }); // 枠
-      box(parent, ex - ew / 2 + 0.1, 0.05, z + d + 0.1, ew - 0.2, 2.3, 0.05, MAT.plastic(0x5C7C92), { noCast: true }); // ガラスの奥行き(暗めの青灰)
-      box(parent, ex - 0.03, 0.05, z + d + 0.15, 0.06, 2.3, 0.02, MAT.white(), { noCast: true }); // 中桟
-      box(parent, ex - ew / 2 - 0.3, 2.55, z + d, ew + 0.6, 0.1, 0.8, MAT.plastic(0x5A6670)); // 庇
-      if (o.label) PROPS.sign(parent, ex, H - 0.7, z + d + 0.02, o.label, Math.min(w - 0.6, 0.62 * o.label.length + 1.2));
+      for (const f of (o.faces || ['s'])) {
+        const g = new T.Group(); parent.add(g);
+        if (f === 'n') { g.position.set(x + w, 0, z); g.rotation.y = Math.PI; } else g.position.set(x, 0, z);
+        // 以下は「南面(+z)・原点=建物の左手前」のローカル座標。北面は 180° 回して同じ部品を使う
+        const lx = w / 2;
+        box(g, lx - ew / 2 - 0.12, 0, d - 0.3, 0.12, 2.6, 0.3, MAT.plastic(0x8D959B), { noCast: true }); // くぼみの側壁
+        box(g, lx + ew / 2, 0, d - 0.3, 0.12, 2.6, 0.3, MAT.plastic(0x8D959B), { noCast: true });
+        box(g, lx - ew / 2 - 0.12, 2.5, d - 0.3, ew + 0.24, 0.1, 0.3, MAT.plastic(0x8D959B), { noCast: true }); // くぼみの天井
+        box(g, lx - ew / 2, 0.05, d - 0.3, ew, 2.3, 0.05, MAT.plastic(0x5C7C92), { noCast: true }); // ガラス戸(奥)
+        box(g, lx - 0.03, 0.05, d - 0.26, 0.06, 2.3, 0.02, MAT.white(), { noCast: true }); // 中桟
+        box(g, lx - ew / 2 - 0.3, 2.6, d - 0.02, ew + 0.6, 0.1, 0.8, MAT.plastic(0x5A6670)); // 庇
+        if (o.label) PROPS.sign(g, lx, H - 0.7, d + 0.02, o.label, Math.min(w - 0.6, 0.62 * o.label.length + 1.2));
+      }
       return body;
     },
     // 戸建て: 壁4面(南に玄関)+切妻屋根
@@ -432,7 +441,8 @@
   const FIG = {
     head: new T.SphereGeometry(0.12, 14, 12),
     hair: new T.SphereGeometry(0.128, 14, 10),
-    torso: new T.CylinderGeometry(0.17, 0.2, 0.60, 12),
+    torso: new T.BoxGeometry(0.34, 0.60, 0.20), // v98: 円柱→箱(近くで「こけし」に見えない)
+    neck: new T.CylinderGeometry(0.045, 0.05, 0.08, 8),
     hip: new T.CylinderGeometry(0.19, 0.17, 0.14, 10),
     leg: new T.CylinderGeometry(0.065, 0.075, 0.74, 8),
     arm: new T.CylinderGeometry(0.045, 0.05, 0.56, 8),
@@ -450,12 +460,14 @@
     const shoeR = new T.Mesh(FIG.shoe, MAT.plastic(0x2B2F33)); shoeR.position.set(0.085, 0.03, 0.03);
     const hip = new T.Mesh(FIG.hip, pants); hip.position.y = 0.78;
     const torso = new T.Mesh(FIG.torso, cloth); torso.position.y = 1.13;
-    const armL = new T.Mesh(FIG.arm, cloth); armL.position.set(-0.24, 1.12, 0);
-    const armR = new T.Mesh(FIG.arm, cloth); armR.position.set(0.24, 1.12, 0);
-    const head = new T.Mesh(FIG.head, MAT.skin()); head.position.y = 1.53;
+    const sleeve = MAT.cloth(shade(o.body !== undefined ? o.body : 0xF3F3F1, 0.14)); // 腕は袖色(胴より一段暗い)
+    const armL = new T.Mesh(FIG.arm, sleeve); armL.position.set(-0.235, 1.12, 0);
+    const armR = new T.Mesh(FIG.arm, sleeve); armR.position.set(0.235, 1.12, 0);
+    const neck = new T.Mesh(FIG.neck, MAT.skin()); neck.position.y = 1.45;
+    const head = new T.Mesh(FIG.head, MAT.skin()); head.position.y = 1.58;
     [legL, legR, hip, torso, armL, armR, head].forEach((m) => { m.castShadow = true; });
-    g.add(legL, legR, shoeL, shoeR, hip, torso, armL, armR, head);
-    if (o.hair !== undefined) { const hair = new T.Mesh(FIG.hair, MAT.hair(o.hair)); hair.position.y = 1.565; hair.scale.set(1, 0.75, 1); hair.castShadow = true; g.add(hair); }
+    g.add(legL, legR, shoeL, shoeR, hip, torso, armL, armR, neck, head);
+    if (o.hair !== undefined) { const hair = new T.Mesh(FIG.hair, MAT.hair(o.hair)); hair.position.y = 1.615; hair.scale.set(1, 0.75, 1); hair.castShadow = true; g.add(hair); }
     if (o.dot !== undefined) { const tag = new T.Mesh(FIG.tag, MAT.plastic(o.dot)); tag.position.set(0.08, 1.28, 0.19); g.add(tag); g.userData.tag = tag; } // 名札(段階・役割の色)
     g.userData.torso = torso; g.userData.limbs = { legL, legR, armL, armR };
     return g;

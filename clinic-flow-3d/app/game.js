@@ -5679,9 +5679,9 @@
   // v97 タウン C: 狭い幅では街を親の 1.7 倍で描き、横スクロールで見せる(本院の入口を中央に)。720px 以上は等倍
   let heroNudged = false;
   function fitTownHero() {
-    const narrow = window.innerWidth < 720;
+    const narrow = window.innerWidth < 720, hero = window.innerWidth < 900; // 720〜899 は等倍のままヒーロー(段差を 2 カラム切替の 900 に寄せる・designer v97 ⑥)
     townIso.zoom = narrow ? 1.7 : 1;
-    townIso.topPad = narrow ? 1.0 : 1.6; // 狭い幅は街の奥をガラスの見出しの下へ潜らせる(designer v97 ⑤・zoom は据え置き。0.4 では本院のラベルが見出しに隠れた)
+    townIso.topPad = hero ? 1.0 : 1.6; // ヒーローでは街の奥をガラスの見出しの下へ潜らせる(designer v97 ⑤・zoom は据え置き。0.4 では本院のラベルが見出しに隠れた)
     townIso.resize();
     const sc = $('townHeroScroll');
     if (sc && narrow) {
@@ -5789,6 +5789,7 @@
           getWeather: () => ensureWeather(),
           onStep: () => SND.step(),
           onAmbience: (kind) => SND.ambience(kind === 'rain' ? 'rain' : kind === 'ice' ? 'wind' : null),
+          onLite: (fps) => toast(`動きを軽くしました(影を省略・${fps}fps)`), // v98: 実機が 30fps 未満のとき
           getBuddyLine: (mode) => {
             const wx = ensureWeather();
             const cands = [];
