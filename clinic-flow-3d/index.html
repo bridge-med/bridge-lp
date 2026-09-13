@@ -36,17 +36,19 @@
       <button class="speed-btn" data-speed="1">×1</button>
       <button class="speed-btn on" data-speed="2">×2</button>
       <button class="speed-btn" data-speed="4">×4</button>
-      <button class="speed-btn" data-speed="8">×8</button>
-      <button class="speed-btn" data-speed="16">×16</button>
-      <button class="speed-btn" data-speed="32">×32</button>
       <button class="speed-btn skip" id="skipBtn" title="1日を自動運営でスキップ">⏩1日</button>
     </div>
     <div class="head-btns">
-      <button class="icon-btn" id="helpBtn" title="チュートリアル">❓</button>
-      <button class="icon-btn" id="moreBtn" title="設定" aria-expanded="false" aria-controls="headMore">⚙</button>
+      <button class="icon-btn" id="moreBtn" title="設定・高速・はじめの7日" aria-expanded="false" aria-controls="headMore">⚙</button>
     </div>
   </div>
   <div class="head-more" id="headMore" hidden>
+    <span class="speed-group speed-fast" role="group" aria-label="高速(パス)">
+      <button class="speed-btn" data-speed="8">×8</button>
+      <button class="speed-btn" data-speed="16">×16</button>
+      <button class="speed-btn" data-speed="32">×32</button>
+    </span>
+    <button class="icon-btn" id="helpBtn" title="はじめの7日">❓</button>
     <button class="icon-btn" id="notifyBtn" title="通知">🔕</button>
     <button class="icon-btn" id="soundBtn" title="効果音">🔊</button>
     <button class="icon-btn wide" id="resetBtn" title="はじめから">🔄 はじめから</button>
@@ -63,10 +65,11 @@
 
 <!-- ===== タブ ===== -->
 <nav class="tabs">
-  <button class="tab-btn on" data-tab="clinic">🏥 院内</button>
-  <button class="tab-btn" data-tab="town">🗺 タウン</button>
-  <button class="tab-btn" data-tab="corp">🏢 法人</button>
-  <button class="tab-btn" data-tab="mgmt">📊 経営</button>
+  <button class="tab-btn on" data-tab="clinic" data-icon="🏥" data-label="院内">🏥 院内</button>
+  <button class="tab-btn" data-tab="staff" data-icon="👥" data-label="スタッフ">👥 スタッフ</button>
+  <button class="tab-btn" data-tab="town" data-icon="🗺" data-label="タウン">🗺 タウン</button>
+  <button class="tab-btn" data-tab="mgmt" data-icon="📊" data-label="経営">📊 経営</button>
+  <button class="tab-btn" data-tab="learn" data-icon="📚" data-label="学び">📚 学び</button>
 </nav>
 
 <main class="main">
@@ -76,6 +79,10 @@
     <div class="card todo-card lv1" id="todoCard">
       <h2 class="card-title">📌 今日の経営</h2>
       <div id="todoBody"></div>
+    </div>
+    <div class="card yesterday-card" id="yesterdayCard" hidden>
+      <div class="card-head has-tool"><h2 class="card-title" id="yesterdayTitle">📋 昨日の結果</h2><span class="card-tools" id="yesterdayTools"></span></div>
+      <div id="yesterdayBody"></div>
     </div>
 
     <div class="stage-wrap">
@@ -94,9 +101,6 @@
       </div>
       <div class="panic" id="panic" hidden>🚨 待合がパンク。椅子と回転(受付・診察)を見直す</div>
     </div>
-
-    <div class="staff-strip" id="staffStrip"></div>
-
 
     <div class="card voice-card" id="voiceCard" hidden>
       <div id="voiceBody"></div>
@@ -122,7 +126,7 @@
     </div>
 
     <div class="card" id="shopCard">
-      <div class="card-head"><h2 class="card-title">🧰 スタッフ &amp; 設備 &amp; 大型投資</h2><span class="card-tools" id="shopTools"></span></div>
+      <div class="card-head"><h2 class="card-title">🧰 院内の打ち手 <small>受付・椅子・設備</small></h2><span class="card-tools" id="shopTools"></span></div>
       <div id="shopList"></div>
       <div class="op-row">
         <button class="op-btn" id="opReserve">📅 予約制 <small>¥50,000</small></button>
@@ -138,44 +142,44 @@
         <label class="ctrl">
           <span class="ctrl-head">診察時間(平均) <b id="vExamMean">6分</b></span>
           <input type="range" id="examMean" min="3" max="12" step="1" value="6">
-          <small class="ctrl-note">短い=回転UP / 長い=待ち時間UP</small>
+          <small class="ctrl-note" data-learn-fold="policy" hidden>短い=回転UP / 長い=待ち時間UP</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">関節注・ハイドロ方針 <b id="vPInj">20%</b></span>
           <input type="range" id="pInj" min="0" max="50" step="5" value="20">
-          <small class="ctrl-note">関節腔内注射80点+薬剤 ≈180点・診察やや延長</small>
+          <small class="ctrl-note" data-learn-fold="policy" hidden>関節腔内注射80点+薬剤 ≈180点・診察やや延長</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">トリガー/ブロック方針 <b id="vPTrig">12%</b></span>
           <input type="range" id="pTrig" min="0" max="40" step="4" value="12">
-          <small class="ctrl-note">トリガーポイント注射70点+薬剤 ≈120点</small>
+          <small class="ctrl-note" data-learn-fold="policy" hidden>トリガーポイント注射70点+薬剤 ≈120点</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">物療の案内方針 <b id="vPPhysio">35%</b></span>
           <input type="range" id="pPhysio" min="0" max="70" step="5" value="35">
-          <small class="ctrl-note">消炎鎮痛等処置35点・物療機器が必要</small>
+          <small class="ctrl-note" data-learn-fold="policy" hidden>消炎鎮痛等処置35点・物療機器が必要</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">処置の実施方針 <b id="vPTreat">15%</b></span>
           <input type="range" id="pTreat" min="0" max="50" step="5" value="15">
-          <small class="ctrl-note">創傷処置・ギプス等 ≈150点・看護師とベッド</small>
+          <small class="ctrl-note" data-learn-fold="policy" hidden>創傷処置・ギプス等 ≈150点・看護師とベッド</small>
         </label>
         <label class="ctrl">
           <span class="ctrl-head">運動器リハビリテーション料の提案方針 <b id="vPReha">35%</b></span>
           <input type="range" id="pReha" min="0" max="70" step="5" value="35">
-          <small class="ctrl-note">(III)85点〜(I)185点/単位・届出後</small>
+          <small class="ctrl-note" data-learn-fold="policy" hidden>(III)85点〜(I)185点/単位・届出後</small>
         </label>
       </div>
     </div>
 
-    <div class="card" id="jihiCard">
-      <div class="card-head"><h2 class="card-title">💰 自費メニュー <small>価格を自分で決める領域</small></h2><span class="card-tools" id="jihiTools"></span></div>
-      <div id="jihiList"></div>
-    </div>
+  </section>
 
-    <div class="card" id="itemCard">
-      <div class="card-head"><h2 class="card-title">🪙 アイテム &amp; プレミアム施設</h2><span class="card-tools" id="itemTools"></span></div>
-      <div id="itemList"></div>
+  <!-- ===== スタッフタブ(v88 便AM-4) ===== -->
+  <section class="tab-panel" id="tab-staff">
+    <div class="staff-strip" id="staffStrip"></div>
+    <div class="card" id="hireCard">
+      <div class="card-head"><h2 class="card-title">🧑‍⚕️ 採用 <small>医師・看護師・PT・助手</small></h2><span class="card-tools" id="hireTools"></span></div>
+      <div id="hireList"></div>
     </div>
   </section>
 
@@ -204,14 +208,6 @@
     </div>
   </section>
 
-  <!-- ===== 法人タブ ===== -->
-  <section class="tab-panel" id="tab-corp">
-    <div class="card" id="corpCard">
-      <h2 class="card-title">🏢 医療法人 — 分院展開 <small>— 専従要件は分院ごと</small></h2>
-      <div id="corpBody"></div>
-    </div>
-  </section>
-
   <!-- ===== 経営タブ ===== -->
   <section class="tab-panel" id="tab-mgmt">
     <div class="card formula" id="formulaCard">
@@ -222,13 +218,6 @@
         <div>単価 = 初再診料 + <b>処置</b> + <b>リハ単位</b>(施設基準で変わる) + 健診 + <b>自費</b></div>
         <div>利益 = 売上 − <b>固定費</b>(人件費・家賃) − 変動費 − 広告費 − 金利</div>
       </div>
-    </div>
-
-    <p class="mgmt-lock" id="mgmtLock" hidden>🔒 <b>Day 8 で解放:</b> KPIピン留め・事業計画・銀行融資・P&amp;L・施設基準・分院展開</p>
-
-    <div class="card" id="kpiCard">
-      <h2 class="card-title">📈 KPIモニタリング</h2>
-      <div id="kpiPicker"></div>
     </div>
 
     <div class="card" id="plannerCard">
@@ -266,27 +255,43 @@
       <h2 class="card-title">🏆 地域リーグ <small>— 町→市→県→地方→全国</small></h2>
       <div id="leagueBody"></div>
     </div>
+    <div class="card" id="corpCard">
+      <h2 class="card-title">🏢 医療法人 — 分院展開 <small>— 専従要件は分院ごと</small></h2>
+      <div id="corpBody"></div>
+    </div>
+    <div class="card" id="investCard">
+      <div class="card-head"><h2 class="card-title">🏗 大型投資 <small>MRI・DEXA・増築</small></h2><span class="card-tools" id="investTools"></span></div>
+      <div id="investList"></div>
+    </div>
+    <div class="card" id="jihiCard">
+      <div class="card-head"><h2 class="card-title">💰 自費メニュー <small>価格を自分で決める領域</small></h2><span class="card-tools" id="jihiTools"></span></div>
+      <div id="jihiList"></div>
+    </div>
+    <div class="card" id="itemCard">
+      <div class="card-head"><h2 class="card-title">🪙 アイテム &amp; プレミアム施設</h2><span class="card-tools" id="itemTools"></span></div>
+      <div id="itemList"></div>
+    </div>
 
+  </section>
+
+  <!-- ===== 学びタブ(v88 便AM-4) ===== -->
+  <section class="tab-panel" id="tab-learn">
     <div class="card" id="missionCard">
       <div class="card-head has-tool"><h2 class="card-title">🎯 ミッション <small>全19</small></h2><span class="card-tools" id="missionTools"></span></div>
       <div id="missionList"></div>
     </div>
-
     <div class="card" id="achCard">
       <h2 class="card-title">🏅 実績 <small>— 解除で💰資金+🪙コイン</small></h2>
       <div id="achList"></div>
     </div>
-
     <div class="card" id="prestigeCard">
       <h2 class="card-title">🏛 殿堂(プレステージ) <small>— 実績を引き継いで2周目へ</small></h2>
       <div id="prestigeBody"></div>
     </div>
-
     <div class="card">
       <h2 class="card-title">📖 外来経営のキホン集(全20条)</h2>
       <div id="textbook"></div>
     </div>
-
     <p class="note">※ 金額・点数・施設基準は教育用に簡略化したフィクションです(運動器リハは1回2単位で計算)。実際の診療報酬・施設基準は最新の告示をご確認ください。<br>まじめな外来設計は <a href="https://bridge-med.github.io/consult-simulator/" target="_blank" rel="noopener">ConsultSim</a>、経営判断の12週は <a href="../turnaround12/" target="_blank" rel="noopener">ターンアラウンド12</a> へ。</p>
   </section>
 
@@ -323,16 +328,6 @@
     <div class="tut-btns"><button class="btn-cta" id="gateGo"></button></div>
   </div>
 </div>
-<div class="tutorial" id="tutorial">
-  <div class="tut-box">
-    <div class="tut-head"><span class="tut-chara">🧑‍⚕️</span><span class="tut-step" id="tutStep">1 / 12</span></div>
-    <p class="tut-text" id="tutText"></p>
-    <div class="tut-btns">
-      <button class="tut-skip" id="tutSkip">スキップ</button>
-      <button class="btn-cta" id="tutNext">次へ →</button>
-    </div>
-  </div>
-</div>
 
 <script src="vendor/three.min.js"></script>
 <script src="data/kb-r08.js"></script>
@@ -365,6 +360,7 @@
 <script src="app/decisions/cases-09-equipment.js"></script>
 <script src="app/decisions/cases-10-organization.js"></script>
 <script src="app/ui/events.js"></script>
+<script src="app/ui/onboarding.js"></script>
 <script src="app/ui/dashboard.js"></script>
 <script src="app/ui/nav.js"></script>
 <script src="app/game.js"></script>
