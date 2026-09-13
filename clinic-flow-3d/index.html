@@ -185,10 +185,10 @@
 
   <!-- ===== タウンタブ ===== -->
   <section class="tab-panel" id="tab-town">
-    <div class="stage-wrap lv3">
-      <canvas id="townStage"></canvas>
+    <div class="stage-wrap lv3 hero" id="townHero">
+      <div class="hero-scroll" id="townHeroScroll" tabindex="0" aria-label="街の地図。横に動かして見る"><canvas id="townStage"></canvas></div>
       <div class="stage-overlay">
-        <div class="stage-badges"><span class="badge"><i data-ic="building"></i>建物をタップすると営業アクション</span><span class="badge" id="hcLegend" hidden><i data-ic="car"></i>藍の線=本日の訪問ルート(実線=済・点線=これから)</span></div>
+        <div class="stage-badges"><span class="badge"><i data-ic="building"></i>タップで営業アクション</span><span class="badge" id="hcLegend" hidden><i data-ic="car"></i>藍の線=本日の訪問ルート(実線=済・点線=これから)</span></div>
         <div class="view-group">
           <button class="view-btn walk-launch" id="walkTownBtn"><i data-ic="walk"></i>街を歩く(3D)</button>
         </div>

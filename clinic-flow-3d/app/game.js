@@ -3045,7 +3045,8 @@
       activeTab = tab;
     if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderVoice(); renderReceipt(); renderPulse(); renderShop(); renderYesterday(); }
     if (tab === 'staff') { renderStaffStrip(); renderShop(); }
-    if (tab === 'town') { townIso.resize(); renderAds(); }
+    document.body.classList.toggle('tab-town-on', tab === 'town'); // v97: 街タブは見出しをガラスにして 3D を主役に
+    if (tab === 'town') { fitTownHero(); renderAds(); }
     if (tab === 'mgmt') { renderPnl(); renderPlanner(); renderBank(); renderKpiPicker(); renderLeague(); renderAcct(); renderDecCard(); renderCorp(); renderShop(); renderJihi(); renderItems(); }
     if (tab === 'learn') { renderMissions(); renderAch(); renderPrestige(); }
     },
@@ -5675,8 +5676,33 @@
   applyLearn(); // レーンの既定と保存済みの開閉を DOM へ(v81 便AJ-2)
 
   clinicIso.resize();
-  townIso.resize();
-  window.addEventListener('resize', () => { clinicIso.resize(); townIso.resize(); });
+  // v97 タウン C: 狭い幅では街を親の 1.7 倍で描き、横スクロールで見せる(本院の入口を中央に)。720px 以上は等倍
+  let heroNudged = false;
+  function fitTownHero() {
+    const narrow = window.innerWidth < 720, hero = window.innerWidth < 900; // 720〜899 は等倍のままヒーロー(段差を 2 カラム切替の 900 に寄せる・designer v97 ⑥)
+    townIso.zoom = narrow ? 1.7 : 1;
+    townIso.topPad = hero ? 1.0 : 1.6; // ヒーローでは街の奥をガラスの見出しの下へ潜らせる(designer v97 ⑤・zoom は据え置き。0.4 では本院のラベルが見出しに隠れた)
+    townIso.resize();
+    const sc = $('townHeroScroll');
+    if (sc && narrow) {
+      const e = TOWN.CLINIC_ENTRANCE; const c = townIso.p(e.x + 0.5, e.y - 1);
+      const target = Math.max(0, c.x - sc.clientWidth / 2);
+      sc.scrollLeft = target; sc.scrollTop = Math.max(0, c.y - sc.clientHeight * 0.6);
+      // 初回だけ 20px ずらして戻す(横に動かせる合図・designer v97 ③)。動きを減らす設定では出さない
+      if (!heroNudged && sc.clientWidth > 0 && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) { // 街タブが表示中のときだけ(非表示で消費すると二度と出ない・PM v97)
+        heroNudged = true; const t0 = performance.now();
+        const step = (t) => { const k = Math.min(1, (t - t0) / 500); sc.scrollLeft = target + 20 * (1 - k); if (k < 1) requestAnimationFrame(step); };
+        requestAnimationFrame(step);
+      }
+    }
+  }
+  // 見出しの高さを CSS 変数に(街のヒーローを見出しの下まで広げるため)
+  const headEl = document.querySelector('.head');
+  const setHeadH = () => { if (headEl) document.documentElement.style.setProperty('--head-h', `${Math.round(headEl.getBoundingClientRect().height)}px`); };
+  if (headEl && typeof ResizeObserver !== 'undefined') new ResizeObserver(setHeadH).observe(headEl);
+  setHeadH();
+  fitTownHero();
+  window.addEventListener('resize', () => { clinicIso.resize(); fitTownHero(); });
 
   switchTab('clinic');
   const afterStart = () => {
@@ -5763,6 +5789,7 @@
           getWeather: () => ensureWeather(),
           onStep: () => SND.step(),
           onAmbience: (kind) => SND.ambience(kind === 'rain' ? 'rain' : kind === 'ice' ? 'wind' : null),
+          onLite: () => toast('動きを軽くしました(影を省略)'), // v98: 実機が 30fps 未満のとき(数値は出さない・designer)
           getBuddyLine: (mode) => {
             const wx = ensureWeather();
             const cands = [];

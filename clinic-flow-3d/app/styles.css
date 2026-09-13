@@ -28,6 +28,8 @@
   --red-pale: #FAE7E5;
   --line: #D4DFE5;
   --shadow: 0 4px 10px rgba(27, 44, 54, 0.08);
+  --shadow-up: 0 -2px 12px rgba(27,44,54,0.10); /* v97: 下辺に重なる板の影 */
+  --glass: color-mix(in srgb, var(--card) 90%, transparent); /* v97: 街タブの見出し(9.5px の --ink-3 が最悪でも 4.97:1) */
   --radius: 12px;
   --sans: 'Zen Kaku Gothic New', 'Noto Sans JP', 'Hiragino Sans', system-ui, sans-serif;
   --en: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -221,6 +223,25 @@ a { color: var(--blue-deep); }
 /* ---------- ステージ ---------- */
 
 .stage-wrap { position: relative; overflow: hidden; } /* v93: 3D はカード枠から出す(.lv3 が枠なしを持つ) */
+/* v97 タウン C(社長決裁 B.C.B): 街の 3D を主役に。狭い幅では見出しの下まで広げ、横スクロールで見回せる。営業先の板が下辺に重なる */
+.hero-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.hero-scroll::-webkit-scrollbar { display: none; }
+.hero-scroll canvas { display: block; }
+@media (max-width: 899px) {
+  #tab-town.show { gap: 0; }
+  #tab-town.show > .stage-wrap.hero { margin: calc(-1 * var(--head-h, 106px)) -14px 0; }
+  #tab-town.show > .stage-wrap.hero .hero-scroll { max-height: 420px; }
+  #tab-town.show > .stage-wrap.hero .stage-overlay { top: calc(var(--head-h, 106px) + 10px); }
+  #tab-town.show > .stage-wrap.hero + .card { margin-top: -24px; position: relative; z-index: 1; box-shadow: var(--shadow-up); } /* 営業先の板がヒーローの下辺に重なる */
+  #tab-town.show > .card + .card { margin-top: 14px; }
+  body.tab-town-on .head { background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  body.tab-town-on .tabs { background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); } /* 720〜899 は見出しの下にタブ行が来る(v98 ⑥)。街の上で読めるようにガラスに */
+  #tab-town .stage-badges { flex: 1 1 auto; min-width: 0; } #tab-town .stage-overlay .view-group { flex: 0 0 auto; margin-left: auto; }
+  #tab-town.show > .stage-wrap.hero .stage-badges { position: absolute; left: 0; bottom: 36px; max-width: calc(100% - 20px); } /* 案内札は左下(板の重なりの上)。見出し直下の帯は本院のラベルに空ける */
+  #tab-town.show > .stage-wrap.hero .stage-overlay { bottom: 0; pointer-events: none; }
+  #tab-town .stage-badges .badge { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* 案内札が本院のラベルに乗らない・ボタンの幅を先に確保(designer v97 ①) */
+  .hero-scroll { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%); } /* 端のラベルの切断を減衰に(②)。横に続く合図も兼ねる */
+}
 #clinicStage, #townStage { display: block; width: 100%; }
 
 .stage-overlay {
