@@ -5559,7 +5559,7 @@
       <p>いまの進行(Day ${G.day})をどうしますか。</p>
       <div class="op-row dec-rewind">
         <button class="op-btn has-note" id="decRwKeep">🗂 控えに残して戻る<span class="act-note">控えは1つだけ。経営タブの分岐点カードから戻れる</span></button>
-        <button class="op-btn has-note" id="decRwDrop">↩️ いまの進行を捨てて戻る<span class="act-note">Day ${e.day} 以降の進行は消える</span></button>
+        <button class="op-btn has-note" id="decRwDrop"><i data-ic="reset"></i> いまの進行を捨てて戻る<span class="act-note">Day ${e.day} 以降の進行は消える</span></button>
       </div>`, 'やめる');
     const fin = (keep) => {
       try {
