@@ -8,6 +8,7 @@ import { CategoryPicker } from '../components/CategoryPicker';
 import { TagPicker } from '../components/TagPicker';
 import { useColors } from '../components/ThemeProvider';
 import { Button } from '../components/ui';
+import { worthAnalyzing } from '../lib/assetize';
 import { quickMemos, workLogs } from '../lib/data';
 import { parseKey, todayKey } from '../lib/date';
 import { tapSuccess } from '../lib/haptics';
@@ -62,7 +63,12 @@ export default function LogEditScreen() {
     if (memoId) void quickMemos.upsert({ id: memoId, convertedToLogId: saved.id } as Partial<QuickMemo>);
     void wordbank.collectFrom([title, did, problem, devised, decision, people, result, learning, nextAction, memo].join(' '));
     tapSuccess();
-    router.back();
+    if (!existing && worthAnalyzing(saved)) {
+      // 入力は1回だけ：保存後はAIが資産化分析へ自動で枝分かれ（詳細画面で表示）。
+      router.replace({ pathname: `/log/${saved.id}`, params: { fresh: '1' } });
+    } else {
+      router.back();
+    }
   }
 
   const empty =
