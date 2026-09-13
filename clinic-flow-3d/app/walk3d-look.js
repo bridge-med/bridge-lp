@@ -377,7 +377,9 @@
       // 入口(面の中央): 0.3m の差し掛け(側壁2枚+天井)+ガラス2枚(中桟)+庇。本体は1枚の箱で穴を開けられないので、くぼみではなく張り出しで影の線を作る(designer v98-3)
       // o.faces で街路に面する複数の面に(既定は南)
       const ex = x + w / 2, ew = Math.min(2.2, w * 0.5);
-      for (const f of (o.faces || ['s'])) {
+      // faces の要素は 's'/'n' か { f, sign: 'top'(上端の大きな看板)|'door'(入口上の小さな札) }。正面(街路側)だけ上端の看板にして差を付ける(社長 2026-09-13)
+      for (const fe of (o.faces || ['s'])) {
+        const f = typeof fe === 'string' ? fe : fe.f, signKind = typeof fe === 'string' ? 'top' : (fe.sign || 'top');
         const g = new T.Group(); parent.add(g);
         // 「南面(+z)・原点=建物の左手前」のローカル座標で組み、北面は原点を右奥(x+w, z+d)に置いて 180° 回す
         if (f === 'n') { g.position.set(x + w, 0, z + d); g.rotation.y = Math.PI; } else g.position.set(x, 0, z);
@@ -388,7 +390,8 @@
         box(g, lx - ew / 2, 0.05, d + 0.05, ew, 2.3, 0.05, MAT.plastic(0x5C7C92), { noCast: true }); // ガラス戸
         box(g, lx - 0.03, 0.05, d + 0.09, 0.06, 2.3, 0.02, MAT.white(), { noCast: true }); // 中桟
         box(g, lx - ew / 2 - 0.3, 2.6, d + 0.28, ew + 0.6, 0.1, 0.8, MAT.plastic(0x5A6670)); // 庇
-        if (o.label) PROPS.sign(g, lx, H - 0.7, d + 0.02, o.label, Math.min(w - 0.6, 0.62 * o.label.length + 1.2));
+        if (o.label && signKind === 'top') PROPS.sign(g, lx, H - 0.7, d + 0.02, o.label, Math.min(w - 0.6, 0.62 * o.label.length + 1.2));
+        else if (o.label) PROPS.sign(g, lx, 3.35, d + 0.02, o.label, Math.min(ew + 0.4, 0.34 * o.label.length + 0.6)); // 入口上の札(庇 2.6m の上・低い視点でも庇に隠れない・2階の窓下端 4.0m より下)
       }
       return body;
     },

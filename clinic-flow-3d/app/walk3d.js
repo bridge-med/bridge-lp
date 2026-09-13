@@ -565,7 +565,7 @@
         const floors = Math.max(1, Math.round(b.h * S * 1.6 / 3));
         const wallHex = parseInt(b.wall.slice(1), 16), roofHex = parseInt(b.roof.slice(1), 16);
         const label = b.mine && clinicName ? clinicName : b.label;
-        LK.PROPS.building(G3, bx, bz, bw, bd, floors, wallHex, roofHex, { label, faces: b.mine ? ['s', 'n'] : ['s'] }); // 本院は街路に面する2面(北=メインストリート側)に入口と看板(designer v98)
+        LK.PROPS.building(G3, bx, bz, bw, bd, floors, wallHex, roofHex, { label, faces: b.mine ? [{ f: 'n', sign: 'top' }, { f: 's', sign: 'door' }] : ['s'] }); // 本院の正面は街路側(北)=上端の看板、南は入口上の札(社長 2026-09-13・designer v98)
         this.colliders.push({ x0: bx - 0.22, z0: bz - (b.mine ? 0.55 : 0.22), x1: bx + bw + 0.22, z1: bz + bd + 0.55 }); // 入口の差し掛け 0.3m の分(本院は北面にも)
         if (b.action || b.mine) {
           this.addAnchor(bx + bw / 2, bz + bd + 0.9, { kind: 'building', b }, Math.max(6.5, (bw + bd) / 2 + 2.5));
