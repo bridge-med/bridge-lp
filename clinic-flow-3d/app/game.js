@@ -5689,7 +5689,7 @@
       const target = Math.max(0, c.x - sc.clientWidth / 2);
       sc.scrollLeft = target; sc.scrollTop = Math.max(0, c.y - sc.clientHeight * 0.6);
       // 初回だけ 20px ずらして戻す(横に動かせる合図・designer v97 ③)。動きを減らす設定では出さない
-      if (!heroNudged && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      if (!heroNudged && sc.clientWidth > 0 && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) { // 街タブが表示中のときだけ(非表示で消費すると二度と出ない・PM v97)
         heroNudged = true; const t0 = performance.now();
         const step = (t) => { const k = Math.min(1, (t - t0) / 500); sc.scrollLeft = target + 20 * (1 - k); if (k < 1) requestAnimationFrame(step); };
         requestAnimationFrame(step);
