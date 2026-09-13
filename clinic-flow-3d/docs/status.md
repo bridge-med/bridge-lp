@@ -1,6 +1,6 @@
 # 現在地(clinic-flow-3d)
 
-版: `ct3d-v93`(sw.js の VER)。公開URL: https://bridge-med.github.io/bridge-lp/clinic-flow-3d/
+版: `ct3d-v96`(sw.js の VER)。公開URL: https://bridge-med.github.io/bridge-lp/clinic-flow-3d/
 
 ## 主要システム
 
@@ -33,6 +33,7 @@
 | ui/nav.js | タブのナビゲーション(v86 抽出・v88 で5カテゴリ) |
 | ui/onboarding.js | 導入シナリオ Day1〜7(v89) |
 | ui/fold.js | カード単位の畳み(v93・経営タブ) |
+| ui/icons.js | SVG 線画のアイコン部品と絵文字の置換(v94・デザイン系 B) |
 | iso.js | 共有アイソメトリック描画エンジン |
 | kasan.js | 体制加算の計上・届出ゲーティング |
 | persona.js | 患者・関係機関・スタッフの人格生成 |
@@ -47,6 +48,7 @@
 | staff.js | 現場スタッフのキャラクター |
 | styles.css | スタイル一式 |
 | town.js | タウンマップ(商圏・営業先) |
+| walk3d-look.js | 3D視察の見た目(材質・什器・人物・光・天球。v96) |
 | walk3d.js | 3D視察モード(Three.js一人称) |
 | zaisokan.js | 在医総管の単一建物人数セル選択 |
 
@@ -62,9 +64,9 @@
 
 - architecture.md・game-design.md・specialty-module.md: 実装の解説。本ファイルの現在地に追随、版番号は持たない
 - ROADMAP.md・docs/roadmap.md: 履歴ログ専用。出荷当時の記述のまま(現行仕様の根拠にしない)
-- docs/ux-audit-v85.md: 便AMのUX監査・改善案・実装計画(v85〜v93)
+- docs/ux-audit-v85.md: 便AMのUX監査・改善案・実装計画(v85〜v93)と便ANのデザイン系(§4・v94〜v96)
 - docs/first-look-test.md: 初見テスト(便AM 完成条件⑰)の観察の型。実施は社長の人選後
 
 ## 次の一手
 
-docs/ux-audit-v85.md の「3. 実装計画」表(v86〜v93・3PR)を参照
+docs/ux-audit-v85.md の「3. 実装計画」表(v86〜v96・4PR)を参照。便AN の残: タウン C 画面(v97)・3D 視察の次便分(保留#53)・実機 fps(保留#54)
