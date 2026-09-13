@@ -3045,7 +3045,8 @@
       activeTab = tab;
     if (tab === 'clinic') { clinicIso.resize(); renderKpiStrip(); renderVoice(); renderReceipt(); renderPulse(); renderShop(); renderYesterday(); }
     if (tab === 'staff') { renderStaffStrip(); renderShop(); }
-    if (tab === 'town') { townIso.resize(); renderAds(); }
+    document.body.classList.toggle('tab-town-on', tab === 'town'); // v97: 街タブは見出しをガラスにして 3D を主役に
+    if (tab === 'town') { fitTownHero(); renderAds(); }
     if (tab === 'mgmt') { renderPnl(); renderPlanner(); renderBank(); renderKpiPicker(); renderLeague(); renderAcct(); renderDecCard(); renderCorp(); renderShop(); renderJihi(); renderItems(); }
     if (tab === 'learn') { renderMissions(); renderAch(); renderPrestige(); }
     },
@@ -5675,8 +5676,21 @@
   applyLearn(); // レーンの既定と保存済みの開閉を DOM へ(v81 便AJ-2)
 
   clinicIso.resize();
-  townIso.resize();
-  window.addEventListener('resize', () => { clinicIso.resize(); townIso.resize(); });
+  // v97 タウン C: 狭い幅では街を親の 1.7 倍で描き、横スクロールで見せる(本院の入口を中央に)。720px 以上は等倍
+  function fitTownHero() {
+    const narrow = window.innerWidth < 720;
+    townIso.zoom = narrow ? 1.7 : 1;
+    townIso.resize();
+    const sc = $('townHeroScroll');
+    if (sc && narrow) { const e = TOWN.CLINIC_ENTRANCE; const c = townIso.p(e.x + 0.5, e.y - 1); sc.scrollLeft = Math.max(0, c.x - sc.clientWidth / 2); sc.scrollTop = Math.max(0, c.y - sc.clientHeight * 0.6); }
+  }
+  // 見出しの高さを CSS 変数に(街のヒーローを見出しの下まで広げるため)
+  const headEl = document.querySelector('.head');
+  const setHeadH = () => { if (headEl) document.documentElement.style.setProperty('--head-h', `${Math.round(headEl.getBoundingClientRect().height)}px`); };
+  if (headEl && typeof ResizeObserver !== 'undefined') new ResizeObserver(setHeadH).observe(headEl);
+  setHeadH();
+  fitTownHero();
+  window.addEventListener('resize', () => { clinicIso.resize(); fitTownHero(); });
 
   switchTab('clinic');
   const afterStart = () => {

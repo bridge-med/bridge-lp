@@ -221,6 +221,19 @@ a { color: var(--blue-deep); }
 /* ---------- ステージ ---------- */
 
 .stage-wrap { position: relative; overflow: hidden; } /* v93: 3D はカード枠から出す(.lv3 が枠なしを持つ) */
+/* v97 タウン C(社長決裁 B.C.B): 街の 3D を主役に。狭い幅では見出しの下まで広げ、横スクロールで見回せる。営業先の板が下辺に重なる */
+.hero-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.hero-scroll::-webkit-scrollbar { display: none; }
+.hero-scroll canvas { display: block; }
+@media (max-width: 719px) {
+  #tab-town.show { gap: 0; }
+  #tab-town.show > .stage-wrap.hero { margin: calc(-1 * var(--head-h, 106px)) -14px 0; }
+  #tab-town.show > .stage-wrap.hero .hero-scroll { max-height: 420px; }
+  #tab-town.show > .stage-wrap.hero .stage-overlay { top: calc(var(--head-h, 106px) + 10px); }
+  #tab-town.show > .stage-wrap.hero + .card { margin-top: -24px; position: relative; z-index: 1; box-shadow: 0 -2px 12px rgba(27,44,54,0.10); } /* 営業先の板がヒーローの下辺に重なる */
+  #tab-town.show > .card + .card { margin-top: 14px; }
+  body.tab-town-on .head { background: rgba(255,255,255,0.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+}
 #clinicStage, #townStage { display: block; width: 100%; }
 
 .stage-overlay {

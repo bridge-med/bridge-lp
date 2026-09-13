@@ -12,17 +12,19 @@ class Iso {
     this.H = gridH;
     this.maxTileW = (opts && opts.maxTileW) || 64;
     this.topPad = (opts && opts.topPad) || 0.9;
+    this.zoom = (opts && opts.zoom) || 1; // v97: 親より広く描いて横スクロールで見せる(街のヒーロー)
     this.time = 0; // アニメーション用(ms)
     this.tw = 48; this.th = 24; this.ox = 0; this.oy = 0; this.dpr = 1;
   }
 
   resize() {
-    const cw = this.canvas.parentElement.clientWidth;
+    const cw = Math.round(this.canvas.parentElement.clientWidth * (this.zoom || 1));
     this.tw = Math.min(this.maxTileW, (cw - 24) * 2 / (this.W + this.H));
     this.th = this.tw / 2;
     const gh = (this.W + this.H) * this.th / 2 + this.tw * 1.7;
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
     this.canvas.style.height = `${gh}px`;
+    this.canvas.style.width = this.zoom !== 1 ? `${cw}px` : '';
     this.canvas.width = cw * this.dpr;
     this.canvas.height = gh * this.dpr;
     this.ox = cw / 2 + (this.H - this.W) * this.tw / 4;
