@@ -1,6 +1,6 @@
 # 現在地(clinic-flow-3d)
 
-版: `ct3d-v96`(sw.js の VER)。公開URL: https://bridge-med.github.io/bridge-lp/clinic-flow-3d/
+版: `ct3d-v98`(sw.js の VER)。公開URL: https://bridge-med.github.io/bridge-lp/clinic-flow-3d/
 
 ## 主要システム
 
@@ -69,4 +69,4 @@
 
 ## 次の一手
 
-docs/ux-audit-v85.md の「3. 実装計画」表(v86〜v96・4PR)を参照。便AN の残: タウン C 画面(v97)・3D 視察の次便分(保留#53)・実機 fps(保留#54)
+docs/ux-audit-v85.md の「3. 実装計画」表(v86〜v98・5PR)を参照。便AN の残: 保留#57(街の 3D の高さ=社長の審美判断)・実機 fps の実測値(保留#54・v98 で自動軽量化は入った)
