@@ -12,6 +12,7 @@
    守っていること:
    - 通常スクロールを乗っ取らない(scrollY を読むだけ)
    - 画面外・非表示タブでは描画を止める(IntersectionObserver + visibilitychange)
+   - 常に動く: ガラスの中を光がゆっくり流れ、二本の板が呼吸のように角度と位置を変え続ける(uTime)
    - prefers-reduced-motion では静止した1枚を描くだけ(スクロール・時間・ポインタの追従なし)
    - 失敗したら何もせず静止画のまま(本文とボタンはこの script と無関係に最初から使える)
    - 色は CSS トークン(--hb-deep / --hb-mid / --hb-mint / --hb-sky)、置き方と濃さは --hb-dist/-x/-y/-scale/-alpha から読む=ライト/ダークに追従
@@ -45,7 +46,7 @@
   ].join('\n');
   const FS = [
     'precision mediump float;',
-    'uniform vec3 uCam; uniform vec3 uDeep; uniform vec3 uMid; uniform vec3 uMint; uniform vec3 uSky; uniform float uReveal; uniform float uDark; uniform float uAlpha;',
+    'uniform vec3 uCam; uniform vec3 uDeep; uniform vec3 uMid; uniform vec3 uMint; uniform vec3 uSky; uniform float uReveal; uniform float uDark; uniform float uAlpha; uniform float uTime;',
     'varying vec3 vPos; varying vec3 vNrm; varying vec2 vUv; varying float vKind;',
     'void main(){',
     '  float edge = smoothstep(uReveal, uReveal - 0.06, vUv.x);',
@@ -63,7 +64,11 @@
     '  vec3 tint = mix(uDeep, uMid, g);',
     '  tint = mix(tint, uMint, pow(sky, 3.0) * 0.55);',
     '  float a = uAlpha + fr * 0.55;',
+    '  float s1 = fract(uTime * 0.055); float s2 = fract(uTime * 0.055 + 0.5);',
+    '  float d1 = vUv.x - s1; float d2 = vUv.x - s2;',
+    '  float glow = exp(-d1 * d1 * 90.0) * 0.55 + exp(-d2 * d2 * 160.0) * 0.3;',
     '  vec3 col = tint * (0.62 + 0.38 * sky) + env * fr * 0.55 + uSky * sp;',
+    '  col += uMint * glow * (0.6 + 0.4 * sky); a = min(1.0, a + glow * 0.22);',
     '  if (vKind > 0.5) { a = min(1.0, a + 0.38); col = mix(col, uMint, 0.45) + uSky * sp; }',
     '  a *= edge;',
     '  gl_FragColor = vec4(col * a, a);',
@@ -85,7 +90,7 @@
   gl.useProgram(prog);
   const A = { pos: gl.getAttribLocation(prog, 'aPos'), nrm: gl.getAttribLocation(prog, 'aNrm'), uv: gl.getAttribLocation(prog, 'aUv'), kind: gl.getAttribLocation(prog, 'aKind') };
   const U = {};
-  ['uProj', 'uView', 'uModel', 'uCam', 'uDeep', 'uMid', 'uMint', 'uSky', 'uReveal', 'uDark', 'uAlpha'].forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+  ['uProj', 'uView', 'uModel', 'uCam', 'uDeep', 'uMid', 'uMint', 'uSky', 'uReveal', 'uDark', 'uAlpha', 'uTime'].forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   /* ---------- tiny vector / matrix helpers ---------- */
   const v3 = (x, y, z) => [x, y, z];
@@ -280,16 +285,16 @@
     gl.uniformMatrix4fv(U.uView, false, lookAt(eye, [0.3, 0.1, 0], [0, 1, 0]));
     gl.uniform3fv(U.uCam, eye);
     gl.uniform3fv(U.uDeep, cols.deep); gl.uniform3fv(U.uMid, cols.mid); gl.uniform3fv(U.uMint, cols.mint); gl.uniform3fv(U.uSky, cols.sky);
-    gl.uniform1f(U.uReveal, reveal); gl.uniform1f(U.uDark, cols.dark); gl.uniform1f(U.uAlpha, lay.alpha);
+    gl.uniform1f(U.uReveal, reveal); gl.uniform1f(U.uDark, cols.dark); gl.uniform1f(U.uAlpha, lay.alpha); gl.uniform1f(U.uTime, time);
 
     const ease = 1 - Math.pow(1 - reveal, 3);
-    const ry = -0.42 + ptr.x * 0.07 + p * 0.55 + (1 - ease) * 0.35;
-    const rx = 0.16 + ptr.y * 0.05 - p * 0.12;
-    const ty = lay.y - p * 1.1 + Math.sin(time * 0.5) * 0.04;
+    const ry = -0.42 + ptr.x * 0.07 + p * 0.55 + (1 - ease) * 0.35 + Math.sin(time * 0.21) * 0.06;
+    const rx = 0.16 + ptr.y * 0.05 - p * 0.12 + Math.sin(time * 0.16 + 1.2) * 0.03;
+    const ty = lay.y - p * 1.1 + Math.sin(time * 0.33) * 0.08;
     const scale = lay.scale;
     const draws = [
-      { g: rise, m: mat(rx, ry + 0.02, 0.03 + Math.sin(time * 0.37) * 0.015, [lay.x + 0.15, ty + 0.05 + Math.sin(time * 0.61) * 0.03, 0], scale) },
-      { g: arch, m: mat(rx, ry, -0.02 + Math.sin(time * 0.29) * 0.015, [lay.x, ty, 0], scale) },
+      { g: rise, m: mat(rx - Math.sin(time * 0.27) * 0.02, ry + 0.02 + Math.sin(time * 0.24 + 0.8) * 0.04, 0.03 + Math.sin(time * 0.37) * 0.02, [lay.x + 0.15 + Math.sin(time * 0.19) * 0.06, ty + 0.05 + Math.sin(time * 0.41 + 2.0) * 0.07, 0], scale) },
+      { g: arch, m: mat(rx, ry - Math.sin(time * 0.24 + 0.8) * 0.02, -0.02 + Math.sin(time * 0.29) * 0.02, [lay.x - Math.sin(time * 0.19) * 0.04, ty, 0], scale) },
     ];
     draws.forEach(d => {
       gl.uniformMatrix4fv(U.uModel, false, d.m);
