@@ -157,12 +157,14 @@ a { color: var(--blue-deep); }
 
 .tabs {
   position: sticky;
-  top: 118px;
+  top: var(--head-h, 118px); /* 見出しの直下に貼り付く(高さは JS が --head-h に書く) */
   z-index: 55;
   max-width: 920px;
   margin: 0 auto;
   display: flex;
   padding: 0 14px;
+  background: var(--card); /* v99.1: PC 幅で背景が無く、スクロールすると本文に透けて重なった(社長 2026-09-21) */
+  border-bottom: 1px solid var(--line);
 }
 .tab-btn {
   flex: 1;
@@ -1226,7 +1228,7 @@ input[type="range"]::-moz-range-thumb {
 @media (min-width: 720px) {
   .ctrl-grid { grid-template-columns: repeat(3, 1fr); }
   .branch-card .ctrl-grid { grid-template-columns: repeat(2, 1fr); } /* 分院の操作パネルは2列: 正式名称の見出し(18字)が3列幅では折れて末尾1字が孤立する(v83 便AK designer) */
-  .tabs { top: 108px; }
+  .tabs { top: var(--head-h, 108px); }
   .hud { gap: 8px 22px; }
   .hud-val { font-size: 20px; } /* v95: 361px 以上は 20px(決裁 c・計測値) */
   .card { padding: 20px 24px; }
@@ -1355,8 +1357,8 @@ input[type="range"]::-moz-range-thumb {
   #tab-mgmt.show > .note { grid-column: 1 / -1; }
 }
 
-/* 横持ちスマホ(背が低い): ヘッダーを流して遊び場を最大化 */
-@media (min-width: 900px) and (max-height: 540px) {
+/* 横持ちスマホ(背が低い・タッチ): ヘッダーを流して遊び場を最大化。PC はズームで背が低くなっても資金の見出しを固定したまま(社長 2026-09-21) */
+@media (min-width: 900px) and (max-height: 540px) and (pointer: coarse) {
   .head { position: static; }
   .tabs { position: static; }
   .eyebrow { display: none; }

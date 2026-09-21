@@ -170,7 +170,7 @@
             <button class="walk-exit" id="walkExit">✕ 視察を終える</button>
           </div>
         </div>
-        <div class="walk-hint">🕹 左タッチ: 移動 ・ 右ドラッグ: 見回す ・ WASD対応</div>
+        <div class="walk-hint">🕹 左半分ドラッグ: 移動 ・ 右半分ドラッグ: 見回す ・ WASD/矢印キー</div>
         <button class="walk-act" id="walkAct" style="display:none"></button>
         <div class="walk-stick" id="walkStick"><div class="walk-knob" id="walkKnob"></div></div>
         <div class="walk-rotate" id="walkRotate" style="display:none">
@@ -1068,7 +1068,7 @@
       let stickPt = null; // フローティングスティック: 左側タッチの基点
       cv.addEventListener('pointerdown', (e) => {
         cv.setPointerCapture(e.pointerId);
-        if (e.pointerType === 'touch' && !stickPt && e.clientX < window.innerWidth * 0.45) {
+        if (!stickPt && e.clientX < window.innerWidth * 0.45 && (e.pointerType === 'touch' || e.button === 0)) { // マウスも左側は移動(PC で前に進めなかった・社長 2026-09-21)
           stickPt = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() };
           stickEl.style.left = (e.clientX - 64) + 'px';
           stickEl.style.top = (e.clientY - 64) + 'px';
@@ -1113,15 +1113,18 @@
       };
       cv.addEventListener('pointerup', endPointer);
       cv.addEventListener('pointercancel', endPointer);
+      const CODE2KEY = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', ArrowUp: 'arrowup', ArrowDown: 'arrowdown', ArrowLeft: 'arrowleft', ArrowRight: 'arrowright' };
       this._onKey = (e) => {
         if (!this.active) return;
-        const k = e.key.toLowerCase();
-        if (e.type === 'keydown' && k === 'escape') { this.exit(); return; }
-        if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) {
+        if (e.type === 'keydown' && (e.key === 'Escape' || e.code === 'Escape')) { this.exit(); return; }
+        // 物理キー(e.code)で判定する。日本語 IME がオンだと e.key が 'Process' になり WASD が効かなかった(社長 PC 2026-09-21)
+        const k = CODE2KEY[e.code] || (e.key && CODE2KEY[{ w: 'KeyW', a: 'KeyA', s: 'KeyS', d: 'KeyD' }[e.key.toLowerCase()]]) ;
+        if (k) {
           this.keys[k] = e.type === 'keydown';
           e.preventDefault();
         }
       };
+      window.addEventListener('blur', () => { this.keys = {}; }); // 窓を離れたら止まる(キーが押しっぱなしにならない)
       window.addEventListener('keydown', this._onKey);
       window.addEventListener('keyup', this._onKey);
 
