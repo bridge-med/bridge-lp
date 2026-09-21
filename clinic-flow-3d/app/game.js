@@ -3211,8 +3211,12 @@
     const il = $('investList'); if (il) il.innerHTML = bigTicket || '<p class="shop-locked">🔒 Day 8 で開く</p>';
     const shopTools = $('shopTools');
     if (shopTools) shopTools.innerHTML = learnBtn('shop', '各行の内訳と算定ルール');
-    $('shopList').querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
-    $('shopList').querySelectorAll('[data-fire]').forEach((b) => b.addEventListener('click', () => fire(b.dataset.fire)));
+    // v88 で採用(#hireList)と大型投資(#investList)を別カードに分けたのに、登録が #shopList だけだった(採用と大型投資が押せなかった・社長 2026-09-21)
+    for (const id of ['shopList', 'hireList', 'investList']) {
+      const box = $(id); if (!box) continue;
+      box.querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
+      box.querySelectorAll('[data-fire]').forEach((b) => b.addEventListener('click', () => fire(b.dataset.fire)));
+    }
     const ex = $('expandBtn');
     if (ex) ex.addEventListener('click', () => {
       if (G.money < EXPAND_COST) { toast(`資金が足りません(${yen(EXPAND_COST)})`); return; }
