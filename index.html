@@ -31,7 +31,7 @@
    構成: ヒーロー(明るい場に、厚いガラスの二本線の事前レンダ。2画面ぶんの固定ステージで、スクロールに応じて
          場が昼→夜に転じ、ゲームの実画面が主役に交代) → おすすめ3つ → 考え方の一文 → フッター
    立体: images/hero/hero-{pc,sp}-{light,dark}.webp(CPU パストレースで描いた背景なしの静止画。影と映り込みも alpha で焼く)。
-         同じ名前で置き換えれば素材を差し替えられる。動きは CSS だけ(光の帯が板の形の中を流れる・ゆっくり呼吸)
+         同じ名前で置き換えれば素材を差し替えられる。動きは CSS だけ(光の帯が板の形の中を流れる)
    文字: 常時表示の本文を前版の半分以下に。詳しい説明は各ページへ
    色: 青緑とミントは --glass 系トークン(shared/bridge.css)。このページと products/ だけで使う
    ================================================================ */
@@ -59,7 +59,7 @@ html.js .hero-track{height:200svh}            /* JS が進み具合を書くと�
 
 /* 立体(事前レンダ)。スクロールで少し引いて退き、夜の場に沈む */
 .hb{position:absolute;inset:0;z-index:1;pointer-events:none;
-  --hero:url(./images/hero/hero-pc-light.webp);--hero-night:url(./images/hero/hero-pc-dark.webp);--hero-pos:calc(100% + 48px) 100%;
+  --hero:url(./images/hero/hero-pc-light.webp);--hero-night:url(./images/hero/hero-pc-dark.webp);--hero-pos:100% 100%;
   opacity:calc(1 - var(--p,0) * 0.78);
   transform:translateY(calc(var(--p,0) * -8vh)) scale(calc(1 - var(--p,0) * 0.12));transform-origin:70% 100%}
 [data-theme="dark"] .hb{--hero:url(./images/hero/hero-pc-dark.webp)}
@@ -70,20 +70,22 @@ html.js .hero-track{height:200svh}            /* JS が進み具合を書くと�
 html.hero-night .hb-night{background:var(--hero-night) var(--hero-pos)/cover no-repeat}
 [data-theme="dark"] .hb-night{display:none}
 /* 光の帯: 板の形(alpha)でマスクしたミントの光が、ゆっくり流れる */
-.hb-sweep{position:absolute;inset:0;-webkit-mask:var(--hero) var(--hero-pos)/cover no-repeat;mask:var(--hero) var(--hero-pos)/cover no-repeat;mix-blend-mode:screen;opacity:.9;
+.hb-sweep{position:absolute;inset:0;overflow:hidden;-webkit-mask:var(--hero) var(--hero-pos)/cover no-repeat;mask:var(--hero) var(--hero-pos)/cover no-repeat;opacity:.75}
+[data-theme="dark"] .hb-sweep{opacity:.55}
+/* 帯そのものは transform だけを動かす(背景位置のアニメーションは毎フレーム再描画になるため) */
+.hb-sweep i{position:absolute;top:0;bottom:0;left:0;width:260%;
   background:linear-gradient(112deg, transparent 38%, rgba(191,245,228,.55) 47%, rgba(255,255,255,.35) 50%, rgba(191,245,228,.55) 53%, transparent 62%);
-  background-size:260% 100%;animation:sweep 7.5s linear infinite}
-[data-theme="dark"] .hb-sweep{opacity:.7}
-@keyframes sweep{0%{background-position:120% 0}100%{background-position:-20% 0}}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
-html.js .hb-in{animation:breathe 9s ease-in-out infinite}
+  animation:sweep 7.5s linear infinite;will-change:transform}
+@keyframes sweep{0%{transform:translateX(0)}100%{transform:translateX(-61.5%)}}
+/* 画面外・非表示タブ・場面2(立体が沈んだ後)では演出を止める。呼吸(scale 1.012)と screen 合成は、見た目にほぼ効かず合成が重いので外した(2026-09-21 計測) */
+.hb-paused .hb-sweep i,.stage[data-active="2"] .hb-sweep i{animation-play-state:paused}
 
 /* 場面1: 見出しと1つのボタン。板に重ねる */
-.scene{position:absolute;inset:0;transition:visibility 0s}
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease,visibility 0s linear .35s}
+.stage[data-active="1"] .scene1,.stage[data-active="2"] .scene2{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .35s ease,visibility 0s}
 .scene[inert]{pointer-events:none}
-.scene.is-off{visibility:hidden}
 .scene1{z-index:2;display:grid;align-items:center;padding:0 var(--pad-x);isolation:isolate;
-  opacity:calc(1 - var(--p1,0) * 1.4);transform:translateY(calc(var(--p1,0) * -60px))}
+  transform:translateY(calc(var(--p1,0) * -60px))}
 .s1-inner{max-width:var(--max);margin:0 auto;width:100%}
 .s1-tag{font:700 12px/1 var(--sans);letter-spacing:0.12em;color:var(--glass);display:flex;align-items:center;gap:12px}
 [data-theme="dark"] .s1-tag{color:var(--glass-hi)}
@@ -102,7 +104,7 @@ html.js .hb-in{animation:breathe 9s ease-in-out infinite}
 
 /* 場面2: ゲームの実画面がせり上がって主役に */
 .scene2{z-index:3;display:grid;grid-template-rows:auto minmax(0,1fr);align-items:end;padding:calc(72px + 4vh) var(--pad-x) 0;
-  opacity:var(--p2,0);background:linear-gradient(180deg,rgba(5,24,22,.88) 0%,rgba(5,24,22,.55) 34%,rgba(5,24,22,0) 60%)}
+  background:linear-gradient(180deg,rgba(5,24,22,.88) 0%,rgba(5,24,22,.55) 34%,rgba(5,24,22,0) 60%)}
 .s2-head{max-width:var(--max);margin:0 auto;width:100%;display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;
   transform:translateY(calc((1 - var(--p2,0)) * 40px))}
 .s2-h{font-family:var(--sans);font-weight:900;font-size:clamp(24px,3.4vw,46px);line-height:1.2;letter-spacing:-0.01em;color:#fff}
@@ -139,8 +141,7 @@ html.js .hb-in{animation:breathe 9s ease-in-out infinite}
   html.js .hero-track{height:100svh}
   .scene2{display:none}
   .scroll-hint::after{animation:none}
-  .hb-sweep{animation:none;opacity:0}
-  html.js .hb-in{animation:none}
+  .hb-sweep{display:none}
 }
 html:not(.js) .scene2{display:none}
 
@@ -194,12 +195,12 @@ html:not(.js) .scene2{display:none}
 <!-- ============ HERO ============
      立体はロゴの「交差する二本の線」を厚いガラスの板として描いた事前レンダ(images/hero/・CPU パストレース・背景なし)。
      PC とスマホは別の構図で描いた別の画像。同じ名前で置き換えれば素材を差し替えられる(scripts/ 側ではなく画像だけ)。
-     動きは CSS のみ: 板の形でマスクした光の帯が流れ、ゆっくり呼吸する。スクロールで --p1(場面1が退く)/ --p2(実画面が上がる)/ --p(立体が引く)/ --pbg(昼→夜)を書く。
-     場面の切り替え: JS が非アクティブな場面に inert・aria-hidden・.is-off(visibility:hidden)を付け、フォーカスは stage に退避する。
+     動きは CSS のみ: 板の形でマスクした光の帯が流れる(transform だけを動かし、画面外・非表示タブ・場面2では止める)。スクロールで --p1(場面1が退く)/ --p2(実画面が上がる)/ --p(立体が引く)/ --pbg(昼→夜)を書く。
+     場面の切り替え: stage の data-active(1|2)が唯一の状態。表示(opacity/visibility)は CSS がこの属性で決め、JS は同じ瞬間に inert・aria-hidden を付け替え、フォーカスを stage に退避する。
      動きを減らす設定と JS なしでは、場面1だけの静止した1画面。本文とボタンは演出と無関係に最初から使える。 -->
 <div class="hero-track" id="heroTrack">
   <section class="stage" id="stage" data-active="1" tabindex="-1" aria-labelledby="heroTitle">
-    <div class="hb" aria-hidden="true"><div class="hb-in"><div class="hb-art"></div><div class="hb-night"></div><div class="hb-sweep"></div></div></div>
+    <div class="hb" aria-hidden="true"><div class="hb-in"><div class="hb-art"></div><div class="hb-night"></div><div class="hb-sweep"><i></i></div></div></div>
 
     <div class="scene scene1" id="scene1">
       <div class="s1-inner">
@@ -214,7 +215,7 @@ html:not(.js) .scene2{display:none}
     </div>
     <div class="scroll-hint" aria-hidden="true">SCROLL</div>
 
-    <div class="scene scene2 is-off" id="scene2" inert aria-hidden="true">
+    <div class="scene scene2" id="scene2" inert aria-hidden="true">
       <div class="s2-head">
         <h2 class="s2-h"><small>Clinic Town 3D</small>クリニック経営を、<br>1日ずつ動かして学ぶ</h2>
         <a class="s2-cta" href="./clinic-flow-3d/index.html">ゲームを始める <span aria-hidden="true">→</span></a>
@@ -295,7 +296,7 @@ html:not(.js) .scene2{display:none}
 <script defer>
 (function () {
   // スクロールの進み具合を CSS 変数に書く(通常スクロールは乗っ取らない)。
-  // 非アクティブな場面は inert + aria-hidden + visibility:hidden で、タップ・クリック・Tab の対象から外す。
+  // 場面の状態は data-active(1|2)の一つだけ。表示は CSS、操作(inert)と aria-hidden とフォーカスは JS が、同じ瞬間に切り替える。
   const track = document.getElementById('heroTrack');
   const stage = document.getElementById('stage');
   const s1 = document.getElementById('scene1'), s2 = document.getElementById('scene2');
@@ -304,14 +305,13 @@ html:not(.js) .scene2{display:none}
   if (reduced) return; // 場面1だけの静止した1画面(scene2 は HTML の inert のまま)
   const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   const clamp = v => Math.max(0, Math.min(1, v));
-  // 場面の操作可否。しきい値にヒステリシスを持たせ、境界で毎フレーム反転しないようにする
-  function setActive(el, on, off) {
+  const SW_ON = 0.34, SW_OFF = 0.30; // 場面2へ / 場面1へ戻る(ヒステリシス: 境界で往復しない)
+  function setActive(el, on) {
     const wasInert = el.hasAttribute('inert');
     if (!on && !wasInert) {
       if (el.contains(document.activeElement)) stage.focus({ preventScroll: true }); // フォーカスの迷子を防ぐ
       el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true');
     } else if (on && wasInert) { el.removeAttribute('inert'); el.setAttribute('aria-hidden', 'false'); }
-    el.classList.toggle('is-off', off); // 完全に消えた場面だけ描画からも外す
   }
   let ticking = false, active = 1;
   const update = () => {
@@ -319,21 +319,26 @@ html:not(.js) .scene2{display:none}
     const r = track.getBoundingClientRect();
     const range = Math.max(1, r.height - window.innerHeight);
     const p = clamp(-r.top / range);
-    const p1 = clamp(p / 0.4);                       // 場面1が退く
-    const p2 = ease(clamp((p - 0.25) / 0.35));        // ゲームの画面がせり上がる(0.6 で全面)
     stage.style.setProperty('--p', p.toFixed(4));
-    stage.style.setProperty('--p1', p1.toFixed(4));
-    stage.style.setProperty('--p2', p2.toFixed(4));
-    stage.style.setProperty('--pbg', clamp((p - 0.1) / 0.4).toFixed(4)); // 明るい場 → 夜
-    if (active === 1 && p2 >= 0.55) active = 2; else if (active === 2 && p2 <= 0.45) active = 1;
-    stage.setAttribute('data-active', String(active));
-    setActive(s1, active === 1, p1 >= 0.72);
-    setActive(s2, active === 2, p2 <= 0.02);
+    stage.style.setProperty('--p1', clamp(p / 0.4).toFixed(4));                     // 場面1の見出しが上へ退く
+    stage.style.setProperty('--p2', ease(clamp((p - 0.25) / 0.35)).toFixed(4));    // 実画面がせり上がる(0.6 で定位置)
+    stage.style.setProperty('--pbg', clamp((p - 0.1) / 0.4).toFixed(4));           // 明るい場 → 夜
+    if (active === 1 && p >= SW_ON) active = 2; else if (active === 2 && p <= SW_OFF) active = 1;
+    if (stage.getAttribute('data-active') !== String(active)) {
+      stage.setAttribute('data-active', String(active));
+      setActive(s1, active === 1); setActive(s2, active === 2);
+    }
   };
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
   update();
+  // 演出の停止: 画面外・非表示タブ(場面2は CSS 側で止める)
+  const hb = stage.querySelector('.hb');
+  const pause = on => hb.classList.toggle('hb-paused', on);
+  let offscreen = false;
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { offscreen = !es[0].isIntersecting; pause(offscreen || document.hidden); }, { threshold: 0 }).observe(stage);
+  document.addEventListener('visibilitychange', () => pause(offscreen || document.hidden));
   // 夜の照明のレンダは最初の画面に要らないので、読み込み後に取りに行く
   const night = () => document.documentElement.classList.add('hero-night');
   if (document.readyState === 'complete') night(); else window.addEventListener('load', night, { once: true });

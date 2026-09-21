@@ -119,7 +119,7 @@ function xformOf(rx, ry, rz, t, s) {
 function buildScene(layout, theme) {
   const L = layout === 'sp'
     ? { x: 1.0, y: 0.3, scale: 0.9, floor: -2.9, eye: [1.6, 0.0, 23], at: [2.6, -2.0, 0], fov: 0.55, ry: -0.62, rx: 0.10 }
-    : { x: 4.55, y: -0.1, scale: 0.92, floor: -2.6, eye: [0.2, 0.9, 14.0], at: [2.2, 0.1, 0], fov: 0.55, ry: -0.62, rx: 0.10 };
+    : { x: 4.85, y: -0.1, scale: 0.92, floor: -2.6, eye: [0.2, 0.9, 14.0], at: [2.2, 0.1, 0], fov: 0.55, ry: -0.62, rx: 0.10 };
   const rz1 = 0.03, rz2 = -0.02;
   const t1 = [L.x + 0.15, L.y + 0.05, 0], t2 = [L.x, L.y, 0];
   const rise = ribbonMesh([
@@ -138,30 +138,31 @@ function buildScene(layout, theme) {
     L, tris, floorY: L.floor,
     // 材質: 透過率(単位長あたり)。厚いほど濃い青緑に沈む
     glass: [
-      { T1: [0.22, 0.66, 0.60], ior: 1.5 },   // arch: 薄い面はほぼ白、厚み方向と重なりで深い青緑に
-      { T1: [0.27, 0.70, 0.64], ior: 1.5 },   // rise
+      { T1: [0.17, 0.62, 0.56], ior: 1.5 },   // arch: 薄い面はほぼ白、厚み方向と重なりで深い青緑に
+      { T1: [0.21, 0.66, 0.60], ior: 1.5 },   // rise
     ],
     floorAlbedo: dark ? [0.055, 0.12, 0.115] : [0.955, 0.945, 0.92],
-    floorGloss: dark ? 0.32 : 0.26,
+    floorGloss: dark ? 0.36 : 0.32,
     lights: dark ? [
-      { c: [-6, 8.5, -6], r: 3.4, e: [0.85, 1.0, 0.95], pow: 9 },
-      { c: [7, 1.2, -5], r: 0.9, e: [0.72, 1.0, 0.92], pow: 40 },
+      { c: [-6, 8.5, -6], r: 4.0, e: [0.85, 1.0, 0.95], pow: 6.5 },
+      { c: [7, 1.2, -5], r: 1.2, e: [0.72, 1.0, 0.92], pow: 20 },
       { c: [4, 2.5, 10], r: 2.4, e: [0.9, 1.0, 0.97], pow: 1.6 },
     ] : [
-      { c: [-6, 8.5, -6], r: 3.4, e: [1.0, 0.99, 0.96], pow: 12 },
-      { c: [7, 1.2, -5], r: 0.9, e: [0.85, 1.0, 0.94], pow: 46 },
+      { c: [-6, 8.5, -6], r: 4.0, e: [1.0, 0.99, 0.96], pow: 8 },
+      { c: [7, 1.2, -5], r: 1.2, e: [0.85, 1.0, 0.94], pow: 22 },
       { c: [4, 2.5, 10], r: 2.4, e: [1.0, 1.0, 1.0], pow: 2.2 },
     ],
     // 反射・屈折が見る環境: 手続き的なスタジオ。明るい空/暗い地平の境と、背面左上・真上・背面右に柔らかい発光パネル(窓相当)
     env: dark
-      ? (d) => { const sky = smooth(-0.01, 0.06, d[1]); let c = lerp([0.015, 0.05, 0.048], lerp([0.22, 0.32, 0.30], [0.08, 0.15, 0.14], smooth(0.1, 0.9, d[1])), sky);
-          c = add(c, mul([0.85, 1.0, 0.95], 2.2 * Math.pow(Math.max(0, dot(d, norm([-0.5, 0.5, -0.7]))), 9)));
-          c = add(c, mul([0.9, 1.0, 0.97], 1.2 * Math.pow(Math.max(0, dot(d, norm([0.0, 1.0, 0.2]))), 7)));
-          c = add(c, mul([0.6, 1.0, 0.88], 3.2 * Math.pow(Math.max(0, dot(d, norm([0.6, 0.15, -0.8]))), 40))); return c; }
-      : (d) => { const sky = smooth(-0.01, 0.06, d[1]); let c = lerp([0.42, 0.47, 0.47], lerp([1.05, 1.04, 1.0], [0.80, 0.84, 0.84], smooth(0.1, 0.9, d[1])), sky);
-          c = add(c, mul([1.0, 0.99, 0.97], 2.4 * Math.pow(Math.max(0, dot(d, norm([-0.5, 0.5, -0.7]))), 9)));
-          c = add(c, mul([1.0, 1.0, 0.98], 1.3 * Math.pow(Math.max(0, dot(d, norm([0.0, 1.0, 0.2]))), 7)));
-          c = add(c, mul([0.75, 1.0, 0.9], 3.4 * Math.pow(Math.max(0, dot(d, norm([0.6, 0.15, -0.8]))), 40))); return c; },
+      ? (d) => { const sky = smooth(-0.01, 0.06, d[1]); let c = lerp([0.03, 0.08, 0.075], lerp([0.22, 0.32, 0.30], [0.08, 0.15, 0.14], smooth(0.1, 0.9, d[1])), sky);
+          c = add(c, mul([0.85, 1.0, 0.95], 1.1 * Math.pow(Math.max(0, dot(d, norm([-0.5, 0.5, -0.7]))), 4)));
+          c = add(c, mul([0.9, 1.0, 0.97], 0.6 * Math.pow(Math.max(0, dot(d, norm([0.0, 1.0, 0.2]))), 3)));
+          c = add(c, mul([0.6, 1.0, 0.88], 1.6 * Math.pow(Math.max(0, dot(d, norm([0.6, 0.15, -0.8]))), 14))); return c; }
+      : (d) => { const sky = smooth(-0.01, 0.06, d[1]); let c = lerp([0.60, 0.65, 0.65], lerp([0.98, 0.97, 0.94], [0.80, 0.84, 0.84], smooth(0.1, 0.9, d[1])), sky);
+          c = add(c, mul([1.0, 0.99, 0.97], 1.1 * Math.pow(Math.max(0, dot(d, norm([-0.5, 0.5, -0.7]))), 4)));
+          c = add(c, mul([1.0, 1.0, 0.98], 0.7 * Math.pow(Math.max(0, dot(d, norm([0.0, 1.0, 0.2]))), 3)));
+          c = add(c, mul([0.75, 1.0, 0.9], 1.6 * Math.pow(Math.max(0, dot(d, norm([0.6, 0.15, -0.8]))), 14))); return c; },
+    causticGain: dark ? 0.4 : 0.8,
     causticTint: dark ? [0.35, 0.75, 0.66] : [0.62, 0.95, 0.86],
     shadowTint: dark ? [0.1, 0.3, 0.28] : [0.35, 0.62, 0.58],
     envAvg: dark ? [0.04, 0.11, 0.10] : [0.95, 0.965, 0.955],
@@ -292,24 +293,29 @@ function trace(S, o, d) {
     if (tF != null) {
       const p = add(o, mul(d, tF)); const n = [0, 1, 0];
       if (b === 0) {
-        // 艶の映り込み: ガラスが映るところだけ色と被覆を持つ
-        if (rnd() < S.floorGloss) {
-          const r = [d[0], -d[1], d[2]]; const jit = mul(norm([rnd() - 0.5, rnd() - 0.5, rnd() - 0.5]), 0.06);
-          const hh = intersect(S, add(p, [0, 1e-3, 0]), norm(add(r, jit)), 1e9);
-          if (!hh) return { col: [0, 0, 0], a: 0 };
-          o = add(p, [0, 1e-3, 0]); d = norm(add(r, jit)); specular = true; thr = mul(thr, 0.9); alpha = 1; continue;
-        }
-        // 影: 直接光の遮蔽と、環境光の遮蔽を、それぞれの寄与で重みづけ
-        const Lw = directLight(S, p, n), L0 = directLightNoShadow(S, p, n);
-        const lD0 = lum(L0), lD = lum(Lw); const occD = lD0 > 1e-6 ? 1 - Math.min(1, lD / lD0) : 0;
-        const ed = cosineDir(n); const eh = intersect(S, add(p, [0, 1e-3, 0]), ed, 1e9);
-        let occE = 0; if (eh) { const g = S.glass[eh.m]; occE = (1 - lum([Math.pow(g.T1[0], 0.3), Math.pow(g.T1[1], 0.3), Math.pow(g.T1[2], 0.3)]) * 0.85) * Math.exp(-eh.t / 1.6); }
+        // 影と艶の映り込みを、確率ではなく毎サンプル評価する(床の粒状ノイズを抑える)
+        const up = add(p, [0, 1e-3, 0]);
+        // 艶: 少しぼけた反射がガラスに当たるところだけ色と被覆を持つ
+        const r = [d[0], -d[1], d[2]]; const jit = mul(norm([rnd() - 0.5, rnd() - 0.5, rnd() - 0.5]), 0.06);
+        const rd = norm(add(r, jit)); const hh = intersect(S, up, rd, 1e9);
+        let refl = [0, 0, 0], reflA = 0;
+        if (hh) { const sub2 = trace(S, up, rd); refl = mul(sub2.col, 0.9); reflA = 1; }
+        // 影: 直接光の遮蔽(光源ごとに 2 点)と、環境光の遮蔽(4 方向)
+        let Lw = [0, 0, 0], L0 = [0, 0, 0];
+        for (let k = 0; k < 2; k++) { Lw = add(Lw, directLight(S, p, n)); L0 = add(L0, directLightNoShadow(S, p, n)); }
+        const lD0 = lum(L0) / 2, lD = lum(Lw) / 2; const occD = lD0 > 1e-6 ? 1 - Math.min(1, lD / lD0) : 0;
+        let occE = 0;
+        for (let k = 0; k < 4; k++) { const ed = cosineDir(n); const eh = intersect(S, up, ed, 1e9); if (eh) { const g = S.glass[eh.m]; occE += (1 - lum([Math.pow(g.T1[0], 0.3), Math.pow(g.T1[1], 0.3), Math.pow(g.T1[2], 0.3)]) * 0.85) * Math.exp(-eh.t / 1.6); } }
+        occE /= 4;
         const lE = lum(S.envAvg);
         const occ = (occD * lD0 + occE * lE) / (lD0 + lE);
-        const a = Math.min(1, occ * 1.4);
-        // 光溜まり(コースティクスの近似): 主光がガラスを通って届くところは、影の中がミントに明るむ
+        const sa = Math.min(1, occ * 1.7);
         const caus = occD > 0.05 ? Math.min(1, lD / Math.max(1e-6, lD0)) * occD : 0;
-        return { col: add(mul(S.shadowTint, a * 0.22), mul(S.causticTint, caus * 0.8)), a };
+        const shadowCol = add(mul(S.shadowTint, sa * 0.22), mul(S.causticTint, caus * S.causticGain));
+        // 合成: 影(a=sa, 色 shadowCol)の上に艶の映り込み(a=g*reflA, 色 refl*g)
+        const g = S.floorGloss;
+        const a = sa + g * reflA * (1 - sa);
+        return { col: add(mul(shadowCol, 1 - g * reflA), mul(refl, g)), a };
       }
       // 二次光線が床に当たった: 床の色をおおまかに返す
       const Lf = add(directLight(S, p, n), S.envAvg);
@@ -347,7 +353,7 @@ function camera(S, w, h) {
   };
 }
 function tonemap(c) {
-  return c.map(v => { v = Math.max(0, v); v = v < 0.85 ? v : 0.85 + 0.15 * (1 - Math.exp(-(v - 0.85) / 0.15)); return Math.pow(Math.min(1, v), 1 / 2.2); });
+  return c.map(v => { v = Math.max(0, v) * 0.96; v = v < 0.7 ? v : 0.7 + 0.3 * (1 - Math.exp(-(v - 0.7) / 0.3)); return Math.pow(Math.min(1, v), 1 / 2.2); });
 }
 
 /* ---------- worker ---------- */
@@ -361,8 +367,10 @@ if (!isMainThread) {
     for (let px = 0; px < w; px++) {
       let acc = [0, 0, 0], accA = 0;
       for (let s = 0; s < spp; s++) {
-        const r = cam(px + rnd(), py + rnd());
-        const { col, a } = trace(S, r.o, r.d);
+        const tent = () => { const u = rnd() * 2; return (u < 1 ? Math.sqrt(u) - 1 : 1 - Math.sqrt(2 - u)) + 0.5; };
+        const r = cam(px + tent(), py + tent());
+        let { col, a } = trace(S, r.o, r.d);
+        const m = Math.max(col[0], col[1], col[2]); if (m > 3.0) col = mul(col, 3.0 / m);
         acc = add(acc, col); accA += a;
       }
       acc = mul(acc, 1 / spp); accA /= spp;
