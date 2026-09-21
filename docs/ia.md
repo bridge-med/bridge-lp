@@ -8,10 +8,10 @@
 ## 1. サイトマップ
 
 ```
-/                       Home           … 世界観だけを伝える(3〜5画面)
+/                       Home           … 玄関。誰に何が役立つかを最初の画面で伝え、おすすめ3点と用途別の索引から道具へ渡す
 ├── philosophy/         Philosophy     … 思想の全文(Why / MVV / リハとは / Thinking / Principles / Manifesto)
 ├── projects/           Projects       … 活動一覧(PMI / AI / 教育 / 研究 / アプリ開発 / 発信)+ Roadmap
-├── products/           Products       … プロダクトカタログ(カテゴリ別・全17点)
+├── products/           Products       … プロダクトカタログ(用途別・全28点)
 │   ├── rehaboard/ 等   個別プロダクト … 既存の独立ページ群(そのまま活用)
 ├── stories/            Stories        … 選択肢が増える瞬間(患者/医療者/組織/キャリア/AI)
 ├── journal/            Journal        … BRIDGE Journal(note記事+タグ探索+実験室)
@@ -23,7 +23,7 @@
 
 ## 2. 情報設計(IA)の原則
 
-1. **Homeは玄関、説明はしない** — Homeの役割は「BRIDGEとは何か」の一言と、探索の地図を渡すことだけ。
+1. **Homeは玄関、長い説明はしない** — Homeの役割は「誰に・何が役立つか」の一言と、次に押すもの(おすすめ3点・用途別の索引)を渡すこと。理念の全文はPhilosophyに置く。(v2.1: 「説明はしない」から改定。初めて訪れた医療職が最初の画面で用途を理解できることを優先する)
 2. **1ページ=1つの問い** — Philosophy「なぜ?」/ Projects「いま何を?」/ Products「何が使える?」/ Stories「何が変わる?」/ Journal「途中はどうなってる?」/ Research「確かめたのか?」/ About「誰が?」/ Community「どう関わる?」
 3. **深さは3階層まで** — Home → セクションページ → 個別ページ。それ以上掘らせない。
 4. **どのページからでも次へ歩ける** — 全ページ末尾に「Where to next(次はどこへ歩きますか)」の3分岐。行き止まりを作らない。
@@ -33,7 +33,7 @@
 
 ### デスクトップ(>920px)
 - 固定ヘッダー(スクロールで背景ブラー+ボーダー)
-- 左:ロゴ(→Home) / 右:Philosophy · Projects · Products · Stories · Journal · Research · About(テキストリンク、現在地はアンダーライン)+ Community(ボタン)+ テーマ切替
+- 左:ロゴ(→Home) / 右:Products · Philosophy · Journal · About(テキストリンク、現在地はアンダーライン)+ Contact(ボタン)+ テーマ切替。Projects · Stories · Services はドロワーとフッターから(v2.1: 個人がプロダクトを試す導線を法人向け相談より前に置く)
 - Mega Menuは現段階では不採用(ページ数8ではフラットの方が認知負荷が低い)。ページが15を超えたら「思想/活動/道具/つながる」の4グループでMega Menu化する。
 
 ### モバイル(≤920px)
@@ -47,10 +47,10 @@
 
 | ページ | 役割 | 想定滞在 | 主な次の一歩 |
 |---|---|---|---|
-| Home | 世界観の提示と探索の起点 | 30秒〜2分 | Philosophy / Products |
+| Home | 用途の提示と、道具への入口(おすすめ3点・用途別索引・ゲーム紹介) | 30秒〜2分 | Products / 個別プロダクト / Philosophy |
 | Philosophy | 思想の全文。共感の醸成 | 5〜10分 | Projects / Stories / Community |
 | Projects | 思想が動いている証拠 | 2〜3分 | Products / Research / Journal |
-| Products | 道具に触れる入口 | 2〜5分 | 個別プロダクト / Starter Kits |
+| Products | 用途(6分類)から道具を選ぶ。各カードに利用条件(無料/登録/保存先)を事実だけ表示 | 2〜5分 | 個別プロダクト / note |
 | Stories | 感情が動く場所 | 3〜5分 | Philosophy / Community |
 | Journal | 過程の公開。継続的な再訪先 | 回遊 | note / Products |
 | Research | 信頼の担保 | 1〜3分 | Projects / Journal |
@@ -128,7 +128,7 @@
 
 ## 10. 拡張性(100件以上に耐える設計)
 
-- **プロダクト** … `products/index.html`の`PRODUCTS`配列に1オブジェクト追加するだけ。カテゴリは`CATS`配列で管理し、カテゴリごとのセクションは自動生成。カテゴリ追加も1行。
+- **プロダクト** … `products/index.html`の`PRODUCTS`配列に1オブジェクト追加するだけ(`use`=用途・`t`=日本語の機能名・`cta`=ボタン文言・`facts`=確認済みの利用条件)。用途は`USES`配列で管理し、用途ごとのセクションは自動生成。トップの「用途から探す」は代表だけを静的HTMLに置いた抜粋なので、代表を入れ替えるときだけ`index.html`も直す。
 - **活動** … `projects/index.html`の`ACTIVITIES`配列。同上。
 - **記事** … `journal/index.html`は`notes/feed.json`(noteのRSSから自動生成)を読み込み、タイトル・本文からタグを自動付与。記事が増えても手作業ゼロ。タグは`TAGS`配列で追加。
 - **物語** … `stories/index.html`の`STORIES`配列。
@@ -139,6 +139,7 @@
 ---
 
 ### 変更履歴
+- v2.1 (2026-09-21): Homeを「誰に何が役立つか」を伝える玄関に(ヒーロー→おすすめ3点→ゲーム紹介→用途別索引→考え方→note→締め)。Productsを用途6分類に再編。ナビの主要入口を Products · Philosophy · Journal · About に。
 - v2.0 (2026-07-11): 1ページLP構成 → マルチページのブランドサイトへ全面再設計。
 
 ## 11. 写しの運用(プロダクト詳細ページ)

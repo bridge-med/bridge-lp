@@ -17,13 +17,13 @@ document.documentElement.classList.add('js');
      primary: ヘッダーに常時表示する主要入口(増やしすぎない)
      それ以外はメニュー(ドロワー)とフッターから辿れる ---- */
   const NAV = [
-    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、これまでの歩み。',                    href: 'about/index.html', primary: true },
-    { id: 'services',   en: 'Services',   jp: '仕事のご依頼',  d: '経営支援・PMI伴走、AI設計・ツール開発、講演・研修。',  href: 'services/index.html', primary: true },
-    { id: 'projects',   en: 'Projects',   jp: '活動',        d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html', primary: true },
-    { id: 'products',   en: 'Products',   jp: 'プロダクト',   d: '実際に使えるもの。すべて公開しています。',             href: 'products/index.html', primary: true },
+    { id: 'products',   en: 'Products',   jp: 'プロダクト',   d: '仕事に使える道具と、経営を体験するゲーム。',            href: 'products/index.html', primary: true },
+    { id: 'philosophy', en: 'Philosophy', jp: '考え方',      d: 'BRIDGEが何を大切にし、なぜこの活動をしているのか。', href: 'philosophy/index.html', primary: true },
     { id: 'journal',    en: 'Journal',    jp: '手記',        d: '完成していない考えも、そのまま公開しています。',       href: 'journal/index.html', primary: true },
-    { id: 'philosophy', en: 'Philosophy', jp: '考え方',      d: 'BRIDGEが何を大切にし、なぜこの活動をしているのか。', href: 'philosophy/index.html' },
+    { id: 'about',      en: 'About',      jp: 'BRIDGEについて', d: '名前の由来と、運営者のこれまでの歩み。',              href: 'about/index.html', primary: true },
+    { id: 'projects',   en: 'Projects',   jp: '活動',        d: 'PMI、AI、教育、研究。いま動いていること。',           href: 'projects/index.html' },
     { id: 'stories',    en: 'Stories',    jp: '物語',        d: '現場で実際にあったことを、一人称で。',                 href: 'stories/index.html' },
+    { id: 'services',   en: 'Services',   jp: '仕事のご依頼',  d: '医療機関向けの経営支援・PMI伴走、ツール開発、講演。', href: 'services/index.html' },
   ];
   const CTA = { id: 'community', en: 'Contact', jp: '話をする', d: '共感も、異論も、相談も。', href: 'community/index.html' };
 
@@ -201,4 +201,5 @@ document.documentElement.classList.add('js');
   };
   observeAll();
   window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll, applyBudoux: applyBudoux };
+  document.documentElement.classList.add('js-ready'); // 安全弁(bridge.css の rv-safe)を解除
 })();

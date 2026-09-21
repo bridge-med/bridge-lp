@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14",
+  "updated": "2026-09-21",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(2026-09-04 社長確認済み=便AA決裁4)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -280,7 +280,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-15"
+      "lastCommit": "2026-08-02"
     },
     {
       "id": "ittan-horyu",
@@ -363,7 +363,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "2026-07-27掲載(社長委任決定)。既定はモック生成でworker非依存。実利用は計測で見る(第12条の判断を計測に委ねる)",
-      "lastCommit": "2026-07-15",
+      "lastCommit": "2026-08-02",
       "decision": {
         "points": "実装は整っている(PWA+サービスワーカー)。返信生成は既定でモック生成のため、公開にworkerの稼働は必須でない(2026-07-26監査役が実測: replyService.js 24行)。第31条の申告は立つ。論点は第12条の実利用ただ一つ。監査役推奨(2026-07-26): 実利用を確認できれば掲載(a)、できなければ引退(b・karteの処方リンク556行の撤去とセット)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'casual', img: 'yawagaeshi.png', name: 'Yawagaeshi', jp: 'やわ返', href: '../yawagaeshi/index.html',\n  p: '送る前に、ひと呼吸。角の立たないやわらかい返信案を3つつくる。' }\n※ 既定はモック生成のためworker稼働は掲載の前提でない。サムネイル作成済み"
@@ -384,7 +384,7 @@
       "measure": "none",
       "measureNote": "Expo書き出しHTMLのため敷設しない(再書き出しで消える)。手動記録",
       "note": "Web書き出し(pomodoro-app)は2026-07-27に引退(社長委任決定・監査役推奨a)。title空・Expo残骸で第32条未達、導線ゼロのため訪問者影響なし。ソース(mobile-pomodoro)は保持。iOS配信または紹介ページ+実利用確認+改名(第30条)が揃ったら掲載を再検討",
-      "lastCommit": "2026-06-20",
+      "lastCommit": "2026-08-02",
       "decision": {
         "points": "ソース(mobile-pomodoro)は運用文書まで揃った本格実装。ただしWeb版はExpo自動書き出しでtitleも空のままで、カタログから直リンクするには粗い(第32条)。名称の第30条抵触もある。監査役推奨(2026-07-26): Web書き出し(pomodoro-app/)を公開ツリーから引退(a・導線ゼロのため訪問者影響なし)。iOS配信または紹介ページ+実利用確認+改名が揃ったら掲載を再検討。代替(b)は紹介ページを作って掲載だが命名の決着が先。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'learning', img: 'bridge-focus.png', name: 'BRIDGE Focus', jp: 'ポモドーロタイマー', href: '../pomodoro-app/index.html',\n  p: 'タスク管理ではなく、いまやる一つに集中するためのタイマー。集中の記録が作業に紐づいて残る。' }\n※ hrefは書き出し物への直リンク。紹介ページを作るならそちらへ向ける。サムネイル作成済み"
@@ -420,7 +420,7 @@
       "status": "未掲載",
       "measure": "local",
       "note": "第31条申告は社長確定待ち。products配列・NAV未掲載(サムネイル作成と掲載可否は社長判断)。有料の統合・閉院実務パックは社長判断で公開保留(2026-07-18、データは完成状態で保持)。現在の公開物はすべて無料。決済開始前に特定商取引法に基づく表記が必須。法務3枚は仮文面で専門家確認要",
-      "lastCommit": "2026-07-18",
+      "lastCommit": "2026-08-02",
       "decision": {
         "points": "sitemap収載済みで検索には開かれているのに、BRIDGE本体(products/NAV)からの導線ゼロの半公開。実体は記事10・無料テンプレ9で空室でない(第14条適合)。aboutで「BRIDGE(運営: 橋本渉)」を自己申告済み。監査役推奨(2026-07-26): 掲載(a・PRODUCTS配列に1行+サムネイル作成+第31条申告確定)。代替(b)はsitemap撤去で出荷前へ戻す(scripts/medops/build.mjs)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'management', img: 'medops.png', name: '医療管理実務ライブラリ', jp: '仮称', href: '../medops/index.html',\n  p: '事務長・法人本部・新任管理職の実務を、実行手順と無料テンプレートに。' }\n※ サムネイル未作成。コピーはeditor照合前提"
@@ -440,7 +440,7 @@
       "status": "未掲載",
       "measure": "local",
       "note": "第31条申告は社長確定待ち。medopsとの棲み分け=施設運営(medops)/チーム運営(本サイト)、統合可否は未決事項。スターターパックは決済準備中表示で公開(実ファイル20点の整備が公開後の最優先タスク)。法務3枚はmedopsと同一水準の仮文面で専門家確認は両サイト分を1回で。第2弾出荷済み(記事計10本・職種別4枚・法人向け)。次回改善候補: ビルド出力とデータの整合を出荷ゲートで機械検査する(qa提案・PM支持。再ビルド→チェックサム比較をshipスキルかcheck-siteへ)。products掲載・正式名称は社長判断",
-      "lastCommit": "2026-07-18",
+      "lastCommit": "2026-08-02",
       "decision": {
         "points": "medopsと同じ半公開(sitemap収載済み・本体からの導線ゼロ)。パックは「決済準備中」「実ファイル提供体制は未用意」とページ上で正直に表記済み(pack/index.html 261行)で第14・15条は保たれている。監査役推奨(2026-07-26): medopsと同時に掲載(a)。掲載する場合パック実ファイル20点の整備が最優先タスクのまま。代替(b)はsitemap撤去(scripts/manager-starter/build.mjs)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'management', img: 'manager-starter.png', name: '医療管理職スターター', jp: '仮称', href: '../manager-starter/index.html',\n  p: '臨床は分かる。でも管理職の仕事は教わっていない。新任管理職の最初の90日を道具にする。' }\n※ サムネイル未作成。コピーはeditor照合前提"
@@ -482,7 +482,7 @@
       "measure": "none",
       "measureNote": "bridge.js非読込のため未計測。手動記録",
       "note": "データが2026-07-04で停止・自動更新ワークフロー不在(棚卸し実測)。休止中で正直に登録(2026-07-27社長委任決定)。復旧はワークフロー再設置とセットで",
-      "lastCommit": "2026-07-26",
+      "lastCommit": "2026-08-02",
       "decision": {
         "points": "6件中で誠実の条項に最も近い(第12・15条)。監査役推奨(2026-07-26): 休止表記(a)=statusを休止中にし、journalカード83行の「毎朝」を実態に合う文言へ(editor照合)。復旧ならワークフロー再設置とセットで表記を戻す。再開の意思がないなら導線撤去(b・カード79-85行の削除)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md"
       }
