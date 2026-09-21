@@ -1,21 +1,27 @@
 /* ================================================================
-   Home hero — 正式ロゴの「交差する二本の線」を、ガラスのリボンとして立体に起こす。
-   素の WebGL(依存なし・約10KB)。二本の線は交差するが接続しない(第24条)。
+   Home hero v2 — 正式ロゴの「交差する二本の線」を、厚みのあるガラスの板として夜の空間に置く。
+   素の WebGL(依存なし)。二本の線は交差するが接続しない(第24条)。
 
    使い方:
      <div class="hb" data-hero-bridge>
-       <img class="hb-poster" src="…/hero-bridge.webp" alt="">   ← WebGL が使えない/描画前の静止画
+       <img class="hb-poster" src="…/hero-bridge.webp" alt="">   ← WebGL が使えない/描画前の静止画(同じシーンの事前レンダ)
        <canvas class="hb-canvas" aria-hidden="true"></canvas>
      </div>
      <script src="…/shared/hero-bridge.js" defer></script>
 
+   CSS 変数(ホスト要素で読む):
+     --hb-deep / --hb-mid / --hb-mint / --hb-sky  色(素材の奥・中間・縁の光・ハイライト)
+     --hb-floor  床の色(反射の消え際)
+     --hb-dist / --hb-x / --hb-y / --hb-scale  置き方(PC とスマホで構図を変える)
+     --hb-alpha  板の基本の不透明度
+     --hb-progress  0〜1。ページ側のスクロールが書き込む。カメラが引き、板が奥へ退く
+     --hb-reflect  0 で床の反射を描かない(負荷を減らしたい端末向け)
+
    守っていること:
-   - 通常スクロールを乗っ取らない(scrollY を読むだけ)
+   - 通常スクロールを乗っ取らない(進み具合は CSS 変数で受け取るだけ)
    - 画面外・非表示タブでは描画を止める(IntersectionObserver + visibilitychange)
-   - 常に動く: ガラスの中を光がゆっくり流れ、二本の板が呼吸のように角度と位置を変え続ける(uTime)
-   - prefers-reduced-motion では静止した1枚を描くだけ(スクロール・時間・ポインタの追従なし)
+   - prefers-reduced-motion では静止した1枚を描くだけ(時間・ポインタ・進み具合の追従なし)
    - 失敗したら何もせず静止画のまま(本文とボタンはこの script と無関係に最初から使える)
-   - 色は CSS トークン(--hb-deep / --hb-mid / --hb-mint / --hb-sky)、置き方と濃さは --hb-dist/-x/-y/-scale/-alpha から読む=ライト/ダークに追従
    ================================================================ */
 (function () {
   'use strict';
@@ -23,7 +29,7 @@
   if (!host) return;
   const canvas = host.querySelector('canvas');
   if (!canvas) return;
-  const CAPTURE = !!window.HERO_BRIDGE_CAPTURE; // 静止画の事前レンダリング用(scripts側が立てる)
+  const CAPTURE = !!window.HERO_BRIDGE_CAPTURE; // 静止画の事前レンダリング用(scripts 側が立てる)
   const reduced = !CAPTURE && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 
@@ -46,31 +52,42 @@
   ].join('\n');
   const FS = [
     'precision mediump float;',
-    'uniform vec3 uCam; uniform vec3 uDeep; uniform vec3 uMid; uniform vec3 uMint; uniform vec3 uSky; uniform float uReveal; uniform float uDark; uniform float uAlpha; uniform float uTime;',
+    'uniform vec3 uCam; uniform vec3 uDeep; uniform vec3 uMid; uniform vec3 uMint; uniform vec3 uSky; uniform vec3 uFloor;',
+    'uniform float uReveal; uniform float uAlpha; uniform float uTime; uniform float uMirror; uniform float uFloorY; uniform float uFade;',
     'varying vec3 vPos; varying vec3 vNrm; varying vec2 vUv; varying float vKind;',
     'void main(){',
     '  float edge = smoothstep(uReveal, uReveal - 0.06, vUv.x);',
     '  if (edge <= 0.001) discard;',
+    // 床(y = uFloorY)より下は描かない。鏡像は床より上に出た部分を描かない=床の上に立つ板と、その映り込みだけになる
+    '  if (uMirror < 0.5 && vPos.y < uFloorY) discard;',
+    '  if (uMirror > 0.5 && vPos.y > uFloorY) discard;',
     '  vec3 N = normalize(vNrm); if (!gl_FrontFacing) N = -N;',
     '  vec3 V = normalize(uCam - vPos);',
     '  float ndv = max(dot(N, V), 0.0);',
-    '  float fr = pow(1.0 - ndv, 3.0);',
-    '  vec3 L1 = normalize(vec3(0.35, 0.9, 0.55)); vec3 H1 = normalize(L1 + V);',
-    '  vec3 L2 = normalize(vec3(-0.7, 0.25, -0.3)); vec3 H2 = normalize(L2 + V);',
-    '  float sp = pow(max(dot(N, H1), 0.0), 120.0) * 0.9 + pow(max(dot(N, H2), 0.0), 36.0) * 0.28;',
-    '  vec3 R = reflect(-V, N); float sky = smoothstep(-0.25, 0.85, R.y);',
-    '  vec3 env = mix(uDeep, uSky, sky);',
+    '  float fr = pow(1.0 - ndv, 2.4);',
+    // 2つの光源: 上からの主光と、左後方からの逆光(縁を立てる)
+    '  vec3 L1 = normalize(vec3(0.3, 0.95, 0.45)); vec3 H1 = normalize(L1 + V);',
+    '  vec3 L2 = normalize(vec3(-0.8, 0.2, -0.5)); vec3 H2 = normalize(L2 + V);',
+    '  float sp = pow(max(dot(N, H1), 0.0), 140.0) * 1.1 + pow(max(dot(N, H2), 0.0), 30.0) * 0.35;',
+    '  vec3 R = reflect(-V, N); float sky = smoothstep(-0.2, 0.9, R.y);',
+    '  vec3 env = mix(uDeep * 0.6, uSky, sky * 0.55);',
     '  float g = smoothstep(0.0, 1.0, vUv.x);',
     '  vec3 tint = mix(uDeep, uMid, g);',
-    '  tint = mix(tint, uMint, pow(sky, 3.0) * 0.55);',
-    '  float a = uAlpha + fr * 0.55;',
-    '  float s1 = fract(uTime * 0.055); float s2 = fract(uTime * 0.055 + 0.5);',
+    '  tint = mix(tint, uMint, pow(sky, 3.0) * 0.5);',
+    // ガラスの中を流れる光(2本の帯)
+    '  float s1 = fract(uTime * 0.05); float s2 = fract(uTime * 0.05 + 0.5);',
     '  float d1 = vUv.x - s1; float d2 = vUv.x - s2;',
-    '  float glow = exp(-d1 * d1 * 90.0) * 0.55 + exp(-d2 * d2 * 160.0) * 0.3;',
-    '  vec3 col = tint * (0.62 + 0.38 * sky) + env * fr * 0.55 + uSky * sp;',
-    '  col += uMint * glow * (0.6 + 0.4 * sky); a = min(1.0, a + glow * 0.22);',
-    '  if (vKind > 0.5) { a = min(1.0, a + 0.38); col = mix(col, uMint, 0.45) + uSky * sp; }',
+    '  float glow = exp(-d1 * d1 * 80.0) * 0.5 + exp(-d2 * d2 * 150.0) * 0.28;',
+    '  float a = uAlpha + fr * 0.5;',
+    '  vec3 col = tint * (0.55 + 0.45 * sky) + env * fr * 0.7 + uSky * sp;',
+    '  col += uMint * fr * 0.45;',                       // 縁の発光(夜の空間で板の輪郭を立てる)
+    '  col += uMint * glow * (0.5 + 0.5 * sky); a = min(1.0, a + glow * 0.2);',
+    '  if (vKind > 0.5) { a = min(1.0, a + 0.42); col = mix(col, uMint, 0.55) + uSky * sp; }', // 厚みの側面
     '  a *= edge;',
+    // 床の反射: 下へ行くほど床の色に沈み、薄くなる
+    '  if (uMirror > 0.5) { float k = clamp((uFloorY - vPos.y) / 2.6, 0.0, 1.0); a *= 0.32 * (1.0 - k); col = mix(col, uFloor, 0.35 + 0.45 * k); }',
+    '  if (uMirror < 0.5) a *= smoothstep(uFloorY, uFloorY + 0.35, vPos.y);',
+    '  a *= uFade;',
     '  gl_FragColor = vec4(col * a, a);',
     '}'
   ].join('\n');
@@ -90,7 +107,7 @@
   gl.useProgram(prog);
   const A = { pos: gl.getAttribLocation(prog, 'aPos'), nrm: gl.getAttribLocation(prog, 'aNrm'), uv: gl.getAttribLocation(prog, 'aUv'), kind: gl.getAttribLocation(prog, 'aKind') };
   const U = {};
-  ['uProj', 'uView', 'uModel', 'uCam', 'uDeep', 'uMid', 'uMint', 'uSky', 'uReveal', 'uDark', 'uAlpha', 'uTime'].forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+  ['uProj', 'uView', 'uModel', 'uCam', 'uDeep', 'uMid', 'uMint', 'uSky', 'uFloor', 'uReveal', 'uAlpha', 'uTime', 'uMirror', 'uFloorY', 'uFade'].forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   /* ---------- tiny vector / matrix helpers ---------- */
   const v3 = (x, y, z) => [x, y, z];
@@ -108,13 +125,16 @@
     const z = norm(sub(eye, at)), x = norm(cross(up, z)), y = cross(z, x);
     return new Float32Array([x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0, -dot(x, eye), -dot(y, eye), -dot(z, eye), 1]);
   }
-  function mat(rx, ry, rz, t, s) {
+  function mat(rx, ry, rz, t, s, mirrorY) {
     const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry), cz = Math.cos(rz), sz = Math.sin(rz);
-    // R = Ry * Rx * Rz (column-major)
     const m00 = cy * cz + sy * sx * sz, m01 = cx * sz, m02 = -sy * cz + cy * sx * sz;
     const m10 = -cy * sz + sy * sx * cz, m11 = cx * cz, m12 = sy * sz + cy * sx * cz;
     const m20 = sy * cx, m21 = -sx, m22 = cy * cx;
-    return new Float32Array([m00 * s, m01 * s, m02 * s, 0, m10 * s, m11 * s, m12 * s, 0, m20 * s, m21 * s, m22 * s, 0, t[0], t[1], t[2], 1]);
+    const m = [m00 * s, m01 * s, m02 * s, 0, m10 * s, m11 * s, m12 * s, 0, m20 * s, m21 * s, m22 * s, 0, t[0], t[1], t[2], 1];
+    if (mirrorY !== undefined) { // y を床(mirrorY)で折り返す: y' = 2f - y
+      m[1] = -m[1]; m[5] = -m[5]; m[9] = -m[9]; m[13] = 2 * mirrorY - m[13];
+    }
+    return new Float32Array(m);
   }
 
   /* ---------- ribbon geometry(3次ベジェの連結 → 平行移動フレーム → 厚みのある板) ---------- */
@@ -123,7 +143,7 @@
     return add(add(mul(p0, u * u * u), mul(p1, 3 * u * u * t)), add(mul(p2, 3 * u * t * t), mul(p3, t * t * t)));
   }
   function ribbon(segs, opt) {
-    const N = 180, ctrl = segs.length;
+    const N = 200, ctrl = segs.length;
     const pts = [];
     for (let i = 0; i <= N; i++) {
       const t = i / N, k = Math.min(ctrl - 1, Math.floor(t * ctrl)), lt = t * ctrl - k;
@@ -131,13 +151,12 @@
       pts.push(bezier(s[0], s[1], s[2], s[3], lt));
     }
     const pos = [], nrm = [], uv = [], kind = [], idx = [];
-    let n = null;
-    let prevT = null;
+    let n = null, prevT = null;
     const frames = [];
     for (let i = 0; i <= N; i++) {
       const tng = norm(sub(pts[Math.min(N, i + 1)], pts[Math.max(0, i - 1)]));
       if (!n) { n = norm(cross(tng, [0, 0, 1])); if (Math.hypot(n[0], n[1], n[2]) < 1e-3) n = [1, 0, 0]; }
-      else { // parallel transport
+      else {
         const b = cross(prevT, tng); const bl = Math.hypot(b[0], b[1], b[2]);
         if (bl > 1e-6) {
           const ax = mul(b, 1 / bl), ang = Math.acos(Math.max(-1, Math.min(1, dot(prevT, tng))));
@@ -150,13 +169,12 @@
       const tw = opt.twist0 + (opt.twist1 - opt.twist0) * t + Math.sin(t * Math.PI * opt.wave) * opt.waveAmp;
       const bn = cross(tng, n);
       const c = Math.cos(tw), s = Math.sin(tw);
-      const side = norm(add(mul(n, c), mul(bn, s)));      // 幅方向
-      const face = norm(cross(tng, side));                  // 面の法線
+      const side = norm(add(mul(n, c), mul(bn, s)));
+      const face = norm(cross(tng, side));
       const w = opt.w0 + (opt.w1 - opt.w0) * Math.sin(t * Math.PI) * (1 - opt.wFlat) + (opt.w1 - opt.w0) * opt.wFlat;
       frames.push({ p: pts[i], side, face, w, t });
     }
     const th = opt.th;
-    // 4本のストリップ(上面・下面・側面2)。各ストリップは2頂点/断面
     const strips = [
       { off: (f) => mul(f.face, th / 2), n: (f) => f.face, k: 0, s: 1 },
       { off: (f) => mul(f.face, -th / 2), n: (f) => mul(f.face, -1), k: 0, s: -1 },
@@ -190,17 +208,17 @@
     return { attrs: [buf(pos, 3, A.pos), buf(nrm, 3, A.nrm), buf(uv, 2, A.uv), buf(kind, 1, A.kind)], ib, count: idx.length };
   }
 
-  // 二本の線。ロゴ(藍: 8,74→176,84 のアーチ / 砂: 58,94→232,12 の上昇)を 3D に。交差するが接続しない
+  // 二本の線(ロゴ: 藍のアーチ / 砂の上昇線)。大きく・厚く。交差するが接続しない
   const arch = ribbon([
-    [v3(-3.2, -3.6, -0.6), v3(-2.2, -1.2, -0.5), v3(-0.8, 1.4, -0.1), v3(0.8, 1.65, 0.1)],
-    [v3(0.8, 1.65, 0.1), v3(2.24, 1.875, 0.28), v3(4.4, 0.3, 0.5), v3(5.8, -2.6, 0.6)],
-  ], { w0: 0.36, w1: 0.68, wFlat: 0.2, th: 0.13, twist0: -0.55, twist1: 0.3, wave: 1.0, waveAmp: 0.1 });
+    [v3(-4.4, -4.0, -0.9), v3(-3.4, -1.0, -0.7), v3(-1.4, 1.9, -0.2), v3(0.6, 2.2, 0.15)],
+    [v3(0.6, 2.2, 0.15), v3(2.5, 2.45, 0.45), v3(4.9, 0.4, 0.75), v3(6.6, -3.0, 0.9)],
+  ], { w0: 0.5, w1: 1.05, wFlat: 0.25, th: 0.26, twist0: -0.5, twist1: 0.35, wave: 1.0, waveAmp: 0.1 });
   const rise = ribbon([
-    [v3(0.0, -3.8, 0.9), v3(0.6, -2.4, 0.7), v3(1.0, -0.9, 0.35), v3(2.0, 0.35, 0.05)],
-    [v3(2.0, 0.35, 0.05), v3(2.9, 1.475, -0.22), v3(4.4, 2.9, -0.55), v3(6.0, 4.0, -0.8)],
-  ], { w0: 0.28, w1: 0.52, wFlat: 0.3, th: 0.11, twist0: 0.45, twist1: -0.3, wave: 1.0, waveAmp: -0.12 });
+    [v3(-0.4, -4.2, 1.1), v3(0.4, -2.6, 0.85), v3(0.9, -0.9, 0.4), v3(2.1, 0.5, 0.05)],
+    [v3(2.1, 0.5, 0.05), v3(3.2, 1.7, -0.25), v3(4.8, 3.2, -0.6), v3(6.6, 4.4, -0.9)],
+  ], { w0: 0.38, w1: 0.78, wFlat: 0.35, th: 0.22, twist0: 0.45, twist1: -0.3, wave: 1.0, waveAmp: -0.12 });
 
-  /* ---------- colors from CSS tokens(ライト/ダーク追従) ---------- */
+  /* ---------- colors / layout from CSS ---------- */
   const parse = (s) => {
     s = (s || '').trim();
     let m = /^#([0-9a-f]{6})$/i.exec(s);
@@ -211,35 +229,37 @@
     if (m) { const p = m[1].split(/[\s,\/]+/).map(Number); return [p[0] / 255, p[1] / 255, p[2] / 255]; }
     return null;
   };
-  let cols = {}, lay = { dist: 9.5, x: 0.9, y: 0, scale: 1 };
-  function readColors() {
+  let cols = {}, lay = { dist: 11, x: 0.8, y: -0.4, scale: 1, alpha: 0.5, reflect: 1, floor: -2.6 };
+  function readStyle() {
     const cs = getComputedStyle(host);
     const g = (n, d) => parse(cs.getPropertyValue(n)) || d;
     const num = (n, d) => { const v = parseFloat(cs.getPropertyValue(n)); return isNaN(v) ? d : v; };
-    // 置き方は CSS 側で決める(PC とスマホで構図を変えるため)
-    lay = { dist: num('--hb-dist', 9.5), x: num('--hb-x', 0.9), y: num('--hb-y', 0), scale: num('--hb-scale', 1), alpha: num('--hb-alpha', 0.34) };
     cols = {
-      deep: g('--hb-deep', [0.05, 0.27, 0.27]),
-      mid: g('--hb-mid', [0.13, 0.48, 0.45]),
-      mint: g('--hb-mint', [0.68, 0.9, 0.82]),
-      sky: g('--hb-sky', [0.98, 0.98, 0.96]),
-      dark: document.documentElement.getAttribute('data-theme') === 'dark' ? 1 : 0,
+      deep: g('--hb-deep', [0.06, 0.3, 0.28]),
+      mid: g('--hb-mid', [0.18, 0.65, 0.58]),
+      mint: g('--hb-mint', [0.75, 0.96, 0.9]),
+      sky: g('--hb-sky', [0.92, 0.98, 0.95]),
+      floor: g('--hb-floor', [0.03, 0.13, 0.12]),
     };
+    lay = { dist: num('--hb-dist', 11), x: num('--hb-x', 0.8), y: num('--hb-y', -0.4), scale: num('--hb-scale', 1), alpha: num('--hb-alpha', 0.5), reflect: num('--hb-reflect', 1), floor: num('--hb-floor-y', -2.6) };
   }
-  readColors();
-  new MutationObserver(() => { readColors(); dirty = true; }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  function readProgress() {
+    const v = parseFloat(getComputedStyle(host).getPropertyValue('--hb-progress'));
+    return isNaN(v) ? 0 : Math.max(0, Math.min(1, v));
+  }
+  readStyle();
+  new MutationObserver(() => { readStyle(); schedule(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   /* ---------- state ---------- */
-  let W = 1, H = 1, dpr = 1, dirty = true, running = false, raf = 0, visible = true;
+  let W = 1, H = 1, dpr = 1, running = false, raf = 0, visible = true;
   let t0 = performance.now(), reveal = reduced || CAPTURE ? 1 : 0;
   const ptr = { x: 0, y: 0, tx: 0, ty: 0 };
   function resize() {
-    readColors();
+    readStyle();
     const r = host.getBoundingClientRect();
     dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2);
     W = Math.max(1, Math.round(r.width * dpr)); H = Math.max(1, Math.round(r.height * dpr));
     if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
-    dirty = true;
   }
   resize();
   window.addEventListener('resize', () => { resize(); schedule(); }, { passive: true });
@@ -257,18 +277,25 @@
     new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) schedule(); else stop(); }, { threshold: 0 }).observe(host);
   }
 
-  function scrollProgress() {
-    const h = host.getBoundingClientRect().height || 1;
-    return Math.max(0, Math.min(1, window.scrollY / h));
+  function drawSet(draws, mirror) {
+    gl.uniform1f(U.uMirror, mirror ? 1 : 0);
+    draws.forEach(d => {
+      gl.uniformMatrix4fv(U.uModel, false, mirror ? d.mm : d.m);
+      d.g.attrs.forEach(a => { gl.bindBuffer(gl.ARRAY_BUFFER, a.b); gl.enableVertexAttribArray(a.loc); gl.vertexAttribPointer(a.loc, a.size, gl.FLOAT, false, 0, 0); });
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, d.g.ib);
+      // 鏡像は巻き方向が反転するので、表裏の順を入れ替える
+      gl.cullFace(mirror ? gl.BACK : gl.FRONT); gl.drawElements(gl.TRIANGLES, d.g.count, gl.UNSIGNED_SHORT, 0);
+      gl.cullFace(mirror ? gl.FRONT : gl.BACK); gl.drawElements(gl.TRIANGLES, d.g.count, gl.UNSIGNED_SHORT, 0);
+    });
   }
 
   function draw(now) {
     const dt = (now - t0) / 1000;
     if (!reduced) {
       ptr.x += (ptr.tx - ptr.x) * 0.06; ptr.y += (ptr.ty - ptr.y) * 0.06;
-      if (reveal < 1) reveal = Math.min(1, dt / 1.6);
+      if (reveal < 1) reveal = Math.min(1, dt / 1.5);
     }
-    const p = reduced ? 0 : scrollProgress();
+    const p = reduced ? 0 : readProgress();  // スクロールの進み: カメラが引き、板が奥へ退く
     const time = reduced ? 0 : dt;
 
     gl.viewport(0, 0, W, H);
@@ -279,32 +306,30 @@
     gl.enable(gl.CULL_FACE);
 
     const aspect = W / H;
-    const fov = 0.52;
-    const eye = [0.3, 0.35, lay.dist];
-    gl.uniformMatrix4fv(U.uProj, false, perspective(fov, aspect, 0.5, 40));
-    gl.uniformMatrix4fv(U.uView, false, lookAt(eye, [0.3, 0.1, 0], [0, 1, 0]));
+    const dist = lay.dist + p * 6.5;
+    const eye = [0.3 + p * 1.2, 0.5 + p * 1.6, dist];
+    gl.uniformMatrix4fv(U.uProj, false, perspective(0.55, aspect, 0.5, 60));
+    gl.uniformMatrix4fv(U.uView, false, lookAt(eye, [0.4 + p * 0.6, -0.2 - p * 0.4, 0], [0, 1, 0]));
     gl.uniform3fv(U.uCam, eye);
-    gl.uniform3fv(U.uDeep, cols.deep); gl.uniform3fv(U.uMid, cols.mid); gl.uniform3fv(U.uMint, cols.mint); gl.uniform3fv(U.uSky, cols.sky);
-    gl.uniform1f(U.uReveal, reveal); gl.uniform1f(U.uDark, cols.dark); gl.uniform1f(U.uAlpha, lay.alpha); gl.uniform1f(U.uTime, time);
+    gl.uniform3fv(U.uDeep, cols.deep); gl.uniform3fv(U.uMid, cols.mid); gl.uniform3fv(U.uMint, cols.mint); gl.uniform3fv(U.uSky, cols.sky); gl.uniform3fv(U.uFloor, cols.floor);
+    gl.uniform1f(U.uReveal, reveal); gl.uniform1f(U.uAlpha, lay.alpha); gl.uniform1f(U.uTime, time);
+    gl.uniform1f(U.uFloorY, lay.floor); gl.uniform1f(U.uFade, 1 - p * 0.6);
 
     const ease = 1 - Math.pow(1 - reveal, 3);
-    const ry = -0.42 + ptr.x * 0.07 + p * 0.55 + (1 - ease) * 0.35 + Math.sin(time * 0.21) * 0.06;
-    const rx = 0.16 + ptr.y * 0.05 - p * 0.12 + Math.sin(time * 0.16 + 1.2) * 0.03;
-    const ty = lay.y - p * 1.1 + Math.sin(time * 0.33) * 0.08;
-    const scale = lay.scale;
+    const ry = -0.38 + ptr.x * 0.06 + p * 0.9 + (1 - ease) * 0.3 + Math.sin(time * 0.21) * 0.05;
+    const rx = 0.12 + ptr.y * 0.04 + p * 0.25 + Math.sin(time * 0.16 + 1.2) * 0.025;
+    const ty = lay.y + Math.sin(time * 0.33) * 0.07;
+    const s = lay.scale;
+    const rz1 = 0.03 + Math.sin(time * 0.37) * 0.02, rz2 = -0.02 + Math.sin(time * 0.29) * 0.02;
+    const t1 = [lay.x + 0.15 + Math.sin(time * 0.19) * 0.06, ty + 0.05 + Math.sin(time * 0.41 + 2.0) * 0.07, 0];
+    const t2 = [lay.x - Math.sin(time * 0.19) * 0.04, ty, 0];
     const draws = [
-      { g: rise, m: mat(rx - Math.sin(time * 0.27) * 0.02, ry + 0.02 + Math.sin(time * 0.24 + 0.8) * 0.04, 0.03 + Math.sin(time * 0.37) * 0.02, [lay.x + 0.15 + Math.sin(time * 0.19) * 0.06, ty + 0.05 + Math.sin(time * 0.41 + 2.0) * 0.07, 0], scale) },
-      { g: arch, m: mat(rx, ry - Math.sin(time * 0.24 + 0.8) * 0.02, -0.02 + Math.sin(time * 0.29) * 0.02, [lay.x - Math.sin(time * 0.19) * 0.04, ty, 0], scale) },
+      { g: rise, m: mat(rx - Math.sin(time * 0.27) * 0.02, ry + 0.02 + Math.sin(time * 0.24 + 0.8) * 0.04, rz1, t1, s), mm: mat(rx - Math.sin(time * 0.27) * 0.02, ry + 0.02 + Math.sin(time * 0.24 + 0.8) * 0.04, rz1, t1, s, lay.floor) },
+      { g: arch, m: mat(rx, ry - Math.sin(time * 0.24 + 0.8) * 0.02, rz2, t2, s), mm: mat(rx, ry - Math.sin(time * 0.24 + 0.8) * 0.02, rz2, t2, s, lay.floor) },
     ];
-    draws.forEach(d => {
-      gl.uniformMatrix4fv(U.uModel, false, d.m);
-      d.g.attrs.forEach(a => { gl.bindBuffer(gl.ARRAY_BUFFER, a.b); gl.enableVertexAttribArray(a.loc); gl.vertexAttribPointer(a.loc, a.size, gl.FLOAT, false, 0, 0); });
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, d.g.ib);
-      gl.cullFace(gl.FRONT); gl.drawElements(gl.TRIANGLES, d.g.count, gl.UNSIGNED_SHORT, 0);
-      gl.cullFace(gl.BACK); gl.drawElements(gl.TRIANGLES, d.g.count, gl.UNSIGNED_SHORT, 0);
-    });
+    if (lay.reflect > 0) drawSet(draws, true);  // 床の反射(先に・薄く)
+    drawSet(draws, false);
     host.classList.add('hb-ready');
-    dirty = false;
     if (CAPTURE) { window.HERO_BRIDGE_DONE = true; }
   }
 
@@ -312,8 +337,7 @@
     raf = 0;
     if (!visible || document.hidden) { running = false; return; }
     draw(now);
-    // 可視中は回し続ける(時間で揺れるため)。reduced と静止画の事前レンダでは1枚描いて止まる。
-    // 画面外・非表示タブは stop() で止める(上の visible / document.hidden の判定)
+    // 可視中は回し続ける(時間で揺れ、光が流れるため)。reduced と静止画の事前レンダでは1枚描いて止まる
     if (!reduced && !CAPTURE) raf = requestAnimationFrame(frame); else running = false;
   }
   function schedule() { if (!running && visible && !document.hidden) { running = true; raf = requestAnimationFrame(frame); } }

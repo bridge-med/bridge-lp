@@ -21,7 +21,8 @@
    Products v3 — 用途から選ぶ一覧。展示のように、大小のリズムで並べる
    色: --glass 系はこのページとトップだけ(shared/bridge.css 参照)。このページでは主ボタン相当(.use-nav は藍=既存の .tag.active と同じ選択状態)に留める
    ================================================================ */
-.page-hero .lead{max-width:38em}
+.page-hero .lead{max-width:34em}
+.page-hero .ph-h{font-family:var(--sans);font-weight:900;font-size:clamp(40px,7.6vw,96px);line-height:1.1;letter-spacing:-0.015em}
 /* 用途の索引(ページ内リンク) */
 .use-nav{max-width:var(--max);margin:clamp(28px,4vh,40px) auto 0;display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
 .use-nav a{font:600 12.5px/1 var(--sans);letter-spacing:0.03em;padding:13px 18px;min-height:44px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;color:var(--ink-2);background:var(--card);transition:all .25s}
@@ -35,7 +36,7 @@
 /* まず試すなら(3つ) */
 .first-sec{padding-top:clamp(64px,9vh,100px);padding-bottom:clamp(64px,9vh,100px)}
 .first-head{display:grid;grid-template-columns:1fr 1fr;gap:20px 48px;align-items:end;margin-bottom:clamp(28px,4vh,40px)}
-.first-head h2{font-family:var(--mincho);font-weight:600;font-size:clamp(26px,3.6vw,40px);line-height:1.5;letter-spacing:0.03em;margin-top:16px}
+.first-head h2{font-family:var(--sans);font-weight:900;font-size:clamp(28px,4vw,48px);line-height:1.2;letter-spacing:-0.01em;margin-top:16px}
 .first-head p{font-size:13.5px;line-height:2.1;color:var(--ink-2);max-width:34em;justify-self:end}
 .first-rows{border-top:1px solid var(--line)}
 .first-row{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1.5fr) auto;gap:8px 28px;align-items:center;padding:clamp(16px,2.4vh,22px) 0;border-bottom:1px solid var(--line);transition:background .3s}
@@ -60,7 +61,7 @@
 .cat-head{max-width:var(--max);margin:0 auto clamp(30px,4vh,44px);display:grid;grid-template-columns:1fr 1fr;gap:16px 48px;align-items:end}
 .cat-head .n{font:700 10px/1 var(--en);letter-spacing:0.24em;text-transform:uppercase;color:var(--ink-3);display:inline-flex;align-items:center;gap:10px}
 .cat-head .n::before{content:'';width:22px;height:1px;background:var(--dawn)}
-.cat-head h2{font-family:var(--mincho);font-weight:600;font-size:clamp(26px,3.6vw,40px);line-height:1.5;letter-spacing:0.03em;margin-top:16px}
+.cat-head h2{font-family:var(--sans);font-weight:900;font-size:clamp(28px,4vw,48px);line-height:1.2;letter-spacing:-0.01em;margin-top:16px}
 .cat-head p{font-size:13.5px;line-height:2.1;color:var(--ink-2);max-width:34em;justify-self:end}
 @media(max-width:860px){.cat-head{grid-template-columns:1fr}.cat-head p{justify-self:start}}
 /* 展示のリズム: 6列グリッド。big=4列(写しが大きい)、通常=2列。3点以下の段はbigが3列 */
@@ -78,7 +79,7 @@ a.prod-card:hover .prod-shot{transform:scale(1.03)}
 .prod-card.big .prod-body{padding:clamp(22px,2.6vw,32px)}
 .prod-k{font:600 10px/1.6 var(--en);letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .prod-k .jp{font:600 10.5px/1.6 var(--sans);letter-spacing:0.06em;text-transform:none;color:var(--ink-3)}
-.prod-t{font-family:var(--mincho);font-weight:600;font-size:18px;line-height:1.55}
+.prod-t{font-family:var(--sans);font-weight:900;font-size:18px;line-height:1.4;letter-spacing:-0.005em}
 .prod-card.big .prod-t{font-size:clamp(22px,2.6vw,30px)}
 .prod-p{font-size:12.5px;line-height:2;color:var(--ink-2);flex:1}
 .prod-card.big .prod-p{font-size:13.5px;max-width:34em}
@@ -105,9 +106,9 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
 <header class="page-hero">
   <div class="page-hero-inner">
     <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Products</span></div>
-    <h1 data-reveal data-reveal-delay="1">現場の悩みに、<br class="br-pc">使える道具を</h1>
+    <h1 class="ph-h" data-reveal data-reveal-delay="1">現場の悩みに、<br>使える道具を</h1>
     <p class="lead" data-reveal data-reveal-delay="2">
-      看護師・リハビリ職・医療事務など、医療の現場で働く人のために作った道具の一覧です。ほとんどは日常の業務で感じた違和感から作り、自分が最初のユーザーになって使い続けているものです。最後の「気軽に試す・作品を楽しむ」だけは、業務とは関係なく作った小品を置いています。用途から選べます。
+      医療の現場で働く人のために作った道具、全28点。ほとんどは自分の業務の違和感から作り、いまも使っているものです。用途から選べます。
     </p>
     <nav class="use-nav" aria-label="用途で絞る" data-reveal data-reveal-delay="3" id="useNav"></nav>
   </div>
@@ -120,9 +121,9 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
     <div class="first-head" data-reveal>
       <div>
         <div class="eyebrow">Selected — まず試すなら</div>
-        <h2 id="firstTitle">初めてなら、この3つから</h2>
+        <h2 id="firstTitle">初めてなら、この3つ</h2>
       </div>
-      <p>登録なしで、ブラウザだけで始められます。入力した内容はお使いの端末の中にだけ残ります。</p>
+      <p>3つとも無料・登録なし。入力は端末の中にだけ残ります。</p>
     </div>
     <div class="first-rows" id="firstRows"></div>
   </div>
@@ -290,7 +291,7 @@ window.addEventListener('DOMContentLoaded', () => {
     a.className = 'first-row'; a.href = p.href; a.setAttribute('data-reveal', ''); a.setAttribute('data-reveal-delay', String(i));
     a.innerHTML = '<img src="' + thumb(p) + '" alt="' + esc(p.name) + 'の画面" loading="lazy" width="880" height="550">' +
       '<span class="t">' + esc(p.name) + '<small>' + esc(p.en ? p.en + ' — ' : '') + esc(USES.find(u => u.id === p.use).t) + '</small></span>' +
-      '<span class="d">' + esc(p.t) + '。' + esc(p.facts.join('・')) + '</span>' +
+      '<span class="d">' + esc(p.t) + '</span>' +
       '<span class="c">' + ctaOf(p) + '</span>';
     first.appendChild(a);
   });
