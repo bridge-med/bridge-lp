@@ -307,9 +307,9 @@
     raf = 0;
     if (!visible || document.hidden) { running = false; return; }
     draw(now);
-    // 動きが要るあいだだけ次のフレームを取る(reduced: 変化があった時だけ1枚)
-    const moving = !reduced && (reveal < 1 || Math.abs(ptr.tx - ptr.x) > 0.002 || Math.abs(ptr.ty - ptr.y) > 0.002 || true);
-    if (moving && !CAPTURE) raf = requestAnimationFrame(frame); else running = false;
+    // 可視中は回し続ける(時間で揺れるため)。reduced と静止画の事前レンダでは1枚描いて止まる。
+    // 画面外・非表示タブは stop() で止める(上の visible / document.hidden の判定)
+    if (!reduced && !CAPTURE) raf = requestAnimationFrame(frame); else running = false;
   }
   function schedule() { if (!running && visible && !document.hidden) { running = true; raf = requestAnimationFrame(frame); } }
   function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; running = false; }

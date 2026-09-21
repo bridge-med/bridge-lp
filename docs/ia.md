@@ -11,7 +11,7 @@
 /                       Home           … 玄関。誰に何が役立つかを最初の画面で伝え、おすすめ3点と用途別の索引から道具へ渡す
 ├── philosophy/         Philosophy     … 思想の全文(Why / MVV / リハとは / Thinking / Principles / Manifesto)
 ├── projects/           Projects       … 活動一覧(PMI / AI / 教育 / 研究 / アプリ開発 / 発信)+ Roadmap
-├── products/           Products       … プロダクトカタログ(カテゴリ別・全17点)
+├── products/           Products       … プロダクトカタログ(用途別・全28点)
 │   ├── rehaboard/ 等   個別プロダクト … 既存の独立ページ群(そのまま活用)
 ├── stories/            Stories        … 選択肢が増える瞬間(患者/医療者/組織/キャリア/AI)
 ├── journal/            Journal        … BRIDGE Journal(note記事+タグ探索+実験室)
