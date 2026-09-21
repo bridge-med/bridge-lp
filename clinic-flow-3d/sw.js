@@ -1,6 +1,6 @@
 /* クリニックタウン3D — Service Worker
  * network-first(常に最新を取りに行き、オフライン時はキャッシュで起動) */
-const VER = 'ct3d-v99.1';
+const VER = 'ct3d-v99.2';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -15,7 +15,9 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) return;
   e.respondWith(
-    fetch(e.request)
+    // cache: 'no-cache' = HTTP キャッシュを使わず毎回サーバーに確かめる(ETag が同じなら 304 で軽い)。
+    // GitHub Pages は max-age=600 を付けるので、これが無いとデプロイ後 10 分は古い game.js が返る(社長 PC 2026-09-21: 直したはずの採用が押せない)
+    fetch(e.request, { cache: 'no-cache' })
       .then((res) => {
         const copy = res.clone();
         caches.open(VER).then((c) => c.put(e.request, copy));
