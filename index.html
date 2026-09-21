@@ -22,13 +22,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./shared/bridge.css">
-<link rel="preload" as="image" href="./images/hero-bridge.webp" fetchpriority="high">
+<link rel="preload" as="image" href="./images/hero/hero-pc-light.webp" media="(min-width:761px)" fetchpriority="high">
+<link rel="preload" as="image" href="./images/hero/hero-sp-light.webp" media="(max-width:760px)" fetchpriority="high">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 /* ================================================================
-   Home v5 — 説明のページから、体験の入口へ
-   構成: ヒーロー(夜の空間にガラスの二本線。2画面ぶんの固定ステージで、スクロールに応じて
-         カメラが引き → ゲームの実画面が主役に交代) → おすすめ3つ → 考え方の一文 → フッター
+   Home v6 — 説明のページから、体験の入口へ
+   構成: ヒーロー(明るい場に、厚いガラスの二本線の事前レンダ。2画面ぶんの固定ステージで、スクロールに応じて
+         場が昼→夜に転じ、ゲームの実画面が主役に交代) → おすすめ3つ → 考え方の一文 → フッター
+   立体: images/hero/hero-{pc,sp}-{light,dark}.webp(CPU パストレースで描いた背景なしの静止画。影と映り込みも alpha で焼く)。
+         同じ名前で置き換えれば素材を差し替えられる。動きは CSS だけ(光の帯が板の形の中を流れる・ゆっくり呼吸)
    文字: 常時表示の本文を前版の半分以下に。詳しい説明は各ページへ
    色: 青緑とミントは --glass 系トークン(shared/bridge.css)。このページと products/ だけで使う
    ================================================================ */
@@ -38,33 +41,49 @@
 
 /* ===== ヒーロー: 固定ステージ ===== */
 .hero-track{position:relative;height:100svh}
-html.js .hero-track{height:230svh}            /* JS が進み具合を書くときだけ2画面ぶんの奥行きを持つ */
-.stage{position:sticky;top:0;height:100svh;overflow:hidden;color:var(--ink);isolation:isolate;
+html.js .hero-track{height:200svh}            /* JS が進み具合を書くときだけ2画面ぶんの奥行きを持つ */
+.stage{position:sticky;top:0;height:100svh;overflow:hidden;color:var(--ink);isolation:isolate;outline:none;
   background:color-mix(in oklab, var(--bg) calc((1 - var(--pbg,0)) * 100%), var(--glass-deep))}
-/* 場面1: 明るい場。床に近いほどミントの光が溜まる */
+/* 場面1: 明るい場。床に近いほどミントの光が溜まる(立体の足元の光溜まり) */
 .stage::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:calc(1 - var(--pbg,0));
   background:
-    radial-gradient(70% 22% at 62% 100%, rgba(168,230,211,.55), transparent),
-    radial-gradient(120% 70% at 70% 80%, rgba(168,230,211,.18), transparent 60%),
-    linear-gradient(180deg, transparent 0%, transparent 60%, color-mix(in srgb, var(--glass-hi) 22%, transparent) 100%)}
+    radial-gradient(60% 18% at 66% 92%, rgba(168,230,211,.50), transparent),
+    radial-gradient(120% 60% at 70% 90%, rgba(168,230,211,.16), transparent 60%),
+    linear-gradient(180deg, transparent 0%, transparent 62%, color-mix(in srgb, var(--glass-hi) 20%, transparent) 100%)}
 /* 場面2: 夜の空間 */
 .stage::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:var(--pbg,0);
   background:
     radial-gradient(120% 70% at 68% 78%, rgba(168,230,211,.20), transparent 60%),
     radial-gradient(90% 60% at 20% 10%, rgba(15,76,71,.55), transparent 65%),
     linear-gradient(180deg, #051816 0%, var(--glass-deep) 55%, #123F3A 100%)}
+
+/* 立体(事前レンダ)。スクロールで少し引いて退き、夜の場に沈む */
 .hb{position:absolute;inset:0;z-index:1;pointer-events:none;
-    --hb-dist:11;--hb-x:1.8;--hb-y:-0.1;--hb-scale:0.9;--hb-alpha:0.66;--hb-floor-y:-2.6;--hb-reflect:1;
-    --hb-deep:#0B4A44;--hb-mid:#1F8F80;--hb-mint:#A8F0DC;--hb-sky:#FFFFFF;--hb-floor:#DDEFE8;--hb-progress:var(--p,0)}
-[data-theme="dark"] .hb{--hb-deep:#0F4C47;--hb-mid:#2FA595;--hb-mint:#BFF5E4;--hb-sky:#EEFBF6;--hb-floor:#0B2D29}
-.hb-poster,.hb-canvas{position:absolute;inset:0;width:100%;height:100%}
-.hb-poster{object-fit:cover;object-position:60% 55%;transition:opacity .6s}
-.hb.hb-ready .hb-poster{opacity:0}
+  --hero:url(./images/hero/hero-pc-light.webp);--hero-night:url(./images/hero/hero-pc-dark.webp);--hero-pos:calc(100% + 48px) 100%;
+  opacity:calc(1 - var(--p,0) * 0.78);
+  transform:translateY(calc(var(--p,0) * -8vh)) scale(calc(1 - var(--p,0) * 0.12));transform-origin:70% 100%}
+[data-theme="dark"] .hb{--hero:url(./images/hero/hero-pc-dark.webp)}
+.hb-in{position:absolute;inset:0;transform-origin:70% 100%}
+.hb-art{position:absolute;inset:0;background:var(--hero) var(--hero-pos)/cover no-repeat}
+/* 夜の照明で描いた同じ造形。場が夜に転じるのに合わせて置き換わる(JS が読み込み後に html.hero-night を付けてから読む) */
+.hb-night{position:absolute;inset:0;opacity:var(--pbg,0)}
+html.hero-night .hb-night{background:var(--hero-night) var(--hero-pos)/cover no-repeat}
+[data-theme="dark"] .hb-night{display:none}
+/* 光の帯: 板の形(alpha)でマスクしたミントの光が、ゆっくり流れる */
+.hb-sweep{position:absolute;inset:0;-webkit-mask:var(--hero) var(--hero-pos)/cover no-repeat;mask:var(--hero) var(--hero-pos)/cover no-repeat;mix-blend-mode:screen;opacity:.9;
+  background:linear-gradient(112deg, transparent 38%, rgba(191,245,228,.55) 47%, rgba(255,255,255,.35) 50%, rgba(191,245,228,.55) 53%, transparent 62%);
+  background-size:260% 100%;animation:sweep 7.5s linear infinite}
+[data-theme="dark"] .hb-sweep{opacity:.7}
+@keyframes sweep{0%{background-position:120% 0}100%{background-position:-20% 0}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+html.js .hb-in{animation:breathe 9s ease-in-out infinite}
 
 /* 場面1: 見出しと1つのボタン。板に重ねる */
-.scene1{position:absolute;inset:0;z-index:2;display:grid;align-items:center;padding:0 var(--pad-x);isolation:isolate;
-  opacity:calc(1 - var(--p1,0) * 1.15);transform:translateY(calc(var(--p1,0) * -60px));pointer-events:none}
-.scene1>*{pointer-events:auto}
+.scene{position:absolute;inset:0;transition:visibility 0s}
+.scene[inert]{pointer-events:none}
+.scene.is-off{visibility:hidden}
+.scene1{z-index:2;display:grid;align-items:center;padding:0 var(--pad-x);isolation:isolate;
+  opacity:calc(1 - var(--p1,0) * 1.4);transform:translateY(calc(var(--p1,0) * -60px))}
 .s1-inner{max-width:var(--max);margin:0 auto;width:100%}
 .s1-tag{font:700 12px/1 var(--sans);letter-spacing:0.12em;color:var(--glass);display:flex;align-items:center;gap:12px}
 [data-theme="dark"] .s1-tag{color:var(--glass-hi)}
@@ -82,9 +101,8 @@ html.js .hero-track{height:230svh}            /* JS が進み具合を書くと�
 @keyframes drip{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
 /* 場面2: ゲームの実画面がせり上がって主役に */
-.scene2{position:absolute;inset:0;z-index:3;display:grid;grid-template-rows:auto minmax(0,1fr);align-items:end;padding:calc(72px + 4vh) var(--pad-x) 0;pointer-events:none;
+.scene2{z-index:3;display:grid;grid-template-rows:auto minmax(0,1fr);align-items:end;padding:calc(72px + 4vh) var(--pad-x) 0;
   opacity:var(--p2,0);background:linear-gradient(180deg,rgba(5,24,22,.88) 0%,rgba(5,24,22,.55) 34%,rgba(5,24,22,0) 60%)}
-.scene2>*{pointer-events:auto}
 .s2-head{max-width:var(--max);margin:0 auto;width:100%;display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;
   transform:translateY(calc((1 - var(--p2,0)) * 40px))}
 .s2-h{font-family:var(--sans);font-weight:900;font-size:clamp(24px,3.4vw,46px);line-height:1.2;letter-spacing:-0.01em;color:#fff}
@@ -101,10 +119,11 @@ html.js .hero-track{height:230svh}            /* JS が進み具合を書くと�
 .s2-cap .jp{font-family:var(--sans);letter-spacing:0.02em}
 
 @media(max-width:760px){
-  .hb-poster{object-position:50% 45%}
-  .scene1{align-items:end;padding-bottom:104px}
-  .scene1::before{content:'';position:absolute;left:0;right:0;bottom:0;height:62%;z-index:-1;pointer-events:none;background:linear-gradient(180deg,transparent 0%,color-mix(in srgb,var(--bg) 88%,transparent) 32%,var(--bg) 100%);opacity:calc(1 - var(--pbg,0))}
-  .hb{--hb-dist:11.5;--hb-x:0.55;--hb-y:0.35;--hb-scale:1;--hb-floor-y:-2.9}
+  .hb{--hero:url(./images/hero/hero-sp-light.webp);--hero-night:url(./images/hero/hero-sp-dark.webp);--hero-pos:50% 0%;transform-origin:50% 60%}
+  [data-theme="dark"] .hb{--hero:url(./images/hero/hero-sp-dark.webp)}
+  .scene1{align-items:end;padding-bottom:96px}
+  /* 文字の場の境界: 上 44% は立体だけ、44〜56% で生成りに切り替わり、下は文字だけ(designer: 洗い流しではなく境界) */
+  .scene1::before{content:'';position:absolute;left:0;right:0;bottom:0;height:56%;z-index:-1;pointer-events:none;background:linear-gradient(180deg,transparent 0%,var(--bg) 22%,var(--bg) 100%);opacity:calc(1 - var(--pbg,0))}
   .s1-h{font-size:clamp(40px,11.2vw,54px);line-height:1.12}
   .s1-sub{font-size:14.5px}
   .s1-actions .btn{min-width:62%;justify-content:center}
@@ -115,11 +134,13 @@ html.js .hero-track{height:230svh}            /* JS が進み具合を書くと�
   .s2-head{gap:12px}
   .s2-cap{margin:12px 0 8px}
 }
-/* 動きを減らす設定・JS なし: 場面1だけの静止した1画面 */
+/* 動きを減らす設定・JS なし: 場面1だけの静止した1画面。光の帯も止める */
 @media(prefers-reduced-motion:reduce){
   html.js .hero-track{height:100svh}
   .scene2{display:none}
   .scroll-hint::after{animation:none}
+  .hb-sweep{animation:none;opacity:0}
+  html.js .hb-in{animation:none}
 }
 html:not(.js) .scene2{display:none}
 
@@ -161,8 +182,6 @@ html:not(.js) .scene2{display:none}
 .idea-links a{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);font:700 14px/1.4 var(--sans);letter-spacing:0.02em;color:var(--ink);min-height:44px}
 .idea-links a small{font:500 11px/1 var(--en);letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3)}
 .idea-links a:hover small{color:var(--ink)}
-.idea-rest{grid-column:2;margin-top:18px;font-size:13px;color:var(--ink-3)}
-@media(max-width:860px){.idea-rest{grid-column:1}}
 @media(max-width:860px){.idea-inner{grid-template-columns:1fr}}
 </style>
 </head>
@@ -173,18 +192,16 @@ html:not(.js) .scene2{display:none}
 <main>
 
 <!-- ============ HERO ============
-     立体はロゴの「交差する二本の線」を厚みのあるガラスの板として描く(shared/hero-bridge.js・素のWebGL)。
-     WebGL が使えない環境と描画前は images/hero-bridge.webp(同じシーンの事前レンダリング)。
-     スクロールで --p1(場面1が退く) / --p2(ゲームの実画面がせり上がる) / --p(カメラ)を書く。
+     立体はロゴの「交差する二本の線」を厚いガラスの板として描いた事前レンダ(images/hero/・CPU パストレース・背景なし)。
+     PC とスマホは別の構図で描いた別の画像。同じ名前で置き換えれば素材を差し替えられる(scripts/ 側ではなく画像だけ)。
+     動きは CSS のみ: 板の形でマスクした光の帯が流れ、ゆっくり呼吸する。スクロールで --p1(場面1が退く)/ --p2(実画面が上がる)/ --p(立体が引く)/ --pbg(昼→夜)を書く。
+     場面の切り替え: JS が非アクティブな場面に inert・aria-hidden・.is-off(visibility:hidden)を付け、フォーカスは stage に退避する。
      動きを減らす設定と JS なしでは、場面1だけの静止した1画面。本文とボタンは演出と無関係に最初から使える。 -->
 <div class="hero-track" id="heroTrack">
-  <section class="stage" id="stage" aria-labelledby="heroTitle">
-    <div class="hb" data-hero-bridge aria-hidden="true">
-      <img class="hb-poster" src="./images/hero-bridge.webp" alt="" width="1600" height="1000" fetchpriority="high" decoding="async">
-      <canvas class="hb-canvas"></canvas>
-    </div>
+  <section class="stage" id="stage" data-active="1" tabindex="-1" aria-labelledby="heroTitle">
+    <div class="hb" aria-hidden="true"><div class="hb-in"><div class="hb-art"></div><div class="hb-night"></div><div class="hb-sweep"></div></div></div>
 
-    <div class="scene1">
+    <div class="scene scene1" id="scene1">
       <div class="s1-inner">
         <p class="s1-tag">看護師・リハビリ職・医療事務の方へ</p>
         <h1 class="s1-h" id="heroTitle">その経験に、<br>次の可能性を</h1>
@@ -197,10 +214,10 @@ html:not(.js) .scene2{display:none}
     </div>
     <div class="scroll-hint" aria-hidden="true">SCROLL</div>
 
-    <div class="scene2" aria-hidden="true">
+    <div class="scene scene2 is-off" id="scene2" inert aria-hidden="true">
       <div class="s2-head">
         <h2 class="s2-h"><small>Clinic Town 3D</small>クリニック経営を、<br>1日ずつ動かして学ぶ</h2>
-        <a class="s2-cta" href="./clinic-flow-3d/index.html" tabindex="-1">ゲームを始める <span aria-hidden="true">→</span></a>
+        <a class="s2-cta" href="./clinic-flow-3d/index.html">ゲームを始める <span aria-hidden="true">→</span></a>
       </div>
       <figure class="s2-shot">
         <p class="s2-cap"><span class="jp">実際のゲーム画面(2026-09-21 撮影)</span></p>
@@ -268,7 +285,6 @@ html:not(.js) .scene2{display:none}
       <li><a href="./about/index.html">運営者について <small>About</small></a></li>
       <li><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">noteで考えていることを読む <small>note ↗</small></a></li>
     </ul>
-    <p class="idea-p idea-rest" data-reveal data-reveal-delay="2">眺めて帰るだけでも構いません。</p>
   </div>
 </section>
 
@@ -276,35 +292,51 @@ html:not(.js) .scene2{display:none}
 
 <footer class="site-footer"></footer>
 <script src="./shared/bridge.js" defer></script>
-<script src="./shared/hero-bridge.js" defer></script>
 <script defer>
 (function () {
-  // スクロールの進み具合を CSS 変数に書く(通常スクロールは乗っ取らない)
+  // スクロールの進み具合を CSS 変数に書く(通常スクロールは乗っ取らない)。
+  // 非アクティブな場面は inert + aria-hidden + visibility:hidden で、タップ・クリック・Tab の対象から外す。
   const track = document.getElementById('heroTrack');
   const stage = document.getElementById('stage');
-  if (!track || !stage) return;
+  const s1 = document.getElementById('scene1'), s2 = document.getElementById('scene2');
+  if (!track || !stage || !s1 || !s2) return;
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) return;
+  if (reduced) return; // 場面1だけの静止した1画面(scene2 は HTML の inert のまま)
   const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-  let ticking = false;
+  const clamp = v => Math.max(0, Math.min(1, v));
+  // 場面の操作可否。しきい値にヒステリシスを持たせ、境界で毎フレーム反転しないようにする
+  function setActive(el, on, off) {
+    const wasInert = el.hasAttribute('inert');
+    if (!on && !wasInert) {
+      if (el.contains(document.activeElement)) stage.focus({ preventScroll: true }); // フォーカスの迷子を防ぐ
+      el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true');
+    } else if (on && wasInert) { el.removeAttribute('inert'); el.setAttribute('aria-hidden', 'false'); }
+    el.classList.toggle('is-off', off); // 完全に消えた場面だけ描画からも外す
+  }
+  let ticking = false, active = 1;
   const update = () => {
     ticking = false;
     const r = track.getBoundingClientRect();
     const range = Math.max(1, r.height - window.innerHeight);
-    const p = Math.max(0, Math.min(1, -r.top / range));
-    const p1 = Math.max(0, Math.min(1, p / 0.45));              // 場面1が退く
-    const p2 = ease(Math.max(0, Math.min(1, (p - 0.35) / 0.5)));  // ゲームの画面がせり上がる
+    const p = clamp(-r.top / range);
+    const p1 = clamp(p / 0.4);                       // 場面1が退く
+    const p2 = ease(clamp((p - 0.25) / 0.35));        // ゲームの画面がせり上がる(0.6 で全面)
     stage.style.setProperty('--p', p.toFixed(4));
     stage.style.setProperty('--p1', p1.toFixed(4));
     stage.style.setProperty('--p2', p2.toFixed(4));
-    stage.style.setProperty('--pbg', Math.max(0, Math.min(1, (p - 0.12) / 0.4)).toFixed(4)); // 明るい場 → 夜
-    stage.querySelector('.scene2').setAttribute('aria-hidden', p2 < 0.5 ? 'true' : 'false');
-    stage.querySelector('.s2-cta').tabIndex = p2 < 0.5 ? -1 : 0;
+    stage.style.setProperty('--pbg', clamp((p - 0.1) / 0.4).toFixed(4)); // 明るい場 → 夜
+    if (active === 1 && p2 >= 0.55) active = 2; else if (active === 2 && p2 <= 0.45) active = 1;
+    stage.setAttribute('data-active', String(active));
+    setActive(s1, active === 1, p1 >= 0.72);
+    setActive(s2, active === 2, p2 <= 0.02);
   };
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
   update();
+  // 夜の照明のレンダは最初の画面に要らないので、読み込み後に取りに行く
+  const night = () => document.documentElement.classList.add('hero-night');
+  if (document.readyState === 'complete') night(); else window.addEventListener('load', night, { once: true });
 })();
 </script>
 </body>
