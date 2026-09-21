@@ -1,6 +1,6 @@
 # 現在地(clinic-flow-3d)
 
-版: `ct3d-v99.1`(sw.js の VER)。公開URL: https://bridge-med.jp/clinic-flow-3d/(旧 https://bridge-med.github.io/bridge-lp/clinic-flow-3d/ は転送)
+版: `ct3d-v99.2`(sw.js の VER)。公開URL: https://bridge-med.jp/clinic-flow-3d/(旧 https://bridge-med.github.io/bridge-lp/clinic-flow-3d/ は転送)
 
 ## 主要システム
 
