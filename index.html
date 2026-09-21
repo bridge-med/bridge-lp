@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-site-verification" content="bKObgIPJoLGHSiLrlUYzFPJwbjRnVZw7gb679J9phxQ">
-<title>BRIDGE — 医療職の仕事と学びを広げる、ツールと経営ゲーム</title>
+<title>BRIDGE — 医療職の仕事と学びを広げる、道具と経営ゲーム</title>
 <meta name="description" content="看護師・リハビリ職・医療事務など、医療の現場で働く人へ。仕事に使える道具と、クリニック経営を体験できるゲームを、理学療法士がひとりで作って公開しています。登録なしでブラウザから試せます。">
 <link rel="canonical" href="https://bridge-med.github.io/bridge-lp/">
 <meta property="og:title" content="BRIDGE — その経験に、次の可能性を">
-<meta property="og:description" content="医療職の仕事と学びを広げる、ツールと経営ゲーム。登録なしでブラウザから試せます。">
+<meta property="og:description" content="医療職の仕事と学びを広げる、道具と経営ゲーム。登録なしでブラウザから試せます。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/">
 <meta property="og:site_name" content="BRIDGE">
@@ -33,79 +33,85 @@
    色: 青緑とミントは --glass 系トークン(shared/bridge.css)。このページと products/ だけで使う
    ================================================================ */
 
-/* 夜の空間の上ではナビを白に(スクロールで背景が付いたら通常に戻る) */
-.site-nav:not(.scrolled) .nav-logo,.site-nav:not(.scrolled) .nav-links a,.site-nav:not(.scrolled) .theme-btn,.site-nav:not(.scrolled) .nav-burger span{color:#fff;border-color:rgba(255,255,255,.35)}
-.site-nav:not(.scrolled) .nav-burger span{background:#fff}
-.site-nav:not(.scrolled) .logo-mark .l-navy{stroke:#fff}
-.site-nav:not(.scrolled) .logo-mark .l-sand{stroke:var(--glass-hi)}
-.site-nav:not(.scrolled) .nav-links a::after{background:var(--glass-hi)}
-
 /* ===== ヒーロー: 固定ステージ ===== */
 .hero-track{position:relative;height:100svh}
 html.js .hero-track{height:230svh}            /* JS が進み具合を書くときだけ2画面ぶんの奥行きを持つ */
-.stage{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--glass-deep);color:#fff;isolation:isolate}
-/* 夜の空間: 上は深く、床に近いほど淡く光る */
-.stage::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+.stage{position:sticky;top:0;height:100svh;overflow:hidden;color:var(--ink);isolation:isolate;
+  background:color-mix(in oklab, var(--bg) calc((1 - var(--pbg,0)) * 100%), var(--glass-deep))}
+/* 場面1: 明るい場。床に近いほどミントの光が溜まる */
+.stage::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:calc(1 - var(--pbg,0));
+  background:
+    radial-gradient(70% 22% at 62% 100%, rgba(168,230,211,.55), transparent),
+    radial-gradient(120% 70% at 70% 80%, rgba(168,230,211,.18), transparent 60%),
+    linear-gradient(180deg, transparent 0%, transparent 60%, color-mix(in srgb, var(--glass-hi) 22%, transparent) 100%)}
+/* 場面2: 夜の空間 */
+.stage::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:var(--pbg,0);
   background:
     radial-gradient(120% 70% at 68% 78%, rgba(168,230,211,.20), transparent 60%),
     radial-gradient(90% 60% at 20% 10%, rgba(15,76,71,.55), transparent 65%),
-    linear-gradient(180deg, #051816 0%, var(--glass-deep) 55%, #0E3E3A 100%)}
+    linear-gradient(180deg, #051816 0%, var(--glass-deep) 55%, #123F3A 100%)}
 .hb{position:absolute;inset:0;z-index:1;pointer-events:none;
-    --hb-dist:11;--hb-x:1.45;--hb-y:-0.1;--hb-scale:0.94;--hb-alpha:0.5;--hb-floor-y:-2.6;--hb-reflect:1;
-    --hb-deep:#0F4C47;--hb-mid:#2FA595;--hb-mint:#BFF5E4;--hb-sky:#EEFBF6;--hb-floor:#08201E;--hb-progress:var(--p,0)}
+    --hb-dist:11;--hb-x:1.8;--hb-y:-0.1;--hb-scale:0.9;--hb-alpha:0.66;--hb-floor-y:-2.6;--hb-reflect:1;
+    --hb-deep:#0B4A44;--hb-mid:#1F8F80;--hb-mint:#A8F0DC;--hb-sky:#FFFFFF;--hb-floor:#DDEFE8;--hb-progress:var(--p,0)}
+[data-theme="dark"] .hb{--hb-deep:#0F4C47;--hb-mid:#2FA595;--hb-mint:#BFF5E4;--hb-sky:#EEFBF6;--hb-floor:#0B2D29}
 .hb-poster,.hb-canvas{position:absolute;inset:0;width:100%;height:100%}
 .hb-poster{object-fit:cover;object-position:60% 55%;transition:opacity .6s}
 .hb.hb-ready .hb-poster{opacity:0}
 
 /* 場面1: 見出しと1つのボタン。板に重ねる */
-.scene1{position:absolute;inset:0;z-index:2;display:grid;align-items:center;padding:0 var(--pad-x);
+.scene1{position:absolute;inset:0;z-index:2;display:grid;align-items:center;padding:0 var(--pad-x);isolation:isolate;
   opacity:calc(1 - var(--p1,0) * 1.15);transform:translateY(calc(var(--p1,0) * -60px));pointer-events:none}
 .scene1>*{pointer-events:auto}
 .s1-inner{max-width:var(--max);margin:0 auto;width:100%}
-.s1-tag{font:600 10.5px/1 var(--en);letter-spacing:0.3em;text-transform:uppercase;color:var(--glass-hi);display:flex;align-items:center;gap:12px}
-.s1-tag::before{content:'';width:28px;height:1px;background:var(--glass-hi)}
-.s1-h{font-family:var(--sans);font-weight:900;font-size:clamp(46px,9.6vw,128px);line-height:1.12;letter-spacing:-0.015em;margin-top:22px;color:#fff;text-wrap:balance;
-  text-shadow:0 2px 30px rgba(5,24,22,.45)}
-.s1-h em{font-style:normal;color:var(--glass-hi)}
-.s1-sub{margin-top:clamp(18px,2.6vh,28px);font-size:clamp(15px,1.4vw,18px);line-height:1.9;color:rgba(255,255,255,.86);max-width:30em}
+.s1-tag{font:700 12px/1 var(--sans);letter-spacing:0.12em;color:var(--glass);display:flex;align-items:center;gap:12px}
+[data-theme="dark"] .s1-tag{color:var(--glass-hi)}
+.s1-tag::before{content:'';width:28px;height:1px;background:currentColor}
+.s1-h{font-family:var(--sans);font-weight:900;font-size:clamp(40px,7.6vw,100px);line-height:1.12;letter-spacing:-0.015em;margin-top:22px;color:var(--ink);text-wrap:balance}
+.s1-sub{margin-top:clamp(18px,2.6vh,28px);font-size:clamp(15px,1.4vw,18px);line-height:1.9;color:var(--ink-2);max-width:30em}
 .s1-actions{display:flex;gap:14px 26px;flex-wrap:wrap;align-items:center;margin-top:clamp(26px,3.6vh,38px)}
-.btn.mint{background:var(--glass-hi);color:var(--glass-deep);font-size:14px;padding:18px 34px}
-.btn.mint:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(0,0,0,.3)}
-.s1-link{font:600 13px/1 var(--sans);letter-spacing:0.04em;color:#fff;border-bottom:1px solid rgba(255,255,255,.45);padding-bottom:5px;display:inline-flex;gap:8px;align-items:center;min-height:44px}
-.s1-link:hover{border-color:#fff}
-.scroll-hint{position:absolute;bottom:22px;left:var(--pad-x);z-index:2;font:600 9px/1 var(--en);letter-spacing:0.3em;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:10px;opacity:calc(1 - var(--p1,0) * 2)}
-.scroll-hint::after{content:'';width:1px;height:30px;background:linear-gradient(rgba(255,255,255,.6),transparent);animation:drip 2.2s infinite}
+.btn.glass{background:var(--glass);color:#fff;font-size:14px;padding:18px 34px}
+[data-theme="dark"] .btn.glass{color:#08131E}
+.btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.s1-link{font:600 13px/1 var(--sans);letter-spacing:0.04em;color:var(--ink);border-bottom:1px solid var(--ink-4);padding-bottom:5px;display:inline-flex;gap:8px;align-items:center;min-height:44px}
+.s1-link:hover{border-color:var(--ink)}
+.scroll-hint{position:absolute;bottom:22px;left:var(--pad-x);z-index:2;font:600 9px/1 var(--en);letter-spacing:0.3em;color:var(--ink-3);display:flex;align-items:center;gap:10px;opacity:calc(1 - var(--p1,0) * 2)}
+.scroll-hint::after{content:'';width:1px;height:30px;background:linear-gradient(var(--ink-3),transparent);animation:drip 2.2s infinite}
 @keyframes drip{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
 /* 場面2: ゲームの実画面がせり上がって主役に */
-.scene2{position:absolute;inset:0;z-index:3;display:grid;grid-template-rows:auto 1fr;align-items:end;padding:calc(72px + 4vh) var(--pad-x) 0;pointer-events:none;
+.scene2{position:absolute;inset:0;z-index:3;display:grid;grid-template-rows:auto minmax(0,1fr);align-items:end;padding:calc(72px + 4vh) var(--pad-x) 0;pointer-events:none;
   opacity:var(--p2,0);background:linear-gradient(180deg,rgba(5,24,22,.88) 0%,rgba(5,24,22,.55) 34%,rgba(5,24,22,0) 60%)}
 html.js:not(.no-scrub) .scene2{visibility:visible}
 .scene2>*{pointer-events:auto}
 .s2-head{max-width:var(--max);margin:0 auto;width:100%;display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;
   transform:translateY(calc((1 - var(--p2,0)) * 40px))}
-.s2-h{font-family:var(--sans);font-weight:900;font-size:clamp(30px,5.4vw,68px);line-height:1.15;letter-spacing:-0.01em;color:#fff}
+.s2-h{font-family:var(--sans);font-weight:900;font-size:clamp(24px,3.4vw,46px);line-height:1.2;letter-spacing:-0.01em;color:#fff}
 .s2-h small{display:block;font:600 10.5px/1 var(--en);letter-spacing:0.3em;text-transform:uppercase;color:var(--glass-hi);margin-bottom:14px}
 .s2-cta{display:inline-flex;align-items:center;gap:10px;font:700 13.5px/1 var(--sans);letter-spacing:0.04em;color:var(--glass-deep);background:var(--glass-hi);padding:16px 26px;border-radius:100px;min-height:44px}
-.s2-shot{max-width:var(--max);margin:0 auto;width:100%;align-self:end;
-  transform:translateY(calc((1 - var(--p2,0)) * 55%)) scale(calc(0.92 + var(--p2,0) * 0.08));transform-origin:50% 100%}
-.s2-frame{border:1px solid rgba(255,255,255,.18);border-bottom:0;border-radius:10px 10px 0 0;overflow:hidden;background:#0E2C2A;box-shadow:0 -20px 80px rgba(0,0,0,.45)}
+.s2-shot{max-width:var(--max);margin:0 auto;width:100%;align-self:end;min-height:0;max-height:100%;overflow:hidden;
+  transform:translateY(calc((1 - var(--p2,0)) * 55%)) scale(calc(0.86 + var(--p2,0) * 0.18));transform-origin:50% 100%}
+.s2-frame{border:1px solid rgba(255,255,255,.18);border-bottom:0;border-radius:10px 10px 0 0;overflow:hidden;background:#0E2C2A;box-shadow:0 -30px 120px rgba(0,0,0,.6)}
 .s2-frame .bar{display:flex;gap:6px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.12)}
 .s2-frame .bar i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.28)}
 .s2-frame img{width:100%;height:auto;aspect-ratio:1440/720;object-fit:cover;object-position:top;display:block}
+.s2-frame .sp-only{display:none}
 .s2-cap{font:500 10.5px/1.8 var(--en);letter-spacing:0.06em;color:rgba(255,255,255,.62);margin:0 0 10px}
 .s2-cap .jp{font-family:var(--sans);letter-spacing:0.02em}
 
 @media(max-width:760px){
-  .hb{--hb-dist:14;--hb-x:-0.2;--hb-y:0.9;--hb-scale:0.98;--hb-floor-y:-3.6}
   .hb-poster{object-position:50% 45%}
-  .scene1{align-items:end;padding-bottom:72px}
-  .s1-h{font-size:clamp(44px,12.6vw,60px);line-height:1.12}
+  .scene1{align-items:end;padding-bottom:104px}
+  .scene1::before{content:'';position:absolute;left:0;right:0;bottom:0;height:62%;z-index:-1;pointer-events:none;background:linear-gradient(180deg,transparent 0%,color-mix(in srgb,var(--bg) 88%,transparent) 32%,var(--bg) 100%);opacity:calc(1 - var(--pbg,0))}
+  .hb{--hb-dist:11.5;--hb-x:0.55;--hb-y:0.35;--hb-scale:1;--hb-floor-y:-2.9}
+  .s1-h{font-size:clamp(40px,11.2vw,54px);line-height:1.12}
   .s1-sub{font-size:14.5px}
-  .s1-actions .btn{width:100%;justify-content:center}
+  .s1-actions .btn{min-width:62%;justify-content:center}
   .scroll-hint{display:none}
   .scene2{padding-top:calc(72px + 2vh)}
-  .s2-frame img{aspect-ratio:1440/900}
+  .s2-frame .pc-only{display:none}
+  .s2-frame .sp-only{display:block;aspect-ratio:780/1280;object-position:top;max-height:56svh}
+  .s2-head{gap:12px}
+  .s2-cap{margin:12px 0 8px}
 }
 /* 動きを減らす設定・JS なし: 場面1だけの静止した1画面 */
 @media(prefers-reduced-motion:reduce){
@@ -138,8 +144,6 @@ html:not(.js) .scene2{display:none}
 .pick-cta .ar{transition:transform .3s var(--ease)}
 .pick:hover .pick-cta .ar{transform:translateX(5px)}
 .picks-more{margin-top:clamp(26px,3.6vh,36px);display:flex;gap:12px 24px;flex-wrap:wrap;align-items:center}
-.picks-more .btn.glass{background:var(--glass);color:#fff}
-[data-theme="dark"] .picks-more .btn.glass{color:#08131E}
 @media(max-width:860px){
   .pick-grid{grid-template-columns:1fr;grid-template-rows:none}
   .pick.big{grid-row:auto}
@@ -155,6 +159,8 @@ html:not(.js) .scene2{display:none}
 .idea-links a{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);font:700 14px/1.4 var(--sans);letter-spacing:0.02em;color:var(--ink);min-height:44px}
 .idea-links a small{font:500 11px/1 var(--en);letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3)}
 .idea-links a:hover small{color:var(--ink)}
+.idea-rest{grid-column:2;margin-top:18px;font-size:13px;color:var(--ink-3)}
+@media(max-width:860px){.idea-rest{grid-column:1}}
 @media(max-width:860px){.idea-inner{grid-template-columns:1fr}}
 </style>
 </head>
@@ -178,11 +184,11 @@ html:not(.js) .scene2{display:none}
 
     <div class="scene1">
       <div class="s1-inner">
-        <p class="s1-tag">BRIDGE — for medical professionals</p>
+        <p class="s1-tag">看護師・リハビリ職・医療事務の方へ</p>
         <h1 class="s1-h" id="heroTitle">その経験に、<br>次の可能性を</h1>
-        <p class="s1-sub">医療職の仕事と学びを広げる、ツールと経営ゲーム。登録なしで、ブラウザから。</p>
+        <p class="s1-sub">医療職の仕事と学びを広げる、道具と経営ゲーム。登録なしで、ブラウザから。</p>
         <div class="s1-actions">
-          <a class="btn mint" href="./products/index.html">道具を見る <span aria-hidden="true">→</span></a>
+          <a class="btn glass" href="./products/index.html">28の道具を見る <span aria-hidden="true">→</span></a>
           <a class="s1-link" href="./clinic-flow-3d/index.html">経営ゲームを始める <span aria-hidden="true">→</span></a>
         </div>
       </div>
@@ -195,9 +201,10 @@ html:not(.js) .scene2{display:none}
         <a class="s2-cta" href="./clinic-flow-3d/index.html" tabindex="-1">ゲームを始める <span aria-hidden="true">→</span></a>
       </div>
       <figure class="s2-shot">
-        <p class="s2-cap">Actual screen <span class="jp">— 実際のゲーム画面(2026-09-21 撮影)</span></p>
+        <p class="s2-cap"><span class="jp">実際のゲーム画面(2026-09-21 撮影)</span></p>
         <div class="s2-frame"><div class="bar"><i></i><i></i><i></i></div>
-          <img src="./images/products/shots/clinic-flow-3d-decision.webp" alt="" width="1440" height="900" loading="lazy" decoding="async"></div>
+          <img class="pc-only" src="./images/products/shots/clinic-flow-3d-decision.webp" alt="" width="1440" height="900" loading="lazy" decoding="async">
+          <img class="sp-only" src="./images/products/shots/clinic-flow-3d-sp.webp" alt="" width="780" height="1280" loading="lazy" decoding="async"></div>
       </figure>
     </div>
   </section>
@@ -209,14 +216,14 @@ html:not(.js) .scene2{display:none}
 <section class="sec picks" id="picks" aria-labelledby="picksTitle">
   <div class="sec-inner">
     <div class="picks-head" data-reveal>
-      <h2 class="picks-h" id="picksTitle">まずは、ひとつ</h2>
-      <p class="picks-note">3つとも無料・登録なし。ブラウザで動き、入力は端末の中にだけ残ります。</p>
+      <h2 class="picks-h" id="picksTitle">まず試すなら、この3つ</h2>
+      <p class="picks-note">無料・登録なし。ブラウザで動き、入力は端末の中にだけ残ります。</p>
     </div>
     <div class="pick-grid">
       <a class="pick big" href="./clinic-flow-3d/index.html" data-reveal>
         <figure class="pick-fig"><img src="./images/products/shots/clinic-flow-3d-home.webp" alt="Clinic Town 3Dの実際の画面。院内の見取り図と、受付窓口や待合椅子などの打ち手が費用・効果つきで並ぶ" width="1440" height="900" loading="lazy"></figure>
         <div class="pick-body">
-          <span class="pick-k">Game — Clinic Town 3D</span>
+          <span class="pick-k">Game — クリニックタウン3D</span>
           <h3 class="pick-t">クリニック経営を、体験する</h3>
           <p class="pick-p">スタッフを配置し、届出を決め、会計のたびに実際の保険点数を見る。</p>
           <span class="pick-cta">ゲームを始める <span class="ar" aria-hidden="true">→</span></span>
@@ -227,6 +234,7 @@ html:not(.js) .scene2{display:none}
         <div class="pick-body">
           <span class="pick-k">Career — 経験の棚卸し</span>
           <h3 class="pick-t">18の質問で、職務経歴書のたねを</h3>
+          <p class="pick-p">転職や面接で、実績をうまく言えないときに。</p>
           <span class="pick-cta">質問に答える <span class="ar" aria-hidden="true">→</span></span>
         </div>
       </a>
@@ -235,12 +243,13 @@ html:not(.js) .scene2{display:none}
         <div class="pick-body">
           <span class="pick-k">Check — 職場モヤモヤ診断</span>
           <h3 class="pick-t">職場のしんどさを、10問で言葉に</h3>
+          <p class="pick-p">我慢する以外の選択肢を、探す材料に。</p>
           <span class="pick-cta">診断を始める <span class="ar" aria-hidden="true">→</span></span>
         </div>
       </a>
     </div>
     <div class="picks-more" data-reveal>
-      <a class="btn glass" href="./products/index.html">すべての道具を見る(28) <span aria-hidden="true">→</span></a>
+      <a class="btn glass" href="./products/index.html">すべての道具を見る <span aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>
@@ -250,13 +259,14 @@ html:not(.js) .scene2{display:none}
   <div class="idea-inner">
     <div data-reveal>
       <h2 class="idea-h" id="ideaTitle">正解を与えるのではなく、<br class="br-pc"><span class="a">選択肢を増やす</span></h2>
-      <p class="idea-p">理学療法士の私(橋本渉)がひとりで運営しています。眺めて帰るだけでも構いません。</p>
+      <p class="idea-p">理学療法士の私(橋本渉)がひとりで運営しています。</p>
     </div>
     <ul class="idea-links" data-reveal data-reveal-delay="1">
       <li><a href="./philosophy/index.html">考え方を読む <small>Philosophy</small></a></li>
       <li><a href="./about/index.html">運営者について <small>About</small></a></li>
       <li><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">noteで考えていることを読む <small>note ↗</small></a></li>
     </ul>
+    <p class="idea-p idea-rest" data-reveal data-reveal-delay="2">眺めて帰るだけでも構いません。</p>
   </div>
 </section>
 
@@ -285,6 +295,7 @@ html:not(.js) .scene2{display:none}
     stage.style.setProperty('--p', p.toFixed(4));
     stage.style.setProperty('--p1', p1.toFixed(4));
     stage.style.setProperty('--p2', p2.toFixed(4));
+    stage.style.setProperty('--pbg', Math.max(0, Math.min(1, (p - 0.12) / 0.4)).toFixed(4)); // 明るい場 → 夜
     stage.querySelector('.scene2').setAttribute('aria-hidden', p2 < 0.5 ? 'true' : 'false');
     stage.querySelector('.s2-cta').tabIndex = p2 < 0.5 ? -1 : 0;
   };

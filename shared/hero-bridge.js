@@ -212,11 +212,11 @@
   const arch = ribbon([
     [v3(-4.4, -4.0, -0.9), v3(-3.4, -1.0, -0.7), v3(-1.4, 1.9, -0.2), v3(0.6, 2.2, 0.15)],
     [v3(0.6, 2.2, 0.15), v3(2.5, 2.45, 0.45), v3(4.9, 0.4, 0.75), v3(6.6, -3.0, 0.9)],
-  ], { w0: 0.5, w1: 1.05, wFlat: 0.25, th: 0.26, twist0: -0.5, twist1: 0.35, wave: 1.0, waveAmp: 0.1 });
+  ], { w0: 0.5, w1: 1.05, wFlat: 0.25, th: 0.26, twist0: -0.5, twist1: 0.5, wave: 1.0, waveAmp: 0.1 });
   const rise = ribbon([
-    [v3(-0.4, -4.2, 1.1), v3(0.4, -2.6, 0.85), v3(0.9, -0.9, 0.4), v3(2.1, 0.5, 0.05)],
-    [v3(2.1, 0.5, 0.05), v3(3.2, 1.7, -0.25), v3(4.8, 3.2, -0.6), v3(6.6, 4.4, -0.9)],
-  ], { w0: 0.38, w1: 0.78, wFlat: 0.35, th: 0.22, twist0: 0.45, twist1: -0.3, wave: 1.0, waveAmp: -0.12 });
+    [v3(-0.9, -4.2, 1.1), v3(0.3, -2.6, 0.85), v3(1.3, -0.9, 0.4), v3(2.9, 0.6, 0.05)],
+    [v3(2.9, 0.6, 0.05), v3(4.2, 1.85, -0.25), v3(5.4, 3.1, -0.6), v3(6.8, 4.2, -0.9)],
+  ], { w0: 0.38, w1: 0.78, wFlat: 0.35, th: 0.22, twist0: 0.5, twist1: -0.45, wave: 1.0, waveAmp: -0.12 });
 
   /* ---------- colors / layout from CSS ---------- */
   const parse = (s) => {
@@ -313,7 +313,7 @@
     gl.uniform3fv(U.uCam, eye);
     gl.uniform3fv(U.uDeep, cols.deep); gl.uniform3fv(U.uMid, cols.mid); gl.uniform3fv(U.uMint, cols.mint); gl.uniform3fv(U.uSky, cols.sky); gl.uniform3fv(U.uFloor, cols.floor);
     gl.uniform1f(U.uReveal, reveal); gl.uniform1f(U.uAlpha, lay.alpha); gl.uniform1f(U.uTime, time);
-    gl.uniform1f(U.uFloorY, lay.floor); gl.uniform1f(U.uFade, 1 - p * 0.6);
+    gl.uniform1f(U.uFloorY, lay.floor); gl.uniform1f(U.uFade, 1 - Math.min(1, p * 1.25) * 0.72);
 
     const ease = 1 - Math.pow(1 - reveal, 3);
     const ry = -0.38 + ptr.x * 0.06 + p * 0.9 + (1 - ease) * 0.3 + Math.sin(time * 0.21) * 0.05;
