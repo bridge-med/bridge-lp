@@ -1355,8 +1355,8 @@ input[type="range"]::-moz-range-thumb {
   #tab-mgmt.show > .note { grid-column: 1 / -1; }
 }
 
-/* 横持ちスマホ(背が低い): ヘッダーを流して遊び場を最大化 */
-@media (min-width: 900px) and (max-height: 540px) {
+/* 横持ちスマホ(背が低い・タッチ): ヘッダーを流して遊び場を最大化。PC はズームで背が低くなっても資金の見出しを固定したまま(社長 2026-09-21) */
+@media (min-width: 900px) and (max-height: 540px) and (pointer: coarse) {
   .head { position: static; }
   .tabs { position: static; }
   .eyebrow { display: none; }
