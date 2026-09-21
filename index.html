@@ -33,6 +33,9 @@
    色: 青緑とミントは --glass 系トークン(shared/bridge.css)。このページと products/ だけで使う
    ================================================================ */
 
+/* 夜の場の上でナビが透けると副リンク(--ink-3)が AA を割る(qa 実測 4.40:1)。このページだけ不透明に近づける */
+.site-nav.scrolled{background:color-mix(in srgb,var(--bg) 97%,transparent)}
+
 /* ===== ヒーロー: 固定ステージ ===== */
 .hero-track{position:relative;height:100svh}
 html.js .hero-track{height:230svh}            /* JS が進み具合を書くときだけ2画面ぶんの奥行きを持つ */
@@ -81,7 +84,6 @@ html.js .hero-track{height:230svh}            /* JS が進み具合を書くと�
 /* 場面2: ゲームの実画面がせり上がって主役に */
 .scene2{position:absolute;inset:0;z-index:3;display:grid;grid-template-rows:auto minmax(0,1fr);align-items:end;padding:calc(72px + 4vh) var(--pad-x) 0;pointer-events:none;
   opacity:var(--p2,0);background:linear-gradient(180deg,rgba(5,24,22,.88) 0%,rgba(5,24,22,.55) 34%,rgba(5,24,22,0) 60%)}
-html.js:not(.no-scrub) .scene2{visibility:visible}
 .scene2>*{pointer-events:auto}
 .s2-head{max-width:var(--max);margin:0 auto;width:100%;display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;
   transform:translateY(calc((1 - var(--p2,0)) * 40px))}
@@ -89,7 +91,7 @@ html.js:not(.no-scrub) .scene2{visibility:visible}
 .s2-h small{display:block;font:600 10.5px/1 var(--en);letter-spacing:0.3em;text-transform:uppercase;color:var(--glass-hi);margin-bottom:14px}
 .s2-cta{display:inline-flex;align-items:center;gap:10px;font:700 13.5px/1 var(--sans);letter-spacing:0.04em;color:var(--glass-deep);background:var(--glass-hi);padding:16px 26px;border-radius:100px;min-height:44px}
 .s2-shot{max-width:var(--max);margin:0 auto;width:100%;align-self:end;min-height:0;max-height:100%;overflow:hidden;
-  transform:translateY(calc((1 - var(--p2,0)) * 55%)) scale(calc(0.86 + var(--p2,0) * 0.18));transform-origin:50% 100%}
+  transform:translateY(calc((1 - var(--p2,0)) * 55%)) scale(calc(0.84 + var(--p2,0) * 0.16));transform-origin:50% 100%}
 .s2-frame{border:1px solid rgba(255,255,255,.18);border-bottom:0;border-radius:10px 10px 0 0;overflow:hidden;background:#0E2C2A;box-shadow:0 -30px 120px rgba(0,0,0,.6)}
 .s2-frame .bar{display:flex;gap:6px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.12)}
 .s2-frame .bar i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.28)}
