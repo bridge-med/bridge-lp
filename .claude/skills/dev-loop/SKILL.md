@@ -32,7 +32,7 @@ docs/context.md 9章（実装時の判断基準）と15章（仕事の進め方�
 ## 2. 調査 — Repository Inspection
 
 - 対象ページ・コードの実物を開く。憶測でパスや仕様を語らない。
-- 類似の既存実装を探し、パターンを踏襲する。新しい部品を発明する前に `docs/design-system.md`（§3 トークン・§4 部品・§5 型）と `shared/bridge.css` / `shared/bridge.js` で表現できないかを先に考える。新しい部品・トークンが要るなら designer に §7 の5問で判断させる。
+- 類似の既存実装を探し、パターンを踏襲する。新しい部品を発明する前に `docs/design-system.md`（§1 トークン・§3 部品・§4 型）と `shared/bridge.css` / `shared/bridge.js` で表現できないかを先に考える。新しい部品・トークンが要るなら designer に §6 の条件で判断させる。
 - データの唯一の情報源を確認する：ナビは NAV 配列、プロダクトは PRODUCTS 配列、活動は ACTIVITIES 配列。
 
 ## 3. 計画 — Implementation Plan
