@@ -14,6 +14,7 @@
 
 .cp-main{min-height:100svh;position:relative;overflow:hidden}
 [tabindex="-1"]:focus{outline:none}
+.cp-jump-target:focus-visible,.cp-jump-target:focus{outline:2px solid var(--blue);outline-offset:6px;border-radius:2px}
 
 /* ---- 画面の出入り(遷移) ---- */
 .cp-screen{transition:opacity var(--cp-t) var(--ease),transform var(--cp-t) var(--ease)}

@@ -161,7 +161,7 @@
     const items = r.bridges.map((b, i) =>
       '<li style="--i:' + i + '"><a href="#cpB' + (i + 1) + '"><span class="n">0' + (i + 1) + '</span><span class="t">' + esc(b.bridge.name) + '</span></a></li>').join('') +
       (r.wish ? '<li class="self" style="--i:3"><a href="#cpSelf"><span class="n">04</span><span class="t">あなた自身が見つけた橋</span></a></li>' : '');
-    return '<div class="cp-map" style="--rows:' + n + '">' + svg +
+    return '<div class="cp-map">' + svg +
       '<span class="cp-map-here" style="top:' + (oy + 12) + 'px" aria-hidden="true">現在地</span>' +
       '<ol class="cp-map-list" aria-label="あなたから見える橋">' + items + '</ol></div>';
   }
@@ -355,6 +355,7 @@
           ev.preventDefault();
           to.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
           if (!to.hasAttribute('tabindex')) to.setAttribute('tabindex', '-1');
+          to.classList.add('cp-jump-target'); // 画面遷移の自動フォーカスと違い、着地点は枠で示す
           to.focus({ preventScroll: true });
         }
         return;
