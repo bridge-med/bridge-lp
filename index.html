@@ -114,8 +114,8 @@ html.hero-night .hb-night{background:var(--hero-night) var(--hero-pos)/cover no-
 /* 文字の登場: 造形が落ち着くのに重ねて、行ごとに上へ短く動きながら現れる(領域は最初から確保。JS が動くときだけ) */
 html.js .stage.intro .s1-tag,html.js .stage.intro .s1-h .ln,html.js .stage.intro .s1-sub,html.js .stage.intro .s1-actions{opacity:0;animation:s1-in .7s cubic-bezier(.2,.7,.2,1) both}
 html.js .stage.intro .s1-tag{animation-delay:.55s}
-html.js .stage.intro .s1-h .ln:nth-child(1){animation-delay:.65s}
-html.js .stage.intro .s1-h .ln:nth-child(2){animation-delay:.82s}
+html.js .stage.intro .s1-h .ln:nth-of-type(1){animation-delay:.65s}
+html.js .stage.intro .s1-h .ln:nth-of-type(2){animation-delay:.82s}
 html.js .stage.intro .s1-sub{animation-delay:1.05s}
 html.js .stage.intro .s1-actions{animation-delay:1.2s}
 .s1-h .ln{display:inline-block}
