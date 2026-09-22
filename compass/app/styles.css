@@ -13,8 +13,6 @@
 .cp .en{font-family:var(--en)}
 
 .cp-main{min-height:100svh;position:relative;overflow:hidden}
-.cp-kicker{font:700 11px/1 var(--en);letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3);display:inline-flex;align-items:center;gap:10px}
-.cp-kicker::before{content:'';width:22px;height:1px;background:var(--dawn)}
 [tabindex="-1"]:focus{outline:none}
 
 /* ---- 画面の出入り(遷移) ---- */
@@ -42,7 +40,7 @@
 /* ---- 導入 ---- */
 .cp-intro{min-height:100svh;display:flex;align-items:center;position:relative;background:linear-gradient(180deg,var(--hero-sky-1) 0%,var(--bg) 70%)}
 .cp-intro[hidden]{display:none}
-.cp-intro-lines{position:absolute;left:0;right:0;bottom:0;height:62%;pointer-events:none;opacity:.9;
+.cp-intro-lines{position:absolute;left:0;right:0;bottom:0;height:48%;pointer-events:none;opacity:.9;
   -webkit-mask-image:linear-gradient(180deg,transparent 0%,var(--ink) 35%);mask-image:linear-gradient(180deg,transparent 0%,var(--ink) 35%)}
 .cp-intro-lines svg g,.cp-intro-lines svg{animation:cp-drift 18s ease-in-out infinite alternate}
 @keyframes cp-drift{from{transform:translateY(0)}to{transform:translateY(-10px)}}
@@ -65,7 +63,6 @@
 .cp-q{max-width:var(--cp-w);margin:0 auto;padding:88px 20px calc(120px + env(safe-area-inset-bottom));min-height:100svh}
 .cp-head{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;column-gap:8px;row-gap:10px;align-items:center;margin-bottom:clamp(28px,5vh,44px)}
 .cp-back{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;margin-left:-10px;color:var(--ink-2);transition:background .2s}
-.cp-back:hover{background:var(--bg-2)}
 .cp-back svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .cp-chapter{display:flex;flex-direction:column;gap:6px}
 .cp-chapter .en{font:600 10px/1 var(--en);letter-spacing:.2em;color:var(--ink-3)}
@@ -78,7 +75,6 @@
 .cp-opts{display:grid;gap:10px;margin-top:clamp(22px,4vh,32px)}
 .cp-opt{display:flex;align-items:center;gap:14px;width:100%;min-height:56px;padding:14px 18px;text-align:left;border:1px solid var(--line);border-radius:14px;background:var(--card);font-size:14.5px;line-height:1.6;color:var(--ink);
   transition:border-color .25s,background .25s,transform .18s var(--ease)}
-.cp-opt:hover{border-color:var(--ink-4)}
 .cp-opt:active{transform:scale(.985)}
 .cp-opt:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .cp-opt.on{border-color:var(--dawn);background:color-mix(in srgb,var(--dawn) 9%,var(--card))}
@@ -94,20 +90,22 @@
   background:linear-gradient(180deg,transparent,var(--bg) 38%)}
 .cp-next{width:100%;max-width:calc(var(--cp-w) - 40px);justify-content:center;min-height:54px}
 .cp-next[disabled]{opacity:.35;cursor:default;transform:none;box-shadow:none}
+.cp-q.is-text{padding-bottom:48px}
+.cp-q.is-text .cp-next-bar{position:static;background:none;padding:24px 0 0} /* 入力中にキーボードと固定バーが重ならないよう、自由記述では固定しない */
 .cp-skip{min-height:44px;padding:0 16px;font-size:13px;color:var(--ink-2);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--ink-4)}
 
 /* 自由記述 */
 .cp-text{margin-top:clamp(22px,4vh,32px)}
 .cp-text textarea{width:100%;min-height:180px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:400 15px/1.9 var(--sans);resize:vertical;transition:border-color .25s}
 .cp-text textarea::placeholder{color:var(--ink-3)}
-.cp-text textarea:focus{outline:none;border-color:var(--dawn)}
+.cp-text textarea:focus{outline:none;border-color:var(--blue)}
 .cp-text-meta{display:flex;justify-content:space-between;gap:16px;margin-top:10px;font-size:11.5px;line-height:1.8;color:var(--ink-3)}
 .cp-count{font-family:var(--en);white-space:nowrap}
 
 /* ---- 翻訳中 ---- */
 .cp-translating{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:100px 24px;text-align:center;background:linear-gradient(180deg,var(--hero-sky-1),var(--bg))}
 .cp-conv{width:min(420px,90vw);height:auto;aspect-ratio:4/3}
-.cp-conv path{animation-duration:1.4s}
+.cp-conv path{animation-duration:.9s} /* 画面にいる約1.9秒のうちに描き終える */
 .cp-trans-t{font-family:var(--mincho);font-weight:600;font-size:clamp(18px,4.6vw,22px);line-height:2}
 
 /* ---- 結果 ---- */
@@ -119,11 +117,11 @@
 .cp-r-sec{padding:clamp(36px,6vh,56px) 24px;border-top:1px solid var(--line)}
 .cp-r-sub{font-size:15px;font-weight:700;letter-spacing:.04em;margin-bottom:20px}
 .cp-tags{display:flex;flex-wrap:wrap;gap:8px}
-.cp-tag{display:inline-flex;align-items:center;min-height:36px;padding:6px 16px;border-radius:100px;background:var(--bg-2);font-size:13.5px;font-weight:500;color:var(--ink)}
+.cp-tag{display:inline-flex;align-items:center;min-height:36px;padding:6px 16px;border-radius:100px;border:1px solid var(--line);font-size:13.5px;font-weight:500;color:var(--ink)}
 .cp-tag.sm{min-height:28px;padding:4px 12px;font-size:12px;color:var(--ink-2)}
 .cp-note{margin-top:18px;font-size:13px;line-height:2;color:var(--ink-2)}
 .cp-tr{list-style:none;display:grid;gap:14px}
-.cp-tr li{display:flex;flex-direction:column;gap:2px;padding-left:16px;border-left:2px solid var(--dawn);font-size:13.5px;line-height:1.9;color:var(--ink-2)}
+.cp-tr li{display:flex;flex-direction:column;gap:2px;padding-left:16px;border-left:2px solid var(--line);font-size:13.5px;line-height:1.9;color:var(--ink-2)}
 .cp-tr b{font-weight:700;color:var(--ink);margin:0 2px}
 .cp-tr .to b{font-size:15px}
 
@@ -139,7 +137,6 @@
 .cp-more{margin-top:16px}
 .cp-more summary{list-style:none;display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 20px;border:1px solid var(--line);border-radius:100px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;transition:border-color .25s}
 .cp-more summary::-webkit-details-marker{display:none}
-.cp-more summary:hover{border-color:var(--ink-3)}
 .cp-more summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .cp-more summary .ar{font-family:var(--en);transition:transform .3s var(--ease)}
 .cp-more[open] summary .ar{transform:rotate(90deg)}
@@ -149,13 +146,12 @@
 .cp-links .t{font-size:14px;font-weight:700}
 .cp-links .d{grid-column:1;font-size:12px;color:var(--ink-3);line-height:1.8}
 .cp-links .ar{grid-column:2;grid-row:1/3;align-self:center;font-family:var(--en);color:var(--ink-3);transition:transform .3s var(--ease)}
-.cp-links a:hover .ar{transform:translateX(4px);color:var(--ink)}
 
 .cp-quote{position:relative;padding:22px 24px;background:var(--bg-2);border-radius:4px;font-family:var(--mincho);font-size:15.5px;line-height:2.1;color:var(--ink)}
-.cp-quote::before{content:'“';position:absolute;left:10px;top:-6px;font:600 36px/1 var(--mincho);color:var(--dawn)}
+.cp-quote::before{content:'“';position:absolute;left:10px;top:-6px;font:600 36px/1 var(--mincho);color:var(--ink-4)}
 .cp-quote p{overflow-wrap:anywhere}
 
-.cp-r-close{padding:clamp(56px,9vh,88px) 24px;border-top:1px solid var(--line);font-family:var(--mincho);font-size:15.5px;line-height:2.2;color:var(--ink-2)}
+.cp-r-close{max-width:var(--text-max);padding:clamp(56px,9vh,88px) 24px;border-top:1px solid var(--line);font-family:var(--mincho);font-size:15.5px;line-height:2.2;color:var(--ink-2)}
 .cp-r-close p + p{margin-top:14px}
 .cp-r-close .last{margin-top:26px;font-size:clamp(18px,4.8vw,21px);font-weight:600;color:var(--ink)}
 .cp-r-act{padding:0 24px clamp(56px,9vh,80px);display:flex;flex-wrap:wrap;gap:12px}
@@ -166,6 +162,14 @@
 /* トースト */
 .cp-toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));z-index:120;transform:translate(-50%,12px);padding:12px 20px;border-radius:100px;background:var(--ink);color:var(--bg);font-size:13px;opacity:0;pointer-events:none;transition:all .35s var(--ease);white-space:nowrap}
 .cp-toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* タップ後に hover の枠が残らないよう、hover はポインタのある環境だけ */
+@media(hover:hover){
+  .cp-opt:hover{border-color:var(--ink-4)}
+  .cp-back:hover{background:var(--bg-2)}
+  .cp-more summary:hover{border-color:var(--ink-3)}
+  .cp-links a:hover .ar{transform:translateX(4px);color:var(--ink)}
+}
 
 @media(min-width:760px){
   .cp-q{padding-top:120px}

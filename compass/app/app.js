@@ -60,7 +60,7 @@
       p += '<path class="ln-n" pathLength="1" style="--d:' + (i * 0.05).toFixed(2) + 's;opacity:' + (0.25 + r() * 0.35).toFixed(2) + '" d="M-10 ' + sy.toFixed(1) + ' C 90 ' + sy.toFixed(1) + ', 140 150, 200 150"/>';
     }
     [60, 150, 240].forEach((ey, i) => {
-      p += '<path class="' + (i === 1 ? 'ln-s' : 'ln-n') + ' ln-out" pathLength="1" style="--d:' + (0.7 + i * 0.12).toFixed(2) + 's" d="M200 150 C 260 150, 300 ' + ey + ', 410 ' + ey + '"/>';
+      p += '<path class="' + (i === 1 ? 'ln-s' : 'ln-n') + ' ln-out" pathLength="1" style="--d:' + (0.5 + i * 0.1).toFixed(2) + 's" d="M200 150 C 260 150, 300 ' + ey + ', 410 ' + ey + '"/>';
     });
     return '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" focusable="false">' + p + '<circle class="ln-dot" cx="200" cy="150" r="3.2"/></svg>';
   }
@@ -135,7 +135,7 @@
         '<div class="cp-next-bar"><button type="button" class="btn primary cp-next" data-act="next">次へ <span aria-hidden="true">→</span></button>' +
         '<button type="button" class="cp-skip" data-act="skip">スキップして次へ</button></div>';
     }
-    return '<section class="cp-screen cp-q" data-step="' + q.id + '">' + head(q.id) +
+    return '<section class="cp-screen cp-q' + (q.type === 'text' ? ' is-text' : '') + '" data-step="' + q.id + '">' + head(q.id) +
       '<h2 class="cp-q-h" tabindex="-1">' + esc(q.text) + '</h2>' +
       (q.hint ? '<p class="cp-q-hint">' + esc(q.hint) + '</p>' : '') + body + '</section>';
   }
@@ -170,7 +170,7 @@
 
     return '<section class="cp-screen cp-result" data-step="result">' +
       '<header class="cp-r-hero">' +
-        '<p class="cp-kicker">YOUR BRIDGE MAP</p>' +
+        '<p class="eyebrow">YOUR BRIDGE MAP</p>' +
         '<h1 class="cp-r-h" tabindex="-1">あなたの経験は、<br>“<span class="em">' + esc(r.headline) + '</span>”<br>につながっています</h1>' +
         '<div class="cp-lines cp-map" aria-hidden="true">' + mapSvg() + '</div>' +
       '</header>' +
@@ -210,10 +210,10 @@
 
       '<aside class="walk cp-walk" aria-labelledby="cpWalk"><div class="walk-inner">' +
         '<p class="eyebrow">Where to next</p>' +
-        '<h2 class="walk-h" id="cpWalk">見えた経験を、言葉として残すなら</h2>' +
+        '<h2 class="walk-h" id="cpWalk">次は、どこへ歩きますか</h2>' +
         '<div class="walk-grid">' +
           '<a class="walk-card" href="../tanaoroshi/index.html"><span class="en">Tanaoroshi</span><span class="t">経験の棚卸し</span><p class="p">18の質問で、職務経歴書のたねをつくります。</p></a>' +
-          '<a class="walk-card" href="../iikae/index.html"><span class="en">Iikae</span><span class="t">現場のことば 言いかえ帳</span><p class="p">現場のことばを、履歴書で通じる言葉に。</p></a>' +
+          '<a class="walk-card" href="../stories/index.html"><span class="en">Stories</span><span class="t">物語を読む</span><p class="p">現場で実際にあったことを、一人称で。</p></a>' +
           '<a class="walk-card" href="../products/index.html"><span class="en">Products</span><span class="t">ほかの道具を見る</span><p class="p">用途から選べる、BRIDGEの道具の一覧です。</p></a>' +
         '</div>' +
         '<p class="walk-note">地図を眺めただけで閉じても、それで十分です。</p>' +
@@ -407,7 +407,7 @@
 
   /* ---- 起動 ---- */
   const introLines = $('.cp-intro-lines');
-  if (introLines) introLines.innerHTML = fanSvg({ n: 14, seed: 5, sand: 8 });
+  if (introLines) introLines.innerHTML = fanSvg({ n: 7, seed: 5, sand: 4 });
   const start = document.getElementById('cpStart');
   start.disabled = false;
   start.addEventListener('click', () => go('profession'));
