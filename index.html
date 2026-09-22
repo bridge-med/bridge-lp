@@ -22,8 +22,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./shared/bridge.css">
-<link rel="preload" as="image" href="./images/hero/hero-pc-light.webp" media="(min-width:761px)" fetchpriority="high">
-<link rel="preload" as="image" href="./images/hero/hero-sp-light.webp" media="(max-width:760px)" fetchpriority="high">
+<link rel="preload" as="image" href="./images/hero/intro-pc-light.webp" media="(min-width:761px)" fetchpriority="high">
+<link rel="preload" as="image" href="./images/hero/intro-sp-light.webp" media="(max-width:760px)" fetchpriority="high">
+<link rel="preload" as="image" href="./images/hero/hero-pc-light.webp" media="(min-width:761px)">
+<link rel="preload" as="image" href="./images/hero/hero-sp-light.webp" media="(max-width:760px)">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 /* ================================================================
@@ -65,6 +67,28 @@ html.js .hero-track{height:200svh}            /* JS が進み具合を書くと�
 [data-theme="dark"] .hb{--hero:url(./images/hero/hero-pc-dark.webp)}
 .hb-in{position:absolute;inset:0;transform-origin:70% 100%}
 .hb-art{position:absolute;inset:0;background:var(--hero) var(--hero-pos)/cover no-repeat}
+/* 登場演出: 開始の構図のポスター(即時表示)→ 動画(カメラが回り込みながら定位置へ)→ 定位置の静止画へクロスフェード
+   動画は images/hero/intro-{pc,sp}-{light,dark}.webm(VP8・無音・背景込み)。再生できない環境は CSS の代替演出(下) */
+.hb-poster,.hb-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--hero-pos);display:none}
+.hb-video{opacity:0}
+.stage.intro .hb-poster{display:block}
+.stage.intro .hb-video{display:block}
+.stage.intro.intro-play .hb-video{opacity:1}
+.stage.intro .hb-art,.stage.intro .hb-sweep{opacity:0}
+.stage.intro.intro-settle .hb-art{opacity:1;transition:opacity .35s ease}
+.stage.intro.intro-settle .hb-poster,.stage.intro.intro-settle .hb-video{opacity:0;transition:opacity .35s ease}
+.stage.intro.intro-settle .hb-sweep{opacity:.75;transition:opacity 1.2s ease .4s}
+[data-theme="dark"] .stage.intro.intro-settle .hb-sweep{opacity:.55}
+/* 動画の背景は焼き込みなので、再生中は CSS の光溜まりを消し、収まったときに灯す */
+.stage.intro.intro-video::before{opacity:0}
+.stage.intro.intro-video.intro-settle::before{opacity:calc(1 - var(--pbg,0));transition:opacity .8s ease}
+/* 代替演出(動画が使えないとき): 開始のポスターから定位置の静止画へ、層ごと少し回り込みながら溶ける */
+.stage.intro.intro-css .hb-in{animation:hb-arrive .95s cubic-bezier(.16,.84,.3,1) both}
+.stage.intro.intro-css .hb-poster{animation:hb-poster-out .95s ease both}
+.stage.intro.intro-css .hb-art{opacity:1;animation:hb-art-in .95s ease both}
+@keyframes hb-arrive{0%{transform:perspective(1400px) rotateY(-7deg) translateX(3.5%) scale(1.05)}100%{transform:none}}
+@keyframes hb-poster-out{0%{opacity:1}60%{opacity:1}100%{opacity:0}}
+@keyframes hb-art-in{0%{opacity:0}55%{opacity:0}100%{opacity:1}}
 /* 夜の照明で描いた同じ造形。場が夜に転じるのに合わせて置き換わる(JS が読み込み後に html.hero-night を付けてから読む) */
 .hb-night{position:absolute;inset:0;opacity:var(--pbg,0)}
 html.hero-night .hb-night{background:var(--hero-night) var(--hero-pos)/cover no-repeat}
@@ -87,6 +111,17 @@ html.hero-night .hb-night{background:var(--hero-night) var(--hero-pos)/cover no-
 .scene1{z-index:2;display:grid;align-items:center;padding:0 var(--pad-x);isolation:isolate;
   transform:translateY(calc(var(--p1,0) * -60px))}
 .s1-inner{max-width:var(--max);margin:0 auto;width:100%}
+/* 文字の登場: 造形が落ち着くのに重ねて、行ごとに上へ短く動きながら現れる(領域は最初から確保。JS が動くときだけ) */
+html.js .stage.intro .s1-tag,html.js .stage.intro .s1-h .ln,html.js .stage.intro .s1-sub,html.js .stage.intro .s1-actions{opacity:0;animation:s1-in .7s cubic-bezier(.2,.7,.2,1) both}
+html.js .stage.intro .s1-tag{animation-delay:.55s}
+html.js .stage.intro .s1-h .ln:nth-child(1){animation-delay:.65s}
+html.js .stage.intro .s1-h .ln:nth-child(2){animation-delay:.82s}
+html.js .stage.intro .s1-sub{animation-delay:1.05s}
+html.js .stage.intro .s1-actions{animation-delay:1.2s}
+.s1-h .ln{display:inline-block}
+@keyframes s1-in{0%{opacity:0;transform:translateY(16px)}100%{opacity:1;transform:none}}
+/* 途中でスクロールされたら演出を終える: 文字は即座に定位置 */
+html.js .stage.intro.intro-done .s1-tag,html.js .stage.intro.intro-done .s1-h .ln,html.js .stage.intro.intro-done .s1-sub,html.js .stage.intro.intro-done .s1-actions{animation:none;opacity:1}
 .s1-tag{font:700 12px/1 var(--sans);letter-spacing:0.12em;color:var(--glass);display:flex;align-items:center;gap:12px}
 [data-theme="dark"] .s1-tag{color:var(--glass-hi)}
 .s1-tag::before{content:'';width:28px;height:1px;background:currentColor}
@@ -142,6 +177,8 @@ html.hero-night .hb-night{background:var(--hero-night) var(--hero-pos)/cover no-
   .scene2{display:none}
   .scroll-hint::after{animation:none}
   .hb-sweep{display:none}
+  .hb-poster,.hb-video{display:none!important}
+  .stage .s1-tag,.stage .s1-h .ln,.stage .s1-sub,.stage .s1-actions,.stage .hb-art{animation:none!important;opacity:1!important}
 }
 html:not(.js) .scene2{display:none}
 
@@ -200,12 +237,12 @@ html:not(.js) .scene2{display:none}
      動きを減らす設定と JS なしでは、場面1だけの静止した1画面。本文とボタンは演出と無関係に最初から使える。 -->
 <div class="hero-track" id="heroTrack">
   <section class="stage" id="stage" data-active="1" tabindex="-1" aria-labelledby="heroTitle">
-    <div class="hb" aria-hidden="true"><div class="hb-in"><div class="hb-art"></div><div class="hb-night"></div><div class="hb-sweep"><i></i></div></div></div>
+    <div class="hb" aria-hidden="true"><div class="hb-in"><div class="hb-art"></div><div class="hb-night"></div><img class="hb-poster" alt="" decoding="async"><video class="hb-video" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback tabindex="-1"></video><div class="hb-sweep"><i></i></div></div></div>
 
     <div class="scene scene1" id="scene1">
       <div class="s1-inner">
         <p class="s1-tag">看護師・リハビリ職・医療事務の方へ</p>
-        <h1 class="s1-h" id="heroTitle">その経験に、<br>次の可能性を</h1>
+        <h1 class="s1-h" id="heroTitle"><span class="ln">その経験に、</span><br><span class="ln">次の可能性を</span></h1>
         <p class="s1-sub">医療職の仕事と学びを広げる、道具と経営ゲーム。登録なしで、ブラウザから。</p>
         <div class="s1-actions">
           <a class="btn glass" href="./products/index.html">28の道具を見る <span aria-hidden="true">→</span></a>
@@ -342,6 +379,49 @@ html:not(.js) .scene2{display:none}
   // 夜の照明のレンダは最初の画面に要らないので、読み込み後に取りに行く
   const night = () => document.documentElement.classList.add('hero-night');
   if (document.readyState === 'complete') night(); else window.addEventListener('load', night, { once: true });
+
+  // ---- 登場演出 ----
+  // 造形が動いて定位置に収まり(動画 0〜0.9 秒)、それに重ねて文字が行ごとに現れる(0.55〜1.9 秒)。
+  // 文字の表示は時間だけで決まり、動画の読み込みに依存しない。動画が 0.7 秒以内に再生できなければ CSS の代替演出。
+  // 同じセッションで戻ってきたときは再生しない。途中でスクロールしたら演出を終えて通常の操作へ。
+  (function intro() {
+    let seen = false; try { seen = sessionStorage.getItem('bridge-hero-intro') === '1'; } catch (e) {}
+    if (seen) return;
+    try { sessionStorage.setItem('bridge-hero-intro', '1'); } catch (e) {}
+    const actions = s1.querySelector('.s1-actions');
+    const poster = hb.querySelector('.hb-poster'), video = hb.querySelector('.hb-video');
+    const layout = window.matchMedia && window.matchMedia('(max-width: 760px)').matches ? 'sp' : 'pc';
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const base = './images/hero/intro-' + layout + '-' + theme;
+    poster.src = base + '.webp';
+    stage.classList.add('intro');
+    actions.setAttribute('inert', ''); // 透明なボタンを押させない・Tab で止めない
+    let done = false;
+    const finish = () => { // 演出の終わり(通常の状態へ)。二度は走らない
+      if (done) return; done = true;
+      stage.classList.add('intro-settle');
+      setTimeout(() => { stage.classList.remove('intro', 'intro-video', 'intro-css', 'intro-play', 'intro-settle', 'intro-done'); try { video.pause(); video.removeAttribute('src'); video.load(); } catch (e) {} poster.removeAttribute('src'); }, 1400);
+    };
+    const abort = () => { if (done) return; stage.classList.add('intro-done'); actions.removeAttribute('inert'); finish(); }; // スクロールで中断: 文字は即座に定位置・ボタンも即座に操作可
+    const onIntroScroll = () => { if (window.scrollY > 8) { abort(); window.removeEventListener('scroll', onIntroScroll); } };
+    window.addEventListener('scroll', onIntroScroll, { passive: true });
+    setTimeout(() => actions.removeAttribute('inert'), 1900); // ボタンが見えきったら操作できる(文字の登場は時間だけで決まり、動画と無関係)
+    const cssIntro = () => { stage.classList.add('intro-css'); setTimeout(finish, 950); };
+    const canWebm = !!video.canPlayType && video.canPlayType('video/webm; codecs="vp8"') !== '';
+    if (!canWebm) { cssIntro(); return; }
+    let started = false;
+    const timer = setTimeout(() => { if (!started) { started = true; cssIntro(); } }, 700); // 0.7 秒待っても再生できなければ代替
+    video.addEventListener('canplay', () => {
+      if (started) return;
+      const pr = video.play();
+      (pr || Promise.resolve()).then(() => { if (started) { video.pause(); return; } started = true; clearTimeout(timer); stage.classList.add('intro-video', 'intro-play'); })
+        .catch(() => { if (!started) { started = true; clearTimeout(timer); cssIntro(); } });
+    }, { once: true });
+    video.addEventListener('ended', finish, { once: true });
+    video.addEventListener('error', () => { if (!started) { started = true; clearTimeout(timer); cssIntro(); } }, { once: true });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && !video.paused) video.pause(); else if (!document.hidden && stage.classList.contains('intro-play') && !done) video.play().catch(() => {}); });
+    video.src = base + '.webm';
+  })();
 })();
 </script>
 </body>

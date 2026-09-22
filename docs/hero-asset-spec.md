@@ -90,3 +90,17 @@ node scripts/render-hero.mjs --layout sp --theme light --w 1200 --h 1800 --spp 1
 (`--theme dark` でダーク。4 コアで PC 1 枚 30 分前後。出力は alpha 付き PNG、WebP への変換は上記)
 
 現状の到達点: designer の採点は素材 6.5 / 構図 6.5(AD 画像との距離)。届いていないのは、透過に映る環境の写実(実在のスタジオや風景の映り込み)。ここを超えるのは外部の素材に任せる想定。
+
+## 8. 登場演出の動画(intro)
+
+最初の画面で、造形が少し斜めの位置から回り込みながら定位置に収まる 0.9 秒の動画。定位置の最後のフレームは §1 の静止画と**同じカメラ・同じ照明**で、動画の終わりに静止画へクロスフェードする。
+
+| ファイル | 内容 | 寸法・形式 |
+|---|---|---|
+| `images/hero/intro-pc-light.webm` ほか4本(pc/sp × light/dark) | 27 フレーム・30fps・0.9 秒・無音・**背景込み**(ライト #FBFAF7 / ダーク #0F1A1E) | PC 1280×800 / スマホ 800×1200、WebM(VP8)。目安 1 本 600KB 以下 |
+| `images/hero/intro-pc-light.webp` ほか4枚 | 動画の最初のフレーム(ポスター。動画が来るまで即時表示) | 動画と同じ寸法、WebP |
+
+- カメラの道筋は `scripts/render-hero.mjs --t 0..1`(開始の構図 → 定位置、easeOutCubic)。外部で作る場合も「最後のフレーム = 静止画の構図」を守る(ここがずれると、動画→静止画の切り替えで跳ねる)
+- 文字・ボタンは焼き込まない。背景は焼き込む(動画に alpha を載せられる環境が限られるため)。ページ側は再生中だけ CSS の光溜まりを消し、収まった瞬間に灯す
+- 再生できない環境(WebM 非対応・自動再生不可・0.7 秒以内に読み込めない)では、ポスターから静止画へ層ごと少し回り込みながら溶ける CSS の代替演出になる。代替は「向き・反射の変化」を含まない(静止画 2 枚の溶け合いと layer の transform)ので、動画とは別物として扱う
+- 再生成: `for i in $(seq 0 26); do node scripts/render-hero.mjs --layout pc --theme light --w 1280 --h 800 --spp 20 --t $(python3 -c "print($i/26)") --bg FBFAF7 --out frames/pc-light-$(printf %02d $i).png; done` → Playwright 同梱の ffmpeg(`/opt/pw-browsers/ffmpeg-*/ffmpeg-linux`、libvpx)で `-framerate 30 -c:v libvpx -crf 12 -b:v 0 -an` の WebM に

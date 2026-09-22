@@ -13,6 +13,8 @@ const OPT = {
   layout: argv.layout || 'pc', theme: argv.theme || 'light',
   w: +(argv.w || 1200), h: +(argv.h || 750), spp: +(argv.spp || 16), out: argv.out || 'hero.png',
   threads: +(argv.threads || os.cpus().length),
+  t: argv.t == null ? 1 : +argv.t,          // 登場演出のカメラ: 0=開始の構図 → 1=定位置(easeOutCubic)
+  bg: argv.bg || '',                          // 指定すると背景を焼いた不透明 PNG(動画のフレーム用)
 };
 
 /* ---------- vec ---------- */
@@ -116,10 +118,18 @@ function xformOf(rx, ry, rz, t, s) {
 }
 
 /* ---------- scene ---------- */
-function buildScene(layout, theme) {
-  const L = layout === 'sp'
+function buildScene(layout, theme, t = 1) {
+  const END = layout === 'sp'
     ? { x: 1.0, y: 0.3, scale: 0.9, floor: -2.9, eye: [1.6, 0.0, 23], at: [2.6, -2.0, 0], fov: 0.55, ry: -0.62, rx: 0.10 }
     : { x: 4.85, y: -0.1, scale: 0.92, floor: -2.6, eye: [0.2, 0.9, 14.0], at: [2.2, 0.1, 0], fov: 0.55, ry: -0.62, rx: 0.10 };
+  // 登場の構図: 少し斜め(手前へ回り込む)・やや遠く・低い位置から、定位置へ収まる
+  const START = layout === 'sp'
+    ? { ...END, ry: -0.98, rx: 0.16, x: 1.5, y: -0.1, scale: 0.86, eye: [2.4, -0.4, 25.5] }
+    : { ...END, ry: -0.98, rx: 0.16, x: 5.6, y: -0.5, scale: 0.88, eye: [1.2, 0.4, 16.0] };
+  const k = 1 - Math.pow(1 - clamp01(t), 3);
+  const L = { ...END };
+  for (const key of ['x', 'y', 'scale', 'ry', 'rx']) L[key] = START[key] + (END[key] - START[key]) * k;
+  L.eye = lerp(START.eye, END.eye, k);
   const rz1 = 0.03, rz2 = -0.02;
   const t1 = [L.x + 0.15, L.y + 0.05, 0], t2 = [L.x, L.y, 0];
   const rise = ribbonMesh([
@@ -358,9 +368,9 @@ function tonemap(c) {
 
 /* ---------- worker ---------- */
 if (!isMainThread) {
-  const { layout, theme, w, h, spp, rows, wid } = workerData;
+  const { layout, theme, w, h, spp, rows, wid, t } = workerData;
   seed = 7919 * (wid + 1);
-  const S = buildScene(layout, theme); S.bvh = buildBVH(S.tris);
+  const S = buildScene(layout, theme, t); S.bvh = buildBVH(S.tris);
   const cam = camera(S, w, h);
   const out = new Float32Array(rows.length * w * 4);
   rows.forEach((py, ri) => {
@@ -395,20 +405,23 @@ if (!isMainThread) {
     wk.on('error', rej);
   })));
   // PNG
-  const raw = Buffer.alloc((w * 4 + 1) * h);
+  const bgc = OPT.bg ? OPT.bg.match(/[0-9a-f]{2}/gi).map(h => parseInt(h, 16)) : null;
+  const ch = bgc ? 3 : 4;
+  const raw = Buffer.alloc((w * ch + 1) * h);
   for (let y = 0; y < h; y++) {
-    raw[y * (w * 4 + 1)] = 0;
+    raw[y * (w * ch + 1)] = 0;
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4; const a = Math.min(1, img[i + 3]);
       // premultiplied → straight alpha(PNG)。色は被覆ぶんで割り戻す
       const c = a > 1e-4 ? tonemap([img[i] / a, img[i + 1] / a, img[i + 2] / a]) : [0, 0, 0];
-      const o = y * (w * 4 + 1) + 1 + x * 4;
-      raw[o] = Math.round(c[0] * 255); raw[o + 1] = Math.round(c[1] * 255); raw[o + 2] = Math.round(c[2] * 255); raw[o + 3] = Math.round(a * 255);
+      const o = y * (w * ch + 1) + 1 + x * ch;
+      if (bgc) { for (let k = 0; k < 3; k++) raw[o + k] = Math.round(c[k] * 255 * a + bgc[k] * (1 - a)); }
+      else { raw[o] = Math.round(c[0] * 255); raw[o + 1] = Math.round(c[1] * 255); raw[o + 2] = Math.round(c[2] * 255); raw[o + 3] = Math.round(a * 255); }
     }
   }
   const crc = (() => { const T = new Int32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; T[n] = c; } return b => { let c = -1; for (let i = 0; i < b.length; i++) c = T[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ -1) >>> 0; }; })();
   const chunk = (type, data) => { const l = Buffer.alloc(4); l.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type), data]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([l, td, c]); };
-  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = bgc ? 2 : 6; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
   const png = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
   writeFileSync(OPT.out, png);
   process.stderr.write(`\n${OPT.out} ${w}x${h} spp=${spp} ${((Date.now() - t0) / 1000).toFixed(1)}s\n`);
