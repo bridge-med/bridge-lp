@@ -15,6 +15,8 @@
 
   const STORE = 'bridge-compass';
   const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* 単一選択(職種・Q1〜)で、選んだ印が見えてから次へ進むまでの間。動きを減らす設定では待たない */
+  const SELECT_DELAY = REDUCED ? 0 : 260;
   const STEPS = ['intro', 'profession'].concat(D.QUESTIONS.map(q => q.id), ['result']);
   const Q = Object.fromEntries(D.QUESTIONS.map(q => [q.id, q]));
 
@@ -96,7 +98,7 @@
       '<h2 class="cp-q-h cp-prof-h" tabindex="-1">まず、<br>今のあなたを教えてください</h2>' +
       '<div class="cp-opts" role="radiogroup" aria-label="職種">' + D.PROFESSIONS.map(p => option(p, cur === p.id, false)).join('') + '</div>' +
       '<p class="cp-prof-note">職種は、経験を言いかえるときの手がかりにだけ使います。</p>' +
-      (cur ? nextBar(true) : '') + '</section>';
+      '</section>'; // 職種はタップ=決定。戻ってきたときも「次へ」は出さず、同じ職種をもう一度タップすれば進む
   }
   function renderQuestion(q) {
     const a = state.answers[q.id];
@@ -276,6 +278,7 @@
         el = intro;
         if (current && current !== intro) current.remove();
         intro.hidden = false;
+        intro.classList.remove('leave', 'leave-back'); // 導入は作り直さず使い回すので、退場時のクラスを外す(残ると透明のまま)
       } else {
         const wrap = document.createElement('div');
         wrap.innerHTML = screenHtml(step);
@@ -393,7 +396,7 @@
         b.setAttribute('aria-checked', String(on));
       });
       busy = true;
-      setTimeout(() => { busy = false; advance(); }, REDUCED ? 120 : 320);
+      setTimeout(() => { busy = false; advance(); }, SELECT_DELAY);
       return;
     }
     // 複数選択
