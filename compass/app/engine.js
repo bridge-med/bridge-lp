@@ -154,37 +154,43 @@
     }
     const assets = Object.keys(contrib).filter(a => contrib[a] > 0)
       .sort((a, b) => contrib[b] - contrib[a] || ASSET_KEYS.indexOf(a) - ASSET_KEYS.indexOf(b)).slice(0, 2);
+    /* 経験1つにつき、いちばん強く効いた回答を1つ。引用した回答と、つなぐ経験を食い違わせない */
     const answers = uniqBy(
-      assets.flatMap(a => assetRes.sources[a]).sort((x, y) => y.pt - x.pt),
+      assets.map(a => assetRes.sources[a].slice().sort((x, y) => y.pt - x.pt)[0]).filter(Boolean),
       x => x.label
-    ).slice(0, 2);
+    );
     return { assets, answers };
   }
 
   const quote = list => list.map(x => '「' + x.label + '」').join('');
-  const assetNames = list => list.map(a => ASSETS[a].label).join('と');
+  /* 「業務改善の経験」「仮説を立てる経験」。word は動詞で終わる呼び名 */
+  const assetNames = list => list.map(a => ASSETS[a].word ? ASSETS[a].word + '経験' : ASSETS[a].label + 'の経験').join('と');
 
   function reasonText(pick, ev, avoidRes) {
     const A = assetNames(ev.assets);
     let s;
     if (pick.slot.id === 'experience') {
       s = ev.answers.length
-        ? quote(ev.answers) + 'という答えに、' + A + 'の経験が表れています。この橋では、その経験が活かせる可能性があります。'
-        : A + 'の経験が、この橋で活かせる可能性があります。';
+        ? quote(ev.answers) + 'という答えに、' + A + 'が表れています。この橋では、その経験が活かせる可能性があります。'
+        : A + 'が、この橋で活かせる可能性があります。';
     } else if (pick.slot.id === 'interest') {
       const from = pick.interestFrom.length ? pick.interestFrom : [];
-      s = from.length
-        ? quote(from) + 'を選んでいます。' + (A ? A + 'の経験も、この方向で使えるかもしれません。' : '') + '一度試してみてもよさそうです。'
-        : (pick.valueFrom.length ? 'これから欲しいものに' + quote(pick.valueFrom) + 'を選んでいます。' : '') +
-          (A ? A + 'の経験が、この方向にもつながっています。' : '') + '一度のぞいてみてもよさそうです。';
+      if (from.length) {
+        /* 橋の主な方向そのものを選んだか、選んだ方向の先にこの橋があるか */
+        s = quote(from) + (pick.direct ? 'を選んでいます。' : 'を選んだ先に、この橋もあります。') +
+          (A ? A + 'も、この方向で使えるかもしれません。' : '') + '一度試してみてもよさそうです。';
+      } else {
+        s = (A ? A + 'は、この方向でも使われます。' : '') +
+          (pick.valueFrom.length ? 'これから欲しいものに選んだ' + quote(pick.valueFrom) + 'とも近い橋です。' : '') + '一度のぞいてみてもよさそうです。';
+      }
     } else {
-      s = (A ? A + 'の経験は、この橋でも使われるものです。' : '') + '今回は直接選んでいない方向なので、まだ使っていない経験かもしれません。';
+      s = (A ? A + 'は、この橋でもよく使われます。' : '') + '今回の答えでは選ばれていない方向です。まだ使っていない経験かもしれません。';
     }
     /* Q5 との重なり。候補から外すのではなく、入り方の話として添える */
     const avoided = ev.assets.filter(a => avoidRes.assets.has(a));
     if (pick.avoidDep >= 0.3 && avoided.length) {
       const labels = uniqBy(avoided.flatMap(a => avoidRes.labels[a]), x => x);
-      s += 'ただ、' + labels.map(l => '「' + l + '」').join('') + 'は今後あまりやりたくないと答えています。その比重が小さい関わり方もあります。';
+      s += 'ただ、' + labels.map(l => '「' + l + '」').join('') + 'は今後あまりやりたくないとも答えています。この橋を考えるなら、その仕事がどのくらいの割合を占めるかも確かめてみてください。';
     }
     return s;
   }
@@ -197,9 +203,9 @@
   }
 
   function headline(top) {
-    if (!top.length) return '“これまでの仕事”';
-    if (top.length === 1) return '“' + ASSETS[top[0]].term + '力”';
-    return '“' + ASSETS[top[0]].ren + '、' + ASSETS[top[1]].term + '力”';
+    if (!top.length) return 'これまでの仕事';
+    if (top.length === 1) return ASSETS[top[0]].term + '力';
+    return ASSETS[top[0]].ren + '、' + ASSETS[top[1]].term + '力';
   }
 
   function pickTranslations(profession, assetRes, n) {

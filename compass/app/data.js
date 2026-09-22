@@ -9,14 +9,15 @@
   'use strict';
 
   /* ---- 経験資産(12種)。回答内での相対的な特徴量であり、能力の絶対値ではない
+     word  : 理由文での呼び名(「〜の経験」が不自然なものだけ。動詞で終える)
      tag   : 結果の「あなたが持っているもの」に出す短い名前
      ren   : 見出しの前半(連用形)  term: 見出しの後半(連体形)
        例) coordination × improvement →「人をつなぎ、仕組みを変える力」 ---- */
   const ASSETS = {
     problemFinding: { label: '課題発見',     tag: '課題発見',   ren: '問題に気づき',         term: '問題に気づく' },
-    hypothesis:     { label: '仮説構築',     tag: '仮説',       ren: '仮説を立て',           term: '仮説を立てる' },
+    hypothesis:     { label: '仮説構築',     word: '仮説を立てる', tag: '仮説',       ren: '仮説を立て',           term: '仮説を立てる' },
     analysis:       { label: '分析',         tag: '分析',       ren: '数字から読み取り',     term: '数字から読み取る' },
-    empathy:        { label: '対人理解',     tag: '対人理解',   ren: '人の気持ちをくみ取り', term: '人の気持ちをくみ取る' },
+    empathy:        { label: '対人理解',     word: '人の気持ちをくみ取る', tag: '対人理解',   ren: '人の気持ちをくみ取り', term: '人の気持ちをくみ取る' },
     coordination:   { label: '調整・交渉',   tag: '調整',       ren: '人と人をつなぎ',       term: '人と人をつなぐ' },
     education:      { label: '教育',         tag: '教育',       ren: '人を育て',             term: '人を育てる' },
     management:     { label: 'マネジメント', tag: 'マネジメント', ren: 'チームを動かし',     term: 'チームを動かす' },
@@ -24,7 +25,7 @@
     creation:       { label: '企画・創造',   tag: '企画',       ren: '新しいものを考え',     term: '新しいものを考える' },
     customer:       { label: '顧客理解',     tag: '顧客理解',   ren: '相手の求めるものをつかみ', term: '相手の求めるものをつかむ' },
     project:        { label: 'プロジェクト推進', tag: '推進',   ren: '物事を前に進め',       term: '物事を前に進める' },
-    expertise:      { label: '専門性',       tag: '専門性',     ren: '専門知識を深め',       term: '専門知識で解く' },
+    expertise:      { label: '専門性',       word: '専門知識を使う', tag: '専門性',     ren: '専門知識を深め',       term: '専門知識で解く' },
   };
 
   /* ---- 職種。結果を決めるためではなく、言いかえ(TRANSLATIONS)を選ぶためだけに使う ---- */
@@ -226,11 +227,11 @@
     ot: [
       { from: '生活歴・価値観の把握', to: 'ユーザーリサーチ',           assets: ['empathy', 'customer'] },
       { from: '作業分析',             to: 'プロセス分解',               assets: ['analysis', 'problemFinding'] },
-      { from: '環境調整',             to: '課題に対するシステム設計',   assets: ['improvement', 'creation'] },
+      { from: '環境調整',             to: '使う人に合わせた環境・仕組みの設計',   assets: ['improvement', 'creation'] },
       { from: '復職支援',             to: '関係者調整・プロジェクト推進', assets: ['coordination', 'project'] },
     ],
     st: [
-      { from: 'コミュニケーション評価', to: '情報伝達上の課題分析',     assets: ['problemFinding', 'analysis'] },
+      { from: 'コミュニケーション評価', to: '伝わらない原因の分析',     assets: ['problemFinding', 'analysis'] },
       { from: '失語症支援',           to: '相手に合わせた情報設計',     assets: ['empathy', 'creation'] },
       { from: '家族指導',             to: '複雑な情報の翻訳・教育',     assets: ['education', 'empathy'] },
       { from: '多職種連携',           to: 'ステークホルダー調整',       assets: ['coordination'] },
@@ -245,10 +246,10 @@
     nurse: [
       { from: '看護計画',             to: '目標設計・計画策定',         assets: ['project', 'hypothesis'] },
       { from: '観察とアセスメント',   to: '課題発見・仮説検証',         assets: ['problemFinding', 'hypothesis'] },
-      { from: '申し送り',             to: '情報の整理と引き継ぎの設計', assets: ['coordination', 'improvement'] },
+      { from: '申し送り',             to: '要点を絞った情報の引き継ぎ', assets: ['coordination', 'improvement'] },
       { from: '患者・家族への説明',   to: '複雑な情報の翻訳',           assets: ['empathy', 'education'] },
-      { from: '病棟の業務調整',       to: 'オペレーション管理',         assets: ['management', 'improvement'] },
-      { from: '新人指導',             to: '人材育成・フィードバック',   assets: ['education'] },
+      { from: 'リーダー業務(その日の業務の割り振り)', to: 'チーム運営・業務の配分',         assets: ['management', 'improvement'] },
+      { from: 'プリセプター・新人指導',             to: '人材育成・フィードバック',   assets: ['education'] },
     ],
     other: [
       { from: '患者・利用者への説明', to: '複雑な情報の翻訳',           assets: ['empathy', 'education'] },

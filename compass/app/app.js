@@ -130,7 +130,7 @@
       const v = typeof a === 'string' ? a : '';
       body = '<div class="cp-text">' +
         '<textarea id="cpText" maxlength="' + q.max + '" rows="6" placeholder="' + esc(q.placeholder) + '" aria-describedby="cpTextNote cpCount">' + esc(v) + '</textarea>' +
-        '<div class="cp-text-meta"><span id="cpTextNote">任意です。書いたことは結果に引用するだけで、判定と共有文には使いません。</span><span id="cpCount" class="cp-count">' + v.length + ' / ' + q.max + '</span></div>' +
+        '<div class="cp-text-meta"><span id="cpTextNote">任意です。書いたことは結果の画面に引用するだけで、橋の選び方と共有文には使いません。</span><span id="cpCount" class="cp-count">' + v.length + ' / ' + q.max + '</span></div>' +
         '</div>' +
         '<div class="cp-next-bar"><button type="button" class="btn primary cp-next" data-act="next">次へ <span aria-hidden="true">→</span></button>' +
         '<button type="button" class="cp-skip" data-act="skip">スキップして次へ</button></div>';
@@ -171,7 +171,7 @@
     return '<section class="cp-screen cp-result" data-step="result">' +
       '<header class="cp-r-hero">' +
         '<p class="cp-kicker">YOUR BRIDGE MAP</p>' +
-        '<h1 class="cp-r-h" tabindex="-1">あなたの経験は、<br><span class="em">' + esc(r.headline) + '</span><br>につながっています</h1>' +
+        '<h1 class="cp-r-h" tabindex="-1">あなたの経験は、<br>“<span class="em">' + esc(r.headline) + '</span>”<br>につながっています</h1>' +
         '<div class="cp-lines cp-map" aria-hidden="true">' + mapSvg() + '</div>' +
       '</header>' +
 
