@@ -1,6 +1,7 @@
 /* ================================================================
    BRIDGE Design System v3.0 — 正式ロゴ準拠
    全ページ共通のデザイントークン+コンポーネント。
+   用途と増やすときの規則は docs/design-system.md(新しい部品・トークンを足す前に読む)。
    配色:白と余白を基調に、藍を骨格、砂色を温度として使う。
    ロゴの思想:線は交差するが接続しない。自由と余白。
    ================================================================ */
@@ -23,6 +24,7 @@
   --dawn:#A98F63;          /* 砂色。ロゴの温度。使いすぎない */
   --dawn-deep:#7D6845;     /* 文字として使える砂。--dawnは白面3.09:1でAA未達のため小さい文字はこちら */
   --card:#FFFFFF;
+  --on-fill:#FFFFFF;       /* --blue・--glass で塗った面の上の文字(主ボタン・選択中のタグ) */
   --dark-sec:#131A2A;
   --dark-sec-text:#EFECE4;
   --dark-sec-dim:#8E93A3;
@@ -63,6 +65,7 @@
   --dawn:#C2A97E;
   --dawn-deep:#C2A97E;    /* ダークは--dawnが暗い面で7.33:1と合格しているため暗くしない(designer指定) */
   --card:#181E2E;
+  --on-fill:#08131E;
   --dark-sec:#0B0F1A;
   --hero-sky-1:#161B2B;
   --hero-sky-2:#111521;
@@ -124,7 +127,8 @@ html.js:not(.js-ready) [data-reveal]{animation:rv-safe .5s var(--ease) 1.8s forw
 /* ===== ヘッダー(JSが .site-nav に描画) ===== */
 .site-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px var(--pad-x);transition:all .35s;background:transparent}
 .site-nav.scrolled{background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:12px var(--pad-x)}
-.nav-logo{font:500 14px/1 var(--en);letter-spacing:0.34em;display:flex;align-items:center;gap:12px;z-index:2;color:var(--ink)}
+.nav-logo{font:500 14px/1 var(--en);letter-spacing:0.34em;display:flex;align-items:center;gap:12px;z-index:2;color:var(--ink);position:relative}
+.nav-logo::after{content:'';position:absolute;inset:-13px 0} /* 見た目18px高のまま、タップ領域を44pxに */
 .nav-logo svg{width:40px;height:18px;flex-shrink:0}
 .logo-mark .l-navy{stroke:var(--navy);fill:none;stroke-linecap:round}
 .logo-mark .l-sand{stroke:var(--dawn);fill:none;stroke-linecap:round}
@@ -137,8 +141,7 @@ html.js:not(.js-ready) [data-reveal]{animation:rv-safe .5s var(--ease) 1.8s forw
 .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 .nav-links a.active{color:var(--ink)}
 .nav-links a.active::after{transform:scaleX(1)}
-.nav-cta{font:700 11px/1 var(--sans);letter-spacing:0.08em;padding:10px 20px;border-radius:100px;background:var(--blue);color:#fff;transition:all .3s var(--ease)}
-[data-theme="dark"] .nav-cta{color:#08131E}
+.nav-cta{font:700 11px/1 var(--sans);letter-spacing:0.08em;padding:10px 20px;border-radius:100px;background:var(--blue);color:var(--on-fill);transition:all .3s var(--ease)}
 .nav-cta:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
 .theme-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3);transition:all .3s;flex-shrink:0;position:relative}
 .theme-btn::after{content:'';position:absolute;inset:-5px;border-radius:50%} /* 見た目は34pxのまま、タップ領域を44pxに */
@@ -163,7 +166,7 @@ body.menu-open .nav-drawer{opacity:1;pointer-events:auto}
 .drawer-item{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);opacity:0;transform:translateY(14px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
 body.menu-open .drawer-item{opacity:1;transform:none}
 .drawer-item .t{font-family:var(--mincho);font-weight:600;font-size:20px}
-.drawer-item .t .en{display:block;font:600 9px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn);margin-bottom:6px}
+.drawer-item .t .en{display:block;font:600 9px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--dawn-deep);margin-bottom:6px}
 .drawer-item .d{font-size:11px;color:var(--ink-3);text-align:right;line-height:1.8;max-width:180px}
 .nav-burger{display:block}
 @media(max-width:920px){
@@ -174,6 +177,8 @@ body.menu-open .drawer-item{opacity:1;transform:none}
 .page-hero{padding:clamp(150px,22vh,240px) var(--pad-x) clamp(70px,10vh,110px);background:linear-gradient(180deg,var(--hero-sky-1),var(--bg));position:relative;overflow:hidden}
 .page-hero-inner{max-width:var(--max);margin:0 auto;position:relative;z-index:1}
 .page-hero .crumb{font:600 10px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:26px;display:flex;gap:10px;align-items:center}
+.page-hero .crumb a{position:relative}
+.page-hero .crumb a::after{content:'';position:absolute;inset:-17px -6px} /* 10px高の文字のまま、タップ領域を44pxに */
 .page-hero .crumb a:hover{color:var(--ink)}
 .page-hero .crumb .sep{color:var(--ink-4)}
 .page-hero h1{font-family:var(--mincho);font-weight:600;font-size:clamp(32px,6vw,64px);line-height:1.6;letter-spacing:0.02em}
@@ -191,8 +196,7 @@ body.menu-open .drawer-item{opacity:1;transform:none}
 
 /* ===== ボタン ===== */
 .btn{display:inline-flex;align-items:center;gap:10px;padding:16px 32px;border-radius:100px;font:700 13px/1 var(--sans);letter-spacing:0.06em;transition:all .3s var(--ease)}
-.btn.primary{background:var(--blue);color:#fff}
-[data-theme="dark"] .btn.primary{color:#08131E}
+.btn.primary{background:var(--blue);color:var(--on-fill)}
 .btn.primary:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 .btn.ghost{border:1px solid var(--line);color:var(--ink-2)}
 .btn.ghost:hover{border-color:var(--ink-3);color:var(--ink);transform:translateY(-2px)}
@@ -201,7 +205,7 @@ body.menu-open .drawer-item{opacity:1;transform:none}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(24px,3vw,36px);box-shadow:var(--shadow);transition:all .35s var(--ease)}
 a.card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
 .card-tag{font:700 10px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);margin-bottom:14px;display:block}
-.card-tag.d{color:var(--dawn)}
+.card-tag.d{color:var(--dawn-deep)}
 .card-t{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2.2vw,21px);line-height:1.8;margin-bottom:12px}
 .card-p{font-size:12.5px;line-height:2.1;color:var(--ink-2)}
 .card-link{font:600 11px/1 var(--en);letter-spacing:0.08em;color:var(--blue);display:inline-flex;gap:6px;align-items:center;margin-top:16px}
@@ -213,14 +217,14 @@ a.card:hover .card-link{gap:10px}
 
 /* ステータスチップ */
 .chip{font:600 9.5px/1 var(--en);letter-spacing:0.12em;padding:5px 10px;border:1px solid var(--line);border-radius:100px;color:var(--ink-3);white-space:nowrap}
-.chip.run{border-color:color-mix(in srgb,var(--dawn) 55%,transparent);color:var(--dawn)}
+.chip.run{border-color:color-mix(in srgb,var(--dawn) 55%,transparent);color:var(--dawn-deep)}
 
 /* タグ(Journal等・選べるUI) */
-.tag-row{display:flex;gap:8px;flex-wrap:wrap}
-.tag{font:600 11px/1 var(--sans);letter-spacing:0.04em;padding:8px 16px;border:1px solid var(--line);border-radius:100px;color:var(--ink-2);transition:all .25s;cursor:pointer}
+.tag-row{display:flex;gap:16px 8px;flex-wrap:wrap}
+.tag{font:600 11px/1 var(--sans);letter-spacing:0.04em;padding:8px 16px;border:1px solid var(--line);border-radius:100px;color:var(--ink-2);transition:all .25s;cursor:pointer;position:relative}
+.tag::after{content:'';position:absolute;inset:-8px 0} /* 見た目29pxのまま、タップ領域を45pxに(行間16pxで隣の行と重ならない) */
 .tag:hover{border-color:var(--ink-3);color:var(--ink)}
-.tag.active{background:var(--blue);border-color:var(--blue);color:#fff}
-[data-theme="dark"] .tag.active{color:#08131E}
+.tag.active{background:var(--blue);border-color:var(--blue);color:var(--on-fill)}
 
 /* グリッド */
 .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
@@ -233,7 +237,7 @@ a.card:hover .card-link{gap:10px}
 .rows{max-width:var(--max);margin:0 auto;border-top:1px solid var(--line)}
 .row{display:grid;grid-template-columns:64px 260px 1fr auto;gap:16px 32px;align-items:baseline;padding:clamp(24px,4vh,38px) 0;border-bottom:1px solid var(--line);transition:background .3s}
 a.row:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
-.row-num{font:600 11px/1 var(--en);letter-spacing:0.14em;color:var(--dawn)}
+.row-num{font:600 11px/1 var(--en);letter-spacing:0.14em;color:var(--dawn-deep)}
 .row-t{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2.3vw,23px);line-height:1.7}
 .row-t .en{display:block;font:500 9.5px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3);margin-top:6px}
 .row-p{font-size:13px;line-height:2.1;color:var(--ink-2);max-width:520px}
@@ -265,5 +269,7 @@ a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 .footer-col .h{font:700 9.5px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:16px}
 .footer-col a{display:block;font-size:12px;color:var(--ink-2);padding:5px 0;transition:color .2s}
 .footer-col a:hover{color:var(--ink)}
+.footer-base a{position:relative}
+.footer-base a::after{content:'';position:absolute;inset:-17px -8px} /* タップ領域44px */
 .footer-base{max-width:var(--max);margin:44px auto 0;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:500 10px/1.8 var(--en);letter-spacing:0.1em;color:var(--ink-4)}
 @media(max-width:860px){.footer-grid{grid-template-columns:1fr 1fr}}
