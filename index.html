@@ -322,7 +322,7 @@ html:not(.js) .scene2{display:none}
     stage.style.setProperty('--p', p.toFixed(4));
     stage.style.setProperty('--p1', clamp(p / 0.4).toFixed(4));                     // 場面1の見出しが上へ退く
     stage.style.setProperty('--p2', ease(clamp((p - 0.25) / 0.35)).toFixed(4));    // 実画面がせり上がる(0.6 で定位置)
-    stage.style.setProperty('--pbg', clamp((p - 0.1) / 0.4).toFixed(4));           // 明るい場 → 夜
+    stage.style.setProperty('--pbg', clamp((p - 0.30) / 0.30).toFixed(4));         // 明るい場 → 夜(場面1が見えている間は暗くしない)
     if (active === 1 && p >= SW_ON) active = 2; else if (active === 2 && p <= SW_OFF) active = 1;
     if (stage.getAttribute('data-active') !== String(active)) {
       stage.setAttribute('data-active', String(active));
