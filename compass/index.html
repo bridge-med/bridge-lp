@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BRIDGE Compass — あなたの経験、どこまで使える? / BRIDGE</title>
+<meta name="description" content="10の質問から、医療職としてのこれまでの経験を別の言葉に翻訳し、まだ見えていない可能性を探します。約3分・登録不要。回答は送信せず、この端末の中だけで扱います。">
+<meta property="og:title" content="BRIDGE Compass — あなたの経験、どこまで使える?">
+<meta property="og:description" content="10の質問から、これまでの経験を別の言葉に翻訳し、まだ見えていない可能性を探します。約3分・登録不要。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/compass/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111521" media="(prefers-color-scheme: dark)">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/bridge.css">
+<link rel="stylesheet" href="app/styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body data-root="../" data-page="products" class="cp">
+
+<header class="site-nav"></header>
+
+<main id="compass" class="cp-main">
+  <!-- 導入。JSが無くても読めるように静的に置く。以降の画面は app.js が同じ場所に描画する -->
+  <section class="cp-screen cp-intro" id="cpIntro" data-step="intro" aria-labelledby="cpIntroH">
+    <div class="cp-lines cp-intro-lines" aria-hidden="true"></div>
+    <div class="cp-intro-inner">
+      <p class="cp-kicker">BRIDGE Compass</p>
+      <h1 class="cp-intro-h" id="cpIntroH" tabindex="-1">あなたの経験、<br>どこまで使える?</h1>
+      <p class="cp-intro-sub">10の質問から、これまでの経験を<br class="br-sp">別の言葉に翻訳し、<br>まだ見えていない可能性を探します。</p>
+      <div class="cp-intro-act">
+        <button class="btn primary cp-start" type="button" id="cpStart" disabled>3分で探してみる <span aria-hidden="true">→</span></button>
+        <ul class="facts cp-facts" aria-label="利用条件">
+          <li>10の質問・約3分</li><li>登録不要</li><li>回答は送信しない</li>
+        </ul>
+      </div>
+      <ol class="cp-chapters" aria-label="質問の流れ">
+        <li><span class="en">01</span>これまで</li>
+        <li><span class="en">02</span>あなたの強み</li>
+        <li><span class="en">03</span>これから</li>
+      </ol>
+      <noscript><p class="cp-noscript">BRIDGE Compassは、ブラウザのJavaScriptで動きます。JavaScriptを有効にすると始められます。</p></noscript>
+    </div>
+  </section>
+</main>
+
+<div class="cp-toast" id="cpToast" role="status" aria-live="polite"></div>
+
+<footer class="site-footer"></footer>
+
+<script src="../shared/bridge.js" defer></script>
+<script src="app/data.js" defer></script>
+<script src="app/engine.js" defer></script>
+<script src="app/app.js" defer></script>
+</body>
+</html>
