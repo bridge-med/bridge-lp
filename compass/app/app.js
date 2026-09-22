@@ -64,25 +64,6 @@
     });
     return '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" focusable="false">' + p + '<circle class="ln-dot" cx="200" cy="150" r="3.2"/></svg>';
   }
-  /* 結果の地図: 一点(いまの経験)から三本の軌跡。終点だけ砂色(選択の瞬間) */
-  function mapSvg() {
-    const r = rand(23);
-    let bg = '';
-    for (let i = 0; i < 10; i++) {
-      const sy = 20 + i * 20 + (r() - 0.5) * 8, ey = 10 + r() * 200;
-      bg += '<path class="ln-n ln-faint" pathLength="1" style="--d:' + (i * 0.05).toFixed(2) + 's" d="M-10 ' + sy.toFixed(1) + ' C 120 ' + (sy + 30).toFixed(1) + ', 220 ' + ey.toFixed(1) + ', 370 ' + ey.toFixed(1) + '"/>';
-    }
-    const ends = [[300, 48], [312, 112], [292, 176]];
-    let lines = '', dots = '';
-    ends.forEach(([x, y], i) => {
-      lines += '<path class="ln-main" pathLength="1" style="--d:' + (0.5 + i * 0.18).toFixed(2) + 's" d="M40 130 C 120 130, 170 ' + y + ', ' + x + ' ' + y + '"/>';
-      dots += '<circle class="ln-end" style="--d:' + (1.3 + i * 0.18).toFixed(2) + 's" cx="' + x + '" cy="' + y + '" r="4"/>' +
-        '<text class="ln-num" x="' + (x + 12) + '" y="' + (y + 4) + '">0' + (i + 1) + '</text>';
-    });
-    return '<svg viewBox="0 0 360 220" preserveAspectRatio="xMidYMid meet" focusable="false">' + bg + lines +
-      '<circle class="ln-origin" cx="40" cy="130" r="4.5"/>' + dots + '</svg>';
-  }
-
   /* ---- 共通部品 ---- */
   function head(step) {
     const q = Q[step];
@@ -97,8 +78,8 @@
     return '<div class="cp-head">' +
       '<button class="cp-back" type="button" data-act="back" aria-label="前の画面に戻る">' +
         '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
-      '<div class="cp-chapter">' + (label ? '<span class="en">' + label.en + '</span><span class="jp">' + label.jp + '</span>' : '<span class="en">START</span><span class="jp">はじめに</span>') + '</div>' +
-      '<div class="cp-progress" role="img" aria-label="' + (label ? label.en.replace('CHAPTER ', '第') + '章「' + label.jp + '」' : 'はじめに') + '">' + segs + '</div>' +
+      '<div class="cp-chapter">' + (label ? '<span class="en">' + label.en + '</span><span class="jp">' + label.jp + '</span>' : '') + '</div>' +
+      (label ? '<div class="cp-progress" role="img" aria-label="' + label.en.replace('CHAPTER ', '第') + '章「' + label.jp + '」">' + segs + '</div>' : '') +
       '</div>';
   }
   const mark = multi => '<span class="cp-mark' + (multi ? ' sq' : '') + '" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>';
@@ -111,10 +92,10 @@
   /* ---- 画面ごとの描画 ---- */
   function renderProfession() {
     const cur = state.answers.profession;
-    return '<section class="cp-screen cp-q" data-step="profession">' + head('profession') +
-      '<h2 class="cp-q-h" tabindex="-1">まず、今のあなたを教えてください</h2>' +
-      '<p class="cp-q-hint">職種で結果は決まりません。経験を別の言葉にするときの手がかりにだけ使います。</p>' +
+    return '<section class="cp-screen cp-q cp-prof" data-step="profession">' + head('profession') +
+      '<h2 class="cp-q-h cp-prof-h" tabindex="-1">まず、<br>今のあなたを教えてください</h2>' +
       '<div class="cp-opts" role="radiogroup" aria-label="職種">' + D.PROFESSIONS.map(p => option(p, cur === p.id, false)).join('') + '</div>' +
+      '<p class="cp-prof-note">職種は、経験を言いかえるときの手がかりにだけ使います。</p>' +
       (cur ? nextBar(true) : '') + '</section>';
   }
   function renderQuestion(q) {
@@ -148,6 +129,43 @@
       '</section>';
   }
 
+  /* 結果の地図: これまでの線が「現在地」に集まり、3方向へ分かれる。
+     Q10 に答えた人には、点線の4本目(本人が見つけた橋)を足す。
+     行の高さ(ROW)と SVG の座標を揃え、橋の名前は HTML で読めるように置く */
+  const ROW = 64, MAP_W = 128, OX = 30;
+  function heroMap(r) {
+    const n = r.bridges.length + (r.wish ? 1 : 0);
+    const h = n * ROW, oy = ROW * 1.5;
+    const endY = i => ROW * i + ROW / 2;
+    let past = '', lines = '', ends = '', travel = '';
+    [oy - 34, oy - 12, oy + 16, oy + 38].forEach((y, i) => {
+      past += '<path class="ln-n ln-past" pathLength="1" style="--d:' + (i * 0.06).toFixed(2) + 's" d="M0 ' + y + ' C 12 ' + y + ', 18 ' + oy + ', ' + OX + ' ' + oy + '"/>';
+    });
+    r.bridges.forEach((b, i) => {
+      const y = endY(i), d = 'M' + OX + ' ' + oy + ' C ' + (OX + 44) + ' ' + oy + ', ' + (OX + 46) + ' ' + y + ', ' + (MAP_W - 8) + ' ' + y;
+      lines += '<path class="ln-main" pathLength="1" style="--d:' + (0.35 + i * 0.16).toFixed(2) + 's" d="' + d + '"/>';
+      ends += '<circle class="ln-end" style="--d:' + (1.1 + i * 0.16).toFixed(2) + 's" cx="' + (MAP_W - 8) + '" cy="' + y + '" r="4.5"/>';
+      /* 現在地から橋の先へ、ときどき小さな光が流れる。動き出すまでは見えない(opacity 0) */
+      const begin = (2.4 + i * 1.2).toFixed(1) + 's';
+      if (!REDUCED) travel += '<circle class="ln-travel" r="2.2" opacity="0">' +
+        '<animateMotion dur="4.8s" begin="' + begin + '" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;0.5;1" calcMode="linear" path="' + d + '"/>' +
+        '<animate attributeName="opacity" dur="4.8s" begin="' + begin + '" repeatCount="indefinite" values="0;.8;.8;0;0" keyTimes="0;0.06;0.44;0.5;1"/></circle>';
+    });
+    if (r.wish) {
+      const y = endY(3);
+      lines += '<path class="ln-self" d="M' + OX + ' ' + oy + ' C ' + (OX + 40) + ' ' + oy + ', ' + (OX + 40) + ' ' + y + ', ' + (MAP_W - 8) + ' ' + y + '"/>';
+      ends += '<circle class="ln-self-end" cx="' + (MAP_W - 8) + '" cy="' + y + '" r="4.5"/>';
+    }
+    const svg = '<svg class="cp-map-svg" width="' + MAP_W + '" height="' + h + '" viewBox="0 0 ' + MAP_W + ' ' + h + '" aria-hidden="true" focusable="false">' +
+      past + lines + ends + travel + '<circle class="ln-origin" cx="' + OX + '" cy="' + oy + '" r="5"/><circle class="ln-origin-ring" cx="' + OX + '" cy="' + oy + '" r="5"/></svg>';
+    const items = r.bridges.map((b, i) =>
+      '<li style="--i:' + i + '"><a href="#cpB' + (i + 1) + '"><span class="n">0' + (i + 1) + '</span><span class="t">' + esc(b.bridge.name) + '</span></a></li>').join('') +
+      (r.wish ? '<li class="self" style="--i:3"><a href="#cpSelf"><span class="n">04</span><span class="t">あなた自身が見つけた橋</span></a></li>' : '');
+    return '<div class="cp-map" style="--rows:' + n + '">' + svg +
+      '<span class="cp-map-here" style="top:' + (oy + 12) + 'px" aria-hidden="true">現在地</span>' +
+      '<ol class="cp-map-list" aria-label="あなたから見える橋">' + items + '</ol></div>';
+  }
+
   function renderResult() {
     const r = E.buildResult(state.answers);
     const quoteBlock = t => '<blockquote class="cp-quote"><p>' + esc(t).replace(/\n/g, '<br>') + '</p></blockquote>';
@@ -156,7 +174,7 @@
       const links = br.links.length
         ? '<ul class="cp-links">' + br.links.map(l => '<li><a href="' + esc(l.href) + '"><span class="t">' + esc(l.t) + '</span><span class="d">' + esc(l.d) + '</span><span class="ar" aria-hidden="true">→</span></a></li>').join('') + '</ul>'
         : '';
-      return '<li class="cp-bridge" data-reveal>' +
+      return '<li class="cp-bridge" id="cpB' + (i + 1) + '" data-reveal>' +
         '<div class="cp-bridge-num en">0' + (i + 1) + '</div>' +
         '<div class="cp-bridge-body">' +
           '<p class="cp-bridge-slot">' + esc(b.slot.label) + '</p>' +
@@ -167,47 +185,54 @@
             '<p>' + esc(br.about) + '</p>' + links + '</details>' +
         '</div></li>';
     }).join('');
+    const lines = r.headlineLines;
 
     return '<section class="cp-screen cp-result" data-step="result">' +
+      /* 01 最初の1画面: 言いかえた見出し・持っているもの・3つの橋だけ。理由は下で */
       '<header class="cp-r-hero">' +
         '<p class="eyebrow">YOUR BRIDGE MAP</p>' +
-        '<h1 class="cp-r-h" tabindex="-1">あなたの経験は、<br>“<span class="em">' + esc(r.headline) + '</span>”<br>につながっています</h1>' +
-        '<div class="cp-lines cp-map" aria-hidden="true">' + mapSvg() + '</div>' +
+        '<p class="cp-r-lead">あなたの経験を、別の言葉にすると</p>' +
+        '<h1 class="cp-r-h" tabindex="-1"><span>' + esc(lines[0]) + '</span><br><span>' + esc(lines[1]) + '</span></h1>' +
+        '<ul class="cp-r-tags" aria-label="あなたが持っているもの">' + r.tags.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' +
+        heroMap(r) +
+        '<a class="cp-r-cue" href="#cpTr">なぜこの橋が見えたか <span aria-hidden="true">↓</span></a>' +
       '</header>' +
 
-      '<section class="cp-r-sec" aria-labelledby="cpHave">' +
-        '<h2 class="cp-r-sub" id="cpHave">あなたが持っているもの</h2>' +
-        '<p class="cp-tags">' + r.tags.map(t => '<span class="cp-tag">' + esc(t) + '</span>').join('') + '</p>' +
+      /* 02 言いかえ */
+      '<section class="cp-r-sec" id="cpTr" aria-labelledby="cpTrH">' +
+        '<h2 class="cp-r-sub" id="cpTrH">これまでの経験を、別の言葉にすると</h2>' +
+        (r.translations.length ? '<ul class="cp-tr">' + r.translations.map(t =>
+          '<li><span class="from">普段やっている<b>' + esc(t.from) + '</b>は、</span><span class="to">別の言葉にすると<b>' + esc(t.to) + '</b>です。</span></li>').join('') + '</ul>' : '') +
         (r.overlaps.length ? '<p class="cp-note">' + r.overlaps.map(l => '「' + esc(l) + '」').join('') + 'は、得意だと答えつつ、今後はあまりやりたくないとも答えています。できることと、これから増やしたいことは、別で構いません。</p>' : '') +
       '</section>' +
 
-      (r.translations.length ? '<section class="cp-r-sec" aria-labelledby="cpTr">' +
-        '<h2 class="cp-r-sub" id="cpTr">これまでの経験を、別の言葉にすると</h2>' +
-        '<ul class="cp-tr">' + r.translations.map(t =>
-          '<li><span class="from">普段やっている<b>' + esc(t.from) + '</b>は、</span><span class="to">別の言葉にすると<b>' + esc(t.to) + '</b>です。</span></li>').join('') + '</ul>' +
-      '</section>' : '') +
-
+      /* 03 3つの橋の詳細 */
       '<section class="cp-r-sec" aria-labelledby="cpBr">' +
-        '<h2 class="cp-r-sub" id="cpBr">あなたから見える3つの橋</h2>' +
+        '<h2 class="cp-r-sub" id="cpBr">3つの橋が見えた理由</h2>' +
         '<ol class="cp-bridges">' + bridges + '</ol>' +
       '</section>' +
 
-      (r.made ? '<section class="cp-r-sec" aria-labelledby="cpMade"><h2 class="cp-r-sub" id="cpMade">あなたが、これまで作ってきたもの</h2>' + quoteBlock(r.made) + '</section>' : '') +
-      (r.wish ? '<section class="cp-r-sec" aria-labelledby="cpWish"><h2 class="cp-r-sub" id="cpWish">まだ、名前のついていない橋</h2>' + quoteBlock(r.wish) +
-        '<p class="cp-note">この地図にない可能性でも構いません。<br>BRIDGEは、そこへ向かう方法もこれから増やしていきます。</p></section>' : '') +
+      /* 04 Q9: 選択肢では拾いきれない、本人の経験 */
+      (r.made ? '<section class="cp-r-sec" aria-labelledby="cpMade"><h2 class="cp-r-sub" id="cpMade">あなたが、これまで作ってきたもの</h2>' +
+        '<p class="cp-r-note">質問の選択肢では拾いきれない、あなた自身の経験です。</p>' + quoteBlock(r.made) + '</section>' : '') +
 
+      /* 05 Q10: Compass が見つけた橋とは別の、本人が見つけた橋 */
+      (r.wish ? '<section class="cp-r-sec cp-self" id="cpSelf" aria-labelledby="cpWish">' +
+        '<p class="cp-self-k"><span class="en">04</span>BRIDGE MAPの、もう1本の線</p>' +
+        '<h2 class="cp-r-sub" id="cpWish">あなた自身が見つけた橋</h2>' +
+        '<blockquote class="cp-self-q"><p>' + esc(r.wish).replace(/\n/g, '<br>') + '</p></blockquote>' +
+        '<p class="cp-r-note">Compassではまだ分類していません。<br>でも、これもあなたのBRIDGE MAPの一部です。</p>' +
+        '<p class="cp-self-m">橋は、用意された選択肢の中にだけあるとは限りません。</p>' +
+      '</section>' : '') +
+
+      /* 06 メッセージ */
       '<section class="cp-r-close">' +
         '<p>これは、あなたの仕事を決めるための結果ではありません。</p>' +
         '<p>これまでの経験を違う角度から見て、<br class="br-pc">まだ使っていない可能性を見つけるための地図です。</p>' +
         '<p class="last">橋は、渡ってみてから決めてもいい。</p>' +
       '</section>' +
 
-      '<div class="cp-r-act">' +
-        '<button type="button" class="btn primary" data-act="share">結果をシェア <span aria-hidden="true">↗</span></button>' +
-        '<button type="button" class="btn ghost" data-act="restart">はじめからやり直す</button>' +
-        '<p class="cp-share-note">共有する文章には、橋の名前だけが入ります。自由記述の答えは入りません。</p>' +
-      '</div>' +
-
+      /* 07 次の一歩 */
       '<aside class="walk cp-walk" aria-labelledby="cpWalk"><div class="walk-inner">' +
         '<p class="eyebrow">Where to next</p>' +
         '<h2 class="walk-h" id="cpWalk">次は、どこへ歩きますか</h2>' +
@@ -218,6 +243,13 @@
         '</div>' +
         '<p class="walk-note">地図を眺めただけで閉じても、それで十分です。</p>' +
       '</div></aside>' +
+
+      /* 08 シェア */
+      '<div class="cp-r-act">' +
+        '<button type="button" class="btn primary" data-act="share">結果をシェア <span aria-hidden="true">↗</span></button>' +
+        '<button type="button" class="btn ghost" data-act="restart">はじめからやり直す</button>' +
+        '<p class="cp-share-note">共有する文章には、橋の名前だけが入ります。自由記述の答えは入りません。</p>' +
+      '</div>' +
       '</section>';
   }
 
@@ -315,6 +347,18 @@
   /* ---- 画面ごとの操作 ---- */
   function bind(el, step) {
     el.addEventListener('click', ev => {
+      /* 結果内のページ内リンク。hash を変えると history に積まれて戻る操作と干渉するので、スクロールだけにする */
+      const jump = ev.target.closest('a[href^="#"]');
+      if (jump) {
+        const to = el.querySelector(jump.getAttribute('href'));
+        if (to) {
+          ev.preventDefault();
+          to.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+          if (!to.hasAttribute('tabindex')) to.setAttribute('tabindex', '-1');
+          to.focus({ preventScroll: true });
+        }
+        return;
+      }
       const btn = ev.target.closest('button');
       if (!btn || busy) return;
       const act = btn.dataset.act;

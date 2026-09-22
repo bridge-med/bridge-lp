@@ -153,6 +153,34 @@ test('見出しは回答で変わる', () => {
   assert.ok(heads.size >= 4);
 });
 
+test('見出しは2行の短い言いかえ。「あなたは○○な人です」の形にしない', () => {
+  for (const [name, a] of Object.entries(PERSONAS)) {
+    const r = E.buildResult(a);
+    assert.equal(r.headlineLines.length, 2, name);
+    assert.equal(r.headline, r.headlineLines.join(''), name);
+    assert.match(r.headline, /力$/, name);
+    assert.ok(!/あなたは|な人|です|。/.test(r.headline), name + ': ' + r.headline);
+  }
+  for (const [key, lines] of Object.entries(D.HEADLINES)) {
+    assert.equal(lines.length, 2, key);
+    for (const k of key.split('+')) assert.ok(D.ASSETS[k], key);
+    assert.equal(key, key.split('+').sort().join('+'), key + ' はアルファベット順で書く');
+  }
+});
+
+test('Q10(本人が見つけた橋)は、内容が政策の話でも Compass の橋を行政/政策に変えない', () => {
+  // PR #123 の確認 persona(PT)。Q10 の中身で判定し直さず、独立した「本人の橋」として返す
+  const base = { profession: 'pt', q1: 'b', q2: 'd', q3: 'f', q4: ['teach', 'listen'], q5: ['deep'], q6: 'e', q7: ['income', 'growth'], q8: 'g',
+    q9: '組織が崩壊しかけているところで、自分のチームだけは保つことができた' };
+  const wish = '政治家というか、厚生労働省のリハビリテーションみたいな感じで関わってみたい';
+  const without = E.buildResult(base), withWish = E.buildResult({ ...base, q10: wish });
+  assert.deepEqual(ids(withWish), ids(without));
+  assert.deepEqual(withWish.headlineLines, without.headlineLines);
+  assert.deepEqual(withWish.tags, without.tags);
+  assert.equal(withWish.wish, wish);
+  assert.equal(without.wish, '');
+});
+
 test('マスターの整合: 役割・橋の重みは合計1、参照先の役割・資産が実在する', () => {
   for (const [r, def] of Object.entries(D.ROLES)) {
     const sum = Object.values(def.weights).reduce((a, b) => a + b, 0);

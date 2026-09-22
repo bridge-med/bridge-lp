@@ -259,6 +259,35 @@
     ],
   };
 
+  /* ---- 結果の見出し。上位2つの経験資産の組み合わせを、短い言葉に言いかえる
+     キーは資産名をアルファベット順に並べて「+」でつなぐ。[1行目, 2行目]
+     能力の評価ではなく「経験の言いかえ」に聞こえる言葉を選ぶ。無い組み合わせは ASSETS の ren/term から組み立てる ---- */
+  const HEADLINES = {
+    'coordination+improvement': ['人と仕組みを', '動かす力'],
+    'improvement+management':   ['チームと仕組みを', '動かす力'],
+    'coordination+management':  ['人をつなぎ、', 'チームを動かす力'],
+    'problemFinding+project':   ['課題を見つけ、', '前に進める力'],
+    'improvement+problemFinding': ['課題を見つけ、', '仕組みを変える力'],
+    'coordination+project':     ['人を巻き込み、', '前に進める力'],
+    'coordination+problemFinding': ['人の間に立ち、', '課題を見つける力'],
+    'improvement+project':      ['仕組みを変え、', '前に進める力'],
+    'creation+project':         ['新しくつくり、', '前に進める力'],
+    'education+expertise':      ['専門性を、', '人に届ける力'],
+    'empathy+expertise':        ['専門性で、', '人を支える力'],
+    'expertise+problemFinding': ['専門性で、', '課題を解く力'],
+    'expertise+hypothesis':     ['問いを立て、', '深く掘る力'],
+    'hypothesis+problemFinding': ['問いを立て、', '深く掘る力'],
+    'analysis+hypothesis':      ['問いを立て、', '数字で確かめる力'],
+    'analysis+improvement':     ['数字を読み、', '仕組みを変える力'],
+    'education+empathy':        ['人に寄り添い、', '育てる力'],
+    'coordination+education':   ['人をつなぎ、', '育てる力'],
+    'coordination+empathy':     ['人の話を聞き、', 'つなぐ力'],
+    'creation+customer':        ['相手の求めるものを、', '形にする力'],
+    'creation+empathy':         ['相手を見て、', '新しくつくる力'],
+    'coordination+creation':    ['人を巻き込み、', '新しくつくる力'],
+    'customer+empathy':         ['相手の声を聞き、', '応える力'],
+  };
+
   /* ---- 結果の3つの橋の見出し(順序が意味を持つ) ---- */
   const SLOTS = [
     { id: 'experience', label: 'すでに持っている経験から見える橋' },
@@ -266,7 +295,7 @@
     { id: 'hidden',     label: 'まだ気づいていないかもしれない橋' },
   ];
 
-  const DATA = { ASSETS, PROFESSIONS, QUESTIONS, CHAPTERS, ROLES, BRIDGES, TRANSLATIONS, SLOTS };
+  const DATA = { ASSETS, PROFESSIONS, QUESTIONS, CHAPTERS, ROLES, BRIDGES, TRANSLATIONS, SLOTS, HEADLINES };
   if (typeof module === 'object' && module.exports) module.exports = DATA;
   else root.COMPASS_DATA = DATA;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -13,7 +13,7 @@
 (function (root) {
   'use strict';
   const D = (typeof module === 'object' && module.exports) ? require('./data.js') : root.COMPASS_DATA;
-  const { ASSETS, QUESTIONS, ROLES, BRIDGES, TRANSLATIONS, SLOTS } = D;
+  const { ASSETS, QUESTIONS, ROLES, BRIDGES, TRANSLATIONS, SLOTS, HEADLINES } = D;
 
   const W_INTEREST = 0.6;
   const VALUE_CAP = 0.15;
@@ -202,10 +202,13 @@
       .slice(0, n);
   }
 
-  function headline(top) {
-    if (!top.length) return 'これまでの仕事';
-    if (top.length === 1) return ASSETS[top[0]].term + '力';
-    return ASSETS[top[0]].ren + '、' + ASSETS[top[1]].term + '力';
+  /* 見出しは2行。上位2つの組み合わせに言いかえがあればそれを、無ければ ren/term から組み立てる */
+  function headlineLines(top) {
+    if (!top.length) return ['これまでの', '仕事の力'];
+    if (top.length === 1) return [ASSETS[top[0]].term, '力'];
+    const key = top.slice(0, 2).sort().join('+');
+    if (HEADLINES && HEADLINES[key]) return HEADLINES[key].slice();
+    return [ASSETS[top[0]].ren + '、', ASSETS[top[1]].term + '力'];
   }
 
   function pickTranslations(profession, assetRes, n) {
@@ -237,7 +240,8 @@
     const top = topAssets(assetRes, 4);
     const text = s => (typeof s === 'string' ? s.trim() : '');
     return {
-      headline: headline(top),
+      headline: headlineLines(top).join(''),
+      headlineLines: headlineLines(top),
       tags: top.map(a => ASSETS[a].tag),
       overlaps: overlaps(answers),
       translations: pickTranslations(answers.profession, assetRes, 2),

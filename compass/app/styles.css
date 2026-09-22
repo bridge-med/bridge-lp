@@ -109,13 +109,43 @@
 .cp-trans-t{font-family:var(--mincho);font-weight:600;font-size:clamp(18px,4.6vw,22px);line-height:2}
 
 /* ---- 結果 ---- */
-.cp-result{max-width:720px;margin:0 auto;padding:0 0 0}
-.cp-r-hero{padding:120px 24px 8px;position:relative}
-.cp-r-h{font-family:var(--mincho);font-weight:600;font-size:clamp(25px,6.4vw,40px);line-height:1.8;letter-spacing:.02em;margin-top:22px}
-.cp-r-h .em{color:var(--blue)}
-.cp-map{margin:18px -8px 0;height:auto;aspect-ratio:36/22;max-height:300px}
+.cp-result{max-width:720px;margin:0 auto}
+/* 01 最初の1画面: 見出し・持っているもの・3つの橋だけ */
+.cp-r-hero{padding:96px 24px 12px;position:relative;display:flex;flex-direction:column}
+.cp-r-lead{margin-top:18px;font-size:12.5px;color:var(--ink-3);letter-spacing:.04em}
+.cp-r-h{font-family:var(--mincho);font-weight:600;font-size:clamp(31px,8.6vw,50px);line-height:1.42;letter-spacing:.02em;margin-top:6px}
+.cp-r-h span{display:inline-block;opacity:0;transform:translateY(10px);animation:cp-rise .9s var(--ease) forwards}
+.cp-r-h span + br + span{animation-delay:.16s}
+.cp-r-tags{list-style:none;display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:18px;opacity:0;animation:cp-fade .8s var(--ease) .35s forwards}
+.cp-r-tags li{font-size:13px;font-weight:500;padding:5px 13px;border:1px solid var(--line);border-radius:100px;color:var(--ink-2)}
+@keyframes cp-rise{to{opacity:1;transform:none}}
+
+/* 地図: 行の高さ64pxと SVG の座標を揃える(app.js の ROW) */
+.cp-map{position:relative;display:grid;grid-template-columns:128px 1fr;margin:clamp(22px,4vh,34px) 0 0 -6px}
+.cp-map-svg{display:block;overflow:visible}
+.cp-map-svg path{fill:none;stroke-linecap:round}
+.cp-map-svg .ln-past{stroke:var(--ink-4);stroke-width:.9;opacity:.8;stroke-dasharray:1;stroke-dashoffset:1;animation:cp-draw 1s var(--ease) forwards;animation-delay:var(--d,0s)}
+.cp-map-svg .ln-main{stroke:var(--blue);stroke-width:1.6;stroke-dasharray:1;stroke-dashoffset:1;animation:cp-draw 1.3s var(--ease) forwards;animation-delay:var(--d,0s)}
+.cp-map-svg .ln-end{fill:var(--dawn);opacity:0;animation:cp-fade .5s var(--ease) forwards;animation-delay:var(--d,0s)}
+.cp-map-svg .ln-self{stroke:var(--ink-3);stroke-width:1.2;stroke-dasharray:3 5;opacity:0;animation:cp-fade .8s var(--ease) 1.5s forwards}
+.cp-map-svg .ln-self-end{fill:var(--bg);stroke:var(--ink-3);stroke-width:1.2;opacity:0;animation:cp-fade .8s var(--ease) 1.6s forwards}
+.cp-map-svg .ln-origin{fill:var(--blue)}
+.cp-map-svg .ln-origin-ring{fill:none;stroke:var(--blue);stroke-width:1;transform-box:fill-box;transform-origin:center;animation:cp-ring 3.6s var(--ease) 1.6s infinite;opacity:0}
+.cp-map-svg .ln-travel{fill:var(--dawn)}
+@keyframes cp-ring{0%{opacity:.5;transform:scale(1)}70%,100%{opacity:0;transform:scale(3.2)}}
+.cp-map-here{position:absolute;left:12px;font-size:10.5px;letter-spacing:.08em;color:var(--ink-3)}
+.cp-map-list{list-style:none}
+.cp-map-list li{height:64px;display:flex;align-items:center;opacity:0;transform:translateX(-6px);animation:cp-rise .7s var(--ease) forwards;animation-delay:calc(1.05s + var(--i) * .16s)}
+.cp-map-list a{display:flex;align-items:baseline;gap:10px;min-height:44px;padding:6px 0;align-items:center}
+.cp-map-list .n{font:600 11px/1 var(--en);letter-spacing:.1em;color:var(--dawn-deep);flex:0 0 auto}
+.cp-map-list .t{font-family:var(--mincho);font-weight:600;font-size:clamp(15.5px,4.3vw,19px);line-height:1.45;color:var(--ink)}
+.cp-map-list .self .n{color:var(--ink-3)}
+.cp-map-list .self .t{font-family:var(--sans);font-weight:500;font-size:13.5px;color:var(--ink-2)}
+.cp-r-cue{align-self:flex-start;margin-top:14px;min-height:44px;display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3)}
+
 .cp-r-sec{padding:clamp(36px,6vh,56px) 24px;border-top:1px solid var(--line)}
 .cp-r-sub{font-size:15px;font-weight:700;letter-spacing:.04em;margin-bottom:20px}
+.cp-r-note{margin:-8px 0 18px;font-size:13px;line-height:2;color:var(--ink-2)}
 .cp-tags{display:flex;flex-wrap:wrap;gap:8px}
 .cp-tag{display:inline-flex;align-items:center;min-height:36px;padding:6px 16px;border-radius:100px;border:1px solid var(--line);font-size:13.5px;font-weight:500;color:var(--ink)}
 .cp-tag.sm{min-height:28px;padding:4px 12px;font-size:12px;color:var(--ink-2)}
@@ -154,10 +184,24 @@
 .cp-r-close{max-width:var(--text-max);padding:clamp(56px,9vh,88px) 24px;border-top:1px solid var(--line);font-family:var(--mincho);font-size:15.5px;line-height:2.2;color:var(--ink-2)}
 .cp-r-close p + p{margin-top:14px}
 .cp-r-close .last{margin-top:26px;font-size:clamp(18px,4.8vw,21px);font-weight:600;color:var(--ink)}
-.cp-r-act{padding:0 24px clamp(56px,9vh,80px);display:flex;flex-wrap:wrap;gap:12px}
+.cp-r-act{padding:clamp(40px,7vh,64px) 24px clamp(56px,9vh,80px);border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px}
 .cp-r-act .btn{min-height:50px}
 .cp-share-note{flex-basis:100%;font-size:11.5px;color:var(--ink-3);line-height:1.8}
 .cp-walk{padding-left:24px;padding-right:24px}
+
+/* 職種: 質問を主役に。補足は下に小さく */
+.cp-prof .cp-head{margin-bottom:clamp(12px,3vh,24px)}
+.cp-prof-h{font-size:clamp(22px,6vw,27px);line-height:1.6}
+.cp-prof-note{margin-top:18px;font-size:11.5px;line-height:1.8;color:var(--ink-3)}
+
+/* 05 本人が見つけた橋: 地図の点線の4本目と同じ線で受ける */
+.cp-self{position:relative}
+.cp-self-k{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--ink-3);margin-bottom:12px}
+.cp-self-k .en{font-size:11px;letter-spacing:.1em}
+.cp-self-k::before{content:'';width:28px;border-top:1.2px dashed var(--ink-3)}
+.cp-self-q{margin:4px 0 20px;padding:4px 0 4px 20px;border-left:1.2px dashed var(--ink-3);font-family:var(--mincho);font-weight:600;font-size:clamp(18px,4.8vw,22px);line-height:1.9;color:var(--ink)}
+.cp-self-q p{overflow-wrap:anywhere}
+.cp-self-m{margin-top:14px;font-family:var(--mincho);font-size:15px;line-height:2;color:var(--ink)}
 
 /* トースト */
 .cp-toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));z-index:120;transform:translate(-50%,12px);padding:12px 20px;border-radius:100px;background:var(--ink);color:var(--bg);font-size:13px;opacity:0;pointer-events:none;transition:all .35s var(--ease);white-space:nowrap}
@@ -179,11 +223,23 @@
   .cp-r-hero,.cp-r-sec,.cp-r-close,.cp-r-act{padding-left:0;padding-right:0}
   .cp-result{padding:0 24px}
 }
+/* PC: 見出しを左、地図を右に。詳細は読みやすい幅に戻す */
+@media(min-width:960px){
+  .cp-result{max-width:1080px}
+  .cp-r-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);grid-template-rows:auto auto auto auto 1fr;column-gap:72px;align-content:center;padding-top:120px;min-height:min(100svh,860px)}
+  .cp-r-hero > *{grid-column:1}
+  .cp-r-hero .cp-map{grid-column:2;grid-row:1 / 6;align-self:center;margin:0}
+  .cp-r-cue{grid-row:5;align-self:end}
+  .cp-r-sec,.cp-r-close,.cp-r-act{max-width:720px;margin-left:auto;margin-right:auto}
+}
 
 @media(prefers-reduced-motion:reduce){
   .cp-screen,.cp-screen.enter,.cp-screen.leave{transition:none}
   .cp-lines path{animation:none;stroke-dashoffset:0}
   .cp-lines .ln-dot,.cp-lines .ln-end{animation:none;opacity:1}
   .cp-intro-lines svg{animation:none}
+  .cp-r-h span,.cp-r-tags,.cp-map-list li,.cp-map-svg .ln-end,.cp-map-svg .ln-self,.cp-map-svg .ln-self-end{animation:none;opacity:1;transform:none}
+  .cp-map-svg path{animation:none;stroke-dashoffset:0}
+  .cp-map-svg .ln-origin-ring{display:none}
   .cp-opt,.cp-mark,.cp-mark svg,.cp-seg span{transition:none}
 }
