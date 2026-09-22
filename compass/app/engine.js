@@ -204,8 +204,8 @@
 
   /* 見出しは2行。上位2つの組み合わせに言いかえがあればそれを、無ければ ren/term から組み立てる */
   function headlineLines(top) {
-    if (!top.length) return ['これまでの', '仕事の力'];
-    if (top.length === 1) return [ASSETS[top[0]].term, '力'];
+    if (!top.length) return ['これまでの仕事で', '積み重ねてきた力'];
+    if (top.length === 1) return [ASSETS[top[0]].term + '力'];
     const key = top.slice(0, 2).sort().join('+');
     if (HEADLINES && HEADLINES[key]) return HEADLINES[key].slice();
     return [ASSETS[top[0]].ren + '、', ASSETS[top[1]].term + '力'];

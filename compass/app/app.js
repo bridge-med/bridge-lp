@@ -192,15 +192,15 @@
       '<header class="cp-r-hero">' +
         '<p class="eyebrow">YOUR BRIDGE MAP</p>' +
         '<p class="cp-r-lead">あなたの経験を、別の言葉にすると</p>' +
-        '<h1 class="cp-r-h" tabindex="-1"><span>' + esc(lines[0]) + '</span><br><span>' + esc(lines[1]) + '</span></h1>' +
+        '<h1 class="cp-r-h" tabindex="-1">' + lines.map(l => '<span>' + esc(l) + '</span>').join('<br>') + '</h1>' +
         '<ul class="cp-r-tags" aria-label="あなたが持っているもの">' + r.tags.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' +
         heroMap(r) +
-        '<a class="cp-r-cue" href="#cpTr">なぜこの橋が見えたか <span aria-hidden="true">↓</span></a>' +
+        '<a class="cp-r-cue" href="#cpBr">なぜこの橋が見えたか <span aria-hidden="true">↓</span></a>' +
       '</header>' +
 
       /* 02 言いかえ */
       '<section class="cp-r-sec" id="cpTr" aria-labelledby="cpTrH">' +
-        '<h2 class="cp-r-sub" id="cpTrH">これまでの経験を、別の言葉にすると</h2>' +
+        '<h2 class="cp-r-sub" id="cpTrH">いつもの仕事を、外の言葉で言うと</h2>' +
         (r.translations.length ? '<ul class="cp-tr">' + r.translations.map(t =>
           '<li><span class="from">普段やっている<b>' + esc(t.from) + '</b>は、</span><span class="to">別の言葉にすると<b>' + esc(t.to) + '</b>です。</span></li>').join('') + '</ul>' : '') +
         (r.overlaps.length ? '<p class="cp-note">' + r.overlaps.map(l => '「' + esc(l) + '」').join('') + 'は、得意だと答えつつ、今後はあまりやりたくないとも答えています。できることと、これから増やしたいことは、別で構いません。</p>' : '') +

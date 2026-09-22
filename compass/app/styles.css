@@ -130,14 +130,15 @@
 .cp-map-svg .ln-self{stroke:var(--ink-3);stroke-width:1.2;stroke-dasharray:3 5;opacity:0;animation:cp-fade .8s var(--ease) 1.5s forwards}
 .cp-map-svg .ln-self-end{fill:var(--bg);stroke:var(--ink-3);stroke-width:1.2;opacity:0;animation:cp-fade .8s var(--ease) 1.6s forwards}
 .cp-map-svg .ln-origin{fill:var(--blue)}
-.cp-map-svg .ln-origin-ring{fill:none;stroke:var(--blue);stroke-width:1;transform-box:fill-box;transform-origin:center;animation:cp-ring 3.6s var(--ease) 1.6s infinite;opacity:0}
+.cp-map-svg .ln-origin-ring{fill:none;stroke:var(--blue);stroke-width:1;transform-box:fill-box;transform-origin:center;animation:cp-ring 3.6s var(--ease) 1.6s 3;opacity:0} /* 止まらない動きは流れる光の1つだけにする */
 .cp-map-svg .ln-travel{fill:var(--dawn)}
 @keyframes cp-ring{0%{opacity:.5;transform:scale(1)}70%,100%{opacity:0;transform:scale(3.2)}}
-.cp-map-here{position:absolute;left:12px;font-size:10.5px;letter-spacing:.08em;color:var(--ink-3)}
+.cp-map-here{position:absolute;left:10px;z-index:1;padding:0 4px;line-height:1.4;background:var(--bg);font-size:10.5px;letter-spacing:.08em;color:var(--ink-2)}
 .cp-map-list{list-style:none}
 .cp-map-list li{height:64px;display:flex;align-items:center;opacity:0;transform:translateX(-6px);animation:cp-rise .7s var(--ease) forwards;animation-delay:calc(1.05s + var(--i) * .16s)}
 .cp-map-list a{display:flex;align-items:baseline;gap:10px;min-height:44px;padding:6px 0;align-items:center}
-.cp-map-list .n{font:600 11px/1 var(--en);letter-spacing:.1em;color:var(--dawn-deep);flex:0 0 auto}
+.cp-map-list .n{font:600 11px/1 var(--en);letter-spacing:.1em;color:var(--ink-3);flex:0 0 auto}
+.cp-map-list a:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
 .cp-map-list .t{font-family:var(--mincho);font-weight:600;font-size:clamp(15.5px,4.3vw,19px);line-height:1.45;color:var(--ink)}
 .cp-map-list .self .n{color:var(--ink-3)}
 .cp-map-list .self .t{font-family:var(--sans);font-weight:500;font-size:13.5px;color:var(--ink-2)}
@@ -158,7 +159,7 @@
 .cp-bridges{list-style:none;display:grid}
 .cp-bridge{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;padding:28px 0;border-top:1px solid var(--line)}
 .cp-bridge:first-child{border-top:0;padding-top:4px}
-.cp-bridge-num{font:500 13px/1.9 var(--en);letter-spacing:.08em;color:var(--dawn-deep)}
+.cp-bridge-num{font:500 13px/1.9 var(--en);letter-spacing:.08em;color:var(--ink-3)}
 .cp-bridge-slot{font-size:12px;color:var(--ink-3);line-height:1.9}
 .cp-bridge-name{font-family:var(--mincho);font-weight:600;font-size:clamp(20px,5.4vw,24px);line-height:1.6;margin:4px 0 10px}
 .cp-bridge-reason{font-size:13.5px;line-height:2.05;color:var(--ink-2)}
@@ -225,11 +226,11 @@
 }
 /* PC: 見出しを左、地図を右に。詳細は読みやすい幅に戻す */
 @media(min-width:960px){
-  .cp-result{max-width:1080px}
-  .cp-r-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);grid-template-rows:auto auto auto auto 1fr;column-gap:72px;align-content:center;padding-top:120px;min-height:min(100svh,860px)}
+  .cp-result{max-width:960px}
+  .cp-r-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);grid-template-rows:auto auto auto auto auto;column-gap:48px;padding-top:clamp(120px,18vh,180px);padding-bottom:48px}
   .cp-r-hero > *{grid-column:1}
-  .cp-r-hero .cp-map{grid-column:2;grid-row:1 / 6;align-self:center;margin:0}
-  .cp-r-cue{grid-row:5;align-self:end}
+  .cp-r-hero .cp-map{grid-column:2;grid-row:2 / 6;align-self:start;margin:8px 0 0}
+  .cp-r-cue{grid-row:5;align-self:start;margin-top:40px}
   .cp-r-sec,.cp-r-close,.cp-r-act{max-width:720px;margin-left:auto;margin-right:auto}
 }
 
