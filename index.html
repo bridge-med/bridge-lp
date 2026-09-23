@@ -127,7 +127,7 @@ html.js .stage.intro.intro-done .s1-tag,html.js .stage.intro.intro-done .s1-h .l
 .s1-tag::before{content:'';width:28px;height:1px;background:currentColor}
 .s1-h{font-family:var(--sans);font-weight:900;font-size:clamp(40px,7.6vw,100px);line-height:1.12;letter-spacing:-0.015em;margin-top:22px;color:var(--ink);text-wrap:balance}
 .s1-sub{margin-top:clamp(18px,2.6vh,28px);font-size:clamp(15px,1.4vw,18px);line-height:1.9;color:var(--ink-2);max-width:30em}
-.s1-actions{display:flex;gap:14px 26px;flex-wrap:wrap;align-items:center;margin-top:clamp(26px,3.6vh,38px)}
+.s1-actions{display:flex;gap:14px 26px;flex-wrap:wrap;align-items:flex-start;margin-top:clamp(26px,3.6vh,38px)}
 .btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px}
 .btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 /* 主CTA(Compass)と、その中身の一行。説明ではなく「何分で何をするか」だけ */
@@ -285,7 +285,7 @@ html:not(.js) .scene2{display:none}
     </div>
     <div class="pick-grid">
       <a class="pick big" href="./compass/index.html" data-reveal>
-        <figure class="pick-fig"><img src="./images/products/thumbs/compass.webp" alt="BRIDGE Compassの実際の画面。「あなたの経験、どこまで使える?」の見出しと、3分で探してみるボタン" width="880" height="550" loading="lazy"></figure>
+        <figure class="pick-fig"><img src="./images/products/thumbs/compass.webp" srcset="./images/products/thumbs/compass.webp 880w, ./images/products/compass-1280.webp 1280w" sizes="(max-width:760px) 100vw, 46vw" alt="BRIDGE Compassの実際の画面。「あなたの経験、どこまで使える?」の見出しと、3分で探してみるボタン" width="880" height="550" loading="lazy"></figure>
         <div class="pick-body">
           <span class="pick-k">Career — BRIDGE Compass</span>
           <h3 class="pick-t">あなたの経験から、<br>3つの橋を見つける</h3>
