@@ -1,0 +1,252 @@
+/* ================================================================
+   BRIDGE Compass — styles
+   shared/bridge.css のトークンの上に載せる。色のハードコードはしない。
+   砂(--dawn)は「選択の瞬間」にだけ: 選んだ選択肢・進捗・地図の終点。
+   カードで囲わず、余白と罫線で区切る。1画面1問、親指の届く位置に「次へ」。
+   ================================================================ */
+
+.cp{--cp-w:560px;--cp-t:.42s}
+.cp .site-footer{display:block}
+.cp.cp-flow .site-footer{display:none}
+.br-sp{display:inline}
+@media(min-width:600px){.br-sp{display:none}}
+.cp .en{font-family:var(--en)}
+
+.cp-main{min-height:100svh;position:relative;overflow:hidden}
+[tabindex="-1"]:focus{outline:none}
+.cp-jump-target:focus-visible,.cp-jump-target:focus{outline:2px solid var(--blue);outline-offset:6px;border-radius:2px}
+
+/* ---- 画面の出入り(遷移) ---- */
+.cp-screen{transition:opacity var(--cp-t) var(--ease),transform var(--cp-t) var(--ease)}
+.cp-screen.enter{opacity:0;transform:translateY(16px);transition:none}
+.cp-screen.enter-back{opacity:0;transform:translateY(-12px);transition:none}
+.cp-screen.leave{opacity:0;transform:translateY(-10px);transition-duration:.18s}
+.cp-screen.leave-back{opacity:0;transform:translateY(10px);transition-duration:.18s}
+
+/* ---- 線 ---- */
+.cp-lines svg{width:100%;height:100%;display:block}
+.cp-lines path{fill:none;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:cp-draw 2.4s var(--ease) forwards;animation-delay:var(--d,0s)}
+.cp-lines .ln-n{stroke:var(--navy);stroke-width:.8}
+[data-theme="dark"] .cp-lines .ln-n{stroke:var(--blue)}
+.cp-lines .ln-s{stroke:var(--dawn);stroke-width:1.6}
+.cp-lines .ln-faint{opacity:.22;stroke-width:.6}
+.cp-lines .ln-main{stroke:var(--blue);stroke-width:1.4;opacity:.8}
+.cp-lines .ln-origin{fill:var(--blue)}
+.cp-lines .ln-dot{fill:var(--dawn);opacity:0;animation:cp-fade .6s var(--ease) .6s forwards}
+.cp-lines .ln-end{fill:var(--dawn);opacity:0;animation:cp-fade .6s var(--ease) forwards;animation-delay:var(--d,0s)}
+.cp-lines .ln-num{font:600 10px var(--en);letter-spacing:.1em;fill:var(--ink-3)}
+@keyframes cp-draw{to{stroke-dashoffset:0}}
+@keyframes cp-fade{to{opacity:1}}
+
+/* ---- 導入 ---- */
+.cp-intro{min-height:100svh;display:flex;align-items:center;position:relative;background:linear-gradient(180deg,var(--hero-sky-1) 0%,var(--bg) 70%)}
+.cp-intro[hidden]{display:none}
+.cp-intro-lines{position:absolute;left:0;right:0;bottom:0;height:48%;pointer-events:none;opacity:.9;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,var(--ink) 35%);mask-image:linear-gradient(180deg,transparent 0%,var(--ink) 35%)}
+.cp-intro-lines svg g,.cp-intro-lines svg{animation:cp-drift 18s ease-in-out infinite alternate}
+@keyframes cp-drift{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+.cp-intro-inner{position:relative;z-index:1;width:100%;max-width:var(--max);margin:0 auto;padding:120px var(--pad-x) clamp(120px,22vh,200px)}
+.cp-intro-h{font-family:var(--mincho);font-weight:600;font-size:clamp(34px,7.4vw,64px);line-height:1.55;letter-spacing:.02em;margin:22px 0 22px}
+.cp-intro-sub{font-size:14.5px;line-height:2.15;color:var(--ink-2);max-width:30em}
+.cp-intro-act{margin-top:36px;display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+.cp-start{min-height:56px;padding:18px 34px;font-size:14px}
+.cp-start[disabled]{opacity:.5;cursor:default}
+.cp-chapters{list-style:none;display:flex;gap:28px;margin-top:clamp(40px,7vh,64px);font-size:12px;color:var(--ink-3);flex-wrap:wrap}
+.cp-chapters li{display:flex;align-items:baseline;gap:8px}
+.cp-chapters .en{font-size:10px;letter-spacing:.16em;color:var(--dawn-deep)}
+.cp-facts li{background:var(--bg)}
+@media(min-width:900px){
+  .cp-intro-lines{left:42%;top:12%;height:auto;-webkit-mask-image:linear-gradient(90deg,transparent 0%,var(--ink) 30%);mask-image:linear-gradient(90deg,transparent 0%,var(--ink) 30%)}
+}
+.cp-noscript{margin-top:24px;font-size:13px;color:var(--ink-2)}
+
+/* ---- 質問 ---- */
+.cp-q{max-width:var(--cp-w);margin:0 auto;padding:88px 20px calc(120px + env(safe-area-inset-bottom));min-height:100svh}
+.cp-head{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;column-gap:8px;row-gap:10px;align-items:center;margin-bottom:clamp(28px,5vh,44px)}
+.cp-back{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;margin-left:-10px;color:var(--ink-2);transition:background .2s}
+.cp-back svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cp-chapter{display:flex;flex-direction:column;gap:6px}
+.cp-chapter .en{font:600 10px/1 var(--en);letter-spacing:.2em;color:var(--ink-3)}
+.cp-chapter .jp{font-size:14px;font-weight:700;line-height:1}
+.cp-progress{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cp-seg{height:3px;border-radius:3px;background:var(--line);overflow:hidden}
+.cp-seg span{display:block;height:100%;background:var(--dawn);transform-origin:left;transition:transform .6s var(--ease)}
+.cp-q-h{font-size:clamp(19px,5.2vw,23px);font-weight:700;line-height:1.75;letter-spacing:.01em}
+.cp-q-hint{margin-top:10px;font-size:12.5px;line-height:1.9;color:var(--ink-3)}
+.cp-opts{display:grid;gap:10px;margin-top:clamp(22px,4vh,32px)}
+.cp-opt{display:flex;align-items:center;gap:14px;width:100%;min-height:56px;padding:14px 18px;text-align:left;border:1px solid var(--line);border-radius:14px;background:var(--card);font-size:14.5px;line-height:1.6;color:var(--ink);
+  transition:border-color .25s,background .25s,transform .18s var(--ease)}
+.cp-opt:active{transform:scale(.985)}
+.cp-opt:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.cp-opt.on{border-color:var(--dawn);background:color-mix(in srgb,var(--dawn) 9%,var(--card))}
+.cp-mark{flex:0 0 22px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink-4);display:grid;place-items:center;transition:all .25s var(--ease)}
+.cp-mark.sq{border-radius:6px}
+.cp-mark svg{width:14px;height:14px;fill:none;stroke:var(--bg);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16;stroke-dashoffset:16;transition:stroke-dashoffset .3s var(--ease) .05s}
+.cp-opt.on .cp-mark{background:var(--dawn);border-color:var(--dawn)}
+.cp-opt.on .cp-mark svg{stroke-dashoffset:0}
+.cp-limit{min-height:1.6em;margin-top:10px;font-size:12px;color:var(--ink-2)}
+
+/* 親指の届く位置に「次へ」 */
+.cp-next-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:16px 20px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:linear-gradient(180deg,transparent,var(--bg) 38%)}
+.cp-next{width:100%;max-width:calc(var(--cp-w) - 40px);justify-content:center;min-height:54px}
+.cp-next[disabled]{opacity:.35;cursor:default;transform:none;box-shadow:none}
+.cp-q.is-text{padding-bottom:48px}
+.cp-q.is-text .cp-next-bar{position:static;background:none;padding:24px 0 0} /* 入力中にキーボードと固定バーが重ならないよう、自由記述では固定しない */
+.cp-skip{min-height:44px;padding:0 16px;font-size:13px;color:var(--ink-2);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--ink-4)}
+
+/* 自由記述 */
+.cp-text{margin-top:clamp(22px,4vh,32px)}
+.cp-text textarea{width:100%;min-height:180px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:400 15px/1.9 var(--sans);resize:vertical;transition:border-color .25s}
+.cp-text textarea::placeholder{color:var(--ink-3)}
+.cp-text textarea:focus{outline:none;border-color:var(--blue)}
+.cp-text-meta{display:flex;justify-content:space-between;gap:16px;margin-top:10px;font-size:11.5px;line-height:1.8;color:var(--ink-3)}
+.cp-count{font-family:var(--en);white-space:nowrap}
+
+/* ---- 翻訳中 ---- */
+.cp-translating{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:100px 24px;text-align:center;background:linear-gradient(180deg,var(--hero-sky-1),var(--bg))}
+.cp-conv{width:min(420px,90vw);height:auto;aspect-ratio:4/3}
+.cp-conv path{animation-duration:.9s} /* 画面にいる約1.9秒のうちに描き終える */
+.cp-trans-t{font-family:var(--mincho);font-weight:600;font-size:clamp(18px,4.6vw,22px);line-height:2}
+
+/* ---- 結果 ---- */
+.cp-result{max-width:720px;margin:0 auto}
+/* 01 最初の1画面: 見出し・持っているもの・3つの橋だけ */
+.cp-r-hero{padding:96px 24px 12px;position:relative;display:flex;flex-direction:column}
+.cp-r-lead{margin-top:18px;font-size:12.5px;color:var(--ink-3);letter-spacing:.04em}
+.cp-r-h{font-family:var(--mincho);font-weight:600;font-size:clamp(31px,8.6vw,50px);line-height:1.42;letter-spacing:.02em;margin-top:6px}
+.cp-r-h span{display:inline-block;opacity:0;transform:translateY(10px);animation:cp-rise .9s var(--ease) forwards}
+.cp-r-h span + br + span{animation-delay:.16s}
+.cp-r-tags{list-style:none;display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:18px;opacity:0;animation:cp-fade .8s var(--ease) .35s forwards}
+.cp-r-tags li{font-size:13px;font-weight:500;padding:5px 13px;border:1px solid var(--line);border-radius:100px;color:var(--ink-2)}
+@keyframes cp-rise{to{opacity:1;transform:none}}
+
+/* 地図: 行の高さ64pxと SVG の座標を揃える(app.js の ROW) */
+.cp-map{position:relative;display:grid;grid-template-columns:128px 1fr;margin:clamp(22px,4vh,34px) 0 0 -6px}
+.cp-map-svg{display:block;overflow:visible}
+.cp-map-svg path{fill:none;stroke-linecap:round}
+.cp-map-svg .ln-past{stroke:var(--ink-4);stroke-width:.9;opacity:.8;stroke-dasharray:1;stroke-dashoffset:1;animation:cp-draw 1s var(--ease) forwards;animation-delay:var(--d,0s)}
+.cp-map-svg .ln-main{stroke:var(--blue);stroke-width:1.6;stroke-dasharray:1;stroke-dashoffset:1;animation:cp-draw 1.3s var(--ease) forwards;animation-delay:var(--d,0s)}
+.cp-map-svg .ln-end{fill:var(--dawn);opacity:0;animation:cp-fade .5s var(--ease) forwards;animation-delay:var(--d,0s)}
+.cp-map-svg .ln-self{stroke:var(--ink-3);stroke-width:1.2;stroke-dasharray:3 5;opacity:0;animation:cp-fade .8s var(--ease) 1.5s forwards}
+.cp-map-svg .ln-self-end{fill:var(--bg);stroke:var(--ink-3);stroke-width:1.2;opacity:0;animation:cp-fade .8s var(--ease) 1.6s forwards}
+.cp-map-svg .ln-origin{fill:var(--blue)}
+.cp-map-svg .ln-origin-ring{fill:none;stroke:var(--blue);stroke-width:1;transform-box:fill-box;transform-origin:center;animation:cp-ring 3.6s var(--ease) 1.6s 3;opacity:0} /* 止まらない動きは流れる光の1つだけにする */
+.cp-map-svg .ln-travel{fill:var(--dawn)}
+@keyframes cp-ring{0%{opacity:.5;transform:scale(1)}70%,100%{opacity:0;transform:scale(3.2)}}
+.cp-map-here{position:absolute;left:10px;z-index:1;padding:0 4px;line-height:1.4;background:var(--bg);font-size:10.5px;letter-spacing:.08em;color:var(--ink-2)}
+.cp-map-list{list-style:none}
+.cp-map-list li{height:64px;display:flex;align-items:center;opacity:0;transform:translateX(-6px);animation:cp-rise .7s var(--ease) forwards;animation-delay:calc(1.05s + var(--i) * .16s)}
+.cp-map-list a{display:flex;align-items:baseline;gap:10px;min-height:44px;padding:6px 0;align-items:center}
+.cp-map-list .n{font:600 11px/1 var(--en);letter-spacing:.1em;color:var(--ink-3);flex:0 0 auto}
+.cp-map-list a:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+.cp-map-list .t{font-family:var(--mincho);font-weight:600;font-size:clamp(15.5px,4.3vw,19px);line-height:1.45;color:var(--ink)}
+.cp-map-list .self .n{color:var(--ink-3)}
+.cp-map-list .self .t{font-family:var(--sans);font-weight:500;font-size:13.5px;color:var(--ink-2)}
+.cp-r-open{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;margin-top:14px;font-size:12.5px;line-height:1.8;color:var(--ink-2)}
+.cp-r-open .k{font-size:11px;color:var(--ink-3)}
+.cp-r-cue{align-self:flex-start;margin-top:14px;min-height:44px;display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3)}
+
+.cp-r-sec{padding:clamp(36px,6vh,56px) 24px;border-top:1px solid var(--line)}
+.cp-r-sub{font-size:15px;font-weight:700;letter-spacing:.04em;margin-bottom:20px}
+.cp-r-note{margin:-8px 0 18px;font-size:13px;line-height:2;color:var(--ink-2)}
+.cp-tags{display:flex;flex-wrap:wrap;gap:8px}
+.cp-tag{display:inline-flex;align-items:center;min-height:36px;padding:6px 16px;border-radius:100px;border:1px solid var(--line);font-size:13.5px;font-weight:500;color:var(--ink)}
+.cp-tag.sm{min-height:28px;padding:4px 12px;font-size:12px;color:var(--ink-2)}
+.cp-note{margin-top:18px;font-size:13px;line-height:2;color:var(--ink-2)}
+.cp-tr{list-style:none;display:grid;gap:14px}
+.cp-tr li{display:flex;flex-direction:column;gap:2px;padding-left:16px;border-left:2px solid var(--line);font-size:13.5px;line-height:1.9;color:var(--ink-2)}
+.cp-tr b{font-weight:700;color:var(--ink);margin:0 2px}
+.cp-tr .to b{font-size:15px}
+
+.cp-bridges{list-style:none;display:grid}
+.cp-bridge{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;padding:28px 0;border-top:1px solid var(--line)}
+.cp-bridge:first-child{border-top:0;padding-top:4px}
+.cp-bridge-num{font:500 13px/1.9 var(--en);letter-spacing:.08em;color:var(--ink-3)}
+.cp-bridge-slot{font-size:12px;color:var(--ink-3);line-height:1.9}
+.cp-bridge-name{font-family:var(--mincho);font-weight:600;font-size:clamp(20px,5.4vw,24px);line-height:1.6;margin:4px 0 10px}
+.cp-bridge-reason{font-size:13.5px;line-height:2.05;color:var(--ink-2)}
+.cp-basis{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px}
+.cp-basis .k{font-size:11px;color:var(--ink-3);margin-right:4px}
+.cp-more{margin-top:16px}
+.cp-more summary{list-style:none;display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 20px;border:1px solid var(--line);border-radius:100px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;transition:border-color .25s}
+.cp-more summary::-webkit-details-marker{display:none}
+.cp-more summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.cp-more summary .ar{font-family:var(--en);transition:transform .3s var(--ease)}
+.cp-more[open] summary .ar{transform:rotate(90deg)}
+.cp-more > p{margin-top:16px;font-size:13.5px;line-height:2;color:var(--ink-2)}
+.cp-links{list-style:none;margin-top:12px;border-top:1px solid var(--line)}
+.cp-links a{display:grid;grid-template-columns:1fr auto;gap:0 12px;padding:14px 0;border-bottom:1px solid var(--line);min-height:44px}
+.cp-links .t{font-size:14px;font-weight:700}
+.cp-links .d{grid-column:1;font-size:12px;color:var(--ink-3);line-height:1.8}
+.cp-links .ar{grid-column:2;grid-row:1/3;align-self:center;font-family:var(--en);color:var(--ink-3);transition:transform .3s var(--ease)}
+
+.cp-quote{position:relative;padding:22px 24px;background:var(--bg-2);border-radius:4px;font-family:var(--mincho);font-size:15.5px;line-height:2.1;color:var(--ink)}
+.cp-quote::before{content:'“';position:absolute;left:10px;top:-6px;font:600 36px/1 var(--mincho);color:var(--ink-4)}
+.cp-quote p{overflow-wrap:anywhere}
+
+.cp-r-close{max-width:var(--text-max);padding:clamp(56px,9vh,88px) 24px;border-top:1px solid var(--line);font-family:var(--mincho);font-size:15.5px;line-height:2.2;color:var(--ink-2)}
+.cp-r-close p + p{margin-top:14px}
+.cp-r-close .last{margin-top:26px;font-size:clamp(18px,4.8vw,21px);font-weight:600;color:var(--ink)}
+.cp-r-act{padding:clamp(40px,7vh,64px) 24px clamp(56px,9vh,80px);border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px}
+.cp-r-act .btn{min-height:50px}
+.cp-share-note{flex-basis:100%;font-size:11.5px;color:var(--ink-3);line-height:1.8}
+.cp-walk{padding-left:24px;padding-right:24px}
+
+/* 職種: 質問を主役に。補足は下に小さく */
+.cp-prof .cp-head{margin-bottom:clamp(12px,3vh,24px)}
+.cp-prof-h{font-size:clamp(22px,6vw,27px);line-height:1.6}
+.cp-prof-note{margin-top:18px;font-size:11.5px;line-height:1.8;color:var(--ink-3)}
+
+/* 05 本人が見つけた橋: 地図の点線の4本目と同じ線で受ける */
+.cp-self{position:relative}
+.cp-self-k{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--ink-3);margin-bottom:12px}
+.cp-self-k .en{font-size:11px;letter-spacing:.1em}
+.cp-self-k::before{content:'';width:28px;border-top:1.2px dashed var(--ink-3)}
+.cp-self-q{margin:4px 0 20px;padding:4px 0 4px 20px;border-left:1.2px dashed var(--ink-3);font-family:var(--mincho);font-weight:600;font-size:clamp(18px,4.8vw,22px);line-height:1.9;color:var(--ink)}
+.cp-self-q p{overflow-wrap:anywhere}
+.cp-self .cp-r-note{margin:8px 0 0}
+.cp-self-m{margin-top:14px;font-family:var(--mincho);font-size:15px;line-height:2;color:var(--ink)}
+
+/* トースト */
+.cp-toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));z-index:120;transform:translate(-50%,12px);padding:12px 20px;border-radius:100px;background:var(--ink);color:var(--bg);font-size:13px;opacity:0;pointer-events:none;transition:all .35s var(--ease);white-space:nowrap}
+.cp-toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* タップ後に hover の枠が残らないよう、hover はポインタのある環境だけ */
+@media(hover:hover){
+  .cp-opt:hover{border-color:var(--ink-4)}
+  .cp-back:hover{background:var(--bg-2)}
+  .cp-more summary:hover{border-color:var(--ink-3)}
+  .cp-links a:hover .ar{transform:translateX(4px);color:var(--ink)}
+}
+
+@media(min-width:760px){
+  .cp-q{padding-top:120px}
+  .cp-next-bar{position:static;background:none;padding:28px 0 0;align-items:flex-start}
+  .cp-next{max-width:280px}
+  .cp-q{padding-bottom:80px}
+  .cp-r-hero,.cp-r-sec,.cp-r-close,.cp-r-act{padding-left:0;padding-right:0}
+  .cp-result{padding:0 24px}
+}
+/* PC: 見出しを左、地図を右に。詳細は読みやすい幅に戻す */
+@media(min-width:960px){
+  .cp-result{max-width:960px}
+  .cp-r-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);grid-template-rows:auto auto auto auto auto auto;column-gap:48px;padding-top:clamp(120px,18vh,180px);padding-bottom:48px}
+  .cp-r-hero > *{grid-column:1}
+  .cp-r-hero .cp-map{grid-column:2;grid-row:2 / 6;align-self:start;margin:8px 0 0}
+  .cp-r-open{grid-row:5;align-self:start;margin-top:40px}
+  .cp-r-cue{grid-row:5;align-self:start;margin-top:40px}
+  .cp-r-open + .cp-r-cue{grid-row:6;margin-top:14px}
+  .cp-r-sec,.cp-r-close,.cp-r-act{max-width:720px;margin-left:auto;margin-right:auto}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .cp-screen,.cp-screen.enter,.cp-screen.leave{transition:none}
+  .cp-lines path{animation:none;stroke-dashoffset:0}
+  .cp-lines .ln-dot,.cp-lines .ln-end{animation:none;opacity:1}
+  .cp-intro-lines svg{animation:none}
+  .cp-r-h span,.cp-r-tags,.cp-map-list li,.cp-map-svg .ln-end,.cp-map-svg .ln-self,.cp-map-svg .ln-self-end{animation:none;opacity:1;transform:none}
+  .cp-map-svg path{animation:none;stroke-dashoffset:0}
+  .cp-map-svg .ln-origin-ring{display:none}
+  .cp-opt,.cp-mark,.cp-mark svg,.cp-seg span{transition:none}
+}
