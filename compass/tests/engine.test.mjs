@@ -213,6 +213,10 @@ test('マスターの整合: 役割・橋の重みは合計1、参照先の役�
     assert.ok(Math.abs(sum - 1) < 1e-9, b.id + ' の重みの合計が1でない');
     for (const r of Object.keys(b.roles)) assert.ok(D.ROLES[r], b.id + ': ' + r);
   }
+  for (const q of D.QUESTIONS) for (const o of q.options || []) {
+    for (const r of Object.keys(o.interest || {})) assert.ok(D.ROLES[r], q.id + '/' + o.id + ': ' + r);
+  }
+  for (const [r, def] of Object.entries(D.ROLES)) assert.ok(def.interest, r + ' に「気になっている方向」の呼び名がない');
   for (const [p, list] of Object.entries(D.TRANSLATIONS)) {
     for (const t of list) for (const a of t.assets) assert.ok(D.ASSETS[a], p + ': ' + a);
   }
