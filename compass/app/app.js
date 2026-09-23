@@ -197,7 +197,7 @@
         '<h1 class="cp-r-h" tabindex="-1">' + lines.map(l => '<span>' + esc(l) + '</span>').join('<br>') + '</h1>' +
         '<ul class="cp-r-tags" aria-label="あなたが持っているもの">' + r.tags.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' +
         heroMap(r) +
-        (r.openInterests.length ? '<p class="cp-r-open"><span class="k">気になっている方向</span>' + r.openInterests.map(t => '<span>' + esc(t) + '</span>').join('') + '</p>' : '') +
+        (r.openInterests.length ? '<p class="cp-r-open"><span class="k">気になっている方向：</span><span>' + r.openInterests.map(esc).join('、') + '</span></p>' : '') +
         '<a class="cp-r-cue" href="#cpBr">なぜこの橋が見えたか <span aria-hidden="true">↓</span></a>' +
       '</header>' +
 
