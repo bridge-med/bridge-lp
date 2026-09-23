@@ -203,7 +203,7 @@ html:not(.js) .scene2{display:none}
 
 /* ===== 試しているもの =====
    商品棚ではなく作業机。大きさの差は使われ方の差: Compass=大きな実画面(右へ裁ち落とす)/ Clinic Town 3D=文字の行だけ
-   (場面2で見せたため)/ 小さな道具=中くらいの実画面1枚と、行末に添える小さな写し / 止めているもの=小さな文字
+   (場面2で見せたため)/ 小さな道具=中くらいの実画面1枚と、行末に添える小さな写し
    実画面の縁は 1px --line・角 2px(Edge)・影なし。裁ち落とす辺には縁も角も付けない(designer 2026-09-23) */
 .lab{padding:clamp(88px,13vh,150px) 0 clamp(72px,10vh,120px);overflow-x:clip}
 .lab-in{max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);box-sizing:content-box}
@@ -261,9 +261,6 @@ html:not(.js) .scene2{display:none}
 .sm-fig img{display:block;width:100%;height:auto;aspect-ratio:880/550;object-fit:cover;object-position:top}
 .sm-cap{margin-top:8px;font-size:12px;line-height:1.6;color:var(--ink-3)}
 
-/* 止めているもの: 見出しを立てず、小さな文字の一段落 */
-.paused{margin-top:clamp(40px,6vh,64px);max-width:36em;padding-left:18px;border-left:1px solid var(--ink-4);font-size:13px;line-height:1.95;color:var(--ink-3)}
-.paused a{color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--ink-4)}
 .lab-all{margin-top:clamp(48px,7vh,72px);display:flex;align-items:baseline;gap:6px 18px;flex-wrap:wrap}
 .lab-all .n{font-size:14px;color:var(--ink-2)}
 
@@ -379,7 +376,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
      商品の一覧ではなく、いま手元にあるもの。事実は台帳と実データに合わせる(第15条):
      Compass の公開日=cockpit ledger(v1 2026-09-22)/ 翻訳の2行=compass/app/data.js の対応表 /
      Clinic Town 3D の回数=git log(clinic-flow-3d・2026-09-01〜21 に 116 コミット)・版=sw.js の VER /
-     キャリアログ=ledger の status「休止中」/ 29=products/index.html の PRODUCTS の件数(増減したらここも直す) -->
+     29=products/index.html の PRODUCTS の件数(増減したらここも直す) -->
 <section class="lab" id="lab" aria-labelledby="labTitle">
   <div class="lab-in" data-reveal>
     <h2 class="lab-h" id="labTitle">ここでは、いろいろ試しています</h2>
@@ -418,6 +415,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
         <ul class="sm-list">
           <li><a class="sm-item" href="./tanaoroshi/index.html"><span class="sm-txt"><span class="sm-name">経験の棚卸し<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">18の質問で、職務経歴書のたねをつくる。面接で実績をうまく言えないときに。</span></span></span></a></li>
           <li><a class="sm-item" href="./nidodema/index.html"><span class="sm-txt"><span class="sm-name">二度手間さがし<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">部署の手作業を、減らせるものと守るものに分ける。</span></span></span><img class="sm-thumb" src="./images/products/thumbs/nidodema.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></a></li>
+          <li><a class="sm-item" href="./daily-app/index.html"><span class="sm-txt"><span class="sm-name">キャリアログ<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">日々の仕事と学びを記録して、キャリアの言葉に。</span></span></a></li>
           <li><a class="sm-item" href="./pmi-quest/index.html"><span class="sm-txt"><span class="sm-name">クリニックPMIクエスト<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">承継直後の30日を、10問で診断する。</span></span></span></a></li>
         </ul>
       </div>
@@ -427,7 +425,6 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       </figure>
     </div>
 
-    <p class="paused" data-reveal>キャリアログは、いま更新を止めています。作った私自身が使わなくなったからです。理由を考えているところです。(<a href="./daily-app/index.html">キャリアログのページ</a>)</p>
 
     <p class="lab-all" data-reveal><span class="n">ぜんぶで29個あります。</span><a class="tx-link" href="./products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
   </div>
