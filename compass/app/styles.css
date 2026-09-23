@@ -231,12 +231,12 @@
 /* PC: 見出しを左、地図を右に。詳細は読みやすい幅に戻す */
 @media(min-width:960px){
   .cp-result{max-width:960px}
-  .cp-r-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);grid-template-rows:auto auto auto auto auto;column-gap:48px;padding-top:clamp(120px,18vh,180px);padding-bottom:48px}
+  .cp-r-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);grid-template-rows:auto auto auto auto auto auto;column-gap:48px;padding-top:clamp(120px,18vh,180px);padding-bottom:48px}
   .cp-r-hero > *{grid-column:1}
   .cp-r-hero .cp-map{grid-column:2;grid-row:2 / 6;align-self:start;margin:8px 0 0}
-  .cp-r-open{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-top:14px;font-size:12.5px;line-height:1.8;color:var(--ink-2)}
-.cp-r-open .k{font-size:11px;color:var(--ink-3)}
-.cp-r-cue{grid-row:5;align-self:start;margin-top:40px}
+  .cp-r-open{grid-row:5;align-self:start;margin-top:40px}
+  .cp-r-cue{grid-row:5;align-self:start;margin-top:40px}
+  .cp-r-open + .cp-r-cue{grid-row:6;margin-top:14px}
   .cp-r-sec,.cp-r-close,.cp-r-act{max-width:720px;margin-left:auto;margin-right:auto}
 }
 
