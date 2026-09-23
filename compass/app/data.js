@@ -20,7 +20,7 @@
     empathy:        { label: '対人理解',     word: '人の気持ちをくみ取る', tag: '対人理解',   ren: '人の気持ちをくみ取り', term: '人の気持ちをくみ取る' },
     coordination:   { label: '調整・交渉',   tag: '調整',       ren: '人と人をつなぎ',       term: '人と人をつなぐ' },
     education:      { label: '教育',         tag: '教育',       ren: '人を育て',             term: '人を育てる' },
-    management:     { label: 'マネジメント', tag: 'マネジメント', ren: 'チームを動かし',     term: 'チームを動かす' },
+    management:     { label: 'チーム推進',   tag: 'チーム推進', ren: 'チームを動かし',     term: 'チームを動かす' }, // 橋の「マネジメント」と階層を分ける(2026-09-23 社長)
     improvement:    { label: '業務改善',     tag: '改善',       ren: '仕組みを変え',         term: '仕組みを変える' },
     creation:       { label: '企画・創造',   tag: '企画',       ren: '新しいものを考え',     term: '新しいものを考える' },
     customer:       { label: '顧客理解',     tag: '顧客理解',   ren: '相手の求めるものをつかみ', term: '相手の求めるものをつかむ' },
@@ -132,18 +132,19 @@
     3: { en: 'CHAPTER 03', jp: 'これから' },
   };
 
-  /* ---- 役割(経験資産 → 役割)。weights は合計1。経験資産から直接「職業」を出さないための中間層 ---- */
+  /* ---- 役割(経験資産 → 役割)。weights は合計1。経験資産から直接「職業」を出さないための中間層
+     interest: 結果の「気になっている方向」に出す短い呼び名(Q6/Q8 で選んだが3つの橋に入らなかったとき) ---- */
   const ROLES = {
-    specialist:     { label: '専門性を深める',             weights: { expertise: 0.6, hypothesis: 0.2, problemFinding: 0.2 } },
-    educator:       { label: '人を育てる',                 weights: { education: 0.6, empathy: 0.25, coordination: 0.15 } },
-    manager:        { label: 'チームを動かす',             weights: { management: 0.5, coordination: 0.3, empathy: 0.1, improvement: 0.1 } },
-    projectManager: { label: '人と仕事をつなぎ、前に進める', weights: { project: 0.45, coordination: 0.35, problemFinding: 0.2 } },
-    operations:     { label: '仕組みを改善する',           weights: { improvement: 0.55, analysis: 0.25, problemFinding: 0.2 } },
-    business:       { label: '事業・経営を動かす',         weights: { customer: 0.3, analysis: 0.25, management: 0.25, creation: 0.2 } },
-    product:        { label: '新しいサービスを作る',       weights: { creation: 0.45, customer: 0.3, problemFinding: 0.15, empathy: 0.1 } },
-    technology:     { label: 'テクノロジーで課題を解く',   weights: { analysis: 0.3, improvement: 0.2, creation: 0.2, hypothesis: 0.15, problemFinding: 0.15 } },
-    research:       { label: '問いを立て、検証する',       weights: { hypothesis: 0.4, analysis: 0.35, problemFinding: 0.25 } },
-    policy:         { label: '制度・社会の仕組みに関わる', weights: { problemFinding: 0.25, coordination: 0.25, analysis: 0.25, improvement: 0.25 } },
+    specialist:     { interest: 'もっと専門的な仕事', label: '専門性を深める',             weights: { expertise: 0.6, hypothesis: 0.2, problemFinding: 0.2 } },
+    educator:       { interest: '人を育てる仕事', label: '人を育てる',                 weights: { education: 0.6, empathy: 0.25, coordination: 0.15 } },
+    manager:        { interest: '組織を動かす仕事', label: 'チームを動かす',             weights: { management: 0.5, coordination: 0.3, empathy: 0.1, improvement: 0.1 } },
+    projectManager: { interest: '企業のプロジェクト', label: '人と仕事をつなぎ、前に進める', weights: { project: 0.45, coordination: 0.35, problemFinding: 0.2 } },
+    operations:     { interest: '仕組みの改善', label: '仕組みを改善する',           weights: { improvement: 0.55, analysis: 0.25, problemFinding: 0.2 } },
+    business:       { interest: '経営', label: '事業・経営を動かす',         weights: { customer: 0.3, analysis: 0.25, management: 0.25, creation: 0.2 } },
+    product:        { interest: '新しい企画・サービス', label: '新しいサービスを作る',       weights: { creation: 0.45, customer: 0.3, problemFinding: 0.15, empathy: 0.1 } },
+    technology:     { interest: 'AI・テクノロジー', label: 'テクノロジーで課題を解く',   weights: { analysis: 0.3, improvement: 0.2, creation: 0.2, hypothesis: 0.15, problemFinding: 0.15 } },
+    research:       { interest: '研究', label: '問いを立て、検証する',       weights: { hypothesis: 0.4, analysis: 0.35, problemFinding: 0.25 } },
+    policy:         { interest: '医療の制度・政策', label: '制度・社会の仕組みに関わる', weights: { problemFinding: 0.25, coordination: 0.25, analysis: 0.25, improvement: 0.25 } },
   };
 
   /* ---- 橋(役割 → 橋)。roles は合計1

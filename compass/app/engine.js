@@ -246,10 +246,26 @@
       overlaps: overlaps(answers),
       translations: pickTranslations(answers.profession, assetRes, 2),
       bridges: picks,
+      openInterests: openInterests(answers, picks),
       made: text(answers.q9),
       wish: text(answers.q10),
       _debug: { assetRes, roles, bridgeScores },
     };
+  }
+
+  /* Q6/Q8 で選んだのに、3つの橋のどれにも主な方向として入らなかった関心。
+     橋の選び方は変えず、選んだことを結果から消さないために名前だけ返す(2026-09-23 社長) */
+  function openInterests(answers, picks) {
+    const covered = new Set();
+    for (const p of picks) for (const [r, wt] of Object.entries(p.bridge.roles)) if (wt >= 0.3) covered.add(r);
+    const out = [];
+    for (const q of QUESTIONS.filter(q => q.options && q.options.some(o => o.interest))) {
+      for (const o of optionsOf(q, answers[q.id])) {
+        const main = Object.keys(o.interest).find(r => o.interest[r] >= 1);
+        if (main && !covered.has(main) && ROLES[main].interest && !out.includes(ROLES[main].interest)) out.push(ROLES[main].interest);
+      }
+    }
+    return out;
   }
 
   /* 共有文。自由記述(Q9/Q10)は入れない */

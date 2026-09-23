@@ -197,6 +197,7 @@
         '<h1 class="cp-r-h" tabindex="-1">' + lines.map(l => '<span>' + esc(l) + '</span>').join('<br>') + '</h1>' +
         '<ul class="cp-r-tags" aria-label="あなたが持っているもの">' + r.tags.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' +
         heroMap(r) +
+        (r.openInterests.length ? '<p class="cp-r-open"><span class="k">気になっている方向</span>' + r.openInterests.map(t => '<span>' + esc(t) + '</span>').join('') + '</p>' : '') +
         '<a class="cp-r-cue" href="#cpBr">なぜこの橋が見えたか <span aria-hidden="true">↓</span></a>' +
       '</header>' +
 
@@ -223,8 +224,8 @@
         '<p class="cp-self-k"><span class="en">04</span>BRIDGE MAPの、もう1本の線</p>' +
         '<h2 class="cp-r-sub" id="cpWish">あなた自身が見つけた橋</h2>' +
         '<blockquote class="cp-self-q"><p>' + esc(r.wish).replace(/\n/g, '<br>') + '</p></blockquote>' +
-        '<p class="cp-r-note">Compassではまだ分類していません。<br>でも、これもあなたのBRIDGE MAPの一部です。</p>' +
-        '<p class="cp-self-m">橋は、用意された選択肢の中にだけあるとは限りません。</p>' +
+        '<p class="cp-self-m">これは、あなた自身が見つけた橋です。</p>' +
+        '<p class="cp-r-note">Compassが示した3つの橋と一緒に、あなたの<span class="nowrap">BRIDGE MAP</span>に残しておきます。<br>まだ名前のない可能性も、ここから探していけます。</p>' +
       '</section>' : '') +
 
       /* 06 メッセージ */

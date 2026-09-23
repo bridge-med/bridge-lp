@@ -181,6 +181,27 @@ test('Q10(本人が見つけた橋)は、内容が政策の話でも Compass の
   assert.equal(without.wish, '');
 });
 
+test('3つの橋に入らなかった関心は「気になっている方向」として残る。橋の選び方は変えない', () => {
+  // 依頼 persona(PT): Q6=新しい企画 / Q8=AI・テクノロジー。AI は3つの橋に入らないが、結果から消さない
+  const persona = { profession: 'pt', q1: 'b', q2: 'd', q3: 'f', q4: ['teach', 'listen'], q5: ['deep'], q6: 'e', q7: ['income', 'growth'], q8: 'g' };
+  const r = E.buildResult(persona);
+  assert.ok(!ids(r).includes('dx'));
+  assert.deepEqual(r.openInterests, ['AI・テクノロジー']);
+  // 関心がどれかの橋に入っているときは何も出さない
+  assert.deepEqual(E.buildResult(PERSONAS.dx).openInterests, []);
+  assert.deepEqual(E.buildResult(PERSONAS.specialist).openInterests, []);
+  // 関心の残し方は、橋の顔ぶれに影響しない(同じ回答で engine の選定結果と一致)
+  const again = E.buildResult({ ...persona });
+  assert.deepEqual(ids(again), ids(r));
+});
+
+test('経験資産の名前と橋の名前を同じ言葉にしない(資産→橋の階層が分かるように)', () => {
+  const bridgeNames = new Set(D.BRIDGES.map(b => b.name));
+  for (const [k, a] of Object.entries(D.ASSETS)) {
+    assert.ok(!bridgeNames.has(a.tag) && !bridgeNames.has(a.label), k + ': ' + a.tag);
+  }
+});
+
 test('マスターの整合: 役割・橋の重みは合計1、参照先の役割・資産が実在する', () => {
   for (const [r, def] of Object.entries(D.ROLES)) {
     const sum = Object.values(def.weights).reduce((a, b) => a + b, 0);
