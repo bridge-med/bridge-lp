@@ -130,6 +130,9 @@ html.js .stage.intro.intro-done .s1-tag,html.js .stage.intro.intro-done .s1-h .l
 .s1-actions{display:flex;gap:14px 26px;flex-wrap:wrap;align-items:center;margin-top:clamp(26px,3.6vh,38px)}
 .btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px}
 .btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+/* 主CTA(Compass)と、その中身の一行。説明ではなく「何分で何をするか」だけ */
+.s1-main{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.s1-meta{font:500 11.5px/1.4 var(--sans);letter-spacing:0.06em;color:var(--ink-3);padding-left:4px}
 .s1-link{font:600 13px/1 var(--sans);letter-spacing:0.04em;color:var(--ink);border-bottom:1px solid var(--ink-4);padding-bottom:5px;display:inline-flex;gap:8px;align-items:center;min-height:44px}
 .s1-link:hover{border-color:var(--ink)}
 .scroll-hint{position:absolute;bottom:22px;left:var(--pad-x);z-index:2;font:600 9px/1 var(--en);letter-spacing:0.3em;color:var(--ink-3);display:flex;align-items:center;gap:10px;opacity:calc(1 - var(--p1,0) * 2)}
@@ -162,7 +165,9 @@ html.js .stage.intro.intro-done .s1-tag,html.js .stage.intro.intro-done .s1-h .l
   .scene1::before{content:'';position:absolute;left:0;right:0;bottom:0;height:56%;z-index:-1;pointer-events:none;background:linear-gradient(180deg,transparent 0%,var(--bg) 22%,var(--bg) 100%);opacity:calc(1 - var(--pbg,0))}
   .s1-h{font-size:clamp(40px,11.2vw,54px);line-height:1.12}
   .s1-sub{font-size:14.5px}
-  .s1-actions .btn{min-width:62%;justify-content:center}
+  .s1-main{min-width:62%;align-items:stretch}
+  .s1-actions .btn{justify-content:center}
+  .s1-meta{padding-left:0;text-align:center}
   .scroll-hint{display:none}
   .scene2{padding-top:calc(72px + 2vh)}
   .s2-frame .pc-only{display:none}
@@ -244,7 +249,10 @@ html:not(.js) .scene2{display:none}
         <h1 class="s1-h" id="heroTitle"><span class="ln">その経験に、</span><br><span class="ln">次の可能性を</span></h1>
         <p class="s1-sub">医療職の仕事と学びを広げる、道具と経営ゲーム。登録なしで、ブラウザから。</p>
         <div class="s1-actions">
-          <a class="btn glass" href="./products/index.html">29の道具を見る <span aria-hidden="true">→</span></a>
+          <div class="s1-main">
+            <a class="btn glass" href="./compass/index.html">3分で可能性を探す <span aria-hidden="true">→</span></a>
+            <p class="s1-meta">BRIDGE Compass・10の質問・約3分</p>
+          </div>
           <a class="s1-link" href="./clinic-flow-3d/index.html">経営ゲームを始める <span aria-hidden="true">→</span></a>
         </div>
       </div>
@@ -267,7 +275,7 @@ html:not(.js) .scene2{display:none}
 </div>
 
 <!-- ============ おすすめ3つ ============
-     選定: 完成度・登録なしで始められること・note 読者(キャリア関心層)との相性。
+     選定: 入口の Compass(自分の可能性を探す)→ 体験の Clinic Town 3D → 言葉にする経験の棚卸し、の3種類の体験。
      3つとも 無料・登録なし・ブラウザ・端末内保存 なので、条件は見出し横の一文にまとめる。 -->
 <section class="sec picks" id="picks" aria-labelledby="picksTitle">
   <div class="sec-inner">
@@ -276,7 +284,16 @@ html:not(.js) .scene2{display:none}
       <p class="picks-note">無料・登録なし。ブラウザで動き、入力は端末の中にだけ残ります。</p>
     </div>
     <div class="pick-grid">
-      <a class="pick big" href="./clinic-flow-3d/index.html" data-reveal>
+      <a class="pick big" href="./compass/index.html" data-reveal>
+        <figure class="pick-fig"><img src="./images/products/thumbs/compass.webp" alt="BRIDGE Compassの実際の画面。「あなたの経験、どこまで使える?」の見出しと、3分で探してみるボタン" width="880" height="550" loading="lazy"></figure>
+        <div class="pick-body">
+          <span class="pick-k">Career — BRIDGE Compass</span>
+          <h3 class="pick-t">あなたの経験から、<br>3つの橋を見つける</h3>
+          <p class="pick-p">10の質問から、いつもの仕事を別の言葉に翻訳。まだ使っていない可能性を探します。</p>
+          <span class="pick-cta">3分で探してみる <span class="ar" aria-hidden="true">→</span></span>
+        </div>
+      </a>
+      <a class="pick" href="./clinic-flow-3d/index.html" data-reveal data-reveal-delay="1">
         <figure class="pick-fig"><img src="./images/products/shots/clinic-flow-3d-home.webp" alt="Clinic Town 3Dの実際の画面。院内の見取り図と、受付窓口や待合椅子などの打ち手が費用・効果つきで並ぶ" width="1440" height="900" loading="lazy"></figure>
         <div class="pick-body">
           <span class="pick-k">Game — クリニックタウン3D</span>
@@ -285,22 +302,13 @@ html:not(.js) .scene2{display:none}
           <span class="pick-cta">ゲームを始める <span class="ar" aria-hidden="true">→</span></span>
         </div>
       </a>
-      <a class="pick" href="./tanaoroshi/index.html" data-reveal data-reveal-delay="1">
+      <a class="pick" href="./tanaoroshi/index.html" data-reveal data-reveal-delay="2">
         <figure class="pick-fig"><img src="./images/products/thumbs/tanaoroshi.webp" alt="経験の棚卸しの実際の画面" width="880" height="550" loading="lazy"></figure>
         <div class="pick-body">
           <span class="pick-k">Career — 経験の棚卸し</span>
           <h3 class="pick-t">18の質問で、職務経歴書のたねを</h3>
           <p class="pick-p">転職や面接で、実績をうまく言えないときに。</p>
           <span class="pick-cta">質問に答える <span class="ar" aria-hidden="true">→</span></span>
-        </div>
-      </a>
-      <a class="pick" href="./moyamoya/index.html" data-reveal data-reveal-delay="2">
-        <figure class="pick-fig"><img src="./images/products/thumbs/moyamoya.webp" alt="職場モヤモヤ診断の実際の画面" width="880" height="550" loading="lazy"></figure>
-        <div class="pick-body">
-          <span class="pick-k">Check — 職場モヤモヤ診断</span>
-          <h3 class="pick-t">職場のしんどさを、10問で言葉に</h3>
-          <p class="pick-p">我慢する以外の選択肢を、探す材料に。</p>
-          <span class="pick-cta">診断を始める <span class="ar" aria-hidden="true">→</span></span>
         </div>
       </a>
     </div>
