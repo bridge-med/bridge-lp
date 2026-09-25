@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>宛先しらべ — 記事の言葉が、誰に向いているかを数える / BRIDGE(運営者用)</title>
+<meta name="description" content="note の記事の言葉を、職種と関心の辞書で数えて、いま誰に宛てた記事になっているかを一文にする運営者用の道具。貼った本文は、この端末の中だけで数えます。">
+<meta name="robots" content="noindex">
+<!-- OGPは意図的に置かない。noindexの運営者用ページに外部プレビューを作らない(Cockpit・みせびらきと同じ設計判断) -->
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111521" media="(prefers-color-scheme: dark)">
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/bridge.css">
+<link rel="stylesheet" href="app/styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<noscript><style>[data-reveal]{opacity:1 !important;transform:none !important}</style></noscript>
+</head>
+<body data-root="../" data-page="atesaki" class="at">
+
+<nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
+
+<header class="page-hero at-hero">
+  <div class="page-hero-inner">
+    <div class="eyebrow">OPERATOR · READERS</div>
+    <h1>その記事は、誰に宛てた言葉になっていますか</h1>
+    <p class="lead at-lead">職種と関心の言葉を数えて、いま誰に宛てた記事になっているかを一文にします。</p>
+
+    <form class="at-form" id="atForm" novalidate>
+      <label class="at-label" for="atIn">記事のURL、または下書きの本文</label>
+      <textarea class="at-in" id="atIn" name="q" rows="3" spellcheck="false" autocomplete="off"
+        placeholder="https://note.com/prime_duck4944/n/…" aria-describedby="atMsg atFacts"></textarea>
+      <p class="at-msg" id="atMsg" role="status" aria-live="polite"></p>
+      <div class="at-act">
+        <button class="btn primary at-go" type="submit">言葉を数える <span aria-hidden="true">→</span></button>
+        <ul class="facts at-facts" id="atFacts" aria-label="この道具の扱い">
+          <li>貼った本文は、この端末の中だけで数えます</li>
+          <li id="atUpdated">記事の一覧は取り込み済みのもの</li>
+        </ul>
+      </div>
+    </form>
+
+    <div class="at-recent" id="atRecent" hidden>
+      <p class="at-recent-h">最近の記事</p>
+      <ul class="at-links" id="atRecentList"></ul>
+    </div>
+
+    <noscript><p class="at-noscript">宛先しらべは、ブラウザのJavaScriptで動きます。JavaScriptを有効にすると使えます。これまでの記事は <a href="../journal/index.html">Journal</a> からも読めます。</p></noscript>
+  </div>
+</header>
+
+<main id="atMain">
+  <!-- 結果。app.js が描く -->
+  <section class="sec at-result" id="atResult" aria-labelledby="atReader" hidden></section>
+
+  <!-- これまでの記事の宛先。app.js が描く -->
+  <section class="sec tint at-map" id="atMap" aria-labelledby="atMapH" hidden>
+    <div class="sec-inner at-col">
+      <div class="eyebrow">Archive</div>
+      <h2 class="sec-h at-map-h" id="atMapH">これまでの記事の宛先</h2>
+      <div class="tag-row at-range" id="atRange" role="group" aria-label="数える範囲"></div>
+      <p class="at-note" id="atMapNote"></p>
+      <h3 class="at-sub">誰に</h3>
+      <ul class="at-bars" id="atBarsWho"></ul>
+      <h3 class="at-sub">何に</h3>
+      <ul class="at-bars" id="atBarsTopic"></ul>
+      <p class="at-note" id="atMapLikes"></p>
+      <details class="at-more" id="atLexicon">
+        <summary>数えている言葉 <span class="ar" aria-hidden="true">→</span></summary>
+        <div class="at-more-body" id="atLexiconBody"></div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<aside class="walk" aria-labelledby="walk-next">
+  <div class="walk-inner">
+    <div class="eyebrow" data-reveal>Where to next</div>
+    <h2 class="walk-h" id="walk-next" data-reveal>次は、どこへ歩きますか</h2>
+    <div class="walk-grid">
+      <a class="walk-card" href="https://note.com/prime_duck4944" target="_blank" rel="noopener" data-reveal>
+        <span class="en">note ↗</span><span class="t">記事を書く</span>
+        <p class="p">数えた宛先を横に置いて、書き足すか、そのまま出すかを決める。</p>
+      </a>
+      <a class="walk-card" href="../journal/index.html" data-reveal data-reveal-delay="1">
+        <span class="en">Journal</span><span class="t">書いたものを読み返す</span>
+        <p class="p">これまでの記事を、サイトの側から見る。</p>
+      </a>
+      <a class="walk-card" href="../cockpit-76a805/index.html" data-reveal data-reveal-delay="2">
+        <span class="en">Cockpit</span><span class="t">道具を見直す</span>
+        <p class="p">この道具も、続けるか、直すか、手放すかの目で見る。</p>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<footer class="site-footer"></footer>
+
+<script src="../shared/bridge.js" defer></script>
+<script src="app/lexicon.js" defer></script>
+<script src="app/engine.js" defer></script>
+<script src="app/app.js" defer></script>
+</body>
+</html>

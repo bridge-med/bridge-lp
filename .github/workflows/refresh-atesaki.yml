@@ -1,0 +1,63 @@
+name: Refresh atesaki data
+
+# 宛先しらべ(atesaki-76a805)の記事データを取り込む。note の予約投稿(7:00・19:00 JST)の後に回す。
+# 読むのは robots.txt が許すパスだけ(RSS と記事ページ)。/api/* は使わない(scripts/atesaki-build.mjs 冒頭)。
+# 新着がなく、スキの読み直し(7日に一度)の日でもなければ、何も書き換えずコミットもしない。
+# 判定の版が焼いたデータと違うときは取り直さずに失敗させる(手元で --rebuild してからコミットする)。
+
+on:
+  schedule:
+    - cron: '40 22 * * *' # 22:40 UTC = 7:40 JST
+    - cron: '40 10 * * *' # 10:40 UTC = 19:40 JST
+  workflow_dispatch:
+    inputs:
+      force_likes:
+        description: 'スキを日数に関係なく読み直す'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: refresh-atesaki
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch and analyze new articles
+        run: node scripts/atesaki-build.mjs ${{ inputs.force_likes && '--force-likes' || '' }}
+      - name: Check data consistency
+        run: node --test atesaki-76a805/tests/*.test.mjs
+      - name: Commit if changed
+        id: commit
+        run: |
+          if git diff --quiet -- atesaki-76a805/data; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            echo "新着なし。今回は静かなまま"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add atesaki-76a805/data
+            git commit -m 'chore(atesaki): 記事データの取り込み'
+            git pull --rebase origin master
+            git push origin HEAD:master
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
+            -d '{"ref":"master"}'

@@ -1,0 +1,118 @@
+/* ================================================================
+   宛先しらべ — styles
+   shared/bridge.css のトークンと部品の上に載せる。色を直書きしない・[data-theme=dark] で上書きしない。
+   このページ専用の部品は .at- を付けてここに置き、bridge.css は触らない(design-system §6)。
+   砂(--dawn)は「選択の瞬間」だけ: eyebrow の線(既存)・ヒーローの線(既存)・一覧の「この記事」(現在地)。
+   該当語の印・棒・数字・宛先の一文には使わない。カードで囲わず、余白と罫線で区切る。1カラム。
+   ================================================================ */
+
+.at .en{font-family:var(--en)}
+[tabindex="-1"]:focus{outline:none}
+
+/* ---- 開き: ヒーローの上下を少し詰め、375×667 の最初の画面に欄と主ボタンが入るように ---- */
+.at-hero{padding-top:clamp(108px,17vh,200px);padding-bottom:clamp(48px,8vh,88px)}
+.at-hero .page-hero-inner{max-width:var(--text-max);margin-left:max(0px,calc((100% - var(--max)) / 2))}
+.at-hero h1{text-wrap:balance}
+.at-lead{margin-top:14px}
+
+/* ---- 入力: 1つの欄+主ボタン1つ ---- */
+.at-form{margin-top:clamp(22px,3.4vh,34px)}
+.at-label{display:block;font:700 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-2);margin-bottom:8px}
+.at-in{display:block;width:100%;min-height:92px;max-height:40vh;resize:vertical;padding:14px 16px;
+  font:400 16px/1.8 var(--sans);color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:6px;
+  transition:border-color .2s}
+.at-in::placeholder{color:var(--ink-3)}
+.at-in:focus{outline:2px solid var(--blue);outline-offset:2px;border-color:var(--blue)}
+.at-msg{min-height:0;font-size:13px;line-height:1.9;color:var(--ink-2);margin-top:8px}
+.at-msg:empty{margin-top:0}
+.at-msg .at-msg-act{display:inline-block;margin-left:4px;color:var(--blue);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:0;font:inherit;min-height:44px;padding:0 2px}
+.at-act{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;margin-top:14px}
+.at-go{min-height:48px;justify-content:center}
+.at-go:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.at-facts li{white-space:normal;line-height:1.5}
+@media(max-width:600px){
+  .at-go{width:100%}
+}
+
+/* ---- 最近の記事: 罫線で区切った行(Compass の .cp-links と同じ役割) ---- */
+.at-recent{margin-top:clamp(28px,4.4vh,44px)}
+.at-recent-h{font:700 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-2);margin-bottom:6px}
+.at-links{list-style:none;border-top:1px solid var(--line)}
+.at-links li{border-bottom:1px solid var(--line)}
+.at-links a{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 14px;min-height:56px;padding:10px 2px;transition:color .2s}
+.at-links a:hover .t{color:var(--blue)}
+.at-links a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.at-links .t{font:600 15px/1.6 var(--mincho);color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.at-links .m{grid-column:1;font:500 11px/1.4 var(--en);letter-spacing:0.04em;color:var(--ink-3)}
+.at-links .ar{grid-column:2;grid-row:1 / span 2;font-family:var(--en);color:var(--ink-4)}
+
+/* ---- 結果 ---- */
+.at-result{padding-top:clamp(56px,9vh,110px)}
+.at-col{max-width:var(--text-max)}
+.at-meta{display:flex;flex-direction:column;gap:6px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.at-meta .t{font:600 15px/1.8 var(--mincho);color:var(--ink-2)}
+.at-meta a.t{display:inline-flex;align-items:center;min-height:44px;gap:8px;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.at-meta a.t:hover{color:var(--ink);text-decoration-color:var(--ink-3)}
+.at-meta .m{font:500 11.5px/1.6 var(--en);letter-spacing:0.04em;color:var(--ink-3)}
+.at-k{margin-top:30px;font:700 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-2)}
+.at-reader{margin-top:10px;font-family:var(--mincho);font-weight:600;font-size:clamp(20px,5.4vw,26px);line-height:1.75;color:var(--ink);text-wrap:balance}
+.at-reader.is-quiet{font-size:clamp(18px,4.6vw,21px);color:var(--ink-2)}
+.at-lines{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.at-lines p{font-size:14px;line-height:1.95;color:var(--ink-2)}
+.at-lines b{font-weight:700;color:var(--ink)}
+
+.at-sub{margin-top:clamp(34px,5vh,46px);font:700 13px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink)}
+.at-sub + *{margin-top:12px}
+
+/* 根拠の文: 左に細い縦線(Compass の .cp-tr と同じ役割)。該当語は太字と文字色だけで示し、色や砂は使わない */
+.at-quotes{list-style:none;display:grid;gap:14px}
+.at-quotes li{padding-left:16px;border-left:2px solid var(--line);font-size:13.5px;line-height:2;color:var(--ink-2)}
+.at-quotes li b{font-weight:700;color:var(--ink)}
+.at-quotes .w{display:block;font:600 10.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-3)}
+
+.at-p{font-size:14px;line-height:2;color:var(--ink-2)}
+.at-p + .at-p{margin-top:6px}
+.at-small{font-size:12.5px;line-height:1.9;color:var(--ink-3)}
+
+/* 折りたたみ(Compass の .cp-more と同じ形。summary は 44px) */
+.at-more{margin-top:clamp(30px,4.6vh,40px)}
+.at-more summary{list-style:none;display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 20px;border:1px solid var(--line);border-radius:100px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;transition:border-color .25s}
+.at-more summary::-webkit-details-marker{display:none}
+.at-more summary:hover{border-color:var(--ink-3)}
+.at-more summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.at-more summary .ar{font-family:var(--en);transition:transform .3s var(--ease)}
+.at-more[open] summary .ar{transform:rotate(90deg)}
+.at-more-body{padding-top:8px}
+.at-more-body .at-sub{margin-top:26px}
+.at-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:12.5px;line-height:1.8;color:var(--ink-2)}
+.at-dl dt{color:var(--ink-3);white-space:nowrap}
+.at-lex{list-style:none;display:grid;gap:12px;font-size:12.5px;line-height:1.9;color:var(--ink-2)}
+.at-lex b{display:block;font-weight:700;color:var(--ink)}
+.at-lex span{color:var(--ink-3)}
+
+.at-again{margin-top:clamp(36px,5.4vh,52px)}
+
+/* ---- 横棒の一覧(この記事の内訳 と これまでの記事)。棒は藍の細い線だけ。影・グラデーション・下地の帯なし ---- */
+.at-bars{list-style:none;border-top:1px solid var(--line)}
+.at-bars li{padding:12px 0 13px;border-bottom:1px solid var(--line)}
+.at-bars .r{display:flex;align-items:baseline;gap:10px}
+.at-bars .l{font-size:13.5px;line-height:1.6;color:var(--ink);flex:1;min-width:0}
+.at-bars .v{font:500 12px/1.6 var(--en);letter-spacing:0.02em;color:var(--ink-2);white-space:nowrap}
+.at-bars .bar{display:block;height:4px;margin-top:8px;background:var(--blue);border-radius:1px;min-width:0}
+.at-bars .bar.zero{background:none;height:4px}
+.at-bars .s{display:block;margin-top:6px;font-size:11.5px;line-height:1.7;color:var(--ink-3)}
+.at-bars .chip{margin-left:6px;vertical-align:1px}
+.at-bars li.is-empty .l{color:var(--ink-3)}
+
+/* ---- これまでの記事 ---- */
+.at-map .at-map-h{margin-bottom:18px}
+.at-range{margin-top:4px}
+.at-note{margin-top:16px;font-size:12.5px;line-height:1.9;color:var(--ink-3)}
+.at-map .at-sub{margin-top:34px}
+
+.at-noscript{margin-top:24px;font-size:13px;line-height:1.9;color:var(--ink-2)}
+.at-noscript a{text-decoration:underline}
+
+@media(prefers-reduced-motion:reduce){
+  .at-more summary .ar{transition:none}
+}
