@@ -300,3 +300,28 @@ test('題だけが名指しして本文に言葉がない下書きは、宛先�
   assert.equal(r.titleRead.who, 'nurse');
   assert.equal(r.titleRead.topic, 'career');
 });
+
+/* ---- 共有文の見分け(2便目の後退の回帰テスト。2026-09-26 コード照合) ---- */
+const shareForms = (title, url) => [title + ' ' + url, title + '\n' + url, title + '\r\n' + url, title + '|Wataru Note @prime_duck4944 #note\n' + url];
+
+test('途中に「?」「？」「。」がある題の共有文も URL として扱う', () => {
+  const url = 'https://note.com/prime_duck4944/n/n93e712e88e58';
+  for (const title of ['「1診と2診、どっちが儲かる?」をシミュレートする道具を作った', 'なぜ寒いと体が震えるのか？ – 臨床知識シリーズ', '28歳、PT、本業420万円。それでも別に悪くなかった。']) {
+    for (const f of shareForms(title, url)) assert.equal(E.looksLikeUrl(f), true, JSON.stringify(f));
+  }
+  assert.equal(E.looksLikeUrl('題の共有 ' + url + ' #note'), true);
+  assert.equal(E.looksLikeUrl(url + '\n題を後ろに置いた共有'), true);
+});
+
+test('取り込み済みの題(上限の字数以下)は、どの共有文の形でも URL として扱う', () => {
+  for (const it of archive.items.filter(it => it.title.length <= E.SHARE_TITLE_MAX)) {
+    for (const f of shareForms(it.title, it.url)) assert.equal(E.looksLikeUrl(f), true, it.key + ' ' + JSON.stringify(f.slice(0, 40)));
+  }
+});
+
+test('文の間に URL が挟まる下書き・URL にくっついた文・URL で始まる長い下書きは本文として数える', () => {
+  const url = 'https://note.com/x/n/n93e712e88e58';
+  assert.equal(E.looksLikeUrl('今日読んだ ' + url + 'がよかった。明日も読む。'), false);
+  assert.equal(E.looksLikeUrl(url + 'を読んで考えた。' + 'あ'.repeat(200) + '。\n看護師として十年働いた。'), false);
+  assert.equal(E.looksLikeUrl('看護師として10年働いた。\n先日読んだ記事 ' + url + ' がよかった。'), false);
+});

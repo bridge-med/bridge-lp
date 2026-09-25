@@ -199,7 +199,12 @@ async function rebuildAll(pages, likesDay = todayJst()) {
 async function main() {
   mkdirSync(DATA, { recursive: true });
   // 写しから焼き直すときのスキの日付は、写しを取った日(list.json の更新日)。今日にすると、育ちきらないスキが比べに入る
-  if (cacheDir) return rebuildAll(readCache(), jstDate(statSync(join(cacheDir, 'list.json')).mtime));
+  if (cacheDir) {
+    const pages = readCache();
+    const day = jstDate(statSync(join(cacheDir, 'list.json')).mtime);
+    console.log(`スキの日付は写しを取った日 ${day}(list.json の更新日)にする`);
+    return rebuildAll(pages, day);
+  }
 
   const prev = readJson(join(DATA, 'archive.json'), null);
   const prevEv = readJson(join(DATA, 'evidence.json'), null);
@@ -211,10 +216,11 @@ async function main() {
     const skipped = [];
     for (const key of keys) {
       try { pages.push(await fetchPage(key)); } catch (e) { if (!gone(e)) throw e; skipped.push(key); }
+      // 上限を超えた時点で止める(note が落ちているときに、残りへ取りに行き続けない)
+      if (skipped.length > GONE_MAX) throw new Error(`1回で${skipped.length}本が見つからない。note 側の不調とみなして書き換えない`);
       await sleep(WAIT_MS);
     }
     if (skipped.length) console.error('見つからない(404)ので外した記事: ' + skipped.join(', '));
-    if (skipped.length > GONE_MAX) throw new Error(`1回で${skipped.length}本が見つからない。note 側の不調とみなして書き換えない`);
     return rebuildAll(pages);
   }
 

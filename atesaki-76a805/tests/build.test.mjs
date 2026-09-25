@@ -112,6 +112,7 @@ test('--rebuild で見つからない(404)記事が上限を超えたら、何�
     const before = read(dir, 'archive.json');
     const r = run(dir, stub(dir, { goneFirst: 6 }), ['--rebuild']);
     assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /見つからない/);
     assert.equal(read(dir, 'archive.json'), before);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

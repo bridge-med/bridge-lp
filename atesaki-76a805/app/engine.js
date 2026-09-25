@@ -394,14 +394,18 @@
     const s = String(input || '').trim().replace(/^[<「『(]+|[>」』)]+$/g, '');
     if (!s) return false;
     if (!/\s/.test(s) && (/^https?:\/\//i.test(s) || /^(?:www\.)?note\.com\//i.test(s) || /^n[0-9a-f]{12}$/i.test(s))) return true;
-    // note の共有文(題+URL)も URL として扱う。URL を除いた残りが、句点のない1〜2行の短い題だけのとき。
-    // 短い下書きの中に URL が混ざっているだけのもの(文が続く)は本文として数える
-    const m = s.match(/https?:\/\/\S*\/n\/n[0-9a-f]{12}\S*/i);
+    // note の共有文(題+URL)も URL として扱う。見分けるのは URL の位置: 共有文では URL が端(先頭か末尾。
+    // 末尾の #タグ・@handle は端とみなす)にあり、下書きでは文の間に挟まる。句読点では見分けない
+    // (「…儲かる?」「…420万円。それでも…」のような題が落ちるため。2026-09-26 コード照合)
+    const m = s.match(/https?:\/\/[!-~]*\/n\/n[0-9a-f]{12}[!-~]*/i);   // URL の後ろは ASCII だけ(くっついた日本語を飲み込まない)
     if (!m) return false;
-    const rest = s.replace(m[0], '').trim();
-    // 「題｜著者名」の形は、縦棒より後ろ(著者名)を外して見る
-    const lines = rest.split('\n').map(l => l.split(/[｜|]/)[0].trim().replace(/[。．!?！？]+$/, '')).filter(Boolean);
-    return rest.length <= SHARE_TITLE_MAX && lines.length <= 2 && lines.every(l => !/[。．!?！？]/.test(l));
+    const tail = s.slice(m.index + m[0].length);
+    const atEnd = /^(?:\s+[#@]\S+)*\s*$/.test(tail);
+    if (m.index !== 0 && !atEnd) return false;
+    const rest = atEnd ? s.slice(0, m.index) : tail;
+    // 「題|著者名」の形は、縦棒より後ろ(著者名・@handle・#note)を外して、題の部分で数える
+    const lines = rest.split(/\r?\n/).map(l => l.split(/[｜|]/)[0].trim()).filter(Boolean);
+    return lines.length <= 2 && lines.join('').length <= SHARE_TITLE_MAX;
   }
 
   /* ================================================================
@@ -513,7 +517,7 @@
 
   const ENGINE = {
     ENGINE_REV, FINGERPRINT, SEGS, SEG_IDS, WHO_IDS, TOPIC_IDS,
-    MIN_RAW, MIN_N, SETTLE_DAYS, MORE, LESS, WINDOW,
+    MIN_RAW, MIN_N, SETTLE_DAYS, MORE, LESS, WINDOW, SHARE_TITLE_MAX,
     normalize, htmlToText, splitSentences, scan, analyze, stripLines, boilerplateOf, readerOf, readTitle, parseNoteUrl, looksLikeUrl, isStory,
     relativeLikes, calibrate, verdictOf, median, quantile, segsOf, baselineOf, contrast,
   };
