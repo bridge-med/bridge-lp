@@ -53,7 +53,7 @@
   const QUOTE_MIN = 20;
   const QUOTE_MAX = 88;
   const QUOTES_PER_SEG = 2;
-  const SHARE_MAX = 200;
+  const SHARE_TITLE_MAX = 80;
 
   const WINDOW = 45;
   const WINDOW_WIDE = 90;
@@ -394,8 +394,14 @@
     const s = String(input || '').trim().replace(/^[<「『(]+|[>」』)]+$/g, '');
     if (!s) return false;
     if (!/\s/.test(s) && (/^https?:\/\//i.test(s) || /^(?:www\.)?note\.com\//i.test(s) || /^n[0-9a-f]{12}$/i.test(s))) return true;
-    // note の共有文(題+URL)のように短く、記事の URL を含むものも URL として扱う
-    return s.length < SHARE_MAX && /https?:\/\/\S*\/n\/n[0-9a-f]{12}/i.test(s);
+    // note の共有文(題+URL)も URL として扱う。URL を除いた残りが、句点のない1〜2行の短い題だけのとき。
+    // 短い下書きの中に URL が混ざっているだけのもの(文が続く)は本文として数える
+    const m = s.match(/https?:\/\/\S*\/n\/n[0-9a-f]{12}\S*/i);
+    if (!m) return false;
+    const rest = s.replace(m[0], '').trim();
+    // 「題｜著者名」の形は、縦棒より後ろ(著者名)を外して見る
+    const lines = rest.split('\n').map(l => l.split(/[｜|]/)[0].trim().replace(/[。．!?！？]+$/, '')).filter(Boolean);
+    return rest.length <= SHARE_TITLE_MAX && lines.length <= 2 && lines.every(l => !/[。．!?！？]/.test(l));
   }
 
   /* ================================================================

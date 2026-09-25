@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, cpSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, cpSync, mkdirSync, writeFileSync, readFileSync, rmSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -41,7 +41,7 @@ globalThis.fetch = async url => {
     return ok('<rss><channel><item><title>' + it.title + '</title><pubDate>Fri, 25 Sep 2026 19:00:00 +0900</pubDate><link>https://note.com/' + A.user + '/n/' + it.key + '</link></item></channel></rss>');
   }
   const key = url.split('/n/')[1];
-  if (opts.gone === key) return { ok: false, status: 404, text: async () => '' };
+  if (opts.gone === key || (opts.goneFirst && A.items.slice(0, opts.goneFirst).some(i => i.key === key))) return { ok: false, status: 404, text: async () => '' };
   const it = A.items.find(i => i.key === key);
   const ld = { '@type': 'BlogPosting', headline: it.title, datePublished: it.date + 'T07:00:00+09:00', dateModified: it.date + 'T07:00:00+09:00', keywords: '看護師,キャリア' };
   const likes = opts.noLikes ? '' : '<button class="o-noteLikeV3"><span class="o-noteLikeV3__count">7</span></button>';
@@ -103,5 +103,30 @@ test('--cache のフォルダがないときは、通信せずに止める', () 
     let calls = [];
     try { calls = JSON.parse(readFileSync(join(dir, 'calls.json'), 'utf8')); } catch { /* 呼ばれていなければファイルもない */ }
     assert.equal(calls.length, 0, '通信した: ' + calls.join(', '));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('--rebuild で見つからない(404)記事が上限を超えたら、何も書き換えずに止める', () => {
+  const dir = sandbox();
+  try {
+    const before = read(dir, 'archive.json');
+    const r = run(dir, stub(dir, { goneFirst: 6 }), ['--rebuild']);
+    assert.notEqual(r.status, 0);
+    assert.equal(read(dir, 'archive.json'), before);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('写し(--cache)から焼き直すとき、スキの日付は写しを取った日(list.json の更新日)にする', () => {
+  const dir = sandbox();
+  try {
+    const cache = join(dir, 'cache');
+    mkdirSync(join(cache, 'raw'), { recursive: true });
+    writeFileSync(join(cache, 'list.json'), JSON.stringify([{ key: 'n000000000001', name: '看護師の転職', publishAt: '2026-09-01T07:00:00+09:00', likeCount: 3, price: 0, hashtags: [] }]));
+    writeFileSync(join(cache, 'raw', 'n000000000001.json'), JSON.stringify({ body: '<p>看護師として働いて、転職を考えた。</p>' }));
+    const t = new Date('2026-09-20T03:00:00Z');   // JST では 2026-09-20 の昼
+    utimesSync(join(cache, 'list.json'), t, t);
+    const r = run(dir, null, ['--cache', cache]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.equal(JSON.parse(read(dir, 'likes.json')).updated, '2026-09-20');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

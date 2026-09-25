@@ -55,11 +55,12 @@
       return false;
     }
   }
-  // 読み込みは1回だけ(読み込み中に別の記事を開いても二重に取りに行かない)
+  // 読み込みは1回だけ(読み込み中に別の記事を開いても二重に取りに行かない)。
+  // 失敗したときは今回だけ根拠なしで描き、次に開いたときに取り直す
   function loadEvidence() {
     state.evidenceP = state.evidenceP || getJson('data/evidence.json')
       .then(ev => new Map(ev.items.map(d => [d.key, d])))
-      .catch(() => new Map());
+      .catch(() => { state.evidenceP = null; return new Map(); });
     return state.evidenceP;
   }
 

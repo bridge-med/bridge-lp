@@ -278,8 +278,12 @@ test('職種の列挙に数えるのは職業だけ(学生・経営側・一般�
   assert.equal(r.raw.general, 0);
 });
 
-test('note の共有文(題+URL)と括弧つきの URL も URL として扱う', () => {
+test('note の共有文(題+URL)と括弧つきの URL も URL として扱う。文が続く下書きの中の URL は本文として数える', () => {
   assert.equal(E.looksLikeUrl('大学院に行って https://note.com/prime_duck4944/n/n93e712e88e58'), true);
+  assert.equal(E.looksLikeUrl('大学院に行って、研究もして、それでも事業会社に出た理由。 https://note.com/prime_duck4944/n/n93e712e88e58'), true);
+  assert.equal(E.looksLikeUrl('大学院に行って、それでも事業会社に出た理由。|Wataru Note\nhttps://note.com/prime_duck4944/n/n93e712e88e58'), true);
+  assert.equal(E.looksLikeUrl('今日読んだ https://note.com/x/n/n93e712e88e58 がよかった。明日も読む。'), false);
+  assert.equal(E.looksLikeUrl('看護師として働いて10年。転職を考えた。参考は https://note.com/x/n/n93e712e88e58 です。'), false);
   assert.equal(E.looksLikeUrl('「https://note.com/x/n/n93e712e88e58」'), true);
   assert.equal(E.looksLikeUrl('www.note.com/x/n/n93e712e88e58'), true);
 });
