@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-09-24T23:14:27+00:00",
+  "updated_at": "2026-09-25T23:19:32+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "臨床を捨てたんじゃない。自分にできることを増やしたかった。",
+      "url": "https://note.com/prime_duck4944/n/n16a56e9d0f3d",
+      "guid": "https://note.com/prime_duck4944/n/n16a56e9d0f3d",
+      "pubDate": "2026-09-26T07:00:00+09:00",
+      "date": "2026-09-26",
+      "excerpt": "「もう理学療法士はやらないんですか？」事業会社に転職してから、たまに聞かれる。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316118183/rectangle_large_type_2_5b086e324a3da96e26b99e08ae9091fc.png?width=800"
+    },
+    {
+      "title": "文章を書くのが苦手な人ほど、AIを使えばいい。",
+      "url": "https://note.com/prime_duck4944/n/n3f45edc052a6",
+      "guid": "https://note.com/prime_duck4944/n/n3f45edc052a6",
+      "pubDate": "2026-09-25T19:00:00+09:00",
+      "date": "2026-09-25",
+      "excerpt": "文章を書くのが苦手。そういう人ほど、AIを使った方がいいと思う。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316892651/rectangle_large_type_2_844c4652141645456fc9f94996f1f282.png?width=800"
+    },
     {
       "title": "大学院に行って、研究もして、それでも事業会社に出た理由。",
       "url": "https://note.com/prime_duck4944/n/n93e712e88e58",
@@ -38,24 +56,6 @@
       "date": "2026-09-23",
       "excerpt": "AIの話をすると、「そのうち仕事なくなるんじゃない？」",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/316112595/rectangle_large_type_2_f4c43013d2936a07fc2c98c391e942b6.png?width=800"
-    },
-    {
-      "title": "28歳、PT、本業420万円。それでも別に悪くなかった。",
-      "url": "https://note.com/prime_duck4944/n/nb87d82c62a5b",
-      "guid": "https://note.com/prime_duck4944/n/nb87d82c62a5b",
-      "pubDate": "2026-09-23T07:00:00+09:00",
-      "date": "2026-09-23",
-      "excerpt": "28歳。理学療法士。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316110784/rectangle_large_type_2_7af0c7efb42ce3379d5a30f2a658956a.png?width=800"
-    },
-    {
-      "title": "医療職こそ、ChatGPTを使った方がいいと思う。",
-      "url": "https://note.com/prime_duck4944/n/ne535c3c7dbd6",
-      "guid": "https://note.com/prime_duck4944/n/ne535c3c7dbd6",
-      "pubDate": "2026-09-22T19:00:00+09:00",
-      "date": "2026-09-22",
-      "excerpt": "医療職とAIって、たぶんかなり相性がいい。別に、AIに診断してもらおうとか、患者さんへの対応を全部任せようとか、そういう話ではない。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316111913/rectangle_large_type_2_c04cd11d9dc4928fc3db08c9f05c0825.png?width=800"
     }
   ]
 }
