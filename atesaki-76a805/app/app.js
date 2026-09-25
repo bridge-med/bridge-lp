@@ -126,7 +126,8 @@
       source: 'archive', key, title: it.title, url: it.url, date: it.date, likes, paid: it.paid, story: it.story, chars: it.chars,
       reader: E.readerOf(it), main: it.main, top: it.top, generalLead: it.generalLead, focus: it.focus,
       titleRead: it.titleRead, gap: it.gap, share: d.share, raw: d.raw, words: d.words, evidence: d.evidence,
-      settling: dayDiff(it.date, today) < E.SETTLE_DAYS, segs: E.segsOf(it),
+      // 比べに入るかはスキを数えた日で決まるので、断り書きも同じ日で判定する
+      settling: dayDiff(it.date, state.likes.updated || today) < E.SETTLE_DAYS, segs: E.segsOf(it),
     });
     if (push && new URLSearchParams(location.search).get('n') !== key) history.pushState({ n: key }, '', '?n=' + encodeURIComponent(key));
   }
@@ -226,7 +227,7 @@
 
     const meta = vm.source === 'archive'
       ? `<a class="t" href="${esc(vm.url)}" target="_blank" rel="noopener">${esc(vm.title)} <span aria-hidden="true">↗</span></a>` +
-        `<span class="m">${esc(vm.date)}${vm.likes != null ? ' · スキ ' + vm.likes : ''}${vm.settling ? '(公開から7日未満。7日を過ぎたあと、次にスキを読み直したときに比べに入ります)' : ''}</span>`
+        `<span class="m">${esc(vm.date)}${vm.likes != null ? ' · スキ ' + vm.likes : ''}${vm.settling ? '(スキを数えた日には公開から7日未満でした。7日以上たってから、次にスキを数え直したときに比べに入ります)' : ''}</span>`
       : `<p class="t">${esc(vm.title || '貼った本文')}</p>` +
         `<span class="m">${vm.chars}字 · この端末の中だけで数えました${vm.fromFirstLine ? ' · 1行目をタイトルとして読みました' : ''}</span>`;
 
@@ -357,7 +358,7 @@
       '<h3 class="at-sub">誰に</h3><ul class="at-lex">' + WHO_ORDER.map(seg).join('') + '</ul>' +
       '<h3 class="at-sub">何に</h3><ul class="at-lex">' + TOPIC_ORDER.map(seg).join('') + '</ul>' +
       '<h3 class="at-sub">スキの数字</h3>' +
-      `<p class="at-small">記事ごとに、スキが「前後45日(記事が少ない時期は90日)に出した記事のスキの中央値」の何倍かを出しています。数えるのは、スキを数えた日に公開から7日以上たっていた記事(物語・有料を除く${c.counted}本)です。` +
+      `<p class="at-small">記事ごとに、スキが「前後45日(記事が少ない時期は90日)に出した記事のスキの中央値」の何倍かを出しています。スキが0の記事も比べられるように、割る前にどちらにも1を足しています。数えるのは、スキを数えた日に公開から7日以上たっていた記事(物語・有料を除く${c.counted}本)です。` +
       `関心ごとにこの倍率の中央値を見て、${E.MORE}倍以上なら「多め」、${E.LESS}倍以下なら「少なめ」とします(どちらも、3分の2以上の記事が同じ向きのとき)。それ以外は「ふだんの幅の中」です。多め・少なめを出すのは、比べられる記事が${E.MIN_N}本以上ある関心だけです。` +
       (likesAt ? `スキの数は${esc(likesAt)}時点です(公開から${LIKES_DAYS}日を過ぎた記事は、それより前に数えた値)。` : '') + '</p>' +
       (calRows ? '<dl class="at-dl">' + calRows + '</dl>' : '');
