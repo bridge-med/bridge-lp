@@ -1,7 +1,8 @@
 /* ================================================================
    宛先しらべ — 画面(DOM と読み込みだけ。判定は engine.js)
    入力は1つの欄: URL 1本なら取り込み済みの記事を開き、それ以外は本文としてこの端末の中で数える。
-   貼った本文はどこにも送らず、保存もしない(localStorage にも入れない)。記事の URL だけを ?n={key} で履歴に積む。
+   貼った本文はどこにも送らず、保存もしない(localStorage にも入れない)。取り込み済みの記事だけを ?n={key} で履歴に積む
+   (貼った本文の結果は履歴に積まない。本文を URL に入れないため)。
    文言の型は editor 照合(2026-09-25): 「届きそう」「刺さる」「答え合わせ」「相対スキ」は画面に出さない。
    ================================================================ */
 (function () {
@@ -9,7 +10,7 @@
   const E = window.ATESAKI_ENGINE;
   const S = E.SEGS;
 
-  const SERIES_START = '2026-06-22';   // 「医療職のキャリア拡張」を掲げた記事の日。いまの連載の始まり
+  const SERIES_START = '2026-06-22';   // 「医療職のキャリア拡張」を掲げた記事の日。呼び名は社長の確認待ち
   const SERIES_LABEL = '6月22日から';
   const INGEST_TIMES = '毎日7時40分と19時40分ごろ';
   const LIKES_DAYS = 60;
@@ -23,13 +24,12 @@
   const result = $('atResult');
   const map = $('atMap');
 
-  const state = { archive: null, likes: null, evidence: null, cal: null, byKey: new Map(), range: 'series', current: null };
+  const state = { archive: null, likes: null, evidenceP: null, cal: null, byKey: new Map(), range: 'series', current: null, seq: 0, ready: null };
   const today = new Date().toLocaleDateString('sv-SE');
   const reduced = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const dayDiff = (a, b) => Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000);
-  const jpDate = d => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || ''); return m ? `${+m[1]}年${+m[2]}月${+m[3]}日` : ''; };
   const shortOf = id => (S[id] ? S[id].short : '');
   const bold = s => '<b>' + esc(s) + '</b>';
 
@@ -45,24 +45,22 @@
       state.archive = a;
       state.likes = l;
       state.byKey = new Map(a.items.map(it => [it.key, it]));
-      state.cal = E.calibrate(a.items, l.likes || {}, today);
+      // 「公開から7日以上」はスキを数えた日で判定する(育ちきらないスキを母数に入れないため)
+      state.cal = E.calibrate(a.items, l.likes || {}, l.updated || today);
       state.ignore = new Set(a.boilerplate || []);
-      $('atUpdated').textContent = `記事の一覧は${jpDate(a.generated)}時点の${a.count}本`;
+      $('atUpdated').textContent = `記事の一覧は${a.generated}時点の${a.count}本`;
       return true;
     } catch (e) {
       $('atUpdated').textContent = '記事の一覧を読めませんでした。本文を貼ると数えられます';
       return false;
     }
   }
-  async function loadEvidence() {
-    if (state.evidence) return state.evidence;
-    try {
-      const ev = await getJson('data/evidence.json');
-      state.evidence = new Map(ev.items.map(d => [d.key, d]));
-    } catch (e) {
-      state.evidence = new Map();
-    }
-    return state.evidence;
+  // 読み込みは1回だけ(読み込み中に別の記事を開いても二重に取りに行かない)
+  function loadEvidence() {
+    state.evidenceP = state.evidenceP || getJson('data/evidence.json')
+      .then(ev => new Map(ev.items.map(d => [d.key, d])))
+      .catch(() => new Map());
+    return state.evidenceP;
   }
 
   /* ---- 最近の記事 ---- */
@@ -98,13 +96,17 @@
     if (E.looksLikeUrl(v)) {
       const p = E.parseNoteUrl(v);
       if (!p) { say('記事のURLは「…/n/」のあとに記事の番号が続く形です。記事のページを開いて、アドレスをそのまま貼ってください。'); return; }
-      if (!state.archive) { say('記事の一覧を読めませんでした。本文を貼ると、いま数えられます。', '本文を貼る'); return; }
+      const ok = await state.ready;   // 一覧の読み込み中なら待つ
+      if (!ok) { say('記事の一覧を読めませんでした。本文を貼ると、いま数えられます。', '本文を貼る'); return; }
       if (state.byKey.has(p.key)) { say(''); showKey(p.key, true); return; }
-      if (p.user && p.user !== state.archive.user) {
-        say(`いま読めるのは ${state.archive.user} の記事です。ほかの記事は、本文を貼ると数えられます(辞書は ${state.archive.user} の記事に合わせて作っています)。`, '本文を貼る');
-        return;
+      const me = state.archive.user;
+      if (p.user && p.user !== me) {
+        say(`取り込んであるのは ${me} の記事です。ほかの人の記事は、本文を貼ると数えられます(辞書は ${me} の記事に合わせて作っています)。`, '本文を貼る');
+      } else if (p.user === me) {
+        say(`この記事は、取り込み済みの一覧の外にあります。公開したばかりの記事なら、次の取り込み(${INGEST_TIMES})で入ります。今すぐ見るときは、本文を貼って数えられます。`, '本文を貼る');
+      } else {
+        say(`この記事は、取り込み済みの一覧の外にあります。取り込んでいるのは ${me} の note の記事だけです。本文を貼ると数えられます。`, '本文を貼る');
       }
-      say(`この記事は、次の取り込み(${INGEST_TIMES})で入ります。今すぐ見るときは、本文を貼って数えられます。`, '本文を貼る');
       return;
     }
     say('');
@@ -115,16 +117,18 @@
   async function showKey(key, push) {
     const it = state.byKey.get(key);
     if (!it) return;
+    const seq = ++state.seq;
     const ev = await loadEvidence();
+    if (seq !== state.seq) return;   // 読み込み中に別の記事が押されたら、後のほうだけを描く
     const d = ev.get(key) || { share: { who: {}, topic: {} }, raw: {}, words: {}, evidence: {} };
     const likes = state.likes.likes[key];
     render({
       source: 'archive', key, title: it.title, url: it.url, date: it.date, likes, paid: it.paid, story: it.story, chars: it.chars,
-      reader: it.reader, main: it.main, top: it.top, generalLead: it.generalLead, focus: it.focus,
+      reader: E.readerOf(it), main: it.main, top: it.top, generalLead: it.generalLead, focus: it.focus,
       titleRead: it.titleRead, gap: it.gap, share: d.share, raw: d.raw, words: d.words, evidence: d.evidence,
       settling: dayDiff(it.date, today) < E.SETTLE_DAYS, segs: E.segsOf(it),
     });
-    if (push) history.pushState({ n: key }, '', '?n=' + encodeURIComponent(key));
+    if (push && new URLSearchParams(location.search).get('n') !== key) history.pushState({ n: key }, '', '?n=' + encodeURIComponent(key));
   }
 
   /* ---- 貼った本文。1行目が短く、句点で終わらなければタイトルとして読む ---- */
@@ -134,6 +138,7 @@
     let text = v;
     const head = lines[0].trim();
     if (lines.length >= 2 && head.length <= 60 && !/[。.]$/.test(head)) { title = head; text = lines.slice(1).join('\n'); }
+    state.seq++;   // 読み込み中の記事があっても、貼った本文の結果を上書きさせない
     const r = E.analyze({ title, text }, { ignore: state.ignore });
     render({
       source: 'paste', title, fromFirstLine: !!title, chars: r.chars, story: r.story,
@@ -169,7 +174,8 @@
     return `<p>タイトルは${side(t.who, t.topic)}に、本文は${side(vm.main.who, vm.main.topic)}に向いた言葉が多い記事です。</p>`;
   }
   function contrastLine(vm) {
-    if (vm.story || !state.archive || !state.archive.baseline) return '';
+    // 宛先を一文にできなかった記事では、割合の差も語らない(言葉がほとんどないところから割合を言わない)
+    if (vm.story || !(vm.reader || {}).found || !state.archive || !state.archive.baseline) return '';
     const d = E.contrast(vm.share || {}, state.archive.baseline);
     const more = d.more.slice(0, 2).map(x => bold(shortOf(x.id)));
     const less = d.less.slice(0, 2).map(x => bold(shortOf(x.id)));
@@ -194,16 +200,28 @@
   function render(vm) {
     state.current = vm;
     const r = vm.reader || {};
+    // 枠(kicker)と見出しで1つの文になるようにする。宛先を出さないときは枠も変える
+    let kicker = 'この記事の言葉が向いているのは';
     let heading;
     let quiet = false;
     const notes = [];
-    if (vm.story) { heading = '物語の回は、言葉の数では宛先を出しません'; quiet = true; notes.push('<p>登場人物の職種の言葉は、読み手の職種とは限らないためです。内訳は下で見られます。</p>'); }
-    else if (r.found) { heading = r.text; if (r.note === 'mixedTopic') notes.push('<p>関心の言葉は、いくつかに分かれています。</p>'); }
-    else { heading = '特定の職種や関心に寄った言葉は、少なめでした'; quiet = true; }
+    if (vm.story) {
+      kicker = '物語の回です';
+      heading = '宛先の一文の代わりに、内訳を出します';
+      quiet = true;
+      notes.push('<p>登場人物の職種の言葉は、読み手の職種と重なるとは限らないためです。</p>');
+    } else if (r.found) {
+      heading = r.text;
+      if (r.note === 'mixedTopic') notes.push('<p>関心の言葉は、いくつかに分かれています。</p>');
+    } else {
+      kicker = 'この記事では';
+      heading = '特定の職種や関心に寄った言葉は、少なめでした';
+      quiet = true;
+    }
 
     const meta = vm.source === 'archive'
       ? `<a class="t" href="${esc(vm.url)}" target="_blank" rel="noopener">${esc(vm.title)} <span aria-hidden="true">↗</span></a>` +
-        `<span class="m">${esc(vm.date)}${vm.likes != null ? ' · スキ ' + vm.likes : ''}${vm.settling ? '(公開から7日未満で、スキは集計中)' : ''}</span>`
+        `<span class="m">${esc(vm.date)}${vm.likes != null ? ' · スキ ' + vm.likes : ''}${vm.settling ? '(公開から7日未満。7日たつとスキの比べに入ります)' : ''}</span>`
       : `<p class="t">${esc(vm.title || '貼った本文')}</p>` +
         `<span class="m">${vm.chars}字 · この端末の中だけで数えました${vm.fromFirstLine ? ' · 1行目をタイトルとして読みました' : ''}</span>`;
 
@@ -219,18 +237,18 @@
     result.innerHTML =
       '<div class="sec-inner at-col">' +
         `<div class="at-meta">${meta}</div>` +
-        '<p class="at-k">この記事の言葉が向いているのは</p>' +
+        `<p class="at-k">${esc(kicker)}</p>` +
         `<h2 class="at-reader${quiet ? ' is-quiet' : ''}" id="atReader" tabindex="-1">${esc(heading)}</h2>` +
         (lines.length ? `<div class="at-lines">${lines.join('')}</div>` : '') +
         (quotes.length ? `<h3 class="at-sub">そう読んだ文</h3><ul class="at-quotes">${quotes.join('')}</ul>` : '') +
         '<h3 class="at-sub">分からないこと</h3>' +
-        '<p class="at-p">実際に読んだ人の職種と人数。スキを押した人の職種。この道具が見るのは、記事の言葉だけです。ビュー数とスキは、note のダッシュボードで見られます。</p>' +
+        '<p class="at-p">実際に読んだ人の職種と人数。スキを押した人の職種。宛先の一文は、記事の言葉だけから出しています。読まれた数(ビュー)は、note のダッシュボードで見られます。</p>' +
         '<p class="at-small">数えているのは言葉の種類と数で、文章のよしあしは対象外です。スキの傾向は、下の「これまでの記事の宛先」にまとめています。</p>' +
-        '<details class="at-more"><summary>内訳を見る <span class="ar" aria-hidden="true">→</span></summary><div class="at-more-body">' +
+        `<details class="at-more"${vm.story ? ' open' : ''}><summary>内訳を見る <span class="ar" aria-hidden="true">→</span></summary><div class="at-more-body">` +
           '<h3 class="at-sub">誰に(本文の職種の言葉の割合)</h3>' + barsHtml(E.WHO_IDS, (vm.share || {}).who || {}, vm.words || {}) +
           ((vm.words || {}).general ? `<p class="at-small">職種を名指ししない言葉: ${esc(vm.words.general.map(x => `${x.term}×${x.count}`).join('・'))}</p>` : '') +
           '<h3 class="at-sub">何に(本文の関心の言葉の割合)</h3>' + barsHtml(E.TOPIC_IDS, (vm.share || {}).topic || {}, vm.words || {}) +
-          '<p class="at-small">割合は、その軸の言葉が出てきた文を数えたものです。タイトルは割合に入れず、本文と並べて見ています。複数の記事に同じ形で出る行(シリーズの案内・告知)は数えていません。</p>' +
+          '<p class="at-small">割合は、その軸の言葉が出てきた文を、語の重みをかけて数えたものです。タイトルは割合とは別に読み、本文と並べています。複数の記事に同じ形で出る行(シリーズの案内・告知)は、数える前に外しています。「いつもの記事」は、物語を除くこれまでの記事の平均です。</p>' +
         '</div></details>' +
         '<div class="at-again"><button class="btn ghost" type="button" id="atAgain">別の記事を数える</button></div>' +
       '</div>';
@@ -259,10 +277,10 @@
     const b = state.cal.bySeg[id];
     // 比べられる記事が MIN_N 本に満たない関心は、行ごとには書かない(一覧の下の一文で断る)
     if (!b || b.n < E.MIN_N) return '';
-    const head = `スキ: ${b.n}本中${b.above}本が、同じ時期の記事より多い`;
+    const head = `全期間のスキ: ${b.n}本中${b.above}本が、同じ時期の記事の中央値より多い`;
     if (b.verdict === 'more') return head + '(多め)';
     if (b.verdict === 'less') return head + '(少なめ)';
-    return head + '(差は見分けられません)';
+    return head + '(ふだんの幅の中)';
   }
   function mapRows(ids, counts, withCal) {
     const max = Math.max(1, ...ids.map(id => counts[id] || 0));
@@ -276,27 +294,35 @@
         (s ? `<span class="s">${esc(s)}</span>` : '') + '</li>';
     }).join('');
   }
+  // 範囲の切り替えボタンは一度だけ作り、押したときは状態だけを書き換える(作り直すとフォーカスが消える)
+  function renderRange() {
+    const range = $('atRange');
+    if (!range.children.length) {
+      range.innerHTML = [['series', SERIES_LABEL], ['all', '全期間']].map(([k, t]) =>
+        `<button type="button" class="tag" data-range="${k}">${esc(t)}</button>`).join('');
+    }
+    for (const b of range.querySelectorAll('[data-range]')) {
+      const on = b.dataset.range === state.range;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', String(on));
+    }
+  }
   function renderMap() {
     if (!state.archive) return;
-    const all = state.archive.items;
+    const inRange = it => state.range === 'all' || it.date >= SERIES_START;
+    const all = state.archive.items.filter(inRange);
     const stories = all.filter(it => it.story).length;
-    const pool = all.filter(it => !it.story && (state.range === 'all' || it.date >= SERIES_START));
+    const pool = all.filter(it => !it.story);
     const counts = {};
     for (const it of pool) for (const id of E.segsOf(it)) counts[id] = (counts[id] || 0) + 1;
 
-    const range = $('atRange');
-    range.innerHTML = [['series', `いまの連載(${SERIES_LABEL})`], ['all', '全期間']].map(([k, t]) =>
-      `<button type="button" class="tag${state.range === k ? ' active' : ''}" data-range="${k}" aria-pressed="${state.range === k}">${esc(t)}</button>`).join('');
-
-    $('atMapNote').textContent = `${pool.length}本の記事を数えています。物語の${stories}本は入れていません。1本の記事が、2つの宛先に入ることがあります。`;
+    renderRange();
+    $('atMapNote').textContent = `${pool.length}本の記事を数えています${stories ? `(物語の${stories}本は別にしています)` : ''}。1本の記事が、複数の宛先に入ることがあります。`;
     $('atBarsWho').innerHTML = mapRows(WHO_ORDER, counts, false);
     $('atBarsTopic').innerHTML = mapRows(TOPIC_ORDER, counts, true);
-    const c = state.cal;
-    const likesAt = state.likes.updated ? jpDate(state.likes.updated) : '';
     $('atMapLikes').textContent =
-      `スキの行は、範囲の切り替えに関係なく全期間で見ています。公開から7日以上の記事(物語・有料を除く${c.counted}本)のスキを、前後45日に出した記事のスキの中央値と比べたものです。` +
-      `比べられる記事が${E.MIN_N}本に満たない関心は、まだ判定できません。スキは、誰が押したかを表しません。曜日・投稿の時刻・note のおすすめなども重なっていて、言葉がスキを増やしたとは言えません。` +
-      (likesAt ? `スキの数は${likesAt}時点です(公開から${LIKES_DAYS}日を過ぎた記事は、それより前に数えた値)。` : '');
+      `スキの行は全期間で数え、比べられる記事が${E.MIN_N}本以上ある関心にだけ出しています。` +
+      'スキから分かるのは押された数までで、言葉がスキを動かしたとまでは言えません。数え方は「数えている言葉とスキの数字」にあります。';
     map.hidden = false;
     if (window.BRIDGE && window.BRIDGE.applyBudoux) window.BRIDGE.applyBudoux(map);
   }
@@ -310,16 +336,24 @@
   /* ---- 数えている言葉(第8条: 判断材料を隠さない)と、スキの数字 ---- */
   function renderLexicon() {
     const seg = id => `<li><b>${esc(S[id].label)}</b><span>${esc(S[id].terms.map(([t, w]) => `${t} ${w}`).join('・'))}</span></li>`;
+    // 判定の本数(MIN_N)に満たない関心は、中央値を出さない(1本の7倍が「スキが多い」と読まれないように)
     const calRows = TOPIC_ORDER.map(id => {
       const b = state.cal ? state.cal.bySeg[id] : null;
       if (!b || !b.n) return '';
-      return `<dt>${esc(S[id].short)}</dt><dd>${b.n}本 · 中央値 ${b.median} · 半分の記事は ${b.q1}〜${b.q3}</dd>`;
+      const v = b.n < E.MIN_N ? `${b.n}本(判定は${E.MIN_N}本から)` : `${b.n}本 · 中央値 ${b.median} · 真ん中の半分は ${b.q1}〜${b.q3}`;
+      return `<dt>${esc(S[id].short)}</dt><dd>${esc(v)}</dd>`;
     }).join('');
+    const c = state.cal;
+    const likesAt = state.likes && state.likes.updated;
     $('atLexiconBody').innerHTML =
-      '<p class="at-small">語のあとの数字は重みです(3 = その読み手を名指しする語、2 = その読み手の場面や道具、1 = 寄るがほかでも使う語)。1つの文では、一番重い語を1回だけ数えます。辞書は atesaki-76a805/app/lexicon.js にあります。</p>' +
+      '<p class="at-small">語のあとの数字は重みです(3 = その読み手を名指しする語、2 = その読み手の場面や道具、1 = 寄るがほかでも使う語、1未満 = 手がかりとして弱い語。2.5 や 1.5 はその間)。1つの文では、読み手ごとに一番重い語を1回だけ数えます。辞書は atesaki-76a805/app/lexicon.js にあります。</p>' +
       '<h3 class="at-sub">誰に</h3><ul class="at-lex">' + WHO_ORDER.map(seg).join('') + '</ul>' +
       '<h3 class="at-sub">何に</h3><ul class="at-lex">' + TOPIC_ORDER.map(seg).join('') + '</ul>' +
-      (calRows ? '<h3 class="at-sub">スキの数字(同じ時期の記事の中央値を1としたとき)</h3><dl class="at-dl">' + calRows + '</dl>' : '');
+      '<h3 class="at-sub">スキの数字</h3>' +
+      `<p class="at-small">スキを数えた日に公開から7日以上たっていた記事(物語・有料を除く${c.counted}本)のスキを、前後45日(記事が少ない時期は90日)に出した記事のスキの中央値と比べています。` +
+      `多め・少なめを出すのは、比べられる記事が${E.MIN_N}本以上ある関心だけです。中央値が${E.MORE}倍以上なら「多め」、${E.LESS}倍以下なら「少なめ」とします(どちらも、3分の2以上の記事が同じ向きのとき)。それ以外は「ふだんの幅の中」です。` +
+      (likesAt ? `スキの数は${esc(likesAt)}時点です(公開から${LIKES_DAYS}日を過ぎた記事は、それより前に数えた値)。` : '') + '</p>' +
+      (calRows ? '<dl class="at-dl">' + calRows + '</dl>' : '');
   }
 
   /* ---- 履歴(戻るで入力に戻れる・?n={key} で開き直せる) ---- */
@@ -330,13 +364,15 @@
   });
 
   (async function init() {
-    const ok = await loadArchive();
+    state.ready = loadArchive();
+    const ok = await state.ready;
     if (ok) {
       renderRecent();
       renderMap();
       renderLexicon();
       const key = new URLSearchParams(location.search).get('n');
       if (key && state.byKey.has(key)) showKey(key, false);
+      else if (key) say('この記事は、まだ取り込まれていません。本文を貼ると数えられます。', '本文を貼る');
     }
   })();
 })();

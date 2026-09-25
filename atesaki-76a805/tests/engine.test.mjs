@@ -45,7 +45,7 @@ test('3職種以上を並べた文は「職種を問わず医療職」として�
       '転職だけがキャリアではありません。', 'キャリアを職種の外まで広げて考える。'),
   });
   assert.equal(r.generalLead, true);
-  assert.ok(r.reader.text.startsWith('職種を問わず医療職で、'), r.reader.text);
+  assert.ok(r.reader.text.startsWith('医療職で、'), r.reader.text);
   assert.ok(r.raw.nurse < E.MIN_RAW && r.raw.nurse < r.raw.general / 3, '列挙の文は各職種に少ししか入らない');
 });
 
@@ -226,7 +226,7 @@ test('物語は宛先を出さない。体の仕組みの解説でタイトル�
     text: para('寒いと筋肉が震えて体温を上げる。', '自律神経が体温を保つ。', '筋肉の震えは熱を作る。', '体温が下がると震えが起きる。', 'PTの僕も驚いた。'),
   });
   assert.equal(b.main.who, 'public');
-  assert.equal(b.reader.text, '医療職以外で、体と健康の仕組みが気になっている人');
+  assert.equal(b.reader.text, '一般の読み手で、体と健康の仕組みが気になっている人');
 });
 
 test('欄の中身が URL 1本なら URL、それ以外は本文として扱う', () => {
@@ -256,4 +256,36 @@ test('タイトルの枠に本文の裏付けがあれば主役にし、裏付�
   const weak = E.analyze({ title: '年収の話', text: para('研究をした。', '論文を書いた。', '大学院に行った。', '学会で発表した。') });
   assert.equal(weak.main.topic, 'study');
   assert.equal(weak.gap.topic, true);
+});
+
+test('英字の語: 後ろの数字は許す(PT5年目)。前の英数字・後ろの英字は外す(PTA・STEP・3PT)', () => {
+  assert.deepEqual(E.scan('PT5年目とOT3年目').map(h => h.key), ['pt', 'ot']);
+  assert.deepEqual(E.scan('PTAとSTEPと3PTとAIS').map(h => h.key), []);
+});
+
+test('題の末尾のシリーズ名の中の語は、読みにも根拠にも使わない', () => {
+  const r = E.analyze({ title: '外来と入院 – PT×経営シリーズ', text: '医療経営の話をする。医療経営の数字を見る。' });
+  assert.equal(r.titleRead.who, null);
+  for (const qs of Object.values(r.evidence)) for (const q of qs) assert.notEqual(q.where, 'title');
+});
+
+test('連載の回(ep.N)は、タグのない貼った本文でも物語と見分ける', () => {
+  assert.equal(E.analyze({ title: '再生の定義 ep.30 新たな朝', text: '看護師が来た。理学療法士も来た。' }).story, true);
+});
+
+test('職種の列挙に数えるのは職業だけ(学生・経営側・一般の読み手の語では数えない)', () => {
+  const r = E.analyze({ title: '', text: '看護師として、1年目のときにご家族へ説明した。' });
+  assert.equal(r.raw.general, 0);
+});
+
+test('note の共有文(題+URL)と括弧つきの URL も URL として扱う', () => {
+  assert.equal(E.looksLikeUrl('大学院に行って https://note.com/prime_duck4944/n/n93e712e88e58'), true);
+  assert.equal(E.looksLikeUrl('「https://note.com/x/n/n93e712e88e58」'), true);
+  assert.equal(E.looksLikeUrl('www.note.com/x/n/n93e712e88e58'), true);
+});
+
+test('引用の切り出しで、絵文字を半分に切らない', () => {
+  const t = '😀'.repeat(30) + '看護師の話' + '😀'.repeat(60);
+  const r = E.analyze({ title: '', text: t + '。看護師が来た。看護師と話した。看護師の記録。' });
+  for (const qs of Object.values(r.evidence)) for (const q of qs) assert.ok(!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(q.text), q.text);
 });

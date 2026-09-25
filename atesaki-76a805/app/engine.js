@@ -13,7 +13,7 @@
                   裏付けが弱いときだけ「タイトルと本文のずれ」とする(2026-09-25 独立の読み手30本との照合で、
                   本文の値だけで決めるとずれの表示が10件中0件しか読み手と合わなかったため)
      名指し       職種の語のすぐ後に「の方」「の皆さん」が続く文(読み手への呼びかけ)は、その職種を ×ADDRESS_W
-     職種の列挙   1文に LIST_WHO 以上の職種が並ぶ文は、各職種には ×LIST_KEEP だけ入れ、「職種を問わず医療職」に入れる
+     職種の列挙   1文に LIST_WHO 以上の職業(LIST_IDS)が並ぶ文は、各職種には ×LIST_KEEP だけ入れ、「職種を問わず医療職」に入れる
      読み手に出す 値が MIN_RAW 以上、かつ軸の中の割合が MIN_SHARE 以上。2人目は1人目の SECOND_RATIO 以上のときだけ
      職種を問わず 医療職の総称が一番多い職種の GENERAL_RATIO 倍以上、または3職種以上に同じくらい触れている
      医療職以外   関心の1位が「体と健康の仕組み」で、タイトルに職種の語がない記事(臨床知識の解説)
@@ -34,7 +34,7 @@
   const { WHO, GENERAL, TOPIC, AXES, STORY } = L;
 
   // 判定の版。数え方(このファイルの定数・処理)を変えたら上げる。辞書の変更は FINGERPRINT が自動で拾う
-  const ENGINE_REV = 9;
+  const ENGINE_REV = 10;
 
   const LEAD_CHARS = 300;
   const LEAD_W = 1.5;
@@ -53,6 +53,7 @@
   const QUOTE_MIN = 20;
   const QUOTE_MAX = 88;
   const QUOTES_PER_SEG = 2;
+  const SHARE_MAX = 200;
 
   const WINDOW = 45;
   const WINDOW_WIDE = 90;
@@ -73,6 +74,7 @@
   for (const [id, s] of Object.entries(TOPIC)) SEGS[id] = Object.assign({ id, axis: 'topic' }, s);
   const SEG_IDS = Object.keys(SEGS);
   const WHO_IDS = Object.keys(WHO);
+  const LIST_IDS = ['nurse', 'rehab', 'clerk', 'care', 'otherMed']; // 列挙の判定に使う職業(学生・経営側・一般の読み手は数えない)
   const TOPIC_IDS = Object.keys(TOPIC);
 
   /* ---- 文字の正規化。全角英数を半角に(ＡＩ → AI)、改行を \n に ---- */
@@ -87,7 +89,7 @@
     return ('0000000' + h.toString(16)).slice(-8);
   }
   const FINGERPRINT = 'r' + ENGINE_REV + '-' + fnv1a(
-    JSON.stringify(SEG_IDS.map(id => [id, SEGS[id].terms])) + JSON.stringify(STORY.tags) + STORY.title.map(String).join() +
+    JSON.stringify(SEG_IDS.map(id => [id, SEGS[id].terms, SEGS[id].phrase, SEGS[id].label, SEGS[id].short])) + JSON.stringify(STORY.tags) + STORY.title.map(String).join() +
     JSON.stringify([LEAD_CHARS, LEAD_W, ADDRESS_W, LIST_WHO, LIST_KEEP, MIN_RAW, MIN_SHARE, SECOND_RATIO, GENERAL_MIN, GENERAL_RATIO, SPREAD_TOP_SHARE, FOCUS_SHARE, TITLE_MIN, BOILER_MIN, QUOTE_MIN, QUOTE_MAX]));
 
   /* ---- 語の索引。同じ語が複数の読み手に効くことがある(「新卒採用」= チーム と 学生・新人(弱く)) ---- */
@@ -100,10 +102,10 @@
     }
   }
   const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // 長い語から試す(「看護師」を「看護」より先に)。英字の語は単語の境目だけ(PT が PTA に当たらない)
+  // 長い語から試す(「看護師」を「看護」より先に)。英字の語の境目は scan で確かめる
   const TERM_RE = new RegExp([...TERM_MAP.values()]
     .sort((a, b) => b.term.length - a.term.length)
-    .map(t => t.ascii ? '\\b' + escRe(normalize(t.term)) + '\\b' : escRe(normalize(t.term)))
+    .map(t => escRe(normalize(t.term)))
     .join('|'), 'gi');
 
   /* ---- note の本文 HTML → 素の文字。段落・見出し・改行を \n にする ---- */
@@ -150,11 +152,23 @@
   }
 
   /* ---- 語を拾う。[{key, index, length}] ---- */
+  /* 英字の語は、前が英数字でなく、後ろが英字でないときだけ(PT が PTA・STEP に当たらず、「PT5年目」には当たる)。
+     後ろ読み(?<!)は古い Safari で構文エラーになるので使わず、ここで確かめる */
+  const ALNUM = /[A-Za-z0-9]/;
+  const ALPHA = /[A-Za-z]/;
   function scan(text) {
     const hits = [];
     TERM_RE.lastIndex = 0;
     let m;
-    while ((m = TERM_RE.exec(text))) hits.push({ key: m[0].toLowerCase(), index: m.index, length: m[0].length });
+    while ((m = TERM_RE.exec(text))) {
+      const key = m[0].toLowerCase();
+      const t = TERM_MAP.get(key);
+      if (t && t.ascii && ((m.index > 0 && ALNUM.test(text[m.index - 1])) || ALPHA.test(text[m.index + m[0].length] || ''))) {
+        TERM_RE.lastIndex = m.index + 1;
+        continue;
+      }
+      hits.push({ key, index: m.index, length: m[0].length });
+    }
     return hits;
   }
 
@@ -183,7 +197,7 @@
       }
     }
     // 職種の列挙: 3つ以上の職種が並ぶ文は、職種を問わない書き方として数える
-    const whoHit = WHO_IDS.filter(id => best[id]);
+    const whoHit = LIST_IDS.filter(id => best[id]);
     if (whoHit.length >= LIST_WHO) {
       best.general = Math.max(best.general || 0, ...whoHit.map(id => best[id]));
       for (const id of whoHit) best[id] *= LIST_KEEP;
@@ -202,10 +216,12 @@
 
   /* ---- タイトルを読む。短いので、弱い語(TITLE_MIN 未満)では決めない。
      「医療職」などの総称があれば、職種の名前があっても総称を呼びかけとみなす(「PT出身の僕が、医療職の〜」) ---- */
+  // 末尾のシリーズ名(「– キャリア探求シリーズ」「…シリーズ(番外編)」)は記事の約束ではないので、読みにも根拠にも使わない
+  const SERIES_RE = /\s*[–—―─-]\s*[^–—―─-]*シリーズ\s*(?:[(（][^)）]*[)）])?\s*$/;
+  const titleCore = t => String(t || '').replace(SERIES_RE, '');
   function readTitle(title) {
     if (!title) return { who: null, topic: null };
-    // 末尾のシリーズ名(「– キャリア探求シリーズ」「…シリーズ(番外編)」)は記事の約束ではないので外す
-    const { best } = readSentence(title.replace(/\s*[–—―─-]\s*[^–—―─-]*シリーズ\s*(?:[(（][^)）]*[)）])?\s*$/, ''));
+    const { best } = readSentence(titleCore(title));
     const pick = ids => ids.filter(id => best[id] >= TITLE_MIN).sort((a, b) => best[b] - best[a])[0] || null;
     const who = best.general >= TITLE_MIN ? 'general' : pick(WHO_IDS);
     return { who, topic: pick(TOPIC_IDS) };
@@ -232,7 +248,7 @@
     const tags = (input.tags || []).map(t => normalize(t).trim()).filter(Boolean);
 
     const sentences = [];
-    if (title) sentences.push({ text: title, start: -1, where: 'title', w: 0 });
+    if (titleCore(title)) sentences.push({ text: titleCore(title), start: -1, where: 'title', w: 0 });
     for (const s of splitSentences(text)) sentences.push(Object.assign(s, { where: 'body', w: s.start < LEAD_CHARS ? LEAD_W : 1 }));
 
     // 本文の値(宛先の一文はこれで決める)と、語の内訳
@@ -339,8 +355,11 @@
     if (text.length <= QUOTE_MAX) return { text, marks: sorted, where };
     const first = sorted[0][0];
     let from = Math.max(0, first - Math.floor(QUOTE_MAX / 4));
-    const to = Math.min(text.length, from + QUOTE_MAX);
+    let to = Math.min(text.length, from + QUOTE_MAX);
     from = Math.max(0, to - QUOTE_MAX);
+    const low = i => { const c = text.charCodeAt(i); return c >= 0xDC00 && c <= 0xDFFF; };
+    if (from > 0 && low(from)) from++;   // 絵文字などを半分に切らない
+    if (to < text.length && low(to)) to--;
     const pre = from > 0 ? '…' : '';
     const post = to < text.length ? '…' : '';
     const kept = sorted.filter(m => m[0] >= from && m[1] <= to).map(m => [m[0] - from + pre.length, m[1] - from + pre.length]);
@@ -372,8 +391,11 @@
   }
   /* 欄の中身が URL 1本だけか(それ以外は本文として数える) */
   function looksLikeUrl(input) {
-    const s = String(input || '').trim();
-    return !!s && !/\s/.test(s) && (/^https?:\/\//i.test(s) || /^note\.com\//i.test(s) || /^n[0-9a-f]{12}$/i.test(s));
+    const s = String(input || '').trim().replace(/^[<「『(]+|[>」』)]+$/g, '');
+    if (!s) return false;
+    if (!/\s/.test(s) && (/^https?:\/\//i.test(s) || /^(?:www\.)?note\.com\//i.test(s) || /^n[0-9a-f]{12}$/i.test(s))) return true;
+    // note の共有文(題+URL)のように短く、記事の URL を含むものも URL として扱う
+    return s.length < SHARE_MAX && /https?:\/\/\S*\/n\/n[0-9a-f]{12}/i.test(s);
   }
 
   /* ================================================================
@@ -418,10 +440,11 @@
     return { rel, near };
   }
   // 三分法: 本数が足りなければ「まだ判定できない」
-  function verdictOf(n, med, above) {
+  function verdictOf(n, med, above, below) {
+    if (below == null) below = n - above;
     if (n < MIN_N || med == null) return 'unknown';
     if (med >= MORE && above / n >= CONSISTENT) return 'more';
-    if (med <= LESS && (n - above) / n >= CONSISTENT) return 'less';
+    if (med <= LESS && below / n >= CONSISTENT) return 'less';
     return 'same';
   }
   function calibrate(items, likes, asOf) {
@@ -436,10 +459,11 @@
       const xs = usable.map(it => rel[it.key]);
       const med = median(xs);
       const above = xs.filter(x => x > 1).length;
+      const below = xs.filter(x => x < 1).length;
       bySeg[id] = {
-        n: xs.length, above, total: mine.length,
+        n: xs.length, above, below, total: mine.length,
         median: r2(med), q1: r2(quantile(xs, 0.25)), q3: r2(quantile(xs, 0.75)),
-        verdict: verdictOf(xs.length, med, above),
+        verdict: verdictOf(xs.length, med, above, below),
       };
     }
     return {

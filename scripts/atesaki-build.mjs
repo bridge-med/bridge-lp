@@ -54,17 +54,23 @@ const todayJst = () => jstDate(Date.now());
 const daysBetween = (a, b) => Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000);
 const decode = s => E.htmlToText(String(s || '').replace(/\n/g, ' '));
 
+// 404(削除・非公開にした記事)は再試行せず、status を持たせて呼び出し側で扱う。ほかの失敗は3回まで試す
 async function getText(url) {
   let last;
   for (let i = 0; i < 3; i++) {
     try {
       const res = await fetch(url, { headers: { 'User-Agent': UA } });
-      if (!res.ok) throw new Error(res.status + ' ' + url);
+      if (!res.ok) { const e = new Error(res.status + ' ' + url); e.status = res.status; throw e; }
       return await res.text();
-    } catch (e) { last = e; await sleep(3000 * 2 ** i); }
+    } catch (e) {
+      last = e;
+      if (e.status === 404) break;
+      if (i < 2) await sleep(3000 * 2 ** i);
+    }
   }
   throw last;
 }
+const gone = e => e && e.status === 404;
 
 /* ---- RSS: 最新 25 本の key・題・公開日 ---- */
 async function fetchRss() {
@@ -112,14 +118,18 @@ async function fetchPage(key) {
       if (found) { post = found; break; }
     } catch { /* 読めない JSON-LD は飛ばす */ }
   }
-  const likes = Number(((html.match(/o-noteLikeV3__count[^>]*>\s*([0-9,]+)/) || [])[1] || '').replace(/,/g, ''));
+  // スキ: 数の要素がなければ0(スキ0の記事には数が出ない)。スキの部品そのものがなければ、ページの作りが
+  // 変わったとみなして null(前の値を残す)
+  const m = html.match(/o-noteLikeV3__count[^>]*>\s*([0-9,]+)/);
+  const likes = m ? Number(m[1].replace(/,/g, '')) : (/o-noteLikeV3/.test(html) ? 0 : null);
+  if (!post.headline || !post.datePublished) throw new Error('題か公開日が読めない(JSON-LD): ' + key);
   return {
     key,
     title: decode(post.headline),
-    date: post.datePublished ? jstDate(post.datePublished) : '',
+    date: jstDate(post.datePublished),
     modified: post.dateModified || '',
     tags: String(post.keywords || '').split(',').map(s => s.trim()).filter(Boolean).map(s => '#' + s),
-    likes: Number.isFinite(likes) ? likes : null,
+    likes,
     paid: /class="[^"]*\bo-paywall\b/.test(html),
     body,
   };
@@ -127,7 +137,9 @@ async function fetchPage(key) {
 
 /* ---- 手元の写し(--cache): 2026-09-25 の初回取得のもの ---- */
 function readCache() {
-  return readJson(join(cacheDir, 'list.json'), []).map(c => {
+  const list = JSON.parse(readFileSync(join(cacheDir, 'list.json'), 'utf8'));   // 読めなければここで止まる
+  if (!Array.isArray(list) || !list.length) throw new Error('写しの一覧が空: ' + cacheDir);
+  return list.map(c => {
     const r = readJson(join(cacheDir, 'raw', c.key + '.json'), null);
     if (!r) throw new Error('写しに本文がない: ' + c.key);
     return { key: c.key, title: c.name, date: String(c.publishAt).slice(0, 10), modified: '', tags: c.hashtags || [], likes: c.likeCount, paid: (c.price || 0) > 0, body: r.body || '' };
@@ -169,6 +181,7 @@ function write(items, details, boilerplate, likes, likesUpdated) {
 
 /* ---- 全件を焼き直す(--cache / --rebuild) ---- */
 async function rebuildAll(pages) {
+  if (!pages.length) throw new Error('0本。何も書き換えない');
   const texts = pages.map(p => E.htmlToText(p.body));
   const boilerplate = E.boilerplateOf(texts);
   const ignore = new Set(boilerplate);
@@ -191,7 +204,12 @@ async function main() {
   if (rebuild) {
     const keys = new Set([...(prev ? prev.items.map(it => it.key) : []), ...(await fetchRss()).map(r => r.key)]);
     const pages = [];
-    for (const key of keys) { pages.push(await fetchPage(key)); await sleep(WAIT_MS); }
+    const skipped = [];
+    for (const key of keys) {
+      try { pages.push(await fetchPage(key)); } catch (e) { if (!gone(e)) throw e; skipped.push(key); }
+      await sleep(WAIT_MS);
+    }
+    if (skipped.length) console.error('見つからない(404)ので外した記事: ' + skipped.join(', '));
     return rebuildAll(pages);
   }
 
@@ -209,7 +227,26 @@ async function main() {
   let added = 0;
   let redone = 0;
   let first = true;
-  const visit = async key => { if (!first) await sleep(WAIT_MS); first = false; return fetchPage(key); };
+  const seen = new Map();   // 同じ回で同じ記事を二度取りに行かない
+  const visit = async key => {
+    if (seen.has(key)) return seen.get(key);
+    if (!first) await sleep(WAIT_MS);
+    first = false;
+    const page = await fetchPage(key);
+    seen.set(key, page);
+    return page;
+  };
+  const removed = [];
+  const drop = key => {
+    const i = items.findIndex(it => it.key === key);
+    if (i >= 0) items.splice(i, 1);
+    const j = details.findIndex(d => d.key === key);
+    if (j >= 0) details.splice(j, 1);
+    delete likes[key];
+    byKey.clear();
+    items.forEach((it, k) => byKey.set(it.key, k));
+    removed.push(key);
+  };
   const put = page => {
     const b = build(page, ignore);
     if (byKey.has(page.key)) { const i = byKey.get(page.key); items[i] = b.item; details[details.findIndex(d => d.key === page.key)] = b.detail; redone++; }
@@ -221,7 +258,7 @@ async function main() {
   for (const r of await fetchRss()) {
     const i = byKey.get(r.key);
     if (i != null && items[i].title === r.title) continue;
-    put(await visit(r.key));
+    try { put(await visit(r.key)); } catch (e) { if (!gone(e)) throw e; if (i != null) drop(r.key); }
   }
 
   // スキ: LIKES_EVERY 日に一度、公開から LIKES_DAYS 日以内の記事だけ読み直す。本文が更新されていれば判定も直す
@@ -229,19 +266,28 @@ async function main() {
   let likesUpdated = prevLikes.updated;
   let likesRead = false;
   if (forceLikes || !likesUpdated || daysBetween(likesUpdated, today) >= LIKES_EVERY) {
-    for (const it of items.filter(x => daysBetween(x.date, today) <= LIKES_DAYS)) {
-      const page = await visit(it.key);
+    const recent = items.filter(x => daysBetween(x.date, today) <= LIKES_DAYS);
+    const read = [];
+    for (const it of recent) {
+      let page;
+      try { page = await visit(it.key); } catch (e) { if (!gone(e)) throw e; drop(it.key); continue; }
       if (page.modified && page.modified !== it.modified) put(page);
       else if (page.likes != null) likes[it.key] = page.likes;
+      if (page.likes != null) read.push([it.key, page.likes]);
     }
+    // 読み直したスキが全部0で、前は0でなかったなら、ページの作りが変わったとみなして止める
+    const before = read.filter(([k]) => (prevLikes.likes[k] || 0) > 0);
+    if (before.length >= 3 && read.every(([, v]) => v === 0)) throw new Error('読み直したスキがすべて0。ページの作りが変わった可能性があるので書き換えない');
     likesUpdated = today;
     likesRead = true;
   }
+  if (removed.length) console.error('見つからない(404)ので外した記事: ' + removed.join(', '));
+  if (removed.length > 5) throw new Error('1回で6本以上が見つからない。note 側の不調とみなして書き換えない');
 
-  const same = added === 0 && redone === 0 && !likesRead;
+  const same = added === 0 && redone === 0 && !likesRead && !removed.length;
   if (same) { console.log('新着なし・スキの読み直しは次の回。書き換えない'); return; }
   write(items, details, prev.boilerplate || [], likes, likesUpdated);
-  console.log(`新着 ${added} 本 / 読み直し ${redone} 本 / スキ ${likesRead ? '読み直した' : 'そのまま'}`);
+  console.log(`新着 ${added} 本 / 読み直し ${redone} 本 / 外した ${removed.length} 本 / スキ ${likesRead ? '読み直した' : 'そのまま'}`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

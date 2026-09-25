@@ -98,11 +98,11 @@
 
 /* ---- 横棒の一覧(この記事の内訳 と これまでの記事)。棒は藍の細い線だけ。影・グラデーション・下地の帯なし ---- */
 .at-bars{list-style:none;border-top:1px solid var(--line)}
-.at-bars li{padding:12px 0 13px;border-bottom:1px solid var(--line)}
+.at-bars li{padding:10px 0 11px;border-bottom:1px solid var(--line)}
 .at-bars .r{display:flex;align-items:baseline;gap:10px}
 .at-bars .l{font-size:13.5px;line-height:1.6;color:var(--ink);flex:1;min-width:0}
 .at-bars .v{font:500 12px/1.6 var(--en);letter-spacing:0.02em;color:var(--ink-2);white-space:nowrap}
-.at-bars .bar{display:block;height:4px;margin-top:8px;background:var(--blue);border-radius:0;min-width:0}
+.at-bars .bar{display:block;height:4px;margin-top:6px;background:var(--blue);border-radius:0;min-width:0}
 .at-bars .bar.zero{background:none;height:4px}
 .at-bars .s{display:block;margin-top:6px;font-size:11.5px;line-height:1.7;color:var(--ink-3)}
 .at-bars .chip{margin-left:6px;vertical-align:1px}
