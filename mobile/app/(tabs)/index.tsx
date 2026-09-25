@@ -7,9 +7,10 @@ import { BuddySprite } from '../../components/BuddySprite';
 import { QuickMemoSheet } from '../../components/QuickMemoSheet';
 import { TaskSheet } from '../../components/TaskSheet';
 import { useColors } from '../../components/ThemeProvider';
+import { dismissFollowUp, followUpTarget } from '../../lib/assetize';
 import { useCoins } from '../../lib/credits';
 import { useCosmetics } from '../../lib/cosmetics';
-import { quickMemos, tasks, workLogs } from '../../lib/data';
+import { assetCandidates, logInsights, quickMemos, tasks, workLogs } from '../../lib/data';
 import { dueLabel, parseKey, startOfWeekKey, todayKey } from '../../lib/date';
 import { tapLight, tapSuccess } from '../../lib/haptics';
 import { levelInfo, stageForLevel } from '../../lib/leveling';
@@ -27,6 +28,8 @@ export default function HomeScreen() {
   const logs = useCollection(workLogs);
   const allTasks = useCollection(tasks);
   useCollection(quickMemos);
+  const insightList = useCollection(logInsights);
+  const candidates = useCollection(assetCandidates);
   const coins = useCoins();
   const prog = useProgress();
   const cos = useCosmetics();
@@ -61,6 +64,8 @@ export default function HomeScreen() {
     () => [...logs].sort((a, b) => (b.date < a.date ? -1 : b.date > a.date ? 1 : b.createdAt < a.createdAt ? -1 : 1)).slice(0, 3),
     [logs],
   );
+  const pendingAssets = useMemo(() => candidates.filter((a) => a.status === 'candidate').length, [candidates]);
+  const followUp = useMemo(() => followUpTarget(logs), [logs, insightList]);
 
   const buddy = buddyName || '相棒';
   const buddyLine = loggedToday
@@ -142,6 +147,42 @@ export default function HomeScreen() {
             <View style={styles.tDiv} />
             <Tally num={coins} label="コイン" tint={colors.gold} />
           </View>
+
+          {/* assets strip — 経験が資産に変わっていく導線（控えめに） */}
+          <View style={styles.assetStrip}>
+            <Pressable onPress={() => router.push('/assets')} style={({ pressed }) => [styles.assetCell, pressed && { opacity: 0.7 }]}>
+              <Feather name="package" size={15} color={c.primary} />
+              <Text style={styles.assetTxt}>資産候補</Text>
+              {pendingAssets > 0 ? (
+                <View style={[styles.assetBadge, { backgroundColor: c.primary }]}>
+                  <Text style={styles.assetBadgeTxt}>{pendingAssets}</Text>
+                </View>
+              ) : null}
+            </Pressable>
+            <View style={styles.tDiv} />
+            <Pressable onPress={() => router.push('/weekly')} style={({ pressed }) => [styles.assetCell, pressed && { opacity: 0.7 }]}>
+              <Feather name="calendar" size={15} color={c.primary} />
+              <Text style={styles.assetTxt}>週間レビュー</Text>
+            </Pressable>
+          </View>
+
+          {/* outcome follow-up nudge */}
+          {followUp ? (
+            <View style={[styles.followUp, { backgroundColor: c.accentWeak }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={[type.muted, { fontSize: 11, color: colors.text2 }]}>{buddy}からの質問</Text>
+                <Text style={[type.bodyMed, { marginTop: 2 }]} numberOfLines={2}>
+                  「{followUp.log.title || followUp.log.did.slice(0, 20) || 'この仕事'}」— その後どうなりましたか？
+                </Text>
+                <Pressable onPress={() => router.push(`/log/${followUp.log.id}`)} hitSlop={6} style={{ marginTop: 4 }}>
+                  <Text style={[type.bodyMed, { color: c.primary }]}>成果を追記する →</Text>
+                </Pressable>
+              </View>
+              <Pressable onPress={() => void dismissFollowUp(followUp.insight)} hitSlop={10}>
+                <Feather name="x" size={16} color={colors.muted} />
+              </Pressable>
+            </View>
+          ) : null}
 
           {/* today's tasks */}
           {dueTasks.length > 0 ? (
@@ -264,6 +305,12 @@ const styles = StyleSheet.create({
   tallyNum: { fontFamily: fonts.maruBlack, fontSize: 24, color: colors.text },
   tallyLbl: { fontFamily: fonts.gothic, fontSize: 11, color: colors.text2 },
   tDiv: { width: StyleSheet.hairlineWidth, height: 30, backgroundColor: colors.line },
+  assetStrip: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, marginTop: spacing.md, paddingVertical: 12 },
+  assetCell: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  assetTxt: { fontFamily: fonts.maruMed, fontSize: 13.5, color: colors.text },
+  assetBadge: { minWidth: 20, height: 18, borderRadius: 9, paddingHorizontal: 5, alignItems: 'center', justifyContent: 'center' },
+  assetBadgeTxt: { fontFamily: fonts.gothicBold, fontSize: 11, color: '#fff' },
+  followUp: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md },
   todoCard: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line, paddingHorizontal: spacing.md },
   todoRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: 13 },
   todoCheck: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5 },

@@ -66,6 +66,7 @@ npx expo start          # QR を Expo Go で読む / npm run ios|android
 - **語学カード** `lib/lang.ts` ＋ `app/lang.tsx`：仕事ログを英語・韓国語の学習カード（訳＋単語帳）に変換（1回1コイン）。現状はグロッサリでプレビュー、本番はサーバ翻訳に差し替え。
 - 「そだち」タブ＝成長ダッシュボード＋キャリア/自己理解モジュール。
 - **毎日のリマインダー** `lib/notifications.ts`：設定でON＋時間を選ぶと、ローカル通知が毎日届く（連続記録の習慣化）。web は非対応で自動 no-op、実機（dev/本番ビルド）で有効。
+- **資産化（v1.1）** `lib/assetize.ts` ＋ `app/assets.tsx` / `app/asset/[id].tsx` / `app/weekly.tsx` / `app/portfolio.tsx`：ログ保存後にAIが1回のバッチ呼び出しで「キャリア実績・スキル・STAR・公開リスク・資産候補(X/note/テンプレ/プロダクト/ストーリー)」を抽出（kind `assetize`、結果は `log_insights`/`asset_candidates` にキャッシュ）。成果の後追い記入（フォローアップ）、週間レビュー（ローカル集計＋AI横断提案 kind `weekly`）、ポートフォリオ自動生成。バックエンド未更新/未設定時はローカル簡易分析に自動フォールバック。**サーバ更新が必要**：`npx supabase functions deploy ai --no-verify-jwt`。
 - **語学コース（英語/韓国語）** `components/CourseScreen.tsx` ＋ `lib/courses.ts` / `lib/vocab*.ts` / `lib/vocabdeck.ts`：英語=中学〜高校・TOEIC約7,500語、韓国語=厳選コア（初級/中級、手キュレーションの検証済み訳＋ローマ字）。Leitner＋復習間隔のSRS（言語別に進捗を名前空間化）、発音TTS（`expo-speech`、en-US/ko-KR）、学習で相棒のXP獲得。韓国語データは `scripts/build-vocab-ko.mjs` で生成。
   - データは `scripts/build-vocab.mjs` が公開コーパス（CEFR-J / octanove / EJDict-hand / FrequencyWords）から `assets/vocab.json` を生成。出典・ライセンスは `assets/vocab.NOTICE.md`。再生成は `node scripts/build-vocab.mjs`（要ネットワーク）。
 

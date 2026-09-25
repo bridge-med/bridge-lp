@@ -24,6 +24,7 @@ export const XP = {
   workstyle: 18,
   module: 8,
   study: 10, // completing a vocabulary study session
+  outcome: 8, // adding a real result to a past log (成果の追跡)
   dailyBonus: 15, // first activity of a real "today"
 } as const;
 

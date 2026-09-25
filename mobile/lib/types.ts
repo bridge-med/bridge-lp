@@ -93,6 +93,47 @@ export interface GenericRecord extends BaseRecord {
   [k: string]: unknown;
 }
 
+// ---- Assetization (v1.1: 経験→キャリア資産) ---------------------------------
+
+export type RiskLevel = 'low' | 'medium' | 'high';
+export type InsightStrength = 'weak' | 'normal' | 'strong';
+
+/** AI (or local-fallback) analysis of a single work log. One per log. */
+export interface LogInsight extends BaseRecord {
+  logId: ID;
+  /** 職務経歴書・評価面談向けの実績表現 */
+  achievement: string;
+  strength: InsightStrength;
+  /** 正直な一言（例: 成果を確認すると実績として強くなります） */
+  strengthNote: string;
+  skills: string[];
+  star: { s: string; t: string; a: string; r: string; resultMissing: boolean };
+  /** Knowledge Areas（例: 業務改善, 医療経営） */
+  areas: string[];
+  risk: { level: RiskLevel; notes: string[] };
+  /** 後から追記した成果（成果の追跡） */
+  outcome?: { note: string; addedAt: string };
+  followUpDismissed?: boolean;
+  source: 'ai' | 'local';
+}
+
+export type AssetKind = 'x' | 'note' | 'template' | 'product' | 'career_story';
+export type AssetStatus = 'candidate' | 'developing' | 'ready' | 'published' | 'archived';
+
+/** 外部資産化できそうなもの（ログから抽出） */
+export interface AssetCandidate extends BaseRecord {
+  kind: AssetKind;
+  status: AssetStatus;
+  title: string;
+  /** ひとことで何が価値か */
+  summary: string;
+  /** 種類ごとの本文（切り口/投稿案、読者/構成、テンプレ概要、アイデア詳細 等） */
+  detail: string;
+  areas: string[];
+  sourceLogIds: ID[];
+  risk?: { level: RiskLevel; notes: string[]; anonymized: string[] };
+}
+
 export type LangCode = 'en' | 'ko';
 
 export interface VocabItem {
@@ -121,4 +162,6 @@ export interface ExportBundle {
   careerOutputs: CareerOutput[];
   langCards?: LangCard[];
   modules?: Record<string, GenericRecord[]>;
+  logInsights?: LogInsight[];
+  assetCandidates?: AssetCandidate[];
 }
