@@ -165,6 +165,8 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 | B-10 | どの段にも入らない半径: `.j-thumb` `.lab-shot`(9px)・トップ `.s2-frame`(10px) | journal・トップ | 寄せる段は社長の審美判断 |
 | B-11 | Projects の `<noscript>` がリンクのない一文だけ(JS なしで行き止まり) | projects | 第26条。次に Projects を触るとき |
 | B-12 | 第22条の3つ(句点・分岐点・現在地)を超える砂の用途: 番号・年・英字ラベル(`.row-num` `.princ-num` `.svc-num` `.pub-y` `.story-k` `.way-en` `.drawer-item .en`)、道のりの最後の点 | 共通・各ページ | 解釈を要する。社長判断 |
+| B-13 | 背の高い `.page-hero`(入力や一覧を抱えるもの)では `.ph-lines` が拡大されて太くなり、小さい文字を横切る。`.facts` に `--bg` を敷く対処が2か所(`.cp-facts`・`.at-facts`) | compass・atesaki-76a805 | 3か所目が出たら `.page-hero` の側で解く(`.ph-lines` の高さの上限など)。2026-09-26 designer 起票 |
+| B-14 | 折りたたみ(`.cp-more`・`.at-more`。Pill の summary)と罫線の行(`.cp-links`・`.at-links`)が2か所で同じ形 | compass・atesaki-76a805 | 3か所目で共通化する(§6 の2)。2026-09-26 designer 起票 |
 | C-1 | トップの夜の場の色の直書き(`#051816` など) | `index.html` | 意図的な例外。第22条 v1.5 の範囲内 |
 | C-2 | `--glass-ink` が未使用 | `bridge.css` | 憲法が用途2「ゲーム紹介の帯」の文言を残しているため、対のトークンも残す |
 | C-3 | 文中の文字リンク(about の連絡先など)が 44px 未満 | 文中 | 文中のリンクは行の高さに従う(WCAG 2.5.8 の例外と同じ) |

@@ -162,11 +162,11 @@ test('辞書: 重みは 0〜3、同じ読み手の中で語が重ならない、
   assert.deepEqual(LX.AXES.map(a => a.id), ['who', 'topic']);
 });
 
-/* ---- 焼いたデータ(yomite/data)と判定の版 ---- */
+/* ---- 焼いたデータ(atesaki-76a805/data)と判定の版 ---- */
 const DATA = join(ROOT, 'data');
 const archive = JSON.parse(readFileSync(join(DATA, 'archive.json'), 'utf8'));
 
-test('焼いたデータの判定の版が、いまの辞書・判定と一致する(違えば node scripts/yomite-build.mjs で焼き直す)', () => {
+test('焼いたデータの判定の版が、いまの辞書・判定と一致する(違えば node scripts/atesaki-build.mjs --rebuild で焼き直す)', () => {
   assert.equal(archive.fingerprint, E.FINGERPRINT);
 });
 

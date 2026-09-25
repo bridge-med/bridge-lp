@@ -8,6 +8,7 @@
 
 .at .en{font-family:var(--en)}
 [tabindex="-1"]:focus{outline:none}
+.at-meta a.t:focus-visible,.at-again .btn:focus-visible,.at-range .tag:focus-visible,.at-msg-act:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 
 /* ---- 開き: ヒーローの上下を少し詰め、375×667 の最初の画面に欄と主ボタンが入るように ---- */
 .at-hero{padding-top:clamp(108px,17vh,200px);padding-bottom:clamp(48px,8vh,88px)}
@@ -25,11 +26,13 @@
 .at-in:focus{outline:2px solid var(--blue);outline-offset:2px;border-color:var(--blue)}
 .at-msg{min-height:0;font-size:13px;line-height:1.9;color:var(--ink-2);margin-top:8px}
 .at-msg:empty{margin-top:0}
-.at-msg .at-msg-act{display:inline-block;margin-left:4px;color:var(--blue);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:0;font:inherit;min-height:44px;padding:0 2px}
+.at-msg .at-msg-act{display:inline;position:relative;margin-left:4px;color:var(--blue);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:0;font:inherit;min-height:0;padding:0}
+.at-msg .at-msg-act::after{content:'';position:absolute;inset:-12px -4px} /* 見た目は文中のリンクのまま、タップ領域を44pxに */
 .at-act{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;margin-top:14px}
 .at-go{min-height:48px;justify-content:center}
 .at-go:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.at-facts li{white-space:normal;line-height:1.5}
+/* ヒーローの線(.ph-lines)が背の高いヒーローで太くなり、小さい文字を横切るため、地を敷く(Compass の .cp-facts と同じ) */
+.at-facts li{white-space:normal;line-height:1.5;background:var(--bg)}
 @media(max-width:600px){
   .at-go{width:100%}
 }
@@ -37,7 +40,7 @@
 /* ---- 最近の記事: 罫線で区切った行(Compass の .cp-links と同じ役割) ---- */
 .at-recent{margin-top:clamp(28px,4.4vh,44px)}
 .at-recent-h{font:700 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-2);margin-bottom:6px}
-.at-links{list-style:none;border-top:1px solid var(--line)}
+.at-links{list-style:none;border-top:1px solid var(--line);background:var(--bg)}
 .at-links li{border-bottom:1px solid var(--line)}
 .at-links a{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 14px;min-height:56px;padding:10px 2px;transition:color .2s}
 .at-links a:hover .t{color:var(--blue)}
@@ -48,10 +51,10 @@
 
 /* ---- 結果 ---- */
 .at-result{padding-top:clamp(56px,9vh,110px)}
-.at-col{max-width:var(--text-max)}
+.at-col{max-width:var(--text-max);margin-left:max(0px,calc((100% - var(--max)) / 2));margin-right:auto} /* ヒーローと同じ左の軸 */
 .at-meta{display:flex;flex-direction:column;gap:6px;padding-bottom:22px;border-bottom:1px solid var(--line)}
 .at-meta .t{font:600 15px/1.8 var(--mincho);color:var(--ink-2)}
-.at-meta a.t{display:inline-flex;align-items:center;min-height:44px;gap:8px;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.at-meta a.t{display:block;min-height:44px;padding:8px 0;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
 .at-meta a.t:hover{color:var(--ink);text-decoration-color:var(--ink-3)}
 .at-meta .m{font:500 11.5px/1.6 var(--en);letter-spacing:0.04em;color:var(--ink-3)}
 .at-k{margin-top:30px;font:700 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-2)}
@@ -72,6 +75,7 @@
 
 .at-p{font-size:14px;line-height:2;color:var(--ink-2)}
 .at-p + .at-p{margin-top:6px}
+.at-p + .at-small{margin-top:10px}
 .at-small{font-size:12.5px;line-height:1.9;color:var(--ink-3)}
 
 /* 折りたたみ(Compass の .cp-more と同じ形。summary は 44px) */
@@ -98,7 +102,7 @@
 .at-bars .r{display:flex;align-items:baseline;gap:10px}
 .at-bars .l{font-size:13.5px;line-height:1.6;color:var(--ink);flex:1;min-width:0}
 .at-bars .v{font:500 12px/1.6 var(--en);letter-spacing:0.02em;color:var(--ink-2);white-space:nowrap}
-.at-bars .bar{display:block;height:4px;margin-top:8px;background:var(--blue);border-radius:1px;min-width:0}
+.at-bars .bar{display:block;height:4px;margin-top:8px;background:var(--blue);border-radius:0;min-width:0}
 .at-bars .bar.zero{background:none;height:4px}
 .at-bars .s{display:block;margin-top:6px;font-size:11.5px;line-height:1.7;color:var(--ink-3)}
 .at-bars .chip{margin-left:6px;vertical-align:1px}
