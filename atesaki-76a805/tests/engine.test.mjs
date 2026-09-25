@@ -289,3 +289,10 @@ test('引用の切り出しで、絵文字を半分に切らない', () => {
   const r = E.analyze({ title: '', text: t + '。看護師が来た。看護師と話した。看護師の記録。' });
   for (const qs of Object.values(r.evidence)) for (const q of qs) assert.ok(!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(q.text), q.text);
 });
+
+test('題だけが名指しして本文に言葉がない下書きは、宛先を出さず、題の読みだけを持つ', () => {
+  const r = E.analyze({ title: '看護師のキャリアの選び方', text: '今日は雨だった。駅まで歩いた。' });
+  assert.equal(r.reader.found, false);
+  assert.equal(r.titleRead.who, 'nurse');
+  assert.equal(r.titleRead.topic, 'career');
+});

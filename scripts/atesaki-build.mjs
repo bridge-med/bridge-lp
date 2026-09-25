@@ -40,6 +40,8 @@ const LIKES_DAYS = 60;      // スキを読み直す記事(公開からの日数
 const DATA = join(repo, 'atesaki-76a805', 'data');
 const argv = process.argv.slice(2);
 const cacheDir = argv.includes('--cache') ? argv[argv.indexOf('--cache') + 1] : null;
+// --cache のあとにフォルダがないとき、ふだんの取り込み(通信)に落ちないように止める
+if (argv.includes('--cache') && (!cacheDir || cacheDir.startsWith('--'))) { console.error('--cache <dir> のフォルダがない。何もしない'); process.exit(1); }
 const rebuild = argv.includes('--rebuild');
 const forceLikes = argv.includes('--force-likes');
 
@@ -268,13 +270,16 @@ async function main() {
   if (forceLikes || !likesUpdated || daysBetween(likesUpdated, today) >= LIKES_EVERY) {
     const recent = items.filter(x => daysBetween(x.date, today) <= LIKES_DAYS);
     const read = [];
+    let unreadable = 0;
     for (const it of recent) {
       let page;
       try { page = await visit(it.key); } catch (e) { if (!gone(e)) throw e; drop(it.key); continue; }
       if (page.modified && page.modified !== it.modified) put(page);
       else if (page.likes != null) likes[it.key] = page.likes;
-      if (page.likes != null) read.push([it.key, page.likes]);
+      if (page.likes != null) read.push([it.key, page.likes]); else unreadable++;
     }
+    // スキの部品が読めないページがあれば、数えた日(likes.updated)を進めない。古い値を今日の値として比べに入れないため
+    if (unreadable) throw new Error(`スキの部品が読めないページが ${unreadable} 本。ページの作りが変わった可能性があるので書き換えない`);
     // 読み直したスキが全部0で、前は0でなかったなら、ページの作りが変わったとみなして止める
     const before = read.filter(([k]) => (prevLikes.likes[k] || 0) > 0);
     if (before.length >= 3 && read.every(([, v]) => v === 0)) throw new Error('読み直したスキがすべて0。ページの作りが変わった可能性があるので書き換えない');

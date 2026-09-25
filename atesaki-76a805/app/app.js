@@ -101,7 +101,7 @@
       if (state.byKey.has(p.key)) { say(''); showKey(p.key, true); return; }
       const me = state.archive.user;
       if (p.user && p.user !== me) {
-        say(`取り込んであるのは ${me} の記事です。ほかの人の記事は、本文を貼ると数えられます(辞書は ${me} の記事に合わせて作っています)。`, '本文を貼る');
+        say(`取り込んであるのは ${me} の記事です。ほかの人の記事は、本文を貼ると数えられます(辞書は、取り込んだ記事に合わせて作っています)。`, '本文を貼る');
       } else if (p.user === me) {
         say(`この記事は、取り込み済みの一覧の外にあります。公開したばかりの記事なら、次の取り込み(${INGEST_TIMES})で入ります。今すぐ見るときは、本文を貼って数えられます。`, '本文を貼る');
       } else {
@@ -169,6 +169,11 @@
   function gapLine(vm) {
     const t = vm.titleRead || {};
     if (vm.story || (!t.who && !t.topic)) return '';
+    // 本文から宛先を読み取れなかったときは、題が向いている先だけを言う(「そろっている」とは言わない)
+    if (!(vm.reader || {}).found) {
+      const named = [t.who, t.topic].filter(Boolean).map(id => bold(shortOf(id))).join('・');
+      return `<p>タイトルは${named}に向いています。宛先を読み取れるだけの言葉があるのは、いまはタイトルだけです。</p>`;
+    }
     if (!vm.gap.who && !vm.gap.topic) return '<p>タイトルと本文の宛先は、そろっています。</p>';
     const side = (who, topic) => [vm.gap.who ? shortOf(who) : '', vm.gap.topic ? shortOf(topic) : ''].filter(Boolean).map(bold).join('・');
     return `<p>タイトルは${side(t.who, t.topic)}に、本文は${side(vm.main.who, vm.main.topic)}に向いた言葉が多い記事です。</p>`;
@@ -206,7 +211,7 @@
     let quiet = false;
     const notes = [];
     if (vm.story) {
-      kicker = '物語の回です';
+      kicker = '物語の回として読みました';
       heading = '宛先の一文の代わりに、内訳を出します';
       quiet = true;
       notes.push('<p>登場人物の職種の言葉は、読み手の職種と重なるとは限らないためです。</p>');
@@ -221,11 +226,12 @@
 
     const meta = vm.source === 'archive'
       ? `<a class="t" href="${esc(vm.url)}" target="_blank" rel="noopener">${esc(vm.title)} <span aria-hidden="true">↗</span></a>` +
-        `<span class="m">${esc(vm.date)}${vm.likes != null ? ' · スキ ' + vm.likes : ''}${vm.settling ? '(公開から7日未満。7日たつとスキの比べに入ります)' : ''}</span>`
+        `<span class="m">${esc(vm.date)}${vm.likes != null ? ' · スキ ' + vm.likes : ''}${vm.settling ? '(公開から7日未満。7日を過ぎたあと、次にスキを読み直したときに比べに入ります)' : ''}</span>`
       : `<p class="t">${esc(vm.title || '貼った本文')}</p>` +
         `<span class="m">${vm.chars}字 · この端末の中だけで数えました${vm.fromFirstLine ? ' · 1行目をタイトルとして読みました' : ''}</span>`;
 
-    const lines = notes.concat([gapLine(vm), contrastLine(vm), vm.paid ? '<p>有料記事は、無料で読める部分だけを数えています。</p>' : '']).filter(Boolean);
+    const contrast = contrastLine(vm);
+    const lines = notes.concat([gapLine(vm), contrast, vm.paid ? '<p>有料記事は、無料で読める部分だけを数えています。</p>' : '']).filter(Boolean);
 
     const quotes = [];
     for (const id of [vm.main && vm.main.who, vm.main && vm.main.topic]) {
@@ -248,7 +254,7 @@
           '<h3 class="at-sub">誰に(本文の職種の言葉の割合)</h3>' + barsHtml(E.WHO_IDS, (vm.share || {}).who || {}, vm.words || {}) +
           ((vm.words || {}).general ? `<p class="at-small">職種を名指ししない言葉: ${esc(vm.words.general.map(x => `${x.term}×${x.count}`).join('・'))}</p>` : '') +
           '<h3 class="at-sub">何に(本文の関心の言葉の割合)</h3>' + barsHtml(E.TOPIC_IDS, (vm.share || {}).topic || {}, vm.words || {}) +
-          '<p class="at-small">割合は、その軸の言葉が出てきた文を、語の重みをかけて数えたものです。タイトルは割合とは別に読み、本文と並べています。複数の記事に同じ形で出る行(シリーズの案内・告知)は、数える前に外しています。「いつもの記事」は、物語を除くこれまでの記事の平均です。</p>' +
+          '<p class="at-small">割合は、その軸の言葉が出てきた文を、語の重みをかけて数えたものです。タイトルは割合とは別に読み、本文と並べています。複数の記事に同じ形で出る行(シリーズの案内・告知)は、数える前に外しています。' + (contrast ? '「いつもの記事」は、物語を除くこれまでの記事の平均です。' : '') + '</p>' +
         '</div></details>' +
         '<div class="at-again"><button class="btn ghost" type="button" id="atAgain">別の記事を数える</button></div>' +
       '</div>';
@@ -264,6 +270,7 @@
   }
 
   function backToInput() {
+    state.seq++;   // 読み込み中の記事があっても、戻ったあとで描かせない
     state.current = null;
     result.hidden = true;
     result.innerHTML = '';
@@ -317,12 +324,12 @@
     for (const it of pool) for (const id of E.segsOf(it)) counts[id] = (counts[id] || 0) + 1;
 
     renderRange();
-    $('atMapNote').textContent = `${pool.length}本の記事を数えています${stories ? `(物語の${stories}本は別にしています)` : ''}。1本の記事が、複数の宛先に入ることがあります。`;
+    $('atMapNote').textContent = `${stories ? `物語の${stories}本を除いた、` : ''}${pool.length}本の記事を数えています。1本の記事が、複数の宛先に入ることがあります。`;
     $('atBarsWho').innerHTML = mapRows(WHO_ORDER, counts, false);
     $('atBarsTopic').innerHTML = mapRows(TOPIC_ORDER, counts, true);
     $('atMapLikes').textContent =
       `スキの行は全期間で数え、比べられる記事が${E.MIN_N}本以上ある関心にだけ出しています。` +
-      'スキから分かるのは押された数までで、言葉がスキを動かしたとまでは言えません。数え方は「数えている言葉とスキの数字」にあります。';
+      'スキから分かるのは押された数までです。曜日や投稿の時刻、note のおすすめも重なるので、言葉がスキを動かしたとまでは言えません。数え方は「数えている言葉とスキの数字」にあります。';
     map.hidden = false;
     if (window.BRIDGE && window.BRIDGE.applyBudoux) window.BRIDGE.applyBudoux(map);
   }
@@ -340,7 +347,7 @@
     const calRows = TOPIC_ORDER.map(id => {
       const b = state.cal ? state.cal.bySeg[id] : null;
       if (!b || !b.n) return '';
-      const v = b.n < E.MIN_N ? `${b.n}本(判定は${E.MIN_N}本から)` : `${b.n}本 · 中央値 ${b.median} · 真ん中の半分は ${b.q1}〜${b.q3}`;
+      const v = b.n < E.MIN_N ? `${b.n}本(判定は${E.MIN_N}本から)` : `${b.n}本 · 中央値 ${b.median}倍 · 真ん中の半分は ${b.q1}〜${b.q3}倍`;
       return `<dt>${esc(S[id].short)}</dt><dd>${esc(v)}</dd>`;
     }).join('');
     const c = state.cal;
@@ -350,8 +357,8 @@
       '<h3 class="at-sub">誰に</h3><ul class="at-lex">' + WHO_ORDER.map(seg).join('') + '</ul>' +
       '<h3 class="at-sub">何に</h3><ul class="at-lex">' + TOPIC_ORDER.map(seg).join('') + '</ul>' +
       '<h3 class="at-sub">スキの数字</h3>' +
-      `<p class="at-small">スキを数えた日に公開から7日以上たっていた記事(物語・有料を除く${c.counted}本)のスキを、前後45日(記事が少ない時期は90日)に出した記事のスキの中央値と比べています。` +
-      `多め・少なめを出すのは、比べられる記事が${E.MIN_N}本以上ある関心だけです。中央値が${E.MORE}倍以上なら「多め」、${E.LESS}倍以下なら「少なめ」とします(どちらも、3分の2以上の記事が同じ向きのとき)。それ以外は「ふだんの幅の中」です。` +
+      `<p class="at-small">記事ごとに、スキが「前後45日(記事が少ない時期は90日)に出した記事のスキの中央値」の何倍かを出しています。数えるのは、スキを数えた日に公開から7日以上たっていた記事(物語・有料を除く${c.counted}本)です。` +
+      `関心ごとにこの倍率の中央値を見て、${E.MORE}倍以上なら「多め」、${E.LESS}倍以下なら「少なめ」とします(どちらも、3分の2以上の記事が同じ向きのとき)。それ以外は「ふだんの幅の中」です。多め・少なめを出すのは、比べられる記事が${E.MIN_N}本以上ある関心だけです。` +
       (likesAt ? `スキの数は${esc(likesAt)}時点です(公開から${LIKES_DAYS}日を過ぎた記事は、それより前に数えた値)。` : '') + '</p>' +
       (calRows ? '<dl class="at-dl">' + calRows + '</dl>' : '');
   }
@@ -372,7 +379,7 @@
       renderLexicon();
       const key = new URLSearchParams(location.search).get('n');
       if (key && state.byKey.has(key)) showKey(key, false);
-      else if (key) say('この記事は、まだ取り込まれていません。本文を貼ると数えられます。', '本文を貼る');
+      else if (key) say('この記事は、取り込み済みの一覧の外にあります。本文を貼ると数えられます。', '本文を貼る');
     }
   })();
 })();
