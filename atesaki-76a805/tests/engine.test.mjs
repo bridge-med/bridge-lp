@@ -212,6 +212,7 @@ test('タイトルと本文を分けて読む: タイトルが医療職全体、
 test('タイトルは弱い語で決めない。末尾のシリーズ名は読まない', () => {
   assert.equal(E.readTitle('病棟で考えたこと').who, null, '病棟(重み1)では看護師と読まない');
   assert.equal(E.readTitle('研究を選ばなかった理由 – キャリア探求シリーズ').topic, 'study');
+  assert.equal(E.readTitle('研究との出会い – キャリア探求シリーズ(番外編)').topic, 'study');
   assert.equal(E.readTitle('PT出身の僕が、医療職のキャリアを考える').who, 'general');
 });
 

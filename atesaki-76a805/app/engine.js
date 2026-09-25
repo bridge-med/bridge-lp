@@ -34,7 +34,7 @@
   const { WHO, GENERAL, TOPIC, AXES, STORY } = L;
 
   // 判定の版。数え方(このファイルの定数・処理)を変えたら上げる。辞書の変更は FINGERPRINT が自動で拾う
-  const ENGINE_REV = 8;
+  const ENGINE_REV = 9;
 
   const LEAD_CHARS = 300;
   const LEAD_W = 1.5;
@@ -204,8 +204,8 @@
      「医療職」などの総称があれば、職種の名前があっても総称を呼びかけとみなす(「PT出身の僕が、医療職の〜」) ---- */
   function readTitle(title) {
     if (!title) return { who: null, topic: null };
-    // 末尾のシリーズ名(「– キャリア探求シリーズ」)は記事の約束ではないので外す
-    const { best } = readSentence(title.replace(/\s*[–—―─-]\s*[^–—―─-]*シリーズ\s*$/, ''));
+    // 末尾のシリーズ名(「– キャリア探求シリーズ」「…シリーズ(番外編)」)は記事の約束ではないので外す
+    const { best } = readSentence(title.replace(/\s*[–—―─-]\s*[^–—―─-]*シリーズ\s*(?:[(（][^)）]*[)）])?\s*$/, ''));
     const pick = ids => ids.filter(id => best[id] >= TITLE_MIN).sort((a, b) => best[b] - best[a])[0] || null;
     const who = best.general >= TITLE_MIN ? 'general' : pick(WHO_IDS);
     return { who, topic: pick(TOPIC_IDS) };
