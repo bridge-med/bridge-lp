@@ -1,0 +1,103 @@
+name: Refresh atesaki data
+
+# 宛先しらべ(atesaki-76a805)の記事データを取り込む。note の予約投稿(7:00・19:00 JST)の後に回す。
+# 読むのは robots.txt が許すパスだけ(RSS と記事ページ)。/api/* は使わない(scripts/atesaki-build.mjs 冒頭)。
+# 新着がなく、スキの読み直し(7日に一度)の日でもなければ、何も書き換えずコミットもしない。
+# 判定の版が焼いたデータと違うときは取り直さずに失敗させる(手元で --rebuild してからコミットする)。
+#
+# master へ直接プッシュするので、プッシュしてよいものを生成データ(atesaki-76a805/data/ 直下の、ふつうのファイルの変更・追加)に
+# 限る。それ以外の変更(ほかのファイル・data/ の下のフォルダ・削除・名前の変更・シンボリックリンクや入れ子のリポジトリ)が
+# 1つでもあれば、コミットもプッシュもせずに失敗させる。確かめるのは2回:
+#   1. コミットの前: 作業ツリーの変更(追跡していない新しいファイルも含む)
+#   2. プッシュの直前: master の最新との差(1コミットだけで、中身が data/ 直下の変更・追加だけ)
+# master 以外のブランチで手動実行したときは、ジョブごと動かさない。
+
+on:
+  schedule:
+    - cron: '40 22 * * *' # 22:40 UTC = 7:40 JST
+    - cron: '40 10 * * *' # 10:40 UTC = 19:40 JST
+  workflow_dispatch:
+    inputs:
+      force_likes:
+        description: 'スキを日数に関係なく読み直す'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: refresh-atesaki
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch and analyze new articles
+        run: node scripts/atesaki-build.mjs ${{ inputs.force_likes && '--force-likes' || '' }}
+      - name: Check data consistency
+        run: node --test atesaki-76a805/tests/*.test.mjs
+      # この段の中身は atesaki-76a805/tests/workflow-guard.test.mjs が取り出して、手元の git で確かめている
+      - name: Commit and push (generated data only)
+        id: commit
+        run: |
+          set -euo pipefail
+          # 許すのは atesaki-76a805/data/ 直下の、ふつうのファイル(100644)の変更(M)と追加(A)だけ。許さない行を出す
+          # 入力は git diff --raw の行(":旧mode 新mode 旧sha 新sha 状態<TAB>パス")
+          outside() {
+            awk -F '\t' '{ split($1, m, " ") } !(NF == 2 && (m[5] == "M" || m[5] == "A") && m[2] == "100644" && $2 ~ "^atesaki-76a805/data/[^/]+$")'
+          }
+          git add -A
+          changes=$(git diff --cached --raw --no-renames)
+          if [ -z "$changes" ]; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            echo "新着なし。今回は静かなまま"
+            exit 0
+          fi
+          bad=$(printf '%s\n' "$changes" | outside)
+          if [ -n "$bad" ]; then
+            echo "::error::生成データ(atesaki-76a805/data/*)以外の変更がある。コミットもプッシュもしない"
+            printf '%s\n' "$bad"
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git commit -q -m 'chore(atesaki): 記事データの取り込み'
+          git fetch -q origin +refs/heads/master:refs/remotes/origin/master
+          git rebase -q origin/master
+          ahead=$(git rev-list --count origin/master..HEAD)
+          if [ "$ahead" = "0" ] && git diff --quiet origin/master HEAD; then
+            # 同じ内容が先に master に入っていた(rebase が取り込みのコミットを空として落とした)。押し出すものはない
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            echo "同じデータがすでに master にある。今回はプッシュしない"
+            exit 0
+          fi
+          if [ "$ahead" != "1" ]; then
+            echo "::error::master の最新より ${ahead} コミット先にある(取り込みの1コミットだけのはず)。プッシュしない"
+            exit 1
+          fi
+          bad=$(git diff --raw --no-renames origin/master HEAD | outside)
+          if [ -n "$bad" ]; then
+            echo "::error::プッシュしようとした中身に、生成データ(atesaki-76a805/data/*)以外の変更がある。プッシュしない"
+            printf '%s\n' "$bad"
+            exit 1
+          fi
+          git push origin HEAD:master
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
+            -d '{"ref":"master"}'
