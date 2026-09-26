@@ -4,6 +4,12 @@ name: Refresh atesaki data
 # 読むのは robots.txt が許すパスだけ(RSS と記事ページ)。/api/* は使わない(scripts/atesaki-build.mjs 冒頭)。
 # 新着がなく、スキの読み直し(7日に一度)の日でもなければ、何も書き換えずコミットもしない。
 # 判定の版が焼いたデータと違うときは取り直さずに失敗させる(手元で --rebuild してからコミットする)。
+#
+# master へ直接プッシュするので、プッシュしてよいものを生成データ(atesaki-76a805/data/ 直下のファイルの変更・追加)に
+# 限る。それ以外の変更が1つでもあれば、コミットもプッシュもせずに失敗させる。確かめるのは2回:
+#   1. コミットの前: 作業ツリーの変更(追跡していない新しいファイルも含む)
+#   2. プッシュの直前: master の最新との差(1コミットだけで、中身が data/ 直下の変更・追加だけ)
+# master 以外のブランチで手動実行したときは、ジョブごと動かさない。
 
 on:
   schedule:
@@ -26,6 +32,7 @@ concurrency:
 
 jobs:
   refresh:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,21 +43,46 @@ jobs:
         run: node scripts/atesaki-build.mjs ${{ inputs.force_likes && '--force-likes' || '' }}
       - name: Check data consistency
         run: node --test atesaki-76a805/tests/*.test.mjs
-      - name: Commit if changed
+      # この段の中身は atesaki-76a805/tests/workflow-guard.test.mjs が取り出して、手元の git で確かめている
+      - name: Commit and push (generated data only)
         id: commit
         run: |
-          if git diff --quiet -- atesaki-76a805/data; then
+          set -euo pipefail
+          # 許すのは atesaki-76a805/data/ 直下のファイルの変更(M)と追加(A)だけ。許さない行を出す
+          outside() {
+            awk -F '\t' '!(NF == 2 && ($1 == "M" || $1 == "A") && $2 ~ "^atesaki-76a805/data/[^/]+$")'
+          }
+          git add -A
+          changes=$(git diff --cached --name-status --no-renames)
+          if [ -z "$changes" ]; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "新着なし。今回は静かなまま"
-          else
-            git config user.name 'github-actions[bot]'
-            git config user.email 'github-actions[bot]@users.noreply.github.com'
-            git add atesaki-76a805/data
-            git commit -m 'chore(atesaki): 記事データの取り込み'
-            git pull --rebase origin master
-            git push origin HEAD:master
-            echo "pushed=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          bad=$(printf '%s\n' "$changes" | outside)
+          if [ -n "$bad" ]; then
+            echo "::error::生成データ(atesaki-76a805/data/*)以外の変更がある。コミットもプッシュもしない"
+            printf '%s\n' "$bad"
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git commit -q -m 'chore(atesaki): 記事データの取り込み'
+          git fetch -q origin +refs/heads/master:refs/remotes/origin/master
+          git rebase -q origin/master
+          ahead=$(git rev-list --count origin/master..HEAD)
+          if [ "$ahead" != "1" ]; then
+            echo "::error::master の最新より ${ahead} コミット先にある(取り込みの1コミットだけのはず)。プッシュしない"
+            exit 1
+          fi
+          bad=$(git diff --name-status --no-renames origin/master HEAD | outside)
+          if [ -n "$bad" ]; then
+            echo "::error::プッシュしようとした中身に、生成データ(atesaki-76a805/data/*)以外の変更がある。プッシュしない"
+            printf '%s\n' "$bad"
+            exit 1
+          fi
+          git push origin HEAD:master
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
       - name: Trigger Pages deploy
         if: steps.commit.outputs.pushed == 'true'
         env:
