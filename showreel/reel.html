@@ -222,10 +222,10 @@ const CARDS = [                                  // 画面でいちばん大き�
   { name: 'クリニックタウン3D', file: 'clinic-flow-3d.png' },
   { name: 'HireBoard', file: 'hireboard.png' },
   { name: 'ターンアラウンド12', file: 'turnaround12.png' },
-  { name: '職場モヤモヤ診断', file: 'moyamoya.png' },
   { name: 'ConsultSim', file: 'consult-simulator.png' },
-  { name: '本部長の巡回手帖', file: 'round-note.png' },
+  { name: '職場モヤモヤ診断', file: 'moyamoya.png' },
   { name: 'HIM Quiz', file: 'him-quiz.png' },
+  { name: '本部長の巡回手帖', file: 'round-note.png' },
 ];
 const cardW = n => n <= 4 ? 0.1875 : 0.1171875;                         // 振り(カード 2..8)
 const cardV = n => n === 1 ? (CUES[1] - 0.10546875) - (G(4, 0) + 0.234375) : n <= 4 ? 0.140625 : 0.05859375;
@@ -384,11 +384,11 @@ function world(t, P) {
   ctx.fillStyle = P.disc;
   [G(2, 0), G(2, 1), G(2, 2)].forEach((h, k) => {
     if (t < h) return;
-    const r = Math.max(7.5, 4 / z) * E.backOut(seg(t, h, 0.18));   // 引いても 4px を下回らない
+    const r = Math.max(7.5, 6 / z) * E.backOut(seg(t, h, 0.18));   // 引いても画面で 6px(小節2 と同じ大きさ)
     ctx.beginPath(); ctx.arc(STATIONS[k], 0, Math.max(0, r), 0, Math.PI * 2); ctx.fill();
   });
   if (t >= G(2, 3)) {
-    const r = Math.max(11.25, 6 / z) * E.backOut(seg(t, G(2, 3), 0.25));   // 引いても 6px を下回らない
+    const r = Math.max(11.25, 9 / z) * E.backOut(seg(t, G(2, 3), 0.25));   // 引いても画面で 9px
     ctx.fillStyle = P.sand; ctx.beginPath(); ctx.arc(F_NODE[0], F_NODE[1], Math.max(0, r), 0, Math.PI * 2); ctx.fill();
   }
 
@@ -440,7 +440,7 @@ function worldText(t, P, hw) {
   if (t >= DIVE + BEAT && t < G(7, 0) + 0.01) {
     const f = F.min(600, 64);
     TYPE_WORDS.forEach((w, k) => {
-      const L = layout(w, f), cx = 14016 + 280 * k, t0 = DIVE + BEAT + 0.234375 * k;
+      const L = layout(w, f), cx = (k < 4 ? 13984 : 14016) + 280 * k, t0 = DIVE + BEAT + 0.234375 * k;   // 墨の間を等しく(2 字と 3 字が混ざるため)
       const out = t >= 11.1328125 ? { t, t0: 11.1328125, d: 0.1171875 } : null;
       lineText(w, f, cx - L.width / 2, -30, P.t1, 0, hw, -1, () => t0, 0.30, 'ty' + k, out);
     });
@@ -500,12 +500,12 @@ function hudName(t, P) {
   if (t < CUES[0] || t >= CUES[8]) return;
   let n = 1; for (let k = 2; k <= 8; k++) if (t >= CUES[k - 1]) n = k;
   const b = CUES[n - 1], next = CUES[n], bar4 = n <= 4;
-  const inD = bar4 ? 0.30 : 0.20, outD = bar4 ? 0.1171875 : 0.05859375;
+  const inD = bar4 ? 0.30 : 0.15, outD = bar4 ? 0.1171875 : 0.05859375;
   const name = CARDS[n - 1].name, f = hasCJK(name) ? F.jp(900, 36) : F.en(800, 36), L = layout(name, f);
-  let dy = 36 * (1 - seg(t, b, inD, E.ease)), a = 1;
-  if (t >= next - outD) { const u = seg(t, next - outD, outD, E.expoIn); dy = -0.3 * 36 * u; a = 1 - u; }
+  const D = 934 - (918 - L.asc);                                   // 切り抜きの下の縁の下へ完全に隠れる量
+  let dy = D * (1 - seg(t, b, inD, E.ease));
+  if (t >= next - outD) dy = D * seg(t, next - outD, outD, E.expoIn);   // 出は入ってきた縁へ沈む(線から出て線へ戻るのと同じ)
   ctx.save(); clipRect(480, 876, 960, 58);
-  ctx.globalAlpha = a;
   drawGlyphs(L, 480, 918 + dy, P.t1);
   ctx.restore();
   if (dy) mv('hud', 480, 918 + dy);
@@ -617,10 +617,12 @@ function speedPx(t) {
   }
   return v;
 }
-/* ぼけの長さは最大 STREAK px(細い線が灰色の帯にならないように)。サンプルの間隔は 1.5px 以下 */
-const STREAK = 18;
-const shutterFor = v => v <= 0 ? 0 : Math.min(0.5, STREAK / v);          // 1 フレームのうちシャッターが開いている割合
-const samplesFor = v => clamp(Math.ceil(v * shutterFor(v) / 1.5), 1, 64);
+/* シャッターは 180°。ただし線だけが画面を占める 2 区間(引き〜ダイブ・屈曲〜引き戻し)では、
+   ぼけの長さを LINE_STREAK px までに抑える(細い線が淡い帯になって消えないように)。サンプルの間隔は 1.5px 以下 */
+let LINE_STREAK = 40;
+const LINE_ONLY = [[8.4375, 9.609375], [12.65625, 13.7109375]];
+const shutterFor = (v, t) => v <= 0 ? 0 : LINE_ONLY.some(([a, b]) => t >= a && t < b) ? Math.min(0.5, LINE_STREAK / v) : 0.5;
+const samplesFor = (v, t) => clamp(Math.ceil(v * shutterFor(v, t) / 1.5), 1, 64);
 
 let GL = null;
 function initGL() {
@@ -656,7 +658,7 @@ function initGL() {
   return { c, gl, acc, res, accT, fbo, srcT };
 }
 function renderFrame(t, maxSamples = 64) {
-  const v = speedPx(t), n = Math.min(maxSamples, samplesFor(v));
+  const v = speedPx(t), n = Math.min(maxSamples, samplesFor(v, t));
   if (n <= 1) { draw(t); window.REEL.out = canvas; window.REEL.lastN = 1; return 1; }
   if (!GL) GL = initGL();
   const { gl, acc, res, accT, fbo, srcT } = GL;
@@ -664,7 +666,7 @@ function renderFrame(t, maxSamples = 64) {
   let cur = 0;
   gl.useProgram(acc);
   gl.uniform1i(gl.getUniformLocation(acc, 'prev'), 0); gl.uniform1i(gl.getUniformLocation(acc, 'src'), 1); gl.uniform1f(gl.getUniformLocation(acc, 'w'), 1 / n);
-  const shutter = shutterFor(v) / FPS;
+  const shutter = shutterFor(v, t) / FPS;
   for (let i = 0; i < n; i++) {
     draw(t + shutter * ((i + .5) / n - .5));
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, srcT);
@@ -706,7 +708,7 @@ const ready = (async () => {
   layoutCache.clear();
 })();
 
-window.REEL = { W, H, FPS, DUR, canvas, draw, renderFrame, speedPx, samplesFor, ready, out: canvas };
+window.REEL = { W, H, FPS, DUR, canvas, draw, renderFrame, speedPx, samplesFor, ready, out: canvas, setLineStreak: v => { LINE_STREAK = v; } };
 
 /* ---- プレビュー(?render なしで開いたとき): 実時間で再生(ぼけなし)。クリックで頭から。?t=秒 で静止 ---- */
 if (!location.search.includes('render')) {

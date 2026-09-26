@@ -63,6 +63,7 @@ page.on('pageerror', e => console.log('[pageerror]', e.message));
 
 await page.goto(`${BASE}/showreel/reel.html?render=1`, { waitUntil: 'load' });
 await page.evaluate(() => window.REEL.ready);
+if (argv.streak) await page.evaluate(v => window.REEL.setLineStreak(v), +argv.streak);   // 比較用: 線だけの区間のぼけの長さ(px)
 const DUR = await page.evaluate(() => window.REEL.DUR);
 
 /* ---- 1 フレーム: サブフレームを Float で平均して動きのぼけを作る ---- */
