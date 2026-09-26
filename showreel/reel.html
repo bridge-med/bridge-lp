@@ -190,11 +190,12 @@ function strokeTo(p, s1, s0 = 0) {
 /* ================================================================
    世界の地図(y は下向き)
    ================================================================ */
-const CARD_X = n => 4520 + 1120 * (n - 1);           // n = 1..8
+const CARD_X = n => 4520 + 976 * (n - 1);            // n = 1..8。間隔 976 で、前の写しの縦の辺も 8px 外に来る(3 辺とも 8px の額)
+const CLIMB_X = CARD_X(1) - 8, PARK_X = CARD_X(8) + 968, MEANDER_END = PARK_X + 160;
 const MAIN = buildPath([
-  [0, 0], [4360, 0], [4360, -308], [5488, -308], [5488, 308], [6608, 308], [6608, -308], [7728, -308], [7728, 308],
-  [8848, 308], [8848, -308], [9968, -308], [9968, 308], [11088, 308], [11088, -308], [12208, -308], [12208, 308],
-  [13328, 308], [13328, -308], [13488, -308], [13488, 0], [16400, 0],
+  [0, 0], [CLIMB_X, 0], [CLIMB_X, -308],
+  ...[1, 2, 3, 4, 5, 6, 7, 8].flatMap(n => { const x = CARD_X(n) + 968, y = n % 2 ? -308 : 308; return [[x, y], [x, -y]]; }),
+  [MEANDER_END, -308], [MEANDER_END, 0], [16400, 0],
 ]);
 const BR_U = buildPath([[3030, 0], [3158, -128], [3930, -128], [3930 + 7000, -128 - 7000]]);
 const BR_D = buildPath([[3030, 0], [3158, 128], [3930, 128], [3930 + 7000, 128 + 7000]]);
@@ -205,7 +206,7 @@ const F_NODE = [3030, 0];
 const K = {
   K0: { x: 0, y: 0, z: 1.8 }, K1: { x: 570, y: -60, z: 1.0 }, K2: { x: 2420, y: 67.5, z: 0.8 },
   K3: { x: 3190, y: 0, z: 1.25 }, K4: { x: 5000, y: 0, z: 1.0 },
-  K12: { x: 6744, y: 0, z: 0.13 }, K13: { x: 14576, y: -80, z: 1.0 },   // K12 = 原点から蛇行の終わりまでを一枚に収める引き
+  K12: { x: 6240, y: 0, z: 0.14 }, K13: { x: 14576, y: -80, z: 1.0 },   // K12 = 原点から蛇行の終わりまでを一枚に収める引き
 };
 function sim(t, a, d, k0, k1, ease) {
   const e = seg(t, a, d, ease);
@@ -269,14 +270,14 @@ function penX0(t) {                              // 最初の直線の上の x
   if (t < G(3, 1)) return 3290;
   if (t < G(3, 2)) return 3290 + 910 * seg(t, G(3, 1), BEAT, E.expoOut);
   if (t < 5.390625) return 4200;
-  if (t < 5.522) return 4200 + 160 * seg(t, 5.390625, 5.522 - 5.390625, E.quadIn);
-  return 4360;
+  if (t < 5.522) return 4200 + (CLIMB_X - 4200) * seg(t, 5.390625, 5.522 - 5.390625, E.quadIn);
+  return CLIMB_X;
 }
 function penS(t) {
   const P = MAIN;
   if (t < 5.522) return segS(P, 0, penX0(t), 0);
-  if (t < 5.615) return segS(P, 1, 4360, -308 * seg(t, 5.522, 0.093, E.lin));
-  if (t < printEnd(1)) { const c = cam(t); return segS(P, 2, clamp(c.x + 488 / c.z, 4360, 5488), -308); }
+  if (t < 5.615) return segS(P, 1, CLIMB_X, -308 * seg(t, 5.522, 0.093, E.lin));
+  if (t < printEnd(1)) { const c = cam(t); return segS(P, 2, clamp(c.x + 488 / c.z, CLIMB_X, CARD_X(1) + 968), -308); }
   let s = segS(P, 2, 5488, -308);
   for (let n = 1; n <= 8; n++) {
     const runK = 2 * n, vK = 2 * n + 1, xr = CARD_X(n) + 968, yr = n % 2 ? -308 : 308;
@@ -291,10 +292,11 @@ function penS(t) {
     s = segS(P, vK, xr, lerp(yr, -yr, u));
     if (u < 1) return s;
   }
-  // 刷りのあと: (13328,-308) に停まり、ダイブで型の線 (14016, 0) へ。そこから等速で右の枠外へ
-  const sPark = segS(P, 17, 13328, -308), sType = segS(P, 20, 14016, 0);
+  // 刷りのあと: 最後の角に停まり、ダイブで型の線 (14016, 0) へ。そこから等速で右の枠外へ
+  // s(u) = A·u² + B·u³ で、止まった状態から出て、9.609 で型を書く速さ(TYPE_V)につながる
+  const sPark = segS(P, 17, PARK_X, -308), sType = segS(P, 20, 14016, 0);
   if (t < DIVE) return sPark;
-  if (t < DIVE + BEAT) { const u = (t - DIVE) / BEAT; return sPark + (sType - sPark) * (2428 * u * u - 1432 * u * u * u) / 996; }
+  if (t < DIVE + BEAT) { const u = (t - DIVE) / BEAT, L = sType - sPark, V = TYPE_V * BEAT; return sPark + (3 * L - V) * u * u + (V - 2 * L) * u * u * u; }
   return segS(P, 20, 14016 + TYPE_V * (t - DIVE - BEAT), 0);
 }
 const TYPE_V = 280 / 0.234375;                    // 型の 5 語を 8 分おきに書く速さ(1194.7 world/s)
@@ -328,9 +330,17 @@ const SAND_CROSS = 86.91;                        // 交点までの弧長(vb)
   for (let i = 0; i <= 2000; i++) { const p = SAND.pts[i]; for (let j = 0; j <= 400; j++) { const q = bez(LOGO_N, j / 400); const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < best) { best = d; bi = i; } } }
   SAND.cross = SAND.L[bi];
 })();
+/* 交差は着地のあと約 4 フレーム止めて見せる(13.1875 まで)。引き戻しの最初の 0.06 秒は quadIn で速さを合わせ、
+   止まった状態から 1 フレームで最高速にならないようにする(砂の線が淡くならない) */
+const PULL0 = 13.1875, PULL1 = 13.7109375, BEND0 = 12.7734375;
+function pullEase(t) {
+  const u = clamp((t - PULL0) / (PULL1 - PULL0)), r = 0.06 / (PULL1 - PULL0);
+  const w = (u < r ? u * u / (2 * r) : u - r / 2) / (1 - r / 2);
+  return E.expoOut(w);
+}
 function markSpace(t) {                           // 画面 = O + s·vb
-  if (t < 13.154296875) return { ox: 360, oy: 265, s: 5 };
-  const e = seg(t, 13.154296875, 0.556640625, E.expoOut);
+  if (t < PULL0) return { ox: 360, oy: 265, s: 5 };
+  const e = pullEase(t);
   const s = lerp(5, 1.30909, e);
   return { ox: 487.2 - 25.443 * s, oy: 372.0 - 21.404 * s, s };
 }
@@ -339,7 +349,7 @@ function sandLen(t) {
   if (t < 13.125) return SAND.cross * Math.pow((t - 12.890625) / 0.234375, 3);
   return SAND.cross + (SAND.len - SAND.cross) * seg(t, 13.125, 0.66943359375, E.expoOut);
 }
-const markStroke = t => t < 13.154296875 ? 6 : lerp(6, 7.855, seg(t, 13.154296875, 0.556640625, E.expoOut));
+const markStroke = t => t < PULL0 ? 6 : lerp(6, 7.855, pullEase(t));
 
 /* ================================================================
    1 枚を描く
@@ -475,6 +485,7 @@ function cards(t, c) {
     const bmp = BMP[n - 1]; if (!bmp) continue;
     const X = CARD_X(n), next = CUES[n];
     const start = n === 1 ? 5.4 : CUES[n - 1];
+    if (PROBING && t >= next && t < next + 1 / FPS) mv('col' + n, X + 960, 0);   // 拍の直前のフレームでもぼけの枚数が落ちないように
     if (t < start || t >= next) continue;
     let x0 = X, x1 = X + 960;
     const cs = next - collapseMargin(n);
@@ -519,6 +530,7 @@ function principle(t, P) {
   let dy = 93 * (1 - seg(t, G(7, 0), 0.30, E.ease));          // 線から立つ(墨の上端 526 が 617 の下に隠れた位置から)
   if (t > 12.65625) dy = 100 * seg(t, 12.65625, 0.1171875, E.cubicIn);
   ctx.save(); clipRect(0, 0, W, 617);
+  ctx.textRendering = 'geometricPrecision';   // 字を 1/4px 単位で置く(既定は整数に丸めて、字間の動きがつかえる)
   drawGlyphs(L, x0, 588 + dy, P.t1, i => ({ dx: (i - (n - 1) / 2) * (ls - 0.02) * 72 }));
   if (dy > 0) mv('pr', 960, 588 + dy);
   ctx.restore();
@@ -533,7 +545,7 @@ function finale(t, P) {
   // 藍: 地平線の 4 点が公式の曲線へ
   let N;
   if (t < 13.0078125) {
-    const e = seg(t, 12.65625, 13.0078125 - 12.65625, E.expoInOut);
+    const e = seg(t, BEND0, 13.0078125 - BEND0, E.sineInOut);   // 原則が沈み終わってから、目で追える速さで持ち上がる
     const A = [[-20, 620], [633.3, 620], [1286.7, 620], [1940, 620]];
     const T = LOGO_N.map(p => [360 + p[0] * 5, 265 + p[1] * 5]);
     N = A.map((a, i) => [lerp(a[0], T[i][0], e), lerp(a[1], T[i][1], e)]);
@@ -567,7 +579,7 @@ function signoff(t, P) {
   const fw = F.en(500, 112), Lw = layout('BRIDGE', fw, 112 * 0.34);
   const lsNow = lerp(0.80, 0.34, seg(t, 13.359375, 0.60, E.ease));
   const aW = seg(t, 13.359375, 0.234375, E.cubicOut);
-  ctx.save(); ctx.globalAlpha = aW;
+  ctx.save(); ctx.globalAlpha = aW; ctx.textRendering = 'geometricPrecision';
   drawGlyphs(Lw, 867, 457, P.t1, i => ({ dx: i * (lsNow - 0.34) * 112 }));
   if (lsNow > 0.341) mv('wm', 867 + 5 * (lsNow - 0.34) * 112, 457);
   ctx.restore();
@@ -619,9 +631,13 @@ function speedPx(t) {
 }
 /* シャッターは 180°。ただし線だけが画面を占める 2 区間(引き〜ダイブ・屈曲〜引き戻し)では、
    ぼけの長さを LINE_STREAK px までに抑える(細い線が淡い帯になって消えないように)。サンプルの間隔は 1.5px 以下 */
-let LINE_STREAK = 40;
-const LINE_ONLY = [[8.4375, 9.609375], [12.65625, 13.7109375]];
-const shutterFor = (v, t) => v <= 0 ? 0 : LINE_ONLY.some(([a, b]) => t >= a && t < b) ? Math.min(0.5, LINE_STREAK / v) : 0.5;
+let LINE_STREAK = 60;
+const LINE_ONLY = [[8.4375, 9.609375, 60], [12.65625, 13.1875, 60], [13.1875, 13.7109375, 24]];   // 引き戻し(縮むだけで繰り返しの模様がない)は 24px まで
+const shutterFor = (v, t) => {
+  if (v <= 0) return 0;
+  const w = LINE_ONLY.find(([a, b]) => t >= a && t < b);
+  return w ? Math.min(0.5, (w[2] === 60 ? LINE_STREAK : w[2]) / v) : 0.5;
+};
 const samplesFor = (v, t) => clamp(Math.ceil(v * shutterFor(v, t) / 1.5), 1, 64);
 
 let GL = null;
