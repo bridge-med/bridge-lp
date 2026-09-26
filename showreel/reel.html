@@ -113,8 +113,8 @@ function drawGlyphs(L, x, y, color, fn, idp) {
     const gl = L.g[i];
     const m = fn ? fn(i, gl) : null;
     const a = m && m.a != null ? m.a : 1;
-    if (a <= 0) continue;
     const dx = m && m.dx || 0, dy = m && m.dy || 0;
+    if (a <= 0) { if (idp && (dy || dx)) mv(idp + i, x + gl.x + dx, y + dy); continue; }
     if (a < 1) { ctx.save(); ctx.globalAlpha *= a; }
     ctx.fillText(gl.ch, x + gl.x + dx, y + dy);
     if (a < 1) ctx.restore();
@@ -134,7 +134,7 @@ function lineText(str, font, x, y, color, lineY, halfW, dir, starts, dur, idp, o
   drawGlyphs(L, x, y, color, (i) => {
     let d;
     if (out) d = D * seg(out.t, out.t0, out.d, E.cubicIn);
-    else { const s = starts(i); if (TT < s) return { a: 0 }; d = D * (1 - seg(TT, s, dur, E.ease)); }
+    else { const s = starts(i); if (TT < s) return { a: 0, dy: dir < 0 ? D : -D }; d = D * (1 - seg(TT, s, dur, E.ease)); }
     return { dy: dir < 0 ? d : -d };        // 上へ出る字は下に隠れている / 下へ出る字は上に隠れている
   }, idp);
   ctx.restore();
@@ -607,13 +607,20 @@ let PROBE_CAM = null;
 function speedPx(t) {
   const dt = 1 / (2 * FPS);
   PROBE_CAM = cam(t);
-  const a = new Map(), b = new Map();
-  PROBING = a; draw(t - dt); PROBING = b; draw(t + dt); PROBING = null;
+  const a = new Map(), m = new Map(), b = new Map();
+  PROBING = a; draw(t - dt); PROBING = m; draw(t); PROBING = b; draw(t + dt); PROBING = null;
   let v = 0;
-  for (const [k, p] of a) { const q = b.get(k); if (q) v = Math.max(v, Math.hypot(q[0] - p[0], q[1] - p[1])); }
+  for (const [k, p] of m) {
+    const pa = a.get(k), pb = b.get(k);
+    if (pa && pb) v = Math.max(v, Math.hypot(pb[0] - pa[0], pb[1] - pa[1]));
+    else if (pa || pb) { const q = pa || pb; v = Math.max(v, 2 * Math.hypot(q[0] - p[0], q[1] - p[1])); }   // 片側にしかない目印は片側差×2
+  }
   return v;
 }
-const samplesFor = v => clamp(Math.ceil(v * 0.5 / 3), 1, 64);
+/* ぼけの長さは最大 STREAK px(細い線が灰色の帯にならないように)。サンプルの間隔は 1.5px 以下 */
+const STREAK = 18;
+const shutterFor = v => v <= 0 ? 0 : Math.min(0.5, STREAK / v);          // 1 フレームのうちシャッターが開いている割合
+const samplesFor = v => clamp(Math.ceil(v * shutterFor(v) / 1.5), 1, 64);
 
 let GL = null;
 function initGL() {
@@ -649,7 +656,7 @@ function initGL() {
   return { c, gl, acc, res, accT, fbo, srcT };
 }
 function renderFrame(t, maxSamples = 64) {
-  const n = Math.min(maxSamples, samplesFor(speedPx(t)));
+  const v = speedPx(t), n = Math.min(maxSamples, samplesFor(v));
   if (n <= 1) { draw(t); window.REEL.out = canvas; window.REEL.lastN = 1; return 1; }
   if (!GL) GL = initGL();
   const { gl, acc, res, accT, fbo, srcT } = GL;
@@ -657,7 +664,7 @@ function renderFrame(t, maxSamples = 64) {
   let cur = 0;
   gl.useProgram(acc);
   gl.uniform1i(gl.getUniformLocation(acc, 'prev'), 0); gl.uniform1i(gl.getUniformLocation(acc, 'src'), 1); gl.uniform1f(gl.getUniformLocation(acc, 'w'), 1 / n);
-  const shutter = 0.5 / FPS;
+  const shutter = shutterFor(v) / FPS;
   for (let i = 0; i < n; i++) {
     draw(t + shutter * ((i + .5) / n - .5));
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, srcT);
