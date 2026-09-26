@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Showreel — BRIDGE</title>
+<title>一本の線 — BRIDGE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@500;700;900&family=Inter:wght@500;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@700;900&family=Inter:wght@500;800&display=swap" rel="stylesheet">
 <style>
   html,body{margin:0;background:#0B0F1A;height:100%;overflow:hidden}
   canvas{display:block;position:absolute;inset:0;margin:auto;width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh}
@@ -17,11 +17,11 @@
 <canvas id="c" width="1920" height="1080"></canvas>
 <script>
 /* ================================================================
-   BRIDGE showreel「一本の線」— 15.000 秒・1920×1080・60fps
+   BRIDGE「一本の線」— 15.000 秒・1920×1080・60fps
    時刻 t だけで 1 枚が決まる(同じ t なら何度描いても同じ絵)。
-   一本の藍の線が、名乗り、渡ってきた現場を結び、今いる点で二手に分かれ、作った道具を刷り、
-   引くと一本の道だったと見せ、考え方の型を書き、最後にロゴの線に曲がって砂の線と交差する
-   (交差するが、接続しない)。数は見せない(2026-09-26 社長指示・PM 改訂 v2)。
+   一本の藍の線が、いまの点から出て、一本しか見えていなかった道を書き、砂の点で三つに分かれ、道具を刷り、
+   引くと分かれた道のあいだを通ってきたと見せ、考え方の型を書き、最後にロゴの線に曲がって砂の線と交差する
+   (交差するが、接続しない)。数は見せない。背骨は思想のページの分岐の図(philosophy/index.html 162–176)。
    書き出しは render.mjs。音は sound.mjs(同じ拍の表を使う)。
    ================================================================ */
 const W = 1920, H = 1080, FPS = 60, DUR = 15;
@@ -64,7 +64,7 @@ E.ease = (() => {
 const seg = (t, a, d, e = E.lin) => e(clamp((t - a) / d));
 
 /* ---- 色(サイトのトークンの値。地は生成りだけ) ---- */
-const LIGHT = { bg: '#FBFAF7', line: '#16233E', disc: '#63646B', t1: '#1B1B1E', t2: '#45464C', t3: '#63646B', sand: '#A98F63' };
+const LIGHT = { bg: '#FBFAF7', line: '#16233E', t1: '#1B1B1E', t2: '#45464C', sand: '#A98F63' };
 
 /* ---- 書体 ---- */
 const F = {
@@ -199,12 +199,11 @@ const MAIN = buildPath([
 ]);
 const BR_U = buildPath([[3030, 0], [3158, -128], [3930, -128], [3930 + 7000, -128 - 7000]]);
 const BR_D = buildPath([[3030, 0], [3158, 128], [3930, 128], [3930 + 7000, 128 + 7000]]);
-const STATIONS = [1470, 1990, 2510, 3030];
 const F_NODE = [3030, 0];
 
 /* ---- カメラ: screen = (p − c)·z + (960, 540)。z が変わる移動は不動点まわりの相似変換 ---- */
 const K = {
-  K0: { x: 0, y: 0, z: 1.8 }, K1: { x: 570, y: -60, z: 1.0 }, K2: { x: 2420, y: 67.5, z: 0.8 },
+  K0: { x: 0, y: 0, z: 1.8 }, K1: { x: 540, y: -61.75, z: 1.0 }, K2: { x: 2420, y: 52.5, z: 0.8 },
   K3: { x: 3190, y: 0, z: 1.25 }, K4: { x: 5000, y: 0, z: 1.0 },
   K12: { x: 6240, y: 0, z: 0.14 }, K13: { x: 14576, y: -80, z: 1.0 },   // K12 = 原点から蛇行の終わりまでを一枚に収める引き
 };
@@ -219,7 +218,7 @@ function sim(t, a, d, k0, k1, ease) {
 /* ---- 刷りの拍(8 枚) ---- */
 const CUES = [G(4, 0), G(4, 1), G(4, 2), G(4, 3), G(5, 0), G(5, .5), G(5, 1), G(5, 1.5), G(5, 2)]; // 9 番目は刷りの終わり
 const CARDS = [                                  // 画面でいちばん大きい字が数字ではない写しを選ぶ(v2)
-  { name: '面接官の手帖', file: 'interview-kit.png' },
+  { name: '経験の棚卸し', file: 'tanaoroshi.png' },
   { name: 'クリニックタウン3D', file: 'clinic-flow-3d.png' },
   { name: 'HireBoard', file: 'hireboard.png' },
   { name: 'ターンアラウンド12', file: 'turnaround12.png' },
@@ -342,7 +341,7 @@ function markSpace(t) {                           // 画面 = O + s·vb
   if (t < PULL0) return { ox: 360, oy: 265, s: 5 };
   const e = pullEase(t);
   const s = lerp(5, 1.30909, e);
-  return { ox: 487.2 - 25.443 * s, oy: 372.0 - 21.404 * s, s };
+  return { ox: 487.2 - 25.443 * s, oy: 540.0 - 55.0 * s, s };   // 引き戻しの不動点 画面 (487.2, 540)。ロックアップの縦の中心が 540
 }
 function sandLen(t) {
   if (t < 12.890625) return 0;
@@ -390,13 +389,7 @@ function world(t, P) {
   const sB = branchS(t);
   if (sB > 0) { strokeTo(BR_U, sB); strokeTo(BR_D, sB); }
 
-  // 駅の点と、いまの点(砂)
-  ctx.fillStyle = P.disc;
-  [G(2, 0), G(2, 1), G(2, 2)].forEach((h, k) => {
-    if (t < h) return;
-    const r = Math.max(7.5, 6 / z) * E.backOut(seg(t, h, 0.18));   // 引いても画面で 6px(小節2 と同じ大きさ)
-    ctx.beginPath(); ctx.arc(STATIONS[k], 0, Math.max(0, r), 0, Math.PI * 2); ctx.fill();
-  });
+  // 分かれ目の点(砂。第22条の「分岐点」)
   if (t >= G(2, 3)) {
     const r = Math.max(11.25, 9 / z) * E.backOut(seg(t, G(2, 3), 0.25));   // 引いても画面で 9px
     ctx.fillStyle = P.sand; ctx.beginPath(); ctx.arc(F_NODE[0], F_NODE[1], Math.max(0, r), 0, Math.PI * 2); ctx.fill();
@@ -411,40 +404,42 @@ function world(t, P) {
   if (sB > 0) for (const [br, id] of [[BR_U, 'u'], [BR_D, 'd']]) {
     const h = pointAt(br, sB); ctx.beginPath(); ctx.arc(h[0], h[1], 5 / z, 0, Math.PI * 2); ctx.fill(); mv('br' + id, h[0], h[1]);
   }
+  // 原点の点(いま): 炭。ペン先より後に描き、引いても画面で 7.5px(冒頭の点だと分かる大きさ)。全編で消さない
+  ctx.fillStyle = P.t1;
+  ctx.beginPath(); ctx.arc(0, 0, Math.max(0, Math.max(7.5, 7.5 / z) * E.backOut(seg(t, 0, 0.18))), 0, Math.PI * 2); ctx.fill();
 
   // 文字(線から出る)
   worldText(t, P, hw);
   ctx.restore();
 }
 
-/* 理学療法士・名前・渡ってきた現場・分岐の言葉・型 */
+/* 分岐の図の言葉(philosophy/index.html 164・166・170・172・174)と型 */
 const penTimeAt = x => whenReaches(penX0, x, 0, 5.5);
 const brTimeAt = (br, x, y) => whenReaches(branchS, segS(br, 1, x, y), G(3, 1) - 0.01, 9);
 const TYPE_WORDS = ['評価', '理解', '設計', '実践', '再評価'];
+/* 墨の端から字の送りの原点を出す(layout と同じ変換の下で測る) */
+function inkLeft(ch, font) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.font = font; const v = ctx.measureText(ch).actualBoundingBoxLeft; ctx.restore(); return v; }
+function inkRight(ch, font) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.font = font; const v = ctx.measureText(ch).actualBoundingBoxRight; ctx.restore(); return v; }
 function worldText(t, P, hw) {
-  // Bar 1: 理学療法士(線の上へ)。文字の中心をペンが通ったら出る
-  if (t > 0.3 && t < 5) {
-    const f = F.jp(900, 180), L = layout('理学療法士', f);
-    lineText('理学療法士', f, 120, -42, P.t1, 0, hw, -1, i => penTimeAt(120 + L.g[i].x + L.g[i].w / 2), 0.30, 'h');
-    lineText('橋本 渉', F.jp(700, 52), 120, 75, P.t1, 0, hw, +1, () => 0.703125, 0.30, 'nm');
+  // Bar 1: いま(線の上へ)。墨の左端を原点の点の左縁にそろえ、字の中心をペンが通ったら立つ
+  if (t > 0.3 && t < 2.2) {
+    const f = F.jp(900, 120), L = layout('いま', f), x = -7.5 + inkLeft('い', f);
+    lineText('いま', f, x, -3 - 21 - L.desc, P.t1, 0, hw, -1, i => penTimeAt(x + L.g[i].x + L.g[i].w / 2), 0.30, 'h');
   }
-  // Bar 2: 渡ってきた現場(番号も見出しもなし。点と語だけ)
-  if (t >= G(2, 0) && t < G(3, 0) + 0.2) {
-    ['臨床', '研究', '経営', 'BRIDGE'].forEach((word, k) => {
-      const h = G(2, k), x = STATIONS[k];
-      if (t < h) return;
-      const out = t >= G(3, 0) ? { t, t0: G(3, 0), d: 0.1875 } : null;
-      if (word === 'BRIDGE') lineTextLS(word, F.en(500, 80), 80 * 0.34, x, 102.5, P.t1, 0, hw, +1, h, 0.30, out, 'w' + k);
-      else lineText(word, F.jp(900, 100), x, 128.75, P.t1, 0, hw, +1, () => h, 0.30, 'w' + k, out);
-    });
+  // Bar 2: 一本しか見えていなかった道(線の下へ、ペンが書くのに合わせて落ちる)。墨の上端は線の下 24px
+  if (t >= G(2, 0) - 0.1 && t < G(3, 0) + 0.2) {
+    const f = F.jp(700, 80), str = '一本しか見えていなかった道', L = layout(str, f), x = 1500 + inkLeft('一', f);
+    const out = t >= G(3, 0) ? { t, t0: G(3, 0), d: 0.1875 } : null;
+    lineText(str, f, x, 3.75 + 30 + L.asc, P.t2, 0, hw, +1, i => penTimeAt(x + L.g[i].x + L.g[i].w / 2), 0.30, 'ip', out);
   }
-  // Bar 3: BRIDGE Compass の分岐
+  // Bar 3: 可能性に気づく → 挑戦する/続ける(分かれ目の砂の点から。どちらの道も選ばない)
   if (t >= G(3, 0.75) && t < 6.2) {
-    wipeTextLS('BRIDGE Compass', F.en(600, 22.4), 22.4 * 0.24, 2745.2, -108.8, P.t2, G(3, 0.75), 0.30, 'eb');
-    lineText('退院支援', F.jp(900, 64), 2745.2, -22.4, P.t1, 0, hw, -1, i => G(3, 0.75) + 0.035 * i, 0.35, 'tai');
-    const fu = F.jp(900, 51.2), Lu = layout('プロジェクト推進', fu), Ld = layout('合意形成', fu);
-    lineText('プロジェクト推進', fu, 3190, -146.4, P.t1, -128, hw, -1, i => brTimeAt(BR_U, 3190 + Lu.g[i].x + Lu.g[i].w / 2, -128), 0.30, 'pj');
-    lineText('合意形成', fu, 3190, 185.6, P.t1, 128, hw, +1, i => brTimeAt(BR_D, 3190 + Ld.g[i].x + Ld.g[i].w / 2, 128), 0.30, 'gi');
+    const fk = F.jp(700, 51.2), sk = '可能性に気づく', Lk = layout(sk, fk);
+    const xk = 3001 - (Lk.g[Lk.g.length - 1].x + inkRight('く', fk));   // 墨の右端を 3001 に(砂の点の左縁まで画面で 22px)
+    lineText(sk, fk, xk, -2.4 - 17.6 - Lk.desc, P.t2, 0, hw, -1, i => G(3, 0.75) + 0.035 * i, 0.35, 'kz');
+    const fu = F.jp(900, 51.2), Lu = layout('挑戦する', fu), Ld = layout('続ける', fu);
+    lineText('挑戦する', fu, 3190, -128 - 2.4 - 17.6 - Lu.desc, P.t1, -128, hw, -1, i => brTimeAt(BR_U, 3190 + Lu.g[i].x + Lu.g[i].w / 2, -128), 0.30, 'ch');
+    lineText('続ける', fu, 3190, 128 + 2.4 + 17.6 + Ld.asc, P.t1, 128, hw, +1, i => brTimeAt(BR_D, 3190 + Ld.g[i].x + Ld.g[i].w / 2, 128), 0.30, 'tz');
   }
   // Bar 6: 型(第10条)。ペン先が語の中心を通ると、その語が線から立つ。輪も矢印も描かない
   if (t >= DIVE + BEAT && t < G(7, 0) + 0.01) {
@@ -456,28 +451,6 @@ function worldText(t, P, hw) {
     });
   }
 }
-/* 字間つきの版(英字の見出し・BRIDGE) */
-function lineTextLS(str, font, ls, x, y, color, lineY, hw, dir, t0, dur, out, idp) {
-  const L = layout(str, font, ls);
-  const D = dir < 0 ? (lineY - hw) - (y - L.asc) : (y + L.desc) - (lineY + hw);
-  let d;
-  if (out) d = D * seg(out.t, out.t0, out.d, E.cubicIn);
-  else { if (TT < t0) return; d = D * (1 - seg(TT, t0, dur, E.ease)); }
-  ctx.save();
-  if (dir < 0) clipRect(x - 50, lineY - hw - 3000, L.width + 100, 3000); else clipRect(x - 50, lineY + hw, L.width + 100, 3000);
-  drawGlyphs(L, x, y + (dir < 0 ? d : -d), color);
-  if (d > 0.5) mv(idp, x, y + (dir < 0 ? d : -d));
-  ctx.restore();
-}
-function wipeTextLS(str, font, ls, x, y, color, t0, dur, idp) {
-  if (TT < t0) return;
-  const L = layout(str, font, ls), e = seg(TT, t0, dur, E.ease);
-  ctx.save(); clipRect(x - 2, y - L.asc - 4, (L.width + 4) * e, L.asc + L.desc + 8);
-  drawGlyphs(L, x, y, color);
-  if (e < 1) mv(idp, x + L.width * e, y);
-  ctx.restore();
-}
-
 /* 写し: 伸び出す(ペンまで)→静止→畳む(右の辺へ) */
 function cards(t, c) {
   const penX = c.x + 488 / c.z;
@@ -536,7 +509,7 @@ function principle(t, P) {
   ctx.restore();
 }
 
-/* ---------------- 終わり: 曲がる線・砂の線・署名 ---------------- */
+/* ---------------- 終わり: 曲がる線・砂の線・ロゴ ---------------- */
 function finale(t, P) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -572,44 +545,16 @@ function finale(t, P) {
   mv('mk0', toS([0, 0])[0], toS([0, 0])[1]); mv('mk1', toS([240, 110])[0], toS([240, 110])[1]);
   signoff(t, P);
 }
-function settle(t, t0, dur, dist) { const e = seg(t, t0, dur, E.ease); return { dy: dist * (1 - e), a: seg(t, t0, Math.min(dur, 0.235), E.cubicOut) }; }
 function signoff(t, P) {
   if (t < 13.359375) return;
-  // BRIDGE: 字間 0.80em → 0.34em(左端を固定)
+  // BRIDGE: 字間 0.80em → 0.34em(左端を固定)。名前の席は置かず、ロゴの交差と余白で終える(第24条の2)
   const fw = F.en(500, 112), Lw = layout('BRIDGE', fw, 112 * 0.34);
   const lsNow = lerp(0.80, 0.34, seg(t, 13.359375, 0.60, E.ease));
   const aW = seg(t, 13.359375, 0.234375, E.cubicOut);
   ctx.save(); ctx.globalAlpha = aW; ctx.textRendering = 'geometricPrecision';
-  drawGlyphs(Lw, 867, 457, P.t1, i => ({ dx: i * (lsNow - 0.34) * 112 }));
-  if (lsNow > 0.341) mv('wm', 867 + 5 * (lsNow - 0.34) * 112, 457);
+  drawGlyphs(Lw, 867, 581, P.t1, i => ({ dx: i * (lsNow - 0.34) * 112 }));
+  if (lsNow > 0.341) mv('wm', 867 + 5 * (lsNow - 0.34) * 112, 581);
   ctx.restore();
-  // 名前
-  const fn = F.jp(700, 64), Ln = layout('橋本 渉', fn);
-  let s = settle(t, 13.359375, 0.47, 24);
-  ctx.save(); ctx.globalAlpha = s.a; drawGlyphs(Ln, 960 - Ln.width / 2, 615 + s.dy, P.t1); ctx.restore(); if (s.dy > 0.1) mv('nm2', 960, 615 + s.dy);
-  // ローマ字
-  if (t >= 13.41796875) {
-    const fr = F.en(600, 24), Lr = layout('WATARU HASHIMOTO', fr, 24 * 0.24);
-    s = settle(t, 13.41796875, 0.41, 24);
-    ctx.save(); ctx.globalAlpha = s.a; drawGlyphs(Lr, 960 - Lr.width / 2, 663 + s.dy, P.t3); ctx.restore(); if (s.dy > 0.1) mv('rj2', 960, 663 + s.dy);
-  }
-  // 肩書き
-  if (t >= 13.59375) {
-    s = settle(t, 13.59375, 0.235, 12);
-    const parts = roleParts(), total = parts.reduce((a, p) => a + p.L.width, 0);
-    let x = 960 - total / 2;
-    ctx.save(); ctx.globalAlpha = s.a;
-    for (const p of parts) { drawGlyphs(p.L, x, 733 + s.dy, p.sep ? P.t3 : P.t2); x += p.L.width; }
-    ctx.restore(); if (s.dy > 0.1) mv('roles', 960, 733 + s.dy);
-  }
-}
-let ROLE = null;
-function roleParts() {
-  if (ROLE) return ROLE;
-  const jp = F.jp(500, 32), en = F.en(600, 32);
-  ROLE = [['理学療法士', jp], [' / ', en, 1], ['医科学修士', jp], [' / ', en, 1], ['医療経営支援・', jp], ['PMI', en], [' / ', en, 1], ['Solo Builder', en]]
-    .map(([s, f, sep]) => ({ L: layout(s, f), sep: !!sep }));
-  return ROLE;
 }
 
 /* ================================================================
@@ -704,12 +649,10 @@ function renderFrame(t, maxSamples = 64) {
    準備: 画像を縮め、使う文字をフォントごとに先読みして確かめる
    ================================================================ */
 const TEXTS = {
-  [F.jp(900, 40)]: '理学療法士臨床研究経営退院支援プロジェクト推進合意形成' + CARDS.map(c => c.name).join(''),
-  [F.jp(700, 40)]: '橋本 渉',
-  [F.jp(500, 40)]: '理学療法士医科学修士医療経営支援・',
+  [F.jp(900, 40)]: 'いま挑戦する続ける' + CARDS.map(c => c.name).join(''),
+  [F.jp(700, 40)]: '一本しか見えていなかった道可能性に気づく',
   [F.min(600, 40)]: '正解を与えるのではなく、選択肢を増やす評価理解設計実践再評価',
   [F.en(500, 40)]: 'BRIDGE',
-  [F.en(600, 40)]: 'WATARU HASHIMOTO BRIDGE Compass / PMI Solo Builder',
   [F.en(800, 40)]: CARDS.map(c => c.name).filter(n => !hasCJK(n)).join(' '),
 };
 const ready = (async () => {
