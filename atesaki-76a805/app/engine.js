@@ -18,10 +18,12 @@
      職種を問わず 医療職の総称が一番多い職種の GENERAL_RATIO 倍以上、または3職種以上に同じくらい触れている
      医療職以外   関心の1位が「体と健康の仕組み」で、タイトルに職種の語がない記事(臨床知識の解説)
      物語         連載小説などは宛先を出さない(登場人物の職種の言葉が、読み手の職種とは限らないため)
-     定型文       BOILER_MIN 本以上の記事に同じ形で出る行(曜日シリーズの案内・販売の告知)は数えない
+     定型文       BOILER_MIN 本以上の記事に同じ形で出る行(曜日シリーズの案内・販売の告知)は数えない。ただし辞書の語と
+                  句読点だけの行(「マネジメント。」)は、本文の箇条書きがたまたまそろったものなので定型文にしない
    スキから見た目安(calibrate):
      相対スキ    (その記事のスキ + 1) ÷ (前後 WINDOW 日に出した記事のスキの中央値 + 1)。フォロワーの増減を相殺する
-     母数        物語・有料記事・公開から SETTLE_DAYS 日未満の記事は入れない
+     母数        物語・有料記事・公開から SETTLE_DAYS 日未満の記事・note で開けなくなっている記事(missing)は入れない
+                  (missing の記事は、スキを読み直せないまま前の値が残っているため)
      話題の偏り  前後の窓に、その読み手ではない記事が MIN_OTHER 本以上ない記事は、その読み手の集計に入れない
                   (同じ話題を続けて書いた時期は、窓がその話題で埋まり、差が打ち消されるため)
      判定の下限  同じ読み手の記事が MIN_N 本未満なら「まだ判定できない」。99 本から無作為に選んで試すと、
@@ -34,7 +36,7 @@
   const { WHO, GENERAL, TOPIC, AXES, STORY } = L;
 
   // 判定の版。数え方(このファイルの定数・処理)を変えたら上げる。辞書の変更は FINGERPRINT が自動で拾う
-  const ENGINE_REV = 10;
+  const ENGINE_REV = 11;
 
   const LEAD_CHARS = 300;
   const LEAD_W = 1.5;
@@ -232,13 +234,19 @@
     if (!ignore || !ignore.size) return text;
     return text.split('\n').filter(l => !ignore.has(l.trim())).join('\n');
   }
-  /* 記事の本文の集まりから定型文の一覧を作る。BOILER_MIN 本以上に同じ形で出て、辞書の語を含む行だけ */
+  /* 記事の本文の集まりから定型文の一覧を作る。BOILER_MIN 本以上に同じ形で出て、辞書の語を含む行だけ。
+     辞書の語と句読点だけの行(「マネジメント。」)は、箇条書きの本文がたまたまそろったものなので外す */
+  function onlyTerms(line) {
+    let rest = line;
+    for (const h of scan(line).sort((a, b) => b.index - a.index)) rest = rest.slice(0, h.index) + rest.slice(h.index + h.length);
+    return !/[^\s\p{P}\p{S}]/u.test(rest);
+  }
   function boilerplateOf(texts) {
     const cnt = new Map();
     for (const t of texts) {
       for (const l of new Set(normalize(t).split('\n').map(x => x.trim()).filter(Boolean))) cnt.set(l, (cnt.get(l) || 0) + 1);
     }
-    return [...cnt].filter(([l, n]) => n >= BOILER_MIN && scan(l).length).map(([l]) => l).sort();
+    return [...cnt].filter(([l, n]) => n >= BOILER_MIN && scan(l).length && !onlyTerms(l)).map(([l]) => l).sort();
   }
 
   /* ---- 本体。{ title, text, tags } → 結果。opts.ignore: 定型文の行(Set) ---- */
@@ -432,7 +440,7 @@
   function segsOf(it) {
     return [].concat(it.generalLead ? ['general'] : [], (it.top && it.top.who) || [], (it.top && it.top.topic) || []);
   }
-  const countable = (it, likes, today) => !it.story && !it.paid && likes[it.key] != null && today - dayNum(it.date) >= SETTLE_DAYS;
+  const countable = (it, likes, today) => !it.story && !it.paid && !it.missing && likes[it.key] != null && today - dayNum(it.date) >= SETTLE_DAYS;
   function relativeLikes(items, likes, asOf) {
     const today = dayNum(asOf);
     const settled = items.filter(it => countable(it, likes, today));
@@ -481,6 +489,7 @@
       counted: Object.keys(rel).length,
       stories: items.filter(it => it.story).length,
       paid: items.filter(it => it.paid && !it.story).length,
+      missing: items.filter(it => it.missing && !it.story).length,
       settling: items.filter(it => !it.story && today - dayNum(it.date) < SETTLE_DAYS).length,
       rel, bySeg,
     };

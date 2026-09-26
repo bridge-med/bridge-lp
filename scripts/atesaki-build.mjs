@@ -11,7 +11,9 @@
    ※ 2026-09-25 の初回の 174 本は、この決まりに気づく前に /api から一度だけ取得した。2026-09-26 に全件を記事ページから
      読み直して焼き直した(--rebuild。その日付を archive.json の rebuilt に残す)。いまのデータの中身は、すべて上の2つの経路から
      作ったもの。読みに行く記事の URL の一覧だけは、初回に知ったものを引き継いでいる(note には、許された経路で全件の一覧を
-     得る方法がない。RSS は最新 25 本、プロフィールのページは最新 19 本まで、サイトマップは直近の数日ぶんだけ)。
+     得る方法がない。RSS は最新 25 本でページ送りもなく、プロフィールのページは最新 19 本まで。サイトマップは更新の新しい
+     記事が 5 万件ずつ並ぶだけで、2026-09-26 に確かめた1ファイルは 2 日前の1日足らずぶんだった)。
+   note へは、どの取得のあいだも WAIT_MS 以上あける(前の取得が終わってから数える。RSS も記事ページも同じ)。
 
    書き出すもの(本文そのものは書き出さない。記事の再配布にしないため):
      data/archive.json    記事ごとの題・日付・タグ・宛先の要約、定型文の一覧、物語を除いた記事の平均の割合
@@ -24,13 +26,21 @@
      記事ページが 404 を返しても、その場では外さない(note 側の一時的な不調のことがあるため)。記事の行に missing
      (最初と最後に 404 だった日・続けて 404 だった回数)を付けてデータはそのまま残し、1日1回だけ確かめ直す。
      最初の 404 から MISSING_DAYS 日以上たち、MISSING_TIMES 回以上続けて 404 だったときに、初めて外す。
-     途中で1回でも開けたら missing を消す。新しく 404 になった記事が1回で GONE_MAX 本を超えたら、何も書き換えずに止める。
+     途中で1回でも開けたら missing を消す(公開から LIKES_DAYS 日以内なら、そのときのスキも読む)。その回の RSS に
+     載っている記事は、条件を満たしても外さない(記事はある)。外すのは1回に GONE_MAX 本まで(残りは次の回)。
+     新しく 404 になった記事が1回で GONE_MAX 本を超えたら、その時点で取りに行くのをやめ、何も書き換えずに止める。
    --rebuild      記事ページを全件読み直して焼き直す(辞書を直したとき。WAIT_MS 間隔で 1 本ずつ。手元で実行する)
-                  404 だった記事は、全件を回り終えてからもう一度だけ確かめ、それでも 404 なら外して知らせる
+                  404 だった記事は、最初の 404 から RECHECK_MS 以上あけてもう一度確かめる。それでも 404 の記事が
+                  あれば、何も書き換えずに一覧を出して止める(外した記事は、許された経路では二度と一覧に戻せないため)。
+                  archive.json がないのに evidence.json か likes.json があるときも止める(RSS の 25 本だけで焼き直さない)
+   --drop-gone=nXXXX,nYYYY
+                  --rebuild と一緒に使う。名指しした記事が2回確かめても 404 なら外して焼き直す(記事を消した・非公開に
+                  したとき。ふだんの取り込みが「新しく 404 が多すぎる」で止まり続けるときの抜け道にもなる)。
+                  名指ししていない記事が 404 のままなら、やはり何も書き換えずに止める
    --force-likes  スキの読み直しを日数に関係なく行う
    ================================================================ */
 import { createRequire } from 'node:module';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -46,17 +56,20 @@ const LIKES_DAYS = 60;      // スキを読み直す記事(公開からの日数
 const GONE_MAX = 5;         // 1回で新しく見つからなくなった(404)記事がこれを超えたら、note 側の不調とみなして止める
 const MISSING_DAYS = 7;     // 404 の記事を外すのは、最初の 404 からこの日数以上たち、
 const MISSING_TIMES = 3;    // この回数以上(1日1回まで数える)続けて 404 だったときだけ
+const RECHECK_MS = 60000;   // --rebuild で 404 だった記事を確かめ直すのは、最初の 404 からこの時間以上たってから
 
 const DATA = join(repo, 'atesaki-76a805', 'data');
 const argv = process.argv.slice(2);
 // 知らない引数(廃止した --cache や打ち間違い)は、ふだんの取り込み(通信)に落ちないように止める
-const unknown = argv.filter(a => a !== '--rebuild' && a !== '--force-likes');
-if (unknown.length) { console.error('知らない引数: ' + unknown.join(' ') + '(使えるのは --rebuild と --force-likes)。何もしない'); process.exit(1); }
+const DROP_RE = /^--drop-gone=(n[0-9a-f]{12}(?:,n[0-9a-f]{12})*)$/;
+const unknown = argv.filter(a => !['--rebuild', '--force-likes'].includes(a) && !DROP_RE.test(a));
+if (unknown.length) { console.error('知らない引数: ' + unknown.join(' ') + '(使えるのは --rebuild・--drop-gone=nXXXX,nYYYY・--force-likes)。何もしない'); process.exit(1); }
 const rebuild = argv.includes('--rebuild');
 const forceLikes = argv.includes('--force-likes');
+const dropGone = new Set(argv.filter(a => DROP_RE.test(a)).flatMap(a => a.match(DROP_RE)[1].split(',')));   // 外してよいと名指しした記事
+if (dropGone.size && !rebuild) { console.error('--drop-gone は --rebuild と一緒に使う。何もしない'); process.exit(1); }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const readJson = (p, fallback) => { try { return JSON.parse(readFileSync(p, 'utf8')); } catch { return fallback; } };
 // 1記事1行(差分が記事単位で読めるように)
 const writeLines = (p, head, items) =>
   writeFileSync(p, JSON.stringify(head).replace(/}$/, ',"items":[\n') + items.map(it => JSON.stringify(it)).join(',\n') + '\n]}\n');
@@ -66,10 +79,17 @@ const todayJst = () => jstDate(Date.now());
 const daysBetween = (a, b) => Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000);
 const decode = s => E.htmlToText(String(s || '').replace(/\n/g, ' '));
 
+// どの取得のあいだも、前の取得が終わってから WAIT_MS 以上あける
+let lastDone = 0;
+async function polite() {
+  const wait = lastDone + WAIT_MS - Date.now();
+  if (lastDone && wait > 0) await sleep(wait);
+}
 // 404(削除・非公開にした記事)は再試行せず、status を持たせて呼び出し側で扱う。ほかの失敗は3回まで試す
 async function getText(url) {
   let last;
   for (let i = 0; i < 3; i++) {
+    await polite();
     try {
       const res = await fetch(url, { headers: { 'User-Agent': UA } });
       if (!res.ok) { const e = new Error(res.status + ' ' + url); e.status = res.status; throw e; }
@@ -78,6 +98,8 @@ async function getText(url) {
       last = e;
       if (e.status === 404) break;
       if (i < 2) await sleep(3000 * 2 ** i);
+    } finally {
+      lastDone = Date.now();
     }
   }
   throw last;
@@ -211,30 +233,50 @@ async function rebuildAll(pages) {
 
 async function main() {
   mkdirSync(DATA, { recursive: true });
-  const prev = readJson(join(DATA, 'archive.json'), null);
-  const prevEv = readJson(join(DATA, 'evidence.json'), null);
-  const prevLikes = readJson(join(DATA, 'likes.json'), { updated: '', likes: {} });
+  // 焼いたデータがあるのに読めない(壊れている)ときは止める。--rebuild が RSS の 25 本だけで焼き直して、残りの一覧を失わないように
+  const load = (f, fallback) => {
+    const p = join(DATA, f);
+    if (!existsSync(p)) return fallback;
+    try { return JSON.parse(readFileSync(p, 'utf8')); } catch (e) { throw new Error(`data/${f} が読めない(${e.message})。直してからもう一度`); }
+  };
+  const prev = load('archive.json', null);
 
   if (rebuild) {
-    const keys = [...new Set([...(prev ? prev.items.map(it => it.key) : []), ...(await fetchRss()).map(r => r.key)])];
-    const pages = new Map();
-    const notFound = [];
-    for (const key of keys) {
-      await sleep(WAIT_MS);
-      try { pages.set(key, await fetchPage(key)); } catch (e) { if (!gone(e)) throw e; notFound.push(key); }
-      // 上限を超えた時点で止める(note が落ちているときに、残りへ取りに行き続けない)
-      if (notFound.length > GONE_MAX) throw new Error(`1回で${notFound.length}本が見つからない。note 側の不調とみなして書き換えない`);
+    // archive.json だけがない(消えた)ときに、RSS の 25 本だけで3つのファイルを上書きしない
+    if (!prev && ['evidence.json', 'likes.json'].some(f => existsSync(join(DATA, f)))) {
+      throw new Error('archive.json がないのに evidence.json か likes.json がある。記事の一覧を失わないように止める(初めて焼くときは data/ を空にする)');
     }
-    // 404 だった記事は、全件を回り終えてからもう一度だけ確かめる(一時的な 404 で外さないため)
+    const keys = [...new Set([...(prev ? prev.items.map(it => it.key) : []), ...(await fetchRss()).map(r => r.key)])];
+    const unknownDrop = [...dropGone].filter(k => !keys.includes(k));
+    if (unknownDrop.length) throw new Error('--drop-gone で名指しした記事が一覧にない: ' + unknownDrop.join(', ') + '。何も書き換えない');
+    const pages = new Map();
+    const firstMiss = new Map();   // key → 最初に 404 だった時刻
+    for (const key of keys) {
+      try { pages.set(key, await fetchPage(key)); } catch (e) { if (!gone(e)) throw e; firstMiss.set(key, Date.now()); }
+      // 名指しした記事のほかに 404 が上限を超えた時点で止める(note が落ちているときに、残りへ取りに行き続けない)
+      const unexpected = [...firstMiss.keys()].filter(k => !dropGone.has(k)).length;
+      if (unexpected > GONE_MAX) throw new Error(`1回で${unexpected}本が見つからない。note 側の不調とみなして書き換えない`);
+    }
+    // 404 だった記事は、最初の 404 から RECHECK_MS 以上あけてもう一度確かめる(一時的な 404 で外さないため)
     const still = [];
-    for (const key of notFound) {
-      await sleep(WAIT_MS);
+    for (const [key, at] of firstMiss) {
+      const wait = at + RECHECK_MS - Date.now();
+      if (wait > 0) await sleep(wait);
       try { pages.set(key, await fetchPage(key)); } catch (e) { if (!gone(e)) throw e; still.push(key); }
     }
-    if (still.length) console.error('2回確かめて見つからない(404)ので外した記事: ' + still.join(', '));
+    const stray = still.filter(k => !dropGone.has(k));
+    if (stray.length) {
+      throw new Error('2回確かめても見つからない(404)記事がある: ' + stray.join(', ') + '。何も書き換えない。' +
+        '記事を消した・非公開にしたのなら、--rebuild --drop-gone=' + stray.join(',') + ' で外して焼き直す');
+    }
+    if (still.length) console.error('2回確かめても見つからない(404)ので外した記事(--drop-gone): ' + still.join(', '));
+    const kept = [...dropGone].filter(k => pages.has(k));
+    if (kept.length) console.error('--drop-gone で名指ししたが開けたので残した記事: ' + kept.join(', '));
     return rebuildAll(keys.filter(k => pages.has(k)).map(k => pages.get(k)));
   }
 
+  const prevEv = load('evidence.json', null);
+  const prevLikes = load('likes.json', { updated: '', likes: {} });
   if (!prev || !prevEv) throw new Error('焼いたデータがない。先に --rebuild で全件を焼く');
   if (prev.fingerprint !== E.FINGERPRINT || prevEv.fingerprint !== E.FINGERPRINT) {
     console.error('判定の版が焼いたデータと違う。note に全件を取りに行かず、ここで止める。手元で --rebuild して焼き直したデータをコミットする');
@@ -249,12 +291,9 @@ async function main() {
   const likes = Object.assign({}, prevLikes.likes);
   let added = 0;
   let redone = 0;
-  let first = true;
   const seen = new Map();   // 同じ回で同じ記事を二度取りに行かない(404 だったことも覚える)
   const visit = async key => {
     if (seen.has(key)) { const s = seen.get(key); if (s.error) throw s.error; return s.page; }
-    if (!first) await sleep(WAIT_MS);
-    first = false;
     try { const page = await fetchPage(key); seen.set(key, { page }); return page; }
     catch (e) { if (gone(e)) seen.set(key, { error: e }); throw e; }
   };
@@ -271,8 +310,16 @@ async function main() {
   let missingChanged = false;
   const markMissing = key => {
     const it = items[byKey.get(key)];
-    if (!it.missing) { it.missing = { since: today, last: today, n: 1 }; newlyMissing.push(key); missingChanged = true; }
-    else if (it.missing.last !== today) { it.missing = { since: it.missing.since, last: today, n: it.missing.n + 1 }; missingChanged = true; }
+    if (!it.missing) {
+      it.missing = { since: today, last: today, n: 1 };
+      newlyMissing.push(key);
+      missingChanged = true;
+      // 新しく 404 になった記事が上限を超えたら、その時点で取りに行くのをやめ、何も書き換えない(note 側の不調とみなす)
+      if (newlyMissing.length > GONE_MAX) throw new Error(`1回で${newlyMissing.length}本が新しく見つからない(404)。note 側の不調とみなして書き換えない`);
+    } else if (it.missing.last !== today) {
+      it.missing = { since: it.missing.since, last: today, n: it.missing.n + 1 };
+      missingChanged = true;
+    }
   };
 
   // 1) 404 を記録している記事を、1日1回だけ確かめ直す。開けたら記録を消す
@@ -283,10 +330,14 @@ async function main() {
     missingChanged = true;
     recovered.push(it.key);
     if (page.modified && page.modified !== it.modified) put(page);
+    // 読めなかったあいだに飛ばしたスキの読み直しを埋める(公開から LIKES_DAYS 日以内の記事)
+    else if (page.likes != null && daysBetween(it.date, today) <= LIKES_DAYS) likes[it.key] = page.likes;
   }
 
   // 2) 新着と、題の変わった記事
-  for (const r of await fetchRss()) {
+  const rss = await fetchRss();
+  const rssKeys = new Set(rss.map(r => r.key));
+  for (const r of rss) {
     const i = byKey.get(r.key);
     if (i != null && items[i].title === r.title) continue;
     try { put(await visit(r.key)); } catch (e) {
@@ -319,26 +370,29 @@ async function main() {
     likesRead = true;
   }
 
-  // 4) 新しく 404 になった記事が多すぎる回は、note 側の不調とみなして何も書き換えない
-  if (newlyMissing.length > GONE_MAX) throw new Error(`1回で${newlyMissing.length}本が新しく見つからない(404)。note 側の不調とみなして書き換えない`);
   if (newlyMissing.length) console.error('404 だった(データは残し、1日1回確かめ直す): ' + newlyMissing.join(', '));
   if (recovered.length) console.log('404 の記録があったが開けた(記録を消した): ' + recovered.join(', '));
 
-  // 5) 外すのは、最初の 404 から MISSING_DAYS 日以上たち、MISSING_TIMES 回以上続けて 404 だった記事だけ
-  const expired = items.filter(x => x.missing && x.missing.n >= MISSING_TIMES && daysBetween(x.missing.since, x.missing.last) >= MISSING_DAYS).map(x => x.key);
-  if (expired.length > GONE_MAX) throw new Error(`外す条件を満たした記事が${expired.length}本ある。多すぎるので書き換えない`);
-  const drop = new Set(expired);
+  // 4) 外すのは、最初の 404 から MISSING_DAYS 日以上たち、MISSING_TIMES 回以上続けて 404 だった記事だけ。
+  //    その回の RSS に載っている記事は外さない(記事はある)。1回に外すのは GONE_MAX 本まで(古い 404 から。残りは次の回)
+  const expired = items
+    .filter(x => x.missing && !rssKeys.has(x.key) && x.missing.n >= MISSING_TIMES && daysBetween(x.missing.since, x.missing.last) >= MISSING_DAYS)
+    .sort((a, b) => a.missing.since.localeCompare(b.missing.since) || a.key.localeCompare(b.key))
+    .map(x => x.key);
+  const dropKeys = expired.slice(0, GONE_MAX);
+  if (expired.length > dropKeys.length) console.error(`外す条件を満たした記事が${expired.length}本。今回は${dropKeys.length}本だけ外し、残りは次の回に回す`);
+  const drop = new Set(dropKeys);
   const keptItems = items.filter(it => !drop.has(it.key));
   const keptDetails = details.filter(d => !drop.has(d.key));
-  for (const key of expired) delete likes[key];
-  if (expired.length) console.error(`${MISSING_DAYS}日以上・${MISSING_TIMES}回以上続けて 404 だったので外した記事: ` + expired.join(', '));
+  for (const key of dropKeys) delete likes[key];
+  if (dropKeys.length) console.error(`${MISSING_DAYS}日以上・${MISSING_TIMES}回以上続けて 404 だったので外した記事: ` + dropKeys.join(', '));
   const stillMissing = keptItems.filter(it => it.missing).map(it => `${it.key}(${it.missing.since}から${it.missing.n}回)`);
   if (stillMissing.length) console.error('404 が続いている記事(まだ外さない): ' + stillMissing.join(', '));
 
-  const same = added === 0 && redone === 0 && !likesRead && !missingChanged && !expired.length;
+  const same = added === 0 && redone === 0 && !likesRead && !missingChanged && !dropKeys.length;
   if (same) { console.log('新着なし・スキの読み直しは次の回。書き換えない'); return; }
   write(keptItems, keptDetails, prev.boilerplate || [], likes, likesUpdated, prev.rebuilt || '');
-  console.log(`新着 ${added} 本 / 読み直し ${redone} 本 / 404 の記録 ${stillMissing.length} 本 / 外した ${expired.length} 本 / スキ ${likesRead ? '読み直した' : 'そのまま'}`);
+  console.log(`新着 ${added} 本 / 読み直し ${redone} 本 / 404 の記録 ${stillMissing.length} 本 / 外した ${dropKeys.length} 本 / スキ ${likesRead ? '読み直した' : 'そのまま'}`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

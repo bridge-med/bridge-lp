@@ -115,7 +115,7 @@ test('スキから見た目安: 本数が足りなければ「まだ判定でき
   assert.equal(E.verdictOf(n, 1.05, n / 2), 'same');
 });
 
-test('相対スキ: 物語・有料・公開から7日未満の記事は数えない。窓がその読み手で埋まる記事も数えない', () => {
+test('相対スキ: 物語・有料・公開から7日未満・note で開けなくなっている(missing)記事は数えない。窓がその読み手で埋まる記事も数えない', () => {
   const items = [];
   const likes = {};
   // 80日にわたって、ai と career を交互に出す(ai はスキが多い)
@@ -129,11 +129,14 @@ test('相対スキ: 物語・有料・公開から7日未満の記事は数え�
   items.push({ key: 'new', date: '2026-09-24', top: { who: [], topic: ['ai'] }, generalLead: false });
   items.push({ key: 'story', date: '2026-07-10', story: true, top: { who: [], topic: ['ai'] }, generalLead: false });
   items.push({ key: 'paid', date: '2026-07-11', paid: true, top: { who: [], topic: ['ai'] }, generalLead: false });
-  Object.assign(likes, { new: 0, story: 100, paid: 0 });
+  items.push({ key: 'gone', date: '2026-07-12', missing: { since: '2026-09-20', last: '2026-09-25', n: 6 }, top: { who: [], topic: ['ai'] }, generalLead: false });
+  Object.assign(likes, { new: 0, story: 100, paid: 0, gone: 0 });
   const c = E.calibrate(items, likes, '2026-09-25');
   assert.equal(c.rel.new, undefined);
   assert.equal(c.rel.story, undefined);
   assert.equal(c.rel.paid, undefined);
+  assert.equal(c.rel.gone, undefined, 'スキを読み直せないまま残っている値を比べに入れた');
+  assert.equal(c.missing, 1);
   assert.equal(c.settling, 1);
   assert.equal(c.bySeg.ai.n, 40);
   assert.equal(c.bySeg.ai.verdict, 'more');
@@ -145,6 +148,13 @@ test('相対スキ: 物語・有料・公開から7日未満の記事は数え�
   const l2 = {};
   for (let i = 0; i < 40; i++) { const key = 's' + i; same.push({ key, date: new Date(Date.UTC(2026, 6, 1 + i)).toISOString().slice(0, 10), top: { who: [], topic: ['biz'] } }); l2[key] = 10; }
   assert.equal(E.calibrate(same, l2, '2026-09-25').bySeg.biz.n, 0);
+});
+
+test('定型文: 5本以上に同じ形で出て辞書の語を含む行。辞書の語と句読点だけの行(箇条書きの本文)は入れない', () => {
+  const body = ['🟥 火曜:キャリア探求シリーズ', 'マネジメント。', '看護師・理学療法士', 'このnoteでは、', 'この記事だけの行です。'];
+  const texts = Array.from({ length: 5 }, (_, i) => body.slice(0, 4).concat(i ? [] : [body[4]]).join('\n'));
+  assert.deepEqual(E.boilerplateOf(texts), ['このnoteでは、', '🟥 火曜:キャリア探求シリーズ'].sort());
+  assert.deepEqual(E.boilerplateOf(texts.slice(0, 4)), [], '4本しかない行は定型文にしない');
 });
 
 test('辞書: 重みは 0〜3、同じ読み手の中で語が重ならない、一文の呼び名に句読点・感嘆符がない', () => {

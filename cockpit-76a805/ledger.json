@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-25",
+  "updated": "2026-09-26",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(2026-09-04 社長確認済み=便AA決裁4)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -570,8 +570,8 @@
       "serves": "note で発信する運営者自身。記事の言葉が誰に宛てたものになっているかを数えて見せ、書き足すか、そのまま出すかを自分で選べるようにする",
       "status": "未掲載",
       "measure": "local",
-      "note": "2026-09-25夜の社長の委任(「noteのURLを入れると、どんな分野の読み手に刺さるか分かるとよい」「8時間くらい頑張って」)で新設。運営者用・noindex・NAV/PRODUCTS/sitemap未掲載。stage/servesはPM案・社長確定待ち。辞書(app/lexicon.js)はAIの起草で社長の確認待ち。データ(atesaki-76a805/data/)はActionが毎日更新するためdirsから外している(lastCommitが開発の信号として働くように)。一般公開には、他の書き手の記事を読む中継が要る(v1には入れない)",
-      "lastCommit": "2026-09-25"
+      "note": "2026-09-25夜の社長の委任(「noteのURLを入れると、どんな分野の読み手に刺さるか分かるとよい」「8時間くらい頑張って」)で新設。運営者用・noindex・NAV/PRODUCTS/sitemap未掲載。stage/servesはPM案・社長確定待ち。辞書(app/lexicon.js)はAIの起草で社長の確認待ち。データ(atesaki-76a805/data/)はActionが毎日更新するためdirsから外している(lastCommitが開発の信号として働くように)。2026-09-26に全件をRSSと記事ページから焼き直した(archive.jsonのrebuilt。/api由来の中身は残っていない。読みに行くURLの一覧だけ初回のものを引き継ぐ)。Actionのプッシュはdata/直下のふつうのファイルの変更・追加だけ。一般公開には、他の書き手の記事を読む中継が要る(v1には入れない)",
+      "lastCommit": "2026-09-26"
     },
     {
       "id": "futatsume",

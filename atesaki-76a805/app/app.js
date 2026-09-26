@@ -124,11 +124,12 @@
     const d = ev.get(key) || { share: { who: {}, topic: {} }, raw: {}, words: {}, evidence: {} };
     const likes = state.likes.likes[key];
     render({
-      source: 'archive', key, title: it.title, url: it.url, date: it.date, likes, paid: it.paid, story: it.story, chars: it.chars,
+      source: 'archive', key, title: it.title, url: it.url, date: it.date, likes, paid: it.paid, story: it.story, chars: it.chars, missing: it.missing,
       reader: E.readerOf(it), main: it.main, top: it.top, generalLead: it.generalLead, focus: it.focus,
       titleRead: it.titleRead, gap: it.gap, share: d.share, raw: d.raw, words: d.words, evidence: d.evidence,
       // 比べに入るかはスキを数えた日で決まるので、断り書きも同じ日で判定する
-      settling: dayDiff(it.date, state.likes.updated || today) < E.SETTLE_DAYS, segs: E.segsOf(it),
+      // missing の記事はスキを読み直さず比べにも入らないので、「次に数え直したときに比べに入ります」を出さない
+      settling: !it.missing && dayDiff(it.date, state.likes.updated || today) < E.SETTLE_DAYS, segs: E.segsOf(it),
     });
     if (push && new URLSearchParams(location.search).get('n') !== key) history.pushState({ n: key }, '', '?n=' + encodeURIComponent(key));
   }
@@ -233,7 +234,9 @@
         `<span class="m">${vm.chars}字 · この端末の中だけで数えました${vm.fromFirstLine ? ' · 1行目をタイトルとして読みました' : ''}</span>`;
 
     const contrast = contrastLine(vm);
-    const lines = notes.concat([gapLine(vm), contrast, vm.paid ? '<p>有料記事は、無料で読める部分だけを数えています。</p>' : '']).filter(Boolean);
+    // 取り込みで記事ページが見つからなかった記事(missing)。データは前に読んだときのまま残している
+    const missing = vm.missing ? `<p>この記事は、${esc(vm.missing.since)}の取り込みから note で開けなくなっています。数えた結果とスキは、その前に読んだときのものです。</p>` : '';
+    const lines = notes.concat([gapLine(vm), contrast, vm.paid ? '<p>有料記事は、無料で読める部分だけを数えています。</p>' : '', missing]).filter(Boolean);
 
     const quotes = [];
     for (const id of [vm.main && vm.main.who, vm.main && vm.main.topic]) {
@@ -359,9 +362,9 @@
       '<h3 class="at-sub">誰に</h3><ul class="at-lex">' + WHO_ORDER.map(seg).join('') + '</ul>' +
       '<h3 class="at-sub">何に</h3><ul class="at-lex">' + TOPIC_ORDER.map(seg).join('') + '</ul>' +
       '<h3 class="at-sub">スキの数字</h3>' +
-      `<p class="at-small">記事ごとに、スキが「前後45日(記事が少ない時期は90日)に出した記事のスキの中央値」の何倍かを出しています。スキが0の記事も比べられるように、割る前にどちらにも1を足しています。数えるのは、スキを数えた日に公開から7日以上たっていた記事(物語・有料を除く${c.counted}本)です。` +
+      `<p class="at-small">記事ごとに、スキが「前後45日(記事が少ない時期は90日)に出した記事のスキの中央値」の何倍かを出しています。スキが0の記事も比べられるように、割る前にどちらにも1を足しています。数えるのは、スキを数えた日に公開から7日以上たっていた記事(物語・有料${c.missing ? 'と、note で開けなくなっている記事' : ''}を除く${c.counted}本)です。` +
       `関心ごとにこの倍率の中央値を見て、${E.MORE}倍以上なら「多め」、${E.LESS}倍以下なら「少なめ」とします(どちらも、3分の2以上の記事が同じ向きのとき)。それ以外は「ふだんの幅の中」です。多め・少なめを出すのは、比べられる記事が${E.MIN_N}本以上ある関心だけです。` +
-      (likesAt ? `スキの数は${esc(likesAt)}時点です(公開から${LIKES_DAYS}日を過ぎた記事は、それより前に数えた値)。` : '') + '</p>' +
+      (likesAt ? `スキの数は${esc(likesAt)}時点です(公開から${LIKES_DAYS}日を過ぎた記事${c.missing ? 'と、note で開けなくなっている記事' : ''}は、それより前に数えた値)。` : '') + '</p>' +
       (calRows ? '<dl class="at-dl">' + calRows + '</dl>' : '');
   }
 
