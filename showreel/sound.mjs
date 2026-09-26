@@ -3,7 +3,8 @@
 // usage: node showreel/sound.mjs [--out showreel/sound.wav]
 // 128 BPM・4/4・8 小節 = 15.000 秒。譜面はストーリーボード §5(5.1 地の拍・5.2 キュー表)
 // どの音も画と同じ格子の正確な時刻に置く(サンプル位置 = round(t × 48000))
-// 仕上げ: 残響 → 低域モノ → 8.789–8.906 の無音 → -14 LUFS・真のピーク -1 dBTP 未満 → 最後の 50 ms を閉じる
+// v2(改訂仕様 2026-09-26): 数えるための音(リールのクリック・無音・「29」の着地・櫛・116 の当たり)は置かない。地の拍は切らずに続く
+// 仕上げ: 残響 → 低域モノ → -14 LUFS・真のピーク -1 dBTP 未満(天井に触れるのは最後の着地だけ)→ 最後の 50 ms を閉じる
 // ================================================================
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -25,26 +26,14 @@ const TAU = 2 * Math.PI;
 const TARGET_LUFS = -14, TP_MAX = -1.1;                       // 積分ラウドネスと真のピークの上限(dBTP)
 const BED_ROOM = 1;                                           // 13.125 より前の天井を何 dB 下げるか(最後の着地だけが天井に触れる)
 const PUSH = 2;                                               // 最後の着地をほかより持ち上げる量(dB)。頭の山はマスターのリミッタが受ける
-const MID_AMP = 0.82;                                         // 「29」の着地のピーク(ラウドネスで最後の着地の 0.6 になる値)
-
-/* 無音(8.789 → 8.906): マスターを 3 ms で閉じ、3 ms で開く。残響の尾も含めて −∞ */
-const SIL0 = at(G(5, 2.75)), SIL1 = at(G(5, 3)), RAMP = ms(3);
-function gateAt(n) {
-  if (n < SIL0 || n >= SIL1) return 1;
-  if (n < SIL0 + RAMP) return 0.5 + 0.5 * Math.cos(Math.PI * (n - SIL0) / RAMP);
-  if (n >= SIL1 - RAMP) return 0.5 - 0.5 * Math.cos(Math.PI * (n - SIL1 + RAMP) / RAMP);
-  return 0;
-}
 
 /* ---- バス(ステレオ) ---- */
 const bus = () => [new Float32Array(N), new Float32Array(N)];
 const DRY = bus(), DUCKED = bus(), ROOM = bus(), HALL = bus();   // DUCKED はキックと着地で沈める(サイドチェイン)
 const duck = new Float32Array(N).fill(1);
 
-let EV = 0;                                                   // いま置いている音の頭(サンプル)
 function put(target, i, l, r) {
   if (i < 0 || i >= N) return;
-  if (EV < SIL1 && i >= SIL0 + RAMP) return;                  // 無音が明ける前に鳴り始めた音(8.789 ちょうどの最後のクリックも)は、無音で切れて戻ってこない
   target[0][i] += l; target[1][i] += r;
 }
 
@@ -81,7 +70,7 @@ function norm(b) {
 }
 function mixInto(dst, src, w) { for (let ch = 0; ch < 2; ch++) for (let k = 0; k < dst[ch].length; k++) dst[ch][k] += src[ch][k] * w; }
 function emit(i0, b, amp, { bus = DRY, room = 0, hall = 0 } = {}) {
-  norm(b); EV = i0;
+  norm(b);
   for (let k = 0; k < b[0].length; k++) {
     const l = b[0][k] * amp, r = b[1][k] * amp;
     put(bus, i0 + k, l, r);
@@ -122,22 +111,6 @@ function boomWave(len, midi, dur, drive = 1.5, soft = 1) {   // soft: 立ち上�
     const tt = k / SR, e = Math.exp(-tt * dec), d = 1 + (drive - 1) * e;   // 頭ほど強く歪ませる(3 倍音 = A、5 倍音 = F♯ が小さな再生機でも聞こえる)
     ph += TAU * f0 * (1 + 2 * Math.exp(-tt * 28)) / SR;
     b[0][k] = b[1][k] = Math.tanh(d * Math.sin(ph)) / Math.tanh(d) * e * Math.sin(Math.PI / 2 * edge(k, len, ms(soft), ms(20)));
-  }
-  return b;
-}
-/* 手拍子: 3 つの短い破裂と短い尾(帯域 1.4 kHz) */
-function clapWave(len) {
-  const b = scratch(len), fl = biquad(), fr = biquad(), hl = biquad(), hr = biquad();
-  const hits = [0, 0.009, 0.019];
-  for (let k = 0; k < len; k++) {
-    const tt = k / SR;
-    let e = 0;
-    for (const h of hits) if (tt >= h) e += Math.min(1, (tt - h) / 0.0002) * Math.exp(-(tt - h) * 320);
-    if (tt >= 0.026) e += 0.55 * Math.min(1, (tt - 0.026) / 0.0005) * Math.exp(-(tt - 0.026) * 26);
-    e *= edge(k, len, 1, ms(10));
-    const n1 = rnd(), n2 = rnd();
-    b[0][k] = hl(fl(n1 * 0.8 + n2 * 0.2, 'bp', 1400, 1.1), 'hp', 700) * e;
-    b[1][k] = hr(fr(n2 * 0.8 + n1 * 0.2, 'bp', 1400, 1.1), 'hp', 700) * e;
   }
   return b;
 }
@@ -204,15 +177,6 @@ function tick(t, amp, f0, pan = 0, { f1 = f0, dur = 0.04, dec = 150, room = 0.2 
   }
   emit(at(t), b, amp, { room });
 }
-/* 5 ms のブリップ(櫛の目盛り) */
-function blip(t, amp, f, pan) {
-  const len = ms(5), b = scratch(len), [gl, gr] = panLR(pan);
-  for (let k = 0; k < len; k++) {
-    const tt = k / SR, v = Math.sin(TAU * f * tt) * Math.exp(-tt / 0.0014) * edge(k, len, ms(0.25), ms(1));
-    b[0][k] = v * gl; b[1][k] = v * gr;
-  }
-  emit(at(t), b, amp, { room: 0.12 });
-}
 /* クリック: 乾いたカチ + f を与えれば音程のある短い響き */
 function click(t, amp, { f = 0, pan = 0, room = 0.12, hall = 0, tone = 0.65, dec = 60, len = 0.12, hpF = 3200 } = {}) {
   const n = at(f ? len : 0.02), b = clickWave(n, hpF), [gl, gr] = panLR(pan);
@@ -268,18 +232,6 @@ function impact(t, amp, parts, { dur = 1, room = 0.1, hall = 0.3, duckDepth = 0.
   if (ratio) tame(b, ratio);
   emit(i0, b, amp, { room, hall });
   sidechain(i0, duckDepth, 5);
-}
-/* ノイズの鳴り(スネア代わり) */
-function snare(t, amp) {
-  const len = at(0.3), b = scratch(len), hl = biquad(), hr = biquad(), bl = biquad(), br = biquad();
-  for (let k = 0; k < len; k++) {
-    const tt = k / SR, e = (Math.exp(-tt * 18) * 0.6 + Math.exp(-tt * 120)) * edge(k, len, ms(0.2), ms(15));
-    const body = Math.sin(TAU * 190 * tt) * Math.exp(-tt * 35) * 0.3;
-    const n1 = rnd(), n2 = rnd();
-    b[0][k] = (bl(hl(n1, 'hp', 1000), 'bp', 3000, 0.6) * 1.4 + body) * e;
-    b[1][k] = (br(hr(n2, 'hp', 1000), 'bp', 3000, 0.6) * 1.4 + body) * e;
-  }
-  emit(at(t), b, amp, { room: 0.3, hall: 0.1 });
 }
 /* 風切り: 帯域通過ノイズの中心を掃引し、左右にも流す(上げ: f0 < f1、下げ: f0 > f1) */
 function whoosh(t0, dur, amp, f0, f1, p0 = 0, p1 = 0, peakAt = 0.5, { q = 1.1, room = 0.25 } = {}) {
@@ -385,18 +337,17 @@ function subLine(segs, amp) {
   }
 }
 
-/* ---- 残響(Freeverb の簡略版)。kill のサンプルで中身を捨てる(無音で尾も切るため) ---- */
-function reverb(inp, { room = 0.84, damp = 0.3, size = 1, pre = 0, hp = 200, kill = -1 } = {}) {
+/* ---- 残響(Freeverb の簡略版) ---- */
+function reverb(inp, { room = 0.84, damp = 0.3, size = 1, pre = 0, hp = 200 } = {}) {
   const len = inp[0].length, out = [new Float32Array(len), new Float32Array(len)];
   const combs = [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617], aps = [556, 441, 341, 225];
   for (let ch = 0; ch < 2; ch++) {
     const spread = ch ? 23 : 0, x = inp[ch], y = out[ch];
-    let f = biquad();
+    const f = biquad();
     const cb = combs.map(c => ({ buf: new Float32Array(Math.round((c + spread) * size * SR / 44100)), i: 0, lp: 0 }));
     const ab = aps.map(c => ({ buf: new Float32Array(Math.round((c + spread) * SR / 44100)), i: 0 }));
     for (let n = 0; n < len; n++) {
-      if (n === kill) { cb.forEach(c => { c.buf.fill(0); c.lp = 0; }); ab.forEach(a => a.buf.fill(0)); f = biquad(); }
-      const j = n - pre, xin = j >= 0 && (kill < 0 || n < kill || j >= kill) ? x[j] : 0;
+      const j = n - pre, xin = j >= 0 ? x[j] : 0;
       const v = f(xin, 'hp', hp, 0.7) * 0.015; let s = 0;
       for (const c of cb) { const o = c.buf[c.i]; c.lp = o * (1 - damp) + c.lp * damp; c.buf[c.i] = v + c.lp * room; c.i = (c.i + 1) % c.buf.length; s += o; }
       for (const a of ab) { const o = a.buf[a.i]; a.buf[a.i] = s + o * 0.5; s = o - s; a.i = (a.i + 1) % a.buf.length; }
@@ -414,19 +365,17 @@ function score() {
   /* ===== 5.1 地の拍 ===== */
   // 小節 1: D2+A2 の持続音(LP 500 Hz)が 0 → 0.04。2 小節の頭のキックの下で引く
   pad(0, G(2) + 0.25, [38, 45], 0.04, 500, { att: 1.6, rel: 0.25, room: 0.2 });
-  // キック(0.85): 2–4 小節は 4 つ打ち、5 小節は 7.500–8.438(8.906 は「29」の着地が代わる)、6 小節は 9.375–10.781 が最後
+  // キック(0.85): 2–6 小節は切らずに 4 つ打ち(8.906 にもキック)。10.781 が地の最後のキック
   const kicks = [];
-  for (let bar = 2; bar <= 4; bar++) for (let bt = 0; bt < 4; bt++) kicks.push(G(bar, bt));
-  kicks.push(G(5, 0), G(5, 1), G(5, 2));
-  for (let bt = 0; bt < 4; bt++) kicks.push(G(6, bt));
+  for (let bar = 2; bar <= 6; bar++) for (let bt = 0; bt < 4; bt++) kicks.push(G(bar, bt));
   kicks.forEach(t => kick(t, 0.85));
   // ハイハット: 裏の 8 分(0.10)。3 小節は 4.688 から裏以外の 16 分にゴースト(0.05)。5 小節は 16 分(0.12)を 8.438 まで
   for (const bar of [2, 3, 4]) for (let bt = 0; bt < 4; bt++) hat(G(bar, bt + 0.5), 0.10, 0.2);
   for (let bt = 2; bt < 4; bt++) for (const q of [0, 0.25, 0.75]) hat(G(3, bt + q), 0.05, -0.15, 90);
   for (let s = 0; s < 8; s++) hat(G(5, s / 4), 0.12 * [0.7, 0.8, 1, 0.8][s % 4], s % 2 ? -0.15 : 0.15, 70);
   for (let s = 0; s < 3; s++) hat(G(6, s + 0.5), 0.10, 0.2);
-  // サブ(D → D → B♭ → C|無音|D → B♭ → C)。5 小節の C は 8.789 で切れる。8 小節は着地が低域を持つ
-  subLine([[G(2), G(4), D2], [G(4), G(5), BB1], [G(5), G(5, 2.75), C2], [G(6), G(7), D2], [G(7), G(7, 2), BB1], [G(7, 2), G(8), C2]], 0.2);
+  // サブ(D → D → B♭ → C → D → B♭ → C)。5 小節の C は 9.375 まで切らない。8 小節は着地が低域を持つ
+  subLine([[G(2), G(4), D2], [G(4), G(5), BB1], [G(5), G(6), C2], [G(6), G(7), D2], [G(7), G(7, 2), BB1], [G(7, 2), G(8), C2]], 0.2);
   // 小節 7: B♭maj9 → Csus2(LP 900 Hz・0.08)。小節 8: Dadd9(D3 A3 E4・0.06)が 14.95 までに消える
   pad(G(7), G(7, 2) + 0.08, [46, 53, 57, 60, 62], 0.08, 900, { att: 0.35, rel: 0.16, room: 0.2, hall: 0.25 });
   pad(G(7, 2) - 0.08, G(8) + 0.15, [48, 55, 60, 62], 0.08, 900, { att: 0.16, rel: 0.15, room: 0.2, hall: 0.25 });
@@ -461,33 +410,13 @@ function score() {
   for (const [tp, tv] of prints) { tick(tp, 0.20, 2600, scr(1448)); tick(tv, 0.08, 1300, scr(1448) * 0.5, { dec: 90, dur: 0.06 }); }
   // --- 小節 5 · カード 5–8(裏拍のモンタージュ)
   for (let h = 0; h < 4; h++) { const c = G(5, h / 2); whoosh(c, 0.1171875, 0.22, 600, 5000, 0.6, -0.6, 0.5); tick(c + 0.1171875, 0.18, 2600, scr(1448)); }
-  // 8.438 → 8.789: 引きの風切り(下げ)、名前のリールのクリック 21 回、ノイズの立ち上がり(8.789 で切る)
+  // 8.438 → 8.789: 引きの風切り(下げ)。8.789–9.141 は息(新しい音は出さない。地の拍は続く)
   whoosh(G(5, 2), 0.3515625, 0.40, 5000, 300, 0, 0, 0.5);
-  for (let k = 9; k <= 29; k++) {
-    const i = k - 9, t = G(5, 2) + 0.3515625 * Math.pow((k - 8) / 21, 0.55);   // 画のリール位置 r(t) が k を越える時刻
-    click(t, 0.16, { f: 1760 * Math.pow(2, Math.floor(i / 4) / 12), len: 0.035, dec: 140, tone: 0.7, room: 0.1 });
-  }
-  riser(G(5, 2), G(5, 2.75), 0.45, { lo: 800, hi: 9000, shape: 3.2 });
-  // 8.789 → 8.906: 無音(マスターのゲート)。8.906: 「29」の着地(中)= キック + サブ D1 0.9 s + 手拍子 + 明るいクリック
-  // 強さ 0.60 はラウドネスで最後の着地の 0.6(−4.4 dB)に合わせる(ピークで 0.60 にすると地の拍より 6 dB 小さく、無音のあとで痩せる)
-  impact(G(5, 3), MID_AMP, [[kickWave, 0.8], [len => boomWave(len, D1, 0.9, 3), 1], [clapWave, 0.45], [len => clickWave(len, 3000), 0.35]], { dur: 0.95, room: 0.15, hall: 0.2, ratio: 1 });
-  // --- 小節 6 · 116
-  whoosh(G(6), BEAT, 0.45, 300, 5000, 0.6, -0.6, 0.5);                     // 潜る(山は 9.609)
-  tick(G(6, 0.5), 0.10, 2400, scr(264) * 0.5, { f1: 1200 });                // 29 が退き、116 の文が入る
-  // 櫛: ペン先が各目盛りを通る正確な時刻。毎秒 60 を超える間は 1 つおき。1.4 → 4.2 kHz(指数)、左右 ±0.3 を交互、強さ ±15%
-  const hum = mkRnd(116);
-  let sounded = 0, prev = false;
-  for (let k = 1; k <= 116; k++) {
-    const p = 12 * (k - 1) / 1380, u = Math.acos(1 - 2 * p) / Math.PI, t = G(6, 1) + 0.9375 * u;
-    const rate = 1380 * (Math.PI / 2) * Math.sin(Math.PI * u) / 0.9375 / 12;   // 目盛り/秒
-    const h = 1 + 0.15 * hum();
-    if (rate > 60 && prev) { prev = false; continue; }
-    prev = true;
-    blip(t, 0.05 * h, 1400 * Math.pow(3, (k - 1) / 115), sounded++ % 2 ? 0.3 : -0.3);
-  }
-  click(G(6, 3), 0.40, { f: hz(86), tone: 0.55, dec: 22, len: 0.3, room: 0.3, hall: 0.15 });   // 116 に着地(クリックの当たり)
-  snare(G(6, 3), 0.20);
-  swell(G(6, 3.5), G(7), 0.30, [74, 77, 81]);                              // スリットへ
+  whoosh(G(5, 3.5), BEAT, 0.45, 300, 5000, 0.6, -0.6, 0.5);               // ダイブ 9.141–9.609(山は 6 小節の頭 9.375、右 → 左)
+  // --- 小節 6 · 型(評価 / 理解 / 設計 / 実践 / 再評価)。語が線から上がる瞬間に 1 語 1 音、駅と同じ声で 0.24。
+  // D5 / A4 / E5 / A4 / D5: 最後は最初と同じ高さ(上がり続けない = 数えない。循環を音で閉じる)。着地の打撃は置かない
+  [[74, 400], [69, 680], [76, 960], [69, 1240], [74, 1520]].forEach(([m, x], i) => click(G(6, 0.5 + i / 2), 0.24, { f: hz(m), pan: scr(x), room: 0.25 }));
+  swell(G(6, 3.5), G(7), 0.30, [74, 77, 81]);                              // 原則(スリット)への入り
   // --- 小節 7 · THE BREATH, THE BEND(キックなし。サブと和音だけ)
   air(G(7), 1.4, 0.20, { rise: 0.46875 });                                  // スリットが開く空気
   mallet(G(7), 74, 0.15, 1.6, 0, { room: 0.3, hall: 0.4 });                // D5
@@ -508,9 +437,8 @@ score();
 /* ================================================================
    ミックスと仕上げ
    ================================================================ */
-const kill = SIL0 + RAMP;
-const room = reverb(ROOM, { room: 0.84, damp: 0.35, size: 1, pre: ms(8), hp: 220, kill });
-const hall = reverb(HALL, { room: 0.86, damp: 0.25, size: 1.45, pre: ms(22), hp: 240, kill });
+const room = reverb(ROOM, { room: 0.84, damp: 0.35, size: 1, pre: ms(8), hp: 220 });
+const hall = reverb(HALL, { room: 0.86, damp: 0.25, size: 1.45, pre: ms(22), hp: 240 });
 const ROOM_RET = 0.9, HALL_RET = 0.9;
 let L = new Float32Array(N), R = new Float32Array(N);
 {
@@ -520,8 +448,7 @@ let L = new Float32Array(N), R = new Float32Array(N);
     let r = DRY[1][n] + DUCKED[1][n] * duck[n] + room[1][n] * ROOM_RET + hall[1][n] * HALL_RET;
     l = hl(l, 'hp', 20); r = hr(r, 'hp', 20);                  // 直流と超低域を落とす
     const m = (l + r) / 2, s = s2(s1((l - r) / 2, 'hp', 120), 'hp', 120);   // 120 Hz より下はモノ
-    const gt = gateAt(n);
-    L[n] = (m + s) * gt; R[n] = (m - s) * gt;
+    L[n] = m + s; R[n] = m - s;
   }
 }
 
@@ -592,13 +519,10 @@ function limit(l, r, ceil) {
   return { out, maxGR };
 }
 const peakOf = (l, r) => { let p = 0; const el = truePeakEnv(l), er = truePeakEnv(r); for (let n = 0; n < N; n++) p = Math.max(p, el[n], er[n]); return p; };
-function dcBlock(x) {   // 5 Hz の 1 次 HPF。状態は無音の中で捨てる(無音のあとに尾を持ち込まない)
+function dcBlock(x) {   // 5 Hz の 1 次 HPF(リミッタの非対称な利きで出る直流を落とす)
   const y = new Float32Array(N), a = 1 - TAU * 5 / SR;
   let px = 0, py = 0;
-  for (let n = 0; n < N; n++) {
-    if (n === SIL0 + RAMP) px = py = 0;
-    py = x[n] - px + a * py; px = x[n]; y[n] = py * gateAt(n);
-  }
+  for (let n = 0; n < N; n++) { py = x[n] - px + a * py; px = x[n]; y[n] = py; }
   return y;
 }
 
@@ -616,11 +540,11 @@ for (let it = 0; it < 8; it++) {
 /* 最後の 50 ms(14.95–15.00)を閉じる(プツ音を出さない) */
 for (let n = at(14.95); n < N; n++) { const u = (N - 1 - n) / (N - 1 - at(14.95)); L[n] *= u * u; R[n] *= u * u; }
 
-/* ---- WAV(16bit・48kHz・ステレオ)。TPDF ディザは無音と終わりでは止める ---- */
+/* ---- WAV(16bit・48kHz・ステレオ)。TPDF ディザは最後の 50 ms では止める ---- */
 const dith = mkRnd(48000);
 const data = Buffer.alloc(N * 4);
 for (let n = 0; n < N; n++) {
-  const d = gateAt(n) === 1 && n < at(14.95) ? 1 : 0;
+  const d = n < at(14.95) ? 1 : 0;
   data.writeInt16LE(Math.max(-32768, Math.min(32767, Math.round(L[n] * 32767 + d * (dith() + dith()) / 2))), n * 4);
   data.writeInt16LE(Math.max(-32768, Math.min(32767, Math.round(R[n] * 32767 + d * (dith() + dith()) / 2))), n * 4 + 2);
 }
