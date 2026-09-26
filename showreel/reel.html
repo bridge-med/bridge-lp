@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Showreel — BRIDGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#0B0F1A;height:100%}
+  canvas{display:block;width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh;margin:auto;position:absolute;inset:0}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+/* ================================================================
+   engine — 時刻 t だけで 1 枚が決まる(同じ t なら何度描いても同じ絵)
+   ================================================================ */
+const W = 1920, H = 1080, FPS = 60, DUR = 15;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d', { willReadFrequently: false });
+
+/* ---- easing ---- */
+const clamp = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
+const lerp = (a, b, u) => a + (b - a) * u;
+const E = {
+  lin: u => u,
+  cubicIn: u => u * u * u,
+  cubicOut: u => 1 - Math.pow(1 - u, 3),
+  cubicInOut: u => u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2,
+  quartOut: u => 1 - Math.pow(1 - u, 4),
+  quintOut: u => 1 - Math.pow(1 - u, 5),
+  expoOut: u => u >= 1 ? 1 : 1 - Math.pow(2, -10 * u),
+  expoIn: u => u <= 0 ? 0 : Math.pow(2, 10 * u - 10),
+  expoInOut: u => u <= 0 ? 0 : u >= 1 ? 1 : u < .5 ? Math.pow(2, 20 * u - 10) / 2 : (2 - Math.pow(2, -20 * u + 10)) / 2,
+  backOut: (u, s = 1.70158) => 1 + (s + 1) * Math.pow(u - 1, 3) + s * Math.pow(u - 1, 2),
+  sineInOut: u => -(Math.cos(Math.PI * u) - 1) / 2,
+};
+/* 区間 [a,b] での進み(0..1)に easing をかける */
+const seg = (t, a, b, e = E.lin) => e(clamp((t - a) / (b - a)));
+
+/* ---- 3 次ベジェ ---- */
+function bez(p, u) {
+  const v = 1 - u;
+  return [v*v*v*p[0] + 3*v*v*u*p[2] + 3*v*u*u*p[4] + u*u*u*p[6],
+          v*v*v*p[1] + 3*v*v*u*p[3] + 3*v*u*u*p[5] + u*u*u*p[7]];
+}
+/* 弧長で等間隔に並べた点列(部分描画を長さ基準にするため) */
+function sampleCurve(segs, n = 400) {
+  const raw = [];
+  segs.forEach((p, k) => { for (let i = (k ? 1 : 0); i <= n; i++) raw.push(bez(p, i / n)); });
+  const L = [0];
+  for (let i = 1; i < raw.length; i++) L.push(L[i - 1] + Math.hypot(raw[i][0] - raw[i-1][0], raw[i][1] - raw[i-1][1]));
+  return { pts: raw, L, len: L[L.length - 1] };
+}
+function pointAt(c, u) {
+  const d = clamp(u) * c.len; let lo = 0, hi = c.L.length - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (c.L[m] < d) lo = m; else hi = m; }
+  const k = (d - c.L[lo]) / ((c.L[hi] - c.L[lo]) || 1);
+  const a = c.pts[lo], b = c.pts[hi];
+  return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), Math.atan2(b[1] - a[1], b[0] - a[0])];
+}
+function strokePart(c, u0, u1) {
+  u0 = clamp(u0); u1 = clamp(u1); if (u1 <= u0) return;
+  const d0 = u0 * c.len, d1 = u1 * c.len;
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i < c.pts.length; i++) {
+    if (c.L[i] < d0) continue;
+    if (!started) { const p = pointAt(c, u0); ctx.moveTo(p[0], p[1]); started = true; }
+    if (c.L[i] > d1) break;
+    ctx.lineTo(c.pts[i][0], c.pts[i][1]);
+  }
+  const e = pointAt(c, u1); ctx.lineTo(e[0], e[1]);
+  ctx.stroke();
+}
+
+/* ---- 文字 ---- */
+const F = {
+  jp: (w, s) => `${w} ${s}px "Noto Sans JP"`,
+  min: (w, s) => `${w} ${s}px "Shippori Mincho B1"`,
+  en: (w, s) => `${w} ${s}px "Inter"`,
+};
+function text(str, x, y, font, color, opt = {}) {
+  ctx.font = font; ctx.fillStyle = color;
+  ctx.letterSpacing = (opt.ls || 0) + 'px';
+  ctx.textAlign = opt.align || 'left';
+  ctx.textBaseline = opt.base || 'alphabetic';
+  ctx.fillText(str, x, y);
+  ctx.letterSpacing = '0px';
+}
+
+/* 1 文字ずつの配置(送りは letterSpacing 込み)。align で行全体をそろえる */
+const glyphCache = new Map();
+function glyphs(str, font, ls = 0) {
+  const key = str + '|' + font + '|' + ls;
+  if (glyphCache.has(key)) return glyphCache.get(key);
+  ctx.font = font; ctx.letterSpacing = '0px';
+  const out = []; let x = 0;
+  for (const ch of str) { const w = ctx.measureText(ch).width; out.push({ ch, x, w }); x += w + ls; }
+  const res = { g: out, width: x - ls };
+  glyphCache.set(key, res);
+  return res;
+}
+/* 1 文字ずつ動かして描く。fn(i, n) が {dx, dy, a, s, r} を返す */
+function textGlyphs(str, x, y, font, color, opt = {}, fn) {
+  const { g, width } = glyphs(str, font, opt.ls || 0);
+  const x0 = opt.align === 'center' ? x - width / 2 : opt.align === 'right' ? x - width : x;
+  ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'left'; ctx.textBaseline = opt.base || 'alphabetic'; ctx.letterSpacing = '0px';
+  g.forEach((gl, i) => {
+    const m = fn ? fn(i, g.length) : {};
+    const a = m.a ?? 1; if (a <= 0) return;
+    ctx.save();
+    ctx.globalAlpha *= a;
+    ctx.translate(x0 + gl.x + gl.w / 2 + (m.dx || 0), y + (m.dy || 0));
+    if (m.r) ctx.rotate(m.r);
+    if (m.s != null && m.s !== 1) ctx.scale(m.s, m.s);
+    ctx.fillText(gl.ch, -gl.w / 2, 0);
+    ctx.restore();
+  });
+  return { x0, width };
+}
+function measure(str, font, ls = 0) { return glyphs(str, font, ls).width; }
+
+/* 矩形で切り抜いて描く(ワイプ・マスク出し) */
+function clipRect(x, y, w, h, fn) { ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); fn(); ctx.restore(); }
+function rrect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+
+/* 画像(実物の写し): 読み込みは先に済ませる */
+const IMG = {};
+function loadImg(key, src) { return new Promise(r => { const im = new Image(); im.onload = () => { IMG[key] = im; r(); }; im.onerror = () => r(); im.src = src; }); }
+/* 写しを枠に入れて描く(色は加工しない。枠の外に色を持ち出さない) */
+function shot(key, x, y, w, h, opt = {}) {
+  const im = IMG[key]; if (!im) return;
+  const r = opt.r ?? 6;
+  ctx.save();
+  if (opt.shadow) { ctx.shadowColor = 'rgba(22,35,62,0.18)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 18; }
+  rrect(x, y, w, h, r); ctx.fillStyle = C.paper; ctx.fill();
+  ctx.shadowColor = 'transparent';
+  rrect(x, y, w, h, r); ctx.clip();
+  // cover(上基準)
+  const s = Math.max(w / im.width, h / im.height), dw = im.width * s, dh = im.height * s;
+  ctx.drawImage(im, x + (w - dw) / 2, y + (opt.top ? 0 : (h - dh) / 2), dw, dh);
+  ctx.restore();
+  if (opt.stroke) { rrect(x + .5, y + .5, w - 1, h - 1, r); ctx.strokeStyle = opt.stroke; ctx.lineWidth = 1; ctx.stroke(); }
+}
+
+/* ---- 描画(後で場面ごとに差し替える) ---- */
+const C = {
+  paper: '#FBFAF7', paper2: '#F4EFE6', paper3: '#EAE2D3',
+  ink: '#1B1B1E', ink2: '#45464C', ink3: '#63646B',
+  navy: '#16233E', blue: '#24365C', sand: '#A98F63', sandDeep: '#7D6845',
+  night: '#111521', night2: '#131A2A', night3: '#0B0F1A',
+  glass: '#0F4C47', glassDeep: '#0B3532', mint: '#A8E6D3', nightInk: '#EFECE4',
+};
+const LOGO = {
+  navy: [8, 74, 62, 16, 118, 24, 176, 84],
+  sand: [58, 94, 118, 60, 158, 22, 232, 12],
+};
+function draw(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = C.paper; ctx.fillRect(0, 0, W, H);
+  const s = 6, ox = W / 2 - 120 * s, oy = H / 2 - 55 * s;
+  const map = p => p.map((v, i) => i % 2 ? oy + v * s : ox + v * s);
+  const n = sampleCurve([map(LOGO.navy)]), d = sampleCurve([map(LOGO.sand)]);
+  ctx.lineCap = 'round'; ctx.lineWidth = 6 * s;
+  ctx.strokeStyle = C.navy; strokePart(n, 0, seg(t, 0, 1.2, E.expoOut));
+  ctx.strokeStyle = C.sand; strokePart(d, 0, seg(t, .4, 1.6, E.expoOut));
+  text('BRIDGE', W / 2, H - 200, F.en(800, 72), C.ink, { align: 'center', ls: 17 });
+  text('人が、自ら選び、納得して生きられる社会', W / 2, H - 120, F.min(600, 40), C.ink2, { align: 'center' });
+  text('その経験に、次の可能性を', W / 2, 140, F.jp(900, 64), C.ink, { align: 'center' });
+}
+
+/* ---- 動きのぼけ: シャッターの開いている間を samples 枚描き、WebGL で平均する(最大 8 枚) ---- */
+let G = null;
+function initGL() {
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const gl = c.getContext('webgl2', { preserveDrawingBuffer: true, antialias: false, premultipliedAlpha: false });
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, `#version 300 es
+    in vec2 p; out vec2 uv; void main(){ uv = vec2(p.x * .5 + .5, .5 - p.y * .5); gl_Position = vec4(p, 0., 1.); }`));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, `#version 300 es
+    precision highp float; in vec2 uv; out vec4 o; uniform sampler2D s[8]; uniform int n;
+    void main(){ vec4 a = vec4(0.);
+      a += texture(s[0], uv); if (n > 1) a += texture(s[1], uv); if (n > 2) a += texture(s[2], uv); if (n > 3) a += texture(s[3], uv);
+      if (n > 4) a += texture(s[4], uv); if (n > 5) a += texture(s[5], uv); if (n > 6) a += texture(s[6], uv); if (n > 7) a += texture(s[7], uv);
+      o = a / float(n); }`));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const texs = [];
+  for (let i = 0; i < 8; i++) {
+    const tx = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, tx);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    texs.push(tx);
+  }
+  gl.uniform1iv(gl.getUniformLocation(prog, 's'), [0, 1, 2, 3, 4, 5, 6, 7]);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+  gl.viewport(0, 0, W, H);
+  return { c, gl, texs, n: gl.getUniformLocation(prog, 'n') };
+}
+function renderBlur(t, samples = 1, shutter = 0) {
+  samples = Math.min(8, samples | 0);
+  if (samples <= 1 || shutter <= 0) { draw(t); window.REEL.out = canvas; return; }
+  if (!G) G = initGL();
+  const gl = G.gl;
+  for (let i = 0; i < samples; i++) {
+    draw(t + shutter * ((i + .5) / samples - .5));
+    gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, G.texs[i]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+  }
+  gl.uniform1i(G.n, samples);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  window.REEL.out = G.c;
+}
+
+/* ---- 準備: 使う文字をフォントごとに先読みする(canvas は使うまで読み込まない) ---- */
+const GLYPHS = 'BRIDGE人が、自ら選び納得して生きられる社会その経験に次の可能性を0123456789';
+const ready = (async () => {
+  await document.fonts.ready;
+  const loads = [];
+  for (const f of [F.jp(900, 40), F.jp(700, 40), F.jp(500, 40), F.jp(400, 40), F.min(600, 40), F.min(800, 40), F.en(500, 40), F.en(600, 40), F.en(700, 40), F.en(800, 40)])
+    loads.push(document.fonts.load(f, GLYPHS));
+  await Promise.all(loads);
+})();
+
+window.REEL = { W, H, FPS, DUR, canvas, draw, renderBlur, ready };
+
+/* ---- プレビュー(?render なしで開いたとき): 実時間で再生。クリックで頭から ---- */
+if (!location.search.includes('render')) {
+  ready.then(() => {
+    let start = performance.now();
+    const q = new URLSearchParams(location.search);
+    if (q.has('t')) { draw(+q.get('t')); return; }
+    const loop = now => { draw(((now - start) / 1000) % DUR); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+    canvas.addEventListener('click', () => { start = performance.now(); });
+  });
+}
+</script>
+</body>
+</html>
