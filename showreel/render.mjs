@@ -21,8 +21,7 @@ const argv = Object.fromEntries(process.argv.slice(2).map((a, i, arr) => a.start
 const FPS = +(argv.fps || 60);
 const FROM = +(argv.from || 0);
 const TO = argv.to != null ? +argv.to : null;
-const SAMPLES = +(argv.samples || 6);
-const SHUTTER = +(argv.shutter || 0.5);            // 1 フレームのうちシャッターが開いている割合(180°)
+const SAMPLES = +(argv.samples || 64);            // 1 フレームのサブフレームの上限(実際の枚数は速さで決まる)
 const OUT = argv.out || path.join(HERE, 'showreel.mp4');
 const FFMPEG = process.env.FFMPEG || 'ffmpeg';
 const FONTCACHE = argv.fontcache || path.join(os.tmpdir(), 'bridge-showreel-fonts');
@@ -68,14 +67,14 @@ const DUR = await page.evaluate(() => window.REEL.DUR);
 
 /* ---- 1 フレーム: サブフレームを Float で平均して動きのぼけを作る ---- */
 async function frame(t, samples) {
-  return page.evaluate(async ([t, samples, shutter, fps]) => {
+  return page.evaluate(async ([t, samples]) => {
     const R = window.REEL;
-    R.renderBlur(t, samples, shutter / fps);
+    R.renderFrame(t, samples);
     const blob = await new Promise(r => R.out.toBlob(r, 'image/png'));
     const buf = new Uint8Array(await blob.arrayBuffer());
     let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
     return btoa(s);
-  }, [t, samples, SHUTTER, FPS]);
+  }, [t, samples]);
 }
 
 if (argv.stills) {
