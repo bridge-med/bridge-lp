@@ -1,0 +1,9 @@
+# 生成物(スクリプトで作り直せる)。台本・時刻表・コードだけをコミットする
+fonts/
+fonts.css
+audio.wav
+video.mp4
+bridge-intro.mp4
+check/
+*.jpg
+voice/samples/

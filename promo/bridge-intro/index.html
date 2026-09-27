@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>BRIDGE 紹介動画</title>
+<link rel="stylesheet" href="fonts.css"><!-- fetch_fonts.py が作る。動画に出る文字だけの部分フォント -->
+<style>
+  html, body { margin: 0; background: #FBFAF7; }
+  canvas { display: block; width: 100vw; height: auto; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="timeline.js"></script>
+<script>
+/* BRIDGE 紹介動画(約34秒)。?render を付けると書き出し用(render.py が 1 コマずつ呼ぶ)、無しならその場で再生する。
+   色は shared/bridge.css のトークンの値だけ(憲法第22条・design-system §1)。
+   文字は炭、藍は線(ロゴ・道)だけ、砂は「選択の瞬間」=分岐点の点とロゴの一本だけ。
+   全面を暗くする場は藍ではなく夜の帯(--dark-sec)。書体は第23条(思想=明朝600/構造=Noto Sans JP + Inter)。
+   発信先はスマホで見られる前提なので、いちばん小さい文字でも 36px(1920幅)にする。
+   数字(回数・版・個数)で語らない。道具は名前と実物の画面で見せる(2026-09-26 社長指示)。 */
+const W = TL.width, H = TL.height, BEAT = 60 / TL.bpm, DUR = TL.beats * BEAT;
+const S = TL.sections;
+const C = {
+  bg: '#FBFAF7',          // --bg
+  ink: '#1B1B1E',         // --ink
+  ink3: '#63646B',        // --ink-3(補足の文字)
+  line: 'rgba(27,27,30,0.14)',
+  navy: '#16233E',        // --navy(線だけ)
+  sand: '#A98F63',        // --dawn(選択の瞬間だけ)
+  night: '#131A2A',       // --dark-sec
+  nightText: '#EFECE4',   // --dark-sec-text
+  nightDim: '#8E93A3',    // --dark-sec-dim
+};
+const MINCHO = '"Shippori Mincho B1", serif', SANS = '"Noto Sans JP", sans-serif', EN = 'Inter, sans-serif';
+const font = (w, px, fam) => `${w} ${px}px ${fam}`;
+
+const canvas = document.getElementById('c');
+const out = canvas.getContext('2d');
+const scratch = document.createElement('canvas'); scratch.width = W; scratch.height = H;
+let ctx = scratch.getContext('2d');
+
+/* ---- 緩急 ---- */
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (b, b0, b1) => clamp((b - b0) / (b1 - b0));
+const E = {
+  outExpo: t => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+  outQuart: t => 1 - Math.pow(1 - t, 4),
+  inCubic: t => t * t * t,
+  inOutCubic: t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+};
+
+/* ---- 曲線(弧長で進み具合を測る) ---- */
+function bezier(p0, p1, p2, p3, n = 240) {
+  const pts = [], cum = [0];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, u = 1 - t;
+    pts.push([
+      u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0],
+      u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1],
+    ]);
+    if (i) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  }
+  return { pts, cum, len: cum[n] };
+}
+const straight = (x0, x1, y) => bezier([x0, y], [lerp(x0, x1, 1 / 3), y], [lerp(x0, x1, 2 / 3), y], [x1, y], 60);
+function strokePartial(curve, f, color, width) {
+  if (f <= 0) return;
+  const { pts, cum, len } = curve, target = f * len;
+  ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) {
+    if (cum[i] <= target) { ctx.lineTo(pts[i][0], pts[i][1]); continue; }
+    const k = (target - cum[i - 1]) / (cum[i] - cum[i - 1]);
+    ctx.lineTo(lerp(pts[i - 1][0], pts[i][0], k), lerp(pts[i - 1][1], pts[i][1], k));
+    break;
+  }
+  ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.stroke();
+}
+
+/* ---- 正式ロゴ(shared/bridge.js の MARK と同じ座標。交差するが、接続しない) ---- */
+const LOGO_NAVY = bezier([8, 74], [62, 16], [118, 24], [176, 84]);
+const LOGO_SAND = bezier([58, 94], [118, 60], [158, 22], [232, 12]);
+const LOGO_SCALE = 2.6;  // 第24条の2:静かに存在させる(画面幅の約3分の1)
+function logo(cx, cy, fNavy, fSand) {
+  ctx.save();
+  ctx.translate(cx - 120 * LOGO_SCALE, cy - 55 * LOGO_SCALE); ctx.scale(LOGO_SCALE, LOGO_SCALE);
+  strokePartial(LOGO_NAVY, fNavy, C.navy, 6);
+  strokePartial(LOGO_SAND, fSand, C.sand, 6);
+  ctx.restore();
+}
+
+/* ---- 文字:下から滑り込む(枠で切る) ---- */
+function reveal(str, x, y, f, color, t, opt = {}) {
+  if (t <= 0) return;
+  const { align = 'left', alpha = 1, spacing = '0px' } = opt;
+  ctx.save();
+  ctx.font = f; ctx.letterSpacing = spacing; ctx.textAlign = align; ctx.textBaseline = 'alphabetic';
+  const m = ctx.measureText(str);
+  const asc = m.fontBoundingBoxAscent, desc = m.fontBoundingBoxDescent, w = m.width;
+  const x0 = align === 'left' ? x : align === 'center' ? x - w / 2 : x - w;
+  ctx.beginPath(); ctx.rect(x0 - 40, y - asc - 4, w + 80, asc + desc + 8); ctx.clip();
+  const e = E.outExpo(t);
+  ctx.globalAlpha = alpha * clamp(t * 2.5);
+  ctx.fillStyle = color;
+  ctx.fillText(str, x, y + (1 - e) * (asc + desc) * 0.9);
+  ctx.restore();
+}
+function textWidth(str, f, spacing = '0px') {
+  ctx.save(); ctx.font = f; ctx.letterSpacing = spacing; const w = ctx.measureText(str).width; ctx.restore(); return w;
+}
+function wordmark(cx, y, px, t) {  // .nav-logo と同じ Inter 500・字間 0.34em
+  const sp = px * 0.34;
+  reveal('BRIDGE', cx + sp / 2, y, font(500, px, EN), C.ink, t, { align: 'center', spacing: sp + 'px' });
+}
+
+/* ---- 分岐点の砂色の点(選択の瞬間) ---- */
+function choiceDot(x, y, t, r = 11) {
+  if (t <= 0) return;
+  const e = E.outExpo(t);
+  ctx.save();
+  ctx.globalAlpha = (1 - clamp(t * 1.2)) * 0.55;
+  ctx.strokeStyle = C.sand; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x, y, r + 34 * E.outQuart(t), 0, Math.PI * 2); ctx.stroke();
+  ctx.globalAlpha = 1; ctx.fillStyle = C.sand;
+  ctx.beginPath(); ctx.arc(x, y, r * e, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+/* ---- 場面ごとの出入り ---- */
+function withScene(alpha, dy, fn) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.translate(0, dy); fn(); ctx.restore();
+}
+const exitOf = (b, b0, b1) => E.inCubic(prog(b, b0, b1));
+
+/* 夜の帯の覆い具合(0〜1)。入りは下から満ち、出は下へ引く。境目はぼかさず、書き出しの最後に1本で描く */
+const NIGHT_IN = [41.1, S.idea], NIGHT_OUT = [46.7, S.breath];
+function nightCover(b) {
+  if (b < NIGHT_IN[0] || b >= NIGHT_OUT[1]) return 0;
+  if (b < NIGHT_IN[1]) return E.inOutCubic(prog(b, NIGHT_IN[0], NIGHT_IN[1]));
+  if (b < NIGHT_OUT[0]) return 1;
+  return 1 - E.inOutCubic(prog(b, NIGHT_OUT[0], NIGHT_OUT[1]));
+}
+
+/* 1. 二本の線 (0〜5拍) */
+function sceneLogo(b) {
+  const o = exitOf(b, 4.2, 5.1);
+  withScene(1 - o, -70 * o, () => {
+    logo(960, 430, E.inOutCubic(prog(b, 0, 2.2)), E.inOutCubic(prog(b, 0.6, 2.8)));
+    wordmark(960, 700, 64, prog(b, 2.5, 3.4));
+  });
+}
+
+/* 2. 毎日やっていること (5〜15拍) */
+const NOUNS = [['患者さんへの対応', 5], ['申し送り', 6], ['多職種カンファレンス', 7], ['記録', 7.5], ['後輩指導', 8.5]];
+function sceneDaily(b) {
+  const gone = E.inCubic(prog(b, 9.3, 10.1));
+  withScene(1 - gone, -180 * gone, () => {
+    NOUNS.forEach(([s, at], i) => {
+      const next = NOUNS[i + 1] ? NOUNS[i + 1][1] : 99;
+      const a = 1 - 0.7 * prog(b, next, next + 0.5);
+      reveal(s, 200, 300 + i * 124, font(700, 76, SANS), C.ink, prog(b, at, at + 0.8), { alpha: a });
+    });
+  });
+  const o = exitOf(b, 14.2, 15);
+  withScene(1 - o, -50 * o, () => {
+    reveal('毎日やっていること、', 960, 500, font(600, 88, MINCHO), C.ink, prog(b, 10, 10.9), { align: 'center' });
+    reveal('たぶん今の職場の外でも使えます', 960, 636, font(600, 88, MINCHO), C.ink, prog(b, 10.75, 11.7), { align: 'center' });
+  });
+}
+
+/* 3. 言葉を置き換える (15〜24拍) */
+const DOT_X = 940, RIGHT_X = 1030;
+function translateRow(b, y, left, right, b0) {
+  const lf = font(700, 56, SANS);
+  reveal(left, 200, y, lf, C.ink3, prog(b, b0, b0 + 0.8));
+  const mid = y - 20;
+  const x1 = 200 + textWidth(left, lf) + 36;
+  strokePartial(straight(x1, DOT_X, mid), E.inOutCubic(prog(b, b0 + 0.8, b0 + 1.6)), C.navy, 3);
+  // 分岐:ひとつは右の言葉へ、残りの二本はまだ名前のない方向へ(右の言葉には届かせない)
+  const fb = E.outQuart(prog(b, b0 + 1.6, b0 + 2.6));
+  strokePartial(straight(DOT_X, RIGHT_X - 30, mid), fb, C.navy, 3);
+  strokePartial(bezier([DOT_X, mid], [DOT_X + 30, mid], [DOT_X + 50, mid - 50], [DOT_X + 72, mid - 74]), fb, C.line, 3);
+  strokePartial(bezier([DOT_X, mid], [DOT_X + 30, mid], [DOT_X + 50, mid + 50], [DOT_X + 72, mid + 74]), fb, C.line, 3);
+  choiceDot(DOT_X, mid, prog(b, b0 + 1.6, b0 + 2.6));
+  reveal(right, RIGHT_X, y, lf, C.ink, prog(b, b0 + 1.8, b0 + 2.7));
+}
+function sceneCompass(b) {
+  const o = exitOf(b, 23.2, 24);
+  withScene(1 - o, -50 * o, () => {
+    reveal('BRIDGE Compass', 200, 220, font(600, 48, EN), C.ink, prog(b, 15, 15.8));
+    reveal('病院の外で通じる言葉に置き換えてみる道具', 200, 292, font(500, 40, SANS), C.ink3, prog(b, 15.3, 16.1));
+    translateRow(b, 520, '退院支援', 'プロジェクト推進・合意形成', 15.2);
+    translateRow(b, 740, '多職種カンファレンス', 'ステークホルダー調整', 18.2);
+  });
+}
+
+/* 4. 作っているもの (24〜42拍) — 数字では語らず、実物を拍に乗せて次々に見せる。
+   最初の4つは2拍ずつ(名前と一言)、残りは半拍ずつ(名前だけ)。画面は写し(無加工・縦横比そのまま・第22条の但し書き) */
+const SHOTS = {};
+const THUMBS = '../../images/products/thumbs/';  // 一覧(products/)と同じ実画面をそのまま使う
+const SCR = { x: 900, y: 250, w: 880, h: 550 };
+const MONTAGE_END = TL.montage[TL.montage.length - 1].beat + TL.montage[TL.montage.length - 1].dur;
+function drawShot(img, dx, alpha) {
+  if (!img || alpha <= 0) return;
+  const k = Math.min(SCR.w / img.naturalWidth, SCR.h / img.naturalHeight);
+  const w = img.naturalWidth * k, h = img.naturalHeight * k;
+  const x = SCR.x + (SCR.w - w) / 2 + dx, y = SCR.y + (SCR.h - h) / 2;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.drawImage(img, x, y, w, h);
+  ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.strokeRect(x - 1, y - 1, w + 2, h + 2);
+  ctx.restore();
+}
+function splitAtComma(str) {  // 一言は読点で2行に分ける
+  const i = str.indexOf('、');
+  return i < 0 ? [str] : [str.slice(0, i + 1), str.slice(i + 1)];
+}
+function sceneMontage(b) {
+  const M = TL.montage;
+  let i = -1;
+  for (let k = 0; k < M.length; k++) if (b >= M[k].beat) i = k;
+  if (i >= 0 && b < MONTAGE_END) {
+    const it = M[i], slow = it.dur >= 1;
+    if (i > 0) {  // 前の画面は左へ抜ける
+      const tout = prog(b, it.beat, it.beat + (slow ? 0.35 : 0.2));
+      drawShot(SHOTS[M[i - 1].img], -120 * E.outQuart(tout), 1 - tout);
+    }
+    const tin = prog(b, it.beat, it.beat + (slow ? 0.7 : 0.3));
+    drawShot(SHOTS[it.img], 160 * (1 - E.outExpo(tin)), clamp(tin * 2));
+    reveal(it.name, 160, 500, font(700, 68, SANS), C.ink, prog(b, it.beat, it.beat + (slow ? 0.8 : 0.3)));
+    if (it.t) {
+      const [l1, l2] = splitAtComma(it.t);
+      reveal(l1, 160, 590, font(500, 44, SANS), C.ink3, prog(b, it.beat + 0.25, it.beat + 1));
+      if (l2) reveal(l2, 160, 652, font(500, 44, SANS), C.ink3, prog(b, it.beat + 0.4, it.beat + 1.15));
+    }
+  }
+  if (b >= MONTAGE_END) {  // 最後の画面も左へ抜けて、一文で受ける
+    const tout = prog(b, MONTAGE_END, MONTAGE_END + 0.35);
+    drawShot(SHOTS[M[M.length - 1].img], -120 * E.outQuart(tout), 1 - tout);
+  }
+  const wipe = nightCover(b);
+  withScene(1, -90 * wipe, () => {
+    reveal('作ったものを、直しながら置いています', 960, 580, font(700, 72, SANS), C.ink, prog(b, 38.6, 39.4), { align: 'center' });
+  });
+}
+
+/* 5. 考え方 (42〜47.25拍・夜の帯) — 分かれた5本はどれも強調しない(選ぶのは本人) */
+const TRUNK_Y = 760, SPLIT_X = 720;
+const TRUNK = straight(-20, SPLIT_X, TRUNK_Y);
+const FANS = [520, 640, 760, 880, 1000].map(y => bezier([SPLIT_X, TRUNK_Y], [920, TRUNK_Y], [1180, y], [1940, y]));
+function sceneIdea(b) {
+  ctx.fillStyle = C.night; ctx.fillRect(0, 0, W, H);
+  const o = exitOf(b, 46.2, 46.7);
+  withScene(1 - o, 0, () => {
+    strokePartial(TRUNK, E.inOutCubic(prog(b, 41.9, 42.9)), C.nightText, 3);
+    FANS.forEach((c, i) => strokePartial(c, E.outQuart(prog(b, 42.9 + i * 0.15, 44.3 + i * 0.15)), C.nightDim, 2.5));
+    choiceDot(SPLIT_X, TRUNK_Y, prog(b, 42.9, 43.9), 13);
+    reveal('正解を与えるのではなく、', 200, 340, font(600, 76, MINCHO), C.nightText, prog(b, 43.1, 44));
+    reveal('選択肢を増やす', 200, 488, font(600, 108, MINCHO), C.nightText, prog(b, 43.9, 44.9));
+  });
+}
+
+/* 6. 締め (47.5〜54拍) */
+function sceneEnd(b) {
+  logo(960, 360, E.outExpo(prog(b, 47.5, 48.7)), E.outExpo(prog(b, 47.75, 48.95)));
+  wordmark(960, 610, 56, prog(b, 48.3, 49.1));
+  reveal('人が、自ら選び、納得して生きられる社会をつくる', 960, 760, font(600, 56, MINCHO), C.ink, prog(b, 49, 49.8), { align: 'center' });
+  reveal('bridge-med.github.io/bridge-lp', 960, 850, font(500, 36, EN), C.ink3, prog(b, 49.7, 50.4), { align: 'center' });
+  // 声は合成音声であることを明かす(第13条・第18条)。製品名や AI の語は出さない(context.md §6)
+  reveal('声は合成音声です', 960, 1000, font(500, 28, SANS), C.ink3, prog(b, 49.7, 50.4), { align: 'center' });
+}
+
+/* ---- 1コマの描画(ぼかしてよいもの) ---- */
+function drawAt(sec) {
+  const b = sec / BEAT;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  if (b < S.daily + 0.2) sceneLogo(b);
+  else if (b < S.compass) sceneDaily(b);
+  else if (b < S.montage) sceneCompass(b);
+  else if (b < S.idea) sceneMontage(b);
+  else if (b < NIGHT_OUT[0]) sceneIdea(b);
+  else if (b >= S.end) sceneEnd(b);
+  // 46.7〜47.25拍は夜の帯が引くだけ、47.25〜47.5拍は何も描かない(音の無音と同じ、ひと呼吸)
+}
+
+/* ---- 仕上げ(ぼかさないもの):夜の帯の境目と、切り抜かれても名前が残る左上の署名 ---- */
+function finish(target, sec) {
+  const b = sec / BEAT, c = nightCover(b);
+  const full = b >= S.idea && b < NIGHT_OUT[0];
+  if (c > 0 && !full) { target.fillStyle = C.night; target.fillRect(0, Math.round(H * (1 - c)), W, H); }
+  if (b > S.daily + 0.2 && b < S.breath) {
+    target.save();
+    target.font = font(500, 22, EN); target.letterSpacing = '7px';
+    target.fillStyle = (full || c > 0.93) ? C.nightDim : C.ink3;
+    target.fillText('BRIDGE', 64, 80);
+    target.restore();
+  }
+}
+
+/* モーションブラー:1コマを少しずつ時間をずらして10回描き、平均する */
+const SUB = 10, SHUTTER = 0.5;
+function renderFrame(frame) {
+  const fps = TL.fps, center = frame / fps;
+  for (let k = 0; k < SUB; k++) {
+    const t = (frame + (k / (SUB - 1) - 0.5) * SHUTTER) / fps;
+    drawAt(clamp(t, 0, DUR - 1e-4));
+    out.globalAlpha = 1 / (k + 1);
+    out.drawImage(scratch, 0, 0);
+  }
+  out.globalAlpha = 1;
+  finish(out, center);
+  return canvas.toDataURL('image/png');
+}
+
+/* フォントと画面:手元のファイルを読み込み、揃わなければ書き出さない */
+const FACES = [font(600, 40, MINCHO), font(500, 40, SANS), font(700, 40, SANS), font(500, 40, EN), font(600, 40, EN)];
+window.ready = (async () => {
+  const all = TL.texts.concat(TL.montage.flatMap(m => [m.name, m.t || ''])).join('');
+  await Promise.all(TL.montage.map(m => new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => { SHOTS[m.img] = im; res(); };
+    im.onerror = () => rej(new Error('shot not loaded: ' + m.img));
+    im.src = THUMBS + m.img;
+  })));
+  await Promise.all(FACES.map(f => document.fonts.load(f, all)));
+  await document.fonts.ready;
+  const loaded = [...document.fonts].filter(f => f.status === 'loaded').length;
+  if (loaded < FACES.length) throw new Error('fonts not loaded: ' + loaded);
+  return loaded;
+})();
+window.renderFrame = renderFrame;
+window.TOTAL_FRAMES = Math.round(DUR * TL.fps);
+
+if (!location.search.includes('render')) {
+  window.ready.then(() => {
+    const t0 = performance.now();
+    const loop = now => {
+      const sec = ((now - t0) / 1000) % DUR;
+      drawAt(sec); out.globalAlpha = 1; out.drawImage(scratch, 0, 0); finish(out, sec);
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  });
+}
+</script>
+</body>
+</html>
