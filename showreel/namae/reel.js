@@ -11,12 +11,12 @@
    12.656〜     v3 の finale(罫が藍の線になり、弧に曲がって砂の線と交わり、ロゴと BRIDGE)。ロゴに光や字間の動きは足さない
    実物の画は capture.mjs が撮り、compose.py がカメラ(camPage)どおりに縦横同じ倍率で切り出す。画素は変えない。写しの上には何も描かない
    ================================================================ */
-const NIGHT = '#131A2A', NT1 = '#EFECE4', NT2 = '#8E93A3', NAVY_D = '#D8DEEB', GLINT = '#FFFFFF';
+const NIGHT = '#131A2A', NT1 = '#EFECE4', NT2 = '#8E93A3', NAVY_D = '#D8DEEB', GLINT = '#FFFFFF';   // 既存トークンの値: --dark-sec・--dark-sec-text・--dark-sec-dim・ダークテーマの --navy・--card
 const JP = (w, s) => `${w} ${s}px "Noto Sans JP"`;
 const MIN = (s) => `600 ${s}px "Shippori Mincho B1"`;
 let MEAS3 = null;
 
-const FS = 12.65625, FSHIFT = 12.65625 - FS;           // finale は前の裁定の拍 27(ロゴの保持は約 1.0 秒)
+const FS = 12.65625, FSHIFT = 12.65625 - FS;           // finale は拍 27(12.656 秒)から。v3 と同じ時刻(ロゴの保持は約 1.0 秒)
 const CUTS = [0, 7.5, FS, 15.0001];
 let FRAME_T = null;
 function segOf(t) { for (let i = 0; i < CUTS.length - 1; i++) if (t < CUTS[i + 1]) return [CUTS[i], CUTS[i + 1]]; return [CUTS[CUTS.length - 2], 15.0001]; }
@@ -53,7 +53,7 @@ function glyphs(str, font, x, y, color, opt = {}) {
 const charXs = (str, font, x0) => { ctx.save(); ctx.font = font; let x = x0; const xs = [...str].map(ch => { const w = ctx.measureText(ch).width, c = x + w / 2; x += w; return c; }); ctx.restore(); return xs; };
 
 /* ================================================================ 藍の弧と光 */
-const ARC = LOGO_N.map(([x, y]) => [163 + (x - 8) * (1529 / 168), 540 + (y - 79) * (80 / 51)]);   // 横は名前の墨の両端(約 163〜1691)と同じ幅。寄っても弧と光のにじみが x 96〜1824 に収まる(designer 必須 1)
+const ARC = LOGO_N.map(([x, y]) => [163 + (x - 8) * (1529 / 168), 540 + (y - 79) * (80 / 51)]);   // 横は名前の墨の両端(約 163〜1691)と同じ幅。寄っても弧と光のにじみが x 96〜1824 に収まる
 const ARCL = (() => { const pts = [], L = [0]; for (let i = 0; i <= 1000; i++) { const p = bez(ARC, i / 1000); if (i) L.push(L[i - 1] + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1])); pts.push(p); } return { pts, L, len: L[1000] }; })();
 function arcAt(s) {                                        // 弧長の割合 s(0〜1)の点
   const d = clamp(s) * ARCL.len; let lo = 0, hi = 1000; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (ARCL.L[m] < d) lo = m; else hi = m; }
@@ -95,7 +95,7 @@ const DY = 700;                                           // 組を縦に積む�
 const HIT0 = 0.5859375;                                   // 大きいことばを保ってから退く打点(拍 1.25)
 const UL0 = 0.05, UL1 = 0.35;                             // 下線を引く(大きいことばの下で)
 const PASS0 = 0.9375, PASS1 = 1.171875;                   // 一組目: 光が渡る(名前は光を追って立つ)
-const DRIFT0 = 1.640625, DRIFT1 = 2.2265625;              // 一組目を読ませる間に、光がもう一度ゆっくり渡る(止まりの規則・直し 10)
+const DRIFT0 = 1.640625, DRIFT1 = 2.2265625;              // 一組目を読ませる間に、光がもう一度ゆっくり渡る(画を止めない)
 const SW = [2.34375];                                     // 送り(拍 5)。一組目を長く読ませ、二組目で実物へ
 const LAST = 1;                                           // 実物の行へ組まれる組
 const TILT = 0.25;                                        // 一段下へ送る時間
@@ -105,7 +105,7 @@ const FOLD0 = 3.45703125, FOLD1 = 3.75;                   // 字が一行に組�
 const WIPE0 = 3.75, WIPE1 = 4.1015625, WX0 = 20;          // 拭い(0.35 秒。実物は拍 8 の 3.75 から出る。縁が画面の中央を通るのは 3.93)
 const EDGE = x0 => [[x0, -40], [x0 + 70, 330], [x0 + 70, 750], [x0, 1120]];
 const wipeX = t => t < WIPE0 ? WX0 : lerp(WX0, 2000, E.cubicInOut(clamp((t - WIPE0) / (WIPE1 - WIPE0))));
-const DRIFT_V = 90;                                       // 名前が立ったあとの上への流れ(ワールド px/秒)。止まりの規則(直し 10)を寄りではなく縦の流れで満たす(designer)
+const DRIFT_V = 90;                                       // 名前が立ったあとの上への流れ(ワールド px/秒)。画を止めないために、寄りではなく縦の流れで動かし続ける
 const vScroll = t => SW.reduce((v, s) => v + DY * E.cubicInOut(clamp((t - s) / TILT)), 0) + DRIFT_V * clamp(t - PASS1, 0, FOLD0 - PASS1);
 const pairAt = t => SW.filter(s => t >= s).length;
 const arcOf = p => s => { const q = arcAt(s); return [q[0], q[1] + p * DY]; };
@@ -127,7 +127,7 @@ function pairAlpha(p, t) {
 }
 
 /* ---- 夜のカメラ: 二段の寄り + 横の流し + 縦の送り + 2.0 から組み替えまで ×1.06 の寄り ---- */
-function cam1(t) { const s1 = 1 + 0.04 * clamp(t / 1.06), s2 = t < 1.06 ? 1 : 1 + 0.08 * E.sineInOut(clamp((t - 1.06) / (SW[0] - 1.06))); return { s1, s2 }; }   // 描いた字の墨を x 96〜1824 に収める(designer 必須 3)
+function cam1(t) { const s1 = 1 + 0.04 * clamp(t / 1.06), s2 = t < 1.06 ? 1 : 1 + 0.08 * E.sineInOut(clamp((t - 1.06) / (SW[0] - 1.06))); return { s1, s2 }; }   // 描いた字の墨を x 96〜1824 に収める
 function nightMat(t) {
   t = Math.min(t, FOLD0);                                 // 組み替えのあいだは FOLD0 で止める(字はそこから画面の座標で動く)
   const { s1, s2 } = cam1(Math.min(t, SW[0]));
@@ -226,13 +226,13 @@ function pageCamList(t) {
 /* あつめた言葉(saved6 → name13。ビューポート 1440×468: 撮れるのはビューポートの内だけ。知らせは釦の列の右(395〜440)に出て、注意の一文(441.9〜)より上に収まる) */
 const COPYF = { x: 720, y: 441 - 540 / 3.0, z: 3.0 };     // 見出し・行・文例・外す・釦・知らせが切れずに入る。枠 x 400〜1040・y 81〜441
 const COPYC = [412, 441], COPY_T = 8.4375,   /* 寄りの不動点は釦の左端と枠の下辺(釦と知らせを切らない) */ WHIP0 = 9.140625, NAME_T = 9.375, NAME_END = 10.3125, G0_AT = 10.6640625;
-const NAMEP = [586.9, 42.25], NAME_S = [1900, 403];      // 「帳」の墨の右端を画面 (1900, 403) に留めて寄る(designer 必須 2)。名前の墨 412.7〜586.9、見出しの墨 114.25〜、IIKAE 597.9〜(実測)
+const NAMEP = [586.9, 42.25], NAME_S = [1900, 403];      // 「帳」の墨の右端を画面 (1900, 403) に留めて寄る。名前の墨 412.7〜586.9、見出しの墨 114.25〜、IIKAE 597.9〜(実測)
 const nameCam = z => ({ x: NAMEP[0] + (960 - NAME_S[0]) / z, y: NAMEP[1] + (540 - NAME_S[1]) / z, z });
 const NM = nameCam(9.56), N1 = nameCam(10.78);            // z 9.56(枠 y 0.1〜113.1・名前は画面 234〜1900)→ 10.78(y 4.9〜105・名前は 22〜1900)
-const G0 = { x: 620, y: 135, z: 4.0 };                    // 名前・見出し・罫・行が一つの画に入る(直し 7)。枠 x 380〜860・y 0〜270
+const G0 = { x: 620, y: 135, z: 4.0 };                    // 名前・見出し・罫・行が一つの画に入る。枠 x 380〜860・y 0〜270
 const NAME_CLIP = { x: 340, y: 0, w: 480, h: 300 };       // name13 の撮る範囲
 /* ---- 罫の下で言いかえる(拍 22.75〜27) ----
-   拍 22.75 G0(直し 7: 名前・見出し・罫・行が一つの画に)→ 23.5 行の頭へ飛び込む →「いつもと違うのに気づいた」(133px。右へ流れ続ける)
+   拍 22.75 G0(名前・見出し・罫・行が一つの画に)→ 23.5 行の頭へ飛び込む →「いつもと違うのに気づいた」(133px。右へ流れ続ける)
    → 24.5〜25 矢印の向きへ一振り。両端で罫を同じ画面 y 438.5 に置くので不動点が罫の上に来て、罫は留まり字だけが入れ替わる
    → 25「わずかな変化への気づきと早期報告」(115px)。あとは kotCam */
 const PAIR_CLIP = { x: 340, y: 0, w: 700, h: 300 };       // pair13 の撮る範囲
@@ -246,10 +246,10 @@ const KOT_Z = 8.5, KOT_M = 38;                            // 言いかえを左�
 const onRule = (x, R, z) => ({ x, y: RULE_C + (540 - R) / z, z });   // 頁 x を画面の中心に、罫を画面 y R に置く
 const genCam = t => onRule(GEN_X + GEN_V * (t - AT_GEN), Y_R, GEN_Z);
 const KOT = onRule(KW[0] + (960 - KOT_M) / KOT_Z, Y_R, KOT_Z);
-const DIVE_E = u => 0.1 * u + 0.9 * whipEase(clamp((u - 0.2) / 0.8));     // 引きで G0 に着いたら 0.07 秒だけじわりと寄り(直し 7 の一つの画)、0.28 秒で飛び込む(同じ頁へ戻って止まる画にしない)
+const DIVE_E = u => 0.1 * u + 0.9 * whipEase(clamp((u - 0.2) / 0.8));     // 引きで G0 に着いたら 0.07 秒だけじわりと寄り(一つの画)、0.28 秒で飛び込む(同じ頁へ戻って止まる画にしない)
 /* 言いかえに着いてから(拍 25〜27): 罫は画面 y 438.5 から降り続け(止まらない・跳ね返らない)、切り替えで finale の線になり、ロゴの弧に曲がる前に地平線 620 に着いて止まる。
    拍 25〜26.25 は言いかえを大きいまま(z 8.5 → 8.59 へゆっくり寄る)。罫は着いた勢いで降り始めて緩む(1.5 → 0.5px/コマ)。
-   拍 26.25〜27 は引きながら矢印を枠に入れ(editor: 言いかえだけを最後の画にしない)、動きのまま finale へ渡す(罫は 2.75px/コマ)。
+   拍 26.25〜27 は引きながら矢印を枠に入れ(言いかえだけを最後の画にしない。行の頭から言いかえた組であることを、矢印で残す)、動きのまま finale へ渡す(罫は 2.75px/コマ)。
    finale の出だし(sceneH)は ×HAND_K0・HAND_DY0 から HAND_T 秒で ×1・0 へ。線の太さ(写しの罫 = z px)・位置・速さ・倍率の変わり方を、切り替えの前後でそろえる */
 const PUSH_H = 1.01, Z_C = 6.25, YR_C = 611;              // 保持の寄り/切り替えのときの倍率(罫は画面で 6.25px)と罫の画面 y(文例の墨 265.0 を枠に入れない下限 608.1 の内)
 const YR_H = 473.5, VR_0 = 90, VR_H = 30, VR_C = 165;     // 罫の画面 y: 保持の終わり/速さ(px/秒): 着いたとき・保持の終わり・切り替え
@@ -290,7 +290,7 @@ function TAKE_OF(n) {
   return 'saved6';
 }
 
-/* ================================================================ 組み替え(4.04〜4.34)と拭い(4.34〜4.57) */
+/* ================================================================ 組み替え(3.46〜3.75)と拭い(3.75〜4.10) */
 let TARGETS = null, SOURCES = null;
 function buildTargets() {
   const asc = (font, ch) => { ctx.save(); ctx.font = font; const m = ctx.measureText(ch); ctx.restore(); return m.fontBoundingBoxAscent; };
@@ -341,17 +341,17 @@ function scene3(t) {
   }
 }
 
-/* ================================================================ 終わり: v3 の finale を 2 拍早めて。地平線が y 632→620 に着く・PULL1 以降 ×1.00→×0.91・字間を 0.30em へ・光が藍の線を渡る */
+/* ================================================================ 終わり: v3 の finale を同じ時刻で(拍 27 から)。写しの罫は画面 y 611 から地平線 620 へ降りて着く。字間は 0.80→0.34em(v3 のまま)。PULL1 以降 ×1.00→×0.93 で遠ざかり、最後の 0.2 秒で地へ溶かす(85%)。光も、v3 にない字間の動きも足さない */
 function sceneH(t, P) {
   const tv = t + FSHIFT;
-  const k = tv < PULL1 ? 1 : 1 - 0.07 * clamp((tv - PULL1) / (15 + FSHIFT - PULL1));                // v3 の遠ざかり ×1.00→×0.93(前の裁定・直し 8)。光・字間の動きは足さない
+  const k = tv < PULL1 ? 1 : 1 - 0.07 * clamp((tv - PULL1) / (15 + FSHIFT - PULL1));                // v3 の遠ざかり ×1.00→×0.93。光・字間の動きは足さない
   const hk = (u => (1 - u) * (1 - u))(clamp((t - FS) / HAND_T));                                   // 1 → 0(quadOut の残り)。写しの引きの速さのまま、線は 611 から地平線 620 へ降りて着き(曲がり始めの前)、全体は ×1.042 から ×1 へ
   const K = k * (1 + (HAND_K0 - 1) * hk), dy = HAND_DY0 * hk;
   const base = [K, 0, 0, K, 960 - 960 * K, 540 - 540 * K + dy];
   const _st = ctx.setTransform.bind(ctx);
   ctx.setTransform = function (a, b, c, d, e, f) { if (arguments.length === 6 && a === 1 && b === 0 && c === 0 && d === 1 && e === 0 && f === 0) return _st(...base); return _st.apply(null, arguments); };
   const hand = E.sineInOut(clamp((t - FS) / 0.08));                                                  // 罫(薄い灰)から藍へ 5 コマで受け渡す(切り替えのあとに薄い線だけの間を作らない)
-  const P2 = hand < 1 ? { ...P, line: mix('#E4E3E0', P.line, hand) } : P;
+  const P2 = hand < 1 ? { ...P, line: mix('#E4E3E0', P.line, hand) } : P;   // #E4E3E0: 写しの罫の色(--line を --bg に重ねた色)
   try { finale(tv, P2); } finally { ctx.setTransform = _st; }
   if (t > 14.8) { _st(1, 0, 0, 1, 0, 0); ctx.fillStyle = LIGHT.bg; ctx.globalAlpha = E.sineInOut(clamp((t - 14.8) / 0.2)) * 0.85; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }   // 最後の 0.2 秒で地へ溶かす(音の減衰と一緒に)
 }
