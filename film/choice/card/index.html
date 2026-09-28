@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P3 signature</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=block">
+<style>
+  /* BRIDGE tokens (shared/bridge.css, light) */
+  :root{--bg:#FBFAF7;--ink:#1B1B1E;--ink-3:#63646B;--navy:#16233E;--dawn:#A98F63}
+  html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}
+  .stage{position:absolute;left:0;top:0;width:1440px;height:810px}
+  svg.mark{position:absolute;overflow:visible}
+  .l-navy{stroke:var(--navy);fill:none;stroke-linecap:round}
+  .l-sand{stroke:var(--dawn);fill:none;stroke-linecap:round}
+  .wm{position:absolute;left:0;width:1440px;text-align:center;font:500 72px/1 'Inter',sans-serif;letter-spacing:.34em;text-indent:.34em;color:var(--ink);opacity:0}
+  .tg{position:absolute;left:0;width:1440px;text-align:center;font:500 40px/1 'Inter',sans-serif;letter-spacing:.22em;text-indent:.22em;color:var(--ink-3);opacity:0}
+</style></head>
+<body>
+<div class="stage">
+  <!-- 正式ロゴ(shared/bridge.js MARK と同じ幾何)。viewBox 240x110 を幅 420px で置く -->
+  <svg class="mark" id="mark" viewBox="0 0 240 110" width="440" height="201.7" aria-hidden="true">
+    <path class="l-navy" stroke-width="6" d="M8 74 C 62 16, 118 24, 176 84"/>
+    <path class="l-sand" stroke-width="6" d="M58 94 C 118 60, 158 22, 232 12"/>
+  </svg>
+  <div class="wm" id="wm">BRIDGE</div>
+  <div class="tg" id="tg">EXPAND CHOICES.</div>
+</div>
+<script>
+  const MW = 440, MH = MW * 110 / 240, MX = (1440 - MW) / 2, MY = 118;
+  const mark = document.getElementById('mark');
+  mark.style.left = MX + 'px'; mark.style.top = MY + 'px';
+  document.getElementById('wm').style.top = (MY + MH + 92) + 'px';
+  document.getElementById('tg').style.top = (MY + MH + 92 + 72 + 50) + 'px';
+  // crossing point of the two strokes, in page px
+  const bez = (P, t) => { const u = 1 - t; return [0, 1].map(k => u*u*u*P[0][k] + 3*u*u*t*P[1][k] + 3*u*t*t*P[2][k] + t*t*t*P[3][k]); };
+  const N = [[8,74],[62,16],[118,24],[176,84]], S = [[58,94],[118,60],[158,22],[232,12]];
+  let best = [1e9];
+  for (let i = 0; i <= 1200; i++) for (let j = 0; j <= 1200; j += 1) { const a = bez(N, i/1200), b = bez(S, j/1200); const d = (a[0]-b[0])**2 + (a[1]-b[1])**2; if (d < best[0]) best = [d, a, b]; }
+  const k = MW / 240;
+  window.CROSS = [MX + best[1][0] * k, MY + best[1][1] * k];
+  window.MARKBOX = { x: MX, y: MY, w: MW, h: MH };
+  window.setT = (t) => {   // seconds since the card started
+    const f = (a, b) => Math.max(0, Math.min(1, (t - a) / (b - a)));
+    document.getElementById('wm').style.opacity = f(window.T_WM, window.T_WM + .3);
+    document.getElementById('tg').style.opacity = f(window.T_TG, window.T_TG + .3);
+  };
+  window.T_WM = 0.85; window.T_TG = 1.15;
+</script>
+</body></html>

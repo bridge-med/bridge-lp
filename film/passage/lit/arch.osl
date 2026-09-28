@@ -1,0 +1,62 @@
+// PASSAGE の建築の面: 目地(面の段を下げた色)と、V から見える面にだけ塗る藍と砂(Varini)。座標は three.js の世界(x 右・y 上・z 手前)
+float frac(float x) { return x - floor(x); }
+float lineAt(float p, float m, float off) {
+  float fw = max(filterwidth(p), 1e-5);
+  float d = fabs(frac((p - off) / m - 0.5) - 0.5) * m / fw;
+  float wpx = clamp(0.012 / fw, 1.0, 2.0);
+  return clamp(wpx * 0.5 + 0.5 - d, 0.0, 1.0) * smoothstep(8.0, 12.0, m / fw);
+}
+float lineOnce(float p, float at) {
+  float fw = max(filterwidth(p), 1e-5);
+  float wpx = clamp(0.012 / fw, 1.0, 2.0);
+  return clamp(wpx * 0.5 + 0.5 - fabs(p - at) / fw, 0.0, 1.0);
+}
+shader arch(
+  color albedo = color(0.8), color jointCol = color(0.7), color skirtCol = color(0.6),
+  float joints = 1, float isFloor = 0, float fY = 0, float fA = 0, float fOx = 0, float fOz = 0, float jointAmt = 1,
+  string maskN = "", string maskS = "", string depth = "",
+  vector r0 = 0, vector r1 = 0, vector r3 = 0, float w0 = 0, float w1 = 0, float w3 = 0,
+  point eyeT = 0, color navy = 0, color dawn = 0, float paint = 1, float dW = 3840, float dH = 2160,
+  output color Col = 0, output float Groove = 0)
+{
+  point pt = point(P[0], P[2], -P[1]);
+  vector nt = vector(Ng[0], Ng[2], -Ng[1]);
+  color c = albedo;
+  int camRay = raytype("camera");
+  if (joints > 0.5 && camRay) {
+    float ca = cos(fA), sa = sin(fA);
+    float dx = pt[0] - fOx, dz = pt[2] - fOz;
+    float Lx = ca * dx - sa * dz, Lz = sa * dx + ca * dz;
+    vector nl = vector(ca * nt[0] - sa * nt[2], nt[1], sa * nt[0] + ca * nt[2]);
+    float k = 0.0;
+    float hy = pt[1] - fY;
+    if (nt[1] > 0.5) {
+      if (hy < 0.01 && isFloor > 0.5) { float col = floor(Lx / 0.6); k = max(lineAt(Lx, 0.6, 0.0), lineAt(Lz, 1.2, fmod(col, 2.0) * 0.6)); Groove = k; }
+    } else if (nt[1] > -0.5) {
+      float along = fabs(nl[0]) > fabs(nl[2]) ? Lz : Lx;
+      if (joints > 1.5) k = lineOnce(hy, 2.4);
+      else k = max(lineAt(along, 1.2, 0.0), hy > 1.2 ? lineAt(hy, 2.4, 0.0) : 0.0);
+      if (hy < 0.03) { c = skirtCol; k = 0.0; }
+    }
+    c = mix(c, jointCol, k * jointAmt);
+  }
+  if (paint > 0.5 && maskN != "" && camRay) {
+    float cx = dot(r0, vector(pt)) + w0, cy = dot(r1, vector(pt)) + w1, cw = dot(r3, vector(pt)) + w3;
+    if (cw > 0.0) {
+      float nx = cx / cw, ny = cy / cw;
+      if (fabs(nx) < 1.0 && fabs(ny) < 1.0) {
+        float s = nx * 0.5 + 0.5, t = 1.0 - (ny * 0.5 + 0.5);
+        float mN = texture(maskN, s, t, "wrap", "black");
+        float mS = texture(maskS, s, t, "wrap", "black");
+        if (mN > 0.003 || mS > 0.003) {
+          float dmax = 0.0;
+          for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++)
+            dmax = max(dmax, texture(depth, s + i / dW, t + j / dH, "interp", "closest", "wrap", "clamp"));
+          float d = distance(pt, eyeT);
+          if (d <= dmax * 1.003 + 0.02) { c = mix(c, navy, mN); c = mix(c, dawn, mS); }
+        }
+      }
+    }
+  }
+  Col = c;
+}
