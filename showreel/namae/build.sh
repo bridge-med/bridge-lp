@@ -1,15 +1,16 @@
 #!/bin/bash
 # 「名前になる」を書き出す: 撮影 → 描いた層 → カメラ → 合成 → 音 → showreel/namae/showreel.mp4
-# 依存: node(playwright の chromium)・python3(numpy・Pillow)・ffmpeg・curl(フォントのキャッシュ。既定は OS の一時領域)
+# 依存: node(playwright の chromium)・python3(numpy・Pillow)・ffmpeg・curl(フォントのキャッシュ。既定は OS の一時領域、BRIDGE_FONTCACHE で替えられる)
 # 途中のもの(撮った画・コマ・音)は showreel/namae/work/ に置く(.gitignore)。撮った画があれば撮り直さない(撮り直すときは work/cap を消す)
 set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"; W="$HERE/work"
+FC="${BRIDGE_FONTCACHE:-${TMPDIR:-/tmp}/bridge-showreel-fonts}"   # フォントのキャッシュ(同じ字形で書き出し直すには、前と同じキャッシュを渡す)
 mkdir -p "$W"
 # 1. 実物の iikae/ を撮る(shots.mjs の 4 本の take。入力はタップとなぞりだけ)
-[ -f "$W/cap/frames.json" ] || node "$HERE/capture.mjs" "$HERE/shots.mjs" "$W/cap" > "$W/capture.log"
+[ -f "$W/cap/frames.json" ] || node "$HERE/capture.mjs" "$HERE/shots.mjs" "$W/cap" --fontcache "$FC" > "$W/capture.log"
 # 2. 描いた層: 0〜246(夜の帯と拭い)と 760〜899(finale)を、サブフレーム 64 で
 T=$(python3 -c "print(','.join(f'{n/60:.6f}' for n in list(range(0, 247)) + list(range(760, 900))))")
-rm -rf "$W/canvas-raw" "$W/canvas"; node "$HERE/render.mjs" --stills "$T" --samples 64 --outdir "$W/canvas-raw" > "$W/render.log"
+rm -rf "$W/canvas-raw" "$W/canvas"; node "$HERE/render.mjs" --stills "$T" --samples 64 --outdir "$W/canvas-raw" --fontcache "$FC" > "$W/render.log"
 python3 - "$W" <<'PY'
 import os, sys
 w = sys.argv[1]; os.makedirs(f'{w}/canvas', exist_ok=True)
@@ -17,7 +18,7 @@ for f in os.listdir(f'{w}/canvas-raw'):
     n = round(float(f[1:-4]) * 60); os.replace(f'{w}/canvas-raw/{f}', f'{w}/canvas/f{n:04d}.png')
 PY
 # 3. 写しの区間のカメラ(reel.js から)
-node "$HERE/cams.mjs" --work "$W"
+node "$HERE/cams.mjs" --work "$W" --fontcache "$FC"
 # 4. 写しの区間 226〜759 を合成(切り出し・縮小・サブフレームの平均。226〜246 は拭い)
 rm -rf "$W/frames"; python3 "$HERE/compose.py" "$W/frames" "$W/canvas" 226-759 --work "$W"
 # 5. 音(音量合わせは gain.json に固定)

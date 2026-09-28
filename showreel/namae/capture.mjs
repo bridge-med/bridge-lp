@@ -31,6 +31,7 @@ let DPR = 3;
 const [shotsPath, OUT] = process.argv.slice(2);
 const opt = Object.fromEntries(process.argv.slice(4).map((a, i, arr) => a.startsWith('--') ? [a.slice(2), arr[i + 1]] : null).filter(Boolean));
 const FONTCACHE = opt.fontcache || path.join(os.tmpdir(), 'bridge-showreel-fonts');
+mkdirSync(FONTCACHE, { recursive: true });
 const FPS = 60;
 const MAXS = +(opt.maxsamples || 48);
 const STEP = +(opt.step || 0.5);                 // サブフレームの間隔(画面の px)
