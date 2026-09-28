@@ -64,7 +64,14 @@
     return V0 * T_CRUISE + V0 * T_DEC * (2 / 3 - e * e + e * e * e / 3);
   };
   const P0 = new T.Vector2(0, 0);
-  const posAt = t => P0.clone().add(DIR.clone().multiplyScalar(sAt(t)));
+  /* 試作(?arct=): 最後の R·θ m を、左へ θ° 曲がる円弧にする(速さは同じ。横から視点が揃う回り込み)。既定は直線 */
+  const ARC_T = num('arct', 0) * DEG, ARC_R = num('arcr', 6.5), S_C = LEN - ARC_R * ARC_T;
+  const posS = s => {
+    if (!ARC_T || s <= S_C) return P0.clone().add(DIR.clone().multiplyScalar(s));
+    const pc = P0.clone().add(DIR.clone().multiplyScalar(S_C)), th = HEAD + Math.min(ARC_T, (s - S_C) / ARC_R);
+    return new T.Vector2(pc.x + ARC_R * (Math.cos(th) - Math.cos(HEAD)), pc.y - ARC_R * (Math.sin(th) - Math.sin(HEAD)));
+  };
+  const posAt = t => posS(sAt(t));
   const VP = posAt(T_ARRIVE);                                                // 最終の視点(平面)
 
   /* 部屋の座標系(frame): 角度 a(左回りが正)で回し、原点を世界の (ox, oz) に置く。
@@ -97,7 +104,8 @@
   const LOGO_N = [[8, 74], [62, 16], [118, 24], [176, 84]];
   const LOGO_S = [[58, 94], [118, 60], [158, 22], [232, 12]];
   const bez = (p, u) => { const a = 1 - u; return [a * a * a * p[0][0] + 3 * a * a * u * p[1][0] + 3 * a * u * u * p[2][0] + u * u * u * p[3][0], a * a * a * p[0][1] + 3 * a * a * u * p[1][1] + 3 * a * u * u * p[2][1] + u * u * u * p[3][1]]; };
-  const MARK = { cx: 0.5 * W, cy: 0.392 * H, s: 0.38 * W / 240 };     // マークの中心(viewBox の 120,53)と倍率
+  const MARK = { cx: 0.5 * W, cy: num('marky', 0.392) * H, s: num('markw', 0.38) * W / 240 };   // マークの中心(viewBox の 120,53)と倍率
+  const MK = MARK.s / (0.38 * W / 240);                                  // 既定の大きさからの倍率(交点の板の幅に使う)
   const vb2px = (x, y) => [MARK.cx + (x - 120) * MARK.s, MARK.cy + (y - 53) * MARK.s];
   const NSEG = 64;
   const polyOf = ctrl => { const P = []; for (let i = 0; i <= NSEG; i++) { const q = bez(ctrl, i / NSEG); P.push(new T.Vector2(q[0], q[1])); } return P; };
@@ -109,7 +117,7 @@
   const NSS = 32;                                                            // 奥の砂の二本(交点の手前と先)の分割数
   const PAINT = {
     vp: { value: new T.Matrix4() }, eye: { value: new T.Vector3() }, res: { value: new T.Vector2(W, H) },
-    mark: { value: new T.Vector3(MARK.cx, MARK.cy, MARK.s) }, hw: { value: 3.0 }, on: { value: 0 },
+    mark: { value: new T.Vector3(MARK.cx, MARK.cy, MARK.s) }, hw: { value: num('hw', 3.0) }, on: { value: 0 },
     dmapN: { value: distN.texture }, ptsN: { value: polyOf(LOGO_N) }, inkN: { value: F.lin(TOK.navy) },
     ptsS1: { value: polyOf(LOGO_S).slice(0, NSS + 1) }, ptsS2: { value: polyOf(LOGO_S).slice(0, NSS + 1) }, inkS: { value: F.lin(TOK.dawn) },
     topMode: { value: 0 }, cTop: { value: F.lin(TOK.ink3) },
@@ -221,6 +229,7 @@
     const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
     const [cx, cz] = Fr.w((x0 + x1) / 2, (z0 + z1) / 2);
     m.position.set(cx, (y0 + y1) / 2, cz); m.rotation.y = Fr.a;
+    m.userData = { kind, fy, fa: Fr.a, fo: [Fr.ox, Fr.oz] };
     scene.add(m); boxes.push(m); return m;
   }
   /* 壁: axis 'x' は z=c の面に沿って x 方向に a0..a1、axis 'z' は x=c の面に沿って z 方向に a0..a1。
@@ -295,6 +304,7 @@
       label.position.set(lx, y1 + 0.18, lz); label.rotation.y = pm.rotation.y;
       scene.add(label);
     }
+    pm.userData = { kind: 'plate', src, region, name };
     const P = { src, name, mesh: pm, w, h, label };
     plates.push(P); return P;
   }
@@ -402,7 +412,7 @@
   /* ---- 交点の砂の板: 交点の前後 ±70px だけ、V から見た輪郭が砂の線そのもの(両端は正式の線と同じ丸い端)になる薄い板。
      材料は --dawn の平塗り(投影の塗りではない)。V から 4.2m、光線に沿って 0.03m。距離の地図には入れない。
      奥の砂はこの区間の内側 8px で止め、丸い端で閉じる(V からは板が端を隠す) ---- */
-  const SAND_D = num('sandd', 4.2), GAP = 62;
+  const SAND_D = num('sandd', 4.2), GAP = 62 * MK;
   let SAND_CX = 0, sU0 = 0, sU1 = 1;
   {
     const N = 400, sp = [], np = [];
@@ -411,9 +421,9 @@
     sp.forEach((p, i) => { for (const q of np) { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < best) { best = d; uc = i / N; } } });
     const cpx = SAND_CX = vb2px(...bez(LOGO_S, uc))[0];
     for (let i = 0; i <= N; i++) { const x = vb2px(...sp[i])[0]; if (x < cpx - GAP) sU0 = i / N; if (x > cpx + GAP && sU1 === 1) sU1 = i / N; }
-    const seg0 = []; for (let i = 0; i <= 160; i++) { const p = bez(LOGO_S, i / 160); if (Math.abs(vb2px(...p)[0] - cpx) <= 70) seg0.push(p); }
+    const seg0 = []; for (let i = 0; i <= 160; i++) { const p = bez(LOGO_S, i / 160); if (Math.abs(vb2px(...p)[0] - cpx) <= 70 * MK) seg0.push(p); }
     const nrm = (a, b) => { const tx = b[0] - a[0], ty = b[1] - a[1], l = Math.hypot(tx, ty); return [-ty / l, tx / l]; };
-    const hwv = 3.0, outline = [];
+    const hwv = PAINT.hw.value, outline = [];
     const nAt = i => nrm(seg0[Math.max(0, i - 1)], seg0[Math.min(seg0.length - 1, i + 1)]);
     const cap = (p, n, sgn) => { for (let k = 1; k < 12; k++) { const a = Math.PI * k / 12, c = Math.cos(a), sn = Math.sin(a); const tx = n[1], ty = -n[0]; outline.push([p[0] + (n[0] * c + tx * sn) * hwv * sgn, p[1] + (n[1] * c + ty * sn) * hwv * sgn]); } };
     seg0.forEach((p, i) => { const n = nAt(i); outline.push([p[0] + n[0] * hwv, p[1] + n[1] * hwv]); });
@@ -426,7 +436,7 @@
     tri.forEach(([a, b, c]) => { idx.push(a, b, c); idx.push(a + n, c + n, b + n); });
     for (let i = 0; i < n; i++) { const j = (i + 1) % n; idx.push(i, j, i + n, j, j + n, i + n); }
     const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
-    const m = new T.Mesh(g, new T.MeshBasicMaterial({ color: F.lin(TOK.dawn), toneMapped: false, side: T.DoubleSide })); scene.add(m); sandOnly.push(m);
+    const m = new T.Mesh(g, new T.MeshBasicMaterial({ color: F.lin(TOK.dawn), toneMapped: false, side: T.DoubleSide })); m.userData = { kind: 'sandplate' }; scene.add(m); sandOnly.push(m);
   }
   const polyU = (ctrl, u0, u1, n) => { const P = []; for (let i = 0; i <= n; i++) { const q = bez(ctrl, u0 + (u1 - u0) * i / n); P.push(new T.Vector2(q[0], q[1])); } return P; };
   PAINT.ptsS1.value = polyU(LOGO_S, 0, sU0, NSS); PAINT.ptsS2.value = polyU(LOGO_S, sU1, 1, NSS);
@@ -622,7 +632,41 @@
     R.renderFrame(t, samples, 0.5, fps, TOP ? drawTop : draw, TOP ? null : post);
   }
   if (Q.has('dbg')) window.FILM_DBG = { scene, cam, draw, T, FC, VPOS };
-  window.FILM = { W, H, FPS, DUR, ready: Promise.resolve(true), renderFrame, out: canvas, camAt, plates, metrics, visibleCounts, paintCount, TOK, CRUISE: V0, PATHLEN: LEN, FIX_D: +FIX_D.toFixed(2), hallV: vpl.map(v => +v.toFixed(2)), hallS0: +crossing(FT, -14.1).s.toFixed(2), strokeDepths: strokeWorld.map(s => s.k + ':' + s.dist.toFixed(1)) };
+  /* ---- 書き出し(光ありの描画器へ渡す。場面の三角形・写し・V・マーク・カメラの経路) ---- */
+  function exportScene() {
+    scene.updateMatrixWorld(true);
+    const meshes = [];
+    scene.traverse(o => {
+      if (!o.isMesh || !o.userData || !o.userData.kind || !o.visible) return;
+      const g = o.geometry, pa = g.attributes.position, uv = g.attributes.uv, v = new T.Vector3(), pos = [], uvs = [];
+      for (let i = 0; i < pa.count; i++) { v.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); pos.push(+v.x.toFixed(5), +v.y.toFixed(5), +v.z.toFixed(5)); if (uv) uvs.push(uv.getX(i), uv.getY(i)); }
+      const idx = g.index ? Array.from(g.index.array) : Array.from({ length: pa.count }, (_, i) => i);
+      meshes.push({ ...o.userData, pos, idx, uv: o.userData.kind === 'plate' ? uvs : undefined });
+    });
+    const cams = []; for (let f = 0; f <= DUR * FPS; f++) { const c = camAt(f / FPS); cams.push([+c.pos.x.toFixed(5), +c.pos.y.toFixed(5), +c.pos.z.toFixed(5), +c.yaw.toFixed(6)]); }
+    return { W, H, FPS, DUR, FOV_H, EYE, SHIFT_Y, V: { pos: VPOS.toArray(), yaw: VYAW }, vp: Array.from(PAINT.vp.value.elements),
+      mark: { cx: MARK.cx, cy: MARK.cy, s: MARK.s, hw: PAINT.hw.value, N: PAINT.ptsN.value.map(p => [p.x, p.y]), S1: PAINT.ptsS1.value.map(p => [p.x, p.y]), S2: PAINT.ptsS2.value.map(p => [p.x, p.y]) },
+      TOK, meshes, cams, T_ARRIVE, T_WM, T_TG, frames: { FI: [FI.a, FI.ox, FI.oz], FT: [FT.a, FT.ox, FT.oz], FC: [FC.a, FC.ox, FC.oz] }, hall: { vpl, zPar, zBl, low: C.low, h: C.h } };
+  }
+  /* V の距離の地図(交点の砂の板を除く)を、行の帯ごとに base64 の float32 で返す(2W×2H、下の行から) */
+  function exportDepth(y0, y1) {
+    const w = distN.width, buf = new Float32Array(w * (y1 - y0) * 4);
+    renderer.readRenderTargetPixels(distN, 0, y0, w, y1 - y0, buf);
+    const r = new Float32Array(w * (y1 - y0)); for (let i = 0; i < r.length; i++) r[i] = buf[i * 4];
+    const b = new Uint8Array(r.buffer); let str = ''; for (let i = 0; i < b.length; i += 0x8000) str += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+    return { w, h: distN.height, data: btoa(str) };
+  }
+  /* マークの覆いの画(2W×2H、白地に線の被覆を濃さで)。which: 'N'(藍)・'S'(奥の砂の二本) */
+  function exportMask(which) {
+    const c = document.createElement('canvas'); c.width = W * 2; c.height = H * 2; const x = c.getContext('2d');
+    x.fillStyle = '#000'; x.fillRect(0, 0, c.width, c.height); x.strokeStyle = '#fff'; x.lineCap = 'round'; x.lineJoin = 'round'; x.lineWidth = 2 * PAINT.hw.value * MARK.s * 2;
+    const draw = P => { x.beginPath(); P.forEach((p, i) => { const X = (MARK.cx + (p.x - 120) * MARK.s) * 2, Y = (MARK.cy + (p.y - 53) * MARK.s) * 2; i ? x.lineTo(X, Y) : x.moveTo(X, Y); }); x.stroke(); };
+    if (which === 'N') draw(PAINT.ptsN.value); else { draw(PAINT.ptsS1.value); draw(PAINT.ptsS2.value); }
+    return c.toDataURL('image/png');
+  }
+  /* 署名の層(BRIDGE・EXPAND CHOICES.)の画と置き場(px)。光ありの描画では最後に重ねる */
+  const exportLockup = () => [[wm, WM], [tg, TG]].map(([c, m]) => ({ png: c.canvas.toDataURL('image/png'), x: Math.round(m.position.x - c.w / 2), y: Math.round(-m.position.y - c.h / 2), w: c.w, h: c.h }));
+  window.FILM = { exportScene, exportDepth, exportMask, exportLockup, W, H, FPS, DUR, ready: Promise.resolve(true), renderFrame, out: canvas, camAt, plates, metrics, visibleCounts, paintCount, TOK, CRUISE: V0, PATHLEN: LEN, FIX_D: +FIX_D.toFixed(2), hallV: vpl.map(v => +v.toFixed(2)), hallS0: +crossing(FT, -14.1).s.toFixed(2), strokeDepths: strokeWorld.map(s => s.k + ':' + s.dist.toFixed(1)) };
 
   /* ---- 確認用の再生(?render なし): ぼけなしで実時間。?t=秒 で止め絵 ---- */
   if (!RENDER) {
