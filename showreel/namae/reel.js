@@ -247,24 +247,22 @@ const onRule = (x, R, z) => ({ x, y: RULE_C + (540 - R) / z, z });   // 頁 x �
 const genCam = t => onRule(GEN_X + GEN_V * (t - AT_GEN), Y_R, GEN_Z);
 const KOT = onRule(KW[0] + (960 - KOT_M) / KOT_Z, Y_R, KOT_Z);
 const DIVE_E = u => 0.1 * u + 0.9 * whipEase(clamp((u - 0.2) / 0.8));     // 引きで G0 に着いたら 0.07 秒だけじわりと寄り(直し 7 の一つの画)、0.28 秒で飛び込む(同じ頁へ戻って止まる画にしない)
-/* 言いかえに着いてから(拍 25〜27): 罫は画面 y 438.5 から一定の速さ(2.75px/コマ)で降り続け、そのまま finale の線になって地平線 620 に着く。止まらない・跳ね返らない(動きの中の切り替え)
-   拍 25〜26.25 は言いかえを大きいまま(z 8.5 → 8.67 へゆっくり寄る。115→117px)、拍 26.25〜27 は引きながら矢印を枠に入れて(editor: 言いかえだけを最後の画にしない)、切り替えで finale へ動きのまま渡す。
+/* 言いかえに着いてから(拍 25〜27): 罫は画面 y 438.5 から降り続け(止まらない・跳ね返らない)、切り替えで finale の線になり、ロゴの弧に曲がる前に地平線 620 に着いて止まる。
+   拍 25〜26.25 は言いかえを大きいまま(z 8.5 → 8.59 へゆっくり寄る)。罫は着いた勢いで降り始めて緩む(1.5 → 0.5px/コマ)。
+   拍 26.25〜27 は引きながら矢印を枠に入れ(editor: 言いかえだけを最後の画にしない)、動きのまま finale へ渡す(罫は 2.75px/コマ)。
    finale の出だし(sceneH)は ×HAND_K0・HAND_DY0 から HAND_T 秒で ×1・0 へ。線の太さ(写しの罫 = z px)・位置・速さ・倍率の変わり方を、切り替えの前後でそろえる */
-const PUSH_H = 1.02, Z_C = 6.5, YR_C = 593;               // 保持の寄り/切り替えのときの倍率(罫は画面で 6.5px)と罫の画面 y(文例の墨 265.0 を枠に入れない下限 589.3 の内)
-const VR = (YR_C - Y_R) / (FS - AT_KOT);                  // 罫の降りる速さ(画面 164.8px/秒)
-const HAND_K0 = Z_C / 6, HAND_DY0 = YR_C - 540 - 80 * HAND_K0, HAND_T = -(80 * (HAND_K0 - 1) + HAND_DY0) * 2 / VR;   // finale の出だし: ×1.083・−33.7px → 0.328 秒で ×1・0(quadOut)
+const PUSH_H = 1.01, Z_C = 6.25, YR_C = 611;              // 保持の寄り/切り替えのときの倍率(罫は画面で 6.25px)と罫の画面 y(文例の墨 265.0 を枠に入れない下限 608.1 の内)
+const YR_H = 473.5, VR_0 = 90, VR_H = 30, VR_C = 165;     // 罫の画面 y: 保持の終わり/速さ(px/秒): 着いたとき・保持の終わり・切り替え
+const HAND_K0 = Z_C / 6, HAND_DY0 = YR_C - 540 - 80 * HAND_K0, HAND_T = -(80 * (HAND_K0 - 1) + HAND_DY0) * 2 / VR_C;   // finale の出だし: ×1.042・−12.3px → 0.109 秒で ×1・0(quadOut)。曲がり始め 12.773 の前に着く
 const ZH = KOT_Z * PUSH_H, ZH_V = KOT_Z * (PUSH_H - 1) / (T_H - AT_KOT), ZC_V = -6 * (HAND_K0 - 1) * 2 / HAND_T;   // 引きの始めと終わりの倍率の速さ(保持の寄り/finale の縮み)
+const herm = (s, p0, m0, p1, m1, D) => { const s2 = s * s, s3 = s2 * s; return (2 * s3 - 3 * s2 + 1) * p0 + (s3 - 2 * s2 + s) * D * m0 + (-2 * s3 + 3 * s2) * p1 + (s3 - s2) * D * m1; };
 const KOT_X = KW[0] + (960 - KOT_M) / KOT_Z;              // 言いかえの中心(着いたときのカメラ x)
 const L_ARROW = 583;                                      // 引きの終わりの枠の左辺(矢印の墨 約 588〜596.2 は入り、「た」〜575.7・「葉」〜574 は入らない)
 const softMax0 = (v, e) => 0.5 * (v + Math.sqrt(v * v + e * e));
 function kotCam(t) {
-  let z;
-  if (t < T_H) z = KOT_Z * (1 + (PUSH_H - 1) * (t - AT_KOT) / (T_H - AT_KOT));
-  else {                                                  // 引き: 倍率を 3 次エルミートで(始めは保持の寄りの速さ、終わりは finale の縮みの速さ)
-    const D = FS - T_H, s = clamp((t - T_H) / D), s2 = s * s, s3 = s2 * s;
-    z = (2 * s3 - 3 * s2 + 1) * ZH + (s3 - 2 * s2 + s) * D * ZH_V + (-2 * s3 + 3 * s2) * Z_C + (s3 - s2) * D * ZC_V;
-  }
-  const yr = Y_R + VR * (t - AT_KOT);                     // 罫の画面 y
+  let z, yr;
+  if (t < T_H) { const D = T_H - AT_KOT, u = clamp((t - AT_KOT) / D); z = KOT_Z * (1 + (PUSH_H - 1) * u); yr = herm(u, Y_R, VR_0, YR_H, VR_H, D); }
+  else { const D = FS - T_H, s = clamp((t - T_H) / D); z = herm(s, ZH, ZH_V, Z_C, ZC_V, D); yr = herm(s, YR_H, VR_H, YR_C, VR_C, D); }   // 引き: 3 次エルミート(始めは保持の速さ、終わりは finale の出だしの速さ)
   const L = L_ARROW + softMax0(KOT_X - 960 / z - L_ARROW, 4);   // 言いかえを真ん中に保ち、枠の左辺が矢印の手前まで広がったら、そこで留める
   return { x: L + 960 / z, y: RULE_C - (yr - 540) / z, z };
 }
@@ -347,12 +345,12 @@ function scene3(t) {
 function sceneH(t, P) {
   const tv = t + FSHIFT;
   const k = tv < PULL1 ? 1 : 1 - 0.07 * clamp((tv - PULL1) / (15 + FSHIFT - PULL1));                // v3 の遠ざかり ×1.00→×0.93(前の裁定・直し 8)。光・字間の動きは足さない
-  const hk = (u => (1 - u) * (1 - u))(clamp((t - FS) / HAND_T));                                   // 1 → 0(quadOut の残り)。写しの引きの速さのまま、線は 593 から地平線 620 へ降りて着き、全体は ×1.083 から ×1 へ
+  const hk = (u => (1 - u) * (1 - u))(clamp((t - FS) / HAND_T));                                   // 1 → 0(quadOut の残り)。写しの引きの速さのまま、線は 611 から地平線 620 へ降りて着き(曲がり始めの前)、全体は ×1.042 から ×1 へ
   const K = k * (1 + (HAND_K0 - 1) * hk), dy = HAND_DY0 * hk;
   const base = [K, 0, 0, K, 960 - 960 * K, 540 - 540 * K + dy];
   const _st = ctx.setTransform.bind(ctx);
   ctx.setTransform = function (a, b, c, d, e, f) { if (arguments.length === 6 && a === 1 && b === 0 && c === 0 && d === 1 && e === 0 && f === 0) return _st(...base); return _st.apply(null, arguments); };
-  const hand = E.sineInOut(clamp((t - FS) / 0.2));                                                  // 罫(薄い灰・画面で 6px)から藍へ 12 コマで受け渡す。砂の線が出る 12.89 には藍
+  const hand = E.sineInOut(clamp((t - FS) / 0.08));                                                  // 罫(薄い灰)から藍へ 5 コマで受け渡す(切り替えのあとに薄い線だけの間を作らない)
   const P2 = hand < 1 ? { ...P, line: mix('#E4E3E0', P.line, hand) } : P;
   try { finale(tv, P2); } finally { ctx.setTransform = _st; }
   if (t > 14.8) { _st(1, 0, 0, 1, 0, 0); ctx.fillStyle = LIGHT.bg; ctx.globalAlpha = E.sineInOut(clamp((t - 14.8) / 0.2)) * 0.85; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }   // 最後の 0.2 秒で地へ溶かす(音の減衰と一緒に)
