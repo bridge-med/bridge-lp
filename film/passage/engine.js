@@ -117,7 +117,7 @@
     const floatOK = isGL2 && !!gl.getExtension('EXT_color_buffer_float');
     const TYPE = accType === 'float' && floatOK ? T.FloatType : T.HalfFloatType;
     /* 場面は 8bit の sRGB で受ける(SwiftShader では浮動小数の的が重い)。蓄積の段で線形へ戻して足す */
-    const sceneOpts = { type: sceneType === 'half' ? T.HalfFloatType : T.UnsignedByteType, format: T.RGBAFormat, encoding: sceneType === 'half' ? T.LinearEncoding : T.sRGBEncoding };
+    const sceneOpts = { type: sceneType === 'half' ? T.HalfFloatType : T.UnsignedByteType, format: T.RGBAFormat, encoding: sceneType === 'half' ? T.LinearEncoding : T.sRGBEncoding, stencilBuffer: true };   // 深度は 24bit(既定の 16bit では写しと裏の面が奥行きを取り合う)
     const sceneRT = isGL2 && msaa > 0
       ? new T.WebGLMultisampleRenderTarget(W, H, { ...sceneOpts, samples: msaa })
       : new T.WebGLRenderTarget(W, H, sceneOpts);

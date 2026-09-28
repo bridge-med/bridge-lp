@@ -3,8 +3,9 @@
 // usage: node film/passage/capture.mjs [--only compass-q,tanaoroshi] [--date 2026-09-27]
 //   → film/passage/plates/<id>-<theme>.webp(可逆)と plates.json(出典・撮影日・状態)
 // 規則: 第22条の写しの但し書き(加工しない・色を枠の外へ持ち出さない)。ia.md §11(撮影日を残す)
-//   - 1440×900 を 2 倍の密度で撮る(2880×1800)。切り抜き・色補正・書き換えをしない
-//   - 保存データなしの新しい状態で撮る(個人の名前・メールが写らないように)
+//   - 1440×900 のページを 2 倍の密度で撮る。撮る範囲(clip)は、映像の開口の比例に合わせて撮るときに選ぶ
+//     (第22条の但し書き「撮る位置で枠の外に出す」。サイトのナビ・ロゴは枠の外)。撮ったあとの切り抜き・色補正・書き換えをしない
+//   - 保存データなしの新しい状態から、製品自身の操作と入力例だけで「使っている途中」の状態にする(個人の名前・メールが写らないように)
 //   - 外部のデモ(bridge-med.github.io)とフォントは curl で取って返す(Chromium に TLS の例外を与えない)
 // 依存: playwright(chromium)・ffmpeg(環境変数 FFMPEG か PATH。libwebp が要る)
 // ================================================================
@@ -55,9 +56,9 @@ function curlGet(url) {
 }
 const ALLOW = /fonts\.(googleapis|gstatic)\.com|bridge-med\.github\.io|cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com/;
 
-const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--lang=ja-JP'], env: { ...process.env, LANG: 'ja_JP.UTF-8', LANGUAGE: 'ja' } });   // 日付の表示を日本語の書式にする
 async function context(theme, dpr = 2) {
-  const c = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: dpr, colorScheme: theme, reducedMotion: 'reduce', serviceWorkers: 'block' });
+  const c = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: dpr, colorScheme: theme, locale: 'ja-JP', reducedMotion: 'reduce', serviceWorkers: 'block' });
   await c.addInitScript(t => { try { localStorage.clear(); localStorage.setItem('bridge-theme', t); } catch (e) {} }, theme);
   await c.route(/^https?:\/\/(?!127\.0\.0\.1)/, async route => {
     const u = route.request().url();
@@ -111,11 +112,36 @@ async function keijiPoster(page) {
 }
 const POSTER_DATE = '2026-10-16';   // 掲示の日付(未来の平日。撮影日によらず同じ画になるよう固定)
 
+/* ---- 経験の棚卸し: 答えている途中。後輩指導・教育の問いで「やったこと」だけ製品の入力例で埋め、「そのあとの変化」にカーソル ----
+   入力例は同じ問いの看護師向けのヒント(data.js の QUESTIONS[8].hint.nurse)から「例えば、」を外した文。
+   画面の職種(リハ職)のヒントは上に出ているので、同じ文が2回並ばないよう別の職種の例を使う(作文はしない) */
+async function tanaMid(page) {
+  await page.click('#intro-start');
+  await page.waitForSelector('#role-list .role-item');
+  await page.click('#role-list .role-item[data-role="reha"]');
+  await page.waitForSelector('#view-quest.on');
+  for (let i = 0; i < 8; i++) { await page.click('#quest-next'); await sleep(250); }   // 空欄のまま進む(空の答えは保存されない)
+  const ex = (await page.evaluate(() => QUESTIONS[8].hint.nurse)).replace(/^例えば、/, '');
+  await page.click('#f-action'); await page.keyboard.type(ex, { delay: 0 });
+  await page.click('#f-change');
+  await page.mouse.move(2, 890); await page.evaluate(() => window.scrollTo(0, 0)); await sleep(400);
+}
+/* ---- 現場のことば 言いかえ帳: 場面を「多職種連携」に絞り、1行に星を付け、別の1行を開いたまま ---- */
+async function iikaeList(page) {
+  await page.click('#intro-start');
+  await page.waitForSelector('#view-list.on');
+  await page.click('#chips-cat .chip[data-cat="team"]'); await sleep(300);
+  let rows = await page.$$('.word-row'); await (await rows[1].$('.word-star')).click(); await sleep(200);
+  rows = await page.$$('.word-row'); await (await rows[4].$('.word-toggle')).click(); await sleep(300);
+  await page.mouse.move(2, 890); await page.evaluate(() => window.scrollTo(0, 0));
+  await sleep(2600);   // 星を付けたときの通知が消えるのを待つ
+}
+
 const PLATES = [
-  { id: 'compass-q', name: 'BRIDGE Compass', url: '/compass/', themes: ['dark', 'light'], state: '2問目「周りから一番頼られるのは?」をまだ選んでいない状態(職種と1問目は先頭の選択肢)', prep: page => compassToQuestion(page, '周りから一番頼られるのは') },
-  { id: 'tanaoroshi', name: '経験の棚卸し', url: '/tanaoroshi/', themes: ['light'], state: '最初の画面・保存データなし' },
-  { id: 'keiji', name: '掲示じたく', url: '/keiji/', themes: ['light'], state: 'できあがりの A4(臨時休診。入力は製品の入力例と固定の日付。差出の行は枠の外)', prep: keijiPoster },
-  { id: 'consult-sim', name: 'ConsultSim', url: 'https://bridge-med.github.io/consult-simulator/', themes: ['light'], state: '公開デモの最初の画面(ダークなし)' },
+  { id: 'compass-q', name: 'BRIDGE Compass', url: '/compass/', themes: ['dark'], clip: { x: 360, y: 90, width: 720, height: 720 }, state: '2問目「周りから一番頼られるのは?」をまだ選んでいない状態(職種と1問目は先頭の選択肢)。範囲は 1:1、サイトのナビは枠の外', prep: page => compassToQuestion(page, '周りから一番頼られるのは') },
+  { id: 'tanaoroshi-mid', name: '経験の棚卸し', url: '/tanaoroshi/', themes: ['light'], clip: { x: 360, y: 150, width: 720, height: 360 }, state: '答えている途中(後輩指導・教育の問い。「やったこと」だけ製品の入力例で埋め、「そのあとの変化」にカーソル)。範囲は 2:1', prep: tanaMid },
+  { id: 'iikae', name: '現場のことば 言いかえ帳', url: '/iikae/', themes: ['light'], clip: { x: 360, y: 356, width: 720, height: 540 }, state: '一覧を「多職種連携」に絞り、1行に星、別の1行を開いたまま。範囲は 4:3', prep: iikaeList },
+  { id: 'keiji', name: '掲示じたく', url: '/keiji/', themes: ['light'], clip: { x: 400, y: 100, width: 640, height: 800 }, state: '貼る前の確認(できあがりの A4 と「内容を直す」。臨時休診、入力は製品の入力例と固定の日付。差出の行は枠の外)。範囲は 4:5', prep: keijiPoster },
 ];
 
 const manifestPath = path.join(OUTDIR, 'plates.json');
@@ -134,12 +160,12 @@ for (const P of PLATES) {
     if (P.prep) await P.prep(page);
     await sleep(600);
     const png = path.join(tmp, `${P.id}-${theme}.png`);
-    await page.screenshot({ path: png });
+    await page.screenshot({ path: png, clip: P.clip });
     const file = `${P.id}-${theme}.webp`;
     execFileSync(FFMPEG, ['-y', '-loglevel', 'error', '-i', png, '-c:v', 'libwebp', '-lossless', '1', '-compression_level', '6', path.join(OUTDIR, file)]);   // 可逆(画素を変えない)
     rmSync(png);
     manifest.plates = manifest.plates.filter(x => x.file !== file);
-    manifest.plates.push({ file, id: P.id, name: P.name, theme, source: P.url, state: P.state, viewport: `1440x900@${P.dpr || 2}x`, captured: DATE });
+    manifest.plates.push({ file, id: P.id, name: P.name, theme, source: P.url, state: P.state, viewport: `1440x900@${P.dpr || 2}x`, clip: P.clip, captured: DATE });
     console.log('plate', file);
     await c.close();
   }

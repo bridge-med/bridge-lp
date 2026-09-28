@@ -98,7 +98,7 @@ await page.evaluate(() => window.FILM.ready);
 if (argv.metrics) {                                          // 読ませる拍の数値と、同時に見える写しの数を JSON で書く
   const m = await page.evaluate(step => window.FILM.metrics(step), +(argv.step || 1 / 30));
   const vis = [];
-  for (let t = 0; t <= 15; t += +(argv.visstep || 0.25)) vis.push({ t: +t.toFixed(3), counts: await page.evaluate(t => window.FILM.visibleCounts(t), t) });
+  for (let t = 0; t <= 15; t += +(argv.visstep || 0.25)) vis.push({ t: +t.toFixed(3), counts: await page.evaluate(t => window.FILM.visibleCounts(t), t), paint: await page.evaluate(t => window.FILM.paintCount(t), t) });
   const info = await page.evaluate(() => ({ cruise: window.FILM.CRUISE, pathLen: window.FILM.PATHLEN, plates: window.FILM.plates.map(p => p.name) }));
   writeFileSync(argv.metrics, JSON.stringify({ info, frames: m, visibility: vis }, null, 1));
   console.log('wrote', argv.metrics, JSON.stringify(info));
