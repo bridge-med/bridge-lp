@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-09-27T23:06:09+00:00",
+  "updated_at": "2026-09-29T00:23:43+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "PTで年収700万円を目指すなら、俺なら最初に何を考えるか。",
+      "url": "https://note.com/prime_duck4944/n/n063d3886bbb9",
+      "guid": "https://note.com/prime_duck4944/n/n063d3886bbb9",
+      "pubDate": "2026-09-29T07:00:00+09:00",
+      "date": "2026-09-29",
+      "excerpt": "「理学療法士で年収700万円って、いけますか？」たまに、こういう話を聞く。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316120432/rectangle_large_type_2_815157b32de05f281671ba5f847583b5.png?width=800"
+    },
+    {
+      "title": "会議メモを5分で整理するために、俺がChatGPTに投げているもの。",
+      "url": "https://note.com/prime_duck4944/n/nfae2111ac6a3",
+      "guid": "https://note.com/prime_duck4944/n/nfae2111ac6a3",
+      "pubDate": "2026-09-28T19:00:00+09:00",
+      "date": "2026-09-28",
+      "excerpt": "会議が終わったあと、メモを整理するのが地味に面倒。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316894697/rectangle_large_type_2_3ffe9e670c02550494c954c08110f77d.png?width=800"
+    },
     {
       "title": "年収を上げることと、自分の価値を上げることは少し違う。",
       "url": "https://note.com/prime_duck4944/n/n199d99fca1f0",
@@ -38,24 +56,6 @@
       "date": "2026-09-26",
       "excerpt": "ChatGPTを使えば、仕事が一気に楽になる。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/316893355/rectangle_large_type_2_eaee90cc1d9dbff6cd7e3acd7de0bed9.png?width=800"
-    },
-    {
-      "title": "臨床を捨てたんじゃない。自分にできることを増やしたかった。",
-      "url": "https://note.com/prime_duck4944/n/n16a56e9d0f3d",
-      "guid": "https://note.com/prime_duck4944/n/n16a56e9d0f3d",
-      "pubDate": "2026-09-26T07:00:00+09:00",
-      "date": "2026-09-26",
-      "excerpt": "「もう理学療法士はやらないんですか？」事業会社に転職してから、たまに聞かれる。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316118183/rectangle_large_type_2_5b086e324a3da96e26b99e08ae9091fc.png?width=800"
-    },
-    {
-      "title": "文章を書くのが苦手な人ほど、AIを使えばいい。",
-      "url": "https://note.com/prime_duck4944/n/n3f45edc052a6",
-      "guid": "https://note.com/prime_duck4944/n/n3f45edc052a6",
-      "pubDate": "2026-09-25T19:00:00+09:00",
-      "date": "2026-09-25",
-      "excerpt": "文章を書くのが苦手。そういう人ほど、AIを使った方がいいと思う。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316892651/rectangle_large_type_2_844c4652141645456fc9f94996f1f282.png?width=800"
     }
   ]
 }
