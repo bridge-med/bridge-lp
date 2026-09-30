@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-09-29T23:45:25+00:00",
+  "updated_at": "2026-09-30T23:54:34+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "自分の給料が安いと思うなら、一度外で値段をつけてもらえばいい。",
+      "url": "https://note.com/prime_duck4944/n/nbb24855495b0",
+      "guid": "https://note.com/prime_duck4944/n/nbb24855495b0",
+      "pubDate": "2026-10-01T07:00:00+09:00",
+      "date": "2026-10-01",
+      "excerpt": "「自分の給料、安くないですか？」医療職として働いていると、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316284380/rectangle_large_type_2_dda629affa45fb22c781efd02680ad50.png?width=800"
+    },
+    {
+      "title": "Excelが苦手でも、関数はAIに聞けばかなり何とかなる。",
+      "url": "https://note.com/prime_duck4944/n/n69a9c930b16f",
+      "guid": "https://note.com/prime_duck4944/n/n69a9c930b16f",
+      "pubDate": "2026-09-30T19:00:00+09:00",
+      "date": "2026-09-30",
+      "excerpt": "Excelが苦手。そういう医療職は、結構多いと思う。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316896278/rectangle_large_type_2_fc542a405ab01c7d52aacb45010c76aa.png?width=800"
+    },
     {
       "title": "時給を上げ続けるだけでは、いつか限界が来る。",
       "url": "https://note.com/prime_duck4944/n/naa8af6d4ddf2",
@@ -38,24 +56,6 @@
       "date": "2026-09-28",
       "excerpt": "会議が終わったあと、メモを整理するのが地味に面倒。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/316894697/rectangle_large_type_2_3ffe9e670c02550494c954c08110f77d.png?width=800"
-    },
-    {
-      "title": "年収を上げることと、自分の価値を上げることは少し違う。",
-      "url": "https://note.com/prime_duck4944/n/n199d99fca1f0",
-      "guid": "https://note.com/prime_duck4944/n/n199d99fca1f0",
-      "pubDate": "2026-09-28T07:00:00+09:00",
-      "date": "2026-09-28",
-      "excerpt": "年収を上げたい。俺もずっと思っている。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316119620/rectangle_large_type_2_bab35f6d9ba4670d4a31845707951ae6.png?width=800"
-    },
-    {
-      "title": "ChatGPTにメールを書かせるとき、俺が最初に伝えていること。",
-      "url": "https://note.com/prime_duck4944/n/na9bffe660b1a",
-      "guid": "https://note.com/prime_duck4944/n/na9bffe660b1a",
-      "pubDate": "2026-09-27T19:00:00+09:00",
-      "date": "2026-09-27",
-      "excerpt": "ChatGPTにメールを書かせる。たぶん、かなり分かりやすいAI活用の一つだと思う。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316894069/rectangle_large_type_2_293afb22d757e83e594f89676420193d.png?width=800"
     }
   ]
 }
