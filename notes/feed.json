@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-09-30T23:54:34+00:00",
+  "updated_at": "2026-10-01T23:55:17+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "管理職になりたくないPTへ。本当に「管理」が嫌いですか？",
+      "url": "https://note.com/prime_duck4944/n/nc017d4b2abdc",
+      "guid": "https://note.com/prime_duck4944/n/nc017d4b2abdc",
+      "pubDate": "2026-10-02T07:00:00+09:00",
+      "date": "2026-10-02",
+      "excerpt": "「管理職には、あまり興味ないです」理学療法士とキャリアの話をしていると、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316285070/rectangle_large_type_2_bb64644effe0a06f14331b463304b40c.png?width=800"
+    },
+    {
+      "title": "医療職がそのまま使えるChatGPTプロンプト30選",
+      "url": "https://note.com/prime_duck4944/n/n9c1b5eebb9e9",
+      "guid": "https://note.com/prime_duck4944/n/n9c1b5eebb9e9",
+      "pubDate": "2026-10-01T19:00:00+09:00",
+      "date": "2026-10-01",
+      "excerpt": "ChatGPTを仕事で使ってみたい。でも、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/318342308/rectangle_large_type_2_0005b0472a4b32d7ba333dfe11634ba1.png?width=800"
+    },
     {
       "title": "自分の給料が安いと思うなら、一度外で値段をつけてもらえばいい。",
       "url": "https://note.com/prime_duck4944/n/nbb24855495b0",
@@ -38,24 +56,6 @@
       "date": "2026-09-29",
       "excerpt": "長い資料を読むのって、結構しんどい。会議資料。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/316895760/rectangle_large_type_2_a4be9ad6b5ba8acbe8edd589c36eb224.png?width=800"
-    },
-    {
-      "title": "PTで年収700万円を目指すなら、俺なら最初に何を考えるか。",
-      "url": "https://note.com/prime_duck4944/n/n063d3886bbb9",
-      "guid": "https://note.com/prime_duck4944/n/n063d3886bbb9",
-      "pubDate": "2026-09-29T07:00:00+09:00",
-      "date": "2026-09-29",
-      "excerpt": "「理学療法士で年収700万円って、いけますか？」たまに、こういう話を聞く。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316120432/rectangle_large_type_2_815157b32de05f281671ba5f847583b5.png?width=800"
-    },
-    {
-      "title": "会議メモを5分で整理するために、俺がChatGPTに投げているもの。",
-      "url": "https://note.com/prime_duck4944/n/nfae2111ac6a3",
-      "guid": "https://note.com/prime_duck4944/n/nfae2111ac6a3",
-      "pubDate": "2026-09-28T19:00:00+09:00",
-      "date": "2026-09-28",
-      "excerpt": "会議が終わったあと、メモを整理するのが地味に面倒。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316894697/rectangle_large_type_2_3ffe9e670c02550494c954c08110f77d.png?width=800"
     }
   ]
 }
