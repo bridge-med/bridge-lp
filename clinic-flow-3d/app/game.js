@@ -5449,6 +5449,7 @@
       <div class="dec-facts">${facts.map((f) => `<span class="kijun-badge alt">${f.label} ${f.val}</span>`).join('')}<span class="kijun-badge alt">余力 ${st.slack > 0 ? '+' : ''}${st.slack}</span><span class="kijun-badge alt">信頼 ${st.trust > 0 ? '+' : ''}${st.trust}</span></div>
       <p class="dec-ask"><b>決めること:</b> ${c.ask}</p>
       <div class="dec-choices">${choices}</div>
+      <p class="pnl-note">数値はゲーム上の仮定</p>
       ${preview}
       <div class="tut-btns"><button class="btn-cta" id="decGo" ${decPick && outcomes[decPick].ok ? '' : 'disabled'}>この方針で決める</button></div>`;
     $('decBody').querySelectorAll('[data-dec]').forEach((b) => b.addEventListener('click', () => {
