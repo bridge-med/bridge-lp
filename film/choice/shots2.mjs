@@ -185,8 +185,10 @@ export const S4 = {
   js: f => true,
   cam: (t, A) => {
     if (t < 12 / FPS) { const c = A.title ? bbc(A.title) : [A.card.x + 120, A.card.y + A.card.height / 2]; return placeCam([A.card.x + 30, c[1]], [W * 0.30, H / 2], 5.0); }
-    // the notice itself: title + the date line, readable on a phone, with a strip of the room on both sides
-    const nc = [A.pt.x + A.pt.width / 2, (A.pt.y + A.big.y + A.big.height) / 2 + 6], nS = 3.0;
+    // the notice itself: title + the first body line, with a strip of the room on both sides.
+    // 2026-10-03 (designer, 第13条): the date is chosen by the shooter, not the product, so the date box stays out of frame
+    // (frame bottom 20 CSS px above where it is measured; the paper is still rising then, so the margin is generous); same 3x, same timing
+    const nS = 3.0, nc = [A.pt.x + A.pt.width / 2, A.big.y - 20 - H / 2 / nS];
     if (t < 31 / FPS) return placeCam(nc, C, nS);
     // the switch, close: the room around it goes from night to day when it is pressed (the product's own .5 s transition);
     // then a cut back to the same framing of the notice, now in the light room (hard cut, like every other cut in the film)

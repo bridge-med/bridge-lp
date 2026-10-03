@@ -16,7 +16,7 @@ film/choice/job2.sh v2 s4,s6   # 一部だけ撮り直す(他のショットの�
 SUBMAX=1 node film/choice/run2.mjs --shots s1 --w 960 --tag probe   # 確認用の速い版(ぶれの副コマを 1 枚に)
 ```
 
-- `p3-v2.mp4`(3.4MB)は 2026-10-03 に master の製品で撮り直した書き出しをコミットしたもの。作り直したら `out/p3-v2.mp4` を手で写す
+- `p3-v2.mp4`(3.3MB)は 2026-10-03 に master の製品で撮り直した書き出しをコミットしたもの。作り直したら `out/p3-v2.mp4` を手で写す
 - コマは `film/choice/work/frames/<tag>/`、mp4 と止め絵は `film/choice/out/` に出る(どちらも git の管理外)
 - 要るもの: node 22、Playwright と Chromium、ffmpeg(libx264)、bc、curl(フォントと CDN のファイルを一度だけ取り、`work/netcache/` に置く)
 - 環境変数: `FFMPEG`(既定は PATH の ffmpeg)、`PLAYWRIGHT_MODULE`(playwright の `index.mjs`。既定は `playwright` → `/opt/node22/lib/node_modules/playwright/index.mjs`)、`PLAYWRIGHT_BROWSERS_PATH`(既定 `/opt/pw-browsers`)、`FILM_WORK`、`FILM_OUT`
