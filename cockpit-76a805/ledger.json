@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-02",
+  "updated": "2026-10-03",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(2026-09-04 社長確認済み=便AA決裁4)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -554,6 +554,24 @@
         "points": "契機は2026-08-20の実害: 販売中の商品(¥2,980)の購入CTA3本が死んだアンカーを指しており、押しても何も起きない状態で公開されていた。Growth OSは『販売中』という粗い状態しか持たないため、経路が通っていないことを拾えない。この道具は代金を受け取って買った人に届くまでを工程に分け、今夜の持ち時間で終わる1手だけを出す。Growth OS(何を作るか)とは受け持ちが重ならない",
         "catalogDraft": "{ cat: 'management', img: 'misebiraki.png', name: 'みせびらき', jp: '売れる状態までの工程', href: '../misebiraki/index.html',\n  p: '作ったものが売れないのは、たいてい商品ではなく経路が通っていないから。売り方の型ごとに工程を並べて、今夜の空き時間で終わる1手だけを出す。' }\n※ 掲載するならサムネイル(images/products/thumbs/misebiraki.webp)の作成が要る"
       }
+    },
+    {
+      "id": "atesaki-76a805",
+      "name": "宛先しらべ",
+      "jp": "記事の言葉の宛先",
+      "cat": "uncataloged",
+      "href": "../atesaki-76a805/index.html",
+      "dirs": [
+        "atesaki-76a805/index.html",
+        "atesaki-76a805/app",
+        "scripts/atesaki-build.mjs"
+      ],
+      "stage": "評価・再評価",
+      "serves": "note で発信する運営者自身。記事の言葉が誰に宛てたものになっているかを数えて見せ、書き足すか、そのまま出すかを自分で選べるようにする",
+      "status": "未掲載",
+      "measure": "local",
+      "note": "2026-09-25夜の社長の委任(「noteのURLを入れると、どんな分野の読み手に刺さるか分かるとよい」「8時間くらい頑張って」)で新設。運営者用・noindex・NAV/PRODUCTS/sitemap未掲載。名称・stage/servesは2026-10-03社長確定。辞書(app/lexicon.js)はAIの起草で社長の確認待ち。データ(atesaki-76a805/data/)はActionが更新するためdirsから外している(lastCommitが開発の信号として働くように)。Actionは手動実行のみで、定期実行は置かない(2026-10-03社長決定)。2026-09-26に全件をRSSと記事ページから焼き直した(archive.jsonのrebuilt。/api由来の中身は残っていない。読みに行くURLの一覧だけ初回のものを引き継ぐ)。Actionのプッシュはdata/直下のふつうのファイルの変更・追加だけ。一般公開には、他の書き手の記事を読む中継が要る(v1には入れない)",
+      "lastCommit": "2026-10-03"
     },
     {
       "id": "futatsume",
