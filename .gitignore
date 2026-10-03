@@ -9,3 +9,8 @@ medical-kb/data/validation-report.json
 medical-kb/data/manifest/crawl-report.*.json
 # ZIP原典の展開ディレクトリ(スクリプトが再展開する)
 medical-kb/data/sources/*/masters/*_x/
+
+# showreel: 音は sound.mjs から再生成できる(書き出しの MP4 に入る)
+showreel/sound.wav
+# showreel/namae: 撮った画・描いた層のコマ・音は build.sh が作り直す(書き出しの MP4 に入る)
+showreel/namae/work

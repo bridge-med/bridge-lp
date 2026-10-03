@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>名前になる — BRIDGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Shippori+Mincho+B1:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#0B0F1A;height:100%;overflow:hidden}
+  canvas{display:block;position:absolute;inset:0;margin:auto;width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+/* ================================================================
+   BRIDGE「名前になる」— 15.000 秒・1920×1080・60fps(言いかえ帳の実物の画面を使う版。v3「一本の線」は ../reel.html)
+   現場のことばが言いかえに変わる瞬間を描いた層で起こし、同じ行の字に重ねて実物の言いかえ帳へ切り替え、
+   行を開く・星を付ける・あつめた言葉を開く・コピーする、を実物の操作で見せ、道具の罫が BRIDGE のロゴの線になって終わる。
+   このページが描くのは BRIDGE の層(夜の帯・弧・字・finale)とカメラだけ。実物の画面は capture.mjs が撮り、compose.py が切り出して重ねる。
+   書き出しは build.sh(撮影 → render.mjs → cams.mjs → compose.py → sound.mjs → mp4)
+   ================================================================ */
+const W = 1920, H = 1080, FPS = 60, DUR = 15;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const BEAT = 0.46875, BAR = 1.875;
+const G = (bar, beat = 0) => (bar - 1) * BAR + beat * BEAT;
+let TT = 0;
+</script>
+<script src="v3-parts.js"></script>
+<script src="reel.js"></script>
+</body>
+</html>
