@@ -381,7 +381,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 
 <!-- ============ HERO ============
      コピー → Motion(12秒のループ)。Motion の中身は実物に寄せて BRIDGE が描いた UI で、語と数値の出どころは次のとおり(第15条):
-     言いかえ=compass/app/data.js の対応表(退院支援・多職種連携・業務改善・患者への説明はそのまま。新人指導は「プリセプター・新人指導」の短縮)/
+     言いかえ=compass/app/data.js の対応表(退院支援・多職種連携・業務改善・患者・家族への説明はそのまま。新人指導は「プリセプター・新人指導」の短縮)/
      Compass のタグと橋の名前=同じ data.js の tag と name(点数・%は実物にも出さないので出さない)/
      クリニックタウン3D の選択肢=clinic-flow-3d/app/decisions/cases-04-sales.js の Day 6 の相談。資金の差 ¥5万=訪問費。患者数と平均待ちは例(下の注記)
      動く層は aria-hidden。内容は figcaption の前の視覚的に隠した一文で伝える。動きを減らす設定では静止の1枚 -->
@@ -403,7 +403,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
           <div class="m-sat"><span class="f">多職種連携</span><span class="t">ステークホルダー調整</span></div>
           <div class="m-sat"><span class="f">新人指導</span><span class="t">人材育成・フィードバック</span></div>
           <div class="m-sat"><span class="f">業務改善</span><span class="t">オペレーション改善</span></div>
-          <div class="m-sat"><span class="f">患者への説明</span><span class="t">複雑な情報の翻訳</span></div>
+          <div class="m-sat"><span class="f">患者・家族への説明</span><span class="t">複雑な情報の翻訳</span></div>
           <div class="m-card m-src"><small>あなたが普段やっていること</small><b>退院支援</b></div>
           <div class="m-line"></div>
           <div class="m-card m-dst"><b>プロジェクト推進</b><b>合意形成</b></div>
@@ -444,7 +444,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 
 <!-- ============ 試しているもの ============
      商品の一覧ではなく、いま手元にあるもの。事実は台帳と実データに合わせる(第15条):
-     Compass の公開日=cockpit ledger(v1 2026-09-22)/ 翻訳の2行=compass/app/data.js の対応表 /
+     Compass の公開日=cockpit ledger(v1 2026-09-22)/ 翻訳の2行=compass/app/data.js の対応表(ヒーローの動きに出てこない行き先を選ぶ)/
      Clinic Town 3D の版=sw.js の VER(手を入れた回数は載せない: 数え方で値が変わり、期間が古び、作業の主体も読み違えられるため。2026-10-03 社長決定)/
      版と個数は scripts/check-site.mjs の6項が照合する /
      29=products/index.html の PRODUCTS の件数(増減したらここも直す) -->
@@ -460,8 +460,8 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       <h3 class="cp-name">BRIDGE Compass</h3>
       <p class="cp-p">毎日やっている仕事を、病院の外で通じる言葉に置き換えてみる道具です。たとえば――</p>
       <dl class="tr" data-reveal data-reveal-delay="1">
-        <div class="tr-row"><dt>家族指導</dt><dd>複雑な情報の翻訳・教育</dd></div>
-        <div class="tr-row"><dt>多職種カンファレンス</dt><dd>ステークホルダー調整</dd></div>
+        <div class="tr-row"><dt>申し送り</dt><dd>要点を絞った情報の引き継ぎ</dd></div>
+        <div class="tr-row"><dt>患者評価</dt><dd>課題発見・仮説検証</dd></div>
       </dl>
       <a class="tx-link" href="./compass/index.html">10の質問に答えてみる <span class="ar" aria-hidden="true">→</span></a>
     </div>
@@ -477,7 +477,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     <div class="cp-text" data-reveal>
       <p class="note">直し続けているもの</p>
       <h3 class="cp-name">クリニックタウン3D</h3>
-      <p class="cp-p">クリニックの経営を、1日ずつ動かして学ぶゲームです。診療時間をひとつ変えると、待ち時間と利益が動きます。</p>
+      <p class="cp-p">クリニックの経営を、1日ずつ動かして学ぶゲームです。診療時間を1コマ変えると、待ち時間と利益が変わります。</p>
       <p class="ct-v">いまの版は <span class="v">v99.3</span> です。</p>
       <a class="tx-link" href="./clinic-flow-3d/index.html">いまの版で遊ぶ <span class="ar" aria-hidden="true">→</span></a>
     </div>
