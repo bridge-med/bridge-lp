@@ -65,7 +65,7 @@
 .hm-stage{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:var(--bg-2);box-shadow:var(--shadow);container-type:inline-size}
 .hm-in{position:absolute;inset:0;
   --dx:-22cqw;--dy:0px;--ex:-1.5cqw;--ey:0px;--l0:scaleX(0);--bmove:translateX(-21cqw) scale(.9);--cin:translateX(5cqw)}
-.hm-in *,.hm-in{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.22,.61,.36,1)}
+.hm-in *,.hm-in *::before,.hm-in{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.22,.61,.36,1)}
 .hm-paused .hm-in,.hm-paused .hm-in *,.hm-paused .hm-in *::before,.hm-off .hm-in,.hm-off .hm-in *,.hm-off .hm-in *::before{animation-play-state:paused}
 
 /* 場面A: 普段の仕事 → 言いかえ */
@@ -133,7 +133,7 @@
 .pn-ch li:nth-child(2){animation-delay:.15s}
 .pn-ch li:nth-child(3){animation-delay:.3s}
 /* 選んだ瞬間だけ砂(第22条 分岐点)。文字は塗らず、左の縦線で示す */
-.pn-ch li:nth-child(1)::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;border-radius:6px 0 0 6px;background:var(--dawn-deep);animation:hm-sel 12s cubic-bezier(.22,.61,.36,1) infinite both}
+.pn-ch li:nth-child(1)::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;border-radius:6px 0 0 6px;background:var(--dawn-deep);animation-name:hm-sel}
 /* 場面D: 終幕 */
 .m-veil{position:absolute;inset:0;z-index:4;background:var(--bg-2);animation-name:hm-veil}
 .m-d{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5cqw;animation-name:hm-d}
