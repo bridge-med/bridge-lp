@@ -87,17 +87,23 @@ img,svg{display:block;max-width:100%}
 .em{color:var(--navy);font-family:var(--serif-en);font-style:normal;font-weight:700}
 
 /* progress bar */
-.progress{position:fixed;top:0;left:0;height:2px;background:var(--navy);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px color-mix(in srgb,var(--navy) 35%,transparent)}
+/* 読了バーは飾り。上端2pxでロゴの当たり判定を奪わないよう pointer-events を切る */
+.progress{pointer-events:none;position:fixed;top:0;left:0;height:2px;background:var(--navy);z-index:200;transition:width .1s linear;width:0;box-shadow:0 0 8px color-mix(in srgb,var(--navy) 35%,transparent)}
 
 /* nav */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px var(--pad-x);transition:all .3s;background:transparent}
 .nav.scrolled{background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:12px var(--pad-x)}
-.nav-logo{font:700 14px/1 var(--serif-en);letter-spacing:0.2em;color:var(--ink)}
+.nav-logo{font:700 14px/1 var(--serif-en);letter-spacing:0.2em;color:var(--ink);position:relative}
+/* タップ領域44px。見た目(16px高)は変えず、当たり判定だけを上下14pxずつ広げる(design-system v1.0 と同じ手) */
+.nav-logo::before{content:'';position:absolute;inset:-14px 0}
 /* 砂: 署名としての句点 */
 .nav-logo .dot{color:var(--dawn)}
 .nav-logo .small{font:500 9px/1 var(--sans-en);letter-spacing:0.16em;color:var(--ink-3);margin-left:8px;text-transform:uppercase}
 .nav-actions{display:flex;gap:10px;align-items:center}
-.nav-actions a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 14px;border-radius:2px;transition:all .15s}
+.nav-actions a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 14px;border-radius:2px;transition:all .15s;position:relative}
+/* 見た目29px高のまま、タップ領域だけ縦に45pxへ(round-note .row-check前例)。
+ * 旧版は640px以下だけに掛けており、641〜920px(QAのモバイル)で29pxのままだった */
+.nav-actions a::before{content:'';position:absolute;inset:-8px 0}
 .nav-actions a.back{color:var(--ink-3)}
 .nav-actions a.back:hover{color:var(--ink)}
 .nav-actions a.cta{background:var(--ink);color:var(--on-fill)}
@@ -109,9 +115,13 @@ img,svg{display:block;max-width:100%}
   .nav.scrolled{padding:10px var(--pad-x)}
   .nav-logo .small{display:none}
   .nav-actions{gap:6px}
-  .nav-actions a{white-space:nowrap;padding:9px 10px;position:relative}
-  /* 見た目29px高のまま、タップ領域だけ縦に44px超へ(round-note .row-check前例) */
-  .nav-actions a::before{content:'';position:absolute;inset:-8px 0}
+  .nav-actions a{white-space:nowrap;padding:9px 10px}
+}
+/* 600px以下: 「← BRIDGE」はロゴと行き先が同じ(../index.html)。狭い一行に同じ行き先を二度置かず、
+ * 帰り道はロゴに任せる(第27条)。これで320pxでもnavが一行に収まり、ロゴの当たり判定(上下14px)が
+ * 折り返した2行目のボタンに重ならない */
+@media(max-width:600px){
+  .nav-actions a.back{display:none}
 }
 /* 320〜360px: emの一息が入りきらないときだけ、文節で折ることを許す(折れ位置はBudouXが決める) */
 @media(max-width:360px){.s-head h2 .em.nowrap{white-space:normal}}
@@ -197,6 +207,9 @@ section.alt{background:var(--paper-2)}
 .foot-brand .dot{color:var(--dawn)}
 .foot-tag{font:500 11px/1.7 var(--sans-jp);color:color-mix(in srgb,var(--on-solid) 58%,var(--ink-solid));margin-bottom:18px}
 .foot-links{display:flex;gap:18px;justify-content:center;font:600 11px/1 var(--sans-en);letter-spacing:0.12em;text-transform:uppercase}
+/* タップ領域44px。行高11pxのまま上下に17pxずつ広げる。折り返す starter-kits は hub.css で行間を34pxにしている */
+.foot-links a{position:relative}
+.foot-links a::before{content:'';position:absolute;inset:-17px 0}
 /* 著作権表記。旧実装は各ページの inline style に color:rgba(255,255,255,0.4) を
  * 直書きしており、藍地で3.59:1(AA未達)かつトークン非経由でダークから到達できなかった */
 .foot-copy{margin-top:24px;font:500 10px/1.5 var(--sans-jp);color:color-mix(in srgb,var(--on-solid) 52%,var(--ink-solid))}
@@ -272,7 +285,7 @@ html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 .alert-item.warn{background:var(--paper-3);border-left-color:var(--navy)}
 .alert-item.info{background:var(--paper-2);border-left-color:var(--blue)}
 .alert-item.ok{background:var(--card);border-left-color:var(--ink-4)}
-.alert-tag{font:800 10px/1 var(--sans-jp);letter-spacing:0.04em;padding:5px 10px;border-radius:2px;flex-shrink:0;color:var(--on-fill)}
+.alert-tag{font:900 10px/1 var(--sans-jp);letter-spacing:0.04em;padding:5px 10px;border-radius:2px;flex-shrink:0;color:var(--on-fill)} /* 同下: 800→実描画の900(ピクセル不変) */
 .alert-item.warn .alert-tag{background:var(--navy)}
 .alert-item.info .alert-tag{background:var(--blue)}
 .alert-item.ok .alert-tag{background:var(--ink-4);color:var(--ink)}
@@ -280,6 +293,11 @@ html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 .alert-body strong{color:var(--ink);font-weight:900} /* Noto Sans JPは800未読込。実描画の900を明示 */
 
 /* compare table */
+/* 320px で表の最小幅が .mock-content を超え、.mock-wrap の overflow:hidden に右端の列が切られていた
+ * (rehaboard 32px・hire-board 16px)。表を包んで横スクロールにする */
+.cmp-scroll{overflow-x:auto}
+/* 包んだ表は折り返さず横に送る(縮めると「腰部脊柱管」が1字ずつ縦に割れる) */
+.cmp-scroll .cmp-table{white-space:nowrap}
 .cmp-table{width:100%;border-collapse:collapse;font:500 12px/1.5 var(--sans-jp)}
 .cmp-table th{background:var(--paper-3);padding:12px 14px;text-align:left;font:700 10px/1 var(--sans-en);letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
 .cmp-table th:not(:first-child){text-align:right}

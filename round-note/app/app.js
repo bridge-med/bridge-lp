@@ -476,6 +476,13 @@
     if (el) el.focus();
   }
 
+  /* ---------- テーマ切替(保存キーはサイト共通の bridge-theme) ---------- */
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('bridge-theme', next); } catch (e) {}
+  });
+
   // ---- 起動 -----------------------------------------------------------------
   render();
 })();
