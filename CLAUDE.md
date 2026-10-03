@@ -49,6 +49,21 @@ UI の変更は次の順で進める：憲法 → design-system → 既存の部
 - 出荷前の機械検査は `node scripts/check-site.mjs`。コミット時は `.claude/settings.json` のhookが自動で強制する。直せない既知の違反は `scripts/check-site.allowlist.json` に理由付きで隔離
 - 出荷（コミット・公開）の手順は `ship` スキル（`.claude/skills/ship/SKILL.md`）に従う。判定の記録は `cockpit-76a805/shiplog.jsonl`
 
+## 作業別のSkills
+
+常に守る前提・一次文書の優先関係・担当・公開判断は本書に残す。作業の手順はSkillsへ置き、憲法・context・デザインシステムの全文や未決事項の台帳を複製しない。
+Skillsは現場の手順、agentsは担当者の判断と照合。担当をSkillで置き換えず、同じ内容のレビューを二度依頼しない。
+
+| 作業 | 使うSkill | 担当との関係 |
+|---|---|---|
+| 実装・修正全般 | `dev-loop` | 開発全体を進める。以下は該当する作業で併用 |
+| 見た目・レイアウト・動き・UI改善 | `bridge-design` | 参照と実装準備を揃え、`designer` が判断する |
+| コピー・見出し・記事・UI文言 | `bridge-copy` | 媒体と事実を揃え、`editor` が照合する |
+| Compassの質問・判定・結果・共有 | `bridge-compass` | 固有仕様と回帰検証を扱う。UI/文章は上記も併用 |
+| コミット・出荷前 | `ship` | 検査・領分照合・PM判定・記録を一度に集約する |
+
+手動で呼ぶ場合は `/bridge-design`、`/bridge-copy`、`/bridge-compass` を使う。詳細は `.claude/skills/<名前>/SKILL.md`。フロントエンド全般とPRレビューは既存の `dev-loop` / `ship` / `qa` が担うため、別Skillへ重複させない。
+
 ## セッション運用（PR監視の禁止）
 
 - PRを作成しても、定期チェックの予約（send_later・Routine等でセッションを後から起こし直す仕組み）を自分で仕掛けない。イベント購読（subscribe_pr_activity）も同様

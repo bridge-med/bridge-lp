@@ -34,6 +34,7 @@ docs/context.md 9章（実装時の判断基準）と15章（仕事の進め方�
 - 対象ページ・コードの実物を開く。憶測でパスや仕様を語らない。
 - 類似の既存実装を探し、パターンを踏襲する。新しい部品を発明する前に `docs/design-system.md`（§1 トークン・§3 部品・§4 型）と `shared/bridge.css` / `shared/bridge.js` で表現できないかを先に考える。新しい部品・トークンが要るなら designer に §6 の条件で判断させる。
 - データの唯一の情報源を確認する：ナビは NAV 配列、プロダクトは PRODUCTS 配列、活動は ACTIVITIES 配列。
+- 作業に応じて `bridge-design`（UI）、`bridge-copy`（文章）、`bridge-compass`（Compass）を併用する。これらは作業の詳細であり、本ループや `ship` の判定・記録をもう一度回すものではない。
 
 ## 3. 計画 — Implementation Plan
 
@@ -56,7 +57,7 @@ docs/context.md 9章（実装時の判断基準）と15章（仕事の進め方�
 
 ## 6. 検査 — Quality Check
 
-- `node scripts/check-site.mjs` を走らせる（このリポジトリの機械検査はこれが全て。lint/typecheck/testは無い。ビルドも無い）。
+- 共通の機械検査は `node scripts/check-site.mjs`。ブランドサイト本体は静的でビルド不要。対象プロダクトに固有のテストやpackage.jsonがあれば、その実物で実行方法を確認して追加検証する。Compassに触れたら `node --test compass/tests/*.test.mjs` も走らせる。
 - 機械が見られないものは実物で確認する：変更ページを開く、モバイル幅（≤920px）、ライト/ダーク両テーマ。
 - PWA（sw.jsを持つプロダクト）に触れたら `CACHE` の版名を上げる。
 
