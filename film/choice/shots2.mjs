@@ -215,11 +215,13 @@ export const S5 = {
   anchors: async page => ({ ch: await box(page, '#decisionGate .dec-choice', 1), sc: await page.evaluate(() => [scrollX, scrollY]) }),
   actions: [{ f: 14, run: async (page, A) => { await page.evaluate(() => document.querySelectorAll('#decisionGate .dec-choice')[1].click()); A.ch2 = await box(page, '#decisionGate .dec-choice.on'); A.ask = await box(page, '#decisionGate .dec-ask'); } }],
   js: f => false,
-  sub: sub([[20, 40]]),
+  sub: sub([[18, 33]]),
   cam: (t, A) => {
     const ch = (t >= 14 / FPS && A.ch2) ? A.ch2 : A.ch;
     const c = [ch.x + 24, ch.y + ch.height / 2];
-    const pull = ease.inOutCubic(seg(t, 20 / FPS, 39 / FPS));
+    // 2026-10-03: pull 20-39 -> 18-32 so the end frame (the options, their numbers and the product's own label
+    // 「数値はゲーム上の仮定」 under them) holds 10 frames instead of 3. Duration unchanged (42 frames)
+    const pull = ease.inOutCubic(seg(t, 18 / FPS, 32 / FPS));
     // end: the decision itself (the ask + the three options), not the whole game screen
     const endS = 2.3, mid = [A.ask ? A.ask.x + A.ask.width / 2 : c[0] + 200, (A.ask ? A.ask.y : c[1] - 120) + 170];
     return zoomCam(c, [W * 0.36, H / 2], [W / 2 + (c[0] - mid[0]) * endS, H / 2 + (c[1] - mid[1]) * endS], 5.5, endS)(pull);
