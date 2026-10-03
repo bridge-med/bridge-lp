@@ -9,3 +9,7 @@ medical-kb/data/validation-report.json
 medical-kb/data/manifest/crawl-report.*.json
 # ZIP原典の展開ディレクトリ(スクリプトが再展開する)
 medical-kb/data/sources/*/masters/*_x/
+
+# film/choice: 撮影のコマ・書き出し(job2.sh で再生成できる)
+film/choice/work/
+film/choice/out/
