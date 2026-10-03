@@ -10,9 +10,8 @@
   const E = window.ATESAKI_ENGINE;
   const S = E.SEGS;
 
-  const SERIES_START = '2026-06-22';   // 「医療職のキャリア拡張」を掲げた記事の日。呼び名は社長の確認待ち
-  const SERIES_LABEL = '6月22日から';
-  const INGEST_TIMES = '毎日7時40分と19時40分ごろ';
+  const SERIES_START = '2026-06-22';   // 「医療職のキャリア拡張」を掲げた記事の日
+  const SERIES_LABEL = '2026年6月22日から';   // 年をまたいでも読み違えないよう年を付ける(2026-10-03 社長決定)
   const LIKES_DAYS = 60;
   const WHO_ORDER = ['general'].concat(E.WHO_IDS);
   const TOPIC_ORDER = E.TOPIC_IDS;
@@ -100,13 +99,14 @@
       const ok = await state.ready;   // 一覧の読み込み中なら待つ
       if (!ok) { say('記事の一覧を読めませんでした。本文を貼ると、いま数えられます。', '本文を貼る'); return; }
       if (state.byKey.has(p.key)) { say(''); showKey(p.key, true); return; }
+      // note の ID(archive.user)は画面に出さない(2026-10-03 社長決定)。比べるのにだけ使う
       const me = state.archive.user;
       if (p.user && p.user !== me) {
-        say(`取り込んであるのは ${me} の記事です。ほかの人の記事は、本文を貼ると数えられます(辞書は、取り込んだ記事に合わせて作っています)。`, '本文を貼る');
+        say('取り込んであるのは BRIDGE の note の記事です。ほかの人の記事は、本文を貼ると数えられます(辞書は、取り込んだ記事に合わせて作っています)。', '本文を貼る');
       } else if (p.user === me) {
-        say(`この記事は、取り込み済みの一覧の外にあります。公開したばかりの記事なら、次の取り込み(${INGEST_TIMES})で入ります。今すぐ見るときは、本文を貼って数えられます。`, '本文を貼る');
+        say('この記事は、取り込み済みの一覧の外にあります。公開したばかりの記事なら、次に取り込んだときに入ります。今すぐ見るときは、本文を貼って数えられます。', '本文を貼る');
       } else {
-        say(`この記事は、取り込み済みの一覧の外にあります。取り込んでいるのは ${me} の note の記事だけです。本文を貼ると数えられます。`, '本文を貼る');
+        say('この記事は、取り込み済みの一覧の外にあります。取り込んでいるのは BRIDGE の note の記事だけです。本文を貼ると数えられます。', '本文を貼る');
       }
       return;
     }

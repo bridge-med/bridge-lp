@@ -1,6 +1,7 @@
 name: Refresh atesaki data
 
-# 宛先しらべ(atesaki-76a805)の記事データを取り込む。note の予約投稿(7:00・19:00 JST)の後に回す。
+# 宛先しらべ(atesaki-76a805)の記事データを取り込む。手動実行(workflow_dispatch)だけで動かす。
+# 定期実行(schedule)は置かない(2026-10-03 社長決定: 自動では回さない)。
 # 読むのは robots.txt が許すパスだけ(RSS と記事ページ)。/api/* は使わない(scripts/atesaki-build.mjs 冒頭)。
 # 新着がなく、スキの読み直し(7日に一度)の日でもなければ、何も書き換えずコミットもしない。
 # 判定の版が焼いたデータと違うときは取り直さずに失敗させる(手元で --rebuild してからコミットする)。
@@ -13,9 +14,6 @@ name: Refresh atesaki data
 # master 以外のブランチで手動実行したときは、ジョブごと動かさない。
 
 on:
-  schedule:
-    - cron: '40 22 * * *' # 22:40 UTC = 7:40 JST
-    - cron: '40 10 * * *' # 10:40 UTC = 19:40 JST
   workflow_dispatch:
     inputs:
       force_likes:

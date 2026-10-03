@@ -1,4 +1,4 @@
-/* 宛先しらべ 毎日の取り込み(.github/workflows/refresh-atesaki.yml)の「プッシュしてよいもの」の防御のテスト
+/* 宛先しらべ 取り込み(.github/workflows/refresh-atesaki.yml)の「プッシュしてよいもの」の防御のテスト
  * 実行: node --test atesaki-76a805/tests/*.test.mjs
  * ワークフローの「Commit and push (generated data only)」の段の中身をそのまま取り出し、一時フォルダに作った
  * 手元の git(master を持つ bare の remote と、actions/checkout@v4 と同じ深さ1の checkout)の上で走らせる。GitHub には通信しない。
