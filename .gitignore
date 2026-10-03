@@ -14,3 +14,6 @@ medical-kb/data/sources/*/masters/*_x/
 showreel/sound.wav
 # showreel/namae: 撮った画・描いた層のコマ・音は build.sh が作り直す(書き出しの MP4 に入る)
 showreel/namae/work
+# film/choice: 撮影のコマ・書き出し(job2.sh で再生成できる)
+film/choice/work/
+film/choice/out/
