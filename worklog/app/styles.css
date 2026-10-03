@@ -296,3 +296,10 @@ details.card > summary::-webkit-details-marker { display: none; }
 .bar { height: 7px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 8px; }
 .bar-fill { height: 100%; background: var(--primary); border-radius: 999px; }
 .out { background: var(--surface-2); }
+
+/* 動きを減らす設定では遷移を止め、完成した姿をそのまま見せる */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  /* .fab の押下縮小は transition を持たないため、上の指定では止まらない */
+  .fab:active { transform: none; }
+}
