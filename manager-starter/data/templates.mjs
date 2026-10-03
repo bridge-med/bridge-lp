@@ -474,7 +474,7 @@ export const TEMPLATES = [
   { id: 'p-newstaff', title: '新人受け入れチェックリスト', packCategory: '採用・教育', formats: ['excel'], purpose: '入職前準備〜3か月の教育項目と担当の管理', timing: '入職決定後', status: 'pack' },
   { id: 'p-interview', title: '採用面接評価シート', packCategory: '採用・教育', formats: ['word'], purpose: '評価観点の設定と事実・印象を分けた記録', timing: '面接前後', status: 'pack' },
   { id: 'p-90days', title: '管理職90日アクションプラン', packCategory: '最初の30日', formats: ['excel'], purpose: '30日・60日・90日の到達目標と週次タスクの計画表', timing: '就任〜90日', status: 'pack' },
-  { id: 'p-prompts', title: '医療管理職向けAI活用プロンプト集', packCategory: 'AI活用', formats: ['guide'], purpose: '議事メモ整理・報告文・タスク分解など12例(個人情報を入れない形)', timing: '随時', status: 'pack' },
+  { id: 'p-prompts', title: '医療管理職向けAI活用プロンプト集', packCategory: 'AI活用', formats: ['word'], purpose: '議事メモ整理・報告文・タスク分解など12例(個人情報を入れない形)', timing: '随時', status: 'pack' },
 ];
 
 export const publishedTemplates = () => TEMPLATES.filter((t) => t.status === 'published');
