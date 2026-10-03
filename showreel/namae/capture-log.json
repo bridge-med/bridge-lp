@@ -1,0 +1,291 @@
+{
+ "capturedAt": "2026-09-28T16:11:53.603Z",
+ "commit": "167c33507a39de2c9ca5e75c300bb0bbc82f666e",
+ "iikaeSameAsOriginMaster": true,
+ "page": "/iikae/index.html",
+ "viewport": "per take (1440 wide)",
+ "theme": "light",
+ "profile": "new (no storage)",
+ "camera": "after capture: uniform-scale crop of the whole-page image (no pixel edits)",
+ "takes": [
+  {
+   "name": "list9",
+   "dpr": 9,
+   "viewport": "1440x900",
+   "clipboard": false,
+   "clip": {
+    "x": 300,
+    "y": 417,
+    "width": 900,
+    "height": 463
+   },
+   "out": [
+    3.7,
+    7.5
+   ],
+   "inputs": [
+    {
+     "vt": -10,
+     "tap": "#intro-start",
+     "page": [
+      484.1,
+      561.4
+     ]
+    },
+    {
+     "vt": 4.453125,
+     "tap": ".word-row[data-key=\"いつもと違うのに気づいた\"] .word-toggle",
+     "page": [
+      694,
+      680.6
+     ]
+    },
+    {
+     "vt": 6.09375,
+     "tap": ".word-row[data-key=\"いつもと違うのに気づいた\"] .word-star",
+     "page": [
+      1004,
+      680.6
+     ]
+    }
+   ],
+   "frames": 228,
+   "state": {
+    "view": "view-list",
+    "open": "いつもと違うのに気づいた",
+    "stars": 1,
+    "saved": [],
+    "toast": "あつめた言葉に入れました",
+    "scrollY": 0
+   }
+  },
+  {
+   "name": "saved6",
+   "dpr": 6,
+   "viewport": "1440x468",
+   "clipboard": true,
+   "clip": {
+    "x": 240,
+    "y": 0,
+    "width": 960,
+    "height": 468
+   },
+   "out": [
+    7.5,
+    12.666666666666666
+   ],
+   "inputs": [
+    {
+     "vt": -10,
+     "swipe": "1 x 300px",
+     "scrollY": 318
+    },
+    {
+     "vt": -10,
+     "tap": "#intro-start",
+     "page": [
+      484.1,
+      208.8
+     ]
+    },
+    {
+     "vt": -9,
+     "swipe": "1 x 300px",
+     "scrollY": 312
+    },
+    {
+     "vt": -9,
+     "tap": ".word-row[data-key=\"いつもと違うのに気づいた\"] .word-star",
+     "page": [
+      1004,
+      351.3
+     ]
+    },
+    {
+     "vt": -6,
+     "swipe": "8 x 600px",
+     "scrollY": 3149
+    },
+    {
+     "vt": 7.3,
+     "tap": "#to-saved",
+     "page": [
+      497.6,
+      382.3
+     ]
+    },
+    {
+     "vt": 8.4375,
+     "tap": "#saved-copy",
+     "page": [
+      476.8,
+      391.9
+     ]
+    }
+   ],
+   "frames": 310,
+   "state": {
+    "view": "view-saved",
+    "open": null,
+    "stars": 1,
+    "saved": [
+     "いつもと違うのに気づいた"
+    ],
+    "toast": "コピーしました",
+    "scrollY": 0
+   }
+  },
+  {
+   "name": "name13",
+   "dpr": 13,
+   "viewport": "1440x468",
+   "clipboard": true,
+   "clip": {
+    "x": 340,
+    "y": 0,
+    "width": 480,
+    "height": 300
+   },
+   "out": [
+    9.1,
+    10.7
+   ],
+   "inputs": [
+    {
+     "vt": -10,
+     "swipe": "1 x 300px",
+     "scrollY": 318
+    },
+    {
+     "vt": -10,
+     "tap": "#intro-start",
+     "page": [
+      484.1,
+      208.8
+     ]
+    },
+    {
+     "vt": -9,
+     "swipe": "1 x 300px",
+     "scrollY": 311
+    },
+    {
+     "vt": -9,
+     "tap": ".word-row[data-key=\"いつもと違うのに気づいた\"] .word-star",
+     "page": [
+      1004,
+      352.3
+     ]
+    },
+    {
+     "vt": -6,
+     "swipe": "8 x 600px",
+     "scrollY": 3149
+    },
+    {
+     "vt": 7.3,
+     "tap": "#to-saved",
+     "page": [
+      497.6,
+      382.3
+     ]
+    },
+    {
+     "vt": 8.4375,
+     "tap": "#saved-copy",
+     "page": [
+      476.8,
+      391.9
+     ]
+    }
+   ],
+   "frames": 96,
+   "state": {
+    "view": "view-saved",
+    "open": null,
+    "stars": 1,
+    "saved": [
+     "いつもと違うのに気づいた"
+    ],
+    "toast": "コピーしました",
+    "scrollY": 0
+   }
+  },
+  {
+   "name": "pair13",
+   "dpr": 13,
+   "viewport": "1440x468",
+   "clipboard": true,
+   "clip": {
+    "x": 340,
+    "y": 0,
+    "width": 700,
+    "height": 300
+   },
+   "out": [
+    10.3,
+    12.666666666666666
+   ],
+   "inputs": [
+    {
+     "vt": -10,
+     "swipe": "1 x 300px",
+     "scrollY": 322
+    },
+    {
+     "vt": -10,
+     "tap": "#intro-start",
+     "page": [
+      484.1,
+      204.8
+     ]
+    },
+    {
+     "vt": -9,
+     "swipe": "1 x 300px",
+     "scrollY": 306
+    },
+    {
+     "vt": -9,
+     "tap": ".word-row[data-key=\"いつもと違うのに気づいた\"] .word-star",
+     "page": [
+      1004,
+      357.3
+     ]
+    },
+    {
+     "vt": -6,
+     "swipe": "8 x 600px",
+     "scrollY": 3149
+    },
+    {
+     "vt": 7.3,
+     "tap": "#to-saved",
+     "page": [
+      497.6,
+      382.3
+     ]
+    },
+    {
+     "vt": 8.4375,
+     "tap": "#saved-copy",
+     "page": [
+      476.8,
+      391.9
+     ]
+    }
+   ],
+   "frames": 142,
+   "state": {
+    "view": "view-saved",
+    "open": null,
+    "stars": 1,
+    "saved": [
+     "いつもと違うのに気づいた"
+    ],
+    "toast": "コピーしました",
+    "scrollY": 0
+   }
+  }
+ ]
+}

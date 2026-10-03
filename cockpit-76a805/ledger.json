@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-02",
+  "updated": "2026-10-03",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(2026-09-04 社長確認済み=便AA決裁4)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -152,7 +152,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "直近の開発が最も活発",
-      "lastCommit": "2026-09-21"
+      "lastCommit": "2026-10-03"
     },
     {
       "id": "him-quiz",
@@ -263,7 +263,7 @@
       "serves": "経験をうまく言葉にできない医療職・対人援助職。棚卸し(評価)で掘り出した経験に履歴書・面接で通じる名前を付け、「自分の仕事の言い表し方」の選択肢を増やす",
       "status": "計測中",
       "measure": "local",
-      "note": "棚卸し(評価)→言いかえ帳(理解)の双方向導線。stage/servesはPM案、社長確定待ち",
+      "note": "棚卸し(評価)→言いかえ帳(理解)の双方向導線。stage/servesは2026-09-04 社長確認済み(便AA決裁4「ledger.jsonの第31条申告(全プロダクト)を社長確認済みに」への回答「良いよ」。記録は clinic-flow-3d/docs/roadmap.md の決裁記録・6b49ab88)",
       "lastCommit": "2026-08-09"
     },
     {
