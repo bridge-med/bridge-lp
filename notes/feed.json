@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-02T23:49:34+00:00",
+  "updated_at": "2026-10-03T23:07:02+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "まとまっていない話を聞く。それもマネージャーの仕事だと思う。",
+      "url": "https://note.com/prime_duck4944/n/nd1b0b768030d",
+      "guid": "https://note.com/prime_duck4944/n/nd1b0b768030d",
+      "pubDate": "2026-10-04T07:00:00+09:00",
+      "date": "2026-10-04",
+      "excerpt": "「ちょっと相談いいですか？」管理職をやっていると、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316286572/rectangle_large_type_2_b94bd0462fc0e1916114a81be9c24945.png?width=800"
+    },
+    {
+      "title": "部下へのフィードバックをAIに考えさせるとき、気をつけていること。",
+      "url": "https://note.com/prime_duck4944/n/n9e1c25784900",
+      "guid": "https://note.com/prime_duck4944/n/n9e1c25784900",
+      "pubDate": "2026-10-03T19:00:00+09:00",
+      "date": "2026-10-03",
+      "excerpt": "部下や後輩に、何かを伝えないといけない場面ってある。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/318347722/rectangle_large_type_2_1378f072ee8781fb016d296e85882b8a.png?width=800"
+    },
     {
       "title": "年下のしょうもないいざこざを、聞いてあげられますか？",
       "url": "https://note.com/prime_duck4944/n/nb8093bb3d06e",
@@ -38,24 +56,6 @@
       "date": "2026-10-01",
       "excerpt": "ChatGPTを仕事で使ってみたい。でも、",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/318342308/rectangle_large_type_2_0005b0472a4b32d7ba333dfe11634ba1.png?width=800"
-    },
-    {
-      "title": "自分の給料が安いと思うなら、一度外で値段をつけてもらえばいい。",
-      "url": "https://note.com/prime_duck4944/n/nbb24855495b0",
-      "guid": "https://note.com/prime_duck4944/n/nbb24855495b0",
-      "pubDate": "2026-10-01T07:00:00+09:00",
-      "date": "2026-10-01",
-      "excerpt": "「自分の給料、安くないですか？」医療職として働いていると、",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316284380/rectangle_large_type_2_dda629affa45fb22c781efd02680ad50.png?width=800"
-    },
-    {
-      "title": "Excelが苦手でも、関数はAIに聞けばかなり何とかなる。",
-      "url": "https://note.com/prime_duck4944/n/n69a9c930b16f",
-      "guid": "https://note.com/prime_duck4944/n/n69a9c930b16f",
-      "pubDate": "2026-09-30T19:00:00+09:00",
-      "date": "2026-09-30",
-      "excerpt": "Excelが苦手。そういう医療職は、結構多いと思う。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316896278/rectangle_large_type_2_fc542a405ab01c7d52aacb45010c76aa.png?width=800"
     }
   ]
 }
