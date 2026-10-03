@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>一本の線 — BRIDGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@700;900&family=Inter:wght@500;800&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#0B0F1A;height:100%;overflow:hidden}
+  canvas{display:block;position:absolute;inset:0;margin:auto;width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+/* ================================================================
+   BRIDGE「一本の線」— 15.000 秒・1920×1080・60fps
+   時刻 t だけで 1 枚が決まる(同じ t なら何度描いても同じ絵)。
+   一本の藍の線が、いまの点から出て、一本しか見えていなかった道を書き、砂の点で三つに分かれ、道具を刷り、
+   引くと分かれた道のあいだを通ってきたと見せ、考え方の型を書き、最後にロゴの線に曲がって砂の線と交差する
+   (交差するが、接続しない)。数は見せない。背骨は思想のページの分岐の図(philosophy/index.html 162–176)。
+   書き出しは render.mjs。音は sound.mjs(同じ拍の表を使う)。
+   ================================================================ */
+const W = 1920, H = 1080, FPS = 60, DUR = 15;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+/* ---- 拍(128 BPM) ---- */
+const BEAT = 0.46875, BAR = 1.875;
+const G = (bar, beat = 0) => (bar - 1) * BAR + beat * BEAT;
+
+/* ---- easing(両端で厳密に 0 と 1) ---- */
+const clamp = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
+const lerp = (a, b, u) => a + (b - a) * u;
+const E = {
+  lin: u => u,
+  quadIn: u => u * u,
+  cubicIn: u => u * u * u,
+  cubicOut: u => 1 - Math.pow(1 - u, 3),
+  cubicInOut: u => u < .5 ? 4 * u * u * u : 1 - Math.pow(2 - 2 * u, 3) / 2,
+  expoOut: u => (1 - Math.pow(2, -10 * u)) / (1 - Math.pow(2, -10)),
+  expoIn: u => (Math.pow(2, 10 * u) - 1) / (Math.pow(2, 10) - 1),
+  sineIn: u => 1 - Math.cos(Math.PI * u / 2),
+  sineInOut: u => (1 - Math.cos(Math.PI * u)) / 2,
+  backOut: u => 1 + 2.4 * Math.pow(u - 1, 3) + 1.4 * Math.pow(u - 1, 2),
+};
+E.expoInOut = u => u < .5 ? E.expoIn(2 * u) / 2 : (1 + E.expoOut(2 * u - 1)) / 2;
+/* サイトの --ease = cubic-bezier(.16,1,.3,1)。文字の出入りはすべてこれ */
+E.ease = (() => {
+  const bx = s => 3 * (1 - s) * (1 - s) * s * .16 + 3 * (1 - s) * s * s * .3 + s * s * s;
+  const by = s => 3 * (1 - s) * (1 - s) * s * 1 + 3 * (1 - s) * s * s * 1 + s * s * s;
+  const N = 2048, lut = new Float32Array(N + 1);
+  for (let i = 0; i <= N; i++) {
+    const u = i / N; let lo = 0, hi = 1;
+    for (let k = 0; k < 40; k++) { const m = (lo + hi) / 2; if (bx(m) < u) lo = m; else hi = m; }
+    lut[i] = by((lo + hi) / 2);
+  }
+  return u => { if (u <= 0) return 0; if (u >= 1) return 1; const f = u * N, i = Math.floor(f); return lut[i] + (lut[i + 1] - lut[i]) * (f - i); };
+})();
+/* 区間 [a, a+d] の進み */
+const seg = (t, a, d, e = E.lin) => e(clamp((t - a) / d));
+
+/* ---- 色(サイトのトークンの値。地は生成りだけ) ---- */
+const LIGHT = { bg: '#FBFAF7', line: '#16233E', t1: '#1B1B1E', t2: '#45464C', sand: '#A98F63' };
+
+/* ---- 書体 ---- */
+const F = {
+  jp: (w, s) => `${w} ${s}px "Noto Sans JP"`,
+  min: (w, s) => `${w} ${s}px "Shippori Mincho B1"`,
+  en: (w, s) => `${w} ${s}px "Inter"`,
+};
+const hasCJK = s => /[　-鿿＀-￯]/.test(s);
+
+/* ================================================================
+   動きのぼけ用の目印: 動くものは mv() で画面上の位置を残す
+   ================================================================ */
+let PROBING = null;
+function mv(id, x, y) {
+  if (!PROBING) return;
+  const m = ctx.getTransform();
+  PROBING.set(id, [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f]);
+}
+
+/* ================================================================
+   文字の組み(1 度だけ測って使い回す)
+   ================================================================ */
+const layoutCache = new Map();
+function layout(str, font, ls = 0) {
+  const key = str + '|' + font + '|' + ls;
+  let r = layoutCache.get(key);
+  if (r) return r;
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.font = font; ctx.letterSpacing = '0px';
+  const g = []; let x = 0, asc = 0, desc = 0;
+  for (const ch of str) {
+    const m = ctx.measureText(ch);
+    g.push({ ch, x, w: m.width });
+    asc = Math.max(asc, m.actualBoundingBoxAscent); desc = Math.max(desc, m.actualBoundingBoxDescent);
+    x += m.width + ls;
+  }
+  ctx.restore();
+  r = { g, width: x - ls, asc, desc, font };
+  layoutCache.set(key, r);
+  return r;
+}
+/* 1 文字ずつ描く。fn(i, glyph) → {dx, dy, a} */
+function drawGlyphs(L, x, y, color, fn, idp) {
+  ctx.font = L.font; ctx.fillStyle = color; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.letterSpacing = '0px';
+  for (let i = 0; i < L.g.length; i++) {
+    const gl = L.g[i];
+    const m = fn ? fn(i, gl) : null;
+    const a = m && m.a != null ? m.a : 1;
+    const dx = m && m.dx || 0, dy = m && m.dy || 0;
+    if (a <= 0) { if (idp && (dy || dx)) mv(idp + i, x + gl.x + dx, y + dy); continue; }
+    if (a < 1) { ctx.save(); ctx.globalAlpha *= a; }
+    ctx.fillText(gl.ch, x + gl.x + dx, y + dy);
+    if (a < 1) ctx.restore();
+    if (idp && m && (m.dy || m.dx)) mv(idp + i, x + gl.x + dx, y + dy);
+  }
+}
+function clipRect(x, y, w, h) { ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); }
+
+/* 線から出る: 線の上(dir=-1)か下(dir=+1)を境に切り、隠れた位置から ease で出す。
+   starts[i] は各文字の出始め */
+function lineText(str, font, x, y, color, lineY, halfW, dir, starts, dur, idp, out = null) {
+  const L = layout(str, font);
+  const D = dir < 0 ? (lineY - halfW) - (y - L.asc) : (y + L.desc) - (lineY + halfW);
+  ctx.save();
+  if (dir < 0) clipRect(x - 400, lineY - halfW - 4000, L.width + 800, 4000);
+  else clipRect(x - 400, lineY + halfW, L.width + 800, 4000);
+  drawGlyphs(L, x, y, color, (i) => {
+    let d;
+    if (out) d = D * seg(out.t, out.t0, out.d, E.cubicIn);
+    else { const s = starts(i); if (TT < s) return { a: 0, dy: dir < 0 ? D : -D }; d = D * (1 - seg(TT, s, dur, E.ease)); }
+    return { dy: dir < 0 ? d : -d };        // 上へ出る字は下に隠れている / 下へ出る字は上に隠れている
+  }, idp);
+  ctx.restore();
+}
+/* ================================================================
+   線(折れ線+角の丸め r=16)。弧長で部分描画する
+   ================================================================ */
+function buildPath(V, r = 16) {
+  const pts = [], L = [], segs = [];
+  let s = 0;
+  const push = (x, y) => { if (pts.length) { const p = pts[pts.length - 1]; s += Math.hypot(x - p[0], y - p[1]); } pts.push([x, y]); L.push(s); };
+  push(V[0][0], V[0][1]);
+  let tPrev = 0;
+  for (let i = 1; i < V.length; i++) {
+    const A = V[i - 1], P = V[i];
+    const d1 = [P[0] - A[0], P[1] - A[1]], l1 = Math.hypot(d1[0], d1[1]); d1[0] /= l1; d1[1] /= l1;
+    segs.push({ ax: A[0], ay: A[1], dx: d1[0], dy: d1[1], len: l1, sA: s - tPrev });
+    if (i === V.length - 1) { push(P[0], P[1]); break; }
+    const B = V[i + 1];
+    const d2 = [B[0] - P[0], B[1] - P[1]], l2 = Math.hypot(d2[0], d2[1]); d2[0] /= l2; d2[1] /= l2;
+    const th = Math.acos(clamp(d1[0] * d2[0] + d1[1] * d2[1], -1, 1));
+    if (th < 1e-4) { push(P[0], P[1]); tPrev = 0; continue; }
+    const tl = r * Math.tan(th / 2);
+    const T1 = [P[0] - d1[0] * tl, P[1] - d1[1] * tl];
+    const side = Math.sign(d1[0] * d2[1] - d1[1] * d2[0]);
+    const C = [T1[0] - d1[1] * r * side, T1[1] + d1[0] * r * side];
+    push(T1[0], T1[1]);
+    const a0 = Math.atan2(T1[1] - C[1], T1[0] - C[0]);
+    const n = Math.max(4, Math.ceil(th / (Math.PI / 32)));
+    for (let k = 1; k <= n; k++) { const a = a0 + side * th * k / n; push(C[0] + Math.cos(a) * r, C[1] + Math.sin(a) * r); }
+    tPrev = tl;
+  }
+  return { pts, L, len: s, segs };
+}
+function pointAt(p, s) {
+  s = clamp(s, 0, p.len);
+  let lo = 0, hi = p.L.length - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (p.L[m] < s) lo = m; else hi = m; }
+  const k = (s - p.L[lo]) / ((p.L[hi] - p.L[lo]) || 1), a = p.pts[lo], b = p.pts[hi];
+  return [lerp(a[0], b[0], k), lerp(a[1], b[1], k)];
+}
+/* 元の辺 k の上の点 (x,y) の弧長 */
+const segS = (p, k, x, y) => { const g = p.segs[k]; return g.sA + (x - g.ax) * g.dx + (y - g.ay) * g.dy; };
+function strokeTo(p, s1, s0 = 0) {
+  s1 = clamp(s1, 0, p.len); if (s1 <= s0) return;
+  ctx.beginPath();
+  const a = pointAt(p, s0); ctx.moveTo(a[0], a[1]);
+  for (let i = 0; i < p.pts.length; i++) { if (p.L[i] <= s0) continue; if (p.L[i] >= s1) break; ctx.lineTo(p.pts[i][0], p.pts[i][1]); }
+  const b = pointAt(p, s1); ctx.lineTo(b[0], b[1]);
+  ctx.stroke();
+}
+
+/* ================================================================
+   世界の地図(y は下向き)
+   ================================================================ */
+const CARD_X = n => 4520 + 976 * (n - 1);            // n = 1..8。間隔 976 で、前の写しの縦の辺も 8px 外に来る(3 辺とも 8px の額)
+const CLIMB_X = CARD_X(1) - 8, PARK_X = CARD_X(8) + 968, MEANDER_END = PARK_X + 160;
+const MAIN = buildPath([
+  [0, 0], [CLIMB_X, 0], [CLIMB_X, -308],
+  ...[1, 2, 3, 4, 5, 6, 7, 8].flatMap(n => { const x = CARD_X(n) + 968, y = n % 2 ? -308 : 308; return [[x, y], [x, -y]]; }),
+  [MEANDER_END, -308], [MEANDER_END, 0], [16400, 0],
+]);
+const BR_U = buildPath([[3030, 0], [3158, -128], [3930, -128], [3930 + 7000, -128 - 7000]]);
+const BR_D = buildPath([[3030, 0], [3158, 128], [3930, 128], [3930 + 7000, 128 + 7000]]);
+const F_NODE = [3030, 0];
+
+/* ---- カメラ: screen = (p − c)·z + (960, 540)。z が変わる移動は不動点まわりの相似変換 ---- */
+const K = {
+  K0: { x: 0, y: 0, z: 1.8 }, K1: { x: 540, y: -44, z: 1.0 }, K2: { x: 2420, y: 52.5, z: 0.8 },
+  K3: { x: 3190, y: 0, z: 1.25 }, K4: { x: 5000, y: 0, z: 1.0 },
+  K12: { x: 6240, y: 0, z: 0.14 }, K13: { x: 14576, y: -80, z: 1.0 },   // K12 = 原点から蛇行の終わりまでを一枚に収める引き
+};
+function sim(t, a, d, k0, k1, ease) {
+  const e = seg(t, a, d, ease);
+  if (Math.abs(k0.z - k1.z) < 1e-9) return { x: lerp(k0.x, k1.x, e), y: lerp(k0.y, k1.y, e), z: k0.z };
+  const z = Math.pow(k0.z, 1 - e) * Math.pow(k1.z, e);
+  const px = (k1.x * k1.z - k0.x * k0.z) / (k1.z - k0.z), py = (k1.y * k1.z - k0.y * k0.z) / (k1.z - k0.z);
+  return { x: px - (px - k0.x) * k0.z / z, y: py - (py - k0.y) * k0.z / z, z };
+}
+
+/* ---- 刷りの拍(8 枚) ---- */
+const CUES = [G(4, 0), G(4, 1), G(4, 2), G(4, 3), G(5, 0), G(5, .5), G(5, 1), G(5, 1.5), G(5, 2)]; // 9 番目は刷りの終わり
+const CARDS = [                                  // 画面でいちばん大きい字が数字ではない写しを選ぶ(v2)
+  { name: '経験の棚卸し', file: 'tanaoroshi.png' },
+  { name: 'クリニックタウン3D', file: 'clinic-flow-3d.png' },
+  { name: 'HireBoard', file: 'hireboard.png' },
+  { name: 'ターンアラウンド12', file: 'turnaround12.png' },
+  { name: 'ConsultSim', file: 'consult-simulator.png' },
+  { name: '職場モヤモヤ診断', file: 'moyamoya.png' },
+  { name: 'HIM Quiz', file: 'him-quiz.png' },
+  { name: '本部長の巡回手帖', file: 'round-note.png' },
+];
+const cardW = n => n <= 4 ? 0.1875 : 0.1171875;                         // 振り(カード 2..8)
+const cardV = n => n === 1 ? (CUES[1] - 0.10546875) - (G(4, 0) + 0.234375) : n <= 4 ? 0.140625 : 0.05859375;
+const collapseMargin = n => CUES[n] >= G(5, 0) ? 0.052 : 0.10546875;   // 次の拍の手前で畳み終える
+const printEnd = n => n === 1 ? G(4, 0) + 0.234375 : CUES[n - 1] + cardW(n);   // 角に着く時刻
+
+function cam(t) {
+  if (t < 0.9375) return sim(t, 0, 0.9375, K.K0, K.K1, E.cubicInOut);
+  if (t < G(1, 3)) return K.K1;
+  if (t < G(2, 0)) return sim(t, G(1, 3), BEAT, K.K1, K.K2, E.cubicInOut);
+  if (t < G(3, 0)) return K.K2;
+  if (t < G(3, 1)) return sim(t, G(3, 0), BEAT, K.K2, K.K3, E.expoInOut);
+  if (t < G(3, 3.5)) return K.K3;
+  if (t < G(4, 0.5)) return sim(t, G(3, 3.5), BEAT, K.K3, K.K4, E.cubicInOut);
+  if (t < CUES[8]) {
+    let x = CARD_X(1) + 480;
+    for (let n = 2; n <= 8; n++) {
+      const b = CUES[n - 1];
+      if (t < b) break;
+      x = lerp(CARD_X(n - 1) + 480, CARD_X(n) + 480, seg(t, b, cardW(n), E.cubicInOut));
+    }
+    return { x, y: 0, z: 1 };
+  }
+  const K8 = { x: CARD_X(8) + 480, y: 0, z: 1 };
+  if (t < 8.7890625) return sim(t, CUES[8], 0.3515625, K8, K.K12, E.cubicInOut);   // 引く: 一本の道だった
+  if (t < DIVE) return K.K12;                                                       // 息
+  if (t < DIVE + BEAT) return sim(t, DIVE, BEAT, K.K12, K.K13, E.cubicInOut);       // 型の線へ
+  return K.K13;
+}
+const DIVE = G(5, 3.5);                           // 9.141
+
+/* ---- ペン先(弧長) ---- */
+const V0 = 1109.3333;                           // 1.875〜3.281 の等速
+function penX0(t) {                              // 最初の直線の上の x
+  if (t < 0.234375) return 0;
+  if (t < 0.703125) return 1080 * seg(t, 0.234375, 0.46875, E.cubicInOut);
+  if (t < 1.171875) return 1080;
+  if (t < 1.875) { const d = t - 1.171875; return 1080 + 390 * (d * d) / (0.703125 * 0.703125); }
+  if (t < 3.28125) return 1470 + V0 * (t - 1.875);
+  if (t < 3.75) { const d = t - 3.28125; return 3030 + V0 * d - V0 / (2 * 0.46875) * d * d; }
+  if (t < G(3, 1)) return 3290;
+  if (t < G(3, 2)) return 3290 + 910 * seg(t, G(3, 1), BEAT, E.expoOut);
+  if (t < 5.390625) return 4200;
+  if (t < 5.522) return 4200 + (CLIMB_X - 4200) * seg(t, 5.390625, 5.522 - 5.390625, E.quadIn);
+  return CLIMB_X;
+}
+function penS(t) {
+  const P = MAIN;
+  if (t < 5.522) return segS(P, 0, penX0(t), 0);
+  if (t < 5.615) return segS(P, 1, CLIMB_X, -308 * seg(t, 5.522, 0.093, E.lin));
+  if (t < printEnd(1)) { const c = cam(t); return segS(P, 2, clamp(c.x + 488 / c.z, CLIMB_X, CARD_X(1) + 968), -308); }
+  let s = segS(P, 2, 5488, -308);
+  for (let n = 1; n <= 8; n++) {
+    const runK = 2 * n, vK = 2 * n + 1, xr = CARD_X(n) + 968, yr = n % 2 ? -308 : 308;
+    if (n > 1) {
+      const b = CUES[n - 1];
+      if (t < b) return s;
+      if (t < b + cardW(n)) { const c = cam(t); return segS(P, runK, Math.min(xr, c.x + 488), yr); }
+    }
+    const v0 = printEnd(n);
+    if (t < v0) return segS(P, runK, xr, yr);
+    const u = seg(t, v0, cardV(n), E.cubicInOut);
+    s = segS(P, vK, xr, lerp(yr, -yr, u));
+    if (u < 1) return s;
+  }
+  // 刷りのあと: 最後の角に停まり、ダイブで型の線 (14016, 0) へ。そこから等速で右の枠外へ
+  // s(u) = A·u² + B·u³ で、止まった状態から出て、9.609 で型を書く速さ(TYPE_V)につながる
+  const sPark = segS(P, 17, PARK_X, -308), sType = segS(P, 20, 14016, 0);
+  if (t < DIVE) return sPark;
+  if (t < DIVE + BEAT) { const u = (t - DIVE) / BEAT, L = sType - sPark, V = TYPE_V * BEAT; return sPark + (3 * L - V) * u * u + (V - 2 * L) * u * u * u; }
+  return segS(P, 20, 14016 + TYPE_V * (t - DIVE - BEAT), 0);
+}
+const TYPE_V = 280 / 0.234375;                    // 型の 5 語を 8 分おきに書く速さ(1194.7 world/s)
+/* 分岐の頭(弧長) */
+function branchS(t) {
+  if (t < G(3, 1)) return 0;
+  if (t < G(3, 2)) return 1600 * seg(t, G(3, 1), BEAT, E.expoOut);
+  if (t < CUES[8]) return Math.min(5200, 1600 + 960 * (t - G(3, 2)));
+  return 5200 + 3800 * seg(t, CUES[8], 0.3515625);   // 引きの間も枠の外へ伸び続ける(行き止まりを見せない)
+}
+/* 単調な関数 f が値 v を越える時刻(二分法) */
+function whenReaches(f, v, a, b) { let lo = a, hi = b; for (let k = 0; k < 50; k++) { const m = (lo + hi) / 2; if (f(m) < v) lo = m; else hi = m; } return hi; }
+
+/* ================================================================
+   画像(実物の写し)。960×600 に先に縮めておき、静止時は整数位置に 1:1 で置く
+   ================================================================ */
+const BMP = [];
+const SHOTS_DIR = '../images/products/';
+
+/* ================================================================
+   ロゴ(公式の SVG: viewBox 0 0 240 110)
+   ================================================================ */
+const LOGO_N = [[8, 74], [62, 16], [118, 24], [176, 84]];
+const LOGO_S = [[58, 94], [118, 60], [158, 22], [232, 12]];
+const bez = (p, u) => { const v = 1 - u; return [v*v*v*p[0][0] + 3*v*v*u*p[1][0] + 3*v*u*u*p[2][0] + u*u*u*p[3][0], v*v*v*p[0][1] + 3*v*v*u*p[1][1] + 3*v*u*u*p[2][1] + u*u*u*p[3][1]]; };
+const SAND = (() => { const pts = [], L = [0]; for (let i = 0; i <= 2000; i++) { const p = bez(LOGO_S, i / 2000); if (i) L.push(L[i - 1] + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1])); pts.push(p); } return { pts, L, len: L[2000] }; })();
+const SAND_CROSS = 86.91;                        // 交点までの弧長(vb)
+/* 交点 vb (132.02, 48.48) を解き直して弧長を合わせる */
+(() => {
+  let best = 1e9, bi = 0;
+  for (let i = 0; i <= 2000; i++) { const p = SAND.pts[i]; for (let j = 0; j <= 400; j++) { const q = bez(LOGO_N, j / 400); const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < best) { best = d; bi = i; } } }
+  SAND.cross = SAND.L[bi];
+})();
+/* 交差は着地のあと約 4 フレーム止めて見せる(13.1875 まで)。引き戻しの最初の 0.06 秒は quadIn で速さを合わせ、
+   止まった状態から 1 フレームで最高速にならないようにする(砂の線が淡くならない) */
+const PULL0 = 13.1875, PULL1 = 13.7109375, BEND0 = 12.7734375;
+function pullEase(t) {
+  const u = clamp((t - PULL0) / (PULL1 - PULL0)), r = 0.06 / (PULL1 - PULL0);
+  const w = (u < r ? u * u / (2 * r) : u - r / 2) / (1 - r / 2);
+  return E.expoOut(w);
+}
+function markSpace(t) {                           // 画面 = O + s·vb
+  if (t < PULL0) return { ox: 360, oy: 265, s: 5 };
+  const e = pullEase(t);
+  const s = lerp(5, 1.30909, e);
+  return { ox: 487.2 - 25.443 * s, oy: 540.0 - 55.0 * s, s };   // 引き戻しの不動点 画面 (487.2, 540)。ロックアップの縦の中心が 540
+}
+function sandLen(t) {
+  if (t < 12.890625) return 0;
+  if (t < 13.125) return SAND.cross * Math.pow((t - 12.890625) / 0.234375, 3);
+  return SAND.cross + (SAND.len - SAND.cross) * seg(t, 13.125, 0.66943359375, E.expoOut);
+}
+const markStroke = t => t < PULL0 ? 6 : lerp(6, 7.855, pullEase(t));
+
+/* ================================================================
+   1 枚を描く
+   ================================================================ */
+let TT = 0;
+function draw(t) {
+  TT = t;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  paint(t, LIGHT);
+}
+
+function paint(t, P) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
+  if (t < 12.65625) world(t, P);
+  screenLayer(t, P);
+  if (t >= 12.65625) finale(t, P);
+}
+
+/* ---------------- 世界(カメラの中) ---------------- */
+function world(t, P) {
+  const c = cam(t), z = c.z;
+  ctx.save();
+  ctx.setTransform(z, 0, 0, z, 960 - c.x * z, 540 - c.y * z);
+  // 静止時のカードを 1:1 にするため、z=1 のときは平行移動を整数に
+  if (z === 1) ctx.setTransform(1, 0, 0, 1, Math.round(960 - c.x), Math.round(540 - c.y));
+  if (PROBING) { const inv = p => [(p[0] - 960) / PROBE_CAM.z + PROBE_CAM.x, (p[1] - 540) / PROBE_CAM.z + PROBE_CAM.y];
+    [[0, 0], [W, 0], [0, H], [W, H], [960, 540]].forEach((p, i) => { const q = inv(p); mv('cam' + i, q[0], q[1]); }); }
+  const lw = 6 / z, hw = lw / 2;
+
+  // 写し(線の下に描く。線は 8 単位外を通るので重ならない)
+  cards(t, c);
+
+  // 線
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = lw; ctx.strokeStyle = P.line;
+  const sMain = penS(t);
+  strokeTo(MAIN, sMain);
+  const sB = branchS(t);
+  if (sB > 0) { strokeTo(BR_U, sB); strokeTo(BR_D, sB); }
+
+  // 分かれ目の点(砂。第22条の「分岐点」)
+  if (t >= G(2, 3)) {
+    const r = Math.max(11.25, 9 / z) * E.backOut(seg(t, G(2, 3), 0.25));   // 引いても画面で 9px
+    ctx.fillStyle = P.sand; ctx.beginPath(); ctx.arc(F_NODE[0], F_NODE[1], Math.max(0, r), 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ペン先
+  ctx.fillStyle = P.line;
+  const head = pointAt(MAIN, sMain);
+  const rHead = (t < 0.18 ? 5 * E.backOut(seg(t, 0, 0.18)) : 5) / z;
+  ctx.beginPath(); ctx.arc(head[0], head[1], Math.max(0, rHead), 0, Math.PI * 2); ctx.fill();
+  mv('pen', head[0], head[1]);
+  if (sB > 0) for (const [br, id] of [[BR_U, 'u'], [BR_D, 'd']]) {
+    const h = pointAt(br, sB); ctx.beginPath(); ctx.arc(h[0], h[1], 5 / z, 0, Math.PI * 2); ctx.fill(); mv('br' + id, h[0], h[1]);
+  }
+  // 原点の点(いま): 炭。ペン先より後に描き、引いても画面で 7.5px(冒頭の点だと分かる大きさ)。全編で消さない
+  ctx.fillStyle = P.t1;
+  ctx.beginPath(); ctx.arc(0, 0, Math.max(0, Math.max(7.5, 7.5 / z) * E.backOut(seg(t, 0, 0.18))), 0, Math.PI * 2); ctx.fill();
+
+  // 文字(線から出る)
+  worldText(t, P, hw);
+  ctx.restore();
+}
+
+/* 分岐の図の言葉(philosophy/index.html 164・166・170・172・174)と型 */
+const penTimeAt = x => whenReaches(penX0, x, 0, 5.5);
+const brTimeAt = (br, x, y) => whenReaches(branchS, segS(br, 1, x, y), G(3, 1) - 0.01, 9);
+const TYPE_WORDS = ['評価', '理解', '設計', '実践', '再評価'];
+/* 墨の端から字の送りの原点を出す(layout と同じ変換の下で測る) */
+function inkLeft(ch, font) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.font = font; const v = ctx.measureText(ch).actualBoundingBoxLeft; ctx.restore(); return v; }
+function inkRight(ch, font) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.font = font; const v = ctx.measureText(ch).actualBoundingBoxRight; ctx.restore(); return v; }
+function worldText(t, P, hw) {
+  // Bar 1: いま(線の上へ)。墨の左端を原点の点の左縁にそろえ、字の中心をペンが通ったら立つ
+  if (t > 0.3 && t < 2.2) {
+    const f = F.jp(900, 80), L = layout('いま', f), x = -7.5 + inkLeft('い', f);
+    lineText('いま', f, x, -3 - 21 - L.desc, P.t1, 0, hw, -1, i => penTimeAt(x + L.g[i].x + L.g[i].w / 2), 0.30, 'h');
+  }
+  // Bar 2: 一本しか見えていなかった道(線の下へ、ペンが書くのに合わせて落ちる)。墨の上端は線の下 24px
+  if (t >= G(2, 0) - 0.1 && t < G(3, 0) + 0.2) {
+    const f = F.jp(700, 80), str = '一本しか見えていなかった道', L = layout(str, f), x = 1500 + inkLeft('一', f);
+    const out = t >= G(3, 0) ? { t, t0: G(3, 0), d: 0.1875 } : null;
+    lineText(str, f, x, 3.75 + 30 + L.asc, P.t2, 0, hw, +1, i => penTimeAt(x + L.g[i].x + L.g[i].w / 2), 0.30, 'ip', out);
+  }
+  // Bar 3: 可能性に気づく → 挑戦する/続ける(分かれ目の砂の点から。どちらの道も選ばない)
+  if (t >= G(3, 0.75) && t < 6.2) {
+    const fk = F.jp(700, 51.2), sk = '可能性に気づく', Lk = layout(sk, fk);
+    const xk = 3001 - (Lk.g[Lk.g.length - 1].x + inkRight('く', fk));   // 墨の右端を 3001 に(砂の点の左縁まで画面で 22px)
+    lineText(sk, fk, xk, -2.4 - 17.6 - Lk.desc, P.t2, 0, hw, -1, i => G(3, 0.75) + 0.035 * i, 0.35, 'kz');
+    const fu = F.jp(900, 51.2), Lu = layout('挑戦する', fu), Ld = layout('続ける', fu);
+    lineText('挑戦する', fu, 3190, -128 - 2.4 - 17.6 - Lu.desc, P.t1, -128, hw, -1, i => brTimeAt(BR_U, 3190 + Lu.g[i].x + Lu.g[i].w / 2, -128), 0.30, 'ch');
+    lineText('続ける', fu, 3190, 128 + 2.4 + 17.6 + Ld.asc, P.t1, 128, hw, +1, i => brTimeAt(BR_D, 3190 + Ld.g[i].x + Ld.g[i].w / 2, 128), 0.30, 'tz');
+  }
+  // Bar 6: 型(第10条)。ペン先が語の中心を通ると、その語が線から立つ。輪も矢印も描かない
+  if (t >= DIVE + BEAT && t < G(7, 0) + 0.01) {
+    const f = F.min(600, 64);
+    TYPE_WORDS.forEach((w, k) => {
+      const L = layout(w, f), cx = (k < 4 ? 13984 : 14016) + 280 * k, t0 = DIVE + BEAT + 0.234375 * k;   // 墨の間を等しく(2 字と 3 字が混ざるため)
+      const out = t >= 11.1328125 ? { t, t0: 11.1328125, d: 0.1171875 } : null;
+      lineText(w, f, cx - L.width / 2, -30, P.t1, 0, hw, -1, () => t0, 0.30, 'ty' + k, out);
+    });
+  }
+}
+/* 写し: 伸び出す(ペンまで)→静止→畳む(右の辺へ) */
+function cards(t, c) {
+  const penX = c.x + 488 / c.z;
+  for (let n = 1; n <= 8; n++) {
+    const bmp = BMP[n - 1]; if (!bmp) continue;
+    const X = CARD_X(n), next = CUES[n];
+    const start = n === 1 ? 5.4 : CUES[n - 1];
+    if (PROBING && t >= next && t < next + 1 / FPS) mv('col' + n, X + 960, 0);   // 拍の直前のフレームでもぼけの枚数が落ちないように
+    if (t < start || t >= next) continue;
+    let x0 = X, x1 = X + 960;
+    const cs = next - collapseMargin(n);
+    if (t >= cs) x0 = X + 960 * seg(t, cs, next - cs, E.cubicIn);
+    else if (t < printEnd(n)) x1 = Math.min(penX, X + 960);
+    if (x1 <= x0) continue;
+    ctx.save(); clipRect(x0, -300, x1 - x0, 600);
+    ctx.drawImage(bmp, X, -300);
+    ctx.restore();
+    if (x0 > X) mv('col' + n, x0, 0);
+  }
+}
+
+/* ---------------- 画面に固定した層 ---------------- */
+function screenLayer(t, P) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  hudName(t, P);
+  if (t >= G(7, 0) && t < 12.8) principle(t, P);
+}
+
+/* HUD: いま刷っている道具の名前だけ(番号は置かない)。拍で入り、次の拍ちょうどに消え終わる */
+function hudName(t, P) {
+  if (t < CUES[0] || t >= CUES[8]) return;
+  let n = 1; for (let k = 2; k <= 8; k++) if (t >= CUES[k - 1]) n = k;
+  const b = CUES[n - 1], next = CUES[n], bar4 = n <= 4;
+  const inD = bar4 ? 0.30 : 0.15, outD = bar4 ? 0.1171875 : 0.05859375;
+  const name = CARDS[n - 1].name, f = hasCJK(name) ? F.jp(900, 36) : F.en(800, 36), L = layout(name, f);
+  const D = 934 - (918 - L.asc);                                   // 切り抜きの下の縁の下へ完全に隠れる量
+  let dy = D * (1 - seg(t, b, inD, E.ease));
+  if (t >= next - outD) dy = D * seg(t, next - outD, outD, E.expoIn);   // 出は入ってきた縁へ沈む(線から出て線へ戻るのと同じ)
+  ctx.save(); clipRect(480, 876, 960, 58);
+  drawGlyphs(L, 480, 918 + dy, P.t1);
+  ctx.restore();
+  if (dy) mv('hud', 480, 918 + dy);
+}
+
+/* 原則: 明朝 72px。字間だけが動く(0.02→0.08em)。最後は線へ沈む */
+function principle(t, P) {
+  const str = '正解を与えるのではなく、選択肢を増やす', f = F.min(600, 72), L = layout(str, f, 72 * 0.02);
+  const ls = lerp(0.02, 0.08, seg(t, G(7, 0), 12.65625 - G(7, 0), E.sineInOut));
+  const n = L.g.length, x0 = 960 - L.width / 2;
+  let dy = 93 * (1 - seg(t, G(7, 0), 0.30, E.ease));          // 線から立つ(墨の上端 526 が 617 の下に隠れた位置から)
+  if (t > 12.65625) dy = 100 * seg(t, 12.65625, 0.1171875, E.cubicIn);
+  ctx.save(); clipRect(0, 0, W, 617);
+  ctx.textRendering = 'geometricPrecision';   // 字を 1/4px 単位で置く(既定は整数に丸めて、字間の動きがつかえる)
+  drawGlyphs(L, x0, 588 + dy, P.t1, i => ({ dx: (i - (n - 1) / 2) * (ls - 0.02) * 72 }));
+  if (dy > 0) mv('pr', 960, 588 + dy);
+  ctx.restore();
+}
+
+/* ---------------- 終わり: 曲がる線・砂の線・ロゴ ---------------- */
+function finale(t, P) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const M = markSpace(t), lw = markStroke(t);
+  const toS = p => [M.ox + p[0] * M.s, M.oy + p[1] * M.s];
+  // 藍: 地平線の 4 点が公式の曲線へ
+  let N;
+  if (t < 13.0078125) {
+    const e = seg(t, BEND0, 13.0078125 - BEND0, E.sineInOut);   // 原則が沈み終わってから、目で追える速さで持ち上がる
+    const A = [[-20, 620], [633.3, 620], [1286.7, 620], [1940, 620]];
+    const T = LOGO_N.map(p => [360 + p[0] * 5, 265 + p[1] * 5]);
+    N = A.map((a, i) => [lerp(a[0], T[i][0], e), lerp(a[1], T[i][1], e)]);
+  } else N = LOGO_N.map(toS);
+  ctx.strokeStyle = P.line; ctx.lineWidth = lw;
+  ctx.beginPath(); ctx.moveTo(N[0][0], N[0][1]); ctx.bezierCurveTo(N[1][0], N[1][1], N[2][0], N[2][1], N[3][0], N[3][1]); ctx.stroke();
+  N.forEach((p, i) => mv('n' + i, p[0], p[1]));
+  // 砂: 自分の始点から。交点を 13.125 ちょうどに通る(藍の上に描く)
+  const sl = sandLen(t);
+  if (sl > 0) {
+    ctx.strokeStyle = P.sand; ctx.beginPath();
+    let last = null;
+    for (let i = 0; i < SAND.pts.length; i++) {
+      if (SAND.L[i] > sl) break;
+      const q = toS(SAND.pts[i]); if (!last) ctx.moveTo(q[0], q[1]); else ctx.lineTo(q[0], q[1]); last = i;
+    }
+    // 端をちょうど弧長 sl に
+    let lo = 0, hi = SAND.L.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (SAND.L[m] < sl) lo = m; else hi = m; }
+    const k = (sl - SAND.L[lo]) / ((SAND.L[hi] - SAND.L[lo]) || 1), e = toS([lerp(SAND.pts[lo][0], SAND.pts[hi][0], k), lerp(SAND.pts[lo][1], SAND.pts[hi][1], k)]);
+    if (last == null) { const s0 = toS(SAND.pts[0]); ctx.moveTo(s0[0], s0[1]); }
+    ctx.lineTo(e[0], e[1]); ctx.stroke();
+    mv('sand', e[0], e[1]);
+  }
+  mv('mk0', toS([0, 0])[0], toS([0, 0])[1]); mv('mk1', toS([240, 110])[0], toS([240, 110])[1]);
+  signoff(t, P);
+}
+function signoff(t, P) {
+  if (t < 13.359375) return;
+  // BRIDGE: 字間 0.80em → 0.34em(左端を固定)。名前の席は置かず、ロゴの交差と余白で終える(第24条の2)
+  const fw = F.en(500, 112), Lw = layout('BRIDGE', fw, 112 * 0.34);
+  const lsNow = lerp(0.80, 0.34, seg(t, 13.359375, 0.60, E.ease));
+  const aW = seg(t, 13.359375, 0.234375, E.cubicOut);
+  ctx.save(); ctx.globalAlpha = aW; ctx.textRendering = 'geometricPrecision';
+  drawGlyphs(Lw, 867, 581, P.t1, i => ({ dx: i * (lsNow - 0.34) * 112 }));
+  if (lsNow > 0.341) mv('wm', 867 + 5 * (lsNow - 0.34) * 112, 581);
+  ctx.restore();
+}
+
+/* ================================================================
+   動きのぼけ: 目印の速さから枚数を決め(最大 64)、線形光で平均する
+   ================================================================ */
+let PROBE_CAM = null;
+function speedPx(t) {
+  const dt = 1 / (2 * FPS);
+  PROBE_CAM = cam(t);
+  const a = new Map(), m = new Map(), b = new Map();
+  PROBING = a; draw(t - dt); PROBING = m; draw(t); PROBING = b; draw(t + dt); PROBING = null;
+  let v = 0;
+  for (const [k, p] of m) {
+    const pa = a.get(k), pb = b.get(k);
+    if (pa && pb) v = Math.max(v, Math.hypot(pb[0] - pa[0], pb[1] - pa[1]));
+    else if (pa || pb) { const q = pa || pb; v = Math.max(v, 2 * Math.hypot(q[0] - p[0], q[1] - p[1])); }   // 片側にしかない目印は片側差×2
+  }
+  return v;
+}
+/* シャッターは 180°。ただし線だけが画面を占める 2 区間(引き〜ダイブ・屈曲〜引き戻し)では、
+   ぼけの長さを LINE_STREAK px までに抑える(細い線が淡い帯になって消えないように)。サンプルの間隔は 1.5px 以下 */
+let LINE_STREAK = 60;
+const LINE_ONLY = [[8.4375, 9.609375, 60], [12.65625, 13.1875, 60], [13.1875, 13.7109375, 24]];   // 引き戻し(縮むだけで繰り返しの模様がない)は 24px まで
+const shutterFor = (v, t) => {
+  if (v <= 0) return 0;
+  const w = LINE_ONLY.find(([a, b]) => t >= a && t < b);
+  return w ? Math.min(0.5, (w[2] === 60 ? LINE_STREAK : w[2]) / v) : 0.5;
+};
+const samplesFor = (v, t) => clamp(Math.ceil(v * shutterFor(v, t) / 1.5), 1, 64);
+
+let GL = null;
+function initGL() {
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const gl = c.getContext('webgl2', { preserveDrawingBuffer: true, antialias: false, premultipliedAlpha: false, alpha: false });
+  if (!gl.getExtension('EXT_color_buffer_float')) throw new Error('EXT_color_buffer_float がない');
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const prog = (vs, fs) => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); return p; };
+  const VS = flip => `#version 300 es
+    in vec2 p; out vec2 uv; void main(){ uv = vec2(p.x * .5 + .5, ${flip ? '.5 - p.y * .5' : 'p.y * .5 + .5'}); gl_Position = vec4(p, 0., 1.); }`;
+  const acc = prog(VS(false), `#version 300 es
+    precision highp float; in vec2 uv; out vec4 o; uniform sampler2D prev, src; uniform float w;
+    void main(){ o = texture(prev, uv) + texture(src, uv) * w; }`);
+  const res = prog(VS(true), `#version 300 es
+    precision highp float; in vec2 uv; out vec4 o; uniform sampler2D acc;
+    vec3 enc(vec3 c){ c = clamp(c, 0., 1.); return mix(c * 12.92, 1.055 * pow(c, vec3(1. / 2.4)) - .055, step(.0031308, c)); }
+    void main(){ o = vec4(enc(texture(acc, uv).rgb), 1.); }`);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  for (const p of [acc, res]) { const l = gl.getAttribLocation(p, 'p'); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0); }
+  const tex = (ifmt, fmt, type) => {
+    const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if (ifmt) gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, W, H, 0, fmt, type, null);
+    return t;
+  };
+  const accT = [tex(gl.RGBA32F, gl.RGBA, gl.FLOAT), tex(gl.RGBA32F, gl.RGBA, gl.FLOAT)];
+  const fbo = accT.map(t => { const f = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, f); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0); return f; });
+  const srcT = tex(null);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+  gl.viewport(0, 0, W, H);
+  return { c, gl, acc, res, accT, fbo, srcT };
+}
+function renderFrame(t, maxSamples = 64) {
+  const v = speedPx(t), n = Math.min(maxSamples, samplesFor(v, t));
+  if (n <= 1) { draw(t); window.REEL.out = canvas; window.REEL.lastN = 1; return 1; }
+  if (!GL) GL = initGL();
+  const { gl, acc, res, accT, fbo, srcT } = GL;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[0]); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+  let cur = 0;
+  gl.useProgram(acc);
+  gl.uniform1i(gl.getUniformLocation(acc, 'prev'), 0); gl.uniform1i(gl.getUniformLocation(acc, 'src'), 1); gl.uniform1f(gl.getUniformLocation(acc, 'w'), 1 / n);
+  const shutter = shutterFor(v, t) / FPS;
+  for (let i = 0; i < n; i++) {
+    draw(t + shutter * ((i + .5) / n - .5));
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, srcT);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, gl.RGBA, gl.UNSIGNED_BYTE, canvas);   // 線形光で読む
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, accT[cur]);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[1 - cur]);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    cur = 1 - cur;
+  }
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.useProgram(res); gl.uniform1i(gl.getUniformLocation(res, 'acc'), 0);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, accT[cur]);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  window.REEL.out = GL.c; window.REEL.lastN = n;
+  return n;
+}
+
+/* ================================================================
+   準備: 画像を縮め、使う文字をフォントごとに先読みして確かめる
+   ================================================================ */
+const TEXTS = {
+  [F.jp(900, 40)]: 'いま挑戦する続ける' + CARDS.map(c => c.name).join(''),
+  [F.jp(700, 40)]: '一本しか見えていなかった道可能性に気づく',
+  [F.min(600, 40)]: '正解を与えるのではなく、選択肢を増やす評価理解設計実践再評価',
+  [F.en(500, 40)]: 'BRIDGE',
+  [F.en(800, 40)]: CARDS.map(c => c.name).filter(n => !hasCJK(n)).join(' '),
+};
+const ready = (async () => {
+  await document.fonts.ready;
+  await Promise.all(Object.entries(TEXTS).map(([f, s]) => document.fonts.load(f, s)));
+  const missing = Object.entries(TEXTS).filter(([f, s]) => !document.fonts.check(f, s)).map(([f]) => f);
+  if (missing.length) throw new Error('フォントが揃っていない: ' + missing.join(', '));
+  await Promise.all(CARDS.map(async (c, i) => {
+    const im = new Image(); im.src = SHOTS_DIR + c.file; await im.decode();
+    BMP[i] = await createImageBitmap(im, { resizeWidth: 960, resizeHeight: 600, resizeQuality: 'high' });
+  }));
+  layoutCache.clear();
+})();
+
+window.REEL = { W, H, FPS, DUR, canvas, draw, renderFrame, speedPx, samplesFor, ready, out: canvas, setLineStreak: v => { LINE_STREAK = v; } };
+
+/* ---- プレビュー(?render なしで開いたとき): 実時間で再生(ぼけなし)。クリックで頭から。?t=秒 で静止 ---- */
+if (!location.search.includes('render')) {
+  ready.then(() => {
+    const q = new URLSearchParams(location.search);
+    if (q.has('t')) { draw(+q.get('t')); return; }
+    const audio = new Audio('sound.wav');
+    let start = performance.now();
+    const loop = now => { const t = ((now - start) / 1000) % DUR; draw(t); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+    canvas.addEventListener('click', () => { start = performance.now(); audio.currentTime = 0; audio.play().catch(() => {}); });
+  });
+}
+</script>
+</body>
+</html>
