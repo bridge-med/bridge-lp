@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* 色はすべてトークン経由。ライト/ダークはここの差し替えだけで切り替える */
+:root {
+  --background: #fafafa;
+  --surface: #ffffff;
+  --foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #63636b;
+  --border: #e4e4e7;
+  /* 入力欄の枠。枠だけが入力欄の目印になるので非テキストのコントラスト 3:1 を満たす */
+  --input: #8a8a93;
+  --primary: #1d4ed8;
+  --primary-foreground: #ffffff;
+  --accent: #eef2ff;
+  --destructive: #b91c1c;
+  --warning: #92400e;
+  --warning-bg: #fef3c7;
+  --success: #15803d;
+  --ring: #2563eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0c0c0e;
+    --surface: #17171a;
+    --foreground: #f4f4f5;
+    --muted: #222226;
+    --muted-foreground: #a1a1aa;
+    --border: #2e2e33;
+    --input: #6b6b74;
+    --primary: #6d8cff;
+    --primary-foreground: #0c0c0e;
+    --accent: #1c2240;
+    --destructive: #f87171;
+    --warning: #fcd34d;
+    --warning-bg: #3a2a07;
+    --success: #4ade80;
+    --ring: #6d8cff;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-success: var(--success);
+  --color-ring: var(--ring);
+  --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}

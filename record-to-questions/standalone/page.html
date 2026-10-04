@@ -1,0 +1,182 @@
+<title>Record to Questions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap">
+<style>
+/* レイアウト: 1列の作業台。上に操作、下に問題カードが縦に並ぶ(スマホで片手で直す前提) */
+:root {
+  --bg: #f6f6f3;
+  --surface: #ffffff;
+  --ink: #1b1d22;
+  --muted: #5d606a;
+  --line: #dcdcd6;
+  --field: #8a8b93;
+  --accent: #1f4fbf;
+  --accent-ink: #ffffff;
+  --accent-soft: #e8eefb;
+  --warn: #8a4b00;
+  --warn-soft: #fbefd9;
+  --danger: #b4231b;
+  --font: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111215; --surface: #1a1b20; --ink: #ecedf0; --muted: #a3a6b0; --line: #2d2f36; --field: #6c6f79;
+    --accent: #7c9cff; --accent-ink: #0d1020; --accent-soft: #1d2440; --warn: #f2c56b; --warn-soft: #33270d; --danger: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111215; --surface: #1a1b20; --ink: #ecedf0; --muted: #a3a6b0; --line: #2d2f36; --field: #6c6f79;
+  --accent: #7c9cff; --accent-ink: #0d1020; --accent-soft: #1d2440; --warn: #f2c56b; --warn-soft: #33270d; --danger: #ff8a80;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.7 var(--font); }
+.wrap { max-width: 720px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px; display: grid; gap: 20px; }
+h1 { font-size: 24px; line-height: 1.3; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
+h2 { font-size: 15px; margin: 0; }
+.lead { color: var(--muted); margin: 4px 0 0; }
+.small { font-size: 12.5px; color: var(--muted); margin: 0; }
+button, .button { font: inherit; min-height: 44px; padding: 0 16px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.ghost.danger { color: var(--danger); }
+.icon { width: 44px; padding: 0; font-size: 18px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input, textarea { font: inherit; font-size: 16px; color: var(--ink); background: var(--surface); border: 1px solid var(--field); border-radius: 8px; padding: 9px 11px; width: 100%; min-height: 44px; line-height: 1.6; }
+textarea { resize: none; overflow: hidden; display: block; }
+
+/* はじめの画面 */
+.drop { background: var(--surface); border: 1px dashed var(--field); border-radius: 14px; padding-block: 28px; padding-inline: 16px; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.drop .button { min-height: 52px; padding: 0 28px; font-size: 16px; }
+.sample { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 8px; }
+.sample .tag { font-size: 11.5px; letter-spacing: .08em; color: var(--muted); }
+.sample ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.sample p { margin: 0; }
+
+/* 進み具合 */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 14px; }
+#steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+#steps li { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+#steps li.active { color: var(--ink); font-weight: 700; }
+#steps li.done { color: var(--ink); }
+#steps .dot { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line); flex: none; }
+#steps li.done .dot { background: var(--accent); border-color: var(--accent); }
+#steps li.active .dot { border-color: var(--accent); box-shadow: inset 0 0 0 4px var(--surface); background: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { #steps li.active .dot { animation: pulse 1.2s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .35; } }
+#steps .detail { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 400; color: var(--muted); font-size: 13px; }
+
+/* 結果 */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; display: grid; gap: 10px; border-bottom: 1px solid var(--line); }
+.bar-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#title { font-weight: 700; font-size: 17px; border-color: transparent; background: transparent; padding-inline: 4px; }
+#title:hover, #title:focus { border-color: var(--field); background: var(--surface); }
+.exports { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 560px) { .exports { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+#summary .warn { color: var(--warn); }
+#warnings { margin: 0; padding: 10px 14px 10px 30px; background: var(--warn-soft); color: var(--warn); border-radius: var(--r); font-size: 13.5px; }
+#jump { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+#jump a { flex: none; min-height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+#jump a.flag { border-color: var(--warn); color: var(--warn); }
+#list { display: grid; gap: 16px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 14px; scroll-margin-top: 170px; }
+.q-head { display: flex; align-items: center; gap: 8px; }
+.q-head h3 { margin: 0; font-size: 18px; flex: 1; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field > label, .flabel { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.row-num .num { width: 96px; }
+.choices { display: grid; gap: 8px; }
+.choice { display: grid; grid-template-columns: 52px minmax(0, 1fr) 44px; gap: 6px; align-items: start; }
+.choice .label { text-align: center; padding-inline: 2px; }
+.pair { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 560px) { .pair { grid-template-columns: 120px minmax(0, 1fr); } }
+.source summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: var(--muted); font-size: 13.5px; }
+.source figure { margin: 8px 0 0; }
+.source img { display: block; border-radius: 8px; border: 1px solid var(--line); max-width: min(100%, 420px); }
+.source figcaption { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.source pre, #merged { white-space: pre-wrap; font: 13.5px/1.7 var(--font); background: var(--bg); border-radius: 8px; padding: 10px 12px; margin: 8px 0 0; overflow-x: auto; }
+.foot { display: flex; flex-wrap: wrap; gap: 8px; }
+#fallback { position: fixed; inset: auto 0 0 0; z-index: 20; background: var(--surface); border-top: 1px solid var(--line); padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 8px; box-shadow: 0 -8px 24px rgb(0 0 0 / .12); }
+#fallback textarea { height: 40vh; overflow: auto; font-size: 14px; }
+#toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 13.5px; z-index: 30; max-width: calc(100% - 32px); }
+</style>
+
+<main class="wrap">
+  <header>
+    <h1>Record to Questions</h1>
+    <p class="lead">画面録画を、問題集に。</p>
+  </header>
+
+  <section id="start" style="display:grid;gap:16px">
+    <div class="drop">
+      <label class="button primary" for="file">動画を選択</label>
+      <input id="file" type="file" accept="video/*,.mp4,.mov,.m4v" hidden>
+      <p class="small">MP4 / MOV(iPhone の画面収録)</p>
+      <button id="resume" type="button" class="ghost" hidden>前回の続き: <span id="resume-label"></span></button>
+    </div>
+    <div class="sample" aria-label="見本">
+      <span class="tag">見本(こういう形で取り出します)</span>
+      <h2>問1</h2>
+      <p>医師法に定められている診療録の保存期間として、正しいものを1つ選べ。</p>
+      <ol id="sample-choices">
+        <li><span data-label="1">1.</span> 2年</li>
+        <li><span data-label="2">2.</span> 3年</li>
+        <li><span data-label="3">3.</span> 5年</li>
+        <li><span data-label="4">4.</span> 10年</li>
+        <li><span data-label="5">5.</span> 永年</li>
+      </ol>
+    </div>
+    <p class="small">解析はこの端末の中だけで行います。動画はどこにも送りません。初回だけ文字認識のデータ(約3MB)を読み込みます。</p>
+  </section>
+
+  <section id="progress" class="panel" hidden aria-live="polite">
+    <h2>解析中</h2>
+    <ol id="steps"></ol>
+    <p class="small">50問・3分ほどの録画で、スマホでは5〜10分ほどかかる見込みです。終わるまでこの画面を開いたままにしてください。</p>
+    <button id="cancel" type="button" class="ghost">中止する</button>
+  </section>
+
+  <section id="error" class="panel" hidden role="alert">
+    <h2>解析できませんでした</h2>
+    <p id="error-message" class="small"></p>
+    <div><button id="retry" type="button">やり直す</button></div>
+  </section>
+
+  <section id="result" hidden style="display:grid;gap:16px">
+    <div class="bar">
+      <input id="title" aria-label="問題集の名前">
+      <div class="bar-row" id="summary"></div>
+      <div class="exports">
+        <button id="copy" type="button" class="primary">全部コピー</button>
+        <button id="dl-txt" type="button">テキスト</button>
+        <button id="dl-md" type="button">Markdown</button>
+        <button id="dl-pdf" type="button">PDF</button>
+      </div>
+      <nav id="jump" aria-label="問題へ移動"></nav>
+    </div>
+    <ul id="warnings" hidden></ul>
+    <div id="list"></div>
+    <div class="foot">
+      <button id="add" type="button">+ 問題を追加</button>
+      <button id="new" type="button" class="ghost">別の動画を解析</button>
+    </div>
+    <details class="source">
+      <summary>読み取った全文</summary>
+      <pre id="merged"></pre>
+    </details>
+  </section>
+</main>
+
+<div id="fallback" hidden>
+  <div class="bar-row"><strong style="flex:1">長押しで全部選択してコピー</strong><button id="fallback-close" type="button" class="ghost">閉じる</button></div>
+  <textarea id="fallback-text" readonly aria-label="書き出す文字"></textarea>
+</div>
+<div id="toast" hidden role="status"></div>
+
+<script>/*BUNDLE*/</script>
