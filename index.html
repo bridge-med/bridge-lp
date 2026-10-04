@@ -619,6 +619,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     var id = ++buildId;
     built = false;
     svg.style.visibility = 'hidden';
+    while (svg.firstChild) svg.removeChild(svg.firstChild); // 子の visibility 属性は親の hidden に勝つので、古い世界は先に消す
     L = spQ.matches ? LAYOUTS.sp : LAYOUTS.pc;
     var P1 = { pass1: true, minFs: 0, verbFs: L.verbPx / (.45 * clamp(svg.getBoundingClientRect().width / L.ref[0], .5, 1.35)) };
     var list = wantList(P1), at = 0;
