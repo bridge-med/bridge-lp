@@ -426,7 +426,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   // Journey が止まったとき(一時停止・画面外・非表示のタブ・動きを減らす設定)も、待たせずに出す
   var root = document.documentElement, cta = document.getElementById('heroCta'), ctaShown = false, started2 = false;
   function showCta() { if (ctaShown || !cta) return; ctaShown = true; cta.classList.add('jr-shown'); }
-  if (cta) { root.classList.add('jr-cta-wait'); setTimeout(function () { if (!started2) showCta(); }, 3500); }
+  if (cta) { root.classList.add('jr-cta-wait'); setTimeout(function () { if (!started2 || !document.querySelector('.nav-entry')) showCta(); }, 3500); } // 動きが始まらない、またはナビの入口がない(共通の JS が遅い・読めない)ときも出す
   // ヒーローが画面にある間はナビのロゴをしまう(狭い画面ではナビの入口と入れ替える)。読み込み直後はヒーローの中にいる前提で付け、観測で直す
   var jrTop = document.querySelector('.jr-top');
   if (jrTop && 'IntersectionObserver' in window) {
