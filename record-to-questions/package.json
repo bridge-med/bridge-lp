@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run tests/unit",
     "test:e2e": "vitest run tests/integration",
-    "sample-video": "node tests/fixtures/make-sample-video.mjs"
+    "sample-video": "node tests/fixtures/make-sample-video.mjs",
+    "standalone": "node scripts/setup-assets.mjs && node standalone/build.mjs"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
@@ -29,6 +30,7 @@
     "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.27",
     "playwright-core": "^1.63.0",

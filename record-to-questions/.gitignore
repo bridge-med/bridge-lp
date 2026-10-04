@@ -44,3 +44,4 @@ tests/fixtures/out/
 # OCR language data / PDF font (scripts/setup-assets.mjs が取得する)
 /.cache/
 /public/fonts/
+/standalone/dist/
