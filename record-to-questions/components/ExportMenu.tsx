@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { IconDownload } from "./ui/icons";
 import { downloadBlob, safeFileName } from "@/lib/export/download";
 import { toMarkdown } from "@/lib/export/markdown";
 import { toPlainText } from "@/lib/export/text";
@@ -40,7 +39,6 @@ export function ExportMenu({ title, questions }: { title: string; questions: Que
   return (
     <div className="flex flex-col items-end gap-1">
       <div className="flex items-center gap-1">
-        <IconDownload className="mr-1 hidden text-muted-foreground sm:block" />
         <Button size="sm" disabled={empty} onClick={() => downloadBlob(toMarkdown(title, questions), `${name}.md`, "text/markdown;charset=utf-8")}>
           Markdown
         </Button>

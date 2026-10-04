@@ -4,7 +4,7 @@ import { forwardRef, useLayoutEffect, useRef, type InputHTMLAttributes, type Tex
 import { cn } from "@/lib/utils";
 
 const base =
-  "w-full rounded-lg border border-border bg-surface px-3 py-2 text-base leading-relaxed placeholder:text-muted-foreground focus:border-ring focus:outline-none sm:text-[15px]";
+  "w-full rounded-lg border border-input bg-surface px-3 py-2 text-base leading-relaxed placeholder:text-muted-foreground focus:border-ring focus:outline-none sm:text-[15px]";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input(
   { className, ...props },

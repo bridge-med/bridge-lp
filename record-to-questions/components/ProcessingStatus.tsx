@@ -29,7 +29,7 @@ export function ProcessingStatus({ progress }: { progress: ProgressState }) {
                 aria-hidden
               >
                 {s.status === "done" && <IconCheck width={14} height={14} />}
-                {s.status === "active" && <span className="size-2 animate-pulse rounded-full bg-primary" />}
+                {s.status === "active" && <span className="size-2 motion-safe:animate-pulse rounded-full bg-primary" />}
               </span>
               <span className={cn(s.status === "pending" && "text-muted-foreground", s.status === "active" && "font-medium")}>
                 {STAGE_LABELS[stage]}

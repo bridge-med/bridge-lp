@@ -37,9 +37,3 @@ export const IconBack = (p: P) => (
 export const IconClose = (p: P) => (
   <svg {...base} {...p}><path d="M6 6l12 12M18 6 6 18" /></svg>
 );
-export const IconDownload = (p: P) => (
-  <svg {...base} {...p}><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></svg>
-);
-export const IconImage = (p: P) => (
-  <svg {...base} {...p}><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h8M8 16h5" /></svg>
-);

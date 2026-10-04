@@ -108,7 +108,7 @@ export default function Home() {
       )}
 
       <p className="mt-4 text-xs text-muted-foreground">
-        動画は解析が終わるとサーバーから削除されます。結果はこの端末のブラウザにだけ保存されます。
+        動画は解析後にサーバーから削除します。結果はこのブラウザにだけ保存します。
       </p>
 
       {phase.kind === "idle" && recent.length > 0 && (

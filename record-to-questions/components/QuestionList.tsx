@@ -35,7 +35,7 @@ export function QuestionList({ questions, selectedId, flaggedIds, onSelect, onAd
                 onClick={() => onSelect(q.id)}
                 aria-current={selected ? "true" : undefined}
                 className={cn(
-                  "flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-lg px-3 text-left text-sm transition-colors",
+                  "flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-lg px-3 text-left text-sm motion-safe:transition-colors",
                   selected ? "bg-accent font-medium text-primary" : "hover:bg-muted",
                 )}
               >
@@ -44,7 +44,10 @@ export function QuestionList({ questions, selectedId, flaggedIds, onSelect, onAd
                   {q.questionText}
                 </span>
                 {flaggedIds.has(q.id) && (
-                  <span className="size-1.5 shrink-0 rounded-full bg-warning" aria-label="要確認" />
+                  <>
+                    <span className="size-1.5 shrink-0 rounded-full bg-warning" aria-hidden />
+                    <span className="sr-only">要確認</span>
+                  </>
                 )}
               </button>
             </li>

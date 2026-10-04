@@ -12,8 +12,9 @@ const variants: Record<Variant, string> = {
 };
 const sizes: Record<Size, string> = {
   md: "min-h-11 px-4 text-sm",
-  sm: "min-h-11 px-3 text-sm sm:min-h-9",
-  icon: "size-11 sm:size-9",
+  // タッチ端末は幅に関わらず 44px。マウス等の細かいポインターだけ詰める
+  sm: "min-h-11 px-3 text-sm pointer-fine:min-h-9",
+  icon: "size-11 pointer-fine:size-9",
 };
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size };
@@ -27,7 +28,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       type={type}
       className={cn(
-        "inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+        "inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg font-medium motion-safe:transition-colors disabled:cursor-not-allowed disabled:opacity-40",
         variants[variant],
         sizes[size],
         className,

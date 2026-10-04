@@ -37,7 +37,7 @@ export function SourcePreview({ frames, allFrames, mergedText }: Props) {
         {(
           [
             ["frames", "この問題"],
-            ["all", `全フレーム(${allFrames.length})`],
+            ["all", "全フレーム"],
             ["text", "全文"],
           ] as const
         ).map(([key, label]) => (
@@ -48,11 +48,12 @@ export function SourcePreview({ frames, allFrames, mergedText }: Props) {
             aria-selected={tab === key}
             onClick={() => setTab(key)}
             className={cn(
-              "min-h-11 flex-1 cursor-pointer rounded-md px-2 sm:min-h-9",
+              "min-h-11 flex-auto cursor-pointer whitespace-nowrap rounded-md px-2 pointer-fine:min-h-9",
               tab === key ? "bg-surface font-medium shadow-sm" : "text-muted-foreground",
             )}
           >
             {label}
+            {key === "all" && <span className="ml-1 tabular-nums text-muted-foreground">{allFrames.length}</span>}
           </button>
         ))}
       </div>
