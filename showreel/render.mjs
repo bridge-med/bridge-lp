@@ -67,7 +67,7 @@ page.on('pageerror', e => console.log('[pageerror]', e.message));
 
 await page.goto(`${BASE}/${path.relative(ROOT, PAGE).split(path.sep).join('/')}?render=1`, { waitUntil: 'load' });
 await page.evaluate(() => window.REEL.ready);
-if (argv.streak) await page.evaluate(v => window.REEL.setLineStreak(v), +argv.streak);   // 比較用: 線だけの区間のぼけの長さ(px)
+if (argv.streak) await page.evaluate(v => { if (window.REEL.setLineStreak) window.REEL.setLineStreak(v); }, +argv.streak);   // 比較用: 線だけの区間のぼけの長さ(px)。ページが持つときだけ
 const DUR = await page.evaluate(() => window.REEL.DUR);
 
 /* ---- 1 フレーム: サブフレームを Float で平均して動きのぼけを作る ---- */
