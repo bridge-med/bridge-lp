@@ -64,39 +64,42 @@
    描画は SVG を JS が組む(文字の幅を測るため、書体の読み込み後)。JS がないときは出さない(コピーと CTA だけで成り立つ) */
 .jr{position:relative;--jr-under:clamp(48px,6vw,96px);margin:calc(var(--jr-under) * -1) 0 0} /* コピーの下に潜る帯(--jr-under)は描画ゼロ */
 .jr-stage{position:relative;height:clamp(540px,48vw,720px)}
-.jr-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:hidden;pointer-events:none;
+.jr-view{position:absolute;inset:0;overflow:hidden;pointer-events:none;
   --jr-top:linear-gradient(to bottom,transparent 0,transparent var(--jr-under),#000 calc(var(--jr-under) + 90px),#000 90%,transparent 100%);
   --jr-side:linear-gradient(to right,transparent 0,#000 7%,#000 93%,transparent 100%);
   -webkit-mask-image:var(--jr-top),var(--jr-side);-webkit-mask-composite:source-in;
   mask-image:var(--jr-top),var(--jr-side);mask-composite:intersect}
+/* カメラは SVG の外(HTML の層)で SVG ごと動かす。SVG の中の transform を毎フレーム書くと、中の字まで組み直しになる(PM・qa 計測 2026-10-04) */
+.jr-cam{position:absolute;left:0;top:0;width:10px;height:10px;transform-origin:0 0}
+.jr-cam svg{position:absolute;left:0;top:0;width:10px;height:10px;overflow:visible}
 html:not(.js) .jr{display:none}
-.jr-svg.jr-in{animation:jr-in .9s var(--ease) both}
+.jr-view.jr-in{animation:jr-in .9s var(--ease) both}
 @keyframes jr-in{from{opacity:0}}
-.jr-svg text{font-family:var(--sans);font-feature-settings:"palt" 1;text-rendering:geometricPrecision} /* 拡大縮小のたびに字形を整え直さない(これがないと毎フレーム重い。qa 2026-10-04) */
-.jr-svg .j-hero{font-weight:900;fill:var(--ink)}
-.jr-svg .j-new{font-weight:700;fill:var(--ink)}
-.jr-svg .j-br{font-weight:700;fill:var(--ink);transition:fill .6s var(--ease)}
-.jr-svg .j-exp{font-weight:500;fill:var(--ink-3)}
-.jr-svg .j-tr{font-weight:500;fill:var(--ink-3)}
-.jr-svg .j-far{font-weight:500;fill:var(--ink-4)}
-.jr-svg .j-sm{font-weight:500;fill:var(--ink-3)}
-.jr-svg .j-en{font-family:var(--en);font-weight:600;letter-spacing:.2em;text-transform:uppercase;fill:var(--ink-3)}
-.jr-svg .j-dim text{fill:var(--ink-3);transition:fill .6s var(--ease)}
-.jr-svg .j-day{font-family:var(--en);font-weight:600;fill:var(--ink-3)}
-.jr-svg .j-num{font-family:var(--en);font-weight:600;fill:var(--ink);font-variant-numeric:tabular-nums}
-.jr-svg .j-verb{font-weight:900;fill:var(--ink)}
+.jr-view text{font-family:var(--sans);font-feature-settings:"palt" 1;text-rendering:geometricPrecision} /* 拡大縮小のたびに字形を整え直さない(これがないと毎フレーム重い。qa 2026-10-04) */
+.jr-view .j-hero{font-weight:900;fill:var(--ink)}
+.jr-view .j-new{font-weight:700;fill:var(--ink)}
+.jr-view .j-br{font-weight:700;fill:var(--ink);transition:fill .6s var(--ease)}
+.jr-view .j-exp{font-weight:500;fill:var(--ink-3)}
+.jr-view .j-tr{font-weight:500;fill:var(--ink-3)}
+.jr-view .j-far{font-weight:500;fill:var(--ink-4)}
+.jr-view .j-sm{font-weight:500;fill:var(--ink-3)}
+.jr-view .j-en{font-family:var(--en);font-weight:600;letter-spacing:.2em;text-transform:uppercase;fill:var(--ink-3)}
+.jr-view .j-dim text{fill:var(--ink-3);transition:fill .6s var(--ease)}
+.jr-view .j-day{font-family:var(--en);font-weight:600;fill:var(--ink-3)}
+.jr-view .j-num{font-family:var(--en);font-weight:600;fill:var(--ink);font-variant-numeric:tabular-nums}
+.jr-view .j-verb{font-weight:900;fill:var(--ink)}
 /* 線は藍(ロゴの線と同じ扱い。ダークはロゴと同じく --ink) */
-.jr-svg .j-line{fill:none;stroke:var(--navy);stroke-linecap:round;stroke-linejoin:round}
-[data-theme="dark"] .jr-svg .j-line{stroke:var(--ink)}
-.jr-svg .j-faint{fill:none;stroke:var(--ink-4);stroke-linecap:round;stroke-linejoin:round}
-.jr-svg .j-road{fill:none;stroke:var(--bg-3);stroke-linecap:butt}
-.jr-svg .j-face{fill:var(--card);stroke:var(--ink-4);stroke-linejoin:round}
-.jr-svg .j-side{fill:var(--bg-2);stroke:var(--ink-4);stroke-linejoin:round}
-.jr-svg .j-person{fill:var(--ink-3)}
-.jr-svg .j-ring{fill:none;stroke:var(--ink-3)}
-.jr-svg .j-dot{fill:var(--ink)}
-.jr-svg .j-dot.sand{fill:var(--dawn)}
-.jr-svg .l-sand{fill:none;stroke:var(--dawn);stroke-linecap:round}
+.jr-view .j-line{fill:none;stroke:var(--navy);stroke-linecap:round;stroke-linejoin:round}
+[data-theme="dark"] .jr-view .j-line{stroke:var(--ink)}
+.jr-view .j-faint{fill:none;stroke:var(--ink-4);stroke-linecap:round;stroke-linejoin:round}
+.jr-view .j-road{fill:none;stroke:var(--bg-3);stroke-linecap:butt}
+.jr-view .j-face{fill:var(--card);stroke:var(--ink-4);stroke-linejoin:round}
+.jr-view .j-side{fill:var(--bg-2);stroke:var(--ink-4);stroke-linejoin:round}
+.jr-view .j-person{fill:var(--ink-3)}
+.jr-view .j-ring{fill:none;stroke:var(--ink-3)}
+.jr-view .j-dot{fill:var(--ink)}
+.jr-view .j-dot.sand{fill:var(--dawn)}
+.jr-view .l-sand{fill:none;stroke:var(--dawn);stroke-linecap:round}
 
 /* 一時停止(5秒を超えて自動で動くため。WCAG 2.2.2)。見た目 34px・タップ 44px(.theme-btn と同じ作り) */
 .jr-toggle{position:absolute;right:max(12px,calc(var(--pad-x) - 16px));bottom:8px;z-index:3;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:var(--ink-2)}
@@ -116,14 +119,14 @@ html:not(.js) .jr{display:none}
   .h-cta .btn{justify-content:center;width:100%;max-width:340px}
   .jr{--jr-under:24px}
   .jr-stage{height:clamp(600px,168vw,720px)}
-  .jr-svg{--jr-top:linear-gradient(to bottom,transparent 0,transparent var(--jr-under),#000 calc(var(--jr-under) + 56px),#000 93%,transparent 100%);
+  .jr-view{--jr-top:linear-gradient(to bottom,transparent 0,transparent var(--jr-under),#000 calc(var(--jr-under) + 56px),#000 93%,transparent 100%);
     --jr-side:linear-gradient(to right,transparent 0,#000 4%,#000 96%,transparent 100%)}
 }
 /* 動きを減らす設定: 俯瞰の静止の1枚(JS が描く)。止める操作は要らない */
 @media(prefers-reduced-motion:reduce){
   .jr-toggle{display:none}
-  .jr-svg .j-br,.jr-svg .j-dim text{transition:none}
-  .jr-svg.jr-in{animation:none}
+  .jr-view .j-br,.jr-view .j-dim text{transition:none}
+  .jr-view.jr-in{animation:none}
 }
 
 /* ===== 試しているもの =====
@@ -275,7 +278,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 
   <figure class="jr" id="journey">
     <div class="jr-stage">
-      <svg class="jr-svg" aria-hidden="true" focusable="false"></svg>
+      <div class="jr-view" aria-hidden="true"><div class="jr-cam"><svg class="jr-far" focusable="false"></svg></div><div class="jr-cam"><svg class="jr-svg" focusable="false"></svg></div></div>
       <button class="jr-toggle" type="button" aria-pressed="false" aria-label="動きを止める"><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
     </div>
     <figcaption class="jr-cap"><span class="sr-only">BRIDGEの道のり。普段の仕事「退院支援」から一本の線が伸び、「合意形成」「プロジェクト推進」という外の言葉に言いかえられる。ほかの経験からの線も集まって現在地になり、BRIDGE Compassの3つの橋に分かれる。医療経営の橋を進むと、線はそのままクリニックタウン3Dの街の道になる。「退院支援室への訪問を増やす」を選ぶと、来院も平均待ちも増える。最後に、見つける・言葉にする・試してみるが一本の線でつながる。</span>クリニックタウン3Dの数値は例です。</figcaption>
@@ -381,7 +384,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   var fig = document.getElementById('journey');
   if (!fig || !document.createElementNS || !window.requestAnimationFrame) return;
   document.documentElement.classList.add('js');
-  var svg = fig.querySelector('.jr-svg'), btn = fig.querySelector('.jr-toggle');
+  var view = fig.querySelector('.jr-view'), svg = fig.querySelector('.jr-svg'), farSvg = fig.querySelector('.jr-far'), btn = fig.querySelector('.jr-toggle');
   var NS = 'http://www.w3.org/2000/svg', LOOP = 18;
   var reduceQ = window.matchMedia('(prefers-reduced-motion: reduce)'), spQ = window.matchMedia('(max-width: 760px)');
 
@@ -618,10 +621,10 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   function build(done) { // 測る → 1回目 → 2回目 を別々の空き時間に分ける(長い処理を1つにしない)。組み上がるまで見せない
     var id = ++buildId;
     built = false;
-    svg.style.visibility = 'hidden';
-    while (svg.firstChild) svg.removeChild(svg.firstChild); // 子の visibility 属性は親の hidden に勝つので、古い世界は先に消す
+    view.style.visibility = 'hidden';
+    [svg, farSvg].forEach(function (n) { while (n.firstChild) n.removeChild(n.firstChild); }); // 子の visibility 属性は親の hidden に勝つので、古い世界は先に消す
     L = spQ.matches ? LAYOUTS.sp : LAYOUTS.pc;
-    var P1 = { pass1: true, minFs: 0, verbFs: L.verbPx / (.45 * clamp(svg.getBoundingClientRect().width / L.ref[0], .5, 1.35)) };
+    var P1 = { pass1: true, minFs: 0, verbFs: L.verbPx / (.45 * clamp(view.getBoundingClientRect().width / L.ref[0], .5, 1.35)) };
     var list = wantList(P1), at = 0;
     (function chunk() { // 書体の最初の組版が重いので、測るだけを先に、少しずつ
       if (id !== buildId) return;
@@ -643,19 +646,18 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
           build.waiting = true;
           document.fonts.ready.then(function () { build.waiting = false; MEASURE = {}; build(function () { render(reduceQ.matches ? STILL : t); }); });
         }
-        svg.style.visibility = '';
-        if (!svg.classList.contains('jr-in')) svg.classList.add('jr-in'); // 最初の1回だけ静かに現れる
+        view.style.visibility = '';
+        if (!view.classList.contains('jr-in')) view.classList.add('jr-in'); // 最初の1回だけ静かに現れる
       });
     }
   }
   function buildWorld(P) {
-    while (svg.firstChild) svg.removeChild(svg.firstChild);
-    var rect = svg.getBoundingClientRect();
+    [svg, farSvg].forEach(function (n) { while (n.firstChild) n.removeChild(n.firstChild); });
+    var rect = view.getBoundingClientRect();
     W = rect.width || 1; H = rect.height || 1;
-    svg.setAttribute('viewBox', '0 0 ' + r2(W) + ' ' + r2(H));
     k = clamp(Math.min(W / L.ref[0], H / L.ref[1]), .5, 1.35);
     S = { labels: [], defs: mk('defs', null, svg), pass1: !!P.pass1 };
-    S.gFar = mk('g', null, svg);
+    S.gFar = mk('g', null, farSvg);
     S.gW = mk('g', null, svg);
     var g = {};
     ['faint', 'road', 'build', 'people', 'lines', 'text', 'logo', 'dot'].forEach(function (n) { g[n] = mk('g', null, S.gW); });
@@ -934,9 +936,9 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     if (!built) return;
     var c = camAt(t), z = c.z * k;
     var fx = W * L.focal[0], fy = H * L.focal[1];
-    put(S.gW, 'transform', 'translate(' + r2(fx) + ' ' + r2(fy) + ') scale(' + (Math.round(z * 10000) / 10000) + ') translate(' + r2(-c.x) + ' ' + r2(-c.y) + ')');
+    svg.parentNode.style.transform = 'translate(' + r2(fx) + 'px,' + r2(fy) + 'px) scale(' + (Math.round(z * 10000) / 10000) + ') translate(' + r2(-c.x) + 'px,' + r2(-c.y) + 'px)';
     var p = .6, zf = k * Math.pow(c.z, p), fcx = A.start[0] + (c.x - A.start[0]) * p, fcy = A.start[1] + (c.y - A.start[1]) * p;
-    put(S.gFar, 'transform', 'translate(' + r2(fx) + ' ' + r2(fy) + ') scale(' + (Math.round(zf * 10000) / 10000) + ') translate(' + r2(-fcx) + ' ' + r2(-fcy) + ')');
+    farSvg.parentNode.style.transform = 'translate(' + r2(fx) + 'px,' + r2(fy) + 'px) scale(' + (Math.round(zf * 10000) / 10000) + ') translate(' + r2(-fcx) + 'px,' + r2(-fcy) + 'px)';
     var px = function (v) { return v * Math.pow(z, .3) / z; }; // 線の太さ(画面 px をおおむね保ち、寄るとわずかに太く)
 
     // 遠い語: 12→10px で薄れる
@@ -1087,7 +1089,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   window.addEventListener('resize', function () {
     clearTimeout(rz);
     rz = setTimeout(function () {
-      var w = svg.getBoundingClientRect().width;
+      var w = view.getBoundingClientRect().width;
       var same = L === (spQ.matches ? LAYOUTS.sp : LAYOUTS.pc);
       if (Math.abs(w - lastW) < 2 && same && !reduceQ.matches) return; // スマホのアドレスバーの伸縮では組み直さない(PC とスマホの世界が替わるときは組み直す)
       lastW = w; build(function () { render(reduceQ.matches ? STILL : t); sync(); });
@@ -1095,7 +1097,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   });
   if (reduceQ.addEventListener) reduceQ.addEventListener('change', function () { build(function () { if (reduceQ.matches) still(); else render(t); sync(); }); });
   fig.journeyRender = function (tt) { t = tt; render(tt); }; // 検証用(時刻を指定して1枚を描く)
-  var go = function () { lastW = svg.getBoundingClientRect().width; init(); };
+  var go = function () { lastW = view.getBoundingClientRect().width; init(); };
   var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
   var started = false;
   var once = function () { if (started) return; started = true; (window.requestIdleCallback || function (f) { setTimeout(f, 60); })(go, { timeout: 800 }); };
