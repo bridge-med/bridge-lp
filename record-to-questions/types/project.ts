@@ -11,7 +11,7 @@ export type SourceFrame = {
 };
 
 export type ProcessWarning = {
-  code: "missing-number" | "duplicate-number" | "no-choices" | "no-questions";
+  code: "missing-number" | "duplicate-number" | "no-choices" | "missing-choice" | "no-questions";
   message: string;
   questionId?: string;
 };

@@ -40,6 +40,14 @@ function isNextChoice(m: ChoiceMatch, prev: ChoiceMatch | undefined): boolean {
   return m.family === prev.family && m.order === prev.order + 1;
 }
 
+/**
+ * OCR が短い選択肢の行(「2. a e」等)を丸ごと読み落とすことがあるので、
+ * 選択肢の途中で番号が1つだけ飛んだ行も選択肢とみなす(飛んだ番号は警告で知らせる)
+ */
+function isChoiceAfterGap(m: ChoiceMatch, prev: ChoiceMatch | undefined): boolean {
+  return !!prev && m.family === prev.family && m.order === prev.order + 2;
+}
+
 function joinText(a: string, b: string): string {
   if (!a) return b;
   if (!b) return a;
@@ -49,7 +57,12 @@ function joinText(a: string, b: string): string {
 
 /** 問題文の中の「ア 〜」「① 〜」「・〜」のような列挙は、改行を残す */
 function startsListItem(text: string): boolean {
-  return matchChoice(text) !== null || /^[・●○■□◆◇※]/.test(text) || /^[ア-オ](?=[\u4e00-\u9fff])/.test(text);
+  return (
+    matchChoice(text) !== null ||
+    /^[・●○■□◆◇※]/.test(text) ||
+    /^[ア-オ](?=[\u4e00-\u9fff])/.test(text) ||
+    /^[a-eA-Eａ-ｅ]\s/.test(text)
+  );
 }
 
 function blockToQuestion(block: Block): Question {
@@ -60,7 +73,7 @@ function blockToQuestion(block: Block): Question {
   let explanation: string | undefined;
   let mode: "question" | "choices" | "explanation" = "question";
 
-  for (const { text } of body) {
+  for (const [lineIndex, { text }] of body.entries()) {
     const exp = matchExplanation(text);
     if (exp !== null) {
       mode = "explanation";
@@ -84,7 +97,14 @@ function blockToQuestion(block: Block): Question {
       questionText = [questionText, ...items].filter(Boolean).join("\n");
       answer = undefined;
     }
-    if (choice && isNextChoice(choice, choices.at(-1)?.match)) {
+    const prev = choices.at(-1)?.match;
+    // 番号が飛んでいても、すぐ次の行が飛ばした番号なら、この行は前の選択肢の折り返し
+    const nextLine = body[lineIndex + 1] ? matchChoice(body[lineIndex + 1].text) : null;
+    const gapFilledNext = !!prev && nextLine?.family === prev.family && nextLine.order === prev.order + 1;
+    if (
+      choice &&
+      (isNextChoice(choice, prev) || (mode === "choices" && !gapFilledNext && isChoiceAfterGap(choice, prev)))
+    ) {
       mode = "choices";
       choices.push({ label: choice.label, text: choice.text, match: choice });
       continue;
@@ -159,9 +179,20 @@ function collectWarnings(questions: Question[]): ProcessWarning[] {
     }
   }
   for (const q of questions) {
+    const name = q.questionNumber !== undefined ? `問${q.questionNumber}` : "番号のない問題";
     if (q.choices.length === 0) {
-      const name = q.questionNumber !== undefined ? `問${q.questionNumber}` : "番号のない問題";
       warnings.push({ code: "no-choices", message: `${name} の選択肢を読み取れませんでした`, questionId: q.id });
+      continue;
+    }
+    const orders = q.choices.map((c) => matchChoice(`${c.label}. x`)?.order ?? matchChoice(c.label)?.order);
+    const gaps: string[] = [];
+    for (let i = 1; i < orders.length; i++) {
+      const a = orders[i - 1];
+      const b = orders[i];
+      if (a !== undefined && b === a + 2) gaps.push(String(a + 1));
+    }
+    if (gaps.length > 0) {
+      warnings.push({ code: "missing-choice", message: `${name} の選択肢${gaps.join("・")}を読み取れていません`, questionId: q.id });
     }
   }
   return warnings;

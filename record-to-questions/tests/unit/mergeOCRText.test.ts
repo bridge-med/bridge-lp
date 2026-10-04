@@ -69,6 +69,24 @@ describe("mergeOCRText", () => {
     expect(merged.map((l) => l.text)).toEqual([...q4, ...q5]);
   });
 
+  it("文面が似ていても、新しい問題番号の画面は捨てない(組み合わせ問題)", () => {
+    const body = ["次の記述のうち正しいものを1つ選べ。", "a 記録の作成者と日時を残す", "b 本人の同意を原則とする", "1. a b", "2. a e", "3. b c"];
+    const merged = mergeOCRText([frame("a", ["問4", ...body]), frame("b", ["問8", ...body])]);
+    expect(merged.filter((l) => /^問/.test(l.text)).map((l) => l.text)).toEqual(["問4", "問8"]);
+    expect(merged).toHaveLength(14);
+  });
+
+  it("番号の映らないスクロール途中の画面は、前の問題と同じ選択肢でも足す", () => {
+    const choices = ["1. a b", "2. a e", "3. b c", "4. c d", "5. d e"];
+    const merged = mergeOCRText([
+      frame("a", ["問3", "次の記述のうち正しいものを選べ。", "a 記録を残す", ...choices]),
+      frame("b", ["問4", "次の記述のうち誤っているものを選べ。", "a 同意を得る", "b 保存期間を守る"]),
+      frame("c", choices), // 問4 をスクロールした先。問4 の選択肢はまだ読んでいない
+    ]);
+    expect(merged.slice(-5).map((l) => l.text)).toEqual(choices);
+    expect(merged).toHaveLength(8 + 4 + 5);
+  });
+
   it("固定帯の行と、信頼度の低い行を除く", () => {
     const f = frame("a", ["9:41 アプリ", "問1", "本文です。", "1. A", "< 前へ 次へ >"]);
     f.ocr.lines[2].confidence = 0;

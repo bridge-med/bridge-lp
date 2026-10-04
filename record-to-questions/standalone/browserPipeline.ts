@@ -3,7 +3,7 @@
  * ffmpeg の代わりに <video> と canvas でフレームを取り出し、OCR も端末の中で動かす。
  * フレーム選択・行の結合・問題への分割は、サーバー版と同じ lib の関数を使う。
  */
-import { createWorker, type Line, type Worker } from "tesseract.js";
+import { createScheduler, createWorker, type Line, type Scheduler } from "tesseract.js";
 import { FRAME_SELECTION, OCR } from "@/lib/config";
 import { newId } from "@/lib/id";
 import { cropToContent, detectFixedBands, selectKeyFrames } from "@/lib/image/deduplicateFrames";
@@ -65,24 +65,38 @@ function toLine(line: Line): OCRLine {
   return { text: line.text.replace(/\n$/, ""), confidence: line.confidence, bbox: line.bbox };
 }
 
-let workerPromise: Promise<Worker> | null = null;
+/**
+ * 同時に動かす OCR の数。2 にすると検証用の Chromium でタブが落ちた(メモリ)。
+ * スマホのメモリはさらに少ないので 1 に固める
+ */
+const WORKERS = 1;
 
-/** OCR エンジンを用意する(初回だけ言語データ約3MBを読み込み、以降は端末に保存したものを使う) */
-function getWorker(): Promise<Worker> {
-  workerPromise ??= (async () => {
-    const worker = await createWorker(OCR.lang, 1, {
-      workerPath: asset("tesseract/worker.js"),
-      corePath: asset("tesseract/core"),
-      langPath: asset("tesseract/lang"),
-      workerBlobURL: false,
-    });
-    await worker.setParameters({ preserve_interword_spaces: "1" });
-    return worker;
+let schedulerPromise: Promise<Scheduler> | null = null;
+
+/** OCR エンジンを用意する(初回だけ言語データ約2MBを読み込み、以降は端末に保存したものを使う) */
+function getScheduler(): Promise<Scheduler> {
+  schedulerPromise ??= (async () => {
+    const scheduler = createScheduler();
+    const workers = await Promise.all(
+      Array.from({ length: WORKERS }, () =>
+        createWorker(OCR.lang, 1, {
+          workerPath: asset("tesseract/worker.js"),
+          corePath: asset("tesseract/core"),
+          langPath: asset("tesseract/lang"),
+          workerBlobURL: false,
+        }),
+      ),
+    );
+    for (const w of workers) {
+      await w.setParameters({ preserve_interword_spaces: "1" });
+      scheduler.addWorker(w);
+    }
+    return scheduler;
   })().catch((e) => {
-    workerPromise = null;
+    schedulerPromise = null;
     throw e;
   });
-  return workerPromise;
+  return schedulerPromise;
 }
 
 export async function processInBrowser(
@@ -126,27 +140,38 @@ export async function processInBrowser(
 
     // 3. OCR
     onProgress({ stage: "ocr-init" });
-    const worker = await getWorker();
+    const scheduler = await getScheduler();
     const scale = Math.min(1, OCR_MAX_WIDTH / vw);
-    const full = canvas(Math.round(vw * scale), Math.round(vh * scale));
-    const pw = Math.min(OCR.previewWidth, full.c.width);
-    const preview = canvas(pw, Math.round((full.c.height * pw) / full.c.width));
-    const frames: SourceFrame[] = [];
-    for (const [n, index] of indices.entries()) {
+    const fw = Math.round(vw * scale);
+    const fh = Math.round(vh * scale);
+    const pw = Math.min(OCR.previewWidth, fw);
+    const preview = canvas(pw, Math.round((fh * pw) / fw));
+    // 動画の読み出しは1本ずつ、OCR は並行で進める(画像は JPEG ではなく PNG 相当の canvas で渡す)
+    let done = 0;
+    onProgress({ stage: "ocr", current: 0, total: indices.length });
+    const jobs: Promise<SourceFrame>[] = [];
+    for (const index of indices) {
       signal.throwIfAborted();
-      onProgress({ stage: "ocr", current: n, total: indices.length });
       await seek(video, Math.min(index / fps, duration - 0.05));
-      full.ctx.drawImage(video, 0, 0, full.c.width, full.c.height);
+      const full = canvas(fw, fh);
+      full.ctx.drawImage(video, 0, 0, fw, fh);
       preview.ctx.drawImage(full.c, 0, 0, preview.c.width, preview.c.height);
-      const { data } = await worker.recognize(full.c, {}, { blocks: true, text: true });
-      const lines: OCRLine[] = [];
-      for (const block of data.blocks ?? []) {
-        for (const paragraph of block.paragraphs) for (const line of paragraph.lines) lines.push(toLine(line));
-      }
-      const ocr: OCRResult = { text: data.text, lines, confidence: data.confidence, width: full.c.width, height: full.c.height };
-      frames.push({ id: newId("f"), timestamp: index / fps, image: preview.c.toDataURL("image/jpeg", 0.7), ocr });
+      const image = preview.c.toDataURL("image/jpeg", 0.7);
+      jobs.push(
+        scheduler.addJob("recognize", full.c, {}, { blocks: true, text: true }).then(({ data }) => {
+          const lines: OCRLine[] = [];
+          for (const block of data.blocks ?? []) {
+            for (const paragraph of block.paragraphs) for (const line of paragraph.lines) lines.push(toLine(line));
+          }
+          const ocr: OCRResult = { text: data.text, lines, confidence: data.confidence, width: fw, height: fh };
+          onProgress({ stage: "ocr", current: ++done, total: indices.length });
+          return { id: newId("f"), timestamp: index / fps, image, ocr };
+        }),
+      );
+      // 読み出しが OCR より先に進みすぎないようにする(メモリを抑える)
+      while (jobs.length - done > WORKERS * 2) await Promise.race(jobs.slice(done));
     }
-    onProgress({ stage: "ocr", current: indices.length, total: indices.length });
+    const frames = await Promise.all(jobs);
 
     // 4. つないで、問題に分ける
     onProgress({ stage: "structure" });

@@ -28,6 +28,14 @@ npm run dev          # http://localhost:3000
 npm test             # 単体テスト(問題分割・行の結合・フレーム選択・書き出し)
 npm run sample-video # 検証用の画面録画を合成(架空の練習問題10問・スクロールと見直しを含む)
 npm run test:e2e     # 合成録画を実際に解析し、10問が欠落・重複・順序崩れなく取れるかを確かめる
+
+# 長い録画(架空の50問・約3分。組み合わせ問題やスクロールを含む)
+node tests/fixtures/make-long-questions.mjs > tests/fixtures/out/long-questions.json
+RTQ_QUESTIONS=tests/fixtures/out/long-questions.json RTQ_FPS=5 node tests/fixtures/make-sample-video.mjs tests/fixtures/out/long-recording.mp4
+RTQ_VIDEO=tests/fixtures/out/long-recording.mp4 RTQ_EXPECTED=tests/fixtures/out/long-questions.json npm run test:e2e
+
+# スマホのブラウザだけで動く1ページ版を standalone/dist/ に組み立てる
+npm run standalone
 RTQ_VIDEO=~/Movies/rec.mov npm run test:e2e   # 手元の録画で試す(結果は tests/fixtures/out/report.md)
 npm run typecheck && npm run lint
 ```

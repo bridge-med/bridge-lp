@@ -1,6 +1,7 @@
 import { MERGE } from "../config";
 import type { FixedBands } from "../image/deduplicateFrames";
 import { cleanLine, comparable, similarity } from "../ocr/normalize";
+import { matchHeader } from "./patterns";
 import type { OCRLine, OCRResult } from "@/types/ocr";
 
 export type FrameText = { frameId: string; ocr: OCRResult };
@@ -88,8 +89,12 @@ type Overlap = {
 function findOverlap(doc: Line[], next: Line[], options: typeof MERGE): Overlap | null {
   const threshold = options.lineSimilarity;
   let best: Overlap | null = null;
+  // 読み飛ばしてよいのは読み崩れた行だけ。問題番号の行は読み飛ばさない(次の問題の始まりを消さないため)
+  const isHeader = (l: Line) => matchHeader(l.text) !== null;
   for (let dropTail = 0; dropTail <= options.edgeSkipLines; dropTail++) {
+    if (dropTail > 0 && (dropTail > doc.length || isHeader(doc[doc.length - dropTail]))) break;
     for (let skipHead = 0; skipHead <= options.edgeSkipLines; skipHead++) {
+      if (skipHead > 0 && (skipHead > next.length || isHeader(next[skipHead - 1]))) break;
       const end = doc.length - dropTail;
       const max = Math.min(end, next.length - skipHead);
       for (let k = max; k >= 1; k--) {
@@ -113,10 +118,30 @@ function findOverlap(doc: Line[], next: Line[], options: typeof MERGE): Overlap 
   return best;
 }
 
-/** next の行の大半がすでに doc の直近にあるか(同じ画面を見直した・スクロールで戻った) */
+function headerNumbers(lines: Line[]): number[] {
+  return lines.map((l) => matchHeader(l.text)?.number).filter((n): n is number => n !== undefined);
+}
+
+/**
+ * next の行の大半がすでに読んだ行か(同じ画面を見直した・スクロールで戻った)。
+ * - まだ出ていない問題番号を含む画面は、文面が似ていても別の問題なので捨てない
+ * - 問題番号が映っていない画面(スクロールの途中)は、いま読んでいる問題の中だけと比べる。
+ *   組み合わせ問題の「1. a b」のように、別の問題と同じ文の選択肢があるため
+ * - 既に出た番号の画面(前の問題に戻った)は、直近の lookbackLines 行と比べる
+ */
 function isContained(doc: Line[], next: Line[], options: typeof MERGE): boolean {
   if (next.length === 0) return true;
-  const recent = doc.slice(-options.lookbackLines);
+  const nextNumbers = headerNumbers(next);
+  const seenNumbers = new Set(headerNumbers(doc));
+  if (nextNumbers.some((n) => !seenNumbers.has(n))) return false;
+  let recent: Line[];
+  if (nextNumbers.length === 0) {
+    let start = doc.length - 1;
+    while (start > 0 && !matchHeader(doc[start].text)) start--;
+    recent = doc.slice(Math.max(0, start));
+  } else {
+    recent = doc.slice(-options.lookbackLines);
+  }
   const found = next.filter((n) => recent.some((d) => sameLine(d.key, n.key, options.lineSimilarity))).length;
   return found / next.length >= options.containedRatio;
 }

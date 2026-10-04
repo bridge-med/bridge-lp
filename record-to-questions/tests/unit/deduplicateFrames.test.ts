@@ -57,7 +57,8 @@ describe("selectKeyFrames", () => {
     const b = screen(page(2), 0);
     const frames = [a, a, a, a, b, b, b, a, a];
     const kept = selectKeyFrames(frames, W, H);
-    expect(kept.map((k) => k.index)).toEqual([0, 4]); // 最後の a は先頭の a と同一なので捨てる
+    // 最後の a は先頭の a と同じだが、画像では捨てない(見直しの重複は文字の段階で除く)
+    expect(kept.map((k) => k.index)).toEqual([0, 4, 7]);
   });
 
   it("長いスクロールの途中も、読み残しが出ない間隔で残す", () => {

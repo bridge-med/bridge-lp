@@ -16,8 +16,10 @@ import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const out = path.resolve(process.argv[2] ?? path.join(here, "out", "sample-recording.mp4"));
-const { questions } = JSON.parse(readFileSync(path.join(here, "sample-questions.json"), "utf8"));
-const FPS = 10;
+// 問題の JSON と撮影のコマ数は差し替えられる(長い録画の検証用: RTQ_QUESTIONS=... RTQ_FPS=5)
+const questionsFile = process.env.RTQ_QUESTIONS ?? path.join(here, "sample-questions.json");
+const { questions } = JSON.parse(readFileSync(questionsFile, "utf8"));
+const FPS = Number(process.env.RTQ_FPS ?? 10);
 
 const executablePath =
   process.env.CHROMIUM_PATH ??
@@ -37,7 +39,7 @@ const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8">
   ol{list-style:none;padding:0;margin:18px 0 0}
   li{background:#fff;border:1px solid #d9dbe0;border-radius:10px;padding:14px 14px;margin-bottom:12px;font-size:17px;line-height:1.6}
 </style></head><body>
-<header><span class="clock">9:41</span><span>診療情報管理 問題演習</span><span>10問</span></header>
+<header><span class="clock">9:41</span><span>診療情報管理 問題演習</span><span>演習</span></header>
 <main id="m"></main>
 <footer><span>&lt; 前へ</span><span>次へ &gt;</span></footer>
 <script>
@@ -65,8 +67,8 @@ try {
     n += count;
   };
   for (const q of questions) {
-    // 問3と問7は画面に収まらない長さにして、スクロールを含める
-    const pad = q.n === 3 ? 520 : q.n === 7 ? 380 : 0;
+    // 問3と問7(長い録画では 10 問ごと)は画面に収まらない長さにして、スクロールを含める
+    const pad = q.n % 10 === 3 ? 520 : q.n % 10 === 7 ? 380 : 0;
     await page.evaluate(([q, pad]) => window.show(q, pad), [q, pad]);
     await shot(FPS * 2); // 2秒読む
     const max = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
@@ -78,9 +80,10 @@ try {
       await page.evaluate((y) => window.scrollTo(0, y), max);
       await shot(FPS * 2);
     }
-    // 問5のあとで一度問4に戻り、また進む(見直しの重複)
-    if (q.n === 5) {
-      await page.evaluate(([q]) => window.show(q, 0), [questions[3]]);
+    // 問5(長い録画では 10 問ごと)のあとで一度前の問題に戻り、また進む(見直しの重複)
+    if (q.n % 10 === 5) {
+      const prev = questions[questions.indexOf(q) - 1];
+      await page.evaluate(([q]) => window.show(q, 0), [prev]);
       await shot(FPS);
       await page.evaluate(([q]) => window.show(q, 0), [q]);
       await shot(FPS);

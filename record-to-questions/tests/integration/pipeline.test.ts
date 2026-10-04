@@ -16,7 +16,8 @@ import { comparable, similarity } from "@/lib/ocr/normalize";
 
 const fixture = path.join(__dirname, "../fixtures/out/sample-recording.mp4");
 const video = process.env.RTQ_VIDEO ?? fixture;
-const isFixture = !process.env.RTQ_VIDEO;
+// 正解の問題 JSON。RTQ_VIDEO だけを渡したときは判定せず、結果を書き出すだけ
+const expectedFile = process.env.RTQ_EXPECTED ?? (process.env.RTQ_VIDEO ? null : path.join(__dirname, "../fixtures/sample-questions.json"));
 
 describe.skipIf(!existsSync(video))("画面録画 → 問題", () => {
   it("問題を欠落・重複・順序崩れなく取り出す", async () => {
@@ -37,19 +38,24 @@ describe.skipIf(!existsSync(video))("画面録画 → 問題", () => {
       const out = path.join(__dirname, "../fixtures/out");
       mkdirSync(out, { recursive: true });
       writeFileSync(path.join(out, "report.md"), report.join("\n"));
-      if (!isFixture) return;
+      if (!expectedFile) return;
 
-      const { questions: expected } = JSON.parse(
-        await readFile(path.join(__dirname, "../fixtures/sample-questions.json"), "utf8"),
-      ) as { questions: { n: number; text: string; choices: string[] }[] };
+      const { questions: expected } = JSON.parse(await readFile(expectedFile, "utf8")) as { questions: { n: number; text: string; choices: string[] }[] };
       expect(result.questions.map((q) => q.questionNumber)).toEqual(expected.map((q) => q.n));
+      // 多少の OCR ミスは許容する(仕様)。番号の欠落・重複・順序崩れは許さない。
+      // 選択肢の数と問題文は、同梱の10問は全問、それ以外(長い録画)は9割以上で合っていること
+      const strict = expectedFile.endsWith("sample-questions.json");
+      let choicesOk = 0;
+      let textOk = 0;
       for (const [i, q] of result.questions.entries()) {
         const want = expected[i];
-        expect(q.choices.length, `問${want.n} の選択肢数`).toBe(want.choices.length);
-        const textScore = similarity(comparable(q.questionText), comparable(want.text.replace(/\n/g, "")));
-        expect(textScore, `問${want.n} の問題文`).toBeGreaterThan(0.85);
+        if (q.choices.length === want.choices.length) choicesOk++;
+        if (similarity(comparable(q.questionText), comparable(want.text.replace(/\n/g, ""))) > 0.85) textOk++;
         expect(q.rawText.length).toBeGreaterThan(0);
       }
+      const need = strict ? expected.length : Math.ceil(expected.length * 0.9);
+      expect(choicesOk, "選択肢の数が合った問題数").toBeGreaterThanOrEqual(need);
+      expect(textOk, "問題文が合った問題数").toBeGreaterThanOrEqual(need);
     } finally {
       await ocr.dispose();
       await rm(workDir, { recursive: true, force: true });

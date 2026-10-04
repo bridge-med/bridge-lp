@@ -117,6 +117,12 @@ Bが正しい。
     expect(questions[0].choices.map((c) => c.text)).toEqual(["平成3. 年に改正された", "令和"]);
   });
 
+  it("OCR が読み落とした選択肢は飛ばして続け、警告を出す", () => {
+    const { questions, warnings } = parseQuestions(lines("問16\n誤っているものを選べ。\n1.ab\n3.bc\n4.cd\n5.de"));
+    expect(questions[0].choices.map((c) => c.label)).toEqual(["1", "3", "4", "5"]);
+    expect(warnings.map((w) => w.message)).toEqual(["問16 の選択肢2を読み取れていません"]);
+  });
+
   it("同じ番号の見直しは1問にまとめ、欠けた番号を知らせる", () => {
     const { questions, warnings } = parseQuestions(
       lines("問1\n正しいものを選べ。\n1. A\n問3\n正しいものを選べ。\n1. C\n問1\n正しいものを選べ。\n1. A"),

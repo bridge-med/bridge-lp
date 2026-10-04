@@ -101,6 +101,17 @@ const STEPS: { key: string; label: string }[] = [
   { key: "structure", label: "問題に分ける" },
 ];
 
+let ocrStartedAt = 0;
+
+function remaining(p: Progress): string {
+  if (p.stage !== "ocr" || !p.total || !p.current) return "";
+  if (p.current === 1) ocrStartedAt = Date.now();
+  if (p.current < 3) return "";
+  const perFrame = (Date.now() - ocrStartedAt) / (p.current - 1);
+  const sec = Math.round((perFrame * (p.total - p.current)) / 1000);
+  return sec >= 60 ? ` ・ 残り約${Math.ceil(sec / 60)}分` : ` ・ 残り約${Math.max(5, Math.ceil(sec / 5) * 5)}秒`;
+}
+
 function renderProgress(p: Progress) {
   const key = p.stage === "ocr-init" ? "ocr" : p.stage;
   const active = STEPS.findIndex((s) => s.key === key);
@@ -109,7 +120,7 @@ function renderProgress(p: Progress) {
     ...STEPS.map((s, i) => {
       const status = i < active ? "done" : i === active ? "active" : "pending";
       let detail = "";
-      if (i === active && p.total) detail = `${p.current ?? 0} / ${p.total}`;
+      if (i === active && p.total) detail = `${p.current ?? 0} / ${p.total}${remaining(p)}`;
       if (i === active && p.stage === "ocr-init") detail = "準備中";
       return el(
         "li",
@@ -326,8 +337,19 @@ async function exportPdf(button: HTMLButtonElement) {
 
 /* ---------- 解析の開始 ---------- */
 
+/** 解析中に画面が消えると止まるので、画面のスリープを止めておく(使えない環境では何もしない) */
+async function keepAwake(): Promise<() => void> {
+  try {
+    const lock = await (navigator as Navigator & { wakeLock?: { request(t: "screen"): Promise<{ release(): Promise<void> }> } }).wakeLock?.request("screen");
+    return () => void lock?.release().catch(() => {});
+  } catch {
+    return () => {};
+  }
+}
+
 async function start(file: File) {
   abort = new AbortController();
+  const release = await keepAwake();
   $("#start").hidden = true;
   $("#result").hidden = true;
   $("#error").hidden = true;
@@ -354,6 +376,8 @@ async function start(file: File) {
     console.error(e);
     $("#error-message").textContent = e instanceof Error ? e.message : String(e);
     $("#error").hidden = false;
+  } finally {
+    release();
   }
 }
 

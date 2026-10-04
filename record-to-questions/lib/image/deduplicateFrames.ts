@@ -107,7 +107,9 @@ type Options = Pick<
  * - スクロール中は画面の keepScrollRatio 分動くごとに1枚(文字の取りこぼしを防ぐ)
  * - スクロールが止まった画面
  * - 画面が切り替わった(問題が変わった)あと、落ち着いた画面
- * 最後に、すでに残したフレームとほぼ同じものを捨てる。
+ * 最後に、直前に残したフレームとほぼ同じものを捨てる。
+ * 残したフレーム全部とは比べない: 縮小画像ではレイアウトの似た別の問題(番号と数語だけ違う)が
+ * 同じに見えるため。見直しで同じ問題が再び映った分は、文字の段階(mergeOCRText)で除く。
  */
 export function selectKeyFrames(
   frames: Thumb[],
@@ -159,8 +161,8 @@ export function selectKeyFrames(
 
   const kept: KeyFrame[] = [];
   for (const c of candidates) {
-    const dup = kept.some((k) => frameDifference(frames[k.index], frames[c.index]) <= options.duplicateDiff);
-    if (!dup) kept.push(c);
+    const last = kept.at(-1);
+    if (!last || frameDifference(frames[last.index], frames[c.index]) > options.duplicateDiff) kept.push(c);
   }
   return kept;
 }
