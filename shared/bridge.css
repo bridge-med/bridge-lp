@@ -19,6 +19,7 @@
   --ink-4:#B6B3AB;
   --line:rgba(27,27,30,0.10);
   --navy:#16233E;
+  --mark-line:var(--navy); /* ロゴの藍の線の役割(ロゴ・下層ヒーローの線)。ライトは --navy、ダークは --ink の別名で、色数は増やさない(designer §6 2026-10-04) */
   --blue:#24365C;
   --blue-soft:#8B9BBC;
   --dawn:#A98F63;          /* 砂色。ロゴの温度。使いすぎない */
@@ -60,6 +61,7 @@
   --ink-4:#565A68;
   --line:rgba(237,234,226,0.10);
   --navy:#D8DEEB;
+  --mark-line:var(--ink); /* ダーク: ロゴの藍の線と同じく --ink */
   --blue:#9FB1D4;
   --blue-soft:#5A6C92;
   --dawn:#C2A97E;
@@ -130,9 +132,8 @@ html.js:not(.js-ready) [data-reveal]{animation:rv-safe .5s var(--ease) 1.8s forw
 .nav-logo{font:500 14px/1 var(--en);letter-spacing:0.34em;display:flex;align-items:center;gap:12px;z-index:2;color:var(--ink);position:relative}
 .nav-logo::after{content:'';position:absolute;inset:-13px 0} /* 見た目18px高のまま、タップ領域を44pxに */
 .nav-logo svg{width:40px;height:18px;flex-shrink:0}
-.logo-mark .l-navy{stroke:var(--navy);fill:none;stroke-linecap:round}
+.logo-mark .l-navy{stroke:var(--mark-line);fill:none;stroke-linecap:round}
 .logo-mark .l-sand{stroke:var(--dawn);fill:none;stroke-linecap:round}
-[data-theme="dark"] .logo-mark .l-navy{stroke:var(--ink)}
 .nav-right{display:flex;align-items:center;gap:20px}
 .nav-links{display:flex;gap:20px;font:600 10px/1 var(--en);letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-3)}
 .nav-links a{padding:6px 0;position:relative;transition:color .2s}
@@ -173,26 +174,26 @@ body.menu-open .drawer-item{opacity:1;transform:none}
   .nav-links,.nav-cta{display:none}
 }
 
-/* ===== ページヒーロー(下層ページ共通) ===== */
-.page-hero{padding:clamp(150px,22vh,240px) var(--pad-x) clamp(70px,10vh,110px);background:linear-gradient(180deg,var(--hero-sky-1),var(--bg));position:relative;overflow:hidden}
+/* ===== ページヒーロー(下層ページ共通) =====
+   トップ(Experience Journey)の文法を下層に写す(2026-10-04 社長指示「他のページも同じような雰囲気で統一感」・designer):
+   平らな地(グラデーションなし)/見出しの下を通る藍の線1本と、現在地の砂の点1つ/動きは読み込み時に一度、線を引くだけ。
+   線は画面の左端から入り、見出しの下を通って、本文幅の右端か見出しの終わりの1字先の遠いほうで終わる直線(右の余白には入らない。曲線はロゴと Journey のもの)。読ませる文字を横切らない。
+   点は見出しの書き出しの真下(第22条の現在地)。線はここを通って先へ続く。CSS だけで描くので JS なしでも出る。
+   見出しは Noto Sans JP 900(憲法第23条 見出しの但し書きの追記 v1.7。章の見出し・思想の一文・本文は明朝のまま) */
+.page-hero{padding:clamp(150px,22vh,240px) var(--pad-x) clamp(70px,10vh,110px);position:relative;overflow:hidden}
 .page-hero-inner{max-width:var(--max);margin:0 auto;position:relative;z-index:1}
 .page-hero .crumb{font:600 10px/1 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:26px;display:flex;gap:10px;align-items:center}
 .page-hero .crumb a{position:relative}
 .page-hero .crumb a::after{content:'';position:absolute;inset:-17px -6px} /* 10px高の文字のまま、タップ領域を44pxに */
 .page-hero .crumb a:hover{color:var(--ink)}
 .page-hero .crumb .sep{color:var(--ink-4)}
-.page-hero h1{font-family:var(--mincho);font-weight:600;font-size:clamp(32px,6vw,64px);line-height:1.6;letter-spacing:0.02em}
-.page-hero h1 .period{color:var(--dawn)}
-.page-hero .lead{max-width:var(--text-max);margin-top:24px;font-size:15px;line-height:2.3;color:var(--ink-2)}
-/* 下層ヒーローの線(bridge.jsが自動挿入) */
-.ph-lines{position:absolute;inset:0;pointer-events:none;opacity:.4}
-.ph-lines svg{width:100%;height:100%}
-.ph-lines path{fill:none;stroke-linecap:round;stroke-width:1.6;stroke-dasharray:1;stroke-dashoffset:1;animation:phd 2.4s var(--ease) .2s forwards}
-.ph-lines .pl-n{stroke:var(--navy)}
-[data-theme="dark"] .ph-lines .pl-n{stroke:var(--blue)}
-.ph-lines .pl-s{stroke:var(--dawn);animation-delay:.7s}
-@keyframes phd{to{stroke-dashoffset:0}}
-@media(prefers-reduced-motion:reduce){.ph-lines path{animation:none;stroke-dashoffset:0}}
+.page-hero h1{font-family:var(--sans);font-weight:900;font-size:clamp(32px,6vw,64px);line-height:1.35;letter-spacing:-0.01em;position:relative;width:fit-content;max-width:100%;--ph-lx:max(var(--pad-x),calc((100vw - var(--max)) / 2))}
+.page-hero h1::after{content:'';position:absolute;left:calc(-1 * var(--ph-lx));top:calc(100% + 10px);width:calc(var(--ph-lx) + min(max(100% + 1em,var(--text-max)),100vw - 2 * var(--ph-lx)));height:2px;background:var(--mark-line);transform-origin:0 50%;animation:ph-line 1s var(--ease) .15s both}
+.page-hero h1::before{content:'';position:absolute;left:0;top:calc(100% + 11px);width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--dawn);z-index:1;animation:ph-dot .3s linear .3s both}
+@keyframes ph-line{from{transform:scaleX(0)}}
+@keyframes ph-dot{from{opacity:0}}
+.page-hero .lead{max-width:var(--text-max);margin-top:38px;font-size:15px;line-height:2.3;color:var(--ink-2)}
+@media(prefers-reduced-motion:reduce){.page-hero h1::after,.page-hero h1::before{animation:none}}
 
 /* ===== ボタン ===== */
 .btn{display:inline-flex;align-items:center;gap:10px;padding:16px 32px;border-radius:100px;font:700 13px/1 var(--sans);letter-spacing:0.06em;transition:all .3s var(--ease)}

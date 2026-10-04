@@ -23,6 +23,10 @@
    ================================================================ */
 .page-hero .lead{max-width:34em}
 .page-hero .ph-h{font-family:var(--sans);font-weight:900;font-size:clamp(40px,7.6vw,96px);line-height:1.1;letter-spacing:-0.015em}
+/* 行送り 1.1 で字が大きいので、共通の線(h1 の下端 +10px)では字に近すぎる。字から線を他のページと同じ 17〜18px に(designer 2026-10-04) */
+.page-hero .ph-h::after{top:calc(100% + 16px)}
+.page-hero .ph-h::before{top:calc(100% + 17px)}
+.page-hero .ph-h + .lead{margin-top:44px}
 /* 用途の索引(ページ内リンク) */
 .use-nav{max-width:var(--max);margin:clamp(28px,4vh,40px) auto 0;display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
 .use-nav a{font:600 12.5px/1 var(--sans);letter-spacing:0.03em;padding:13px 18px;min-height:44px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;color:var(--ink-2);background:var(--card);transition:all .25s}
@@ -103,9 +107,9 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
 
 <header class="page-hero">
   <div class="page-hero-inner">
-    <div class="crumb" data-reveal><a href="../index.html">Home</a><span class="sep">/</span><span>Products</span></div>
-    <h1 class="ph-h" data-reveal data-reveal-delay="1">現場の悩みに、<br>使える道具を</h1>
-    <p class="lead" data-reveal data-reveal-delay="2">
+    <div class="crumb"><a href="../index.html">Home</a><span class="sep">/</span><span>Products</span></div>
+    <h1 class="ph-h">現場の悩みに、<br>使える道具を</h1>
+    <p class="lead">
       医療の現場で働く人のための道具、全29点。用途から選べます。
     </p>
     <nav class="use-nav" aria-label="用途で絞る" data-reveal data-reveal-delay="3" id="useNav"></nav>
