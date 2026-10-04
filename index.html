@@ -37,7 +37,7 @@
      線が巻き戻り(BRIDGE から退院支援への線は戻さない)、カメラが言葉の野へ戻る。終わりのロゴ表示は置かない(起点と重なるため外した)
    表現の約束(このヒーローだけ。designer 2026-10-04)
      1 線が主語: 新しく現れるものは、線が届いたときにだけ現れる。場面をフェードで入れ替えない。最初からあるのは起点の BRIDGE と言葉の野(ループの起点)。
-       初回の寄った画には BRIDGE だけを置き、言葉の野はカメラが引くにつれて霞から見えてくる
+       例外: 初回の寄った画には BRIDGE だけを置き、その引きでだけ、言葉の野と遠い語は濃さを上げて現れる(遠近の見え方であって、場面の入れ替えではない)
      2 線は言葉(経験)から出るか、一本の線から分かれる。何もない所から湧かせない。例外は正式ロゴの砂の線で、藍から生やさない
      3 移動・拡大は視点(カメラ)の仕事。要素に許す動きは、線が伸びる/語が線から出る/点が線を進む/数値が入れ替わる、の4つだけ
      4 文字は空間に置く(カード・枠・影に入れない)。読ませる語は線の上に置き、12px 以上・不透明・--ink か --ink-3。
@@ -312,11 +312,11 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     <figure class="jr" id="journey">
       <div class="jr-view" aria-hidden="true"><div class="jr-cam"><svg class="jr-far" focusable="false"></svg></div><div class="jr-cam"><svg class="jr-svg" focusable="false"></svg></div></div>
       <button class="jr-toggle" type="button" aria-pressed="false" aria-label="動きを止める"><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
-      <figcaption class="sr-only">BRIDGEの道のり。ロゴの線が伸びて、普段の仕事「退院支援」に届く。そこから一本の線が伸び、「合意形成」「プロジェクト推進」という外の言葉に言いかえられる。ほかの経験からの線も集まって現在地になり、BRIDGE Compassの3つの橋に分かれる。医療経営の橋を進むと、線はそのままクリニックタウン3Dの街の道になる。「退院支援室への訪問を増やす」を選ぶと、来院も平均待ちも増える。最後に、見つける・言葉にする・試してみるが一本の線でつながる。</figcaption>
+      <figcaption class="sr-only">BRIDGEの道のり。ロゴの線が伸びて、普段の仕事「退院支援」に届く。その先で、退院支援は「合意形成」「プロジェクト推進」という、病院の外でも通じる言葉に言いかえられる。ほかの経験からの線も集まって現在地になり、BRIDGE Compassの3つの橋に分かれる。「医療経営 / BizOps」の橋を進むと、線はそのままクリニックタウン3Dの街の道になる。「退院支援室への訪問を増やす」を選ぶと、来院が増え、平均待ちも長くなる。最後に引くと、ここまでの道のりが一本の線でつながり、その線から「見つける」「言葉にする」「試してみる」が出てくる。</figcaption>
     </figure>
   </div>
   <div class="hero-foot">
-    <p class="hero-desc">看護師・リハビリ職・医療事務の方へ。毎日の仕事を、外でも通じる言葉にして、試せる場所までつなぎます。<small>動きの中のクリニックタウン3Dの数値は例です。</small></p>
+    <p class="hero-desc">看護師・リハビリ職・医療事務の方へ。いつもの仕事が病院の外でどんな言葉になるかを見つけて、ゲームや道具で試せます。<small>動きに出てくるクリニックタウン3Dの数値は例です。</small></p>
     <div class="hero-cta" id="heroCta">
       <a class="btn glass" href="./compass/index.html">自分の場合を見てみる <span aria-hidden="true">→</span></a>
       <p class="h-meta">10の質問・約3分・登録不要</p>
