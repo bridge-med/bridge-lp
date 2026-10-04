@@ -70,7 +70,9 @@
   -webkit-mask-image:var(--jr-top),var(--jr-side);-webkit-mask-composite:source-in;
   mask-image:var(--jr-top),var(--jr-side);mask-composite:intersect}
 html:not(.js) .jr{display:none}
-.jr-svg text{font-family:var(--sans);font-feature-settings:"palt" 1}
+.jr-svg.jr-in{animation:jr-in .9s var(--ease) both}
+@keyframes jr-in{from{opacity:0}}
+.jr-svg text{font-family:var(--sans);font-feature-settings:"palt" 1;text-rendering:geometricPrecision} /* 拡大縮小のたびに字形を整え直さない(これがないと毎フレーム重い。qa 2026-10-04) */
 .jr-svg .j-hero{font-weight:900;fill:var(--ink)}
 .jr-svg .j-new{font-weight:700;fill:var(--ink)}
 .jr-svg .j-br{font-weight:700;fill:var(--ink);transition:fill .6s var(--ease)}
@@ -121,6 +123,7 @@ html:not(.js) .jr{display:none}
 @media(prefers-reduced-motion:reduce){
   .jr-toggle{display:none}
   .jr-svg .j-br,.jr-svg .j-dim text{transition:none}
+  .jr-svg.jr-in{animation:none}
 }
 
 /* ===== 試しているもの =====
@@ -443,7 +446,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       far: [['記録', -176, -610], ['受付', 150, -590], ['会計', -176, 700], ['レセプト点検', 96, 760]],
       farFs: 13,
       stations: [['退院支援', -160, -300, 40, 'j-hero'], ['合意形成', -120, -192, 27, 'j-new'], ['プロジェクト推進', -84, -92, 27, 'j-new']],
-      N: [-104, 136], hereFs: 14, enFs: 12,
+      N: [-110, 136], hereFs: 14, enFs: 12,
       field: [
         ['申し送り', -170, -456, null],
         ['多職種連携', 24, -494, 'ステークホルダー調整', 30, 64],
@@ -451,7 +454,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
         ['業務改善', 70, -370, null]
       ],
       fieldFs: 17, trFs: 13,
-      branch: { x: -50, rows: [136, 216, 296], fs: 20 }, // 現在地の高さから下へ分かれる(戻る線が橋の名前を横切らない)
+      branch: { x: -70, rows: [136, 216, 296], fs: 20 }, // 現在地の高さから下へ分かれる(戻る線が橋の名前を横切らない)
       town: { x0: -150, ring: 96, end: 130, roadW: 30, fs: 14, numFs: 18, road: [-150, 512], via: { R: 176, Yb: 362, Lx: -176 },
               b: [[-144, 58, 50, 34], [-76, 50, 86, 30], [-18, 110, 62, 38, 1], [112, 44, 40, 32]] },
       verbPx: 19, logoPx: 64,
@@ -461,8 +464,8 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
           [1.2, A.start[0], A.start[1] + 10, 1.01],
           [2.8, 0, A.st1[1] - 10, 1.03],
           [4.2, 0, A.N[1] - 70, .97],
-          [5.4, 6, A.N[1] + 20, 1],
-          [6.3, 6, A.N[1] + 50, 1.01],
+          [5.4, 24, A.N[1] + 20, 1],
+          [6.3, 24, A.N[1] + 50, 1.01],
           [7.6, 20, A.town[1] - 190, 1],
           [9.0, A.clinic[0] - 30, A.town[1] - 70, 1.06],
           [10.2, A.clinic[0] - 30, A.town[1] - 72, 1.08, 1],
@@ -481,26 +484,43 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   /* ---------------- 状態 ---------------- */
   var L, W = 0, H = 0, k = 1, A = {}, keys = [], S = null, built = false;
 
+  /* 文字の幅は組み立ての最初にまとめて測る(1語ずつ測ると、そのたびにレイアウトが走る) */
+  var MEASURE = {};
+  function prefetch(items) {
+    var g = mk('g', { visibility: 'hidden' }, svg), todo = [], seen = {};
+    items.forEach(function (it) {
+      var key = it[2] + '|' + it[1] + '|' + it[0];
+      if (MEASURE[key] || seen[key]) return;
+      seen[key] = 1;
+      var t = mk('text', { x: 0, y: 0, 'font-size': it[1], 'class': it[2] }, g);
+      t.textContent = it[0];
+      todo.push([key, t, it[0]]);
+    });
+    todo.forEach(function (q) {
+      var t = q[1], xs = [];
+      for (var i = 0; i < q[2].length; i++) { try { xs.push(t.getStartPositionOfChar(i).x); } catch (e) { xs.push(i * +t.getAttribute('font-size')); } }
+      MEASURE[q[0]] = { w: t.getComputedTextLength(), xs: xs };
+    });
+    svg.removeChild(g);
+  }
+  function measure(str, fs, cls) { var key = cls + '|' + fs + '|' + str; if (!MEASURE[key]) prefetch([[str, fs, cls]]); return MEASURE[key]; }
+
   /* 文字: 線から出る語。dir=-1 は線の上に座る(線が下線)、+1 は線の下に下がる */
   function label(parent, str, x, ulY, fs, cls, dir, opt) {
     opt = opt || {};
     var g = mk('g', null, parent);
     var asc = fs * 0.88, desc = fs * 0.16, gap = fs * 0.28 + (opt.gap || 0);
     var base = dir < 0 ? ulY - gap : ulY + gap + asc;
-    var probe = mk('text', { x: x, y: base, 'font-size': fs, 'class': cls }, g);
-    probe.textContent = str;
-    var w = probe.getComputedTextLength ? probe.getComputedTextLength() : str.length * fs;
-    var glyphs = [];
+    var m = measure(str, fs, cls), w = m.w, glyphs = [];
     if (opt.whole) {
-      glyphs.push({ el: probe, x: x, base: base });
+      var one = mk('text', { x: r2(x), y: base, 'font-size': fs, 'class': cls }, g);
+      one.textContent = str;
+      glyphs.push({ el: one, x: x, base: base });
     } else {
-      var n = str.length, xs = [];
-      for (var i = 0; i < n; i++) { try { xs.push(probe.getStartPositionOfChar(i).x); } catch (e) { xs.push(x + i * fs); } }
-      g.removeChild(probe);
-      for (var j = 0; j < n; j++) {
-        var el = mk('text', { x: r2(xs[j]), y: base, 'font-size': fs, 'class': cls }, g);
+      for (var j = 0; j < str.length; j++) {
+        var el = mk('text', { x: r2(x + m.xs[j]), y: base, 'font-size': fs, 'class': cls }, g);
         el.textContent = str[j];
-        glyphs.push({ el: el, x: xs[j], base: base });
+        glyphs.push({ el: el, x: x + m.xs[j], base: base });
       }
     }
     var D = dir < 0 ? (ulY - (base - asc)) + 2 : -((base + desc) - ulY) - 2;
@@ -528,32 +548,45 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     }
   }
 
-  /* 経路: 下線と曲線をつないだ一本の d。各区間の始まりの距離を測っておく */
-  function Route(parent, cls) { this.parts = []; this.cls = cls; this.parent = parent; this.marks = []; }
-  Route.prototype.M = function (x, y) { this.parts.push('M' + r2(x) + ' ' + r2(y)); this.x = x; this.y = y; return this; };
-  Route.prototype.L = function (x, y) { this.parts.push('L' + r2(x) + ' ' + r2(y)); this.x = x; this.y = y; return this; };
-  Route.prototype.C = function (a, b, c, d, x, y) { this.parts.push('C' + [a, b, c, d, x, y].map(r2).join(' ')); this.x = x; this.y = y; return this; };
+  /* 経路: 下線と曲線をつないだ一本の d。長さと点は JS で数える(組み立て中も描画中も DOM を読まない)。
+     描画側の長さは pathLength でこの値に揃える */
+  function Route(parent, cls) { this.parts = []; this.cls = cls; this.parent = parent; this.pts = []; this.cum = []; }
+  Route.prototype.push = function (x, y) {
+    var n = this.pts.length;
+    if (n) { var px = this.pts[n - 2], py = this.pts[n - 1]; this.cum.push(this.cum[this.cum.length - 1] + Math.sqrt((x - px) * (x - px) + (y - py) * (y - py))); }
+    else this.cum.push(0);
+    this.pts.push(x, y);
+  };
+  Route.prototype.M = function (x, y) { this.parts.push('M' + r2(x) + ' ' + r2(y)); this.push(x, y); this.x = x; this.y = y; return this; };
+  Route.prototype.L = function (x, y) { this.parts.push('L' + r2(x) + ' ' + r2(y)); this.push(x, y); this.x = x; this.y = y; return this; };
+  Route.prototype.C = function (a, b, c, d, x, y) {
+    this.parts.push('C' + [a, b, c, d, x, y].map(r2).join(' '));
+    var x0 = this.x, y0 = this.y;
+    for (var i = 1; i <= 28; i++) {
+      var u = i / 28, v = 1 - u, k0 = v * v * v, k1 = 3 * v * v * u, k2 = 3 * v * u * u, k3 = u * u * u;
+      this.push(k0 * x0 + k1 * a + k2 * c + k3 * x, k0 * y0 + k1 * b + k2 * d + k3 * y);
+    }
+    this.x = x; this.y = y; return this;
+  };
   Route.prototype.to = function (x, y, sx) { // 水平の接線でつなぐ S 字。左へ戻るときは、取っ手を縦の距離で決めて輪にしない
     var dx = x < this.x - 10 ? clamp(Math.abs(y - this.y) * .45 + 16, 36, 110) : Math.max(Math.abs(x - this.x) * (sx || .55), 30);
     return this.C(this.x + dx, this.y, x - dx, y, x, y);
   };
-  Route.prototype.mark = function () { S.scratch.setAttribute('d', this.parts.join('')); var len = S.scratch.getTotalLength(); this.marks.push(len); return len; };
-  Route.prototype.done = function (extraCls) {
+  Route.prototype.mark = function () { return this.cum[this.cum.length - 1]; };
+  Route.prototype.done = function () {
     this.d = this.parts.join('');
-    this.el = mk('path', { d: this.d, 'class': this.cls + (extraCls ? ' ' + extraCls : '') }, this.parent);
-    this.len = this.el.getTotalLength();
-    // 点の表(描画中に DOM を読まない: 読むとそのたびにスタイルの再計算が走る)
-    var STEP = 4, n = Math.max(2, Math.ceil(this.len / STEP)), lut = new Float32Array((n + 1) * 2);
-    for (var i = 0; i <= n; i++) { var q = this.el.getPointAtLength(this.len * i / n); lut[i * 2] = q.x; lut[i * 2 + 1] = q.y; }
-    this.lut = lut; this.n = n;
+    this.len = this.mark();
+    this.el = mk('path', { d: this.d, 'class': this.cls, pathLength: r2(this.len) }, this.parent);
     put(this.el, 'stroke-dasharray', r2(this.len) + ' ' + r2(this.len + 10));
     put(this.el, 'stroke-dashoffset', r2(this.len));
     return this;
   };
   Route.prototype.draw = function (dist) { put(this.el, 'stroke-dashoffset', r2(this.len - clamp(dist, 0, this.len))); put(this.el, 'visibility', dist <= 0 ? 'hidden' : 'visible'); };
-  Route.prototype.at = function (dist) {
-    var f = clamp(dist / this.len) * this.n, i = Math.min(Math.floor(f), this.n - 1), u = f - i, a = this.lut;
-    return [a[i * 2] + (a[i * 2 + 2] - a[i * 2]) * u, a[i * 2 + 1] + (a[i * 2 + 3] - a[i * 2 + 1]) * u];
+  Route.prototype.at = function (dist) { // 距離 → 点(二分探索)
+    var c = this.cum, d = clamp(dist, 0, this.len), lo = 0, hi = c.length - 1;
+    while (hi - lo > 1) { var m = (lo + hi) >> 1; if (c[m] < d) lo = m; else hi = m; }
+    var u = (d - c[lo]) / ((c[hi] - c[lo]) || 1), a = this.pts;
+    return [a[lo * 2] + (a[hi * 2] - a[lo * 2]) * u, a[lo * 2 + 1] + (a[hi * 2 + 1] - a[lo * 2 + 1]) * u];
   };
 
   /* 線の下線の位置に置く語を、経路の今の点の距離で出す */
@@ -568,11 +601,51 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 
   /* ---------------- 組み立て ---------------- */
   /* 2回組む: 1回目で俯瞰の倍率を測り、2回目で「俯瞰でも 12.5px を割らない語の下限」と三つの言葉の大きさを決める */
-  function build() {
+  var idle = window.requestIdleCallback ? function (f) { window.requestIdleCallback(f, { timeout: 500 }); } : function (f) { setTimeout(f, 30); };
+  var buildId = 0;
+  function wantList(P) { // 組み立てで使う語と大きさの一覧
+    var T_ = L.town, statFs = spQ.matches ? T_.fs - 2 : T_.fs, nameFs0 = Math.max(T_.fs + (spQ.matches ? 6 : 7), P.minFs), want = [];
+    want.push([L.stations[0][0], L.stations[0][3], L.stations[0][4]]);
+    L.stations.slice(1).forEach(function (q) { want.push([q[0], Math.max(q[3], P.minFs), q[4]]); });
+    want.push(['現在地', L.hereFs, 'j-sm'], ['BRIDGE Compass', L.enFs, 'j-en']);
+    L.field.forEach(function (f) { want.push([f[0], L.fieldFs, 'j-exp']); if (f[3]) want.push([f[3], L.trFs, 'j-tr']); });
+    ['プロジェクトマネジメント', '医療経営 / BizOps', '教育 / 人材育成'].forEach(function (n) { want.push([n, Math.max(L.branch.fs, P.minFs), 'j-br']); });
+    want.push(['クリニック', nameFs0, 'j-new'], ['来院', statFs, 'j-sm'], ['平均待ち', statFs, 'j-sm'], ['48人', T_.numFs, 'j-num'], ['31分', T_.numFs, 'j-num'],
+      ['退院支援室への訪問を増やす', T_.fs, 'j-new'], ['Day 6', T_.fs - 2, 'j-day']);
+    ['見つける。', '言葉にする。', '試してみる。'].forEach(function (v) { want.push([v, P.verbFs, 'j-verb']); });
+    return want;
+  }
+  function build(done) { // 測る → 1回目 → 2回目 を別々の空き時間に分ける(長い処理を1つにしない)。組み上がるまで見せない
+    var id = ++buildId;
+    built = false;
+    svg.style.visibility = 'hidden';
     L = spQ.matches ? LAYOUTS.sp : LAYOUTS.pc;
-    buildWorld({ minFs: 0, verbFs: L.verbPx / (.45 * clamp(svg.getBoundingClientRect().width / L.ref[0], .5, 1.35)) });
-    var z1 = S.zOv;
-    buildWorld({ minFs: 12.8 / z1, verbFs: Math.min(L.verbPx / z1, S.verbRoom) });
+    var P1 = { pass1: true, minFs: 0, verbFs: L.verbPx / (.45 * clamp(svg.getBoundingClientRect().width / L.ref[0], .5, 1.35)) };
+    var list = wantList(P1), at = 0;
+    (function chunk() { // 書体の最初の組版が重いので、測るだけを先に、少しずつ
+      if (id !== buildId) return;
+      prefetch(list.slice(at, at + 8)); at += 8;
+      if (at < list.length) { idle(chunk); return; }
+      idle(afterMeasure);
+    })();
+    function afterMeasure() {
+      if (id !== buildId) return;
+      buildWorld(P1);
+      idle(function () {
+        if (id !== buildId) return;
+        var z1 = S.zOv;
+        buildWorld({ minFs: 12.8 / z1, verbFs: Math.min(L.verbPx / z1, S.verbRoom) });
+        built = true;
+        if (done) done();
+        // 書体が届く前に測った場合は、届いてから測り直す
+        if (document.fonts && document.fonts.status !== 'loaded' && !build.waiting) {
+          build.waiting = true;
+          document.fonts.ready.then(function () { build.waiting = false; MEASURE = {}; build(function () { render(reduceQ.matches ? STILL : t); }); });
+        }
+        svg.style.visibility = '';
+        if (!svg.classList.contains('jr-in')) svg.classList.add('jr-in'); // 最初の1回だけ静かに現れる
+      });
+    }
   }
   function buildWorld(P) {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
@@ -580,13 +653,14 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     W = rect.width || 1; H = rect.height || 1;
     svg.setAttribute('viewBox', '0 0 ' + r2(W) + ' ' + r2(H));
     k = clamp(Math.min(W / L.ref[0], H / L.ref[1]), .5, 1.35);
-    S = { labels: [], defs: mk('defs', null, svg) };
-    S.scratch = mk('path', { d: 'M0 0', fill: 'none', stroke: 'none' }, S.defs);
+    S = { labels: [], defs: mk('defs', null, svg), pass1: !!P.pass1 };
     S.gFar = mk('g', null, svg);
     S.gW = mk('g', null, svg);
     var g = {};
     ['faint', 'road', 'build', 'people', 'lines', 'text', 'logo', 'dot'].forEach(function (n) { g[n] = mk('g', null, S.gW); });
     S.g = g;
+
+    prefetch(wantList(P)); // 使う語をまとめて測る(多くは build() が先に測ってある)
 
     // 遠い気配の語(視差のある奥の層)
     S.far = L.far.map(function (f) { var t = mk('text', { x: f[1], y: f[2], 'font-size': L.farFs, 'class': 'j-far' }, S.gFar); t.textContent = f[0]; return { el: t, fs: L.farFs }; });
@@ -595,8 +669,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     S.field = L.field.map(function (f) {
       var t = mk('text', { x: f[1], y: f[2], 'font-size': L.fieldFs, 'class': 'j-exp' }, g.text);
       t.textContent = f[0];
-      var w = t.getComputedTextLength();
-      return { el: t, x: f[1], y: f[2], w: w, f: f };
+      return { el: t, x: f[1], y: f[2], w: measure(f[0], L.fieldFs, 'j-exp').w, f: f };
     });
 
     // 本線: 退院支援 → 合意形成 → プロジェクト推進 → 現在地
@@ -606,7 +679,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     var s0 = st[0];
     var heroT = mk('text', { x: s0[1], y: s0[2], 'font-size': s0[3], 'class': s0[4] }, g.text);
     heroT.textContent = s0[0];
-    var hw = heroT.getComputedTextLength();
+    var hw = measure(s0[0], s0[3], s0[4]).w;
     var ul0 = s0[2] + s0[3] * 0.28;
     // 下線は語より長くてよい(俯瞰で「見つける。」がこの下線の水平の所から下がる)
     var pad = spQ.matches; // スマホは戻りの斜線が語に触れないよう、下線の入口と折り返しの手前に1字ぶんの水平を足す
@@ -624,13 +697,13 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       S.stations.push(lb);
     }
     // 現在地へ: 最後は水平に入る(その線から「現在地」が出る)
-    var run = spQ.matches ? 70 : 190;
+    var run = spQ.matches ? 60 : 190;
     var N0 = N, delta = spQ.matches ? 0 : Math.max(0, main.x + 110 + run - N0[0]); // 下線を延ばしても S の横幅を保つ
     N = [N0[0] + delta, N0[1]];
     main.to(N[0] - run, N[1]);
     var dHere = main.mark();
     main.L(N[0], N[1]);
-    main.done();
+    main.done(true);
     S.main = main;
     // スマホは戻る線が上から入るので、「現在地」は線の下に下げる
     var here = label(g.text, '現在地', N[0] - run + 16, N[1], L.hereFs, 'j-sm', spQ.matches ? 1 : -1);
@@ -666,7 +739,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       var d0 = r.mark();
       var lb = label(g.text, names[bi], B.x, y, Math.max(B.fs, P.minFs), 'j-br', -1);
       r.L(B.x + lb.w + 18, y);
-      r.done();
+      r.done(bi === 1);
       glyphTrig(lb, d0, B.x - 10, r.len);
       r.lb = lb; r.i = bi;
       return r;
@@ -703,7 +776,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     road.L(T.end, roadY);
     var dEnd = road.mark();
     S.townGeom = { roadY: roadY, dTown: dTown, dRing: dRing, dEnd: dEnd };
-    road.done();
+    road.done(true);
     S.road = road;
     S.ringX = T.ring;
 
@@ -825,7 +898,6 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       q.mx = f * (b.x - a.x) / dt; q.my = f * (b.y - a.y) / dt; q.mz = f * (b.lz - a.lz) / dt;
     });
     S.chain = { Lm: main.len, Lb: chosen.len, Lr: road.len };
-    built = true;
   }
 
   function camAt(t) {
@@ -996,10 +1068,11 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   var STILL = 13.2; // 俯瞰に三つの言葉が出ている時刻(ロゴの前)
   function still() { render(STILL); }
   function init() {
-    build();
-    if (reduceQ.matches) { still(); return; }
-    render(t);
-    setTimeout(sync, 400); // 読み込み直後の重い処理を避ける
+    build(function () {
+      if (reduceQ.matches) { still(); return; }
+      render(t);
+      setTimeout(sync, 400); // 読み込み直後の重い処理を避ける
+    });
   }
   btn.addEventListener('click', function () {
     userPaused = !userPaused;
@@ -1014,11 +1087,12 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     clearTimeout(rz);
     rz = setTimeout(function () {
       var w = svg.getBoundingClientRect().width;
-      if (Math.abs(w - lastW) < 2 && !reduceQ.matches) return; // スマホのアドレスバーの伸縮では組み直さない
-      lastW = w; build(); render(reduceQ.matches ? STILL : t);
+      var same = L === (spQ.matches ? LAYOUTS.sp : LAYOUTS.pc);
+      if (Math.abs(w - lastW) < 2 && same && !reduceQ.matches) return; // スマホのアドレスバーの伸縮では組み直さない(PC とスマホの世界が替わるときは組み直す)
+      lastW = w; build(function () { render(reduceQ.matches ? STILL : t); sync(); });
     }, 200);
   });
-  if (reduceQ.addEventListener) reduceQ.addEventListener('change', function () { build(); if (reduceQ.matches) still(); sync(); });
+  if (reduceQ.addEventListener) reduceQ.addEventListener('change', function () { build(function () { if (reduceQ.matches) still(); else render(t); sync(); }); });
   fig.journeyRender = function (tt) { t = tt; render(tt); }; // 検証用(時刻を指定して1枚を描く)
   var go = function () { lastW = svg.getBoundingClientRect().width; init(); };
   var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
