@@ -1,6 +1,7 @@
 // ================================================================
 // showreel render — reel.html を 1 フレームずつ描いて MP4 にする
-// usage: node showreel/render.mjs [--from 0] [--to 15] [--fps 60] [--samples 6] [--out showreel/showreel.mp4]
+// usage: node showreel/render.mjs [--page showreel/reel.html] [--from 0] [--to 15] [--fps 60] [--samples 6] [--out showreel/showreel.mp4]
+//        --page は window.REEL(DUR・ready・renderFrame(t, samples)・out)を持つリポジトリ内の HTML。既定は reel.html。音は同じディレクトリの sound.wav
 //        node showreel/render.mjs --stills 0.5,2.1,7.3 --outdir <dir>   (確認用の静止画だけ)
 // 依存: playwright(chromium)・ffmpeg(PATH か FFMPEG)。音は showreel/sound.mjs が書く WAV を重ねる
 // フォント: reel.html は Google Fonts を読む。描画時はその要求を curl で取ったキャッシュから返す
@@ -22,6 +23,8 @@ const FPS = +(argv.fps || 60);
 const FROM = +(argv.from || 0);
 const TO = argv.to != null ? +argv.to : null;
 const SAMPLES = +(argv.samples || 64);            // 1 フレームのサブフレームの上限(実際の枚数は速さで決まる)
+const PAGE = (argv.page || 'showreel/reel.html').replace(/^\/+/, '');
+const PAGE_DIR = path.join(ROOT, path.dirname(PAGE));
 const OUT = argv.out || path.join(HERE, 'showreel.mp4');
 const FFMPEG = process.env.FFMPEG || 'ffmpeg';
 const FONTCACHE = argv.fontcache || path.join(os.tmpdir(), 'bridge-showreel-fonts');
@@ -61,9 +64,9 @@ await page.route(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, async route =>
 page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') console.log('[page]', m.text()); });
 page.on('pageerror', e => console.log('[pageerror]', e.message));
 
-await page.goto(`${BASE}/showreel/reel.html?render=1`, { waitUntil: 'load' });
+await page.goto(`${BASE}/${PAGE}?render=1`, { waitUntil: 'load' });
 await page.evaluate(() => window.REEL.ready);
-if (argv.streak) await page.evaluate(v => window.REEL.setLineStreak(v), +argv.streak);   // 比較用: 線だけの区間のぼけの長さ(px)
+if (argv.streak) await page.evaluate(v => window.REEL.setLineStreak && window.REEL.setLineStreak(v), +argv.streak);   // 比較用: 線だけの区間のぼけの長さ(px)
 const DUR = await page.evaluate(() => window.REEL.DUR);
 
 /* ---- 1 フレーム: サブフレームを Float で平均して動きのぼけを作る ---- */
@@ -94,7 +97,7 @@ if (argv.stills) {
 /* ---- 動画: PNG を ffmpeg に流す。音(sound.wav)があれば重ねる ---- */
 const end = TO ?? DUR;
 const n0 = Math.round(FROM * FPS), n1 = Math.round(end * FPS);
-const wav = path.join(HERE, 'sound.wav');
+const wav = path.join(PAGE_DIR, 'sound.wav');
 const withAudio = existsSync(wav) && !argv.noaudio;
 const args = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-'];
 if (withAudio) args.push('-ss', String(FROM), '-t', String((n1 - n0) / FPS), '-i', wav);
