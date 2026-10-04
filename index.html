@@ -73,12 +73,13 @@ html:not(.js) .jr{display:none}
 .jr-svg text{font-family:var(--sans);font-feature-settings:"palt" 1}
 .jr-svg .j-hero{font-weight:900;fill:var(--ink)}
 .jr-svg .j-new{font-weight:700;fill:var(--ink)}
-.jr-svg .j-br{font-weight:700;fill:var(--ink)}
+.jr-svg .j-br{font-weight:700;fill:var(--ink);transition:fill .6s var(--ease)}
 .jr-svg .j-exp{font-weight:500;fill:var(--ink-3)}
 .jr-svg .j-tr{font-weight:500;fill:var(--ink-3)}
 .jr-svg .j-far{font-weight:500;fill:var(--ink-4)}
 .jr-svg .j-sm{font-weight:500;fill:var(--ink-3)}
-.jr-svg .j-en{font-family:var(--en);font-weight:600;letter-spacing:.2em;fill:var(--ink-3)}
+.jr-svg .j-en{font-family:var(--en);font-weight:600;letter-spacing:.2em;text-transform:uppercase;fill:var(--ink-3)}
+.jr-svg .j-dim text{fill:var(--ink-3);transition:fill .6s var(--ease)}
 .jr-svg .j-day{font-family:var(--en);font-weight:600;fill:var(--ink-3)}
 .jr-svg .j-num{font-family:var(--en);font-weight:600;fill:var(--ink);font-variant-numeric:tabular-nums}
 .jr-svg .j-verb{font-weight:900;fill:var(--ink)}
@@ -417,7 +418,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       branch: { x: 740, rows: [-40, 96, 232], fs: 25 },
       town: { x0: 1080, ring: 1600, end: 1650, roadW: 34, fs: 17, numFs: 24, road: [1080, 440],
               b: [[1100, 92, 62, 52], [1214, 76, 112, 42], [1312, 168, 84, 60, 1], [1504, 86, 50, 54]] },
-      verbs: [[0, 'below'], [2, 'below'], ['road', 'below']], verbPx: 26, logoPx: 86,
+      verbPx: 26, logoPx: 86,
       cam: function (A) {
         return [
           [0, A.start[0], A.start[1], 1, 1],
@@ -438,21 +439,21 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     },
     sp: {
       ref: [390, 680], focal: [0.5, 0.5],
-      far: [['記録', -150, -560], ['受付', 120, -520], ['会計', -170, 250], ['回診', 140, -170], ['レセプト点検', 70, 560], ['夜勤', -168, -60], ['カルテ', 150, 200]],
+      far: [['記録', -176, -610], ['受付', 150, -590], ['会計', -176, 700], ['レセプト点検', 96, 760]],
       farFs: 13,
       stations: [['退院支援', -160, -300, 40, 'j-hero'], ['合意形成', -120, -192, 27, 'j-new'], ['プロジェクト推進', -84, -92, 27, 'j-new']],
-      N: [-104, 16], hereFs: 14, enFs: 12,
+      N: [-104, 136], hereFs: 14, enFs: 12,
       field: [
         ['申し送り', -170, -456, null],
-        ['多職種連携', 24, -494, 'ステークホルダー調整', 44, -14],
+        ['多職種連携', 24, -494, 'ステークホルダー調整', 30, 64],
         ['患者・家族への説明', -50, -414, null],
-        ['業務改善', 70, -370, 'オペレーション改善', 64, -246]
+        ['業務改善', 70, -370, null]
       ],
       fieldFs: 17, trFs: 13,
-      branch: { x: -50, rows: [16, 96, 176], fs: 20 }, // 現在地の高さから下へ分かれる(戻る線が橋の名前を横切らない)
-      town: { x0: -150, ring: 96, end: 130, roadW: 30, fs: 14, numFs: 20, road: [-150, 384],
-              b: [[-140, 60, 50, 34], [-70, 50, 86, 30], [-8, 110, 62, 38, 1], [116, 44, 40, 32]] },
-      verbs: [[0, 'below'], ['branch', 'below'], ['road', 'below']], verbPx: 19, logoPx: 64,
+      branch: { x: -50, rows: [136, 216, 296], fs: 20 }, // 現在地の高さから下へ分かれる(戻る線が橋の名前を横切らない)
+      town: { x0: -150, ring: 96, end: 130, roadW: 30, fs: 14, numFs: 18, road: [-150, 512], via: { R: 176, Yb: 362, Lx: -176 },
+              b: [[-144, 58, 50, 34], [-76, 50, 86, 30], [-18, 110, 62, 38, 1], [112, 44, 40, 32]] },
+      verbPx: 19, logoPx: 64,
       cam: function (A) {
         return [
           [0, A.start[0], A.start[1], 1, 1],
@@ -461,7 +462,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
           [4.2, 0, A.N[1] - 70, .97],
           [5.4, 6, A.N[1] + 20, 1],
           [6.3, 6, A.N[1] + 50, 1.01],
-          [7.6, 0, A.town[1] - 120, 1],
+          [7.6, 20, A.town[1] - 190, 1],
           [9.0, A.clinic[0] - 30, A.town[1] - 70, 1.06],
           [10.2, A.clinic[0] - 30, A.town[1] - 72, 1.08, 1],
           [12.2, A.ov[0], A.ov[1], A.ov[2], 1],
@@ -483,7 +484,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   function label(parent, str, x, ulY, fs, cls, dir, opt) {
     opt = opt || {};
     var g = mk('g', null, parent);
-    var asc = fs * 0.88, desc = fs * 0.16, gap = fs * 0.28;
+    var asc = fs * 0.88, desc = fs * 0.16, gap = fs * 0.28 + (opt.gap || 0);
     var base = dir < 0 ? ulY - gap : ulY + gap + asc;
     var probe = mk('text', { x: x, y: base, 'font-size': fs, 'class': cls }, g);
     probe.textContent = str;
@@ -565,8 +566,14 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   var riseBy = function (tip) { return function (gl) { return E.out(clamp((tip - gl.trig) / (gl.rl || RISE))); }; };
 
   /* ---------------- 組み立て ---------------- */
+  /* 2回組む: 1回目で俯瞰の倍率を測り、2回目で「俯瞰でも 12.5px を割らない語の下限」と三つの言葉の大きさを決める */
   function build() {
     L = spQ.matches ? LAYOUTS.sp : LAYOUTS.pc;
+    buildWorld({ minFs: 0, verbFs: L.verbPx / (.45 * clamp(svg.getBoundingClientRect().width / L.ref[0], .5, 1.35)) });
+    var z1 = S.zOv;
+    buildWorld({ minFs: 12.8 / z1, verbFs: Math.min(L.verbPx / z1, S.verbRoom) });
+  }
+  function buildWorld(P) {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var rect = svg.getBoundingClientRect();
     W = rect.width || 1; H = rect.height || 1;
@@ -600,15 +607,16 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     heroT.textContent = s0[0];
     var hw = heroT.getComputedTextLength();
     var ul0 = s0[2] + s0[3] * 0.28;
-    main.M(s0[1] - 6, ul0).L(s0[1] + hw + 18, ul0);
+    // 下線は語より長くてよい(俯瞰で「見つける。」がこの下線の水平の所から下がる)
+    main.M(s0[1] - 6, ul0).L(s0[1] + Math.max(hw + 18, spQ.matches ? 0 : P.verbFs * 5.15 + 4), ul0);
     S.hero = heroT;
     for (var i = 1; i < st.length; i++) {
-      var s = st[i], ul = s[2] + s[3] * 0.28;
+      var s = st[i], fsS = Math.max(s[3], P.minFs), ul = s[2] + fsS * 0.28;
       main.to(s[1] - 8, ul);
       var d0 = main.mark();
-      var lb = label(g.text, s[0], s[1], ul, s[3], s[4], -1);
+      var lb = label(g.text, s[0], s[1], ul, fsS, s[4], -1);
       glyphTrig(lb, d0, s[1] - 8);
-      main.L(s[1] + lb.w + 22, ul);
+      main.L(s[1] + Math.max(lb.w + 22, i === 2 ? P.verbFs * 6.15 + 10 : 0), ul);
       lb.route = 'main';
       S.stations.push(lb);
     }
@@ -651,7 +659,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       r.M(N[0], N[1]);
       if (y !== N[1]) r.to(B.x - 10, y, .5); else r.L(B.x - 10, y);
       var d0 = r.mark();
-      var lb = label(g.text, names[bi], B.x, y, B.fs, 'j-br', -1);
+      var lb = label(g.text, names[bi], B.x, y, Math.max(B.fs, P.minFs), 'j-br', -1);
       r.L(B.x + lb.w + 18, y);
       r.done();
       glyphTrig(lb, d0, B.x - 10, r.len);
@@ -662,14 +670,20 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     S.chosen = chosen;
     // 3本の橋の下に、その名前(BRIDGE COMPASS)が下がって出る
     var last = S.branches[2];
-    S.en = label(g.text, 'BRIDGE COMPASS', B.x, B.rows[2], L.enFs, 'j-en', 1, { whole: true });
+    S.en = label(g.text, 'BRIDGE Compass', B.x, B.rows[2], L.enFs, 'j-en', 1, { whole: true, gap: L.enFs }); // 表示は大文字(CSS)。下線から1字ぶん離す
     S.en.glyphs[0].trig = last.len * .8; S.en.glyphs[0].rl = last.len * .2;
 
     // 道: 医療経営の線がそのまま街の道になり、最後にロゴの藍へ曲がる
     var T = L.town, roadY = T.road ? T.road[1] : N[1];
     var road = new Route(g.lines, 'j-line');
     road.M(chosen.x, chosen.y);
-    if (T.road) { road.to(T.road[0], roadY, .9); }
+    if (T.via) { // スマホ: 橋の群れの右で下り、屋根より上の空きを左へ戻り、左端で下りて道に入る(語と建物を横切らない)
+      var V = T.via;
+      road.C(chosen.x + 40, chosen.y, V.R, chosen.y + 20, V.R, chosen.y + 60)
+        .C(V.R, V.Yb - 24, V.R - 24, V.Yb, V.R - 64, V.Yb)
+        .L(V.Lx + 40, V.Yb)
+        .C(V.Lx, V.Yb, V.Lx - 22, roadY, T.x0, roadY);
+    } else if (T.road) { road.to(T.road[0], roadY, .9); }
     var dTown = road.mark() + (T.road ? 0 : (T.x0 - chosen.x));
     road.L(T.ring, roadY);
     var dRing = road.mark();
@@ -682,35 +696,38 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 
     // 道の面(線の奥に広がる。--bg-3 の面だけ)
     var surf = new Route(g.road, 'j-road');
-    surf.M(T.x0, roadY - T.roadW / 2).L(T.end + 10, roadY - T.roadW / 2).done();
+    surf.M(T.x0, roadY - T.roadW / 2).L(T.end, roadY - T.roadW / 2).done();
     put(surf.el, 'stroke-width', T.roadW);
     S.surf = surf;
 
     // 建物: 線が輪郭を描いて現れる(斜投影。正面・上面・側面)
-    var groundY = roadY - T.roadW;
+    var groundY = roadY - T.roadW, shift = 0;
+    var nameFs = Math.max(T.fs + (spQ.matches ? 6 : 7), P.minFs);
     S.builds = T.b.map(function (b) {
-      var x = b[0], w = b[1], h = b[2], dp = b[3], ox = OBL[0] * dp, oy = OBL[1] * dp;
+      var x = b[0] + shift, w = b[1], h = b[2], dp = b[3], ox = OBL[0] * dp, oy = OBL[1] * dp;
+      if (b[4]) { var need = nameFs * 5.1 + 24; if (need > w) { shift += need - w; w = need; } } // 「クリニック」が正面に収まる幅まで広げ、後ろの建物をずらす
       var gb = mk('g', null, g.build);
-      var P = function (pts) { return 'M' + pts.map(function (p) { return r2(p[0]) + ' ' + r2(p[1]); }).join(' L') + ' Z'; };
+      var poly = function (pts) { return 'M' + pts.map(function (p) { return r2(p[0]) + ' ' + r2(p[1]); }).join(' L') + ' Z'; };
       var top = groundY - h;
       var faces = [
-        mk('path', { d: P([[x + w, groundY], [x + w + ox, groundY + oy], [x + w + ox, top + oy], [x + w, top]]), 'class': 'j-side', pathLength: 1 }, gb),
-        mk('path', { d: P([[x, top], [x + w, top], [x + w + ox, top + oy], [x + ox, top + oy]]), 'class': 'j-face', pathLength: 1 }, gb),
-        mk('path', { d: P([[x, groundY], [x + w, groundY], [x + w, top], [x, top]]), 'class': 'j-face', pathLength: 1 }, gb)
+        mk('path', { d: poly([[x + w, groundY], [x + w + ox, groundY + oy], [x + w + ox, top + oy], [x + w, top]]), 'class': 'j-side', pathLength: 1 }, gb),
+        mk('path', { d: poly([[x, top], [x + w, top], [x + w + ox, top + oy], [x + ox, top + oy]]), 'class': 'j-face', pathLength: 1 }, gb),
+        mk('path', { d: poly([[x, groundY], [x + w, groundY], [x + w, top], [x, top]]), 'class': 'j-face', pathLength: 1 }, gb)
       ];
       faces.forEach(function (f) { put(f, 'stroke-dasharray', '1 1.02'); });
       var trig = Math.min(dTown + (x - T.x0) - 40, dEnd - 170); // 道の終わりまでに描き終える
       var o = { g: gb, faces: faces, trig: trig, x: x, w: w, top: top, ox: ox, oy: oy, clinic: !!b[4] };
       if (b[4]) {
-        o.name = label(g.text, 'クリニック', x + 12, top, T.fs + (spQ.matches ? 6 : 7), 'j-new', 1); // 屋根の縁から正面に下がる(俯瞰でも 12px を割らない大きさ)
+        o.name = label(g.text, 'クリニック', x + 12, top, nameFs, 'j-new', 1); // 屋根の縁から正面に下がる。俯瞰でも 12.5px を割らない
         o.name.glyphs.forEach(function (gl) { gl.trig = Math.min(trig + 120, dEnd - 150) + (gl.x - x) * .3; gl.rl = 90; });
         // 数値は上面の奥の縁から出る(良い面と代償が1つずつ: 来院と平均待ち)
         var sy = top + oy;
         var sx = x + ox + 4;
         o.stats = [['来院', 48, 52, '人'], ['平均待ち', 31, 34, '分']].map(function (sd, si) {
-          var lbl = label(g.text, sd[0], sx, sy, T.fs - 3, 'j-sm', -1, { whole: true });
+          var lbl = label(g.text, sd[0], sx, sy, spQ.matches ? T.fs - 2 : T.fs, 'j-sm', -1, { whole: true });
           var val = label(g.text, sd[1] + sd[3], sx + lbl.w + 6, sy, T.numFs, 'j-num', -1, { whole: true });
-          sx += lbl.w + 6 + val.w + T.numFs * .8;
+          lbl.lodFs = val.lodFs = Math.min(lbl.fs, val.fs); // 語と数値は組で出て組で消える
+          sx += lbl.w + 6 + val.w + T.numFs * .6;
           [lbl, val].forEach(function (l) { l.glyphs[0].trig = Math.min(trig + 150, dEnd - 130) + si * 24; l.glyphs[0].rl = 90; });
           return { lbl: lbl, val: val, a: sd[1], b: sd[2], u: sd[3] };
         });
@@ -731,7 +748,8 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     S.ring = mk('circle', { cx: T.ring, cy: roadY, r: 9, 'class': 'j-ring' }, g.text);
 
     // 人の点(患者に限らない)
-    S.people = [0, 1, 2, 3, 4, 5].map(function (i) { return { el: mk('circle', { r: 2.6, 'class': 'j-person' }, g.people), ph: i / 6, late: i >= 4 }; });
+    var PH = [0, .07, .31, .52, .58, .83], SPD = [.045, .038, .052, .041, .057, .034], LANE = [0, 0, 1, 0, 1, 1];
+    S.people = PH.map(function (ph, i) { return { el: mk('circle', { r: 2.6, 'class': 'j-person' }, g.people), ph: ph, sp: SPD[i], lane: LANE[i], late: i >= 4 }; });
 
     // 点(現在地。分かれ目で砂に変わる)
     S.dotInk = mk('circle', { r: 5, 'class': 'j-dot' }, g.dot);
@@ -767,18 +785,23 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     S.logoN = logoN; S.logoS = logoS; S.logoW = 6 * sc;
 
     // 三つの言葉: それぞれの場所の線から下がって出る(俯瞰の画面で verbPx)
-    var vfs = L.verbPx / zOv, vs = ['見つける。', '言葉にする。', '試してみる。'];
-    var anchors = [
-      [st[0][1] - 6, ul0],
-      L.verbs[1][0] === 'branch' ? [B.x, B.rows[2]] : [st[2][1], st[2][2] + st[2][3] * .28],
-      [T.x0 + 20, roadY]
+    var vfs = P.verbFs, vs = ['見つける。', '言葉にする。', '試してみる。'];
+    var st2ul = S.stations[1].ul;
+    var anchors = [[st[0][1] - 6, ul0], [st[2][1], st2ul], [T.x0 + 20, roadY]];
+    // 三つの言葉は、それぞれの下線の水平の所に収まる大きさまで(次の組み立てで使う)
+    var rooms = [
+      spQ.matches ? hw + 6 : (st[1][1] - 60) - (st[0][1] - 6),
+      spQ.matches ? 178 - (st[2][1] - 8) : (N[0] - run - 30) - (st[2][1] - 8),
+      T.end - (T.x0 + 20)
     ];
+    S.verbRoom = Math.min(rooms[0] / 5.15, rooms[1] / 6.15, rooms[2] / 6.15);
     S.verbs = vs.map(function (v, vi) { return label(g.text, v, anchors[vi][0], anchors[vi][1] + (vi === 2 ? 2 : 0), vfs, 'j-verb', 1, { lod: false }); });
 
     // 俯瞰をもう一度(ロゴと言葉を含めて)
     ov = fit(core());
+    S.zOv = ov[2] * k;
 
-    var start = spQ.matches ? [0, st[0][2] - 70] : [st[0][1] + 200, 24];
+    var start = spQ.matches ? [0, st[0][2] - 80] : [st[0][1] + 200, 24];
     A.start = start; A.st1 = [st[1][1], st[1][2]]; A.N = N; A.town = [T.x0, roadY]; A.ov = ov;
     if (!A.clinic) A.clinic = [T.ring - 100, roadY - 80];
     keys = L.cam(A).map(function (q) { return { t: q[0], x: q[1], y: q[2], lz: Math.log(q[3]), hold: !!q[4] }; });
@@ -850,7 +873,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       var d = r.len * a;
       r.draw(d);
       put(r.el, 'stroke-width', r2(px(1.1)));
-      put(r.el, 'opacity', r2(.6 - .25 * seg(t, 5.8, .5)));
+      put(r.el, 'opacity', r2((.6 - .25 * seg(t, 5.8, .5)) * lodA(L.fieldFs, z))); // 周りの語が消えたら線も退く
       if (r.tr) riseGlyphs(r.tr, riseBy(d));
     });
 
@@ -864,7 +887,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       put(r.el, 'stroke-width', r2(px(r === S.chosen ? lerp(1.7, 2.6, em) : 1.7)));
       put(r.el, 'opacity', r === S.chosen ? '1' : r2(1 - .68 * em));
       riseGlyphs(r.lb, riseBy(d));
-      r.lb.dim = r === S.chosen ? 1 : 1 - .5 * em;
+      put(r.lb.g, 'class', r !== S.chosen && em > .5 ? 'j-dim' : ''); // 選ばれなかった橋の名前は不透明の --ink-3 に
       if (r.i === 2) riseGlyphs(S.en, riseBy(d));
     });
 
@@ -879,7 +902,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     S.logoS.draw(S.logoS.len * sandD);
     put(S.logoS.el, 'stroke-width', r2(Math.max(px(2.6), S.logoW)));
     // 道の面: 線の少し後ろから広がる
-    S.surf.draw(dRoad - g.dTown - 70);
+    S.surf.draw(dRoad - g.dTown - 70 * (1 - seg(t, 9.4, .7, E.inOut))); // 伸びている間だけ線の少し後ろ。伸び終えたら道の終わりまで
     // 建物の輪郭
     S.builds.forEach(function (b) {
       var q = clamp((dRoad - b.trig) / 160);
@@ -902,8 +925,6 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     });
     riseGlyphs(S.choice, riseBy(dRoad));
     riseGlyphs(S.day, riseBy(dRoad));
-    var dayTxt = t >= 9.3 && t < 15.6 ? 'Day 7' : 'Day 6';
-    if (S.day.glyphs[0].el.textContent !== dayTxt) S.day.glyphs[0].el.textContent = dayTxt;
     var ringOn = clamp((dRoad - (g.dRing - 40)) / 40);
     put(S.ring, 'opacity', r2(ringOn));
     put(S.ring, 'r', r2(9 * Math.pow(z, .3) / z));
@@ -912,10 +933,10 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     // 人の点: 道ができたところを歩く
     var walkLen = g.dRing - g.dTown - 60;
     S.people.forEach(function (pp) {
-      var u = ((pp.ph + t * .045) % 1);
+      var u = ((pp.ph + t * pp.sp) % 1);
       var x = L.town.x0 + 20 + u * walkLen;
       var vis = clamp((dRoad - g.dTown - (x - L.town.x0) - 30) / 60) * (pp.late ? seg(t, 9.4, .5) : 1);
-      put(pp.el, 'cx', r2(x)); put(pp.el, 'cy', r2(g.roadY - L.town.roadW + 7));
+      put(pp.el, 'cx', r2(x)); put(pp.el, 'cy', r2(g.roadY - L.town.roadW * (pp.lane ? .42 : .8)));
       put(pp.el, 'r', r2(2.6 / z * Math.pow(z, .3)));
       put(pp.el, 'opacity', r2(vis));
     });
@@ -926,7 +947,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     else if (dDot <= Lm + Lb) pt = S.chosen.at(dDot - Lm);
     else pt = S.road.at(dDot - Lm - Lb);
     var appear = t < 15.6 ? seg(t, 1.0, .3, E.out) : 1 - seg(t, 17.75, .2);
-    var sand = clamp((dDot - Lm + 2) / 24);
+    var sand = clamp((dDot - Lm + 24) / 24); // 現在地に着いたときに砂
     var rr = 5.4 * Math.pow(z, .3) / z * appear;
     [S.dotInk, S.dotSand].forEach(function (d, i) {
       put(d, 'cx', r2(pt[0])); put(d, 'cy', r2(pt[1])); put(d, 'r', r2(Math.max(rr, 0)));
@@ -940,7 +961,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     });
 
     // 文字の大きさによる薄れ(12→10px)
-    S.labels.forEach(function (lb) { if (lb.lod) put(lb.g, 'opacity', r2(lodA(lb.fs, z) * lb.dim)); });
+    S.labels.forEach(function (lb) { if (lb.lod) put(lb.g, 'opacity', r2(lodA(lb.lodFs || lb.fs, z))); });
   }
 
   /* ---------------- 時間 ---------------- */
