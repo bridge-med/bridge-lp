@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>re + habilis — BRIDGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@700&family=Inter:wght@500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#FBFAF7;height:100%;overflow:hidden}
+  canvas{display:block;position:absolute;inset:0;margin:auto;width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+/* ================================================================
+   BRIDGE「re + habilis」— 16.000 秒・1920×1080・60fps・無音
+   時刻 t だけで 1 枚が決まる(同じ t なら何度描いても同じ絵)。
+   憲法第3条(リハビリテーションの定義)と第4条(対象)を、そこに書いてある言葉だけで動かす。新しいコピーは書かない。
+     リハビリテーション → re / habilis(再び・ふさわしい)
+     → 「機能の回復」が静かに薄れ、「回復」を残して「その人がその人らしく生きられる状態への回復」に開く
+     → 一本の藍の線が左から入り、患者・医療者・組織・企業・地域・社会 が順に線の上に立つ(分かれない。同じ一本の線=考え方は同じ)
+     → 語が線に沈み、線がロゴの藍の線に曲がり、砂の線が交差する(接続しない)。BRIDGE。
+   道具(easing・文字の組み・ロゴの経路と finale)は ../namae/v3-parts.js を読む(v3「一本の線」から写した一式。経路の写しを増やさない)。
+   finale は v3 の時刻のまま、t − FIN_OFF で呼ぶ。砂が出るのはロゴの砂の線だけ。
+   書き出しは ../render.mjs --page showreel/rehabilitation/reel.html。約束(window.REEL)は ../reel.html と同じ。
+   ================================================================ */
+const W = 1920, H = 1080, FPS = 60, DUR = 16;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let TT = 0;                                   // v3-parts の lineText が読む「いまの時刻」
+</script>
+<script src="../namae/v3-parts.js"></script>
+<script>
+const INK3 = '#63646B';                       // --ink-3(補足・注記)。LIGHT(v3-parts)にない値はこれだけ
+const fadeIO = (t, a0, d0, a1, d1) => Math.min(seg(t, a0, d0, E.ease), 1 - seg(t, a1, d1, E.ease));
+/* 一行をまとめて出す/消す(透明度と上下 dy) */
+function textIO(L, x, y, color, a, dy) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a;
+  drawGlyphs(L, x, y + dy, color);
+  ctx.restore();
+}
+
+/* ================================================================
+   時刻表(秒)。editor の条件: 一文は全部見えてから 3 秒以上、六語は最後の語から 2.5 秒以上、署名は 1.5 秒以上止める
+   ================================================================ */
+const LINE_Y = 620;                           // v3 の finale が曲げ始める「地平線」と同じ高さ・太さ 6
+const FIN_OFF = 0.5;                          // finale(v3 の時刻)を 0.5 秒遅らせて呼ぶ: 曲げ始め 13.27 → 署名 13.86 → 字間が落ち着く 14.46 → 16.00 まで静止
+const T = {
+  word0: 0.20, wordStep: 0.07, wordFade: 0.45,            // リハビリテーション(9 字): 最後の字が 1.21 で出揃う
+  rule0: 1.05, ruleD: 0.60,                                // 藍の細い線
+  ety0: 1.40, etyD: 0.50, ety2: 1.60,                      // re / habilis、再び / ふさわしい
+  exit1: 2.70, exit1D: 0.45,
+  def0: 3.05, defD: 0.50,                                  // 機能の回復
+  col0: 3.95, colD: 0.50,                                  // 「機能の」が薄れて畳まれる
+  grow0: 4.45, growD: 1.30,                                // 一文が開く(5.75 で出揃う)
+  exit2: 8.80, exit2D: 0.40,                               // 3.05 秒置いた
+  line0: 8.95, lineD: 1.40,                                // 一本の線が左から右の外まで
+  wordD: 0.45,                                             // 語が線から立つ時間
+  sink0: 12.70, sinkD: 0.40,                               // 語が線に沈む。「社会」は 10.0 に出揃い、2.7 秒置いた
+  bend: 12.7734375 + 0.5,                                  // ここから finale(v3-parts)が線を描く
+};
+/* 六語の席(x)。等間隔にしない */
+const WORDS = [
+  { x: 150, s: '患者' }, { x: 470, s: '医療者' }, { x: 790, s: '組織' },
+  { x: 1030, s: '企業' }, { x: 1320, s: '地域' }, { x: 1640, s: '社会' },
+];
+
+/* ================================================================
+   場面 1: リハビリテーション → re / habilis
+   ================================================================ */
+const WORD = 'リハビリテーション';
+function scene1(t) {
+  if (t >= T.exit1 + T.exit1D) return;
+  const out = seg(t, T.exit1, T.exit1D, E.ease);          // 退場: 透明に、24px 上へ
+  const L = layout(WORD, F.min(600, 104), 104 * 0.06);
+  const x = (W - L.width) / 2, y = 500;
+  ctx.save(); ctx.globalAlpha = 1 - out; ctx.translate(0, -24 * out);
+  drawGlyphs(L, x, y, LIGHT.t1, i => {
+    const u = seg(t, T.word0 + i * T.wordStep, T.wordFade, E.ease);
+    return { a: u, dy: 10 * (1 - u) };
+  });
+  // 藍の細い線: 語の幅を左から右へ
+  const rl = seg(t, T.rule0, T.ruleD, E.cubicInOut);
+  if (rl > 0) {
+    ctx.strokeStyle = LIGHT.line; ctx.lineWidth = 2; ctx.lineCap = 'butt';
+    ctx.beginPath(); ctx.moveTo(x, y + 46); ctx.lineTo(x + L.width * rl, y + 46); ctx.stroke();
+  }
+  // 語源(注記): Inter と Noto Sans JP。二組を線の両端に寄せる
+  const Lre = layout('re', F.en(500, 44), 44 * 0.02), Lha = layout('habilis', F.en(500, 44), 44 * 0.02);
+  const Lsa = layout('再び', F.jp(700, 34), 34 * 0.08), Lfu = layout('ふさわしい', F.jp(700, 34), 34 * 0.08);
+  const a1 = seg(t, T.ety0, T.etyD, E.ease), a2 = seg(t, T.ety2, T.etyD, E.ease);
+  const xr = x + 8, xh = x + L.width - Lha.width - 8, yb = y + 108;
+  textIO(Lre, xr, yb, LIGHT.t2, a1, 12 * (1 - a1));
+  textIO(Lha, xh, yb, LIGHT.t2, a1, 12 * (1 - a1));
+  textIO(Lsa, xr + 2, yb + 54, INK3, a2, 10 * (1 - a2));
+  textIO(Lfu, x + L.width - Lfu.width - 8, yb + 54, INK3, a2, 10 * (1 - a2));
+  ctx.restore();
+}
+
+/* ================================================================
+   場面 2: 機能の回復 → その人がその人らしく生きられる状態への回復
+   「回復」は固定の席ではなく、開いていく文に押されて右へ移る。組は常に中央。「機能の」は印を付けず、静かに薄れるだけ
+   ================================================================ */
+const PRE1 = '機能の', PRE2 = 'その人がその人らしく生きられる状態への', KAI = '回復';
+const DEF_SIZE = 64, DEF_LS = DEF_SIZE * 0.04;
+function scene2(t) {
+  if (t < T.def0 || t >= T.exit2 + T.exit2D) return;
+  const inA = seg(t, T.def0, T.defD, E.ease), out = seg(t, T.exit2, T.exit2D, E.ease);
+  const fnt = F.min(600, DEF_SIZE);
+  const L1 = layout(PRE1, fnt, DEF_LS), L2 = layout(PRE2, fnt, DEF_LS), Lk = layout(KAI, fnt, DEF_LS);
+  const adv = L => L.width + DEF_LS;                       // 次の語までの送り
+  // 「機能の」は c1 文字ぶん、新しい文は c2 文字ぶん見えている(連続量)
+  const c1 = L1.g.length * (1 - seg(t, T.col0, T.colD, E.sineInOut));
+  const c2 = L2.g.length * seg(t, T.grow0, T.growD, E.sineInOut);
+  const wVis = (L, c) => { const n = Math.floor(c); if (n >= L.g.length) return adv(L); return L.g[n].x + (L.g[n].w + DEF_LS) * (c - n); };
+  const w1 = wVis(L1, c1), w2 = wVis(L2, c2);
+  const total = w1 + w2 + Lk.width;
+  const x0 = (W - total) / 2, y = 560;
+  ctx.save(); ctx.globalAlpha = inA * (1 - out); ctx.translate(0, 18 * (1 - inA) - 24 * out);
+  // 出入りの途中の字は「回復」の左端で切る(重ねない)。薄れる字は右から、出る字は左から
+  ctx.save(); clipRect(x0 - 60, y - 120, w1 + w2 + 60, 200);
+  if (c1 > 0) drawGlyphs(L1, x0, y, INK3, i => ({ a: clamp((c1 - i) * 1.5) }));                 // 右の字から順に薄れ、「回復」が左へ寄る
+  if (c2 > 0) drawGlyphs(L2, x0 + w1, y, LIGHT.t1, i => { const a = clamp((c2 - i) * 1.5); return { a, dy: 6 * (1 - a) }; });   // 左から順に出る
+  ctx.restore();
+  drawGlyphs(Lk, x0 + w1 + w2, y, LIGHT.t1);
+  mv('kai', x0 + w1 + w2, y);
+  ctx.restore();
+}
+
+/* ================================================================
+   場面 3: 一本の線が、患者・医療者・組織・企業・地域・社会 を順に通る(第4条。分かれない・砂なし)
+   線は v3 の finale の「地平線」(y=620・太さ 6・x −20〜1940)と同じ姿で止まり、finale がそのまま曲げる
+   ================================================================ */
+const WFONT = F.jp(700, 40);
+function wordStart(i) {                        // 線の先端が席を通る時刻
+  const target = (WORDS[i].x + layout(WORDS[i].s, WFONT).width / 2 + 20) / 1960;   // 先端 = −20 + 1960·cubicOut(u)
+  const u = 1 - Math.cbrt(1 - target);
+  return T.line0 + T.lineD * u;
+}
+function scene3(t) {
+  if (t < T.line0 || t >= T.bend) return;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = LIGHT.line; ctx.lineWidth = 6;
+  const tip = lerp(-20, 1940, seg(t, T.line0, T.lineD, E.cubicOut));
+  ctx.beginPath(); ctx.moveTo(-20, LINE_Y); ctx.lineTo(tip, LINE_Y); ctx.stroke();
+  mv('tip', tip, LINE_Y);
+  // 語は線の上に立つ(線より下は見せない)。沈むときは逆向きに同じ道
+  const out = t >= T.sink0 ? { t, t0: T.sink0, d: T.sinkD } : null;
+  WORDS.forEach((w, i) => {
+    if (t < wordStart(i) && !out) return;
+    lineText(w.s, WFONT, w.x, LINE_Y - 22, LIGHT.t1, LINE_Y, 3, -1, () => wordStart(i), T.wordD, null, out);
+  });
+}
+
+/* ================================================================
+   1 枚
+   ================================================================ */
+function draw(t) {
+  TT = t;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+  ctx.fillStyle = LIGHT.bg; ctx.fillRect(0, 0, W, H);
+  scene1(t); scene2(t); scene3(t);
+  if (t >= T.bend) finale(t - FIN_OFF, LIGHT);           // v3-parts: 地平線がロゴの藍の線へ曲がり、砂の線が交差し、BRIDGE
+}
+
+/* ---- 動きのぼけ: シャッター 180°(B-13)。v3 と同じく、動くものの目印(mv)から 1 コマの速さを測り、
+   副コマを出力面に 1/(i+1) で重ねる(= 平均)。線だけが画面を占める区間は尾の長さに上限を置く(v3-parts の LINE_ONLY と同じ値・+0.5 秒) ---- */
+const OUT = document.createElement('canvas'); OUT.width = W; OUT.height = H;
+const octx = OUT.getContext('2d');
+const STREAK_CAPS = [[12.65625 + FIN_OFF, PULL0 + FIN_OFF, 60], [PULL0 + FIN_OFF, PULL1 + FIN_OFF, 24], [T.line0, T.line0 + 0.3, 60]];
+function speedPx(t) {                          // 1 コマあたりの最大移動(px)
+  const probe = tt => { PROBING = new Map(); draw(tt); const m = PROBING; PROBING = null; return m; };
+  const a = probe(t), b = probe(t + 1 / FPS);
+  let v = 0;
+  for (const [k, p] of a) { const q = b.get(k); if (q) v = Math.max(v, Math.hypot(q[0] - p[0], q[1] - p[1])); }
+  return v;
+}
+function shutterFrac(v, t) {                   // コマに対するシャッターの割合(180° = 0.5)
+  if (v <= 0) return 0;
+  const w = STREAK_CAPS.find(([a, b]) => t >= a && t < b);
+  return w ? Math.min(0.5, w[2] / v) : 0.5;
+}
+function renderFrame(t, maxSamples = 64) {
+  const v = speedPx(t), sh = shutterFrac(v, t);
+  const n = clamp(Math.ceil(v * sh / 1.5), 1, maxSamples);      // 副コマは 1.5px おき(v3 と同じ)
+  octx.globalAlpha = 1; octx.clearRect(0, 0, W, H);
+  for (let i = 0; i < n; i++) {
+    draw(t + (sh / FPS) * ((i + .5) / n - .5));
+    octx.globalAlpha = 1 / (i + 1);
+    octx.drawImage(canvas, 0, 0);
+  }
+  octx.globalAlpha = 1;
+  window.REEL.out = OUT; window.REEL.lastN = n; window.REEL.lastStreak = v * sh;
+  return n;
+}
+
+/* ---- 準備: 使う文字をフォントごとに先読みして確かめる ---- */
+const TEXTS = {
+  [F.min(600, 40)]: WORD + PRE1 + PRE2 + KAI,
+  [F.jp(700, 40)]: '再びふさわしい' + WORDS.map(w => w.s).join(''),
+  [F.en(500, 40)]: 'rehabilis BRIDGE',
+};
+const ready = (async () => {
+  await document.fonts.ready;
+  await Promise.all(Object.entries(TEXTS).map(([f, s]) => document.fonts.load(f, s)));
+  const missing = Object.entries(TEXTS).filter(([f, s]) => !document.fonts.check(f, s)).map(([f]) => f);
+  if (missing.length) throw new Error('フォントが揃っていない: ' + missing.join(', '));
+  layoutCache.clear();
+})();
+
+window.REEL = { W, H, FPS, DUR, canvas, draw, renderFrame, speedPx, shutterFrac, ready, out: canvas };
+
+/* ---- プレビュー(?render なしで開いたとき): 実時間で再生(ぼけなし)。クリックで頭から。?t=秒 で静止 ---- */
+const q = new URLSearchParams(location.search);
+if (!q.has('render')) {
+  ready.then(() => {
+    if (q.has('t')) { draw(+q.get('t')); return; }
+    let t0 = performance.now();
+    const loop = () => { const t = (performance.now() - t0) / 1000; draw(Math.min(t, DUR)); if (t < DUR + 1) requestAnimationFrame(loop); };
+    canvas.addEventListener('click', () => { t0 = performance.now(); requestAnimationFrame(loop); });
+    requestAnimationFrame(loop);
+  }).catch(e => { document.body.insertAdjacentHTML('beforeend', '<pre style="position:fixed;left:16px;top:16px;color:#1B1B1E">' + e.message + '</pre>'); });
+}
+</script>
+</body>
+</html>
