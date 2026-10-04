@@ -25,18 +25,30 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 /* ================================================================
-   Home v8 — Hero Motion v1(2026-10-03 社長仕様)
-   構成: ヒーロー(コピー → 12秒でループする製品の動き) → 試しているもの(Compass / クリニックタウン3D / 小さな道具) → 本人の言葉 → フッター
-   ヒーローの動き: 普段の仕事が別の言葉になり(退院支援 → プロジェクト推進・合意形成)、Compass の結果になり、
-         クリニックタウン3Dで試せる、という BRIDGE の体験を、説明文ではなく実物に寄せた UI の動きで見せる。
-         動画ではなく HTML/CSS。全要素が同じ 12 秒の CSS animation で同期し、JS は停止(画面外・一時停止ボタン)とスクロールの拡大だけ
-   前版(v6〜v7)のガラスの立体と固定ステージは外した。素材は images/hero/ に残す(docs/hero-asset-spec.md)
-   色: 4系統のトークンだけ。ガラスは主ボタン(第22条 用途3)だけに残す。砂は選んだ選択肢の印とロゴの砂の線だけ
+   Home v9 — Experience Journey(2026-10-04 社長指示: 機能を説明するヒーローではなく、BRIDGE という概念を1本の線と空間の移動で体験させる)
+   構成: ヒーロー(コピー → 枠のない全幅の Journey) → 試しているもの(Compass / クリニックタウン3D / 小さな道具) → 本人の言葉 → フッター
+   Journey(約18秒で一周・カットなし。時刻 t だけで1枚の絵が決まる。文法はショーリール v3「一本の線」と Compass の結果の地図に揃える)
+     言葉の野(最初からある)→ 退院支援の下に線が引かれ、合意形成・プロジェクト推進が線から出る → 周りの経験からも薄い線が伸び、
+     言いかえを通って現在地に集まる → 分かれ目で点が砂になり、3本の橋に分かれる → 医療経営 / BizOps の線を点が進み、カメラが寄る →
+     同じ線の奥に道の面が広がり、線が建物の輪郭を描く(クリニックタウン3D)→ 選ぶと数値が入れ替わる →
+     引くと線は街の先で折り返し、全部の下を通って戻る。そこから「見つける。言葉にする。試してみる。」が出て、退いたあと線がロゴの藍に曲がる →
+     線が巻き戻り、カメラが言葉の野へ戻る
+   表現の約束(このヒーローだけ。designer 2026-10-04)
+     1 線が主語: 新しく現れるものは、線が届いたときにだけ現れる。場面をフェードで入れ替えない。言葉の野だけは最初からある(ループの起点)
+     2 線は言葉(経験)から出るか、一本の線から分かれる。何もない所から湧かせない。例外は正式ロゴの砂の線で、藍から生やさない
+     3 移動・拡大は視点(カメラ)の仕事。要素に許す動きは、線が伸びる/語が線から出る/点が線を進む/数値が入れ替わる、の4つだけ
+     4 文字は空間に置く(カード・枠・影に入れない)。読ませる語は線の上に置き、12px 以上・不透明・--ink か --ink-3。
+       画面上 12px を割る気配の語は 12→10px のあいだで薄れて消える
+     5 砂は現在地・分岐点の点1つと、選ぶ瞬間だけ(第22条)。線は藍(ロゴの線と同じ扱い)。破線は使わない(BRIDGE で破線は「未確定」)
+     6 終わりは引き: 全体が一本でつながる俯瞰で終える。タイトルカードを出さない。継ぎ目は視点の移動と線の巻き戻しで渡す
+     7 静止版(動きを減らす設定)は俯瞰の1枚。ロゴを含めない
+   色: 4系統のトークンだけ。ガラスは主ボタン(第22条 用途3)だけ。キャンバスの端の溶けは mask(アルファ)で、色のグラデーションではない
+   前版(Hero Motion v1・カードの切り替え)と、その前のガラスの立体は外した。立体の素材は images/hero/ に残す(docs/hero-asset-spec.md)
    ================================================================ */
 
 /* ===== ヒーロー: コピー ===== */
-.hero{padding:calc(72px + clamp(36px,7vh,80px)) 0 clamp(72px,11vh,120px);overflow-x:clip}
-.hero-copy{max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);display:flex;flex-direction:column;align-items:center;text-align:center}
+.hero{padding:calc(72px + clamp(36px,7vh,80px)) 0 clamp(40px,7vh,80px);overflow-x:clip}
+.hero-copy{position:relative;z-index:2;max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);display:flex;flex-direction:column;align-items:center;text-align:center}
 .h-tag{font:500 13px/1.6 var(--sans);letter-spacing:0.08em;color:var(--ink-3)}
 .h-h{font-family:var(--sans);font-weight:900;font-size:clamp(36px,5vw,68px);line-height:1.2;letter-spacing:-0.015em;margin-top:18px;color:var(--ink)}
 .h-h .ln{display:inline-block}
@@ -47,207 +59,67 @@
 .btn.glass:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .h-meta{font:500 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-3)}
 
-/* ===== ヒーロー: Motion =====
-   外枠(.hm)の拡大はスクロール、中(.hm-in 以下)の動きは時間。同じ要素の transform を取り合わない(外枠は scale プロパティだけ)。
-   時間割(12秒・% は 12 秒に対する位置)
-   外枠はスクロールで 84% → 100%(1100px 以上。仕様の「約80% → 約95%」を、縮めても中の文字が 12px を割らない範囲で)
-   0.0〜2.5  「あなたが普段やっていること/退院支援」が浮かぶ。周囲に普段の仕事が少し遅れて浮かぶ
-   2.5〜5.0  退院支援が左へ(スマホは上へ)→ 線が伸びる → 言いかえ「プロジェクト推進/合意形成」。周囲の語も言いかえに変わる
-   5.0〜8.0  カード群が奥へ退き、Compass の結果(タグが順に出て、現在地から3本の線が伸び、橋の名前に届く)
-   8.0〜10.5 Compass が左へ退き、右からクリニックタウン3D。選択肢の1つが選ばれ、Day 6 → 7、数値がわずかに変わる
-   10.5〜12  後ろの画面が薄くなり、中央に「見つける。言葉にする。試してみる。」と正式ロゴ。約0.5秒静止し、
-             消えていくのと重なって最初の退院支援カードが浮かび上がる(0% と 100% は同じ状態。終わりを感じさせない)
-   位置の差(PC=横 / スマホ=縦)は .hm-in の変数だけで切り替える(keyframes は1組) */
-.hm{position:relative;width:min(95vw,1120px);margin:clamp(44px,7vh,72px) auto 0;
-  scale:calc(.84 + .16 * var(--grow,0));transform-origin:50% 0;transition:scale .7s var(--ease)}
-/* 拡大は 1100px 以上だけ(それより狭いと縮めた状態で中の文字が 12px を割る) */
-@media(max-width:1099px){.hm{scale:none;transition:none}}
-.hm-stage{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:var(--bg-2);box-shadow:var(--shadow);container-type:inline-size}
-.hm-in{position:absolute;inset:0;
-  --dx:-22cqw;--dy:0px;--ex:-1.5cqw;--ey:0px;--l0:scaleX(0);--bmove:translateX(-21cqw) scale(.9);--cin:translateX(5cqw)}
-.hm-in *,.hm-in *::before,.hm-in{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.22,.61,.36,1)}
-.hm-paused .hm-in,.hm-paused .hm-in *,.hm-paused .hm-in *::before,.hm-off .hm-in,.hm-off .hm-in *,.hm-off .hm-in *::before{animation-play-state:paused}
-
-/* 場面A: 普段の仕事 → 言いかえ */
-.m-a{position:absolute;inset:0;z-index:1;animation-name:hm-a}
-.m-card{position:absolute;translate:-50% -50%;background:var(--card);border:1px solid var(--line);border-radius:6px;white-space:nowrap}
-.m-src{left:50%;top:46%;padding:1.8cqw 2.6cqw;display:flex;flex-direction:column;align-items:flex-start;gap:.5cqw;animation-name:hm-src}
-.m-src small{font:500 max(12px,1.4cqw)/1.4 var(--sans);color:var(--ink-3)}
-.m-src b{font:900 3.4cqw/1.25 var(--sans);color:var(--ink);letter-spacing:.01em}
-.m-line{position:absolute;left:40%;top:46%;width:16.5%;height:2px;margin-top:-1px;background:var(--blue);transform-origin:0 50%;animation-name:hm-line}
-.m-dst{left:72%;top:46%;padding:1.8cqw 2.6cqw;display:flex;flex-direction:column;gap:.3cqw;border-color:var(--blue-soft);animation-name:hm-dst}
-.m-dst b{font:900 2.7cqw/1.35 var(--sans);color:var(--ink)}
-.m-cap{position:absolute;left:50%;top:68%;translate:-50% 0;font:500 max(12px,1.4cqw)/1.5 var(--sans);color:var(--ink-3);white-space:nowrap;animation-name:hm-cap}
-.m-sat{position:absolute;translate:-50% -50%;display:grid;padding:.7cqw 1.5cqw;border-radius:100px;background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--line);
-  font:500 max(12px,1.4cqw)/1.4 var(--sans);color:var(--ink-2);white-space:nowrap;animation-name:hm-sat}
-.m-sat span{grid-area:1/1;text-align:center}
-.m-sat .f{animation-name:hm-sf}
-.m-sat .t{animation-name:hm-st;color:var(--ink)}
-.m-sat:nth-child(1){left:20%;top:18%}
-.m-sat:nth-child(2){left:78%;top:16%}
-.m-sat:nth-child(3){left:17%;top:80%}
-.m-sat:nth-child(4){left:80%;top:82%}
-.m-sat:nth-child(1),.m-sat:nth-child(1) span{animation-delay:.15s}
-.m-sat:nth-child(2),.m-sat:nth-child(2) span{animation-delay:.32s}
-.m-sat:nth-child(3),.m-sat:nth-child(3) span{animation-delay:.48s}
-.m-sat:nth-child(4),.m-sat:nth-child(4) span{animation-delay:.62s}
-
-/* 画面の板(Compass / クリニックタウン3D)。ブランドの4系統で描く(ゲームの色を持ち込まない) */
-.m-pn{position:absolute;translate:-50% -50%;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:3.2cqw 3.4cqw;display:flex;flex-direction:column}
-.pn-k{font:600 max(12px,1.4cqw)/1 var(--en);letter-spacing:.22em;color:var(--ink-3);text-transform:uppercase}
-/* 場面B: Compass の結果(実物の結果画面を簡略化。点数や%は出さない) */
-.m-b{left:50%;top:50%;width:50%;z-index:2;animation-name:hm-b}
-.pn-lead{margin-top:2.2cqw;font:700 1.9cqw/1.5 var(--sans);color:var(--ink)}
-.pn-tags{list-style:none;display:flex;flex-wrap:wrap;gap:.8cqw;margin-top:1.8cqw}
-.pn-tags li{font:500 max(12px,1.4cqw)/1 var(--sans);color:var(--ink-2);padding:.75cqw 1.4cqw;border:1px solid var(--line);border-radius:100px;animation-name:hm-tag}
-.pn-tags li:nth-child(2){animation-delay:.18s}
-.pn-tags li:nth-child(3){animation-delay:.36s}
-.pn-tags li:nth-child(4){animation-delay:.54s}
-.pn-map{position:relative;margin-top:2.6cqw;padding-left:9cqw}
-.pn-map svg{position:absolute;left:0;top:0;width:9cqw;height:100%;overflow:visible}
-.pn-map path{fill:none;stroke:var(--blue);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation-name:hm-path}
-.pn-map path:nth-of-type(2){animation-delay:.2s}
-.pn-map path:nth-of-type(3){animation-delay:.4s}
-.pn-map circle{fill:var(--blue)}
-.pn-map ol{list-style:none;display:grid}
-.pn-map li{display:flex;align-items:center;min-height:5.6cqw;padding-left:1.2cqw;font:700 1.75cqw/1.35 var(--sans);color:var(--ink);animation-name:hm-br}
-.pn-map li:nth-child(2){animation-delay:.2s}
-.pn-map li:nth-child(3){animation-delay:.4s}
-/* 場面C: クリニックタウン3D(実物の Day 6 の相談を簡略化。数値は例) */
-.m-c{left:69%;top:50%;width:48%;z-index:3;animation-name:hm-c}
-.pn-name{margin-top:1cqw;font:900 2.1cqw/1.3 var(--sans);color:var(--ink)}
-.pn-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1cqw;margin-top:2cqw;padding:1.4cqw 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.pn-stats dt{font:500 max(12px,1.4cqw)/1.3 var(--sans);color:var(--ink-3)}
-.pn-stats dd{display:grid;overflow:hidden;margin-top:.4cqw;font:700 2.1cqw/1.2 var(--en);color:var(--ink);font-variant-numeric:tabular-nums}
-.pn-stats dd span{grid-area:1/1}
-.pn-stats dd small{font:500 max(12px,.62em)/1 var(--sans);margin-left:.1em}
-.pn-stats .o{animation-name:hm-o}
-.pn-stats .n{animation-name:hm-n}
-.pn-stats div:nth-child(2) span{animation-delay:.08s}
-.pn-stats div:nth-child(3) span{animation-delay:.16s}
-.pn-stats div:nth-child(4) span{animation-delay:.24s}
-.pn-q{margin-top:2cqw;font:700 max(12px,1.45cqw)/1.4 var(--sans);color:var(--ink-2)}
-.pn-ch{list-style:none;display:grid;gap:.9cqw;margin-top:1.1cqw}
-.pn-ch li{position:relative;padding:1.1cqw 1.6cqw;border:1px solid var(--line);border-radius:6px;font:500 max(12px,1.45cqw)/1.4 var(--sans);color:var(--ink);animation-name:hm-ch;--dim:.45}
-.pn-ch li:nth-child(1){--dim:1}
-.pn-ch li:nth-child(2){animation-delay:.15s}
-.pn-ch li:nth-child(3){animation-delay:.3s}
-/* 選んだ瞬間だけ砂(第22条 分岐点)。文字は塗らず、左の縦線で示す */
-.pn-ch li:nth-child(1)::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;border-radius:6px 0 0 6px;background:var(--dawn-deep);animation-name:hm-sel}
-/* 場面D: 終幕 */
-.m-veil{position:absolute;inset:0;z-index:4;background:var(--bg-2);animation-name:hm-veil}
-.m-d{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5cqw;animation-name:hm-d}
-.m-d p{display:flex;flex-direction:column;align-items:center;gap:.4cqw}
-.m-d p span{font:900 3.5cqw/1.35 var(--sans);color:var(--ink);letter-spacing:.02em;animation-name:hm-fin}
-.m-d p span:nth-child(2){animation-delay:.12s}
-.m-d p span:nth-child(3){animation-delay:.24s}
-.m-d svg{width:7cqw;height:auto;animation-name:hm-fin;animation-delay:.36s}
-
-@keyframes hm-a{0%,41.5%{opacity:1;transform:none}47%,96.9%{opacity:0;transform:translateY(-1.5%) scale(.93)}97%,100%{opacity:1;transform:none}}
-@keyframes hm-src{0%{opacity:.5;transform:translateY(5px)}5%,21%{opacity:1;transform:none}27%,96.9%{opacity:1;transform:translate(var(--dx),var(--dy))}97%{opacity:0;transform:translateY(12px);animation-timing-function:linear}100%{opacity:.5;transform:translateY(5px)}}
-@keyframes hm-line{0%,26.5%{transform:var(--l0)}31.5%,96.8%{transform:none}96.9%,100%{transform:var(--l0)}}
-@keyframes hm-dst{0%,30.5%{opacity:0;transform:translate(var(--ex),var(--ey))}36%,96.8%{opacity:1;transform:none}96.9%,100%{opacity:0;transform:translate(var(--ex),var(--ey))}}
-@keyframes hm-cap{0%,34%{opacity:0;transform:translateY(6px)}38.5%,96.8%{opacity:1;transform:none}96.9%,100%{opacity:0;transform:translateY(6px)}}
-@keyframes hm-sat{0%{opacity:0;transform:translateY(10px)}6%,40%{opacity:1;transform:none}45%{opacity:0;transform:none}100%{opacity:0;transform:translateY(10px)}}
-@keyframes hm-sf{0%,25%{opacity:1}28%,99%{opacity:0}100%{opacity:1}}
-@keyframes hm-st{0%,26.5%{opacity:0;transform:translateY(4px)}30%,99%{opacity:1;transform:none}100%{opacity:0;transform:translateY(4px)}}
-@keyframes hm-b{0%,43%{opacity:0;transform:translateY(3cqw) scale(.97)}49%,66.7%{opacity:1;transform:none}72.5%,87.5%{opacity:.55;transform:var(--bmove)}91.5%,96.5%{opacity:.08;transform:var(--bmove)}99.5%,100%{opacity:0;transform:var(--bmove)}}
-@keyframes hm-tag{0%,48%{opacity:0;transform:translateY(5px)}51%,99%{opacity:1;transform:none}100%{opacity:0;transform:translateY(5px)}}
-@keyframes hm-path{0%,51%{stroke-dashoffset:1}57%,99%{stroke-dashoffset:0}100%{stroke-dashoffset:1}}
-@keyframes hm-br{0%,55%{opacity:0;transform:translateX(-4px)}59%,99%{opacity:1;transform:none}100%{opacity:0;transform:translateX(-4px)}}
-@keyframes hm-c{0%,67.5%{opacity:0;transform:var(--cin)}73%,87.5%{opacity:1;transform:none}91.5%,96.5%{opacity:.08;transform:none}99.5%,100%{opacity:0;transform:none}}
-@keyframes hm-ch{0%,72%{opacity:0;transform:translateY(5px)}75%,80%{opacity:1;transform:none}81.5%,99%{opacity:var(--dim);transform:none}100%{opacity:0;transform:translateY(5px)}}
-@keyframes hm-sel{0%,78.5%{opacity:0}80%,99%{opacity:1}100%{opacity:0}}
-@keyframes hm-o{0%,82%{opacity:1;transform:none}84%,99.5%{opacity:0;transform:translateY(-40%)}100%{opacity:1;transform:none}}
-@keyframes hm-n{0%,82.5%{opacity:0;transform:translateY(40%)}85%,99.5%{opacity:1;transform:none}100%{opacity:0;transform:translateY(40%)}}
-@keyframes hm-veil{0%,87.5%{opacity:0}91.5%,97%{opacity:.82}100%{opacity:0}}
-@keyframes hm-d{0%,87%{opacity:0}87.5%,96.5%{opacity:1}99.5%,100%{opacity:0}}
-@keyframes hm-fin{0%,87.5%{opacity:0;transform:translateY(8px)}90.5%,100%{opacity:1;transform:none}}
+/* ===== ヒーロー: Journey =====
+   枠・角丸・影のない全幅のキャンバス。上端はコピーの下へ少し潜り、四辺は mask で地に溶ける(溶ける帯に読ませる語を置かない)。
+   描画は SVG を JS が組む(文字の幅を測るため、書体の読み込み後)。JS がないときは出さない(コピーと CTA だけで成り立つ) */
+.jr{position:relative;--jr-under:clamp(48px,6vw,96px);margin:calc(var(--jr-under) * -1) 0 0} /* コピーの下に潜る帯(--jr-under)は描画ゼロ */
+.jr-stage{position:relative;height:clamp(540px,48vw,720px)}
+.jr-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:hidden;pointer-events:none;
+  --jr-top:linear-gradient(to bottom,transparent 0,transparent var(--jr-under),#000 calc(var(--jr-under) + 90px),#000 90%,transparent 100%);
+  --jr-side:linear-gradient(to right,transparent 0,#000 7%,#000 93%,transparent 100%);
+  -webkit-mask-image:var(--jr-top),var(--jr-side);-webkit-mask-composite:source-in;
+  mask-image:var(--jr-top),var(--jr-side);mask-composite:intersect}
+html:not(.js) .jr{display:none}
+.jr-svg text{font-family:var(--sans);font-feature-settings:"palt" 1}
+.jr-svg .j-hero{font-weight:900;fill:var(--ink)}
+.jr-svg .j-new{font-weight:700;fill:var(--ink)}
+.jr-svg .j-br{font-weight:700;fill:var(--ink)}
+.jr-svg .j-exp{font-weight:500;fill:var(--ink-3)}
+.jr-svg .j-tr{font-weight:500;fill:var(--ink-3)}
+.jr-svg .j-far{font-weight:500;fill:var(--ink-4)}
+.jr-svg .j-sm{font-weight:500;fill:var(--ink-3)}
+.jr-svg .j-en{font-family:var(--en);font-weight:600;letter-spacing:.2em;fill:var(--ink-3)}
+.jr-svg .j-day{font-family:var(--en);font-weight:600;fill:var(--ink-3)}
+.jr-svg .j-num{font-family:var(--en);font-weight:600;fill:var(--ink);font-variant-numeric:tabular-nums}
+.jr-svg .j-verb{font-weight:900;fill:var(--ink)}
+/* 線は藍(ロゴの線と同じ扱い。ダークはロゴと同じく --ink) */
+.jr-svg .j-line{fill:none;stroke:var(--navy);stroke-linecap:round;stroke-linejoin:round}
+[data-theme="dark"] .jr-svg .j-line{stroke:var(--ink)}
+.jr-svg .j-faint{fill:none;stroke:var(--ink-4);stroke-linecap:round;stroke-linejoin:round}
+.jr-svg .j-road{fill:none;stroke:var(--bg-3);stroke-linecap:butt}
+.jr-svg .j-face{fill:var(--card);stroke:var(--ink-4);stroke-linejoin:round}
+.jr-svg .j-side{fill:var(--bg-2);stroke:var(--ink-4);stroke-linejoin:round}
+.jr-svg .j-person{fill:var(--ink-3)}
+.jr-svg .j-ring{fill:none;stroke:var(--ink-3)}
+.jr-svg .j-dot{fill:var(--ink)}
+.jr-svg .j-dot.sand{fill:var(--dawn)}
+.jr-svg .l-sand{fill:none;stroke:var(--dawn);stroke-linecap:round}
 
 /* 一時停止(5秒を超えて自動で動くため。WCAG 2.2.2)。見た目 34px・タップ 44px(.theme-btn と同じ作り) */
-.hm-toggle{position:absolute;right:10px;bottom:10px;z-index:6;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:var(--ink-2);
-  scale:calc(1 / (.84 + .16 * var(--grow,0)));transform-origin:100% 100%;transition:scale .7s var(--ease)} /* 外枠を縮めてもタップ 44px のまま */
-@media(max-width:1099px){.hm-toggle{scale:none}}
-.hm-toggle::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--card);border:1px solid var(--line);transition:border-color .3s var(--ease)}
-.hm-toggle:hover::before{border-color:var(--ink-4)}
-.hm-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:0}
-.hm-toggle svg{position:relative;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.hm-toggle .i-play,.hm-toggle[aria-pressed="true"] .i-pause{display:none}
-.hm-toggle[aria-pressed="true"] .i-play{display:block}
-.hm-cap{margin-top:12px;text-align:center;font-size:12px;line-height:1.6;color:var(--ink-3)}
+.jr-toggle{position:absolute;right:max(12px,calc(var(--pad-x) - 16px));bottom:8px;z-index:3;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:var(--ink-2)}
+.jr-toggle::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg);border:1px solid var(--line);transition:border-color .3s var(--ease)}
+.jr-toggle:hover::before{border-color:var(--ink-4)}
+.jr-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:0}
+.jr-toggle svg{position:relative;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.jr-toggle .i-play,.jr-toggle[aria-pressed="true"] .i-pause{display:none}
+.jr-toggle[aria-pressed="true"] .i-play{display:block}
+.jr-cap{max-width:var(--max);margin:4px auto 0;padding:0 var(--pad-x);text-align:center;font-size:12px;line-height:1.6;color:var(--ink-3)}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
-/* スマホ: PC の縮小ではなく縦の構図。周囲の語と細かい数値を減らし、退院支援 → 言いかえ を縦に並べる */
-@container (max-width:560px){
-  .hm-in{--dx:0px;--dy:-17cqw;--ex:0px;--ey:-2cqw;--l0:scaleY(0);--bmove:translateY(-9cqw) scale(.92);--cin:translateX(10cqw)}
-  .m-src{top:40%;padding:3.6cqw 5.4cqw;gap:1cqw}
-  .m-src small{font-size:max(12px,3.3cqw)}
-  .m-src b{font-size:8.6cqw}
-  .m-line{left:50%;top:38%;width:2px;height:14%;margin:0 0 0 -1px;transform-origin:50% 0}
-  .m-dst{left:50%;top:62%;padding:3.6cqw 5.4cqw;align-items:center}
-  .m-dst b{font-size:6.6cqw}
-  .m-cap{top:80%;font-size:max(12px,3.4cqw)}
-  .m-sat{visibility:hidden}
-  .m-pn{padding:6.4cqw 6cqw}
-  .pn-k{font-size:max(12px,3cqw)}
-  .m-b{width:88%}
-  .pn-lead{margin-top:4.4cqw;font-size:4.6cqw}
-  .pn-tags{gap:2cqw;margin-top:3.6cqw}
-  .pn-tags li{font-size:max(12px,3.3cqw);padding:1.8cqw 3cqw}
-  .pn-map{margin-top:5cqw;padding-left:16cqw}
-  .pn-map svg{width:16cqw}
-  .pn-map li{min-height:13cqw;padding-left:2.4cqw;font-size:4.2cqw}
-  .m-c{left:50%;top:55%;width:88%}
-  .pn-name{margin-top:2cqw;font-size:5.4cqw}
-  .pn-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:2cqw;margin-top:4cqw;padding:3cqw 0}
-  .pn-stats div:nth-child(4){visibility:hidden;position:absolute}
-  .pn-stats dt{font-size:max(12px,3cqw)}
-  .pn-stats dd{margin-top:1cqw;font-size:5.6cqw}
-  .pn-q{margin-top:4cqw;font-size:max(12px,3.6cqw)}
-  .pn-ch{gap:2.2cqw;margin-top:2.4cqw}
-  .pn-ch li{padding:2.8cqw 3.6cqw;font-size:max(12px,3.6cqw)}
-  .pn-ch li:nth-child(3){visibility:hidden;position:absolute}
-  .m-d{gap:10cqw}
-  .m-d p span{font-size:8.8cqw}
-  .m-d svg{width:18cqw}
-}
 @media(max-width:760px){
   .h-h{font-size:clamp(34px,10vw,48px)}
   .h-sub{font-size:14.5px}
   .h-cta{align-self:stretch}
   .h-cta .btn{justify-content:center;width:100%;max-width:340px}
-  /* 拡大は PC だけ。スマホは左右 16px の余白で固定 */
-  .hm{width:calc(100% - 32px);scale:none;transition:none}
-  .hm-stage{aspect-ratio:4/5}
+  .jr{--jr-under:24px}
+  .jr-stage{height:clamp(600px,168vw,720px)}
+  .jr-svg{--jr-top:linear-gradient(to bottom,transparent 0,transparent var(--jr-under),#000 calc(var(--jr-under) + 56px),#000 93%,transparent 100%);
+    --jr-side:linear-gradient(to right,transparent 0,#000 4%,#000 96%,transparent 100%)}
 }
-/* 動きを減らす設定: 動かさず、関係が1枚で分かる静止の構図(退院支援 → 言いかえ / Compass / クリニックタウン3D / 三つの言葉) */
+/* 動きを減らす設定: 俯瞰の静止の1枚(JS が描く)。止める操作は要らない */
 @media(prefers-reduced-motion:reduce){
-  .hm,.hm-toggle{scale:none;transition:none}
-  .hm-toggle{display:none}
-  .hm-stage{aspect-ratio:auto}
-  .hm-in{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2.4cqw;padding:3.6cqw}
-  .hm-in,.hm-in *,.hm-in *::before{animation:none!important;opacity:1!important;transform:none!important}
-  .m-a{position:relative;grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1.6cqw 2.4cqw}
-  .m-card,.m-cap,.m-pn{position:relative;left:auto;top:auto;translate:none}
-  .m-line{position:relative;left:auto;top:auto;width:8cqw;margin:0}
-  .m-cap{flex-basis:100%;text-align:center}
-  .m-sat,.m-veil,.pn-stats .n{display:none}
-  .pn-map path{stroke-dashoffset:0}
-  .m-pn{width:auto;height:auto;gap:0}
-  .pn-map{margin-top:2cqw;min-height:16cqw}
-  .m-d{position:relative;grid-column:1/-1;flex-direction:row;gap:2cqw}
-  .m-d p{flex-direction:row;gap:1.2cqw}
-  .m-d p span{font-size:max(15px,1.8cqw)}
-  .m-d svg{display:none} /* 静止の1枚では語の続きに見えるため出さない(ロゴはナビにある) */
-  @container (max-width:560px){
-    .hm-in{grid-template-columns:1fr;gap:5cqw;padding:6cqw}
-    .m-a{flex-direction:column}
-    .m-cap{flex-basis:auto}
-    .m-line{width:2px;height:8cqw}
-    .m-d{flex-direction:column}
-    .m-d p span{font-size:max(15px,4.6cqw)}
-  }
+  .jr-toggle{display:none}
 }
-.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 /* ===== 試しているもの =====
    商品棚ではなく作業机。大きさの差は使われ方の差: Compass=大きな実画面(右へ裁ち落とす)/ クリニックタウン3D=同じ組みの左右反転
@@ -379,11 +251,12 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 <main>
 
 <!-- ============ HERO ============
-     コピー → Motion(12秒のループ)。Motion の中身は実物に寄せて BRIDGE が描いた UI で、語と数値の出どころは次のとおり(第15条):
-     言いかえ=compass/app/data.js の対応表(退院支援・多職種連携・業務改善・患者・家族への説明はそのまま。新人指導は「プリセプター・新人指導」の短縮)/
-     Compass のタグと橋の名前=同じ data.js の tag と name(点数・%は実物にも出さないので出さない)/
-     クリニックタウン3D の選択肢=clinic-flow-3d/app/decisions/cases-04-sales.js の Day 6 の相談。資金の差 ¥5万=訪問費。患者数と平均待ちは例(下の注記)
-     動く層は aria-hidden。内容は figcaption の前の視覚的に隠した一文で伝える。動きを減らす設定では静止の1枚 -->
+     コピー → Experience Journey(一本の線とカメラの移動。SVG は下の script が組む)。語と数値の出どころ(第15条):
+     言いかえ=compass/app/data.js の対応表(退院支援・申し送り・多職種連携・業務改善・患者・家族への説明はそのまま。新人指導は「プリセプター・新人指導」の短縮)/
+     橋の名前=同じ data.js の name(点数・%は実物にも出さないので出さない)/
+     クリニックタウン3D の選択肢=clinic-flow-3d/app/decisions/cases-04-sales.js の Day 6 の相談。来院と平均待ちの値は例(figcaption の注記)/
+     遠くに浮かぶ気配の語(受付・会計・レセプト点検など)は医療の現場の仕事の名前で、言いかえの対応はない
+     SVG は aria-hidden。流れは figcaption の視覚的に隠した一文で伝える。動きを減らす設定では俯瞰の静止の1枚 -->
 <section class="hero" aria-labelledby="heroTitle">
   <div class="hero-copy">
     <p class="h-tag">看護師・リハビリ職・医療事務の方へ</p>
@@ -395,49 +268,12 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     </div>
   </div>
 
-  <figure class="hm" id="heroMotion">
-    <div class="hm-stage">
-      <div class="hm-in" aria-hidden="true">
-        <div class="m-a">
-          <div class="m-sat"><span class="f">多職種連携</span><span class="t">ステークホルダー調整</span></div>
-          <div class="m-sat"><span class="f">新人指導</span><span class="t">人材育成・フィードバック</span></div>
-          <div class="m-sat"><span class="f">業務改善</span><span class="t">オペレーション改善</span></div>
-          <div class="m-sat"><span class="f">患者・家族への説明</span><span class="t">複雑な情報の翻訳</span></div>
-          <div class="m-card m-src"><small>あなたが普段やっていること</small><b>退院支援</b></div>
-          <div class="m-line"></div>
-          <div class="m-card m-dst"><b>プロジェクト推進</b><b>合意形成</b></div>
-          <p class="m-cap">BRIDGEでは、こう捉えます</p>
-        </div>
-        <div class="m-pn m-b">
-          <p class="pn-k">BRIDGE Compass</p>
-          <p class="pn-lead">あなたの経験を、別の言葉にすると</p>
-          <ul class="pn-tags"><li>調整</li><li>推進</li><li>改善</li><li>教育</li></ul>
-          <div class="pn-map">
-            <svg viewBox="0 0 100 300" preserveAspectRatio="none"><path pathLength="1" d="M8 150 C 50 150, 52 50, 100 50"/><path pathLength="1" d="M8 150 C 50 150, 52 150, 100 150"/><path pathLength="1" d="M8 150 C 50 150, 52 250, 100 250"/></svg>
-            <ol><li>プロジェクトマネジメント</li><li>医療経営 / BizOps</li><li>教育 / 人材育成</li></ol>
-          </div>
-        </div>
-        <div class="m-pn m-c">
-          <p class="pn-k">Clinic Town 3D</p>
-          <p class="pn-name">クリニックタウン3D</p>
-          <dl class="pn-stats">
-            <div><dt>Day</dt><dd><span class="o">6</span><span class="n">7</span></dd></div>
-            <div><dt>患者数</dt><dd><span class="o">48<small>人</small></span><span class="n">52<small>人</small></span></dd></div>
-            <div><dt>平均待ち</dt><dd><span class="o">31<small>分</small></span><span class="n">34<small>分</small></span></dd></div>
-            <div><dt>資金</dt><dd><span class="o">¥218<small>万</small></span><span class="n">¥213<small>万</small></span></dd></div>
-          </dl>
-          <p class="pn-q">何を変える？</p>
-          <ul class="pn-ch"><li>退院支援室への訪問を増やす</li><li>既存のケアマネとの関係を深める</li><li>先に受け入れ体制を整える</li></ul>
-        </div>
-        <div class="m-veil"></div>
-        <div class="m-d">
-          <p><span>見つける。</span><span>言葉にする。</span><span>試してみる。</span></p>
-          <svg class="logo-mark" viewBox="0 0 240 110"><path class="l-navy" stroke-width="6" d="M8 74 C 62 16, 118 24, 176 84"/><path class="l-sand" stroke-width="6" d="M58 94 C 118 60, 158 22, 232 12"/></svg>
-        </div>
-      </div>
-      <button class="hm-toggle" type="button" aria-pressed="false" aria-label="動きを止める" aria-controls="heroMotion"><svg class="i-pause" viewBox="0 0 16 16"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
+  <figure class="jr" id="journey">
+    <div class="jr-stage">
+      <svg class="jr-svg" aria-hidden="true" focusable="false"></svg>
+      <button class="jr-toggle" type="button" aria-pressed="false" aria-label="動きを止める"><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
     </div>
-    <figcaption class="hm-cap"><span class="sr-only">BRIDGEでできることの流れ。普段の仕事「退院支援」が「プロジェクト推進・合意形成」という外の言葉に置き換わり、BRIDGE Compassで自分の経験を別の言葉にし、クリニックタウン3Dで経営の判断を1日ずつ試す。</span>画面は実物を簡略化したもので、数値は例です。</figcaption>
+    <figcaption class="jr-cap"><span class="sr-only">BRIDGEの道のり。普段の仕事「退院支援」から一本の線が伸び、「合意形成」「プロジェクト推進」という外の言葉が見つかる。ほかの経験からの線も集まって現在地になり、BRIDGE Compassの3つの橋に分かれる。医療経営の橋を進むと、線はそのままクリニックタウン3Dの街の道になり、経営の判断を試せる。最後に、見つける・言葉にする・試してみるが一本の線でつながる。</span>クリニックタウン3Dの数値は例です。</figcaption>
   </figure>
 </section>
 
@@ -528,36 +364,634 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 
 <footer class="site-footer"></footer>
 <script src="./shared/bridge.js" defer></script>
-<script defer>
+<script>
+/* ================================================================
+   Experience Journey — 一本の線とカメラ。時刻 t(0〜18 秒・ループ)だけで1枚の絵が決まる。
+   動きは4つだけ(線が伸びる/語が線から出る/点が線を進む/数値が入れ替わる)。移動と拡大はカメラの仕事。
+   世界の座標は PC(横に流れる)とスマホ(縦に流れる)の2通り。どちらも同じ順序:
+   言葉の野 → 退院支援から線 → 言いかえ → 現在地(Compass)→ 3本の橋 → 医療経営の線を進む → 線が道になる(街)→ 選ぶ → 引き → ロゴ → 巻き戻し
+   ================================================================ */
 (function () {
-  // ヒーローの Motion。動き自体は CSS(12秒の animation 1本で同期)。ここでは止める・拡大するだけ
-  const hm = document.getElementById('heroMotion');
-  if (!hm) return;
-  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) return; // 静止の1枚(CSS)
-  // 一時停止(WCAG 2.2.2)。止めた位置からそのまま再開する
-  const btn = hm.querySelector('.hm-toggle');
-  btn.addEventListener('click', () => {
-    const on = btn.getAttribute('aria-pressed') !== 'true';
-    btn.setAttribute('aria-pressed', String(on));
-    btn.setAttribute('aria-label', on ? '動きを再開する' : '動きを止める');
-    hm.classList.toggle('hm-paused', on);
-  });
-  // 画面外では止める(戻れば続きから)
-  if ('IntersectionObserver' in window) new IntersectionObserver(es => hm.classList.toggle('hm-off', !es[0].isIntersecting), { threshold: 0 }).observe(hm);
-  // スクロールで外枠を 84% → 100%(1100px 以上だけ)。値は1つの CSS 変数だけ。追従の緩さは CSS の transition が受け持つ
-  const pc = window.matchMedia('(min-width: 1100px)');
-  let ticking = false;
-  const update = () => {
-    ticking = false;
-    if (!pc.matches) return;
-    const p = Math.max(0, Math.min(1, window.scrollY / (window.innerHeight * 0.45)));
-    hm.style.setProperty('--grow', (1 - Math.pow(1 - p, 2)).toFixed(3));
+  'use strict';
+  var fig = document.getElementById('journey');
+  if (!fig || !document.createElementNS || !window.requestAnimationFrame) return;
+  document.documentElement.classList.add('js');
+  var svg = fig.querySelector('.jr-svg'), btn = fig.querySelector('.jr-toggle');
+  var NS = 'http://www.w3.org/2000/svg', LOOP = 18;
+  var reduceQ = window.matchMedia('(prefers-reduced-motion: reduce)'), spQ = window.matchMedia('(max-width: 760px)');
+
+  var clamp = function (x, a, b) { a = a == null ? 0 : a; b = b == null ? 1 : b; return x < a ? a : x > b ? b : x; };
+  var lerp = function (a, b, u) { return a + (b - a) * u; };
+  var E = {
+    lin: function (u) { return u; },
+    out: function (u) { return 1 - Math.pow(1 - u, 3); },
+    inOut: function (u) { return u < .5 ? 4 * u * u * u : 1 - Math.pow(2 - 2 * u, 3) / 2; }
   };
-  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll, { passive: true });
-  update();
+  var seg = function (t, a, d, e) { return (e || E.lin)(clamp((t - a) / d)); };
+  function mk(tag, attrs, parent) {
+    var n = document.createElementNS(NS, tag);
+    if (attrs) for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function put(n, k, v) { var c = n._c || (n._c = {}); if (c[k] !== v) { c[k] = v; n.setAttribute(k, v); } }
+  var r2 = function (v) { return String(Math.round(v * 100) / 100); };
+
+  /* ---------------- 世界の配置 ---------------- */
+  var LAYOUTS = {
+    pc: {
+      ref: [1600, 720], focal: [0.5, 0.56],
+      far: [['記録', -1160, -140], ['回診', -760, 400], ['受付', -1260, 330], ['会計', 260, -270], ['服薬指導', 140, 430], ['勤務表', 820, -260],
+            ['家族面談', -420, -300], ['レセプト点検', 1180, 330], ['物品管理', 1560, -190], ['夜勤', -1320, 10], ['カルテ', 620, 400]],
+      farFs: 15,
+      stations: [['退院支援', -680, -40, 44, 'j-hero'], ['合意形成', -330, 62, 30, 'j-new'], ['プロジェクト推進', 0, 164, 30, 'j-new']],
+      N: [580, 96], hereFs: 15, enFs: 13,
+      field: [
+        ['申し送り', -990, -190, '要点を絞った情報の引き継ぎ', -320, -206],
+        ['多職種連携', -620, -250, 'ステークホルダー調整', 70, -110],
+        ['新人指導', -1030, 96, '人材育成・フィードバック', -560, 326],
+        ['患者・家族への説明', -1000, 240, '複雑な情報の翻訳', -110, 330],
+        ['業務改善', -590, 184, 'オペレーション改善', 190, 268]
+      ],
+      fieldFs: 19, trFs: 15,
+      branch: { x: 740, rows: [-40, 96, 232], fs: 25 },
+      town: { x0: 1080, ring: 1600, end: 1650, roadW: 34, fs: 17, numFs: 24, road: [1080, 440],
+              b: [[1100, 92, 62, 52], [1214, 76, 112, 42], [1312, 168, 84, 60, 1], [1504, 86, 50, 54]] },
+      verbs: [[0, 'below'], [2, 'below'], ['road', 'below']], verbPx: 26, logoPx: 86,
+      cam: function (A) {
+        return [
+          [0, A.start[0], A.start[1], 1, 1],
+          [1.2, A.start[0] + 24, A.start[1] + 4, 1.012],
+          [2.8, A.st1[0] + 160, A.st1[1] + 20, 1.04],
+          [4.2, A.N[0] - 300, A.N[1] - 10, .9],
+          [5.4, A.N[0] + 200, A.N[1] + 10, .97],
+          [6.3, A.N[0] + 280, A.N[1] + 30, 1],
+          [7.6, A.town[0] - 40, A.town[1] - 170, 1.04],
+          [9.0, A.clinic[0] + 20, A.town[1] - 80, 1.14],
+          [10.2, A.clinic[0] + 40, A.town[1] - 82, 1.17, 1],
+          [12.2, A.ov[0], A.ov[1], A.ov[2], 1],
+          [13.9, A.ov[0] + 6, A.ov[1], A.ov[2] * 1.012],
+          [15.6, A.ov[0], A.ov[1], A.ov[2], 1],
+          [18, A.start[0], A.start[1], 1, 1]
+        ];
+      }
+    },
+    sp: {
+      ref: [390, 680], focal: [0.5, 0.5],
+      far: [['記録', -150, -560], ['受付', 120, -520], ['会計', -170, 250], ['回診', 140, -170], ['レセプト点検', 70, 560], ['夜勤', -168, -60], ['カルテ', 150, 200]],
+      farFs: 13,
+      stations: [['退院支援', -160, -300, 40, 'j-hero'], ['合意形成', -120, -192, 27, 'j-new'], ['プロジェクト推進', -84, -92, 27, 'j-new']],
+      N: [-104, 16], hereFs: 14, enFs: 12,
+      field: [
+        ['申し送り', -170, -456, null],
+        ['多職種連携', 24, -494, 'ステークホルダー調整', 44, -14],
+        ['患者・家族への説明', -50, -414, null],
+        ['業務改善', 70, -370, 'オペレーション改善', 64, -246]
+      ],
+      fieldFs: 17, trFs: 13,
+      branch: { x: -50, rows: [16, 96, 176], fs: 20 }, // 現在地の高さから下へ分かれる(戻る線が橋の名前を横切らない)
+      town: { x0: -150, ring: 96, end: 130, roadW: 30, fs: 14, numFs: 20, road: [-150, 384],
+              b: [[-140, 60, 50, 34], [-70, 50, 86, 30], [-8, 110, 62, 38, 1], [116, 44, 40, 32]] },
+      verbs: [[0, 'below'], ['branch', 'below'], ['road', 'below']], verbPx: 19, logoPx: 64,
+      cam: function (A) {
+        return [
+          [0, A.start[0], A.start[1], 1, 1],
+          [1.2, A.start[0], A.start[1] + 10, 1.01],
+          [2.8, 0, A.st1[1] - 10, 1.03],
+          [4.2, 0, A.N[1] - 70, .97],
+          [5.4, 6, A.N[1] + 20, 1],
+          [6.3, 6, A.N[1] + 50, 1.01],
+          [7.6, 0, A.town[1] - 120, 1],
+          [9.0, A.clinic[0] - 30, A.town[1] - 70, 1.06],
+          [10.2, A.clinic[0] - 30, A.town[1] - 72, 1.08, 1],
+          [12.2, A.ov[0], A.ov[1], A.ov[2], 1],
+          [13.9, A.ov[0], A.ov[1] + 4, A.ov[2] * 1.012],
+          [15.6, A.ov[0], A.ov[1], A.ov[2], 1],
+          [18, A.start[0], A.start[1], 1, 1]
+        ];
+      }
+    }
+  };
+  /* 正式ロゴの線(shared/bridge.js の MARK と同じ経路。第三の近似を作らない) */
+  var LOGO_N = [[8, 74], [62, 16], [118, 24], [176, 84]], LOGO_S = [[58, 94], [118, 60], [158, 22], [232, 12]];
+  var OBL = [0.36, -0.36]; // 斜投影の奥行き(右上へ)
+
+  /* ---------------- 状態 ---------------- */
+  var L, W = 0, H = 0, k = 1, A = {}, keys = [], S = null, built = false;
+
+  /* 文字: 線から出る語。dir=-1 は線の上に座る(線が下線)、+1 は線の下に下がる */
+  function label(parent, str, x, ulY, fs, cls, dir, opt) {
+    opt = opt || {};
+    var g = mk('g', null, parent);
+    var asc = fs * 0.88, desc = fs * 0.16, gap = fs * 0.28;
+    var base = dir < 0 ? ulY - gap : ulY + gap + asc;
+    var probe = mk('text', { x: x, y: base, 'font-size': fs, 'class': cls }, g);
+    probe.textContent = str;
+    var w = probe.getComputedTextLength ? probe.getComputedTextLength() : str.length * fs;
+    var glyphs = [];
+    if (opt.whole) {
+      glyphs.push({ el: probe, x: x, base: base });
+    } else {
+      var n = str.length, xs = [];
+      for (var i = 0; i < n; i++) { try { xs.push(probe.getStartPositionOfChar(i).x); } catch (e) { xs.push(x + i * fs); } }
+      g.removeChild(probe);
+      for (var j = 0; j < n; j++) {
+        var el = mk('text', { x: r2(xs[j]), y: base, 'font-size': fs, 'class': cls }, g);
+        el.textContent = str[j];
+        glyphs.push({ el: el, x: xs[j], base: base });
+      }
+    }
+    var D = dir < 0 ? (ulY - (base - asc)) + 2 : -((base + desc) - ulY) - 2;
+    var id = 'jc' + (label.n = (label.n || 0) + 1);
+    var cp = mk('clipPath', { id: id, clipPathUnits: 'userSpaceOnUse' }, S.defs);
+    var cy = dir < 0 ? base - asc - fs : ulY + 1.2;
+    var ch = dir < 0 ? (ulY - 1.2) - cy : fs * 2.2;
+    var crect = mk('rect', { x: r2(x - fs), y: r2(cy), width: r2(w + fs * 2), height: r2(ch) }, cp);
+    g.setAttribute('clip-path', 'url(#' + id + ')');
+    var lb = { g: g, glyphs: glyphs, x: x, w: w, fs: fs, ul: ulY, D: D, dir: dir, lod: opt.lod !== false, dim: 1, clipRect: crect };
+    glyphs.forEach(function (gl) { put(gl.el, 'y', r2(gl.base + D)); });
+    S.labels.push(lb);
+    return lb;
+  }
+  function shiftLabel(lb, dx) {
+    lb.x += dx;
+    lb.glyphs.forEach(function (gl) { gl.x += dx; put(gl.el, 'x', r2(gl.x)); });
+    lb.clipRect.setAttribute('x', r2(lb.x - lb.fs));
+  }
+  function riseGlyphs(lb, f) { // f(glyph) → 0..1
+    for (var i = 0; i < lb.glyphs.length; i++) {
+      var gl = lb.glyphs[i], p = f(gl);
+      put(gl.el, 'y', r2(gl.base + lb.D * (1 - p)));
+      put(gl.el, 'visibility', p <= 0 ? 'hidden' : 'visible');
+    }
+  }
+
+  /* 経路: 下線と曲線をつないだ一本の d。各区間の始まりの距離を測っておく */
+  function Route(parent, cls) { this.parts = []; this.cls = cls; this.parent = parent; this.marks = []; }
+  Route.prototype.M = function (x, y) { this.parts.push('M' + r2(x) + ' ' + r2(y)); this.x = x; this.y = y; return this; };
+  Route.prototype.L = function (x, y) { this.parts.push('L' + r2(x) + ' ' + r2(y)); this.x = x; this.y = y; return this; };
+  Route.prototype.C = function (a, b, c, d, x, y) { this.parts.push('C' + [a, b, c, d, x, y].map(r2).join(' ')); this.x = x; this.y = y; return this; };
+  Route.prototype.to = function (x, y, sx) { // 水平の接線でつなぐ S 字。左へ戻るときは、取っ手を縦の距離で決めて輪にしない
+    var dx = x < this.x - 10 ? clamp(Math.abs(y - this.y) * .45 + 16, 36, 110) : Math.max(Math.abs(x - this.x) * (sx || .55), 30);
+    return this.C(this.x + dx, this.y, x - dx, y, x, y);
+  };
+  Route.prototype.mark = function () { S.scratch.setAttribute('d', this.parts.join('')); var len = S.scratch.getTotalLength(); this.marks.push(len); return len; };
+  Route.prototype.done = function (extraCls) {
+    this.d = this.parts.join('');
+    this.el = mk('path', { d: this.d, 'class': this.cls + (extraCls ? ' ' + extraCls : '') }, this.parent);
+    this.len = this.el.getTotalLength();
+    // 点の表(描画中に DOM を読まない: 読むとそのたびにスタイルの再計算が走る)
+    var STEP = 4, n = Math.max(2, Math.ceil(this.len / STEP)), lut = new Float32Array((n + 1) * 2);
+    for (var i = 0; i <= n; i++) { var q = this.el.getPointAtLength(this.len * i / n); lut[i * 2] = q.x; lut[i * 2 + 1] = q.y; }
+    this.lut = lut; this.n = n;
+    put(this.el, 'stroke-dasharray', r2(this.len) + ' ' + r2(this.len + 10));
+    put(this.el, 'stroke-dashoffset', r2(this.len));
+    return this;
+  };
+  Route.prototype.draw = function (dist) { put(this.el, 'stroke-dashoffset', r2(this.len - clamp(dist, 0, this.len))); put(this.el, 'visibility', dist <= 0 ? 'hidden' : 'visible'); };
+  Route.prototype.at = function (dist) {
+    var f = clamp(dist / this.len) * this.n, i = Math.min(Math.floor(f), this.n - 1), u = f - i, a = this.lut;
+    return [a[i * 2] + (a[i * 2 + 2] - a[i * 2]) * u, a[i * 2 + 1] + (a[i * 2 + 3] - a[i * 2 + 1]) * u];
+  };
+
+  /* 線の下線の位置に置く語を、経路の今の点の距離で出す */
+  var RISE = 150;
+  function glyphTrig(lb, startDist, startX, endDist) {
+    lb.glyphs.forEach(function (gl) {
+      gl.trig = startDist + Math.abs(gl.x - startX) * 0.85;
+      gl.rl = endDist ? Math.max(8, Math.min(RISE, endDist - gl.trig)) : RISE; // 線の終わりまでに出きる
+    });
+  }
+  var riseBy = function (tip) { return function (gl) { return E.out(clamp((tip - gl.trig) / (gl.rl || RISE))); }; };
+
+  /* ---------------- 組み立て ---------------- */
+  function build() {
+    L = spQ.matches ? LAYOUTS.sp : LAYOUTS.pc;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var rect = svg.getBoundingClientRect();
+    W = rect.width || 1; H = rect.height || 1;
+    svg.setAttribute('viewBox', '0 0 ' + r2(W) + ' ' + r2(H));
+    k = clamp(Math.min(W / L.ref[0], H / L.ref[1]), .5, 1.35);
+    S = { labels: [], defs: mk('defs', null, svg) };
+    S.scratch = mk('path', { d: 'M0 0', fill: 'none', stroke: 'none' }, S.defs);
+    S.gFar = mk('g', null, svg);
+    S.gW = mk('g', null, svg);
+    var g = {};
+    ['faint', 'road', 'build', 'people', 'lines', 'text', 'logo', 'dot'].forEach(function (n) { g[n] = mk('g', null, S.gW); });
+    S.g = g;
+
+    // 遠い気配の語(視差のある奥の層)
+    S.far = L.far.map(function (f) { var t = mk('text', { x: f[1], y: f[2], 'font-size': L.farFs, 'class': 'j-far' }, S.gFar); t.textContent = f[0]; return { el: t, fs: L.farFs }; });
+
+    // 言葉の野: 周りの経験(最初からある)
+    S.field = L.field.map(function (f) {
+      var t = mk('text', { x: f[1], y: f[2], 'font-size': L.fieldFs, 'class': 'j-exp' }, g.text);
+      t.textContent = f[0];
+      var w = t.getComputedTextLength();
+      return { el: t, x: f[1], y: f[2], w: w, f: f };
+    });
+
+    // 本線: 退院支援 → 合意形成 → プロジェクト推進 → 現在地
+    var st = L.stations, N = L.N;
+    var main = new Route(g.lines, 'j-line');
+    S.stations = [];
+    var s0 = st[0];
+    var heroT = mk('text', { x: s0[1], y: s0[2], 'font-size': s0[3], 'class': s0[4] }, g.text);
+    heroT.textContent = s0[0];
+    var hw = heroT.getComputedTextLength();
+    var ul0 = s0[2] + s0[3] * 0.28;
+    main.M(s0[1] - 6, ul0).L(s0[1] + hw + 18, ul0);
+    S.hero = heroT;
+    for (var i = 1; i < st.length; i++) {
+      var s = st[i], ul = s[2] + s[3] * 0.28;
+      main.to(s[1] - 8, ul);
+      var d0 = main.mark();
+      var lb = label(g.text, s[0], s[1], ul, s[3], s[4], -1);
+      glyphTrig(lb, d0, s[1] - 8);
+      main.L(s[1] + lb.w + 22, ul);
+      lb.route = 'main';
+      S.stations.push(lb);
+    }
+    // 現在地へ: 最後は水平に入る(その線から「現在地」が出る)
+    var run = spQ.matches ? 70 : 190;
+    main.to(N[0] - run, N[1]);
+    var dHere = main.mark();
+    main.L(N[0], N[1]);
+    main.done();
+    S.main = main;
+    // スマホは戻る線が上から入るので、「現在地」は線の下に下げる
+    var here = label(g.text, '現在地', N[0] - run + 16, N[1], L.hereFs, 'j-sm', spQ.matches ? 1 : -1);
+    glyphTrig(here, dHere, N[0] - run); here.route = 'main';
+    S.here = [here];
+
+    // 周りの経験から: 言いかえを通って現在地へ集まる薄い線
+    S.periph = S.field.map(function (fw, idx) {
+      var f = fw.f, r = new Route(g.faint, 'j-faint');
+      var uy = fw.y + L.fieldFs * 0.28;
+      r.M(fw.x - 4, uy).L(fw.x + fw.w + 12, uy);
+      var tr = null;
+      if (f[3]) {
+        var tul = f[5] + L.trFs * 0.28;
+        r.to(f[4] - 6, tul);
+        var dt = r.mark();
+        tr = label(g.text, f[3], f[4], tul, L.trFs, 'j-tr', -1);
+        r.L(f[4] + tr.w + 14, tul);
+        glyphTrig(tr, dt, f[4] - 6, r.mark());
+      }
+      r.to(N[0], N[1], .6);
+      r.done();
+      r.tr = tr; r.idx = idx;
+      return r;
+    });
+
+    // 3本の橋(Compass の橋の名前)
+    var B = L.branch, names = ['プロジェクトマネジメント', '医療経営 / BizOps', '教育 / 人材育成'];
+    S.branches = B.rows.map(function (y, bi) {
+      var r = new Route(g.lines, 'j-line');
+      r.M(N[0], N[1]);
+      if (y !== N[1]) r.to(B.x - 10, y, .5); else r.L(B.x - 10, y);
+      var d0 = r.mark();
+      var lb = label(g.text, names[bi], B.x, y, B.fs, 'j-br', -1);
+      r.L(B.x + lb.w + 18, y);
+      r.done();
+      glyphTrig(lb, d0, B.x - 10, r.len);
+      r.lb = lb; r.i = bi;
+      return r;
+    });
+    var chosen = S.branches[1];
+    S.chosen = chosen;
+    // 3本の橋の下に、その名前(BRIDGE COMPASS)が下がって出る
+    var last = S.branches[2];
+    S.en = label(g.text, 'BRIDGE COMPASS', B.x, B.rows[2], L.enFs, 'j-en', 1, { whole: true });
+    S.en.glyphs[0].trig = last.len * .8; S.en.glyphs[0].rl = last.len * .2;
+
+    // 道: 医療経営の線がそのまま街の道になり、最後にロゴの藍へ曲がる
+    var T = L.town, roadY = T.road ? T.road[1] : N[1];
+    var road = new Route(g.lines, 'j-line');
+    road.M(chosen.x, chosen.y);
+    if (T.road) { road.to(T.road[0], roadY, .9); }
+    var dTown = road.mark() + (T.road ? 0 : (T.x0 - chosen.x));
+    road.L(T.ring, roadY);
+    var dRing = road.mark();
+    road.L(T.end, roadY);
+    var dEnd = road.mark();
+    S.townGeom = { roadY: roadY, dTown: dTown, dRing: dRing, dEnd: dEnd };
+    road.done();
+    S.road = road;
+    S.ringX = T.ring;
+
+    // 道の面(線の奥に広がる。--bg-3 の面だけ)
+    var surf = new Route(g.road, 'j-road');
+    surf.M(T.x0, roadY - T.roadW / 2).L(T.end + 10, roadY - T.roadW / 2).done();
+    put(surf.el, 'stroke-width', T.roadW);
+    S.surf = surf;
+
+    // 建物: 線が輪郭を描いて現れる(斜投影。正面・上面・側面)
+    var groundY = roadY - T.roadW;
+    S.builds = T.b.map(function (b) {
+      var x = b[0], w = b[1], h = b[2], dp = b[3], ox = OBL[0] * dp, oy = OBL[1] * dp;
+      var gb = mk('g', null, g.build);
+      var P = function (pts) { return 'M' + pts.map(function (p) { return r2(p[0]) + ' ' + r2(p[1]); }).join(' L') + ' Z'; };
+      var top = groundY - h;
+      var faces = [
+        mk('path', { d: P([[x + w, groundY], [x + w + ox, groundY + oy], [x + w + ox, top + oy], [x + w, top]]), 'class': 'j-side', pathLength: 1 }, gb),
+        mk('path', { d: P([[x, top], [x + w, top], [x + w + ox, top + oy], [x + ox, top + oy]]), 'class': 'j-face', pathLength: 1 }, gb),
+        mk('path', { d: P([[x, groundY], [x + w, groundY], [x + w, top], [x, top]]), 'class': 'j-face', pathLength: 1 }, gb)
+      ];
+      faces.forEach(function (f) { put(f, 'stroke-dasharray', '1 1.02'); });
+      var trig = Math.min(dTown + (x - T.x0) - 40, dEnd - 170); // 道の終わりまでに描き終える
+      var o = { g: gb, faces: faces, trig: trig, x: x, w: w, top: top, ox: ox, oy: oy, clinic: !!b[4] };
+      if (b[4]) {
+        o.name = label(g.text, 'クリニック', x + 12, top, T.fs + (spQ.matches ? 6 : 7), 'j-new', 1); // 屋根の縁から正面に下がる(俯瞰でも 12px を割らない大きさ)
+        o.name.glyphs.forEach(function (gl) { gl.trig = Math.min(trig + 120, dEnd - 150) + (gl.x - x) * .3; gl.rl = 90; });
+        // 数値は上面の奥の縁から出る(良い面と代償が1つずつ: 来院と平均待ち)
+        var sy = top + oy;
+        var sx = x + ox + 4;
+        o.stats = [['来院', 48, 52, '人'], ['平均待ち', 31, 34, '分']].map(function (sd, si) {
+          var lbl = label(g.text, sd[0], sx, sy, T.fs - 3, 'j-sm', -1, { whole: true });
+          var val = label(g.text, sd[1] + sd[3], sx + lbl.w + 6, sy, T.numFs, 'j-num', -1, { whole: true });
+          sx += lbl.w + 6 + val.w + T.numFs * .8;
+          [lbl, val].forEach(function (l) { l.glyphs[0].trig = Math.min(trig + 150, dEnd - 130) + si * 24; l.glyphs[0].rl = 90; });
+          return { lbl: lbl, val: val, a: sd[1], b: sd[2], u: sd[3] };
+        });
+        A.clinic = [x + w / 2, top];
+      }
+      return o;
+    });
+
+    // 選ぶ: 道の上に座る語と印(Day はこの語の側)。点が印に入ると、数値が入れ替わる
+    var choice = label(g.text, '退院支援室への訪問を増やす', 0, roadY, T.fs, 'j-new', -1);
+    var cx0 = T.ring - 18 - choice.w;
+    shiftLabel(choice, cx0);
+    var day = label(g.text, 'Day 6', 0, roadY, T.fs - 2, 'j-day', -1, { whole: true });
+    shiftLabel(day, cx0 - day.w - 14);
+    day.glyphs[0].trig = dTown + (day.x - T.x0) - 40;
+    glyphTrig(choice, dTown + (cx0 - T.x0) - 60, cx0);
+    S.choice = choice; S.day = day;
+    S.ring = mk('circle', { cx: T.ring, cy: roadY, r: 9, 'class': 'j-ring' }, g.text);
+
+    // 人の点(患者に限らない)
+    S.people = [0, 1, 2, 3, 4, 5].map(function (i) { return { el: mk('circle', { r: 2.6, 'class': 'j-person' }, g.people), ph: i / 6, late: i >= 4 }; });
+
+    // 点(現在地。分かれ目で砂に変わる)
+    S.dotInk = mk('circle', { r: 5, 'class': 'j-dot' }, g.dot);
+    S.dotSand = mk('circle', { r: 5, 'class': 'j-dot sand' }, g.dot);
+
+    // 俯瞰の大きさを決めてから、三つの言葉とロゴを置く(画面上の大きさで決める)
+    var core = function () { // 俯瞰で収める範囲: 言葉の野の気配(周りの語と薄い線)を除いた本筋
+      var hide = [g.faint].concat(S.field.map(function (f) { return f.el; })).concat(S.periph.filter(function (r) { return r.tr; }).map(function (r) { return r.tr.g; }));
+      hide.forEach(function (n) { n.style.display = 'none'; });
+      var b = S.gW.getBBox();
+      hide.forEach(function (n) { n.style.display = ''; });
+      return b;
+    };
+    var bb = core();
+    var fit = function (bx) {
+      var padT = H * (spQ.matches ? .1 : .17) + 10, padB = H * .1 + 16, padX = W * .07 + 10;
+      var z = Math.min((W - padX * 2) / bx.width, (H - padT - padB) / bx.height) / k;
+      var zz = z * k;
+      return [bx.x + bx.width / 2, bx.y + bx.height / 2 - (padT - padB) / 2 / zz, z];
+    };
+    var ov = fit(bb), zOv = ov[2] * k;
+
+    // ロゴ: 道の終わりから藍が曲がって正式ロゴの藍に。砂は自分の始点から
+    var sc = L.logoPx / 240 / zOv;
+    var lp = function (p) { return [ox0 + p[0] * sc, oy0 + p[1] * sc]; };
+    var ox0 = T.end + 60 - LOGO_N[0][0] * sc, oy0 = roadY - LOGO_N[0][1] * sc;
+    var n0 = lp(LOGO_N[0]), n1 = lp(LOGO_N[1]), n2 = lp(LOGO_N[2]), n3 = lp(LOGO_N[3]);
+    var logoN = new Route(g.logo, 'j-line');
+    logoN.M(T.end, roadY).C(T.end + 40, roadY, n0[0] - 22, n0[1] + 4, n0[0], n0[1]).C(n1[0], n1[1], n2[0], n2[1], n3[0], n3[1]).done();
+    var s0p = LOGO_S.map(lp);
+    var logoS = new Route(g.logo, 'l-sand');
+    logoS.M(s0p[0][0], s0p[0][1]).C(s0p[1][0], s0p[1][1], s0p[2][0], s0p[2][1], s0p[3][0], s0p[3][1]).done();
+    S.logoN = logoN; S.logoS = logoS; S.logoW = 6 * sc;
+
+    // 三つの言葉: それぞれの場所の線から下がって出る(俯瞰の画面で verbPx)
+    var vfs = L.verbPx / zOv, vs = ['見つける。', '言葉にする。', '試してみる。'];
+    var anchors = [
+      [st[0][1] - 6, ul0],
+      L.verbs[1][0] === 'branch' ? [B.x, B.rows[2]] : [st[2][1], st[2][2] + st[2][3] * .28],
+      [T.x0 + 20, roadY]
+    ];
+    S.verbs = vs.map(function (v, vi) { return label(g.text, v, anchors[vi][0], anchors[vi][1] + (vi === 2 ? 2 : 0), vfs, 'j-verb', 1, { lod: false }); });
+
+    // 俯瞰をもう一度(ロゴと言葉を含めて)
+    ov = fit(core());
+
+    var start = spQ.matches ? [0, st[0][2] - 70] : [st[0][1] + 200, 24];
+    A.start = start; A.st1 = [st[1][1], st[1][2]]; A.N = N; A.town = [T.x0, roadY]; A.ov = ov;
+    if (!A.clinic) A.clinic = [T.ring - 100, roadY - 80];
+    keys = L.cam(A).map(function (q) { return { t: q[0], x: q[1], y: q[2], lz: Math.log(q[3]), hold: !!q[4] }; });
+    keys.forEach(function (q, i) {
+      if (q.hold) { q.mx = q.my = q.mz = 0; return; }
+      var a = keys[i - 1] || keys[keys.length - 2], b = keys[i + 1] || keys[1];
+      var dt = (b.t - a.t) || 1, f = .85;
+      q.mx = f * (b.x - a.x) / dt; q.my = f * (b.y - a.y) / dt; q.mz = f * (b.lz - a.lz) / dt;
+    });
+    S.chain = { Lm: main.len, Lb: chosen.len, Lr: road.len };
+    built = true;
+  }
+
+  function camAt(t) {
+    var i = 0;
+    while (i < keys.length - 2 && t >= keys[i + 1].t) i++;
+    var a = keys[i], b = keys[i + 1], h = b.t - a.t, s = clamp((t - a.t) / h);
+    var s2 = s * s, s3 = s2 * s, h00 = 2 * s3 - 3 * s2 + 1, h10 = s3 - 2 * s2 + s, h01 = -2 * s3 + 3 * s2, h11 = s3 - s2;
+    return {
+      x: h00 * a.x + h10 * h * a.mx + h01 * b.x + h11 * h * b.mx,
+      y: h00 * a.y + h10 * h * a.my + h01 * b.y + h11 * h * b.my,
+      z: Math.exp(h00 * a.lz + h10 * h * a.mz + h01 * b.lz + h11 * h * b.mz)
+    };
+  }
+
+  /* 本線→選んだ橋→道→ロゴの藍、をひと続きの距離で進める(点は印まで) */
+  function chainAt(t) {
+    var c = S.chain, g = S.townGeom, Lm = c.Lm, Lb = c.Lb;
+    var full = Lm + Lb + c.Lr + S.logoN.len;
+    var d;
+    if (t < 1.2) d = 0;
+    else if (t < 4.4) d = Lm * seg(t, 1.2, 3.2, E.inOut);
+    else if (t < 6.3) d = Lm;
+    else if (t < 9.0) d = Lm + (Lb + g.dRing) * seg(t, 6.3, 2.7, E.inOut);
+    else if (t < 10.0) d = Lm + Lb + lerp(g.dRing, c.Lr, seg(t, 9.0, 1.0, E.out));
+    else if (t < 13.9) d = Lm + Lb + c.Lr;
+    else if (t < 15.6) d = Lm + Lb + c.Lr + S.logoN.len * seg(t, 13.9, .7, E.inOut);
+    else d = full * (1 - seg(t, 15.6, 2.2, E.inOut));
+    return d;
+  }
+
+  /* ---------------- 1枚を描く ---------------- */
+  function render(t) {
+    if (!built) return;
+    var c = camAt(t), z = c.z * k;
+    var fx = W * L.focal[0], fy = H * L.focal[1];
+    put(S.gW, 'transform', 'translate(' + r2(fx) + ' ' + r2(fy) + ') scale(' + (Math.round(z * 10000) / 10000) + ') translate(' + r2(-c.x) + ' ' + r2(-c.y) + ')');
+    var p = .6, zf = k * Math.pow(c.z, p), fcx = A.start[0] + (c.x - A.start[0]) * p, fcy = A.start[1] + (c.y - A.start[1]) * p;
+    put(S.gFar, 'transform', 'translate(' + r2(fx) + ' ' + r2(fy) + ') scale(' + (Math.round(zf * 10000) / 10000) + ') translate(' + r2(-fcx) + ' ' + r2(-fcy) + ')');
+    var px = function (v) { return v * Math.pow(z, .3) / z; }; // 線の太さ(画面 px をおおむね保ち、寄るとわずかに太く)
+
+    // 遠い語: 12→10px で薄れる
+    var lodA = function (fs, zz) { var s = fs * zz; return clamp((s - 10) / 2); };
+    S.far.forEach(function (f) { put(f.el, 'opacity', r2(.85 * lodA(f.fs, zf))); });
+    S.field.forEach(function (f) { put(f.el, 'opacity', r2(lodA(L.fieldFs, z))); });
+
+    // 本線
+    var C = chainAt(t), ch = S.chain, Lm = ch.Lm, Lb = ch.Lb, g = S.townGeom;
+    var dMain = clamp(C, 0, Lm);
+    S.main.draw(dMain);
+    put(S.g.lines, 'stroke-width', r2(px(2.2)));
+    S.stations.forEach(function (lb) { riseGlyphs(lb, riseBy(dMain)); });
+    S.here.forEach(function (lb) { riseGlyphs(lb, riseBy(dMain)); });
+
+    // 周りの線(2.2〜4.8 に伸び、16.6〜17.4 に戻る)
+    var back = seg(t, 16.5, .9, E.inOut);
+    S.periph.forEach(function (r, i) {
+      var a = t < 15.6 ? seg(t, 2.2 + i * .2, 2.4, E.inOut) : 1 - back;
+      var d = r.len * a;
+      r.draw(d);
+      put(r.el, 'stroke-width', r2(px(1.1)));
+      put(r.el, 'opacity', r2(.6 - .25 * seg(t, 5.8, .5)));
+      if (r.tr) riseGlyphs(r.tr, riseBy(d));
+    });
+
+    // 3本の橋(4.6〜5.8)。選んだ線は太く、他は薄く。戻りは 16.2〜16.8
+    var bs = t < 15.6 ? seg(t, 4.6, 1.2, E.out) : 1 - seg(t, 16.2, .6, E.inOut);
+    var em = t < 15.6 ? seg(t, 5.8, .5, E.inOut) : 1;
+    S.branches.forEach(function (r) {
+      var d = r.len * bs;
+      if (r === S.chosen) d = Math.max(d, clamp(C - Lm, 0, Lb));
+      r.draw(d);
+      put(r.el, 'stroke-width', r2(px(r === S.chosen ? lerp(1.7, 2.6, em) : 1.7)));
+      put(r.el, 'opacity', r === S.chosen ? '1' : r2(1 - .68 * em));
+      riseGlyphs(r.lb, riseBy(d));
+      r.lb.dim = r === S.chosen ? 1 : 1 - .5 * em;
+      if (r.i === 2) riseGlyphs(S.en, riseBy(d));
+    });
+
+    // 道とロゴの藍
+    var dRoad = clamp(C - Lm - Lb, 0, ch.Lr);
+    S.road.draw(dRoad);
+    put(S.road.el, 'stroke-width', r2(px(2.6)));
+    var dLogo = clamp(C - Lm - Lb - ch.Lr, 0, S.logoN.len);
+    S.logoN.draw(dLogo);
+    put(S.logoN.el, 'stroke-width', r2(Math.max(px(2.6), S.logoW)));
+    var sandD = t < 15.6 ? seg(t, 14.2, .6, E.inOut) : 1 - seg(t, 15.6, .25, E.inOut);
+    S.logoS.draw(S.logoS.len * sandD);
+    put(S.logoS.el, 'stroke-width', r2(Math.max(px(2.6), S.logoW)));
+    // 道の面: 線の少し後ろから広がる
+    S.surf.draw(dRoad - g.dTown - 70);
+    // 建物の輪郭
+    S.builds.forEach(function (b) {
+      var q = clamp((dRoad - b.trig) / 160);
+      b.faces.forEach(function (f, fi) {
+        var qq = clamp(q * 1.25 - fi * .12);
+        put(f, 'stroke-dashoffset', r2(1 - qq));
+        put(f, 'fill-opacity', r2(clamp((qq - .55) / .45)));
+        put(f, 'visibility', qq <= 0 ? 'hidden' : 'visible');
+      });
+      put(b.g, 'stroke-width', r2(1.1 / z));
+      if (b.name) {
+        riseGlyphs(b.name, riseBy(dRoad));
+        var swap = seg(t, 9.3, .6, E.inOut);
+        b.stats.forEach(function (sd) {
+          riseGlyphs(sd.lbl, riseBy(dRoad)); riseGlyphs(sd.val, riseBy(dRoad));
+          var v = Math.round(lerp(sd.a, sd.b, swap));
+          if (sd.val.glyphs[0].el.textContent !== v + sd.u) sd.val.glyphs[0].el.textContent = v + sd.u;
+        });
+      }
+    });
+    riseGlyphs(S.choice, riseBy(dRoad));
+    riseGlyphs(S.day, riseBy(dRoad));
+    var dayTxt = t >= 9.3 && t < 15.6 ? 'Day 7' : 'Day 6';
+    if (S.day.glyphs[0].el.textContent !== dayTxt) S.day.glyphs[0].el.textContent = dayTxt;
+    var ringOn = clamp((dRoad - (g.dRing - 40)) / 40);
+    put(S.ring, 'opacity', r2(ringOn));
+    put(S.ring, 'r', r2(9 * Math.pow(z, .3) / z));
+    put(S.ring, 'stroke-width', r2(px(1.3)));
+
+    // 人の点: 道ができたところを歩く
+    var walkLen = g.dRing - g.dTown - 60;
+    S.people.forEach(function (pp) {
+      var u = ((pp.ph + t * .045) % 1);
+      var x = L.town.x0 + 20 + u * walkLen;
+      var vis = clamp((dRoad - g.dTown - (x - L.town.x0) - 30) / 60) * (pp.late ? seg(t, 9.4, .5) : 1);
+      put(pp.el, 'cx', r2(x)); put(pp.el, 'cy', r2(g.roadY - L.town.roadW + 7));
+      put(pp.el, 'r', r2(2.6 / z * Math.pow(z, .3)));
+      put(pp.el, 'opacity', r2(vis));
+    });
+
+    // 点: 本線では墨、分かれ目から砂
+    var dDot = Math.min(C, Lm + Lb + g.dRing), pt;
+    if (dDot <= Lm) pt = S.main.at(dDot);
+    else if (dDot <= Lm + Lb) pt = S.chosen.at(dDot - Lm);
+    else pt = S.road.at(dDot - Lm - Lb);
+    var appear = t < 15.6 ? seg(t, 1.0, .3, E.out) : 1 - seg(t, 17.75, .2);
+    var sand = clamp((dDot - Lm + 2) / 24);
+    var rr = 5.4 * Math.pow(z, .3) / z * appear;
+    [S.dotInk, S.dotSand].forEach(function (d, i) {
+      put(d, 'cx', r2(pt[0])); put(d, 'cy', r2(pt[1])); put(d, 'r', r2(Math.max(rr, 0)));
+      put(d, 'opacity', r2(i ? sand : 1 - sand));
+    });
+
+    // 三つの言葉(俯瞰で線から下がって出る。ロゴの前に退く)
+    S.verbs.forEach(function (lb, vi) {
+      var a = seg(t, 12.0 + vi * .25, .6, E.out) * (1 - seg(t, 13.55, .45, E.inOut));
+      riseGlyphs(lb, function () { return a; });
+    });
+
+    // 文字の大きさによる薄れ(12→10px)
+    S.labels.forEach(function (lb) { if (lb.lod) put(lb.g, 'opacity', r2(lodA(lb.fs, z) * lb.dim)); });
+  }
+
+  /* ---------------- 時間 ---------------- */
+  var t = 0, last = 0, playing = false, userPaused = false, offscreen = false, raf = 0;
+  function frame(now) {
+    raf = 0;
+    if (!playing) return;
+    var dt = last ? Math.min((now - last) / 1000, .05) : 0;
+    last = now;
+    t = (t + dt) % LOOP;
+    render(t);
+    raf = requestAnimationFrame(frame);
+  }
+  function sync() {
+    var should = built && !reduceQ.matches && !userPaused && !offscreen && !document.hidden;
+    if (should && !playing) { playing = true; last = 0; if (!raf) raf = requestAnimationFrame(frame); }
+    else if (!should) { playing = false; }
+  }
+  var STILL = 13.2; // 俯瞰に三つの言葉が出ている時刻(ロゴの前)
+  function still() { render(STILL); }
+  function init() {
+    build();
+    if (reduceQ.matches) { still(); return; }
+    render(t);
+    setTimeout(sync, 400); // 読み込み直後の重い処理を避ける
+  }
+  btn.addEventListener('click', function () {
+    userPaused = !userPaused;
+    btn.setAttribute('aria-pressed', String(userPaused));
+    btn.setAttribute('aria-label', userPaused ? '動きを再開する' : '動きを止める');
+    sync();
+  });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { offscreen = !es[0].isIntersecting; sync(); }, { threshold: 0 }).observe(fig);
+  document.addEventListener('visibilitychange', sync);
+  var rz = 0, lastW = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(rz);
+    rz = setTimeout(function () {
+      var w = svg.getBoundingClientRect().width;
+      if (Math.abs(w - lastW) < 2 && !reduceQ.matches) return; // スマホのアドレスバーの伸縮では組み直さない
+      lastW = w; build(); render(reduceQ.matches ? STILL : t);
+    }, 200);
+  });
+  if (reduceQ.addEventListener) reduceQ.addEventListener('change', function () { build(); if (reduceQ.matches) still(); sync(); });
+  fig.journeyRender = function (tt) { t = tt; render(tt); }; // 検証用(時刻を指定して1枚を描く)
+  var go = function () { lastW = svg.getBoundingClientRect().width; init(); };
+  var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  var started = false;
+  var once = function () { if (started) return; started = true; (window.requestIdleCallback || function (f) { setTimeout(f, 60); })(go, { timeout: 800 }); };
+  fontsReady.then(once, once);
+  setTimeout(once, 1500);
 })();
 </script>
 </body>
