@@ -45,7 +45,8 @@
      5 砂は現在地・分岐点の点1つと、選ぶ瞬間だけ(第22条)。線は藍(ロゴの線と同じ扱い)。破線は使わない(BRIDGE で破線は「未確定」)
      6 終わりは引き: 起点の BRIDGE から全体が一本でつながる俯瞰で終える。タイトルカードを出さない。継ぎ目は視点の移動と線の巻き戻しで渡す。
        起点の名前は俯瞰で 12px 以上、マークの線は Journey の線より細くしない。導入とループの合流点では、カメラも線の先端も速さを途切れさせない
-     7 静止版(動きを減らす設定)は俯瞰の1枚。世界の中にロゴを含めない(BRIDGE は h1 のロックアップのまま上に置く)。CTA は最初から出す
+     7 静止版(動きを減らす設定)は俯瞰の1枚。世界の中にロゴを含めない(BRIDGE は h1 のロックアップのまま上に置く)。CTA は最初から出す。
+       静止の1枚でも読ませる語は 12px 以上(退院支援は他の駅より小さくしない)
    色: 4系統のトークンだけ。ガラスは主ボタン(第22条 用途3)だけ。キャンバスの端の溶けは mask(アルファ)で、色のグラデーションではない
    前版(Hero Motion v1・カードの切り替え)と、その前のガラスの立体は外した。立体の素材は images/hero/ に残す(docs/hero-asset-spec.md)
    ================================================================ */
@@ -154,7 +155,7 @@ html:not(.js) .jr{display:none}
 /* 狭い画面はナビに入口とロゴを並べる幅がない: ヒーローが見えている間だけ入口を出し、その間ロゴは流れの外へ。過ぎたらロゴに戻す(下の lab に Compass の入口がある) */
 @media(max-width:600px){
   html:not(.hero-in) .nav-entry{display:none}
-  html.hero-in body[data-page="home"] .nav-logo{position:absolute}
+  html.hero-in body[data-page="home"] .nav-logo{position:absolute;transition:none} /* しまうときは即時(入口と 0.4 秒重ならない)。出るときの .4s は残す */
   html.hero-in body[data-page="home"] .nav-right{margin-left:auto}
 }
 /* 動きを減らす設定: 俯瞰の静止の1枚(JS が描く)。止める操作は要らない */
@@ -518,7 +519,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       N: [-110, 136], hereFs: 14, enFs: 12,
       field: [ // 本線(退院支援 → 合意形成 → プロジェクト推進)の右側に置く
         ['多職種連携', 30, -352, 'ステークホルダー調整', 30, 64],
-        ['申し送り', 92, -300, null],
+        ['申し送り', 106, -326, null],
         ['患者・家族への説明', 20, -236, null],
         ['業務改善', 84, -140, null]
       ],
@@ -532,9 +533,9 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
           [0, A.start[0], A.start[1], A.z0, 1],
           [1.2, A.start[0], A.start[1] + 10, A.z0 * 1.01],
           [2.8, 0, A.st1[1] - 10, 1.03 * A.zt],
-          [4.2, 0, A.N[1] - 70, .97 * A.zt],
-          [5.4, 44, A.N[1] + 20, A.zt],
-          [6.3, 44, A.N[1] + 50, 1.01 * A.zt],
+          [4.2, 0, A.N[1] - 70, .97 * A.zB],
+          [5.4, 44, A.N[1] + 20, A.zB],
+          [6.3, 44, A.N[1] + 50, 1.01 * A.zB],
           [7.6, 20, A.town[1] - 190, A.zt],
           [9.0, A.clinic[0] - 30, A.town[1] - 70, 1.06 * A.zt],
           [10.2, A.clinic[0] - 30, A.town[1] - 72, 1.08 * A.zt, 1],
@@ -670,9 +671,12 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   /* 2回組む: 1回目で俯瞰の倍率を測り、2回目で「俯瞰でも 12.5px を割らない語の下限」と三つの言葉の大きさを決める */
   var idle = window.requestIdleCallback ? function (f) { window.requestIdleCallback(f, { timeout: 500 }); } : function (f) { setTimeout(f, 30); };
   var buildId = 0, holdView = false, revealed = false;
+  // 退院支援の字: 他の駅が俯瞰の下限(minFs)で大きくなっても、見出しの大小を逆にしない。
+  // スマホでは「見つける。」がこの語の幅に収まる大きさまでなので、下限の 1.3 倍にして三つの言葉も 12px を割らないようにする
+  function heroFs(P) { return Math.max(L.stations[0][3], (P.minFs || 0) * 1.3); }
   function wantList(P) { // 組み立てで使う語と大きさの一覧
     var T_ = L.town, statFs = spQ.matches ? T_.fs - 2 : T_.fs, nameFs0 = Math.max(T_.fs + (spQ.matches ? 6 : 7), P.minFs), want = [];
-    want.push([L.stations[0][0], L.stations[0][3], L.stations[0][4]]);
+    want.push([L.stations[0][0], heroFs(P), L.stations[0][4]]);
     L.stations.slice(1).forEach(function (q) { want.push([q[0], Math.max(q[3], P.minFs), q[4]]); });
     want.push(['現在地', L.hereFs, 'j-sm'], ['BRIDGE Compass', L.enFs, 'j-en']);
     L.field.forEach(function (f) { want.push([f[0], L.fieldFs, 'j-exp']); if (f[3]) want.push([f[3], L.trFs, 'j-tr']); });
@@ -741,19 +745,24 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     });
 
     // 本線: 退院支援 → 合意形成 → プロジェクト推進 → 現在地
-    var st = L.stations, N = L.N;
+    var st = L.stations.map(function (q) { return q.slice(); }), N = L.N;
+    if (spQ.matches) { // スマホで字が大きくなる画面(俯瞰の下限 minFs が大きい)では、「見つける。」と次の語が重ならないよう、合意形成から下を下げる
+      var fs1 = Math.max(st[1][3], P.minFs || 0), ulH = st[0][2] + heroFs(P) * .28;
+      var y1 = Math.max(st[1][2], ulH + (P.verbFs || 0) * 1.4 + 20 + fs1 * .8);
+      st[2][2] += y1 - st[1][2]; st[1][2] = y1;
+    }
     var main = new Route(g.lines, 'j-line');
     S.stations = [];
     var s0 = st[0];
-    var ul0 = s0[2] + s0[3] * 0.28;
+    var ul0 = s0[2] + heroFs(P) * 0.28;
     // 退院支援も線から出る(初回は BRIDGE から伸びた線が届いたとき、ループでは下線が引かれたとき)
-    var heroLb = label(g.text, s0[0], s0[1], ul0, s0[3], s0[4], -1);
+    var heroLb = label(g.text, s0[0], s0[1], ul0, heroFs(P), s0[4], -1);
     var hw = heroLb.w;
     glyphTrig(heroLb, 0, s0[1] - 6);
     S.heroLb = heroLb;
     // 下線は語より長くてよい(俯瞰で「見つける。」がこの下線の水平の所から下がる)
     var pad = spQ.matches; // スマホは戻りの斜線が語に触れないよう、下線の入口と折り返しの手前に1字ぶんの水平を足す
-    main.M(s0[1] - 6, ul0).L(s0[1] + Math.max(hw + 18 + (pad ? s0[3] * .8 : 0), pad ? 0 : P.verbFs * 5.15 + 4), ul0);
+    main.M(s0[1] - 6, ul0).L(s0[1] + Math.max(hw + 18 + (pad ? heroFs(P) * .8 : 0), pad ? 0 : P.verbFs * 5.15 + 4), ul0);
 
     // 起点の BRIDGE(h1 と同じロックアップ)と、マークの藍の線の端から退院支援の下線へ伸びる線
     // 藍の端と、端での向き(線はこの接線を継いで角を作らない。名前の下を水平に走らせず、砂の線にも触れない)
@@ -773,7 +782,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     S.prefix = pre;
     for (var i = 1; i < st.length; i++) {
       var s = st[i], fsS = Math.max(s[3], P.minFs), ul = s[2] + fsS * 0.28;
-      var lead = pad ? fsS : 0;
+      var lead = pad ? fsS * 1.6 : 0; // スマホ: 戻りの斜線が語の左上を横切らないよう、下線の入口に字の 1.6 倍の水平を足す
       main.to(s[1] - 8 - lead, ul);
       var d0 = main.mark();
       var lb = label(g.text, s[0], s[1], ul, fsS, s[4], -1);
@@ -781,6 +790,20 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       main.L(s[1] + Math.max(lb.w + 22 + lead, i === 2 ? P.verbFs * 6.15 + 10 : 0), ul);
       lb.route = 'main';
       S.stations.push(lb);
+    }
+    // スマホ: 字が大きくなる画面では本線と語が右へ広がるので、言葉の野の語を、本線・駅の名前・起点の名前に触れない所まで右へ逃がす。冒頭の画に収まらない語は出さない
+    if (spQ.matches) {
+      var z0f = startZ0(), sx0 = Math.min(-40, LG.x + (W * L.focal[0] - 16) / (k * z0f)), xEdge = sx0 + (W * L.focal[0] - 20) / (k * z0f);
+      var occ = [[s0[1] - 10, ul0 - heroFs(P) - 6, s0[1] + hw + 10, ul0 + 8], [LG.x + 300 * LG.s, LG.y, LG.x + 770 * LG.s, LG.y + 110 * LG.s]]
+        .concat(S.stations.map(function (lb) { return [lb.x - 10, lb.ul - lb.fs - 6, lb.x + lb.w + 10, lb.ul + 8]; }));
+      [main, pre].forEach(function (r) { for (var pi = 0; pi < r.pts.length; pi += 2) occ.push([r.pts[pi] - 12, r.pts[pi + 1] - 6, r.pts[pi] + 12, r.pts[pi + 1] + 6]); });
+      S.field.forEach(function (fw) {
+        var top = fw.y - L.fieldFs - 4, bot = fw.y + 6, x = fw.x, moved = true;
+        while (moved) { moved = false; occ.forEach(function (o) { if (o[1] < bot && o[3] > top && o[0] < x + fw.w && o[2] > x) { x = o[2]; moved = true; } }); }
+        fw.x = x; fw.el.setAttribute('x', r2(x));
+        fw.off = x + fw.w > xEdge;
+        if (fw.off) fw.el.style.display = 'none';
+      });
     }
     // 現在地へ: 最後は水平に入る(その線から「現在地」が出る)
     var run = spQ.matches ? 60 : 190;
@@ -812,7 +835,8 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       }
       r.to(N[0], N[1], .6);
       r.done();
-      r.tr = tr; r.idx = idx;
+      r.tr = tr; r.idx = idx; r.off = fw.off;
+      if (fw.off) { r.el.style.display = 'none'; if (tr) tr.g.style.display = 'none'; } // 出さない語からは線も出さない
       return r;
     });
 
@@ -851,8 +875,9 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     road.M(chosen.x, chosen.y);
     if (T.via) { // スマホ: 橋の群れの右で下り、屋根より上の空きを左へ戻り、左端で下りて道に入る(語と建物を横切らない)
       var V = T.via;
-      road.C(chosen.x + 40, chosen.y, V.R, chosen.y + 20, V.R, chosen.y + 60)
-        .C(V.R, V.Yb - 24, V.R - 24, V.Yb, V.R - 64, V.Yb)
+      var R = Math.max(V.R, chosen.x + 30, B.x + S.branches[2].lb.w + 40); // 字が大きいときも、下りる線が下の橋の名前を横切らない
+      road.C(chosen.x + 40, chosen.y, R, chosen.y + 20, R, chosen.y + 60)
+        .C(R, V.Yb - 24, R - 24, V.Yb, R - 64, V.Yb)
         .L(V.Lx + 40, V.Yb)
         .C(V.Lx, V.Yb, V.Lx - 22, roadY, T.x0, roadY);
     } else if (T.road) { road.to(T.road[0], roadY, .9); }
@@ -935,6 +960,8 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       hide.forEach(function (n) { n.style.display = 'none'; });
       var b = S.gW.getBBox();
       hide.forEach(function (n) { n.style.display = ''; });
+      S.field.forEach(function (f) { if (f.off) f.el.style.display = 'none'; });
+      S.periph.forEach(function (r) { if (r.off && r.tr) r.tr.g.style.display = 'none'; });
       if (still) { S.logoG.style.display = 'none'; S.prefix.el.style.display = 'none'; }
       return b;
     };
@@ -952,12 +979,16 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     // 三つの言葉: それぞれの場所の線から下がって出る(俯瞰の画面で verbPx)
     var vfs = P.verbFs, vs = ['見つける。', '言葉にする。', '試してみる。'];
     var st2ul = S.stations[1].ul;
-    var anchors = [[st[0][1] - 6, ul0], [st[2][1], st2ul], [T.x0 + 20, roadY]];
+    // スマホ: 「言葉にする。」は下線の入口の水平から、「試してみる。」は道に入る手前の水平から下げる(入ってくる線は上側なので横切らない)。幅を稼いで 12px を割らないため
+    var lead2 = spQ.matches ? Math.max(st[2][3], P.minFs) * 1.6 : 0;
+    var anchors = [[st[0][1] - 6, ul0], [st[2][1] - (spQ.matches ? 8 + lead2 : 0), st2ul], [T.x0 + (spQ.matches ? -30 : 20), roadY]];
+    // 1回目の組み立てでは、2回目の字の大きさ(俯瞰の下限 mf2 と退院支援の幅)を見込んで収まる幅を測る
+    var mf2 = P.pass1 ? 12.8 / zOv : P.minFs, hw2 = hw * heroFs({ minFs: mf2 }) / heroFs(P);
     // 三つの言葉は、それぞれの下線の水平の所に収まる大きさまで(次の組み立てで使う)
     var rooms = [
-      spQ.matches ? hw + 6 : (st[1][1] - 60) - (st[0][1] - 6),
-      spQ.matches ? 178 - (st[2][1] - 8) : (N0[0] - run - 30) - (st[2][1] - 8),
-      T.end - (T.x0 + 20)
+      spQ.matches ? hw2 + 6 : (st[1][1] - 60) - (st[0][1] - 6),
+      spQ.matches ? 178 - anchors[1][0] : (N0[0] - run - 30) - (st[2][1] - 8),
+      T.end - anchors[2][0]
     ];
     S.verbRoom = Math.min(rooms[0] / 5.15, rooms[1] / 6.15, rooms[2] / 6.15);
     S.verbs = vs.map(function (v, vi) { return label(g.text, v, anchors[vi][0], anchors[vi][1] + (vi === 2 ? 2 : 0), vfs, 'j-verb', 1, { lod: false }); });
@@ -968,7 +999,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 
     // 冒頭の画: 言葉の野と、左上に小さく起点の BRIDGE(ナビの下の溶ける帯より下に入れる)
     var fy0 = H * L.focal[1], topClear = under + (spQ.matches ? 40 : 60);
-    var z0 = L.startZ || 1, start = spQ.matches ? [-40, st[0][2]] : [st[0][1] + 200, 24];
+    var z0 = startZ0(), start = spQ.matches ? [-40, st[0][2]] : [st[0][1] + 200, 24];
     start[0] = Math.min(start[0], LG.x + (W * L.focal[0] - 16) / (k * z0)); // ロゴの左端を画面に収める(狭い画面ほど俯瞰に合わせてロゴが大きくなる)
     start[1] = Math.min(start[1], LG.y - (topClear - fy0) / (k * z0));
     A.z0 = z0;
@@ -982,6 +1013,9 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       S.brandCam = { x: wc[0] - (sc0[0] - W * L.focal[0]) / zE0, y: wc[1] - (sc0[1] - fy0) / zE0, z: zE0 / k };
     } A.st1 = [st[1][1], st[1][2]]; A.N = N; A.town = [T.x0, roadY]; A.ov = ov;
     if (!A.clinic) A.clinic = [T.ring - 100, roadY - 80];
+    // スマホの3本の橋の画: いちばん長い橋の名前の右端が、右の溶ける帯より内側に入る倍率まで引く(カメラの中心 x=44)
+    var xR = Math.max.apply(null, S.branches.map(function (r) { return B.x + r.lb.w; }));
+    A.zB = spQ.matches ? Math.min(A.zt, (W * (.5 - .04) - 10) / ((xR - 44) * k * 1.012)) : A.zt;
     keys = L.cam(A).map(function (q) { return { t: q[0], x: q[1], y: q[2], lz: Math.log(q[3]), hold: !!q[4] }; });
     keys.forEach(function (q, i) {
       if (q.hold) { q.mx = q.my = q.mz = 0; return; }
@@ -995,6 +1029,8 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     S.mMain = S.m1 * pre.len / INTRO * 3.2 / main.len;
     if (S.m0 == null) S.m0 = 0;
   }
+  // 冒頭の画の倍率: スマホは少し引く(startZ)。背の低い画面(k が小さい)では、言葉の野の語が薄れきらない(11.6px)所まで戻す
+  function startZ0() { var z = L.startZ || 1; return spQ.matches ? clamp(11.6 / (L.fieldFs * k), z, 1.05) : z; }
   // 3次エルミート(始点の傾き m0・終点の傾き m1。0→1)
   var herm = function (u, m0, m1) { var u2 = u * u, u3 = u2 * u; return (u3 - 2 * u2 + u) * m0 + (3 * u2 - 2 * u3) + (u3 - u2) * m1; };
   function camVel(t) { var a = camAt(t - .01), b = camAt(t + .01); return { x: (b.x - a.x) / .02, y: (b.y - a.y) / .02, lz: (Math.log(b.z) - Math.log(a.z)) / .02 }; }
@@ -1137,7 +1173,8 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 
     // 点: 本線では墨、分かれ目から砂
     var dDot = Math.min(C, Lm + Lb + g.dRing), pt;
-    if (dDot <= Lm) pt = S.main.at(dDot);
+    if (intro) pt = S.prefix.at(dPre); // 導入中は藍の端からの線の先端に乗る(線より先に出ない)
+    else if (dDot <= Lm) pt = S.main.at(dDot);
     else if (dDot <= Lm + Lb) pt = S.chosen.at(dDot - Lm);
     else pt = S.road.at(dDot - Lm - Lb);
     var appear = intro ? E.out(seg(ti, INTRO - .32, .32)) : t < R0 ? seg(t, 1.0, .3, E.out) : 1 - seg(t, LOOP - .25, .2);
