@@ -14,10 +14,11 @@ import type { Question } from "@/types/question";
 
 const SAVE_LABEL: Record<SaveState, string> = { saved: "保存済み", saving: "保存中", error: "保存できませんでした" };
 
-function emptyQuestion(after?: Question): Question {
+/** 追加する問題。番号は既存と重ならないよう空欄にして、利用者が入れる */
+function emptyQuestion(): Question {
   return {
     id: newId(),
-    questionNumber: after?.questionNumber !== undefined ? after.questionNumber + 1 : undefined,
+    questionNumber: undefined,
     questionText: "",
     choices: [1, 2, 3, 4, 5].map((n) => ({ label: String(n), text: "" })),
     rawText: "",
@@ -59,7 +60,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const setQuestions = (fn: (qs: Question[]) => Question[]) => update((p) => ({ ...p, questions: fn(p.questions) }));
 
   const addQuestion = () => {
-    const q = emptyQuestion(current ?? undefined);
+    const q = emptyQuestion();
     setQuestions((qs) => {
       const at = current ? qs.findIndex((x) => x.id === current.id) + 1 : qs.length;
       return [...qs.slice(0, at), q, ...qs.slice(at)];
@@ -98,12 +99,14 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           >
             <IconBack />
           </Link>
-          <input
-            aria-label="問題集の名前"
-            value={project.title}
-            onChange={(e) => update((p) => ({ ...p, title: e.target.value }))}
-            className="min-h-11 min-w-0 flex-1 rounded-lg bg-transparent px-2 text-base font-semibold hover:bg-muted focus:bg-surface focus:outline-none"
-          />
+          <h1 className="flex min-w-0 flex-1">
+            <input
+              aria-label="問題集の名前"
+              value={project.title}
+              onChange={(e) => update((p) => ({ ...p, title: e.target.value }))}
+              className="min-h-11 w-full min-w-0 rounded-lg bg-transparent px-2 text-base font-semibold hover:bg-muted focus:bg-surface"
+            />
+          </h1>
           <span
             className={saveState === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"}
             aria-live="polite"

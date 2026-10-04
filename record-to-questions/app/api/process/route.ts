@@ -8,6 +8,7 @@ import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import { UPLOAD } from "@/lib/config";
 import { createOCRProvider } from "@/lib/ocr";
 import { processVideo } from "@/lib/pipeline/processVideo";
+import { FfmpegError } from "@/lib/video/ffmpeg";
 import { RuleBasedStructurer } from "@/lib/structurer/RuleBasedStructurer";
 import type { PipelineEvent } from "@/types/pipeline";
 
@@ -20,7 +21,12 @@ export const maxDuration = 900;
  * 動画とフレーム画像は一時ディレクトリにだけ置き、成功・失敗・中断のどれでも最後に消す。
  */
 export async function POST(request: Request) {
-  const fileName = decodeURIComponent(request.headers.get("x-file-name") ?? "video");
+  let fileName: string;
+  try {
+    fileName = decodeURIComponent(request.headers.get("x-file-name") ?? "video");
+  } catch {
+    return Response.json({ error: "ファイル名を読み取れませんでした" }, { status: 400 });
+  }
   const ext = path.extname(fileName).toLowerCase();
   if (!(UPLOAD.acceptedExtensions as readonly string[]).includes(ext)) {
     return Response.json({ error: `対応していない形式です(${UPLOAD.acceptedExtensions.join(" / ")})` }, { status: 415 });
@@ -65,6 +71,7 @@ export async function POST(request: Request) {
           createWriteStream(videoPath),
           { signal: abort.signal },
         );
+        if (received === 0) throw new Error("動画が空です");
         emit({ type: "stage", stage: "upload", status: "done", detail: `${(received / 1024 / 1024).toFixed(1)}MB` });
 
         const result = await processVideo(videoPath, workDir, {
@@ -76,7 +83,7 @@ export async function POST(request: Request) {
         emit({ type: "result", result });
       } catch (e) {
         const message = abort.signal.aborted ? "解析を中断しました" : e instanceof Error ? e.message : String(e);
-        console.error("[process]", e);
+        console.error("[process]", e, e instanceof FfmpegError ? e.stderr : "");
         emit({ type: "error", message });
       } finally {
         await ocr.dispose().catch((e) => console.error("[process] OCR の後片付けに失敗", e));

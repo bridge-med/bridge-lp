@@ -27,8 +27,14 @@ export function run(cmd: "ffmpeg" | "ffprobe", args: string[], { signal }: RunOp
       }
     });
     child.on("close", (code) => {
-      if (code === 0) resolve(Buffer.concat(out));
-      else reject(new FfmpegError(`${cmd} が終了コード ${code} で失敗しました: ${err.trim().split("\n").pop() ?? ""}`, err));
+      if (code === 0) {
+        resolve(Buffer.concat(out));
+        return;
+      }
+      // 画面に出す文には、ffmpeg の生の出力(サーバーの一時パスを含む)を入れない。詳細は stderr に持たせてログへ
+      reject(
+        new FfmpegError("動画を読み取れませんでした。ファイルが壊れていないか確認してください", `${cmd} exit ${code}: ${err}`),
+      );
     });
   });
 }

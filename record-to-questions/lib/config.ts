@@ -5,7 +5,7 @@
 
 export const UPLOAD = {
   maxBytes: 1024 * 1024 * 1024, // 1GB
-  acceptedExtensions: [".mp4", ".mov", ".m4v", ".webm"],
+  acceptedExtensions: [".mp4", ".mov", ".m4v"],
 } as const;
 
 export const FRAME_SELECTION = {
