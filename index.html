@@ -73,7 +73,7 @@
 .hero-desc{font-size:14px;line-height:1.9;color:var(--ink-2);max-width:31em}
 .hero-desc small{display:block;margin-top:4px;font-size:12px;line-height:1.6;color:var(--ink-3)}
 .hero-cta{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap;justify-content:flex-end;transition:opacity .9s var(--ease),transform .9s var(--ease)}
-.btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px;min-height:44px}
+.btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px;min-height:44px;white-space:nowrap} /* 帯の flex で縮められても1行(761〜797px で「る」が落ちていた) */
 .btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 .btn.glass:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .h-meta{font:500 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-3)}
@@ -709,6 +709,7 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
         buildWorld({ minFs: 12.8 / z1, verbFs: Math.min(L.verbPx / z1, S.verbRoom), logoS: 13.2 / (84 * z1) }); // 俯瞰で起点の名前が 12px を割らない
         built = true;
         if (done) done();
+        tryIntro();
         // 書体が届く前に測った場合は、届いてから測り直す
         if (document.fonts && document.fonts.status !== 'loaded' && !build.waiting) {
           build.waiting = true;
@@ -1227,21 +1228,26 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
     if (!an.length) { setTimeout(res, Math.max(0, navyEnd - performance.now())); return; }
     an[0].finished.then(function () { var st = an[0].startTime; if (st != null) navyEnd = st + an[0].effect.getComputedTiming().endTime; res(); }, res);
   });
+  var navyOk = false, introStarted = false;
+  function tryIntro() { // 藍が描き終わり、かつ世界が組み上がっているとき(どちらが後でも、組み直しを挟んでも)に一度だけ始める
+    if (!navyOk || !built || introStarted || introDone || ti >= 0 || !holdView || reduceQ.matches) return;
+    requestAnimationFrame(function (now) {
+      if (!navyOk || !built || introStarted || introDone || ti >= 0 || !holdView || reduceQ.matches) return;
+      introStarted = true;
+      if (!S.brandCam) { holdView = false; introDone = true; render(t); reveal(); handoff(); setTimeout(sync, 250); return; }
+      S.m0 = now - navyEnd > 70 ? 0 : Math.min(2.1, S.navyLen * S.LG.s * NAVY_SLOPE / NAVY_DUR * INTRO / S.prefix.len);
+      ti = 0; holdView = false;
+      render(0, 0); reveal(); handoff(); sync();
+    });
+  }
   function init() {
     var first = !reduceQ.matches && window.scrollY < view.getBoundingClientRect().height * .6;
     holdView = first; // 初回の導入では、すり替えの瞬間まで世界を見せない
+    if (first) navyDone.then(function () { navyOk = true; tryIntro(); });
     build(function () {
       if (reduceQ.matches) { still(); showCta(); return; }
-      if (!first || !S.brandCam) { holdView = false; introDone = true; render(t); reveal(); handoff(); setTimeout(sync, 250); return; }
-      navyDone.then(function () {
-        requestAnimationFrame(function (now) {
-          if (introDone || ti >= 0 || !built) return;
-          // 世界の組み上がりが藍の描き終わりに間に合ったときだけ、先端の速さを引き継ぐ(遅れたときは止まった先端から静かに伸ばす)
-          S.m0 = now - navyEnd > 70 ? 0 : Math.min(2.1, S.navyLen * S.LG.s * NAVY_SLOPE / NAVY_DUR * INTRO / S.prefix.len);
-          ti = 0; holdView = false;
-          render(0, 0); reveal(); handoff(); sync();
-        });
-      });
+      if (!first) { holdView = false; introDone = true; render(t); reveal(); handoff(); setTimeout(sync, 250); return; }
+      tryIntro();
     });
   }
   btn.addEventListener('click', function () {
