@@ -22,6 +22,23 @@
 .toc::-webkit-scrollbar{display:none}
 .toc a{white-space:nowrap;padding:4px 0;transition:color .2s}
 .toc a:hover{color:var(--ink)}
+/* 映像「re + habilis」の窓(2026-10-05・designer 条件付き合格)。使う場所はここだけなので共通へ上げない(design-system §6)。
+   枠=Edge(角 4px・--line の縁・影なし・hover なし)。地は --bg の窓(帯の --bg-2 に溶かさない: H.264 で色がずれ、意図しない縁が出るため)。
+   画角は既存の 760px を境に 16:9 と 4:5。再生ボタンはトップの .jr-toggle と同じ値(2か所目。3か所目が出たら bridge.css へ) */
+.reel{max-width:880px;margin:clamp(48px,7vh,72px) auto 0}
+.reel-frame{position:relative;aspect-ratio:16/9;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg)}
+.reel-v{display:block;width:100%;height:100%;object-fit:cover;background:var(--bg)}
+.reel-toggle{position:absolute;right:8px;bottom:8px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:var(--ink-2)}
+.reel-toggle::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg);border:1px solid var(--line);transition:border-color .3s var(--ease)}
+.reel-toggle:hover::before{border-color:var(--ink-4)}
+.reel-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:0}
+.reel-toggle svg{position:relative;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.reel-toggle .i-play,.reel-toggle[aria-pressed="true"] .i-pause{display:none}
+.reel-toggle[aria-pressed="true"] .i-play{display:block}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media(max-width:760px){.reel-frame{aspect-ratio:4/5}}
+.reel:not(.reel-js) .reel-frame{aspect-ratio:16/9}  /* JS が動かないときはライト・横長・ネイティブの操作盤の 1 通り(ページも JS なしではライト)。印はこの figure にだけ付ける(html.js を前倒しにすると、ページの data-reveal の初回表示が変わる) */
+.reel-toggle[hidden]{display:none}  /* display:grid が [hidden] に勝つため */
 
 .prose{max-width:var(--text-max);font-size:15px;line-height:2.4;color:var(--ink-2)}
 .prose+.prose{margin-top:1.8em}
@@ -148,6 +165,19 @@
     <p class="prose" data-reveal>
       この定義に立つと、対象は患者に限らなくなります。数字に追われて萎縮している医療チームにも、承継したばかりで立て直しの道筋が見えないクリニックにも、キャリアに行き詰まりを感じている人にも、同じ考え方が使えます。対象が変わるだけで、やることの本質は変わりません。私が広めたいのは理学療法士という職業ではなく、この<strong>考え方そのもの</strong>です。
     </p>
+    <!-- 映像「re + habilis」(showreel/rehabilitation/)。この節の文章と同じ順序を、憲法の言葉だけで動かす。文章は置き換えない。
+         画面に半分入ったら一度だけ再生(無音・ループなし)。画面外・非表示のタブで止め、戻ったら続きから。人が止めたら再開しない。
+         動きを減らす設定では自動で再生せず、ポスター(12.0 秒・六語が線の上に揃った画)とボタンを出す。
+         版はテーマ × 画角(≤760px は 4:5)の 4 本から 1 本だけを、近づいてから読み込む。JS がないときはライト・横長の 1 本をネイティブの操作盤で再生できる -->
+    <figure class="reel" data-reveal>
+      <div class="reel-frame">
+        <video class="reel-v" muted playsinline preload="none" controls poster="../showreel/rehabilitation/light-wide.webp" width="1920" height="1080">
+          <source src="../showreel/rehabilitation/light-wide.mp4" type="video/mp4">
+        </video>
+        <button class="reel-toggle" type="button" aria-pressed="true" aria-label="映像を再生する" hidden><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
+      </div>
+      <figcaption class="sr-only">映像(16秒・音なし)。「リハビリテーション」の文字の下に、語源のre(再び)とhabilis(ふさわしい)が並ぶ。「機能の回復」が、「その人がその人らしく生きられる状態への回復」へ広がる。一本の線が、患者・医療者・組織・企業・地域・社会を順に通る。最後に線は曲がり、もう一本の線と交わってBRIDGEのロゴになる。</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -350,5 +380,70 @@
 
 <footer class="site-footer"></footer>
 <script src="../shared/bridge.js" defer></script>
+<script>
+/* 映像「re + habilis」の窓。状態: 自動で一度だけ再生(autoDone)/人が止めた(userPaused)/画面外・非表示で止めた(autoPaused) */
+(function () {
+  'use strict';
+  var fig = document.querySelector('.reel'), v = fig && fig.querySelector('.reel-v'), btn = fig && fig.querySelector('.reel-toggle');
+  if (!v || !btn || !('IntersectionObserver' in window) || !window.matchMedia) return;   // 古い環境ではネイティブの操作盤のまま
+  fig.classList.add('reel-js');                      // 窓を JS ありの組み(≤760px は 4:5)にする
+  var DIR = '../showreel/rehabilitation/', root = document.documentElement;
+  var reduceQ = window.matchMedia('(prefers-reduced-motion: reduce)'), spQ = window.matchMedia('(max-width: 760px)');
+  var near = false, inView = false, autoDone = false, userPaused = false, autoPaused = false, cur = '';
+  var name = function () { return (root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light') + '-' + (spQ.matches ? 'tall' : 'wide'); };
+
+  // ネイティブの操作盤をしまい、自前のボタンを出す。<source> は外して、版を JS で選ぶ
+  v.removeAttribute('controls');
+  Array.prototype.slice.call(v.querySelectorAll('source')).forEach(function (s) { s.remove(); });
+  btn.hidden = false;
+
+  function label() {
+    var playing = !v.paused && !v.ended;
+    btn.setAttribute('aria-pressed', String(!playing));
+    btn.setAttribute('aria-label', playing ? '映像を止める' : v.ended ? 'もう一度再生する' : '映像を再生する');
+  }
+  function play() { var p = v.play(); if (p && p.catch) p.catch(function () { label(); }); }
+  // 版の差し替え(テーマ・画角が変わったとき)。再生位置と、再生中かどうかを保つ
+  function pick() {
+    var n = name();
+    if (n === cur) return;
+    var t = v.currentTime || 0, was = !v.paused && !v.ended, ended = v.ended;
+    cur = n; v.poster = DIR + n + '.webp';
+    if (!near) return;                                   // 近づくまで映像は読まない(ポスターだけ)
+    v.src = DIR + n + '.mp4';
+    if (t > 0) v.addEventListener('loadedmetadata', function f() { v.removeEventListener('loadedmetadata', f); v.currentTime = ended ? v.duration : t; }, { once: true });
+    if (was) play();
+  }
+  function load() { if (near) return; near = true; cur = ''; pick(); v.preload = 'auto'; }
+
+  pick();
+  new IntersectionObserver(function (es) { if (es[0].isIntersecting) load(); }, { rootMargin: '600px 0px' }).observe(v);
+  new IntersectionObserver(function (es) {
+    var r = es[0].intersectionRatio;
+    if (r >= 0.5) {
+      inView = true;
+      if (document.hidden) return;
+      if (!autoDone && !reduceQ.matches) { autoDone = true; load(); play(); }
+      else if (autoPaused && !userPaused) { autoPaused = false; play(); }
+    } else if (!es[0].isIntersecting) {
+      inView = false;
+      if (!v.paused && !v.ended) { autoPaused = true; v.pause(); }
+    }
+  }, { threshold: [0, 0.5] }).observe(v);
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (!v.paused && !v.ended) { autoPaused = true; v.pause(); } }
+    else if (autoPaused && inView && !userPaused) { autoPaused = false; play(); }
+  });
+  btn.addEventListener('click', function () {
+    load(); autoDone = true; autoPaused = false;
+    if (!v.paused && !v.ended) { userPaused = true; v.pause(); }
+    else { userPaused = false; if (v.ended) v.currentTime = 0; play(); }
+  });
+  ['play', 'pause', 'ended'].forEach(function (e) { v.addEventListener(e, label); });
+  new MutationObserver(pick).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  if (spQ.addEventListener) spQ.addEventListener('change', pick); else if (spQ.addListener) spQ.addListener(pick);
+  label();
+})();
+</script>
 </body>
 </html>

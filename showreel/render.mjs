@@ -2,6 +2,9 @@
 // showreel render — reel.html を 1 フレームずつ描いて MP4 にする
 // usage: node showreel/render.mjs [--from 0] [--to 15] [--fps 60] [--samples 6] [--out showreel/showreel.mp4]
 //        node showreel/render.mjs --stills 0.5,2.1,7.3 --outdir <dir>   (確認用の静止画だけ)
+//        node showreel/render.mjs --page showreel/rehabilitation/reel.html --out showreel/rehabilitation/showreel.mp4
+//        (--page: 描く html をリポジトリ基準の相対パスで。既定は showreel/reel.html。window.REEL の約束は同じ。音は同じディレクトリの sound.wav)
+//        --query 'theme=dark&layout=tall' で、ページの問い合わせに足す(版を選ぶページのため)
 // 依存: playwright(chromium)・ffmpeg(PATH か FFMPEG)。音は showreel/sound.mjs が書く WAV を重ねる
 // フォント: reel.html は Google Fonts を読む。描画時はその要求を curl で取ったキャッシュから返す
 //           (Chromium に TLS の例外を与えないため。キャッシュは --fontcache、既定は OS の一時領域)
@@ -22,7 +25,9 @@ const FPS = +(argv.fps || 60);
 const FROM = +(argv.from || 0);
 const TO = argv.to != null ? +argv.to : null;
 const SAMPLES = +(argv.samples || 64);            // 1 フレームのサブフレームの上限(実際の枚数は速さで決まる)
-const OUT = argv.out || path.join(HERE, 'showreel.mp4');
+const PAGE = argv.page ? path.resolve(ROOT, argv.page) : path.join(HERE, 'reel.html');   // 描く html(リポジトリの中)
+const PAGEDIR = path.dirname(PAGE);
+const OUT = argv.out || path.join(PAGEDIR, 'showreel.mp4');
 const FFMPEG = process.env.FFMPEG || 'ffmpeg';
 const FONTCACHE = argv.fontcache || path.join(os.tmpdir(), 'bridge-showreel-fonts');
 const CRF = argv.crf || '14';
@@ -61,9 +66,9 @@ await page.route(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, async route =>
 page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') console.log('[page]', m.text()); });
 page.on('pageerror', e => console.log('[pageerror]', e.message));
 
-await page.goto(`${BASE}/showreel/reel.html?render=1`, { waitUntil: 'load' });
+await page.goto(`${BASE}/${path.relative(ROOT, PAGE).split(path.sep).join('/')}?render=1${argv.query ? '&' + argv.query : ''}`, { waitUntil: 'load' });
 await page.evaluate(() => window.REEL.ready);
-if (argv.streak) await page.evaluate(v => window.REEL.setLineStreak(v), +argv.streak);   // 比較用: 線だけの区間のぼけの長さ(px)
+if (argv.streak) await page.evaluate(v => { if (window.REEL.setLineStreak) window.REEL.setLineStreak(v); }, +argv.streak);   // 比較用: 線だけの区間のぼけの長さ(px)。ページが持つときだけ
 const DUR = await page.evaluate(() => window.REEL.DUR);
 
 /* ---- 1 フレーム: サブフレームを Float で平均して動きのぼけを作る ---- */
@@ -94,7 +99,7 @@ if (argv.stills) {
 /* ---- 動画: PNG を ffmpeg に流す。音(sound.wav)があれば重ねる ---- */
 const end = TO ?? DUR;
 const n0 = Math.round(FROM * FPS), n1 = Math.round(end * FPS);
-const wav = path.join(HERE, 'sound.wav');
+const wav = path.join(PAGEDIR, 'sound.wav');
 const withAudio = existsSync(wav) && !argv.noaudio;
 const args = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-'];
 if (withAudio) args.push('-ss', String(FROM), '-t', String((n1 - n0) / FPS), '-i', wav);
