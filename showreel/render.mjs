@@ -99,7 +99,6 @@ if (argv.stills) {
 /* ---- 動画: PNG を ffmpeg に流す。音(sound.wav)があれば重ねる ---- */
 const end = TO ?? DUR;
 const n0 = Math.round(FROM * FPS), n1 = Math.round(end * FPS);
-const [OW, OH] = await page.evaluate(() => [window.REEL.W, window.REEL.H]);
 const wav = path.join(PAGEDIR, 'sound.wav');
 const withAudio = existsSync(wav) && !argv.noaudio;
 const args = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-'];
