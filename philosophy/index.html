@@ -37,7 +37,8 @@
 .reel-toggle[aria-pressed="true"] .i-play{display:block}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 @media(max-width:760px){.reel-frame{aspect-ratio:4/5}}
-html:not(.js) .reel-frame{aspect-ratio:16/9}  /* JS なしはライト・横長・ネイティブの操作盤の 1 通り(ページも JS なしではライト) */
+.reel:not(.reel-js) .reel-frame{aspect-ratio:16/9}  /* JS が動かないときはライト・横長・ネイティブの操作盤の 1 通り(ページも JS なしではライト)。印はこの figure にだけ付ける(html.js を前倒しにすると、ページの data-reveal の初回表示が変わる) */
+.reel-toggle[hidden]{display:none}  /* display:grid が [hidden] に勝つため */
 
 .prose{max-width:var(--text-max);font-size:15px;line-height:2.4;color:var(--ink-2)}
 .prose+.prose{margin-top:1.8em}
@@ -383,9 +384,9 @@ html:not(.js) .reel-frame{aspect-ratio:16/9}  /* JS なしはライト・横長�
 /* 映像「re + habilis」の窓。状態: 自動で一度だけ再生(autoDone)/人が止めた(userPaused)/画面外・非表示で止めた(autoPaused) */
 (function () {
   'use strict';
-  document.documentElement.classList.add('js');   // 共通の bridge.js(defer)を待たずに、窓を JS ありの組み(≤760px は 4:5)にする
   var fig = document.querySelector('.reel'), v = fig && fig.querySelector('.reel-v'), btn = fig && fig.querySelector('.reel-toggle');
   if (!v || !btn || !('IntersectionObserver' in window) || !window.matchMedia) return;   // 古い環境ではネイティブの操作盤のまま
+  fig.classList.add('reel-js');                      // 窓を JS ありの組み(≤760px は 4:5)にする
   var DIR = '../showreel/rehabilitation/', root = document.documentElement;
   var reduceQ = window.matchMedia('(prefers-reduced-motion: reduce)'), spQ = window.matchMedia('(max-width: 760px)');
   var near = false, inView = false, autoDone = false, userPaused = false, autoPaused = false, cur = '';
