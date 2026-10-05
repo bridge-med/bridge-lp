@@ -9,33 +9,69 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@700&family=Inter:wght@500&display=swap" rel="stylesheet">
 <style>
-  html,body{margin:0;background:#FBFAF7;height:100%;overflow:hidden}
-  canvas{display:block;position:absolute;inset:0;margin:auto;width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh}
+  html,body{margin:0;background:#0B0F1A;height:100%;overflow:hidden}
+  canvas{display:block;position:absolute;inset:0;margin:auto;max-width:100vw;max-height:100vh;width:auto;height:auto}
 </style>
 </head>
 <body>
-<canvas id="c" width="1920" height="1080"></canvas>
+<canvas id="c"></canvas>
 <script>
 /* ================================================================
-   BRIDGE「re + habilis」— 16.000 秒・1920×1080・60fps・無音
+   BRIDGE「re + habilis」— 16.000 秒・60fps・無音
    時刻 t だけで 1 枚が決まる(同じ t なら何度描いても同じ絵)。
    憲法第3条(リハビリテーションの定義)と第4条(対象)を、そこに書いてある言葉だけで動かす。新しいコピーは書かない。
      リハビリテーション → re / habilis(再び・ふさわしい)
      → 「機能の回復」が静かに薄れ、「回復」を残して「その人がその人らしく生きられる状態への回復」に開く
-     → 一本の藍の線が左から入り、患者・医療者・組織・企業・地域・社会 が順に線の上に立つ(分かれない。同じ一本の線=考え方は同じ)
-     → 語が線に沈み、線がロゴの藍の線に曲がり、砂の線が交差する(接続しない)。BRIDGE。
+     → 一本の線が左から入り、患者・医療者・組織・企業・地域・社会 が順に線の上に立つ(分かれない。同じ一本の線=考え方は同じ)
+     → 語が線に沈み、線がロゴの線に曲がり、砂の線が交差する(接続しない)。BRIDGE。
    道具(easing・文字の組み・ロゴの経路と finale)は ../namae/v3-parts.js を読む(v3「一本の線」から写した一式。経路の写しを増やさない)。
    finale は v3 の時刻のまま、t − FIN_OFF で呼ぶ。砂が出るのはロゴの砂の線だけ。
-   書き出しは ../render.mjs --page showreel/rehabilitation/reel.html。約束(window.REEL)は ../reel.html と同じ。
+
+   版は問い合わせで選ぶ(思想ページが テーマ × 画角 で選んで読む。2026-10-05):
+     ?theme=light|dark   色(shared/bridge.css のトークンの値)
+     ?layout=wide|tall   wide=1920×1080(PC)/ tall=1080×1350(4:5・スマホ。≤760px)
+   tall の振付: 一文は二行(「その人がその人らしく/生きられる状態への回復」)で、開く代わりに字が置かれた位置に出る。
+   署名は finale を 1920×1080 の裏の面に描き、0.75 倍で縦の中央に写す(経路の写しを増やさない)。
+   書き出しは ../render.mjs --page showreel/rehabilitation/reel.html --query 'theme=dark&layout=tall'。約束(window.REEL)は ../reel.html と同じ。
    ================================================================ */
-const W = 1920, H = 1080, FPS = 60, DUR = 16;
+const QS = new URLSearchParams(location.search);
+const THEME = QS.get('theme') === 'dark' ? 'dark' : 'light';
+const LAYOUT = QS.get('layout') === 'tall' ? 'tall' : 'wide';
+const W = LAYOUT === 'tall' ? 1080 : 1920, H = LAYOUT === 'tall' ? 1350 : 1080, FPS = 60, DUR = 16;
 const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+canvas.width = W; canvas.height = H;
+let ctx = canvas.getContext('2d');            // let: tall の署名は v3-parts の finale を裏の面(FIN)に描かせるため、一時的に差し替える
 let TT = 0;                                   // v3-parts の lineText が読む「いまの時刻」
 </script>
 <script src="../namae/v3-parts.js"></script>
 <script>
-const INK3 = '#63646B';                       // --ink-3(補足・注記)。LIGHT(v3-parts)にない値はこれだけ
+/* ---- 色(shared/bridge.css のトークンの値)。line=ロゴの藍の線の役割 --mark-line(ライト --navy・ダーク --ink) ---- */
+const PAL = {
+  light: { bg: '#FBFAF7', line: '#16233E', t1: '#1B1B1E', t2: '#45464C', t3: '#63646B', sand: '#A98F63' },   // = v3-parts の LIGHT + --ink-3
+  dark:  { bg: '#111521', line: '#EDEAE2', t1: '#EDEAE2', t2: '#C2BFB6', t3: '#8A8D98', sand: '#C2A97E' },
+};
+const P = PAL[THEME];
+
+/* ---- 画角ごとの組み(px は書き出しの画素) ---- */
+const GEO = {
+  wide: {
+    word: { size: 104, y: 500 }, rule: 46,
+    ety: { re: 44, sa: 34, dy: 108, dy2: 54 },
+    def: { size: 64, y: 560 },
+    line: { y: 620, w: 6 },
+    words: { size: 40, xs: [150, 470, 790, 1030, 1320, 1640] },   // 等間隔にしない
+  },
+  tall: {
+    word: { size: 92, y: 600 }, rule: 42,
+    ety: { re: 52, sa: 40, dy: 116, dy2: 62 },
+    def: { size: 80, y: 700, y1: 640, y2: 770 },                  // 一行のとき y、二行のとき y1 / y2
+    line: { y: 735, w: 4.5 },                                     // = finale の地平線(620・太さ 6)を 0.75 倍で写した位置と太さ
+    words: { size: 52, xs: [40, 196, 432, 588, 772, 935] },
+    fin: { s: 0.75, sx: 1000, sy: 620 },                          // 裏の面の (sx, sy) を (W/2, line.y) に、s 倍で写す。sx は下で署名の中心に合わせ直す
+  },
+};
+const G = GEO[LAYOUT];
+
 const fadeIO = (t, a0, d0, a1, d1) => Math.min(seg(t, a0, d0, E.ease), 1 - seg(t, a1, d1, E.ease));
 /* 一行をまとめて出す/消す(透明度と上下 dy) */
 function textIO(L, x, y, color, a, dy) {
@@ -48,11 +84,10 @@ function textIO(L, x, y, color, a, dy) {
 /* ================================================================
    時刻表(秒)。editor の条件: 一文は全部見えてから 3 秒以上、六語は最後の語から 2.5 秒以上、署名は 1.5 秒以上止める
    ================================================================ */
-const LINE_Y = 620;                           // v3 の finale が曲げ始める「地平線」と同じ高さ・太さ 6
 const FIN_OFF = 0.5;                          // finale(v3 の時刻)を 0.5 秒遅らせて呼ぶ: 曲げ始め 13.27 → 署名 13.86 → 字間が落ち着く 14.46 → 16.00 まで静止
 const T = {
   word0: 0.20, wordStep: 0.07, wordFade: 0.45,            // リハビリテーション(9 字): 最後の字が 1.21 で出揃う
-  rule0: 1.05, ruleD: 0.60,                                // 藍の細い線
+  rule0: 1.05, ruleD: 0.60,                                // 線
   ety0: 1.40, etyD: 0.50, ety2: 1.60,                      // re / habilis、再び / ふさわしい
   exit1: 2.70, exit1D: 0.45,
   def0: 3.05, defD: 0.50,                                  // 機能の回復
@@ -64,11 +99,7 @@ const T = {
   sink0: 12.70, sinkD: 0.40,                               // 語が線に沈む。「社会」は 10.0 に出揃い、2.7 秒置いた
   bend: 12.7734375 + 0.5,                                  // ここから finale(v3-parts)が線を描く
 };
-/* 六語の席(x)。等間隔にしない */
-const WORDS = [
-  { x: 150, s: '患者' }, { x: 470, s: '医療者' }, { x: 790, s: '組織' },
-  { x: 1030, s: '企業' }, { x: 1320, s: '地域' }, { x: 1640, s: '社会' },
-];
+const WORDS = ['患者', '医療者', '組織', '企業', '地域', '社会'].map((s, i) => ({ s, x: G.words.xs[i] }));
 
 /* ================================================================
    場面 1: リハビリテーション → re / habilis
@@ -77,83 +108,131 @@ const WORD = 'リハビリテーション';
 function scene1(t) {
   if (t >= T.exit1 + T.exit1D) return;
   const out = seg(t, T.exit1, T.exit1D, E.ease);          // 退場: 透明に、24px 上へ
-  const L = layout(WORD, F.min(600, 104), 104 * 0.06);
-  const x = (W - L.width) / 2, y = 500;
+  const L = layout(WORD, F.min(600, G.word.size), G.word.size * 0.06);
+  const x = (W - L.width) / 2, y = G.word.y;
   ctx.save(); ctx.globalAlpha = 1 - out; ctx.translate(0, -24 * out);
-  drawGlyphs(L, x, y, LIGHT.t1, i => {
+  drawGlyphs(L, x, y, P.t1, i => {
     const u = seg(t, T.word0 + i * T.wordStep, T.wordFade, E.ease);
     return { a: u, dy: 10 * (1 - u) };
   });
-  // 藍の細い線: 語の幅を左から右へ
+  // 細い線: 語の幅を左から右へ
   const rl = seg(t, T.rule0, T.ruleD, E.cubicInOut);
   if (rl > 0) {
-    ctx.strokeStyle = LIGHT.line; ctx.lineWidth = 2; ctx.lineCap = 'butt';
-    ctx.beginPath(); ctx.moveTo(x, y + 46); ctx.lineTo(x + L.width * rl, y + 46); ctx.stroke();
+    ctx.strokeStyle = P.line; ctx.lineWidth = 2; ctx.lineCap = 'butt';
+    ctx.beginPath(); ctx.moveTo(x, y + G.rule); ctx.lineTo(x + L.width * rl, y + G.rule); ctx.stroke();
   }
   // 語源(注記): Inter と Noto Sans JP。二組を線の両端に寄せる
-  const Lre = layout('re', F.en(500, 44), 44 * 0.02), Lha = layout('habilis', F.en(500, 44), 44 * 0.02);
-  const Lsa = layout('再び', F.jp(700, 34), 34 * 0.08), Lfu = layout('ふさわしい', F.jp(700, 34), 34 * 0.08);
+  const e = G.ety;
+  const Lre = layout('re', F.en(500, e.re), e.re * 0.02), Lha = layout('habilis', F.en(500, e.re), e.re * 0.02);
+  const Lsa = layout('再び', F.jp(700, e.sa), e.sa * 0.08), Lfu = layout('ふさわしい', F.jp(700, e.sa), e.sa * 0.08);
   const a1 = seg(t, T.ety0, T.etyD, E.ease), a2 = seg(t, T.ety2, T.etyD, E.ease);
-  const xr = x + 8, xh = x + L.width - Lha.width - 8, yb = y + 108;
-  textIO(Lre, xr, yb, LIGHT.t2, a1, 12 * (1 - a1));
-  textIO(Lha, xh, yb, LIGHT.t2, a1, 12 * (1 - a1));
-  textIO(Lsa, xr + 2, yb + 54, INK3, a2, 10 * (1 - a2));
-  textIO(Lfu, x + L.width - Lfu.width - 8, yb + 54, INK3, a2, 10 * (1 - a2));
+  const xr = x + 8, xh = x + L.width - Lha.width - 8, yb = y + e.dy;
+  textIO(Lre, xr, yb, P.t2, a1, 12 * (1 - a1));
+  textIO(Lha, xh, yb, P.t2, a1, 12 * (1 - a1));
+  textIO(Lsa, xr + 2, yb + e.dy2, P.t3, a2, 10 * (1 - a2));
+  textIO(Lfu, x + L.width - Lfu.width - 8, yb + e.dy2, P.t3, a2, 10 * (1 - a2));
   ctx.restore();
 }
 
 /* ================================================================
    場面 2: 機能の回復 → その人がその人らしく生きられる状態への回復
-   「回復」は固定の席ではなく、開いていく文に押されて右へ移る。組は常に中央。「機能の」は印を付けず、静かに薄れるだけ
+   wide: 「回復」は固定の席ではなく、開いていく文に押されて右へ移る。組は常に中央。「機能の」は印を付けず、静かに薄れるだけ
+   tall: 二行。「機能の」が薄れるあいだに「回復」が最終の位置(二行目の終わり)へ移り、一行目→二行目の順に字が左から出る
    ================================================================ */
 const PRE1 = '機能の', PRE2 = 'その人がその人らしく生きられる状態への', KAI = '回復';
-const DEF_SIZE = 64, DEF_LS = DEF_SIZE * 0.04;
+const SPLIT = 10;                                          // tall の改行位置: その人がその人らしく / 生きられる状態への回復(editor 指定)
 function scene2(t) {
   if (t < T.def0 || t >= T.exit2 + T.exit2D) return;
+  const size = G.def.size, ls = size * 0.04, fnt = F.min(600, size);
   const inA = seg(t, T.def0, T.defD, E.ease), out = seg(t, T.exit2, T.exit2D, E.ease);
-  const fnt = F.min(600, DEF_SIZE);
-  const L1 = layout(PRE1, fnt, DEF_LS), L2 = layout(PRE2, fnt, DEF_LS), Lk = layout(KAI, fnt, DEF_LS);
-  const adv = L => L.width + DEF_LS;                       // 次の語までの送り
-  // 「機能の」は c1 文字ぶん、新しい文は c2 文字ぶん見えている(連続量)
-  const c1 = L1.g.length * (1 - seg(t, T.col0, T.colD, E.sineInOut));
-  const c2 = L2.g.length * seg(t, T.grow0, T.growD, E.sineInOut);
-  const wVis = (L, c) => { const n = Math.floor(c); if (n >= L.g.length) return adv(L); return L.g[n].x + (L.g[n].w + DEF_LS) * (c - n); };
-  const w1 = wVis(L1, c1), w2 = wVis(L2, c2);
-  const total = w1 + w2 + Lk.width;
-  const x0 = (W - total) / 2, y = 560;
+  const L1 = layout(PRE1, fnt, ls), L2 = layout(PRE2, fnt, ls), Lk = layout(KAI, fnt, ls);
+  const adv = L => L.width + ls;                           // 次の語までの送り
+  const col = seg(t, T.col0, T.colD, E.sineInOut);
+  // 字の席が開く・閉じる量(字数の連続量)。wide では字は席が開ききってから置かれ、席が閉じ始める前に消える(重ねない・切らない)。
+  // そのため席の量を FADE ぶん長く走らせ、端の字の出入りの時間を確保する
+  const FADE = LAYOUT === 'wide' ? 0.4 : 0;
+  const c1 = (L1.g.length + FADE) * (1 - col);             // 「機能の」の席
+  const c2 = (L2.g.length + FADE) * seg(t, T.grow0, T.growD, E.sineInOut);   // 新しい文の席
   ctx.save(); ctx.globalAlpha = inA * (1 - out); ctx.translate(0, 18 * (1 - inA) - 24 * out);
-  // 出入りの途中の字は「回復」の左端で切る(重ねない)。薄れる字は右から、出る字は左から
-  ctx.save(); clipRect(x0 - 60, y - 120, w1 + w2 + 60, 200);
-  if (c1 > 0) drawGlyphs(L1, x0, y, INK3, i => ({ a: clamp((c1 - i) * 1.5) }));                 // 右の字から順に薄れ、「回復」が左へ寄る
-  if (c2 > 0) drawGlyphs(L2, x0 + w1, y, LIGHT.t1, i => { const a = clamp((c2 - i) * 1.5); return { a, dy: 6 * (1 - a) }; });   // 左から順に出る
-  ctx.restore();
-  drawGlyphs(Lk, x0 + w1 + w2, y, LIGHT.t1);
-  mv('kai', x0 + w1 + w2, y);
+  if (LAYOUT === 'wide') {
+    const wVis = (L, c) => { const n = Math.floor(c); if (n >= L.g.length) return adv(L); return L.g[n].x + (L.g[n].w + ls) * (c - n); };
+    const w1 = wVis(L1, c1), w2 = wVis(L2, c2);
+    const x0 = (W - (w1 + w2 + Lk.width)) / 2, y = G.def.y;
+    // 字 i は、席が開ききった(c ≥ i+1)あとの FADE のあいだに出る。消えるときはその逆で、席が閉じ始める前に消えきる。
+    // どの瞬間も、見えている字は自分の席の中にいて「回復」と重ならない(切り抜きを使わない。2026-10-05)
+    const fa = (c, i) => clamp((c - (i + 1)) / FADE);
+    if (c1 > 0) drawGlyphs(L1, x0, y, P.t3, i => ({ a: fa(c1, i) }));
+    if (c2 > 0) drawGlyphs(L2, x0 + w1, y, P.t1, i => { const a = fa(c2, i); return { a, dy: 6 * (1 - a) }; });
+    drawGlyphs(Lk, x0 + w1 + w2, y, P.t1);
+    mv('kai', x0 + w1 + w2, y);
+  } else {
+    // 最終の組: 二行とも中央
+    const La = layout(PRE2.slice(0, SPLIT), fnt, ls), Lb = layout(PRE2.slice(SPLIT), fnt, ls);
+    const xa = (W - La.width) / 2, xb = (W - (adv(Lb) + Lk.width)) / 2;
+    // 最初の組: 「機能の回復」一行で中央
+    const x1 = (W - (adv(L1) + Lk.width)) / 2;
+    if (c1 > 0) drawGlyphs(L1, x1, G.def.y, P.t3, i => ({ a: clamp(c1 - i) }));    // 右の字から順に薄れる(その場で)
+    const m = E.ease(col);                                                         // 回復の移動
+    const kx = lerp(x1 + adv(L1), xb + adv(Lb), m), ky = lerp(G.def.y, G.def.y2, m);
+    drawGlyphs(Lk, kx, ky, P.t1);
+    mv('kai', kx, ky);
+    if (c2 > 0) {
+      const ap = i => { const a = clamp((c2 - i) * 1.5); return { a, dy: 6 * (1 - a) }; };
+      drawGlyphs(La, xa, G.def.y1, P.t1, i => ap(i));
+      drawGlyphs(Lb, xb, G.def.y2, P.t1, i => ap(i + SPLIT));
+    }
+  }
   ctx.restore();
 }
 
 /* ================================================================
    場面 3: 一本の線が、患者・医療者・組織・企業・地域・社会 を順に通る(第4条。分かれない・砂なし)
-   線は v3 の finale の「地平線」(y=620・太さ 6・x −20〜1940)と同じ姿で止まり、finale がそのまま曲げる
+   線は finale の「地平線」と同じ姿で止まり、finale がそのまま曲げる(wide: y=620・太さ 6 / tall: その 0.75 倍の写し)
    ================================================================ */
-const WFONT = F.jp(700, 40);
+const WFONT = () => F.jp(700, G.words.size);
+const LX0 = -20, LX1 = W + 20;                 // 線の左端と、右へ伸びきる先
 function wordStart(i) {                        // 線の先端が席を通る時刻
-  const target = (WORDS[i].x + layout(WORDS[i].s, WFONT).width / 2 + 20) / 1960;   // 先端 = −20 + 1960·cubicOut(u)
-  const u = 1 - Math.cbrt(1 - target);
+  const target = (WORDS[i].x + layout(WORDS[i].s, WFONT()).width / 2 + 20 - LX0) / (LX1 - LX0);
+  const u = 1 - Math.cbrt(1 - target);         // 先端 = LX0 + (LX1−LX0)·cubicOut(u)
   return T.line0 + T.lineD * u;
 }
 function scene3(t) {
   if (t < T.line0 || t >= T.bend) return;
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = LIGHT.line; ctx.lineWidth = 6;
-  const tip = lerp(-20, 1940, seg(t, T.line0, T.lineD, E.cubicOut));
-  ctx.beginPath(); ctx.moveTo(-20, LINE_Y); ctx.lineTo(tip, LINE_Y); ctx.stroke();
-  mv('tip', tip, LINE_Y);
+  const ly = G.line.y;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = P.line; ctx.lineWidth = G.line.w;
+  const tip = lerp(LX0, LX1, seg(t, T.line0, T.lineD, E.cubicOut));
+  ctx.beginPath(); ctx.moveTo(LX0, ly); ctx.lineTo(tip, ly); ctx.stroke();
+  mv('tip', tip, ly);
   // 語は線の上に立つ(線より下は見せない)。沈むときは逆向きに同じ道
   const out = t >= T.sink0 ? { t, t0: T.sink0, d: T.sinkD } : null;
   WORDS.forEach((w, i) => {
     if (t < wordStart(i) && !out) return;
-    lineText(w.s, WFONT, w.x, LINE_Y - 22, LIGHT.t1, LINE_Y, 3, -1, () => wordStart(i), T.wordD, null, out);
+    lineText(w.s, WFONT(), w.x, ly - Math.round(G.words.size * 0.55), P.t1, ly, G.line.w / 2, -1, () => wordStart(i), T.wordD, null, out);
   });
+}
+
+/* ================================================================
+   場面 4: 署名(v3-parts の finale)。tall は裏の面に描いて縮めて写す
+   ================================================================ */
+let FIN = null, finCtx = null;
+function signTall(t) {
+  if (!FIN) {
+    FIN = document.createElement('canvas'); FIN.width = 1920; FIN.height = 1080; finCtx = FIN.getContext('2d');
+    // 写しの中心を、引き戻したあとの署名(マーク+BRIDGE)の横の中心に合わせる
+    const s = 1.30909, ox = 487.2 - 25.443 * s;
+    const Lw = layout('BRIDGE', F.en(500, 112), 112 * 0.34);
+    G.fin.sx = (ox + 867 + Lw.width) / 2;
+  }
+  const keep = ctx, before = PROBING ? new Set(PROBING.keys()) : null;
+  ctx = finCtx;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, 1920, 1080); ctx.globalAlpha = 1;
+  finale(t - FIN_OFF, P);
+  ctx = keep;
+  const f = G.fin, ox = W / 2 - f.sx * f.s, oy = G.line.y - f.sy * f.s;
+  if (PROBING) for (const [k, p] of PROBING) if (!before.has(k)) PROBING.set(k, [ox + p[0] * f.s, oy + p[1] * f.s]);
+  ctx.save(); ctx.setTransform(f.s, 0, 0, f.s, ox, oy); ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(FIN, 0, 0);
+  ctx.restore();
 }
 
 /* ================================================================
@@ -162,16 +241,17 @@ function scene3(t) {
 function draw(t) {
   TT = t;
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
-  ctx.fillStyle = LIGHT.bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
   scene1(t); scene2(t); scene3(t);
-  if (t >= T.bend) finale(t - FIN_OFF, LIGHT);           // v3-parts: 地平線がロゴの藍の線へ曲がり、砂の線が交差し、BRIDGE
+  if (t >= T.bend) { if (LAYOUT === 'tall') signTall(t); else finale(t - FIN_OFF, P); }   // 地平線がロゴの線へ曲がり、砂の線が交差し、BRIDGE
 }
 
 /* ---- 動きのぼけ: シャッター 180°(B-13)。v3 と同じく、動くものの目印(mv)から 1 コマの速さを測り、
    副コマを出力面に 1/(i+1) で重ねる(= 平均)。線だけが画面を占める区間は尾の長さに上限を置く(v3-parts の LINE_ONLY と同じ値・+0.5 秒) ---- */
 const OUT = document.createElement('canvas'); OUT.width = W; OUT.height = H;
 const octx = OUT.getContext('2d');
-const STREAK_CAPS = [[12.65625 + FIN_OFF, PULL0 + FIN_OFF, 60], [PULL0 + FIN_OFF, PULL1 + FIN_OFF, 24], [T.line0, T.line0 + 0.3, 60]];
+const CAP_S = LAYOUT === 'tall' ? G.fin.s : 1;  // 上限は線の太さに比例させる(tall は 0.75 倍の写し)
+const STREAK_CAPS = [[12.65625 + FIN_OFF, PULL0 + FIN_OFF, 60 * CAP_S], [PULL0 + FIN_OFF, PULL1 + FIN_OFF, 24 * CAP_S], [T.line0, T.line0 + 0.3, 60 * CAP_S]];
 function speedPx(t) {                          // 1 コマあたりの最大移動(px)
   const probe = tt => { PROBING = new Map(); draw(tt); const m = PROBING; PROBING = null; return m; };
   const a = probe(t), b = probe(t + 1 / FPS);
@@ -212,18 +292,17 @@ const ready = (async () => {
   layoutCache.clear();
 })();
 
-window.REEL = { W, H, FPS, DUR, canvas, draw, renderFrame, speedPx, shutterFrac, ready, out: canvas };
+window.REEL = { W, H, FPS, DUR, THEME, LAYOUT, canvas, draw, renderFrame, speedPx, shutterFrac, ready, out: canvas };
 
 /* ---- プレビュー(?render なしで開いたとき): 実時間で再生(ぼけなし)。クリックで頭から。?t=秒 で静止 ---- */
-const q = new URLSearchParams(location.search);
-if (!q.has('render')) {
+if (!QS.has('render')) {
   ready.then(() => {
-    if (q.has('t')) { draw(+q.get('t')); return; }
+    if (QS.has('t')) { draw(+QS.get('t')); return; }
     let t0 = performance.now();
     const loop = () => { const t = (performance.now() - t0) / 1000; draw(Math.min(t, DUR)); if (t < DUR + 1) requestAnimationFrame(loop); };
     canvas.addEventListener('click', () => { t0 = performance.now(); requestAnimationFrame(loop); });
     requestAnimationFrame(loop);
-  }).catch(e => { document.body.insertAdjacentHTML('beforeend', '<pre style="position:fixed;left:16px;top:16px;color:#1B1B1E">' + e.message + '</pre>'); });
+  }).catch(e => { document.body.insertAdjacentHTML('beforeend', '<pre style="position:fixed;left:16px;top:16px;color:#EDEAE2">' + e.message + '</pre>'); });
 }
 </script>
 </body>

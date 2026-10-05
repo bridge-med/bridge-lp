@@ -4,6 +4,7 @@
 //        node showreel/render.mjs --stills 0.5,2.1,7.3 --outdir <dir>   (確認用の静止画だけ)
 //        node showreel/render.mjs --page showreel/rehabilitation/reel.html --out showreel/rehabilitation/showreel.mp4
 //        (--page: 描く html をリポジトリ基準の相対パスで。既定は showreel/reel.html。window.REEL の約束は同じ。音は同じディレクトリの sound.wav)
+//        --query 'theme=dark&layout=tall' で、ページの問い合わせに足す(版を選ぶページのため)
 // 依存: playwright(chromium)・ffmpeg(PATH か FFMPEG)。音は showreel/sound.mjs が書く WAV を重ねる
 // フォント: reel.html は Google Fonts を読む。描画時はその要求を curl で取ったキャッシュから返す
 //           (Chromium に TLS の例外を与えないため。キャッシュは --fontcache、既定は OS の一時領域)
@@ -65,7 +66,7 @@ await page.route(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, async route =>
 page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') console.log('[page]', m.text()); });
 page.on('pageerror', e => console.log('[pageerror]', e.message));
 
-await page.goto(`${BASE}/${path.relative(ROOT, PAGE).split(path.sep).join('/')}?render=1`, { waitUntil: 'load' });
+await page.goto(`${BASE}/${path.relative(ROOT, PAGE).split(path.sep).join('/')}?render=1${argv.query ? '&' + argv.query : ''}`, { waitUntil: 'load' });
 await page.evaluate(() => window.REEL.ready);
 if (argv.streak) await page.evaluate(v => { if (window.REEL.setLineStreak) window.REEL.setLineStreak(v); }, +argv.streak);   // 比較用: 線だけの区間のぼけの長さ(px)。ページが持つときだけ
 const DUR = await page.evaluate(() => window.REEL.DUR);
@@ -98,6 +99,7 @@ if (argv.stills) {
 /* ---- 動画: PNG を ffmpeg に流す。音(sound.wav)があれば重ねる ---- */
 const end = TO ?? DUR;
 const n0 = Math.round(FROM * FPS), n1 = Math.round(end * FPS);
+const [OW, OH] = await page.evaluate(() => [window.REEL.W, window.REEL.H]);
 const wav = path.join(PAGEDIR, 'sound.wav');
 const withAudio = existsSync(wav) && !argv.noaudio;
 const args = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-'];
