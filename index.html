@@ -45,8 +45,14 @@
      5 砂は現在地・分岐点の点1つと、選ぶ瞬間だけ(第22条)。線は藍(ロゴの線と同じ扱い)。破線は使わない(BRIDGE で破線は「未確定」)
      6 終わりは引き: 起点の BRIDGE から全体が一本でつながる俯瞰で終える。タイトルカードを出さない。継ぎ目は視点の移動と線の巻き戻しで渡す。
        起点の名前は俯瞰で 12px 以上、マークの線は Journey の線より細くしない。導入とループの合流点では、カメラも線の先端も速さを途切れさせない
+       (Journey のループの中の取り決め。#about の閉じは下の『閉じの約束』)
      7 静止版(動きを減らす設定)は俯瞰の1枚。世界の中にロゴを含めない(BRIDGE は h1 のロックアップのまま上に置く)。CTA は最初から出す。
        静止の1枚でも読ませる語は 12px 以上(退院支援は他の駅より小さくしない)
+   閉じの約束(#about の帯 .kz だけ。designer 2026-10-05)
+     1 線が主語。帯に現れるのは線だけで、文字を描かない。地を塗らない(夜・グラデーション・ぼかしなし。端の溶けは mask のアルファ)
+     2 手で起きる。時刻はスクロール位置だけで決まる。固定・吸着・スクロール量の書き換えをしない。止めれば止まり、戻せばほどける
+     3 終わりは本物のロゴへの受け渡し。清書が SVG のマーク(h1 の経路)にぴったり重なったところで、0.1 の重ねで SVG に渡す。破線や点線に見える瞬間を作らない
+     4 砂は、収束して砂の線になる粒と、ロゴの砂の線だけ。着地の後に粒を残さない。マークが見えているあいだはナビのロゴをしまう(home のフッターはマークを出さない)
    色: 4系統のトークンだけ。ガラスは主ボタン(第22条 用途3)だけ。キャンバスの端の溶けは mask(アルファ)で、色のグラデーションではない
    前版(Hero Motion v1・カードの切り替え)と、その前のガラスの立体は外した。立体の素材は images/hero/ に残す(docs/hero-asset-spec.md)
    ================================================================ */
@@ -233,7 +239,7 @@ html:not(.js) .jr{display:none}
 
 /* ===== 本人の言葉 =====
    ブランドの一文を独立させず、本人の短い文章の後に置く。明朝はこの一文だけ(憲法第23条 v1.5)。地の色は変えず、罫線で区切る */
-.me{padding:0 var(--pad-x) clamp(96px,14vh,160px)}
+.me{padding:0 var(--pad-x) clamp(96px,14vh,160px);overflow-x:clip} /* overflow-x: 閉じの帯の canvas を画面の端まで裁ち落とすため(.lab と同じ) */
 .me-in{max-width:var(--max);margin:0 auto;border-top:1px solid var(--line);padding-top:clamp(64px,9vh,104px);
   display:grid;grid-template-columns:minmax(0,2fr) minmax(0,7fr) minmax(0,3fr)}
 .me-body{grid-column:2}
@@ -246,6 +252,31 @@ html:not(.js) .jr{display:none}
 .me-links a{display:inline-flex;align-items:center;gap:8px;min-height:44px;font:600 14px/1.4 var(--sans);color:var(--ink);border-bottom:1px solid var(--ink-4);transition:border-color .3s var(--ease)}
 .me-links a:hover{border-color:var(--ink)}
 .me-note{margin-top:10px;font-size:13px;line-height:1.8;color:var(--ink-3)}
+
+/* ===== 閉じ(#about の帯)。約束は <style> 冒頭の「閉じの約束」 =====
+   kz-on=マークを写せた(帯はマークの高さ)/kz-live=動ける(帯を高くし canvas を出す)/.kz-run=動きの途中(SVG を隠す)/kz-in=マークが見えている。
+   JS なしは帯ごと出さない。動きを減らす設定はマークだけ(h2 の上 14px) */
+.kz{display:none;position:relative;--kz-mw:clamp(112px,10vw,148px)}
+html.kz-on .kz{display:block;margin-top:clamp(48px,7vh,72px);height:calc(var(--kz-mw) * 110 / 240)}
+html.kz-on .idea-h{margin-top:14px}
+/* 高さは整数 px に(端数があると canvas の清書と SVG のマークが 1px 近くずれる。実測) */
+html.kz-live .kz{height:clamp(320px,52vh,520px);height:clamp(320px,52svh,520px);height:round(down,clamp(320px,52svh,520px),1px)}
+/* 左のずらし: 藍の線の始点(x=8)を h2 の1文字目にそろえる */
+.kz-mark{position:absolute;bottom:0;left:calc(var(--kz-mw) * -8 / 240);width:var(--kz-mw);height:calc(var(--kz-mw) * 110 / 240);pointer-events:none}
+.kz.kz-run .kz-mark{visibility:hidden}
+.kz-c{display:none}
+/* 端の溶けは mask のアルファ(#000 は不透明度の指定。.jr-view と同じ)。下端の --kz-fb は着地の前に JS が 40→0px に */
+html.kz-live .kz-c{display:block;position:absolute;top:0;height:100%;pointer-events:none;z-index:1;
+  --kz-fs:calc(var(--pad-x) * .5);--kz-fb:40px;
+  --kz-v:linear-gradient(to bottom,transparent 0,#000 56px,#000 calc(100% - var(--kz-fb)),transparent 100%);
+  --kz-h:linear-gradient(to right,transparent 0,#000 var(--kz-fs),#000 calc(100% - var(--kz-fs)),transparent 100%);
+  -webkit-mask-image:var(--kz-v),var(--kz-h);-webkit-mask-composite:source-in;mask-image:var(--kz-v),var(--kz-h);mask-composite:intersect}
+/* 帯のマークが見えているあいだは、ナビのロゴをしまう(home だけ。hero-in と同じく位置は変えない)。
+   home のフッターはマークを出さない(帯のマークが閉じを担う。解析中に決まるのでずれない。design-system §3) */
+html.kz-in body[data-page="home"] .nav-logo{opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s linear .4s}
+html.kz-on body[data-page="home"] .footer-brand svg{display:none}
+@media(max-width:760px){.kz{--kz-mw:92px} html.kz-live .kz{height:clamp(280px,48vh,420px);height:clamp(280px,48svh,420px);height:round(down,clamp(280px,48svh,420px),1px)}}
+@media(prefers-reduced-motion:reduce){html.kz-live .kz{height:calc(var(--kz-mw) * 110 / 240)} html.kz-live .kz-c{display:none}}
 
 /* ===== 下の動き(3種類だけ) =====
    1) 文字: 共通の reveal。本人の言葉だけは移動なしで、ゆっくり opacity のみ
@@ -264,6 +295,8 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
 @media(prefers-reduced-motion:reduce){
   html.js .tr dd::before,html.js .cp-shot[data-reveal],html.js .cp.rev .cp-shot[data-reveal]{transform:none;transition:none;animation:none}
 }
+/* 閉じの帯があるときは、明朝の一文を最初から出す(マークより後に文字が追いかけて出ない)。上の html.js .me [data-reveal] と同じ詳細度なので、この位置に置く */
+html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;animation:none}
 
 @media(max-width:860px){
   .cp{grid-template-columns:1fr;padding-left:0}
@@ -399,7 +432,9 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
       <p class="me-p" data-reveal>外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p>
       <p class="me-p" data-reveal>道は、病院の外にも続いています。それが見えるものを、ひとつずつ作っています。</p>
       <p class="me-sign" data-reveal>理学療法士の私(橋本渉)が、ひとりで運営しています。</p>
-      <div data-reveal>
+      <div class="kz" id="kz" aria-hidden="true"><canvas class="kz-c"></canvas><svg class="logo-mark kz-mark" viewBox="0 0 240 110" focusable="false"></svg></div>
+      <script>/* 閉じの帯: h1 のマークの d を写し、動けるなら解析中に帯を高く */(()=>{try{const d=document,r=d.documentElement.classList,m=d.querySelector('.kz-mark'),c=d.querySelector('.kz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;r.add('kz-on');if(c.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches)r.add('kz-live')}catch(e){}})()</script>
+      <div class="me-close" data-reveal>
         <h2 class="idea-h" id="ideaTitle">正解を与えるのではなく、<br class="br-pc"><span class="a">選択肢を増やす</span></h2>
         <p class="me-links"><a href="./philosophy/index.html">考え方をもう少し読む <span aria-hidden="true">→</span></a><a href="./about/index.html">運営者について</a><a href="./community/index.html">話をする</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">noteで書いていること <span aria-hidden="true">↗</span></a></p>
         <p class="me-note">見るだけで帰っても、それで十分です。</p>
@@ -1278,6 +1313,126 @@ html.js:not(.js-ready) .tr dd::before{animation:rv-safe .5s var(--ease) 1.8s for
   fontsReady.then(once, once);
   setTimeout(once, 1500);
 })();
+</script>
+<script>
+/* 閉じ(#about の帯 .kz)。τ(0〜5)は帯の進みを追い、追いつけば止まる。約束は <style> 冒頭。失敗したら完成形 */
+(()=>{'use strict';
+const D=document,R=D.documentElement,CL=R.classList,kz=D.getElementById('kz');if(!kz||!CL.contains('kz-on'))return;
+const cv=kz.querySelector('.kz-c'),mk=kz.querySelector('.kz-mark'),KC=kz.classList,M=Math;
+let ctx,raf=0,last=0,live=0,job=0,drawn=-1;
+const stop=()=>{raf&&cancelAnimationFrame(raf);raf=last=0};
+const clear=()=>{ctx&&(ctx.setTransform(1,0,0,1,0,0),ctx.clearRect(0,0,cv.width,cv.height));drawn=-1};
+const fail=()=>{job++;live=0;stop();clear();CL.remove('kz-live','kz-in');KC.remove('kz-run')};
+try{
+const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=4.7,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),
+  PD=[...mk.children].map(p=>new Path2D(p.getAttribute('d')));
+let tau=5,ready=0,vis=0,v72=0,m72=0,near=0,hold=0,hg=0,W=0,H=0,sc=1,mx=0,my=0,s0=1,s1=1,N=0,wm=1,stride=1,cut=1,rs=0,ema=0,slow=0,fi=0,COL,PX,PY,BR,Z,U0,OFF,CUR;
+// 出典: showreel/kousa.html 29・30・48・75 行(PR #143・67fb41c)
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x,lerp=(a,b,u)=>a+(b-a)*u,seg=(t,a,d)=>clamp((t-a)/d),frac=x=>x-M.floor(x);
+// 出典: 同 41〜47 行。--ease の LUT
+const ease=(()=>{const bx=s=>3*(1-s)*(1-s)*s*.16+3*(1-s)*s*s*.3+s*s*s,by=s=>1-(1-s)*(1-s)*(1-s),n=2048,L=new Float32Array(n+1);
+  for(let i=0;i<=n;i++){let lo=0,hi=1;for(let k=0;k<40;k++){const m=(lo+hi)/2;bx(m)<i/n?lo=m:hi=m}L[i]=by((lo+hi)/2)}
+  return u=>{if(u<=0)return 0;if(u>=1)return 1;const f=u*n,i=f|0;return L[i]+(L[i+1]-L[i])*(f-i)}})();
+// 出典: 同 51 行
+const hash=(i,k)=>{let x=(i*374761393+k*668265263)>>>0;x=((x^(x>>>13))*1274126177)>>>0;return((x^(x>>>16))>>>0)/4294967296};
+// 出典: 同 81〜86 行
+const field=(x,y,t,z,th,am)=>th+am*.85*(M.sin(x*.0023+t*.35+z*5.1)*M.cos(y*.0031-t*.3+z*2)+.65*M.sin(x*.0014-y*.0027+t*.55+z*3.3)+.35*M.sin(y*.0065+x*.0011-t*.9+z*1.7));
+// 出典: 同 60・61・132・139・140 行(LOGO は収束先の計算だけに使う)
+const LOGO=[[[8,74],[62,16],[118,24],[176,84]],[[58,94],[118,60],[158,22],[232,12]]];
+const bez=(p,u)=>{const a=1-u;return[0,1].map(d=>a*a*a*p[0][d]+3*a*a*u*p[1][d]+3*a*u*u*p[2][d]+u*u*u*p[3][d])};
+const nrm=(c,u)=>{const a=bez(LOGO[c],M.max(0,u-.01)),b=bez(LOGO[c],M.min(1,u+.01)),dx=b[0]-a[0],dy=b[1]-a[1],l=M.hypot(dx,dy)||1;return[-dy/l,dx/l]};
+const wIdx=w=>clamp(M.round(M.log2(w/.5)*2),0,12),wOf=i=>.5*M.pow(2,i/2);
+const LT=[0,1].map(c=>{const a=new Float32Array((NL+1)*4);for(let i=0;i<=NL;i++)a.set(bez(LOGO[c],i/NL).concat(nrm(c,i/NL)),i*4);return a}),
+  Lc=LT.map(a=>{let L=0;for(let i=4;i<=NL*4;i+=4)L+=M.hypot(a[i]-a[i-4],a[i+1]-a[i-3]);return L});
+
+const rect=()=>kz.getBoundingClientRect();
+// p=0: 帯の半分が画面に入る/1: 帯の下端が画面の 70%
+const readT=()=>{const r=rect(),vh=innerHeight,h=r.height/2;return 5*clamp((vh-h-r.top)/(.3*vh+h))};
+const offscreen=()=>{const r=rect();return r.bottom<=0||r.top>=innerHeight};
+const apply=()=>{KC.toggle('kz-run',!!live&&tau<4.4);CL.toggle('kz-in',!!(live?v72&&tau>=1:m72))};
+const off=()=>{live=0;stop();clear();apply();removeEventListener('scroll',kick)};
+// live になるのは表ができ、帯が画面外のときだけ
+const goLive=()=>{if(!live&&!hold&&ready&&CL.contains('kz-live')&&offscreen()){live=1;tau=readT();clear();apply()}};
+// アンカーで飛んだら、止まるまで live にしない
+const holdStill=()=>{hold=1;const g=++hg;let y=-1,n=0;const chk=()=>{if(g!==hg)return;if(scrollY===y){if(++n>=3){hold=0;goLive();return}}else{n=0;y=scrollY}setTimeout(chk,200)};D.readyState==='complete'?chk():addEventListener('load',chk)};
+
+const size=()=>{let d=M.min(devicePixelRatio||1,1.5);const px=W>860?1.3e6:.6e6;if(W*H*d*d>px)d=M.sqrt(px/(W*H));d*=cut;cv.width=M.max(1,M.round(W*d));cv.height=M.max(1,M.round(H*d));drawn=-1};
+const layout=()=>{const kr=rect(),mr=mk.getBoundingClientRect(),pc=(W=R.clientWidth)>860;H=kr.height;
+  cv.style.left=-kr.left+'px';cv.style.width=W+'px';
+  mx=M.round(mr.left);my=M.round(mr.top-kr.top); // SVG は CSS px の整数に寄せて描かれる(実測)
+  s1=mr.width/240;s0=M.min(.7*W/224,.7*H/82);sc=M.max(W/1920,.5);N=pc?360:300;wm=pc?1:1.15;size()};
+// 積分: 120 粒ずつ idle で(なければ setTimeout)
+const integrate=()=>{const id=++job,later=window.requestIdleCallback?f=>requestIdleCallback(f,{timeout:800}):f=>setTimeout(f,30);let k0=0;
+  ready=0;layout();const Ww=W/sc,Wh=H/sc,V=290/SR;
+  Z=new Float32Array(N);U0=new Float32Array(N);OFF=new Float32Array(N);CUR=new Uint8Array(N);PX=new Float32Array(N*ST);PY=new Float32Array(N*ST);BR=new Uint8Array(N*ST);
+  const chunk=()=>{if(id!==job)return;try{const k1=M.min(N,k0+120);
+    for(let k=k0;k<k1;k++){const i=M.floor(k*1800/N),z=Z[k]=hash(i,2),b=k*ST;U0[k]=hash(i,3);OFF[k]=hash(i,5)+hash(i,6)-1;CUR[k]=hash(i,7)<.15;
+      let x=PX[b]=-90+(Ww+180)*hash(i,11),y=PY[b]=-90+(Wh+180)*hash(i,12);
+      for(let j=1;j<ST;j++){const a=field(x,y,9.7+(j-1)/SR,z,-.34,.61);let br=0;x+=M.cos(a)*V;y+=M.sin(a)*V;
+        if(x>Ww+90){x-=Ww+180;br=1}else if(x<-90){x+=Ww+180;br=1}if(y>Wh+90){y-=Wh+180;br=1}else if(y<-90){y+=Wh+180;br=1}
+        BR[b+j]=br;PX[b+j]=x;PY[b+j]=y}}
+    k0=k1;if(k0<N)later(chunk);else{ready=1;goLive()}}catch(e){fail()}};
+  later(chunk)};
+const rebuild=()=>{job++;ready=0;PX=0;off();if(CL.contains('kz-live')&&near)integrate()};
+// 色は計算済みのトークンだけ
+const readColors=()=>{const cs=getComputedStyle(R),nv=getComputedStyle(mk.firstChild).stroke;COL=[cs.getPropertyValue('--blue-soft').trim(),cs.getPropertyValue('--blue').trim(),nv,nv,getComputedStyle(mk.lastChild).stroke]};
+
+// 1 枚を描く(τ だけで決まる)
+const draw=()=>{const t0=performance.now(),T=tau;if(rs){rs=0;size()}clear();ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
+  cv.style.setProperty('--kz-fb',40*(1-seg(T,2.4,1))+'px');
+  if(T<END){ctx.lineCap=ctx.lineJoin='round';
+    const jf=(T+.3)*SR,j=M.min(ST-2,jf|0),f=jf-j,e=ease(seg(T,2.4,2)),s=lerp(s0,s1,e),cx=lerp(W/2,mx+120*s1,e),cy=lerp(H/2,my+55*s1,e),spr=(1-ease(seg(T,1.2,2.2)))*8,BK=[{},{},{},{},{}],LS=[[],[],[],[],[]];
+    const add=(bd,wi,aq,n)=>{const key=wi*5+aq;let p=BK[bd][key];if(!p){p=BK[bd][key]=new Path2D();LS[bd].push(key)}p.moveTo(P[0],P[1]);for(let q=1;q<n;q++)p.lineTo(P[q*2],P[q*2+1])};
+    for(let k=0;k<N;k+=stride){const z=Z[k],ms=.6+.8*U0[k],m=ease(seg(T,ms,2.2)),Ki=M.round(lerp(16,7,seg(T,ms+1.4,.8))),lt=LT[CUR[k]],b=k*ST;
+      let am=1-ease(seg(T,4+.4*z,.3)),n=0,pu=-1,L=0,dH=0;if(am<=.02)continue;
+      if(m>0){const uh=frac(U0[k]+.12*(T-.6));if(uh<.018)am*=uh/.018}
+      for(let q=0;q<Ki;q+=2){const ix=j-q;if(ix<0||(q&&(BR[b+ix+1]||BR[b+ix+2])))break; // 2 段おきに点を取る(ラスタ化は頂点の数で重い)
+        let x=PX[b+ix],y=PY[b+ix];if(!q&&!BR[b+ix+1]){x=lerp(x,PX[b+ix+1],f);y=lerp(y,PY[b+ix+1],f)}x*=sc;y*=sc;
+        if(m>0){ // カメラは今の τ のものを尾全体に
+          const u=frac(U0[k]+.12*((q?ix/SR-.3:T)-.6));if(pu>=0&&M.abs(u-pu)>.5)break;pu=u;
+          const uf=u*NL,li=M.min(NL-1,uf|0),g=uf-li,o=li*4,sp=spr*OFF[k]*s,ox=cx+(lerp(lt[o],lt[o+4],g)-120)*s,oy=cy+(lerp(lt[o+1],lt[o+5],g)-55)*s;
+          x=lerp(x,ox+lerp(lt[o+2],lt[o+6],g)*sp,m);y=lerp(y,oy+lerp(lt[o+3],lt[o+7],g)*sp,m);dH=M.max(dH,M.hypot(x-ox,y-oy))}
+        if(n)L+=M.hypot(x-P[n*2-2],y-P[n*2-1]);P[n*2]=x;P[n*2+1]=y;n++}
+      const aq=M.round(am*4);if(L<2||aq<=0)continue;
+      // 幅は曲線に乗ってから(dH<2px)収束の終わりに太らせ、長さの 1/4 まで(粒・剥片に見せない)
+      const w=lerp((.6+1.4*z)*wm,6*s*.28,seg(m,.9,.1)**2*clamp(1-dH/2)),wi=M.min(wIdx(w),M.floor(2*M.log2(L/2))),bd=m>.5?(CUR[k]?4:3):z<.4?0:z<.75?1:2;
+      add(bd,wi,aq,n)}
+    for(let bd=0;bd<5;bd++){ctx.strokeStyle=COL[bd];for(const key of LS[bd]){const aq=key%5;ctx.globalAlpha=AL[bd]*aq/4;ctx.lineWidth=wOf((key-aq)/5);ctx.stroke(BK[bd][key])}}
+    // 清書: 細い芯を左から引く(先端は収束の先頭より先へ出ない)。3–4 で幅 6·s。4.4 で SVG を出し 4.5 までに消す
+    const r=ease(seg(T,1.75,1)),la=1-seg(T,4.4,.1);
+    if(r>0&&la>0){ctx.globalAlpha=la;ctx.translate(cx-120*s,cy-55*s);ctx.scale(s,s);ctx.lineWidth=lerp(1.68,6,ease(seg(T,3,1)));
+      for(let c=0;c<2;c++){ctx.strokeStyle=COL[c?4:2];ctx.setLineDash(r<1?[r*Lc[c],Lc[c]+1]:[]);ctx.stroke(PD[c])}ctx.setLineDash([])}
+    ctx.globalAlpha=1}
+  drawn=T;
+  // 降格: 描画時間か rAF の間隔×0.4(ラスタ化の遅さ)の EMA が 12 回続けて 20ms 超で 1 段(1 本おき→×0.8)。戻さない
+  const dd=performance.now()-t0,d=M.max(dd,fi*.4);fi=0;ema=ema?ema+.2*(d-ema):d;
+  if(ema<=20)slow=0;else if(++slow>=12){slow=ema=0;if(stride<2)stride=2;else if(cut==1)cut=.8,rs=1}};
+const paint=()=>{try{draw();apply()}catch(e){fail()}};
+// 追い方: 指数 0.14 秒・|Δτ|≤4dt・下限 0.3dt
+const tick=now=>{raf=0;if(!live||!vis||D.hidden){last=0;return}
+  try{const tT=readT(),dt=last?M.min((now-last)/1000,.1):1/60,d=tT-tau;fi=last?now-last:0;last=now;
+    if(M.abs(d)<.002)tau=tT;else{let st=d*(1-M.exp(-dt/.14));if(M.abs(st)<.3*dt)st=M.abs(d)<.3*dt?d:M.sign(d)*.3*dt;tau+=clamp(st,-4*dt,4*dt);if(M.abs(tT-tau)<.002)tau=tT}
+    if(tau!==drawn)paint();if(tau!==tT)raf=requestAnimationFrame(tick);else last=0}catch(e){fail()}};
+const kick=()=>{if(live&&vis&&!raf&&!D.hidden)raf=requestAnimationFrame(tick)};
+
+const IO=IntersectionObserver;
+// kz-in: live は帯が画面にあり τ≥1、ほかはマークが画面にあるとき
+const io=new IO(es=>{for(const e of es)e.target===kz?v72=e.isIntersecting:m72=e.isIntersecting;apply()},{rootMargin:'-72px 0px 0px 0px'});io.observe(kz);io.observe(mk);
+if(!(ctx=cv.getContext('2d')))return fail();
+readColors();
+new IO(es=>{near=es[es.length-1].isIntersecting;if(near&&!PX&&CL.contains('kz-live'))integrate()},{rootMargin:'100% 0px'}).observe(kz);
+// 画面にあるときだけ描く。画面外は τ=τT・canvas は空
+new IO(es=>{vis=es[es.length-1].isIntersecting;
+  if(vis){if(live){addEventListener('scroll',kick,{passive:true});tau=readT();paint();kick()}}
+  else{removeEventListener('scroll',kick);stop();clear();if(live){tau=readT();apply()}else goLive()}}).observe(kz);
+D.addEventListener('visibilitychange',()=>D.hidden?stop():kick());
+if(location.hash)holdStill();addEventListener('hashchange',()=>{if(offscreen())off();holdStill()});
+new MutationObserver(()=>{readColors();if(live&&vis)paint()}).observe(R,{attributes:true,attributeFilter:['data-theme']});
+// 組み直しは幅か高さが 2px 以上変わったとき
+let rz=0;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(CL.contains('kz-live')&&(M.abs(R.clientWidth-W)>=2||M.abs(rect().height-H)>=2))rebuild()},200)});
+const onR=()=>{if(rq.matches){job++;ready=0;PX=0;off();CL.remove('kz-live')}else{CL.add('kz-live');rebuild()}};
+rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
+}catch(e){fail()}})();
 </script>
 </body>
 </html>
