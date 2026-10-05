@@ -255,14 +255,12 @@ html:not(.js) .jr{display:none}
 
 /* ===== 閉じ(#about の帯)。約束は <style> 冒頭の「閉じの約束」 =====
    kz-on=マークを写せた(帯はマークの高さ)/kz-live=動ける(帯を高くし canvas を出す)/.kz-run=動きの途中(SVG を隠す)/kz-in=マークが見えている。
-   JS なしは帯ごと出さない。動きを減らす設定はマークだけ(h2 の上 14px)。kz-noland=着地をやめる版(本体の LAND=false) */
+   JS なしは帯ごと出さない。動きを減らす設定はマークだけ(h2 の上 14px) */
 .kz{display:none;position:relative;--kz-mw:clamp(112px,10vw,148px)}
 html.kz-on .kz{display:block;margin-top:clamp(48px,7vh,72px);height:calc(var(--kz-mw) * 110 / 240)}
-html.kz-on:not(.kz-noland) .idea-h{margin-top:14px}
+html.kz-on .idea-h{margin-top:14px}
 /* 高さは整数 px に(端数があると canvas の清書と SVG のマークが 1px 近くずれる。実測) */
 html.kz-live .kz{height:clamp(320px,52vh,520px);height:clamp(320px,52svh,520px);height:round(down,clamp(320px,52svh,520px),1px)}
-html.kz-noland:not(.kz-live) .kz{display:none}
-html.kz-noland .kz-mark{visibility:hidden}
 /* 左のずらし: 藍の線の始点(x=8)を h2 の1文字目にそろえる */
 .kz-mark{position:absolute;bottom:0;left:calc(var(--kz-mw) * -8 / 240);width:var(--kz-mw);height:calc(var(--kz-mw) * 110 / 240);pointer-events:none}
 .kz.kz-run .kz-mark{visibility:hidden}
@@ -276,7 +274,7 @@ html.kz-live .kz-c{display:block;position:absolute;top:0;height:100%;pointer-eve
 /* 帯のマークが見えているあいだは、ナビのロゴをしまう(home だけ。hero-in と同じく位置は変えない)。
    home のフッターはマークを出さない(帯のマークが閉じを担う。解析中に決まるのでずれない。design-system §3) */
 html.kz-in body[data-page="home"] .nav-logo{opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s linear .4s}
-html.kz-on:not(.kz-noland) body[data-page="home"] .footer-brand svg{display:none}
+html.kz-on body[data-page="home"] .footer-brand svg{display:none}
 @media(max-width:760px){.kz{--kz-mw:92px} html.kz-live .kz{height:clamp(280px,48vh,420px);height:clamp(280px,48svh,420px);height:round(down,clamp(280px,48svh,420px),1px)}}
 @media(prefers-reduced-motion:reduce){html.kz-live .kz{height:calc(var(--kz-mw) * 110 / 240)} html.kz-live .kz-c{display:none}}
 
@@ -1320,15 +1318,13 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
 /* 閉じ(#about の帯 .kz)。τ(0〜5)は帯の進みを追い、追いつけば止まる。約束は <style> 冒頭。失敗したら完成形 */
 (()=>{'use strict';
 const D=document,R=D.documentElement,CL=R.classList,kz=D.getElementById('kz');if(!kz||!CL.contains('kz-on'))return;
-const LAND=true; // false: 着地せず清書を 4.4–4.8 で消す(kz-noland)
 const cv=kz.querySelector('.kz-c'),mk=kz.querySelector('.kz-mark'),KC=kz.classList,M=Math;
 let ctx,raf=0,last=0,live=0,job=0,drawn=-1;
 const stop=()=>{raf&&cancelAnimationFrame(raf);raf=last=0};
 const clear=()=>{ctx&&(ctx.setTransform(1,0,0,1,0,0),ctx.clearRect(0,0,cv.width,cv.height));drawn=-1};
 const fail=()=>{job++;live=0;stop();clear();CL.remove('kz-live','kz-in');KC.remove('kz-run')};
 try{
-if(!LAND)CL.add('kz-noland');
-const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=LAND?4.7:4.8,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),
+const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=4.7,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),
   PD=[...mk.children].map(p=>new Path2D(p.getAttribute('d')));
 let tau=5,ready=0,vis=0,v72=0,m72=0,near=0,hold=0,hg=0,W=0,H=0,sc=1,mx=0,my=0,s0=1,s1=1,N=0,wm=1,stride=1,cut=1,rs=0,ema=0,slow=0,fi=0,COL,PX,PY,BR,Z,U0,OFF,CUR;
 // 出典: showreel/kousa.html 29・30・48・75 行(PR #143・67fb41c)
@@ -1353,7 +1349,7 @@ const rect=()=>kz.getBoundingClientRect();
 // p=0: 帯の半分が画面に入る/1: 帯の下端が画面の 70%
 const readT=()=>{const r=rect(),vh=innerHeight,h=r.height/2;return 5*clamp((vh-h-r.top)/(.3*vh+h))};
 const offscreen=()=>{const r=rect();return r.bottom<=0||r.top>=innerHeight};
-const apply=()=>{KC.toggle('kz-run',!!live&&tau<4.4);CL.toggle('kz-in',!!(live?v72&&tau>=1&&(LAND||tau<4.8):LAND&&m72))};
+const apply=()=>{KC.toggle('kz-run',!!live&&tau<4.4);CL.toggle('kz-in',!!(live?v72&&tau>=1:m72))};
 const off=()=>{live=0;stop();clear();apply();removeEventListener('scroll',kick)};
 // live になるのは表ができ、帯が画面外のときだけ
 const goLive=()=>{if(!live&&!hold&&ready&&CL.contains('kz-live')&&offscreen()){live=1;tau=readT();clear();apply()}};
@@ -1403,7 +1399,7 @@ const draw=()=>{const t0=performance.now(),T=tau;if(rs){rs=0;size()}clear();ctx.
       add(bd,wi,aq,n)}
     for(let bd=0;bd<5;bd++){ctx.strokeStyle=COL[bd];for(const key of LS[bd]){const aq=key%5;ctx.globalAlpha=AL[bd]*aq/4;ctx.lineWidth=wOf((key-aq)/5);ctx.stroke(BK[bd][key])}}
     // 清書: 細い芯を左から引く(先端は収束の先頭より先へ出ない)。3–4 で幅 6·s。4.4 で SVG を出し 4.5 までに消す
-    const r=ease(seg(T,1.75,1)),la=1-seg(T,4.4,LAND?.1:.4);
+    const r=ease(seg(T,1.75,1)),la=1-seg(T,4.4,.1);
     if(r>0&&la>0){ctx.globalAlpha=la;ctx.translate(cx-120*s,cy-55*s);ctx.scale(s,s);ctx.lineWidth=lerp(1.68,6,ease(seg(T,3,1)));
       for(let c=0;c<2;c++){ctx.strokeStyle=COL[c?4:2];ctx.setLineDash(r<1?[r*Lc[c],Lc[c]+1]:[]);ctx.stroke(PD[c])}ctx.setLineDash([])}
     ctx.globalAlpha=1}
