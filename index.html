@@ -1347,7 +1347,8 @@ const LT=[0,1].map(c=>{const a=new Float32Array((NL+1)*4);for(let i=0;i<=NL;i++)
 
 const rect=()=>kz.getBoundingClientRect();
 // p=0: 帯の半分が画面に入る/1: 帯の下端が画面の 70%
-const readT=()=>{const r=rect(),vh=innerHeight,h=r.height/2;return 5*clamp((vh-h-r.top)/(.3*vh+h))};
+/* 帯の上端が帯の 1/4 ぶん画面に入ったら 0、帯の下端が画面の高さの 55% に来たら 5。送る量は 0.45 画面+帯の 3/4(2026-10-06 社長「実機でだいぶ早い」で 1.5 倍に) */
+const readT=()=>{const r=rect(),vh=innerHeight,h=r.height/2;return 5*clamp((vh-.5*h-r.top)/(.45*vh+1.5*h))};
 const offscreen=()=>{const r=rect();return r.bottom<=0||r.top>=innerHeight};
 const apply=()=>{KC.toggle('kz-run',!!live&&tau<4.4);CL.toggle('kz-in',!!(live?v72&&tau>=1:m72))};
 const off=()=>{live=0;stop();clear();apply();removeEventListener('scroll',kick)};
@@ -1408,10 +1409,10 @@ const draw=()=>{const t0=performance.now(),T=tau;if(rs){rs=0;size()}clear();ctx.
   const dd=performance.now()-t0,d=M.max(dd,fi*.4);fi=0;ema=ema?ema+.2*(d-ema):d;
   if(ema<=20)slow=0;else if(++slow>=12){slow=ema=0;if(stride<2)stride=2;else if(cut==1)cut=.8,rs=1}};
 const paint=()=>{try{draw();apply()}catch(e){fail()}};
-// 追い方: 指数 0.14 秒・|Δτ|≤4dt・下限 0.3dt
+// 追い方: 指数 0.2 秒・|Δτ|≤2.6dt(はじいても端から端まで約 1.9 秒)・下限 0.3dt
 const tick=now=>{raf=0;if(!live||!vis||D.hidden){last=0;return}
   try{const tT=readT(),dt=last?M.min((now-last)/1000,.1):1/60,d=tT-tau;fi=last?now-last:0;last=now;
-    if(M.abs(d)<.002)tau=tT;else{let st=d*(1-M.exp(-dt/.14));if(M.abs(st)<.3*dt)st=M.abs(d)<.3*dt?d:M.sign(d)*.3*dt;tau+=clamp(st,-4*dt,4*dt);if(M.abs(tT-tau)<.002)tau=tT}
+    if(M.abs(d)<.002)tau=tT;else{let st=d*(1-M.exp(-dt/.2));if(M.abs(st)<.3*dt)st=M.abs(d)<.3*dt?d:M.sign(d)*.3*dt;tau+=clamp(st,-2.6*dt,2.6*dt);if(M.abs(tT-tau)<.002)tau=tT}
     if(tau!==drawn)paint();if(tau!==tT)raf=requestAnimationFrame(tick);else last=0}catch(e){fail()}};
 const kick=()=>{if(live&&vis&&!raf&&!D.hidden)raf=requestAnimationFrame(tick)};
 
