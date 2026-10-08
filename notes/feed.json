@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-06T23:51:27+00:00",
+  "updated_at": "2026-10-08T00:14:22+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "病院では普通だった経験が、外に出たら武器になった。",
+      "url": "https://note.com/prime_duck4944/n/naa498ecade51",
+      "guid": "https://note.com/prime_duck4944/n/naa498ecade51",
+      "pubDate": "2026-10-08T07:00:00+09:00",
+      "date": "2026-10-08",
+      "excerpt": "病院で働いていた頃、自分のやっていることを、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316343208/rectangle_large_type_2_6c438984b9450d3ecc4622e09e664d35.png?width=800"
+    },
+    {
+      "title": "業務改善って、別にすごいシステムを作ることじゃない。",
+      "url": "https://note.com/prime_duck4944/n/n6a821224eaac",
+      "guid": "https://note.com/prime_duck4944/n/n6a821224eaac",
+      "pubDate": "2026-10-07T19:00:00+09:00",
+      "date": "2026-10-07",
+      "excerpt": "業務改善って聞くと、少し大きなことに聞こえる。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/319806810/rectangle_large_type_2_4440acd2ff2abda96c056611fea8adf9.png?width=800"
+    },
     {
       "title": "医療職が事業会社に出て、初めて分かったこと。",
       "url": "https://note.com/prime_duck4944/n/n5c40c5e2c2df",
@@ -38,24 +56,6 @@
       "date": "2026-10-05",
       "excerpt": "会議の前って、意外と地味に時間を使う。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/319803927/rectangle_large_type_2_66395005946c3c75580ca3a5a0441827.png?width=800"
-    },
-    {
-      "title": "医療でマネジメントできる人は、自分が思っているよりずっと少ない。",
-      "url": "https://note.com/prime_duck4944/n/n58a04fb2c6c5",
-      "guid": "https://note.com/prime_duck4944/n/n58a04fb2c6c5",
-      "pubDate": "2026-10-05T07:00:00+09:00",
-      "date": "2026-10-05",
-      "excerpt": "病院にいた頃、マネジメントをしている自分を、",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316287741/rectangle_large_type_2_b466007a34002156667d2ab2854a30e4.png?width=800"
-    },
-    {
-      "title": "「この文章、角が立たない？」をAIに聞く使い方。",
-      "url": "https://note.com/prime_duck4944/n/n7cb3cf36efde",
-      "guid": "https://note.com/prime_duck4944/n/n7cb3cf36efde",
-      "pubDate": "2026-10-04T19:00:00+09:00",
-      "date": "2026-10-04",
-      "excerpt": "仕事をしていると、内容そのものより、",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/319257369/rectangle_large_type_2_93f42d99643ccb5bf666fab5979cbb6b.png?width=800"
     }
   ]
 }
