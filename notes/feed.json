@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-08T00:14:22+00:00",
+  "updated_at": "2026-10-09T00:25:42+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "事業会社に行けば年収が上がる、なんて単純な話ではない。",
+      "url": "https://note.com/prime_duck4944/n/nf714d81c43a4",
+      "guid": "https://note.com/prime_duck4944/n/nf714d81c43a4",
+      "pubDate": "2026-10-09T07:00:00+09:00",
+      "date": "2026-10-09",
+      "excerpt": "「事業会社に行ったら、給料上がりますか？」医療職から事業会社への転職の話になると、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/316345264/rectangle_large_type_2_fb726a2d30edb2a3483414fa9c7ce6c3.png?width=800"
+    },
+    {
+      "title": "「これExcelで管理する必要ある？」から始めてみる。",
+      "url": "https://note.com/prime_duck4944/n/nec44f9ae7b71",
+      "guid": "https://note.com/prime_duck4944/n/nec44f9ae7b71",
+      "pubDate": "2026-10-08T19:00:00+09:00",
+      "date": "2026-10-08",
+      "excerpt": "業務改善の話をしていると、とりあえずExcelで管理しよう、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/319807749/rectangle_large_type_2_84ae0f536ed857e92d82f3a794d067d0.png?width=800"
+    },
     {
       "title": "病院では普通だった経験が、外に出たら武器になった。",
       "url": "https://note.com/prime_duck4944/n/naa498ecade51",
@@ -38,24 +56,6 @@
       "date": "2026-10-06",
       "excerpt": "1on1や面談って、「何を話せばいいか分からない」",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/319804945/rectangle_large_type_2_97122d96001a66e2ada037ae3e325325.png?width=800"
-    },
-    {
-      "title": "主任になるか迷っているなら、「給料が上がるか」以外にも見てほしいこと。",
-      "url": "https://note.com/prime_duck4944/n/ne80bb873b467",
-      "guid": "https://note.com/prime_duck4944/n/ne80bb873b467",
-      "pubDate": "2026-10-06T07:00:00+09:00",
-      "date": "2026-10-06",
-      "excerpt": "「主任をやらないかって言われてるんですけど、どう思います？」こういう相談をされたら、",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316289186/rectangle_large_type_2_b83eb7c7556cc10869c01b7ec5bdbaf3.png?width=800"
-    },
-    {
-      "title": "会議のアジェンダをゼロから考えるのをやめた。",
-      "url": "https://note.com/prime_duck4944/n/na0a30e1e6ae3",
-      "guid": "https://note.com/prime_duck4944/n/na0a30e1e6ae3",
-      "pubDate": "2026-10-05T19:00:00+09:00",
-      "date": "2026-10-05",
-      "excerpt": "会議の前って、意外と地味に時間を使う。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/319803927/rectangle_large_type_2_66395005946c3c75580ca3a5a0441827.png?width=800"
     }
   ]
 }
