@@ -541,6 +541,23 @@ a { color: inherit; text-decoration: none; }
   margin-top: 4px;
 }
 
+/* BRIDGE への戻り線(第26条)。見た目は round-note の .foot-brand と同じ、タップ 44px */
+.foot-brand {
+  align-self: center;
+  display: inline-block;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 16px 12px;
+  font: 700 10.5px/1 var(--en);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.foot-brand:hover { color: var(--navy); }
+.foot-brand:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
 /* ---------- トースト ---------- */
 
 .toast {
@@ -593,7 +610,7 @@ a { color: inherit; text-decoration: none; }
   .app.enter .screen { animation: none; }
   .delta { animation: none; }
   .progress-fill, .meter-track i { transition: none; }
-  .btn, .choice, .toast { transition: none; }
+  .btn, .choice, .toast, .foot-brand { transition: none; }
   .btn:active, .choice:active { transform: none; }
   .theme-btn { transition: none; }
 }
