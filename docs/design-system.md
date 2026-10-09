@@ -94,7 +94,7 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 |---|---|---|---|---|
 | Navigation | `.site-nav` | 常に。ページ追加は `NAV` 配列に1行 | ページごとに独自ナビ | 現在地は `.active`+`aria-current`(砂の下線)。Home だけ一度きりの例外: ヒーローの間はロゴをしまい、Compass への文字リンク `.nav-entry` を足す(index の `<style>`・ia.md v2.8)。#about の帯のマークが見えているあいだもロゴをしまう(`kz-in`)。2ページ目で使うなら `bridge.js` へ移す |
 | Mobile Navigation | `.nav-drawer` | 920px 以下で自動 | 説明を省く | `aria-expanded`。ハンバーガーはタップ 44px |
-| Theme toggle | `.theme-btn` | ナビに1つ | 2つ目を置く | 見た目 34px・タップ 44px |
+| Theme toggle | `.theme-btn` | ナビに1つ | 2つ目を置く | 見た目 34px・タップ 44px。自前の `.theme-btn` を持つプロダクトは `::before` の `inset:-6px` で広げる(枠線 1px の内側から測るので 34px の円に -5px では 42px。iikae・keiji・keiri・tanaoroshi・nidodema を 2026-10-09 に揃えた) |
 | Footer | `.site-footer` | 常に | ページ独自のリンク集を足す | Home だけの例外: #about の帯のマークが閉じを担うので、`kz-on` のときフッターのマークを出さない(`.footer-brand svg` を `display:none`。名前と EXPAND CHOICES. は左にそろう)。解析中に決まる規則で、スクロールでは付け外ししない。マークを同時に 2 つ見せないため(着地後のマークからフッターのマークまでが 1 画面に足りない: 390×844 で 433px・1440×900 で 431px・1920×1080 で 456px。2026-10-05 測定・社長決裁。PR #144)。1440×900・1920×1080 ではページの末尾でも帯のマークが画面に残るので、末尾ではナビのロゴもしまったままになる(社長の確認事項) |
 | Page hero / Breadcrumb | `.page-hero` `.crumb` | トップ以外。1ページ=1つの問い。平らな地に、見出しの下を通る藍の線1本と現在地の砂の点1つ(ロゴの藍の線の延長と第22条の現在地) | 2つ目のヒーロー・4階層目・地のグラデーション・装飾の曲線 | パンくずはタップ 44px。線は画面の左端から入り、本文幅の右端か見出しの終わりの1字先の遠いほうで終わる直線(右の余白には入らない)。太さ 2px。読ませる文字を横切らない |
 | Section | `.sec` `.sec.tint` `.eyebrow` `.sec-h` `.body-p` `.stmt` | 章ごとに1つ | 1段に見出し2つ | — |
@@ -173,6 +173,9 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 | B-15 | トップの Experience Journey のスマホで、戻りの斜線が「合意形成」の「合」と「プロジェクト推進」の「プ」の左上をかすめる。高さ 568px 以下では「ロ」にもかかる(線が読ませる語を横切らない、の例外になっている) | `index.html`(スマホの本線) | 改修前からある(2026-10-04 ファーストビュー改修の designer 最終照合で記録)。次に Journey を触るとき、斜線の終わりを下線へ水平に入れて直す |
 | B-16 | トップの `index.html` の Journey の線(`.jr-view .j-line`)が `--navy` とダーク用の上書き `--ink` で書かれている。ロゴの藍の線の役割 `--mark-line`(2026-10-04 追加)に当たる | `index.html`(`.j-line` の2行) | 下層ヒーローの共通化(PR #141)で、ロゴとヒーローの線だけを `--mark-line` に移した。次に Journey を触るとき `--mark-line` に置き換え、ダーク用の上書きを消す |
 | B-17 | 動きを止める丸いボタン(44px・`--bg` の円・`--line` の縁・`aria-pressed`)が2か所になった。トップの Journey の `.jr-toggle` と、思想ページの映像の窓の `.reel-toggle`(値は同じ。2026-10-05) | `index.html` `philosophy/index.html` | 2か所なので共通へ上げない(§6)。3か所目が出たら `bridge.css` の部品に上げ、両方をそれに置き換える |
+| B-18 | round-note の結果画面の `.foot-brand` が古い名乗り「BRIDGE — A Small Medical Studio」のままで(app.js:165)、タップ領域も 44px 未満(inline で padding なし) | `round-note/app/app.js` `styles.css` | 名乗りの文言は editor の領分。次に round-note を触るとき、turnaround12 と同じ「← BRIDGE」と 44px に揃える。`.foot-brand` が3か所目に出たら、そのとき §6 で共通化を判断する(2026-10-09) |
+| B-19 | turnaround12 のトップ画面に BRIDGE の名前が見えない(戻りの線は結果の2画面にしかない) | `turnaround12/app/app.js`(トップ画面) | 第24条の2「静かに存在させる」と第26条に関わる。置き場所(ヘッダーか末尾か)は designer が判断する。次に turnaround12 を触るとき(2026-10-09) |
+| B-20 | legal の3ページ(privacy・focus-privacy・support)が `bridge.css` を読まない自前のライト固定ページで、色はトークンと同じ値の hex 直書き。ダーク非対応。support の h2 は砂(#7D6845。2026-10-09 に privacy は藍へ直した=社長決裁)、focus-privacy の h2 は #5e80a8 で4系統の外。本文幅 720px も第23条の約 660px を超える | `legal/*.html` | 3ページを同時に `bridge.css` へ載せ替えるときに、トークン化とダーク対応をまとめて直す。次便の完成の定義: 3ページの h2 と focus-privacy の #5e80a8 を bridge.css のライト値へ揃える(1コミット、designer→現場→qa。2026-10-09 PM) |
 | C-2 | `--glass-ink` が未使用 | `bridge.css` | 憲法が用途2「ゲーム紹介の帯」の文言を残しているため、対のトークンも残す |
 | C-3 | 文中の文字リンク(about の連絡先など)が 44px 未満 | 文中 | 文中のリンクは行の高さに従う(WCAG 2.5.8 の例外と同じ) |
 | C-4 | `--glass-deep` が未使用になった。第22条ガラスの用途1(ヒーローの立体)と用途4(夜の場)を使う場所がなくなり、`bridge.css` のガラスのコメント(`--glass-deep` の説明)も実装と合わない | `bridge.css` | トップのヒーローを作り直して(Hero Motion v1 → Experience Journey・2026-10-03〜04)立体と夜の場を外したため。素材は戻すときのために残す(docs/hero-asset-spec.md)ので、C-2 と同じくトークンと憲法の文言は消さない |

@@ -373,6 +373,7 @@
       ${metersHTML(state.stats)}
       <button class="btn btn-primary" data-action="retry">もう一度、着任する</button>
       <button class="btn btn-ghost" data-action="home">トップに戻る</button>
+      <a class="foot-brand" href="../index.html">← BRIDGE</a>
     </section>`;
   }
 
@@ -427,6 +428,7 @@
 
       <button class="btn btn-primary" data-action="retry">もう一度、着任する(イベントは変わります)</button>
       <p class="result-note">※ 本作はエンタメを含むフィクションです。実在のクリニック再建は、数字・人・制度をチームで、もっとゆっくり丁寧に。</p>
+      <a class="foot-brand" href="../index.html">← BRIDGE</a>
     </section>`;
   }
 
