@@ -39,7 +39,7 @@
 .branch-fig .reel{margin:0 auto}
 .branch-fig .reel-frame{aspect-ratio:880/300;border:0;border-radius:0}
 .branch-fig .motion-toggle{right:auto;left:8px} /* 右下は「続ける」の真下なので左下へ(位置だけの上書き) */
-@media(max-width:760px){.branch-fig .reel-js .reel-frame{aspect-ratio:4/5;border:1px solid var(--line);border-radius:4px}}
+@media(max-width:760px){.branch-fig .reel-js .reel-frame{aspect-ratio:4/5}} /* tall も縁なし(図として見せる。designer 2026-10-10) */
 .branch-cap{text-align:center;margin-top:22px;font-size:13px;color:var(--ink-3)}
 
 .mvp-grid{max-width:var(--max);margin:clamp(40px,6vh,60px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
