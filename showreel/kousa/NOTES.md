@@ -14,16 +14,21 @@
 ## 書き出し
 
 ```sh
-D=showreel/kousa
+D=showreel/kousa; M=/tmp/kousa-master
 for th in light dark; do for ly in wide tall; do
-  node showreel/render.mjs --page $D/reel.html --query "theme=$th&layout=$ly" --fps 30 --samples 4 --noaudio 1 --crf 23 --out $D/$th-$ly.mp4
+  node showreel/render.mjs --page $D/reel.html --query "theme=$th&layout=$ly" --fps 30 --samples 4 --noaudio 1 --crf 23 --out $M/$th-$ly.mp4   # 原板
   node showreel/render.mjs --page $D/reel.html --query "theme=$th&layout=$ly" --stills 14.9 --samples 1 --outdir /tmp/kousa-$th-$ly
   ffmpeg -y -i /tmp/kousa-$th-$ly/t14.900.png -c:v libwebp -quality 88 -compression_level 6 $D/$th-$ly.webp
 done; done
+# ページ用(1版 2MB 以下・§4): wide は 1440×810・crf 32、tall は 900×1126・crf 31 に再圧縮
+for th in light dark; do
+  ffmpeg -y -i $M/$th-wide.mp4 -vf scale=1440:-2:flags=lanczos -c:v libx264 -preset slow -crf 32 -pix_fmt yuv420p -profile:v high -tune animation -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart $D/$th-wide.mp4
+  ffmpeg -y -i $M/$th-tall.mp4 -vf scale=900:-2:flags=lanczos  -c:v libx264 -preset slow -crf 31 -pix_fmt yuv420p -profile:v high -tune animation -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart $D/$th-tall.mp4
+done
 ```
 
 - 要るもの: node 22、playwright(chromium)、ffmpeg(libx264・libwebp)。`playwright` がリポジトリの `node_modules` から見つからないときは `ln -s /opt/node-tools/node_modules/playwright node_modules/playwright`
-- 粒は 1200(20 秒版の 1800 から減らした。B-21: 容量 1版 2MB 以下)。軌跡は絵の情報量が多く、60fps・crf 20 では wide が約 14MB になったので、30fps・crf 23 で書き出し、crf 30 に再圧縮する(シャッター 180° のぼけは fps に対して相対)。wide 約 4MB・tall 約 3.5MB。ページは 1 本だけを近づいてから読むが、容量の判断は台帳に残す
+- 容量(B-21・§4「1版 2MB 以下」): 筆の軌跡は絵の情報量が多く、1800 粒・60fps・crf 20 では 1 版 14MB だった。粒を 1200 に減らし、30fps(シャッター 180° のぼけは fps に対して相対)、原板 crf 23 から wide 1440×810・crf 32、tall 900×1126・crf 31 に再圧縮して、wide 1.67〜1.82MB・tall 1.77〜1.88MB。ポスターは原寸(1920×1080 / 1080×1350)の webp
 
 ## 絵コンテ(確定値・秒)
 
