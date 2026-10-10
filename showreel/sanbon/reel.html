@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>一本から三本に — BRIDGE(philosophy 選択肢を増やすということ)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#111521;height:100%;overflow:hidden}
+  html[data-theme="light"],html[data-theme="light"] body{background:#FBFAF7}
+  canvas{display:block;position:absolute;inset:0;margin:auto;max-width:100vw;max-height:100vh}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+/* ================================================================
+   BRIDGE「一本から三本に」— 14.000 秒・60fps・無音(2026-10-10)
+   philosophy/index.html #expand の分岐の図(.branch-fig の SVG)を置き換える映像。
+   言葉は editor 確定の絵コンテ(scratchpad/sanbon-storyboard.md → NOTES.md)のまま。画面に出る語は 8 語だけ。
+   時刻 t だけで 1 枚が決まる。
+   版: ?theme=light|dark & layout=wide|tall
+       wide = 1760×600(= 図の viewBox 880×300 の 2 倍。最後の 1 コマは図と同じ語・同じ位置)
+       tall = 1080×1350(≤760px 用。道を上から下へ流す縦の組み。語は同じ)
+   書き出しは showreel/render.mjs --page showreel/sanbon/reel.html --query 'theme=light&layout=wide'
+   ================================================================ */
+const Q = new URLSearchParams(location.search);
+const THEME = Q.get('theme') === 'dark' ? 'dark' : 'light';
+const TALL = Q.get('layout') === 'tall';
+document.documentElement.setAttribute('data-theme', THEME);
+const W = TALL ? 1080 : 1760, H = TALL ? 1350 : 600, FPS = 60, DUR = 14;
+const canvas = document.getElementById('c');
+canvas.width = W; canvas.height = H; canvas.style.aspectRatio = `${W} / ${H}`; canvas.style.width = TALL ? 'min(100vw, 80vh)' : 'min(100vw, 293vh)';
+const ctx = canvas.getContext('2d');
+
+/* ---- easing(サイトの --ease と cubicOut) ---- */
+const clamp = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
+const lerp = (a, b, u) => a + (b - a) * u;
+const cubicOut = u => 1 - Math.pow(1 - u, 3);
+const ease = (() => {
+  const bx = s => 3 * (1 - s) * (1 - s) * s * .16 + 3 * (1 - s) * s * s * .3 + s * s * s;
+  const by = s => 3 * (1 - s) * (1 - s) * s + 3 * (1 - s) * s * s + s * s * s;
+  const N = 2048, lut = new Float32Array(N + 1);
+  for (let i = 0; i <= N; i++) { const u = i / N; let lo = 0, hi = 1; for (let k = 0; k < 40; k++) { const m = (lo + hi) / 2; if (bx(m) < u) lo = m; else hi = m; } lut[i] = by((lo + hi) / 2); }
+  return u => { if (u <= 0) return 0; if (u >= 1) return 1; const f = u * N, i = Math.floor(f); return lut[i] + (lut[i + 1] - lut[i]) * (f - i); };
+})();
+const seg = (t, a, d, e = ease) => e(clamp((t - a) / d));
+
+/* ---- 色(bridge.css のトークンの値。図の CSS と同じ役割) ---- */
+const C = THEME === 'dark'
+  ? { bg: '#111521', ink: '#EDEAE2', ink3: '#8A8D98', opt: '#9FB1D4', dawn: '#C2A97E' }   // ダークの .opt は --blue
+  : { bg: '#FBFAF7', ink: '#1B1B1E', ink3: '#63646B', opt: '#16233E', dawn: '#A98F63' };
+const F = { jp: s => `600 ${s}px "Noto Sans JP"`, min: s => `600 ${s}px "Shippori Mincho B1"` };
+
+/* ---- 組み(wide は SVG の座標 ×2。tall は縦の組み) ---- */
+const SC = 2;
+const G = TALL ? {
+  now: [540, 150], nowR: 10, nowLbl: { x: 540, y: 108, align: 'center' },
+  base: [[540, 150], [540, 600]],
+  baseLbl: { x: 572, y: 392, align: 'left' },
+  fork: [540, 600], forkR: 8, forkLbl: { x: 508, y: 592, align: 'right' },
+  opts: [[[540, 600], [540, 760], [220, 860], [220, 1080]], [[540, 600], [540, 800], [540, 900], [540, 1120]], [[540, 600], [540, 760], [860, 860], [860, 1080]]],
+  optLbl: [{ x: 220, y: 1162, align: 'center' }, { x: 540, y: 1202, align: 'center' }, { x: 860, y: 1162, align: 'center' }],
+  goal: { x: 540, y: 710, align: 'center' },
+  fs: { b: 36, l: 32, goal: 52 }, lw: { base: 4, opt: 3.2 },
+} : {
+  now: [60 * SC, 150 * SC], nowR: 5 * SC, nowLbl: { x: 40 * SC, y: 128 * SC, align: 'left' },
+  base: [[60 * SC, 150 * SC], [360 * SC, 150 * SC]],
+  baseLbl: { x: 150 * SC, y: 174 * SC, align: 'left' },
+  fork: [360 * SC, 150 * SC], forkR: 4 * SC, forkLbl: { x: 312 * SC, y: 122 * SC, align: 'left' },
+  opts: [[[360, 150], [480, 150], [520, 60], [820, 52]], [[360, 150], [500, 150], [540, 150], [820, 150]], [[360, 150], [480, 150], [520, 240], [820, 248]]].map(p => p.map(q => [q[0] * SC, q[1] * SC])),
+  optLbl: [{ x: 832 * SC, y: 56 * SC, align: 'left' }, { x: 832 * SC, y: 154 * SC, align: 'left' }, { x: 832 * SC, y: 252 * SC, align: 'left' }],
+  goal: { x: 392 * SC, y: 150 * SC, align: 'left' },
+  fs: { b: 12 * SC, l: 11 * SC, goal: 17 * SC }, lw: { base: 2 * SC, opt: 1.6 * SC },
+};
+const WORDS = { now: 'いま', base: '一本しか見えていなかった道', fork: '可能性に気づく', opts: ['挑戦する', '選び直す', '続ける'], goal1: '歩行の自立', goal2: '孫の運動会に行く' };
+
+const bez = (p, u) => { const a = 1 - u; return [a * a * a * p[0][0] + 3 * a * a * u * p[1][0] + 3 * a * u * u * p[2][0] + u * u * u * p[3][0], a * a * a * p[0][1] + 3 * a * a * u * p[1][1] + 3 * a * u * u * p[2][1] + u * u * u * p[3][1]]; };
+function strokeBez(p, u, color, w, alpha = 1) {
+  if (u <= 0) return;
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.globalAlpha = alpha; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]);
+  const n = Math.max(2, Math.ceil(80 * u));
+  for (let i = 1; i <= n; i++) { const q = bez(p, u * i / n); ctx.lineTo(q[0], q[1]); }
+  ctx.stroke(); ctx.globalAlpha = 1;
+}
+/* ラベル: 透明から、6px 下から上がって置かれる(サイトの data-reveal と同じ向き) */
+function label(str, pos, font, color, a, rise = 6) {
+  if (a <= 0) return;
+  ctx.font = font; ctx.fillStyle = color; ctx.textAlign = pos.align; ctx.textBaseline = 'alphabetic';
+  ctx.letterSpacing = '0.08em';
+  ctx.globalAlpha = a; ctx.fillText(str, pos.x, pos.y + (1 - a) * rise); ctx.globalAlpha = 1;
+  ctx.letterSpacing = '0px';
+}
+function dot(p, r, color, a) {
+  if (a <= 0) return;
+  ctx.fillStyle = color; ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(p[0], p[1], r * (0.6 + 0.4 * a), 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+}
+
+/* ================================================================
+   draw(t) — 絵コンテ(秒)
+   0.20–0.60 いまの点 / 0.40–0.90 「いま」/ 0.90–2.40 一本の道 / 1.90–2.50 「一本しか見えていなかった道」
+   3.00–3.45 「歩行の自立」/ 4.60–5.10 薄れる / 5.00–5.50 「孫の運動会に行く」/ 7.20–7.60 分かれ目の点(砂)
+   7.40–7.90 「可能性に気づく」/ 8.00–8.40 目標の語の退場 / 8.40–10.20 三本が同時に同じ時間で伸びる
+   9.90–10.40 三語が同時に出る / 10.40–14.00 静止(図と同じ姿)
+   ================================================================ */
+function draw(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  /* 1. いまの点と一本の道 */
+  dot(G.now, G.nowR, C.ink, seg(t, 0.20, 0.40));
+  label(WORDS.now, G.nowLbl, F.jp(G.fs.b), C.ink, seg(t, 0.40, 0.50));
+  const ub = seg(t, 0.90, 1.50, cubicOut);
+  if (ub > 0) {
+    ctx.strokeStyle = C.ink3; ctx.lineWidth = G.lw.base; ctx.beginPath();
+    ctx.moveTo(G.base[0][0], G.base[0][1]); ctx.lineTo(lerp(G.base[0][0], G.base[1][0], ub), lerp(G.base[0][1], G.base[1][1], ub)); ctx.stroke();
+  }
+  label(WORDS.base, G.baseLbl, F.jp(G.fs.l), C.ink3, seg(t, 1.90, 0.60));
+
+  /* 2. 目標が変わる(明朝。取り消し線や印は付けない)。退場は 8.00–8.40 */
+  const out = 1 - seg(t, 8.00, 0.40);
+  const g1 = seg(t, 3.00, 0.45) * (1 - seg(t, 4.60, 0.50));
+  const g2 = seg(t, 5.00, 0.50) * out;
+  ctx.textBaseline = 'middle';
+  if (g1 > 0) { ctx.font = F.min(G.fs.goal); ctx.fillStyle = C.ink; ctx.textAlign = G.goal.align; ctx.globalAlpha = g1; ctx.fillText(WORDS.goal1, G.goal.x, G.goal.y + (1 - seg(t, 3.00, 0.45)) * 8); ctx.globalAlpha = 1; }
+  if (g2 > 0) { ctx.font = F.min(G.fs.goal); ctx.fillStyle = C.ink; ctx.textAlign = G.goal.align; ctx.globalAlpha = g2; ctx.fillText(WORDS.goal2, G.goal.x, G.goal.y + (1 - seg(t, 5.00, 0.50)) * 8 - (1 - out) * 6); ctx.globalAlpha = 1; }
+
+  /* 分かれ目の点(作中で砂はこの点だけ)と「可能性に気づく」 */
+  dot(G.fork, G.forkR, C.dawn, seg(t, 7.20, 0.40));
+  label(WORDS.fork, G.forkLbl, F.jp(G.fs.l), C.ink3, seg(t, 7.40, 0.50));
+
+  /* 3. 三本が同時に、同じ時間で伸びる(速さではなく時間を揃える) */
+  const uo = seg(t, 8.40, 1.80, cubicOut);
+  for (const p of G.opts) strokeBez(p, uo, C.opt, G.lw.opt, 0.85);
+  const la = seg(t, 9.90, 0.50);
+  G.opts.forEach((p, i) => label(WORDS.opts[i], G.optLbl[i], F.jp(G.fs.b), C.ink, la));
+  /* 分かれ目の点は道の上に重ねて描く(図と同じ重なり順) */
+  dot(G.fork, G.forkR, C.dawn, seg(t, 7.20, 0.40));
+}
+
+/* ---- 動きのぼけ: サブフレームを平均(180° シャッター) ---- */
+const acc = document.createElement('canvas'); acc.width = W; acc.height = H;
+const actx = acc.getContext('2d');
+function renderFrame(t, maxSamples = 8) {
+  const n = Math.max(1, Math.min(maxSamples, 8));
+  if (n <= 1) { draw(t); window.REEL.out = canvas; return 1; }
+  actx.setTransform(1, 0, 0, 1, 0, 0); actx.globalCompositeOperation = 'source-over'; actx.globalAlpha = 1; actx.clearRect(0, 0, W, H);
+  const shutter = 0.5 / FPS;
+  for (let i = 0; i < n; i++) { draw(t + shutter * ((i + .5) / n - .5)); actx.globalAlpha = 1 / (i + 1); actx.drawImage(canvas, 0, 0); }
+  actx.globalAlpha = 1;
+  window.REEL.out = acc; return n;
+}
+
+/* ---- 準備: 使う文字をフォントごとに先読み ---- */
+const TEXTS = {
+  [F.jp(40)]: WORDS.now + WORDS.base + WORDS.fork + WORDS.opts.join(''),
+  [F.min(40)]: WORDS.goal1 + WORDS.goal2,
+};
+const ready = (async () => {
+  await document.fonts.ready;
+  await Promise.all(Object.entries(TEXTS).map(([f, s]) => document.fonts.load(f, s)));
+  const missing = Object.entries(TEXTS).filter(([f, s]) => !document.fonts.check(f, s)).map(([f]) => f);
+  if (missing.length) throw new Error('フォントが揃っていない: ' + missing.join(', '));
+})();
+
+window.REEL = { W, H, FPS, DUR, canvas, draw, renderFrame, ready, out: canvas };
+
+/* ---- プレビュー(?render なし): 実時間で再生。クリックで頭から。?t=秒 で静止 ---- */
+if (!location.search.includes('render')) {
+  ready.then(() => {
+    if (Q.has('t')) { draw(+Q.get('t')); return; }
+    let start = performance.now();
+    const loop = now => { draw(((now - start) / 1000) % DUR); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+    canvas.addEventListener('click', () => { start = performance.now(); });
+  });
+}
+</script>
+</body>
+</html>

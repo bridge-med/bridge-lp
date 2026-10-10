@@ -3,6 +3,10 @@ import { sleep } from './lib.mjs';
 import { ease, seg, lerp, clamp, zoomCam, placeCam, FPS } from './engine.mjs';
 
 const W = 1920, H = 1080, C = [W / 2, H / 2];
+/* tall (1080x1350, 4:5) 2026-10-10: the same pages, actions and timing; only the camera differs. Rule of thumb: scale = wide x TK
+   (0.5625 = 1080/1920) keeps the same width of the page in the frame (the same apparent size on a phone), with 2.2x the height;
+   where the wide frame is a close-up of a point, the tall scale is raised a little so the point is not lost in the extra height. */
+const TW = 1080, TH = 1350, TC = [TW / 2, TH / 2], TK = TW / W;
 const bbc = b => [b.x + b.width / 2, b.y + b.height / 2];
 async function box(page, sel, i = 0) {
   return page.evaluate(([sel, i]) => { const e = document.querySelectorAll(sel)[i < 0 ? document.querySelectorAll(sel).length + i : i]; if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x + scrollX, y: r.y + scrollY, width: r.width, height: r.height }; }, [sel, i]);
@@ -53,6 +57,15 @@ export const S1 = {
     const B = [W / 2 + (A.mark[0] - (qx + 250)) * endS, H / 2 + (A.mark[1] - (qy + A.mark[1]) / 2) * endS];
     return zoomCam(A.mark, Astart, B, s0, endS)(ease.inOutCubic(seg(t, 28 / FPS, 60 / FPS)));
   },
+  tall: { cam: (t, A) => {
+    // the option line at the same width of the page as wide (5.1x: the circle, 人に教えること, and the neighbours above and below), then the question and the list
+    const s0 = 9 * TK, oc = [A.opt.x + 100, A.opt.y + A.opt.height / 2];
+    const Astart = [TW / 2 + (A.mark[0] - oc[0]) * s0, TH / 2 + (A.mark[1] - oc[1]) * s0];
+    const endS = 3.3 * TK;
+    const qx = A.q.x, qy = A.q.y + A.q.height / 2;
+    const B = [TW / 2 + (A.mark[0] - (qx + 250)) * endS, TH / 2 + (A.mark[1] - (qy + A.mark[1]) / 2) * endS];
+    return zoomCam(A.mark, Astart, B, s0, endS, TW, TH)(ease.inOutCubic(seg(t, 28 / FPS, 60 / FPS)));
+  } },
 };
 
 /* ---------- S2 経験の棚卸し: typing an experience (dark) ---------- */
@@ -112,6 +125,19 @@ export const S2 = {
     const sp = [lerp(cs[0], ce[0], pull), lerp(cs[1], ce[1], pull)];
     return placeCam(caret, sp, s);
   },
+  tall: { cam: (t, A) => {
+    const cx = lerp(A.w[0] + 60, A.w[A.w.length - 1], ease.inOutSine(seg(t, 0.0, 1.75)));
+    const caret = [A.ta.x + A.pl + cx, A.ta.y + A.pt + A.lh / 2];
+    const s0 = 7.5 * TK;
+    const pull = ease.inOutCubic(seg(t, 55 / FPS, 66 / FPS));
+    if (pull <= 0) return placeCam(caret, [TW * 0.56, TH * 0.5], s0, TW, TH);
+    const endS = 2.6 * TK;
+    const tgt = [A.ta.x + A.ta.width * 0.5, (A.q ? A.q.y : A.ta.y - 120) + 120];
+    const b = placeCam(tgt, TC, endS, TW, TH);
+    const s = Math.exp(lerp(Math.log(s0), Math.log(endS), pull));
+    const cs = [TW * 0.56, TH * 0.5], ce = [TW / 2 + (caret[0] - b.cx) * endS, TH / 2 + (caret[1] - b.cy) * endS];
+    return placeCam(caret, [lerp(cs[0], ce[0], pull), lerp(cs[1], ce[1], pull)], s, TW, TH);
+  } },
 };
 S2.prepAfter = async page => page.evaluate(t => { window.__TT = t; }, TANA_TEXT);
 
@@ -133,6 +159,7 @@ export const S2B = {
   } }],
   js: f => true,
   cam: (t, A) => placeCam([A.a.x + 205, A.row.y + A.row.height / 2 - 6], C, Math.exp(lerp(Math.log(3.7), Math.log(4.2), ease.outCubic(seg(t, 0.1, 0.75))))),   // settles onto the kept sentence
+  tall: { cam: (t, A) => placeCam([A.a.x + 205, A.row.y + A.row.height / 2 - 6], TC, Math.exp(lerp(Math.log(3.7 * TK), Math.log(4.2 * TK), ease.outCubic(seg(t, 0.1, 0.75)))), TW, TH) },
 };
 
 /* ---------- S3 現場のことば 言いかえ帳: read the reframe (dark). v2: no star, no push onto a lone icon ---------- */
@@ -155,6 +182,11 @@ export const S3 = {
     const x0 = A.genba.x + 105, x1 = A.kotoba.x + A.kotoba.width - 110;
     return placeCam([lerp(x0, x1, ease.inOutSine(seg(t, 0, 1.15))), y], C, s);
   },
+  tall: { cam: (t, A) => {
+    const s = 8 * TK, y = A.genba.y + A.genba.height / 2;
+    const x0 = A.genba.x + 105, x1 = A.kotoba.x + A.kotoba.width - 110;
+    return placeCam([lerp(x0, x1, ease.inOutSine(seg(t, 0, 1.15))), y], TC, s, TW, TH);
+  } },
 };
 
 /* ---------- S4 掲示じたく: choose a notice, the A4 (tight), then the product's own light/dark switch, pressed on screen ----------
@@ -195,11 +227,19 @@ export const S4 = {
     if (t < 52 / FPS) return placeCam(bbc(A.btn), [W / 2, H * 0.56], 7.0);
     return placeCam(nc, C, nS);
   },
+  tall: { cam: (t, A) => {
+    if (t < 12 / FPS) { const c = A.title ? bbc(A.title) : [A.card.x + 120, A.card.y + A.card.height / 2]; return placeCam([A.card.x + 30, c[1]], [TW * 0.30, TH / 2], 5.0 * TK, TW, TH); }
+    // the notice: the same rule (frame bottom 20 CSS px above the date box), the paper with a strip of the room on both sides
+    const nS = 3.0 * TK, nc = [A.pt.x + A.pt.width / 2, A.big.y - 20 - TH / 2 / nS];
+    if (t < 31 / FPS) return placeCam(nc, TC, nS, TW, TH);
+    if (t < 52 / FPS) return placeCam(bbc(A.btn), [TW / 2, TH * 0.56], 7.0 * TK, TW, TH);
+    return placeCam(nc, TC, nS, TW, TH);
+  } },
 };
 
 /* ---------- S5 クリニックタウン3D: an organisation decides (game) ---------- */
 export const S5 = {
-  id: 's5', url: '/clinic-flow-3d/', theme: 'light', frames: 42, settleMs: 2500, gl: true,
+  id: 's5', url: '/clinic-flow-3d/', theme: 'light', frames: 42, settleMs: 2500, gl: true, fixedTheme: true,   // the product has no dark display: the copy stays light in the dark film (no darkening of the copy, 第22条)
   prep: async page => {
     for (let i = 0; i < 3; i++) { await page.evaluate(() => { const g = document.getElementById('gateGo'); if (g && g.offsetParent) g.click(); }); await sleep(800); }
     for (let d = 0; d < 20; d++) {
@@ -226,6 +266,13 @@ export const S5 = {
     const endS = 2.3, mid = [A.ask ? A.ask.x + A.ask.width / 2 : c[0] + 200, (A.ask ? A.ask.y : c[1] - 120) + 170];
     return zoomCam(c, [W * 0.36, H / 2], [W / 2 + (c[0] - mid[0]) * endS, H / 2 + (c[1] - mid[1]) * endS], 5.5, endS)(pull);
   },
+  tall: { cam: (t, A) => {
+    const ch = (t >= 14 / FPS && A.ch2) ? A.ch2 : A.ch;
+    const c = [ch.x + 24, ch.y + ch.height / 2];
+    const pull = ease.inOutCubic(seg(t, 18 / FPS, 32 / FPS));
+    const endS = 2.3 * TK, mid = [A.ask ? A.ask.x + A.ask.width / 2 : c[0] + 200, (A.ask ? A.ask.y : c[1] - 120) + 170];
+    return zoomCam(c, [TW * 0.36, TH / 2], [TW / 2 + (c[0] - mid[0]) * endS, TH / 2 + (c[1] - mid[1]) * endS], 5.5 * TK, endS, TW, TH)(pull);
+  } },
 };
 
 /* ---------- M1-M5 staccato: the same moment of choosing, again and again, at the same point and size (light) ----------
@@ -242,6 +289,7 @@ function mini({ id, url, prep, mark, click, frames, s, mouse = false }) {
     } }],
     js: f => false,
     cam: (t, A) => placeCam(A.m, C, s),
+    tall: { cam: (t, A) => placeCam(A.m, TC, s * TK, TW, TH) },   // the same point, the same size across the width
   };
 }
 const OPT = '.cp-screen:last-of-type .cp-opt', MARK = '.cp-screen:last-of-type .cp-opt .cp-mark';
@@ -271,6 +319,15 @@ export const S6 = {
     const s = Math.exp(lerp(Math.log(S6_S0), Math.log(S6_S1), u * u * u));
     return zc((Math.log(s) - Math.log(S6_S0)) / (Math.log(S6_S1) - Math.log(S6_S0)));
   },
+  tall: { cam: (t, A) => {
+    // the map at the same width of the page (2.36x), the same dive to 400x (the point's colour fills the frame)
+    const s0 = S6_S0 * TK, cx0 = (A.o[0] - 60 + A.list.x + 262) / 2;
+    const Astart = [TW / 2 + (A.o[0] - cx0) * s0, TH / 2];
+    const u = clamp(t / (33 / FPS));
+    const zc = zoomCam(A.o, Astart, TC, s0, S6_S1, TW, TH);
+    const s = Math.exp(lerp(Math.log(s0), Math.log(S6_S1), u * u * u));
+    return zc((Math.log(s) - Math.log(s0)) / (Math.log(S6_S1) - Math.log(s0)));
+  } },
 };
 
 /* ---------- S7 signature (light): out of the navy arc, the sand line crosses, then BRIDGE / EXPAND CHOICES. ----------
@@ -301,4 +358,12 @@ export const S7 = {
     const pr = 1 - Math.pow(1 - u, 2.6);
     return zoomCam(A.p, C, B, S7_S0, endS)(pr);
   },
+  // tall: the card is 1440x810; at 1.7x the 4:5 frame (635x794 page px) still lies inside it, the mark ~53% of the width, BRIDGE below it
+  tall: { cam: (t, A) => {
+    const endS = 1.7;
+    const B = [TW / 2 + (A.p[0] - 720) * endS, TH / 2 + (A.p[1] - 405) * endS];
+    const u = clamp(t / (36 / FPS));
+    const pr = 1 - Math.pow(1 - u, 2.6);
+    return zoomCam(A.p, TC, B, S7_S0, endS, TW, TH)(pr);
+  } },
 };
