@@ -262,14 +262,18 @@ a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 
 /* ===== Reel(映像の窓)と Motion toggle(動きを止める丸いボタン) =====
    型は docs/design-system.md §4「映像」。組みと挙動は bridge.js の Reel(figure.reel[data-reel])が担う。
-   窓=Edge(角 4px・--line の縁・影なし・hover なし)。地は --bg の窓(帯の --bg-2 に溶かさない: H.264 で色がずれ、意図しない縁が出るため)。
+   窓は縁なし・角 0・地は透明で、置く節の地に溶かす(社長 2026-10-10「動画が置かれてる感が強い。境界線が無い方が見やすい」・designer)。
+   そのため映像は「書き出しの地=置く節の地」で書き出す(4版とも外周が節の地と ΔRGB 2 以下。帯の節なら --bg-2 で書き出す)。
+   停止ボタンは窓の外、下に右揃えで置く(窓の中に置くと、地に溶けた映像の上で宙に浮き、写しの上にも重なるため)。
    画角は 760px を境に 16:9 と 4:5。JS が動かないときはライト・横長・ネイティブの操作盤の1通り(印 .reel-js はこの figure にだけ付ける。html.js に寄せると data-reveal の初回表示が変わる) */
 .reel{max-width:880px;margin:clamp(48px,7vh,72px) auto 0}
-.reel-frame{position:relative;aspect-ratio:16/9;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg)}
-.reel-v{display:block;width:100%;height:100%;object-fit:cover;background:var(--bg)}
+.reel-frame{position:relative;aspect-ratio:16/9}
+.reel-v{display:block;width:100%;height:100%;object-fit:cover;background:transparent}
 @media(max-width:760px){.reel-js .reel-frame{aspect-ratio:4/5}}
+.reel.reel-js{padding-bottom:52px} /* 窓の下の停止ボタンの分(44px+8px)。JS がないときはボタンを出さないので足さない */
+.reel .motion-toggle{top:calc(100% + 8px);right:0;bottom:auto}
 /* 動きを止める丸いボタン(5秒を超えて自動で動くものに置く。WCAG 2.2.2)。見た目 34px・タップ 44px(.theme-btn と同じ作り)。
-   aria-pressed="true"=止めている。置き場所は窓の右下 8px。ページで変えるときは位置だけを上書きする(トップの Journey は .jr .motion-toggle) */
+   aria-pressed="true"=止めている。置き場所は既定で右下 8px、映像の窓(.reel)では窓の外の下・右揃え。ページで変えるときは位置だけを上書きする(トップの Journey は .jr .motion-toggle) */
 .motion-toggle{position:absolute;right:8px;bottom:8px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:var(--ink-2)}
 .motion-toggle::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg);border:1px solid var(--line);transition:border-color .3s var(--ease)}
 .motion-toggle:hover::before{border-color:var(--ink-4)}

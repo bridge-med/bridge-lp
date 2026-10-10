@@ -34,12 +34,11 @@
 .etym-word .sand{color:var(--dawn);font-style:normal}
 
 .branch-fig{max-width:880px;margin:clamp(48px,7vh,72px) auto}
-/* 分岐の図は映像「一本から三本に」(showreel/sanbon/)に置き換えた(2026-10-10)。窓の画角だけ図の比(880:300)に合わせる。≤760px は共通の 4:5(tall は縦の組み)。
+/* 分岐の図は映像「一本から三本に」(showreel/sanbon/)に置き換えた(2026-10-10)。窓の画角だけ図の比(880:300)に合わせる(縁なしは全窓の既定)。≤760px は共通の 4:5(tall は縦の組み)。
    図の色の約束はそのまま映像の中にある: 分かれ目の点だけ砂、道は3本とも藍(一本を勧めない。B-14・designer 2026-10-09) */
 .branch-fig .reel{margin:0 auto}
-.branch-fig .reel-frame{aspect-ratio:880/300;border:0;border-radius:0}
-.branch-fig .motion-toggle{right:auto;left:8px} /* 右下は「続ける」の真下なので左下へ(位置だけの上書き) */
-@media(max-width:760px){.branch-fig .reel-js .reel-frame{aspect-ratio:4/5}} /* tall も縁なし(図として見せる。designer 2026-10-10) */
+.branch-fig .reel-frame{aspect-ratio:880/300}
+@media(max-width:760px){.branch-fig .reel-js .reel-frame{aspect-ratio:4/5}}
 .branch-cap{text-align:center;margin-top:22px;font-size:13px;color:var(--ink-3)}
 
 .mvp-grid{max-width:var(--max);margin:clamp(40px,6vh,60px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}

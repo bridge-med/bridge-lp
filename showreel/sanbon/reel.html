@@ -56,7 +56,7 @@ const C = THEME === 'dark'
 const F = { jp: s => `600 ${s}px "Noto Sans JP"`, min: s => `600 ${s}px "Shippori Mincho B1"` };
 
 /* ---- 組み(wide は SVG の座標 ×2。tall は縦の組み) ---- */
-const SC = 2;
+const SC = 2, DX = -40;   // DX: 横長は図の座標を左へ 40px 寄せる(右端のラベル「選び直す」が窓の端に触れないように。縁なしの窓では切れが見える。2026-10-10)
 const G = TALL ? {
   now: [540, 150], nowR: 10, nowLbl: { x: 540, y: 108, align: 'center' },
   base: [[540, 150], [540, 600]],
@@ -67,13 +67,13 @@ const G = TALL ? {
   goal: { x: 540, y: 710, align: 'center' },
   fs: { b: 36, l: 32, goal: 52 }, lw: { base: 4, opt: 3.2 },
 } : {
-  now: [60 * SC, 150 * SC], nowR: 5 * SC, nowLbl: { x: 40 * SC, y: 128 * SC, align: 'left' },
-  base: [[60 * SC, 150 * SC], [360 * SC, 150 * SC]],
-  baseLbl: { x: 150 * SC, y: 174 * SC, align: 'left' },
-  fork: [360 * SC, 150 * SC], forkR: 4 * SC, forkLbl: { x: 312 * SC, y: 122 * SC, align: 'left' },
-  opts: [[[360, 150], [480, 150], [520, 60], [820, 52]], [[360, 150], [500, 150], [540, 150], [820, 150]], [[360, 150], [480, 150], [520, 240], [820, 248]]].map(p => p.map(q => [q[0] * SC, q[1] * SC])),
-  optLbl: [{ x: 832 * SC, y: 56 * SC, align: 'left' }, { x: 832 * SC, y: 154 * SC, align: 'left' }, { x: 832 * SC, y: 252 * SC, align: 'left' }],
-  goal: { x: 392 * SC, y: 150 * SC, align: 'left' },
+  now: [60 * SC + DX, 150 * SC], nowR: 5 * SC, nowLbl: { x: 40 * SC + DX, y: 128 * SC, align: 'left' },
+  base: [[60 * SC + DX, 150 * SC], [360 * SC + DX, 150 * SC]],
+  baseLbl: { x: 150 * SC + DX, y: 174 * SC, align: 'left' },
+  fork: [360 * SC + DX, 150 * SC], forkR: 4 * SC, forkLbl: { x: 312 * SC + DX, y: 122 * SC, align: 'left' },
+  opts: [[[360, 150], [480, 150], [520, 60], [820, 52]], [[360, 150], [500, 150], [540, 150], [820, 150]], [[360, 150], [480, 150], [520, 240], [820, 248]]].map(p => p.map(q => [q[0] * SC + DX, q[1] * SC])),
+  optLbl: [{ x: 832 * SC + DX, y: 56 * SC, align: 'left' }, { x: 832 * SC + DX, y: 154 * SC, align: 'left' }, { x: 832 * SC + DX, y: 252 * SC, align: 'left' }],
+  goal: { x: 392 * SC + DX, y: 150 * SC, align: 'left' },
   fs: { b: 12 * SC, l: 11 * SC, goal: 17 * SC }, lw: { base: 2 * SC, opt: 1.6 * SC },
 };
 const WORDS = { now: 'いま', base: '一本しか見えていなかった道', fork: '可能性に気づく', opts: ['挑戦する', '選び直す', '続ける'], goal1: '歩行の自立', goal2: '孫の運動会に行く' };

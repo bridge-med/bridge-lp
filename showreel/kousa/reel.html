@@ -32,7 +32,23 @@ const W = TALL ? 1080 : 1920, H = TALL ? 1350 : 1080, FPS = 60, DUR = 15;
 const CX = W / 2, CY = H / 2, KS = TALL ? 0.75 : 1;   // KS: 文字とロゴの縮尺(tall は re + habilis と同じ 0.75)
 const canvas = document.getElementById('c');
 canvas.width = W; canvas.height = H; canvas.style.aspectRatio = `${W} / ${H}`; canvas.style.width = TALL ? 'min(100vw, 80vh)' : 'min(100vw, 177.78vh)';
-const ctx = canvas.getContext('2d');
+const MAIN = canvas.getContext('2d');
+/* 線の層: 筆の線と文字はこの層に描き、窓の端へ近づいた線だけを地へ溶かしてから地の上に重ねる。
+   窓に縁を付けないので、線が窓の端で切れると見えない箱が見えてしまう(designer 2026-10-10)。地は平らな --bg のまま(グラデーションを足さない) */
+const LAYER = document.createElement('canvas'); LAYER.width = W; LAYER.height = H;
+const LCTX = LAYER.getContext('2d');
+let ctx = LCTX;
+const EDGE = Math.round(Math.min(W, H) * 0.14);   // 端から 14% の帯で線を 1→0 に(1080 で 151px)
+const MASK = (() => {
+  const m = document.createElement('canvas'); m.width = W; m.height = H;
+  const mc = m.getContext('2d'), img = mc.createImageData(W, H), d = img.data;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const u = Math.min(x, W - 1 - x, y, H - 1 - y) / EDGE;
+    const a = u >= 1 ? 1 : u <= 0 ? 0 : u * u * (3 - 2 * u);
+    d[(y * W + x) * 4 + 3] = Math.round(a * 255);
+  }
+  mc.putImageData(img, 0, 0); return m;
+})();
 
 /* ---- easing ---- */
 const clamp = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
@@ -154,12 +170,14 @@ const widthIdx = w => clamp(Math.round(Math.log2(w / 0.5) * 2), 0, 12);
 const widthOf = idx => 0.5 * Math.pow(2, idx / 2);
 
 function draw(t) {
+  /* ---- 地: テーマの --bg のまま、平らに(転換もグラデーションもしない。§1・§4「地は --bg の窓」designer 2026-10-10) ---- */
+  MAIN.setTransform(1, 0, 0, 1, 0, 0); MAIN.globalAlpha = 1; MAIN.globalCompositeOperation = 'source-over';
+  MAIN.fillStyle = C.bg; MAIN.fillRect(0, 0, W, H);
+  ctx = LCTX;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, W, H);
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-
-  /* ---- 地: テーマの --bg のまま、平らに(転換もグラデーションもしない。§1・§4「地は --bg の窓」designer 2026-10-10) ---- */
-  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
 
   /* ---- 軌跡 ---- */
   const buckets = new Map();   // key -> {path, band, pal, w, aq}  aq: 粒ごとの不透明度(4 段階)
@@ -310,6 +328,11 @@ function draw(t) {
     [...str].forEach((ch, i) => { ctx.fillText(ch, x, brY + 59 * KS + (1 - ea) * 20 * KS); x += ws[i] + sp; });
     ctx.globalAlpha = 1;
   }
+  /* ---- 線の層を、端で地へ溶かしてから地の上に重ねる ---- */
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'destination-in'; ctx.drawImage(MASK, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  MAIN.drawImage(LAYER, 0, 0);
 }
 
 /* ---- 動きのぼけ: サブフレームを平均(累積の canvas に移動平均で重ねる) ---- */

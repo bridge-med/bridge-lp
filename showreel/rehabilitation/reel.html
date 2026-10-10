@@ -30,6 +30,7 @@
    版は問い合わせで選ぶ(思想ページが テーマ × 画角 で選んで読む。2026-10-05):
      ?theme=light|dark   色(shared/bridge.css のトークンの値)
      ?layout=wide|tall   wide=1920×1080(PC)/ tall=1080×1350(4:5・スマホ。≤760px)
+     ?ground=tint        地を --bg-2 に(思想ページの #rehabilitation は帯の節。2026-10-10 から窓は縁なしで地に溶かす)
    tall の振付: 一文は二行(「その人がその人らしく/生きられる状態への回復」)で、開く代わりに字が置かれた位置に出る。
    署名は finale を 1920×1080 の裏の面に描き、0.75 倍で縦の中央に写す(経路の写しを増やさない)。
    書き出しは ../render.mjs --page showreel/rehabilitation/reel.html --query 'theme=dark&layout=tall'。約束(window.REEL)は ../reel.html と同じ。
@@ -40,7 +41,8 @@ const LAYOUT = QS.get('layout') === 'tall' ? 'tall' : 'wide';
 const W = LAYOUT === 'tall' ? 1080 : 1920, H = LAYOUT === 'tall' ? 1350 : 1080, FPS = 60, DUR = 16;
 const canvas = document.getElementById('c');
 canvas.width = W; canvas.height = H;
-let ctx = canvas.getContext('2d');            // let: tall の署名は v3-parts の finale を裏の面(FIN)に描かせるため、一時的に差し替える
+const MAIN = canvas.getContext('2d');
+let ctx = MAIN;                               // let: tall の署名は v3-parts の finale を裏の面(FIN)に描かせるため、一時的に差し替える
 let TT = 0;                                   // v3-parts の lineText が読む「いまの時刻」
 </script>
 <script src="../namae/v3-parts.js"></script>
@@ -50,7 +52,9 @@ const PAL = {
   light: { bg: '#FBFAF7', line: '#16233E', t1: '#1B1B1E', t2: '#45464C', t3: '#63646B', sand: '#A98F63' },   // = v3-parts の LIGHT + --ink-3
   dark:  { bg: '#111521', line: '#EDEAE2', t1: '#EDEAE2', t2: '#C2BFB6', t3: '#8A8D98', sand: '#C2A97E' },
 };
-const P = PAL[THEME];
+const P = Object.assign({}, PAL[THEME]);
+/* ?ground=tint: 置く節が帯(.sec.tint)のときの地 --bg-2(ライト #F4EFE6・ダーク #161B2B)。窓に縁を付けず地に溶かすため、書き出しの地=置く節の地(design-system §3・2026-10-10) */
+if (QS.get('ground') === 'tint') P.bg = THEME === 'dark' ? '#161B2B' : '#F4EFE6';
 
 /* ---- 画角ごとの組み(px は書き出しの画素) ---- */
 const GEO = {
@@ -238,12 +242,35 @@ function signTall(t) {
 /* ================================================================
    1 枚
    ================================================================ */
+/* 線と文字の層: 窓の端へ届いた線(場面 3 の「左の外から右の外へ」の一本の線)を、端の 3% で地へ溶かしてから地の上に重ねる。
+   窓に縁を付けないので、線が窓の端で切れると見えない箱が見えてしまう(designer 2026-10-10)。地は平らのまま */
+const LAYER = document.createElement('canvas'); LAYER.width = W; LAYER.height = H;
+const LCTX = LAYER.getContext('2d');
+const EDGE = Math.round(Math.min(W, H) * 0.03);
+const MASK = (() => {
+  const m = document.createElement('canvas'); m.width = W; m.height = H;
+  const mc = m.getContext('2d'), img = mc.createImageData(W, H), d = img.data;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const u = Math.min(x, W - 1 - x, y, H - 1 - y) / EDGE;
+    const a = u >= 1 ? 1 : u <= 0 ? 0 : u * u * (3 - 2 * u);
+    d[(y * W + x) * 4 + 3] = Math.round(a * 255);
+  }
+  mc.putImageData(img, 0, 0); return m;
+})();
 function draw(t) {
   TT = t;
-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
-  ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
+  MAIN.setTransform(1, 0, 0, 1, 0, 0); MAIN.globalAlpha = 1; MAIN.globalCompositeOperation = 'source-over';
+  MAIN.fillStyle = P.bg; MAIN.fillRect(0, 0, W, H);
+  ctx = LCTX;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, W, H);
   scene1(t); scene2(t); scene3(t);
   if (t >= T.bend) { if (LAYOUT === 'tall') signTall(t); else finale(t - FIN_OFF, P); }   // 地平線がロゴの線へ曲がり、砂の線が交差し、BRIDGE
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'destination-in'; ctx.drawImage(MASK, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  MAIN.drawImage(LAYER, 0, 0);
+  ctx = MAIN;
 }
 
 /* ---- 動きのぼけ: シャッター 180°(B-13)。v3 と同じく、動くものの目印(mv)から 1 コマの速さを測り、
