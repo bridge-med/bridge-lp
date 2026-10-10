@@ -16,14 +16,14 @@
 ```sh
 D=showreel/kousa
 for th in light dark; do for ly in wide tall; do
-  node showreel/render.mjs --page $D/reel.html --query "theme=$th&layout=$ly" --samples 4 --noaudio 1 --crf 20 --out $D/$th-$ly.mp4
+  node showreel/render.mjs --page $D/reel.html --query "theme=$th&layout=$ly" --fps 30 --samples 4 --noaudio 1 --crf 23 --out $D/$th-$ly.mp4
   node showreel/render.mjs --page $D/reel.html --query "theme=$th&layout=$ly" --stills 14.9 --samples 1 --outdir /tmp/kousa-$th-$ly
   ffmpeg -y -i /tmp/kousa-$th-$ly/t14.900.png -c:v libwebp -quality 88 -compression_level 6 $D/$th-$ly.webp
 done; done
 ```
 
 - 要るもの: node 22、playwright(chromium)、ffmpeg(libx264・libwebp)。`playwright` がリポジトリの `node_modules` から見つからないときは `ln -s /opt/node-tools/node_modules/playwright node_modules/playwright`
-- 1800 粒の軌跡は絵の情報量が多く、crf 20 で wide が約 5〜6MB になる。ページは 1 本だけを近づいてから読むが、容量の判断は台帳に残す
+- 1800 粒の軌跡は絵の情報量が多く、60fps・crf 20 では wide が約 14MB になったので、30fps・crf 23 で書き出す(シャッター 180° のぼけは fps に対して相対)。ページは 1 本だけを近づいてから読むが、容量の判断は台帳に残す
 
 ## 絵コンテ(確定値・秒)
 

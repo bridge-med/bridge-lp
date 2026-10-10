@@ -18,9 +18,6 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 .name-fig{max-width:720px;margin:clamp(44px,6vh,64px) auto 0;text-align:center}
-.name-fig svg{width:100%;max-width:560px;margin:0 auto}
-.name-fig .arc{stroke:var(--blue-soft);stroke-width:2;fill:none}
-.name-fig .lbl{font:600 12px var(--sans);fill:var(--ink-2);letter-spacing:.06em}
 .name-cap{margin-top:20px;font-size:13px;color:var(--ink-3)}
 .tl{max-width:var(--max);margin:clamp(48px,7vh,72px) auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
 .tl::before{content:'';position:absolute;top:5px;left:0;right:0;height:1px;background:var(--line)}
@@ -79,16 +76,19 @@
       現場と経営。臨床と数字。エビデンスと実感。人と技術。いまの状態と、本来の可能性。——本当は繋がっているはずなのに、分かれてしまったものが、世の中にはたくさんあります。そのあいだに橋を架けて、行き来できるようにする。BRIDGEという名前は、その仕事の宣言です。
     </p>
   </div>
+  <!-- 映像「交差」(showreel/kousa/)。筆の軌跡がロゴの二本の線に収束する。交差するが接続しない=名前の由来そのもの。
+       橋の弧の図(2026-10-10 まで)を置き換えた(designer 2026-10-09: 1 セクションに図は 1 つ)。キャプションは図のときの文のまま。
+       再生の約束(一度だけ・無音・画面外で止める・停止ボタン・動きを減らす設定ではポスター)は shared/bridge.js の reel が担う。版は data-reel の中から選ぶ -->
   <div class="name-fig" data-reveal>
-    <svg viewBox="0 0 560 150" role="img" aria-label="図:現場と経営、いまと可能性の間に橋が架かる">
-      <text class="lbl" x="30" y="130">現場</text>
-      <text class="lbl" x="490" y="130">経営</text>
-      <text class="lbl" x="222" y="30" fill="var(--dawn)">BRIDGE</text>
-      <path class="arc" d="M60 115 Q 280 30 500 115"/>
-      <circle cx="60" cy="115" r="4" fill="var(--ink-3)"/>
-      <circle cx="500" cy="115" r="4" fill="var(--ink-3)"/>
-      <circle cx="280" cy="72" r="4" fill="var(--dawn)"/>
-    </svg>
+    <figure class="reel" data-reel="../showreel/kousa/">
+      <div class="reel-frame">
+        <video class="reel-v" muted playsinline preload="none" controls poster="../showreel/kousa/light-wide.webp" width="1920" height="1080">
+          <source src="../showreel/kousa/light-wide.mp4" type="video/mp4">
+        </video>
+        <button class="motion-toggle" type="button" aria-pressed="true" aria-label="映像を再生する" hidden><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
+      </div>
+      <figcaption class="sr-only">映像(15秒・音なし)。一点から生まれた筆の軌跡が束になって流れ、「分かれてしまったものの間に、橋を架ける」の文字が線の間から現れる。すべての軌跡が藍と砂の二本の線に集まり、交差するが接続しないBRIDGEのロゴになる。最後に BRIDGE / EXPAND CHOICES. の署名。</figcaption>
+    </figure>
     <p class="name-cap">いちばん最初の橋は「現場と経営」。いまは「人と可能性」まで広がりました。</p>
   </div>
 </section>
