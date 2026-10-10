@@ -260,6 +260,27 @@ a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 .walk-note{max-width:34em;margin:34px 0 0;font:400 14px/2.1 var(--mincho);color:var(--ink-2)}
 @media(max-width:760px){.walk-grid{grid-template-columns:1fr}}
 
+/* ===== Reel(映像の窓)と Motion toggle(動きを止める丸いボタン) =====
+   型は docs/design-system.md §4「映像」。組みと挙動は bridge.js の Reel(figure.reel[data-reel])が担う。
+   窓=Edge(角 4px・--line の縁・影なし・hover なし)。地は --bg の窓(帯の --bg-2 に溶かさない: H.264 で色がずれ、意図しない縁が出るため)。
+   画角は 760px を境に 16:9 と 4:5。JS が動かないときはライト・横長・ネイティブの操作盤の1通り(印 .reel-js はこの figure にだけ付ける。html.js に寄せると data-reveal の初回表示が変わる) */
+.reel{max-width:880px;margin:clamp(48px,7vh,72px) auto 0}
+.reel-frame{position:relative;aspect-ratio:16/9;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg)}
+.reel-v{display:block;width:100%;height:100%;object-fit:cover;background:var(--bg)}
+@media(max-width:760px){.reel-js .reel-frame{aspect-ratio:4/5}}
+/* 動きを止める丸いボタン(5秒を超えて自動で動くものに置く。WCAG 2.2.2)。見た目 34px・タップ 44px(.theme-btn と同じ作り)。
+   aria-pressed="true"=止めている。置き場所は窓の右下 8px。ページで変えるときは位置だけを上書きする(トップの Journey は .jr .motion-toggle) */
+.motion-toggle{position:absolute;right:8px;bottom:8px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:var(--ink-2)}
+.motion-toggle::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg);border:1px solid var(--line);transition:border-color .3s var(--ease)}
+.motion-toggle:hover::before{border-color:var(--ink-4)}
+.motion-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:0}
+.motion-toggle svg{position:relative;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.motion-toggle .i-play,.motion-toggle[aria-pressed="true"] .i-pause{display:none}
+.motion-toggle[aria-pressed="true"] .i-play{display:block}
+.motion-toggle[hidden]{display:none} /* display:grid が [hidden] に勝つため */
+/* 視覚的に隠し、読み上げには残す(映像や Journey の figcaption) */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
 /* ===== フッター(JSが .site-footer に描画) ===== */
 .site-footer{border-top:1px solid var(--line);padding:64px var(--pad-x) 56px;background:var(--bg-2)}
 .footer-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:36px}

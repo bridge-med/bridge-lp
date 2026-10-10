@@ -4,6 +4,8 @@
    使い方:
      <body data-root="../" data-page="philosophy">
      <script src="../shared/bridge.js" defer></script>
+   映像の窓(Reel)の約束: <figure class="reel" data-reel="../showreel/<名前>/"> > .reel-frame > video.reel-v(muted playsinline preload="none" controls poster=light-wide.webp + <source> light-wide.mp4) + button.motion-toggle[hidden](.i-pause/.i-play の svg) / figcaption.sr-only(流れを一文で)
+     版は data-reel の下の {light,dark}-{wide,tall}.mp4 と同名の .webp。JS がなければライト横長をネイティブの操作盤で再生できる。挙動は下の「Reel」の節
    ================================================================ */
 /* JSが動く環境でだけ data-reveal を隠す(CSSは html.js 配下に限定)。
  * JS無効環境で恒久的に不可視になる既存不具合の解消。先頭・同期実行 */
@@ -189,6 +191,84 @@ document.documentElement.classList.add('js');
     applyBudoux(); // 動的描画されたカード等にも文節改行を適用
   };
   observeAll();
+
+  /* ---- Reel(映像の窓・共通。型は docs/design-system.md §4「映像」) ----
+     版はテーマ(html の data-theme)× 画角(≤760px は tall=4:5)の4本から1本だけを、近づいてから読む(それまではポスターだけ)。
+     画面に半分入ったら一度だけ再生(無音・ループなし)。画面外・非表示のタブで止め、戻ったら続きから。人が止めたら再開しない。
+     動きを減らす設定では自動で再生せず、ポスターと再生ボタン。テーマ・画角が変わったら版を差し替え、再生位置と再生中かどうかを保つ。
+     ページ内で同時に再生するのは1本だけ(designer 2026-10-09): 1本が再生を始めたら、ほかは画面外で止めたときと同じ扱いで止める。
+     状態: 自動で一度だけ再生した(autoDone)/人が止めた(userPaused)/画面外・非表示・ほかの1本のために止めた(autoPaused) ---- */
+  const reels = document.querySelectorAll('figure.reel[data-reel]');
+  if (reels.length && 'IntersectionObserver' in window && window.matchMedia) {   // 古い環境ではネイティブの操作盤のまま
+    const html = document.documentElement;
+    const reduceQ = window.matchMedia('(prefers-reduced-motion: reduce)'), spQ = window.matchMedia('(max-width: 760px)');
+    const name = () => (html.getAttribute('data-theme') === 'dark' ? 'dark' : 'light') + '-' + (spQ.matches ? 'tall' : 'wide');
+    const units = [];
+    reels.forEach(fig => {
+      const v = fig.querySelector('.reel-v'), btn = fig.querySelector('.motion-toggle');
+      if (!v || !btn) return;
+      fig.classList.add('reel-js');                      // 窓を JS ありの組み(≤760px は 4:5)にする
+      const DIR = fig.getAttribute('data-reel');
+      let near = false, inView = false, autoDone = false, userPaused = false, autoPaused = false, cur = '';
+
+      // ネイティブの操作盤をしまい、自前のボタンを出す。<source> は外して、版を JS で選ぶ
+      v.removeAttribute('controls');
+      v.querySelectorAll('source').forEach(s => s.remove());
+      btn.hidden = false;
+
+      const label = () => {
+        const playing = !v.paused && !v.ended;
+        btn.setAttribute('aria-pressed', String(!playing));
+        btn.setAttribute('aria-label', playing ? '映像を止める' : v.ended ? 'もう一度再生する' : '映像を再生する');
+      };
+      const play = () => { const p = v.play(); if (p && p.catch) p.catch(() => { label(); }); };
+      const stop = () => { if (!v.paused && !v.ended) { autoPaused = true; v.pause(); } };   // 自動で止める(戻ったら続きから)
+      // 版の差し替え(テーマ・画角が変わったとき)。再生位置と、再生中かどうかを保つ
+      const pick = () => {
+        const n = name();
+        if (n === cur) return;
+        const t = v.currentTime || 0, was = !v.paused && !v.ended, ended = v.ended;
+        cur = n; v.poster = DIR + n + '.webp';
+        if (!near) return;                                 // 近づくまで映像は読まない(ポスターだけ)
+        v.src = DIR + n + '.mp4';
+        if (t > 0) v.addEventListener('loadedmetadata', function f() { v.removeEventListener('loadedmetadata', f); v.currentTime = ended ? v.duration : t; }, { once: true });
+        if (was) play();
+      };
+      const load = () => { if (near) return; near = true; cur = ''; pick(); v.preload = 'auto'; };
+      const unit = { v, stop };
+      units.push(unit);
+
+      pick();
+      new IntersectionObserver(es => { if (es[0].isIntersecting) load(); }, { rootMargin: '600px 0px' }).observe(v);
+      new IntersectionObserver(es => {
+        const r = es[0].intersectionRatio;
+        if (r >= 0.5) {
+          inView = true;
+          if (document.hidden) return;
+          if (!autoDone && !reduceQ.matches) { autoDone = true; load(); play(); }
+          else if (autoPaused && !userPaused) { autoPaused = false; play(); }
+        } else if (!es[0].isIntersecting) {
+          inView = false;
+          stop();
+        }
+      }, { threshold: [0, 0.5] }).observe(v);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop();
+        else if (autoPaused && inView && !userPaused) { autoPaused = false; play(); }
+      });
+      btn.addEventListener('click', () => {
+        load(); autoDone = true; autoPaused = false;
+        if (!v.paused && !v.ended) { userPaused = true; v.pause(); }
+        else { userPaused = false; if (v.ended) v.currentTime = 0; play(); }
+      });
+      v.addEventListener('play', () => { units.forEach(u => { if (u !== unit) u.stop(); }); });   // 同時に1本だけ
+      ['play', 'pause', 'ended'].forEach(e => v.addEventListener(e, label));
+      new MutationObserver(pick).observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+      if (spQ.addEventListener) spQ.addEventListener('change', pick); else if (spQ.addListener) spQ.addListener(pick);
+      label();
+    });
+  }
+
   window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll, applyBudoux: applyBudoux };
   document.documentElement.classList.add('js-ready'); // 安全弁(bridge.css の rv-safe)を解除
 })();

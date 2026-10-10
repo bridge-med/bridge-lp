@@ -2,14 +2,17 @@
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
 <title>P3 signature</title>
+<!-- 製品と同じ起動: localStorage の bridge-theme を data-theme に写す(ダーク版の撮影のため。2026-10-10) -->
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=block">
-<!-- 色は shared/bridge.css のトークン(ライト)だけを使う。直書きしない。撮影時は /__p3/card/ で配られ、この相対パスは /shared/bridge.css に解決する -->
+<!-- 色は shared/bridge.css のトークンだけを使う。直書きしない。撮影時は /__p3/card/ で配られ、この相対パスは /shared/bridge.css に解決する。
+     藍の線は --mark-line(ロゴの藍の線の役割。ライトは --navy と同値、ダークは --ink。design-system/designer 2026-10-04)。2026-10-10 にダーク版のため --navy から置き換えた(ライトの値は同じ) -->
 <link rel="stylesheet" href="../../../shared/bridge.css">
 <style>
   html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;transition:none}
   .stage{position:absolute;left:0;top:0;width:1440px;height:810px}
   svg.mark{position:absolute;overflow:visible}
-  .l-navy{stroke:var(--navy);fill:none;stroke-linecap:round}
+  .l-navy{stroke:var(--mark-line);fill:none;stroke-linecap:round}
   .l-sand{stroke:var(--dawn);fill:none;stroke-linecap:round}
   .wm{position:absolute;left:0;width:1440px;text-align:center;font:500 72px/1 var(--en);letter-spacing:.34em;text-indent:.34em;color:var(--ink);opacity:0}
   .tg{position:absolute;left:0;width:1440px;text-align:center;font:500 40px/1 var(--en);letter-spacing:.22em;text-indent:.22em;color:var(--ink-3);opacity:0}

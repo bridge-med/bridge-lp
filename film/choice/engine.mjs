@@ -96,10 +96,17 @@ async function grab(cdp, cam, W, H, k) {
 }
 
 // shot: { id, url, theme, frames, prep, anchors(page)->obj, actions: [{f, run(page, A)}], cam(t, A)->{cx,cy,s}, sub(f)->n, js(f)->bool (advance app timers) }
-export async function renderShot(shot, { W = 1920, H = 1080, outDir, only = null, base, browser }) {
+//   tall: { cam, vw, vh, ... }  overrides used when the frame is 1080x1350 (fmt 'tall'); same page, same actions, same timing, another camera
+//   fixedTheme: true            the product has no dark display: --theme does not touch this shot (the copy stays as the product shows it)
+// frames: 'wide' = 1920x1080 (default), 'tall' = 1080x1350. The capture is always at the frame's native size; W only scales the output (preview)
+export const FRAMES = { wide: [1920, 1080], tall: [1080, 1350] };
+export async function renderShot(shot, { W, outDir, only = null, base, browser, theme = null, fmt = 'wide' }) {
+  let H;
+  if (fmt === 'tall') { if (!shot.tall) throw new Error(shot.id + ': no tall camera'); shot = { ...shot, ...shot.tall }; }
+  if (theme && !shot.fixedTheme) shot = { ...shot, theme };
   if (!only) rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
-  const k = 1, OW = W, OH = H; W = 1920; H = 1080;
+  const [FW, FH] = FRAMES[fmt]; const k = 1, OW = W || FW, OH = Math.round(OW * FH / FW); W = FW; H = FH;
   const { c, page, cdp } = await openShot(browser, base, shot);
   const A = shot.anchors ? await shot.anchors(page) : {};
   if (shot.debugAnchors) console.log(shot.id, JSON.stringify(A), await page.evaluate(() => [scrollX, scrollY, innerWidth, innerHeight, visualViewport.pageTop]));
