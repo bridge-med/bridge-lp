@@ -22,8 +22,8 @@ for th in light dark; do for ly in wide tall; do
 done; done
 # ページ用(1版 2MB 以下・§4): wide は 1440×810・crf 32、tall は 900×1126・crf 31 に再圧縮
 for th in light dark; do
-  ffmpeg -y -i $M/$th-wide.mp4 -vf scale=1440:-2:flags=lanczos -c:v libx264 -preset slow -crf 32 -pix_fmt yuv420p -profile:v high -tune animation -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart $D/$th-wide.mp4
-  ffmpeg -y -i $M/$th-tall.mp4 -vf scale=900:-2:flags=lanczos  -c:v libx264 -preset slow -crf 31 -pix_fmt yuv420p -profile:v high -tune animation -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart $D/$th-tall.mp4
+  ffmpeg -y -i $M/$th-wide.mp4 -vf scale=1440:-2:flags=lanczos -c:v libx264 -preset slow -crf 32 -x264-params aq-mode=3:aq-strength=1.2 -pix_fmt yuv420p -profile:v high -tune animation -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart $D/$th-wide.mp4
+  ffmpeg -y -i $M/$th-tall.mp4 -vf scale=900:-2:flags=lanczos  -c:v libx264 -preset slow -crf 31 -x264-params aq-mode=3:aq-strength=1.2 -pix_fmt yuv420p -profile:v high -tune animation -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart $D/$th-tall.mp4
 done
 ```
 
@@ -56,3 +56,5 @@ done
 ## 2026-10-10 線の端を地へ溶かす
 
 about の窓を縁なしにした(社長「境界線が無い方が見やすい」・design-system v1.4)。流れの区間(4〜9 秒)で筆の線が窓の端を外周の最大 4 割の長さで横切り、縁がないと見えない箱で線が切れて見えたので、筆の線と文字を層に描き、窓の端から 14%(1080 で 151px)の帯で 1→0 に地へ溶かしてから平らな地に重ねる(地にはグラデーションを足さない)。
+
+- 2026-10-10: 縁なしの窓の条件(外周の 98% 以上が地と ΔRGB 2 以下)に、暗い地の圧縮ノイズ(ΔRGB 3)が 450 コマ中 53 コマで掛かったので、暗部を細かく量子化する aq-mode=3 で再圧縮した(容量は増えない。1.44〜1.49MB)
