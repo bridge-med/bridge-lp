@@ -44,7 +44,7 @@ const PICKS = { profession: 0, q1: 2, q2: 2, q3: 2, q4: [0, 3], q5: [-1], q6: 1,
 export const S1 = {
   id: 's1', url: '/compass/', theme: 'dark', frames: 70,   // v2: 4 frames of the end hold go to the signature
   prep: page => compassTo(page, '周りから一番頼られるのは', PICKS),
-  anchors: async page => ({ mark: bbc(await box(page, '.cp-screen:last-of-type .cp-opt .cp-mark', 2)), opt: await box(page, '.cp-screen:last-of-type .cp-opt', 2), q: await box(page, '.cp-screen:last-of-type .cp-q-h') }),
+  anchors: async page => ({ mark: bbc(await box(page, '.cp-screen:last-of-type .cp-opt .cp-mark', 2)), opt: await box(page, '.cp-screen:last-of-type .cp-opt', 2), q: await box(page, '.cp-screen:last-of-type .cp-q-h'), opts: await box(page, '.cp-screen:last-of-type .cp-opts') }),   // opts: tall only
   actions: [{ f: 10, run: jsClick('.cp-screen:last-of-type .cp-opt', 2) }],
   js: f => false,                                   // hold the app's own "advance after choosing" (time-remap: the moment is held)
   sub: sub([[28, 60]], 12),
@@ -58,12 +58,12 @@ export const S1 = {
     return zoomCam(A.mark, Astart, B, s0, endS)(ease.inOutCubic(seg(t, 28 / FPS, 60 / FPS)));
   },
   tall: { cam: (t, A) => {
-    // the option line at the same width of the page as wide (5.1x: the circle, 人に教えること, and the neighbours above and below), then the question and the list
-    const s0 = 9 * TK, oc = [A.opt.x + 100, A.opt.y + A.opt.height / 2];
+    // 6x: the circle and 人に教えること fill the width (22 px of page on each side); the 4:5 height then holds the neighbouring options whole
+    // (the one-line close-up of wide is not possible at this width: the line itself is 137 px of page), then the question and the whole list (1.9x)
+    const s0 = 6, oc = [A.opt.x + 87, A.opt.y + A.opt.height / 2];
     const Astart = [TW / 2 + (A.mark[0] - oc[0]) * s0, TH / 2 + (A.mark[1] - oc[1]) * s0];
-    const endS = 3.3 * TK;
-    const qx = A.q.x, qy = A.q.y + A.q.height / 2;
-    const B = [TW / 2 + (A.mark[0] - (qx + 250)) * endS, TH / 2 + (A.mark[1] - (qy + A.mark[1]) / 2) * endS];
+    const endS = 1.9, cc = [A.q.x + A.q.width / 2, (A.q.y + A.opts.y + A.opts.height) / 2 + 30];
+    const B = [TW / 2 + (A.mark[0] - cc[0]) * endS, TH / 2 + (A.mark[1] - cc[1]) * endS];
     return zoomCam(A.mark, Astart, B, s0, endS, TW, TH)(ease.inOutCubic(seg(t, 28 / FPS, 60 / FPS)));
   } },
 };
@@ -131,8 +131,8 @@ export const S2 = {
     const s0 = 7.5 * TK;
     const pull = ease.inOutCubic(seg(t, 55 / FPS, 66 / FPS));
     if (pull <= 0) return placeCam(caret, [TW * 0.56, TH * 0.5], s0, TW, TH);
-    const endS = 2.6 * TK;
-    const tgt = [A.ta.x + A.ta.width * 0.5, (A.q ? A.q.y : A.ta.y - 120) + 120];
+    const endS = 1.65;   // the whole question view (question, 場面, やったこと, the buttons); 2.6*TK would reach above the page top
+    const tgt = [A.ta.x + A.ta.width * 0.5, (A.q ? A.q.y : A.ta.y - 120) + 267];
     const b = placeCam(tgt, TC, endS, TW, TH);
     const s = Math.exp(lerp(Math.log(s0), Math.log(endS), pull));
     const cs = [TW * 0.56, TH * 0.5], ce = [TW / 2 + (caret[0] - b.cx) * endS, TH / 2 + (caret[1] - b.cy) * endS];
@@ -229,8 +229,9 @@ export const S4 = {
   },
   tall: { cam: (t, A) => {
     if (t < 12 / FPS) { const c = A.title ? bbc(A.title) : [A.card.x + 120, A.card.y + A.card.height / 2]; return placeCam([A.card.x + 30, c[1]], [TW * 0.30, TH / 2], 5.0 * TK, TW, TH); }
-    // the notice: the same rule (frame bottom 20 CSS px above the date box), the paper with a strip of the room on both sides
-    const nS = 3.0 * TK, nc = [A.pt.x + A.pt.width / 2, A.big.y - 20 - TH / 2 / nS];
+    // the notice: the same rule (frame bottom 20 CSS px above the date box). 2.2x is the lowest scale whose frame top stays on the page (y >= 0):
+    // the title fits with 17 px of paper on each side, the room shows above the paper (not beside it as in wide)
+    const nS = 2.2, nc = [A.pt.x + A.pt.width / 2, A.big.y - 20 - TH / 2 / nS];
     if (t < 31 / FPS) return placeCam(nc, TC, nS, TW, TH);
     if (t < 52 / FPS) return placeCam(bbc(A.btn), [TW / 2, TH * 0.56], 7.0 * TK, TW, TH);
     return placeCam(nc, TC, nS, TW, TH);
@@ -270,7 +271,8 @@ export const S5 = {
     const ch = (t >= 14 / FPS && A.ch2) ? A.ch2 : A.ch;
     const c = [ch.x + 24, ch.y + ch.height / 2];
     const pull = ease.inOutCubic(seg(t, 18 / FPS, 32 / FPS));
-    const endS = 2.3 * TK, mid = [A.ask ? A.ask.x + A.ask.width / 2 : c[0] + 200, (A.ask ? A.ask.y : c[1] - 120) + 170];
+    // end 1.6x (not 2.3*TK): the decision panel (480 px of page) with room on both sides; centred 120 px under the ask so the frame stays inside the viewport
+    const endS = 1.6, mid = [A.ask ? A.ask.x + A.ask.width / 2 : c[0] + 200, (A.ask ? A.ask.y : c[1] - 120) + 120];
     return zoomCam(c, [TW * 0.36, TH / 2], [TW / 2 + (c[0] - mid[0]) * endS, TH / 2 + (c[1] - mid[1]) * endS], 5.5 * TK, endS, TW, TH)(pull);
   } },
 };
@@ -322,7 +324,7 @@ export const S6 = {
   tall: { cam: (t, A) => {
     // the map at the same width of the page (2.36x), the same dive to 400x (the point's colour fills the frame)
     const s0 = S6_S0 * TK, cx0 = (A.o[0] - 60 + A.list.x + 262) / 2;
-    const Astart = [TW / 2 + (A.o[0] - cx0) * s0, TH / 2];
+    const Astart = [TW / 2 + (A.o[0] - cx0) * s0, TH / 2 - 24];   // -24: the frame top stays on the page (y >= 0)
     const u = clamp(t / (33 / FPS));
     const zc = zoomCam(A.o, Astart, TC, s0, S6_S1, TW, TH);
     const s = Math.exp(lerp(Math.log(s0), Math.log(S6_S1), u * u * u));

@@ -22,6 +22,24 @@ SUBMAX=1 node film/choice/run2.mjs --shots s1 --w 960 --tag probe   # 確認用�
 - 環境変数: `FFMPEG`(既定は PATH の ffmpeg)、`PLAYWRIGHT_MODULE`(playwright の `index.mjs`。既定は `playwright` → `/opt/node22/lib/node_modules/playwright/index.mjs`)、`PLAYWRIGHT_BROWSERS_PATH`(既定 `/opt/pw-browsers`)、`FILM_WORK`、`FILM_OUT`
 - クリニックタウン3D(S5)の経営の相談は回ごとの乱数で中身が変わる。撮り直すたびに S5 の画は変わる
 
+## products ハブ用の 4 本(2026-10-10)
+
+{light,dark}×{wide,tall}。wide=1920×1080(master の定義そのまま)、tall=1080×1350(4:5)。
+
+```sh
+film/choice/job4.sh light wide     # = job2.sh と同じ画。out/p3-v2-light-wide.mp4 と out/p3-v2-light-wide-t{0.0,11.2,14.0}.{png,webp}
+film/choice/job4.sh dark wide      # 全ショットを bridge-theme=dark で撮る(ダーク表示のない クリニックタウン3D(S5)は fixedTheme: ライトのまま)
+film/choice/job4.sh light tall     # shots2.mjs の各ショットの tall(1080×1350 のカメラ値)で撮る。画の中身・順序・秒数は wide と同じ
+film/choice/job4.sh dark tall
+SUBMAX=1 node film/choice/run2.mjs --fmt tall --theme dark --w 540 --tag probe --shots s1 --only 0,69   # 確認用
+```
+
+- `run2.mjs` の引数: `--fmt wide|tall`(撮影面。既定 wide)、`--theme light|dark`(全ショットのテーマを上書き。`fixedTheme: true` のショットは除く)、`--w`(出力幅。既定は面の幅。確認用の縮小)
+- tall のカメラ値は `shots2.mjs` の各ショットの `tall: { cam }`(engine が `--fmt tall` のとき shot に重ねる)。倍率の目安は wide×0.5625(同じ横幅=同じ見かけの大きさ)。例外と理由は各ショットのコメント
+- 署名の面(`card/index.html`)は製品と同じ起動スクリプトで `data-theme` を付け、藍の線は `--mark-line`(ライトは --navy と同値、ダークは --ink)
+- ポスター候補: `posters.sh`(t=0.0 / 11.2 / 14.0 の 3 つ。webp は libwebp quality 90、同じコマの png も置く。無加工)
+- 工程の記録: `work/PROGRESS.md`
+
 ## 流用ショット(v1 の絵コンテから)
 
 | ショット | 画面(すべて実物) | カメラ |
