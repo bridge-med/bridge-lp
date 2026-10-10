@@ -41,7 +41,6 @@
 .first-head{display:grid;grid-template-columns:1fr 1fr;gap:20px 48px;align-items:end;margin-bottom:clamp(28px,4vh,40px)}
 .first-head h2{font-family:var(--sans);font-weight:900;font-size:clamp(28px,4vw,48px);line-height:1.2;letter-spacing:-0.01em;margin-top:16px}
 .first-head p{font-size:13.5px;line-height:2.1;color:var(--ink-2);max-width:34em;justify-self:end}
-.first-reel{margin:0 auto clamp(28px,4vh,40px)} /* 見出しの直下、行の上に1つ(designer 2026-10-09)。窓の既定の上余白は見出しの間隔が担う */
 .first-rows{border-top:1px solid var(--line)}
 .first-row{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1.5fr) auto;gap:8px 28px;align-items:center;padding:clamp(16px,2.4vh,22px) 0;border-bottom:1px solid var(--line);transition:background .3s}
 .first-row:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
@@ -128,10 +127,20 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
       </div>
       <p>無料・登録なし。入力は端末の中にだけ残ります。</p>
     </div>
-    <!-- 映像「選ぶ瞬間」(showreel/choice/)。実物の製品を実物の操作だけで動かした写し(第22条の写しの但し書き)。
-         Compass・経験の棚卸し・言いかえ帳・掲示じたく・クリニックタウン3D で選ぶ瞬間が続き、最後に BRIDGE の署名。
-         再生の約束は shared/bridge.js の Reel が担う。版は data-reel の中から選ぶ -->
-    <figure class="reel first-reel" data-reel="../showreel/choice/" data-reveal>
+    <div class="first-rows" id="firstRows"></div>
+  </div>
+</section>
+
+<!-- 用途ごとのセクションとカードは PRODUCTS 配列から自動生成 -->
+<div id="catalog"></div>
+
+<!-- 映像「選ぶ瞬間」(showreel/choice/)。実物の製品を実物の操作だけで動かした写し(第22条の写しの但し書き)。
+     BRIDGE Compass・経験の棚卸し・言いかえ帳・掲示じたく・クリニックタウン3D で選ぶ瞬間が続き、最後に BRIDGE の署名。
+     置き場は一覧の末尾(用途の節の後・Where to next の直前)。署名が「次は、どこへ歩きますか」へ受け渡す(designer 2026-10-10)。
+     再生の約束は shared/bridge.js の Reel が担う。版は data-reel の中から選ぶ -->
+<section class="sec" aria-label="映像「選ぶ瞬間」">
+  <div class="sec-inner">
+    <figure class="reel" data-reel="../showreel/choice/" data-reveal>
       <div class="reel-frame">
         <video class="reel-v" muted playsinline preload="none" controls poster="../showreel/choice/light-wide.webp" width="1920" height="1080">
           <source src="../showreel/choice/light-wide.mp4" type="video/mp4">
@@ -140,12 +149,8 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
       </div>
       <figcaption class="sr-only">映像(15秒・音なし)。BRIDGE Compassの質問で「人に教えること」を選ぶ。経験の棚卸しに、やったことの文が打ち込まれて「集まった材料」に残る。現場のことば 言いかえ帳で「板挟みになってた」が「立場の違う人の間の調整」に言いかえられる。掲示じたくで「臨時休診」を選び、できあがりの紙の表示がダークからライトへ切り替わる。クリニックタウン3Dで経営の相談の選択肢を選び、画面に「数値はゲーム上の仮定」と出る。選ぶ瞬間が五つ続き、BRIDGE Compassの結果の地図で、現在地から「教育/人材育成」「プロジェクトマネジメント」「行政/医療政策」へ線が分かれる。最後に BRIDGE / EXPAND CHOICES. の署名。</figcaption>
     </figure>
-    <div class="first-rows" id="firstRows"></div>
   </div>
 </section>
-
-<!-- 用途ごとのセクションとカードは PRODUCTS 配列から自動生成 -->
-<div id="catalog"></div>
 <noscript><p style="max-width:660px;margin:60px auto;color:var(--ink-3);font-size:13px;padding:0 24px">一覧の表示にはJavaScriptが必要です。JavaScriptを使わずに開くには、<a href="../clinic-flow-3d/index.html" style="text-decoration:underline">クリニックタウン3D</a>、<a href="../tanaoroshi/index.html" style="text-decoration:underline">経験の棚卸し</a>、<a href="../moyamoya/index.html" style="text-decoration:underline">職場モヤモヤ診断</a>、<a href="../keiji/index.html" style="text-decoration:underline">掲示じたく</a>、<a href="../nidodema/index.html" style="text-decoration:underline">二度手間さがし</a> のリンクをご利用ください。</p></noscript>
 </main>
 
