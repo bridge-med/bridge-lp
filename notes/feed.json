@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-10T00:04:14+00:00",
+  "updated_at": "2026-10-10T23:36:20+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "医療職だからこそ、経営側でできることがある。",
+      "url": "https://note.com/prime_duck4944/n/n21034d4d891f",
+      "guid": "https://note.com/prime_duck4944/n/n21034d4d891f",
+      "pubDate": "2026-10-11T07:00:00+09:00",
+      "date": "2026-10-11",
+      "excerpt": "事業会社に出てから、医療機関の経営や運営について考える時間が増えた。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/320600450/rectangle_large_type_2_ea9d8ace3203d3043336c6815a517574.png?width=800"
+    },
+    {
+      "title": "WBSを作ると、仕事ができるように見える理由。",
+      "url": "https://note.com/prime_duck4944/n/ndfa7e13c7b47",
+      "guid": "https://note.com/prime_duck4944/n/ndfa7e13c7b47",
+      "pubDate": "2026-10-10T19:00:00+09:00",
+      "date": "2026-10-10",
+      "excerpt": "WBSって、言葉だけ聞くと、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/319811538/rectangle_large_type_2_388e0472c653dbddf18e9d2783288904.png?width=800"
+    },
     {
       "title": "臨床しかしてこなかった人に、ビジネスはできないのか。",
       "url": "https://note.com/prime_duck4944/n/n27c8b2294840",
@@ -38,24 +56,6 @@
       "date": "2026-10-08",
       "excerpt": "業務改善の話をしていると、とりあえずExcelで管理しよう、",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/319807749/rectangle_large_type_2_84ae0f536ed857e92d82f3a794d067d0.png?width=800"
-    },
-    {
-      "title": "病院では普通だった経験が、外に出たら武器になった。",
-      "url": "https://note.com/prime_duck4944/n/naa498ecade51",
-      "guid": "https://note.com/prime_duck4944/n/naa498ecade51",
-      "pubDate": "2026-10-08T07:00:00+09:00",
-      "date": "2026-10-08",
-      "excerpt": "病院で働いていた頃、自分のやっていることを、",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/316343208/rectangle_large_type_2_6c438984b9450d3ecc4622e09e664d35.png?width=800"
-    },
-    {
-      "title": "業務改善って、別にすごいシステムを作ることじゃない。",
-      "url": "https://note.com/prime_duck4944/n/n6a821224eaac",
-      "guid": "https://note.com/prime_duck4944/n/n6a821224eaac",
-      "pubDate": "2026-10-07T19:00:00+09:00",
-      "date": "2026-10-07",
-      "excerpt": "業務改善って聞くと、少し大きなことに聞こえる。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/319806810/rectangle_large_type_2_4440acd2ff2abda96c056611fea8adf9.png?width=800"
     }
   ]
 }
