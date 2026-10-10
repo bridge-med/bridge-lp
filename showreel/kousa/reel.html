@@ -80,7 +80,7 @@ const bez = (p, u) => { const a = 1 - u; return [a * a * a * p[0][0] + 3 * a * a
    案B「筆」— 流れ場をたどる軌跡が筆のように線を書く
    粒 N 本を 120Hz で 20 秒ぶん先に積分しておく(決定的)。draw(t) は表を読むだけ。
    ================================================================ */
-const N = 1800, SR = 120, STEPS = DUR * SR + 3, K = 26;
+const N = 1200, SR = 120, STEPS = DUR * SR + 3, K = 26;   // 粒は 1800→1200(容量 1版 2MB 以下のため画の密度を減らす。B-21・designer 2026-10-10)
 const T_MS = 9.0;   // 収束の開始(粒ごとに +0.8 秒まで散らす)
 const PX = new Float32Array(N * STEPS), PY = new Float32Array(N * STEPS), BR = new Uint8Array(N * STEPS);
 const BS = new Int32Array(N), Z = new Float32Array(N), U0 = new Float32Array(N), OFF = new Float32Array(N), MS = new Float32Array(N);
@@ -102,7 +102,7 @@ function fieldAngle(x, y, t, z, th, am) {
   for (let j = 0; j < STEPS; j++) { const t = j / SR; TH[j] = theta0(t); AM[j] = ampF(t); SP[j] = spdF(t); }
   for (let i = 0; i < N; i++) {
     const h1 = hash(i, 1);
-    const birth = i === 0 ? 0 : i < 500 ? 0.3 + 2.3 * Math.pow(h1, 1.6) : 2.6 + 2.6 * h1;   // i=0 は 0.0 秒からの一点(先導)。5.2 秒までに全粒が生まれる
+    const birth = i === 0 ? 0 : i < 330 ? 0.3 + 2.3 * Math.pow(h1, 1.6) : 2.6 + 2.6 * h1;   // i=0 は 0.0 秒からの一点(先導)。5.2 秒までに全粒が生まれる
     BS[i] = Math.floor(birth * SR);
     Z[i] = i === 0 ? 0.95 : hash(i, 2);
     U0[i] = hash(i, 3);
