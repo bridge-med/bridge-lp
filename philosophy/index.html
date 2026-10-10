@@ -34,14 +34,12 @@
 .etym-word .sand{color:var(--dawn);font-style:normal}
 
 .branch-fig{max-width:880px;margin:clamp(48px,7vh,72px) auto}
-.branch-fig svg{width:100%;height:auto}
-.branch-fig .base{stroke:var(--ink-3);stroke-width:2;fill:none}
-.branch-fig .opt{stroke:var(--navy);stroke-width:1.6;fill:none;opacity:.85}
-[data-theme="dark"] .branch-fig .opt{stroke:var(--blue)}
-.branch-fig .dot{fill:var(--ink)}
-.branch-fig .dot.d{fill:var(--dawn)} /* 分かれ目の点だけ砂(第22条の分岐点)。道は3本とも .opt の藍(一本を勧めない。B-14・designer 2026-10-09) */
-.branch-fig .lbl{font:600 11px var(--sans);fill:var(--ink-3);letter-spacing:.08em}
-.branch-fig .lbl.b{fill:var(--ink);font-size:12px}
+/* 分岐の図は映像「一本から三本に」(showreel/sanbon/)に置き換えた(2026-10-10)。窓の画角だけ図の比(880:300)に合わせる。≤760px は共通の 4:5(tall は縦の組み)。
+   図の色の約束はそのまま映像の中にある: 分かれ目の点だけ砂、道は3本とも藍(一本を勧めない。B-14・designer 2026-10-09) */
+.branch-fig .reel{margin:0 auto}
+.branch-fig .reel-frame{aspect-ratio:880/300;border:0;border-radius:0}
+.branch-fig .motion-toggle{right:auto;left:8px} /* 右下は「続ける」の真下なので左下へ(位置だけの上書き) */
+@media(max-width:760px){.branch-fig .reel-js .reel-frame{aspect-ratio:4/5;border:1px solid var(--line);border-radius:4px}}
 .branch-cap{text-align:center;margin-top:22px;font-size:13px;color:var(--ink-3)}
 
 .mvp-grid{max-width:var(--max);margin:clamp(40px,6vh,60px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -169,21 +167,19 @@
     <p class="prose" style="margin-top:36px" data-reveal>
       「選択肢を増やす」というのは、比喩ではなく、リハビリテーションで実際に起きることです。目標が「歩行の自立」から「孫の運動会に行く」に変わった患者を想像してみてください。歩いて行くのか、車椅子で行くのか、家族と一緒に行くのか。道が一本から三本に増えた瞬間、リハビリは訓練ではなく、人生の設計になります。
     </p>
+    <!-- 映像「一本から三本に」(showreel/sanbon/)。この節の分岐の図と同じ語・同じ位置で、「いま」の点から一本の道が伸び、目標が変わり、分かれ目の点(砂)が灯って三本の道が同時に伸びる。
+         最後の1コマ・ポスター・JS なしの姿は図と同じ。ロゴの finale は付けない(同じページの re + habilis が持つ)。言葉は editor 確定(showreel/sanbon/NOTES.md)。
+         再生の約束は shared/bridge.js の Reel が担う。版は data-reel の中から選ぶ(wide=1760×600・tall=1080×1350) -->
     <div class="branch-fig" data-reveal>
-      <svg viewBox="0 0 880 300" role="img" aria-label="図解:一本しか見えていなかった道が、選べる複数の道に分かれていく">
-        <circle class="dot" cx="60" cy="150" r="5"/>
-        <text class="lbl b" x="40" y="128">いま</text>
-        <path class="base" d="M60 150 H 360"/>
-        <text class="lbl" x="150" y="174">一本しか見えていなかった道</text>
-        <path class="opt" d="M360 150 C 480 150 520 60 820 52"/>
-        <path class="opt" d="M360 150 C 500 150 540 150 820 150"/>
-        <path class="opt" d="M360 150 C 480 150 520 240 820 248"/>
-        <text class="lbl b" x="832" y="56">挑戦する</text>
-        <text class="lbl b" x="832" y="154">選び直す</text>
-        <text class="lbl b" x="832" y="252">続ける</text>
-        <circle class="dot d" cx="360" cy="150" r="4"/>
-        <text class="lbl" x="312" y="122">可能性に気づく</text>
-      </svg>
+      <figure class="reel" data-reel="../showreel/sanbon/">
+        <div class="reel-frame">
+          <video class="reel-v" muted playsinline preload="none" controls poster="../showreel/sanbon/light-wide.webp" width="1760" height="600">
+            <source src="../showreel/sanbon/light-wide.mp4" type="video/mp4">
+          </video>
+          <button class="motion-toggle" type="button" aria-pressed="true" aria-label="映像を再生する" hidden><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
+        </div>
+        <figcaption class="sr-only">映像(14秒・音なし)。「いま」の点から、一本しか見えていなかった道が右へ伸びる。道の先の目標が「歩行の自立」から「孫の運動会に行く」に変わり、分かれ目の点が灯って「可能性に気づく」の文字が出る。道は三本に分かれ、挑戦する・選び直す・続けるに届いて止まる。</figcaption>
+      </figure>
       <p class="branch-cap">どの道を選んでもいい。<strong>選べること</strong>そのものが、回復だと考えています。</p>
     </div>
     <p class="prose" data-reveal>
