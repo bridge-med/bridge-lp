@@ -136,15 +136,8 @@ html:not(.js) .jr{display:none}
 .jr-view .j-dot.sand{fill:var(--dawn)}
 .jr-view .l-sand{fill:none;stroke:var(--dawn);stroke-linecap:round}
 
-/* 一時停止(5秒を超えて自動で動くため。WCAG 2.2.2)。見た目 34px・タップ 44px(.theme-btn と同じ作り) */
-.jr-toggle{position:absolute;right:max(12px,calc(var(--pad-x) - 16px));bottom:8px;z-index:3;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:var(--ink-2)}
-.jr-toggle::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg);border:1px solid var(--line);transition:border-color .3s var(--ease)}
-.jr-toggle:hover::before{border-color:var(--ink-4)}
-.jr-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:0}
-.jr-toggle svg{position:relative;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.jr-toggle .i-play,.jr-toggle[aria-pressed="true"] .i-pause{display:none}
-.jr-toggle[aria-pressed="true"] .i-play{display:block}
-.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* 一時停止(5秒を超えて自動で動くため。WCAG 2.2.2)。部品は bridge.css の .motion-toggle(2026-10-10 に共通化)。ここでは置き場所だけ: 帯の右端に寄せ、世界の上に出す */
+.jr .motion-toggle{right:max(12px,calc(var(--pad-x) - 16px));z-index:3}
 
 @media(max-width:760px){
   .hero{--foot-h:104px}
@@ -166,7 +159,7 @@ html:not(.js) .jr{display:none}
 }
 /* 動きを減らす設定: 俯瞰の静止の1枚(JS が描く)。止める操作は要らない */
 @media(prefers-reduced-motion:reduce){
-  .jr-toggle{display:none}
+  .jr .motion-toggle{display:none}
   /* 導入なし: BRIDGE は上に置いたまま、その下に俯瞰の静止の1枚。CTA は最初から */
   .jr-brand{top:calc(var(--jr-under) + 16px);transform:translate(-50%,0);width:clamp(220px,26vw,350px)}
   .jr-brand .l-navy,.jr-brand .l-sand{animation:none}
@@ -345,7 +338,7 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
     <h1 class="jr-brand" id="heroTitle"><svg class="logo-mark" viewBox="0 0 758 110" role="img" aria-label="BRIDGE"><path class="l-navy" stroke-width="6" pathLength="1" d="M8 74 C 62 16, 118 24, 176 84"/><path class="l-sand" stroke-width="6" pathLength="1" d="M58 94 C 118 60, 158 22, 232 12"/><text class="jr-word" x="312" y="86">BRIDGE</text></svg></h1>
     <figure class="jr" id="journey">
       <div class="jr-view" aria-hidden="true"><div class="jr-cam"><svg class="jr-far" focusable="false"></svg></div><div class="jr-cam"><svg class="jr-svg" focusable="false"></svg></div></div>
-      <button class="jr-toggle" type="button" aria-pressed="false" aria-label="動きを止める"><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
+      <button class="motion-toggle" type="button" aria-pressed="false" aria-label="動きを止める"><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
       <figcaption class="sr-only">BRIDGEの道のり。ロゴの線が伸びて、普段の仕事「退院支援」に届く。その先で、退院支援は「合意形成」「プロジェクト推進」という、病院の外でも通じる言葉に言いかえられる。ほかの経験からの線も集まって現在地になり、BRIDGE Compassの3つの橋に分かれる。「医療経営 / BizOps」の橋を進むと、線はそのままクリニックタウン3Dの街の道になる。「退院支援室への訪問を増やす」を選ぶと、来院が増え、平均待ちも長くなる。最後に引くと、ここまでの道のりが一本の線でつながり、その線から「見つける」「言葉にする」「試してみる」が出てくる。</figcaption>
     </figure>
   </div>
@@ -481,7 +474,7 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
   var hMark = brand && brand.querySelector('svg'), hNavy = hMark && hMark.querySelector('.l-navy'), hSand = hMark && hMark.querySelector('.l-sand'), hWord = hMark && hMark.querySelector('text');
   if (!fig || !hWord || !document.createElementNS || !window.requestAnimationFrame) { showCta(); return; }
   root.classList.add('js');
-  var view = fig.querySelector('.jr-view'), svg = fig.querySelector('.jr-svg'), farSvg = fig.querySelector('.jr-far'), btn = fig.querySelector('.jr-toggle');
+  var view = fig.querySelector('.jr-view'), svg = fig.querySelector('.jr-svg'), farSvg = fig.querySelector('.jr-far'), btn = fig.querySelector('.motion-toggle');
   var NS = 'http://www.w3.org/2000/svg', LOOP = 16.6, R0 = 14.4, INTRO = 2.4; // R0 = 巻き戻しの始まり。INTRO = 初回の導入(その後ループの 1.2 秒地点に合流)
   var reduceQ = window.matchMedia('(prefers-reduced-motion: reduce)'), spQ = window.matchMedia('(max-width: 760px)');
 

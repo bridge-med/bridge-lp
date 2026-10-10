@@ -23,7 +23,7 @@ done; done
 ```
 
 - 要るもの: node 22、playwright(chromium)、ffmpeg(libx264・libwebp)。`playwright` がリポジトリの `node_modules` から見つからないときは `ln -s /opt/node-tools/node_modules/playwright node_modules/playwright`
-- 1800 粒の軌跡は絵の情報量が多く、60fps・crf 20 では wide が約 14MB になったので、30fps・crf 23 で書き出す(シャッター 180° のぼけは fps に対して相対)。ページは 1 本だけを近づいてから読むが、容量の判断は台帳に残す
+- 1800 粒の軌跡は絵の情報量が多く、60fps・crf 20 では wide が約 14MB になったので、30fps・crf 23 で書き出し、crf 30 に再圧縮する(シャッター 180° のぼけは fps に対して相対)。wide 約 4MB・tall 約 3.5MB。ページは 1 本だけを近づいてから読むが、容量の判断は台帳に残す
 
 ## 絵コンテ(確定値・秒)
 
