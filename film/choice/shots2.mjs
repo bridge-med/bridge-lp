@@ -322,9 +322,12 @@ export const S6 = {
     return zc((Math.log(s) - Math.log(S6_S0)) / (Math.log(S6_S1) - Math.log(S6_S0)));
   },
   tall: { cam: (t, A) => {
-    // the map at the same width of the page (2.36x), the same dive to 400x (the point's colour fills the frame)
-    const s0 = S6_S0 * TK, cx0 = (A.o[0] - 60 + A.list.x + 262) / 2;
-    const Astart = [TW / 2 + (A.o[0] - cx0) * s0, TH / 2 - 24];   // -24: the frame top stays on the page (y >= 0)
+    // 2026-10-10 designer: at 2.36x (wide x TK) the site nav (.site-nav, fixed at page y 0-74) was in the frame above the map.
+    // Closer (2.6x) and the map set higher in the frame: the frame top is at page y 84 (below the nav), the frame is centred on the
+    // map's content (the left arcs at map.x .. the end of the longest name 02 at list.x+254), 現在地 and 01-03 stay readable
+    // (names about 19px x 2.6 = 49px tall at 1080), then the same dive to 400x (the point's colour fills the last 2 frames)
+    const s0 = 2.6, cx0 = (A.map.x + A.list.x + 254) / 2;
+    const Astart = [TW / 2 + (A.o[0] - cx0) * s0, (A.o[1] - 84) * s0];
     const u = clamp(t / (33 / FPS));
     const zc = zoomCam(A.o, Astart, TC, s0, S6_S1, TW, TH);
     const s = Math.exp(lerp(Math.log(s0), Math.log(S6_S1), u * u * u));
