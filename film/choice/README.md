@@ -38,7 +38,7 @@ SUBMAX=1 node film/choice/run2.mjs --fmt tall --theme dark --w 540 --tag probe -
 - tall のカメラ値は `shots2.mjs` の各ショットの `tall: { cam }`(engine が `--fmt tall` のとき shot に重ねる)。倍率の目安は wide×0.5625(同じ横幅=同じ見かけの大きさ)。例外と理由は各ショットのコメント
 - 署名の面(`card/index.html`)は製品と同じ起動スクリプトで `data-theme` を付け、藍の線は `--mark-line`(ライトは --navy と同値、ダークは --ink)
 - ポスター候補: `posters.sh`(t=0.0 / 11.2 / 14.0 の 3 つ。webp は libwebp quality 90、同じコマの png も置く。無加工)
-- 工程の記録: `work/PROGRESS.md`
+- 工程の記録: `work/PROGRESS.md(ローカル・未追跡)`
 
 ## 流用ショット(v1 の絵コンテから)
 
