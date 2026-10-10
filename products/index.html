@@ -41,6 +41,7 @@
 .first-head{display:grid;grid-template-columns:1fr 1fr;gap:20px 48px;align-items:end;margin-bottom:clamp(28px,4vh,40px)}
 .first-head h2{font-family:var(--sans);font-weight:900;font-size:clamp(28px,4vw,48px);line-height:1.2;letter-spacing:-0.01em;margin-top:16px}
 .first-head p{font-size:13.5px;line-height:2.1;color:var(--ink-2);max-width:34em;justify-self:end}
+.first-reel{margin:0 0 clamp(28px,4vh,40px)} /* 見出しの直下、行の上に1つ(designer 2026-10-09)。窓の既定の上余白は見出しの間隔が担う */
 .first-rows{border-top:1px solid var(--line)}
 .first-row{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1.5fr) auto;gap:8px 28px;align-items:center;padding:clamp(16px,2.4vh,22px) 0;border-bottom:1px solid var(--line);transition:background .3s}
 .first-row:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
@@ -127,6 +128,18 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
       </div>
       <p>無料・登録なし。入力は端末の中にだけ残ります。</p>
     </div>
+    <!-- 映像「選ぶ瞬間」(showreel/choice/)。実物の製品を実物の操作だけで動かした写し(第22条の写しの但し書き)。
+         Compass・経験の棚卸し・言いかえ帳・掲示じたく・クリニックタウン3D で選ぶ瞬間が続き、最後に BRIDGE の署名。
+         再生の約束は shared/bridge.js の Reel が担う。版は data-reel の中から選ぶ -->
+    <figure class="reel first-reel" data-reel="../showreel/choice/" data-reveal>
+      <div class="reel-frame">
+        <video class="reel-v" muted playsinline preload="none" controls poster="../showreel/choice/light-wide.webp" width="1920" height="1080">
+          <source src="../showreel/choice/light-wide.mp4" type="video/mp4">
+        </video>
+        <button class="motion-toggle" type="button" aria-pressed="true" aria-label="映像を再生する" hidden><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z"/></svg></button>
+      </div>
+      <figcaption class="sr-only">映像(15秒・音なし)。Compassの質問で「人に教えること」を選ぶ。経験の棚卸しに、やったことの文が打ち込まれて材料として残る。言いかえ帳で「板挟みになってた」が「立場の違う人の間の調整」に言いかえられる。掲示じたくで「臨時休診」を選び、できあがりの紙が暗い部屋から明るい部屋へ切り替わる。クリニックタウン3Dで経営の相談の選択肢を選ぶ。選ぶ瞬間が五つ続き、Compassの結果の地図に現在地と三つの橋が出る。最後に BRIDGE / EXPAND CHOICES. の署名。</figcaption>
+    </figure>
     <div class="first-rows" id="firstRows"></div>
   </div>
 </section>
