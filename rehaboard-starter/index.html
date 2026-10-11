@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script>document.documentElement.classList.add('js')</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RehaBoard Starter Kit — 整形外科クリニック向け リハKPI管理スターターキット</title>
@@ -43,6 +44,7 @@ body{font-family:var(--sans-jp);background:var(--paper);color:var(--ink);overflo
 h1,h2,h3,.hero-h{text-wrap:balance;word-break:auto-phrase;line-break:strict;overflow-wrap:break-word}
 p{text-wrap:pretty;word-break:auto-phrase;line-break:strict;overflow-wrap:break-word}
 .nowrap{white-space:nowrap}
+@media(max-width:420px){h2 .nowrap{white-space:normal}} /* 390px で「こうなっていませんか?」が 408px になり横スクロールが出ていた(2026-10-11)。折れ位置は BudouX に任せる */
 .br-pc{display:none}
 @media(min-width:720px){.br-pc{display:inline}}
 .br-sp{display:inline}
@@ -73,8 +75,9 @@ img,svg{display:block;max-width:100%}
 .nav-actions a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 14px;border-radius:2px;transition:all .15s}
 .nav-actions a.back{color:var(--ink-3)}
 .nav-actions a.back:hover{color:var(--ink)}
-.nav-actions a.cta{background:var(--ink);color:#fff}
-.nav-actions a.cta:hover{background:var(--indigo-deep)}
+/* ナビの CTA は ghost(ヒーローの主ボタンと同じ行き先。主は1画面に1つ。designer 2026-10-11) */
+.nav-actions a.cta{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.nav-actions a.cta:hover{border-color:var(--ink)}
 
 /* hero */
 .hero{padding:160px var(--pad-x) 100px;position:relative;background:var(--paper);text-align:left;border-bottom:1px solid var(--line)}
@@ -243,8 +246,10 @@ section.alt{background:var(--paper-2)}
 .foot-copy{margin-top:24px;font:500 10px/1.5 var(--sans-jp);color:var(--ink-4)}
 
 /* reveal */
-[data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
-[data-reveal].vis{opacity:1;transform:translateY(0)}
+/* JS が付与する html.js 配下でだけ隠す(JS 無効では最初から見える)。reduced-motion では動かさない(qa 2026-10-11) */
+html.js [data-reveal]{opacity:0;transform:translateY(12px);transition:opacity .6s cubic-bezier(0.2,0.7,0.2,1),transform .6s cubic-bezier(0.2,0.7,0.2,1)}
+html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){html.js [data-reveal]{opacity:1;transform:none;transition:none}}
 
 </style>
 </head>
@@ -269,7 +274,7 @@ section.alt{background:var(--paper-2)}
 <nav class="nav" id="nav">
   <a href="../index.html" class="nav-logo" data-link="bridge-lp">BRIDGE<span class="dot">.</span><span class="small">RehaBoard Starter</span></a>
   <div class="nav-actions">
-    <a href="../index.html" class="back" data-link="bridge-lp">← BRIDGE</a>
+    <a href="../products/index.html" class="back" data-link="products">← 一覧へ</a>
     <a href="#purchase" class="cta" data-link="purchase-starter">購入する</a>
   </div>
 </nav>
