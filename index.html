@@ -75,11 +75,12 @@ html.hz-live .hz-c{display:block;position:absolute;top:0;height:100%;pointer-eve
 /* 帯: PC は左に短い説明、右に CTA。スマホは説明・CTA の順で、どちらも最初の画面に入る(IA の原則1) */
 .hero-foot{height:var(--foot-h);max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);display:flex;align-items:center;justify-content:space-between;gap:16px 48px;box-sizing:content-box}
 .hero-desc{font-size:14px;line-height:1.9;color:var(--ink-2);max-width:31em}
-.hero-cta{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.hero-cta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
 .hero-main{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap;justify-content:flex-end}
 /* 副導線(ゲーム / 実務の道具)。主ボタンは Compass の1つだけ。文字リンク2つまで(designer 2026-10-11) */
 .h-alt{display:flex;flex-wrap:wrap;gap:0 22px;justify-content:flex-end}
-.tx-link.alt{min-height:36px;font-size:13px;color:var(--ink-2)}
+.tx-link.alt{min-height:36px;font-size:13px;color:var(--ink-2);position:relative}
+.tx-link.alt::after{content:'';position:absolute;inset:-4px 0 -5px} /* 見た目36pxのまま、タップ領域を44pxに(.tag::after と同じ型。下は1pxの下線ぶん広げる) */
 .tx-link.alt:hover{color:var(--ink)}
 .btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px;min-height:44px;white-space:nowrap} /* 帯の flex で縮められても1行(761〜797px で「る」が落ちていた) */
 .btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
@@ -132,15 +133,24 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
 .cp-shot .th-d,[data-theme="dark"] .cp-shot .th-l{display:none}
 [data-theme="dark"] .cp-shot .th-d{display:block}
 
-@media(max-width:760px){
+/* 帯を縦に積むのは 860px 以下(768 でも副導線が最初の画面に入る。designer 2026-10-11) */
+@media(max-width:860px){
   .hero{--foot-h:232px}
-  .jr-brand{top:44%;width:min(88vw,420px)}
   .hero-foot{flex-direction:column;align-items:stretch;justify-content:center;gap:12px}
   .hero-desc{order:-1;font-size:13px;line-height:1.85;max-width:none}
   .hero-cta{align-items:center;gap:6px}
   .hero-main{flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
   .hero-main .btn{justify-content:center;width:100%;max-width:340px}
   .h-alt{justify-content:center;gap:0 16px}
+}
+/* 副導線が2段に積まれる幅では ::after の当たり判定が隣と重なるので、実寸で44pxにする(qa 2026-10-11) */
+@media(max-width:600px){
+  .hero{--foot-h:256px}
+  .tx-link.alt{min-height:44px}
+  .tx-link.alt::after{content:none}
+}
+@media(max-width:760px){
+  .jr-brand{top:44%;width:min(88vw,420px)}
   .w-p{font-size:19px;line-height:2.05;letter-spacing:.03em}
   .pl-path{stroke-width:1.6}
   .try-cta{flex-direction:column;align-items:flex-start;gap:2px}
@@ -167,7 +177,7 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
 .tx-link .ar{transition:transform .3s var(--ease)}
 .tx-link:hover{border-color:var(--ink)}
 .tx-link:hover .ar{transform:translateX(4px)}
-.tx-link:focus-visible,.cp-shot:focus-visible,.sm-fig:focus-visible,.sm-item:focus-visible,.me-links a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.tx-link:focus-visible,.cp-shot:focus-visible,.sm-fig:focus-visible,.use-item:focus-visible,.me-links a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 
 /* Compass: 左に文字、右に実画面(sec-inner の右端を越えて画面の端まで) */
 .cp{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,5vw,72px);align-items:center;
@@ -207,7 +217,6 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
 .use-list{list-style:none;margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(32px,5vw,72px);border-top:1px solid var(--line)}
 .use-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 20px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line);min-height:44px;transition:border-color .3s var(--ease)}
 .use-item:hover{border-bottom-color:var(--ink-4)}
-.use-item:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .use-txt{display:flex;flex-direction:column;gap:4px}
 .use-t{font:700 16.5px/1.5 var(--sans);color:var(--ink)}
 .use-d{font-size:13.5px;line-height:1.85;color:var(--ink-2)}
@@ -219,7 +228,7 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
 /* ===== 閉じ(#about) =====
    本人の言葉3文 → 筆の線がロゴに集まる帯 → 明朝の一文 → 出口(2026-10-11)。明朝はこの一文だけ(憲法第23条 v1.5)。地の色は変えず、罫線で区切る */
 .me{padding:0 var(--pad-x) clamp(96px,14vh,160px);overflow-x:clip} /* overflow-x: 閉じの帯の canvas を画面の端まで裁ち落とすため(.lab と同じ) */
-.me-in{max-width:var(--max);margin:0 auto;border-top:1px solid var(--line);padding-top:clamp(64px,9vh,104px);
+.me-in{max-width:var(--max);margin:0 auto;padding-top:clamp(64px,9vh,104px); /* 上の罫線は「目的から探す」の最後の行が持つ(二重にしない) */
   display:grid;grid-template-columns:minmax(0,2fr) minmax(0,7fr) minmax(0,3fr)}
 .me-body{grid-column:2}
 .idea-h{margin-top:clamp(48px,7vh,72px);font-family:var(--mincho);font-weight:600;font-size:clamp(24px,3.2vw,38px);line-height:1.6;letter-spacing:0.03em}
@@ -301,7 +310,7 @@ html.kz-on body[data-page="home"] .footer-brand svg{display:none}
     <p class="hero-desc">看護師・リハビリ職・医療事務の方へ。いつもの仕事が病院の外でどんな言葉になるかを見つけて、ゲームや道具で試せます。</p>
     <div class="hero-cta" id="heroCta">
       <div class="hero-main"><a class="btn glass" href="./compass/index.html">自分の場合を見てみる <span aria-hidden="true">→</span></a><p class="h-meta">10の質問・約3分・登録不要</p></div>
-      <p class="h-alt"><a class="tx-link alt" href="./clinic-flow-3d/index.html">ゲームで経営を学ぶ <span class="ar" aria-hidden="true">→</span></a><a class="tx-link alt" href="./products/index.html#work">明日の業務の道具を見る <span class="ar" aria-hidden="true">→</span></a></p>
+      <p class="h-alt"><a class="tx-link alt" href="./clinic-flow-3d/index.html">ゲームで経営を学ぶ <span class="ar" aria-hidden="true">→</span></a><a class="tx-link alt" href="./products/index.html#work">明日の業務に使える道具を見る <span class="ar" aria-hidden="true">→</span></a></p>
     </div>
   </div>
 </section>
@@ -321,7 +330,7 @@ html.kz-on body[data-page="home"] .footer-brand svg{display:none}
       <h2 class="try-h" id="tryTitle">いつもの仕事を、外の言葉で言うと</h2>
       <div class="tw-pick tag-row" id="twPick" role="group" aria-label="いつもの仕事を選ぶ" hidden></div>
       <p class="tw-out" aria-live="polite" aria-atomic="true"><span class="tw-from">「<b>退院支援</b>」は</span><span class="tw-to"><span class="tw-to-t">プロジェクト推進・合意形成</span></span></p>
-      <p class="cp-p try-p">10の質問に答えると、職種と答えに沿った言いかえと、いまの経験から見える3つの方向が「橋」として出ます。右は、理学療法士の答えの一例から出た結果の画面です。</p>
+      <p class="cp-p try-p">10の質問に答えると、職種と答えに沿った言いかえと、いまの経験から見える3つの方向が「橋」として出ます。添えた画面は、職種を理学療法士にして答えたときの結果の一例です。</p>
       <p class="try-cta"><a class="tx-link" href="./compass/index.html">自分の場合を見てみる <span class="ar" aria-hidden="true">→</span></a><span class="h-meta">10の質問・約3分・登録不要</span></p>
     </div>
     <figure class="cp-fig">
@@ -329,7 +338,7 @@ html.kz-on body[data-page="home"] .footer-brand svg{display:none}
         <img class="th-l" src="./images/products/shots/compass-result-light.webp" alt="BRIDGE Compassの結果画面の例。見出し「立場の違う人を、ひとつのチームにする力」、持っているもの「調整・チーム推進・改善・対人理解」、現在地から「マネジメント」「プロジェクトマネジメント」「行政 / 医療政策」へ3本の線が分かれる地図" width="1280" height="800" decoding="async">
         <img class="th-d" src="./images/products/shots/compass-result-dark.webp" alt="" width="1280" height="800" loading="lazy" decoding="async">
       </a>
-      <figcaption class="shot-cap">結果画面の例。理学療法士で、調整やチームの質問を選んだ場合(<time datetime="2026-10-11">2026-10-11</time> 撮影)</figcaption>
+      <figcaption class="shot-cap">結果画面の例。職種は理学療法士、調整やチームに関わる答えを選んだ場合(<time datetime="2026-10-11">2026-10-11</time> 撮影)</figcaption>
     </figure>
   </div>
   <script>/* 言いかえの一場面: 選ぶと、言いかえを入れ替えて砂の下線を引く */(()=>{try{const T=[['退院支援','プロジェクト推進・合意形成'],['申し送り','要点を絞った情報の引き継ぎ'],['患者・家族への説明','複雑な情報の翻訳'],['多職種カンファレンス','ステークホルダー調整'],['作業分析','プロセス分解'],['後輩指導','人材育成・フィードバック']];
@@ -345,7 +354,7 @@ html.kz-on body[data-page="home"] .footer-brand svg{display:none}
      事実は台帳と実データに合わせる(第15条): Clinic Town 3D の版=sw.js の VER(手を入れた回数は載せない。2026-10-03 社長決定)/ 版と個数は scripts/check-site.mjs の6項が照合する / 29=products/index.html の PRODUCTS の件数(増減したらここも直す) -->
 <section class="lab" id="lab" aria-labelledby="labTitle">
   <div class="lab-in">
-    <h2 class="lab-h" id="labTitle">ほかにも、作っています</h2>
+    <h2 class="lab-h" id="labTitle">ほかにも作っています</h2>
     <p class="lab-lead">直しながら置いています。ここに並べたものは無料で、登録もいりません。入力はこの端末の中にだけ残ります。</p>
   </div>
 
@@ -375,7 +384,7 @@ html.kz-on body[data-page="home"] .footer-brand svg{display:none}
         <figcaption class="sm-cap">経験の棚卸し(実際の画面)</figcaption>
       </figure>
     </div>
-    <p class="lab-all"><span class="n">ぜんぶで29個あります。</span><a class="tx-link" href="./products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
+    <p class="lab-all"><span class="n">ぜんぶで29点あります。</span><a class="tx-link" href="./products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
   </div>
 </section>
 
