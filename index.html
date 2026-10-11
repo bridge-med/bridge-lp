@@ -25,19 +25,18 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 /* ================================================================
-   Home v10 — 筆の線のトップ(2026-10-11 社長「マージして」。試作 v4 = claude.ai の artifact「BRIDGE トップ試作」)
+   Home v11 — 筆の線と、ページを進む一本の線(2026-10-11 社長「一旦マージして」。試作 v7 = claude.ai の artifact「BRIDGE トップ試作」)
    構成: ヒーロー(100svh: 真ん中に BRIDGE のロックアップ+短い説明と CTA の帯)→ 本人の言葉(3文)→ 触れる(いつもの仕事を、外の言葉で言うと・Compass)
          → ほかに試しているもの(クリニックタウン3D / 小さな道具)→ 閉じ(#about: 筆の線がロゴに集まる帯・明朝の一文・出口)→ フッター
    並びは憲法第20条の曲線: 安心 → 共感 → 希望 → 挑戦したい → 自分で選べる → 未来が楽しみ
-   線の約束(ヒーローと本人の言葉の背面 .hz。designer 2026-10-10 照合)
-     1 素材は閉じ(.kz)と同じ筆の線だけ。語・図・地の塗りを描かない。端の溶けは mask のアルファ
-     2 開いた瞬間だけ時間で動く(約3秒・一度だけ): 画面いっぱいの線 → 大きなロゴ → 名前の横のマークに収まり、名前が出る
-     3 あとはスクロール位置だけで決まる(時刻 W)。止めれば止まり、戻せば戻る。固定するのはヒーローの 1.4 画面だけ(sticky)。文字は普通に流れる
-       ヒーロー: マークが画面いっぱいに大きくなり、ほどけて線の野になる
-       本人の言葉: 1文目で静かに(4割を消し、濃さ7割)/ 2文目で流れの近くから向きがそろう / 3文目で6割の線が一本の流れに集まり、右上の画面の外へ続く
-       (全部を一本にしない。文は「外に"も"」なので、残りは静かな野のまま)。文の近くでは線を薄くする。層が外れるときは、流れの手前の端から抜ける
-     4 砂は、ロゴの砂の線に集まる粒と、触れる一場面で選んだ瞬間の下線だけ(第22条)
-     5 動きを減らす設定・JS なし・初期化の失敗では線の層を出さない(ロックアップが最初から真ん中にあり、固定もしない)
+   開いた瞬間(.hz。designer 2026-10-10 照合)
+     素材は閉じ(.kz)と同じ筆の線だけ。画面いっぱいの線 → 大きなロゴ → 名前の横のマークに収まり、名前が出る(約 3.2 秒・一度だけ)。スクロールには従わず、固定もしない
+   ページの線(.pl)
+     1 ヒーローのロゴの藍の線が、その終わり(176,84)からその向きのまま伸び、ページの余白を縫って、閉じのロゴの藍の線の始まり(8,74)へ同じ向きで入る
+       (最後は左から角を作らずに回り込む)。色は --mark-line(ロゴの藍の線の役割)。語・図は描かない。読ませる文字を横切らない(実画面の写しの後ろは通る)
+     2 引く長さはスクロール位置だけで決まる。先端は画面の高さの 7 割(スマホは 8 割。最初の 0.4 画面は始まりから滑らかに追いつく)。スマホは節の間の空きで左右を渡る。先端の点は砂(第22条の現在地)
+     3 本人の言葉・触れる一場面・ほかの道具(文字と実画面)は、先端が届いた高さから上からぬぐうように現れ、戻せば引っ込む(mask のアルファ)
+     4 動きを減らす設定では、線は最初から引き終え、点はなく、文字と実画面は最初から見える。JS なしでは線を出さない(文字と実画面は見える)
    閉じの約束(#about の帯 .kz だけ。designer 2026-10-05)
      1 線が主語。帯に現れるのは線だけで、文字を描かない。地を塗らない(夜・グラデーション・ぼかしなし。端の溶けは mask のアルファ)
      2 手で起きる。時刻はスクロール位置だけで決まる。固定・吸着・スクロール量の書き換えをしない。止めれば止まり、戻せばほどける
@@ -50,7 +49,7 @@
 /* ===== ヒーロー: 最初の1画面 =====
    上から: 面(真ん中に BRIDGE のロックアップ)→ 帯(短い説明と CTA)。帯までで 100svh。
    ロックアップは h1 のインライン SVG(正式ロゴの MARK の経路+英字)。JS がなくても、初期化が遅くても、BRIDGE と CTA は最初から見える。
-   動けるとき(hz-live)は、h1 のマークの上に同じ経路の写し(.hz-mark)を重ね、線の層がそこへ集まって渡す */
+   動けるとき(hz-live)は、面(.jr-top)の中の canvas に筆の線が集まり、h1 のマークに重ねた同じ経路の写し(.hz-mark)へ渡す */
 .hero{position:relative;overflow-x:clip;--foot-h:128px}
 .jr-top{position:relative;height:calc(100svh - var(--foot-h));min-height:460px;max-height:980px}
 .jr-brand{position:absolute;left:50%;top:47%;z-index:2;width:clamp(320px,52vw,860px);margin:0;transform:translate(-50%,-50%);line-height:0;pointer-events:none}
@@ -65,8 +64,13 @@
 html.hz-on .jr-brand > svg:not(.hz-mark) .l-navy,html.hz-on .jr-brand > svg:not(.hz-mark) .l-sand{visibility:hidden;animation:none}
 html.hz-on .jr-brand .hz-mark{display:block;position:absolute;left:0;top:0;width:calc(100% * 240 / 758);height:auto;overflow:visible}
 .jr-brand .hz-mark .l-navy,.jr-brand .hz-mark .l-sand{stroke-dasharray:none;animation:none}
-html.hz-run .hz-mark{visibility:hidden} /* 線の層が描いているあいだは写しを隠す(収まったところで 0.1 の重ねで渡す) */
+.hz.hz-run .hz-mark{visibility:hidden} /* 線の層が描いているあいだは写しを隠す(収まったところで 0.1 の重ねで渡す) */
 html.hz-live .jr-brand .jr-word{opacity:clamp(0,calc((var(--hz-t,5) - 4) / .38),1)} /* 名前はマークが収まるのと一緒に出る */
+/* 線の層(開いた瞬間だけ): 上はナビの下、下は帯の手前で溶ける(mask のアルファ) */
+.hz-c{display:none}
+html.hz-live .hz-c{display:block;position:absolute;top:0;height:100%;pointer-events:none;z-index:1;
+  --hz-v:linear-gradient(to bottom,transparent 0,transparent 52px,#000 120px,#000 calc(100% - 36px),transparent 100%);
+  -webkit-mask-image:var(--hz-v);mask-image:var(--hz-v)}
 /* 帯: PC は左に短い説明、右に CTA。スマホは説明・CTA の順で、どちらも最初の画面に入る(IA の原則1) */
 .hero-foot{height:var(--foot-h);max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);display:flex;align-items:center;justify-content:space-between;gap:16px 48px;box-sizing:content-box}
 .hero-desc{font-size:14px;line-height:1.9;color:var(--ink-2);max-width:31em}
@@ -78,35 +82,29 @@ html.hz-live .jr-brand .jr-word{opacity:clamp(0,calc((var(--hz-t,5) - 4) / .38),
 /* ヒーローが画面にある間は、ナビのロゴをしまう(面の中に BRIDGE があるので二つ並べない)。出るときも消えるときも .4s */
 body[data-page="home"] .nav-logo{transition:opacity .4s var(--ease),visibility 0s}
 html.hero-in body[data-page="home"] .nav-logo{opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s linear .4s}
-/* ただし線の層がロゴをほどいているあいだ(τ<1.75。面にロゴも名前もない)は、ナビのロゴを出す(BRIDGE の名前を画面から途切れさせない。第24条の2・designer 2026-10-11) */
-html.hz-live.hero-in:not(.hz-logo) body[data-page="home"] .nav-logo{opacity:1;visibility:visible;transition:opacity .4s var(--ease),visibility 0s}
 
-/* ===== 線の層(.hz)と固定 =====
-   .world(ヒーロー+本人の言葉)の背面に、画面の高さの層を1枚(sticky)。文字は普通に流れる。固定(pin)するのはヒーローだけで、動けるときだけ。
-   mask: 上はナビの下、帯(説明と CTA)の上下は JS が --b0/--b1 で穴を開ける。下端は層が外れるとき JS が --fe で柔らかく広げる(水平の切り口を見せない) */
-.world{position:relative}
-.hz-bg{display:none}
-html.hz-live .hz-bg{display:block;position:absolute;inset:0;pointer-events:none;z-index:0}
-.hz{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
-.hz-c{position:absolute;top:0;left:0;width:100%;height:100%;--b0:300vh;--b1:300vh;--fe:36px;
-  --hz-v:linear-gradient(to bottom,transparent 0,transparent 52px,#000 120px,#000 calc(var(--b0) - 40px),transparent var(--b0),transparent var(--b1),#000 calc(var(--b1) + 40px),#000 calc(100% - var(--fe)),transparent 100%);
-  -webkit-mask-image:var(--hz-v);mask-image:var(--hz-v)}
-.hero-pin,.words{position:relative;z-index:1}
-html.hz-live .hero-pin{height:240vh;height:240svh}
-html.hz-live .hero-pin > .hero{position:sticky;top:0;height:100vh;height:100svh}
-html.hz-live .jr-top{min-height:0} /* 固定中は帯まで 100svh に収める(低い画面で CTA が下へはみ出していた。qa 2026-10-11) */
+/* ===== ページの線(約束は <style> 冒頭の「ページの線」) =====
+   本文の下の層(実画面の写しの後ろを通るときは隠れる)。pl-on=線を出す(開いた瞬間のあと)/pl-reveal=先端で現す(動けるときだけ)。
+   .pr は先端が届いた高さまで上から見える(--pr 0→1。JS が付ける)。ぬぐいの縁は 72px の mask のアルファ */
+main{position:relative;overflow-x:clip} /* 線の層が画面の外へ出ても横スクロールを出さない(body の overflow-x に頼らない) */
+main > section{position:relative;z-index:1}
+.pl{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:0;overflow:visible;opacity:0;transition:opacity .6s var(--ease)}
+html.pl-on .pl{opacity:1}
+.pl-path{fill:none;stroke:var(--mark-line);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pl-tip{fill:var(--dawn);opacity:0;transition:opacity .3s var(--ease)}
+.pl-tip.on{opacity:1}
+html.pl-reveal .pr:not(.pr-done){-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--pr,0) * (100% + 72px) - 72px),transparent calc(var(--pr,0) * (100% + 72px)));mask-image:linear-gradient(to bottom,#000 calc(var(--pr,0) * (100% + 72px) - 72px),transparent calc(var(--pr,0) * (100% + 72px)));transform:translateY(calc((1 - var(--pr,0)) * 14px))}
+/* 現れ終えたら mask を外す(mask は外へ出るフォーカスの輪も切るため)。先端より下でも、中にフォーカスがあれば見せる(WCAG 2.4.7) */
+html.pl-reveal .pr:focus-within{-webkit-mask-image:none;mask-image:none;transform:none}
 
 /* ===== 本人の言葉 =====
-   1文ずつ、画面の真ん中を通る。PC は左寄り(右側を線の流れに空ける)。3文目のあと 0.4 画面ほど、できた流れを画面に残す */
-.words{padding:0 var(--pad-x)}
+   大きな字で3文。PC は左寄り(右の余白をページの線が通る)。ページの線の先端が届いたところから現れる */
+.words{padding:clamp(56px,9vh,110px) var(--pad-x) 0}
 .w-in{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,7fr) minmax(0,3fr)}
-.w-step{grid-column:2;min-height:86vh;min-height:86svh;display:flex;align-items:center}
-.w-last{min-height:140vh;min-height:140svh;align-items:flex-start;padding-top:34vh;padding-top:34svh;box-sizing:border-box}
+.w-step{grid-column:2;padding:clamp(18px,3.5vh,40px) 0}
 .w-p{max-width:23em;font:500 clamp(20px,2.05vw,29px)/2.05 var(--sans);letter-spacing:.04em;color:var(--ink);word-break:auto-phrase}
 .w-p .w-l{display:block}
 .w-sign{margin-top:30px;font:400 13px/1.8 var(--sans);letter-spacing:.02em;color:var(--ink-3)}
-/* 線の層がないとき: 線のない 86〜140svh は余白ではなく空白なので、普通の段の間隔に */
-html:not(.hz-live) .w-step{min-height:auto;padding:clamp(48px,12vh,120px) 0}
 
 /* ===== 触れる: いつもの仕事を、外の言葉で言うと =====
    左に文字と選択、右に Compass の実画面(下の .cp の組み)。選択は .tag(押せる Pill)。13px と大きな言いかえの組みはここだけ(DS §6: designer 2026-10-10)。
@@ -139,8 +137,7 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
   .hero-cta{flex-direction:column;align-items:center;justify-content:center;gap:8px}
   .hero-cta .btn{justify-content:center;width:100%;max-width:340px}
   .w-p{font-size:19px;line-height:2.05;letter-spacing:.03em}
-  .w-step{min-height:80svh}
-  .w-last{min-height:130svh;padding-top:30svh}
+  .pl-path{stroke-width:1.6}
   .try-cta{flex-direction:column;align-items:flex-start}
   .try-cta .btn{width:100%;max-width:340px;justify-content:center}
 }
@@ -244,19 +241,10 @@ html.kz-on body[data-page="home"] .footer-brand svg{display:none}
 @media(prefers-reduced-motion:reduce){html.kz-live .kz{height:calc(var(--kz-mw) * 110 / 240)} html.kz-live .kz-c{display:none}}
 
 /* ===== 下の動き =====
-   1) 文字: 共通の reveal。本人の言葉と閉じは移動なしで、ゆっくり opacity のみ
-   2) 砂の下線: 触れる一場面で選んだ瞬間だけ、左から引く(scaleX)
-   3) Compass とクリニックタウン3D の実画面: 横から少しだけ覗く(一度だけ)
-   初期状態は html.js の下にだけ書き、共通の安全弁(rv-safe)と reduced-motion を子要素・疑似要素にも当てる */
+   1) 本人の言葉・触れる一場面・ほかの道具: ページの線の先端が届いたところから現れる(.pr。上の「ページの線」)
+   2) 閉じ: 共通の reveal を移動なしで、ゆっくり opacity のみ(帯があるときは下の規則で最初から)
+   3) 砂の下線: 触れる一場面で選んだ瞬間だけ、左から引く(scaleX) */
 html.js .me [data-reveal]{transform:none;transition:opacity 1.6s ease}
-html.js .words [data-reveal]{transform:none;transition:opacity 1.4s ease}
-html.js .cp-shot[data-reveal]{transform:translateX(64px);transition:opacity 1.2s var(--ease),transform 1.6s var(--ease),border-color .35s var(--ease)}
-html.js .cp-shot[data-reveal].on{transform:none}
-html.js .cp.rev .cp-shot[data-reveal]{transform:translateX(-64px)}
-html.js .cp.rev .cp-shot[data-reveal].on{transform:none}
-@media(prefers-reduced-motion:reduce){
-  html.js .cp-shot[data-reveal],html.js .cp.rev .cp-shot[data-reveal]{transform:none;transition:none;animation:none}
-}
 /* 閉じの帯があるときは、明朝の一文を最初から出す(マークより後に文字が追いかけて出ない)。上の html.js .me [data-reveal] と同じ詳細度なので、この位置に置く */
 html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;animation:none}
 
@@ -289,16 +277,16 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
 
 <main>
 
-<!-- ============ ヒーロー+本人の言葉(.world) ============
-     開いた瞬間は BRIDGE と動き。h1 は BRIDGE のロックアップ(正式ロゴの MARK の経路+英字)。背面の線の層(.hz)は下の script が描く(約束は <style> 冒頭の「線の約束」)。
+<svg class="pl" id="pl" aria-hidden="true" focusable="false"><path class="pl-path"/><circle class="pl-tip" r="4.5"/></svg>
+
+<!-- ============ ヒーロー ============
+     開いた瞬間は BRIDGE と動き。h1 は BRIDGE のロックアップ(正式ロゴの MARK の経路+英字)。面の中の筆の線(.hz)は下の script が描く(約束は <style> 冒頭)。
      線の層は aria-hidden で、読む内容を持たない。動きを減らす設定・JS なしでは出さない -->
-<div class="world" id="world">
-<div class="hz-bg" aria-hidden="true"><div class="hz" id="hz"><canvas class="hz-c"></canvas></div></div>
-<div class="hero-pin" id="heroPin">
 <section class="hero" aria-labelledby="heroTitle">
-  <div class="jr-top">
+  <div class="jr-top hz" id="hz">
+    <canvas class="hz-c" aria-hidden="true"></canvas>
     <h1 class="jr-brand" id="heroTitle"><svg class="logo-mark" viewBox="0 0 758 110" role="img" aria-label="BRIDGE"><path class="l-navy" stroke-width="6" pathLength="1" d="M8 74 C 62 16, 118 24, 176 84"/><path class="l-sand" stroke-width="6" pathLength="1" d="M58 94 C 118 60, 158 22, 232 12"/><text class="jr-word" x="312" y="86">BRIDGE</text></svg><svg class="logo-mark hz-mark" viewBox="0 0 240 110" aria-hidden="true" focusable="false"></svg></h1>
-    <script>/* 線の層の準備: h1 のマークの経路を写し(hz-on)、動けるときだけ hz-live。動けるなら最初の1枚はマークを隠し、線が集まるのを待つ */(()=>{try{const d=document,r=d.documentElement,c=r.classList,m=d.querySelector('.hz-mark'),cv=d.querySelector('.hz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle > svg:not(.hz-mark) .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;c.add('hz-on');if(cv.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches){c.add('hz-live','hz-run','hz-logo');r.style.setProperty('--hz-t','0');setTimeout(()=>{if(!(window.HZ&&HZ.kick))c.remove('hz-live','hz-run','hz-logo')},4000)}}catch(e){}})()</script>
+    <script>/* 開いた瞬間の準備: h1 のマークの経路を写し(hz-on)、動けるときだけ hz-live。動けるなら最初の1枚はマークを隠し、線が集まるのを待つ(4 秒で始まらなければ静止に戻す) */(()=>{try{const d=document,r=d.documentElement,c=r.classList,m=d.querySelector('.hz-mark'),cv=d.querySelector('.hz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle > svg:not(.hz-mark) .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;c.add('hz-on');if(cv.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const z=d.getElementById('hz');c.add('hz-live');z.classList.add('hz-run');r.style.setProperty('--hz-t','0');setTimeout(()=>{if(!(window.HZ&&HZ.kick)){c.remove('hz-live');z.classList.remove('hz-run')}},4000)}}catch(e){}})()</script>
   </div>
   <div class="hero-foot">
     <p class="hero-desc">看護師・リハビリ職・医療事務の方へ。いつもの仕事が病院の外でどんな言葉になるかを見つけて、ゲームや道具で試せます。</p>
@@ -308,20 +296,18 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
     </div>
   </div>
 </section>
-</div>
 
 <!-- ============ 本人の言葉 ============
-     ヒーローの線の世界のまま読む。1〜2文目は社長の依頼文(2026-09-23)の言葉をもとにしている(第13条: 本人の実話の範囲を超えない)。
+     ページの線の先端が届いたところから現れる。1〜2文目は社長の依頼文(2026-09-23)の言葉をもとにしている(第13条: 本人の実話の範囲を超えない)。
      3文目は前の版のトップの文を引き継いだ(社長本人の言葉かは未確認のまま、2026-10-11 社長「マージして」でこの形で出荷)。
      道具の前に置くのは第20条の曲線(安心 → 共感 → 希望 → 挑戦したい)のため -->
 <section class="words" id="words" aria-label="運営者の言葉">
   <div class="w-in">
-    <div class="w-step"><p class="w-p" data-reveal>臨床だけをしていた頃、事業会社で働くとは思っていませんでした。</p></div>
-    <div class="w-step"><p class="w-p" data-reveal>外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p></div>
-    <div class="w-step w-last"><div class="w-p" data-reveal><p>道は、病院の外にも続いています。<span class="w-l">それが見えるものを、ひとつずつ作っています。</span></p><p class="w-sign">理学療法士の私(橋本渉)が、ひとりで運営しています。</p></div></div>
+    <div class="w-step"><p class="w-p">臨床だけをしていた頃、事業会社で働くとは思っていませんでした。</p></div>
+    <div class="w-step"><p class="w-p">外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p></div>
+    <div class="w-step"><div class="w-p"><p>道は、病院の外にも続いています。<span class="w-l">それが見えるものを、ひとつずつ作っています。</span></p><p class="w-sign">理学療法士の私(橋本渉)が、ひとりで運営しています。</p></div></div>
   </div>
 </section>
-</div>
 
 <!-- ============ 触れる: いつもの仕事を、外の言葉で言うと ============
      第28条(体験は説明に勝る)の「触れる」瞬間。事実は実データに合わせる(第15条):
@@ -338,7 +324,7 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
       <p class="cp-p try-p">言いかえは BRIDGE Compass の表から選んでいます。質問に答えると、職種と答えに沿った言いかえと、いまの経験から見える3つの方向が「橋」として出ます。</p>
       <div class="try-cta"><a class="btn glass" href="./compass/index.html">自分の場合を見てみる <span aria-hidden="true">→</span></a><p class="h-meta">10の質問・約3分・登録不要</p></div>
     </div>
-    <a class="cp-shot" href="./compass/index.html" data-reveal>
+    <a class="cp-shot" href="./compass/index.html">
       <img src="./images/products/compass-1280.webp" srcset="./images/products/thumbs/compass.webp 880w, ./images/products/compass-1280.webp 1280w" sizes="(max-width:860px) 100vw, 58vw" alt="BRIDGE Compassの実際の画面。「あなたの経験、どこまで使える?」の見出しと、3分で探してみるボタン" width="1280" height="800" loading="lazy" decoding="async">
     </a>
   </div>
@@ -351,21 +337,21 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
 </section>
 
 <!-- ============ ほかに試しているもの ============
-     商品の一覧ではなく、いま手元にあるもの。事実は台帳と実データに合わせる(第15条):
+     商品の一覧ではなく、いま手元にあるもの。文字と実画面はページの線の先端が届いたところから現れる。事実は台帳と実データに合わせる(第15条):
      Clinic Town 3D の版=sw.js の VER(手を入れた回数は載せない: 数え方で値が変わり、期間が古び、作業の主体も読み違えられるため。2026-10-03 社長決定)/
      版と個数は scripts/check-site.mjs の6項が照合する /
      29=products/index.html の PRODUCTS の件数(増減したらここも直す) -->
 <section class="lab" id="lab" aria-labelledby="labTitle">
-  <div class="lab-in" data-reveal>
+  <div class="lab-in">
     <h2 class="lab-h" id="labTitle">ほかにも、いろいろ試しています</h2>
     <p class="lab-lead">作ったものを、直しながら置いています。ここに並べたものは無料で、登録もいりません。入力はこの端末の中にだけ残ります。</p>
   </div>
 
   <div class="cp rev">
-    <a class="cp-shot" href="./clinic-flow-3d/index.html" data-reveal>
+    <a class="cp-shot" href="./clinic-flow-3d/index.html">
       <img src="./images/products/shots/clinic-flow-3d-decision.webp" sizes="(max-width:860px) 100vw, 58vw" alt="クリニックタウン3Dの実際の画面。Day 6 の相談で、紹介を増やす動き方を3つの選択肢から選ぶところ" width="1440" height="900" loading="lazy" decoding="async">
     </a>
-    <div class="cp-text" data-reveal>
+    <div class="cp-text">
       <p class="note">直し続けているもの</p>
       <h3 class="cp-name">クリニックタウン3D</h3>
       <p class="cp-p">クリニックの経営を、1日ずつ動かして学ぶゲームです。診療時間を1コマ変えると、待ち時間と利益が変わります。</p>
@@ -377,7 +363,7 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
   <div class="lab-in">
 
     <div class="sm">
-      <div data-reveal>
+      <div>
         <p class="note">小さく試しているもの</p>
         <ul class="sm-list">
           <li><a class="sm-item" href="./tanaoroshi/index.html"><span class="sm-txt"><span class="sm-name">経験の棚卸し<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">18の質問で、職務経歴書のたねをつくる。面接で実績をうまく言えないときに。</span></span></a></li>
@@ -386,14 +372,14 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
           <li><a class="sm-item" href="./pmi-quest/index.html"><span class="sm-txt"><span class="sm-name">クリニックPMIクエスト<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">承継直後の30日を、10問で診断する。</span></span></a></li>
         </ul>
       </div>
-      <figure data-reveal data-reveal-delay="1">
+      <figure>
         <a class="sm-fig" href="./tanaoroshi/index.html"><img src="./images/products/thumbs/tanaoroshi.webp" alt="経験の棚卸しの実際の画面" width="880" height="550" loading="lazy" decoding="async"></a>
         <figcaption class="sm-cap">経験の棚卸し(実際の画面)</figcaption>
       </figure>
     </div>
 
 
-    <p class="lab-all" data-reveal><span class="n">ぜんぶで29個あります。</span><a class="tx-link" href="./products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
+    <p class="lab-all"><span class="n">ぜんぶで29個あります。</span><a class="tx-link" href="./products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
   </div>
 </section>
 
@@ -419,44 +405,22 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
 <footer class="site-footer"></footer>
 <script src="./shared/bridge.js" defer></script>
 <script>
-/* 線の層の時刻 W。ヒーローの固定の間は τ(5→0.45。5=名前の横のマーク、3.4=画面いっぱいのロゴ、0.45=線の野)、そのあと本人の言葉のあいだは 1 画面につき 0.8 ずつ下がる。
-   開いた瞬間: 線の準備ができたら約 3.2 秒で 0→5(一度だけ)。phase(W): 本人の言葉の何文目が画面の中央にあるか(0,1,2。間は補間)。
-   exit(W): 層が外れてから 0.7 画面上がるまでに 0→1。strength(): ダークの線の強さ(線と地のコントラストの中央値をライトにそろえる。ライト 2.73 / ダーク 3.20 → ×0.86 で 2.66。言葉の背面だけ) */
+/* 開いた瞬間の時刻 τ(0〜5)。線の準備ができたら約 3.2 秒で 0→5(一度だけ。3.45 までは画面の中央に大きなロゴ、そこから名前の横へ縮む)。スクロールには従わない。
+   集まり終えたら HZ.done を解く(ページの線がそれを待つ)。動けない・失敗・途中から開いたときはすぐ解く */
 window.HZ = (function () {
-  var R = document.documentElement, pin = document.getElementById('heroPin'), band = document.querySelector('.hero-foot'), world = document.getElementById('world');
-  var DU = 3.2, t0 = 0, started = false, done = false, RATE = .8, pinEnd = 1e9, wEnd = -1e9, ws = [];
+  var R = document.documentElement, DU = 3.2, t0 = 0, started = false, done = false, res;
   var io = function (u) { return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
-  function p() { var r = pin.getBoundingClientRect(), span = r.height - innerHeight; return span > 1 ? Math.min(1, Math.max(0, -r.top / span)) : 0; }
-  /* スクロールの進み p → τ。大きくなっていく区間(4.4→3.4)に長く、線の野は短く */
-  var KP = [[0, 5], [.12, 4.4], [.46, 3.35], [.74, 1.7], [1, .45]];
-  function scrollTau(x) { for (var i = 1; i < KP.length; i++) if (x <= KP[i][0]) { var a = KP[i - 1], b = KP[i], u = (x - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * u; } return KP[KP.length - 1][1]; }
-  function Wof(y) { return .45 - RATE * (y - pinEnd) / innerHeight; }
-  var wp = [].slice.call(document.querySelectorAll('.w-p'));
-  function measure() { var vh = innerHeight, sy = scrollY, r = pin.getBoundingClientRect(); pinEnd = r.top + sy + r.height - vh;
-    var wr = world.getBoundingClientRect(); wEnd = Wof(wr.bottom + sy - vh);
-    ws = wp.map(function (el) { var b = el.getBoundingClientRect(); return Wof(b.top + sy + b.height / 2 - vh / 2); }); }
-  function load() { if (done) return 5; if (!started) return 0; var u = (performance.now() - t0) / 1000 / DU; if (u >= 1) { done = true; return 5; } return 5 * io(u); }
-  var cv = document.querySelector('.hz-c');
+  function finish() { done = true; if (res) { res(); res = null; } }
+  function load() { if (done) return 5; if (!started) return 0; var u = (performance.now() - t0) / 1000 / DU; if (u >= 1) { finish(); return 5; } return 5 * io(u); }
   var api = {
-    target: function () { var y = scrollY, t = y <= pinEnd ? scrollTau(p()) : Math.max(-2.9, Wof(y)); return Math.min(load(), t); },
-    phase: function (w) { var n = ws.length; if (!n) return -9; if (w >= ws[0]) return -(w - ws[0]) / RATE; for (var i = 0; i < n - 1; i++) if (w >= ws[i + 1]) return i + (ws[i] - w) / (ws[i] - ws[i + 1]); return n - 1 + (ws[n - 1] - w) / RATE; },
-    exit: function (w) { return Math.min(1, Math.max(0, (wEnd - w) / (.7 * RATE))); },
-    strength: function () { return R.getAttribute('data-theme') === 'dark' ? .86 : 1; },
-    /* 画面にある文の箱(舞台の座標・余白 24px)。線はこの近くで薄くなる */
-    boxes: function () { var o = [], c = cv.getBoundingClientRect(), vh = innerHeight;
-      for (var i = 0; i < wp.length; i++) { var b = wp[i].getBoundingClientRect(); if (b.bottom < -40 || b.top > vh + 40) continue; o.push([b.left - c.left - 24, b.top - c.top - 24, b.right - c.left + 24, b.bottom - c.top + 24]); } return o; },
+    done: new Promise(function (r) { res = r; }),
+    target: load,
     waiting: function () { return !done && R.classList.contains('hz-live'); },
     kick: null,
-    onReady: function () { if (started || done) return; started = true; t0 = performance.now(); (function loop() { if (api.kick) api.kick(); if (!done) requestAnimationFrame(loop); })(); }
+    onReady: function () { if (started || done) return; started = true; t0 = performance.now(); (function loop() { load(); if (api.kick) api.kick(); if (!done) requestAnimationFrame(loop); })(); } // 面が画面の外でも時計は進める(ページの線は HZ.done を待つ)
   };
-  /* 帯(説明と CTA)の上下には線を描かない。層が外れるときは下端を柔らかく広げる */
-  function onScroll() { if (!band) return; var c = cv.getBoundingClientRect(), b = band.getBoundingClientRect(); cv.style.setProperty('--b0', Math.round(b.top - c.top) + 'px'); cv.style.setProperty('--b1', Math.round(b.bottom - c.top) + 'px');
-    var y = scrollY, e = y > pinEnd ? api.exit(Wof(y)) : 0; cv.style.setProperty('--fe', Math.round(36 + e * .5 * c.height) + 'px'); }
-  addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('resize', function () { measure(); onScroll(); });
-  measure(); onScroll();
-  addEventListener('load', function () { measure(); onScroll(); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  if (!R.classList.contains('hz-live') || scrollY > innerHeight * .3) finish();
+  new MutationObserver(function () { if (!R.classList.contains('hz-live')) finish(); }).observe(R, { attributes: true, attributeFilter: ['class'] });
   /* ヒーローが見えているあいだはナビのロゴをしまう */
   var top = document.querySelector('.jr-top');
   if (top && 'IntersectionObserver' in window) { R.classList.add('hero-in'); new IntersectionObserver(function (es) { R.classList.toggle('hero-in', es[0].intersectionRatio >= .2); }, { rootMargin: '-72px 0px 0px 0px', threshold: [0, .2, .4] }).observe(top); }
@@ -464,55 +428,58 @@ window.HZ = (function () {
 })();
 </script>
 <script>
-/* 線の層: ヒーローと本人の言葉の背面(.hz)。閉じ(.kz)のコードの二つ目を、時刻 W に広げたもの。
-   W 5〜0.45: ヒーロー(τ。5=名前の横のマーク、3.4=画面いっぱいのロゴ、0.45=線の野)
-   W 0.45 より下: 本人の言葉。線の野が静かになり(1文目)、向きがそろい(2文目)、一本の流れになって画面の外へ続く(3文目)
-   W はスクロール位置だけで決まる(開いた瞬間の約3秒だけは時間で 0→5)。止まれば止まり、戻せば戻る。失敗したら完成形 */
+/* 開いた瞬間(面の .hz)。閉じ(.kz)のコードの二つ目(B-13)。τ は HZ.target()(読み込みの進みだけ)を追い、追いつけば止まる。約束は <style> 冒頭。失敗したら完成形 */
 (()=>{'use strict';
 const D=document,R=D.documentElement,CL=R.classList,kz=D.getElementById('hz');if(!kz||!CL.contains('hz-on'))return;
-const cv=kz.querySelector('.hz-c'),mk=D.querySelector('.hz-mark'),hero=D.querySelector('.hero'),jt=D.querySelector('.jr-top'),M=Math;
-let ctx,raf=0,last=0,live=0,job=0,drawn=-99;
+const cv=kz.querySelector('.hz-c'),mk=kz.querySelector('.hz-mark'),KC=kz.classList,M=Math;
+let ctx,raf=0,last=0,live=0,job=0,drawn=-1;
 const stop=()=>{raf&&cancelAnimationFrame(raf);raf=last=0};
-const clear=()=>{ctx&&(ctx.setTransform(1,0,0,1,0,0),ctx.clearRect(0,0,cv.width,cv.height));drawn=-99};
-const fail=()=>{job++;live=0;stop();clear();CL.remove('hz-live','hz-run')};
+const clear=()=>{ctx&&(ctx.setTransform(1,0,0,1,0,0),ctx.clearRect(0,0,cv.width,cv.height));drawn=-1};
+const fail=()=>{job++;live=0;stop();clear();CL.remove('hz-live','hz-in');KC.remove('hz-run')};
 try{
-const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=4.7,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),Q=new Float32Array(32),
+const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=4.7,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),
   PD=[...mk.children].map(p=>new Path2D(p.getAttribute('d')));
-let tau=5,ready=0,vis=0,hold=0,hg=0,near=0,W=0,H=0,HC=0,sc=1,mx=0,my=0,s0=1,s1=1,N=0,wm=1,stride=1,cut=1,rs=0,ema=0,slow=0,fi=0,
-  COL,AM=1,PX,PY,BR,Z,U0,OFF,CUR,TH,TS,JR,RL,RC,RV=1,RW=40,TA=-.6;
+let tau=5,ready=0,vis=0,near=0,hold=0,hg=0,W=0,H=0,sc=1,mx=0,my=0,s0=1,s1=1,N=0,wm=1,stride=1,cut=1,rs=0,ema=0,slow=0,fi=0,COL,PX,PY,BR,Z,U0,OFF,CUR;
+// 出典: showreel/kousa.html 29・30・48・75 行(PR #143・67fb41c)
 const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x,lerp=(a,b,u)=>a+(b-a)*u,seg=(t,a,d)=>clamp((t-a)/d),frac=x=>x-M.floor(x);
+// 出典: 同 41〜47 行。--ease の LUT
 const ease=(()=>{const bx=s=>3*(1-s)*(1-s)*s*.16+3*(1-s)*s*s*.3+s*s*s,by=s=>1-(1-s)*(1-s)*(1-s),n=2048,L=new Float32Array(n+1);
   for(let i=0;i<=n;i++){let lo=0,hi=1;for(let k=0;k<40;k++){const m=(lo+hi)/2;bx(m)<i/n?lo=m:hi=m}L[i]=by((lo+hi)/2)}
   return u=>{if(u<=0)return 0;if(u>=1)return 1;const f=u*n,i=f|0;return L[i]+(L[i+1]-L[i])*(f-i)}})();
+// 出典: 同 51 行
 const hash=(i,k)=>{let x=(i*374761393+k*668265263)>>>0;x=((x^(x>>>13))*1274126177)>>>0;return((x^(x>>>16))>>>0)/4294967296};
+// 出典: 同 81〜86 行
 const field=(x,y,t,z,th,am)=>th+am*.85*(M.sin(x*.0023+t*.35+z*5.1)*M.cos(y*.0031-t*.3+z*2)+.65*M.sin(x*.0014-y*.0027+t*.55+z*3.3)+.35*M.sin(y*.0065+x*.0011-t*.9+z*1.7));
+// 出典: 同 60・61・132・139・140 行(LOGO は収束先の計算だけに使う)
 const LOGO=[[[8,74],[62,16],[118,24],[176,84]],[[58,94],[118,60],[158,22],[232,12]]];
-const bezP=(p,u)=>{const a=1-u;return[0,1].map(d=>a*a*a*p[0][d]+3*a*a*u*p[1][d]+3*a*u*u*p[2][d]+u*u*u*p[3][d])};
-const lut=p=>{const a=new Float32Array((NL+1)*4);for(let i=0;i<=NL;i++){const u=i/NL,q0=bezP(p,M.max(0,u-.01)),q1=bezP(p,M.min(1,u+.01)),dx=q1[0]-q0[0],dy=q1[1]-q0[1],l=M.hypot(dx,dy)||1;a.set(bezP(p,u).concat([-dy/l,dx/l]),i*4)}return a};
+const bez=(p,u)=>{const a=1-u;return[0,1].map(d=>a*a*a*p[0][d]+3*a*a*u*p[1][d]+3*a*u*u*p[2][d]+u*u*u*p[3][d])};
+const nrm=(c,u)=>{const a=bez(LOGO[c],M.max(0,u-.01)),b=bez(LOGO[c],M.min(1,u+.01)),dx=b[0]-a[0],dy=b[1]-a[1],l=M.hypot(dx,dy)||1;return[-dy/l,dx/l]};
 const wIdx=w=>clamp(M.round(M.log2(w/.5)*2),0,12),wOf=i=>.5*M.pow(2,i/2);
-const LT=LOGO.map(lut),Lc=LT.map(a=>{let L=0;for(let i=4;i<=NL*4;i+=4)L+=M.hypot(a[i]-a[i-4],a[i+1]-a[i-3]);return L});
+const LT=[0,1].map(c=>{const a=new Float32Array((NL+1)*4);for(let i=0;i<=NL;i++)a.set(bez(LOGO[c],i/NL).concat(nrm(c,i/NL)),i*4);return a}),
+  Lc=LT.map(a=>{let L=0;for(let i=4;i<=NL*4;i+=4)L+=M.hypot(a[i]-a[i-4],a[i+1]-a[i-3]);return L});
 
 const rect=()=>kz.getBoundingClientRect();
+// 時刻は読み込みの進みだけ(HZ.target)。スクロールには従わない
 const readT=()=>HZ.target();
-const apply=()=>{CL.toggle('hz-run',live?tau<4.4:HZ.waiting());CL.toggle('hz-logo',!live||tau>=1.75||HZ.waiting())};
-const off=()=>{live=0;stop();clear();apply();removeEventListener('scroll',kick)};
-const goLive=()=>{if(!live&&!hold&&ready&&CL.contains('hz-live')){live=1;tau=readT();clear();apply();if(vis){addEventListener('scroll',kick,{passive:true});paint();kick()}}};
+const offscreen=()=>{const r=rect();return r.bottom<=0||r.top>=innerHeight};
+const apply=()=>{KC.toggle('hz-run',live?tau<4.4:HZ.waiting())};
+const off=()=>{live=0;stop();clear();apply()};
+// live になるのは表ができたとき(開いた瞬間は面が画面にある状態で始まる)
+const goLive=()=>{if(!live&&!hold&&ready&&CL.contains('hz-live')){live=1;tau=readT();clear();apply();if(vis){paint();kick()}}};
+// アンカーで飛んだら、止まるまで live にしない
 const holdStill=()=>{hold=1;const g=++hg;let y=-1,n=0;const chk=()=>{if(g!==hg)return;if(scrollY===y){if(++n>=3){hold=0;goLive();return}}else{n=0;y=scrollY}setTimeout(chk,200)};D.readyState==='complete'?chk():addEventListener('load',chk)};
 
-const size=()=>{let d=M.min(devicePixelRatio||1,1.5);const px=W>860?1.3e6:.6e6;if(W*H*d*d>px)d=M.sqrt(px/(W*H));d*=cut;cv.width=M.max(1,M.round(W*d));cv.height=M.max(1,M.round(H*d));drawn=-99};
-/* 流れの道筋: 画面の下から右上の外へ(PC は文字の右側、スマホは文字の下を浅く)。幅は奥へ行くほど細く */
-const road=pc=>{const C=(pc?[[.52,1.14],[.66,.74],[.82,.38],[1.14,.16]]:[[-.14,1.03],[.3,.98],[.7,.8],[1.18,.6]]).map(([x,y])=>[x*W,y*H]);
-  RL=lut(C);let L=0;for(let i=4;i<=NL*4;i+=4)L+=M.hypot(RL[i]-RL[i-4],RL[i+1]-RL[i-3]);
-  RC=[];for(let i=0;i<=NL;i+=8)RC.push(RL[i*4],RL[i*4+1]);RV=340*sc/L;RW=(pc?.075:.06)*H;TA=M.atan2(C[3][1]-C[0][1],C[3][0]-C[0][0])};
-const layout=()=>{const kr=rect(),mr=mk.getBoundingClientRect(),hr=hero.getBoundingClientRect(),pc=(W=R.clientWidth)>860;H=kr.height;HC=jt.getBoundingClientRect().height||H;
+const size=()=>{let d=M.min(devicePixelRatio||1,1.5);const px=W>860?1.3e6:.6e6;if(W*H*d*d>px)d=M.sqrt(px/(W*H));d*=cut;cv.width=M.max(1,M.round(W*d));cv.height=M.max(1,M.round(H*d));drawn=-1};
+const layout=()=>{const kr=rect(),mr=mk.getBoundingClientRect(),pc=(W=R.clientWidth)>860;H=kr.height;
   cv.style.left=-kr.left+'px';cv.style.width=W+'px';
-  mx=M.round(mr.left);my=M.round(mr.top-hr.top); // マークの位置はヒーローの上端から(固定中はヒーローの上端=舞台の上端)
-  s1=mr.width/240;s0=M.min(.7*W/224,.7*HC/82);sc=M.max(W/1920,.5);N=M.round(pc?700:400);wm=pc?1:1.15;road(pc);size()};
+  mx=M.round(mr.left);my=M.round(mr.top-kr.top); // SVG は CSS px の整数に寄せて描かれる(実測)
+  s1=mr.width/240;s0=M.min(.7*W/224,.7*H/82);sc=M.max(W/1920,.5);N=pc?700:400;wm=pc?1:1.15;size()};
+// 積分: 120 粒ずつ idle で(なければ setTimeout)
 const integrate=()=>{const id=++job,later=f=>setTimeout(f,0);let k0=0;
   ready=0;layout();const Ww=W/sc,Wh=H/sc,V=290/SR;
-  Z=new Float32Array(N);U0=new Float32Array(N);OFF=new Float32Array(N);CUR=new Uint8Array(N);TH=new Uint8Array(N);TS=new Float32Array(N);JR=new Uint8Array(N);PX=new Float32Array(N*ST);PY=new Float32Array(N*ST);BR=new Uint8Array(N*ST);
-  const chunk=()=>{if(id!==job)return;try{const k1=M.min(N,k0+200);
-    for(let k=k0;k<k1;k++){const i=M.floor(k*1800/N),z=Z[k]=hash(i,2),b=k*ST;U0[k]=hash(i,3);OFF[k]=hash(i,5)+hash(i,6)-1;CUR[k]=hash(i,7)<.15;TH[k]=hash(i,8)<.4;TS[k]=hash(i,9);JR[k]=hash(i,10)<.6;
+  Z=new Float32Array(N);U0=new Float32Array(N);OFF=new Float32Array(N);CUR=new Uint8Array(N);PX=new Float32Array(N*ST);PY=new Float32Array(N*ST);BR=new Uint8Array(N*ST);
+  const chunk=()=>{if(id!==job)return;try{const k1=M.min(N,k0+260);
+    for(let k=k0;k<k1;k++){const i=M.floor(k*1800/N),z=Z[k]=hash(i,2),b=k*ST;U0[k]=hash(i,3);OFF[k]=hash(i,5)+hash(i,6)-1;CUR[k]=hash(i,7)<.15;
       let x=PX[b]=-90+(Ww+180)*hash(i,11),y=PY[b]=-90+(Wh+180)*hash(i,12);
       for(let j=1;j<ST;j++){const a=field(x,y,9.7+(j-1)/SR,z,-.34,.61);let br=0;x+=M.cos(a)*V;y+=M.sin(a)*V;
         if(x>Ww+90){x-=Ww+180;br=1}else if(x<-90){x+=Ww+180;br=1}if(y>Wh+90){y-=Wh+180;br=1}else if(y<-90){y+=Wh+180;br=1}
@@ -520,49 +487,41 @@ const integrate=()=>{const id=++job,later=f=>setTimeout(f,0);let k0=0;
     k0=k1;if(k0<N)later(chunk);else{ready=1;goLive();HZ.onReady()}}catch(e){fail()}};
   later(chunk)};
 const rebuild=()=>{job++;ready=0;PX=0;off();if(CL.contains('hz-live')&&near)integrate()};
-const readColors=()=>{const cs=getComputedStyle(R);AM=HZ.strength();const nv=getComputedStyle(mk.firstChild).stroke;COL=[cs.getPropertyValue('--blue-soft').trim(),cs.getPropertyValue('--blue').trim(),nv,nv,getComputedStyle(mk.lastChild).stroke]};
+// 色は計算済みのトークンだけ
+const readColors=()=>{const cs=getComputedStyle(R),nv=getComputedStyle(mk.firstChild).stroke;COL=[cs.getPropertyValue('--blue-soft').trim(),cs.getPropertyValue('--blue').trim(),nv,nv,getComputedStyle(mk.lastChild).stroke]};
 
-const draw=()=>{const t0=performance.now(),T=tau,TB=T<.45?HZ.boxes():[];R.style.setProperty('--hz-t',M.max(0,T).toFixed(3));if(rs){rs=0;size()}clear();ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
+// 1 枚を描く(τ だけで決まる)
+const draw=()=>{const t0=performance.now(),T=tau;R.style.setProperty('--hz-t',T.toFixed(3));if(rs){rs=0;size()}clear();ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
+  cv.style.setProperty('--kz-fb',40*(1-seg(T,2.4,1))+'px');
   if(T<END){ctx.lineCap=ctx.lineJoin='round';
-    // 本人の言葉の進み ph(0=1文目が画面の中央、1=2文目、2=3文目)。Wd 静かに/Wa 向きがそろう/Wr 流れに集まる
-    const ph=HZ.phase(T),Wd=ease(seg(ph,-1,.9)),Wa=ease(seg(ph,.3,.6)),Wr=seg(ph,1.25,.8),ex=HZ.exit(T),dW=.4*W,ga=lerp(1,AM,Wd);
-    const Fh=T>=.45?T:.9-T,jf=(Fh+.3)*SR,j=M.max(0,M.min(ST-2,jf|0)),f=jf-j,e=ease(seg(T,3.45,.95)),s=lerp(s0,s1,e),cx=lerp(W/2,mx+120*s1,e),cy=lerp(HC/2,my+55*s1,e),spr=(1-ease(seg(T,1.2,2.2)))*8,BK=[{},{},{},{},{}],LS=[[],[],[],[],[]];
+    const jf=(T+.3)*SR,j=M.min(ST-2,jf|0),f=jf-j,e=ease(seg(T,3.45,.95)),s=lerp(s0,s1,e),cx=lerp(W/2,mx+120*s1,e),cy=lerp(H/2,my+55*s1,e),spr=(1-ease(seg(T,1.2,2.2)))*8,BK=[{},{},{},{},{}],LS=[[],[],[],[],[]];
     const add=(bd,wi,aq,n)=>{const key=wi*5+aq;let p=BK[bd][key];if(!p){p=BK[bd][key]=new Path2D();LS[bd].push(key)}p.moveTo(P[0],P[1]);for(let q=1;q<n;q++)p.lineTo(P[q*2],P[q*2+1])};
-    for(let k=0;k<N;k+=stride){const z=Z[k],ms=.6+.8*U0[k],m=ease(seg(T,ms,2.2)),mr=Wr>0&&JR[k]?ease(seg(Wr,.4*TS[k],.6)):0,Ki=M.round(lerp(16,7,seg(T,ms+1.4,.8))+12*Wa*(1-.5*mr)),lt=LT[CUR[k]],b=k*ST;
-      let am=(1-ease(seg(T,4+.4*z,.3)))*(1-.3*Wd)*(1-Wd*TH[k]*(1-mr))*(JR[k]?1:lerp(1,.72,Wr))*(1-(JR[k]?0:ex)),n=0,pu=-1,pr=-1,L=0,dH=0;if(am<=.02)continue;
+    for(let k=0;k<N;k+=stride){const z=Z[k],ms=.6+.8*U0[k],m=ease(seg(T,ms,2.2)),Ki=M.round(lerp(16,7,seg(T,ms+1.4,.8))),lt=LT[CUR[k]],b=k*ST;
+      let am=1-ease(seg(T,4+.4*z,.3)),n=0,pu=-1,L=0,dH=0;if(am<=.02)continue;
       if(m>0){const uh=frac(U0[k]+.12*(T-.6));if(uh<.018)am*=uh/.018}
-      for(let q=0;q<Ki;q+=2){const ix=j-q;if(ix<0||(q&&(BR[b+ix+1]||BR[b+ix+2])))break;
+      for(let q=0;q<Ki;q+=2){const ix=j-q;if(ix<0||(q&&(BR[b+ix+1]||BR[b+ix+2])))break; // 2 段おきに点を取る(ラスタ化は頂点の数で重い)
         let x=PX[b+ix],y=PY[b+ix];if(!q&&!BR[b+ix+1]){x=lerp(x,PX[b+ix+1],f);y=lerp(y,PY[b+ix+1],f)}x*=sc;y*=sc;
-        const Fq=q?ix/SR-.3:Fh;
-        if(m>0){const u=frac(U0[k]+.12*(Fq-.6));if(pu>=0&&M.abs(u-pu)>.5)break;pu=u;
+        if(m>0){ // カメラは今の τ のものを尾全体に
+          const u=frac(U0[k]+.12*((q?ix/SR-.3:T)-.6));if(pu>=0&&M.abs(u-pu)>.5)break;pu=u;
           const uf=u*NL,li=M.min(NL-1,uf|0),g=uf-li,o=li*4,sp=spr*OFF[k]*s,ox=cx+(lerp(lt[o],lt[o+4],g)-120)*s,oy=cy+(lerp(lt[o+1],lt[o+5],g)-55)*s;
           x=lerp(x,ox+lerp(lt[o+2],lt[o+6],g)*sp,m);y=lerp(y,oy+lerp(lt[o+3],lt[o+7],g)*sp,m);dH=M.max(dH,M.hypot(x-ox,y-oy))}
-        if(mr>0){const u=frac(U0[k]+RV*Fq);if(pr>=0&&M.abs(u-pr)>.5)break;pr=u;if(!q&&ex>0)am*=clamp((u-(ex*1.15-.12))/.12);
-          const uf=u*NL,li=M.min(NL-1,uf|0),g=uf-li,o=li*4,wd=RW*(lerp(1.3,.5,u)*OFF[k]+.22*M.sin(u*6+TS[k]*6.283));
-          Q[n*2]=lerp(RL[o],RL[o+4],g)+lerp(RL[o+2],RL[o+6],g)*wd;Q[n*2+1]=lerp(RL[o+1],RL[o+5],g)+lerp(RL[o+3],RL[o+7],g)*wd}
-        P[n*2]=x;P[n*2+1]=y;n++}
-      if(n<2)continue;
-      // 向きがそろう: 尾ごと、その重心のまわりで流れの向きへ回す(線に向きはないので回すのは ±90° まで)
-      if(Wa>0&&m<=0){let gx=0,gy=0;for(let i=0;i<n;i++){gx+=P[i*2];gy+=P[i*2+1]}gx/=n;gy/=n;
-        let d=TA-M.atan2(P[n*2-1]-P[1],P[n*2-2]-P[0]);d=((d+M.PI/2)%M.PI+M.PI)%M.PI-M.PI/2;
-        let rd=1e9;for(let i=0;i<RC.length;i+=2)rd=M.min(rd,M.hypot(RC[i]-gx,RC[i+1]-gy));
-        const r=d*Wa*(.45+.3*TS[k])*(1-clamp(rd/dW)),c=M.cos(r),sn=M.sin(r);
-        for(let i=0;i<n;i++){const dx=P[i*2]-gx,dy=P[i*2+1]-gy;P[i*2]=gx+dx*c-dy*sn;P[i*2+1]=gy+dx*sn+dy*c}}
-      if(mr>0)for(let i=0;i<n*2;i++)P[i]=lerp(P[i],Q[i],mr);
-      for(const b of TB){const mi=(n>>1)*2,x=P[mi],y=P[mi+1],dx=M.max(b[0]-x,0,x-b[2]),dy=M.max(b[1]-y,0,y-b[3]);am*=lerp(.12,1,clamp(M.max(dx,dy)/150))}
-      for(let i=1;i<n;i++)L+=M.hypot(P[i*2]-P[i*2-2],P[i*2+1]-P[i*2-1]);
+        if(n)L+=M.hypot(x-P[n*2-2],y-P[n*2-1]);P[n*2]=x;P[n*2+1]=y;n++}
       const aq=M.round(am*4);if(L<2||aq<=0)continue;
-      const w0=(.6+1.4*z)*wm*lerp(1,1.25,mr),w=lerp(w0,6*s*.28,seg(m,.9,.1)**2*clamp(1-dH/2)),wi=M.min(wIdx(w),M.floor(2*M.log2(L/2))),bd=m>.5?(CUR[k]?4:3):z<.4?0:z<.75?1:2;
+      // 幅は曲線に乗ってから(dH<2px)収束の終わりに太らせ、長さの 1/4 まで(粒・剥片に見せない)
+      const w=lerp((.6+1.4*z)*wm,6*s*.28,seg(m,.9,.1)**2*clamp(1-dH/2)),wi=M.min(wIdx(w),M.floor(2*M.log2(L/2))),bd=m>.5?(CUR[k]?4:3):z<.4?0:z<.75?1:2;
       add(bd,wi,aq,n)}
-    for(let bd=0;bd<5;bd++){ctx.strokeStyle=COL[bd];for(const key of LS[bd]){const aq=key%5;ctx.globalAlpha=AL[bd]*aq/4*ga;ctx.lineWidth=wOf((key-aq)/5);ctx.stroke(BK[bd][key])}}
+    for(let bd=0;bd<5;bd++){ctx.strokeStyle=COL[bd];for(const key of LS[bd]){const aq=key%5;ctx.globalAlpha=AL[bd]*aq/4;ctx.lineWidth=wOf((key-aq)/5);ctx.stroke(BK[bd][key])}}
+    // 清書: 細い芯を左から引く(先端は収束の先頭より先へ出ない)。3–4 で幅 6·s。4.4 で SVG を出し 4.5 までに消す
     const r=ease(seg(T,1.75,1)),la=1-seg(T,4.4,.1);
     if(r>0&&la>0){ctx.globalAlpha=la;ctx.translate(cx-120*s,cy-55*s);ctx.scale(s,s);ctx.lineWidth=lerp(1.68,6,ease(seg(T,3.5,.9)));
       for(let c=0;c<2;c++){ctx.strokeStyle=COL[c?4:2];ctx.setLineDash(r<1?[r*Lc[c],Lc[c]+1]:[]);ctx.stroke(PD[c])}ctx.setLineDash([])}
     ctx.globalAlpha=1}
   drawn=T;
+  // 降格: 描画時間か rAF の間隔×0.4(ラスタ化の遅さ)の EMA が 12 回続けて 20ms 超で 1 段(1 本おき→×0.8)。戻さない
   const dd=performance.now()-t0,d=M.max(dd,fi*.4);fi=0;ema=ema?ema+.2*(d-ema):d;
   if(ema<=20)slow=0;else if(++slow>=12){slow=ema=0;if(stride<2)stride=2;else if(cut==1)cut=.8,rs=1}};
 const paint=()=>{try{draw();apply()}catch(e){fail()}};
+// 追い方: 指数 0.2 秒・|Δτ|≤2.6dt(はじいても端から端まで約 1.9 秒)・下限 0.3dt
 const tick=now=>{raf=0;if(!live||!vis||D.hidden){last=0;return}
   try{const tT=readT(),dt=last?M.min((now-last)/1000,.1):1/60,d=tT-tau;fi=last?now-last:0;last=now;
     if(M.abs(d)<.002)tau=tT;else{let st=d*(1-M.exp(-dt/.2));if(M.abs(st)<.3*dt)st=M.abs(d)<.3*dt?d:M.sign(d)*.3*dt;tau+=clamp(st,-2.6*dt,2.6*dt);if(M.abs(tT-tau)<.002)tau=tT}
@@ -573,16 +532,146 @@ const IO=IntersectionObserver;
 if(!(ctx=cv.getContext('2d')))return fail();
 readColors();
 new IO(es=>{near=es[es.length-1].isIntersecting;if(near&&!PX&&CL.contains('hz-live'))integrate()},{rootMargin:'100% 0px'}).observe(kz);
+// 画面にあるときだけ描く。画面外は τ=τT・canvas は空
 new IO(es=>{vis=es[es.length-1].isIntersecting;
-  if(vis){if(live){addEventListener('scroll',kick,{passive:true});tau=readT();paint();kick()}}
-  else{removeEventListener('scroll',kick);stop();clear();if(live){tau=readT();apply()}else goLive()}}).observe(kz);
+  if(vis){if(live){tau=readT();paint();kick()}}
+  else{stop();clear();if(live){tau=readT();apply()}else goLive()}}).observe(kz);
 D.addEventListener('visibilitychange',()=>D.hidden?stop():kick());
-if(location.hash)holdStill();addEventListener('hashchange',holdStill);
+if(location.hash)holdStill();addEventListener('hashchange',()=>{if(offscreen())off();holdStill()});
 new MutationObserver(()=>{readColors();if(live&&vis)paint()}).observe(R,{attributes:true,attributeFilter:['data-theme']});
+// 組み直しは幅か高さが 2px 以上変わったとき
 let rz=0;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(CL.contains('hz-live')&&(M.abs(R.clientWidth-W)>=2||M.abs(rect().height-H)>=2))rebuild()},200)});
 const onR=()=>{if(rq.matches){job++;ready=0;PX=0;off();CL.remove('hz-live')}else{CL.add('hz-live');rebuild()}};
 rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
 }catch(e){fail()}})();
+</script>
+<script>
+/* ページの線(約束は <style> 冒頭)。道筋は本文の実際の位置から組む(PC は余白を縫い、スマホは節の間の空きで左右を渡る)。
+   始まり: ヒーローのマークの藍の線の終わり(176,84)から、その向きのまま伸びる。終わり: 閉じのマークの藍の線の始まり(8,74)へ、その向きで入る。
+   長さ: 先端の高さ σ(ページの上から)= スクロール + 画面の高さ×0.7(スマホは 0.8。最初の 0.4 画面は始まりから滑らかに追いつく)。道筋の y の累積最大で長さを引く */
+(function () {
+  var D = document, R = D.documentElement, main = D.querySelector('main'), svg = D.getElementById('pl');
+  if (!svg || !main || !window.requestAnimationFrame || !svg.querySelector('.pl-path').getTotalLength) return;
+  var path = svg.querySelector('.pl-path'), tip = svg.querySelector('.pl-tip'), rq = matchMedia('(prefers-reduced-motion: reduce)');
+  var LUT = [], total = 0, y0 = 0, mainTop = 0, cur = -1, raf = 0, last = 0, ready = false, live = false;
+  var M = Math, clamp = function (x, a, b) { return x < a ? a : x > b ? b : x; };
+  function rel(sel) { var el = typeof sel === 'string' ? D.querySelector(sel) : sel; if (!el) return null; var r = el.getBoundingClientRect(); if (!r.width && !r.height) return null; return { l: r.left, t: r.top + scrollY - mainTop, r: r.right, b: r.bottom + scrollY - mainTop, w: r.width, h: r.height }; }
+  function mk(sel, x, y, vw) { var el = D.querySelector(sel); if (!el) return null; var r = el.getBoundingClientRect(); if (!r.width) return null; var s = r.width / (vw || 240); return [r.left + x * s, r.top + scrollY - mainTop + y * s, s]; }
+  function route(W) {
+    var pc = W > 860, P = [], A = mk('.jr-brand .hz-mark', 176, 84) || mk('.jr-brand > svg', 176, 84, 758), E = mk('.kz-mark', 8, 74);
+    if (!A) return null;
+    var push = function (x, y) { P.push([x, y]); };
+    var band = rel('.hero-foot'), desc = rel('.hero-desc'), cta = rel('.hero-cta'), wps = [].map.call(D.querySelectorAll('.w-p'), rel).filter(Boolean);
+    var tryT = rel('.try .cp-text'), tryS = rel('.try .cp-shot'), labIn = rel('.lab-in'), ctT = rel('.cp.rev .cp-text'), ctS = rel('.cp.rev .cp-shot'), sm = rel('.sm'), all = rel('.lab-all');
+    var s = A[2];
+    push(A[0], A[1]);
+    var lead = pc ? 110 : 70; push(A[0] + .695 * lead, A[1] + .719 * lead); // 藍の線の終わりの向き(118,24)→(176,84)のまま(短いと継ぎ目が折れて見える)
+    if (pc) {
+      var gx = desc && cta ? (desc.r + cta.l) / 2 : W / 2, wr = 0; wps.forEach(function (w) { wr = M.max(wr, w.r); });
+      var xr = M.min(W - 48, wr + 80), lx = M.max(28, (tryT ? tryT.l : 120) - 62), rx = W - 58;
+      push(gx, band.t + band.h * .5);
+      if (wps.length) { push(xr, wps[0].t - 24); wps.forEach(function (w, i) { push(xr + (i % 2 ? -16 : 16), w.t + w.h * .55); }); push(xr, wps[wps.length - 1].b + 24); }
+      var tb = M.max(tryT ? tryT.b : 0, tryS ? tryS.b : 0), gp = labIn ? labIn.t - tb : 40;
+      if (tryT) { push(lx, tryT.t - 18); push(lx + 12, tryT.t + tryT.h * .55); push(lx, tb + gp * .3); }
+      if (labIn) push(rx, labIn.t - gp * .25);
+      if (ctT) push(rx - 10, ctT.t + ctT.h * .5);
+      if (sm) push(rx, sm.t + sm.h * .5);
+      if (all) push(rx, all.b + 30);
+    } else {
+      var ex = W - 8, wx = 8, gap = function (a, b, u) { return a + (b - a) * u; };
+      if (band) { push(ex, band.t - 26); push(ex, band.b + 10); }
+      wps.forEach(function (w) { push(ex, w.t + w.h * .5); });
+      var g1 = wps.length ? wps[wps.length - 1].b : (band ? band.b : 0);
+      if (tryT) { push(ex, gap(g1, tryT.t, .2)); push(wx, gap(g1, tryT.t, .8)); push(wx, tryT.t + tryT.h * .5); }
+      var tb2 = M.max(tryT ? tryT.b : 0, tryS ? tryS.b : 0);
+      if (labIn) { push(wx, gap(tb2, labIn.t, .2)); push(ex, gap(tb2, labIn.t, .8)); push(ex, labIn.t + labIn.h * .5); }
+      if (ctT) push(ex, ctT.t + ctT.h * .5);
+      var cb = M.max(ctT ? ctT.b : 0, ctS ? ctS.b : 0);
+      if (sm) { push(ex, gap(cb, sm.t, .2)); push(wx, gap(cb, sm.t, .8)); push(wx, sm.t + sm.h * .5); }
+      if (all) push(wx, all.b + 24);
+    }
+    // 閉じ: マークの上の空いた帯(筆の線が集まる場所)を横切って左へ。そこから下りて、大きな弧で藍の線の始まり(8,74)へ、その向き((8,74)→(62,16))のまま入る
+    var kzb = rel('.kz'), END = null;
+    if (E) { var mx = pc ? E[0] - 78 : M.max(6, E[0] - 18), my = E[1] - (pc ? 46 : 30);
+      if (pc && kzb && kzb.h > 120) push((E[0] + W) / 2 + 60, kzb.t + kzb.h * .22);
+      push(mx, my);
+      END = { e: [E[0], E[1]], r: pc ? 62 : 38, u: pc ? 80 : 48 }; } // 入ってきた向きのまま回り込み、藍の線の始まりへ入る(角を作らない)
+    // y が戻る点を均す(先端の高さで長さを引くため)
+    for (var i = 1; i < P.length; i++) if (P[i][1] < P[i - 1][1] + 8) P[i][1] = P[i - 1][1] + 8;
+    P.END = END;
+    return P;
+  }
+  function swoop(P) { var q = P[P.length - 1], p = P[P.length - 2] || q, E = P.END; if (!E) return '';
+    var dx = q[0] - p[0], dy = q[1] - p[1], dl = Math.hypot(dx, dy) || 1, tx = .82, ty = -.57; // 入ってきた向きで回り込み、藍の線の始まりへ入る(約35°。藍の線の始まり (8,74)→(62,16) の約47°より浅くして、回り込みを小さくする)
+    return ' C' + cx(q[0] + dx / dl * E.r).toFixed(1) + ' ' + (q[1] + dy / dl * E.r).toFixed(1) + ' ' + cx(E.e[0] - tx * E.u).toFixed(1) + ' ' + (E.e[1] - ty * E.u).toFixed(1) + ' ' + E.e[0].toFixed(1) + ' ' + E.e[1].toFixed(1); }
+  var XW = 0, cx = function (x) { return M.min(XW - 4, M.max(4, x)); }; // 制御点を画面の内側に置く(3次ベジェは制御点の凸包の中に収まるので、線と先端が画面の外へ出ない)
+  function toPath(P) { // Catmull-Rom → 3次ベジェ
+    var d = 'M' + P[0][0].toFixed(1) + ' ' + P[0][1].toFixed(1);
+    for (var i = 0; i < P.length - 1; i++) {
+      var p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2, k = 1 / 6;
+      d += ' C' + cx(p1[0] + (p2[0] - p0[0]) * k).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) * k).toFixed(1) + ' ' + cx(p2[0] - (p3[0] - p1[0]) * k).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) * k).toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+    }
+    return d;
+  }
+  function build() {
+    mainTop = main.getBoundingClientRect().top + scrollY;
+    var W = R.clientWidth, H = main.offsetHeight;
+    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.style.height = H + 'px';
+    XW = W; var P = route(W); if (!P || P.length < 3) { ready = false; return; }
+    var dBody = toPath(P); path.setAttribute('d', dBody); var lenQ = path.getTotalLength();
+    path.setAttribute('d', dBody + swoop(P)); total = path.getTotalLength();
+    LUT = []; var m = -1e9, py = null;
+    for (var l = 0; l <= total + 4; l += 5) { var ll = M.min(l, total), p = path.getPointAtLength(ll);
+      if (ll <= lenQ || py == null) m = M.max(m, p.y); else m += M.max(p.y - py, 5 * .45); // 弧のあいだは、上へ戻る分もスクロールで少しずつ引く
+      py = p.y; LUT.push([ll, m]); if (ll >= total) break; }
+    collect();
+    y0 = P[0][1]; path.style.strokeDasharray = total + ' ' + (total + 20); ready = true; cur = -1; kick();
+  }
+  /* 線の先端が届いた高さから、文字とプロダクトが上から現れる(--pr 0→1。戻せば引っ込む) */
+  var RVSEL = '.w-p, .try .note, .try-h, .tw-pick, .tw-out, .try-p, .try-cta, .try .cp-shot, .lab-h, .lab-lead, .cp.rev .cp-shot, .cp.rev .note, .cp.rev .cp-name, .cp.rev .cp-p, .ct-v, .cp.rev .tx-link, .sm .note, .sm-list li, .sm-fig, .sm-cap, .lab-all';
+  var RV = [], LEAD = 40;
+  function collect() { RV = [].map.call(D.querySelectorAll(RVSEL), function (el) { el.classList.add('pr'); var r = el.getBoundingClientRect(); return { el: el, t: r.top + scrollY - mainTop, h: M.max(1, r.height), v: -1 }; }); }
+  function sigAt(l) { if (!LUT.length) return -1e9; var i = M.min(LUT.length - 1, M.max(0, M.round(l / 5))); return LUT[i][1]; }
+  function reveal(l) {
+    var ty = rq.matches || l >= total - 1 ? 1e9 : sigAt(l);
+    for (var i = 0; i < RV.length; i++) { var o = RV[i], v = clamp((ty - o.t + LEAD) / o.h, 0, 1); if (M.abs(v - o.v) > .002) { o.v = v; o.el.style.setProperty('--pr', v.toFixed(3)); o.el.classList.toggle('pr-done', v >= 1); } }
+  }
+  function lenAt(sig) { // 累積最大の y が sig を超えない最長の長さ
+    if (!LUT.length || sig <= LUT[0][1]) return 0;
+    var lo = 0, hi = LUT.length - 1; if (sig >= LUT[hi][1]) return total;
+    while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (LUT[mid][1] <= sig) lo = mid; else hi = mid; }
+    var a = LUT[lo], b = LUT[hi], u = b[1] > a[1] ? (sig - a[1]) / (b[1] - a[1]) : 1; return a[0] + (b[0] - a[0]) * clamp(u, 0, 1);
+  }
+  function target() {
+    if (rq.matches) return total;
+    var vh = innerHeight, k = innerWidth <= 760 ? .8 : .7, s0 = .4 * vh, sy = M.max(0, scrollY), tipY = sy + k * vh - mainTop;
+    var sig = sy < s0 ? y0 + (s0 + k * vh - mainTop - y0) * (sy / s0) : tipY;
+    return lenAt(sig);
+  }
+  function paint(l) {
+    path.style.strokeDashoffset = (total - l).toFixed(1);
+    reveal(l);
+    var on = !rq.matches && l > 18 && l < total - 2; tip.classList.toggle('on', on);
+    if (on) { var p = path.getPointAtLength(l); tip.setAttribute('cx', p.x.toFixed(1)); tip.setAttribute('cy', p.y.toFixed(1)); }
+  }
+  function step(now) {
+    raf = 0; if (!ready || !live) return;
+    var tg = target(), dt = last ? M.min((now - last) / 1000, .05) : 1 / 60; last = now;
+    var smooth = !rq.matches;
+    if (cur < 0 || !smooth) cur = tg; else { var d = tg - cur; cur = M.abs(d) < .5 ? tg : cur + d * (1 - M.exp(-dt / .16)); }
+    paint(cur);
+    if (cur !== tg) raf = requestAnimationFrame(step); else last = 0;
+  }
+  function kick() { if (live && ready && !raf) raf = requestAnimationFrame(step); }
+  addEventListener('scroll', kick, { passive: true });
+  var rz = 0; addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(build, 150); });
+  if (window.ResizeObserver) { var lh = 0; new ResizeObserver(function () { var h = main.offsetHeight; if (M.abs(h - lh) > 2) { lh = h; clearTimeout(rz); rz = setTimeout(build, 150); } }).observe(main); }
+  var go = function () { build(); live = true; R.classList.add('pl-on'); if (!rq.matches) R.classList.add('pl-reveal'); kick(); };
+  var fontsReady = D.fonts && D.fonts.ready ? D.fonts.ready : Promise.resolve();
+  Promise.all([fontsReady, window.HZ && HZ.done ? HZ.done : Promise.resolve()]).then(go, go);
+  addEventListener('load', function () { if (live) build(); });
+  if (rq.addEventListener) rq.addEventListener('change', function () { R.classList.toggle('pl-reveal', !rq.matches); cur = -1; kick(); });
+})();
 </script>
 <script>
 /* 閉じ(#about の帯 .kz)。τ(0〜5)は帯の進みを追い、追いつけば止まる。約束は <style> 冒頭。失敗したら完成形 */
