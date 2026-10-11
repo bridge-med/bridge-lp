@@ -428,124 +428,6 @@ window.HZ = (function () {
 })();
 </script>
 <script>
-/* 開いた瞬間(面の .hz)。閉じ(.kz)のコードの二つ目(B-13)。τ は HZ.target()(読み込みの進みだけ)を追い、追いつけば止まる。約束は <style> 冒頭。失敗したら完成形 */
-(()=>{'use strict';
-const D=document,R=D.documentElement,CL=R.classList,kz=D.getElementById('hz');if(!kz||!CL.contains('hz-on'))return;
-const cv=kz.querySelector('.hz-c'),mk=kz.querySelector('.hz-mark'),KC=kz.classList,M=Math;
-let ctx,raf=0,last=0,live=0,job=0,drawn=-1;
-const stop=()=>{raf&&cancelAnimationFrame(raf);raf=last=0};
-const clear=()=>{ctx&&(ctx.setTransform(1,0,0,1,0,0),ctx.clearRect(0,0,cv.width,cv.height));drawn=-1};
-const fail=()=>{job++;live=0;stop();clear();CL.remove('hz-live','hz-in');KC.remove('hz-run')};
-try{
-const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=4.7,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),
-  PD=[...mk.children].map(p=>new Path2D(p.getAttribute('d')));
-let tau=5,ready=0,vis=0,near=0,hold=0,hg=0,W=0,H=0,sc=1,mx=0,my=0,s0=1,s1=1,N=0,wm=1,stride=1,cut=1,rs=0,ema=0,slow=0,fi=0,COL,PX,PY,BR,Z,U0,OFF,CUR;
-// 出典: showreel/kousa.html 29・30・48・75 行(PR #143・67fb41c)
-const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x,lerp=(a,b,u)=>a+(b-a)*u,seg=(t,a,d)=>clamp((t-a)/d),frac=x=>x-M.floor(x);
-// 出典: 同 41〜47 行。--ease の LUT
-const ease=(()=>{const bx=s=>3*(1-s)*(1-s)*s*.16+3*(1-s)*s*s*.3+s*s*s,by=s=>1-(1-s)*(1-s)*(1-s),n=2048,L=new Float32Array(n+1);
-  for(let i=0;i<=n;i++){let lo=0,hi=1;for(let k=0;k<40;k++){const m=(lo+hi)/2;bx(m)<i/n?lo=m:hi=m}L[i]=by((lo+hi)/2)}
-  return u=>{if(u<=0)return 0;if(u>=1)return 1;const f=u*n,i=f|0;return L[i]+(L[i+1]-L[i])*(f-i)}})();
-// 出典: 同 51 行
-const hash=(i,k)=>{let x=(i*374761393+k*668265263)>>>0;x=((x^(x>>>13))*1274126177)>>>0;return((x^(x>>>16))>>>0)/4294967296};
-// 出典: 同 81〜86 行
-const field=(x,y,t,z,th,am)=>th+am*.85*(M.sin(x*.0023+t*.35+z*5.1)*M.cos(y*.0031-t*.3+z*2)+.65*M.sin(x*.0014-y*.0027+t*.55+z*3.3)+.35*M.sin(y*.0065+x*.0011-t*.9+z*1.7));
-// 出典: 同 60・61・132・139・140 行(LOGO は収束先の計算だけに使う)
-const LOGO=[[[8,74],[62,16],[118,24],[176,84]],[[58,94],[118,60],[158,22],[232,12]]];
-const bez=(p,u)=>{const a=1-u;return[0,1].map(d=>a*a*a*p[0][d]+3*a*a*u*p[1][d]+3*a*u*u*p[2][d]+u*u*u*p[3][d])};
-const nrm=(c,u)=>{const a=bez(LOGO[c],M.max(0,u-.01)),b=bez(LOGO[c],M.min(1,u+.01)),dx=b[0]-a[0],dy=b[1]-a[1],l=M.hypot(dx,dy)||1;return[-dy/l,dx/l]};
-const wIdx=w=>clamp(M.round(M.log2(w/.5)*2),0,12),wOf=i=>.5*M.pow(2,i/2);
-const LT=[0,1].map(c=>{const a=new Float32Array((NL+1)*4);for(let i=0;i<=NL;i++)a.set(bez(LOGO[c],i/NL).concat(nrm(c,i/NL)),i*4);return a}),
-  Lc=LT.map(a=>{let L=0;for(let i=4;i<=NL*4;i+=4)L+=M.hypot(a[i]-a[i-4],a[i+1]-a[i-3]);return L});
-
-const rect=()=>kz.getBoundingClientRect();
-// 時刻は読み込みの進みだけ(HZ.target)。スクロールには従わない
-const readT=()=>HZ.target();
-const offscreen=()=>{const r=rect();return r.bottom<=0||r.top>=innerHeight};
-const apply=()=>{KC.toggle('hz-run',live?tau<4.4:HZ.waiting())};
-const off=()=>{live=0;stop();clear();apply()};
-// live になるのは表ができたとき(開いた瞬間は面が画面にある状態で始まる)
-const goLive=()=>{if(!live&&!hold&&ready&&CL.contains('hz-live')){live=1;tau=readT();clear();apply();if(vis){paint();kick()}}};
-// アンカーで飛んだら、止まるまで live にしない
-const holdStill=()=>{hold=1;const g=++hg;let y=-1,n=0;const chk=()=>{if(g!==hg)return;if(scrollY===y){if(++n>=3){hold=0;goLive();return}}else{n=0;y=scrollY}setTimeout(chk,200)};D.readyState==='complete'?chk():addEventListener('load',chk)};
-
-const size=()=>{let d=M.min(devicePixelRatio||1,1.5);const px=W>860?1.3e6:.6e6;if(W*H*d*d>px)d=M.sqrt(px/(W*H));d*=cut;cv.width=M.max(1,M.round(W*d));cv.height=M.max(1,M.round(H*d));drawn=-1};
-const layout=()=>{const kr=rect(),mr=mk.getBoundingClientRect(),pc=(W=R.clientWidth)>860;H=kr.height;
-  cv.style.left=-kr.left+'px';cv.style.width=W+'px';
-  mx=M.round(mr.left);my=M.round(mr.top-kr.top); // SVG は CSS px の整数に寄せて描かれる(実測)
-  s1=mr.width/240;s0=M.min(.7*W/224,.7*H/82);sc=M.max(W/1920,.5);N=pc?700:400;wm=pc?1:1.15;size()};
-// 積分: 120 粒ずつ idle で(なければ setTimeout)
-const integrate=()=>{const id=++job,later=f=>setTimeout(f,0);let k0=0;
-  ready=0;layout();const Ww=W/sc,Wh=H/sc,V=290/SR;
-  Z=new Float32Array(N);U0=new Float32Array(N);OFF=new Float32Array(N);CUR=new Uint8Array(N);PX=new Float32Array(N*ST);PY=new Float32Array(N*ST);BR=new Uint8Array(N*ST);
-  const chunk=()=>{if(id!==job)return;try{const k1=M.min(N,k0+260);
-    for(let k=k0;k<k1;k++){const i=M.floor(k*1800/N),z=Z[k]=hash(i,2),b=k*ST;U0[k]=hash(i,3);OFF[k]=hash(i,5)+hash(i,6)-1;CUR[k]=hash(i,7)<.15;
-      let x=PX[b]=-90+(Ww+180)*hash(i,11),y=PY[b]=-90+(Wh+180)*hash(i,12);
-      for(let j=1;j<ST;j++){const a=field(x,y,9.7+(j-1)/SR,z,-.34,.61);let br=0;x+=M.cos(a)*V;y+=M.sin(a)*V;
-        if(x>Ww+90){x-=Ww+180;br=1}else if(x<-90){x+=Ww+180;br=1}if(y>Wh+90){y-=Wh+180;br=1}else if(y<-90){y+=Wh+180;br=1}
-        BR[b+j]=br;PX[b+j]=x;PY[b+j]=y}}
-    k0=k1;if(k0<N)later(chunk);else{ready=1;goLive();HZ.onReady()}}catch(e){fail()}};
-  later(chunk)};
-const rebuild=()=>{job++;ready=0;PX=0;off();if(CL.contains('hz-live')&&near)integrate()};
-// 色は計算済みのトークンだけ
-const readColors=()=>{const cs=getComputedStyle(R),nv=getComputedStyle(mk.firstChild).stroke;COL=[cs.getPropertyValue('--blue-soft').trim(),cs.getPropertyValue('--blue').trim(),nv,nv,getComputedStyle(mk.lastChild).stroke]};
-
-// 1 枚を描く(τ だけで決まる)
-const draw=()=>{const t0=performance.now(),T=tau;R.style.setProperty('--hz-t',T.toFixed(3));if(rs){rs=0;size()}clear();ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
-  cv.style.setProperty('--kz-fb',40*(1-seg(T,2.4,1))+'px');
-  if(T<END){ctx.lineCap=ctx.lineJoin='round';
-    const jf=(T+.3)*SR,j=M.min(ST-2,jf|0),f=jf-j,e=ease(seg(T,3.45,.95)),s=lerp(s0,s1,e),cx=lerp(W/2,mx+120*s1,e),cy=lerp(H/2,my+55*s1,e),spr=(1-ease(seg(T,1.2,2.2)))*8,BK=[{},{},{},{},{}],LS=[[],[],[],[],[]];
-    const add=(bd,wi,aq,n)=>{const key=wi*5+aq;let p=BK[bd][key];if(!p){p=BK[bd][key]=new Path2D();LS[bd].push(key)}p.moveTo(P[0],P[1]);for(let q=1;q<n;q++)p.lineTo(P[q*2],P[q*2+1])};
-    for(let k=0;k<N;k+=stride){const z=Z[k],ms=.6+.8*U0[k],m=ease(seg(T,ms,2.2)),Ki=M.round(lerp(16,7,seg(T,ms+1.4,.8))),lt=LT[CUR[k]],b=k*ST;
-      let am=1-ease(seg(T,4+.4*z,.3)),n=0,pu=-1,L=0,dH=0;if(am<=.02)continue;
-      if(m>0){const uh=frac(U0[k]+.12*(T-.6));if(uh<.018)am*=uh/.018}
-      for(let q=0;q<Ki;q+=2){const ix=j-q;if(ix<0||(q&&(BR[b+ix+1]||BR[b+ix+2])))break; // 2 段おきに点を取る(ラスタ化は頂点の数で重い)
-        let x=PX[b+ix],y=PY[b+ix];if(!q&&!BR[b+ix+1]){x=lerp(x,PX[b+ix+1],f);y=lerp(y,PY[b+ix+1],f)}x*=sc;y*=sc;
-        if(m>0){ // カメラは今の τ のものを尾全体に
-          const u=frac(U0[k]+.12*((q?ix/SR-.3:T)-.6));if(pu>=0&&M.abs(u-pu)>.5)break;pu=u;
-          const uf=u*NL,li=M.min(NL-1,uf|0),g=uf-li,o=li*4,sp=spr*OFF[k]*s,ox=cx+(lerp(lt[o],lt[o+4],g)-120)*s,oy=cy+(lerp(lt[o+1],lt[o+5],g)-55)*s;
-          x=lerp(x,ox+lerp(lt[o+2],lt[o+6],g)*sp,m);y=lerp(y,oy+lerp(lt[o+3],lt[o+7],g)*sp,m);dH=M.max(dH,M.hypot(x-ox,y-oy))}
-        if(n)L+=M.hypot(x-P[n*2-2],y-P[n*2-1]);P[n*2]=x;P[n*2+1]=y;n++}
-      const aq=M.round(am*4);if(L<2||aq<=0)continue;
-      // 幅は曲線に乗ってから(dH<2px)収束の終わりに太らせ、長さの 1/4 まで(粒・剥片に見せない)
-      const w=lerp((.6+1.4*z)*wm,6*s*.28,seg(m,.9,.1)**2*clamp(1-dH/2)),wi=M.min(wIdx(w),M.floor(2*M.log2(L/2))),bd=m>.5?(CUR[k]?4:3):z<.4?0:z<.75?1:2;
-      add(bd,wi,aq,n)}
-    for(let bd=0;bd<5;bd++){ctx.strokeStyle=COL[bd];for(const key of LS[bd]){const aq=key%5;ctx.globalAlpha=AL[bd]*aq/4;ctx.lineWidth=wOf((key-aq)/5);ctx.stroke(BK[bd][key])}}
-    // 清書: 細い芯を左から引く(先端は収束の先頭より先へ出ない)。3–4 で幅 6·s。4.4 で SVG を出し 4.5 までに消す
-    const r=ease(seg(T,1.75,1)),la=1-seg(T,4.4,.1);
-    if(r>0&&la>0){ctx.globalAlpha=la;ctx.translate(cx-120*s,cy-55*s);ctx.scale(s,s);ctx.lineWidth=lerp(1.68,6,ease(seg(T,3.5,.9)));
-      for(let c=0;c<2;c++){ctx.strokeStyle=COL[c?4:2];ctx.setLineDash(r<1?[r*Lc[c],Lc[c]+1]:[]);ctx.stroke(PD[c])}ctx.setLineDash([])}
-    ctx.globalAlpha=1}
-  drawn=T;
-  // 降格: 描画時間か rAF の間隔×0.4(ラスタ化の遅さ)の EMA が 12 回続けて 20ms 超で 1 段(1 本おき→×0.8)。戻さない
-  const dd=performance.now()-t0,d=M.max(dd,fi*.4);fi=0;ema=ema?ema+.2*(d-ema):d;
-  if(ema<=20)slow=0;else if(++slow>=12){slow=ema=0;if(stride<2)stride=2;else if(cut==1)cut=.8,rs=1}};
-const paint=()=>{try{draw();apply()}catch(e){fail()}};
-// 追い方: 指数 0.2 秒・|Δτ|≤2.6dt(はじいても端から端まで約 1.9 秒)・下限 0.3dt
-const tick=now=>{raf=0;if(!live||!vis||D.hidden){last=0;return}
-  try{const tT=readT(),dt=last?M.min((now-last)/1000,.1):1/60,d=tT-tau;fi=last?now-last:0;last=now;
-    if(M.abs(d)<.002)tau=tT;else{let st=d*(1-M.exp(-dt/.2));if(M.abs(st)<.3*dt)st=M.abs(d)<.3*dt?d:M.sign(d)*.3*dt;tau+=clamp(st,-2.6*dt,2.6*dt);if(M.abs(tT-tau)<.002)tau=tT}
-    if(tau!==drawn)paint();if(tau!==tT)raf=requestAnimationFrame(tick);else last=0}catch(e){fail()}};
-const kick=()=>{if(live&&vis&&!raf&&!D.hidden)raf=requestAnimationFrame(tick)};HZ.kick=kick;
-
-const IO=IntersectionObserver;
-if(!(ctx=cv.getContext('2d')))return fail();
-readColors();
-new IO(es=>{near=es[es.length-1].isIntersecting;if(near&&!PX&&CL.contains('hz-live'))integrate()},{rootMargin:'100% 0px'}).observe(kz);
-// 画面にあるときだけ描く。画面外は τ=τT・canvas は空
-new IO(es=>{vis=es[es.length-1].isIntersecting;
-  if(vis){if(live){tau=readT();paint();kick()}}
-  else{stop();clear();if(live){tau=readT();apply()}else goLive()}}).observe(kz);
-D.addEventListener('visibilitychange',()=>D.hidden?stop():kick());
-if(location.hash)holdStill();addEventListener('hashchange',()=>{if(offscreen())off();holdStill()});
-new MutationObserver(()=>{readColors();if(live&&vis)paint()}).observe(R,{attributes:true,attributeFilter:['data-theme']});
-// 組み直しは幅か高さが 2px 以上変わったとき
-let rz=0;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(CL.contains('hz-live')&&(M.abs(R.clientWidth-W)>=2||M.abs(rect().height-H)>=2))rebuild()},200)});
-const onR=()=>{if(rq.matches){job++;ready=0;PX=0;off();CL.remove('hz-live')}else{CL.add('hz-live');rebuild()}};
-rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
-}catch(e){fail()}})();
-</script>
-<script>
 /* ページの線(約束は <style> 冒頭)。道筋は本文の実際の位置から組む(PC は余白を縫い、スマホは節の間の空きで左右を渡る)。
    始まり: ヒーローのマークの藍の線の終わり(176,84)から、その向きのまま伸びる。終わり: 閉じのマークの藍の線の始まり(8,74)へ、その向きで入る。
    長さ: 先端の高さ σ(ページの上から)= スクロール + 画面の高さ×0.7(スマホは 0.8。最初の 0.4 画面は始まりから滑らかに追いつく)。道筋の y の累積最大で長さを引く */
@@ -674,14 +556,18 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
 })();
 </script>
 <script>
-/* 閉じ(#about の帯 .kz)。τ(0〜5)は帯の進みを追い、追いつけば止まる。約束は <style> 冒頭。失敗したら完成形 */
-(()=>{'use strict';
-const D=document,R=D.documentElement,CL=R.classList,kz=D.getElementById('kz');if(!kz||!CL.contains('kz-on'))return;
-const cv=kz.querySelector('.kz-c'),mk=kz.querySelector('.kz-mark'),KC=kz.classList,M=Math;
+/* 筆の線のエンジン(開いた瞬間 .hz と閉じ .kz で同じコードを2回使う。B-13 の共通化・2026-10-11)。
+   τ(0〜5)は o.readT を追い、追いつけば止まる。約束は <style> 冒頭の「開いた瞬間」「閉じの約束」。失敗したら完成形。
+   2つの面で違うのは、時刻の読み方(読み込みの進み/帯の進み)・粒の数・積分の刻み・縮む拍と太る拍・live になる条件(閉じは帯が画面外のときだけ)・
+   閉じだけの kz-in の追跡とスクロールの監視・開いた瞬間だけの --hz-t と HZ への連絡で、o に渡す。
+   このページだけのコード。bridge.js へ上げない(design-system §6。window.BRIDGE_BRUSH は bridge.js の window.BRIDGE の仲間ではない) */
+window.BRIDGE_BRUSH=function(o){'use strict';
+const D=document,R=D.documentElement,CL=R.classList,id=o.id,kz=D.getElementById(id);if(!kz||!CL.contains(id+'-on'))return;
+const cv=kz.querySelector('.'+id+'-c'),mk=kz.querySelector('.'+id+'-mark'),KC=kz.classList,M=Math,LIVE=id+'-live',IN=id+'-in',RUN=id+'-run';
 let ctx,raf=0,last=0,live=0,job=0,drawn=-1;
 const stop=()=>{raf&&cancelAnimationFrame(raf);raf=last=0};
 const clear=()=>{ctx&&(ctx.setTransform(1,0,0,1,0,0),ctx.clearRect(0,0,cv.width,cv.height));drawn=-1};
-const fail=()=>{job++;live=0;stop();clear();CL.remove('kz-live','kz-in');KC.remove('kz-run')};
+const fail=()=>{job++;live=0;stop();clear();CL.remove(LIVE,IN);KC.remove(RUN)};
 try{
 const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=4.7,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),
   PD=[...mk.children].map(p=>new Path2D(p.getAttribute('d')));
@@ -705,14 +591,13 @@ const LT=[0,1].map(c=>{const a=new Float32Array((NL+1)*4);for(let i=0;i<=NL;i++)
   Lc=LT.map(a=>{let L=0;for(let i=4;i<=NL*4;i+=4)L+=M.hypot(a[i]-a[i-4],a[i+1]-a[i-3]);return L});
 
 const rect=()=>kz.getBoundingClientRect();
-// p=0: 帯の半分が画面に入る/1: 帯の下端が画面の 70%
-/* 帯の上端が帯の 1/4 ぶん画面に入ったら 0、帯の下端が画面の高さの 55% に来たら 5。送る量は 0.45 画面+帯の 3/4(2026-10-06 社長「実機でだいぶ早い」で 1.5 倍に) */
-const readT=()=>{const r=rect(),vh=innerHeight,h=r.height/2;return 5*clamp((vh-.5*h-r.top)/(.45*vh+1.5*h))};
+// 時刻の読み方は面ごと(o.readT。開いた瞬間=読み込みの進み / 閉じ=帯の進み)
+const readT=()=>o.readT(rect,clamp);
 const offscreen=()=>{const r=rect();return r.bottom<=0||r.top>=innerHeight};
-const apply=()=>{KC.toggle('kz-run',!!live&&tau<4.4);CL.toggle('kz-in',!!(live?v72&&tau>=1:m72))};
-const off=()=>{live=0;stop();clear();apply();removeEventListener('scroll',kick)};
-// live になるのは表ができ、帯が画面外のときだけ
-const goLive=()=>{if(!live&&!hold&&ready&&CL.contains('kz-live')&&offscreen()){live=1;tau=readT();clear();apply()}};
+const apply=()=>{KC.toggle(RUN,live?tau<4.4:!!(o.idleRun&&o.idleRun()));if(o.track)CL.toggle(IN,!!(live?v72&&tau>=1:m72))};
+const off=()=>{live=0;stop();clear();apply();if(o.scroll)removeEventListener('scroll',kick)};
+// live になるのは表ができたとき。閉じは帯が画面外のときだけ(o.offscreenOnly)。開いた瞬間は面が画面にある状態で始まるので、すぐ描く
+const goLive=()=>{if(!live&&!hold&&ready&&CL.contains(LIVE)&&(!o.offscreenOnly||offscreen())){live=1;tau=readT();clear();apply();if(!o.offscreenOnly&&vis){paint();kick()}}};
 // アンカーで飛んだら、止まるまで live にしない
 const holdStill=()=>{hold=1;const g=++hg;let y=-1,n=0;const chk=()=>{if(g!==hg)return;if(scrollY===y){if(++n>=3){hold=0;goLive();return}}else{n=0;y=scrollY}setTimeout(chk,200)};D.readyState==='complete'?chk():addEventListener('load',chk)};
 
@@ -720,28 +605,28 @@ const size=()=>{let d=M.min(devicePixelRatio||1,1.5);const px=W>860?1.3e6:.6e6;i
 const layout=()=>{const kr=rect(),mr=mk.getBoundingClientRect(),pc=(W=R.clientWidth)>860;H=kr.height;
   cv.style.left=-kr.left+'px';cv.style.width=W+'px';
   mx=M.round(mr.left);my=M.round(mr.top-kr.top); // SVG は CSS px の整数に寄せて描かれる(実測)
-  s1=mr.width/240;s0=M.min(.7*W/224,.7*H/82);sc=M.max(W/1920,.5);N=pc?360:300;wm=pc?1:1.15;size()};
-// 積分: 120 粒ずつ idle で(なければ setTimeout)
-const integrate=()=>{const id=++job,later=window.requestIdleCallback?f=>requestIdleCallback(f,{timeout:800}):f=>setTimeout(f,30);let k0=0;
+  s1=mr.width/240;s0=M.min(.7*W/224,.7*H/82);sc=M.max(W/1920,.5);N=pc?o.n[0]:o.n[1];wm=pc?1:1.15;size()};
+// 積分: o.chunk 粒ずつ、o.later の間隔で(開いた瞬間=すぐ / 閉じ=idle)
+const integrate=()=>{const id=++job,later=o.later;let k0=0;
   ready=0;layout();const Ww=W/sc,Wh=H/sc,V=290/SR;
   Z=new Float32Array(N);U0=new Float32Array(N);OFF=new Float32Array(N);CUR=new Uint8Array(N);PX=new Float32Array(N*ST);PY=new Float32Array(N*ST);BR=new Uint8Array(N*ST);
-  const chunk=()=>{if(id!==job)return;try{const k1=M.min(N,k0+120);
+  const chunk=()=>{if(id!==job)return;try{const k1=M.min(N,k0+o.chunk);
     for(let k=k0;k<k1;k++){const i=M.floor(k*1800/N),z=Z[k]=hash(i,2),b=k*ST;U0[k]=hash(i,3);OFF[k]=hash(i,5)+hash(i,6)-1;CUR[k]=hash(i,7)<.15;
       let x=PX[b]=-90+(Ww+180)*hash(i,11),y=PY[b]=-90+(Wh+180)*hash(i,12);
       for(let j=1;j<ST;j++){const a=field(x,y,9.7+(j-1)/SR,z,-.34,.61);let br=0;x+=M.cos(a)*V;y+=M.sin(a)*V;
         if(x>Ww+90){x-=Ww+180;br=1}else if(x<-90){x+=Ww+180;br=1}if(y>Wh+90){y-=Wh+180;br=1}else if(y<-90){y+=Wh+180;br=1}
         BR[b+j]=br;PX[b+j]=x;PY[b+j]=y}}
-    k0=k1;if(k0<N)later(chunk);else{ready=1;goLive()}}catch(e){fail()}};
+    k0=k1;if(k0<N)later(chunk);else{ready=1;goLive();if(o.onReady)o.onReady()}}catch(e){fail()}};
   later(chunk)};
-const rebuild=()=>{job++;ready=0;PX=0;off();if(CL.contains('kz-live')&&near)integrate()};
+const rebuild=()=>{job++;ready=0;PX=0;off();if(CL.contains(LIVE)&&near)integrate()};
 // 色は計算済みのトークンだけ
 const readColors=()=>{const cs=getComputedStyle(R),nv=getComputedStyle(mk.firstChild).stroke;COL=[cs.getPropertyValue('--blue-soft').trim(),cs.getPropertyValue('--blue').trim(),nv,nv,getComputedStyle(mk.lastChild).stroke]};
 
 // 1 枚を描く(τ だけで決まる)
-const draw=()=>{const t0=performance.now(),T=tau;if(rs){rs=0;size()}clear();ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
+const draw=()=>{const t0=performance.now(),T=tau;if(o.onDraw)o.onDraw(T);if(rs){rs=0;size()}clear();ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
   cv.style.setProperty('--kz-fb',40*(1-seg(T,2.4,1))+'px');
   if(T<END){ctx.lineCap=ctx.lineJoin='round';
-    const jf=(T+.3)*SR,j=M.min(ST-2,jf|0),f=jf-j,e=ease(seg(T,2.4,2)),s=lerp(s0,s1,e),cx=lerp(W/2,mx+120*s1,e),cy=lerp(H/2,my+55*s1,e),spr=(1-ease(seg(T,1.2,2.2)))*8,BK=[{},{},{},{},{}],LS=[[],[],[],[],[]];
+    const jf=(T+.3)*SR,j=M.min(ST-2,jf|0),f=jf-j,e=ease(seg(T,o.shrink[0],o.shrink[1])),s=lerp(s0,s1,e),cx=lerp(W/2,mx+120*s1,e),cy=lerp(H/2,my+55*s1,e),spr=(1-ease(seg(T,1.2,2.2)))*8,BK=[{},{},{},{},{}],LS=[[],[],[],[],[]];
     const add=(bd,wi,aq,n)=>{const key=wi*5+aq;let p=BK[bd][key];if(!p){p=BK[bd][key]=new Path2D();LS[bd].push(key)}p.moveTo(P[0],P[1]);for(let q=1;q<n;q++)p.lineTo(P[q*2],P[q*2+1])};
     for(let k=0;k<N;k+=stride){const z=Z[k],ms=.6+.8*U0[k],m=ease(seg(T,ms,2.2)),Ki=M.round(lerp(16,7,seg(T,ms+1.4,.8))),lt=LT[CUR[k]],b=k*ST;
       let am=1-ease(seg(T,4+.4*z,.3)),n=0,pu=-1,L=0,dH=0;if(am<=.02)continue;
@@ -750,17 +635,17 @@ const draw=()=>{const t0=performance.now(),T=tau;if(rs){rs=0;size()}clear();ctx.
         let x=PX[b+ix],y=PY[b+ix];if(!q&&!BR[b+ix+1]){x=lerp(x,PX[b+ix+1],f);y=lerp(y,PY[b+ix+1],f)}x*=sc;y*=sc;
         if(m>0){ // カメラは今の τ のものを尾全体に
           const u=frac(U0[k]+.12*((q?ix/SR-.3:T)-.6));if(pu>=0&&M.abs(u-pu)>.5)break;pu=u;
-          const uf=u*NL,li=M.min(NL-1,uf|0),g=uf-li,o=li*4,sp=spr*OFF[k]*s,ox=cx+(lerp(lt[o],lt[o+4],g)-120)*s,oy=cy+(lerp(lt[o+1],lt[o+5],g)-55)*s;
-          x=lerp(x,ox+lerp(lt[o+2],lt[o+6],g)*sp,m);y=lerp(y,oy+lerp(lt[o+3],lt[o+7],g)*sp,m);dH=M.max(dH,M.hypot(x-ox,y-oy))}
+          const uf=u*NL,li=M.min(NL-1,uf|0),g=uf-li,o2=li*4,sp=spr*OFF[k]*s,ox=cx+(lerp(lt[o2],lt[o2+4],g)-120)*s,oy=cy+(lerp(lt[o2+1],lt[o2+5],g)-55)*s;
+          x=lerp(x,ox+lerp(lt[o2+2],lt[o2+6],g)*sp,m);y=lerp(y,oy+lerp(lt[o2+3],lt[o2+7],g)*sp,m);dH=M.max(dH,M.hypot(x-ox,y-oy))}
         if(n)L+=M.hypot(x-P[n*2-2],y-P[n*2-1]);P[n*2]=x;P[n*2+1]=y;n++}
       const aq=M.round(am*4);if(L<2||aq<=0)continue;
       // 幅は曲線に乗ってから(dH<2px)収束の終わりに太らせ、長さの 1/4 まで(粒・剥片に見せない)
       const w=lerp((.6+1.4*z)*wm,6*s*.28,seg(m,.9,.1)**2*clamp(1-dH/2)),wi=M.min(wIdx(w),M.floor(2*M.log2(L/2))),bd=m>.5?(CUR[k]?4:3):z<.4?0:z<.75?1:2;
       add(bd,wi,aq,n)}
     for(let bd=0;bd<5;bd++){ctx.strokeStyle=COL[bd];for(const key of LS[bd]){const aq=key%5;ctx.globalAlpha=AL[bd]*aq/4;ctx.lineWidth=wOf((key-aq)/5);ctx.stroke(BK[bd][key])}}
-    // 清書: 細い芯を左から引く(先端は収束の先頭より先へ出ない)。3–4 で幅 6·s。4.4 で SVG を出し 4.5 までに消す
+    // 清書: 細い芯を左から引く(先端は収束の先頭より先へ出ない)。幅は o.width の拍で 6·s へ。4.4 で SVG を出し 4.5 までに消す
     const r=ease(seg(T,1.75,1)),la=1-seg(T,4.4,.1);
-    if(r>0&&la>0){ctx.globalAlpha=la;ctx.translate(cx-120*s,cy-55*s);ctx.scale(s,s);ctx.lineWidth=lerp(1.68,6,ease(seg(T,3,1)));
+    if(r>0&&la>0){ctx.globalAlpha=la;ctx.translate(cx-120*s,cy-55*s);ctx.scale(s,s);ctx.lineWidth=lerp(1.68,6,ease(seg(T,o.width[0],o.width[1])));
       for(let c=0;c<2;c++){ctx.strokeStyle=COL[c?4:2];ctx.setLineDash(r<1?[r*Lc[c],Lc[c]+1]:[]);ctx.stroke(PD[c])}ctx.setLineDash([])}
     ctx.globalAlpha=1}
   drawn=T;
@@ -773,26 +658,37 @@ const tick=now=>{raf=0;if(!live||!vis||D.hidden){last=0;return}
   try{const tT=readT(),dt=last?M.min((now-last)/1000,.1):1/60,d=tT-tau;fi=last?now-last:0;last=now;
     if(M.abs(d)<.002)tau=tT;else{let st=d*(1-M.exp(-dt/.2));if(M.abs(st)<.3*dt)st=M.abs(d)<.3*dt?d:M.sign(d)*.3*dt;tau+=clamp(st,-2.6*dt,2.6*dt);if(M.abs(tT-tau)<.002)tau=tT}
     if(tau!==drawn)paint();if(tau!==tT)raf=requestAnimationFrame(tick);else last=0}catch(e){fail()}};
-const kick=()=>{if(live&&vis&&!raf&&!D.hidden)raf=requestAnimationFrame(tick)};
+const kick=()=>{if(live&&vis&&!raf&&!D.hidden)raf=requestAnimationFrame(tick)};if(o.expose)o.expose(kick);
 
 const IO=IntersectionObserver;
-// kz-in: live は帯が画面にあり τ≥1、ほかはマークが画面にあるとき
-const io=new IO(es=>{for(const e of es)e.target===kz?v72=e.isIntersecting:m72=e.isIntersecting;apply()},{rootMargin:'-72px 0px 0px 0px'});io.observe(kz);io.observe(mk);
+// 閉じだけ: kz-in は live なら帯が画面にあり τ≥1、ほかはマークが画面にあるとき
+if(o.track){const io=new IO(es=>{for(const e of es)e.target===kz?v72=e.isIntersecting:m72=e.isIntersecting;apply()},{rootMargin:'-72px 0px 0px 0px'});io.observe(kz);io.observe(mk)}
 if(!(ctx=cv.getContext('2d')))return fail();
 readColors();
-new IO(es=>{near=es[es.length-1].isIntersecting;if(near&&!PX&&CL.contains('kz-live'))integrate()},{rootMargin:'100% 0px'}).observe(kz);
+new IO(es=>{near=es[es.length-1].isIntersecting;if(near&&!PX&&CL.contains(LIVE))integrate()},{rootMargin:'100% 0px'}).observe(kz);
 // 画面にあるときだけ描く。画面外は τ=τT・canvas は空
 new IO(es=>{vis=es[es.length-1].isIntersecting;
-  if(vis){if(live){addEventListener('scroll',kick,{passive:true});tau=readT();paint();kick()}}
-  else{removeEventListener('scroll',kick);stop();clear();if(live){tau=readT();apply()}else goLive()}}).observe(kz);
+  if(vis){if(live){if(o.scroll)addEventListener('scroll',kick,{passive:true});tau=readT();paint();kick()}}
+  else{if(o.scroll)removeEventListener('scroll',kick);stop();clear();if(live){tau=readT();apply()}else goLive()}}).observe(kz);
 D.addEventListener('visibilitychange',()=>D.hidden?stop():kick());
 if(location.hash)holdStill();addEventListener('hashchange',()=>{if(offscreen())off();holdStill()});
 new MutationObserver(()=>{readColors();if(live&&vis)paint()}).observe(R,{attributes:true,attributeFilter:['data-theme']});
 // 組み直しは幅か高さが 2px 以上変わったとき
-let rz=0;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(CL.contains('kz-live')&&(M.abs(R.clientWidth-W)>=2||M.abs(rect().height-H)>=2))rebuild()},200)});
-const onR=()=>{if(rq.matches){job++;ready=0;PX=0;off();CL.remove('kz-live')}else{CL.add('kz-live');rebuild()}};
+let rz=0;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(CL.contains(LIVE)&&(M.abs(R.clientWidth-W)>=2||M.abs(rect().height-H)>=2))rebuild()},200)});
+const onR=()=>{if(rq.matches){job++;ready=0;PX=0;off();CL.remove(LIVE)}else{CL.add(LIVE);rebuild()}};
 rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
-}catch(e){fail()}})();
+}catch(e){fail()}};
+</script>
+<script>
+/* 開いた瞬間(面の .hz)。τ は HZ.target()(読み込みの進みだけ)を追う。スクロールには従わない。約束は <style> 冒頭 */
+BRIDGE_BRUSH({id:'hz',readT:()=>HZ.target(),idleRun:()=>HZ.waiting(),n:[700,400],chunk:260,later:f=>setTimeout(f,0),onReady:()=>HZ.onReady(),
+  onDraw:T=>document.documentElement.style.setProperty('--hz-t',T.toFixed(3)),shrink:[3.45,.95],width:[3.5,.9],expose:k=>{HZ.kick=k}});
+</script>
+<script>
+/* 閉じ(#about の帯 .kz)。τ(0〜5)は帯の進みを追う。約束は <style> 冒頭
+   帯の上端が帯の 1/4 ぶん画面に入ったら 0、帯の下端が画面の高さの 55% に来たら 5。送る量は 0.45 画面+帯の 3/4(2026-10-06 社長「実機でだいぶ早い」で 1.5 倍に) */
+BRIDGE_BRUSH({id:'kz',readT:(rect,clamp)=>{const r=rect(),vh=innerHeight,h=r.height/2;return 5*clamp((vh-.5*h-r.top)/(.45*vh+1.5*h))},track:true,scroll:true,offscreenOnly:true,
+  n:[360,300],chunk:120,later:window.requestIdleCallback?f=>requestIdleCallback(f,{timeout:800}):f=>setTimeout(f,30),shrink:[2.4,2],width:[3,1]});
 </script>
 </body>
 </html>
