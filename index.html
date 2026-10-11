@@ -86,7 +86,7 @@ html.hero-in body[data-page="home"] .nav-logo{opacity:0;visibility:hidden;transi
 /* ===== ページの線(約束は <style> 冒頭の「ページの線」) =====
    本文の下の層(実画面の写しの後ろを通るときは隠れる)。pl-on=線を出す(開いた瞬間のあと)/pl-reveal=先端で現す(動けるときだけ)。
    .pr は先端が届いた高さまで上から見える(--pr 0→1。JS が付ける)。ぬぐいの縁は 72px の mask のアルファ */
-main{position:relative}
+main{position:relative;overflow-x:clip} /* 線の層が画面の外へ出ても横スクロールを出さない(body の overflow-x に頼らない) */
 main > section{position:relative;z-index:1}
 .pl{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:0;overflow:visible;opacity:0;transition:opacity .6s var(--ease)}
 html.pl-on .pl{opacity:1}
@@ -439,7 +439,7 @@ const fail=()=>{job++;live=0;stop();clear();CL.remove('hz-live','hz-in');KC.remo
 try{
 const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=4.7,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),
   PD=[...mk.children].map(p=>new Path2D(p.getAttribute('d')));
-let tau=5,ready=0,vis=0,v72=0,m72=0,near=0,hold=0,hg=0,W=0,H=0,sc=1,mx=0,my=0,s0=1,s1=1,N=0,wm=1,stride=1,cut=1,rs=0,ema=0,slow=0,fi=0,COL,PX,PY,BR,Z,U0,OFF,CUR;
+let tau=5,ready=0,vis=0,near=0,hold=0,hg=0,W=0,H=0,sc=1,mx=0,my=0,s0=1,s1=1,N=0,wm=1,stride=1,cut=1,rs=0,ema=0,slow=0,fi=0,COL,PX,PY,BR,Z,U0,OFF,CUR;
 // 出典: showreel/kousa.html 29・30・48・75 行(PR #143・67fb41c)
 const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x,lerp=(a,b,u)=>a+(b-a)*u,seg=(t,a,d)=>clamp((t-a)/d),frac=x=>x-M.floor(x);
 // 出典: 同 41〜47 行。--ease の LUT
@@ -592,7 +592,7 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
     }
     // 閉じ: マークの上の空いた帯(筆の線が集まる場所)を横切って左へ。そこから下りて、大きな弧で藍の線の始まり(8,74)へ、その向き((8,74)→(62,16))のまま入る
     var kzb = rel('.kz'), END = null;
-    if (E) { var mx = pc ? E[0] - 78 : M.max(3, E[0] - 22), my = E[1] - (pc ? 46 : 30);
+    if (E) { var mx = pc ? E[0] - 78 : M.max(6, E[0] - 18), my = E[1] - (pc ? 46 : 30);
       if (pc && kzb && kzb.h > 120) push((E[0] + W) / 2 + 60, kzb.t + kzb.h * .22);
       push(mx, my);
       END = { e: [E[0], E[1]], r: pc ? 62 : 38, u: pc ? 80 : 48 }; } // 入ってきた向きのまま回り込み、藍の線の始まりへ入る(角を作らない)
@@ -603,12 +603,13 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
   }
   function swoop(P) { var q = P[P.length - 1], p = P[P.length - 2] || q, E = P.END; if (!E) return '';
     var dx = q[0] - p[0], dy = q[1] - p[1], dl = Math.hypot(dx, dy) || 1, tx = .82, ty = -.57; // 入ってきた向きで回り込み、藍の線の始まりへ入る(約35°。藍の線の始まり (8,74)→(62,16) の約47°より浅くして、回り込みを小さくする)
-    return ' C' + (q[0] + dx / dl * E.r).toFixed(1) + ' ' + (q[1] + dy / dl * E.r).toFixed(1) + ' ' + (E.e[0] - tx * E.u).toFixed(1) + ' ' + (E.e[1] - ty * E.u).toFixed(1) + ' ' + E.e[0].toFixed(1) + ' ' + E.e[1].toFixed(1); }
+    return ' C' + cx(q[0] + dx / dl * E.r).toFixed(1) + ' ' + (q[1] + dy / dl * E.r).toFixed(1) + ' ' + cx(E.e[0] - tx * E.u).toFixed(1) + ' ' + (E.e[1] - ty * E.u).toFixed(1) + ' ' + E.e[0].toFixed(1) + ' ' + E.e[1].toFixed(1); }
+  var XW = 0, cx = function (x) { return M.min(XW - 4, M.max(4, x)); }; // 制御点を画面の内側に置く(3次ベジェは制御点の凸包の中に収まるので、線と先端が画面の外へ出ない)
   function toPath(P) { // Catmull-Rom → 3次ベジェ
     var d = 'M' + P[0][0].toFixed(1) + ' ' + P[0][1].toFixed(1);
     for (var i = 0; i < P.length - 1; i++) {
       var p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2, k = 1 / 6;
-      d += ' C' + (p1[0] + (p2[0] - p0[0]) * k).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) * k).toFixed(1) + ' ' + (p2[0] - (p3[0] - p1[0]) * k).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) * k).toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+      d += ' C' + cx(p1[0] + (p2[0] - p0[0]) * k).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) * k).toFixed(1) + ' ' + cx(p2[0] - (p3[0] - p1[0]) * k).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) * k).toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
     }
     return d;
   }
@@ -616,7 +617,7 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
     mainTop = main.getBoundingClientRect().top + scrollY;
     var W = R.clientWidth, H = main.offsetHeight;
     svg.setAttribute('width', W); svg.setAttribute('height', H); svg.style.height = H + 'px';
-    var P = route(W); if (!P || P.length < 3) { ready = false; return; }
+    XW = W; var P = route(W); if (!P || P.length < 3) { ready = false; return; }
     var dBody = toPath(P); path.setAttribute('d', dBody); var lenQ = path.getTotalLength();
     path.setAttribute('d', dBody + swoop(P)); total = path.getTotalLength();
     LUT = []; var m = -1e9, py = null;
