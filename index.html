@@ -94,6 +94,7 @@ html.hz-live .hz-bg{display:block;position:absolute;inset:0;pointer-events:none;
 .hero-pin,.words{position:relative;z-index:1}
 html.hz-live .hero-pin{height:240vh;height:240svh}
 html.hz-live .hero-pin > .hero{position:sticky;top:0;height:100vh;height:100svh}
+html.hz-live .jr-top{min-height:0} /* 固定中は帯まで 100svh に収める(低い画面で CTA が下へはみ出していた。qa 2026-10-11) */
 
 /* ===== 本人の言葉 =====
    1文ずつ、画面の真ん中を通る。PC は左寄り(右側を線の流れに空ける)。3文目のあと 0.4 画面ほど、できた流れを画面に残す */
@@ -113,7 +114,8 @@ html:not(.hz-live) .w-step{min-height:auto;padding:clamp(48px,12vh,120px) 0}
 .try{padding:clamp(56px,9vh,110px) 0 clamp(24px,4vh,48px);overflow-x:clip}
 .try-h{margin-top:10px;font:700 clamp(20px,2vw,26px)/1.5 var(--sans);letter-spacing:.01em}
 .tw-pick{margin-top:22px}
-.tw-pick .tag{font-size:13px;padding:10px 16px;background:none}
+.tw-pick[hidden]{display:none}
+.tw-pick .tag{font-size:13px;padding:10px 16px}
 .tw-pick .tag[aria-pressed="true"]{cursor:default}
 .tw-pick .tag:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .tw-out{margin-top:28px}
@@ -296,7 +298,7 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
 <section class="hero" aria-labelledby="heroTitle">
   <div class="jr-top">
     <h1 class="jr-brand" id="heroTitle"><svg class="logo-mark" viewBox="0 0 758 110" role="img" aria-label="BRIDGE"><path class="l-navy" stroke-width="6" pathLength="1" d="M8 74 C 62 16, 118 24, 176 84"/><path class="l-sand" stroke-width="6" pathLength="1" d="M58 94 C 118 60, 158 22, 232 12"/><text class="jr-word" x="312" y="86">BRIDGE</text></svg><svg class="logo-mark hz-mark" viewBox="0 0 240 110" aria-hidden="true" focusable="false"></svg></h1>
-    <script>/* 線の層の準備: h1 のマークの経路を写し(hz-on)、動けるときだけ hz-live。動けるなら最初の1枚はマークを隠し、線が集まるのを待つ */(()=>{try{const d=document,r=d.documentElement,c=r.classList,m=d.querySelector('.hz-mark'),cv=d.querySelector('.hz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle > svg:not(.hz-mark) .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;c.add('hz-on');if(cv.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches){c.add('hz-live','hz-run','hz-logo');r.style.setProperty('--hz-t','0')}}catch(e){}})()</script>
+    <script>/* 線の層の準備: h1 のマークの経路を写し(hz-on)、動けるときだけ hz-live。動けるなら最初の1枚はマークを隠し、線が集まるのを待つ */(()=>{try{const d=document,r=d.documentElement,c=r.classList,m=d.querySelector('.hz-mark'),cv=d.querySelector('.hz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle > svg:not(.hz-mark) .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;c.add('hz-on');if(cv.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches){c.add('hz-live','hz-run','hz-logo');r.style.setProperty('--hz-t','0');setTimeout(()=>{if(!(window.HZ&&HZ.kick))c.remove('hz-live','hz-run','hz-logo')},4000)}}catch(e){}})()</script>
   </div>
   <div class="hero-foot">
     <p class="hero-desc">看護師・リハビリ職・医療事務の方へ。いつもの仕事が病院の外でどんな言葉になるかを見つけて、ゲームや道具で試せます。</p>
@@ -332,7 +334,7 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
       <p class="note">BRIDGE Compass(<time datetime="2026-09-22">2026-09-22</time> 公開)</p>
       <h2 class="try-h" id="tryTitle">いつもの仕事を、外の言葉で言うと</h2>
       <div class="tw-pick tag-row" id="twPick" role="group" aria-label="いつもの仕事を選ぶ" hidden></div>
-      <p class="tw-out" aria-live="polite"><span class="tw-from">「<b>退院支援</b>」は</span><span class="tw-to"><span class="tw-to-t">プロジェクト推進・合意形成</span></span></p>
+      <p class="tw-out" aria-live="polite" aria-atomic="true"><span class="tw-from">「<b>退院支援</b>」は</span><span class="tw-to"><span class="tw-to-t">プロジェクト推進・合意形成</span></span></p>
       <p class="cp-p try-p">言いかえは BRIDGE Compass の表から選んでいます。質問に答えると、職種と答えに沿った言いかえと、いまの経験から見える3つの方向が「橋」として出ます。</p>
       <div class="try-cta"><a class="btn glass" href="./compass/index.html">自分の場合を見てみる <span aria-hidden="true">→</span></a><p class="h-meta">10の質問・約3分・登録不要</p></div>
     </div>
@@ -378,10 +380,10 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
       <div data-reveal>
         <p class="note">小さく試しているもの</p>
         <ul class="sm-list">
-          <li><a class="sm-item" href="./tanaoroshi/index.html"><span class="sm-txt"><span class="sm-name">経験の棚卸し<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">18の質問で、職務経歴書のたねをつくる。面接で実績をうまく言えないときに。</span></span></span></a></li>
-          <li><a class="sm-item" href="./nidodema/index.html"><span class="sm-txt"><span class="sm-name">二度手間さがし<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">部署の手作業を、減らせるものと守るものに分ける。</span></span></span><img class="sm-thumb" src="./images/products/thumbs/nidodema.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></a></li>
+          <li><a class="sm-item" href="./tanaoroshi/index.html"><span class="sm-txt"><span class="sm-name">経験の棚卸し<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">18の質問で、職務経歴書のたねをつくる。面接で実績をうまく言えないときに。</span></span></a></li>
+          <li><a class="sm-item" href="./nidodema/index.html"><span class="sm-txt"><span class="sm-name">二度手間さがし<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">部署の手作業を、減らせるものと守るものに分ける。</span></span><img class="sm-thumb" src="./images/products/thumbs/nidodema.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></a></li>
           <li><a class="sm-item" href="./daily-app/index.html"><span class="sm-txt"><span class="sm-name">キャリアログ<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">日々の仕事と学びを記録して、キャリアの言葉に。</span></span></a></li>
-          <li><a class="sm-item" href="./pmi-quest/index.html"><span class="sm-txt"><span class="sm-name">クリニックPMIクエスト<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">承継直後の30日を、10問で診断する。</span></span></span></a></li>
+          <li><a class="sm-item" href="./pmi-quest/index.html"><span class="sm-txt"><span class="sm-name">クリニックPMIクエスト<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">承継直後の30日を、10問で診断する。</span></span></a></li>
         </ul>
       </div>
       <figure data-reveal data-reveal-delay="1">
