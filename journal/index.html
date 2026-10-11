@@ -42,6 +42,7 @@ a.j-row:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 @media(max-width:860px){.j-lead{grid-template-columns:1fr}.j-row{grid-template-columns:96px minmax(0,1fr)}.j-row .j-thumb{width:96px}.j-row .j-date{grid-column:2}.j-row .j-go{display:none}}
 .j-state{max-width:var(--max);margin:28px auto 0;font-size:13.5px;line-height:2;color:var(--ink-2)}
 .j-state[hidden]{display:none}
+html:not(.js) #jState{display:none} /* JS 無効では「読み込んでいます」を出さない(qa 2026-10-11)。代わりは noscript */
 .j-state a{color:var(--blue);border-bottom:1px solid var(--blue-soft)}
 /* 実験室: 行型(写し・名前・状態・一文・リンク) */
 .lab-rows{max-width:var(--max);margin:clamp(28px,4vh,40px) auto 0;border-top:1px solid var(--line)}
@@ -81,6 +82,7 @@ a.lab-row:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
   <div id="jLead"></div>
   <div class="j-rows" id="jGrid" hidden></div>
   <p class="j-state" id="jState" aria-live="polite">記事を読み込んでいます。</p>
+  <noscript><p class="j-state">記事の一覧の表示には JavaScript が必要です。<a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteで直接お読みください ↗</a></p></noscript>
   <div class="sec-inner" style="margin-top:40px">
     <a class="btn ghost" href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteですべての記事を読む</a>
   </div>
@@ -167,7 +169,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     grid.innerHTML = ''; lead.innerHTML = '';
     const list = items.filter(it => active === 'all' || it._tags.includes(active));
     grid.hidden = list.length <= 1;
-    if (!list.length) { state.hidden = false; state.innerHTML = 'このタグの記事はまだありません。<a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteには他の記事もあります ↗</a>'; return; }
+    if (!list.length) { state.hidden = false; state.innerHTML = (active === 'all' ? '記事はまだありません。' : 'このタグの記事はまだありません。') + '<a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteには他の記事もあります ↗</a>'; return; }
     state.hidden = true;
     const first = list[0];
     lead.innerHTML = '<a class="j-lead" href="' + esc(first.url) + '" target="_blank" rel="noopener">' +
