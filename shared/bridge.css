@@ -93,7 +93,7 @@ button{font:inherit;background:none;border:none;cursor:pointer;color:inherit}
 .nowrap{white-space:nowrap}
 .br-pc{display:none}
 @media(min-width:720px){.br-pc{display:inline}}
-section[id],div[id]{scroll-margin-top:90px}
+section[id],div[id],article[id]{scroll-margin-top:90px}
 main{display:block}
 
 /* ===== タイポグラフィ ===== */
@@ -248,6 +248,17 @@ a.row:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
 a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 @media(max-width:860px){.row{grid-template-columns:1fr auto}.row-num{display:none}.row-p{grid-column:1/-1}}
 
+/* 目次(静的・ページ内リンク)。philosophy の章と stories の話で使う(2か所目。designer 2026-10-11 §6 で共通化)。
+   番号は --ink-3(砂にしない。B-12)。行は 44px。PC は2列、760px 以下で1列。sticky・blur・横スクロールにしない(B-8 を閉じる) */
+.toc{max-width:var(--max);margin:clamp(32px,5vh,48px) auto 0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(28px,4vw,64px);border-top:1px solid var(--line)}
+.toc li{border-bottom:1px solid var(--line)}
+.toc a{display:grid;grid-template-columns:2.2em minmax(0,1fr);align-items:baseline;gap:10px;min-height:44px;padding:11px 0;font:500 14px/1.7 var(--sans);color:var(--ink);transition:color .2s}
+.toc a:hover{color:var(--blue)}
+.toc a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.toc .n{font:600 10.5px/1 var(--en);letter-spacing:0.12em;color:var(--ink-3)}
+.toc .s{display:block;font-size:12px;line-height:1.7;color:var(--ink-3);margin-top:2px}
+@media(max-width:760px){.toc{grid-template-columns:1fr}}
+
 /* 「次はどこへ歩く?」— 各ページ末尾の分岐(押し付けない導線) */
 .walk{padding:var(--sec-y) var(--pad-x);border-top:1px solid var(--line)}
 .walk-inner{max-width:var(--max);margin:0 auto}
@@ -297,3 +308,16 @@ a.row:hover .row-arr{transform:translateX(6px);color:var(--blue)}
 .footer-base a::after{content:'';position:absolute;inset:-17px -8px} /* タップ領域44px */
 .footer-base{max-width:var(--max);margin:44px auto 0;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:500 10px/1.8 var(--en);letter-spacing:0.1em;color:var(--ink-4)}
 @media(max-width:860px){.footer-grid{grid-template-columns:1fr 1fr}}
+
+/* ===== 文字リンク(主ボタンの横・リードの下の一歩。3ページ目=services で昇格。B-23 を閉じる。designer 2026-10-11) ===== */
+.tx-link{display:inline-flex;align-items:center;gap:10px;min-height:44px;font:700 14px/1.4 var(--sans);letter-spacing:0.02em;color:var(--ink);border-bottom:1px solid var(--ink-4);transition:border-color .3s var(--ease)}
+.tx-link .ar{transition:transform .3s var(--ease)}
+.tx-link:hover{border-color:var(--ink)}
+.tx-link:hover .ar{transform:translateX(4px)}
+.tx-link:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+/* ===== 作ったものの行(段・年表・行の下に、実在の道具へ。philosophy/about/projects の3か所で昇格。designer 2026-10-11) ===== */
+.made{font-size:11.5px;line-height:1.9;color:var(--ink-3)}
+.made a{color:var(--ink-2);border-bottom:1px solid var(--line);white-space:nowrap}
+.made a:hover{color:var(--blue);border-color:var(--blue-soft)}
+@media(max-width:920px){.made a{display:inline-flex;align-items:center;min-height:44px}}

@@ -28,12 +28,14 @@
 .tl-t{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2vw,22px);margin-bottom:10px}
 .tl-p{font-size:12px;line-height:2.05;color:var(--ink-2);max-width:220px}
 .tl-step.now .tl-t{color:var(--dawn-deep)}
+/* 各現場から生まれた道具(実在のものだけ) */
+.tl-made{margin-top:12px;max-width:220px} /* 文字と色は共通の .made */
 @media(max-width:860px){
   .tl{grid-template-columns:1fr;padding-left:28px}
   .tl::before{top:0;bottom:0;left:5px;right:auto;width:1px;height:auto}
   .tl-step{padding:0 0 38px 0}
   .tl-step::before{left:-28px;top:8px}
-  .tl-p{max-width:none}
+  .tl-p,.tl-made{max-width:none}
 }
 .founder-wrap{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:240px 1fr;gap:clamp(28px,5vw,56px);align-items:start}
 .founder-photo{aspect-ratio:4/5;border-radius:16px;background:var(--dark-sec) url('../images/founder.jpg') center/cover;box-shadow:var(--shadow)}
@@ -58,7 +60,7 @@
     <div class="crumb"><a href="../index.html">Home</a><span class="sep">/</span><span>About</span></div>
     <h1>BRIDGEについて</h1>
     <p class="lead">
-      BRIDGEという名前の由来と、これまでの歩み、いま運営している人間についての短い記録です。始まったばかりの小さな活動なので、等身大のまま書きます。
+      BRIDGEという名前の由来と、これまでの歩み、運営している人間について。臨床・研究・経営の経験から、どの道具が生まれたかも添えました。
     </p>
   </div>
 </header>
@@ -104,21 +106,25 @@
       <span class="tl-tag">01 Clinical</span>
       <div class="tl-t">臨床</div>
       <p class="tl-p">理学療法士として現場に立つ。患者の「もっとできるのに」を、ここで知った。</p>
+      <p class="tl-made made">ここから: <a href="../tanaoroshi/index.html">経験の棚卸し</a>・<a href="../iikae/index.html">現場のことば 言いかえ帳</a>・<a href="../compass/index.html">BRIDGE Compass</a>(現場の経験を、外の言葉に)</p>
     </div>
     <div class="tl-step" data-reveal data-reveal-delay="1">
       <span class="tl-tag">02 Research</span>
       <div class="tl-t">研究</div>
       <p class="tl-p">大学院で「評価の客観性」と向き合い、英語論文を発表。検証する目を得た。</p>
+      <p class="tl-made made">ここから: 測ってから語る設計。<a href="../rehaboard/index.html">RehaBoard</a> の KPI 辞書、<a href="../medboard/index.html">MedBoard</a> の「流れ」で見る数字</p>
     </div>
     <div class="tl-step" data-reveal data-reveal-delay="2">
       <span class="tl-tag">03 Management</span>
       <div class="tl-t">経営</div>
       <p class="tl-p">事業会社で医療経営・PMIの数字に責任を持つ。「医療を持続可能にする」視点が言語化された。</p>
+      <p class="tl-made made">ここから: <a href="../clinic-flow-3d/index.html">クリニックタウン3D</a>・<a href="../medops/index.html">医療管理実務ライブラリ</a>・<a href="../pmi-quest/index.html">クリニックPMIクエスト</a></p>
     </div>
     <div class="tl-step now" data-reveal data-reveal-delay="3">
       <span class="tl-tag">04 Now</span>
       <div class="tl-t">BRIDGE</div>
       <p class="tl-p">4つの現場の交差点で、人と社会の選択肢を広げるプロジェクトを始めた。</p>
+      <p class="tl-made made">いま: <a href="../products/index.html">Productsの道具</a>を、直しながら公開している</p>
     </div>
   </div>
 </section>
@@ -170,7 +176,7 @@
     <div class="walk-grid">
       <a class="walk-card" href="../philosophy/index.html" data-reveal>
         <span class="en">Philosophy</span><span class="t">BRIDGEの思想を読む</span>
-        <p class="p">なぜ存在するのか。いちばん長いページ。</p>
+        <p class="p">リハビリテーションの語源から、選択肢を増やすということまで。</p>
       </a>
       <a class="walk-card" href="../projects/index.html" data-reveal data-reveal-delay="1">
         <span class="en">Projects</span><span class="t">いまの活動を見る</span>
@@ -181,7 +187,6 @@
         <p class="p">共感も、異論も、歓迎します。</p>
       </a>
     </div>
-    <p class="walk-note" data-reveal>ここまで読んで、この人はこういう順番で来たのか、と分かっただけで十分です。話しかけるかどうかは、あなたが決めることです。</p>
   </div>
 </aside>
 
