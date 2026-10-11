@@ -124,7 +124,7 @@
   .item-cta{grid-column:2;min-height:0;padding-top:4px}
 }
 /* 0件(§4 Empty: 一文+別の行き先) */
-.find-empty{max-width:var(--max);margin:0 auto;padding:clamp(40px,6vh,64px) 0;font-size:14px;line-height:2;color:var(--ink-2)}
+.find-empty{max-width:var(--max);margin:0 auto;padding:clamp(40px,6vh,64px) var(--pad-x);box-sizing:content-box;font-size:14px;line-height:2;color:var(--ink-2)} /* 左右は --pad-x(0件の文が画面の端に触れていた。pm 2026-10-11) */
 .find-empty[hidden]{display:none}
 .find-empty a{color:var(--blue);border-bottom:1px solid var(--blue-soft)}
 /* 一覧の末尾: 一文だけ */
@@ -223,7 +223,7 @@
     <div class="walk-grid">
       <a class="walk-card" href="../philosophy/index.html">
         <span class="en">Philosophy</span><span class="t">道具の奥にある考え方を読む</span>
-        <p class="p">正解を与えるのではなく、選択肢を増やす。</p>
+        <p class="p">リハビリテーションの語源から、選択肢を増やすということまで。</p>
       </a>
       <a class="walk-card" href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">
         <span class="en">note ↗</span><span class="t">考えていることを読む</span>
@@ -234,7 +234,7 @@
         <p class="p">あなたの現場の「面倒くさい」を道具に。</p>
       </a>
     </div>
-    <p class="walk-note">気になるものをひとつ、試してみてください。</p>
+    <p class="walk-note">気になるものをひとつ、試してみてください。一覧を眺めるだけで終わっても十分です。</p>
   </div>
 </aside>
 
