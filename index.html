@@ -34,7 +34,7 @@
    ページの線(.pl)
      1 ヒーローのロゴの藍の線が、その終わり(176,84)からその向きのまま伸び、ページの余白を縫って、閉じのロゴの藍の線の始まり(8,74)へ同じ向きで入る
        (最後は左から角を作らずに回り込む)。色は --mark-line(ロゴの藍の線の役割)。語・図は描かない。読ませる文字を横切らない(実画面の写しの後ろは通る)
-     2 引く長さはスクロール位置だけで決まる。先端は画面の高さの 7 割(最初の 0.4 画面は始まりから滑らかに追いつく)。先端の点は砂(第22条の現在地)
+     2 引く長さはスクロール位置だけで決まる。先端は画面の高さの 7 割(スマホは 8 割。最初の 0.4 画面は始まりから滑らかに追いつく)。スマホは節の間の空きで左右を渡る。先端の点は砂(第22条の現在地)
      3 本人の言葉・触れる一場面・ほかの道具(文字と実画面)は、先端が届いた高さから上からぬぐうように現れ、戻せば引っ込む(mask のアルファ)
      4 動きを減らす設定では、線は最初から引き終え、点はなく、文字と実画面は最初から見える。JS なしでは線を出さない(文字と実画面は見える)
    閉じの約束(#about の帯 .kz だけ。designer 2026-10-05)
@@ -93,7 +93,9 @@ html.pl-on .pl{opacity:1}
 .pl-path{fill:none;stroke:var(--mark-line);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pl-tip{fill:var(--dawn);opacity:0;transition:opacity .3s var(--ease)}
 .pl-tip.on{opacity:1}
-html.pl-reveal .pr{-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--pr,0) * (100% + 72px) - 72px),transparent calc(var(--pr,0) * (100% + 72px)));mask-image:linear-gradient(to bottom,#000 calc(var(--pr,0) * (100% + 72px) - 72px),transparent calc(var(--pr,0) * (100% + 72px)));transform:translateY(calc((1 - var(--pr,0)) * 14px))}
+html.pl-reveal .pr:not(.pr-done){-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--pr,0) * (100% + 72px) - 72px),transparent calc(var(--pr,0) * (100% + 72px)));mask-image:linear-gradient(to bottom,#000 calc(var(--pr,0) * (100% + 72px) - 72px),transparent calc(var(--pr,0) * (100% + 72px)));transform:translateY(calc((1 - var(--pr,0)) * 14px))}
+/* 現れ終えたら mask を外す(mask は外へ出るフォーカスの輪も切るため)。先端より下でも、中にフォーカスがあれば見せる(WCAG 2.4.7) */
+html.pl-reveal .pr:focus-within{-webkit-mask-image:none;mask-image:none;transform:none}
 
 /* ===== 本人の言葉 =====
    大きな字で3文。PC は左寄り(右の余白をページの線が通る)。ページの線の先端が届いたところから現れる */
@@ -239,19 +241,10 @@ html.kz-on body[data-page="home"] .footer-brand svg{display:none}
 @media(prefers-reduced-motion:reduce){html.kz-live .kz{height:calc(var(--kz-mw) * 110 / 240)} html.kz-live .kz-c{display:none}}
 
 /* ===== 下の動き =====
-   1) 文字: 共通の reveal。本人の言葉と閉じは移動なしで、ゆっくり opacity のみ
-   2) 砂の下線: 触れる一場面で選んだ瞬間だけ、左から引く(scaleX)
-   3) Compass とクリニックタウン3D の実画面: 横から少しだけ覗く(一度だけ)
-   初期状態は html.js の下にだけ書き、共通の安全弁(rv-safe)と reduced-motion を子要素・疑似要素にも当てる */
+   1) 本人の言葉・触れる一場面・ほかの道具: ページの線の先端が届いたところから現れる(.pr。上の「ページの線」)
+   2) 閉じ: 共通の reveal を移動なしで、ゆっくり opacity のみ(帯があるときは下の規則で最初から)
+   3) 砂の下線: 触れる一場面で選んだ瞬間だけ、左から引く(scaleX) */
 html.js .me [data-reveal]{transform:none;transition:opacity 1.6s ease}
-html.js .words [data-reveal]{transform:none;transition:opacity 1.4s ease}
-html.js .cp-shot[data-reveal]{transform:translateX(64px);transition:opacity 1.2s var(--ease),transform 1.6s var(--ease),border-color .35s var(--ease)}
-html.js .cp-shot[data-reveal].on{transform:none}
-html.js .cp.rev .cp-shot[data-reveal]{transform:translateX(-64px)}
-html.js .cp.rev .cp-shot[data-reveal].on{transform:none}
-@media(prefers-reduced-motion:reduce){
-  html.js .cp-shot[data-reveal],html.js .cp.rev .cp-shot[data-reveal]{transform:none;transition:none;animation:none}
-}
 /* 閉じの帯があるときは、明朝の一文を最初から出す(マークより後に文字が追いかけて出ない)。上の html.js .me [data-reveal] と同じ詳細度なので、この位置に置く */
 html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;animation:none}
 
@@ -424,7 +417,7 @@ window.HZ = (function () {
     target: load,
     waiting: function () { return !done && R.classList.contains('hz-live'); },
     kick: null,
-    onReady: function () { if (started || done) return; started = true; t0 = performance.now(); (function loop() { if (api.kick) api.kick(); if (!done) requestAnimationFrame(loop); else finish(); })(); }
+    onReady: function () { if (started || done) return; started = true; t0 = performance.now(); (function loop() { load(); if (api.kick) api.kick(); if (!done) requestAnimationFrame(loop); })(); } // 面が画面の外でも時計は進める(ページの線は HZ.done を待つ)
   };
   if (!R.classList.contains('hz-live') || scrollY > innerHeight * .3) finish();
   new MutationObserver(function () { if (!R.classList.contains('hz-live')) finish(); }).observe(R, { attributes: true, attributeFilter: ['class'] });
@@ -466,13 +459,12 @@ const LT=[0,1].map(c=>{const a=new Float32Array((NL+1)*4);for(let i=0;i<=NL;i++)
   Lc=LT.map(a=>{let L=0;for(let i=4;i<=NL*4;i+=4)L+=M.hypot(a[i]-a[i-4],a[i+1]-a[i-3]);return L});
 
 const rect=()=>kz.getBoundingClientRect();
-// p=0: 帯の半分が画面に入る/1: 帯の下端が画面の 70%
-/* 帯の上端が帯の 1/4 ぶん画面に入ったら 0、帯の下端が画面の高さの 55% に来たら 5。送る量は 0.45 画面+帯の 3/4(2026-10-06 社長「実機でだいぶ早い」で 1.5 倍に) */
+// 時刻は読み込みの進みだけ(HZ.target)。スクロールには従わない
 const readT=()=>HZ.target();
 const offscreen=()=>{const r=rect();return r.bottom<=0||r.top>=innerHeight};
 const apply=()=>{KC.toggle('hz-run',live?tau<4.4:HZ.waiting())};
 const off=()=>{live=0;stop();clear();apply()};
-// live になるのは表ができ、帯が画面外のときだけ
+// live になるのは表ができたとき(開いた瞬間は面が画面にある状態で始まる)
 const goLive=()=>{if(!live&&!hold&&ready&&CL.contains('hz-live')){live=1;tau=readT();clear();apply();if(vis){paint();kick()}}};
 // アンカーで飛んだら、止まるまで live にしない
 const holdStill=()=>{hold=1;const g=++hg;let y=-1,n=0;const chk=()=>{if(g!==hg)return;if(scrollY===y){if(++n>=3){hold=0;goLive();return}}else{n=0;y=scrollY}setTimeout(chk,200)};D.readyState==='complete'?chk():addEventListener('load',chk)};
@@ -537,8 +529,6 @@ const tick=now=>{raf=0;if(!live||!vis||D.hidden){last=0;return}
 const kick=()=>{if(live&&vis&&!raf&&!D.hidden)raf=requestAnimationFrame(tick)};HZ.kick=kick;
 
 const IO=IntersectionObserver;
-// kz-in: live は帯が画面にあり τ≥1、ほかはマークが画面にあるとき
-const io=new IO(es=>{for(const e of es)e.target===kz?v72=e.isIntersecting:m72=e.isIntersecting;apply()},{rootMargin:'-72px 0px 0px 0px'});io.observe(kz);io.observe(mk);
 if(!(ctx=cv.getContext('2d')))return fail();
 readColors();
 new IO(es=>{near=es[es.length-1].isIntersecting;if(near&&!PX&&CL.contains('hz-live'))integrate()},{rootMargin:'100% 0px'}).observe(kz);
@@ -556,9 +546,9 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
 }catch(e){fail()}})();
 </script>
 <script>
-/* ページの線(約束は <style> 冒頭)。道筋は本文の実際の位置から組む(PC は余白を縫い、スマホは右端を下る)。
+/* ページの線(約束は <style> 冒頭)。道筋は本文の実際の位置から組む(PC は余白を縫い、スマホは節の間の空きで左右を渡る)。
    始まり: ヒーローのマークの藍の線の終わり(176,84)から、その向きのまま伸びる。終わり: 閉じのマークの藍の線の始まり(8,74)へ、その向きで入る。
-   長さ: 先端の高さ σ(ページの上から)= スクロール + 画面の高さ×0.6(最初の 0.4 画面は始まりから滑らかに追いつく)。道筋の y の累積最大で長さを引く */
+   長さ: 先端の高さ σ(ページの上から)= スクロール + 画面の高さ×0.7(スマホは 0.8。最初の 0.4 画面は始まりから滑らかに追いつく)。道筋の y の累積最大で長さを引く */
 (function () {
   var D = document, R = D.documentElement, main = D.querySelector('main'), svg = D.getElementById('pl');
   if (!svg || !main || !window.requestAnimationFrame || !svg.querySelector('.pl-path').getTotalLength) return;
@@ -575,26 +565,30 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
     var tryT = rel('.try .cp-text'), tryS = rel('.try .cp-shot'), labIn = rel('.lab-in'), ctT = rel('.cp.rev .cp-text'), ctS = rel('.cp.rev .cp-shot'), sm = rel('.sm'), all = rel('.lab-all');
     var s = A[2];
     push(A[0], A[1]);
-    push(A[0] + 58 * s * .9, A[1] + 60 * s * .9); // 藍の線の終わりの向き(118,24)→(176,84)のまま
+    var lead = pc ? 110 : 70; push(A[0] + .695 * lead, A[1] + .719 * lead); // 藍の線の終わりの向き(118,24)→(176,84)のまま(短いと継ぎ目が折れて見える)
     if (pc) {
       var gx = desc && cta ? (desc.r + cta.l) / 2 : W / 2, wr = 0; wps.forEach(function (w) { wr = M.max(wr, w.r); });
       var xr = M.min(W - 48, wr + 80), lx = M.max(28, (tryT ? tryT.l : 120) - 62), rx = W - 58;
       push(gx, band.t + band.h * .5);
       if (wps.length) { push(xr, wps[0].t - 24); wps.forEach(function (w, i) { push(xr + (i % 2 ? -16 : 16), w.t + w.h * .55); }); push(xr, wps[wps.length - 1].b + 24); }
-      if (tryT) { push(lx, tryT.t - 18); push(lx + 12, tryT.t + tryT.h * .55); var tb = M.max(tryT.b, tryS ? tryS.b : 0); push(lx, tb + 14); }
-      if (labIn) push(rx, labIn.t - 6);
+      var tb = M.max(tryT ? tryT.b : 0, tryS ? tryS.b : 0), gp = labIn ? labIn.t - tb : 40;
+      if (tryT) { push(lx, tryT.t - 18); push(lx + 12, tryT.t + tryT.h * .55); push(lx, tb + gp * .3); }
+      if (labIn) push(rx, labIn.t - gp * .25);
       if (ctT) push(rx - 10, ctT.t + ctT.h * .5);
       if (sm) push(rx, sm.t + sm.h * .5);
       if (all) push(rx, all.b + 30);
     } else {
-      var ex = W - 8;
+      var ex = W - 8, wx = 8, gap = function (a, b, u) { return a + (b - a) * u; };
       if (band) { push(ex, band.t - 26); push(ex, band.b + 10); }
       wps.forEach(function (w) { push(ex, w.t + w.h * .5); });
-      if (tryT) push(ex, tryT.t + tryT.h * .5);
-      if (labIn) push(ex, labIn.t + labIn.h * .5);
+      var g1 = wps.length ? wps[wps.length - 1].b : (band ? band.b : 0);
+      if (tryT) { push(ex, gap(g1, tryT.t, .2)); push(wx, gap(g1, tryT.t, .8)); push(wx, tryT.t + tryT.h * .5); }
+      var tb2 = M.max(tryT ? tryT.b : 0, tryS ? tryS.b : 0);
+      if (labIn) { push(wx, gap(tb2, labIn.t, .2)); push(ex, gap(tb2, labIn.t, .8)); push(ex, labIn.t + labIn.h * .5); }
       if (ctT) push(ex, ctT.t + ctT.h * .5);
-      if (sm) push(ex, sm.t + sm.h * .5);
-      if (all) push(ex, all.b + 24);
+      var cb = M.max(ctT ? ctT.b : 0, ctS ? ctS.b : 0);
+      if (sm) { push(ex, gap(cb, sm.t, .2)); push(wx, gap(cb, sm.t, .8)); push(wx, sm.t + sm.h * .5); }
+      if (all) push(wx, all.b + 24);
     }
     // 閉じ: マークの上の空いた帯(筆の線が集まる場所)を横切って左へ。そこから下りて、大きな弧で藍の線の始まり(8,74)へ、その向き((8,74)→(62,16))のまま入る
     var kzb = rel('.kz'), END = null;
@@ -608,7 +602,7 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
     return P;
   }
   function swoop(P) { var q = P[P.length - 1], p = P[P.length - 2] || q, E = P.END; if (!E) return '';
-    var dx = q[0] - p[0], dy = q[1] - p[1], dl = Math.hypot(dx, dy) || 1, tx = .82, ty = -.57; // 入ってきた向きで回り込み、藍の線の始まり(上向き右)へ入る
+    var dx = q[0] - p[0], dy = q[1] - p[1], dl = Math.hypot(dx, dy) || 1, tx = .82, ty = -.57; // 入ってきた向きで回り込み、藍の線の始まりへ入る(約35°。藍の線の始まり (8,74)→(62,16) の約47°より浅くして、回り込みを小さくする)
     return ' C' + (q[0] + dx / dl * E.r).toFixed(1) + ' ' + (q[1] + dy / dl * E.r).toFixed(1) + ' ' + (E.e[0] - tx * E.u).toFixed(1) + ' ' + (E.e[1] - ty * E.u).toFixed(1) + ' ' + E.e[0].toFixed(1) + ' ' + E.e[1].toFixed(1); }
   function toPath(P) { // Catmull-Rom → 3次ベジェ
     var d = 'M' + P[0][0].toFixed(1) + ' ' + P[0][1].toFixed(1);
@@ -639,7 +633,7 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
   function sigAt(l) { if (!LUT.length) return -1e9; var i = M.min(LUT.length - 1, M.max(0, M.round(l / 5))); return LUT[i][1]; }
   function reveal(l) {
     var ty = rq.matches || l >= total - 1 ? 1e9 : sigAt(l);
-    for (var i = 0; i < RV.length; i++) { var o = RV[i], v = clamp((ty - o.t + LEAD) / o.h, 0, 1); if (M.abs(v - o.v) > .002) { o.v = v; o.el.style.setProperty('--pr', v.toFixed(3)); } }
+    for (var i = 0; i < RV.length; i++) { var o = RV[i], v = clamp((ty - o.t + LEAD) / o.h, 0, 1); if (M.abs(v - o.v) > .002) { o.v = v; o.el.style.setProperty('--pr', v.toFixed(3)); o.el.classList.toggle('pr-done', v >= 1); } }
   }
   function lenAt(sig) { // 累積最大の y が sig を超えない最長の長さ
     if (!LUT.length || sig <= LUT[0][1]) return 0;
@@ -649,7 +643,7 @@ rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
   }
   function target() {
     if (rq.matches) return total;
-    var vh = innerHeight, k = .7, s0 = .4 * vh, sy = M.max(0, scrollY), tipY = sy + k * vh - mainTop;
+    var vh = innerHeight, k = innerWidth <= 760 ? .8 : .7, s0 = .4 * vh, sy = M.max(0, scrollY), tipY = sy + k * vh - mainTop;
     var sig = sy < s0 ? y0 + (s0 + k * vh - mainTop - y0) * (sy / s0) : tipY;
     return lenAt(sig);
   }
