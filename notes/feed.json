@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-13T02:03:38+00:00",
+  "updated_at": "2026-10-13T23:44:37+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "病院で評価される人と、転職市場で評価される人は同じなのか",
+      "url": "https://note.com/prime_duck4944/n/n972efe1318e7",
+      "guid": "https://note.com/prime_duck4944/n/n972efe1318e7",
+      "pubDate": "2026-10-14T07:00:00+09:00",
+      "date": "2026-10-14",
+      "excerpt": "病院で一生懸命働いている人が、外の世界でも同じように評価されるとは限りません。逆に、院内ではそれほど目立っていなくても、別の環境では高く評価される人もいます。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/323102647/rectangle_large_type_2_3509a685b5d9d9e140a89ee014b75a2f.png?width=800"
+    },
+    {
+      "title": "AIにコードを書かせる前に、決めておきたいこと。",
+      "url": "https://note.com/prime_duck4944/n/n56bbe1f4d1b8",
+      "guid": "https://note.com/prime_duck4944/n/n56bbe1f4d1b8",
+      "pubDate": "2026-10-13T19:00:00+09:00",
+      "date": "2026-10-13",
+      "excerpt": "AIを使えば、コードを書けなくても、",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/320607156/rectangle_large_type_2_0bb35e1db234d77fb14d66813a25cf7f.png?width=800"
+    },
     {
       "title": "「35歳までに700万円欲しい」と言われたら、俺ならこう考える。",
       "url": "https://note.com/prime_duck4944/n/n6a2dbc49a67c",
@@ -38,24 +56,6 @@
       "date": "2026-10-11",
       "excerpt": "WBSを作ると仕事が進みやすい。これは前回書いた。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/320604968/rectangle_large_type_2_ef09f87bfb97934a901703387bbf6910.png?width=800"
-    },
-    {
-      "title": "医療職だからこそ、経営側でできることがある。",
-      "url": "https://note.com/prime_duck4944/n/n21034d4d891f",
-      "guid": "https://note.com/prime_duck4944/n/n21034d4d891f",
-      "pubDate": "2026-10-11T07:00:00+09:00",
-      "date": "2026-10-11",
-      "excerpt": "事業会社に出てから、医療機関の経営や運営について考える時間が増えた。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/320600450/rectangle_large_type_2_ea9d8ace3203d3043336c6815a517574.png?width=800"
-    },
-    {
-      "title": "WBSを作ると、仕事ができるように見える理由。",
-      "url": "https://note.com/prime_duck4944/n/ndfa7e13c7b47",
-      "guid": "https://note.com/prime_duck4944/n/ndfa7e13c7b47",
-      "pubDate": "2026-10-10T19:00:00+09:00",
-      "date": "2026-10-10",
-      "excerpt": "WBSって、言葉だけ聞くと、",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/319811538/rectangle_large_type_2_388e0472c653dbddf18e9d2783288904.png?width=800"
     }
   ]
 }
