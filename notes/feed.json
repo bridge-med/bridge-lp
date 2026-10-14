@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-13T23:44:37+00:00",
+  "updated_at": "2026-10-14T23:16:26+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "年収500万円を超えても、将来への不安が消えなかった理由",
+      "url": "https://note.com/prime_duck4944/n/n0314b2f68d86",
+      "guid": "https://note.com/prime_duck4944/n/n0314b2f68d86",
+      "pubDate": "2026-10-15T07:00:00+09:00",
+      "date": "2026-10-15",
+      "excerpt": "理学療法士として病院で働いていた頃、年収500万円という数字は、一つの目標でした。当時の本業の年収は約420万円。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/323104719/rectangle_large_type_2_2e2fc3ae718c44aa86aa767288b70e9e.png?width=800"
+    },
+    {
+      "title": "ChatGPTに仕事を頼む前に、私が整理している4つのこと",
+      "url": "https://note.com/prime_duck4944/n/n5860ee161b74",
+      "guid": "https://note.com/prime_duck4944/n/n5860ee161b74",
+      "pubDate": "2026-10-14T19:00:00+09:00",
+      "date": "2026-10-14",
+      "excerpt": "ChatGPTを使っているのに、思ったような回答が出てこない。そんな経験はないでしょうか。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/323104077/rectangle_large_type_2_2450f1219522e84bbfdf4c4e5aba21f7.png?width=800"
+    },
     {
       "title": "病院で評価される人と、転職市場で評価される人は同じなのか",
       "url": "https://note.com/prime_duck4944/n/n972efe1318e7",
@@ -38,24 +56,6 @@
       "date": "2026-10-12",
       "excerpt": "少し前まで、「業務ツールを作る」",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/320606033/rectangle_large_type_2_93cf0242ee693ca1ab76f3f0ff722139.png?width=800"
-    },
-    {
-      "title": "29歳PT、年収430万、主任打診あり。俺ならまずこれを聞く。",
-      "url": "https://note.com/prime_duck4944/n/nff1f74e826d5",
-      "guid": "https://note.com/prime_duck4944/n/nff1f74e826d5",
-      "pubDate": "2026-10-12T07:00:00+09:00",
-      "date": "2026-10-12",
-      "excerpt": "29歳。理学療法士7年目。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/320601973/rectangle_large_type_2_be5e8a37552b3778ea1a14dd77abecbd.png?width=800"
-    },
-    {
-      "title": "初めてWBSを作る人向け。これだけあれば始められるテンプレート。",
-      "url": "https://note.com/prime_duck4944/n/neac59ce6d336",
-      "guid": "https://note.com/prime_duck4944/n/neac59ce6d336",
-      "pubDate": "2026-10-11T19:00:00+09:00",
-      "date": "2026-10-11",
-      "excerpt": "WBSを作ると仕事が進みやすい。これは前回書いた。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/320604968/rectangle_large_type_2_ef09f87bfb97934a901703387bbf6910.png?width=800"
     }
   ]
 }
