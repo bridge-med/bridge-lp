@@ -141,6 +141,7 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 
 - 憲法とは別の系を認められているのは **clinic-flow-3d だけ**(2026-09-12 社長発効・全文は context.md 冒頭)。基準は `clinic-flow-3d/docs/ux-audit-v85.md` §4、アイコンは線画 SVG(`clinic-flow-3d/app/ui/icons.js`)。ブランドサイトの見た目へ戻さない。守る条は発効文どおり: 第8条・第15条・第19条3〜4号・44px/AA・スマホ最優先・文字量を抑える・三分法。
 - プロダクト紹介 LP 系(`shared/subpage.css` を読む9ページ)はブランドサイトの一部として第22〜24条の下にある(同じ4系統を別名で持つ。`--paper`=`--bg`、`--serif-jp`=`--mincho` など。B-4)。その他のアプリに第22〜24条がどう及ぶかは未決事項 #8。
+- LP 系の冒頭(v1.9): `.hero.lp`。左に誰向け(`.lp-for`。`--ink-3`、砂にしない)・一文・`.lp-facts`・主 CTA 1つと一覧への文字リンク(`.lp-cta .sub a`、44px)、右に写し1枚(`.lp-shot`。角 3px・`--line` の縁・影なし・撮影日を figcaption に)。ヒーローの中に `data-reveal` を付けない(§4 CTA「主ボタンを遅らせない」)。ナビの `.cta` は ghost(ヒーローの主ボタンと同じ行き先なので、主は1画面に1つ)。600px 以下は「← 一覧へ」を隠し、CTA の下の文字リンクが一覧へ戻る道を受ける。Starter Kits のナビの語は本体の NAV と同じ(`.nav-links`。600px 以下は Products / Starter Kits だけ残し、残りはフッター)。写しは1ページ1枚(第22条)。
 - プロダクト一般に別の系を認めるかは未決事項 #8。designer は判断材料(なぜブランドの系では足りないか)を揃えて社長に上げる。
 
 ## 6. 増やすときの規則
@@ -168,7 +169,7 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 | B-1 | 共通のフォーカスリングがない | `bridge.css` | トップの夜の場で `--blue` の輪が見えにくい。designer 判断 |
 | B-2 | 道のりの型が4ページで重複(`.road` `.flow` `.tf-flow` `.tl`。点の塗りが `--bg`/`--bg-2` で割れる) | projects・services・philosophy・about | 4ページ同時に触るため |
 | B-3 | 砂の縦線の注記が4通り(`.fee` `.story-q` `.honest` `.etym`) | services・stories・philosophy | 同上 |
-| B-4 | 紹介 LP 系が同じ4系統を別名で持つ(ダークの段の順も違う) | `subpage.css` | 9ページの見た目に響く |
+| B-4 | 紹介 LP 系が同じ4系統を別名で持つ(ダークの段の順も違う) | `subpage.css` | 9ページの見た目に響く。reveal の値(.6s・12px)は v1.9 で bridge.css に揃えた。安全弁(1.2s)と rootMargin は未 |
 | B-5 | 未使用: `.grid-2` `.grid-4` `.hikari` `.ao` `--hero-glow` `--hero-sky-2`(`.page-hero h1 .period` は 2026-10-04 に消した。`--hero-sky-1` は compass/app/styles.css が使うので残す) | `bridge.css` | 全ディレクトリで未使用を確かめてから消す |
 | B-6 | フッターの縦並びリンクが 34px(見た目を変えずに広げられない) | `.footer-col a` | 全ページのフッターの高さが変わる |
 | B-7 | 小さな inline style(`margin-top`・`text-decoration:underline`・見出しの `font-size` 上書き) | about・philosophy・research・products・projects・community | 触るページのついでに class へ |
@@ -182,6 +183,7 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 | B-21 | 映像の容量の目安が §4 になかった。交差(showreel/kousa)は 1800 粒の軌跡で、60fps・crf 20 では 1版 14MB、30fps・crf 30 でも 4MB になった(re + habilis は 0.4〜0.54MB) | `showreel/kousa/` | §4 に「1版 2MB 以下」を足した(designer 2026-10-10)。1200 粒・30fps・wide 1440 crf32 / tall 900 crf31 で 1.67〜1.88MB(fa527b2)。閉じ。残: 6.5〜9秒で手前の線が見出しの字を横切るかを現場が計測(B-15 の規律)。横切っていれば線の経路を逃がす(次便)。B-18〜B-20 は PR #146 で起票 |
 | B-22 | 正式ロゴの経路の写しが散らばっている: bridge.js の MARK・showreel/reel.html(v3)・showreel/namae/・トップの h1(インライン SVG。JS なしでも出すため)・トップの筆の線のエンジンの `LOGO`(ベジェの制御点。v1.6 で index.html の中は2つから1つに減った)・404.html・film/choice/card/index.html、ビルド用の scripts/make-ogp.mjs と film/choice/shots2.mjs、各プロダクトの nav-logo(subpage.css を読む9ファイル。`stroke="#16233E"` を直書き)。トップでは h1 から読み、写しを増やさない | 上記 | 範囲(プロダクトの nav-logo を含めるか・§5)を決めてから数え直す。寄せるときは、すでに公開されている `BRIDGE.MARK` から読む形を先に検討し、`MARK_PATHS` のような新しい名前は要るときだけ足す。見た目を変えずに1か所ずつ(§6)。B-13(映像の規律)から 2026-10-11 に分けた |
 | B-23 | ~~文字リンクは §4 CTA に語としてあるが、§3 に部品がない~~ | `shared/bridge.css` | v1.8 で閉じた(3ページ目=services で `.tx-link` を bridge.css へ上げた) |
+| B-24 | 紹介 LP 系の既存の欠陥(第32条): 9本に favicon がない、6本に og:description がない、見出しの飛び(h2→h4)、`target=_blank` に `rel=noopener` がない外部リンク、rehaboard-starter に Where to next がない、LP のナビが `shared/bridge.js` の NAV を経由しない第二の情報源 | `subpage.css` を読む9ページ・rehaboard-starter | PR-C の後に単独の便で1回にまとめる(qa 2026-10-11 の指摘) |
 | C-2 | `--glass-ink` が未使用 | `bridge.css` | 憲法が用途2「ゲーム紹介の帯」の文言を残しているため、対のトークンも残す |
 | C-3 | 文中の文字リンク(about の連絡先など)が 44px 未満 | 文中 | 文中のリンクは行の高さに従う(WCAG 2.5.8 の例外と同じ) |
 | C-4 | `--glass-deep` が未使用になった。第22条ガラスの用途1(ヒーローの立体)と用途4(夜の場)を使う場所がなくなり、`bridge.css` のガラスのコメント(`--glass-deep` の説明)も実装と合わない | `bridge.css` | トップのヒーローを作り直して(Hero Motion v1 → Experience Journey・2026-10-03〜04)立体と夜の場を外したため。素材は戻すときのために残す(docs/hero-asset-spec.md)ので、C-2 と同じくトークンと憲法の文言は消さない |
@@ -189,6 +191,7 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 ---
 
 ### 改定履歴
+- v1.9 (2026-10-11): 社長指示「サイト全体改修」の PR-C(製品 LP 8ページ + Starter Kits + rehaboard-starter)。§5 に LP 系の冒頭の型(`.hero.lp`・誰向けは ink-3・写し1枚・ナビの CTA は ghost・600px 以下の一覧への道)。B-4 に reveal の値の整合。rehaboard-starter の reveal を `html.js` 配下に限定し、JS 無効・reduced-motion で本文が見えるようにした。
 - v1.8 (2026-10-11): 社長指示「サイト全体改修」の PR-B(下層8ページ)。§3 に目次 `.toc`・文字リンク `.tx-link`・作ったものの行 `.made` を足し、Row の変種と「題は明朝」を明記。§1 Soft から `.way-card` `.j-card` を外し `.j-lead` を足す。§4 Page opening にリードの下の一歩の規則、状態に Journal の読み込み中/失敗。§7 の B-8・B-10・B-11・B-23 を閉じ、B-9 から `.j-meta` を外す。walk-note は行動を求めるページ(philosophy・stories・services・products。community は独立した `.enough` の節で明文化)に残し、about・projects・research・journal からは外した(社長指示「帰っても十分は必要な場所だけ」。第29条の字面との整理は第33条の検討課題)。
 - v1.7 (2026-10-11): 社長指示「サイト全体改修」の PR-A(共通・トップ・Products)。§1 Motion: `[data-reveal]` を .6s・12px に、観測を画面に入る前に(bridge.css/bridge.js)。トップの文字と実画面を線に依存させない(.pr の mask を外す)。開いた瞬間を再訪・データセーバーでは出さず、フォールバックを 1.2 秒に。§3 Chip を 10.5px `--sans` に、例外の状態だけに。§3 Footer「つくったもの」列。§4 状態に「絞り込みの0件」。Products の検索窓・行型一覧・主役の組みは Products の `<style>` に閉じる(designer 2026-10-11 §6 判定: 行き先の種類はラベルにせずボタン文言で、`.toc` は上げない、実画面つきヒーローは subpage.css で可=PR-C)。新しいトークンはない
 - v1.6 (2026-10-11): 筆の線のコード(開いた瞬間 `.hz`・閉じ `.kz`)を index.html の1つのエンジン `BRIDGE_BRUSH(o)` にまとめた(B-13 の期限「トップの線を触る次の出荷の前に単独の便で」。PM 2026-10-11)。面ごとに違うのは、時刻の読み方・粒の数・積分の刻み・縮む拍と太る拍・live になる条件・閉じだけの kz-in とスクロールの監視・開いた瞬間だけの `--hz-t` と HZ への連絡。1ページの中の2回なので bridge.js へ上げない(§6)。kousa.html の写しは showreel の規律のまま(写しは kousa とこのエンジンの2か所)。見た目・約束・トークンは変えない。画素比較はライトで14コマ(hz は τ=1.5/2.6/3.9 に固定、kz はスクロール4点、1440×900 と 390×844): 10コマが同一。残り4コマの差(hz 1440 τ3.9: ナビ右上 4×32px で閾値超 0px / hz 390 τ3.9: 2×2px で 0px / kz 1440 τ0.85: 16px / kz 390 τ0.35: 295px)は、同じコードを2回走らせた差(最大 19,191px)より小さい。qa は別途、旧2回・新2回の canvas 全画素ハッシュ12コマがすべて一致することを確かめた。B-13 の筆の線の項を閉じ、正式ロゴの経路の写しを B-22 に分けた
