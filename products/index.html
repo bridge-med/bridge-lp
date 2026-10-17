@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Products — 用途から選べる道具の一覧 / BRIDGE</title>
-<meta name="description" content="医療の現場で働く人のために作った道具の一覧。明日の業務を楽にする、経営・管理の実務に使う、医療経営を学ぶ、キャリア・経験を整理する、学習を続ける、気軽に試す。用途から選べます。無料・登録不要・ブラウザで動くものを中心に公開中。">
+<meta name="description" content="医療の現場で働く人のために作った道具の一覧、全29点。明日の業務を楽にする、経営・管理の実務に使う、医療経営を学ぶ、キャリア・経験を整理する、学習を続ける、気軽に試す。用途と言葉で探せます。無料・登録不要・ブラウザで動くものを中心に公開中。">
 <meta property="og:title" content="Products — 用途から選べる道具の一覧 / BRIDGE">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/ogp/products.jpg">
@@ -18,8 +18,10 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 /* ================================================================
-   Products v3 — 用途から選ぶ一覧。展示のように、大小のリズムで並べる
-   色: --glass 系はこのページとトップだけ(shared/bridge.css 参照)。このページでは主ボタン相当(.use-nav は藍=既存の .tag.active と同じ選択状態)に留める
+   Products v4 — 主役(まず試すなら)と、全29点を探す密な一覧を分ける(2026-10-11 社長指示・designer 照合)
+   上から: ヒーロー → 探す(検索窓+用途のチップ)→ まず試すなら(Compass 大・クリニックタウン3D と掲示じたく 中)→ 用途ごとの行の一覧 → 映像「選ぶ瞬間」→ Where to next
+   行き先の種類はラベルにせず、ボタンの文言で分ける(本体=動詞 / 紹介=「紹介とデモを見る」/ 外部=「配布ページへ ↗」)。状態は例外(更新休止)のときだけ .chip で出す(designer 2026-10-11)
+   色: --glass はこのページとトップだけ(主ボタン)。角丸カードの反復はやめ、写しは Edge(1px --line・角 2〜4px・影なし)。hover は縁の色だけ(拡大しない)
    ================================================================ */
 .page-hero .lead{max-width:34em}
 .page-hero .ph-h{font-family:var(--sans);font-weight:900;font-size:clamp(40px,7.6vw,96px);line-height:1.1;letter-spacing:-0.015em}
@@ -27,76 +29,104 @@
 .page-hero .ph-h::after{top:calc(100% + 16px)}
 .page-hero .ph-h::before{top:calc(100% + 17px)}
 .page-hero .ph-h + .lead{margin-top:44px}
-/* 用途の索引(ページ内リンク) */
-.use-nav{max-width:var(--max);margin:clamp(28px,4vh,40px) auto 0;display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
-.use-nav a{font:600 12.5px/1 var(--sans);letter-spacing:0.03em;padding:13px 18px;min-height:44px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;color:var(--ink-2);background:var(--card);transition:all .25s}
-.use-nav a:hover{border-color:var(--ink-3);color:var(--ink)}
-.use-nav a.first{background:var(--blue);border-color:var(--blue);color:var(--on-fill)}
-.use-nav a .n{font:700 9px/1 var(--en);letter-spacing:0.18em;color:var(--ink-4)}
-.use-nav a.first .n{color:inherit;opacity:.7}
-.use-nav a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
-/* まず試すなら(3つ) */
-.first-sec{padding-top:clamp(64px,9vh,100px);padding-bottom:clamp(64px,9vh,100px)}
-.first-head{display:grid;grid-template-columns:1fr 1fr;gap:20px 48px;align-items:end;margin-bottom:clamp(28px,4vh,40px)}
+/* ===== 探す(検索窓+用途のチップ)。このページだけの部品(designer 2026-10-11: 高さ 44px 以上・16px・縁は --line・角 Edge 4px) ===== */
+.find{max-width:var(--max);margin:clamp(28px,4vh,40px) auto 0;display:grid;gap:14px;position:relative;z-index:1}
+.find-q{display:flex;align-items:center;gap:10px;max-width:480px;min-height:48px;padding:0 14px 0 16px;border:1px solid var(--line);border-radius:4px;background:var(--card);transition:border-color .25s}
+.find-q:focus-within{border-color:var(--blue);outline:2px solid var(--blue);outline-offset:2px}
+.find-q svg{width:16px;height:16px;flex-shrink:0;color:var(--ink-3)}
+.find-q input{flex:1;min-width:0;border:0;background:none;font:500 16px/1.4 var(--sans);color:var(--ink);padding:12px 0}
+.find-q input:focus{outline:none}
+.find-q input::placeholder{color:var(--ink-3)}
+.find-q .clr{display:none;width:44px;height:44px;margin-right:-10px;place-items:center;color:var(--ink-3);border-radius:50%}
+.find-q.has .clr{display:grid}
+.find-q .clr:hover{color:var(--ink)}
+.find-q .clr:focus-visible{outline:2px solid var(--blue);outline-offset:-4px}
+.find .tag-row{gap:16px 8px}
+.find .tag{font-size:12.5px;padding:9px 15px}
+.find .tag:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.find-n{font:500 12.5px/1.6 var(--sans);color:var(--ink-3);min-height:1.6em}
+@media(max-width:600px){.find .tag{font-size:12px;padding:9px 12px}}
+
+/* ===== まず試すなら: 主役1つ(Compass)+ 中2つ ===== */
+.first-sec{padding:clamp(56px,8vh,88px) 0;overflow-x:clip} /* 左右の余白は .first-head と .feat2 が持つ(.feat は右へ裁ち落とすため。トップの .lab-in と同じ形) */
+.first-head{max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);box-sizing:content-box}
 .first-head h2{font-family:var(--sans);font-weight:900;font-size:clamp(28px,4vw,48px);line-height:1.2;letter-spacing:-0.01em;margin-top:16px}
-.first-head p{font-size:13.5px;line-height:2.1;color:var(--ink-2);max-width:34em;justify-self:end}
-.first-rows{border-top:1px solid var(--line)}
-.first-row{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1.5fr) auto;gap:8px 28px;align-items:center;padding:clamp(16px,2.4vh,22px) 0;border-bottom:1px solid var(--line);transition:background .3s}
-.first-row:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
-.first-row:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
-.first-row img{width:200px;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:3px;background:var(--bg-3);display:block}
-.first-row .t{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2vw,21px);line-height:1.6}
-.first-row .t small{display:block;font:500 9.5px/1.6 var(--en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-top:6px}
-.first-row .d{font-size:13px;line-height:2;color:var(--ink-2)}
-.first-row .c{font:700 12px/1 var(--sans);letter-spacing:0.04em;color:var(--blue);white-space:nowrap;display:inline-flex;gap:8px;align-items:center}
-.first-row .c .ar{transition:transform .3s var(--ease)}
-.first-row:hover .c .ar{transform:translateX(5px)}
+.first-head p{margin-top:12px;font-size:13.5px;line-height:2.1;color:var(--ink-2);max-width:34em}
+/* 主役: 左に文字、右に実画面(sec-inner の右端を越えて画面の端まで。トップの .cp と同じ組み) */
+.feat{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,5vw,64px);align-items:center;margin-top:clamp(36px,5vh,56px);padding-left:max(var(--pad-x),calc((100% - var(--max)) / 2))}
+.feat-why{font:600 12.5px/1.7 var(--sans);letter-spacing:.04em;color:var(--ink-3)} /* 理由の一文は説明なので砂にしない(第22条・designer 2026-10-11) */
+.feat-name{margin-top:8px;font:900 clamp(26px,3vw,38px)/1.25 var(--sans);letter-spacing:-0.005em}
+.feat-name small{display:block;font:500 11px/1.6 var(--en);letter-spacing:0.12em;color:var(--ink-3);margin-top:8px}
+.feat-p{margin-top:14px;font-size:14.5px;line-height:2;color:var(--ink-2);max-width:26em}
+.feat .facts{margin-top:16px}
+.feat-cta{margin-top:22px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px}
+.btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px;min-height:44px;white-space:nowrap}
+.btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn.glass:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.feat-meta{font:500 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-3)}
+.feat-shot{display:block;border:1px solid var(--line);border-right:0;border-radius:2px 0 0 2px;overflow:hidden;background:var(--bg-3);transition:border-color .35s var(--ease)}
+.feat-shot:hover{border-color:var(--blue-soft)}
+.feat-shot:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.feat-shot img{display:block;width:100%;height:auto;aspect-ratio:1280/800;object-fit:cover;object-position:left top}
+.feat-shot .th-d,[data-theme="dark"] .feat-shot .th-l{display:none}
+[data-theme="dark"] .feat-shot .th-d{display:block}
+.shot-cap{margin-top:8px;font-size:12px;line-height:1.7;color:var(--ink-3)}
+/* 中2つ: 写しの上に名前と理由。同じ大きさの2つなので、並べるのはこの段だけ */
+.feat2{max-width:var(--max);margin:clamp(40px,6vh,64px) auto 0;padding:0 var(--pad-x);box-sizing:content-box;display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,40px)}
+.feat2 a{display:block;transition:border-color .35s var(--ease)}
+.feat2 .sh{display:block;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--bg-3);transition:border-color .35s var(--ease)}
+.feat2 a:hover .sh{border-color:var(--blue-soft)}
+.feat2 a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.feat2 .sh img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top}
+.feat2 .nm{display:block;margin-top:6px;font:900 clamp(19px,2vw,24px)/1.35 var(--sans);letter-spacing:-0.005em}
+.feat2 .why{display:block;margin-top:14px;font:600 12.5px/1.7 var(--sans);letter-spacing:.04em;color:var(--ink-3)}
+.feat2 .d{display:block;margin-top:6px;font-size:13.5px;line-height:1.95;color:var(--ink-2)}
+.feat2 .go{display:inline-flex;align-items:center;gap:8px;margin-top:10px;min-height:44px;font:700 13px/1.4 var(--sans);letter-spacing:.02em;color:var(--ink);border-bottom:1px solid var(--ink-4);transition:border-color .3s var(--ease)}
+.feat2 a:hover .go{border-color:var(--ink)}
+.feat2 .go .ar{transition:transform .3s var(--ease)}
+.feat2 a:hover .go .ar{transform:translateX(4px)}
 @media(max-width:860px){
-  .first-head{grid-template-columns:1fr}.first-head p{justify-self:start}
-  .first-row{grid-template-columns:96px 1fr auto}
-  .first-row img{width:96px}
-  .first-row .d{grid-column:2/-1}
+  .feat{grid-template-columns:1fr;padding-left:0;gap:18px}
+  .feat-text{padding:0 var(--pad-x)}
+  .feat-shot{border-left:0;border-right:0;border-radius:0}
+  .feat-fig .shot-cap{padding:0 var(--pad-x)}
 }
+@media(max-width:600px){.feat2{grid-template-columns:1fr;gap:32px}}
 
-/* 用途ごとのセクション */
-.cat-sec{padding-top:clamp(72px,10vh,120px);padding-bottom:clamp(72px,10vh,120px)}
-.cat-head{max-width:var(--max);margin:0 auto clamp(30px,4vh,44px);display:grid;grid-template-columns:1fr 1fr;gap:16px 48px;align-items:end}
-.cat-head .n{font:700 10px/1 var(--en);letter-spacing:0.24em;text-transform:uppercase;color:var(--ink-3);display:inline-flex;align-items:center;gap:10px}
-.cat-head .n::before{content:'';width:22px;height:1px;background:var(--dawn)}
-.cat-head h2{font-family:var(--sans);font-weight:900;font-size:clamp(28px,4vw,48px);line-height:1.2;letter-spacing:-0.01em;margin-top:16px}
+/* ===== 用途ごとの一覧(行型・密度のある一覧) ===== */
+.cat-sec{padding-top:clamp(56px,8vh,96px);padding-bottom:clamp(56px,8vh,96px)}
+.cat-sec[hidden]{display:none}
+.cat-head{max-width:var(--max);margin:0 auto clamp(22px,3vh,32px);display:grid;grid-template-columns:1fr 1fr;gap:12px 48px;align-items:end}
+.cat-head .n{font:600 11px/1.6 var(--sans);letter-spacing:0.08em;color:var(--ink-3)}
+.cat-head h2{font-family:var(--sans);font-weight:900;font-size:clamp(26px,3.6vw,42px);line-height:1.2;letter-spacing:-0.01em;margin-top:10px}
 .cat-head p{font-size:13.5px;line-height:2.1;color:var(--ink-2);max-width:34em;justify-self:end}
 @media(max-width:860px){.cat-head{grid-template-columns:1fr}.cat-head p{justify-self:start}}
-/* 展示のリズム: 6列グリッド。big=4列(写しが大きい)、通常=2列。3点以下の段はbigが3列 */
-.prod-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px}
-.prod-card{grid-column:span 2;background:var(--card);border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;overflow:hidden;transition:border-color .35s var(--ease),transform .35s var(--ease)}
-.prod-card.big{grid-column:span 4}
-.prod-card.wide{grid-column:span 3}
-a.prod-card:hover{transform:translateY(-3px);border-color:var(--blue-soft)}
-a.prod-card:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.prod-fig{margin:0;overflow:hidden;border-bottom:1px solid var(--line);background:var(--bg-3)}
-.prod-shot{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top;display:block;transition:transform .6s var(--ease)}
-.prod-card.big .prod-shot{aspect-ratio:16/9}
-a.prod-card:hover .prod-shot{transform:scale(1.03)}
-.prod-body{padding:20px 20px 22px;display:flex;flex-direction:column;gap:10px;flex:1}
-.prod-card.big .prod-body{padding:clamp(22px,2.6vw,32px)}
-.prod-k{font:600 10px/1.6 var(--en);letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.prod-k .jp{font:600 10.5px/1.6 var(--sans);letter-spacing:0.06em;text-transform:none;color:var(--ink-3)}
-.prod-t{font-family:var(--sans);font-weight:900;font-size:18px;line-height:1.4;letter-spacing:-0.005em}
-.prod-card.big .prod-t{font-size:clamp(22px,2.6vw,30px)}
-.prod-body .facts{margin-top:2px}
-.prod-link{display:inline-flex;gap:8px;align-items:center;margin-top:4px;font:700 12px/1 var(--sans);letter-spacing:0.04em;color:var(--blue);border-bottom:1px solid var(--line);padding-bottom:5px;align-self:flex-start}
-.prod-link .ar{transition:transform .3s var(--ease)}
-a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
-@media(max-width:960px){
-  .prod-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .prod-card,.prod-card.wide{grid-column:span 1}
-  .prod-card.big{grid-column:span 2}
+.items{max-width:var(--max);margin:0 auto;border-top:1px solid var(--line)}
+.item{display:grid;grid-template-columns:168px minmax(0,1fr) auto;gap:8px 28px;align-items:center;padding:clamp(16px,2.4vh,22px) 0;border-bottom:1px solid var(--line);transition:background .3s}
+.item[hidden]{display:none}
+.item:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
+.item:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.item-shot{width:168px;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:3px;background:var(--bg-3);display:block}
+.item-main{display:flex;flex-direction:column;gap:6px;min-width:0}
+.item-name{font:700 16.5px/1.45 var(--sans);color:var(--ink);display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+.item-name small{font:500 10.5px/1 var(--en);letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3)}
+.item-t{font-size:13.5px;line-height:1.9;color:var(--ink-2)}
+.item-for{font-size:12px;line-height:1.7;color:var(--ink-3)}
+.item .facts{margin-top:2px}
+.item .facts li{white-space:normal;line-height:1.4} /* 狭い行では折り返す(360px 以下で横スクロールしていた。qa 2026-10-11) */
+.item-cta{font:700 12.5px/1.4 var(--sans);letter-spacing:0.02em;color:var(--blue);white-space:nowrap;display:inline-flex;gap:8px;align-items:center;min-height:44px}
+.item-cta .ar{transition:transform .3s var(--ease)}
+.item:hover .item-cta .ar{transform:translateX(5px)}
+@media(max-width:860px){
+  .item{grid-template-columns:104px minmax(0,1fr);gap:6px 16px;align-items:start}
+  .item-shot{width:104px}
+  .item-cta{grid-column:2;min-height:0;padding-top:4px}
 }
-@media(max-width:600px){
-  .prod-grid{grid-template-columns:1fr}
-  .prod-card,.prod-card.big,.prod-card.wide{grid-column:span 1}
-}
+/* 0件(§4 Empty: 一文+別の行き先) */
+.find-empty{max-width:var(--max);margin:0 auto;padding:clamp(40px,6vh,64px) var(--pad-x);box-sizing:content-box;font-size:14px;line-height:2;color:var(--ink-2)} /* 左右は --pad-x(0件の文が画面の端に触れていた。pm 2026-10-11) */
+.find-empty[hidden]{display:none}
+.find-empty a{color:var(--blue);border-bottom:1px solid var(--blue-soft)}
 /* 一覧の末尾: 一文だけ */
 .walk-note{max-width:34em}
 </style>
@@ -110,37 +140,69 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
     <div class="crumb"><a href="../index.html">Home</a><span class="sep">/</span><span>Products</span></div>
     <h1 class="ph-h">現場の悩みに、<br>使える道具を</h1>
     <p class="lead">
-      医療の現場で働く人のための道具、全29点。用途から選べます。
+      医療の現場で働く人のための道具、全29点。用途を選ぶか、言葉で探せます。ほとんどが無料・登録不要で、ブラウザからすぐ使えます。
     </p>
-    <nav class="use-nav" aria-label="用途で絞る" data-reveal data-reveal-delay="3" id="useNav"></nav>
+    <div class="find" id="find">
+      <label class="find-q" for="findQ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="findQ" placeholder="名前や、やりたいことで探す" aria-label="道具を言葉で探す" autocomplete="off"><button type="button" class="clr" id="findClr" aria-label="検索語を消す"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></label>
+      <div class="tag-row" id="useTags" role="group" aria-label="用途で絞る"></div>
+      <p class="find-n" id="findN" aria-live="polite"></p>
+    </div>
   </div>
 </header>
 
 <main>
-<!-- まず試すなら(3点)。トップの「まずは、ひとつ」と同じ選定 -->
+<!-- まず試すなら(3点)。トップの主ボタン(Compass)と副導線(クリニックタウン3D・明日の業務の道具)と同じ選定。理由は各項目に書く。検索・絞り込み中は出さない -->
 <section class="sec first-sec" id="first" aria-labelledby="firstTitle">
-  <div class="sec-inner">
-    <div class="first-head" data-reveal>
-      <div>
-        <div class="eyebrow">Selected — まず試すなら</div>
-        <h2 id="firstTitle">初めてなら、この3つ</h2>
-      </div>
-      <p>無料・登録なし。入力は端末の中にだけ残ります。</p>
+  <div class="first-head">
+    <div class="eyebrow">Selected — まず試すなら</div>
+    <h2 id="firstTitle">初めてなら、この3つ</h2>
+    <p>どれも無料・登録なしで、入力は端末の中にだけ残ります。</p>
+  </div>
+  <div class="feat">
+    <div class="feat-text">
+      <p class="feat-why">3分で、自分の経験の別の言い方が分かる</p>
+      <h3 class="feat-name">BRIDGE Compass<small>Compass</small></h3>
+      <p class="feat-p">10の質問に答えると、いつもの仕事の言いかえと、いまの経験から見える3つの方向が「橋」として出ます。看護師・リハビリ職・柔道整復師などの医療専門職向けです。</p>
+      <ul class="facts" aria-label="利用条件"><li>無料</li><li>登録不要</li><li>回答は送信しない</li><li>10問・約3分</li></ul>
+      <div class="feat-cta"><a class="btn glass" href="../compass/index.html">質問に答える <span aria-hidden="true">→</span></a><p class="feat-meta">結果は共有文にもできます</p></div>
     </div>
-    <div class="first-rows" id="firstRows"></div>
+    <figure class="feat-fig">
+      <a class="feat-shot" href="../compass/index.html" aria-label="BRIDGE Compass を開く">
+        <img class="th-l" src="../images/products/shots/compass-result-light.webp" alt="BRIDGE Compassの結果画面の例。見出し「立場の違う人を、ひとつのチームにする力」と、現在地から3方向へ分かれる橋の地図" width="1280" height="800" loading="lazy" decoding="async">
+        <img class="th-d" src="../images/products/shots/compass-result-dark.webp" alt="" width="1280" height="800" loading="lazy" decoding="async">
+      </a>
+      <figcaption class="shot-cap">結果画面の例。職種は理学療法士、調整やチームに関わる答えを選んだ場合(2026-10-11 撮影)</figcaption>
+    </figure>
+  </div>
+  <div class="feat2">
+    <a href="../clinic-flow-3d/index.html">
+      <span class="sh"><img src="../images/products/shots/clinic-flow-3d-decision.webp" alt="クリニックタウン3Dの実際の画面。相談で動き方を3つから選ぶところ" width="1440" height="900" loading="lazy" decoding="async"></span>
+      <span class="why">遊びながら、経営の数字に触れられる</span>
+      <span class="nm">クリニックタウン3D</span>
+      <span class="d">クリニックの経営を1日ずつ動かすゲーム。診療時間を1コマ変えると、待ち時間と利益が変わります。</span>
+      <span class="go">ゲームを始める <span class="ar" aria-hidden="true">→</span></span>
+    </a>
+    <a href="../keiji/index.html">
+      <span class="sh"><img src="../images/products/thumbs/keiji.webp" alt="掲示じたくの実際の画面" width="880" height="550" loading="lazy" decoding="async"></span>
+      <span class="why">数カ所埋めるだけで、貼れる紙が1枚できる</span>
+      <span class="nm">掲示じたく</span>
+      <span class="d">臨時休診・診療時間の変更などの院内掲示を、種類を選んで数カ所埋めるだけでA4とSNS用の文面に。受付・事務の方に。</span>
+      <span class="go">掲示をつくる <span class="ar" aria-hidden="true">→</span></span>
+    </a>
   </div>
 </section>
 
-<!-- 用途ごとのセクションとカードは PRODUCTS 配列から自動生成 -->
+<!-- 用途ごとのセクションと行は PRODUCTS 配列から自動生成 -->
 <div id="catalog"></div>
+<p class="find-empty" id="findEmpty" hidden>一致する道具がありません。<a href="#find" id="findReset">絞り込みを外す</a>と全29点に戻ります。<a href="../community/index.html">欲しい道具を伝える</a>こともできます。</p>
 
 <!-- 映像「選ぶ瞬間」(showreel/choice/)。実物の製品を実物の操作だけで動かした写し(第22条の写しの但し書き)。
      BRIDGE Compass・経験の棚卸し・言いかえ帳・掲示じたく・クリニックタウン3D で選ぶ瞬間が続き、最後に BRIDGE の署名。
      置き場は一覧の末尾(用途の節の後・Where to next の直前)。署名が「次は、どこへ歩きますか」へ受け渡す(designer 2026-10-10)。
      再生の約束は shared/bridge.js の Reel が担う。版は data-reel の中から選ぶ -->
-<section class="sec" aria-label="映像「選ぶ瞬間」">
+<section class="sec" aria-label="映像「選ぶ瞬間」" id="reelSec">
   <div class="sec-inner">
-    <figure class="reel" data-reel="../showreel/choice/" data-reveal>
+    <figure class="reel" data-reel="../showreel/choice/">
       <div class="reel-frame">
         <video class="reel-v" muted playsinline preload="none" controls poster="../showreel/choice/light-wide.webp" width="1920" height="1080">
           <source src="../showreel/choice/light-wide.mp4" type="video/mp4">
@@ -151,28 +213,28 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
     </figure>
   </div>
 </section>
-<noscript><p style="max-width:660px;margin:60px auto;color:var(--ink-3);font-size:13px;padding:0 24px">一覧の表示にはJavaScriptが必要です。JavaScriptを使わずに開くには、<a href="../clinic-flow-3d/index.html" style="text-decoration:underline">クリニックタウン3D</a>、<a href="../tanaoroshi/index.html" style="text-decoration:underline">経験の棚卸し</a>、<a href="../moyamoya/index.html" style="text-decoration:underline">職場モヤモヤ診断</a>、<a href="../keiji/index.html" style="text-decoration:underline">掲示じたく</a>、<a href="../nidodema/index.html" style="text-decoration:underline">二度手間さがし</a> のリンクをご利用ください。</p></noscript>
+<noscript><p style="max-width:660px;margin:60px auto;color:var(--ink-3);font-size:13px;padding:0 24px">一覧の表示にはJavaScriptが必要です。主な道具は、ここから直接開けます: <a href="../compass/index.html" style="text-decoration:underline">BRIDGE Compass</a>、<a href="../clinic-flow-3d/index.html" style="text-decoration:underline">クリニックタウン3D</a>、<a href="../keiji/index.html" style="text-decoration:underline">掲示じたく</a>、<a href="../tanaoroshi/index.html" style="text-decoration:underline">経験の棚卸し</a>、<a href="../moyamoya/index.html" style="text-decoration:underline">職場モヤモヤ診断</a>、<a href="../nidodema/index.html" style="text-decoration:underline">二度手間さがし</a>。</p></noscript>
 </main>
 
 <aside class="walk" aria-labelledby="walk-next">
   <div class="walk-inner">
-    <div class="eyebrow" data-reveal>Where to next</div>
-    <h2 class="walk-h" id="walk-next" data-reveal>次は、どこへ歩きますか</h2>
+    <div class="eyebrow">Where to next</div>
+    <h2 class="walk-h" id="walk-next">次は、どこへ歩きますか</h2>
     <div class="walk-grid">
-      <a class="walk-card" href="../philosophy/index.html" data-reveal>
+      <a class="walk-card" href="../philosophy/index.html">
         <span class="en">Philosophy</span><span class="t">道具の奥にある考え方を読む</span>
-        <p class="p">正解を与えるのではなく、選択肢を増やす。</p>
+        <p class="p">リハビリテーションの語源から、選択肢を増やすということまで。</p>
       </a>
-      <a class="walk-card" href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer" data-reveal data-reveal-delay="1">
+      <a class="walk-card" href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">
         <span class="en">note ↗</span><span class="t">考えていることを読む</span>
         <p class="p">医療職のキャリアと、経験を言葉にすること。</p>
       </a>
-      <a class="walk-card" href="../community/index.html" data-reveal data-reveal-delay="2">
+      <a class="walk-card" href="../community/index.html">
         <span class="en">Community</span><span class="t">課題を持ち込む</span>
         <p class="p">あなたの現場の「面倒くさい」を道具に。</p>
       </a>
     </div>
-    <p class="walk-note" data-reveal>気になるものをひとつ、試してみてください。</p>
+    <p class="walk-note">気になるものをひとつ、試してみてください。一覧を眺めるだけで終わっても十分です。</p>
   </div>
 </aside>
 
@@ -182,149 +244,176 @@ a.prod-card:hover .prod-link .ar{transform:translateX(5px)}
 // ================================================================
 // プロダクトデータ(唯一の情報源。足せば増える)
 //   use   : 用途(USES のキー)。開発者の分類ではなく、利用者の目的で分ける
-//   t     : 日本語の機能名(カードの見出し)。英語名だけでは用途が分からないものほど大事
+//   t     : 日本語の機能名(行の説明)。英語名だけでは用途が分からないものほど大事
 //   name  : 表示名(日本語があれば日本語)。en は英語の正式名称・ブランド名。小さく添える
-//   cta   : ボタン文言。遷移先の実態に合わせる(アプリ本体=すぐ使える動詞 / 紹介ページ=「紹介とデモを見る」等)
-//   (長い説明文 p は 2026-09-21 に外した。カードは 名前・一文・利用条件・実画面・ボタン だけ。詳しい説明は各プロダクトのページへ)
+//   for   : 誰向けか(各プロダクトの説明文から。新しく作らない)
+//   kind  : 行き先の種類。app=本体(すぐ使える) / intro=紹介のページ / dist=外部の配布ページ。ラベルは出さず、cta の文言で分ける(本体=動詞 / 紹介=「紹介とデモを見る」、デモのない紹介は「紹介を見る」/ 外部=「配布ページへ」)
+//   cta   : ボタン文言。遷移先の実態に合わせる
+//   status: 例外のときだけ。paused=更新休止(表示は .chip)。語彙は 提供中(無印)/ 試作 / 更新休止 の3つ(pm 2026-10-11)。「準備中」は置かない(第14条)
 //   facts : 利用条件。各プロダクトのコードとページで確認できた事実だけ(2026-09-21 調査)
 //           「無料」= 価格表示がなく、コードに課金経路がないもの / 「端末内保存」= localStorage のみで外部送信なし
-//   big   : 展示で大きく見せる(用途ごとに1点まで)
 //   stage : 思考の型(評価→理解→設計→実践→再評価)のどの段階を支えるか(第31条の自己申告は cockpit の台帳)
 // ================================================================
 window.addEventListener('DOMContentLoaded', () => {
   const USES = [
-    { id: 'work',   t: '明日の業務を楽にする',   p: '受付や事務の手作業を、選ぶだけに。' },
-    { id: 'manage', t: '経営・管理の実務に使う', p: '部門長・事務長・法人本部の仕事に。' },
-    { id: 'learn',  t: '医療経営を学ぶ',         p: '診療科を選び、1日ずつ回して、点数表を手触りに。' },
-    { id: 'career', t: 'キャリア・経験を整理する', p: '経験を言葉に。職務経歴書と面接の材料に。' },
-    { id: 'study',  t: '学習を続ける',           p: '記録の側を軽くして、続ける。' },
-    { id: 'play',   t: '気軽に試す・作品を楽しむ', p: '数分で終わるものと、眺めるための作品。' },
+    { id: 'work',   t: '明日の業務を楽にする',   s: '業務',   p: '受付や事務の手作業を、選ぶだけに。' },
+    { id: 'manage', t: '経営・管理の実務に使う', s: '経営・管理', p: '部門長・事務長・法人本部の仕事に。' },
+    { id: 'learn',  t: '医療経営を学ぶ',         s: '経営を学ぶ', p: '診療科を選び、1日ずつ回して、点数表を手触りに。' },
+    { id: 'career', t: 'キャリア・経験を整理する', s: 'キャリア', p: '経験を言葉に。職務経歴書と面接の材料に。' },
+    { id: 'study',  t: '学習を続ける',           s: '学習',   p: '記録の側を軽くして、続ける。' },
+    { id: 'play',   t: '気軽に試す・作品を楽しむ', s: '試す・作品', p: '数分で終わるものと、眺めるための作品。' },
   ];
-  const FIRST = ['clinic-flow-3d', 'tanaoroshi', 'moyamoya']; // トップの「まずは、ひとつ」と同じ
   const PRODUCTS = [
     // ---- 明日の業務を楽にする ----
-    { id: 'keiji', use: 'work', big: true, t: '院内掲示を、選んで埋めるだけ', name: '掲示じたく', en: 'Keiji', img: 'keiji.png', href: '../keiji/index.html', cta: '掲示をつくる',
+    { id: 'keiji', use: 'work', kind: 'app', t: '院内掲示を、選んで埋めるだけ', name: '掲示じたく', en: 'Keiji', for: '受付・事務の方に', img: 'keiji.png', href: '../keiji/index.html', cta: '掲示をつくる',
       facts: ['無料', '登録不要', '端末内保存'] },
-    { id: 'nidodema', use: 'work', t: '部署の手作業を、減らせるものと守るものに分ける', name: '二度手間さがし', en: 'Nidodema', img: 'nidodema.png', href: '../nidodema/index.html', cta: 'チェックを始める',
+    { id: 'nidodema', use: 'work', kind: 'app', t: '部署の手作業を、減らせるものと守るものに分ける', name: '二度手間さがし', en: 'Nidodema', for: '転記やFAXの手間が多い部署に', img: 'nidodema.png', href: '../nidodema/index.html', cta: 'チェックを始める',
       facts: ['無料', '登録不要', '端末内保存'] },
-    { id: 'yawagaeshi', use: 'work', t: '角の立たない返信案を、3つつくる', name: 'やわ返', en: 'Yawagaeshi', img: 'yawagaeshi.png', href: '../yawagaeshi/index.html', cta: '返信案をつくる',
+    { id: 'yawagaeshi', use: 'work', kind: 'app', t: '角の立たない返信案を、3つつくる', name: 'やわ返', en: 'Yawagaeshi', for: '返信の言い方に迷う人に', img: 'yawagaeshi.png', href: '../yawagaeshi/index.html', cta: '返信案をつくる',
       facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'] },
     // ---- 経営・管理の実務に使う ----
-    { id: 'rehaboard', use: 'manage', big: true, t: 'リハ部門の運営を、1画面に', name: 'RehaBoard', img: 'rehaboard.png', href: '../rehaboard/index.html', cta: '紹介とデモを見る',
+    { id: 'rehaboard', use: 'manage', kind: 'intro', t: 'リハ部門の運営を、1画面に', name: 'RehaBoard', for: 'リハ部門の責任者・主任に', img: 'rehaboard.png', href: '../rehaboard/index.html', cta: '紹介とデモを見る',
       facts: ['デモは無料', '本体は買い切り ¥1,980', '登録不要', '端末内保存'] },
-    { id: 'medboard', use: 'manage', t: '外来の患者フローを、2施設で見比べる', name: 'MedBoard', img: 'medboard.png', href: '../medboard/index.html', cta: '紹介とデモを見る',
+    { id: 'medboard', use: 'manage', kind: 'intro', t: '外来の患者フローを、2施設で見比べる', name: 'MedBoard', for: '外来クリニックの院長・事務長に', img: 'medboard.png', href: '../medboard/index.html', cta: '紹介とデモを見る',
       facts: ['デモは無料', '登録不要', '端末内保存'] },
-    { id: 'hire-board', use: 'manage', t: '医療機関の採用を、カンバンで追う', name: 'HireBoard', img: 'hireboard.png', href: '../hire-board/index.html', cta: '紹介とデモを見る',
+    { id: 'hire-board', use: 'manage', kind: 'intro', t: '医療機関の採用を、カンバンで追う', name: 'HireBoard', for: '医療機関の採用担当・事務長に', img: 'hireboard.png', href: '../hire-board/index.html', cta: '紹介とデモを見る',
       facts: ['デモは無料', '登録不要', '端末内保存'] },
-    { id: 'interview-kit', use: 'manage', t: '面接の質問を用意し、事実と印象を分けて記録する', name: '面接官の手帖', en: 'InterviewKit', img: 'interview-kit.png', href: '../interview-kit/index.html', cta: '紹介とデモを見る',
+    { id: 'interview-kit', use: 'manage', kind: 'intro', t: '面接の質問を用意し、事実と印象を分けて記録する', name: '面接官の手帖', en: 'InterviewKit', for: '医療機関の面接官に', img: 'interview-kit.png', href: '../interview-kit/index.html', cta: '紹介を見る',
       facts: ['無料', '登録不要', '端末内保存'] },
-    { id: 'consult-simulator', use: 'manage', t: '1診と2診で、待ち時間がどう変わるかを試す', name: 'ConsultSim', img: 'consult-simulator.png', href: '../consult-simulator/index.html', cta: '紹介とデモを見る',
+    { id: 'consult-simulator', use: 'manage', kind: 'intro', t: '1診と2診で、待ち時間がどう変わるかを試す', name: 'ConsultSim', for: '診察体制を決める院長・事務長に', img: 'consult-simulator.png', href: '../consult-simulator/index.html', cta: '紹介とデモを見る',
       facts: ['デモは無料', '登録不要'] },
-    { id: 'round-note', use: 'manage', t: '複数施設の巡回を、1冊の手帖に', name: '本部長の巡回手帖', en: 'RoundNote', img: 'round-note.png', href: '../round-note/index.html', cta: '手帖を開く',
+    { id: 'round-note', use: 'manage', kind: 'app', t: '複数施設の巡回を、1冊の手帖に', name: '本部長の巡回手帖', en: 'RoundNote', for: '複数施設を統括する本部長・エリアマネージャーに', img: 'round-note.png', href: '../round-note/index.html', cta: '手帖を開く',
       facts: ['無料', '登録不要', '端末内保存'] },
-    { id: 'manager-starter', use: 'manage', t: '初めて管理職になった人の、チェックリストと記入式シート', name: '医療管理職スターター', img: 'manager-starter.png', href: '../manager-starter/index.html', cta: 'チェックリストを見る',
+    { id: 'manager-starter', use: 'manage', kind: 'app', t: '初めて管理職になった人の、チェックリストと記入式シート', name: '医療管理職スターター', for: '医療専門職から初めて管理職になった人に', img: 'manager-starter.png', href: '../manager-starter/index.html', cta: 'チェックリストを見る',
       facts: ['無料のチェックリストとセルフチェック', '登録不要'] },
-    { id: 'medops', use: 'manage', t: '医療管理の実務手順と、無料テンプレート', name: '医療管理実務ライブラリ', img: 'medops.png', href: '../medops/index.html', cta: '記事とテンプレートを見る',
+    { id: 'medops', use: 'manage', kind: 'app', t: '医療管理の実務手順と、無料テンプレート', name: '医療管理実務ライブラリ', for: '新任の事務長・医療管理職に', img: 'medops.png', href: '../medops/index.html', cta: '記事とテンプレートを見る',
       facts: ['テンプレートは無料', '登録不要'] },
-    { id: 'reha-checklist', use: 'manage', t: 'リハ部門KPIのチェックリスト(PDF・スプレッドシート)', name: 'Reha Checklist', img: 'reha-checklist.png', href: 'https://bridge-med.github.io/reha-checklist-lp/', ext: true, cta: '配布ページへ',
+    { id: 'reha-checklist', use: 'manage', kind: 'dist', t: 'リハ部門KPIのチェックリスト(PDF・スプレッドシート)', name: 'Reha Checklist', for: '整形外科クリニックの院長・事務長・リハ責任者に', img: 'reha-checklist.png', href: 'https://bridge-med.github.io/reha-checklist-lp/', ext: true, cta: '配布ページへ',
       facts: ['無料', 'メールアドレスの登録が必要', 'PDF+スプレッドシート'] },
     // ---- 医療経営を学ぶ ----
-    { id: 'clinic-flow-3d', use: 'learn', big: true, t: 'クリニック経営を、1日ずつ動かして学ぶ', name: 'クリニックタウン3D', en: 'Clinic Town 3D', img: 'clinic-flow-3d.png', href: '../clinic-flow-3d/index.html', cta: 'ゲームを始める',
+    { id: 'clinic-flow-3d', use: 'learn', kind: 'app', t: 'クリニック経営を、1日ずつ動かして学ぶ', name: 'クリニックタウン3D', en: 'Clinic Town 3D', for: '経営を体験してみたい医療職に', img: 'clinic-flow-3d.png', href: '../clinic-flow-3d/index.html', cta: 'ゲームを始める',
       facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'] },
-    { id: 'turnaround12', use: 'learn', t: '赤字クリニックを、12週で立て直す', name: 'ターンアラウンド12', en: 'Turnaround 12', img: 'turnaround12.png', href: '../turnaround12/index.html', cta: 'ゲームを始める',
+    { id: 'turnaround12', use: 'learn', kind: 'app', t: '赤字クリニックを、12週で立て直す', name: 'ターンアラウンド12', en: 'Turnaround 12', for: '立て直しの判断を体験してみたい人に', img: 'turnaround12.png', href: '../turnaround12/index.html', cta: 'ゲームを始める',
       facts: ['無料', '登録不要', '端末内保存', '1プレイ約5分'] },
-    { id: 'pmi-quest', use: 'learn', t: '承継直後の30日を、10問で診断する', name: 'クリニックPMIクエスト', en: 'PMI Quest', img: 'pmi-quest.png', href: '../pmi-quest/index.html', cta: '診断ゲームを始める',
+    { id: 'pmi-quest', use: 'learn', kind: 'app', t: '承継直後の30日を、10問で診断する', name: 'クリニックPMIクエスト', en: 'PMI Quest', for: '承継・統合に関わる人に', img: 'pmi-quest.png', href: '../pmi-quest/index.html', cta: '診断ゲームを始める',
       facts: ['無料', '登録不要', '端末内保存', '10問・約3分'] },
     // ---- キャリア・経験を整理する ----
-    { id: 'tanaoroshi', use: 'career', big: true, t: '18の質問で、職務経歴書のたねをつくる', name: '経験の棚卸し', en: 'Tanaoroshi', img: 'tanaoroshi.png', href: '../tanaoroshi/index.html', cta: '質問に答える',
-      facts: ['無料', '登録不要', '端末内保存', '約15分'] },
-    { id: 'iikae', use: 'career', t: '現場のことばを、履歴書で通じる言葉に', name: '現場のことば 言いかえ帳', en: 'Iikae', img: 'iikae.png', href: '../iikae/index.html', cta: '言いかえ帳を開く',
-      facts: ['無料', '登録不要', '端末内保存'] },
-    { id: 'moyamoya', use: 'career', t: '職場の「なんとなくしんどい」を、10問で言葉に', name: '職場モヤモヤ診断', en: 'Moyamoya Check', img: 'moyamoya.png', href: '../moyamoya/index.html', cta: '診断を始める',
-      facts: ['無料', '登録不要', '端末内保存', '10問・約3分'] },
-    { id: 'compass', use: 'career', t: '10の質問で、これまでの経験を別の言葉に翻訳する', name: 'BRIDGE Compass', en: 'Compass', img: 'compass.png', href: '../compass/index.html', cta: '3分で探してみる',
+    { id: 'compass', use: 'career', kind: 'app', t: '10の質問で、これまでの経験を別の言葉に翻訳する', name: 'BRIDGE Compass', en: 'Compass', for: '看護師・リハビリ職などの医療専門職に', img: 'compass.png', href: '../compass/index.html', cta: '質問に答える',
       facts: ['無料', '登録不要', '回答は送信しない', '10問・約3分'] },
-    { id: 'karte', use: 'career', t: '職場のしんどさを、カルテの形で読む', name: '現場のカルテ', en: 'KARTE', img: 'karte.png', href: '../karte/index.html', cta: '読んでみる',
+    { id: 'tanaoroshi', use: 'career', kind: 'app', t: '18の質問で、職務経歴書のたねをつくる', name: '経験の棚卸し', en: 'Tanaoroshi', for: '職務経歴書や面接を控えた医療職に', img: 'tanaoroshi.png', href: '../tanaoroshi/index.html', cta: '質問に答える',
+      facts: ['無料', '登録不要', '端末内保存', '約15分'] },
+    { id: 'iikae', use: 'career', kind: 'app', t: '現場のことばを、履歴書で通じる言葉に', name: '現場のことば 言いかえ帳', en: 'Iikae', for: '現場の言葉を履歴書に書けずにいる医療職に', img: 'iikae.png', href: '../iikae/index.html', cta: '言いかえ帳を開く',
+      facts: ['無料', '登録不要', '端末内保存'] },
+    { id: 'moyamoya', use: 'career', kind: 'app', t: '職場の「なんとなくしんどい」を、10問で言葉に', name: '職場モヤモヤ診断', en: 'Moyamoya Check', for: '職場のしんどさを言葉にしたい人に', img: 'moyamoya.png', href: '../moyamoya/index.html', cta: '診断を始める',
+      facts: ['無料', '登録不要', '端末内保存', '10問・約3分'] },
+    { id: 'karte', use: 'career', kind: 'app', t: '職場のしんどさを、カルテの形で読む', name: '現場のカルテ', en: 'KARTE', for: '職場のしんどさを、読み物として眺めたい人に', img: 'karte.png', href: '../karte/index.html', cta: '読んでみる',
       facts: ['登録不要', '入力の保存なし', '読みもの'] },
-    { id: 'daily-app', use: 'career', t: '日々の仕事と学びを記録して、キャリアの言葉に', name: 'キャリアログ', img: 'careerlog.png', href: '../daily-app/index.html', cta: 'Web版を開く',
-      facts: ['登録不要', 'Web版(スマホ向けアプリのプレビュー)', '記録は端末内', '文章の整形だけ外部サーバー', '更新は休止中'] },
-    { id: 'growth-76a805', use: 'career', t: '仕事の記録を、企画や発信のたねに', name: 'Growth OS', img: 'growth.png', href: '../growth-76a805/index.html', cta: '記録を始める',
+    { id: 'daily-app', use: 'career', kind: 'app', status: 'paused', t: '日々の仕事と学びを記録して、キャリアの言葉に', name: 'キャリアログ', for: '日々の仕事を記録して、面接や1on1に使いたい人に', img: 'careerlog.png', href: '../daily-app/index.html', cta: 'Web版を開く',
+      facts: ['登録不要', 'Web版(スマホ向けアプリのプレビュー)', '記録は端末内', '文章の整形だけ外部サーバー'] },
+    { id: 'growth-76a805', use: 'career', kind: 'app', t: '仕事の記録を、企画や発信のたねに', name: 'Growth OS', for: '仕事の記録を企画や発信につなげたい人に', img: 'growth.png', href: '../growth-76a805/index.html', cta: '記録を始める',
       facts: ['無料', '登録不要', '端末内保存'] },
     // ---- 学習を続ける ----
-    { id: 'him-quiz', use: 'study', big: true, t: '診療情報管理士の模擬試験、全12章・360問', name: 'HIM Quiz', img: 'him-quiz.png', href: '../him-quiz/index.html', cta: '紹介を見る',
+    { id: 'him-quiz', use: 'study', kind: 'intro', t: '診療情報管理士の模擬試験、全12章・360問', name: 'HIM Quiz', for: '診療情報管理士の独学者に', img: 'him-quiz.png', href: '../him-quiz/index.html', cta: '紹介を見る',
       facts: ['無料', 'ログイン不要', '端末内保存', 'スマホ対応'] },
-    { id: 'study-board', use: 'study', t: '複数科目の学習を、1枚のボードで続ける', name: 'StudyBoard', img: 'studyboard.png', href: '../study-board/index.html', cta: '紹介とデモを見る',
+    { id: 'study-board', use: 'study', kind: 'intro', t: '複数科目の学習を、1枚のボードで続ける', name: 'StudyBoard', for: '複数科目を並行して学ぶ社会人に', img: 'studyboard.png', href: '../study-board/index.html', cta: '紹介を見る',
       facts: ['無料', 'ログイン不要', '端末内保存'] },
-    { id: 'english-trainer', use: 'study', t: '瞬間英作文を、通勤の合間に', name: 'Daily English', img: 'english-trainer.png', href: '../english-trainer/index.html', cta: '紹介を見る',
+    { id: 'english-trainer', use: 'study', kind: 'intro', t: '瞬間英作文を、通勤の合間に', name: 'Daily English', for: '医療経営の英語まで学びたい人に', img: 'english-trainer.png', href: '../english-trainer/index.html', cta: '紹介を見る',
       facts: ['無料', 'ログイン不要', '端末内保存', 'スマホ最適化'] },
     // ---- 気軽に試す・作品を楽しむ ----
-    { id: 'gokigen-gacha', use: 'play', t: '疲れた日の回復行動を、ひとつだけ', name: 'ごきげん回復ガチャ', en: 'Gokigen Gacha', img: 'gokigen-gacha.png', href: '../gokigen-gacha/index.html', cta: 'ガチャを回す',
+    { id: 'gokigen-gacha', use: 'play', kind: 'app', t: '疲れた日の回復行動を、ひとつだけ', name: 'ごきげん回復ガチャ', en: 'Gokigen Gacha', for: '疲れた日、やる気が出ない日の自分に', img: 'gokigen-gacha.png', href: '../gokigen-gacha/index.html', cta: 'ガチャを回す',
       facts: ['無料', '登録不要', '端末内保存'] },
-    { id: 'ittan-horyu', use: 'play', t: '買う前に、少しだけ寝かせる', name: 'いったん保留', en: 'Ittan Horyu', img: 'ittan-horyu.png', href: '../ittan-horyu/index.html', cta: '保留してみる',
+    { id: 'ittan-horyu', use: 'play', kind: 'app', t: '買う前に、少しだけ寝かせる', name: 'いったん保留', en: 'Ittan Horyu', for: '衝動買いを減らしたい人に', img: 'ittan-horyu.png', href: '../ittan-horyu/index.html', cta: '保留してみる',
       facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'] },
-    { id: 'madoakari', use: 'play', big: true, t: '小さな病院の一日を、ただ眺める', name: '窓あかり', en: 'Madoakari', img: 'madoakari.png', href: '../madoakari/index.html', cta: '眺める',
+    { id: 'madoakari', use: 'play', kind: 'app', t: '小さな病院の一日を、ただ眺める', name: '窓あかり', en: 'Madoakari', for: '夜中も続く病院の仕事を、眺めてみたい人に', img: 'madoakari.png', href: '../madoakari/index.html', cta: '眺める',
       facts: ['無料', '登録不要', 'ホーム画面に追加できる'] },
-    { id: 'futatsume', use: 'play', t: '二つの波が重なる、水面のパズル', name: 'ふたつめの波', en: 'Futatsume', img: 'futatsume.png', href: '../futatsume/index.html', cta: '遊ぶ',
+    { id: 'futatsume', use: 'play', kind: 'app', t: '二つの波が重なる、水面のパズル', name: 'ふたつめの波', en: 'Futatsume', for: '点数も時間制限もないパズルで、一息つきたい人に', img: 'futatsume.png', href: '../futatsume/index.html', cta: '遊ぶ',
       facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'] },
   ];
+  const STATUS = { paused: '更新休止', lab: '試作' };
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   const thumb = p => '../images/products/thumbs/' + p.img.replace('.png', '.webp');
-  const byId = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
+  const useOf = id => USES.find(u => u.id === id);
   const ctaOf = p => esc(p.cta) + (p.ext ? ' ↗' : '') + ' <span class="ar" aria-hidden="true">→</span>';
-  const linkAttrs = p => 'href="' + esc(p.href) + '"' + (p.ext ? ' target="_blank" rel="noopener noreferrer"' : '');
 
-  // 用途の索引(ページ内リンク)
-  const nav = document.getElementById('useNav');
-  nav.innerHTML = '<a class="first" href="#first">まず試すなら</a>' +
-    USES.map((u, i) => '<a href="#' + u.id + '"><span class="n">' + String(i + 1).padStart(2, '0') + '</span>' + esc(u.t) + '</a>').join('');
-
-  // まず試すなら(3点)
-  const first = document.getElementById('firstRows');
-  FIRST.map(id => byId[id]).filter(Boolean).forEach((p, i) => {
-    const a = document.createElement('a');
-    a.className = 'first-row'; a.href = p.href; a.setAttribute('data-reveal', ''); a.setAttribute('data-reveal-delay', String(i));
-    a.innerHTML = '<img src="' + thumb(p) + '" alt="' + esc(p.name) + 'の画面" loading="lazy" width="880" height="550">' +
-      '<span class="t">' + esc(p.name) + '<small>' + esc(p.en ? p.en + ' — ' : '') + esc(USES.find(u => u.id === p.use).t) + '</small></span>' +
-      '<span class="d">' + esc(p.t) + '</span>' +
-      '<span class="c">' + ctaOf(p) + '</span>';
-    first.appendChild(a);
-  });
-
-  // 用途ごとのセクション
+  // 用途ごとのセクションと行
   const root = document.getElementById('catalog');
-  USES.forEach((u, ui) => {
+  USES.forEach(u => {
     const items = PRODUCTS.filter(p => p.use === u.id);
     if (!items.length) return;
     const sec = document.createElement('section');
-    sec.className = 'sec cat-sec' + (ui % 2 ? ' tint' : '');
+    sec.className = 'sec cat-sec';
     sec.id = u.id;
+    sec.dataset.use = u.id;
     sec.setAttribute('aria-labelledby', 'cat-' + u.id);
     sec.innerHTML =
-      '<div class="cat-head" data-reveal><div><span class="n">' + String(ui + 1).padStart(2, '0') + ' — ' + items.length + ' items</span>' +
+      '<div class="cat-head"><div><span class="n">' + items.length + '点</span>' +
       '<h2 id="cat-' + u.id + '">' + esc(u.t) + '</h2></div><p>' + esc(u.p) + '</p></div>' +
-      '<div class="prod-grid"></div>';
-    const grid = sec.querySelector('.prod-grid');
-    items.forEach((p, i) => {
+      '<div class="items"></div>';
+    const list = sec.querySelector('.items');
+    items.forEach(p => {
       const a = document.createElement('a');
-      a.className = 'prod-card' + (p.big ? (items.length <= 3 ? ' wide' : ' big') : '');
+      a.className = 'item';
       a.href = p.href;
+      a.dataset.use = p.use;
+      a.dataset.text = [p.name, p.en, p.t, p.for, u.t, u.s, (p.facts || []).join(' '), STATUS[p.status] || ''].join(' ').toLowerCase();
       if (p.ext) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
-      a.setAttribute('data-reveal', '');
-      a.setAttribute('data-reveal-delay', String(i % 3));
       a.innerHTML =
-        '<figure class="prod-fig"><img class="prod-shot" src="' + thumb(p) + '" alt="' + esc(p.name) + 'の画面" loading="lazy" width="880" height="550"></figure>' +
-        '<div class="prod-body">' +
-          '<span class="prod-k"><span class="jp">' + esc(p.name) + '</span>' + (p.en ? '<span>' + esc(p.en) + '</span>' : '') + (p.ext ? '<span class="jp">外部サイト</span>' : '') + '</span>' +
-          '<h3 class="prod-t">' + esc(p.t) + '</h3>' +
-          '<ul class="facts" aria-label="利用条件">' + p.facts.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul>' +
-          '<span class="prod-link">' + ctaOf(p) + '</span>' +
-        '</div>';
-      grid.appendChild(a);
+        '<img class="item-shot" src="' + thumb(p) + '" alt="' + esc(p.name) + 'の画面" loading="lazy" width="880" height="550" decoding="async">' +
+        '<span class="item-main">' +
+          '<span class="item-name">' + esc(p.name) + (p.en ? '<small>' + esc(p.en) + '</small>' : '') + (p.ext ? '<small>外部サイト</small>' : '') + (p.status ? '<span class="chip">' + esc(STATUS[p.status] || p.status) + '</span>' : '') + '</span>' +
+          '<span class="item-t">' + esc(p.t) + '</span>' +
+          (p.for ? '<span class="item-for">' + esc(p.for) + '</span>' : '') +
+          '<ul class="facts" aria-label="利用条件">' + (p.facts || []).map(f => '<li>' + esc(f) + '</li>').join('') + '</ul>' +
+        '</span>' +
+        '<span class="item-cta">' + ctaOf(p) + '</span>';
+      list.appendChild(a);
     });
     root.appendChild(sec);
   });
-  if (window.BRIDGE) window.BRIDGE.observeReveal();
+
+  // 探す: 検索語 × 用途のチップ。絞り込み中は「まず試すなら」と映像をしまう。0件は一文と別の行き先
+  const q = document.getElementById('findQ'), qWrap = q.closest('.find-q'), clr = document.getElementById('findClr'), tags = document.getElementById('useTags'), n = document.getElementById('findN');
+  const first = document.getElementById('first'), reelSec = document.getElementById('reelSec'), empty = document.getElementById('findEmpty');
+  let use = 'all';
+  const norm = s => String(s || '').trim().toLowerCase().replace(/[　\s]+/g, ' ');
+  function apply() {
+    const words = norm(q.value).split(' ').filter(Boolean);
+    qWrap.classList.toggle('has', words.length > 0);
+    let shown = 0;
+    root.querySelectorAll('.cat-sec').forEach(sec => {
+      let k = 0;
+      sec.querySelectorAll('.item').forEach(a => {
+        const hit = (use === 'all' || a.dataset.use === use) && words.every(w => a.dataset.text.includes(w));
+        a.hidden = !hit; if (hit) k++;
+      });
+      sec.hidden = k === 0; shown += k;
+    });
+    const filtering = use !== 'all' || words.length > 0;
+    first.hidden = filtering; reelSec.hidden = filtering;
+    empty.hidden = shown > 0;
+    n.textContent = filtering ? ('全' + PRODUCTS.length + '点のうち ' + shown + '点') : '';
+  }
+  const setUse = (id, push) => {
+    use = id;
+    tags.querySelectorAll('.tag').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.use === id)));
+    if (push) history.replaceState(null, '', id === 'all' ? location.pathname : '#' + id);
+    apply();
+  };
+  [{ id: 'all', s: 'すべて' }].concat(USES).forEach(u => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tag'; b.dataset.use = u.id; b.textContent = u.s; b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => setUse(u.id, true));
+    tags.appendChild(b);
+  });
+  q.addEventListener('input', apply);
+  clr.addEventListener('click', () => { q.value = ''; apply(); q.focus(); });
+  document.getElementById('findReset').addEventListener('click', e => { e.preventDefault(); q.value = ''; setUse('all', true); document.getElementById('find').scrollIntoView({ block: 'start' }); });
+  // #work などのハッシュで来たら、そのチップを選んだ状態で開く(ハッシュの節へは通常どおり飛ぶ)
+  const fromHash = () => { const h = location.hash.replace('#', ''); setUse(USES.some(u => u.id === h) ? h : 'all', false); };
+  fromHash();
+  window.addEventListener('hashchange', fromHash);
+  if (window.BRIDGE) window.BRIDGE.applyBudoux();
 });
 </script>
 </body>

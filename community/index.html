@@ -16,13 +16,21 @@
 <link rel="stylesheet" href="../shared/bridge.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
-.ways{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-@media(max-width:640px){.ways{grid-template-columns:1fr}}
-.way-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(26px,3.5vw,40px);box-shadow:var(--shadow);transition:all .35s var(--ease);display:flex;flex-direction:column;gap:12px}
-a.way-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
+/* 連絡先(冒頭。文字リンク・44px) */
+.contact-list{list-style:none;max-width:var(--text-max);margin-top:24px;border-top:1px solid var(--line)}
+.contact-list li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:16px;align-items:center;min-height:52px;padding:6px 0;border-bottom:1px solid var(--line)}
+.contact-list .k{font:600 11px/1.6 var(--sans);letter-spacing:0.08em;color:var(--ink-3)}
+.contact-list a{display:inline-flex;align-items:center;justify-self:start;min-height:44px;font:600 14.5px/1.5 var(--sans);color:var(--ink);border-bottom:1px solid var(--ink-4);transition:border-color .3s var(--ease)}
+.contact-list a:hover{border-color:var(--ink)}
+/* 関わり方は4行(カードにしない) */
+.ways{max-width:var(--max);margin:0 auto;border-top:1px solid var(--line)}
+.way-card{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:8px 28px;align-items:center;padding:clamp(20px,3vh,30px) 0;border-bottom:1px solid var(--line);transition:background .3s}
+a.way-card:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
+a.way-card:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+@media(max-width:640px){.way-card{grid-template-columns:1fr;gap:4px}}
 .way-en{font:700 10px/1 var(--en);letter-spacing:0.24em;text-transform:uppercase;color:var(--dawn-deep)}
-.way-t{font-family:var(--mincho);font-weight:600;font-size:clamp(19px,2.4vw,24px)}
-.way-p{font-size:12.5px;line-height:2.1;color:var(--ink-2);flex:1}
+.way-t{font-family:var(--mincho);font-weight:600;font-size:clamp(19px,2.4vw,24px);display:block;margin-top:4px}
+.way-p{font-size:12.5px;line-height:2.1;color:var(--ink-2);max-width:40em}
 .way-go{font:600 11px/1 var(--en);letter-spacing:0.08em;color:var(--blue);display:inline-flex;gap:6px}
 a.way-card:hover .way-go{gap:10px}
 .enough{background:var(--dark-sec);color:var(--dark-sec-text);text-align:center}
@@ -38,10 +46,14 @@ a.way-card:hover .way-go{gap:10px}
 <header class="page-hero">
   <div class="page-hero-inner">
     <div class="crumb"><a href="../index.html">Home</a><span class="sep">/</span><span>Contact</span></div>
-    <h1>関わり方は、<br>ひとつではありません</h1>
+    <h1>話をする</h1>
     <p class="lead">
-      読む、使う、話す、一緒に作る。BRIDGEとの関わり方は、どれでも構いません。共感だけでなく、異論や現場の困りごとも歓迎しています。この考え方が社会に届くなら、届ける人は私でなくてもいいと本気で思っています。
+      共感も、異論も、現場の「面倒くさい」の相談も。連絡先はこの2つで、返信はできるだけ早くします。読む・使う・一緒に作る、という関わり方もあります。
     </p>
+    <ul class="contact-list" aria-label="連絡先">
+      <li><span class="k">メール</span><a href="mailto:h.w19961013@gmail.com">h.w19961013@gmail.com</a></li>
+      <li><span class="k">X</span><a href="https://x.com/WataruPT1013" target="_blank" rel="noopener">@WataruPT1013 でDM ↗</a></li>
+    </ul>
   </div>
 </header>
 
@@ -55,26 +67,22 @@ a.way-card:hover .way-go{gap:10px}
   </div>
   <div class="ways" style="margin-top:clamp(36px,5vh,52px)">
     <a class="way-card" href="https://note.com/prime_duck4944" target="_blank" rel="noopener" data-reveal>
-      <span class="way-en">01 — Read</span>
-      <span class="way-t">読む</span>
+      <span><span class="way-en">01 — Read</span><span class="way-t">読む</span></span>
       <p class="way-p">noteとJournalで、思想と過程を公開しています。読んでもらえたら、それだけでこのプロジェクトは前に進みます。</p>
       <span class="way-go">noteを読む →</span>
     </a>
     <a class="way-card" href="mailto:h.w19961013@gmail.com" data-reveal data-reveal-delay="1">
-      <span class="way-en">02 — Talk</span>
-      <span class="way-t">話す</span>
-      <p class="way-p">共感も、異論も、現場の「面倒くさい」の相談も。メールか、XのDMでどうぞ。返信はできるだけ早く。</p>
+      <span><span class="way-en">02 — Talk</span><span class="way-t">話す</span></span>
+      <p class="way-p">書き出しに迷ったら、困っていることを箇条書きで送ってください。連絡先は上の2つです。</p>
       <span class="way-go">メールを書く →</span>
     </a>
     <a class="way-card" href="../products/index.html" data-reveal data-reveal-delay="2">
-      <span class="way-en">03 — Use</span>
-      <span class="way-t">使う</span>
+      <span><span class="way-en">03 — Use</span><span class="way-t">使う</span></span>
       <p class="way-p">道具はすべて公開しています。触ってみるのが一番早い。使いにくかったら、それも教えてください。作り直します。</p>
       <span class="way-go">道具に触れる →</span>
     </a>
     <a class="way-card" href="../services/index.html" data-reveal data-reveal-delay="3">
-      <span class="way-en">04 — Build</span>
-      <span class="way-t">作る</span>
+      <span><span class="way-en">04 — Build</span><span class="way-t">作る</span></span>
       <p class="way-p">あなたの現場の課題を、一緒に道具にしませんか。受託・共創・導入相談・業務分析、何でも。会議室ではなく、現場のデスクから始めましょう。</p>
       <span class="way-go">仕事のご依頼を見る →</span>
     </a>
@@ -83,7 +91,6 @@ a.way-card:hover .way-go{gap:10px}
     <div style="display:flex;gap:14px;flex-wrap:wrap">
       <a class="btn primary" href="mailto:h.w19961013@gmail.com">メールを書く</a>
       <a class="btn ghost" href="https://x.com/WataruPT1013" target="_blank" rel="noopener">XでDMする</a>
-      <a class="btn ghost" href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteを読む</a>
     </div>
   </div>
 </section>

@@ -106,8 +106,9 @@ img,svg{display:block;max-width:100%}
 .nav-actions a::before{content:'';position:absolute;inset:-8px 0}
 .nav-actions a.back{color:var(--ink-3)}
 .nav-actions a.back:hover{color:var(--ink)}
-.nav-actions a.cta{background:var(--ink);color:var(--on-fill)}
-.nav-actions a.cta:hover{background:var(--navy)}
+/* ナビの CTA は ghost(ヒーローの主ボタンと同じ行き先なので、主は1画面に1つ。designer 2026-10-11) */
+.nav-actions a.cta{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.nav-actions a.cta:hover{border-color:var(--ink)}
 /* モバイル: 製品名はheroが名乗るためロゴ側を畳み、CTAは1行を保つ。
  * さらに狭い画面では文字を潰さず行ごと折り返す */
 @media(max-width:640px){
@@ -117,9 +118,8 @@ img,svg{display:block;max-width:100%}
   .nav-actions{gap:6px}
   .nav-actions a{white-space:nowrap;padding:9px 10px}
 }
-/* 600px以下: 「← BRIDGE」はロゴと行き先が同じ(../index.html)。狭い一行に同じ行き先を二度置かず、
- * 帰り道はロゴに任せる(第27条)。これで320pxでもnavが一行に収まり、ロゴの当たり判定(上下14px)が
- * 折り返した2行目のボタンに重ならない */
+/* 600px以下: 「← 一覧へ」を隠し、一覧へはヒーローの CTA の下の文字リンク(.lp-cta .sub)が受ける(designer 2026-10-11)。
+ * 320pxでもnavが一行に収まり、ロゴの当たり判定(上下14px)が折り返した2行目のボタンに重ならない */
 @media(max-width:600px){
   .nav-actions a.back{display:none}
 }
@@ -136,6 +136,28 @@ img,svg{display:block;max-width:100%}
 .hero-meta{display:flex;flex-wrap:wrap;gap:18px;font:500 11px/1 var(--sans-en);letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3)}
 .hero-meta span::before{content:'·';margin-right:18px;color:var(--ink-4)}
 .hero-meta span:first-child::before{display:none}
+
+/* 実画面つきヒーロー(2026-10-11 社長指示「冒頭に対象者・用途・実画面・開始CTA」。designer §6: 9ページで使う型として可)
+ * 左: 誰向け・一文・利用条件(日本語の事実)・主CTA。右: 実物の写し1枚(無加工・撮影日つき・Edge 2〜4px・1px の縁・影なし)。
+ * 写しは lazy にしない(最初の画面)。760px 以下は縦積み。写しは1ページ1枚(第22条)。 */
+.hero.lp{padding:150px var(--pad-x) 80px}
+.lp-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,5vw,64px);align-items:center}
+.lp-for{font:600 12px/1.7 var(--sans-jp);letter-spacing:0.04em;color:var(--ink-3);margin-bottom:16px} /* 誰向けの一文は説明なので砂にしない(designer 2026-10-11 の理由の一文と同じ扱い) */
+.lp-facts{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0 0 28px;padding:0}
+.lp-facts li{font:600 10.5px/1 var(--sans-jp);letter-spacing:0.04em;padding:7px 11px;border:1px solid var(--line);border-radius:100px;color:var(--ink-3);white-space:nowrap}
+.lp-cta{display:flex;align-items:center;flex-wrap:wrap;gap:12px 18px}
+.lp-cta .buy-btn{min-height:48px}
+.lp-cta .sub{font:600 12px/1.6 var(--sans-jp);color:var(--ink-3)}
+.lp-cta .sub a{display:inline-flex;align-items:center;min-height:44px;color:var(--ink-2);border-bottom:1px solid var(--line)} /* 600px以下では一覧へ戻る唯一の道なので 44px */
+.lp-cta .sub a:hover{color:var(--ink);border-color:var(--ink)}
+.lp-shot{margin:0;min-width:0}
+.lp-shot a,.lp-shot .fr{display:block;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:var(--paper-3)}
+.lp-shot a:hover{border-color:var(--navy)}
+.lp-shot img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:left top}
+.lp-shot figcaption{font:500 11.5px/1.8 var(--sans-jp);color:var(--ink-3);margin-top:8px}
+.hero.lp .hero-h{font-size:clamp(28px,3.8vw,48px);margin-bottom:18px}
+.hero.lp .hero-sub{font-size:15px;margin-bottom:22px}
+@media(max-width:760px){.hero.lp{padding:120px var(--pad-x) 56px}.lp-grid{grid-template-columns:1fr;gap:28px}}
 
 /* sections */
 section{padding:120px var(--pad-x);position:relative}
@@ -260,7 +282,7 @@ section.alt{background:var(--paper-2)}
 .foot-brand .mark path:last-child{stroke:var(--dawn)}
 
 /* reveal — JSが付与する html.js 配下でだけ隠す。JS無効環境では最初から見える */
-html.js [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(0.2,0.7,0.2,1),transform .8s cubic-bezier(0.2,0.7,0.2,1)}
+html.js [data-reveal]{opacity:0;transform:translateY(12px);transition:opacity .6s cubic-bezier(0.2,0.7,0.2,1),transform .6s cubic-bezier(0.2,0.7,0.2,1)} /* bridge.css v1.7 と同じ値(B-4) */
 html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 [data-reveal-delay="1"]{transition-delay:.1s}
 [data-reveal-delay="2"]{transition-delay:.2s}
@@ -373,3 +395,10 @@ html.js [data-reveal].vis{opacity:1;transform:translateY(0)}
 .nav-logo{display:inline-flex;align-items:center;gap:10px}
 .nav-logo .mark{width:36px;height:16px;flex-shrink:0}
 .nav-logo .mark path{fill:none;stroke-linecap:round}
+
+/* ===== Starter Kits のナビの語(Products / Starter Kits / Journal / About / Contact)。600px以下は Journal・About・Contact を隠す(フッターにある)。designer 2026-10-11 ===== */
+.nav-links{display:flex;gap:2px;align-items:center}
+.nav-links a{font:600 11px/1 var(--sans-jp);letter-spacing:0.04em;padding:9px 10px;border-radius:2px;color:var(--ink-3);position:relative;white-space:nowrap}
+.nav-links a::before{content:'';position:absolute;inset:-11px 0} /* 当たり判定 44px */
+.nav-links a.on,.nav-links a:hover{color:var(--ink)}
+@media(max-width:600px){.nav-links a:nth-child(n+3){display:none}}

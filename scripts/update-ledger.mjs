@@ -10,6 +10,20 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+// 浅いクローン(git clone --depth)では git log が途中で切れ、全製品の lastCommit が
+// 最古のコミットの日付に書き換わる(2026-10-11 に 22 製品が巻き戻った)。走らせずに止める。
+const isShallow = () => {
+  try {
+    return execFileSync('git', ['rev-parse', '--is-shallow-repository'], { cwd: repo, encoding: 'utf8' }).trim() === 'true';
+  } catch {
+    return true; // git が引けないなら焼き込まない
+  }
+};
+if (isShallow()) {
+  console.error('update-ledger: 浅いクローン(shallow)のため lastCommit を焼き込みません。`git fetch --unshallow` の後に実行してください。ledger.json は変更していません。');
+  process.exit(2);
+}
 const ledgerPath = join(repo, 'cockpit-76a805', 'ledger.json');
 const ledger = JSON.parse(readFileSync(ledgerPath, 'utf8'));
 

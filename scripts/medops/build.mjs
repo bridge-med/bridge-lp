@@ -17,7 +17,7 @@ import { TEMPLATES, publishedTemplates } from '../../medops/data/templates.mjs';
 import { ARTICLES, publishedArticles } from '../../medops/data/articles.mjs';
 import {
   esc, page, breadcrumbs, breadcrumbLd, tplCard, artCard, catCard,
-  contentHtml, priceHtml, formatLabel, catName, dateJp,
+  contentHtml, priceHtml, formatLabel, typeFormats, filterFormats, hasCopy, catName, dateJp,
 } from './html.mjs';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -85,6 +85,7 @@ const relatedSection = (root, tplIds = [], artIds = []) => {
         <a class="btn primary" href="templates/index.html${paidTpls.length ? '?free=1' : ''}">無料テンプレートを見る</a>
         <a class="btn ghost" href="#themes">実務テーマから探す</a>
       </div>
+      <p class="sibling-note">迷ったら: ${esc(SITE.sibling.lead)}は姉妹サイト<a href="${root}${SITE.sibling.href}">${esc(SITE.sibling.name)}</a>へ。${esc(SITE.sibling.self)}には、このサイトが合います。</p>
     </div>
     ${paidTpls.length ? `<div class="hero-preview" aria-label="テンプレートのイメージ(統合実務パックのWBS抜粋)">
       <div class="bar"><b>統合全体WBS</b><span>— 担当・確認先・期限まで1枚で</span></div>
@@ -262,7 +263,7 @@ ${breadcrumbs(root, [['テンプレート', null]])}
         <label class="flabel" for="f-role">対象者</label>
         <select id="f-role"><option value="">指定しない</option>${ROLES.map((r) => `<option value="${r.id}">${esc(r.label)}</option>`).join('')}</select>
         <label class="flabel" for="f-format">形式</label>
-        <select id="f-format"><option value="">指定しない</option>${FORMATS.map((f) => `<option value="${f.id}">${esc(f.label)}</option>`).join('')}</select>
+        <select id="f-format"><option value="">指定しない</option>${filterFormats().map((f) => `<option value="${f.id}">${esc(f.label)}</option>`).join('')}</select>
         <label class="flabel" for="f-phase">フェーズ</label>
         <select id="f-phase"><option value="">指定しない</option>${PHASES.map((p) => `<option value="${p.id}">${esc(p.label)}</option>`).join('')}</select>
       </div>
@@ -313,7 +314,7 @@ for (const t of tpls) {
       <dl>
         <dt>テーマ</dt><dd>${esc(catName(t.categoryId))}</dd>
         <dt>対象</dt><dd>${(t.targetRoles || []).map((r) => esc((ROLES.find((x) => x.id === r) || {}).label || r)).join('、')}</dd>
-        <dt>形式</dt><dd>${(t.formats || []).map((f) => esc(formatLabel(f))).join('、')}</dd>
+        <dt>形式</dt><dd>${typeFormats(t).map((f) => esc(formatLabel(f))).join('、')}</dd>
         ${t.includedFiles ? `<dt>ファイル数</dt><dd>${t.includedFiles.length}ファイル</dd>` : ''}
         ${t.estimatedTime ? `<dt>所要時間</dt><dd>${esc(t.estimatedTime)}</dd>` : ''}
       </dl>
@@ -329,13 +330,14 @@ for (const t of tpls) {
     main = `
     <div class="prose">
       <p>${esc(t.description)}</p>
+      ${t.content && t.content.groups ? `<p class="tpl-act"><button class="btn ghost small" data-copy-target="tpl-body-${t.id}">この内容をテキストでコピー</button><span>Wordやメモに貼り付けて編集できます</span></p>` : ''}
       ${contentHtml(t)}
       ${t.reviewNote ? `<div class="notice"><div class="h">確認のお願い</div>${esc(t.reviewNote)}</div>` : ''}
     </div>`;
     side = `
     <div class="buy-card">
       <span class="badge free" style="align-self:flex-start">無料</span>
-      <p class="note">この資料は登録なしで使えます。内容をコピーし、自院用に編集してください。Excel・Word版のダウンロード提供は準備中です。</p>
+      <p class="note">この資料は登録なしで使えます。Word・Excel版はありません。内容をページ上でコピーし、自院用に編集してください。</p>
       ${(t.relatedTemplateIds || []).map(tplById).filter((x) => x && !x.isFree).slice(0, 1).map((x) =>
         `<a class="btn primary" href="${root}templates/${x.slug}/index.html">有料版: ${esc(x.shortTitle)}を見る</a>`).join('')}
       <a class="btn ghost" href="${root}templates/index.html">他のテンプレートを探す</a>
