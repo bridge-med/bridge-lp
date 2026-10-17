@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Philosophy — 思想 / BRIDGE</title>
-<meta name="description" content="なぜBRIDGEはあるのか。私が考えるリハビリテーションとは何か。選択肢を増やすということについて、いちばん長く書いたページです。">
+<meta name="description" content="なぜBRIDGEはあるのか。理学療法士として考えてきたリハビリテーションの意味と、それがどの道具になったかを書いています。">
 <link rel="canonical" href="https://bridge-med.github.io/bridge-lp/philosophy/">
 <meta property="og:title" content="Philosophy — 思想 / BRIDGE">
 <meta property="og:description" content="リハビリテーションとは、人や組織が本来持つ可能性を引き出し、自ら選び、納得して前へ進める状態をつくること。">
@@ -18,10 +18,14 @@
 <link rel="stylesheet" href="../shared/bridge.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
-.toc{position:sticky;top:64px;z-index:10;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px var(--pad-x);display:flex;gap:20px;overflow-x:auto;font:600 10px/1 var(--en);letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);scrollbar-width:none}
-.toc::-webkit-scrollbar{display:none}
-.toc a{white-space:nowrap;padding:4px 0;transition:color .2s}
-.toc a:hover{color:var(--ink)}
+/* 冒頭の核の主張(明朝 .stmt。h1 にしない=第23条第1項との齟齬を増やさない。designer 2026-10-11) */
+.core{max-width:var(--max);margin:0 auto;padding:clamp(8px,2vh,20px) 0 0}
+.core .stmt{font-size:clamp(24px,3.2vw,38px);line-height:1.7} /* トップの .idea-h と同じ大きさ(h1 と主役を争わない。designer 2026-10-11) */
+.core .stmt .sand{color:var(--dawn-deep)} /* ライトで 3:1 を満たす側(トップの .idea-h .a と同じ) */
+.core p{margin-top:16px;font-size:14px;line-height:2.2;color:var(--ink-2);max-width:var(--text-max)}
+/* 思考の型の各段に、支える道具(cockpit の台帳の第31条の自己申告から。2026-09-04 社長確認) */
+.tf-tools{margin-top:12px;max-width:170px} /* 文字と色は共通の .made */
+@media(max-width:900px){.tf-tools{max-width:none}}
 .prose{max-width:var(--text-max);font-size:15px;line-height:2.4;color:var(--ink-2)}
 .prose+.prose{margin-top:1.8em}
 .prose strong{color:var(--ink);font-weight:700}
@@ -42,8 +46,12 @@
 @media(max-width:760px){.branch-fig .reel-js .reel-frame{aspect-ratio:4/5}} /* tall も縁なし(図として見せる。designer 2026-10-10) */
 .branch-cap{text-align:center;margin-top:22px;font-size:13px;color:var(--ink-3)}
 
-.mvp-grid{max-width:var(--max);margin:clamp(40px,6vh,60px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-@media(max-width:860px){.mvp-grid{grid-template-columns:1fr}}
+/* Mission / Vision / Philosophy は3行(カードにしない。designer 2026-10-11) */
+.mvp{max-width:var(--max);margin:clamp(40px,6vh,60px) auto 0;border-top:1px solid var(--line)}
+.mvp-row{display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px 32px;align-items:baseline;padding:clamp(18px,3vh,28px) 0;border-bottom:1px solid var(--line)}
+.mvp-row .k{font:700 10px/1.8 var(--en);letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3)}
+.mvp-row .v{font-family:var(--mincho);font-weight:600;font-size:clamp(17px,2.2vw,22px);line-height:1.8}
+@media(max-width:600px){.mvp-row{grid-template-columns:1fr;gap:4px}}
 
 .tf-flow{max-width:var(--max);margin:clamp(44px,6vh,64px) auto 0;display:grid;grid-template-columns:repeat(5,1fr) 1.25fr;gap:0;position:relative}
 .tf-flow::before{content:'';position:absolute;top:5px;left:0;right:0;height:1px;background:var(--line)}
@@ -90,21 +98,24 @@
     <div class="crumb"><a href="../index.html">Home</a><span class="sep">/</span><span>Philosophy</span></div>
     <h1>考え方</h1>
     <p class="lead">
-      いちばん長く書いたページです。目次から、気になる章だけ読んでもらっても構いません。
+      理学療法士として考えてきたリハビリテーションの意味と、それがどの道具になったかを書いています。
     </p>
+    <div class="core">
+      <p class="stmt">正解を与えるのではなく、<br class="br-pc"><span class="sand">選択肢を増やす</span></p>
+      <p>迷ったときは、ひとつの問いに戻ります。「その人の選択肢は、増えたか。」</p>
+    </div>
+    <ol class="toc" aria-label="章の目次">
+      <li><a href="#choose"><span class="n">01</span><span>人は、もっと選べる<span class="s">なぜ、この活動をしているのか</span></span></a></li>
+      <li><a href="#rehabilitation"><span class="n">02</span><span>リハビリテーションとは<span class="s">語源と、私の定義</span></span></a></li>
+      <li><a href="#expand"><span class="n">03</span><span>選択肢を増やすということ<span class="s">道が一本から三本に増える瞬間</span></span></a></li>
+      <li><a href="#happiness"><span class="n">04</span><span>選ぶことと、納得して生きること<span class="s">Mission / Vision / Philosophy</span></span></a></li>
+      <li><a href="#beyond"><span class="n">05</span><span>臨床から社会へ<span class="s">PMIは、組織へのリハビリテーション</span></span></a></li>
+      <li><a href="#thinking"><span class="n">06</span><span>思考の型<span class="s">5段階と、それを支える道具</span></span></a></li>
+      <li><a href="#principles"><span class="n">07</span><span>5つの原則<span class="s">判断に迷ったら、ここに戻る</span></span></a></li>
+      <li><a href="#manifesto"><span class="n">08</span><span>Manifesto<span class="s">宣言</span></span></a></li>
+    </ol>
   </div>
 </header>
-
-<nav class="toc" aria-label="ページ内目次">
-  <a href="#choose">人は、もっと選べる</a>
-  <a href="#rehabilitation">リハビリテーションとは</a>
-  <a href="#expand">選択肢を増やす</a>
-  <a href="#happiness">選ぶことと、納得</a>
-  <a href="#beyond">臨床から社会へ</a>
-  <a href="#thinking">思考の型</a>
-  <a href="#principles">原則</a>
-  <a href="#manifesto">Manifesto</a>
-</nav>
 
 <main>
 
@@ -196,19 +207,10 @@
       なぜそこまで「選ぶこと」にこだわるのか。私は、人は自ら選び、納得して生きることで、最も幸福になれると考えているからです。他人が用意した最適解の上を歩くより、多少遠回りでも自分で選んだ道のほうが、人は前を向けます。これは臨床で患者を見てきた実感であり、自分自身の転職や進学で確かめてきたことでもあります。
     </p>
   </div>
-  <div class="mvp-grid">
-    <div class="card" data-reveal>
-      <span class="card-tag d">Mission</span>
-      <p class="card-t">リハビリテーションという学問を通して、人と社会の選択肢を広げる</p>
-    </div>
-    <div class="card" data-reveal data-reveal-delay="1">
-      <span class="card-tag d">Vision</span>
-      <p class="card-t">誰もが、自ら選び、納得して人生をデザインできる社会</p>
-    </div>
-    <div class="card" data-reveal data-reveal-delay="2">
-      <span class="card-tag d">Philosophy</span>
-      <p class="card-t">人は、自ら選び、納得して生きることで、最も幸福になれる</p>
-    </div>
+  <div class="mvp" data-reveal>
+    <div class="mvp-row"><span class="k">Mission</span><p class="v">リハビリテーションという学問を通して、人と社会の選択肢を広げる</p></div>
+    <div class="mvp-row"><span class="k">Vision</span><p class="v">誰もが、自ら選び、納得して人生をデザインできる社会</p></div>
+    <div class="mvp-row"><span class="k">Philosophy</span><p class="v">人は、自ら選び、納得して生きることで、最も幸福になれる</p></div>
   </div>
 </section>
 
@@ -234,33 +236,39 @@
     <div class="eyebrow" data-reveal>Rehabilitation Thinking — 思考の型</div>
     <h2 class="sec-h" data-reveal data-reveal-delay="1">評価から始めて、選択肢が広がるまで</h2>
     <p class="prose" data-reveal data-reveal-delay="2">
-      臨床で使われる思考の型を、私はそのまま組織にもキャリアにもAI導入にも使っています。型は5段階で、一度きりではなく循環します。回すたびに、選べる道が増えていきます。
+      臨床で使われる思考の型を、私はそのまま組織にもキャリアにもAI導入にも使っています。型は5段階で、一度きりではなく循環します。回すたびに、選べる道が増えていきます。各段の下に、その段階を支える道具を添えました。
     </p>
   </div>
   <div class="tf-flow">
     <div class="tf-step" data-reveal>
       <div class="tf-num">01</div><div class="tf-t">評価</div><span class="tf-en">Assess</span>
       <p class="tf-p">思い込みではなく、事実から始めます。いま何ができて、何に困っているのか。</p>
+      <p class="tf-tools made">道具: <a href="../tanaoroshi/index.html">経験の棚卸し</a>・<a href="../moyamoya/index.html">職場モヤモヤ診断</a>・<a href="../nidodema/index.html">二度手間さがし</a>・<a href="../medboard/index.html">MedBoard</a></p>
     </div>
     <div class="tf-step" data-reveal data-reveal-delay="1">
       <div class="tf-num">02</div><div class="tf-t">理解</div><span class="tf-en">Understand</span>
       <p class="tf-p">数字の奥にある文脈を読みます。その人、その組織にとっての意味をつかむ。</p>
+      <p class="tf-tools made">道具: <a href="../clinic-flow-3d/index.html">クリニックタウン3D</a>・<a href="../iikae/index.html">現場のことば 言いかえ帳</a>・<a href="../pmi-quest/index.html">クリニックPMIクエスト</a>・<a href="../medops/index.html">医療管理実務ライブラリ</a></p>
     </div>
     <div class="tf-step" data-reveal data-reveal-delay="2">
       <div class="tf-num">03</div><div class="tf-t">設計</div><span class="tf-en">Design</span>
       <p class="tf-p">目標と道筋を、本人と一緒に決めます。押し付けた計画は続きません。</p>
+      <p class="tf-tools made">道具: <a href="../consult-simulator/index.html">ConsultSim</a>・<a href="../hire-board/index.html">HireBoard</a>・<a href="../manager-starter/index.html">医療管理職スターター</a></p>
     </div>
     <div class="tf-step" data-reveal data-reveal-delay="3">
       <div class="tf-num">04</div><div class="tf-t">実践</div><span class="tf-en">Practice</span>
       <p class="tf-p">小さく始めて、続けられる形にします。意志の強さではなく、仕組みで支える。</p>
+      <p class="tf-tools made">道具: <a href="../keiji/index.html">掲示じたく</a>・<a href="../interview-kit/index.html">面接官の手帖</a>・<a href="../him-quiz/index.html">HIM Quiz</a>・<a href="../yawagaeshi/index.html">やわ返</a></p>
     </div>
     <div class="tf-step" data-reveal data-reveal-delay="4">
       <div class="tf-num">05</div><div class="tf-t">再評価</div><span class="tf-en">Reassess</span>
       <p class="tf-p">変化を測って、設計に戻します。この循環が前進を確かなものにします。</p>
+      <p class="tf-tools made">道具: <a href="../rehaboard/index.html">RehaBoard</a>・<a href="../round-note/index.html">本部長の巡回手帖</a>・<a href="../study-board/index.html">StudyBoard</a></p>
     </div>
     <div class="tf-step out" data-reveal data-reveal-delay="5">
       <div class="tf-num">→</div><div class="tf-t">選択肢が広がる</div><span class="tf-en">Choices Expand</span>
       <p class="tf-p">この型の目的地です。回すほど、選べる道が増えていく。</p>
+      <p class="tf-tools made">道具: <a href="../compass/index.html">BRIDGE Compass</a>(いまの経験から見える3つの橋)</p>
     </div>
   </div>
 </section>

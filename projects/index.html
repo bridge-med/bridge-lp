@@ -25,6 +25,9 @@
 .road-t{font-family:var(--mincho);font-weight:600;font-size:clamp(15px,1.8vw,20px);margin-bottom:4px}
 .road-en{font:500 9px/1 var(--en);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:10px}
 .road-p{font-size:11.5px;line-height:2;color:var(--ink-2)}
+/* 行の下に、作ったもの(実在のリンクだけ) */
+.row-made{grid-column:2/-1;margin-top:-6px} /* 文字と色は共通の .made */
+@media(max-width:860px){.row-made{grid-column:1/-1}}
 @media(max-width:900px){
   .road{grid-template-columns:1fr;padding-left:28px}
   .road::before{top:0;bottom:0;left:5px;right:auto;width:1px;height:auto}
@@ -56,7 +59,7 @@
     <div class="eyebrow" data-reveal>Current Activities — 現在の活動</div>
   </div>
   <div class="rows" style="margin-top:clamp(44px,6vh,64px)" id="activityRows"></div>
-  <noscript><p style="max-width:660px;margin:40px auto;color:var(--ink-3);font-size:13px">一覧の表示にはJavaScriptが必要です。</p></noscript>
+  <noscript><p style="max-width:660px;margin:40px auto;color:var(--ink-3);font-size:13px;line-height:2">一覧の表示にはJavaScriptが必要です。活動の中身は <a href="../products/index.html" style="text-decoration:underline">Products</a>(道具)、<a href="../research/index.html" style="text-decoration:underline">Research</a>(研究)、<a href="../journal/index.html" style="text-decoration:underline">Journal</a>(発信)から辿れます。</p></noscript>
 </section>
 
 <!-- ============ 進み方(Roadmap) ============ -->
@@ -113,7 +116,6 @@
         <p class="p">完成品ではなく「途中」もそのまま。</p>
       </a>
     </div>
-    <p class="walk-note" data-reveal>いま何が動いているかを知ってもらえれば、このページの役目は終わりです。関わり方を探すのは、その先で構いません。</p>
   </div>
 </aside>
 
@@ -126,23 +128,28 @@
 window.addEventListener('DOMContentLoaded', () => {
   const ACTIVITIES = [
     { t: 'PMI', en: 'Post Merger Integration', status: '実務', run: false,
-      p: '医療機関の承継・統合後の立て直し。評価→課題抽出→介入→再評価という、組織へのリハビリテーションの実務。' },
+      p: '医療機関の承継・統合後の立て直し。評価→課題抽出→介入→再評価という、組織へのリハビリテーションの実務。',
+      made: [['../medops/index.html', '医療管理実務ライブラリ(統合・承継のチェックリスト)'], ['../pmi-quest/index.html', 'クリニックPMIクエスト']] },
     { t: 'AI活用', en: 'AI in Practice', status: '実践中', run: false,
-      p: '医療と経営の現場にAIを実装し、対話と思考のための時間を取り戻す。過程も含めて公開する。' },
+      p: '医療と経営の現場にAIを実装し、対話と思考のための時間を取り戻す。過程も含めて公開する。',
+      made: [['../manager-starter/templates/ai-rules-for-managers/index.html', '医療管理職のAI利用ルール(1枚版)'], ['../medops/articles/ai-for-medical-admin/index.html', 'AIで医療管理業務を効率化するときの注意点(記事)']] },
     { t: '教育', en: 'Education', status: '実践中', run: false,
-      p: 'リハビリテーション思考を、次の世代へ。学べるゲームや教材で、経営と臨床の橋を渡せる人を増やす。', href: '../products/index.html#learning' },
+      p: 'リハビリテーション思考を、次の世代へ。学べるゲームや教材で、経営と臨床の橋を渡せる人を増やす。', href: '../products/index.html#learn',
+      made: [['../clinic-flow-3d/index.html', 'クリニックタウン3D'], ['../turnaround12/index.html', 'ターンアラウンド12'], ['../him-quiz/index.html', 'HIM Quiz']] },
     { t: '研究', en: 'Research', status: '継続中', run: false,
       p: '大学院で学んだ「検証する目」を持ち続ける。実践を感想で終わらせず、確かめてから届ける。', href: '../research/index.html' },
     { t: 'アプリ開発', en: 'Product Development', status: '稼働中', run: true,
-      p: 'キャリアログ、RehaBoard、Clinic Town 3Dなど。人が前へ進める仕組みを、軽い道具の形で。', href: '../products/index.html' },
+      p: 'BRIDGE Compass、RehaBoard、クリニックタウン3Dなど。人が前へ進める仕組みを、軽い道具の形で。', href: '../products/index.html' },
     { t: '発信', en: 'Writing', status: '継続中', run: true,
-      p: '開発の過程、現場で考えたこと、キャリアの探求。思想を、誰でも受け取れる言葉にして残す。', href: '../journal/index.html' },
+      p: '開発の過程、現場で考えたこと、キャリアの探求。思想を、誰でも受け取れる言葉にして残す。', href: '../journal/index.html',
+      made: [['https://note.com/prime_duck4944', 'note(連載)'], ['../stories/index.html', 'Stories(実話6篇)']] },
     { t: 'Next', en: 'まだ名前のない構想', status: '構想中', run: false,
       p: '思想が先、形はあと。次の活動は、いつも現場の違和感から生まれます。' },
   ];
   const wrap = document.getElementById('activityRows');
   ACTIVITIES.forEach((a, i) => {
     const el = document.createElement(a.href ? 'a' : 'div');
+    if (a.href && a.made) a.made = a.made.map(m => [null, m[1]]); // 行自体がリンクなので、中に別のリンクを置かない(名前だけ)
     el.className = 'row';
     if (a.href) el.href = a.href;
     el.setAttribute('data-reveal', '');
@@ -150,7 +157,8 @@ window.addEventListener('DOMContentLoaded', () => {
       '<span class="row-num">' + String(i + 1).padStart(2, '0') + '</span>' +
       '<span class="row-t">' + a.t + '<span class="en">' + a.en + '</span></span>' +
       '<span class="row-p">' + a.p + '</span>' +
-      '<span style="display:flex;align-items:center;gap:14px;justify-self:end"><span class="chip' + (a.run ? ' run' : '') + '">' + a.status + '</span>' + (a.href ? '<span class="row-arr">→</span>' : '') + '</span>';
+      '<span style="display:flex;align-items:center;gap:14px;justify-self:end"><span class="chip' + (a.run ? ' run' : '') + '">' + a.status + '</span>' + (a.href ? '<span class="row-arr">→</span>' : '') + '</span>' +
+      (a.made ? '<span class="row-made made">作ったもの: ' + a.made.map(m => m[0] ? '<a href="' + m[0] + '"' + (m[0].startsWith('http') ? ' target="_blank" rel="noopener"' : '') + '>' + m[1] + '</a>' : m[1]).join('・') + '</span>' : '');
     wrap.appendChild(el);
   });
   if (window.BRIDGE) window.BRIDGE.observeReveal();
