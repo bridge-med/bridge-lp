@@ -1,6 +1,6 @@
 # BRIDGE Design System
 
-**v1.0 — 2026-09-22 / v1.1 — 2026-10-04 / v1.2 — 2026-10-05 / v1.3 — 2026-10-10 / v1.4 — 2026-10-11 / v1.5 — 2026-10-11 / v1.6 — 2026-10-11 / v1.7 — 2026-10-11**
+**v1.0 — 2026-09-22 / v1.1 — 2026-10-04 / v1.2 — 2026-10-05 / v1.3 — 2026-10-10 / v1.4 — 2026-10-11 / v1.5 — 2026-10-11 / v1.6 — 2026-10-11 / v1.7 — 2026-10-11 / v1.8 — 2026-10-11 / v1.9 — 2026-10-11 / v1.10 — 2026-10-17**
 
 > UI を作る前に、この文書を数分で読む(§0〜§6。§7 は台帳で通読不要)。
 > 新しいデザインを発明するための文書ではない。すでにあるものを使い、判断を揃えるための文書である。
@@ -114,7 +114,8 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 
 - **focus**: 共通のリングは未整備(B-1)。書くときは `outline:2px solid var(--blue);outline-offset:2〜3px`(トップ・一覧と同じ)。
 - **selected**: `.tag.active` の値(藍の塗り・`--on-fill` の文字)。押せるボタンなら `aria-pressed="true"` で同じ値になる(`bridge.css` の1つの規則。トップの触れる一場面・2026-10-11)。
-- **disabled / loading**: ブランドサイトに実装はない。必要になってから §6 で足す。
+- **disabled / loading**: ブランドサイトに実装はない。必要になってから §6 で足す
+- **当たり判定**: 見た目を変えずにタップ 44px にするときは、疑似要素で当たり判定だけを広げる。外へ広げるなら inset は枠線の内側の寸法から測る(34px・枠線 1px なら内側 32px → `inset:-6px`。`.theme-btn`)。内に描くなら 44px の箱の内側に見た目を置く(`.motion-toggle::before{inset:5px}`)。色・影は足さない(designer 2026-10-17)。
 
 ## 4. Patterns
 
@@ -170,7 +171,7 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 | B-2 | 道のりの型が4ページで重複(`.road` `.flow` `.tf-flow` `.tl`。点の塗りが `--bg`/`--bg-2` で割れる) | projects・services・philosophy・about | 4ページ同時に触るため |
 | B-3 | 砂の縦線の注記が4通り(`.fee` `.story-q` `.honest` `.etym`) | services・stories・philosophy | 同上 |
 | B-4 | 紹介 LP 系が同じ4系統を別名で持つ(ダークの段の順も違う) | `subpage.css` | 9ページの見た目に響く。reveal の値(.6s・12px)は v1.9 で bridge.css に揃えた。安全弁(1.2s)と rootMargin は未 |
-| B-5 | 未使用: `.grid-2` `.grid-4` `.hikari` `.ao` `--hero-glow` `--hero-sky-2`(`.page-hero h1 .period` は 2026-10-04 に消した。`--hero-sky-1` は compass/app/styles.css が使うので残す) | `bridge.css` | 全ディレクトリで未使用を確かめてから消す |
+| B-5 | 未使用: `.grid-2` `.grid-4` `.hikari` `.ao` `--hero-glow` `--hero-sky-2`(`.page-hero h1 .period` は 2026-10-04 に消した。`--hero-sky-1` は compass/app/styles.css が使うので残す) | `bridge.css` | 全ディレクトリで未使用を確かめてから消す。2026-10-17 に全ディレクトリ(`*.html` `*.css` `*.js`)で使用ゼロを確かめて6つを消し、閉じた(`.grid-4` は daily-app の Expo のビルド産物に同名の文字列があるだけで bridge.css を読まない。`--hero-sky-1` と `.grid-3`(research)は残す) |
 | B-6 | フッターの縦並びリンクが 34px(見た目を変えずに広げられない) | `.footer-col a` | 全ページのフッターの高さが変わる |
 | B-7 | 小さな inline style(`margin-top`・`text-decoration:underline`・見出しの `font-size` 上書き) | about・philosophy・research・products・projects・community | 触るページのついでに class へ |
 | B-8 | ~~44px 未満のリンク: `.story-src a`・`.toc a`~~ | stories・philosophy | v1.8 で閉じた(`.toc` を共通化して行 44px、出典は 44px、`.made a` は 920 以下で 44px) |
@@ -184,13 +185,16 @@ Soft を多用しない(第24条)ので、新しい部品はまず Edge で考�
 | B-22 | 正式ロゴの経路の写しが散らばっている: bridge.js の MARK・showreel/reel.html(v3)・showreel/namae/・トップの h1(インライン SVG。JS なしでも出すため)・トップの筆の線のエンジンの `LOGO`(ベジェの制御点。v1.6 で index.html の中は2つから1つに減った)・404.html・film/choice/card/index.html、ビルド用の scripts/make-ogp.mjs と film/choice/shots2.mjs、各プロダクトの nav-logo(subpage.css を読む9ファイル。`stroke="#16233E"` を直書き)。トップでは h1 から読み、写しを増やさない | 上記 | 範囲(プロダクトの nav-logo を含めるか・§5)を決めてから数え直す。寄せるときは、すでに公開されている `BRIDGE.MARK` から読む形を先に検討し、`MARK_PATHS` のような新しい名前は要るときだけ足す。見た目を変えずに1か所ずつ(§6)。B-13(映像の規律)から 2026-10-11 に分けた |
 | B-23 | ~~文字リンクは §4 CTA に語としてあるが、§3 に部品がない~~ | `shared/bridge.css` | v1.8 で閉じた(3ページ目=services で `.tx-link` を bridge.css へ上げた) |
 | B-24 | 紹介 LP 系の既存の欠陥(第32条): 9本に favicon がない、6本に og:description がない、見出しの飛び(h2→h4)、`target=_blank` に `rel=noopener` がない外部リンク、rehaboard-starter に Where to next がない、LP のナビが `shared/bridge.js` の NAV を経由しない第二の情報源 | `subpage.css` を読む9ページ・rehaboard-starter | PR-C の後に単独の便で1回にまとめる(qa 2026-10-11 の指摘) |
+| B-25 | cockpit-76a805/index.html が 390px で横スクロールする(scrollWidth 445。棚卸しの便の前は 490) | `cockpit-76a805/` | 2026-10-17 qa 指摘。棚卸しの便より前からある。noindex の運営者専用ページだが 44px/AA と同じく横はみ出しは守る。次に cockpit を触るときに直す |
 | C-2 | `--glass-ink` が未使用 | `bridge.css` | 憲法が用途2「ゲーム紹介の帯」の文言を残しているため、対のトークンも残す |
 | C-3 | 文中の文字リンク(about の連絡先など)が 44px 未満 | 文中 | 文中のリンクは行の高さに従う(WCAG 2.5.8 の例外と同じ) |
-| C-4 | `--glass-deep` が未使用になった。第22条ガラスの用途1(ヒーローの立体)と用途4(夜の場)を使う場所がなくなり、`bridge.css` のガラスのコメント(`--glass-deep` の説明)も実装と合わない | `bridge.css` | トップのヒーローを作り直して(Hero Motion v1 → Experience Journey・2026-10-03〜04)立体と夜の場を外したため。素材は戻すときのために残す(docs/hero-asset-spec.md)ので、C-2 と同じくトークンと憲法の文言は消さない |
+| C-4 | `--glass-deep` が未使用になった。第22条ガラスの用途1(ヒーローの立体)と用途4(夜の場)を使う場所がなくなり、`bridge.css` のガラスのコメント(`--glass-deep` の説明)も実装と合わない | `bridge.css` | トップのヒーローを作り直して(Hero Motion v1 → Experience Journey・2026-10-03〜04)立体と夜の場を外したため。素材は戻すときのために残す(docs/hero-asset-spec.md)ので、C-2 と同じくトークンと憲法の文言は消さない。コメントの不整合は 2026-10-17 に直した(「いまは未使用。戻すときのために残す」と明記)。トークンを残す判断はそのまま |
+| C-5 | cockpit の Where to next に `.walk-note`(第29条)が無い | cockpit-76a805 | noindex の運営者専用ページで、訪問者に関わり方を選ばせる場面が無いため置かない(designer 2026-10-17) |
 
 ---
 
 ### 改定履歴
+- v1.10 (2026-10-17): 棚卸しの便(見た目の変更なし)。§7 B-5(未使用の `.grid-2` `.grid-4` `.hikari` `.ao` `--hero-glow` `--hero-sky-2`)を消して閉じ、C-4 のコメントを実装に合わせた。§3 Theme toggle の「タップ 44px」が実装では 42px だった(`::after`/`::before` の `inset:-5px` は border-box の枠線の内側から測るため)。共通 `bridge.css` と iikae・keiji・keiri を `-6px` にして 44px に揃えた(round-note・turnaround12 は既に -6px)。§3 に「当たり判定」の規則を1行足した。§7 に C-5(cockpit の `.walk-note` 無しは第29条の適用外)と B-25(cockpit の横スクロール)。
 - v1.9 (2026-10-11): 社長指示「サイト全体改修」の PR-C(製品 LP 8ページ + Starter Kits + rehaboard-starter)。§5 に LP 系の冒頭の型(`.hero.lp`・誰向けは ink-3・写し1枚・ナビの CTA は ghost・600px 以下の一覧への道)。B-4 に reveal の値の整合。rehaboard-starter の reveal を `html.js` 配下に限定し、JS 無効・reduced-motion で本文が見えるようにした。
 - v1.8 (2026-10-11): 社長指示「サイト全体改修」の PR-B(下層8ページ)。§3 に目次 `.toc`・文字リンク `.tx-link`・作ったものの行 `.made` を足し、Row の変種と「題は明朝」を明記。§1 Soft から `.way-card` `.j-card` を外し `.j-lead` を足す。§4 Page opening にリードの下の一歩の規則、状態に Journal の読み込み中/失敗。§7 の B-8・B-10・B-11・B-23 を閉じ、B-9 から `.j-meta` を外す。walk-note は行動を求めるページ(philosophy・stories・services・products。community は独立した `.enough` の節で明文化)に残し、about・projects・research・journal からは外した(社長指示「帰っても十分は必要な場所だけ」。第29条の字面との整理は第33条の検討課題)。
 - v1.7 (2026-10-11): 社長指示「サイト全体改修」の PR-A(共通・トップ・Products)。§1 Motion: `[data-reveal]` を .6s・12px に、観測を画面に入る前に(bridge.css/bridge.js)。トップの文字と実画面を線に依存させない(.pr の mask を外す)。開いた瞬間を再訪・データセーバーでは出さず、フォールバックを 1.2 秒に。§3 Chip を 10.5px `--sans` に、例外の状態だけに。§3 Footer「つくったもの」列。§4 状態に「絞り込みの0件」。Products の検索窓・行型一覧・主役の組みは Products の `<style>` に閉じる(designer 2026-10-11 §6 判定: 行き先の種類はラベルにせずボタン文言で、`.toc` は上げない、実画面つきヒーローは subpage.css で可=PR-C)。新しいトークンはない
