@@ -10,6 +10,15 @@ export const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export const formatLabel = (id) => (FORMATS.find((f) => f.id === id) || {}).label || id;
+/* ファイルの形式(Word・Excel)は配布していないので、無料テンプレの面には出さない(第15条・biz 2026-10-11)。
+   データの formats には旗として残し、ファイルができたらここを外す */
+export const FILE_FORMATS = new Set(['excel', 'word']);
+export const typeFormats = (t) => (t.formats || []).filter((f) => !FILE_FORMATS.has(f));
+export const filterFormats = () => FORMATS.filter((f) => !FILE_FORMATS.has(f.id));
+export const hasCopy = (t) => !!(t.content && (t.content.groups || t.content.letters));
+export const formatChips = (t) =>
+  typeFormats(t).slice(0, 2).map((f) => `<span class="chip">${esc(formatLabel(f))}</span>`).join('') +
+  (hasCopy(t) ? '<span class="chip">コピーして使える</span>' : '');
 export const catName = (id) => (CATEGORIES.find((c) => c.id === id) || {}).name || '';
 export const dateJp = (iso) => iso ? iso.replace(/-/g, '/') : '';
 export const dateNum = (iso) => iso ? Number(iso.replace(/-/g, '')) : 0;
@@ -63,6 +72,7 @@ const footer = (root) => `
       <div class="fb">
         <div class="name">${esc(SITE.name)}</div>
         <p>${esc(SITE.description)}</p>
+        <p class="parent">${esc(SITE.parent.name)}(理学療法士・橋本渉の個人プロジェクト)が公開している道具のひとつです。<a href="${root}../products/index.html">ほかの道具の一覧 →</a></p>
       </div>
       <div>
         <div class="fh">コンテンツ</div>
@@ -156,10 +166,10 @@ export const priceHtml = (t) => {
 };
 
 export const tplCard = (t, root) => {
-  const text = [t.title, t.summary, catName(t.categoryId), (t.formats || []).map(formatLabel).join(' ')].join(' ').toLowerCase();
+  const text = [t.title, t.summary, catName(t.categoryId), typeFormats(t).map(formatLabel).join(' ')].join(' ').toLowerCase();
   return `<a class="tpl-card" href="${root}templates/${t.slug}/index.html"
    data-cat="${t.categoryId}" data-free="${t.isFree ? 1 : 0}"
-   data-roles="${(t.targetRoles || []).join(' ')}" data-formats="${(t.formats || []).join(' ')}"
+   data-roles="${(t.targetRoles || []).join(' ')}" data-formats="${typeFormats(t).join(' ')}"
    data-phases="${(t.phases || []).join(' ')}" data-text="${esc(text)}"
    data-priority="${t.priority || 99}" data-pub="${dateNum(t.publishedAt)}" data-upd="${dateNum(t.updatedAt)}"
    data-price="${t.isFree ? 0 : SITE.pricing.flagship.launch}">
@@ -170,7 +180,7 @@ export const tplCard = (t, root) => {
     <span class="t">${esc(t.title)}</span>
     <span class="d">${esc(t.summary)}</span>
     <span class="meta">
-      ${(t.formats || []).slice(0, 3).map((f) => `<span class="chip">${esc(formatLabel(f))}</span>`).join('')}
+      ${formatChips(t)}
       <span>更新 ${dateJp(t.updatedAt)}</span>
       ${t.isFree ? '<span class="price">無料</span>' : priceHtml(t)}
     </span>

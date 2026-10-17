@@ -19,7 +19,7 @@ import { DIAG } from '../../manager-starter/data/diagnosis.mjs';
 import { publishedProfessions } from '../../manager-starter/data/professions.mjs';
 import {
   esc, page, breadcrumbs, breadcrumbLd, tplCard, artCard, contentHtml,
-  formatLabel, profLabel, expLabel, catName, catShort, dateJp,
+  formatLabel, typeFormats, filterFormats, hasCopy, profLabel, expLabel, catName, catShort, dateJp,
 } from './html.mjs';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -102,7 +102,8 @@ const packAvailable = PRODUCT.status === 'published';
         <a class="btn cta" href="templates/first-7days-checklist/index.html">最初の7日チェックリストを見る</a>
         <a class="btn ghost" href="check/index.html">管理職の現在地を確認する</a>
       </div>
-      <p style="font-size:11.5px;color:var(--ink-3);margin-top:12px">登録不要・無料ですぐ使えます</p>
+      <p style="font-size:12px;color:var(--ink-3);margin-top:12px">登録不要・無料ですぐ使えます</p>
+      <p class="sibling-note">迷ったら: ${esc(SITE.sibling.lead)}は姉妹サイト<a href="${root}${SITE.sibling.href}">${esc(SITE.sibling.name)}</a>へ。${esc(SITE.sibling.self)}には、このサイトが合います。</p>
     </div>
     <div class="hero-minis" aria-label="テンプレートの例">
       <div class="mini">
@@ -436,7 +437,7 @@ ${breadcrumbs(root, [['テンプレート', null]])}
         <label class="flabel" for="f-exp">管理職歴</label>
         <select id="f-exp"><option value="">指定しない</option>${EXPERIENCE.map((e) => `<option value="${e.id}">${esc(e.label)}</option>`).join('')}</select>
         <label class="flabel" for="f-format">形式</label>
-        <select id="f-format"><option value="">指定しない</option>${FORMATS.map((f) => `<option value="${f.id}">${esc(f.label)}</option>`).join('')}</select>
+        <select id="f-format"><option value="">指定しない</option>${filterFormats().map((f) => `<option value="${f.id}">${esc(f.label)}</option>`).join('')}</select>
       </div>
     </details>
   </div>
@@ -485,12 +486,13 @@ ${breadcrumbs(root, [['テンプレート', 'templates/index.html'], [t.shortTit
 <div class="wrap detail">
   <div class="prose">
     <p>${esc(t.description)}</p>
+    ${t.content && t.content.groups ? `<p class="tpl-act"><button class="btn ghost small" data-copy-target="tpl-body-${t.id}">この内容をテキストでコピー</button><span>Wordやメモに貼り付けて編集できます</span></p>` : ''}
     ${contentHtml(t)}
   </div>
   <aside class="detail-side" aria-label="資料情報">
     <div class="buy-card">
       <span class="badge free" style="align-self:flex-start">無料</span>
-      <p class="note">登録なしで使えます。内容をコピーし、職場に合わせて編集してください。Excel・Word版のダウンロード提供は準備中です。</p>
+      <p class="note">この資料は登録なしで使えます。Word・Excel版はありません。内容をページ上でコピーし、職場に合わせて編集してください。</p>
       ${packAvailable ? `<a class="btn primary" href="${root}pack/index.html">20種まとめて使う: スターターパック</a>` : ''}
       <a class="btn ghost" href="${root}templates/index.html">他のテンプレートを探す</a>
     </div>
@@ -500,7 +502,7 @@ ${breadcrumbs(root, [['テンプレート', 'templates/index.html'], [t.shortTit
         <dt>テーマ</dt><dd>${esc(catName(t.categoryId))}</dd>
         <dt>対象</dt><dd>${(t.targetProfessions || []).map((p) => esc(profLabel(p))).join('、')}</dd>
         <dt>管理職歴</dt><dd>${(t.experience || []).map((e) => esc(expLabel(e))).join('、')}</dd>
-        <dt>形式</dt><dd>${(t.formats || []).map((f) => esc(formatLabel(f))).join('、')}</dd>
+        <dt>形式</dt><dd>${typeFormats(t).map((f) => esc(formatLabel(f))).join('、')}</dd>
       </dl>
     </div>
   </aside>
