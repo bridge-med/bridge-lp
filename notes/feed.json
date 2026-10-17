@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-16T22:52:49+00:00",
+  "updated_at": "2026-10-17T22:23:44+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "資格を増やす前に、今の仕事で成果を作るという選択",
+      "url": "https://note.com/prime_duck4944/n/n7f1e9170d917",
+      "guid": "https://note.com/prime_duck4944/n/n7f1e9170d917",
+      "pubDate": "2026-10-18T07:00:00+09:00",
+      "date": "2026-10-18",
+      "excerpt": "医療職として働いていると、資格を取ることがキャリアアップの一つの方法になります。認定資格、専門資格、大学院、医療経営に関する資格。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/323129929/rectangle_large_type_2_694f2333cb3fac43d4aad587edb2b6cb.png?width=800"
+    },
+    {
+      "title": "ChatGPTで作った議事録を、実行につながるタスク表にする方法",
+      "url": "https://note.com/prime_duck4944/n/nf922a12b265c",
+      "guid": "https://note.com/prime_duck4944/n/nf922a12b265c",
+      "pubDate": "2026-10-17T19:00:00+09:00",
+      "date": "2026-10-17",
+      "excerpt": "ChatGPTを使えば、会議の議事録はかなり簡単に作れるようになりました。録音データを文字起こしして、AIに要約してもらう。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/323107819/rectangle_large_type_2_195510138908e9e7f04c0e6a2009b6c6.png?width=800"
+    },
     {
       "title": "病院から事業会社への転職準備。私ならこの順番で進める",
       "url": "https://note.com/prime_duck4944/n/nf989405d6008",
@@ -38,24 +56,6 @@
       "date": "2026-10-15",
       "excerpt": "「お願いしていた仕事、どうなった？」そう聞いたときに、",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/323105317/rectangle_large_type_2_a4592a28438e8d43dcfb2df826b53291.png?width=800"
-    },
-    {
-      "title": "年収500万円を超えても、将来への不安が消えなかった理由",
-      "url": "https://note.com/prime_duck4944/n/n0314b2f68d86",
-      "guid": "https://note.com/prime_duck4944/n/n0314b2f68d86",
-      "pubDate": "2026-10-15T07:00:00+09:00",
-      "date": "2026-10-15",
-      "excerpt": "理学療法士として病院で働いていた頃、年収500万円という数字は、一つの目標でした。当時の本業の年収は約420万円。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323104719/rectangle_large_type_2_2e2fc3ae718c44aa86aa767288b70e9e.png?width=800"
-    },
-    {
-      "title": "ChatGPTに仕事を頼む前に、私が整理している4つのこと",
-      "url": "https://note.com/prime_duck4944/n/n5860ee161b74",
-      "guid": "https://note.com/prime_duck4944/n/n5860ee161b74",
-      "pubDate": "2026-10-14T19:00:00+09:00",
-      "date": "2026-10-14",
-      "excerpt": "ChatGPTを使っているのに、思ったような回答が出てこない。そんな経験はないでしょうか。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323104077/rectangle_large_type_2_2450f1219522e84bbfdf4c4e5aba21f7.png?width=800"
     }
   ]
 }
