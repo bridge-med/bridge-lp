@@ -31,6 +31,14 @@ export const SITE = {
     note: 'https://note.com/prime_duck4944',
     x: 'https://x.com/WataruPT1013',
   },
+  /* 姉妹サイト(振り分けの軸は成果物名ではなく読者。biz 2026-10-11) */
+  sibling: {
+    name: '医療管理職スターター',
+    href: '../manager-starter/index.html',
+    scope: 'チーム運営・1on1・上司報告など、初めて管理職になった人の実務はこちら',
+    lead: '初めて管理職になり、1on1・会議・上司報告から整えたい人',
+    self: '事務長・法人本部など、施設の運営(行政手続き・統合)を担う人',
+  },
 
   /* 運営者(BRIDGE本体と同一。詳細は about ページ) */
   operator: {
@@ -111,6 +119,7 @@ export const FOOTER_LINKS = {
   about: [
     { label: '運営者について', href: 'about/index.html' },
     { label: 'BRIDGE(運営プロジェクト)', href: '../index.html' },
+    { label: '医療管理職スターター(新任管理職向け)', href: '../manager-starter/index.html' },
     { label: 'お問い合わせ', href: '../community/index.html' },
   ],
   legal: [

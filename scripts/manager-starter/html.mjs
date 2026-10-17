@@ -12,6 +12,15 @@ export const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export const formatLabel = (id) => (FORMATS.find((f) => f.id === id) || {}).label || id;
+/* ファイルの形式(Word・Excel)は配布していないので、無料テンプレの面には出さない(第15条・biz 2026-10-11)。
+   データの formats には旗として残し、ファイルができたらここを外す */
+export const FILE_FORMATS = new Set(['excel', 'word']);
+export const typeFormats = (t) => (t.formats || []).filter((f) => !FILE_FORMATS.has(f));
+export const filterFormats = () => FORMATS.filter((f) => !FILE_FORMATS.has(f.id));
+export const hasCopy = (t) => !!(t.content && (t.content.groups || t.content.letters));
+export const formatChips = (t) =>
+  typeFormats(t).slice(0, 2).map((f) => `<span class="chip">${esc(formatLabel(f))}</span>`).join('') +
+  (hasCopy(t) ? '<span class="chip">コピーして使える</span>' : '');
 export const profLabel = (id) => (PROFESSIONS.find((p) => p.id === id) || {}).label || id;
 export const expLabel = (id) => (EXPERIENCE.find((e) => e.id === id) || {}).label || id;
 export const catName = (id) => (CATEGORIES.find((c) => c.id === id) || {}).name || '';
@@ -58,7 +67,7 @@ const header = (root, page) => `
     <div class="sub">その他</div>
     <a href="${root}about/index.html">運営者について</a>
     <a href="${root}faq/index.html">よくある質問</a>
-    <a href="${root}../medops/index.html">${esc(SITE.sibling.name)}</a>
+    <a href="${root}${SITE.sibling.href}">${esc(SITE.sibling.name)}</a>
     <a href="${root}../index.html">${esc(SITE.parent.name)}(運営プロジェクト)</a>
   </nav>
 </header>`;
@@ -70,6 +79,7 @@ const footer = (root) => `
       <div class="fb">
         <div class="name">${esc(SITE.name)}</div>
         <p>${esc(SITE.description)}</p>
+        <p class="parent">${esc(SITE.parent.name)}(理学療法士・橋本渉の個人プロジェクト)が公開している道具のひとつです。<a href="${root}../products/index.html">ほかの道具の一覧 →</a></p>
       </div>
       <div>
         <div class="fh">コンテンツ</div>
@@ -152,11 +162,11 @@ ${footer(root)}
 /* ---- カード部品 ---- */
 
 export const tplCard = (t, root) => {
-  const text = [t.title, t.summary, catName(t.categoryId), (t.formats || []).map(formatLabel).join(' ')].join(' ').toLowerCase();
+  const text = [t.title, t.summary, catName(t.categoryId), typeFormats(t).map(formatLabel).join(' ')].join(' ').toLowerCase();
   return `<a class="tpl-card" href="${root}templates/${t.slug}/index.html"
    data-cat="${t.categoryId}" data-free="1"
    data-profs="${(t.targetProfessions || []).join(' ')}" data-exp="${(t.experience || []).join(' ')}"
-   data-formats="${(t.formats || []).join(' ')}" data-text="${esc(text)}"
+   data-formats="${typeFormats(t).join(' ')}" data-text="${esc(text)}"
    data-priority="${t.priority || 99}" data-pub="${dateNum(t.publishedAt)}" data-upd="${dateNum(t.updatedAt)}">
     <span class="top">
       <span class="badge free">無料</span>
@@ -165,7 +175,7 @@ export const tplCard = (t, root) => {
     <span class="t">${esc(t.title)}</span>
     <span class="d">${esc(t.summary)}</span>
     <span class="meta">
-      ${(t.formats || []).slice(0, 2).map((f) => `<span class="chip">${esc(formatLabel(f))}</span>`).join('')}
+      ${formatChips(t)}
       <span>更新 ${dateJp(t.updatedAt)}</span>
     </span>
   </a>`;

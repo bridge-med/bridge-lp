@@ -10,7 +10,7 @@
 
 :root{
   --bg:#FBFAF7; --bg-2:#F4EFE6; --bg-3:#EAE2D3;
-  --ink:#1B1B1E; --ink-2:#45464C; --ink-3:#6E6F76; --ink-4:#B6B3AB;
+  --ink:#1B1B1E; --ink-2:#45464C; --ink-3:#63646B; --ink-4:#B6B3AB;
   --line:rgba(27,27,30,0.12); --line-soft:rgba(27,27,30,0.07);
   --navy:#16233E; --blue:#24365C; --blue-soft:#8B9BBC;
   --sand:#A98F63; --sand-bg:rgba(169,143,99,0.10);
@@ -468,3 +468,12 @@ a.prof-card:hover{border-color:var(--blue-soft);transform:translateY(-2px);box-s
 .standpoint{font-size:13.5px;color:var(--ink-2);line-height:1.9;max-width:var(--text-max);margin-top:8px}
 .prof-card .t{font-weight:700;font-size:14.5px}
 .prof-card .d{font-size:12px;color:var(--ink-2);line-height:1.85}
+
+/* 2026-10-11 社長指示「サイト全体改修」: 位置づけ(BRIDGE の道具のひとつ)・姉妹サイトへの迷ったら・形式と使い方の分離・コピーを先に */
+h1,h2,h3{word-break:auto-phrase}
+.sibling-note{margin-top:14px;font-size:12px;color:var(--ink-3);line-height:1.9;max-width:520px}
+.sibling-note a{color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
+.prose .tpl-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:14px 0 4px;font-size:12px;color:var(--ink-3)}
+.tpl-act .btn{min-height:44px}
+.mo-footer .fb .parent{margin-top:12px}
+.mo-footer .fb .parent a{display:inline;padding:0;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px} /* 文中のリンク(design-system §7 C-3) */
