@@ -292,6 +292,7 @@
       ${best ? `<p class="best-badge">自己ベスト: ランク${esc(best.rank)}(スコア ${best.score})</p>` : ''}
       <button class="btn btn-primary" data-action="start">着任する</button>
       ${saved ? `<button class="btn btn-ghost" data-action="resume">続きから再開する(第${saved.week}週)</button>` : ''}
+      <p class="top-bridge"><a href="../products/index.html">BRIDGE のほかの道具を見る →</a></p>
     </section>`;
   }
 
