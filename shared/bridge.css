@@ -29,12 +29,10 @@
   --dark-sec:#131A2A;
   --dark-sec-text:#EFECE4;
   --dark-sec-dim:#8E93A3;
-  --hero-sky-1:#F4EFE6;
-  --hero-sky-2:#FBFAF7;
-  --hero-glow:rgba(169,143,99,0.16);
+  --hero-sky-1:#F4EFE6; /* compass/app/styles.css が読む。--hero-sky-2・--hero-glow は未使用のため 2026-10-17 に消した(B-5) */
   --shadow:0 2px 8px rgba(22,35,62,0.04),0 16px 48px rgba(22,35,62,0.07);
   /* ガラスの素材(2026-09-21 社長指示・トップと一覧に限る。憲法第22条の改定案 v1.4 と対)
-     --glass: 深い青緑=立体の素材と、トップ・一覧の主ボタン / --glass-deep: トップのヒーローがスクロール後に転じる夜の場(両テーマ同一・憲法第22条 v1.5)
+     --glass: 深い青緑=立体の素材と、トップ・一覧の主ボタン / --glass-deep: 夜の場(両テーマ同一・憲法第22条 v1.5)。トップのヒーローを作り直して(2026-10-04)夜の場は無くなり、いまは未使用。戻すときのために残す(design-system §7 C-4)
      --glass-hi: ミント=屈折のハイライトと帯の中の小さなアクセント(面積を増やさない) / --glass-ink: 帯の文字
      文字色・リンク・罫線・他ページには使わない。色名ではなく素材名にしたのは、流用を防ぐため(designer 2026-09-21) */
   --glass:#0F4C47;
@@ -70,8 +68,6 @@
   --on-fill:#08131E;
   --dark-sec:#0B0F1A;
   --hero-sky-1:#161B2B;
-  --hero-sky-2:#111521;
-  --hero-glow:rgba(194,169,126,0.12);
   --shadow:0 2px 8px rgba(0,0,0,0.25),0 16px 48px rgba(0,0,0,0.35);
   --glass:#3FA898;
   --glass-deep:#0B3532;
@@ -100,8 +96,6 @@ main{display:block}
 .eyebrow{font:700 10px/1 var(--en);letter-spacing:0.24em;text-transform:uppercase;color:var(--ink-3);display:inline-flex;align-items:center;gap:10px}
 .eyebrow::before{content:'';width:22px;height:1px;background:var(--dawn)}
 .stmt{font-family:var(--mincho);font-weight:600;line-height:1.75;letter-spacing:0.02em}
-.hikari{color:var(--dawn)}
-.ao{color:var(--blue)}
 .body-p{max-width:var(--text-max);font-size:15px;line-height:2.3;color:var(--ink-2)}
 .sec-h{font-family:var(--mincho);font-weight:600;font-size:clamp(25px,4.2vw,44px);line-height:1.7;margin:24px 0 28px}
 
@@ -145,7 +139,7 @@ html.js:not(.js-ready) [data-reveal]{animation:rv-safe .5s var(--ease) 1.8s forw
 .nav-cta{font:700 11px/1 var(--sans);letter-spacing:0.08em;padding:10px 20px;border-radius:100px;background:var(--blue);color:var(--on-fill);transition:all .3s var(--ease)}
 .nav-cta:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
 .theme-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3);transition:all .3s;flex-shrink:0;position:relative}
-.theme-btn::after{content:'';position:absolute;inset:-5px;border-radius:50%} /* 見た目は34pxのまま、タップ領域を44pxに */
+.theme-btn::after{content:'';position:absolute;inset:-6px;border-radius:50%} /* 見た目は34pxのまま、タップ領域を44pxに(border-box なので疑似要素は枠線の内側 32px から測る。-5px では 42px だった) */
 .theme-btn:hover{color:var(--ink);border-color:var(--ink-3)}
 .theme-btn svg{width:15px;height:15px}
 [data-theme="light"] .icon-sun{display:none}
@@ -228,11 +222,9 @@ a.card:hover .card-link{gap:10px}
 .tag.active,.tag[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-fill)} /* 選ばれている(押せるボタンなら aria-pressed で) */
 
 /* グリッド */
-.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-@media(max-width:960px){.grid-3,.grid-4{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px} /* .grid-2 .grid-4 は未使用のため 2026-10-17 に消した(B-5) */
+@media(max-width:960px){.grid-3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.grid-3{grid-template-columns:1fr}}
 
 /* 行リスト */
 .rows{max-width:var(--max);margin:0 auto;border-top:1px solid var(--line)}

@@ -99,7 +99,7 @@ a { color: inherit; text-decoration: none; }
   transition: color .3s, border-color .3s;
   position: relative;
 }
-.theme-btn::before { content: ''; position: absolute; inset: -5px; }
+.theme-btn::before { content: ''; position: absolute; inset: -6px; } /* 44px(枠線の内側から測るため -6px) */
 .theme-btn svg { width: 15px; height: 15px; }
 .theme-btn:hover { color: var(--ink); border-color: var(--blue-soft); }
 .theme-btn .icon-sun { display: none; }
