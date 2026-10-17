@@ -610,3 +610,8 @@ a { color: inherit; text-decoration: none; }
   .meters .meter { flex: 1 1 40%; }
   .meters .meter-cash { flex: 1 1 100%; border-bottom: 1px dashed var(--line); padding-bottom: 10px; }
 }
+
+/* BRIDGE への戻り道(タイトル画面だけ。44px) */
+.top-bridge { margin-top: 18px; text-align: center; }
+.top-bridge a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; font-size: 12.5px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+.top-bridge a:hover { color: var(--ink); }

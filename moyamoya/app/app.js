@@ -163,6 +163,7 @@
       <button class="btn btn-primary" data-action="start">診断スタート</button>
       ${saved ? `<button class="btn btn-ghost" data-action="resume">続きから再開する(${saved.length}問回答済み)</button>` : ''}
       <p class="top-note">${esc(MOYA_APP.disclaimer)}</p>
+      <p class="top-bridge"><a href="../products/index.html">BRIDGE のほかの道具を見る →</a></p>
     </section>`;
   }
 

@@ -17,23 +17,43 @@
 <link rel="stylesheet" href="../shared/bridge.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
-.j-grid{max-width:var(--max);margin:clamp(36px,5vh,52px) auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media(max-width:960px){.j-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.j-grid{grid-template-columns:1fr}}
-.j-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 14px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow);transition:all .35s var(--ease)}
-.j-thumb{width:100%;height:auto;aspect-ratio:1200/630;object-fit:cover;border-radius:9px;border:1px solid var(--line);background:var(--bg-3);display:block}
-.j-card>.j-meta,.j-card>.j-t,.j-card>.j-ex,.j-card>.j-tags{padding:0 8px}
-.lab-shot{width:100%;height:auto;aspect-ratio:1440/900;object-fit:cover;object-position:top;border-radius:9px;border:1px solid var(--line);background:var(--bg-3);display:block;margin-bottom:4px}
-a.j-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
-.j-meta{display:flex;justify-content:space-between;align-items:center;font:600 10px/1 var(--en);letter-spacing:0.12em;color:var(--ink-4)}
+/* Journal v2(2026-10-11): 最新の1本を大きく(Soft の板は1つ)、残りは行。読込中 / 失敗 / 該当なし を分ける。実験室は行にし、状態を日本語の .chip で(B-10 を閉じる) */
+.j-lead{max-width:var(--max);margin:clamp(36px,5vh,52px) auto 0;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(20px,3vw,40px);align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,2vw,24px);box-shadow:var(--shadow);transition:border-color .35s var(--ease),transform .35s var(--ease)}
+a.j-lead:hover{transform:translateY(-3px);border-color:var(--blue-soft)}
+a.j-lead:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.j-lead .j-thumb{width:100%;height:auto;aspect-ratio:1200/630;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:var(--bg-3);display:block}
+.j-lead .j-t{font-size:clamp(19px,2.4vw,25px)}
+.j-lead .j-ex{-webkit-line-clamp:4}
+.j-lead-body{display:flex;flex-direction:column;gap:12px;min-width:0}
+.j-meta{display:flex;justify-content:space-between;align-items:center;font:600 10.5px/1 var(--en);letter-spacing:0.12em;color:var(--ink-3)}
 .j-tags{display:flex;gap:6px;flex-wrap:wrap}
-.j-tags span{font:600 9.5px/1 var(--sans);padding:4px 9px;border:1px solid var(--line);border-radius:100px;color:var(--ink-3)}
-.j-t{font-family:var(--mincho);font-weight:600;font-size:16px;line-height:1.8;flex:1}
-.j-ex{font-size:11.5px;line-height:1.95;color:var(--ink-3);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.j-empty{max-width:var(--max);margin:40px auto 0;font-size:13px;color:var(--ink-3)}
-.lab-grid{max-width:var(--max);margin:clamp(36px,5vh,52px) auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-@media(max-width:960px){.lab-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){.lab-grid{grid-template-columns:1fr}}
+.j-tags span{font:600 10px/1 var(--sans);padding:4px 9px;border:1px solid var(--line);border-radius:100px;color:var(--ink-3)}
+.j-t{font-family:var(--mincho);font-weight:600;font-size:16px;line-height:1.8}
+.j-ex{font-size:12.5px;line-height:1.95;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.j-rows{max-width:var(--max);margin:clamp(24px,4vh,36px) auto 0;border-top:1px solid var(--line)}
+.j-row{display:grid;grid-template-columns:112px 96px minmax(0,1fr) auto;gap:8px 22px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line);transition:background .3s}
+a.j-row:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
+a.j-row:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.j-row .j-thumb{width:112px;height:auto;aspect-ratio:1200/630;object-fit:cover;border-radius:4px;border:1px solid var(--line);background:var(--bg-3);display:block}
+.j-row .j-date{font:600 11px/1.6 var(--en);letter-spacing:0.1em;color:var(--ink-3)}
+.j-row .j-t{font-size:15.5px;line-height:1.7}
+.j-row .j-ex{-webkit-line-clamp:1;font-size:12px}
+.j-row .j-go{font:600 11px/1 var(--en);letter-spacing:0.1em;color:var(--ink-3);white-space:nowrap}
+@media(max-width:860px){.j-lead{grid-template-columns:1fr}.j-row{grid-template-columns:96px minmax(0,1fr)}.j-row .j-thumb{width:96px}.j-row .j-date{grid-column:2}.j-row .j-go{display:none}}
+.j-state{max-width:var(--max);margin:28px auto 0;font-size:13.5px;line-height:2;color:var(--ink-2)}
+.j-state[hidden]{display:none}
+html:not(.js) #jState{display:none} /* JS 無効では「読み込んでいます」を出さない(qa 2026-10-11)。代わりは noscript */
+.j-state a{color:var(--blue);border-bottom:1px solid var(--blue-soft)}
+/* 実験室: 行型(写し・名前・状態・一文・リンク) */
+.lab-rows{max-width:var(--max);margin:clamp(28px,4vh,40px) auto 0;border-top:1px solid var(--line)}
+.lab-row{display:grid;grid-template-columns:168px minmax(0,1fr) auto;gap:8px 24px;align-items:center;padding:clamp(16px,2.4vh,22px) 0;border-bottom:1px solid var(--line);transition:background .3s}
+a.lab-row:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
+a.lab-row:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.lab-shot{width:168px;height:auto;aspect-ratio:1440/900;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:3px;background:var(--bg-3);display:block}
+.lab-row .nm{font:600 16px/1.5 var(--mincho);display:flex;align-items:center;gap:10px;flex-wrap:wrap} /* 一覧の題は明朝(第23条 v1.7) */
+.lab-row .d{font-size:13px;line-height:1.9;color:var(--ink-2);margin-top:4px}
+.lab-row .go{font:700 12.5px/1.4 var(--sans);color:var(--blue);white-space:nowrap}
+@media(max-width:860px){.lab-row{grid-template-columns:104px minmax(0,1fr)}.lab-shot{width:104px}.lab-row .go{grid-column:2}}
 </style>
 </head>
 <body data-root="../" data-page="journal">
@@ -45,7 +65,7 @@ a.j-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
     <div class="crumb"><a href="../index.html">Home</a><span class="sep">/</span><span>Journal</span></div>
     <h1>途中をそのまま公開する</h1>
     <p class="lead">
-      BRIDGE Journal。開発の過程、現場で考えたこと、キャリアの探求。完成した思想だけでなく、迷っている途中も残します。過程を公開するのは、「言語化」がBRIDGEの進み方の一部だからです。
+      開発の過程、現場で考えたこと、医療職のキャリアの探求。noteに書いた記事を、ここから読めます。完成した思想だけでなく、迷っている途中も残しています。
     </p>
   </div>
 </header>
@@ -56,12 +76,14 @@ a.j-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
 <section class="sec">
   <div class="sec-inner">
     <div class="eyebrow" data-reveal>Articles — 記事</div>
-    <h2 class="sec-h" data-reveal data-reveal-delay="1">タグで、興味のあるところから</h2>
-    <div class="tag-row" id="tagRow" data-reveal data-reveal-delay="2"></div>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">最新の記事と、タグで探す</h2>
+    <div class="tag-row" id="tagRow" role="group" aria-label="タグで絞る"></div>
   </div>
-  <div class="j-grid" id="jGrid"></div>
-  <p class="j-empty" id="jEmpty" hidden>このタグの記事はまだありません。noteには他の記事もあります。</p>
-  <div class="sec-inner" style="margin-top:40px" data-reveal>
+  <div id="jLead"></div>
+  <div class="j-rows" id="jGrid" hidden></div>
+  <p class="j-state" id="jState" aria-live="polite">記事を読み込んでいます。</p>
+  <noscript><p class="j-state">記事の一覧の表示には JavaScript が必要です。<a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteで直接お読みください ↗</a></p></noscript>
+  <div class="sec-inner" style="margin-top:40px">
     <a class="btn ghost" href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteですべての記事を読む</a>
   </div>
 </section>
@@ -70,39 +92,21 @@ a.j-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
 <section class="sec tint">
   <div class="sec-inner">
     <div class="eyebrow" data-reveal>Laboratory — 実験室</div>
-    <h2 class="sec-h" data-reveal data-reveal-delay="1">道具になる前の実験たち</h2>
+    <h2 class="sec-h" data-reveal data-reveal-delay="1">道具になる前の実験</h2>
     <p class="body-p" data-reveal data-reveal-delay="2">
-      自分のために作った内製ツールと、実験的な制作物。いま動いているものも、手が止まっているものも、そのまま置いています。ここから次のプロダクトが生まれます。
+      自分のために作った内製の画面です。2つとも、いまは更新を止めています。公開している道具は<a href="../products/index.html" style="border-bottom:1px solid var(--line)">Products</a>にまとめています。
     </p>
   </div>
-  <div class="lab-grid">
-    <a class="card" href="../morning/index.html" data-reveal>
+  <div class="lab-rows">
+    <a class="lab-row" href="../morning/index.html">
       <img class="lab-shot" src="../images/products/thumbs/morning.webp" alt="" loading="lazy" width="1440" height="900">
-      <span class="card-tag">Paused</span>
-      <div class="card-t">朝の手帖</div>
-      <p class="card-p">政治経済・医療政策・論文・テックを一画面に集めた内製ダッシュボード。自動更新の仕組みを置けないまま、2026-07-04で更新が止まっています。画面はそのまま残してあります。</p>
-      <span class="card-link">見てみる →</span>
+      <span><span class="nm">朝の手帖<span class="chip">更新休止</span></span><span class="d">政治経済・医療政策・論文・テックを一画面に集めた内製ダッシュボード。自動更新の仕組みを置けないまま、2026-07-04で更新が止まっています。画面はそのまま残してあります。</span></span>
+      <span class="go">見てみる →</span>
     </a>
-    <a class="card" href="../worklog/index.html" data-reveal data-reveal-delay="1">
+    <a class="lab-row" href="../worklog/index.html">
       <img class="lab-shot" src="../images/products/thumbs/worklog.webp" alt="" loading="lazy" width="1440" height="900">
-      <span class="card-tag">Log</span>
-      <div class="card-t">CxO Roadmap Log</div>
-      <p class="card-p">日々の現場仕事や数字の成果を、実績の言葉に変換する個人用のアプリ。記録は2026-07-04で止まったままです。再開したら、また書きます。</p>
-      <span class="card-link">見てみる →</span>
-    </a>
-    <a class="card" href="../karte/index.html" data-reveal data-reveal-delay="2">
-      <img class="lab-shot" src="../images/products/thumbs/karte.webp" alt="" loading="lazy" width="1440" height="900">
-      <span class="card-tag">Concept</span>
-      <div class="card-t">KARTE</div>
-      <p class="card-p">職場のしんどさをSOAP形式で書き起こす、診察型コンセプトページ。</p>
-      <span class="card-link">見てみる →</span>
-    </a>
-    <a class="card" href="../moyamoya/index.html" data-reveal data-reveal-delay="3">
-      <img class="lab-shot" src="../images/products/thumbs/moyamoya.webp" alt="" loading="lazy" width="1440" height="900">
-      <span class="card-tag">Diagnosis</span>
-      <div class="card-t">Moyamoya Check</div>
-      <p class="card-p">職場の“なんとなくしんどい”を10問で言語化する診断。</p>
-      <span class="card-link">見てみる →</span>
+      <span><span class="nm">CxO Roadmap Log<span class="chip">更新休止</span></span><span class="d">日々の現場仕事や数字の成果を、実績の言葉に変換する個人用のアプリ。記録は2026-07-04で止まったままです。再開したら、また書きます。</span></span>
+      <span class="go">見てみる →</span>
     </a>
   </div>
 </section>
@@ -127,7 +131,6 @@ a.j-card:hover{transform:translateY(-4px);border-color:var(--blue-soft)}
         <p class="p">共感も異論も、歓迎します。</p>
       </a>
     </div>
-    <p class="walk-note" data-reveal>途中の話を、途中のまま置いて帰ってください。読まれたところまでが、公開した意味です。</p>
   </div>
 </aside>
 
@@ -150,7 +153,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   ];
   const tagRow = document.getElementById('tagRow');
   const grid = document.getElementById('jGrid');
-  const empty = document.getElementById('jEmpty');
+  const lead = document.getElementById('jLead');
+  const state = document.getElementById('jState');
   const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   let items = [];
   let active = 'all';
@@ -159,34 +163,42 @@ window.addEventListener('DOMContentLoaded', async () => {
     const text = (it.title || '') + ' ' + (it.excerpt || '');
     return TAGS.filter(t => t.match && t.match.test(text)).map(t => t.id);
   }
+  const tagHtml = it => '<div class="j-tags">' + it._tags.map(id => '<span>' + TAGS.find(t => t.id === id).label + '</span>').join('') + '</div>';
+  // 最新の1本を大きく、残りは行。該当なしは一文と別の行き先(§4 Empty)
   function render() {
-    grid.innerHTML = '';
+    grid.innerHTML = ''; lead.innerHTML = '';
     const list = items.filter(it => active === 'all' || it._tags.includes(active));
-    empty.hidden = list.length > 0;
-    list.forEach((it, i) => {
+    grid.hidden = list.length <= 1;
+    if (!list.length) { state.hidden = false; state.innerHTML = (active === 'all' ? '記事はまだありません。' : 'このタグの記事はまだありません。') + '<a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteには他の記事もあります ↗</a>'; return; }
+    state.hidden = true;
+    const first = list[0];
+    lead.innerHTML = '<a class="j-lead" href="' + esc(first.url) + '" target="_blank" rel="noopener">' +
+      (first.thumbnail ? '<img class="j-thumb" src="' + esc(first.thumbnail) + '" alt="" width="1200" height="630" onerror="this.remove()">' : '<span></span>') +
+      '<span class="j-lead-body"><span class="j-meta"><span>' + esc(first.date || '') + ' · 最新</span><span>note ↗</span></span>' +
+      '<span class="j-t">' + esc(first.title) + '</span><span class="j-ex">' + esc(first.excerpt || '') + '</span>' + tagHtml(first) + '</span></a>';
+    list.slice(1).forEach(it => {
       const a = document.createElement('a');
-      a.className = 'j-card';
+      a.className = 'j-row';
       a.href = it.url; a.target = '_blank'; a.rel = 'noopener';
-      a.setAttribute('data-reveal', ''); a.setAttribute('data-reveal-delay', String(i % 3));
       a.innerHTML =
-        (it.thumbnail ? '<img class="j-thumb" src="' + esc(it.thumbnail) + '" alt="" loading="lazy" width="1200" height="630" onerror="this.remove()">' : '') +
-        '<div class="j-meta"><span>' + esc(it.date || '') + '</span><span>note ↗</span></div>' +
-        '<div class="j-t">' + esc(it.title) + '</div>' +
-        '<p class="j-ex">' + esc(it.excerpt || '') + '</p>' +
-        '<div class="j-tags">' + it._tags.map(id => '<span>' + TAGS.find(t => t.id === id).label + '</span>').join('') + '</div>';
+        (it.thumbnail ? '<img class="j-thumb" src="' + esc(it.thumbnail) + '" alt="" loading="lazy" width="1200" height="630" onerror="this.remove()">' : '<span></span>') +
+        '<span class="j-date">' + esc(it.date || '') + '</span>' +
+        '<span><span class="j-t">' + esc(it.title) + '</span><span class="j-ex">' + esc(it.excerpt || '') + '</span>' + tagHtml(it) + '</span>' +
+        '<span class="j-go">note ↗</span>';
       grid.appendChild(a);
     });
-    if (window.BRIDGE) window.BRIDGE.observeReveal();
+    if (window.BRIDGE) window.BRIDGE.applyBudoux();
   }
   // タグUI
   TAGS.forEach(t => {
     const b = document.createElement('button');
-    b.className = 'tag' + (t.id === active ? ' active' : '');
+    b.type = 'button';
+    b.className = 'tag';
+    b.setAttribute('aria-pressed', String(t.id === active));
     b.textContent = t.label;
     b.addEventListener('click', () => {
       active = t.id;
-      tagRow.querySelectorAll('.tag').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
+      tagRow.querySelectorAll('.tag').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
       render();
     });
     tagRow.appendChild(b);
@@ -199,8 +211,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     items = (data.items || []).map(it => ({ ...it, _tags: tagsOf(it) }));
     render();
   } catch (e) {
-    empty.hidden = false;
-    empty.textContent = '記事一覧を読み込めませんでした。noteで直接お読みください。';
+    state.hidden = false;
+    state.innerHTML = '記事一覧を読み込めませんでした。<a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">noteで直接お読みください ↗</a>';
   }
 });
 </script>

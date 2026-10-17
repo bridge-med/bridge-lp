@@ -21,6 +21,14 @@
 <link rel="stylesheet" href="../shared/bridge.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
+/* 冒頭の相談(文字リンク。ボタンにしない=Page opening の型を崩さない。designer 2026-10-11) */
+.lead-act{max-width:var(--text-max);margin-top:22px;display:flex;align-items:center;flex-wrap:wrap;gap:4px 18px}
+.lead-meta{font-size:12.5px;color:var(--ink-3)}
+/* 相談できる課題(見出しの前に、短い語で) */
+/* 押せない語なので Pill にしない(designer 2026-10-11)。素の一覧、PC は2列 */
+.ask{max-width:var(--max);margin:clamp(20px,3vh,28px) auto 0;list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:2px 32px}
+.ask li{font-size:13.5px;line-height:1.9;color:var(--ink-2)}
+@media(max-width:600px){.ask{grid-template-columns:1fr}}
 /* サービスメニュー(3本・行型) */
 .svc{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:120px 1fr;gap:16px 40px;padding:clamp(36px,6vh,56px) 0;border-bottom:1px solid var(--line);align-items:start}
 .svc:last-of-type{border-bottom:none}
@@ -69,8 +77,9 @@
     <div class="crumb"><a href="../index.html">Home</a><span class="sep">/</span><span>Services</span></div>
     <h1>仕事のご依頼</h1>
     <p class="lead">
-      何を頼めて、どう進むのかをまとめました。初回の相談は無料です。相談したからといって、依頼しなければいけないわけではありません。
+      相談できる課題、一緒に作るもの、進め方、料金の考え方の順に書いています。初回の相談(オンライン30〜60分)は無料です。依頼するかどうかは、相談のあとで決めてください。
     </p>
+    <p class="lead-act"><a class="tx-link" href="mailto:h.w19961013@gmail.com?subject=%E3%80%90%E7%9B%B8%E8%AB%87%E3%80%91BRIDGE%E3%81%B8%E3%81%AE%E4%BB%95%E4%BA%8B%E3%81%AE%E7%9B%B8%E8%AB%87&body=%E3%81%8A%E5%90%8D%E5%89%8D%EF%BC%9A%0A%E3%81%94%E6%89%80%E5%B1%9E%EF%BC%9A%0A%E5%9B%B0%E3%81%A3%E3%81%A6%E3%81%84%E3%82%8B%E3%81%93%E3%81%A8%EF%BC%88%E7%AE%87%E6%9D%A1%E6%9B%B8%E3%81%8D%E3%81%A7%E3%82%82%EF%BC%89%EF%BC%9A%0A">相談メールを書く <span class="ar" aria-hidden="true">→</span></a><span class="lead-meta">名前・所属・困っていることの欄を入れてあります</span></p>
   </div>
 </header>
 
@@ -79,7 +88,11 @@
 <!-- ============ できること ============ -->
 <section class="sec">
   <div class="sec-inner">
-    <div class="eyebrow" data-reveal>Menu — できること</div>
+    <div class="eyebrow" data-reveal>Ask — 相談できる課題</div>
+    <ul class="ask" data-reveal>
+      <li>承継・統合直後の立て直し</li><li>リハ部門の数字と朝礼</li><li>書類仕事・集計の置き換え</li><li>院内研修・キャリア講演</li>
+    </ul>
+    <div class="eyebrow" style="margin-top:clamp(44px,6vh,64px)" data-reveal>Build — 一緒に作るもの</div>
   </div>
   <div class="sec-inner">
     <div class="svc" data-reveal>
@@ -197,7 +210,7 @@
         <p class="p">経歴と、BRIDGEという名前の由来。</p>
       </a>
     </div>
-    <p class="walk-note" data-reveal>見積もりを取らずに閉じてもらって大丈夫です。頼まずに自分の組織で試すほうが早いなら、そちらのほうがいいと思っています。</p>
+    <p class="walk-note" data-reveal>見積もりを取らずに閉じてもらって大丈夫です。頼まずに自分の組織で試すほうが早いなら、そのほうがいいと思っています。</p>
   </div>
 </aside>
 

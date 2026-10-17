@@ -27,11 +27,12 @@
 .story p strong{color:var(--ink)}
 .story-q{border-left:2px solid var(--dawn);padding:6px 0 6px 24px;margin:1.8em 0;font-family:var(--mincho);font-weight:500;font-size:clamp(15px,2.2vw,18px);line-height:2.2;color:var(--ink)}
 .story-src{margin-top:2em;display:flex;gap:10px 24px;flex-wrap:wrap}
-.story-src a{font:600 12px/1.8 var(--sans);letter-spacing:0.04em;color:var(--blue);border-bottom:1px solid var(--blue-soft);padding-bottom:2px}
+.story-src a{display:inline-flex;align-items:center;min-height:44px;font:600 12px/1.8 var(--sans);letter-spacing:0.04em;color:var(--blue);border-bottom:1px solid var(--blue-soft)} /* 44px(B-8 を閉じる) */
+.stories .toc{margin-top:clamp(36px,5vh,52px)}
 .honest{max-width:660px;margin:clamp(26px,4vh,40px) 0 0;padding:18px 26px;border-left:2px solid var(--dawn);font-size:12.5px;line-height:2.1;color:var(--ink-3)}
 </style>
 </head>
-<body data-root="../" data-page="stories">
+<body data-root="../" data-page="stories" class="stories">
 
 <nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
 
@@ -45,13 +46,21 @@
     <p class="honest" data-reveal data-reveal-delay="3">
       患者さんに関する記述は、個人が特定されないよう細部を一部変えています。他の方の物語は、本人の了承をいただけたものから順に載せていく予定です。
     </p>
+    <ol class="toc" aria-label="6つの話">
+      <li><a href="#s1"><span class="n">01</span><span>三人の顔<span class="s">臨床 — 正しいことを、届く順番で</span></span></a></li>
+      <li><a href="#s2"><span class="n">02</span><span>門の長さ<span class="s">制度 — 必要な人に、必要なだけ</span></span></a></li>
+      <li><a href="#s3"><span class="n">03</span><span>科長の背中が消えた日<span class="s">越境 — 臨床を連れて、外へ</span></span></a></li>
+      <li><a href="#s4"><span class="n">04</span><span>朝礼の沈黙<span class="s">経営 — RehaBoard が生まれた場所</span></span></a></li>
+      <li><a href="#s5"><span class="n">05</span><span>数字は冷たいから、使える<span class="s">研究 — 絵を地図に変える</span></span></a></li>
+      <li><a href="#s6"><span class="n">06</span><span>記録がキャリアの言葉になる<span class="s">道具 — キャリアログの反省文</span></span></a></li>
+    </ol>
   </div>
 </header>
 
 <main>
 <section class="sec" style="padding-top:clamp(40px,6vh,64px)">
 
-  <article class="story" data-reveal>
+  <article class="story" id="s1" data-reveal>
     <span class="story-k">01 — Clinical / 臨床</span>
     <h2 class="story-t">三人の顔</h2>
     <p>
@@ -69,7 +78,7 @@
     </div>
   </article>
 
-  <article class="story" data-reveal>
+  <article class="story" id="s2" data-reveal>
     <span class="story-k">02 — Clinical / 制度</span>
     <h2 class="story-t">門の長さ</h2>
     <p>
@@ -86,7 +95,7 @@
     </div>
   </article>
 
-  <article class="story" data-reveal>
+  <article class="story" id="s3" data-reveal>
     <span class="story-k">03 — Crossing / 越境</span>
     <h2 class="story-t">科長の背中が消えた日</h2>
     <p>
@@ -104,7 +113,7 @@
     </div>
   </article>
 
-  <article class="story" data-reveal>
+  <article class="story" id="s4" data-reveal>
     <span class="story-k">04 — Management / 経営</span>
     <h2 class="story-t">朝礼の沈黙</h2>
     <p>
@@ -118,7 +127,7 @@
     </div>
   </article>
 
-  <article class="story" data-reveal>
+  <article class="story" id="s5" data-reveal>
     <span class="story-k">05 — Research / 研究</span>
     <h2 class="story-t">数字は冷たいから、使える</h2>
     <p>
@@ -132,7 +141,7 @@
     </div>
   </article>
 
-  <article class="story" data-reveal>
+  <article class="story" id="s6" data-reveal>
     <span class="story-k">06 — Career / 道具</span>
     <h2 class="story-t">記録がキャリアの言葉になる</h2>
     <p>
@@ -168,7 +177,7 @@
         <p class="p">選択肢が増えた経験があれば、ぜひ。</p>
       </a>
     </div>
-    <p class="walk-note" data-reveal>読んで、朝礼で下を向いたスタッフの顔が少し想像できたなら、それで足ります。あなた自身の話を送るかどうかは、また別のことです。</p>
+    <p class="walk-note" data-reveal>朝礼で下を向いたスタッフの顔が少し想像できたなら、それで足ります。あなた自身の話を送るかどうかは、あなたが決めることです。</p>
   </div>
 </aside>
 

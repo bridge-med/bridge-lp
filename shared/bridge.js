@@ -110,7 +110,7 @@ document.documentElement.classList.add('js');
         ]) +
         col('つくったもの', [
           { t: 'Products', href: 'products/index.html' },
-          { t: 'キャリアログ', href: 'daily-app/index.html' },
+          { t: 'BRIDGE Compass', href: 'compass/index.html' },
           { t: 'Starter Kits', href: 'starter-kits/index.html' },
         ]) +
         col('つながる', [
@@ -185,7 +185,7 @@ document.documentElement.classList.add('js');
     for (const e of entries) {
       if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
     }
-  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  }, { threshold: 0, rootMargin: '0px 0px 10% 0px' }); // 画面に入る前に始め、読む位置では不透明に(2026-10-11。前は threshold .12・-8%)
   const observeAll = () => {
     document.querySelectorAll('[data-reveal]:not(.on)').forEach(el => io.observe(el));
     applyBudoux(); // 動的描画されたカード等にも文節改行を適用
