@@ -25,18 +25,19 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 /* ================================================================
-   Home v11 — 筆の線と、ページを進む一本の線(2026-10-11 社長「一旦マージして」。試作 v7 = claude.ai の artifact「BRIDGE トップ試作」)
-   構成: ヒーロー(100svh: 真ん中に BRIDGE のロックアップ+短い説明と CTA の帯)→ 本人の言葉(3文)→ 触れる(いつもの仕事を、外の言葉で言うと・Compass)
-         → ほかに試しているもの(クリニックタウン3D / 小さな道具)→ 閉じ(#about: 筆の線がロゴに集まる帯・明朝の一文・出口)→ フッター
-   並びは憲法第20条の曲線: 安心 → 共感 → 希望 → 挑戦したい → 自分で選べる → 未来が楽しみ
+   Home v12 — 筆の線と、ページを進む一本の線。並びは「BRIDGE → 触れる体験 → 代表作 → 目的から探す → 本人の言葉 → 閉じ」(2026-10-11 社長指示・designer 照合。ia v3.1)
+   構成: ヒーロー(100svh: 真ん中に BRIDGE のロックアップ+短い説明と主ボタン・副導線の帯)→ 触れる(いつもの仕事を、外の言葉で言うと・Compass の結果画面の例)
+         → 作っているもの(クリニックタウン3D / 経験の棚卸し)→ 目的から探す(用途6つの帯)→ 閉じ(#about: 本人の言葉3文・筆の線がロゴに集まる帯・明朝の一文・出口)→ フッター
+   第20条の曲線の読み替え(designer 2026-10-11): 安心=ヒーロー / 共感・希望=言いかえを体験する / 挑戦したい=代表作 / 自分で選べる=目的から探す / 未来が楽しみ=本人の言葉と閉じ
    開いた瞬間(.hz。designer 2026-10-10 照合)
-     素材は閉じ(.kz)と同じ筆の線だけ。画面いっぱいの線 → 大きなロゴ → 名前の横のマークに収まり、名前が出る(約 3.2 秒・一度だけ)。スクロールには従わず、固定もしない
+     素材は閉じ(.kz)と同じ筆の線だけ。画面いっぱいの線 → 大きなロゴ → 名前の横のマークに収まり、名前が出る(約 3.2 秒・一度だけ)。スクロールには従わず、固定もしない。
+     同じタブでの再訪・データセーバー・動きを減らす設定・JS なしでは出さず、ロックアップは最初から真ん中にある(2026-10-11)
    ページの線(.pl)
      1 ヒーローのロゴの藍の線が、その終わり(176,84)からその向きのまま伸び、ページの余白を縫って、閉じのロゴの藍の線の始まり(8,74)へ同じ向きで入る
        (最後は左から角を作らずに回り込む)。色は --mark-line(ロゴの藍の線の役割)。語・図は描かない。読ませる文字を横切らない(実画面の写しの後ろは通る)
      2 引く長さはスクロール位置だけで決まる。先端は画面の高さの 7 割(スマホは 8 割。最初の 0.4 画面は始まりから滑らかに追いつく)。スマホは節の間の空きで左右を渡る。先端の点は砂(第22条の現在地)
-     3 本人の言葉・触れる一場面・ほかの道具(文字と実画面)は、先端が届いた高さから上からぬぐうように現れ、戻せば引っ込む(mask のアルファ)
-     4 動きを減らす設定では、線は最初から引き終え、点はなく、文字と実画面は最初から見える。JS なしでは線を出さない(文字と実画面は見える)
+     3 線が寄るのは3か所: 言いかえの組(経験 → 別の言葉)・代表作の実画面の縁(課題 → 道具)・閉じのロゴ。ほかの区間は余白を通るだけ
+     4 文字と実画面の表示は線に依存しない(2026-10-11 社長指示「演出に内容の可視性を依存させない」。v11 の .pr の mask は外した)。動きを減らす設定では線は最初から引き終え、点はない。JS なしでは線を出さない
    閉じの約束(#about の帯 .kz だけ。designer 2026-10-05)
      1 線が主語。帯に現れるのは線だけで、文字を描かない。地を塗らない(夜・グラデーション・ぼかしなし。端の溶けは mask のアルファ)
      2 手で起きる。時刻はスクロール位置だけで決まる。固定・吸着・スクロール量の書き換えをしない。止めれば止まり、戻せばほどける
@@ -50,7 +51,7 @@
    上から: 面(真ん中に BRIDGE のロックアップ)→ 帯(短い説明と CTA)。帯までで 100svh。
    ロックアップは h1 のインライン SVG(正式ロゴの MARK の経路+英字)。JS がなくても、初期化が遅くても、BRIDGE と CTA は最初から見える。
    動けるとき(hz-live)は、面(.jr-top)の中の canvas に筆の線が集まり、h1 のマークに重ねた同じ経路の写し(.hz-mark)へ渡す */
-.hero{position:relative;overflow-x:clip;--foot-h:128px}
+.hero{position:relative;overflow-x:clip;--foot-h:152px}
 .jr-top{position:relative;height:calc(100svh - var(--foot-h));min-height:460px;max-height:980px}
 .jr-brand{position:absolute;left:50%;top:47%;z-index:2;width:clamp(320px,52vw,860px);margin:0;transform:translate(-50%,-50%);line-height:0;pointer-events:none}
 .jr-brand svg{display:block;width:100%;height:auto;overflow:visible}
@@ -74,7 +75,13 @@ html.hz-live .hz-c{display:block;position:absolute;top:0;height:100%;pointer-eve
 /* 帯: PC は左に短い説明、右に CTA。スマホは説明・CTA の順で、どちらも最初の画面に入る(IA の原則1) */
 .hero-foot{height:var(--foot-h);max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);display:flex;align-items:center;justify-content:space-between;gap:16px 48px;box-sizing:content-box}
 .hero-desc{font-size:14px;line-height:1.9;color:var(--ink-2);max-width:31em}
-.hero-cta{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap;justify-content:flex-end}
+.hero-cta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+.hero-main{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap;justify-content:flex-end}
+/* 副導線(ゲーム / 実務の道具)。主ボタンは Compass の1つだけ。文字リンク2つまで(designer 2026-10-11) */
+.h-alt{display:flex;flex-wrap:wrap;gap:0 22px;justify-content:flex-end}
+.tx-link.alt{min-height:36px;font-size:13px;color:var(--ink-2);position:relative}
+.tx-link.alt::after{content:'';position:absolute;inset:-4px 0 -5px} /* 見た目36pxのまま、タップ領域を44pxに(.tag::after と同じ型。下は1pxの下線ぶん広げる) */
+.tx-link.alt:hover{color:var(--ink)}
 .btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px;min-height:44px;white-space:nowrap} /* 帯の flex で縮められても1行(761〜797px で「る」が落ちていた) */
 .btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 .btn.glass:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
@@ -84,8 +91,7 @@ body[data-page="home"] .nav-logo{transition:opacity .4s var(--ease),visibility 0
 html.hero-in body[data-page="home"] .nav-logo{opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s linear .4s}
 
 /* ===== ページの線(約束は <style> 冒頭の「ページの線」) =====
-   本文の下の層(実画面の写しの後ろを通るときは隠れる)。pl-on=線を出す(開いた瞬間のあと)/pl-reveal=先端で現す(動けるときだけ)。
-   .pr は先端が届いた高さまで上から見える(--pr 0→1。JS が付ける)。ぬぐいの縁は 72px の mask のアルファ */
+   本文の下の層(実画面の写しの後ろを通るときは隠れる)。pl-on=線を出す(開いた瞬間のあと)。文字と実画面はこの線に依存せず、最初からある */
 main{position:relative;overflow-x:clip} /* 線の層が画面の外へ出ても横スクロールを出さない(body の overflow-x に頼らない) */
 main > section{position:relative;z-index:1}
 .pl{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:0;overflow:visible;opacity:0;transition:opacity .6s var(--ease)}
@@ -93,15 +99,10 @@ html.pl-on .pl{opacity:1}
 .pl-path{fill:none;stroke:var(--mark-line);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pl-tip{fill:var(--dawn);opacity:0;transition:opacity .3s var(--ease)}
 .pl-tip.on{opacity:1}
-html.pl-reveal .pr:not(.pr-done){-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--pr,0) * (100% + 72px) - 72px),transparent calc(var(--pr,0) * (100% + 72px)));mask-image:linear-gradient(to bottom,#000 calc(var(--pr,0) * (100% + 72px) - 72px),transparent calc(var(--pr,0) * (100% + 72px)));transform:translateY(calc((1 - var(--pr,0)) * 14px))}
-/* 現れ終えたら mask を外す(mask は外へ出るフォーカスの輪も切るため)。先端より下でも、中にフォーカスがあれば見せる(WCAG 2.4.7) */
-html.pl-reveal .pr:focus-within{-webkit-mask-image:none;mask-image:none;transform:none}
 
-/* ===== 本人の言葉 =====
-   大きな字で3文。PC は左寄り(右の余白をページの線が通る)。ページの線の先端が届いたところから現れる */
-.words{padding:clamp(56px,9vh,110px) var(--pad-x) 0}
-.w-in{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,7fr) minmax(0,3fr)}
-.w-step{grid-column:2;padding:clamp(18px,3.5vh,40px) 0}
+/* ===== 本人の言葉(閉じの頭。大きな字で3文。PC は右の余白をページの線が通る) ===== */
+.words{padding:0 0 clamp(8px,2vh,20px)}
+.w-step{padding:clamp(18px,3.5vh,40px) 0}
 .w-p{max-width:23em;font:500 clamp(20px,2.05vw,29px)/2.05 var(--sans);letter-spacing:.04em;color:var(--ink);word-break:auto-phrase}
 .w-p .w-l{display:block}
 .w-sign{margin-top:30px;font:400 13px/1.8 var(--sans);letter-spacing:.02em;color:var(--ink-3)}
@@ -126,20 +127,33 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
 @keyframes tw-draw{to{transform:none}}
 @keyframes tw-in{from{opacity:0}}
 .try-p{margin-top:22px;font-size:14px}
-.try-cta{margin-top:26px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px}
+.try-cta{margin-top:22px;display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px}
+.cp-fig{margin:0;min-width:0}
+.shot-cap{margin-top:8px;font-size:12px;line-height:1.7;color:var(--ink-3)}
+.cp-shot .th-d,[data-theme="dark"] .cp-shot .th-l{display:none}
+[data-theme="dark"] .cp-shot .th-d{display:block}
 
-@media(max-width:860px){.w-in{grid-template-columns:1fr}.w-step{grid-column:1}}
-@media(max-width:760px){
-  .hero{--foot-h:196px}
-  .jr-brand{top:44%;width:min(88vw,420px)}
+/* 帯を縦に積むのは 860px 以下(768 でも副導線が最初の画面に入る。designer 2026-10-11) */
+@media(max-width:860px){
+  .hero{--foot-h:232px}
   .hero-foot{flex-direction:column;align-items:stretch;justify-content:center;gap:12px}
   .hero-desc{order:-1;font-size:13px;line-height:1.85;max-width:none}
-  .hero-cta{flex-direction:column;align-items:center;justify-content:center;gap:8px}
-  .hero-cta .btn{justify-content:center;width:100%;max-width:340px}
+  .hero-cta{align-items:center;gap:6px}
+  .hero-main{flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
+  .hero-main .btn{justify-content:center;width:100%;max-width:340px}
+  .h-alt{justify-content:center;gap:0 16px}
+}
+/* 副導線が2段に積まれる幅では ::after の当たり判定が隣と重なるので、実寸で44pxにする(qa 2026-10-11) */
+@media(max-width:600px){
+  .hero{--foot-h:256px}
+  .tx-link.alt{min-height:44px}
+  .tx-link.alt::after{content:none}
+}
+@media(max-width:760px){
+  .jr-brand{top:44%;width:min(88vw,420px)}
   .w-p{font-size:19px;line-height:2.05;letter-spacing:.03em}
   .pl-path{stroke-width:1.6}
-  .try-cta{flex-direction:column;align-items:flex-start}
-  .try-cta .btn{width:100%;max-width:340px;justify-content:center}
+  .try-cta{flex-direction:column;align-items:flex-start;gap:2px}
 }
 @media(prefers-reduced-motion:reduce){
   .jr-brand .l-navy,.jr-brand .l-sand{animation:none}
@@ -163,7 +177,7 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
 .tx-link .ar{transition:transform .3s var(--ease)}
 .tx-link:hover{border-color:var(--ink)}
 .tx-link:hover .ar{transform:translateX(4px)}
-.tx-link:focus-visible,.cp-shot:focus-visible,.sm-fig:focus-visible,.sm-item:focus-visible,.me-links a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.tx-link:focus-visible,.cp-shot:focus-visible,.sm-fig:focus-visible,.use-item:focus-visible,.me-links a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 
 /* Compass: 左に文字、右に実画面(sec-inner の右端を越えて画面の端まで) */
 .cp{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,5vw,72px);align-items:center;
@@ -182,19 +196,12 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
 .ct-v{margin-top:10px;font-size:13.5px;line-height:1.8;color:var(--ink-3)}
 .ct-v .v{font-family:var(--en)}
 
-/* 小さく試しているもの: 左に文字の一覧、右に中くらいの実画面を1枚(少し下げて一覧の2行目に寄せる) */
-.sm{margin-top:clamp(72px,10vh,120px);display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);gap:24px clamp(40px,6vw,88px);align-items:start}
-.sm-list{list-style:none;margin-top:12px;border-top:1px solid var(--line)}
-.sm-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 20px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line);min-height:44px;transition:border-color .3s var(--ease)}
-.sm-item:hover{border-bottom-color:var(--ink-4)}
-.sm-name{font:700 16.5px/1.5 var(--sans);color:var(--ink)}
-.sm-txt{display:flex;flex-direction:column;gap:4px}
-.sm-d{font-size:13.5px;line-height:1.85;color:var(--ink-2)}
-.sm-name .ar{display:inline-block;margin-left:8px;color:var(--ink-3);transition:transform .3s var(--ease)}
-.sm-item:hover .sm-name .ar{transform:translateX(4px)}
-/* 行末に添える小さな写し(二度手間さがし) */
-.sm-thumb{align-self:center;width:clamp(96px,11vw,136px);height:auto;aspect-ratio:880/550;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:2px;background:var(--bg-3)}
-.sm-fig{display:block;margin-top:clamp(48px,7vh,84px);border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--bg-3);transition:border-color .35s var(--ease)}
+/* 中くらいの実画面(経験の棚卸し): 左に文字、右に実画面1枚(少し下げる) */
+.sm{margin-top:clamp(72px,10vh,120px);display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:24px clamp(40px,6vw,88px);align-items:center}
+.sm-name{margin-top:10px;font:900 clamp(22px,2.4vw,30px)/1.3 var(--sans);letter-spacing:-0.005em}
+.sm-d{margin-top:12px;font-size:14.5px;line-height:2;color:var(--ink-2);max-width:26em}
+.sm-text .tx-link{margin-top:18px}
+.sm-fig{display:block;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--bg-3);transition:border-color .35s var(--ease)}
 .sm-fig:hover{border-color:var(--blue-soft)}
 .sm-fig img{display:block;width:100%;height:auto;aspect-ratio:880/550;object-fit:cover;object-position:top}
 .sm-cap{margin-top:8px;font-size:12px;line-height:1.6;color:var(--ink-3)}
@@ -202,10 +209,26 @@ html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
 .lab-all{margin-top:clamp(48px,7vh,72px);display:flex;align-items:baseline;gap:6px 18px;flex-wrap:wrap}
 .lab-all .n{font-size:14px;color:var(--ink-2)}
 
+/* ===== 目的から探す(用途6つの帯。索引は Products が持つ) =====
+   行の形は前の版の .sm-item と同じ(名前・一文・→・下罫)。PC は2列×3行。番号は付けない(B-9・B-12) */
+.uses{padding:clamp(56px,9vh,110px) var(--pad-x) 0}
+.uses-in{max-width:var(--max);margin:0 auto}
+.uses-h{font:700 clamp(22px,2.6vw,32px)/1.5 var(--sans);letter-spacing:0.01em}
+.use-list{list-style:none;margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(32px,5vw,72px);border-top:1px solid var(--line)}
+.use-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 20px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line);min-height:44px;transition:border-color .3s var(--ease)}
+.use-item:hover{border-bottom-color:var(--ink-4)}
+.use-txt{display:flex;flex-direction:column;gap:4px}
+.use-t{font:700 16.5px/1.5 var(--sans);color:var(--ink)}
+.use-d{font-size:13.5px;line-height:1.85;color:var(--ink-2)}
+.use-n{font:500 13px/1.4 var(--sans);color:var(--ink-3);white-space:nowrap}
+.use-n .ar{display:inline-block;margin-left:8px;transition:transform .3s var(--ease)}
+.use-item:hover .use-n .ar{transform:translateX(4px)}
+@media(max-width:860px){.use-list{grid-template-columns:1fr}}
+
 /* ===== 閉じ(#about) =====
-   本人の言葉は上(#words)へ移した(2026-10-11)。ここは筆の線がロゴに集まる帯と、明朝の一文と出口。明朝はこの一文だけ(憲法第23条 v1.5)。地の色は変えず、罫線で区切る */
+   本人の言葉3文 → 筆の線がロゴに集まる帯 → 明朝の一文 → 出口(2026-10-11)。明朝はこの一文だけ(憲法第23条 v1.5)。地の色は変えず、罫線で区切る */
 .me{padding:0 var(--pad-x) clamp(96px,14vh,160px);overflow-x:clip} /* overflow-x: 閉じの帯の canvas を画面の端まで裁ち落とすため(.lab と同じ) */
-.me-in{max-width:var(--max);margin:0 auto;border-top:1px solid var(--line);padding-top:clamp(64px,9vh,104px);
+.me-in{max-width:var(--max);margin:0 auto;padding-top:clamp(64px,9vh,104px); /* 上の罫線は「目的から探す」の最後の行が持つ(二重にしない) */
   display:grid;grid-template-columns:minmax(0,2fr) minmax(0,7fr) minmax(0,3fr)}
 .me-body{grid-column:2}
 .idea-h{margin-top:clamp(48px,7vh,72px);font-family:var(--mincho);font-weight:600;font-size:clamp(24px,3.2vw,38px);line-height:1.6;letter-spacing:0.03em}
@@ -241,25 +264,18 @@ html.kz-on body[data-page="home"] .footer-brand svg{display:none}
 @media(prefers-reduced-motion:reduce){html.kz-live .kz{height:calc(var(--kz-mw) * 110 / 240)} html.kz-live .kz-c{display:none}}
 
 /* ===== 下の動き =====
-   1) 本人の言葉・触れる一場面・ほかの道具: ページの線の先端が届いたところから現れる(.pr。上の「ページの線」)
-   2) 閉じ: 共通の reveal を移動なしで、ゆっくり opacity のみ(帯があるときは下の規則で最初から)
-   3) 砂の下線: 触れる一場面で選んだ瞬間だけ、左から引く(scaleX) */
-html.js .me [data-reveal]{transform:none;transition:opacity 1.6s ease}
-/* 閉じの帯があるときは、明朝の一文を最初から出す(マークより後に文字が追いかけて出ない)。上の html.js .me [data-reveal] と同じ詳細度なので、この位置に置く */
-html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;animation:none}
+   文字と実画面は最初からある(reveal を付けない。2026-10-11 社長指示)。動くのは、ページの線・閉じの帯・触れる一場面の砂の下線(選んだ瞬間だけ左から引く)だけ */
 
 @media(max-width:860px){
   .cp{grid-template-columns:1fr;padding-left:0}
   .cp-text{padding:0 var(--pad-x)}
   /* 実画面は左右を裁ち落として大きく。上下の縁だけ残す */
   .cp-shot{border-left:0;border-right:0;border-radius:0;margin-top:4px}
+  .cp-fig .shot-cap{padding:0 var(--pad-x)} /* 裁ち落とした写しの下の一文は、左右の余白に戻す(ページの線が端を通るため) */
   .cp.rev{grid-template-columns:1fr;padding-right:0} /* .cp の1列化より詳細度が高いので、ここでも1列に(2026-10-11 まで 390px 幅で実画面が 149px に縮んでいた) */
   .cp.rev .cp-text{order:-1}
   .cp.rev .cp-shot{border-right:0;border-radius:0}
-  .sm{grid-template-columns:1fr}
-  /* 一覧の下に、右へ寄せた実画面(次が少し覗く) */
-  .sm-fig{margin-top:8px;width:74%;justify-self:end}
-  .sm-cap{justify-self:end;width:74%}
+  .sm{grid-template-columns:1fr;gap:18px}
   .me-in{grid-template-columns:1fr}
   .me-body{grid-column:1}
 }
@@ -267,7 +283,7 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
   .lab-h{font-size:22px}
   .cp-name{font-size:28px}
   .cp-p{font-size:14.5px}
-  .sm-thumb{width:84px}
+  .sm-name{font-size:24px}
 }
 </style>
 </head>
@@ -281,39 +297,32 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
 
 <!-- ============ ヒーロー ============
      開いた瞬間は BRIDGE と動き。h1 は BRIDGE のロックアップ(正式ロゴの MARK の経路+英字)。面の中の筆の線(.hz)は下の script が描く(約束は <style> 冒頭)。
-     線の層は aria-hidden で、読む内容を持たない。動きを減らす設定・JS なしでは出さない -->
+     線の層は aria-hidden で、読む内容を持たない。動きを減らす設定・JS なし・同じタブでの再訪・データセーバーでは出さない(完成形から)。
+     帯の説明・主ボタン・副導線は最初から読める(演出を待たない。2026-10-11 社長指示) -->
 <section class="hero" aria-labelledby="heroTitle">
   <div class="jr-top hz" id="hz">
     <canvas class="hz-c" aria-hidden="true"></canvas>
     <h1 class="jr-brand" id="heroTitle"><svg class="logo-mark" viewBox="0 0 758 110" role="img" aria-label="BRIDGE"><path class="l-navy" stroke-width="6" pathLength="1" d="M8 74 C 62 16, 118 24, 176 84"/><path class="l-sand" stroke-width="6" pathLength="1" d="M58 94 C 118 60, 158 22, 232 12"/><text class="jr-word" x="312" y="86">BRIDGE</text></svg><svg class="logo-mark hz-mark" viewBox="0 0 240 110" aria-hidden="true" focusable="false"></svg></h1>
-    <script>/* 開いた瞬間の準備: h1 のマークの経路を写し(hz-on)、動けるときだけ hz-live。動けるなら最初の1枚はマークを隠し、線が集まるのを待つ(4 秒で始まらなければ静止に戻す) */(()=>{try{const d=document,r=d.documentElement,c=r.classList,m=d.querySelector('.hz-mark'),cv=d.querySelector('.hz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle > svg:not(.hz-mark) .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;c.add('hz-on');if(cv.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const z=d.getElementById('hz');c.add('hz-live');z.classList.add('hz-run');r.style.setProperty('--hz-t','0');setTimeout(()=>{if(!(window.HZ&&HZ.kick)){c.remove('hz-live');z.classList.remove('hz-run')}},4000)}}catch(e){}})()</script>
+    <script>/* 開いた瞬間の準備: h1 のマークの経路を写し(hz-on)、動けるときだけ hz-live。動けるなら最初の1枚はマークを隠し、線が集まるのを待つ(1.2 秒で始まらなければ静止に戻す)。
+      同じタブでの再訪(sessionStorage)とデータセーバーでは動かさず、完成形から(2026-10-11 社長指示: 再訪・低速回線で待ち時間を作らない) */(()=>{try{const d=document,r=d.documentElement,c=r.classList,m=d.querySelector('.hz-mark'),cv=d.querySelector('.hz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle > svg:not(.hz-mark) .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;c.add('hz-on');let seen=false;try{seen=sessionStorage.getItem('bridge-hz')==='1';sessionStorage.setItem('bridge-hz','1')}catch(e){}const save=navigator.connection&&navigator.connection.saveData;if(!seen&&!save&&cv.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const z=d.getElementById('hz');c.add('hz-live');z.classList.add('hz-run');r.style.setProperty('--hz-t','0');setTimeout(()=>{if(!(window.HZ&&HZ.kick)){c.remove('hz-live');z.classList.remove('hz-run')}},1200)}}catch(e){}})()</script>
   </div>
   <div class="hero-foot">
     <p class="hero-desc">看護師・リハビリ職・医療事務の方へ。いつもの仕事が病院の外でどんな言葉になるかを見つけて、ゲームや道具で試せます。</p>
     <div class="hero-cta" id="heroCta">
-      <a class="btn glass" href="./compass/index.html">自分の場合を見てみる <span aria-hidden="true">→</span></a>
-      <p class="h-meta">10の質問・約3分・登録不要</p>
+      <div class="hero-main"><a class="btn glass" href="./compass/index.html">自分の場合を見てみる <span aria-hidden="true">→</span></a><p class="h-meta">10の質問・約3分・登録不要</p></div>
+      <p class="h-alt"><a class="tx-link alt" href="./clinic-flow-3d/index.html">ゲームで経営を学ぶ <span class="ar" aria-hidden="true">→</span></a><a class="tx-link alt" href="./products/index.html#work">明日の業務に使える道具を見る <span class="ar" aria-hidden="true">→</span></a></p>
     </div>
   </div>
 </section>
 
-<!-- ============ 本人の言葉 ============
-     ページの線の先端が届いたところから現れる。1〜2文目は社長の依頼文(2026-09-23)の言葉をもとにしている(第13条: 本人の実話の範囲を超えない)。
-     3文目は前の版のトップの文を引き継いだ(社長本人の言葉かは未確認のまま、2026-10-11 社長「マージして」でこの形で出荷)。
-     道具の前に置くのは第20条の曲線(安心 → 共感 → 希望 → 挑戦したい)のため -->
-<section class="words" id="words" aria-label="運営者の言葉">
-  <div class="w-in">
-    <div class="w-step"><p class="w-p">臨床だけをしていた頃、事業会社で働くとは思っていませんでした。</p></div>
-    <div class="w-step"><p class="w-p">外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p></div>
-    <div class="w-step"><div class="w-p"><p>道は、病院の外にも続いています。<span class="w-l">それが見えるものを、ひとつずつ作っています。</span></p><p class="w-sign">理学療法士の私(橋本渉)が、ひとりで運営しています。</p></div></div>
-  </div>
-</section>
-
 <!-- ============ 触れる: いつもの仕事を、外の言葉で言うと ============
-     第28条(体験は説明に勝る)の「触れる」瞬間。事実は実データに合わせる(第15条):
+     ヒーローの次に置く(2026-10-11 社長指示: 長い運営者紹介を体験の前に置かない)。第28条(体験は説明に勝る)の「触れる」瞬間。事実は実データに合わせる(第15条):
      Compass の公開日=cockpit ledger(v1 2026-09-22)/ 見出し=Compass の結果画面の見出しと同じ言葉(compass/app/app.js)/
      言いかえ=compass/app/data.js の TRANSLATIONS から職種をまたいで6つ(語は変えない。退院支援・多職種カンファレンス・後輩指導=pt / 申し送り・患者・家族への説明=nurse / 作業分析=ot)/
-     橋は答えから出る(engine.js の pickBridges)ので、言いかえから出るとは書かない。JS がないときは退院支援の1組だけを見せる -->
+     右の実画面=結果画面の例。理学療法士で Q1〜Q8 を「周囲を巻き込んで解決する/人やチームの調整/チームがうまく動いた/仕組みを改善する・人の話を聞いてまとめる/特にない/チームを動かす仕事/成長・働きやすさ/医療系企業のプロジェクトに入る」と答え、
+     Q9・Q10 は空のまま。compass/app/engine.js の実際の判定で出た結果画面をそのまま撮った(2026-10-11・1280×800・ライト/ダーク・無加工)。本人の結果と誤認させないよう「例」と答えの条件を添える。
+     橋は答えから出る(engine.js の pickBridges)ので、言いかえから出るとは書かない。JS がないときは退院支援の1組だけを見せる。
+     Compass 行きの主ボタンはヒーローの1つだけ。ここは文字リンク(design-system §4 CTA: 同じ行き先の主ボタンを同時に画面に入れない。designer 2026-10-11) -->
 <section class="try" id="try" aria-labelledby="tryTitle">
   <div class="cp">
     <div class="cp-text">
@@ -321,12 +330,16 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
       <h2 class="try-h" id="tryTitle">いつもの仕事を、外の言葉で言うと</h2>
       <div class="tw-pick tag-row" id="twPick" role="group" aria-label="いつもの仕事を選ぶ" hidden></div>
       <p class="tw-out" aria-live="polite" aria-atomic="true"><span class="tw-from">「<b>退院支援</b>」は</span><span class="tw-to"><span class="tw-to-t">プロジェクト推進・合意形成</span></span></p>
-      <p class="cp-p try-p">言いかえは BRIDGE Compass の表から選んでいます。質問に答えると、職種と答えに沿った言いかえと、いまの経験から見える3つの方向が「橋」として出ます。</p>
-      <div class="try-cta"><a class="btn glass" href="./compass/index.html">自分の場合を見てみる <span aria-hidden="true">→</span></a><p class="h-meta">10の質問・約3分・登録不要</p></div>
+      <p class="cp-p try-p">10の質問に答えると、職種と答えに沿った言いかえと、いまの経験から見える3つの方向が「橋」として出ます。添えた画面は、職種を理学療法士にして答えたときの結果の一例です。</p>
+      <p class="try-cta"><a class="tx-link" href="./compass/index.html">自分の場合を見てみる <span class="ar" aria-hidden="true">→</span></a><span class="h-meta">10の質問・約3分・登録不要</span></p>
     </div>
-    <a class="cp-shot" href="./compass/index.html">
-      <img src="./images/products/compass-1280.webp" srcset="./images/products/thumbs/compass.webp 880w, ./images/products/compass-1280.webp 1280w" sizes="(max-width:860px) 100vw, 58vw" alt="BRIDGE Compassの実際の画面。「あなたの経験、どこまで使える?」の見出しと、3分で探してみるボタン" width="1280" height="800" loading="lazy" decoding="async">
-    </a>
+    <figure class="cp-fig">
+      <a class="cp-shot" href="./compass/index.html">
+        <img class="th-l" src="./images/products/shots/compass-result-light.webp" alt="BRIDGE Compassの結果画面の例。見出し「立場の違う人を、ひとつのチームにする力」、持っているもの「調整・チーム推進・改善・対人理解」、現在地から「マネジメント」「プロジェクトマネジメント」「行政 / 医療政策」へ3本の線が分かれる地図" width="1280" height="800" decoding="async">
+        <img class="th-d" src="./images/products/shots/compass-result-dark.webp" alt="" width="1280" height="800" loading="lazy" decoding="async">
+      </a>
+      <figcaption class="shot-cap">結果画面の例。職種は理学療法士、調整やチームに関わる答えを選んだ場合(<time datetime="2026-10-11">2026-10-11</time> 撮影)</figcaption>
+    </figure>
   </div>
   <script>/* 言いかえの一場面: 選ぶと、言いかえを入れ替えて砂の下線を引く */(()=>{try{const T=[['退院支援','プロジェクト推進・合意形成'],['申し送り','要点を絞った情報の引き継ぎ'],['患者・家族への説明','複雑な情報の翻訳'],['多職種カンファレンス','ステークホルダー調整'],['作業分析','プロセス分解'],['後輩指導','人材育成・フィードバック']];
     const d=document,box=d.getElementById('twPick'),fr=d.querySelector('.tw-from b'),to=d.querySelector('.tw-to-t'),tw=d.querySelector('.tw-to');
@@ -336,15 +349,13 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
     box.hidden=false;d.documentElement.classList.add('tw-on')}catch(e){}})()</script>
 </section>
 
-<!-- ============ ほかに試しているもの ============
-     商品の一覧ではなく、いま手元にあるもの。文字と実画面はページの線の先端が届いたところから現れる。事実は台帳と実データに合わせる(第15条):
-     Clinic Town 3D の版=sw.js の VER(手を入れた回数は載せない: 数え方で値が変わり、期間が古び、作業の主体も読み違えられるため。2026-10-03 社長決定)/
-     版と個数は scripts/check-site.mjs の6項が照合する /
-     29=products/index.html の PRODUCTS の件数(増減したらここも直す) -->
+<!-- ============ 作っているもの(代表作) ============
+     商品の一覧ではなく、いま手元にあるもの。大きさの差は使われ方の差: クリニックタウン3D=大きな実画面(左へ裁ち落とす)/ 経験の棚卸し=中くらいの実画面(designer 2026-10-11: 代表作は2つまで。ほかの道具は下の「目的から探す」が受ける)。
+     事実は台帳と実データに合わせる(第15条): Clinic Town 3D の版=sw.js の VER(手を入れた回数は載せない。2026-10-03 社長決定)/ 版と個数は scripts/check-site.mjs の6項が照合する / 29=products/index.html の PRODUCTS の件数(増減したらここも直す) -->
 <section class="lab" id="lab" aria-labelledby="labTitle">
   <div class="lab-in">
-    <h2 class="lab-h" id="labTitle">ほかにも、いろいろ試しています</h2>
-    <p class="lab-lead">作ったものを、直しながら置いています。ここに並べたものは無料で、登録もいりません。入力はこの端末の中にだけ残ります。</p>
+    <h2 class="lab-h" id="labTitle">ほかにも作っています</h2>
+    <p class="lab-lead">直しながら置いています。ここに並べたものは無料で、登録もいりません。入力はこの端末の中にだけ残ります。</p>
   </div>
 
   <div class="cp rev">
@@ -352,7 +363,7 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
       <img src="./images/products/shots/clinic-flow-3d-decision.webp" sizes="(max-width:860px) 100vw, 58vw" alt="クリニックタウン3Dの実際の画面。Day 6 の相談で、紹介を増やす動き方を3つの選択肢から選ぶところ" width="1440" height="900" loading="lazy" decoding="async">
     </a>
     <div class="cp-text">
-      <p class="note">直し続けているもの</p>
+      <p class="note">直し続けているゲーム</p>
       <h3 class="cp-name">クリニックタウン3D</h3>
       <p class="cp-p">クリニックの経営を、1日ずつ動かして学ぶゲームです。診療時間を1コマ変えると、待ち時間と利益が変わります。</p>
       <p class="ct-v">いまの版は <span class="v">v99.3</span> です。</p>
@@ -361,37 +372,54 @@ html.kz-on .me-close[data-reveal]{opacity:1;transform:none;transition:none;anima
   </div>
 
   <div class="lab-in">
-
     <div class="sm">
-      <div>
-        <p class="note">小さく試しているもの</p>
-        <ul class="sm-list">
-          <li><a class="sm-item" href="./tanaoroshi/index.html"><span class="sm-txt"><span class="sm-name">経験の棚卸し<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">18の質問で、職務経歴書のたねをつくる。面接で実績をうまく言えないときに。</span></span></a></li>
-          <li><a class="sm-item" href="./nidodema/index.html"><span class="sm-txt"><span class="sm-name">二度手間さがし<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">部署の手作業を、減らせるものと守るものに分ける。</span></span><img class="sm-thumb" src="./images/products/thumbs/nidodema.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></a></li>
-          <li><a class="sm-item" href="./daily-app/index.html"><span class="sm-txt"><span class="sm-name">キャリアログ<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">日々の仕事と学びを記録して、キャリアの言葉に。</span></span></a></li>
-          <li><a class="sm-item" href="./pmi-quest/index.html"><span class="sm-txt"><span class="sm-name">クリニックPMIクエスト<span class="ar" aria-hidden="true">→</span></span><span class="sm-d">承継直後の30日を、10問で診断する。</span></span></a></li>
-        </ul>
+      <div class="sm-text">
+        <p class="note">面接の前に</p>
+        <h3 class="sm-name">経験の棚卸し</h3>
+        <p class="sm-d">18の質問に、思い出せるものから答えていくと、職務経歴書のたねと面接で話す材料ができあがります。約15分。</p>
+        <a class="tx-link" href="./tanaoroshi/index.html">質問に答える <span class="ar" aria-hidden="true">→</span></a>
       </div>
       <figure>
         <a class="sm-fig" href="./tanaoroshi/index.html"><img src="./images/products/thumbs/tanaoroshi.webp" alt="経験の棚卸しの実際の画面" width="880" height="550" loading="lazy" decoding="async"></a>
         <figcaption class="sm-cap">経験の棚卸し(実際の画面)</figcaption>
       </figure>
     </div>
-
-
-    <p class="lab-all"><span class="n">ぜんぶで29個あります。</span><a class="tx-link" href="./products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
+    <p class="lab-all"><span class="n">ぜんぶで29点あります。</span><a class="tx-link" href="./products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
   </div>
 </section>
 
-<!-- ============ 閉じ ============
-     本人の言葉は上(#words)へ移した(2026-10-11)。筆の線がロゴに集まる帯 → 明朝の一文 → 出口。
+<!-- ============ 目的から探す ============
+     用途の6分類は products/index.html の USES と同じ順・同じ語・同じ一文。件数は PRODUCTS から(scripts/check-site.mjs の6項が照合する。増減したらここも直す)。
+     索引は Products が持つ。ここは渡すだけの薄い帯(ia v3.1)。形は .sm-item と同じ(名前・一文・→・下罫。designer 2026-10-11) -->
+<section class="uses" id="uses" aria-labelledby="usesTitle">
+  <div class="uses-in">
+    <h2 class="uses-h" id="usesTitle">目的から探す</h2>
+    <ul class="use-list">
+      <li><a class="use-item" href="./products/index.html#work"><span class="use-txt"><span class="use-t">明日の業務を楽にする</span><span class="use-d">受付や事務の手作業を、選ぶだけに。</span></span><span class="use-n">3点<span class="ar" aria-hidden="true">→</span></span></a></li>
+      <li><a class="use-item" href="./products/index.html#manage"><span class="use-txt"><span class="use-t">経営・管理の実務に使う</span><span class="use-d">部門長・事務長・法人本部の仕事に。</span></span><span class="use-n">9点<span class="ar" aria-hidden="true">→</span></span></a></li>
+      <li><a class="use-item" href="./products/index.html#learn"><span class="use-txt"><span class="use-t">医療経営を学ぶ</span><span class="use-d">診療科を選び、1日ずつ回して、点数表を手触りに。</span></span><span class="use-n">3点<span class="ar" aria-hidden="true">→</span></span></a></li>
+      <li><a class="use-item" href="./products/index.html#career"><span class="use-txt"><span class="use-t">キャリア・経験を整理する</span><span class="use-d">経験を言葉に。職務経歴書と面接の材料に。</span></span><span class="use-n">7点<span class="ar" aria-hidden="true">→</span></span></a></li>
+      <li><a class="use-item" href="./products/index.html#study"><span class="use-txt"><span class="use-t">学習を続ける</span><span class="use-d">記録の側を軽くして、続ける。</span></span><span class="use-n">3点<span class="ar" aria-hidden="true">→</span></span></a></li>
+      <li><a class="use-item" href="./products/index.html#play"><span class="use-txt"><span class="use-t">気軽に試す・作品を楽しむ</span><span class="use-d">数分で終わるものと、眺めるための作品。</span></span><span class="use-n">4点<span class="ar" aria-hidden="true">→</span></span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 閉じ(本人の言葉 → 筆の線がロゴに集まる帯 → 明朝の一文 → 出口) ============
+     本人の言葉は道具のあとに置く(2026-10-11 社長指示: BRIDGE → 体験/代表作 → 用途別入口 → 作っている人の視点 → 次の行動。designer: 文字の面を2つ続けないため閉じの頭に入れる)。
+     1〜2文目は社長の依頼文(2026-09-23)の言葉をもとにしている(第13条: 本人の実話の範囲を超えない)。3文目は前の版のトップの文を引き継いだ(社長本人の言葉かは未確認のまま、2026-10-11 社長「マージして」でこの形で出荷)。
      明朝の一文は憲法第23条 v1.5 がトップに残すと定めたもの。出口は 読む/読む/話す/note と「何もしなくても十分」(第29条) -->
 <section class="me" id="about" aria-labelledby="ideaTitle">
   <div class="me-in">
     <div class="me-body">
+      <div class="words" id="words" aria-label="運営者の言葉">
+        <div class="w-step"><p class="w-p">臨床だけをしていた頃、事業会社で働くとは思っていませんでした。</p></div>
+        <div class="w-step"><p class="w-p">外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p></div>
+        <div class="w-step"><div class="w-p"><p>道は、病院の外にも続いています。<span class="w-l">それが見えるものを、ひとつずつ作っています。</span></p><p class="w-sign">理学療法士の私(橋本渉)が、ひとりで運営しています。</p></div></div>
+      </div>
       <div class="kz" id="kz" aria-hidden="true"><canvas class="kz-c"></canvas><svg class="logo-mark kz-mark" viewBox="0 0 240 110" focusable="false"></svg></div>
       <script>/* 閉じの帯: h1 のマークの d を写し、動けるなら解析中に帯を高く */(()=>{try{const d=document,r=d.documentElement.classList,m=d.querySelector('.kz-mark'),c=d.querySelector('.kz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;r.add('kz-on');if(c.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches)r.add('kz-live')}catch(e){}})()</script>
-      <div class="me-close" data-reveal>
+      <div class="me-close">
         <h2 class="idea-h" id="ideaTitle">正解を与えるのではなく、<br class="br-pc"><span class="a">選択肢を増やす</span></h2>
         <p class="me-links"><a href="./philosophy/index.html">考え方をもう少し読む <span aria-hidden="true">→</span></a><a href="./about/index.html">運営者について</a><a href="./community/index.html">話をする</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">noteで書いていること <span aria-hidden="true">↗</span></a></p>
         <p class="me-note">見るだけで帰っても、それで十分です。</p>
@@ -430,7 +458,8 @@ window.HZ = (function () {
 <script>
 /* ページの線(約束は <style> 冒頭)。道筋は本文の実際の位置から組む(PC は余白を縫い、スマホは節の間の空きで左右を渡る)。
    始まり: ヒーローのマークの藍の線の終わり(176,84)から、その向きのまま伸びる。終わり: 閉じのマークの藍の線の始まり(8,74)へ、その向きで入る。
-   長さ: 先端の高さ σ(ページの上から)= スクロール + 画面の高さ×0.7(スマホは 0.8。最初の 0.4 画面は始まりから滑らかに追いつく)。道筋の y の累積最大で長さを引く */
+   長さ: 先端の高さ σ(ページの上から)= スクロール + 画面の高さ×0.7(スマホは 0.8。最初の 0.4 画面は始まりから滑らかに追いつく)。道筋の y の累積最大で長さを引く。
+   2026-10-11: 文字と実画面の表示は線の先端に依存させない(社長指示「演出に内容の可視性を依存させない」)。線は本文の脇を通る伴走で、先端の砂の点が現在地を示すだけ */
 (function () {
   var D = document, R = D.documentElement, main = D.querySelector('main'), svg = D.getElementById('pl');
   if (!svg || !main || !window.requestAnimationFrame || !svg.querySelector('.pl-path').getTotalLength) return;
@@ -444,26 +473,26 @@ window.HZ = (function () {
     if (!A) return null;
     var push = function (x, y) { P.push([x, y]); };
     var band = rel('.hero-foot'), desc = rel('.hero-desc'), cta = rel('.hero-cta'), wps = [].map.call(D.querySelectorAll('.w-p'), rel).filter(Boolean);
-    var tryT = rel('.try .cp-text'), tryS = rel('.try .cp-shot'), labIn = rel('.lab-in'), ctT = rel('.cp.rev .cp-text'), ctS = rel('.cp.rev .cp-shot'), sm = rel('.sm'), all = rel('.lab-all');
-    var s = A[2];
+    var tryT = rel('.try .cp-text'), tryS = rel('.try .cp-fig'), labIn = rel('.lab-in'), ctT = rel('.cp.rev .cp-text'), ctS = rel('.cp.rev .cp-shot'), sm = rel('.sm'), smT = rel('.sm-text'), smF = rel('.sm-fig'), all = rel('.lab-all'), uses = rel('.uses-in');
     push(A[0], A[1]);
     var lead = pc ? 110 : 70; push(A[0] + .695 * lead, A[1] + .719 * lead); // 藍の線の終わりの向き(118,24)→(176,84)のまま(短いと継ぎ目が折れて見える)
     if (pc) {
       var gx = desc && cta ? (desc.r + cta.l) / 2 : W / 2, wr = 0; wps.forEach(function (w) { wr = M.max(wr, w.r); });
       var xr = M.min(W - 48, wr + 80), lx = M.max(28, (tryT ? tryT.l : 120) - 62), rx = W - 58;
-      push(gx, band.t + band.h * .5);
-      if (wps.length) { push(xr, wps[0].t - 24); wps.forEach(function (w, i) { push(xr + (i % 2 ? -16 : 16), w.t + w.h * .55); }); push(xr, wps[wps.length - 1].b + 24); }
+      if (band) push(gx, band.t + band.h * .5);
       var tb = M.max(tryT ? tryT.b : 0, tryS ? tryS.b : 0), gp = labIn ? labIn.t - tb : 40;
       if (tryT) { push(lx, tryT.t - 18); push(lx + 12, tryT.t + tryT.h * .55); push(lx, tb + gp * .3); }
       if (labIn) push(rx, labIn.t - gp * .25);
-      if (ctT) push(rx - 10, ctT.t + ctT.h * .5);
-      if (sm) push(rx, sm.t + sm.h * .5);
+      // 代表作の実画面の縁に寄る(課題 → 道具): 写しと文字の間の空きの列を、上から入って下へ抜ける(斜めに文字を横切らない)
+      if (ctS && ctT) { var gx1 = (ctS.r + ctT.l) / 2; push(gx1, ctS.t - 36); push(gx1, ctS.t + ctS.h * .5); push(gx1, ctS.b + 36); } else if (ctT) push(rx - 10, ctT.t + ctT.h * .5);
+      if (smT && smF) { var gx2 = (smT.r + smF.l) / 2; push(gx2, smF.t - 30); push(gx2, smF.t + smF.h * .5); } else if (sm) push(rx, sm.t + sm.h * .5);
       if (all) push(rx, all.b + 30);
+      if (uses) { push(rx, uses.t + uses.h * .5); push(rx, uses.b + 28); } // 用途の行の右端を下まで通ってから、言葉の右の余白へ
+      if (wps.length) { push(xr, wps[0].t - 24); wps.forEach(function (w, i) { push(xr + (i % 2 ? -16 : 16), w.t + w.h * .55); }); push(xr, wps[wps.length - 1].b + 24); }
     } else {
       var ex = W - 8, wx = 8, gap = function (a, b, u) { return a + (b - a) * u; };
       if (band) { push(ex, band.t - 26); push(ex, band.b + 10); }
-      wps.forEach(function (w) { push(ex, w.t + w.h * .5); });
-      var g1 = wps.length ? wps[wps.length - 1].b : (band ? band.b : 0);
+      var g1 = band ? band.b : 0;
       if (tryT) { push(ex, gap(g1, tryT.t, .2)); push(wx, gap(g1, tryT.t, .8)); push(wx, tryT.t + tryT.h * .5); }
       var tb2 = M.max(tryT ? tryT.b : 0, tryS ? tryS.b : 0);
       if (labIn) { push(wx, gap(tb2, labIn.t, .2)); push(ex, gap(tb2, labIn.t, .8)); push(ex, labIn.t + labIn.h * .5); }
@@ -471,6 +500,9 @@ window.HZ = (function () {
       var cb = M.max(ctT ? ctT.b : 0, ctS ? ctS.b : 0);
       if (sm) { push(ex, gap(cb, sm.t, .2)); push(wx, gap(cb, sm.t, .8)); push(wx, sm.t + sm.h * .5); }
       if (all) push(wx, all.b + 24);
+      if (uses) { push(wx, gap(all ? all.b : 0, uses.t, .3)); push(ex, gap(all ? all.b : 0, uses.t, .9)); push(ex, uses.t + uses.h * .5); }
+      wps.forEach(function (w) { push(ex, w.t + w.h * .5); });
+      if (wps.length) push(ex, wps[wps.length - 1].b + 24); // 言葉の下まで端を通ってから閉じへ(斜めに署名を横切らない)
     }
     // 閉じ: マークの上の空いた帯(筆の線が集まる場所)を横切って左へ。そこから下りて、大きな弧で藍の線の始まり(8,74)へ、その向き((8,74)→(62,16))のまま入る
     var kzb = rel('.kz'), END = null;
@@ -506,17 +538,7 @@ window.HZ = (function () {
     for (var l = 0; l <= total + 4; l += 5) { var ll = M.min(l, total), p = path.getPointAtLength(ll);
       if (ll <= lenQ || py == null) m = M.max(m, p.y); else m += M.max(p.y - py, 5 * .45); // 弧のあいだは、上へ戻る分もスクロールで少しずつ引く
       py = p.y; LUT.push([ll, m]); if (ll >= total) break; }
-    collect();
     y0 = P[0][1]; path.style.strokeDasharray = total + ' ' + (total + 20); ready = true; cur = -1; kick();
-  }
-  /* 線の先端が届いた高さから、文字とプロダクトが上から現れる(--pr 0→1。戻せば引っ込む) */
-  var RVSEL = '.w-p, .try .note, .try-h, .tw-pick, .tw-out, .try-p, .try-cta, .try .cp-shot, .lab-h, .lab-lead, .cp.rev .cp-shot, .cp.rev .note, .cp.rev .cp-name, .cp.rev .cp-p, .ct-v, .cp.rev .tx-link, .sm .note, .sm-list li, .sm-fig, .sm-cap, .lab-all';
-  var RV = [], LEAD = 40;
-  function collect() { RV = [].map.call(D.querySelectorAll(RVSEL), function (el) { el.classList.add('pr'); var r = el.getBoundingClientRect(); return { el: el, t: r.top + scrollY - mainTop, h: M.max(1, r.height), v: -1 }; }); }
-  function sigAt(l) { if (!LUT.length) return -1e9; var i = M.min(LUT.length - 1, M.max(0, M.round(l / 5))); return LUT[i][1]; }
-  function reveal(l) {
-    var ty = rq.matches || l >= total - 1 ? 1e9 : sigAt(l);
-    for (var i = 0; i < RV.length; i++) { var o = RV[i], v = clamp((ty - o.t + LEAD) / o.h, 0, 1); if (M.abs(v - o.v) > .002) { o.v = v; o.el.style.setProperty('--pr', v.toFixed(3)); o.el.classList.toggle('pr-done', v >= 1); } }
   }
   function lenAt(sig) { // 累積最大の y が sig を超えない最長の長さ
     if (!LUT.length || sig <= LUT[0][1]) return 0;
@@ -532,7 +554,6 @@ window.HZ = (function () {
   }
   function paint(l) {
     path.style.strokeDashoffset = (total - l).toFixed(1);
-    reveal(l);
     var on = !rq.matches && l > 18 && l < total - 2; tip.classList.toggle('on', on);
     if (on) { var p = path.getPointAtLength(l); tip.setAttribute('cx', p.x.toFixed(1)); tip.setAttribute('cy', p.y.toFixed(1)); }
   }
@@ -548,11 +569,11 @@ window.HZ = (function () {
   addEventListener('scroll', kick, { passive: true });
   var rz = 0; addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(build, 150); });
   if (window.ResizeObserver) { var lh = 0; new ResizeObserver(function () { var h = main.offsetHeight; if (M.abs(h - lh) > 2) { lh = h; clearTimeout(rz); rz = setTimeout(build, 150); } }).observe(main); }
-  var go = function () { build(); live = true; R.classList.add('pl-on'); if (!rq.matches) R.classList.add('pl-reveal'); kick(); };
+  var go = function () { build(); live = true; R.classList.add('pl-on'); kick(); };
   var fontsReady = D.fonts && D.fonts.ready ? D.fonts.ready : Promise.resolve();
   Promise.all([fontsReady, window.HZ && HZ.done ? HZ.done : Promise.resolve()]).then(go, go);
   addEventListener('load', function () { if (live) build(); });
-  if (rq.addEventListener) rq.addEventListener('change', function () { R.classList.toggle('pl-reveal', !rq.matches); cur = -1; kick(); });
+  if (rq.addEventListener) rq.addEventListener('change', function () { cur = -1; kick(); });
 })();
 </script>
 <script>
