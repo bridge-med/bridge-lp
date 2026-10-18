@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-11",
+  "updated": "2026-10-18",
   "note": "BRIDGEプロダクト台帳。stage/servesは第31条の自己申告(2026-09-04 社長確認済み=便AA決裁4)。lastCommitはscripts/update-ledger.mjsが焼き込む。lastUsedは各端末のlocalStorage(bridge-usage)から表示時に読む。",
   "statuses": {
     "計測中": "公開中。利用データを集めて再評価を待っている",
@@ -23,7 +23,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-10-03"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "medboard",
@@ -39,7 +39,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "hire-board",
@@ -55,7 +55,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-10-03"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "interview-kit",
@@ -71,7 +71,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "consult-simulator",
@@ -87,7 +87,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "round-note",
@@ -119,7 +119,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "テンプレ6種は掲示の一般的な定型からの再構成。社長の実務照合が宿題(2026-07-31出荷時のeditor保留事項)",
-      "lastCommit": "2026-10-03"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "daily-app",
@@ -152,7 +152,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "直近の開発が最も活発",
-      "lastCommit": "2026-10-03"
+      "lastCommit": "2026-10-18"
     },
     {
       "id": "him-quiz",
@@ -168,7 +168,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-10-11"
     },
     {
       "id": "study-board",
@@ -184,7 +184,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "english-trainer",
@@ -200,7 +200,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "turnaround12",
@@ -216,7 +216,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-10-03"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "compass",
@@ -264,7 +264,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "棚卸し(評価)→言いかえ帳(理解)の双方向導線。stage/servesは2026-09-04 社長確認済み(便AA決裁4「ledger.jsonの第31条申告(全プロダクト)を社長確認済みに」への回答「良いよ」。記録は clinic-flow-3d/docs/roadmap.md の決裁記録・6b49ab88)",
-      "lastCommit": "2026-10-03"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "moyamoya",
@@ -280,7 +280,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "pmi-quest",
@@ -296,7 +296,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-07-15"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "ittan-horyu",
@@ -328,7 +328,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "",
-      "lastCommit": "2026-08-09"
+      "lastCommit": "2026-10-17"
     },
     {
       "id": "reha-checklist",
@@ -420,7 +420,7 @@
       "status": "計測中",
       "measure": "local",
       "note": "starter-kitsハブ(KIT 03)から導線接続(2026-07-16)。副業設計の収益の器。売れ行きは計測で見る",
-      "lastCommit": "2026-08-20"
+      "lastCommit": "2026-10-11"
     },
     {
       "id": "medops",
@@ -436,7 +436,7 @@
       "status": "未掲載",
       "measure": "local",
       "note": "第31条申告は社長確定待ち。products配列・NAV未掲載(サムネイル作成と掲載可否は社長判断)。有料の統合・閉院実務パックは社長判断で公開保留(2026-07-18、データは完成状態で保持)。現在の公開物はすべて無料。決済開始前に特定商取引法に基づく表記が必須。法務3枚は仮文面で専門家確認要",
-      "lastCommit": "2026-07-18",
+      "lastCommit": "2026-10-17",
       "decision": {
         "points": "sitemap収載済みで検索には開かれているのに、BRIDGE本体(products/NAV)からの導線ゼロの半公開。実体は記事10・無料テンプレ9で空室でない(第14条適合)。aboutで「BRIDGE(運営: 橋本渉)」を自己申告済み。監査役推奨(2026-07-26): 掲載(a・PRODUCTS配列に1行+サムネイル作成+第31条申告確定)。代替(b)はsitemap撤去で出荷前へ戻す(scripts/medops/build.mjs)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'management', img: 'medops.png', name: '医療管理実務ライブラリ', jp: '仮称', href: '../medops/index.html',\n  p: '事務長・法人本部・新任管理職の実務を、実行手順と無料テンプレートに。' }\n※ サムネイル未作成。コピーはeditor照合前提"
@@ -456,7 +456,7 @@
       "status": "未掲載",
       "measure": "local",
       "note": "第31条申告は社長確定待ち。medopsとの棲み分け=施設運営(medops)/チーム運営(本サイト)、統合可否は未決事項。スターターパックは決済準備中表示で公開(実ファイル20点の整備が公開後の最優先タスク)。法務3枚はmedopsと同一水準の仮文面で専門家確認は両サイト分を1回で。第2弾出荷済み(記事計10本・職種別4枚・法人向け)。次回改善候補: ビルド出力とデータの整合を出荷ゲートで機械検査する(qa提案・PM支持。再ビルド→チェックサム比較をshipスキルかcheck-siteへ)。products掲載・正式名称は社長判断",
-      "lastCommit": "2026-10-03",
+      "lastCommit": "2026-10-17",
       "decision": {
         "points": "medopsと同じ半公開(sitemap収載済み・本体からの導線ゼロ)。パックは「決済準備中」「実ファイル提供体制は未用意」とページ上で正直に表記済み(pack/index.html 261行)で第14・15条は保たれている。監査役推奨(2026-07-26): medopsと同時に掲載(a)。掲載する場合パック実ファイル20点の整備が最優先タスクのまま。代替(b)はsitemap撤去(scripts/manager-starter/build.mjs)。詳細はdrafts/掲載ガバナンス棚卸し-2026-07-26.md",
         "catalogDraft": "{ cat: 'management', img: 'manager-starter.png', name: '医療管理職スターター', jp: '仮称', href: '../manager-starter/index.html',\n  p: '臨床は分かる。でも管理職の仕事は教わっていない。新任管理職の最初の90日を道具にする。' }\n※ サムネイル未作成。コピーはeditor照合前提"
