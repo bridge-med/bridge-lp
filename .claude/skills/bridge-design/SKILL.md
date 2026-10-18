@@ -12,7 +12,7 @@ description: BRIDGEの見た目・レイアウト・動き・UIを改修する�
 1. 対象がブランドの面かプロダクトの画面かを `docs/design-system.md` §0 で決める。思想は共有し、デザインはプロダクトごとに選ぶ(`CONSTITUTION.md` 第30条の2)。
 2. ブランドの面なら、`CONSTITUTION.md` 第6〜7章、`docs/design-system.md` §0〜§6、`docs/ia.md` の対象ページの役割を読み、`shared/bridge.css` / `shared/bridge.js` の既存部品・トークンを調べる。
 3. プロダクトの画面なら、`docs/design-system.md` §5(前提・共通の品質基準)、`docs/context.md` 冒頭(§7 の読み方)、そのプロダクトのトークン・部品と前提の記録(自身の styles.css・README。clinic-flow-3d なら `clinic-flow-3d/docs/ux-audit-v85.md` §4)を読む。ブランドの部品・色・書体を初期値にしない。
-4. 新しいプロダクトなら、前提(誰が・何を・どこで・どんな体験)を先に決め、デザインの方向を2〜3並べて `designer` に比べてもらう(§5)。既存のデザインの再利用から始めない。
+4. 新しいプロダクトと、デザインの方向の作り直し(系の入れ替え)なら、前提(誰が・何を・どこで・どんな体験)を先に決め、デザインの方向を2〜3並べて `designer` に比べてもらう(§5)。既存のデザインの再利用から始めない。
 
 ## 方針を決めて実装する
 
