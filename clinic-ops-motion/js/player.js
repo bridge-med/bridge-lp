@@ -13,7 +13,7 @@
   const $ = id => document.getElementById(id);
   const stage = $('stage'), frame = $('frame'), canvas = $('film'), veil = $('veil'), big = $('big'), bigLabel = $('bigLabel');
   const home = $('home'), state = $('state'), live = $('live'), playBtn = $('play'), restartBtn = $('restart'), seek = $('seek');
-  const timeEl = $('time'), fsBtn = $('fs'), chapters = $('chapters'), ticks = $('ticks');
+  const timeEl = $('time'), fsBtn = $('fs'), chapters = $('chapters'), ticks = $('ticks'), controls = $('controls');
   /* 書き出しではサブフレームごとに画素を読むので、読み出しの速い canvas にする */
   const ctx = canvas.getContext('2d', RENDER ? { alpha: false, willReadFrequently: true } : { alpha: false });
   if (!RENDER) state.textContent = '読み込み中です';
@@ -130,8 +130,7 @@
 
   function setPlayIcon() {
     playBtn.setAttribute('aria-label', playing ? '一時停止' : '再生');
-    playBtn.querySelector('.i-play').style.display = playing ? 'none' : '';
-    playBtn.querySelector('.i-pause').style.display = playing ? '' : 'none';
+    playBtn.classList.toggle('is-playing', playing);
   }
   function play() {
     if (ended || t >= DUR) { t = 0; ended = false; }
@@ -139,7 +138,7 @@
     last = performance.now(); dirty = true; setPlayIcon(); say('再生しています'); idleSoon();
   }
   function pause(msg = '一時停止しました') {
-    playing = false; setPlayIcon(); say(msg); stage.classList.remove('idle');
+    playing = false; setPlayIcon(); say(msg); idleSoon();
   }
   function toggle() { if (playing) pause(); else play(); }
   function goTo(s) {
@@ -148,9 +147,9 @@
     ui(true);
   }
   function finish() {
-    playing = false; ended = true; t = DUR; setPlayIcon();
+    playing = false; ended = true; t = DUR; setPlayIcon(); ui(true);
     bigLabel.textContent = 'もう一度見る'; home.hidden = false; veil.hidden = false;
-    say('最後まで再生しました。もう一度見ることができます');
+    say('最後まで再生しました。もう一度見ることができます'); idleSoon();
   }
 
   /* ---- 1 コマごと ---- */
@@ -200,10 +199,28 @@
   const endScrub = () => { if (!scrubbing) return; scrubbing = false; if (wasPlaying && t < DUR) play(); };
   seek.addEventListener('pointerup', endScrub);
   seek.addEventListener('change', endScrub);
-  canvas.addEventListener('click', toggle);
+  /* 全画面で帯が隠れているとき、指で触れた最初の1回は帯を出すだけにする(思わず止めない) */
+  let revealOnly = false;
+  stage.addEventListener('pointerdown', e => { revealOnly = e.target === canvas && e.pointerType !== 'mouse' && stage.classList.contains('idle'); }, true);
+  canvas.addEventListener('click', () => {
+    frame.focus({ preventScroll: true });             // 映像を押したあとも F などの操作が効く
+    if (revealOnly) { revealOnly = false; return; }
+    toggle();
+  });
 
+  /* 再生のキーが効くのは、フォーカスが映像と操作の中にあるとき・全画面のとき・どこにもフォーカスがなく映像が半分以上見えているとき。
+     下の「作品について」を読んでいるときは、Space や矢印でページを送れる */
+  const keysForFilm = () => {
+    const a = document.activeElement;
+    if (fsEl()) return true;
+    if (a && a !== document.body && a !== document.documentElement) return stage.contains(a);
+    const r = frame.getBoundingClientRect();
+    return Math.min(r.bottom, innerHeight) - Math.max(r.top, 0) >= r.height * 0.5;
+  };
   document.addEventListener('keydown', e => {
+    if (fsEl()) idleSoon();                            // 全画面で隠れた操作の帯を呼び戻す(Tab で届くように)
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!keysForFilm()) return;
     const tag = (e.target && e.target.tagName) || '';
     const onButton = tag === 'BUTTON' || tag === 'A';
     switch (e.key) {
@@ -234,15 +251,22 @@
     const on = !!fsEl();
     fsBtn.setAttribute('aria-label', on ? '全画面を終える' : '全画面で見る');
     setTimeout(fit, 60);
+    idleSoon();
   };
   document.addEventListener('fullscreenchange', onFs);
   document.addEventListener('webkitfullscreenchange', onFs);
-  /* 全画面で再生中は、操作を 2.5 秒で隠す */
+  /* 全画面では、触れずに 2.5 秒たつと操作の帯を隠す(止めているときも。架空の注記を帯の下に隠したままにしない)。
+     キーボードで帯の中にいるあいだは隠さない */
   let idleT = 0;
+  const keyboardInControls = () => {
+    const a = document.activeElement;
+    if (!a || !controls.contains(a)) return false;
+    try { return a.matches(':focus-visible'); } catch { return true; }
+  };
   function idleSoon() {
     stage.classList.remove('idle');
     clearTimeout(idleT);
-    idleT = setTimeout(() => { if (playing && fsEl()) stage.classList.add('idle'); }, 2500);
+    idleT = setTimeout(() => { if (fsEl() && !keyboardInControls()) stage.classList.add('idle'); }, 2500);
   }
   ['pointermove', 'pointerdown', 'keydown', 'focusin'].forEach(ev => stage.addEventListener(ev, idleSoon));
 

@@ -1270,6 +1270,7 @@
     const S = canvas.width / W;
     const cam = E.camera(rig(t));
     ctx.setTransform(S, 0, 0, S, 0, 0);
+    ctx.lineJoin = 'miter';                          // 待ち時間の線の round を次のコマへ持ち越さない
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
     ctx.filter = 'none';
