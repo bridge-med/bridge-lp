@@ -14,7 +14,7 @@
     { t: 0, en: 'CHAOS' },
     { t: 4.2, en: 'CONNECTION' },
     { t: 8.8, en: 'INTELLIGENCE' },
-    { t: 12.6, en: 'CONTROL' },
+    { t: 13.2, en: 'CONTROL' },
     { t: 17.8, en: 'FUTURE' },
   ];
 
@@ -393,18 +393,18 @@
   const OPT_U = -730, OPT_V = 318, OPT_DY = 44;      // 選択肢の位置(平面の局所座標。図の左下)
   function rigTarget(t) {
     const r = {
-      tx: tr(t, 0, [[4.5, 6.1, -40], [13.4, 15.2, 40]]),
-      ty: tr(t, -40, [[4.5, 6.1, 90], [8.8, 9.6, -112], [11.0, 11.9, 102], [13.4, 15.2, -10]]),
+      tx: tr(t, 0, [[4.5, 6.1, -40], [14.0, 15.6, 40]]),
+      ty: tr(t, -40, [[4.5, 6.1, 90], [8.8, 9.6, -112], [11.0, 11.9, 102], [14.0, 15.6, -10]]),
       tz: tr(t, -900, [[4.5, 6.1, 900]]),
-      yaw: tr(t, -0.1, [[0, 1.8, 0.1, ease.out], [4.5, 6.1, -0.62], [6.3, 7.8, 0.62], [13.5, 15.2, 0.34], [15.2, 16.5, -0.34, ease.soft]]),
-      pitch: tr(t, 0.05, [[0, 1.8, -0.05, ease.out], [4.5, 6.1, 0.3], [6.3, 7.8, -0.3], [13.5, 15.2, 0.15], [15.2, 16.5, -0.15, ease.soft]]),
+      yaw: tr(t, -0.1, [[0, 1.8, 0.1, ease.out], [4.5, 6.1, -0.62], [6.3, 7.8, 0.62], [14.05, 15.6, 0.34], [15.6, 16.6, -0.34, ease.soft]]),
+      pitch: tr(t, 0.05, [[0, 1.8, -0.05, ease.out], [4.5, 6.1, 0.3], [6.3, 7.8, -0.3], [14.05, 15.6, 0.15], [15.6, 16.6, -0.15, ease.soft]]),
       roll: tr(t, 0.05, [[0, 1.8, -0.05, ease.out], [4.5, 6.1, -0.05], [6.3, 7.8, 0.05]]),
       dist: tr(t, 3600, [[0, 2.6, -2740, ease.dive], [2.6, 4.2, -60, ease.soft], [4.5, 6.1, 350], [6.3, 7.8, 1610], [7.8, 8.8, -30, ease.soft],
-        [8.8, 9.6, 140], [9.6, 11.2, -110, ease.soft], [12.2, 13.3, -900, ease.in], [13.3, 15.2, 2330, ease.out], [15.2, 16.5, -700, ease.soft], [16.3, 17.8, -60, ease.soft]]),
-      f: tr(t, 1100, [[4.5, 6.1, 20], [6.3, 7.8, 1580], [13.4, 15.2, -300]]),
+        [8.8, 9.6, 140], [9.6, 11.2, -110, ease.soft], [13.0, 14.0, -900, ease.in], [14.0, 15.6, 2330, ease.out], [15.6, 16.6, -700, ease.soft], [16.6, 17.8, -60, ease.soft]]),
+      f: tr(t, 1100, [[4.5, 6.1, 20], [6.3, 7.8, 1580], [14.0, 15.6, -300]]),
     };
     /* 選択肢へ寄る(虹彩の前) */
-    const k = ease.inOut(seg(t, 12.2, 13.3)) * (1 - ease.inOut(seg(t, 13.3, 15.0)));
+    const k = ease.inOut(seg(t, 13.0, 14.0)) * (1 - ease.inOut(seg(t, 14.0, 15.4)));
     r.tx += (OPT_U + 120 - r.tx) * k * 0.55; r.ty += (OPT_V + OPT_DY * TXT.pick - r.ty) * k * 0.55;
     /* 小さな手持ちの揺れ(ほぼ止まる拍では弱く) */
     const sway = 0.0045 * (1 - 0.7 * readBeat(t));
@@ -416,7 +416,7 @@
   /* 読ませる拍(カメラをほぼ止める区間)。1 で静止に近い */
   function readBeat(t) {
     const w = (a, b) => smooth(a, a + 0.4, t) * (1 - smooth(b - 0.4, b, t));
-    return Math.max(w(2.6, 4.2), w(7.8, 8.9), w(9.7, 12.2), w(16.3, 17.8), w(20.4, 23.4));
+    return Math.max(w(2.6, 4.2), w(7.8, 8.9), w(9.7, 13.0), w(16.6, 17.8), w(20.4, 23.4));
   }
 
   /* FUTURE: 位置で決めるカメラ。17.8 秒の注視点のカメラから始めて、つなぎ目をなくす */
@@ -429,7 +429,7 @@
     const a = ease.inOut(seg(t, 17.8, 19.4)), b = ease.inOut(seg(t, 19.1, 21.1));
     const x = S5_0.x * (1 - a);
     const y = lerp(lerp(S5_0.y, -2300, a), DH / 2 - 1250, b);
-    const z = lerp(lerp(S5_0.z, -1700, a), -4300, b);
+    const z = lerp(lerp(S5_0.z, -1700, a), -4750, b);
     const pitch = lerp(lerp(S5_0.pitch, 0.9, a), 0.0368, b);
     const yaw = S5_0.yaw * (1 - a);
     const f = lerp(lerp(S5_0.f, 2100, a), 1900, b);
@@ -445,13 +445,13 @@
   /* ================================================================
      場面ごとの量
      ================================================================ */
-  const flip = t => ease.inOut(seg(t, 12.62, 13.55));           // 虹彩の開き 0→1
+  const flip = t => ease.inOut(seg(t, 13.2, 14.13));           // 虹彩の開き 0→1
   const sweepY = t => lerp(-140, H + 140, ease.inOut(seg(t, 4.2, 5.05)));
   /* ピント送り: 焦点の線が通ったところから絞りを閉じる */
   const apK = (t, y) => (t < 4.2 ? 1 : t > 5.1 ? 0 : clamp((y - sweepY(t)) / 180 + 0.5));
   /* 図の上の時刻(14:20 まで進み、CONTROL で次の来院まで進む) */
   const NEXT = D.NEXT;
-  const clock = t => (t < 7.3 ? D.T0 : t < 15.5 ? lerp(D.T0, D.NOW, ease.inOut(seg(t, 7.3, 8.7))) : lerp(D.NOW, NEXT, ease.inOut(seg(t, 15.7, 16.9))));
+  const clock = t => (t < 7.3 ? D.T0 : t < 15.8 ? lerp(D.T0, D.NOW, ease.inOut(seg(t, 7.3, 8.7))) : lerp(D.NOW, NEXT, ease.inOut(seg(t, 15.9, 16.8))));
 
   /* ================================================================
      描画: 地
@@ -665,7 +665,7 @@
 
   /* 図(待ち時間の線と一日の図)の置き場所。CONTROL で「本日の流れ」の枠へ縮んで移る */
   function chartGroup(t) {
-    const k = ease.inOut(seg(t, 13.75, 15.05));
+    const k = ease.inOut(seg(t, 14.3, 15.4));
     return { du: lerp(0, -302, k), dv: lerp(0, 80, k), k: lerp(1, 0.95, k) };
   }
   const curveGroup = chartGroup;
@@ -816,7 +816,7 @@
     const g = curveGroup(t);
     pen.grp(g.du, g.dv, g.k);
     const prog = ease.inOut(seg(t, 8.9, 10.0));
-    const xMax = ux(D.T0) + (ux(D.T1) - ux(D.T0)) * prog;
+    const xMax = Math.min(ux(D.T0) + (ux(D.T1) - ux(D.T0)) * prog, ux(clock(t)));   // 測れているのは「いま」まで
     const ink2 = C.ink2, rule = C.rule, ice = C.ice;
     const textIce = day ? C.iceink : C.ice;
     /* 目盛り: 0 分と 30 分 */
@@ -862,8 +862,8 @@
   const scanU = t => lerp(ux(D.T0) - 30, ux(D.T1) + 30, ease.inOut(seg(t, 9.85, 11.05)));
   const scanAt = u => 9.85 + 1.2 * ((u - ux(D.T0) + 30) / (ux(D.T1) - ux(D.T0) + 60));
   function drawInsights(ctx, cam, t, C, day) {
-    if (t < 9.8 || t > 14.2) return;
-    const out = 1 - smooth(13.55, 14.05, t);
+    if (t < 9.8 || t > 14.8) return;
+    const out = 1 - smooth(14.15, 14.6, t);
     const amber = day ? C.amberink : C.amber, ink = C.ink, ink2 = C.ink2;
     /* 走査線 */
     if (t < 11.2) {
@@ -903,10 +903,10 @@
 
   /* 選択肢: 3 つ並び、人がひとつを選ぶ(画は材料と選択肢まで。どれが正しいかは描かない) */
   function optPos(i) { return [OPT_U, OPT_V + i * OPT_DY]; }
-  const TAP = 12.0;
+  const TAP = 12.8;                                  // 3 つが出揃って(11.94)から 0.8 秒あけて触れる
   function drawOptions(ctx, cam, t, C, day) {
-    if (t < 11.25 || t > 14.3) return;
-    const out = 1 - smooth(13.6, 14.1, t);
+    if (t < 11.25 || t > 14.8) return;
+    const out = 1 - smooth(14.15, 14.6, t);
     pen.grp(0, 0, 1);
     const ink = C.ink, ink2 = C.ink2, amber = C.amber, amberT = day ? C.amberink : C.amber;
     const head = smooth(11.25, 11.6, t) * out;
@@ -919,7 +919,8 @@
       const al = smooth(11.35 + i * 0.12, 11.7 + i * 0.12, t) * out;
       if (al <= 0.01) return;
       const sel = i === TXT.pick;
-      const dim = sel ? 1 : 1 - 0.55 * picked;
+      const dim = sel ? 1 : 1 - 0.45 * picked;                        // 丸(飾り)だけ薄くする
+      const col = sel ? ink : M.mixc(ink, ink2, picked);              // 文字は色で引く(ink-2 は AA を満たす)
       /* 丸(選んだものだけ塗る) */
       if (pen.p(a, b - 6)) {
         const r = 8 * q.s;
@@ -928,7 +929,7 @@
         if (sel && picked > 0) { ctx.globalAlpha = al * picked; ctx.fillStyle = rgba(amber, 1); ctx.beginPath(); ctx.arc(q.x, q.y, r * 0.55, 0, Math.PI * 2); ctx.fill(); }
         ctx.globalAlpha = 1;
       }
-      pen.text(s, a + 22, b, FONT.jp(sel && picked > 0.5 ? 700 : 500, 20), ink, al * dim);
+      pen.text(s, a + 22, b, FONT.jp(sel && picked > 0.5 ? 700 : 500, 20), col, al);
     });
     const wBox = 470, hBox = OPT_DY * 3 + 52;
     pen.brackets(x0, y0 - 8, wBox, hBox, 14, ink2, 0.8 * head, 1.4, ease.out(seg(t, 11.25, 11.6)));
@@ -953,7 +954,6 @@
      ================================================================ */
   const DW = 2400, DH = 1350;                          // 板の大きさ(中心が原点)
   function lockK(t, at) { return ease.out(seg(t, at, at + 0.45)); }
-  function countUp(t, at, v) { return Math.round(v * ease.out(seg(t, at, at + 0.9))); }
 
   function drawSheet(ctx, cam, t, C, al) {
     if (al <= 0.01) return;
@@ -996,7 +996,7 @@
     pen.grp(0, 0, 1);
     const L = -1140, R = 1140;
     /* 見出しの帯 */
-    const hk = lockK(t, 14.05);
+    const hk = lockK(t, 14.55);
     pen.text('SAMPLE CLINIC', L, -598, FONT.en(700, 22), ink, hk, 'left', 'expanded', 3);
     pen.text('整形外科・リハビリテーション科(架空のクリニック)', L + 330, -598, FONT.jp(500, 19), ink2, hk);
     const tau = clock(t);
@@ -1011,16 +1011,16 @@
 
     /* KPI 4 つ */
     const S = D.stats;
-    const arrived = S.arrived + (t > 16.6 ? 1 : 0);
+    const arrived = S.arrived + (clock(t) >= D.NEXT ? 1 : 0);   // 時計が次の来院に着いたら 1 人増える
     const kpis = [
-      { en: 'VISITS', jp: '来院', v: String(countUp(t, 14.2, arrived)), u: '人', sub: `本日の予定 ${S.total}人` },
-      { en: 'WAIT', jp: '平均待ち時間', v: String(countUp(t, 14.32, S.waitAvg)), u: '分', sub: `10時台は ${S.peak}分`, warn: true },
+      { en: 'VISITS', jp: '来院', v: String(arrived), u: '人', sub: `本日の予定 ${S.total}人` },
+      { en: 'WAIT', jp: '平均待ち時間', v: String(S.waitAvg), u: '分', sub: `10時台は ${S.peak}分`, warn: true },
       { en: 'NEXT SLOT', jp: '次に入れられる枠', v: fmt(S.nextSlot), u: '', sub: 'リハ室' },
-      { en: 'PER VISIT', jp: '患者単価', v: '¥' + countUp(t, 14.56, S.unitPrice).toLocaleString('en-US'), u: '', sub: '本日の平均' },
+      { en: 'PER VISIT', jp: '患者単価', v: '¥' + S.unitPrice.toLocaleString('en-US'), u: '', sub: '本日の平均' },
     ];
     const kw = (R - L - 3 * 40) / 4, KY = -540;
     kpis.forEach((k, i) => {
-      const x = L + i * (kw + 40), lk = lockK(t, 14.2 + i * 0.12);
+      const x = L + i * (kw + 40), lk = lockK(t, 14.65 + i * 0.1);
       pen.brackets(x, KY, kw, 196, 18, ink3, 0.95, 1.5, lk);
       pen.text(k.en, x + 28, KY + 40, FONT.en(600, 13), ink2, lk, 'left', 'normal', 2.2);
       pen.text(k.jp, x + 28, KY + 70, FONT.jp(500, 19), ink, lk);
@@ -1033,13 +1033,13 @@
     });
 
     /* 本日の流れ(枠と題だけ。図は drawChart が縮んで入ってくる) */
-    module(L, -305, 1580, 635, 'TODAY\u2019S FLOW', '本日の流れ', 14.6, C);
+    module(L, -305, 1580, 635, 'TODAY\u2019S FLOW', '本日の流れ', 14.95, C);
 
     /* 稼働率の輪(レンズの距離目盛りのように) */
-    const rk = module(480, -305, 660, 315, 'OCCUPANCY', '稼働率', 14.75, C);
+    const rk = module(480, -305, 660, 315, 'OCCUPANCY', '稼働率', 15.05, C);
     {
       const cx = 480 + 660 - 150, cy = -305 + 182, rad = 88;
-      const prog = ease.inOut(seg(t, 14.85, 15.75)) * S.occ / 100;
+      const prog = ease.inOut(seg(t, 15.1, 15.85)) * S.occ / 100;
       ring(ctx, cx, cy, rad, 0, 1, rule, 12, rk);
       ring(ctx, cx, cy, rad, 0, prog, iceT, 12, rk);
       ctx.globalAlpha = rk * 0.75; ctx.strokeStyle = rgba(ink3, 1); ctx.lineWidth = 1.2; ctx.beginPath();
@@ -1048,14 +1048,14 @@
         pen.move(cx + Math.cos(an) * r0, cy + Math.sin(an) * r0); pen.line(cx + Math.cos(an) * r1, cy + Math.sin(an) * r1);
       }
       ctx.stroke(); ctx.globalAlpha = 1;
-      pen.text(String(Math.round(prog * 100)), cx - 6, cy + 21, FONT.mono(300, 60), ink, rk, 'center');
+      pen.text(String(S.occ), cx - 6, cy + 21, FONT.mono(300, 60), ink, rk, 'center');
       pen.text('%', cx + 48, cy + 19, FONT.jp(500, 20), ink2, rk);
       pen.text('診察室・リハ室', 508, -305 + 250, FONT.jp(500, 16), ink2, rk);
       pen.text('本日の予定を含む', 508, -305 + 278, FONT.jp(500, 16), ink2, rk);
     }
 
     /* 職員の負荷(人の形と、14:20 までの使用の割合) */
-    const sk = module(480, 50, 660, 280, 'STAFF LOAD', '職員の負荷', 14.9, C);
+    const sk = module(480, 50, 660, 280, 'STAFF LOAD', '職員の負荷', 15.15, C);
     const staff = [['医師', 2, S.load.doctor], ['理学療法士', 5, S.load.pt], ['受付・会計', 3, S.load.front]];
     staff.forEach(([n, c, v], i) => {
       const y = 50 + 112 + i * 56, bx = 508, bw = 660 - 56;
@@ -1064,32 +1064,31 @@
         if (!pen.p(bx + 140 + j * 22, y - 7)) continue;
         person(ctx, q.x, q.y, q.s * 1.15, rgba(ink2, sk));
       }
-      const pv = v * ease.inOut(seg(t, 15.0 + i * 0.1, 15.8 + i * 0.1));
-      pen.text(`${Math.round(pv * 100)}%`, bx + bw, y, FONT.mono(400, 20), ink, sk, 'right');
+      const pv = v * ease.inOut(seg(t, 15.2 + i * 0.08, 15.9 + i * 0.08));
+      pen.text(`${Math.round(v * 100)}%`, bx + bw, y, FONT.mono(400, 20), ink, sk, 'right');
       ctx.globalAlpha = sk; ctx.fillStyle = rgba(rule, 1); ctx.beginPath(); pen.rect(bx, y + 13, bw, 5); ctx.fill();
       ctx.fillStyle = rgba(v > 0.82 ? amber : C.ice, 1); ctx.beginPath(); pen.rect(bx, y + 13, bw * pv, 5); ctx.fill(); ctx.globalAlpha = 1;
     });
 
     /* 来週の予約(細い棒。満ちた日だけ琥珀) */
-    const bk = module(L, 372, 1580, 258, 'NEXT WEEK', '来週の予約', 15.1, C);
+    const bk = module(L, 372, 1580, 258, 'NEXT WEEK', '来週の予約', 15.25, C);
     D.week.forEach((d, i) => {
       const colW = (1580 - 56) / 6, x = L + 28 + i * colW, base = 372 + 214, hmax = 112;
-      const r = d.booked / d.cap, h = hmax * r * ease.out(seg(t, 15.2 + i * 0.06, 15.9 + i * 0.06));
+      const r = d.booked / d.cap, h = hmax * r * ease.out(seg(t, 15.3 + i * 0.05, 16.0 + i * 0.05));
       const bx = x + 64;
       ctx.globalAlpha = bk; ctx.fillStyle = rgba(rule, 1); ctx.beginPath(); pen.rect(bx, base - hmax, 14, hmax); ctx.fill();
       ctx.fillStyle = rgba(r >= 0.97 ? amber : ink2, 1); ctx.beginPath(); pen.rect(bx, base - h, 14, h); ctx.fill(); ctx.globalAlpha = 1;
       pen.text(d.d, x + 10, base, FONT.jp(500, 18), ink2, bk);
-      pen.text(`${Math.round(r * 100)}%`, bx + 30, base - 4, FONT.mono(400, 18), r >= 0.97 ? amberT : ink, bk * smooth(15.6, 16.0, t));
+      pen.text(`${Math.round(r * 100)}%`, bx + 30, base - 4, FONT.mono(400, 18), r >= 0.97 ? amberT : ink, bk);
     });
 
     /* 決めたこと(人が選んだことが画面に残る) */
-    const dk = module(480, 372, 660, 258, 'DECIDED', '決めたこと', 15.4, C);
+    const dk = module(480, 372, 660, 258, 'DECIDED', '決めたこと', 15.45, C);
     if (pen.p(510, 372 + 112)) {
       ctx.globalAlpha = dk; ctx.fillStyle = rgba(amber, 1); ctx.beginPath(); ctx.arc(q.x, q.y, 6 * q.s, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
     }
-    pen.text(TXT.opts[TXT.pick], 532, 372 + 120, FONT.jp(700, 24), ink, dk);
-    pen.text('来週の月曜から', 532, 372 + 162, FONT.jp(500, 17), ink2, dk);
-    pen.text('院長と事務長で決定', 532, 372 + 196, FONT.jp(500, 17), ink2, dk);
+    pen.text(TXT.opts[TXT.pick], 532, 372 + 124, FONT.jp(700, 28), ink, dk);
+    pen.text('来週の月曜から・院長と事務長で決定', 510, 372 + 182, FONT.jp(500, 22), ink2, dk);
   }
   function ring(ctx, cx, cy, r, a0, a1, col, lw, al) {
     if (a1 <= a0 || al <= 0.01) return;
@@ -1253,12 +1252,12 @@
       if (t > 17.9) drawTiles(ctx, cam, t, C);
       pen.use(ctx, cam, S);
       if (t >= 17.8) setMainPlane(t);
-      drawSheet(ctx, cam, t, C, smooth(13.7, 14.4, t));
+      drawSheet(ctx, cam, t, C, smooth(14.25, 14.9, t));
       drawChart(ctx, cam, t, C, true);
       drawCurve(ctx, cam, t, C, true);
       drawInsights(ctx, cam, t, C, true);
       drawOptions(ctx, cam, t, C, true);
-      if (t > 13.9) drawDashboard(ctx, cam, t, C);
+      if (t > 14.45) drawDashboard(ctx, cam, t, C);
     }
   }
 
@@ -1282,7 +1281,7 @@
       /* 光は明るい点に薄く(夜だけ) */
       if (!skip.has('bloom')) post.bloom(ctx, canvas, 0.55 * (1 - fl));
       ctx.setTransform(S, 0, 0, S, 0, 0);
-      post.vignette(ctx, canvas, [0, 0, 0], 0.4 * (1 - fl));
+      post.vignette(ctx, canvas, NI.shade, 0.4 * (1 - fl));
       ctx.setTransform(S, 0, 0, S, 0, 0);
     }
     if (fl > 0) {

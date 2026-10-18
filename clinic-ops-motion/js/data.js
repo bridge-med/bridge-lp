@@ -153,11 +153,10 @@
     { d: '月', booked: 147, cap: 150 }, { d: '火', booked: 121, cap: 150 }, { d: '水', booked: 108, cap: 150 },
     { d: '木', booked: 129, cap: 150 }, { d: '金', booked: 138, cap: 150 }, { d: '土', booked: 88, cap: 90 },
   ];
-  const fr = rng(4242);
-  const forecast = (week_, dow) => {
+  const forecast = (week_, dow) => {                             // 週と曜日だけで決まる(描くたびに変わらない)
     if (dow === 6) return 0;                                     // 日曜は休診
     const base = [0.93, 0.8, 0.72, 0.84, 0.88, 0.95][dow];
-    return Math.min(1, Math.max(0.35, base + (fr() - 0.5) * 0.16 - week_ * 0.004));
+    return Math.min(1, Math.max(0.35, base + (F.M.hash(week_ * 8 + dow, 4242) - 0.5) * 0.16 - week_ * 0.004));
   };
 
   F.D = { T0, T1, NOW, NEXT, SESS, REHAB, LANES, LANE, P, blocks, curve, heat, stats, week, forecast };

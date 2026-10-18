@@ -16,6 +16,7 @@
   const timeEl = $('time'), fsBtn = $('fs'), chapters = $('chapters'), ticks = $('ticks');
   /* 書き出しではサブフレームごとに画素を読むので、読み出しの速い canvas にする */
   const ctx = canvas.getContext('2d', RENDER ? { alpha: false, willReadFrequently: true } : { alpha: false });
+  if (!RENDER) state.textContent = '読み込み中です';
 
   /* ---- フォントがそろってから素材を作る(書き出しでは欠けたら止める) ---- */
   const ready = (async () => {
@@ -89,7 +90,7 @@
   film.CH.forEach((c, i) => {
     const at = `${(c.t / DUR) * 100}%`;
     const li = document.createElement('li'); li.style.setProperty('--at', at); ticks.appendChild(li);
-    const cl = document.createElement('li'); cl.style.setProperty('--at', `calc(${at} + 0px)`);
+    const cl = document.createElement('li');
     const b = document.createElement('button'); b.type = 'button'; b.textContent = c.en; b.dataset.i = i;
     b.setAttribute('aria-label', `${c.en} の場面へ(${c.t.toFixed(1)}秒)`);
     b.addEventListener('click', () => { goTo(c.t); if (!playing) play(); });
@@ -110,6 +111,7 @@
     const m = Math.floor(s / 60), r = s - m * 60;
     return `${String(m).padStart(2, '0')}:${r.toFixed(1).padStart(4, '0')}`;
   };
+  $('dur').textContent = ` / ${fmt(DUR)}`;
   let lastUi = -1;
   function ui(force) {
     const k = Math.round(t * 10);
@@ -117,8 +119,9 @@
     lastUi = k;
     if (!scrubbing) seek.value = t.toFixed(2);
     seek.style.setProperty('--p', `${(t / DUR) * 100}%`);
-    seek.setAttribute('aria-valuetext', `${t.toFixed(1)}秒 / ${DUR}秒`);
-    timeEl.textContent = `${fmt(t)} / ${fmt(DUR)}`;
+    const sec = playing ? Math.floor(t) : Math.round(t * 10) / 10;
+    if (seek.dataset.v !== String(sec)) { seek.dataset.v = String(sec); seek.setAttribute('aria-valuetext', `${sec}秒 / ${DUR}秒`); }
+    timeEl.textContent = fmt(t);
     let cur = 0;
     film.CH.forEach((c, i) => { if (t >= c.t) cur = i; });
     chapters.querySelectorAll('button').forEach(b => b.setAttribute('aria-current', String(+b.dataset.i === cur)));
@@ -141,7 +144,7 @@
   function toggle() { if (playing) pause(); else play(); }
   function goTo(s) {
     t = M.clamp(s, 0, DUR); dirty = true;
-    if (t < DUR) { ended = false; if (!veil.hidden && !reduce) veil.hidden = true; }
+    if (t < DUR) { ended = false; veil.hidden = true; home.hidden = true; }
     ui(true);
   }
   function finish() {
@@ -203,17 +206,17 @@
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = (e.target && e.target.tagName) || '';
     const onButton = tag === 'BUTTON' || tag === 'A';
-    const onRange = e.target === seek;
     switch (e.key) {
-      case ' ': case 'k': case 'K':
-        if (onButton && e.key === ' ') return;          // ボタンの上の Space はそのボタンに任せる
+      case ' ':
+        if (onButton) return;                            // ボタンの上の Space はそのボタンに任せる
         e.preventDefault(); toggle(); break;
-      case 'ArrowLeft': case 'ArrowRight':
-        if (onRange) return;
+      case 'ArrowLeft': case 'ArrowRight':                       // スライダーの上でも同じ幅で動かす
         e.preventDefault(); goTo(t + (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? 1 / FPS : 1)); break;
-      case 'Home': if (!onRange) { e.preventDefault(); goTo(0); } break;
-      case 'End': if (!onRange) { e.preventDefault(); goTo(DUR); finish(); } break;
-      case 'f': case 'F': if (!fsBtn.hidden) { e.preventDefault(); toggleFs(); } break;
+      case 'Home': e.preventDefault(); goTo(0); break;
+      case 'End': e.preventDefault(); goTo(DUR); finish(); break;
+      case 'f': case 'F':                                // 1 文字の操作は、再生の操作にフォーカスがあるときだけ(WCAG 2.1.4)
+        if (!fsBtn.hidden && (stage.contains(document.activeElement) || fsEl())) { e.preventDefault(); toggleFs(); }
+        break;
       default:
     }
   });

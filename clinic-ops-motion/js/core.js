@@ -81,7 +81,7 @@
   const mixc = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
 
   const TOKENS = {
-    night: ['bg', 'haze', 'ink', 'ink-2', 'ink-3', 'rule', 'ice', 'amber'],
+    night: ['bg', 'haze', 'ink', 'ink-2', 'ink-3', 'rule', 'ice', 'amber', 'shade'],
     day: ['bg', 'haze', 'panel', 'ink', 'ink-2', 'ink-3', 'rule', 'ice', 'ice-ink', 'amber', 'amber-ink'],
   };
   function readPalette() {
