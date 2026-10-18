@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>THE FUTURE OF CLINIC OPERATIONS</title>
+<meta name="description" content="クリニックの散らばった数字がつながり、待ち時間のピークとリハ室の空きが浮かび、人が選んだことが画面に残るまでを描いた約23秒の映像作品。数値はすべて架空のサンプルです。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="THE FUTURE OF CLINIC OPERATIONS">
+<meta property="og:description" content="クリニックの散らばった数字がつながり、待ち時間のピークとリハ室の空きが浮かび、人が選んだことが画面に残るまでを描いた約23秒の映像作品。数値はすべて架空のサンプルです。">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/clinic-ops-motion/">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/clinic-ops-motion/poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#05080B">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chivo+Mono:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     作品の色と書体。映像の描画(js/core.js の readPalette)もここから読む。値はここだけに置く
+     ============================================================ */
+  :root {
+    color-scheme: dark;
+    /* 夜(CHAOS〜INTELLIGENCE) */
+    --n-bg: #04070A; --n-haze: #101B24; --n-ink: #E8EFF4; --n-ink-2: #A6B7C4; --n-ink-3: #637A8C;
+    --n-rule: #2A3945; --n-ice: #8ACBF2; --n-amber: #FFB547;
+    /* 昼(CONTROL〜FUTURE)。小さな文字に使うのは -ink の付いた値だけ */
+    --d-bg: #E7ECEF; --d-haze: #F6F8F9; --d-panel: #FFFFFF; --d-ink: #0B1218; --d-ink-2: #46535E; --d-ink-3: #8C99A3;
+    --d-rule: #D3DBE0; --d-ice: #4C93C9; --d-ice-ink: #1F5F92; --d-amber: #EE9512; --d-amber-ink: #8F4E00;
+    /* 再生ページ */
+    --page: #05080B; --page-ink: #E8EFF4; --page-ink-2: #A6B7C4; --page-line: rgba(232, 239, 244, .16);
+    --page-line-2: rgba(232, 239, 244, .32); --accent: #FFB547; --scrim: rgba(4, 7, 10, .72);
+    --font-en: Archivo, system-ui, sans-serif;
+    --font-mono: "Chivo Mono", ui-monospace, monospace;
+    --font-jp: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+    --gutter: clamp(16px, 3vw, 40px);
+    --bar: 56px;
+    --ctl: 64px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { background: var(--page); color: var(--page-ink); -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: var(--font-jp); font-weight: 500; line-height: 1.8; background: var(--page); }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* ---- 上の帯 ---- */
+  .bar { height: var(--bar); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 var(--gutter); }
+  .bar h1 { margin: 0; font: 600 12px/1.3 var(--font-en); letter-spacing: .22em; font-stretch: 125%; color: var(--page-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; font-size: 13px; color: var(--page-ink-2); text-decoration: none; white-space: nowrap; }
+  .bar a:hover { color: var(--page-ink); }
+
+  /* ---- 映像の舞台(全画面にするのはこの要素) ---- */
+  .stage { position: relative; display: flex; flex-direction: column; align-items: center; padding: 0 var(--gutter); }
+  .frame { position: relative; width: min(100%, calc((100svh - var(--bar) - var(--ctl) - 28px) * 16 / 9)); aspect-ratio: 16 / 9; background: var(--n-bg); overflow: hidden; }
+  .frame canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .veil { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--scrim); }
+  .veil[hidden] { display: none; }
+  .veil .big { display: inline-flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 24px 0 18px; border: 1px solid var(--page-line-2); border-radius: 26px; background: rgba(4, 7, 10, .5); color: var(--page-ink); font: 600 14px/1 var(--font-jp); cursor: pointer; }
+  .veil .big:hover { border-color: var(--page-ink); }
+  .veil .big svg { width: 20px; height: 20px; }
+  .veil a { display: inline-flex; align-items: center; min-height: 44px; font-size: 13px; color: var(--page-ink-2); }
+  .veil a:hover { color: var(--page-ink); }
+  .veil a[hidden] { display: none; }
+  .state { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; font-size: 13px; color: var(--page-ink-2); pointer-events: none; }
+  .state:empty { display: none; }
+
+  /* ---- 操作 ---- */
+  .controls { width: min(100%, calc((100svh - var(--bar) - var(--ctl) - 28px) * 16 / 9)); min-height: var(--ctl); display: grid; grid-template-columns: auto auto 1fr auto auto auto; align-items: center; gap: 4px 6px; padding: 10px 0 0; }
+  .ctl { width: 44px; height: 44px; display: inline-grid; place-items: center; border: 0; border-radius: 22px; background: transparent; color: var(--page-ink); cursor: pointer; text-decoration: none; }
+  .ctl:hover { background: rgba(232, 239, 244, .08); }
+  .ctl svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .ctl .fill { fill: currentColor; stroke: none; }
+  .ctl[hidden] { display: none; }
+  .ctl.text { width: auto; padding: 0 12px; gap: 8px; display: inline-flex; font: 600 12px/1 var(--font-en); letter-spacing: .14em; }
+  .ctl.text svg { width: 18px; height: 18px; }
+  .time { font: 400 13px/1 var(--font-mono); color: var(--page-ink-2); white-space: nowrap; padding: 0 6px; font-variant-numeric: tabular-nums; }
+  .seek { position: relative; height: 44px; display: flex; align-items: center; min-width: 0; }
+  .seek input { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; margin: 0; background: transparent; cursor: pointer; position: relative; z-index: 1; }
+  .seek input::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(to right, var(--page-ink) var(--p, 0%), var(--page-line-2) var(--p, 0%)); }
+  .seek input::-moz-range-track { height: 2px; background: var(--page-line-2); }
+  .seek input::-moz-range-progress { height: 2px; background: var(--page-ink); }
+  .seek input::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -6px; border-radius: 50%; background: var(--accent); border: 0; }
+  .seek input::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 0; }
+  .seek input:focus-visible { outline-offset: 0; }
+  .ticks { position: absolute; left: 7px; right: 7px; top: 50%; height: 10px; margin: -5px 0 0; padding: 0; list-style: none; pointer-events: none; }
+  .ticks li { position: absolute; left: var(--at); top: 0; width: 1px; height: 10px; background: var(--page-line-2); }
+  .chapters { grid-column: 1 / -1; display: flex; gap: 0; margin: 0; padding: 0; list-style: none; position: relative; height: 44px; }
+  .chapters li { position: absolute; left: var(--at); }
+  .chapters button { min-height: 44px; padding: 0 10px 0 0; border: 0; background: none; color: var(--page-ink-2); font: 600 10.5px/1 var(--font-en); letter-spacing: .18em; cursor: pointer; white-space: nowrap; }
+  .chapters button:hover, .chapters button[aria-current="true"] { color: var(--page-ink); }
+  .chapters button[aria-current="true"]::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 50%; background: var(--accent); vertical-align: 1px; }
+
+  /* 全画面: 映像を画面いっぱいに、操作は下に重ねて、再生中は静かに隠す */
+  .stage:fullscreen { justify-content: center; padding: 0; background: #000; }
+  .stage:fullscreen .frame { width: min(100vw, 177.78vh); }
+  .stage:fullscreen .controls { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; padding: 28px clamp(16px, 3vw, 40px) 16px; background: linear-gradient(to top, rgba(0, 0, 0, .78), rgba(0, 0, 0, 0)); transition: opacity .3s; }
+  .stage:fullscreen.idle .controls { opacity: 0; }
+  .stage:fullscreen.idle { cursor: none; }
+  .stage:-webkit-full-screen { justify-content: center; padding: 0; background: #000; }
+  .stage:-webkit-full-screen .frame { width: min(100vw, 177.78vh); }
+  .stage:-webkit-full-screen .controls { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; padding: 28px 24px 16px; background: linear-gradient(to top, rgba(0, 0, 0, .78), rgba(0, 0, 0, 0)); }
+
+  /* ---- 作品について ---- */
+  .about { max-width: 760px; margin: 56px auto 0; padding: 0 var(--gutter) 72px; }
+  .about h2 { margin: 0 0 18px; font: 600 12px/1.4 var(--font-en); letter-spacing: .22em; font-stretch: 125%; color: var(--page-ink-2); }
+  .about p { margin: 0 0 18px; font-size: 15px; color: var(--page-ink); }
+  .about .note { padding: 12px 16px; border-left: 2px solid var(--accent); font-size: 14px; }
+  .scenes { margin: 28px 0; padding: 0; list-style: none; border-top: 1px solid var(--page-line); }
+  .scenes li { display: grid; grid-template-columns: 76px 128px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--page-line); font-size: 14px; }
+  .scenes .sec { font: 400 12px/1.9 var(--font-mono); color: var(--page-ink-2); }
+  .scenes .en { font: 600 11px/2.1 var(--font-en); letter-spacing: .16em; }
+  .keys { font-size: 13px; color: var(--page-ink-2); }
+  .keys kbd { display: inline-block; min-width: 22px; padding: 1px 6px; margin: 0 2px; border: 1px solid var(--page-line-2); border-radius: 4px; font: 400 12px/1.6 var(--font-mono); text-align: center; color: var(--page-ink); }
+  .out { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 28px; }
+  .out a { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; }
+
+  @media (max-width: 760px) {
+    :root { --bar: 52px; }
+    .bar { height: auto; min-height: var(--bar); padding-top: 4px; padding-bottom: 4px; }
+    .bar h1 { font-size: 10px; letter-spacing: .12em; line-height: 1.5; white-space: normal; }
+    .frame, .controls { width: 100%; }
+    .controls { grid-template-columns: auto auto 1fr auto auto; }
+    .controls .seek { grid-column: 1 / -1; grid-row: 1; }
+    .chapters { display: none; }
+    .time { justify-self: start; }
+    .scenes li { grid-template-columns: 1fr; gap: 2px; }
+  }
+  @media (max-width: 420px) {
+    .bar { padding: 0 16px; }
+    .stage { padding: 0 16px; }
+    .controls { padding: 6px 0 0; }
+    .ctl.text span { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stage:fullscreen .controls { transition: none; }
+  }
+  body.render { overflow: hidden; }
+  body.render .bar, body.render .controls, body.render .about, body.render .veil, body.render .state { display: none !important; }
+  body.render .stage { padding: 0; }
+  body.render .frame { width: 1920px; height: 1080px; }
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>THE FUTURE OF CLINIC OPERATIONS</h1>
+  <a href="#about">作品について</a>
+</header>
+
+<main>
+  <section class="stage" id="stage" aria-label="映像と再生の操作">
+    <div class="frame" id="frame">
+      <canvas id="film" role="img" aria-label="映像「THE FUTURE OF CLINIC OPERATIONS」(約23秒・音なし)" aria-describedby="film-desc"></canvas>
+      <div class="veil" id="veil" hidden>
+        <button class="big" id="big" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg><span id="bigLabel">再生する</span></button>
+        <a href="../" id="home" hidden>BRIDGE の公式サイトへ</a>
+      </div>
+      <p class="state" id="state">読み込み中です</p>
+    </div>
+    <div class="controls" id="controls">
+      <button class="ctl" id="play" type="button" aria-label="再生">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play fill" d="M8 5.5v13l10.5-6.5z"/><g class="i-pause"><path d="M8.5 5.5v13M15.5 5.5v13" stroke-width="2.2"/></g></svg>
+      </button>
+      <button class="ctl" id="restart" type="button" aria-label="最初から再生">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg>
+      </button>
+      <div class="seek">
+        <input type="range" id="seek" min="0" max="23" step="0.01" value="0" aria-label="再生位置">
+        <ol class="ticks" aria-hidden="true" id="ticks"></ol>
+      </div>
+      <span class="time" id="time" aria-hidden="true">00:00.0 / 00:23.0</span>
+      <button class="ctl" id="fs" type="button" aria-label="全画面で見る" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></svg>
+      </button>
+      <ol class="chapters" id="chapters" aria-label="場面"></ol>
+    </div>
+    <p class="sr-only" id="film-desc">ぼけた数字の粒の中に THE NUMBERS ARE THERE. THE PICTURE ISN’T. と出る。数字がクリニックの一日の流れ(受付・診察・X線・リハ室・会計)につながり、10時台の待ち時間 37分(平均)と、リハ室 14:00–15:30 の稼働 36% に括弧が付く。「再診の枠を 15時台に広げる」「リハの予約を 14時台に寄せる」「今週はこのまま様子を見る」から、人が2つ目を選ぶ。夜の配色が昼に変わってダッシュボードになり、選んだことが「来週の月曜から・院長と事務長で決定」と残る。最後に先の週の日々が地平線まで並び、SEE CLEARLY. THEN DECIDE. と出る。数値はすべて架空のサンプル。</p>
+    <p class="sr-only" id="live" aria-live="polite"></p>
+  </section>
+
+  <section class="about" id="about">
+    <h2>ABOUT</h2>
+    <p>クリニックの受付から会計までの数字が、ばらばらのまま並んでいるところから始まります。数字が一日の流れにつながり、待ち時間のピークとリハ室の空きが浮かび、人が選んだことが画面に残るまでを、約23秒の映像にしました。音はありません。</p>
+    <p class="note">映像の中の数値と名称は、すべて架空のサンプルです。実在の医療機関や製品とは関係ありません。</p>
+    <ol class="scenes" id="scenes">
+      <li><span class="sec">00:00</span><span class="en">CHAOS</span><span>ピントの合わない数字の中を進む。数字はあるのに、全体が見えない</span></li>
+      <li><span class="sec">00:04</span><span class="en">CONNECTION</span><span>数字が受付・診察・X線・リハ室・会計の一日の流れに降りて、つながる</span></li>
+      <li><span class="sec">00:08</span><span class="en">INTELLIGENCE</span><span>10時台の待ちのピークと、リハ室の午後の空きに括弧が付く。人が3つの選択肢からひとつを選ぶ</span></li>
+      <li><span class="sec">00:12</span><span class="en">CONTROL</span><span>夜の配色が昼に変わり、同じ図が人の扱えるダッシュボードに組み変わる</span></li>
+      <li><span class="sec">00:17</span><span class="en">FUTURE</span><span>画面が床に倒れ、先の週の日々まで見渡せる</span></li>
+    </ol>
+    <p class="keys"><kbd>Space</kbd>再生と一時停止 <kbd>←</kbd><kbd>→</kbd>1秒ずつ移動 <kbd>Home</kbd>最初から <kbd>F</kbd>全画面</p>
+    <div class="out">
+      <a href="../">BRIDGE の公式サイトへ</a>
+    </div>
+  </section>
+</main>
+
+<script src="js/core.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/data.js"></script>
+<script src="js/film.js"></script>
+<script src="js/player.js"></script>
+</body>
+</html>
