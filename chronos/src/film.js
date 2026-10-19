@@ -94,9 +94,9 @@ export async function createFilm({ renderer, width, height, msaa = 0 }) {
   const rig5 = new CameraRig([
     { t: B.waveCut, pos: [330, 92, 262], look: [0, 28, 0], fov: 48 },
     { t: 21.6, pos: [405, 150, 330], look: [0, 22, 0], fov: 46, ease: 'inOutSine' },
-    { t: 24.2, pos: [300, 600, 600], look: [0, 0, -20], fov: 40, ease: 'linear' },
-    { t: 27.0, pos: [0, 975, 652], look: [0, 0, -62], fov: 36, ease: 'outSine' },
-    { t: DURATION, pos: [0, 950, 636], look: [0, 0, -62], fov: 36, ease: 'inOutSine' },
+    { t: 24.2, pos: [300, 600, 600], look: [0, 0, 20], fov: 40, ease: 'linear' },
+    { t: 27.0, pos: [0, 1085, 732], look: [0, 0, 86], fov: 36, ease: 'outSine' },
+    { t: DURATION, pos: [0, 1060, 715], look: [0, 0, 86], fov: 36, ease: 'inOutSine' },
   ]);
   const cameraAt = (t) => {
     if (t < B.awaken) { const r = rig1.evaluate(t); return { pos: r.pos.clone(), look: r.look.clone(), fov: r.fov, roll: r.roll }; }

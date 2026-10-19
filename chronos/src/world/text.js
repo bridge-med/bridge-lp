@@ -170,18 +170,18 @@ export class Typography {
     // ---- 3. CHRONOS / EVERY SECOND IS ENGINEERED. ----
     const ti = this.title, tg = this.tag;
     if (t >= B.titleIn - 0.02) {
-      ti.group.visible = true; this.place(ti, 0, -0.50, 0.112, 40);
+      ti.group.visible = true; this.place(ti, 0, -0.565, 0.108, 40);
       const p = span(t, B.titleIn, B.titleIn + 1.1);
       ti.pinGlow = span(t, B.titleIn + 0.95, B.titleIn + 1.3, E.outCubic) * (0.85 + 0.15 * Math.sin(t * 5.0));
       revealConverge(ti, p);
       lightOn = Math.max(lightOn, span(t, B.titleIn, B.titleIn + 0.5));
     } else ti.group.visible = false;
     if (t >= B.tagIn - 0.02) {
-      tg.group.visible = true; const { hh, s } = this.place(tg, 0, -0.70, 0.034, 40);
+      tg.group.visible = true; const { hh, s } = this.place(tg, 0, -0.765, 0.033, 40);
       const u = span(t, B.tagIn, B.tagIn + 0.75, E.inOutSine); const x = (-0.6 + 1.25 * u) * tg.width;
       revealScan(tg, x);
       const sb = this.scanBar; const on = u > 0 && u < 1;
-      sb.visible = on; if (on) { sb.position.set(x * s, -0.70 * hh, -40 + 0.3); sb.scale.set(0.02 * s, tg.size * 1.9 * s, 0.05); }
+      sb.visible = on; if (on) { sb.position.set(x * s, -0.765 * hh, -40 + 0.3); sb.scale.set(0.02 * s, tg.size * 1.9 * s, 0.05); }
       lightOn = 1;
     } else { tg.group.visible = false; this.scanBar.visible = false; }
     this.light.intensity = 900 * lightOn;
