@@ -1,5 +1,7 @@
 # CHRONOS — The City That Manufactures Time
 
+![CHRONOS — final frame](poster.png)
+
 A 30-second procedural motion-design film. Everything on screen is generated in code: the gear train and its
 meshing phases, the city and its assembly choreography, the kinetic typography (a stroke typeface built from
 mechanical bars), the armillary core, the energy wave, and the transformation of the whole metropolis into a clock.
