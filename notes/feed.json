@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-18T22:27:08+00:00",
+  "updated_at": "2026-10-19T23:45:11+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "20代の医療職が、年収より先に考えたい働き方の選択肢",
+      "url": "https://note.com/prime_duck4944/n/nc9d264498f66",
+      "guid": "https://note.com/prime_duck4944/n/nc9d264498f66",
+      "pubDate": "2026-10-20T07:00:00+09:00",
+      "date": "2026-10-20",
+      "excerpt": "20代で医療職として働いていると、一度は自分の年収について考えることがあると思います。同年代の友人と収入を比較したり、SNSで別の業界の給与を見たり。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/323133286/rectangle_large_type_2_29dc936b84aa4a31c16a89d210929bd0.png?width=800"
+    },
+    {
+      "title": "AIで資料を要約したあと、何を自分で確認するべきか",
+      "url": "https://note.com/prime_duck4944/n/nb2b99957b076",
+      "guid": "https://note.com/prime_duck4944/n/nb2b99957b076",
+      "pubDate": "2026-10-19T19:00:00+09:00",
+      "date": "2026-10-19",
+      "excerpt": "長い資料を読むとき、ChatGPTなどのAIに要約してもらうことがあります。何十ページもある資料でも、短時間で要点を整理してくれる。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/323132386/rectangle_large_type_2_2fc90ab05c61370d636e959bf73400aa.png?width=800"
+    },
     {
       "title": "病院でのマネジメント経験は、事業会社でも通用するのか",
       "url": "https://note.com/prime_duck4944/n/nc44cf4b2abac",
@@ -38,24 +56,6 @@
       "date": "2026-10-17",
       "excerpt": "ChatGPTを使えば、会議の議事録はかなり簡単に作れるようになりました。録音データを文字起こしして、AIに要約してもらう。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/323107819/rectangle_large_type_2_195510138908e9e7f04c0e6a2009b6c6.png?width=800"
-    },
-    {
-      "title": "病院から事業会社への転職準備。私ならこの順番で進める",
-      "url": "https://note.com/prime_duck4944/n/nf989405d6008",
-      "guid": "https://note.com/prime_duck4944/n/nf989405d6008",
-      "pubDate": "2026-10-17T07:00:00+09:00",
-      "date": "2026-10-17",
-      "excerpt": "理学療法士として病院で働いていた頃、事業会社への転職は、正直なところ身近な選択肢ではありませんでした。周囲を見ても、転職先といえば別の病院やクリニック、訪問看護ステーションなどが中心です。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323107079/rectangle_large_type_2_2ff6e2bef8bb08a24c5f036bc8c357c3.png?width=800"
-    },
-    {
-      "title": "AIの回答をそのまま使わないために、私が確認している5つのこと",
-      "url": "https://note.com/prime_duck4944/n/naa0387a65d0e",
-      "guid": "https://note.com/prime_duck4944/n/naa0387a65d0e",
-      "pubDate": "2026-10-16T19:00:00+09:00",
-      "date": "2026-10-16",
-      "excerpt": "ChatGPTに仕事を依頼すると、驚くほどきれいな回答が返ってくることがあります。文章も自然で、構成も整っている。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323106414/rectangle_large_type_2_d3bc0ca4b22b2287053fa1857f83d54b.png?width=800"
     }
   ]
 }
