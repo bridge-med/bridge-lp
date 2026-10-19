@@ -201,10 +201,13 @@
   seek.addEventListener('change', endScrub);
   /* 全画面で帯が隠れているとき、指で触れた最初の1回は帯を出すだけにする(思わず止めない) */
   let revealOnly = false;
-  stage.addEventListener('pointerdown', e => { revealOnly = e.target === canvas && e.pointerType !== 'mouse' && stage.classList.contains('idle'); }, true);
+  stage.addEventListener('pointerdown', e => {
+    revealOnly = e.target === canvas && e.pointerType !== 'mouse' && stage.classList.contains('idle');
+    if (revealOnly) e.stopPropagation();             // 帯を押せる状態に戻すのは、このタップが終わってから
+  }, true);
   canvas.addEventListener('click', () => {
     frame.focus({ preventScroll: true });             // 映像を押したあとも F などの操作が効く
-    if (revealOnly) { revealOnly = false; return; }
+    if (revealOnly) { revealOnly = false; idleSoon(); return; }
     toggle();
   });
 

@@ -70,7 +70,7 @@
   .veil a:hover { color: var(--page-ink); }
   .veil a[hidden] { display: none; }
   .state { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max-content; max-width: calc(100% - 32px); margin: 0; font-size: 13px; text-align: center; color: var(--page-ink-2); pointer-events: none; }
-  .state a { pointer-events: auto; color: var(--page-ink); }
+  .state a { pointer-events: auto; color: var(--page-ink); white-space: nowrap; }
   .state:empty { display: none; }
 
   /* ---- 操作 ---- */
@@ -154,6 +154,13 @@
   @media (orientation: landscape) and (max-height: 500px) {
     .frame, .controls { width: min(100%, calc((100svh - var(--bar) - 8px) * 16 / 9)); }
     .chapters { display: none; }
+  }
+  /* 縦向きの狭い全画面では板が2行になる。帯は枠の下なので、下寄せに戻しても重ならない */
+  @media (orientation: portrait) and (max-width: 359px) {
+    .stage:fullscreen .veil { top: auto; bottom: clamp(8px, 3.5%, 28px); }
+  }
+  @media (orientation: portrait) and (max-width: 359px) {
+    .stage:-webkit-full-screen .veil { top: auto; bottom: clamp(8px, 3.5%, 28px); }
   }
   @media (prefers-reduced-motion: reduce) {
     .stage:fullscreen .controls, .stage:fullscreen.idle .controls { transition: none; }
