@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-19T23:45:11+00:00",
+  "updated_at": "2026-10-20T23:12:25+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "転職して気づいた、病院勤務で身についていた意外な強み",
+      "url": "https://note.com/prime_duck4944/n/n5a6f0611063d",
+      "guid": "https://note.com/prime_duck4944/n/n5a6f0611063d",
+      "pubDate": "2026-10-21T08:08:35+09:00",
+      "date": "2026-10-21",
+      "excerpt": "病院で働いていた頃、自分の強みを聞かれたら、何と答えていただろう。おそらく、理学療法士としての臨床経験や、スタッフ教育、マネジメントの経験を挙げていたと思います。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/326691679/rectangle_large_type_2_991f5c5e2974877326b0571298cd51ca.png?width=800"
+    },
+    {
+      "title": "仕事ができる人ほど、管理職になって苦労する理由",
+      "url": "https://note.com/prime_duck4944/n/n8cae3cdaf54f",
+      "guid": "https://note.com/prime_duck4944/n/n8cae3cdaf54f",
+      "pubDate": "2026-10-20T19:00:00+09:00",
+      "date": "2026-10-20",
+      "excerpt": "プレーヤーとして優秀だった人が、管理職になった途端に苦労する。これは、医療現場でも珍しいことではないと思います。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/323133921/rectangle_large_type_2_1ad66c7d049b4d6bd6c654a16d8329eb.png?width=800"
+    },
     {
       "title": "20代の医療職が、年収より先に考えたい働き方の選択肢",
       "url": "https://note.com/prime_duck4944/n/nc9d264498f66",
@@ -38,24 +56,6 @@
       "date": "2026-10-18",
       "excerpt": "「最近、何か困っていることある？」そう聞いても、",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/323130512/rectangle_large_type_2_3ff94ef5ceb660eaf010de9a4ae97f02.png?width=800"
-    },
-    {
-      "title": "資格を増やす前に、今の仕事で成果を作るという選択",
-      "url": "https://note.com/prime_duck4944/n/n7f1e9170d917",
-      "guid": "https://note.com/prime_duck4944/n/n7f1e9170d917",
-      "pubDate": "2026-10-18T07:00:00+09:00",
-      "date": "2026-10-18",
-      "excerpt": "医療職として働いていると、資格を取ることがキャリアアップの一つの方法になります。認定資格、専門資格、大学院、医療経営に関する資格。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323129929/rectangle_large_type_2_694f2333cb3fac43d4aad587edb2b6cb.png?width=800"
-    },
-    {
-      "title": "ChatGPTで作った議事録を、実行につながるタスク表にする方法",
-      "url": "https://note.com/prime_duck4944/n/nf922a12b265c",
-      "guid": "https://note.com/prime_duck4944/n/nf922a12b265c",
-      "pubDate": "2026-10-17T19:00:00+09:00",
-      "date": "2026-10-17",
-      "excerpt": "ChatGPTを使えば、会議の議事録はかなり簡単に作れるようになりました。録音データを文字起こしして、AIに要約してもらう。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323107819/rectangle_large_type_2_195510138908e9e7f04c0e6a2009b6c6.png?width=800"
     }
   ]
 }
