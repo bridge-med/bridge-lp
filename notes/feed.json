@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-20T23:12:25+00:00",
+  "updated_at": "2026-10-21T23:24:25+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "医療職の市場価値は、資格の数だけでは測れない",
+      "url": "https://note.com/prime_duck4944/n/n4e82a3b627e3",
+      "guid": "https://note.com/prime_duck4944/n/n4e82a3b627e3",
+      "pubDate": "2026-10-22T08:01:05+09:00",
+      "date": "2026-10-22",
+      "excerpt": "理学療法士として働いていると、資格や学歴がキャリアの一つの指標になることがあります。認定資格、専門資格、大学院、各種研修の修了歴。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/327042363/rectangle_large_type_2_a610662e0f71f84719b9cf10434d2ff0.png?width=800"
+    },
+    {
+      "title": "Excelの管理表をAIに作らせるとき、失敗しない頼み方",
+      "url": "https://note.com/prime_duck4944/n/nb7b270af2182",
+      "guid": "https://note.com/prime_duck4944/n/nb7b270af2182",
+      "pubDate": "2026-10-21T19:00:00+09:00",
+      "date": "2026-10-21",
+      "excerpt": "「この情報、Excelで管理できるようにしてほしい」仕事で、そんな依頼を受けることがあります。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/326693100/rectangle_large_type_2_4c2e51b67896b512108a36e4ae6e85b4.png?width=800"
+    },
     {
       "title": "転職して気づいた、病院勤務で身についていた意外な強み",
       "url": "https://note.com/prime_duck4944/n/n5a6f0611063d",
@@ -38,24 +56,6 @@
       "date": "2026-10-19",
       "excerpt": "長い資料を読むとき、ChatGPTなどのAIに要約してもらうことがあります。何十ページもある資料でも、短時間で要点を整理してくれる。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/323132386/rectangle_large_type_2_2fc90ab05c61370d636e959bf73400aa.png?width=800"
-    },
-    {
-      "title": "病院でのマネジメント経験は、事業会社でも通用するのか",
-      "url": "https://note.com/prime_duck4944/n/nc44cf4b2abac",
-      "guid": "https://note.com/prime_duck4944/n/nc44cf4b2abac",
-      "pubDate": "2026-10-19T07:00:00+09:00",
-      "date": "2026-10-19",
-      "excerpt": "病院で管理職を経験していても、その経験が外の世界でどれくらい評価されるのか、分からない人は多いと思います。私自身、理学療法士として病院で働き、40人規模のチームマネジメントに関わってきました。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323131536/rectangle_large_type_2_2c8b574e7ef9b98d889c8401ecc622cf.png?width=800"
-    },
-    {
-      "title": "1on1で部下が本音を話さないとき、管理職が見直したいこと",
-      "url": "https://note.com/prime_duck4944/n/n2b66115a972f",
-      "guid": "https://note.com/prime_duck4944/n/n2b66115a972f",
-      "pubDate": "2026-10-18T19:00:00+09:00",
-      "date": "2026-10-18",
-      "excerpt": "「最近、何か困っていることある？」そう聞いても、",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323130512/rectangle_large_type_2_3ff94ef5ceb660eaf010de9a4ae97f02.png?width=800"
     }
   ]
 }
