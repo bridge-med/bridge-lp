@@ -19,6 +19,9 @@ type Item = { icon: ComponentProps<typeof Feather>['name']; label: string; desc:
 
 // キャリアに変える — このアプリのキラー機能。
 const CAREER: Item[] = [
+  { icon: 'package', label: '資産ライブラリ', desc: '発信ネタ・テンプレ・プロダクトの種', href: '/assets' },
+  { icon: 'calendar', label: '週間レビュー', desc: '1週間の実績・スキル・資産を棚卸し', href: '/weekly' },
+  { icon: 'briefcase', label: 'ポートフォリオ', desc: '実績・スキル・エピソードの現在地', href: '/portfolio' },
   { icon: 'trending-up', label: '成果・実績', desc: '数字で語れる実績をまとめる', href: '/m/achievements' },
   { icon: 'layers', label: 'スキル', desc: '保有スキルとレベルを整理', href: '/m/skills' },
   { icon: 'award', label: '強み', desc: 'あなたの強みと根拠を見つける', href: '/m/strengths' },
