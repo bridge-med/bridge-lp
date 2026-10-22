@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-21T23:24:25+00:00",
+  "updated_at": "2026-10-22T23:25:59+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "事業会社に入って、医療現場の見え方が変わった",
+      "url": "https://note.com/prime_duck4944/n/n1e847df71011",
+      "guid": "https://note.com/prime_duck4944/n/n1e847df71011",
+      "pubDate": "2026-10-23T07:00:00+09:00",
+      "date": "2026-10-23",
+      "excerpt": "病院で働いていた頃、私は医療現場のことを、それなりに理解しているつもりでした。理学療法士として臨床に携わり、スタッフ教育や40人規模のチームマネジメントも経験しました。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/327045629/rectangle_large_type_2_dd054e9addc46af258697ec91b6863ea.png?width=800"
+    },
+    {
+      "title": "【100円】医療職向け・AIに業務を任せるための指示書テンプレート集",
+      "url": "https://note.com/prime_duck4944/n/n96e7948a7a8e",
+      "guid": "https://note.com/prime_duck4944/n/n96e7948a7a8e",
+      "pubDate": "2026-10-22T19:00:00+09:00",
+      "date": "2026-10-22",
+      "excerpt": "ChatGPTを仕事で使っていると、こんなことはないでしょうか。「もう少し具体的にしてほしい」",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/327044501/rectangle_large_type_2_5fac631b0ab5257c10a1786fefe70021.png?width=800"
+    },
     {
       "title": "医療職の市場価値は、資格の数だけでは測れない",
       "url": "https://note.com/prime_duck4944/n/n4e82a3b627e3",
@@ -38,24 +56,6 @@
       "date": "2026-10-20",
       "excerpt": "プレーヤーとして優秀だった人が、管理職になった途端に苦労する。これは、医療現場でも珍しいことではないと思います。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/323133921/rectangle_large_type_2_1ad66c7d049b4d6bd6c654a16d8329eb.png?width=800"
-    },
-    {
-      "title": "20代の医療職が、年収より先に考えたい働き方の選択肢",
-      "url": "https://note.com/prime_duck4944/n/nc9d264498f66",
-      "guid": "https://note.com/prime_duck4944/n/nc9d264498f66",
-      "pubDate": "2026-10-20T07:00:00+09:00",
-      "date": "2026-10-20",
-      "excerpt": "20代で医療職として働いていると、一度は自分の年収について考えることがあると思います。同年代の友人と収入を比較したり、SNSで別の業界の給与を見たり。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323133286/rectangle_large_type_2_29dc936b84aa4a31c16a89d210929bd0.png?width=800"
-    },
-    {
-      "title": "AIで資料を要約したあと、何を自分で確認するべきか",
-      "url": "https://note.com/prime_duck4944/n/nb2b99957b076",
-      "guid": "https://note.com/prime_duck4944/n/nb2b99957b076",
-      "pubDate": "2026-10-19T19:00:00+09:00",
-      "date": "2026-10-19",
-      "excerpt": "長い資料を読むとき、ChatGPTなどのAIに要約してもらうことがあります。何十ページもある資料でも、短時間で要点を整理してくれる。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/323132386/rectangle_large_type_2_2fc90ab05c61370d636e959bf73400aa.png?width=800"
     }
   ]
 }
