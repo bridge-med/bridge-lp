@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHRONOS</title>
+<meta name="description" content="CHRONOS — The City That Manufactures Time. A procedural 30-second motion-design film.">
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: Inter, "Helvetica Neue", Arial, sans-serif; }
+  #stage { position: fixed; inset: 0; display: grid; place-items: center; background: #000; }
+  canvas { display: block; width: 100%; height: 100%; object-fit: contain; }
+  #ui { position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 18px; display: flex; align-items: center; gap: 14px; color: #9aa3ad; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0; transition: opacity .35s; pointer-events: none; }
+  #ui.show { opacity: 1; pointer-events: auto; }
+  #bar { position: relative; flex: 1; height: 2px; background: rgba(255,255,255,0.15); cursor: pointer; }
+  #bar > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #ff7a2a; }
+  #bar > b { position: absolute; top: -4px; width: 1px; height: 10px; background: rgba(255,255,255,0.35); }
+  #time { font-variant-numeric: tabular-nums; min-width: 7ch; }
+  button { background: none; border: 1px solid rgba(255,255,255,0.25); color: #d8dce4; font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 5px 10px; cursor: pointer; }
+  button:hover { border-color: #5ee6ff; color: #fff; }
+  #hint { position: fixed; top: 16px; right: 18px; color: #5a626c; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0; transition: opacity .35s; }
+  #hint.show { opacity: 1; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="stage"><canvas id="c"></canvas></div>
+<div id="hint">space pause · ← → scrub · r restart · f fullscreen</div>
+<div id="ui"><button id="play">Pause</button><span id="time">00.00</span><div id="bar"><i></i></div><span>30.00</span></div>
+<script type="module">
+import * as THREE from 'three';
+import { createFilm, DURATION, BEATS } from './src/film.js';
+
+const q = new URLSearchParams(location.search);
+const renderMode = q.get('render') === '1';
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', preserveDrawingBuffer: renderMode, alpha: false });
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+renderer.autoClear = false;
+
+let W = 1920, H = 1080;
+function fit() {
+  if (renderMode) { W = +(q.get('w') || 1920); H = +(q.get('h') || 1080); }
+  else {
+    const dpr = Math.min(window.devicePixelRatio || 1, +(q.get('dpr') || 2));
+    const ww = window.innerWidth, wh = window.innerHeight;
+    const s = Math.min(ww / 16, wh / 9);
+    W = Math.round(s * 16 * dpr); H = Math.round(s * 9 * dpr);
+    canvas.style.width = Math.round(s * 16) + 'px'; canvas.style.height = Math.round(s * 9) + 'px';
+  }
+  renderer.setSize(W, H, false);
+}
+fit();
+
+const film = await createFilm({ renderer, width: W, height: H, msaa: renderMode ? 0 : 4 });
+
+if (renderMode) {
+  const gl = renderer.getContext(); const px = new Uint8Array(4);
+  window.CHRONOS = {
+    duration: DURATION, beats: BEATS,
+    renderFrame: (t, opts = {}) => { film.renderFrame(t, opts); gl.finish(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); return true; },
+    setSize: (w, h) => { W = w; H = h; renderer.setSize(w, h, false); film.setSize(w, h); },
+    ready: true,
+  };
+} else {
+  // ---- real-time player ----
+  const ui = document.getElementById('ui'), hint = document.getElementById('hint'), bar = document.getElementById('bar'), fill = bar.querySelector('i'), timeEl = document.getElementById('time'), playBtn = document.getElementById('play');
+  for (const b of Object.values(BEATS)) { const m = document.createElement('b'); m.style.left = (b / DURATION * 100) + '%'; bar.appendChild(m); }
+  let t = +(q.get('t') || 0), playing = q.get('paused') !== '1', last = performance.now(), loop = q.get('loop') !== '0', uiTimer = 0;
+  const showUI = () => { ui.classList.add('show'); hint.classList.add('show'); clearTimeout(uiTimer); uiTimer = setTimeout(() => { ui.classList.remove('show'); hint.classList.remove('show'); }, 2200); };
+  window.addEventListener('mousemove', showUI); showUI();
+  window.addEventListener('resize', () => { fit(); film.setSize(W, H); });
+  const setPlaying = (p) => { playing = p; playBtn.textContent = p ? 'Pause' : 'Play'; last = performance.now(); };
+  playBtn.addEventListener('click', () => setPlaying(!playing));
+  bar.addEventListener('click', (e) => { const r = bar.getBoundingClientRect(); t = ((e.clientX - r.left) / r.width) * DURATION; });
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); setPlaying(!playing); }
+    else if (e.code === 'ArrowRight') t = Math.min(DURATION, t + (e.shiftKey ? 0.1 : 1));
+    else if (e.code === 'ArrowLeft') t = Math.max(0, t - (e.shiftKey ? 0.1 : 1));
+    else if (e.code === 'KeyR') t = 0;
+    else if (e.code === 'KeyF') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
+    showUI();
+  });
+  let lastDrawn = -1, lastW = 0;
+  function frame(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (playing) { t += dt; if (t >= DURATION) { if (loop) t = 0; else { t = DURATION; setPlaying(false); } } }
+    if (t !== lastDrawn || W !== lastW) { film.renderFrame(t, { samples: 1 }); lastDrawn = t; lastW = W; }
+    fill.style.width = (t / DURATION * 100) + '%'; timeEl.textContent = t.toFixed(2).padStart(5, '0');
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
