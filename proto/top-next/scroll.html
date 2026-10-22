@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>BRIDGE トップ下書き(スクロール)</title>
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<!-- スクロールで現れる下書き(社長 2026-10-22「動画を置いてる感が強い。スクロールすると現れる感じとか、そういうのの組み合わせ」)
+     勝手に再生されるものは置かない。動きはすべて読む人のスクロールに従う(止めれば止まり、戻せば戻る)か、画面に入ったときに一度だけ現れる(既存の data-reveal)。
+     動きを減らす設定・データセーバー・JS なし・#still では、全部が最初から読める静かな形(sc-anim を付けない) -->
+<script>(function(){var c=document.documentElement.classList,save=navigator.connection&&navigator.connection.saveData;if(location.hash!=='#still'&&!save&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))c.add('sc-anim')})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/bridge.css">
+<style>
+/* ================================================================
+   組み合わせる動き(上から):
+   1 最初の画面は固定され、スクロールするたびに「いつもの仕事」の語が外の言葉に言いかわる(5組。スクロール位置だけで決まる)
+   2 代表作の実画面は、画面に入るにつれて枠が開きながら大きくなる。横の実画面は少し遅れて滑り込む(スクロールに従う)
+   3 見出し・説明・ボタンは画面に入ったときに一度だけ現れる(既存の data-reveal)
+   4 用途の6語は、上から順に現れる(data-reveal の遅れ)
+   5 本人の言葉は、読み進めるスクロールに合わせて一字ずつ濃くなる
+   色はトークンだけ。砂は明朝の一文の強調だけ(現行と同じ)
+   ================================================================ */
+main{overflow-x:clip}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--pad-x)}
+
+/* ===== 1 言いかわる最初の画面 ===== */
+.st{position:relative}
+.st-pin{min-height:100svh;display:flex;flex-direction:column;padding-top:76px;box-sizing:border-box}
+.st-h{font:700 15px/1.6 var(--sans);letter-spacing:.04em;color:var(--ink-2)}
+.st-stage{position:relative;flex:1 1 auto;min-height:360px;margin-top:8px}
+.pr{padding:18px 0}
+.pr-p{font:500 12px/1.4 var(--sans);letter-spacing:.06em;color:var(--ink-3)}
+.pr-f{margin-top:6px;font:900 clamp(34px,10vw,64px)/1.25 var(--sans);letter-spacing:.01em;color:var(--ink-2);word-break:auto-phrase}
+.pr-t{margin-top:10px;font:900 clamp(30px,8.6vw,58px)/1.3 var(--sans);letter-spacing:.01em;color:var(--ink);word-break:auto-phrase}
+.pr-t::before{content:'外では';display:block;margin-bottom:4px;font:500 12px/1.4 var(--sans);letter-spacing:.06em;color:var(--ink-3)}
+.st-band{flex:none;padding:14px 0 24px}
+.st-d{max-width:30em;font:400 13.5px/1.8 var(--sans);color:var(--ink-2)}
+.st-cta{margin-top:14px;display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}
+.btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:17px 30px;min-height:44px;white-space:nowrap}
+.btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn.glass:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.h-meta{font:500 12px/1.6 var(--sans);letter-spacing:.04em;color:var(--ink-3)}
+.st-note{font:500 11px/1.5 var(--sans);color:var(--ink-3)}
+.st-hint{position:absolute;left:0;bottom:6px;font:500 11px/1 var(--sans);letter-spacing:.12em;color:var(--ink-3);display:none}
+/* 動けるとき: 区間を縦に伸ばして画面を固定し、組を重ねる。各組の出入りは下の script がスクロール位置から決める */
+html.sc-anim .st{height:calc(100svh + var(--n,5) * 55svh)}
+html.sc-anim .st-pin{position:sticky;top:0;height:100svh;min-height:0}
+html.sc-anim .pr{position:absolute;left:0;right:0;top:50%;padding:0;transform:translateY(-50%)}
+html.sc-anim .pr-f,html.sc-anim .pr-t,html.sc-anim .pr-p{will-change:transform,opacity}
+html.sc-anim .st-hint{display:block}
+
+/* ===== 代表作 ===== */
+.lab{padding:clamp(64px,12vh,120px) 0 clamp(40px,7vh,72px)}
+.lab-h{font:900 clamp(26px,3.4vw,40px)/1.4 var(--sans);letter-spacing:.01em}
+.lab-lead{margin-top:10px;font:400 13.5px/1.85 var(--sans);color:var(--ink-3);max-width:34em}
+.wk{margin-top:clamp(40px,8vh,72px)}
+.wk-shot{display:block;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg-2)}
+.wk-shot img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:left top}
+.wk-shot:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+html.sc-anim .wk-shot{will-change:transform,clip-path}
+.wk-name{margin-top:18px;font:900 24px/1.4 var(--sans)}
+.wk-p{margin-top:6px;font:400 14px/1.85 var(--sans);color:var(--ink-2)}
+.wk-v{font:400 13px/1.8 var(--sans);color:var(--ink-3)}
+.wk .btn.ghost{margin-top:14px;min-height:44px}
+.lab-all{margin-top:40px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font:400 13px/1.8 var(--sans);color:var(--ink-3)}
+@media(max-width:919px){.wk.big .wk-shot{margin:0 calc(-1 * var(--pad-x));border-left:0;border-right:0;border-radius:0}}
+@media(min-width:920px){
+  .works{display:grid;grid-template-columns:7fr 5fr;gap:56px;align-items:start}
+  .wk.side{margin-top:clamp(120px,18vh,200px)}
+}
+
+/* ===== 用途 ===== */
+.uses{padding:clamp(40px,8vh,80px) 0}
+.uses-h{font:900 clamp(22px,2.6vw,30px)/1.4 var(--sans)}
+.use-list{margin-top:18px;list-style:none;padding:0;border-top:1px solid var(--line)}
+.use-list a{display:flex;justify-content:space-between;align-items:center;min-height:56px;border-bottom:1px solid var(--line);font:700 17px/1.4 var(--sans);color:var(--ink);transition:color .25s}
+.use-list a:hover{color:var(--blue)}
+.use-list a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.use-list .ar{color:var(--ink-3);font-weight:500}
+@media(min-width:920px){.use-list{display:grid;grid-template-columns:repeat(3,1fr);column-gap:32px}}
+
+/* ===== 本人の言葉 → 次の行動 ===== */
+.me{padding:clamp(64px,14vh,140px) 0 clamp(64px,10vh,120px)}
+.me-p{max-width:20em;font:700 clamp(22px,3vw,36px)/1.8 var(--sans);letter-spacing:.03em;color:var(--ink);word-break:auto-phrase}
+html.sc-anim .me-p .ch{color:var(--ink-4);transition:color .15s linear}
+html.sc-anim .me-p .ch.on{color:var(--ink)}
+.me-sign{margin-top:18px;font:400 13px/1.8 var(--sans);color:var(--ink-3)}
+.idea-h{margin-top:clamp(72px,12vh,120px);font-family:'Shippori Mincho B1',serif;font-weight:600;font-size:clamp(26px,3.4vw,40px);line-height:1.6;letter-spacing:.03em}
+.idea-h .a{color:var(--dawn-deep)}
+.me-links{margin-top:28px;display:flex;flex-wrap:wrap;gap:4px 24px}
+.me-links a{display:inline-flex;align-items:center;min-height:44px;font:500 14px/1.4 var(--sans);color:var(--ink-2);border-bottom:1px solid var(--line)}
+.me-links a:hover{color:var(--ink);border-color:var(--ink-3)}
+.me-links a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.me-note{margin-top:22px;font:400 13px/1.8 var(--sans);color:var(--ink-3)}
+
+/* data-reveal は既存の部品(bridge.css)。動きを減らす設定では bridge.css が止める。#still のときはここで止める */
+html:not(.sc-anim) [data-reveal]{opacity:1;transform:none;transition:none;animation:none}
+
+/* 下書きの切り替え(本番には持ち込まない) */
+.sw{position:fixed;left:12px;bottom:12px;z-index:200;display:flex;gap:2px;padding:4px;border-radius:100px;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font:700 12px/1 var(--sans)}
+.sw button{min-width:44px;height:44px;padding:0 14px;border-radius:100px;font:inherit;color:var(--ink-2);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--blue);color:var(--on-fill)}
+.sw button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+</style>
+</head>
+<body data-root="../../" data-page="">
+<nav class="site-nav"></nav>
+
+<main>
+
+<!-- 1 言いかわる最初の画面。JS なし・止めた姿では、組が縦に並ぶだけの静かな形 -->
+<section class="st" id="st" aria-labelledby="stTitle">
+  <div class="st-pin wrap">
+    <h1 class="st-h" id="stTitle">いつもの仕事を、外の言葉で言うと</h1>
+    <div class="st-stage" id="stage">
+      <div class="pr"><p class="pr-p">理学療法士</p><p class="pr-f">退院支援</p><p class="pr-t">プロジェクト推進・合意形成</p></div>
+      <span class="st-hint" aria-hidden="true">スクロール</span>
+    </div>
+    <div class="st-band">
+      <p class="st-note">BRIDGE Compass にある言いかえの例</p>
+      <p class="st-d">医療の現場で働く人へ。いつもの仕事が、医療の外でどんな言葉になるかを見つけられます。</p>
+      <div class="st-cta"><a class="btn glass" href="../../compass/index.html">自分の仕事で見てみる <span aria-hidden="true">→</span></a><span class="h-meta">10の質問・約3分・登録不要</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2・3 代表作 -->
+<section class="lab" aria-labelledby="labTitle">
+  <div class="wrap">
+    <h2 class="lab-h" id="labTitle" data-reveal>ほかにも作っています</h2>
+    <p class="lab-lead" data-reveal data-reveal-delay="1">ここに並べたものは無料で、登録もいりません。入力はこの端末の中にだけ残ります。</p>
+    <div class="works">
+      <article class="wk big">
+        <a class="wk-shot" data-scrub="open" href="../../clinic-flow-3d/index.html" tabindex="-1" aria-hidden="true"><img src="../../images/products/shots/clinic-flow-3d-decision.webp" alt="" width="1440" height="900" loading="lazy" decoding="async"></a>
+        <h3 class="wk-name" data-reveal>クリニックタウン3D</h3>
+        <p class="wk-p" data-reveal data-reveal-delay="1">クリニックの経営を、1日ずつ動かして学ぶゲームです。</p>
+        <p class="wk-v" data-reveal data-reveal-delay="1">いまの版は v99.3 です。</p>
+        <a class="btn ghost" data-reveal data-reveal-delay="2" href="../../clinic-flow-3d/index.html">遊んでみる <span aria-hidden="true">→</span></a>
+      </article>
+      <article class="wk side">
+        <a class="wk-shot" data-scrub="slide" href="../../tanaoroshi/index.html" tabindex="-1" aria-hidden="true"><img src="../../images/products/thumbs/tanaoroshi.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></a>
+        <h3 class="wk-name" data-reveal>経験の棚卸し</h3>
+        <p class="wk-p" data-reveal data-reveal-delay="1">18の質問に答えると、職務経歴書のたねと面接で話す材料ができます。</p>
+        <a class="btn ghost" data-reveal data-reveal-delay="2" href="../../tanaoroshi/index.html">思い出せるものから答える <span aria-hidden="true">→</span></a>
+      </article>
+    </div>
+    <p class="lab-all" data-reveal><span>ぜんぶで29点あります。</span><a class="tx-link" href="../../products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
+  </div>
+</section>
+
+<!-- 4 用途 -->
+<section class="uses" aria-labelledby="usesTitle">
+  <div class="wrap">
+    <h2 class="uses-h" id="usesTitle" data-reveal>目的から探す</h2>
+    <ul class="use-list">
+      <li data-reveal><a href="../../products/index.html#work">業務<span class="ar" aria-hidden="true">→</span></a></li>
+      <li data-reveal data-reveal-delay="1"><a href="../../products/index.html#manage">経営・管理<span class="ar" aria-hidden="true">→</span></a></li>
+      <li data-reveal data-reveal-delay="2"><a href="../../products/index.html#learn">経営を学ぶ<span class="ar" aria-hidden="true">→</span></a></li>
+      <li data-reveal data-reveal-delay="1"><a href="../../products/index.html#career">キャリア<span class="ar" aria-hidden="true">→</span></a></li>
+      <li data-reveal data-reveal-delay="2"><a href="../../products/index.html#study">学習<span class="ar" aria-hidden="true">→</span></a></li>
+      <li data-reveal data-reveal-delay="3"><a href="../../products/index.html#play">試す・作品<span class="ar" aria-hidden="true">→</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 5 本人の言葉 → 次の行動(閉じの帯 .kz は本番のものを残す前提で、下書きには入れていない) -->
+<section class="me" aria-labelledby="ideaTitle">
+  <div class="wrap">
+    <p class="me-p" id="meP">外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p>
+    <p class="me-sign" data-reveal>理学療法士 橋本渉</p>
+    <h2 class="idea-h" id="ideaTitle" data-reveal>正解を与えるのではなく、<br class="br-pc"><span class="a">選択肢を増やす</span></h2>
+    <p class="me-links" data-reveal data-reveal-delay="1"><a href="../../philosophy/index.html">考え方を読む <span aria-hidden="true">→</span></a><a href="../../about/index.html">運営者について</a><a href="../../community/index.html">話をする</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">noteを読む <span aria-hidden="true">↗</span></a></p>
+    <p class="me-note" data-reveal data-reveal-delay="2">見るだけで帰っても、それで十分です。</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer"></footer>
+
+<nav class="sw" aria-label="下書きの切り替え">
+  <button type="button" data-k="anim">動き</button>
+  <button type="button" data-k="still">止めた姿</button>
+</nav>
+
+<script src="../../shared/bridge.js" defer></script>
+<script src="../../compass/app/data.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var R = document.documentElement, C = R.classList, D = window.COMPASS_DATA;
+  var on = function () { return C.contains('sc-anim'); };
+  var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+  var ease = function (u) { return 1 - Math.pow(1 - u, 3); };
+  var vh = function () { return window.innerHeight; };
+
+  /* ---- 1 言いかわる組。語は compass/app/data.js から(写しを持たない)。組と順は editor 2026-10-21 の推奨から5つ ---- */
+  var ORDER = [['pt', '退院支援'], ['nurse', '申し送り'], ['ot', '作業分析'], ['st', 'コミュニケーション評価'], ['judo', '問診']];
+  var stage = document.getElementById('stage'), st = document.getElementById('st'), prs = [];
+  if (D) {
+    var label = function (id) { var p = D.PROFESSIONS.filter(function (x) { return x.id === id; })[0]; return p ? p.label.replace(/\(.*?\)/, '') : id; };
+    var pairs = ORDER.map(function (o) { var t = (D.TRANSLATIONS[o[0]] || []).filter(function (x) { return x.from === o[1]; })[0]; return t && { p: label(o[0]), from: t.from, to: t.to }; }).filter(Boolean);
+    stage.querySelectorAll('.pr').forEach(function (e) { e.remove(); });
+    pairs.forEach(function (t) {
+      var e = document.createElement('div'); e.className = 'pr';
+      e.innerHTML = '<p class="pr-p"></p><p class="pr-f"></p><p class="pr-t"></p>';
+      e.children[0].textContent = t.p; e.children[1].textContent = t.from; e.children[2].textContent = t.to;
+      stage.insertBefore(e, stage.lastElementChild); prs.push(e);
+    });
+    st.style.setProperty('--n', prs.length);
+  }
+
+  /* ---- 5 本人の言葉を一字ずつに分ける(読み上げは元の一文のまま) ---- */
+  var meP = document.getElementById('meP'), chs = [];
+  (function () {
+    var txt = meP.textContent; meP.setAttribute('aria-label', txt); meP.textContent = '';
+    for (var i = 0; i < txt.length; i++) { var s = document.createElement('span'); s.className = 'ch'; s.setAttribute('aria-hidden', 'true'); s.textContent = txt[i]; meP.appendChild(s); chs.push(s); }
+  })();
+
+  var scrubs = [].slice.call(document.querySelectorAll('[data-scrub]'));
+
+  /* ---- スクロール位置から、すべての動きを決める(時刻は使わない) ---- */
+  var frame = function () {
+    var H = vh();
+    if (!on()) {
+      prs.forEach(function (e) { [].forEach.call(e.children, function (c) { c.style.transform = ''; c.style.opacity = ''; }); e.style.visibility = ''; });
+      scrubs.forEach(function (e) { e.style.transform = ''; e.style.clipPath = ''; });
+      chs.forEach(function (c) { c.classList.add('on'); });
+      return;
+    }
+    /* 1: 区間の中の進み p(0〜1)を組の数で割り、各組の中の u で「出る → 言いかわる → 去る」 */
+    if (prs.length) {
+      var r = st.getBoundingClientRect(), span = st.offsetHeight - H, p = clamp(-r.top / span), n = prs.length;
+      prs.forEach(function (e, i) {
+        var u = p * n - i, f = e.children[1], t = e.children[2], lab = e.children[0];
+        var first = i === 0, last = i === n - 1;
+        var inn = first ? 1 : ease(clamp((u + .02) / .2));        /* 前の組が去り終えてから入る(重ねない) */
+        var sw = ease(clamp((u - .22) / .4));                       /* 言いかわり */
+        var out = last ? 0 : ease(clamp((u - .78) / .18));          /* 去る */
+        e.style.visibility = (inn <= 0 || out >= 1) ? 'hidden' : '';
+        var y = (1 - inn) * 60 - out * 80;
+        lab.style.transform = 'translateY(' + y + 'px)'; lab.style.opacity = String(inn * (1 - out));
+        f.style.transform = 'translateY(' + (y - sw * 18) + 'px) scale(' + (1 - sw * .42) + ')';
+        f.style.transformOrigin = 'left bottom';
+        f.style.opacity = String(inn * (1 - out) * (1 - sw * .45));
+        t.style.transform = 'translateY(' + (y + (1 - sw) * 48) + 'px)';
+        t.style.opacity = String(sw * (1 - out));
+      });
+    }
+    /* 2: 実画面。下端から入って画面の中ほどに来るまでに、枠が開きながら大きくなる/横から滑り込む */
+    scrubs.forEach(function (e) {
+      var b = e.getBoundingClientRect(), u = ease(clamp((H - b.top) / (H * .75)));
+      if (e.dataset.scrub === 'open') { e.style.transform = 'scale(' + (.86 + .14 * u) + ')'; e.style.clipPath = 'inset(' + ((1 - u) * 14) + '% ' + ((1 - u) * 10) + '% round 4px)'; }
+      else e.style.transform = 'translateX(' + ((1 - u) * 22) + '%)';
+    });
+    /* 5: 一字ずつ。段落の頭が画面の 80% から 35% に来るあいだに読み進める */
+    var mb = meP.getBoundingClientRect(), mu = clamp((H * .8 - mb.top) / (H * .45 + mb.height * .6)), k = Math.round(mu * chs.length);
+    chs.forEach(function (c, i) { c.classList.toggle('on', i < k); });
+  };
+  var ticking = false;
+  var req = function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; frame(); }); } };
+  window.addEventListener('scroll', req, { passive: true });
+  window.addEventListener('resize', req);
+  frame();
+
+  /* ---- 下書きの切り替え ---- */
+  var sync = function () { document.querySelectorAll('.sw button').forEach(function (b) { b.setAttribute('aria-pressed', String((b.dataset.k === 'anim') === on())); }); };
+  document.querySelectorAll('.sw button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      C.toggle('sc-anim', b.dataset.k === 'anim');
+      sync(); frame(); req();
+    });
+  });
+  sync();
+});
+</script>
+</body>
+</html>
