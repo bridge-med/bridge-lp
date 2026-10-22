@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>BRIDGE トップ下書き</title>
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<!-- 最初の画面だけの動く下書き(designer 2026-10-22 の3案。社長「案1もなんかしょぼい」=動きが小さく地味・発想が弱い)
+     #a #b #c で案を、#still で止めた姿を開ける。左下の切り替えは読み込み直さずに入れ替える。
+     動かすのは、動きを減らす設定・データセーバー・止めた姿でないときだけ(fv-anim) -->
+<script>(function(){var r=document.documentElement,c=r.classList,h=location.hash.slice(1);c.add(h==='b'||h==='c'?'k-'+h:'k-a');var save=navigator.connection&&navigator.connection.saveData;window.FV_OK=!save&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);if(h!=='still'&&window.FV_OK)c.add('fv-anim')})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/bridge.css">
+<style>
+/* ================================================================
+   動く下書き(最初の画面だけ)。動くのは語そのもので、線もロゴも描かない。語は compass/app/data.js(案C は engine.js も)から組む
+   構図: スマホは 動きの場(画面の残り全部)→ 職種のチップ → 文字の帯(見出し・一文・主ボタン)。PC は左に文字、右に場
+   色はトークンだけ: 地 --bg(案A の上の帯だけ --bg-2)/ 動く語 --ink-2 / 止まった語 --ink / 職種名・添え書き --ink-3。砂は場に置かない
+   ================================================================ */
+main{overflow-x:clip}
+.k-a .only-b,.k-a .only-c,.k-b .only-a,.k-b .only-c,.k-c .only-a,.k-c .only-b{display:none}
+.fv{min-height:100svh;display:flex;flex-direction:column;padding-top:72px;box-sizing:border-box}
+.fv-field{position:relative;flex:1 1 auto;min-height:400px;overflow:hidden}
+.fv-in{flex:none;padding:0 var(--pad-x)}
+.chips{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips .tag{flex:none;font-size:12.5px;padding:9px 14px}
+.chips .tag:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.fv-band{padding:14px 0 22px}
+.fv-h{font:900 clamp(20px,2.6vw,32px)/1.5 var(--sans);letter-spacing:.02em;color:var(--ink)}
+.fv-d{margin-top:6px;max-width:30em;font:400 13.5px/1.8 var(--sans);color:var(--ink-2)}
+.fv-cta{margin-top:16px;display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}
+.btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:17px 30px;min-height:44px;white-space:nowrap}
+.btn.glass:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.h-meta{font:500 12px/1.6 var(--sans);letter-spacing:.04em;color:var(--ink-3)}
+.ex-note{position:absolute;left:var(--pad-x);bottom:10px;right:64px;z-index:3;font:500 11px/1.5 var(--sans);letter-spacing:.03em;color:var(--ink-3)}
+.fv-field .motion-toggle{position:absolute;right:max(8px,calc(var(--pad-x) - 18px));bottom:4px;z-index:4}
+@media(min-width:920px){
+  .fv{display:grid;grid-template-columns:5fr 7fr;grid-template-rows:auto auto;align-content:center;column-gap:48px;padding:96px var(--pad-x) 48px;max-width:var(--max);margin:0 auto}
+  .fv-field{grid-column:2;grid-row:1 / span 2;height:min(78vh,700px);min-height:0;border-radius:4px}
+  .fv-in{grid-column:1;padding:0}
+  .fv-in.top{grid-row:2}
+  .fv-in.bot{grid-row:1;align-self:end}
+}
+
+/* ===== 案A 境目: 境目を通ると、言葉が言いかわる ===== */
+.fa{position:absolute;inset:0;--b:46%}
+.fa-zone{position:absolute;left:0;right:0;top:0;height:var(--b);background:var(--bg-2)}
+.fa-lab{position:absolute;z-index:2;font:500 12px/1 var(--sans);letter-spacing:.08em;color:var(--ink-3)}
+.fa-lab.up{left:var(--pad-x);top:12px}
+.fa-lab.dn{left:var(--pad-x);top:calc(var(--b) + 12px)}
+.fa-clip{position:absolute;inset:0}
+.fa-clip.to{clip-path:inset(0 0 calc(100% - var(--b)) 0)}
+.fa-clip.from{clip-path:inset(var(--b) 0 0 0)}
+.fa-col{position:absolute;left:var(--pad-x);right:var(--pad-x);top:0;will-change:transform}
+.fa-box{position:relative;height:72px;margin-bottom:24px}
+.fa-box.last{margin-top:72px}
+.fa-w{position:absolute;left:0;right:68px;top:0;font:900 26px/1.25 var(--sans);letter-spacing:.01em;word-break:auto-phrase}
+.fa-clip.to .fa-w{color:var(--ink)}
+.fa-clip.from .fa-w{color:var(--ink-2)}
+.fa-clip.to .last .fa-w{top:-48px}
+.fa-clip.from .last .fa-w{top:48px}
+.fa-p{position:absolute;right:0;top:4px;font:500 11px/1.4 var(--sans);color:var(--ink-3)}
+.fa-clip.to .last .fa-p{top:-44px}
+.fa-clip.from .last .fa-p{top:52px}
+
+/* ===== 案B 交差点: 職種の違う言葉が、すれ違って同じ言葉になる ===== */
+.fb{position:absolute;inset:0}
+.fb-to{position:absolute;max-width:72%;transform:translateY(-50%)}
+.fb-to.l{left:var(--pad-x)}
+.fb-to.r{right:var(--pad-x);text-align:right}
+.fb-t{font:900 22px/1.35 var(--sans);letter-spacing:.01em;color:var(--ink);word-break:auto-phrase}
+.fb-s{margin-top:2px;font:500 11.5px/1.5 var(--sans);color:var(--ink-3)}
+.fb-mv{position:absolute;left:0;top:0;white-space:nowrap;pointer-events:none;will-change:transform}
+.fb-mv .p{display:block;font:500 11px/1.4 var(--sans);color:var(--ink-3)}
+.fb-mv .w{display:block;font:700 28px/1.3 var(--sans);color:var(--ink-2)}
+
+/* ===== 案C 行き先が動く: 答えが変わると、12の行き先が組み替わる ===== */
+.fc{position:absolute;inset:0;padding:16px var(--pad-x) 40px;display:flex;flex-direction:column}
+.fc-tag{font:500 13px/1.6 var(--sans);color:var(--ink-2);min-height:21px}
+.fc-pile{margin-top:14px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.fc-b{display:inline-block;transform-origin:left bottom;font:500 16px/1.6 var(--sans);color:var(--ink-3);will-change:transform}
+.fc-b.on{font:900 32px/1.3 var(--sans);color:var(--ink);letter-spacing:.01em}
+
+/* ===== 下書きの切り替え(本番には持ち込まない) ===== */
+.sw{position:fixed;left:12px;bottom:12px;z-index:200;display:flex;gap:2px;padding:4px;border-radius:100px;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font:700 12px/1 var(--sans)}
+.sw button{min-width:44px;height:44px;padding:0 12px;border-radius:100px;font:inherit;color:var(--ink-2);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--blue);color:var(--on-fill)}
+.sw button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.sw .sep{width:1px;margin:8px 4px;background:var(--line)}
+</style>
+</head>
+<body data-root="../../" data-page="">
+<nav class="site-nav"></nav>
+
+<main>
+<section class="fv" aria-labelledby="fvTitle">
+  <div class="fv-field" id="field" aria-hidden="true">
+    <div class="fa only-a" id="fa">
+      <div class="fa-zone"></div>
+      <span class="fa-lab up">外では</span><span class="fa-lab dn">病院で</span>
+      <div class="fa-clip to"><div class="fa-col" id="faTo"></div></div>
+      <div class="fa-clip from"><div class="fa-col" id="faFrom"></div></div>
+    </div>
+    <div class="fb only-b" id="fb"></div>
+    <div class="fc only-c" id="fc"><p class="fc-tag" id="fcTag"></p><div class="fc-pile" id="fcPile"></div></div>
+    <p class="ex-note only-a">BRIDGE Compass の言いかえ表から</p>
+    <p class="ex-note only-b">BRIDGE Compass の言いかえ表から。同じ言葉に言いかえられる語を交差させています</p>
+    <p class="ex-note only-c">BRIDGE Compass の計算をそのまま使っています。答えは職種ごとの一例です</p>
+    <button class="motion-toggle" id="mt" type="button" aria-label="動きを止める" aria-pressed="false" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M4.5 2.5v9M9.5 2.5v9"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.5l7 4.5-7 4.5z"/></svg></button>
+  </div>
+  <p class="sr-only" id="fvSr">いつもの仕事の言葉が、医療の外でどんな言葉になるかの例。たとえば退院支援は、外の言葉でプロジェクト推進・合意形成。</p>
+  <div class="fv-in top"><div class="chips tag-row" id="chips" role="group" aria-label="職種を選ぶ"></div></div>
+  <div class="fv-in bot">
+    <div class="fv-band">
+      <h1 class="fv-h" id="fvTitle">いつもの仕事を、外の言葉で言うと</h1>
+      <p class="fv-d">医療の現場で働く人へ。いつもの仕事が、医療の外でどんな言葉になるかを見つけられます。</p>
+      <div class="fv-cta"><a class="btn glass" href="../../compass/index.html">自分の仕事で見てみる <span aria-hidden="true">→</span></a><span class="h-meta">10の質問・約3分・登録不要</span></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<nav class="sw" aria-label="下書きの切り替え">
+  <button type="button" data-k="a">A 境目</button>
+  <button type="button" data-k="b">B 交差点</button>
+  <button type="button" data-k="c">C 行き先</button>
+  <span class="sep" aria-hidden="true"></span>
+  <button type="button" data-k="still" aria-label="止めた姿">止</button>
+</nav>
+
+<script src="../../shared/bridge.js" defer></script>
+<script src="../../compass/app/data.js" defer></script>
+<script src="../../compass/app/engine.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var R = document.documentElement, C = R.classList, D = window.COMPASS_DATA, E = window.COMPASS_ENGINE;
+  if (!D) return;
+  var field = document.getElementById('field'), mt = document.getElementById('mt'), chips = document.getElementById('chips');
+  var anim = function () { return C.contains('fv-anim'); };
+  var kind = function () { return C.contains('k-b') ? 'b' : C.contains('k-c') ? 'c' : 'a'; };
+  var label = function (id) { var p = D.PROFESSIONS.filter(function (x) { return x.id === id; })[0]; return p ? p.label.replace(/\(.*?\)/, '') : id; };
+  var short = function (id) { return id === 'other' ? 'その他' : label(id); };
+  /* editor 2026-10-21 が外した組(誤解・誇張の恐れ、言いかえになっていない、長すぎる) */
+  var EXCLUDE = ['継続通院支援', '自費施術', '集客', '院運営', '業務改善', 'リーダー業務(その日の業務の割り振り)', '環境調整'];
+  var TR = {};
+  Object.keys(D.TRANSLATIONS).forEach(function (p) { TR[p] = D.TRANSLATIONS[p].filter(function (t) { return EXCLUDE.indexOf(t.from) < 0; }); });
+  var PROFS = D.PROFESSIONS.map(function (p) { return p.id; });
+
+  /* ---- 小さな時計: setTimeout の予定も、止める・再開できるように ---- */
+  var paused = false, userPaused = false, timers = [];
+  var later = function (fn, ms) { var t = { fn: fn, left: ms, at: performance.now(), id: 0 }; t.id = setTimeout(function () { timers.splice(timers.indexOf(t), 1); fn(); }, ms); timers.push(t); };
+  var clearLater = function () { timers.forEach(function (t) { clearTimeout(t.id); }); timers = []; };
+  var all = function () { return field.getAnimations ? field.getAnimations({ subtree: true }) : []; };
+  var running = false;
+  var setPaused = function (v) {
+    if (paused === v) return; paused = v;
+    all().forEach(function (a) { v ? a.pause() : a.play(); });
+    if (v) timers.forEach(function (t) { clearTimeout(t.id); t.left -= performance.now() - t.at; });
+    else timers.forEach(function (t) { t.at = performance.now(); t.id = setTimeout(function () { timers.splice(timers.indexOf(t), 1); t.fn(); }, Math.max(0, t.left)); });
+    syncMt();
+  };
+  var syncMt = function () { var p = paused || !running; mt.setAttribute('aria-pressed', String(p)); mt.setAttribute('aria-label', p ? '動きをもう一度再生する' : '動きを止める'); };
+  var done = function () { running = false; syncMt(); };
+  mt.addEventListener('click', function () {
+    if (!running) { userPaused = false; play(true); return; }
+    userPaused = !paused; setPaused(!paused);
+  });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { if (!userPaused && running) setPaused(!es[0].isIntersecting); }, { threshold: 0 }).observe(field);
+  document.addEventListener('visibilitychange', function () { if (!userPaused && running) setPaused(document.hidden); });
+  var stopAll = function () { clearLater(); all().forEach(function (a) { a.cancel(); }); paused = false; running = false; };
+
+  /* ================= 案A 境目 ================= */
+  var A_ORDER = [['nurse', '申し送り'], ['ot', '作業分析'], ['judo', '問診'], ['st', 'コミュニケーション評価'], ['nurse', '患者・家族への説明'], ['pt', '患者評価'], ['other', '多職種との連携'], ['ot', '生活歴・価値観の把握'], ['st', '家族指導'], ['other', '日々の業務の工夫'], ['pt', '退院支援']];
+  var find = function (p, from) { return (TR[p] || []).filter(function (t) { return t.from === from; })[0]; };
+  var aBuild = function (list) {
+    ['faTo', 'faFrom'].forEach(function (id) {
+      var col = document.getElementById(id); col.innerHTML = '';
+      list.forEach(function (it, i) {
+        var box = document.createElement('div'); box.className = 'fa-box' + (i === list.length - 1 ? ' last' : '');
+        var w = document.createElement('p'); w.className = 'fa-w'; w.textContent = id === 'faTo' ? it.to : it.from;
+        var p = document.createElement('span'); p.className = 'fa-p'; p.textContent = label(it.p);
+        box.appendChild(w); box.appendChild(p); col.appendChild(box);
+        if (w.scrollHeight > 72) w.style.fontSize = '22px';
+      });
+    });
+  };
+  var aEnd = function () {
+    var col = document.getElementById('faTo'), last = col.lastElementChild, b = field.clientHeight * 0.46;
+    return b - (last.offsetTop + 36);
+  };
+  var aRun = function (list, dur) {
+    aBuild(list);
+    var end = aEnd(), start = field.clientHeight + 8;
+    ['faTo', 'faFrom'].forEach(function (id) {
+      var col = document.getElementById(id);
+      col.style.transform = 'translateY(' + end + 'px)';
+      if (!anim()) return;
+      col.animate([{ transform: 'translateY(' + start + 'px)', offset: 0 }, { transform: 'translateY(' + (end + (start - end) * 0.1) + 'px)', offset: 0.88, easing: 'cubic-bezier(.16,1,.3,1)' }, { transform: 'translateY(' + end + 'px)', offset: 1 }], { duration: dur, easing: 'linear', fill: 'backwards' });
+    });
+    if (anim()) { running = true; later(done, dur); }
+    syncMt();
+  };
+  var aDefault = function () { return A_ORDER.map(function (o) { var t = find(o[0], o[1]); return t && { p: o[0], from: t.from, to: t.to }; }).filter(Boolean); };
+  var aProf = function (p) {
+    var first = { pt: '退院支援', nurse: '申し送り', ot: '作業分析', judo: '問診', st: 'コミュニケーション評価', other: '多職種との連携' }[p];
+    var list = TR[p].filter(function (t) { return t.from !== first; }).map(function (t) { return { p: p, from: t.from, to: t.to }; });
+    var f = find(p, first); if (f) list.push({ p: p, from: f.from, to: f.to });
+    return list;
+  };
+
+  /* ================= 案B 交差点 ================= */
+  var bRows = function (p) {
+    var by = {};
+    PROFS.forEach(function (q) { TR[q].forEach(function (t) { (by[t.to] = by[t.to] || []).push({ p: q, from: t.from }); }); });
+    var rows;
+    if (!p) rows = Object.keys(by).filter(function (k) { return by[k].length >= 2; }).map(function (k) { return { to: k, m: by[k] }; });
+    else rows = TR[p].map(function (t) { return { to: t.to, m: by[t.to] }; });
+    rows.sort(function (x, y) { return y.m.length - x.m.length; });
+    return rows.slice(0, 6);
+  };
+  var bRun = function (p) {
+    var fb = document.getElementById('fb'); fb.innerHTML = '';
+    var rows = bRows(p), H = field.clientHeight - 30, W = field.clientWidth, n = rows.length;
+    var diag = Math.sqrt(W * W + H * H), step = n > 1 ? (H - 24) / n : H;
+    var tos = rows.map(function (r, i) {
+      var el = document.createElement('div'); el.className = 'fb-to ' + (i % 2 ? 'r' : 'l');
+      el.style.top = (12 + step * (i + .5)) + 'px';
+      el.innerHTML = '<p class="fb-t"></p><p class="fb-s"></p>';
+      el.firstChild.textContent = r.to;
+      el.lastChild.textContent = r.m.map(function (m) { return short(m.p) + ' ' + m.from; }).join(' / ');
+      fb.appendChild(el); return el;
+    });
+    if (!anim()) { syncMt(); return; }
+    running = true;
+    var GAP = 700, DUR = 1500, fr = fb.getBoundingClientRect();
+    rows.forEach(function (r, i) {
+      var el = tos[i], t = el.querySelector('.fb-t'), s = el.querySelector('.fb-s'), rc = t.getBoundingClientRect();
+      var P = { x: rc.left - fr.left + rc.width / 2, y: rc.top - fr.top + rc.height / 2 };
+      var degs = [-30, 30, 84, -84];
+      t.animate([{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: i * GAP + 680, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' });
+      s.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: (n - 1) * GAP + DUR, fill: 'backwards' });
+      r.m.forEach(function (m, j) {
+        var a = degs[j % degs.length] * Math.PI / 180, dx = Math.cos(a), dy = Math.sin(a);
+        if (i % 2) dx = -dx;
+        var L = diag * 0.8, mv = document.createElement('div'); mv.className = 'fb-mv';
+        mv.innerHTML = '<span class="p"></span><span class="w"></span>';
+        mv.firstChild.textContent = label(m.p); mv.lastChild.textContent = m.from;
+        fb.appendChild(mv);
+        var w = mv.offsetWidth, h = mv.offsetHeight;
+        var at = function (k) { return 'translate(' + (P.x - w / 2 + dx * L * k) + 'px,' + (P.y - h / 2 + dy * L * k) + 'px)'; };
+        mv.style.transform = at(1);
+        mv.animate([{ transform: at(-1) }, { transform: at(1) }], { duration: DUR, delay: i * GAP + j * 60, easing: 'linear', fill: 'both' });
+      });
+    });
+    later(done, (n - 1) * GAP + DUR + 400);
+    syncMt();
+  };
+
+  /* ================= 案C 行き先が動く ================= */
+  /* 答えの例は compass/tests/engine.test.mjs の PERSONAS(職種ごとに1人)を写した。名札の言葉は仮(editor へ) */
+  var PERSONAS = [
+    ['nurse', '教えることの多い答え', { profession: 'nurse', q1: 'c', q2: 'c', q3: 'c', q4: ['teach', 'listen'], q5: ['data'], q6: 'b', q7: ['growth', 'impact'], q8: 'b' }],
+    ['ot', '改善と数字に関わる答え', { profession: 'ot', q1: 'd', q2: 'd', q3: 'e', q4: ['improve', 'data'], q5: ['deep'], q6: 'c', q7: ['income', 'autonomy'], q8: 'c' }],
+    ['st', '新しい技術に関心のある答え', { profession: 'st', q1: 'd', q2: 'e', q3: 'e', q4: ['data', 'improve'], q5: ['none'], q6: 'f', q7: ['novelty', 'growth'], q8: 'g' }],
+    ['judo', '新しく始めることに関心のある答え', { profession: 'judo', q1: 'e', q2: 'f', q3: 'f', q4: ['create', 'listen'], q5: ['deep'], q6: 'e', q7: ['autonomy', 'income'], q8: 'f' }],
+    ['other', '制度や仕組みに関心のある答え', { profession: 'other', q1: 'c', q2: 'd', q3: 'b', q4: ['cause', 'data'], q5: ['teach'], q6: 'g', q7: ['impact', 'stability'], q8: 'h' }],
+    ['pt', '専門性を深めたい答え', { profession: 'pt', q1: 'a', q2: 'a', q3: 'a', q4: ['deep', 'cause'], q5: ['none'], q6: 'a', q7: ['expertise', 'stability'], q8: 'a' }]
+  ];
+  var cEls = null;
+  var cBuild = function () {
+    var pile = document.getElementById('fcPile'); pile.innerHTML = ''; cEls = {};
+    D.BRIDGES.forEach(function (b) { var s = document.createElement('span'); s.className = 'fc-b'; s.textContent = b.name; pile.appendChild(s); cEls[b.id] = s; });
+  };
+  var cShow = function (k, animate) {
+    if (!E) return;
+    var per = PERSONAS[k], ids = E.buildResult(per[2]).bridges.map(function (b) { return b.bridge.id; });
+    var pile = document.getElementById('fcPile'), els = Object.keys(cEls).map(function (id) { return cEls[id]; });
+    var before = new Map(els.map(function (e) { return [e, e.getBoundingClientRect()]; }));
+    D.BRIDGES.forEach(function (b) { cEls[b.id].classList.toggle('on', ids.indexOf(b.id) >= 0); });
+    ids.concat(D.BRIDGES.map(function (b) { return b.id; }).filter(function (id) { return ids.indexOf(id) < 0; })).forEach(function (id) { pile.appendChild(cEls[id]); });
+    var tag = document.getElementById('fcTag'); tag.textContent = '例: ' + label(per[0]) + '/' + per[1];
+    if (!animate) return;
+    tag.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
+    els.forEach(function (e) {
+      var a = before.get(e), b = e.getBoundingClientRect();
+      var sx = a.width / b.width, sy = a.height / b.height;
+      e.animate([{ transform: 'translate(' + (a.left - b.left) + 'px,' + (a.bottom - b.bottom) + 'px) scale(' + sx + ',' + sy + ')' }, { transform: 'none' }], { duration: 700, easing: 'cubic-bezier(.16,1,.3,1)' });
+    });
+  };
+  var cRun = function (only) {
+    if (!cEls) cBuild();
+    if (only != null) { cShow(only, anim()); syncMt(); return; }
+    if (!anim()) { cShow(PERSONAS.length - 1, false); syncMt(); return; }
+    running = true; cShow(0, false);
+    PERSONAS.forEach(function (_, k) { if (k) later(function () { cShow(k, true); }, k * 1100); });
+    later(done, PERSONAS.length * 1100);
+    syncMt();
+  };
+
+  /* ================= 職種のチップと、案の切り替え ================= */
+  var cur = null;
+  PROFS.forEach(function (p) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'tag'; b.dataset.p = p; b.textContent = label(p); b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function () { cur = p; [].forEach.call(chips.children, function (x) { x.setAttribute('aria-pressed', String(x === b)); }); userPaused = false; play(false); });
+    chips.appendChild(b);
+  });
+  var play = function (replayAll) {
+    stopAll();
+    if (replayAll) { cur = null; [].forEach.call(chips.children, function (x) { x.setAttribute('aria-pressed', 'false'); }); }
+    var k = kind();
+    if (k === 'a') aRun(cur ? aProf(cur) : aDefault(), cur ? 5000 : 10000);
+    else if (k === 'b') bRun(cur);
+    else cRun(cur ? PERSONAS.map(function (x) { return x[0]; }).indexOf(cur) : null);
+    mt.hidden = !anim();
+  };
+  var apply = function (k) {
+    if (k === 'still') C.toggle('fv-anim', !C.contains('fv-anim') && window.FV_OK ? true : false);
+    else { C.remove('k-a', 'k-b', 'k-c'); C.add('k-' + k); if (window.FV_OK) C.add('fv-anim'); }
+    document.querySelectorAll('.sw button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.k === kind() || (b.dataset.k === 'still' && !anim()))); });
+    window.scrollTo(0, 0); userPaused = false; play(true);
+  };
+  document.querySelectorAll('.sw button').forEach(function (b) { b.addEventListener('click', function () { apply(b.dataset.k); }); });
+  var go = function () {
+    document.querySelectorAll('.sw button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.k === kind() || (b.dataset.k === 'still' && !anim()))); });
+    play(true);
+  };
+  (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 1200); })]) : Promise.resolve()).then(go);
+  var rw = window.innerWidth;
+  window.addEventListener('resize', function () { if (Math.abs(window.innerWidth - rw) > 40) { rw = window.innerWidth; play(false); } });
+});
+</script>
+</body>
+</html>
