@@ -73,6 +73,7 @@ html.wb-anim .wb.run.swap .wb-o{animation-delay:.05s}
 .win{position:relative;margin-top:26px;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg-2);aspect-ratio:4/5;max-width:520px}
 .win video,.win img{display:block;width:100%;height:100%;object-fit:cover}
 .win-cap{margin-top:8px}
+@media(max-width:919px){.wk-cap{padding:0 var(--pad-x);margin-left:calc(-1 * var(--pad-x));margin-right:calc(-1 * var(--pad-x))}}
 .win .motion-toggle{z-index:2}
 .tw{margin-top:clamp(36px,6vh,56px)}
 .tw-out{margin-top:18px;font:700 clamp(20px,2.2vw,26px)/1.6 var(--sans);color:var(--ink)}
@@ -205,7 +206,7 @@ html.wb-anim.p1 .ub.in li::before{transition:transform .25s var(--ease) calc(.45
           <video muted playsinline preload="none" data-tall="./media/compass-tall.mp4" data-wide="./media/compass-wide.mp4" data-poster-tall="./media/compass-tall.webp" data-poster-wide="./media/compass-wide.webp" aria-describedby="cmpCap"></video>
           <button class="motion-toggle" type="button" aria-label="映像を止める" aria-pressed="false" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M4.5 2.5v9M9.5 2.5v9"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.5l7 4.5-7 4.5z"/></svg></button>
         </div>
-        <figcaption class="ex-note win-cap" id="cmpCap">答えの一例で撮った、BRIDGE Compass の実際の画面</figcaption>
+        <figcaption class="ex-note win-cap" id="cmpCap">答えの一例で撮った実際の画面。職種は理学療法士、調整やチームに関わる答えを選んだ場合(<time datetime="2026-10-22">2026-10-22</time> 撮影)</figcaption>
       </figure>
     </div>
 
@@ -228,9 +229,10 @@ html.wb-anim.p1 .ub.in li::before{transition:transform .25s var(--ease) calc(.45
         <a class="wk-shot only-1" href="../../clinic-flow-3d/index.html" tabindex="-1" aria-hidden="true"><img src="../../images/products/shots/clinic-flow-3d-decision.webp" alt="" width="1440" height="900" loading="lazy" decoding="async"></a>
         <figure class="only-2">
           <div class="win" data-win>
-            <video muted playsinline preload="none" data-tall="./media/town-tall.mp4" data-wide="./media/town-wide.mp4" data-poster-tall="./media/town-tall.webp" data-poster-wide="./media/town-wide.webp" aria-label="クリニックタウン3Dの実際の画面"></video>
+            <video muted playsinline preload="none" data-tall="./media/town-tall.mp4" data-wide="./media/town-wide.mp4" data-poster-tall="./media/town-tall.webp" data-poster-wide="./media/town-wide.webp" aria-describedby="townCap"></video>
             <button class="motion-toggle" type="button" aria-label="映像を止める" aria-pressed="false" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M4.5 2.5v9M9.5 2.5v9"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.5l7 4.5-7 4.5z"/></svg></button>
           </div>
+          <figcaption class="ex-note win-cap wk-cap" id="townCap">実際のゲーム画面。経営の相談で選択肢を1つ選んだところ。数値はゲーム上の仮定です(<time datetime="2026-10-22">2026-10-22</time> 撮影)</figcaption>
         </figure>
         <h3 class="wk-name">クリニックタウン3D</h3>
         <p class="wk-p">クリニックの経営を、1日ずつ動かして学ぶゲームです。</p>
