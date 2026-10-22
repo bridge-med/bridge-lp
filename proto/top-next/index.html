@@ -7,11 +7,11 @@
 <title>BRIDGE トップ試作</title>
 <script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
 <!-- 試作の切り替え(読み込みで一度だけ決める。ちらつかせないため head で同期実行)
-     ?plan=1|2  案1「言葉が分かれる」/ 案2「実物が動く」(既定は 1。JS なしも 1)
-     &still=1   動きを減らす設定・JS なし・再訪で見える完成形を、OS の設定を変えずに見る
+     ?plan=1|2  案1「言葉が分かれる」/ 案2「実物が動く」(既定は 1。JS なしも 1)。#p1 / #p2 でも同じ
+     &still=1   動きを減らす設定・JS なし・再訪で見える完成形を、OS の設定を変えずに見る(#still でも同じ)。左下の切り替えは読み込み直さずに入れ替える
      &bare=1    左下の切り替えを隠す
      動かすのは、still でなく・動きを減らす設定でなく・データセーバーでないときだけ(wb-anim)。本番は同じタブでの再訪も止めるが、試作は比べるために毎回動かす -->
-<script>(function(){var r=document.documentElement,q=new URLSearchParams(location.search),c=r.classList;c.add(q.get('plan')==='2'?'p2':'p1');if(q.get('still')==='1')c.add('still');if(q.get('bare')==='1')c.add('bare');var save=navigator.connection&&navigator.connection.saveData;if(!c.contains('still')&&!save&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))c.add('wb-anim')})();</script>
+<script>(function(){var r=document.documentElement,q=new URLSearchParams(location.search),h=location.hash.slice(1),c=r.classList;c.add(q.get('plan')==='2'||h==='p2'?'p2':'p1');if(q.get('still')==='1'||h==='still')c.add('still');if(q.get('bare')==='1')c.add('bare');var save=navigator.connection&&navigator.connection.saveData;window.WB_OK=!save&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);if(!c.contains('still')&&window.WB_OK)c.add('wb-anim')})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -155,8 +155,9 @@ html.wb-anim.p1 .ub.in li::before{transition:transform .25s var(--ease) calc(.45
 
 /* ===== 試作の切り替え(本番には持ち込まない) ===== */
 .sw{position:fixed;left:12px;bottom:12px;z-index:200;display:flex;gap:4px;padding:4px;border-radius:100px;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font:700 12px/1 var(--sans)}
-.sw a{display:grid;place-items:center;min-width:44px;height:40px;padding:0 12px;border-radius:100px;color:var(--ink-2)}
-.sw a[aria-current="true"]{background:var(--blue);color:var(--on-fill)}
+.sw button{display:grid;place-items:center;min-width:44px;height:44px;padding:0 12px;border-radius:100px;font:inherit;color:var(--ink-2);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--blue);color:var(--on-fill)}
+.sw button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .bare .sw{display:none}
 </style>
 </head>
@@ -281,20 +282,19 @@ html.wb-anim.p1 .ub.in li::before{transition:transform .25s var(--ease) calc(.45
 <footer class="site-footer"></footer>
 
 <nav class="sw" aria-label="試作の切り替え">
-  <a href="?plan=1" data-k="p1">案1</a>
-  <a href="?plan=2" data-k="p2">案2</a>
-  <a href="?plan=1&amp;still=1" data-k="still">止めた姿</a>
+  <button type="button" data-k="p1">案1</button>
+  <button type="button" data-k="p2">案2</button>
+  <button type="button" data-k="still">止めた姿</button>
 </nav>
 
 <script src="../../shared/bridge.js" defer></script>
 <script src="../../compass/app/data.js" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var R = document.documentElement, C = R.classList, anim = C.contains('wb-anim');
-
-  /* 切り替えの現在地 */
-  var cur = C.contains('still') ? 'still' : (C.contains('p2') ? 'p2' : 'p1');
-  document.querySelectorAll('.sw a').forEach(function (a) { if (a.dataset.k === cur) a.setAttribute('aria-current', 'true'); });
+  var R = document.documentElement, C = R.classList;
+  var anim = function () { return C.contains('wb-anim'); };
+  var replay = function (el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  var wb = document.getElementById('wb'), ub = document.getElementById('ub');
 
   /* ---- 言いかえ: compass/app/data.js の TRANSLATIONS をそのまま読む(写しを持たない)。組と順は editor 2026-10-21 ---- */
   var D = window.COMPASS_DATA;
@@ -308,17 +308,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   if (pairs.length) {
     var at = 0;
-    var wb = document.getElementById('wb'), wbFrom = document.getElementById('wbFrom'), wbTo = document.getElementById('wbTo'), wbSr = document.getElementById('wbSr');
+    var wbFrom = document.getElementById('wbFrom'), wbTo = document.getElementById('wbTo'), wbSr = document.getElementById('wbSr');
     var twOut = document.getElementById('twOut'), twFrom = document.getElementById('twFrom'), twTo = document.getElementById('twTo');
     var groups = [document.getElementById('pick1'), document.getElementById('pick2')];
     var label = function (id) { var p = D.PROFESSIONS.filter(function (x) { return x.id === id; })[0]; return p ? p.label.replace(/\(.*?\)/, '') : id; };
-    var replay = function (el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
     var show = function (i, user) {
       at = i; var t = pairs[i];
       wbFrom.textContent = t.from; wbTo.textContent = t.to; wbSr.textContent = t.from + 'は、外の言葉で、' + t.to;
       twFrom.textContent = t.from; twTo.textContent = t.to;
       groups.forEach(function (g) { [].forEach.call(g.querySelectorAll('.tag'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.p === t.p)); }); });
-      if (user && anim) { wb.classList.add('swap'); replay(wb, 'run'); replay(twOut, 'draw'); }
+      if (user && anim()) { wb.classList.add('swap'); replay(wb, 'run'); replay(twOut, 'draw'); }
     };
     var profs = [];
     pairs.forEach(function (t) { if (profs.indexOf(t.p) < 0) profs.push(t.p); });
@@ -338,38 +337,60 @@ document.addEventListener('DOMContentLoaded', function () {
     show(0, false);
   }
 
-  /* ---- 案1: 開いたときに一度だけ分かれる(画面に入っていれば読み込みで) ---- */
-  if (anim && C.contains('p1')) document.getElementById('wb').classList.add('run');
-
-  /* ---- 案1: 用途の分岐は、画面に4割入ったら一度だけ ---- */
-  var ub = document.getElementById('ub');
-  if (anim && C.contains('p1') && 'IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { ub.classList.add('in'); io.disconnect(); } }, { threshold: .4 });
-    io.observe(ub);
-  } else ub.classList.add('in');
-
   /* ---- 案2: 窓。画面に半分入ったら一度だけ再生。止めた姿・動きを減らす設定では、最後のコマ(ポスター)と再生ボタン ---- */
-  if (C.contains('p2')) {
+  var wins = [];
+  var setupWins = function () {
+    if (wins.length) return;
     var tall = matchMedia('(max-width: 919px)').matches;
     document.querySelectorAll('[data-win]').forEach(function (w) {
-      var v = w.querySelector('video'), b = w.querySelector('.motion-toggle');
+      var v = w.querySelector('video'), b = w.querySelector('.motion-toggle'), st = { v: v, played: false };
       v.poster = tall ? v.dataset.posterTall : v.dataset.posterWide;
       v.src = tall ? v.dataset.tall : v.dataset.wide;
-      var played = false;
+      if (anim()) v.preload = 'auto';
       var sync = function () { var paused = v.paused || v.ended; b.setAttribute('aria-pressed', String(paused)); b.setAttribute('aria-label', paused ? '映像を再生する' : '映像を止める'); };
       v.addEventListener('play', sync); v.addEventListener('pause', sync); v.addEventListener('ended', sync);
       b.hidden = false; sync();
-      b.addEventListener('click', function () { played = true; if (v.paused || v.ended) { if (v.ended) v.currentTime = 0; v.play().catch(function () {}); } else v.pause(); });
-      if (!anim) return;
-      v.preload = 'auto';
-      var o = new IntersectionObserver(function (es) {
+      b.addEventListener('click', function () { st.played = true; if (v.paused || v.ended) { if (v.ended) v.currentTime = 0; v.play().catch(function () {}); } else v.pause(); });
+      if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {
         var e = es[0];
-        if (e.intersectionRatio >= .5 && !played) { played = true; v.play().catch(function () {}); }
+        if (e.intersectionRatio >= .5 && !st.played && anim() && C.contains('p2')) { st.played = true; v.play().catch(function () {}); }
         else if (!e.isIntersecting && !v.paused) v.pause();
-      }, { threshold: [0, .5] });
-      o.observe(w);
+      }, { threshold: [0, .5] }).observe(w);
+      wins.push(st);
     });
-  }
+  };
+
+  /* ---- 用途の分岐(案1)は、画面に4割入ったら一度だけ ---- */
+  var uio = null;
+  var setUses = function () {
+    if (uio) { uio.disconnect(); uio = null; }
+    ub.classList.remove('in');
+    if (anim() && C.contains('p1') && 'IntersectionObserver' in window) {
+      uio = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { ub.classList.add('in'); uio.disconnect(); uio = null; } }, { threshold: .4 });
+      uio.observe(ub);
+    } else ub.classList.add('in');
+  };
+
+  /* ---- 状態を当てる(読み込みと、左下の切り替え)。切り替えは読み込み直さずに入れ替え、最初の画面から見せ直す ---- */
+  var apply = function (k, user) {
+    if (user) {
+      C.remove('p1', 'p2', 'still', 'wb-anim');
+      C.add(k === 'p2' ? 'p2' : 'p1');
+      if (k === 'still') C.add('still'); else if (window.WB_OK) C.add('wb-anim');
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll('.sw button').forEach(function (a) { a.setAttribute('aria-pressed', String(a.dataset.k === k)); });
+    wb.classList.remove('run', 'swap');
+    if (anim() && C.contains('p1')) replay(wb, 'run');
+    setUses();
+    if (C.contains('p2')) { setupWins(); wins.forEach(function (st) { st.played = false; st.v.pause(); try { st.v.currentTime = 0; } catch (e) {} }); }
+    else wins.forEach(function (st) { st.v.pause(); });
+  };
+  document.querySelectorAll('.sw button').forEach(function (a) {
+    a.addEventListener('click', function () { apply(a.dataset.k, true); try { history.replaceState(null, '', '#' + a.dataset.k); } catch (err) {} });
+  });
+  apply(C.contains('still') ? 'still' : (C.contains('p2') ? 'p2' : 'p1'), false);
+  window.addEventListener('hashchange', function () { var h = location.hash.slice(1); if (h === 'p1' || h === 'p2' || h === 'still') apply(h, true); });
 });
 </script>
 </body>
