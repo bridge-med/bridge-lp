@@ -148,7 +148,8 @@ function townMat(cls) {
 if (vFx.y > .5) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.075, .095, .15), uNight * .82);
 if (uFocus > -.5 && abs(vBid - uFocus) > .5) { float k = vBid > .5 ? uDim : uDim * .55; float l = dot(diffuseColor.rgb, vec3(.3, .59, .11)); diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(l), vec3(.93, .92, .9), .22), k); }`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + FWIN)
-      .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5) outgoingLight = diffuseColor.rgb;\noutgoingLight = mix(outgoingLight, uHazeC, (1.0 - smoothstep(-7.9, -6.2, vHkY)) * uHazeK);\n#include <opaque_fragment>');
+      .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5) outgoingLight = diffuseColor.rgb;\n#include <opaque_fragment>')
+      .replace('#include <tonemapping_fragment>', '#include <tonemapping_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uHazeC, (1.0 - smoothstep(-7.9, -6.2, vHkY)) * uHazeK);');
   };
   m.customProgramCacheKey = () => 'hk-town2-' + cls;
   return (TM[cls] = m);
@@ -271,7 +272,7 @@ function groundAO(x, z, occ) {
 let GROUND_MS = 0;
 function* groundMeshGen(occ, q) {
   let t0 = performance.now(); GROUND_MS = 0;
-  const NR = q === 'low' ? 16 : 22, NS = q === 'low' ? 96 : 112, pos = [], nor = [], col = [], idx = [];
+  const NR = q === 'low' ? 16 : 22, NS = q === 'low' ? 96 : 160, pos = [], nor = [], col = [], idx = [];   // 角度の刻みは縁の地層(skirt)と同じ。縁で頂点がそろい、低い段の境にすき間ができない
   const g1 = new THREE.Color(C.grass), g2 = new THREE.Color(C.grass2), g3 = new THREE.Color(C.lawn);
   const FR = []; for (let j = 0; j <= NR - 6; j++) FR.push(.85 * Math.pow(j / (NR - 6), .85)); FR.push(.875, .89, .905, .92, .95, 1);
   for (let j = 0; j < FR.length; j++) for (let i = 0; i < NS; i++) {
@@ -1049,14 +1050,15 @@ function vehicles(world, dyn, B) {
   bg.add(at(box(1.16, .05, .425, M(C.busBand, { r: .6 })), 0, .2, 0));
   bg.add(at(box(.96, .13, .43, M('#4E5D6C', { r: .3 })), -.02, .37, 0), at(box(.02, .17, .38, M('#4E5D6C', { r: .3 })), .575, .33, 0));
   for (const [x, z] of [[-.36, -.2], [.36, -.2], [-.36, .2], [.36, .2]]) { const w = cyl(.08, .08, .06, M(C.tire), 10); w.rotation.x = Math.PI / 2; w.position.set(x, .08, z); bg.add(w); }
-  const bus = new THREE.Mesh(bakeGeo(bg), vcMat({ r: .6 })); bus.castShadow = true; bus.receiveShadow = true; world.add(bus);
+  // 動く物は、まとめる(bakeStatic)対象から外す(keep)。外さないと、島の真ん中の台地の中に固まって、走らない
+  const bus = new THREE.Mesh(bakeGeo(bg), vcMat({ r: .6 })); bus.castShadow = true; bus.receiveShadow = true; bus.userData.keep = true; world.add(bus);
   dyn.bus = { mesh: bus, a: deg(100), v: 0 };
   // 車(3台・色違い。くすんだ色)
   const cg = new THREE.InstancedMesh(bakeGeo(carGroup('#FFFFFF')), vcMat({ r: .55 }), 3); cg.castShadow = true; cg.frustumCulled = false; world.add(cg);
   ['#E6E1D7', '#9AAA98', '#C2AE8E'].forEach((c, i) => cg.setColorAt(i, new THREE.Color(c)));
   dyn.cars = { mesh: cg, list: [{ a: deg(10), sp: .085, lane: -1 }, { a: deg(190), sp: .07, lane: 1 }, { a: deg(300), sp: .09, lane: -1 }] };
   // 病院の白い車(青緑の線。赤十字は使わない)。環状の道から坂を上がって、救急口の庇の下に着く
-  const hc = new THREE.Mesh(bakeGeo(carGroup('#F7F6F2', C.scrub)), vcMat({ r: .5 })); hc.castShadow = true; world.add(hc);
+  const hc = new THREE.Mesh(bakeGeo(carGroup('#F7F6F2', C.scrub)), vcMat({ r: .5 })); hc.castShadow = true; hc.userData.keep = true; hc.visible = false; world.add(hc);
   roadCrossings(B);
   const pts = drivePts(B);
   dyn.hcar = { mesh: hc, pts, stop: new THREE.Vector3(pts[pts.length - 1][0], 0, pts[pts.length - 1][1]) };
@@ -1151,26 +1153,39 @@ function hazeSheets(world, rnd) {
     const pos = [], uvs = [], idx = []; let base = 0;
     for (const g of parts) { pos.push(...g.attributes.position.array); uvs.push(...g.attributes.uv.array); for (const i of g.index.array) idx.push(i + base); base += g.attributes.position.count; g.dispose(); }
     const geom = new THREE.BufferGeometry(); geom.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geom.setIndex(idx); geom.computeBoundingSphere();
-    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false, color: '#FFFFFF', opacity: .78 });
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false, color: '#FFFFFF', opacity: .78, toneMapped: false });
     const m = new THREE.Mesh(geom, mat); m.userData.keep = true; m.renderOrder = 2; world.add(m); out.push(m); mats.push(mat);
   }
   return { mat: mats[0], mats, meshes: out };
 }
-/* 雲の素材: 縁ほど透けて、空に溶ける(くっきりした綿の塊にしない) */
+/* 雲の素材: 光の当たる上面と陰の2色で塗り、縁ほど透けて空に溶ける(くっきりした綿の塊にしない)。
+   光で色を計算せず、トーンマッピングもしない(ページの空の CSS の色と、同じ値で合わせられるように) */
 function softCloudMat() {
-  const m = new THREE.MeshStandardMaterial({ color: '#FFFFFF', roughness: 1, emissive: '#FFFFFF', emissiveIntensity: .5, transparent: true, depthWrite: false });
-  m.onBeforeCompile = s => {
-    s.fragmentShader = s.fragmentShader.replace('#include <opaque_fragment>', 'float hkNdv = abs(dot(normalize(normal), isOrthographic ? vec3(0., 0., 1.) : normalize(vViewPosition)));\ndiffuseColor.a *= smoothstep(.12, .85, hkNdv) * .92;\n#include <opaque_fragment>');
-  };
-  m.customProgramCacheKey = () => 'hk-cloud';
-  return m;
+  return new THREE.ShaderMaterial({
+    uniforms: { uLit: { value: new THREE.Color('#FFFFFF') }, uShade: { value: new THREE.Color('#DDE6EE') }, uOp: { value: .9 }, uSun: { value: new THREE.Vector3(-.3, .8, .5) } },
+    vertexShader: `varying vec3 vN; varying vec3 vV;
+void main() {
+  mat3 im = mat3(instanceMatrix); vec3 n = im * (normal / vec3(dot(im[0], im[0]), dot(im[1], im[1]), dot(im[2], im[2])));
+  vN = normalize(mat3(modelMatrix) * n); vV = normalize(normalMatrix * n);
+  gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
+}`,
+    fragmentShader: `uniform vec3 uLit; uniform vec3 uShade; uniform float uOp; uniform vec3 uSun; varying vec3 vN; varying vec3 vV;
+void main() {
+  vec3 n = normalize(vN); float k = clamp(smoothstep(-.4, .8, dot(n, normalize(uSun))) * .65 + smoothstep(-.5, .9, n.y) * .5, 0., 1.);
+  float a = smoothstep(.12, .85, abs(normalize(vV).z)) * uOp;
+  gl_FragColor = vec4(mix(uShade, uLit, k), a);
+  #include <colorspace_fragment>
+}`,
+    transparent: true, depthWrite: false, toneMapped: false
+  });
 }
-/* 雲ともやの色と濃さ(昼・夕・夜)。ページの空のグラデーション(--sky-*)に溶ける値にする
-   昼は白。夕は桃色(上のもや・空の雲)から藤色(下のもや)へ。夜は空の藍に溶ける、ごく淡い藍 */
+/* 雲ともやの色と濃さ(昼・夕・夜)。ページの空(index.html の --sky-*)の下の色から上の色へ、つながる値にする
+   lit / shade = 空の雲の光の当たる上面と陰。h / h2 = 島の下のもやの上の組と下の組。r = 岩の先が溶ける色(rk はその強さ)
+   昼: 白と、空の水色に寄せた陰 / 夕: 上面は背景の下の桃色(#F6DCC0)より少し桃色、陰はラベンダー / 夜: 背景の下の藍(#2E2C58)に寄せて、ごく淡く */
 const CLOUD = [
-  { c: '#FFFFFF', e: .5, o: .95, h: '#FFFFFF', h2: '#FFFFFF', ho: .95, r: '#F1EEE8', rk: .78 },
-  { c: '#FCDCD2', e: .3, o: .8, h: '#F7D2C4', h2: '#E8D0DC', ho: .74, r: '#EFD3C8', rk: .74 },
-  { c: '#414A7A', e: .02, o: .16, h: '#30396A', h2: '#2E3263', ho: .2, r: '#1E2244', rk: .4 }
+  { lit: '#FFFFFF', shade: '#DDE6EE', o: .92, h: '#FFFDF9', h2: '#F0F0EC', ho: .9, r: '#F4F1EA', rk: .75 },
+  { lit: '#FAD9C7', shade: '#C2B9D9', o: .85, h: '#F8D9C7', h2: '#EAD1D8', ho: .8, r: '#F3D6C6', rk: .72 },
+  { lit: '#3A4072', shade: '#272B52', o: .3, h: '#33386A', h2: '#2E2F5E', ho: .3, r: '#2B2D57', rk: .45 }
 ];
 function sky(scene, world, dyn, rnd, q) {
   const sg = new THREE.SphereGeometry(1, 16, 10), N = 12;
@@ -1193,10 +1208,10 @@ export function placeSky(dyn, t, night) {
   let i = 0; const o = new THREE.Object3D();
   for (const c of C2.list) { const a = deg(190) + ((c.a - deg(190) + t * c.sp) % deg(110)), cx = Math.cos(a) * c.r, cz = Math.sin(a) * c.r; for (const [px, py, pz, s] of c.puffs) { o.position.set(cx + px * .8, c.y + py, cz + pz); o.scale.set(s * .8, s * .5, s * .66); o.updateMatrix(); C2.mesh.setMatrixAt(i++, o.matrix); } }
   C2.mesh.instanceMatrix.needsUpdate = true;
-  // 雲の色は時間帯に合わせる(昼は白、夕は桃色がかった灰、夜は沈んだ藍)。applyTod が覚えた時間帯を使う(撮るときもページでも同じ)
+  // 雲の色は時間帯に合わせる(上の CLOUD)。applyTod が覚えた時間帯と光の向きを使う(撮るときもページでも同じ)
   const tk = TODK, ci = Math.min(1, Math.floor(tk)), ck = tk - ci;
-  const cmat = C2.mesh.material, A = CLOUD[ci], Bc = CLOUD[ci + 1];
-  cmat.color.copy(_c1.set(A.c)).lerp(_c2.set(Bc.c), ck); cmat.emissive.copy(cmat.color); cmat.emissiveIntensity = lerp(A.e, Bc.e, ck); cmat.opacity = lerp(A.o, Bc.o, ck);
+  const cu = C2.mesh.material.uniforms, A = CLOUD[ci], Bc = CLOUD[ci + 1];
+  cu.uLit.value.copy(_c1.set(A.lit)).lerp(_c2.set(Bc.lit), ck); cu.uShade.value.copy(_c1.set(A.shade)).lerp(_c2.set(Bc.shade), ck); cu.uOp.value = lerp(A.o, Bc.o, ck); cu.uSun.value.copy(SUNDIR);
   if (dyn.haze) dyn.haze.mats.forEach((m, j) => { const key = j ? 'h2' : 'h'; m.color.copy(_c1.set(A[key])).lerp(_c2.set(Bc[key]), ck); m.opacity = lerp(A.ho, Bc.ho, ck); });
   U.uHazeC.value.copy(_c1.set(A.r)).lerp(_c2.set(Bc.r), ck); U.uHazeK.value = lerp(A.rk, Bc.rk, ck);
   void night;
@@ -1269,7 +1284,7 @@ const TOD = [
   { hemiS: '#DDBFC8', hemiG: '#8E7068', hemi: .74, sun: '#FF9C60', sunI: 2.5, sunPos: [-15, 4.6, 3.2], fill: '#A4A2DD', fillI: .52, exp: 1.0, glow: .62, pt: .45, fog: '#D9B7AF', env: .45, gC: '#FFDDB2' },
   { hemiS: '#62709D', hemiG: '#2E2C47', hemi: .9, sun: '#B9C7F2', sunI: 1.0, sunPos: [-5, 14, 9], fill: '#7482C4', fillI: .34, exp: 1.08, glow: 1, pt: 1, fog: '#252D57', env: .35, gC: '#E4ECF7' }   // 夜: 手前の左上から月明かり。形と屋根の色が読めるように
 ];
-const _c1 = new THREE.Color(), _c2 = new THREE.Color();
+const _c1 = new THREE.Color(), _c2 = new THREE.Color(), SUNDIR = new THREE.Vector3(-.3, .8, .5);
 export function makeLights(scene, mapSize) {
   const hemi = new THREE.HemisphereLight('#fff', '#888', 1); scene.add(hemi);
   const sun = new THREE.DirectionalLight('#fff', 2); sun.castShadow = true; sun.shadow.mapSize.set(mapSize, mapSize);
@@ -1305,7 +1320,7 @@ export function applyTod(L, renderer, m, clouds) {
   TODK = m;
   L.hemi.color.copy(_c1.set(a.hemiS)).lerp(_c2.set(b.hemiS), k); L.hemi.groundColor.copy(_c1.set(a.hemiG)).lerp(_c2.set(b.hemiG), k); L.hemi.intensity = lerp(a.hemi, b.hemi, k);
   L.sun.color.copy(_c1.set(a.sun)).lerp(_c2.set(b.sun), k); L.sun.intensity = lerp(a.sunI, b.sunI, k);
-  L.sun.position.set(lerp(a.sunPos[0], b.sunPos[0], k), lerp(a.sunPos[1], b.sunPos[1], k), lerp(a.sunPos[2], b.sunPos[2], k));
+  L.sun.position.set(lerp(a.sunPos[0], b.sunPos[0], k), lerp(a.sunPos[1], b.sunPos[1], k), lerp(a.sunPos[2], b.sunPos[2], k)); SUNDIR.copy(L.sun.position).normalize();
   L.fill.color.copy(_c1.set(a.fill)).lerp(_c2.set(b.fill), k); L.fill.intensity = lerp(a.fillI, b.fillI, k);
   renderer.toneMappingExposure = lerp(a.exp, b.exp, k);
   const glow = lerp(a.glow, b.glow, k), pt = lerp(a.pt, b.pt, k);
