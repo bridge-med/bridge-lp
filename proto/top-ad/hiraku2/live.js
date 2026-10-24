@@ -8,6 +8,7 @@
    ・品質の段: 高(画素比2・影2048)/中(画素比1.5・影1024)/低(画素比1・影なし)。重いときは自動で一段下げる
    ================================================================ */
 import { THREE, makeScene, makeLights, applyTod, aimCamera, capFrame, makeRenderer, fit, ELEV, U, LAYOUT, IDS, CAP_W, CAP_H, placePeople, placeVehicles, placeSky, placeSmall, angDiff, plazaFrame, PALETTE } from './world.js';
+import * as WORLD from './world.js';   // makeSceneAsync(段ごとに休みを入れて作る入口)があれば、それを使う
 import { BOXES, WALL } from './buildings.js';
 
 const TAU = Math.PI * 2, deg = d => d * Math.PI / 180, clamp = (v, a, b) => Math.max(a, Math.min(b, v)), clamp01 = v => clamp(v, 0, 1);
@@ -132,7 +133,7 @@ function setStatic(S) {
    ページの中で描く
    o = { canvas, box, safe(): {l,t,r,b}, onHover(id|null), onPick(id), onEmpty(), onPress(id), onStation(sid|null, how), onLayout(L), onOpened(id), onClosed(), tod, mod(Promise<module>) }
    ================================================================ */
-export function live(o) {
+export async function live(o) {
   /* 撮るための手動の時計(?clock=manual)。ふつうは clock() */
   const manual = new URLSearchParams(location.search).get('clock') === 'manual';
   let vnow = 0;
@@ -143,7 +144,9 @@ export function live(o) {
   const DPR = { high: 2, mid: 1.5, low: 1 }, SHADOW = { high: 2048, mid: 1024, low: 0 };
   let tier = DPR[o.quality] ? o.quality : small ? 'mid' : 'high';
   const renderer = makeRenderer(o.canvas, Math.min(devicePixelRatio || 1, DPR[tier]), W, H, false);
-  const S = makeScene({ quality: tier }), L = makeLights(S.scene, SHADOW[tier] || 1024);
+  // 町を作るあいだ主スレッドを長く止めないよう、分けて作る入口があれば待つ(止めた画像は、そのあいだも見えている)
+  const S = WORLD.makeSceneAsync ? await WORLD.makeSceneAsync({ quality: tier }) : makeScene({ quality: tier });
+  const L = makeLights(S.scene, SHADOW[tier] || 1024);
   if (!SHADOW[tier]) L.sun.castShadow = false;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
   const CAPF = capFrame(camera);
@@ -219,7 +222,7 @@ export function live(o) {
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const p of bd.pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
     const sf = o.safe(), sw = sf.r - sf.l, shh = sf.b - sf.t;
-    const k = id === 'plaza' ? .84 : id === 'park' ? (small ? 1.12 : .94) : small ? .78 : .76;
+    const k = id === 'plaza' ? .7 : id === 'park' ? (small ? 1.12 : .94) : small ? .78 : .76;
     let ppu = Math.min(sw * k / (x1 - x0), shh * k / (y1 - y0));
     ppu = Math.min(ppu, base.ppu * (id === 'park' ? 6.5 : small ? 4.2 : 3.8));
     const bx = (x0 + x1) / 2, by = (y0 + y1) / 2, scx = (sf.l + sf.r) / 2, scy = (sf.t + sf.b) / 2;
@@ -643,6 +646,8 @@ export function live(o) {
     /* 手動の時計で ms だけ進めて、1枚描く(撮るとき) */
     advance(ms) { const n = Math.max(1, Math.round(ms / (1000 / 60))); for (let i = 0; i < n; i++) { vnow += ms / n; frame(vnow, i === n - 1); } },
     get manual() { return manual; },
-    get tier() { return tier; }
+    get tier() { return tier; },
+    /* 撮る・確かめるため: 建物の中の点(その建物の座標)が、いま画面のどこにあるか */
+    screenOf(id, l) { const pl = placeOf(S, id), v = new THREE.Vector3(...l).applyAxisAngle(Y, pl.yaw).add(pl.p).applyAxisAngle(Y, rot.x).project(camera), r = o.canvas.getBoundingClientRect(); return [r.left + (v.x + 1) / 2 * W, r.top + (1 - v.y) / 2 * H]; }
   };
 }

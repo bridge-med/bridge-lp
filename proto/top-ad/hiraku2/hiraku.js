@@ -275,17 +275,25 @@ function boot() {
   menu.addEventListener('close', () => menuBtn.focus());
 
   /* ---------- 立体と入れ替える(読み込みのあと、手が空いたときに) ---------- */
+  /* 計測: 長いタスク(50ms 超)。止めた画像から立体へ替わる前後(読み込み開始から、替わって 2 秒後まで)で、スクロールやタップが止まる長さ */
+  const swap = { start: 0, live: 0 }, lts = [];
+  try { new PerformanceObserver(l => { for (const e of l.getEntries()) lts.push([Math.round(e.startTime), Math.round(e.duration)]); }).observe({ type: 'longtask', buffered: true }); } catch (e) { /* 使えない環境では測らない */ }
+  window.__lt = () => {
+    const end = swap.live ? swap.live + 2000 : performance.now(), inSwap = lts.filter(([s0, d]) => s0 + d > swap.start && s0 < end);
+    const sum = a => a.reduce((t, [, d]) => t + d, 0);
+    return { count: lts.length, total: sum(lts), max: Math.max(0, ...lts.map(([, d]) => d)), swapStart: Math.round(swap.start), swapLive: Math.round(swap.live), swapCount: inSwap.length, swapTotal: sum(inSwap), swapMax: Math.max(0, ...inSwap.map(([, d]) => d)) };
+  };
   function hasWebGL() { try { const c = document.createElement('canvas'); return !!(window.WebGL2RenderingContext && c.getContext('webgl2')); } catch (e) { return false; } }
   function upgrade() {
     if (reduce() || save || !hasWebGL() || Q.get('static') === '1') return;
-    const t0 = performance.now();
+    const t0 = performance.now(); swap.start = t0;
     const mod = Q.get('stub') === '1' ? import('./interiors-stub.js') : import('./interiors.js').then(m => { if (typeof m.buildInterior !== 'function') throw new Error('no buildInterior'); return m; }).catch(() => import('./interiors-stub.js'));
-    import('./live.js').then(L => {
+    import('./live.js').then(async L => {
       const mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8, saved = store.get('bridge-hiraku-q');
       let quality = Q.get('q') || saved || (phone() ? 'mid' : 'high');
       if (!Q.get('q') && quality === 'high' && (mem <= 4 || cores <= 4)) quality = 'mid';
       if (!Q.get('q') && (mem <= 2 || cores <= 2)) quality = 'low';
-      ctl = L.live({
+      ctl = await L.live({
         canvas, box: still, tod: TODS.indexOf(R.dataset.tod), mod, reduce, quality,
         safe() {
           const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -314,7 +322,7 @@ function boot() {
         onOpened() {},
         onClosed() {}
       });
-      window.__ctl = ctl; window.__t3 = Math.round(performance.now() - t0);
+      window.__ctl = ctl; window.__t3 = Math.round(performance.now() - t0); swap.live = performance.now();
       if (paused) ctl.setPaused(true);
       requestAnimationFrame(() => R.classList.add('live'));
     }).catch(err => console.warn(err));

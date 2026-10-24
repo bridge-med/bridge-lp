@@ -45,6 +45,7 @@ const BASE = {
   people: ['#4E9C96', '#2E3E5C', '#F3F2EE', '#9AA3AD', '#D8C7A8', '#7E9CC4', '#5D7F70', '#F3F2EE'], skin: ['#F0D2BC', '#E4BE9F', '#C99D7F']
 };
 const mix = (a, b, t) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), t).getHexString();
+const enc = x => x <= .0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - .055;   // 光の量 → 画面の色の値(にじみの枠は値のまま足すため)
 function makePalette(p) {
   const outer = !!(p && p.wallIn);
   const P = Object.assign({}, BASE, outer ? {} : p || {});
@@ -421,6 +422,8 @@ export function buildInterior(kind, box, ctx = {}) {
   const hlGeo = E.HL.geometry();
   // 色だけを足し、透明度は変えない(空に重なる所で、キャンバスに黒い跡を残さない)
   const hlMat = new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, toneMapped: false, blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor, blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor });
+  // 足す量は画面の色の値のまま(色空間の変換をしない)。変換すると小さい値が急に明るくなり、にじみの外の縁が線に見え、内の縁は白く飛ぶ
+  hlMat.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <colorspace_fragment>', ''); };
   const hlMesh = hlGeo ? new THREE.Mesh(hlGeo, hlMat) : null; if (hlMesh) { hlMesh.renderOrder = 2; hlMesh.frustumCulled = false; group.add(hlMesh); }
   const hlBase = hlGeo ? hlGeo.attributes.position.array.slice() : null, hlCol = hlGeo ? hlGeo.attributes.color.array.slice() : null;
   let nightK = 0;
@@ -454,7 +457,7 @@ export function buildInterior(kind, box, ctx = {}) {
     }
     if (hlGeo && s.hl) {
       // 画面は昼もわずかに、夜はもう少し光る。ふれた物は、紙や板でも柔らかく光る
-      const glowK = clamp01(s.on) * (s.glass ? lerp(0, .1, nightK) : 0) * (1 - s.flick * 2) + .3 * k + .12 * (s.hoverK || 0);
+      const glowK = clamp01(s.on) * (s.glass ? lerp(0, .15, nightK) : 0) * (1 - s.flick * 2) + .5 * k + .32 * (s.hoverK || 0);
       const Pp = hlGeo.attributes.position.array, Cc = hlGeo.attributes.color.array;
       for (let v = s.hl[0]; v < s.hl[1]; v++) { Pp[v * 3] = hlBase[v * 3] + dx; Pp[v * 3 + 1] = hlBase[v * 3 + 1] + dy; Pp[v * 3 + 2] = hlBase[v * 3 + 2] + dz; Cc[v * 3] = hlCol[v * 3] * glowK; Cc[v * 3 + 1] = hlCol[v * 3 + 1] * glowK; Cc[v * 3 + 2] = hlCol[v * 3 + 2] * glowK; }
       hlGeo.attributes.position.needsUpdate = true; hlGeo.attributes.color.needsUpdate = true;
@@ -508,7 +511,7 @@ export function buildInterior(kind, box, ctx = {}) {
     if (E.rings.length && hlGeo) {
       const Pp = hlGeo.attributes.position.array, Cc = hlGeo.attributes.color.array;
       for (const rr of E.rings) {
-        const k = (t * .28 + rr.ph) % 1, sc = rr.r0 + k * rr.r1, c = (1 - k) * (1 - k) * .6;
+        const k = (t * .28 + rr.ph) % 1, sc = rr.r0 + k * rr.r1, c = enc((1 - k) * (1 - k) * .6);
         for (let v = rr.v[0]; v < rr.v[1]; v++) { Pp[v * 3] = rr.x + hlBase[v * 3] * sc; Pp[v * 3 + 1] = rr.y; Pp[v * 3 + 2] = rr.z + hlBase[v * 3 + 2] * sc; Cc[v * 3] = Cc[v * 3 + 1] = Cc[v * 3 + 2] = c; }
       }
       hlGeo.attributes.position.needsUpdate = true; hlGeo.attributes.color.needsUpdate = true;
@@ -827,9 +830,9 @@ function haloGeo(w, h, m, g, c) {
   if (HALO.has(key)) return HALO.get(key);
   const a = w / 2 + m, b = h / 2 + m, pos = [], cl = [];
   const ring = d => [[-a - d, -b - d], [a + d, -b - d], [a + d, b + d], [-a - d, b + d]];
-  const R = [[ring(0), 1], [ring(g * .3), .28], [ring(g), 0]];    // 内の縁から、柔らかく消える
+  const R = [[ring(0), 1], [ring(g * .22), .55], [ring(g * .55), .2], [ring(g), 0]];    // 内の縁から、尾を引いて柔らかく消える
   const put = (v, k) => { pos.push(v[0], v[1], 0); cl.push(c[0] * k, c[1] * k, c[2] * k); };
-  for (let r = 0; r < 2; r++) {
+  for (let r = 0; r < R.length - 1; r++) {
     const [I, ki] = R[r], [O, ko] = R[r + 1];
     for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; put(I[i], ki); put(O[i], ko); put(O[j], ko); put(I[i], ki); put(O[j], ko); put(I[j], ki); }
   }
