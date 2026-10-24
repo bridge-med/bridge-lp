@@ -27,21 +27,21 @@ export const C = {
   // 地面と島
   grass: '#AABA90', grass2: '#9FAF86', grassEdge: '#93A67D', lawn: '#B4C39C', lawn2: '#A6B78E',
   soil1: '#957A63', soil2: '#C9AE89', soil3: '#BDB3A4', soil4: '#A88F78', rock: '#B19F8D', rockD: '#958473',
-  pave: '#E8E1D4', pave2: '#DCD3C3', curb: '#D1C7B6', walk: '#E1D8C7', road: '#BFB6A5', roadEdge: '#D3CBBC', line: '#F2EDE2',
+  pave: '#D9CDB7', pave2: '#CBBEA7', joint: '#C5B8A1', curb: '#D1C7B6', walk: '#E1D8C7', road: '#BFB6A5', roadEdge: '#D3CBBC', line: '#F2EDE2',
   stoneWall: '#ADA18D', stoneWall2: '#9B8F7B', coping: '#E6DFD1',
   // 病院(主役)
-  white: '#F6F3EC', white2: '#E6E1D7', trim: '#FAF7F0', slab: '#D8D0C2', machine: '#C9C2B6', inner: '#F2ECE1',
+  white: '#FCF8EF', white2: '#EAE4D8', trim: '#FFFCF5', hospGlass: '#7A91A2', slab: '#D8D0C2', machine: '#C9C2B6', inner: '#F2ECE1',
   scrub: '#579C95', scrubD: '#467F79',
   // 展望台と広場(ブランドの2色)
   sandTower: '#DCC9A4', sandTowerD: '#CBB690', indigo: '#2B3A5C', indigoD: '#1E2A45', navy: '#16233E', brand: '#A98F63',
-  inlayI: '#26324F', inlayS: '#B39867', arcI: '#22304F', arcS: '#A98F63',
+  inlayI: '#6D7792', inlayS: '#C4AA80', arcI: '#2F4069', arcS: '#A98F63',
   // 脇役
-  sage: '#AFBD9E', terra: '#B07763', terraL: '#C49A7E', cream: '#EEE5D3',
-  glassWall: '#B2C2CA', slate: '#6B7379', blind: '#ECE6DA', officeWall: '#D5D0C7',
-  stone: '#DDD3C0', stone2: '#CFC3AC', column: '#ECE5D7', verdigris: '#86A898',
+  sage: '#AFBD9E', terra: '#B07763', terraL: '#C49A7E', cream: '#E6DAC4', zinc: '#B9BCB4', zincD: '#A6AAA2',
+  glassWall: '#ADBEC7', slate: '#69717A', blind: '#E7E1D5', officeWall: '#CDC7BC',
+  stone: '#D6CBB5', stone2: '#CBBEA6', column: '#E3DACA', verdigris: '#86A898',
   brick: '#A9776A', brickD: '#8F6458', timber: '#BFA07F', roofSlate: '#68635E', frame: '#4A4440',
   // 背景の家(くすんだテラコッタ・灰青・生成り)
-  houseA: '#ECE4D5', houseB: '#E1D8C8', houseC: '#D8D5CE', roofA: '#A97C6A', roofB: '#7E8994', roofC: '#CFC3AC',
+  houseA: '#E3D8C5', houseB: '#D9CDB9', houseC: '#CFCBC3', roofA: '#A97C6A', roofB: '#7E8994', roofC: '#CFC3AC',
   glass: '#97AEBC', glassDark: '#62768A', door: '#5C6B7C',
   trunk: '#7B695C', leaf: ['#8FA67C', '#9BAF87', '#82996F', '#A5B890'], conifer: ['#5F7F66', '#6B8B70'], ochre: ['#C1A06C', '#B79365'],
   wood: '#A88468', woodL: '#C7A982', lampPole: '#6E7682', lampHead: '#FFF4DA', steel: '#8D979F',
@@ -174,10 +174,10 @@ export function grid(g, face, W, D, cy, cols, rows, dx, dy, ww, wh, o = {}) {
     if (o.frame) {   // 窓の上の小さな庇と、下の水切り(影の線が、壁に奥行きを出す)
       const fm = M(o.frame, { r: .7 }), lip = .05;
       const put = (m, px, py, pz) => { m.castShadow = false; g.add(at(m, px, py, pz)); };
-      if (face === 'front') { put(cbox(ww + .06, .025, lip, fm, .008), u, y + wh / 2 + .02, D / 2 + lip / 2); put(cbox(ww + .03, .018, lip * .7, fm, .006), u, y - wh / 2 - .012, D / 2 + lip * .35); }
-      if (face === 'back') { put(cbox(ww + .06, .025, lip, fm, .008), u, y + wh / 2 + .02, -D / 2 - lip / 2); }
-      if (face === 'left') { put(cbox(lip, .025, ww + .06, fm, .008), -W / 2 - lip / 2, y + wh / 2 + .02, u); }
-      if (face === 'right') { put(cbox(lip, .025, ww + .06, fm, .008), W / 2 + lip / 2, y + wh / 2 + .02, u); }
+      if (face === 'front') { put(box(ww + .06, .025, lip, fm), u, y + wh / 2 + .02, D / 2 + lip / 2); put(box(ww + .03, .018, lip * .7, fm), u, y - wh / 2 - .012, D / 2 + lip * .35); if (o.jambs) for (const sx of [-1, 1]) put(box(.022, wh + .02, .045, fm), u + sx * (ww / 2 + .011), y, D / 2 + .022); }
+      if (face === 'back') { put(box(ww + .06, .025, lip, fm), u, y + wh / 2 + .02, -D / 2 - lip / 2); if (o.jambs) for (const sx of [-1, 1]) put(box(.022, wh + .02, .045, fm), u + sx * (ww / 2 + .011), y, -D / 2 - .022); }
+      if (face === 'left') { put(box(lip, .025, ww + .06, fm), -W / 2 - lip / 2, y + wh / 2 + .02, u); if (o.jambs) for (const sx of [-1, 1]) put(box(.045, wh + .02, .022, fm), -W / 2 - .022, y, u + sx * (ww / 2 + .011)); }
+      if (face === 'right') { put(box(lip, .025, ww + .06, fm), W / 2 + lip / 2, y + wh / 2 + .02, u); if (o.jambs) for (const sx of [-1, 1]) put(box(.045, wh + .02, .022, fm), W / 2 + .022, y, u + sx * (ww / 2 + .011)); }
     }
   }
 }
@@ -186,12 +186,12 @@ export function grid(g, face, W, D, cy, cols, rows, dx, dy, ww, wh, o = {}) {
    木: 棒付きキャンディーにしない。いくつかの塊を寄せた樹冠(下ほど暗い)、層の針葉樹、細長い並木、植え込み・生け垣
    形は種類ごとに共有し、まとめるときに頂点を写す。q = 'low' のときは塊を減らし、面も粗くする
    ================================================================ */
-const BLOB = new Map();
+const BLOB = new Map(), LO = new THREE.Color(.56, .62, .62), HI = new THREE.Color(1.1, 1.08, .94);   // 樹冠の下(暗く少し青い)と上(明るく暖かい)
 function blobGeo(q) {
   if (BLOB.has(q)) return BLOB.get(q);
-  const g = q === 'low' ? new THREE.SphereGeometry(1, 6, 4) : new THREE.SphereGeometry(1, 8, 6);   // 約 80 三角形・63 頂点(なめらかな法線)
+  const g = q === 'low' ? new THREE.SphereGeometry(1, 6, 4) : new THREE.SphereGeometry(1, 8, 5);   // 約 64 三角形(なめらかな法線)
   const p = g.attributes.position, col = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i++) { const y = p.getY(i), k = .66 + .34 * smooth01((y + .85) / 1.7); col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = k; }
+  for (let i = 0; i < p.count; i++) { const k = smooth01((p.getY(i) + .8) / 1.6); col.set(LO.clone().lerp(HI, k).toArray(), i * 3); }
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   BLOB.set(q, g); return g;
 }
@@ -200,7 +200,7 @@ function tierGeo(q) {
   if (TIER.has(q)) return TIER.get(q);
   const g = new THREE.ConeGeometry(1, 1, q === 'low' ? 6 : 9, 1, false);
   const p = g.attributes.position, col = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i++) { const y = p.getY(i), k = .62 + .38 * smooth01(y + .5); col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = k; }
+  for (let i = 0; i < p.count; i++) { const k = smooth01(p.getY(i) + .5); col.set(LO.clone().lerp(HI, k * .9).toArray(), i * 3); }
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   TIER.set(q, g); return g;
 }
@@ -226,7 +226,7 @@ export function tree(r, kind, s0 = 1, q = 'high') {
     const pal = kind === 'ochre' ? C.ochre : C.leaf, base = pal[Math.floor(r() * pal.length)];
     const col = M(base, { vc: true }), col2 = M(new THREE.Color(base).offsetHSL(0, -.02, -.035).getStyle(), { vc: true });
     blob(g, col, 0, h + .34, 0, .32, .28, .32, q);
-    const n = q === 'low' ? 1 : 3 + Math.floor(r() * 2);
+    const n = q === 'low' ? 1 : 2 + Math.floor(r() * 2);
     for (let i = 0; i < n; i++) { const a = i / n * TAU + r() * .8, rr = .17 + r() * .07; blob(g, i % 2 ? col2 : col, Math.cos(a) * .2, h + .22 + r() * .2, Math.sin(a) * .2, rr, rr * .86, rr, q); }
   }
   g.scale.setScalar(s); return g;

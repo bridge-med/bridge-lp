@@ -112,7 +112,18 @@ export async function capture(Q) {
   await new Promise(r => requestAnimationFrame(r));
   renderer.render(S.scene, camera);
   // 建物ごとの位置(枠の %): 名前の札(上)と、押せる範囲
-  const pins = {};
+  const pins = {}, obs = {};
+  if (mode === 'poster') {   // 建物ごとの外形: まとめた形の頂点を、建物の印(aBid)ごとに画面へ写した範囲
+    S.world.updateMatrixWorld(true); const v = new THREE.Vector3();
+    for (const mesh of S.baked || []) {
+      const P = mesh.geometry.attributes.position, Bd = mesh.geometry.attributes.aBid; if (!P || !Bd) continue;
+      for (let i = 0; i < P.count; i++) {
+        const bid = Math.round(Bd.getX(i)); if (bid < 1) continue;
+        v.fromBufferAttribute(P, i).applyMatrix4(mesh.matrixWorld).project(camera);
+        const q = obs[bid] || (obs[bid] = [1e9, 1e9, -1e9, -1e9]); q[0] = Math.min(q[0], v.x); q[1] = Math.min(q[1], v.y); q[2] = Math.max(q[2], v.x); q[3] = Math.max(q[3], v.y);
+      }
+    }
+  }
   if (mode === 'poster') for (const id of IDS) {
     const ex = id === 'plaza' ? null : S.B[id].ex, pl = placeOf(S, id), bd = boundsOf(id, ex), m = new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), pl.yaw), new THREE.Vector3(1, 1, 1));
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
@@ -120,6 +131,7 @@ export async function capture(Q) {
     const tp = new THREE.Vector3(0, bd.top, 0).applyMatrix4(m).project(camera);
     const pc = (vx, vy) => [+((vx + 1) / 2 * 100).toFixed(2), +((1 - vy) / 2 * 100).toFixed(2)];
     pins[id] = { tag: pc(tp.x, tp.y), box: [...pc(x0, y1), ...pc(x1, y0)] };
+    const ob = obs[LAYOUT[id].bid]; if (ob) pins[id].ob = [...pc(ob[0], ob[3]), ...pc(ob[2], ob[1])];
     const na = ex && nudgeAt(id, ex); if (na) { const v = new THREE.Vector3(...na).applyMatrix4(m).project(camera); pins[id].nudge = pc(v.x, v.y); }
   }
   window.__done = { pins, calls: renderer.info.render.calls, tris: renderer.info.render.triangles };
@@ -213,22 +225,34 @@ export async function live(o) {
 
   /* ---- 寄る先(建物を正面に向け、安全な範囲 = パネルやシートを避けた所に収める) ---- */
   const tmpCam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
+  /* ひらいたときの寄る先(建物を正面に向け、安全な範囲 = パネルやシートを避けた所に収める) */
   function frameFor(id) {
-    const pl = placeOf(S, id), tower = id === 'observatory';
-    // 展望台は縦に長いので、中の階(床から箱の高さまで)を縦に収める。上の灯室と下の台ははみ出してよい
-    const bd = tower ? { pts: ring(1.05, 0, BOXES.observatory.h) } : boundsOf(id, id === 'plaza' ? null : S.B[id].ex);
-    const r = nearestRot(rot.x, deg(pl.face - 45));
-    const el = id === 'park' ? deg(small ? 16 : 22) : id === 'plaza' ? deg(30) : deg(26);   // 広場は、弧がロゴとして読める低めの角度から
-    aimCamera(tmpCam, origin, el);
-    const m = new THREE.Matrix4().makeRotationY(r).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), pl.yaw), new THREE.Vector3(1, 1, 1)));
-    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-    for (const p of bd.pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+    const pl = placeOf(S, id), r = nearestRot(rot.x, deg(pl.face - 45)), bldg = id !== 'plaza' && id !== 'park';
+    // 広場は、弧がロゴとして読める低めの角度から。病院は少し見下ろして、手前の広場の弧を画面の下へ逃がす
+    const el = id === 'park' ? deg(small ? 16 : 22) : id === 'plaza' ? deg(30) : id === 'hospital' ? deg(31) : deg(26);
     const sf = o.safe(), sw = sf.r - sf.l, shh = sf.b - sf.t;
-    const k = id === 'plaza' ? .7 : id === 'park' ? (small ? 1.12 : .94) : tower ? (small ? .98 : .9) : small ? .78 : .76;
-    let ppu = Math.min(sw * k / (x1 - x0), shh * k / (y1 - y0));
-    ppu = Math.min(ppu, base.ppu * (id === 'park' ? 6.5 : small ? 4.2 : 3.8));
-    const bx = (x0 + x1) / 2, by = (y0 + y1) / 2, scx = (sf.l + sf.r) / 2, scy = (sf.t + sf.b) / 2;
-    return { rot: r, elev: el, x: bx - (scx - W / 2) / ppu, y: by + (scy - H / 2) / ppu, ppu };
+    const q = viewBox(id, r, el, bldg);
+    let ppu;
+    if (bldg) ppu = Math.min(fitPpu(q, id, sw, shh), fitPpu(viewBox('hospital', r, deg(31), true), 'hospital', sw, shh) * 1.25);   // 小さな建物は、病院の 1.25 倍まで
+    else { const k = id === 'plaza' ? .7 : small ? 1.12 : .94; ppu = Math.min(sw * k / q.w, shh * k / q.h, base.ppu * (id === 'park' ? 6.5 : 14)); }
+    // 建物は、中の階を安全な範囲の少し上(46%)に。手前の倒れた壁と広場は下へ
+    const scx = (sf.l + sf.r) / 2, scy = sf.t + shh * (bldg ? .46 : .5);
+    return { rot: r, elev: el, x: q.cx - (scx - W / 2) / ppu, y: q.cy + (scy - H / 2) / ppu, ppu };
+  }
+  /* 建物の、カメラから見た範囲(カメラの座標)。建物は中の階(床から箱の高さまで。倒れた壁と屋上ははみ出してよい)、展望台は塔の中の階 */
+  function viewBox(id, r, el, bldg) {
+    const pl = placeOf(S, id), b = BOXES[id], X0 = b ? b.w / 2 + E + WALL : 0, Z0 = b ? b.d / 2 + E + WALL : 0;
+    const pts = id === 'observatory' ? ring(1.05, 0, b.h) : bldg ? rect3(-X0, -Z0, X0, Z0, -S.B[id].ex.y0, b.h) : boundsOf(id, id === 'plaza' ? null : S.B[id].ex).pts;
+    aimCamera(tmpCam, origin, el);
+    const m = new THREE.Matrix4().makeRotationY(r).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(Y, pl.yaw), one));
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const p of pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+    return { w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+  }
+  /* ひらいた建物が主役: スマホはシートの上の見える幅の 88%、PC はパネルの左の範囲の 55%(画面の幅の約 36%)。高さが足りなければ縦で収める(展望台・事務所) */
+  function fitPpu(q, id, sw, shh) {
+    const tower = id === 'observatory', fw = small ? .88 : .55, fh = tower ? (small ? .98 : .9) : small ? .9 : .82;
+    return Math.min(sw * fw / q.w, shh * fh / q.h, base.ppu * 14);
   }
   function nearestRot(cur, target) { let d = ((target - cur) % TAU + TAU) % TAU; if (d > Math.PI) d -= TAU; return cur + d; }
   /* 道具を見つける: その物の画面(中の形の、物ごとの板)が、見える範囲の約3割を占めるまで寄る */
@@ -536,7 +560,9 @@ export async function live(o) {
   }
   function kick() { if (manual) { dirty = true; return; } if (!running) { running = true; last = clock(); requestAnimationFrame(loop); } }
   function loop(now) { frame(now); }
+  let ready = false;   // シェーダーの準備が済むまでは描かない(止めた画像が見えている)
   function frame(now, force) {
+    if (!ready) { running = false; return; }
     const gap = now - last, dt = Math.min(.05, gap / 1000); last = now; frameN++;
     if (running && visible && !document.hidden) measure(gap);
     if (!paused) t += dt;
@@ -630,7 +656,18 @@ export async function live(o) {
   /* ---- 最初の1枚を描いてから、止めた画像と入れ替える ---- */
   resize();
   placePeople(S.dyn, 0, null); placeVehicles(S.dyn, 0, 0, null); placeSky(S.dyn, 0, U.uNight.value); placeSmall(S.dyn, 0, true);
-  setCamera(); renderer.render(S.scene, camera); layout();
+  setCamera();
+  // シェーダーの準備を、主スレッドを長く止めずに済ませる(KHR_parallel_shader_compile があれば並行に)。使えなければ、そのまま描く
+  const tc = performance.now();
+  const cmode = new URLSearchParams(location.search).get('compile');   // 計測の比べ: none(分けない)・split・async
+  try {
+    if (cmode === 'none') { /* 分けない(比べるため) */ }
+    else if (cmode !== 'split' && renderer.compileAsync && (cmode === 'async' || renderer.extensions.has('KHR_parallel_shader_compile'))) await renderer.compileAsync(S.scene, camera);
+    else { renderer.compile(S.scene, camera); await new Promise(r => requestAnimationFrame(() => r())); }   // 並行にできない端末: 準備と最初の描画を、別の手番に分ける
+  } catch (e) { /* そのまま描く */ }
+  const compileMs = Math.round(performance.now() - tc);
+  ready = true;
+  renderer.render(S.scene, camera); layout();
   const info = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures };
   kick();
   modP.then(() => {});
@@ -649,6 +686,7 @@ export async function live(o) {
     advance(ms) { const n = Math.max(1, Math.round(ms / (1000 / 60))); for (let i = 0; i < n; i++) { vnow += ms / n; frame(vnow, i === n - 1); } },
     get manual() { return manual; },
     get tier() { return tier; },
+    get compileMs() { return compileMs; },
     /* 撮る・確かめるため: 建物の中の点(その建物の座標)が、いま画面のどこにあるか */
     screenOf(id, l) { const pl = placeOf(S, id), v = new THREE.Vector3(...l).applyAxisAngle(Y, pl.yaw).add(pl.p).applyAxisAngle(Y, rot.x).project(camera), r = o.canvas.getBoundingClientRect(); return [r.left + (v.x + 1) / 2 * W, r.top + (1 - v.y) / 2 * H]; }
   };

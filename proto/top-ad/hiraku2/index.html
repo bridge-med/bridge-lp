@@ -30,7 +30,7 @@
   --jp:'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif;
   --en:'Barlow','Helvetica Neue',Arial,sans-serif;
   --ease:cubic-bezier(.2,.8,.2,1);
-  --cl:5.3;--cr:84.2;--ct:2.2;--cb:68.1;
+  --cl:10.0;--cr:82.3;--ct:5.7;--cb:66.9;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--paper)}
@@ -266,9 +266,9 @@ html.js .pair.armed .open{clip-path:inset(0 0 100% 0)}
   .copy{left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px))}
   .eyebrow{font-size:11.5px;gap:8px}
   h1{margin-top:6px;font-size:clamp(22px,6.2vw,24px);line-height:1.34}
-  /* 町の大きさは、撮った画像の中の建物の群れ(--cl〜--cr)が画面の幅の 98% になるように。高さが足りないときは、高さで決める */
+  /* 町の大きさは、撮った画像の中の7つの建物の外形(--cl〜--cr)が、左右に 8px の余白で画面の幅に収まるように。高さが足りないときは、高さで決める */
   .hero{--top0:max(136px,calc(150px + (100svh - 700px) * .45));--bot0:150px}   /* 背の高い画面では、町を下げて、入口との間の空きを減らす */
-  .still{--W:min(calc(98vw * 100 / (var(--cr) - var(--cl))),calc((100svh - var(--top0) - var(--bot0)) * 100 / ((var(--cb) - var(--ct)) * .9)));width:var(--W);left:calc(50% - var(--W) * (var(--cl) + var(--cr)) / 200);transform:none;top:calc(var(--top0) + env(safe-area-inset-top,0px) - var(--W) * .9 * var(--ct) / 100)}
+  .still{--W:min(calc((100vw - 16px) * 100 / (var(--cr) - var(--cl))),calc((100svh - var(--top0) - var(--bot0)) * 100 / ((var(--cb) - var(--ct)) * .9)));width:var(--W);left:calc(50% - var(--W) * (var(--cl) + var(--cr)) / 200);transform:none;top:calc(var(--top0) + env(safe-area-inset-top,0px) - var(--W) * .9 * var(--ct) / 100)}
   .cta-wrap{left:var(--pad);right:var(--pad);bottom:calc(16px + env(safe-area-inset-bottom,0px))}
   .ctrl{margin-left:0}
   .ctrl .cbtn .face{width:30px;height:30px;background:rgba(255,255,255,.46);box-shadow:0 0 0 1px rgba(30,40,50,.1);backdrop-filter:none;-webkit-backdrop-filter:none}

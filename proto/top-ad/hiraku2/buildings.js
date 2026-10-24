@@ -9,9 +9,9 @@
      人の背の高さは PERSON_H(中の人も、この大きさに合わせる)
      箱の外に足したもの(病院の右の翼・車寄せ・最上階のセットバックなど)は、中の約束に触れない。
      セットバックと屋上の物は屋根の部品(part 2)で、ひらくと屋根と一緒に持ち上がって消える
-   ■ 断面の切り口(poche)
-     前の壁が倒れると見える、外の殻(側面と奥の壁)の前の縁と上の縁は、PALETTE.poche(濃い藍)で塗る。
-     中の床・壁・天井の切り口は、中のモジュールが同じ色で塗る
+   ■ 断面の切り口
+     前の壁が倒れると見える、外の殻(側面と奥の壁)の前の縁と、屋根を外すと見える壁の上の縁は、淡い面(PALETTE.cutLight)。
+     ふつうの壁と同じように光を受ける。藍(PALETTE.poche)は、中のモジュールが部屋の縁に引く細い線だけに使う(2026-10-24 決定)
    ■ 最初の値からの変更
      2026-10-24 展望台の直径 w 1.0 → 1.2(7つの道具を3つの階に置くため)。ほかは BRIEF の最初の値のまま
    ================================================================ */
@@ -28,7 +28,8 @@ export const BOXES = {
   park: { w: 4.0, d: 3.0, h: 0, floors: 0, shape: 'open' }
 };
 
-/* 中の形にも使ってよい色(ctx.palette として渡す)。落ち着いた建築模型の色と、B の温かさ。poche は断面の切り口の色 */
+/* 中の形にも使ってよい色(ctx.palette として渡す)。落ち着いた建築模型の色と、B の温かさ。
+   cutLight は外の殻の切り口(淡い面)、poche は中の担当が部屋の縁に引く細い藍の線 */
 export const PALETTE = {
   wallIn: '#F4EFE6', wallIn2: '#EAE2D4', floor: '#D9C7A8', floorStone: '#D8D2C6', ceil: '#F7F3EC',
   wood: '#C9A980', woodD: '#A88761', woodL: '#DCC5A2', steel: '#8D979F', steelL: '#C9CED2', dark: '#3A4047',
@@ -36,7 +37,7 @@ export const PALETTE = {
   glass: '#9DB4C2', plant: ['#7FA06F', '#8FB07C', '#6E9363'], pot: '#C98B6B',
   scrubs: ['#3F8B87', '#2E3C56'], coat: '#F3F1EB', office: ['#5A646E', '#2F3B4E', '#8C8F94'], casual: ['#C79B87', '#8FB1D1', '#D7C7AC', '#6F8A6A', '#B07F5F'],
   skin: ['#EECFB8', '#E0BB9B', '#CBA282'], hair: ['#2A2522', '#3D332C', '#594A3D', '#8A8278'],
-  poche: '#16233E'
+  poche: '#16233E', cutLight: '#E9E1D5'
 };
 
 /* ================================================================
@@ -50,10 +51,10 @@ import { THREE, C, M, at, tag, box, cbox, rbox, cyl, sph, gable, shell, pane, gr
 const E = .004;                 // 中の形と面が重ならないための、すき間
 const PC = .006;                // 切り口の塗りの厚み
 const INNER = () => M(C.inner);
-const POCHE = () => M(PALETTE.poche, { r: .8 });
-const flat = m => { m.userData.fx = [9, 0]; m.castShadow = false; return m; };   // 切り口: 光も影も受けない平らな藍(中の担当の塗りとつながる)
+const POCHE = () => M(PALETTE.cutLight, { r: .85 });   // 外の殻の切り口の淡い面
+const flat = m => { m.castShadow = false; return m; };   // 切り口の面(光はふつうに受ける。影は落とさない)
 /* 側面・奥の壁(動かない)と、前の壁(倒れる。内側に生成りの裏張り)。窓は呼ぶ側で足す
-   側面の壁の前の縁と、側面・奥の壁の上の縁には、断面の切り口(poche)を貼る。閉じているときは前の壁と屋根に隠れる */
+   側面の壁の前の縁と、側面・奥の壁の上の縁には、切り口の淡い面を貼る。閉じているときは前の壁と屋根に隠れる */
 function walls(g, b, wallMat, frontMat) {
   const t = WALL, X = b.w / 2 + E, Z = b.d / 2 + E, h = b.h, hw = h - PC;
   g.add(at(box(t, hw, 2 * Z + t - PC, wallMat), -(X + t / 2), hw / 2, -t / 2 - PC / 2));
@@ -81,7 +82,7 @@ function hospital() {
   const g = new THREE.Group(), b = BOXES.hospital, y0 = .06, white = M(C.white), white2 = M(C.white2), trim = M(C.trim, { r: .7 }), band = M(C.scrub, { r: .65 });
   const s = walls(g, b, white), { fw, X, Z, t, W, D } = s, h = b.h, fh = h / b.floors, F = Z + t;
   plinth(g, W, D, y0, M(C.stone2));
-  const winO = { flicker: true, mode: 1, glow: 4, frame: C.trim };
+  const winO = { flicker: true, mode: 1, glow: 4, frame: C.trim, jambs: true, mat: M(C.hospGlass, { r: .25 }) };
   // 角の付け柱(面取り。角に光が乗る)。前の2本は前の壁と一緒に倒れる
   for (const sx of [-1, 1]) { g.add(at(cbox(.11, h, .11, trim, .02), sx * (X + t - .035), h / 2, -(F - .035))); fw.add(at(cbox(.11, h, .11, trim, .02), sx * (X + t - .035), h / 2, F - .035 + .012)); }
   // 階の帯(石の細い水切り)。正面の上の縁だけ、青緑の細い線
@@ -254,7 +255,7 @@ function clinic(signs) {
   pane(fw, -.38, .54, F + .012, 1.08, .58, .03, { glow: 0 });
   for (const x of [-.74, -.38, -.02]) fw.add(nc(at(box(.03, .6, .035, cream), x, .54, F + .022)));
   fw.add(nc(at(box(1.12, .03, .035, cream), -.38, .845, F + .022)), nc(at(box(1.12, .04, .05, cream), -.38, .235, F + .025)));
-  for (let i = 0; i < 9; i++) { const st = rbox(.13, .025, .34, .01, i % 2 ? cream : M(C.terra, { r: .8 })); st.position.set(-.89 + i * .127, .96, F + .15); st.rotation.x = deg(22); fw.add(st); }
+  for (let i = 0; i < 9; i++) { const st = cbox(.13, .025, .34, i % 2 ? cream : M(C.terra, { r: .8 }), .008); st.position.set(-.89 + i * .127, .96, F + .15); st.rotation.x = deg(22); fw.add(st); }
   fw.add(at(box(.66, .7, .02, M(C.white2)), .62, .37, F + .006));
   const dl = tag(at(box(.26, .58, .02, M(C.glass, { r: .25 })), .5, .31, F + .02), { part: 61 }), dr = tag(at(box(.26, .58, .02, M(C.glass, { r: .25 })), .76, .31, F + .02), { part: 71 });
   dl.userData.fx = [0, 1]; dr.userData.fx = [0, 1];
@@ -270,8 +271,8 @@ function clinic(signs) {
   g.add(at(cyl(.09, .07, .16, M(C.terraL), 10), X + t + .3, .08, -.32), at(sph(.12, M(C.leaf[1]), 8, 6), X + t + .3, .25, -.32));
   // 屋根: 片流れ(前が低く、奥が高い)。両脇の三角の壁も屋根の部品
   const rf = roofGroup(g), lo = h + .05, hi = h + .5, ov = .14, L = Math.hypot(D + ov * 2, hi - lo), ang = Math.atan2(hi - lo, D + ov * 2);
-  const slope = cbox(W + .18, .055, L, M(C.roofB, { r: .8 }), .015); slope.position.set(0, (lo + hi) / 2 + .03, 0); slope.rotation.x = ang; rf.add(slope);
-  for (let i = 0; i < 7; i++) { const sm = box(.02, .02, L, M('#6F7A85', { r: .8 })); sm.castShadow = false; sm.position.set(-W / 2 + .1 + i * (W - .2) / 6, (lo + hi) / 2 + .065, 0); sm.rotation.x = ang; rf.add(sm); }
+  const slope = cbox(W + .18, .055, L, M(C.zinc, { r: .75 }), .015); slope.position.set(0, (lo + hi) / 2 + .03, 0); slope.rotation.x = ang; rf.add(slope);
+  for (let i = 0; i < 7; i++) { const sm = box(.02, .02, L, M(C.zincD, { r: .75 })); sm.castShadow = false; sm.position.set(-W / 2 + .1 + i * (W - .2) / 6, (lo + hi) / 2 + .065, 0); sm.rotation.x = ang; rf.add(sm); }
   const tri = new THREE.Shape(); tri.moveTo(-D / 2, 0); tri.lineTo(D / 2, 0); tri.lineTo(-D / 2, hi - lo); tri.lineTo(-D / 2, 0);
   for (const sx of [-1, 1]) { const tg = new THREE.ExtrudeGeometry(tri, { depth: t, bevelEnabled: false }); const m = sh2(new THREE.Mesh(tg, sage)); m.rotation.y = -Math.PI / 2; m.position.set(sx * (X + t / 2) + t / 2, h, 0); rf.add(m); }
   rf.add(at(box(W, hi - lo + .02, t, sage), 0, h + (hi - lo) / 2, -(Z + t / 2)));
@@ -292,18 +293,21 @@ function office() {
       for (let i = 0; i < n; i++) {
         const u = (i - 1) * span / 3, pw = span / 3 - .05;
         if (face === 'front' && f === 0 && i === 1) continue;
+        const solid = i === 0;   // 左の柱間は石の壁にして、細い縦の窓だけ
         const p = pane(tgt, 0, cy, 0, 1, 1, 1, { flicker: true, mode: 2, glow: 4, mat: gw });
         const off = .012, py = f === 0 ? cy - .03 : cy;
-        if (face === 'front') { p.position.set(u, py, F + off); p.scale.set(pw, ph, .03); }
-        if (face === 'back') { p.position.set(u, py, -F - off); p.scale.set(pw, ph, .03); }
-        if (face === 'left') { p.position.set(-(X + t) - off, py, u); p.scale.set(.03, ph, pw); }
-        if (face === 'right') { p.position.set(X + t + off, py, u); p.scale.set(.03, ph, pw); }
+        const pw2 = solid ? .09 : pw, ph2 = solid ? ph * .92 : ph;
+        if (face === 'front') { p.position.set(u, py, F + off); p.scale.set(pw2, ph2, .03); }
+        if (face === 'back') { p.position.set(u, py, -F - off); p.scale.set(pw2, ph2, .03); }
+        if (face === 'left') { p.position.set(-(X + t) - off, py, u); p.scale.set(.03, ph2, pw2); }
+        if (face === 'right') { p.position.set(X + t + off, py, u); p.scale.set(.03, ph2, pw2); }
+        if (solid) continue;
         if ((i + f) % 3 === 0 && f > 0) {
           const bl = box(1, 1, 1, blind); bl.castShadow = false; const bh = ph * (.22 + ((i * 7 + f * 3) % 3) * .1), by = cy + ph / 2 - bh / 2;
-          if (face === 'front') { bl.position.set(u, by, F + off + .012); bl.scale.set(pw * .96, bh, .006); }
-          if (face === 'back') { bl.position.set(u, by, -F - off - .012); bl.scale.set(pw * .96, bh, .006); }
-          if (face === 'left') { bl.position.set(-(X + t) - off - .012, by, u); bl.scale.set(.006, bh, pw * .96); }
-          if (face === 'right') { bl.position.set(X + t + off + .012, by, u); bl.scale.set(.006, bh, pw * .96); }
+          if (face === 'front') { bl.position.set(u, by, F + off + .021); bl.scale.set(pw * .96, bh, .006); }
+          if (face === 'back') { bl.position.set(u, by, -F - off - .021); bl.scale.set(pw * .96, bh, .006); }
+          if (face === 'left') { bl.position.set(-(X + t) - off - .021, by, u); bl.scale.set(.006, bh, pw * .96); }
+          if (face === 'right') { bl.position.set(X + t + off + .021, by, u); bl.scale.set(.006, bh, pw * .96); }
           tgt.add(bl);
         }
       }
@@ -384,12 +388,12 @@ function library() {
 export const PARK = { pond: { x: 1.15, z: .55, r: .5 }, cafe: { x: 1.45, z: -1.05 } };
 function park() {
   const g = new THREE.Group(), b = BOXES.park, r = rng(71);
-  g.add(tag(at(rbox(b.w, .06, b.d, .5, M(C.lawn)), 0, .02, 0), { surf: true }));
+  g.add(tag(at(cbox(b.w, .06, b.d, M(C.lawn), .03), 0, .02, 0), { surf: true }));
   // カフェの屋台(テラコッタと生成りの日よけ)
   const cf = new THREE.Group(); cf.position.set(PARK.cafe.x, 0, PARK.cafe.z); cf.rotation.y = deg(-35);
   cf.add(at(cbox(.8, .5, .5, M(C.terraL), .02), 0, .3, 0));
   cf.add(at(cbox(.84, .04, .54, M(C.cream), .01), 0, .56, 0));
-  for (let i = 0; i < 6; i++) { const s = rbox(.14, .03, .5, .01, i % 2 ? M(C.cream) : M(C.terra, { r: .8 })); s.position.set(-.35 + i * .14, .82, .12); s.rotation.x = deg(18); cf.add(s); }
+  for (let i = 0; i < 6; i++) { const s = cbox(.14, .03, .5, i % 2 ? M(C.cream) : M(C.terra, { r: .8 }), .008); s.position.set(-.35 + i * .14, .82, .12); s.rotation.x = deg(18); cf.add(s); }
   for (const x of [-.39, .39]) cf.add(at(cyl(.02, .02, .4, M(C.wood), 5), x, .7, .3));
   for (let i = 0; i < 2; i++) { const tb = new THREE.Group(); tb.position.set(-.3 + i * .6, 0, .62); tb.add(at(cyl(.12, .12, .025, M(C.trim), 14), 0, .3, 0), at(cyl(.015, .015, .3, M(C.steel), 5), 0, .15, 0)); cf.add(tb); }
   g.add(cf);

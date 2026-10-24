@@ -96,7 +96,12 @@ function boot() {
     r.addEventListener('animationend', () => r.remove()); rings.append(r);
   }
 
-  /* ---------- 名前の札 ---------- */
+  /* ---------- 名前の札(上の帯=ヘッダーに重ねない。左右も画面の中に) ---------- */
+  const hd = $('.hd');
+  function tagXY(p, half = 64) {
+    const top = hd ? hd.getBoundingClientRect().bottom - heroRect().top : 56, w = hero.clientWidth;
+    return [Math.min(Math.max(p[0], half + 8), w - half - 8), Math.max(p[1], top + 48)];
+  }
   function showTag(id, on, sub) {
     clearTimeout(tagTimer);
     if (!on || !id) { tagB.classList.remove('on'); tagFor = null; return; }
@@ -104,21 +109,23 @@ function boot() {
     tagFor = id;
     tagB.innerHTML = '';
     tagB.append(b.name); if (sub) { const s = document.createElement('small'); s.textContent = b.role; tagB.append(s); }
-    tagB.style.left = p[0].toFixed(1) + 'px'; tagB.style.top = p[1].toFixed(1) + 'px';
+    const [x, y] = tagXY(p, sub ? 80 : 48);
+    tagB.style.left = x.toFixed(1) + 'px'; tagB.style.top = y.toFixed(1) + 'px';
     tagB.classList.add('on');
   }
   let sTagFor = null, sPos = {};
   function showSTag(sid) {
     if (!sid || !sPos[sid]) { tagS.classList.remove('on'); sTagFor = null; return; }
     sTagFor = sid; tagS.textContent = sPos[sid].label;
-    tagS.style.left = sPos[sid].x.toFixed(1) + 'px'; tagS.style.top = (sPos[sid].y - 8).toFixed(1) + 'px'; tagS.classList.add('on');
+    const [x, y] = tagXY([sPos[sid].x, sPos[sid].y - 8], 70);
+    tagS.style.left = x.toFixed(1) + 'px'; tagS.style.top = y.toFixed(1) + 'px'; tagS.classList.add('on');
   }
 
   /* ---------- 誘い: 数秒おきに、建物のひとつがふっと明るくなり、短い名前の札が一瞬出て消える。最初にふれたら止める ---------- */
   const ORDER = ['observatory', 'clinic', 'library', 'office', 'atelier', 'park', 'hospital'];
   let invT = 0, invI = 0;
   function startInvite() {
-    if (reduce() || touched || paused) return;
+    if (reduce() || touched || paused || nudgeOn) return;   // 最初の訪問で「ふれてみる」が出ている間は、名前の札を出さない
     stopInvite();
     const step = () => {
       if (touched || openId || paused) return;
@@ -127,7 +134,7 @@ function boot() {
       showTag(id, true); tagTimer = setTimeout(() => { if (tagFor === id && !hoverId) showTag(null); }, 1500);
       invT = setTimeout(step, 4200);
     };
-    invT = setTimeout(step, nudgeOn ? 4200 : 2600);   // 気づきの輪が出ているときは、名前の札を少し遅らせる
+    invT = setTimeout(step, 2600);
   }
   function stopInvite() { clearTimeout(invT); }
   function firstTouch() {
@@ -315,7 +322,7 @@ function boot() {
           const hr = heroRect(), cr = canvas.getBoundingClientRect(), ox = cr.left - hr.left, oy = cr.top - hr.top;
           for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; footPos[id] = [ox + p.foot[0], oy + p.foot[1]]; if (p.nudge) nudgePos = [ox + p.nudge[0], oy + p.nudge[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }
           placeNudge();
-          if (tagFor) { const p = tagPos[tagFor]; tagB.style.left = p[0].toFixed(1) + 'px'; tagB.style.top = p[1].toFixed(1) + 'px'; }
+          if (tagFor) { const [x, y] = tagXY(tagPos[tagFor], 64); tagB.style.left = x.toFixed(1) + 'px'; tagB.style.top = y.toFixed(1) + 'px'; }
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };
           if (sTagFor) showSTag(sTagFor);
         },

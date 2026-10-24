@@ -38,12 +38,16 @@ const toSF = (x, z) => [(x - z) * R2, (x + z) * R2];
 export const angDiff = (a, b) => { let d = (a - b) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; };
 
 /* ---------- 島の輪郭(完全な円でなく、ゆるい入り江と岬) ---------- */
-const BUMPS = [[300, .55, 22], [168, .32, 26], [45, .2, 34], [100, -.3, 20], [232, -.3, 22], [352, -.2, 18], [205, .16, 14]];
+const BUMPS = [[300, .72, 17], [326, -.42, 9], [8, -.62, 11], [45, .5, 15], [102, -.6, 12], [142, .6, 15], [172, .3, 18], [232, -.32, 20], [205, .16, 12], [268, .25, 13]];
 export function islandR(a) {
   let r = ISLAND_R + .07 * Math.sin(a * 7 + .4) + .05 * Math.sin(a * 11 + 1.3);
   for (const [c, A, w] of BUMPS) { const d = angDiff(a, deg(c)) / deg(w); r += A * Math.exp(-d * d); }
   return r;
 }
+/* 縁の一段低い段(手前右・公園の側)。島の角度 a で、縁から内へ LEDGE.w の幅が LEDGE.d だけ低い */
+const LEDGE = { a0: 333, a1: 22, soft: 6, w: 1.0, d: .48, step: .16 };
+function ledgeW(a) { let d = ((a / Math.PI * 180) % 360 + 360) % 360; const lo = LEDGE.a0, hi = LEDGE.a1 + 360; if (d < 180) d += 360; return smooth01((d - lo) / LEDGE.soft) * smooth01((hi - d) / LEDGE.soft); }
+function ledgeDrop(a, r, R) { const w = ledgeW(a); if (w <= 0) return 0; return LEDGE.d * w * smooth01((r - (R - LEDGE.w)) / LEDGE.step); }
 /* ---------- 台地(病院と広場がのる、少し高い段)。符号付きの距離(負 = 台地の上) ---------- */
 function sdRBox(s, f, cs, cf, hs, hf, r) { const qx = Math.abs(s - cs) - hs + r, qy = Math.abs(f - cf) - hf + r, mx = qx > 0 ? qx : 0, my = qy > 0 ? qy : 0; return Math.sqrt(mx * mx + my * my) + Math.min(Math.max(qx, qy), 0) - r; }
 function smin(a, b, k) { const h = clamp01(.5 + .5 * (b - a) / k); return lerp(b, a, h) - k * h * (1 - h); }
@@ -66,7 +70,7 @@ function rampK(s, f) {
 const nearPlateau = (x, z) => { const s = (x - z) * R2, f = (x + z) * R2; return !(s < -4.2 || s > 4.8 || f < -4.4 || f > 6.6); };
 export function groundY(x, z) {
   const s = (x - z) * R2, f = (x + z) * R2;
-  if (s < -4.2 || s > 4.8 || f < -4.4 || f > 6.6) return 0;
+  if (s < -4.2 || s > 4.8 || f < -4.4 || f > 6.6) { const r2 = x * x + z * z; if (r2 < 60) return 0; const a = Math.atan2(z, x); return -ledgeDrop(a, Math.sqrt(r2), islandR(a)); }
   const d = plateauSF(s, f);
   if (d < -.02) return PLATEAU_H;
   for (const st of STAIRS) { const q = inRect(s, f, st); if (q.inside) return PLATEAU_H * (1 - smooth01(q.along / st.len)); }
@@ -84,14 +88,15 @@ export const U = {
   uOpenA: { value: -1 }, uOpenB: { value: -1 }, uRoofA: { value: 1 }, uRoofB: { value: 1 },
   uLiftBid: { value: -1 }, uLift: { value: 0 },
   uPM: { value: Array.from({ length: 8 }, () => new THREE.Matrix4()) },
-  uGlowW: { value: new THREE.Color('#FFB873') }, uGlowI: { value: new THREE.Color('#A9BCFF') }, uGlowS: { value: new THREE.Color('#FFCF8C') },
-  uGlowC: { value: new THREE.Color('#EEF4FF') }, uGlowL: { value: new THREE.Color('#FFC27A') }, uGlowK: { value: new THREE.Color('#FFF0D2') }
+  uGlowW: { value: new THREE.Color('#FFB873') }, uGlowI: { value: new THREE.Color('#9DB2FF') }, uGlowS: { value: new THREE.Color('#FFC77A') },
+  uGlowC: { value: new THREE.Color('#E4ECF7') }, uGlowL: { value: new THREE.Color('#FFC27A') }, uGlowK: { value: new THREE.Color('#FFF0D2') },
+  uHazeC: { value: new THREE.Color('#FFFFFF') }, uHazeK: { value: .8 }   // 岩の先が下へ行くほど溶ける、もやの色と強さ。placeSky が時間帯で変える
 };
 const VCOMMON = `
 attribute vec2 aFx; attribute float aBid; attribute float aPart; attribute float aWin;
 uniform float uOpenA; uniform float uOpenB; uniform float uRoofA; uniform float uRoofB; uniform float uLiftBid; uniform float uLift;
 uniform mat4 uPM[8];
-varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut;
+varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY;
 mat4 hkPart(out float cut) {
   cut = 1.0;
   float an = floor(aPart / 10.0 + .01), pa = aPart - an * 10.0;
@@ -104,11 +109,11 @@ mat4 hkPart(out float cut) {
 }`;
 const VBEGIN = `float hkC; mat4 hkM = hkPart(hkC); vec3 transformed = (hkM * vec4(position, 1.0)).xyz;
 if (abs(aBid - uLiftBid) < .5) transformed.y += uLift;
-vFx = aFx; vBid = aBid; vWin = aWin; vCut = hkC;`;
+vFx = aFx; vBid = aBid; vWin = aWin; vCut = hkC; vHkY = (modelMatrix * vec4(transformed, 1.0)).y;`;
 const FCOMMON = `
 uniform float uNight; uniform float uTime; uniform float uHi; uniform float uHiAmt; uniform vec3 uHiColor;
-uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK;
-varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut;
+uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK; uniform vec3 uHazeC; uniform float uHazeK;
+varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY;
 float hkBayer(vec2 p) { vec2 q = mod(floor(p), 4.0); float i = q.x + q.y * 4.0;
   return (i < 1.0 ? 0. : i < 2.0 ? 8. : i < 3.0 ? 2. : i < 4.0 ? 10. : i < 5.0 ? 12. : i < 6.0 ? 4. : i < 7.0 ? 14. : i < 8.0 ? 6. : i < 9.0 ? 3. : i < 10.0 ? 11. : i < 11.0 ? 1. : i < 12.0 ? 9. : i < 13.0 ? 15. : i < 14.0 ? 7. : i < 15.0 ? 13. : 5.) / 16.0 + 1.0 / 32.0; }
 float hkHash(float n) { return fract(sin(n) * 43758.5453123); }`;
@@ -117,15 +122,16 @@ float hkHash(float n) { return fract(sin(n) * 43758.5453123); }`;
 const FWIN = `
 float hkLit = 1.0;
 if (vWin > .5) {
-  float md = floor(vWin / 4096.0 + .001), id = vWin - md * 4096.0, h = hkHash(id * 1.731);
+  float wv = floor(vWin + .5), md = floor(wv / 4096.0 + .001), id = wv - md * 4096.0, h = hkHash(id * 1.731);   // 補間のわずかな誤差で、1枚の窓が三角形ごとに点いたり消えたりしないよう、整数に丸める
   if (md < .5) { float cyc = floor(uTime * (.035 + h * .06) + h * 9.0); hkLit = step(.4, hkHash(id * 3.17 + cyc * 7.13)); }
   else if (md < 1.5) { hkLit = step(.3, h); }
-  else if (md < 2.5) { float cyc = floor(uTime * (.02 + h * .03) + h * 5.0); hkLit = step(.74, hkHash(id * 5.31 + cyc * 3.7)); }
+  else if (md < 2.5) { float cyc = floor(uTime * (.02 + h * .03) + h * 5.0); hkLit = step(.72, hkHash(id * 5.31 + cyc * 3.7)) * .34; }
   else if (md < 3.5) { hkLit = step(.12, h); }
 }
 float gk = vFx.x;
-vec3 hkG = gk < 1.5 ? uGlowW : gk < 2.5 ? uGlowI : gk < 3.5 ? uGlowS : gk < 4.5 ? uGlowC : gk < 5.5 ? uGlowL : uGlowK;
-totalEmissiveRadiance += hkG * step(.5, gk) * step(gk, 8.5) * hkLit * uNight * 2.3;
+vec3 hkG = gk < 1.5 ? uGlowW : gk < 2.5 ? uGlowI : gk < 3.5 ? uGlowS : gk < 4.5 ? uGlowC : gk < 5.5 ? uGlowL : gk < 6.5 ? uGlowK : gk < 7.5 ? uGlowI : uGlowS;
+float gi = gk < 1.5 ? 1.9 : gk < 3.5 ? 1.15 : gk < 4.5 ? .95 : gk < 5.5 ? 1.6 : gk < 6.5 ? 1.3 : .42;
+totalEmissiveRadiance += hkG * gi * step(.5, gk) * step(gk, 8.5) * hkLit * uNight;
 totalEmissiveRadiance += uHiColor * (1.0 - step(.5, abs(vBid - uHi))) * uHiAmt;`;
 const TM = {};
 function townMat(cls) {
@@ -142,7 +148,7 @@ function townMat(cls) {
 if (vFx.y > .5) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.075, .095, .15), uNight * .82);
 if (uFocus > -.5 && abs(vBid - uFocus) > .5) { float k = vBid > .5 ? uDim : uDim * .55; float l = dot(diffuseColor.rgb, vec3(.3, .59, .11)); diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(l), vec3(.93, .92, .9), .22), k); }`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + FWIN)
-      .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5) outgoingLight = diffuseColor.rgb;\n#include <opaque_fragment>');
+      .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5) outgoingLight = diffuseColor.rgb;\noutgoingLight = mix(outgoingLight, uHazeC, (1.0 - smoothstep(-7.9, -6.2, vHkY)) * uHazeK);\n#include <opaque_fragment>');
   };
   m.customProgramCacheKey = () => 'hk-town2-' + cls;
   return (TM[cls] = m);
@@ -165,11 +171,11 @@ function depthMat() {
 const _m = new THREE.Matrix4(), _n = new THREE.Matrix3(), _v = new THREE.Vector3();
 let AO_MS = 0;
 function inherit(o, root, key, dflt) { for (let p = o; p && p !== root; p = p.parent) if (p.userData[key] !== undefined) return p.userData[key]; return dflt; }
-function mergeItems(items, inv, ao) {
+function* mergeItemsGen(items, inv, ao) {
   let nv = 0, ni = 0;
   for (const { o } of items) { const g = o.geometry; nv += g.attributes.position.count; ni += g.index ? g.index.count : g.attributes.position.count; }
   const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), col = new Float32Array(nv * 3), fxa = new Float32Array(nv * 2), bid = new Float32Array(nv), part = new Float32Array(nv), win = new Float32Array(nv), idx = new Uint32Array(ni), aoMask = new Uint8Array(ao ? nv : 0);
-  let vo = 0, io = 0;
+  let vo = 0, io = 0, since = 0;
   for (const it of items) {
     const o = it.o, g = o.geometry, P = g.attributes.position, N = g.attributes.normal, Cc = g.attributes.color, c = o.material.color;
     _m.multiplyMatrices(inv, o.matrixWorld); _n.getNormalMatrix(_m);
@@ -184,16 +190,27 @@ function mergeItems(items, inv, ao) {
     }
     if (g.index) { const I = g.index.array; for (let j = 0; j < I.length; j++) idx[io + j] = I[j] + vo; io += I.length; }
     else { for (let j = 0; j < P.count; j++) idx[io + j] = vo + j; io += P.count; }
-    vo += P.count;
+    vo += P.count; since += P.count;
+    if (since > 4000) { since = 0; yield 'merge'; }
   }
   // 接地の陰: 地面に近いほど少し暗く(壁の下ほどわずかに暗いグラデーション)。地面から 0.55 より高い頂点は変わらないので、とばす
-  if (ao) { const t0 = performance.now(); for (let k = 0; k < nv; k++) { if (!aoMask[k]) continue; const y = pos[k * 3 + 1]; if (y > PLATEAU_H + .56) continue; const x = pos[k * 3], z = pos[k * 3 + 2]; if (y > .56 && !nearPlateau(x, z)) continue; const a = .8 + .2 * smooth01((y - groundY(x, z)) / .55); col[k * 3] *= a; col[k * 3 + 1] *= a; col[k * 3 + 2] *= a; } AO_MS += performance.now() - t0; }
+  if (ao) {
+    let t0 = performance.now();
+    for (let k = 0; k < nv; k++) {
+      if (k % 12000 === 11999) { AO_MS += performance.now() - t0; yield 'ao'; t0 = performance.now(); }
+      if (!aoMask[k]) continue; const y = pos[k * 3 + 1]; if (y > PLATEAU_H + .56) continue; const x = pos[k * 3], z = pos[k * 3 + 2]; if (y > .56 && !nearPlateau(x, z)) continue;
+      const a = .8 + .2 * smooth01((y - groundY(x, z)) / .55); col[k * 3] *= a; col[k * 3 + 1] *= a; col[k * 3 + 2] *= a;
+    }
+    AO_MS += performance.now() - t0;
+  }
   const out = new THREE.BufferGeometry();
   out.setAttribute('position', new THREE.BufferAttribute(pos, 3)); out.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); out.setAttribute('color', new THREE.BufferAttribute(col, 3));
   out.setAttribute('aFx', new THREE.BufferAttribute(fxa, 2)); out.setAttribute('aBid', new THREE.BufferAttribute(bid, 1)); out.setAttribute('aPart', new THREE.BufferAttribute(part, 1)); out.setAttribute('aWin', new THREE.BufferAttribute(win, 1));
   out.setIndex(new THREE.BufferAttribute(idx, 1)); out.computeBoundingSphere();
   return out;
 }
+const runGen = g => { let r; do r = g.next(); while (!r.done); return r.value; };
+const mergeItems = (items, inv, ao) => runGen(mergeItemsGen(items, inv, ao));
 function collect(root) {
   const items = [];
   root.traverse(o => {
@@ -202,7 +219,7 @@ function collect(root) {
   });
   return items;
 }
-function bakeStatic(root, ao = true) {
+function* bakeStaticGen(root, ao = true) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), buckets = new Map();
   for (const it of collect(root)) {
@@ -212,11 +229,14 @@ function bakeStatic(root, ao = true) {
     if (!buckets.has(key)) buckets.set(key, []); buckets.get(key).push(it);
   }
   for (const its of buckets.values()) for (const { o } of its) o.parent.remove(o);
+  yield 'collect';
   const out = [];
   for (const [key, its] of buckets) {
-    const mesh = new THREE.Mesh(mergeItems(its, inv, ao), townMat(key[0])); mesh.castShadow = key[1] === 'c'; mesh.receiveShadow = true; mesh.userData.keep = true;
+    const geom = yield* mergeItemsGen(its, inv, ao);
+    const mesh = new THREE.Mesh(geom, townMat(key[0])); mesh.castShadow = key[1] === 'c'; mesh.receiveShadow = true; mesh.userData.keep = true;
     if (mesh.castShadow) mesh.customDepthMaterial = depthMat();
     root.add(mesh); out.push(mesh);
+    yield 'bucket';
   }
   return out;
 }
@@ -249,13 +269,15 @@ function groundAO(x, z, occ) {
   return k;
 }
 let GROUND_MS = 0;
-function groundMesh(occ, q) {
-  const t0 = performance.now();
-  const NR = q === 'low' ? 16 : 22, NS = q === 'low' ? 96 : 128, pos = [], nor = [], col = [], idx = [];
+function* groundMeshGen(occ, q) {
+  let t0 = performance.now(); GROUND_MS = 0;
+  const NR = q === 'low' ? 16 : 22, NS = q === 'low' ? 96 : 112, pos = [], nor = [], col = [], idx = [];
   const g1 = new THREE.Color(C.grass), g2 = new THREE.Color(C.grass2), g3 = new THREE.Color(C.lawn);
-  for (let j = 0; j <= NR; j++) for (let i = 0; i < NS; i++) {
-    const a = i / NS * TAU, rr = islandR(a) * Math.pow(j / NR, .8), x = Math.cos(a) * rr, z = Math.sin(a) * rr;
-    pos.push(x, 0, z); nor.push(0, 1, 0);
+  const FR = []; for (let j = 0; j <= NR - 6; j++) FR.push(.85 * Math.pow(j / (NR - 6), .85)); FR.push(.875, .89, .905, .92, .95, 1);
+  for (let j = 0; j < FR.length; j++) for (let i = 0; i < NS; i++) {
+    if (i === 0 && j % 6 === 5) { GROUND_MS += performance.now() - t0; yield 'ground'; t0 = performance.now(); }
+    const a = i / NS * TAU, Ra = islandR(a), rr = Ra * FR[j], x = Math.cos(a) * rr, z = Math.sin(a) * rr;
+    pos.push(x, -ledgeDrop(a, rr, Ra), z); nor.push(0, 1, 0);
     const n = noise2(x * .55, z * .55);
     _col.copy(g1).lerp(n > 0 ? g3 : g2, Math.min(1, Math.abs(n) * .9));
     // 台地の石垣の根もと(一段低い側)は少し暗く、島の縁の近くはわずかに明るく乾いた草に
@@ -263,9 +285,10 @@ function groundMesh(occ, q) {
     const k = groundAO(x, z, occ) * wallAO * (1 + .04 * smooth01((rr - islandR(a) + 1.2) / 1.2));
     col.push(_col.r * k, _col.g * k, _col.b * k);
   }
-  for (let j = 0; j < NR; j++) for (let i = 0; i < NS; i++) { const a = j * NS + i, b = j * NS + (i + 1) % NS, c = a + NS, d = b + NS; idx.push(a, c, b, b, c, d); }
-  GROUND_MS = performance.now() - t0;
-  return surf(new THREE.Mesh(geo(pos, nor, idx, col), M('#FFFFFF', { vc: true, r: .95 })));
+  for (let j = 0; j < FR.length - 1; j++) for (let i = 0; i < NS; i++) { const a = j * NS + i, b = j * NS + (i + 1) % NS, c = a + NS, d = b + NS; idx.push(a, c, b, b, c, d); }
+  const gg = geo(pos, nor, idx, col); gg.computeVertexNormals();
+  GROUND_MS += performance.now() - t0;
+  return surf(new THREE.Mesh(gg, M('#FFFFFF', { vc: true, r: .95 })));
 }
 /* 縁の地層: 草の縁 → 表土(こげ茶)→ 砂岩(黄土)→ 石(灰)→ 砂岩。層ごとに少し引っ込み、光の線ができる */
 const STRATA = [
@@ -275,7 +298,7 @@ const STRATA = [
   { y: -.94, d: -.21, c: 'soil3' }, { y: -1.36, d: -.26, c: 'soil3' },
   { y: -1.38, d: -.32, c: 'soil4' }, { y: -1.72, d: -.42, c: 'soil4' }
 ];
-function skirt(rnd, q) {
+function* skirtGen(rnd, q) {
   const NS = q === 'low' ? 96 : 160, rows = [];
   // 層の境目ごとの波(ひとつの段の上と下の行は同じ波を使い、層が交差しない)。層は場所で厚くなったり薄くなったりする
   const BND = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4], ph = Array.from({ length: 5 }, () => [rnd() * TAU, rnd() * TAU]), AMP = [.015, .08, .1, .09, .06];
@@ -284,13 +307,16 @@ function skirt(rnd, q) {
     const L = STRATA[k], row = [], bnd = BND[k];
     for (let i = 0; i <= NS; i++) {
       const a = i / NS * TAU, R = islandR(a), nn = k > 2 ? Math.sin(a * 9 + jit[k][0]) * .035 + Math.sin(a * 23 + jit[k][1]) * .02 : 0;
-      const yy = L.y + (k > 2 ? AMP[bnd] * (Math.sin(a * 3 + ph[bnd][0]) + .6 * Math.sin(a * 7 + ph[bnd][1])) : 0), rr = R + L.d + nn;
+      let yy = L.y + (k > 2 ? AMP[bnd] * (Math.sin(a * 3 + ph[bnd][0]) + .6 * Math.sin(a * 7 + ph[bnd][1])) : 0); const rr = R + L.d + nn;
+      const dr = LEDGE.d * ledgeW(a); if (dr > 0 && yy > -1) yy = yy - dr * (1 + yy);
       row.push([Math.cos(a) * rr, yy, Math.sin(a) * rr]);
     }
     rows.push(row);
   }
+  yield 'skirt';
   const pos = [], nor = [], col = [], idx = [], tmp = new THREE.Color();
   for (let k = 0; k < rows.length - 1; k++) {
+    if (k === 5) yield 'skirt';
     const cc = STRATA[k + 1].c; if (!cc) continue;
     for (let i = 0; i < NS; i++) {
       const p = [rows[k][i], rows[k][i + 1], rows[k + 1][i + 1], rows[k + 1][i]];
@@ -300,6 +326,7 @@ function skirt(rnd, q) {
       idx.push(b0, b0 + 1, b0 + 2, b0, b0 + 2, b0 + 3);
     }
   }
+  yield 'skirt';
   // 崖から突き出す岩(ところどころ。層の色で)
   const rk = new THREE.IcosahedronGeometry(1, 0), RP = rk.attributes.position, nRock = q === 'low' ? 5 : 9;
   for (let n = 0; n < nRock; n++) {
@@ -313,11 +340,12 @@ function skirt(rnd, q) {
       idx.push(b0, b0 + 1, b0 + 2);
     }
   }
-  const g = geo(pos, nor, idx, col); g.computeVertexNormals();
-  return { mesh: surf(new THREE.Mesh(g.toNonIndexed(), M('#FFFFFF', { flat: true, vc: true, r: .95 }))), bottom: rows[rows.length - 1] };
+  // 平らな陰影(flat)なので、法線はシェーダーが面から求める。頂点は四角ごとに別なので、色も面ごとに分かれる
+  const g = geo(pos, nor, idx, col);
+  return { mesh: surf(new THREE.Mesh(g, M('#FFFFFF', { flat: true, vc: true, r: .95 }))), bottom: rows[rows.length - 1] };
 }
 /* 岩の塊: 一つの円錐でなく、段(層)と縦の割れ目のある塊。下へ行くほど細く、少し傾く。小さな塊が2つぶら下がる */
-function rockMass(rnd, bottom, q) {
+function* rockMassGen(rnd, bottom, q) {
   const NS = bottom.length - 1, pos = [], col = [], tmp = new THREE.Color();
   const tri = (a, b, c, hint) => {   // 三角形を、外向きの手がかり hint に合わせた向きで足す
     const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
@@ -325,20 +353,22 @@ function rockMass(rnd, bottom, q) {
     for (const p of flip ? [a, c, b] : [a, b, c]) { pos.push(p[0], p[1], p[2]); col.push(tmp.r, tmp.g, tmp.b); }
   };
   const quad = (p, hint) => { tri(p[0], p[1], p[2], hint); tri(p[0], p[2], p[3], hint); };
-  const PROF = [[-1.72, 1], [-2.1, .93], [-2.2, .87], [-3.0, .8], [-3.1, .74], [-4.0, .67], [-4.12, .61], [-5.0, .53], [-5.12, .47], [-6.0, .38], [-6.12, .33], [-6.9, .24], [-7.6, .15], [-8.2, .07], [-8.6, 0]];
+  // 本体: 層の段(張り出しと引っ込み)と縦の割れ目。下は平らに閉じる(細い三角形を一点に集めない)
+  const PROF = [[-1.72, 1], [-2.1, .93], [-2.2, .86], [-3.0, .79], [-3.12, .72], [-4.0, .64], [-4.12, .57], [-4.9, .48], [-5.02, .42], [-5.5, .34]];
   const cracks = Array.from({ length: 9 }, () => [rnd() * TAU, .05 + rnd() * .05, .12 + rnd() * .2]);
   const rows = [], axis = [];
   for (let k = 0; k < PROF.length; k++) {
-    const [y, sc] = PROF[k], dep = clamp01((-y - 1.72) / 6.9), lean = dep * dep, row = [];
-    axis.push([lean * .7, lean * .35]);
+    const [y, sc] = PROF[k], dep = clamp01((-y - 1.72) / 3.8), lean = dep * dep, row = [];
+    axis.push([lean * .5, lean * .25]);
     for (let i = 0; i <= NS; i++) {
       const a = i / NS * TAU, b = bottom[i % NS];
-      let rad = Math.hypot(b[0], b[2]) * sc * (1 + (.1 * Math.sin(a * 3 + 1) + .07 * Math.sin(a * 5 + 2.3) + .05 * Math.sin(a * 8 + .4)) * dep) * (1 + .38 * dep * dep * Math.sin(a * 3 + .6));
+      let rad = Math.hypot(b[0], b[2]) * sc * (1 + (.1 * Math.sin(a * 3 + 1) + .07 * Math.sin(a * 5 + 2.3) + .05 * Math.sin(a * 8 + .4)) * dep);
       for (const [ca, w, dd] of cracks) { const d = angDiff(a, ca) / w; rad -= dd * Math.exp(-d * d) * (k ? 1 : 0) * Math.min(1, sc * 2.4); }
-      row.push(k === 0 ? [b[0], b[1], b[2]] : [Math.cos(a) * rad + lean * .7, y + Math.sin(a * 4 + k) * .06 * dep - .9 * dep * dep * Math.max(0, Math.sin(a * 3 + .6)), Math.sin(a) * rad + lean * .35]);
+      row.push(k === 0 ? [b[0], b[1], b[2]] : [Math.cos(a) * rad + lean * .5, y + Math.sin(a * 4 + k) * .06 * dep, Math.sin(a) * rad + lean * .25]);
     }
     rows.push(row);
   }
+  yield 'rock';
   const bands = [C.rock, C.soil4, C.rock, C.soil3, C.rock, C.soil4, C.rockD];
   for (let k = 0; k < rows.length - 1; k++) for (let i = 0; i < NS; i++) {
     const p = [rows[k][i], rows[k][i + 1], rows[k + 1][i + 1], rows[k + 1][i]], a = (i + .5) / NS * TAU;
@@ -347,16 +377,27 @@ function rockMass(rnd, bottom, q) {
     const mx = (p[0][0] + p[2][0]) / 2 - axis[k][0], mz = (p[0][2] + p[2][2]) / 2 - axis[k][1];
     quad(p, [mx, -.25 * k / rows.length * Math.hypot(mx, mz), mz]);
   }
-  // ぶら下がる小さな塊
-  for (const [a0, r0, len, w, y0] of [[deg(78), 4.4, 2.0, .85, -3.4], [deg(12), 4.9, 1.6, .7, -2.9], [deg(150), 4.0, 1.8, .75, -3.0]]) {
-    const cx = Math.cos(a0) * r0, cz = Math.sin(a0) * r0, M2 = 7, K2 = 5, ring = [];
-    for (let k = 0; k <= K2; k++) { const r2 = []; for (let i = 0; i < M2; i++) { const u = k / K2, a = i / M2 * TAU + k * .3, rad = w * (1 - u) * (1 - u * .2) * (.85 + .25 * Math.sin(a * 3 + r0)); r2.push([cx + Math.cos(a) * rad + u * .2, y0 - u * len, cz + Math.sin(a) * rad]); } ring.push(r2); }
+  yield 'rock';
+  // 底: 少し凹凸のある面で閉じる(下向き。カメラからは見えない)
+  const last = rows[rows.length - 1], ax = axis[axis.length - 1], cy = PROF[PROF.length - 1][0] - .25, ctr = [ax[0], cy, ax[1]];
+  tmp.set(C.rockD);
+  for (let i = 0; i < NS; i += 4) { const j = Math.min(NS, i + 4); tri(last[i], last[j], ctr, [0, -1, 0]); for (let m = i; m < j; m++) tri(last[m], last[m + 1], last[j], [0, -1, 0]); }
+  // 割れて垂れる先(3本。層の段と、少しねじれ)
+  for (const [s0, f0, len, w, lean] of [[-.6, 1.05, 3.0, 1.35, -.15], [1.6, .85, 1.7, .85, .3], [.45, -1.0, 2.3, 1.0, .1]]) {   // 大きい先が1本と、小さい先が2本(左右対称の牙にしない)
+    const [ox, oz] = SF(s0, f0), a0 = Math.atan2(oz, ox), r0 = Math.hypot(ox, oz);
+    const cx = ax[0] + Math.cos(a0) * r0, cz = ax[1] + Math.sin(a0) * r0, y0 = PROF[PROF.length - 1][0] + .25, M2 = 8, K2 = 6, ring = [];
+    for (let k = 0; k <= K2; k++) {
+      const u = k / K2, r2 = [], step = k % 2 ? .9 : 1;   // 段ごとに少し張り出す
+      for (let i = 0; i < M2; i++) { const a = i / M2 * TAU + k * .35, rad = Math.max(.02, w * Math.pow(1 - u, 1.15) * step * (.82 + .3 * Math.sin(a * 3 + r0 * 4))); r2.push([cx + Math.cos(a) * rad + u * lean, y0 - u * len, cz + Math.sin(a) * rad + u * lean * .5]); }
+      ring.push(r2);
+    }
     for (let k = 0; k < K2; k++) for (let i = 0; i < M2; i++) {
       const p = [ring[k][i], ring[k][(i + 1) % M2], ring[k + 1][(i + 1) % M2], ring[k + 1][i]], u = (k + .5) / K2;
-      tmp.set(k % 2 ? C.rock : C.soil4).offsetHSL(0, 0, -u * .06 + (rnd() - .5) * .04);
-      quad(p, [(p[0][0] + p[2][0]) / 2 - cx - u * .2, -.2, (p[0][2] + p[2][2]) / 2 - cz]);
+      tmp.set(k % 2 ? C.rock : C.soil4).offsetHSL(0, 0, -u * .07 + (rnd() - .5) * .04);
+      quad(p, [(p[0][0] + p[2][0]) / 2 - cx - u * lean, -.2, (p[0][2] + p[2][2]) / 2 - cz - u * lean * .5]);
     }
   }
+  yield 'rock';
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.computeVertexNormals();
   void q;
   return surf(new THREE.Mesh(g, M('#FFFFFF', { flat: true, vc: true, r: .95 })));
@@ -371,7 +412,7 @@ function plateauOutline(n) {
   }
   return { c, pts: out };
 }
-function plateau(g, occ, q) {
+function* plateauGen(g, occ, q) {
   const { c, pts } = plateauOutline(q === 'low' ? 120 : 200), n = pts.length, H = PLATEAU_H;
   // 上の面(芝。頂点の色でむらと、縁の近くの陰)
   const K = 8, pos = [], nor = [], col = [], idx = [], g1 = new THREE.Color(C.lawn), g2 = new THREE.Color(C.grass);
@@ -384,27 +425,47 @@ function plateau(g, occ, q) {
   }
   for (let k = 0; k < K; k++) for (let i = 0; i < n; i++) { const a = k * n + i, b = k * n + (i + 1) % n, cc = a + n, d = b + n; idx.push(a, cc, b, b, cc, d); }
   g.add(surf(new THREE.Mesh(geo(pos, nor, idx, col), M('#FFFFFF', { vc: true, r: .95 }))));
-  // 石垣(2段の石積み。石ごとに少し違う色、根もとは少し外へ)と、笠石。階段と坂の所はあける
+  yield 'plateau';
+  // 石垣(乱積み: 長さと高さのそろわない石を2段に。背の高い石がところどころ2段をまたぐ。石ごとに少し出入りし、目地は奥の暗い帯が細く見える。
+  // 根もとほど外へ(のり)。笠石。階段と坂の所はあける)
   const cut = (s, f) => { for (const st of STAIRS) { const q2 = inRect(s, f, st); if (q2.along > -.3 && q2.along < .3 && Math.abs(q2.across) < st.w / 2 + .02) return true; } return rampK(s, f) >= 0 && rampK(s, f) < .5; };
-  const wp = [], wn = [], wc = [], wi = [], tmp = new THREE.Color(), rnd = rng(77);
-  const capPts = [];
-  for (let i = 0; i < n; i++) {
-    const p0 = pts[i], p1 = pts[(i + 1) % n], ms = (p0[0] + p1[0]) / 2, mf = (p0[1] + p1[1]) / 2;
-    if (cut(ms, mf)) { capPts.push(null); continue; }
-    capPts.push(i);
-    const ts = p1[0] - p0[0], tf = p1[1] - p0[1], tl = Math.hypot(ts, tf) || 1, ns = -tf / tl, nf = ts / tl;   // 外向き
-    const out = (p, d) => SF(p[0] + ns * d, p[1] + nf * d);
-    for (let row = 0; row < 2; row++) {
-      const y0 = row * H / 2, y1 = (row + 1) * H / 2, b0 = row ? .015 : .04, b1 = row ? 0 : .015;
-      const A = out(p0, b0), B = out(p1, b0), Cq = out(p1, b1), D = out(p0, b1);
-      tmp.set(C.stoneWall).lerp(_col.set(C.stoneWall2), rnd() * .6).offsetHSL(0, (rnd() - .5) * .015, (rnd() - .5) * .03 + ((i + row) % 2 ? .008 : -.008));
-      const [nx, nz] = SF(ns, nf), base = wp.length / 3;
-      for (const [x, y, z] of [[A[0], y0, A[1]], [B[0], y0, B[1]], [Cq[0], y1, Cq[1]], [D[0], y1, D[1]]]) { wp.push(x, y, z); wn.push(nx, .15, nz); wc.push(tmp.r, tmp.g, tmp.b); }
-      wi.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  const wp = [], wn = [], wc = [], wi = [], rnd = rng(77);
+  const isOpen = pts.map((p0, i) => { const p1 = pts[(i + 1) % n]; return !cut((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2); });
+  const capPts = isOpen.map((o, i) => o ? i : null);
+  const bat = y => .04 * (1 - y / H), GAP = .008, TOP = H - 1e-4;
+  const wallQuad = (i, ya, yb, za, zb, e0, e1, bulge, col) => {   // 区間 i の石の面。ya, yb = 始まりの下と上、za, zb = 終わりの下と上。e0, e1 = 目地のぶん端を詰める
+    const p0 = pts[i], p1 = pts[(i + 1) % n], ts0 = p1[0] - p0[0], tf0 = p1[1] - p0[1], tl = Math.hypot(ts0, tf0) || 1, ts = ts0 / tl, tf = tf0 / tl, ns = -tf, nf = ts, [nx, nz] = SF(ns, nf);
+    const P = (p, e, y) => { const d = bat(y) + bulge; return SF(p[0] + ts * e + ns * d, p[1] + tf * e + nf * d); };
+    const base = wp.length / 3;
+    for (const [p, e, y] of [[p0, e0, ya], [p1, -e1, za], [p1, -e1, zb], [p0, e0, yb]]) { const [x, z] = P(p, e, y); wp.push(x, y, z); wn.push(nx, .15, nz); wc.push(col.r, col.g, col.b); }
+    wi.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  };
+  const stoneCol = () => new THREE.Color(C.stoneWall).lerp(_col.set(C.stoneWall2), rnd() * .7).offsetHSL(0, (rnd() - .5) * .02, (rnd() - .5) * .07 - (rnd() < .14 ? .05 : 0));
+  const mortar = new THREE.Color(C.stoneWall2).offsetHSL(0, 0, -.16);
+  let st0 = isOpen.indexOf(false); if (st0 < 0) st0 = 0;
+  const runs = []; let cur = [];
+  for (let k = 1; k <= n; k++) { const i = (st0 + k) % n; if (isOpen[i]) cur.push(i); else if (cur.length) { runs.push(cur); cur = []; } }
+  if (cur.length) runs.push(cur);
+  for (const run of runs) {
+    const split = new Float32Array(run.length), L = run.length;
+    for (let k = 0; k < L;) {      // 下の段: 大きめの石(2〜3区間)。ときどき2段をまたぐ背の高い石
+      const tall = rnd() < .1, len = Math.min(L - k, tall ? 1 + (rnd() < .5 ? 1 : 0) : 2 + Math.floor(rnd() * 2));
+      const top = tall ? H : H * (.4 + rnd() * .2), yt = tall ? H : top - GAP / 2, col = stoneCol(), bulge = (rnd() - .35) * .012;
+      for (let j = 0; j < len; j++) { split[k + j] = top; wallQuad(run[k + j], 0, yt, 0, yt, j ? 0 : GAP / 2, j === len - 1 ? GAP / 2 : 0, bulge, col); }
+      k += len;
     }
+    for (let k = 0; k < L;) {      // 上の段: 1〜3区間。下の石の高さに合わせて、下の縁が段になる
+      if (split[k] >= TOP) { k++; continue; }
+      let len = 1 + Math.floor(rnd() * 3), j = 0; while (j < len && k + j < L && split[k + j] < TOP) j++; len = j;
+      const col = stoneCol(), bulge = (rnd() - .35) * .01;
+      for (let j2 = 0; j2 < len; j2++) { const yb = split[k + j2] + GAP / 2; wallQuad(run[k + j2], yb, H, yb, H, j2 ? 0 : GAP / 2, j2 === len - 1 ? GAP / 2 : 0, bulge, col); }
+      k += len;
+    }
+    for (const i of run) wallQuad(i, 0, H, 0, H, 0, 0, -.006, mortar);   // 目地(奥の暗い帯)
   }
   const wg = geo(wp, wn, wi, wc);
   g.add(surf(new THREE.Mesh(wg, M('#FFFFFF', { vc: true, r: .9 }))));
+  yield 'plateau';
   // 笠石(縁の上の細い帯)
   const cp = [], cn = [], ci = [];
   for (let i = 0; i < n; i++) {
@@ -480,70 +541,96 @@ function drivePts(B) {
    文字どおりの「橋」(水路に架けた小さな橋)はやめる ---------- */
 const LOGO = { I: [[8, 74], [62, 16], [118, 24], [176, 84]], S: [[58, 94], [118, 60], [158, 22], [232, 12]] };
 function bez(P, t) { const u = 1 - t; return [u * u * u * P[0][0] + 3 * u * u * t * P[1][0] + 3 * u * t * t * P[2][0] + t * t * t * P[3][0], u * u * u * P[0][1] + 3 * u * u * t * P[1][1] + 3 * u * t * t * P[2][1] + t * t * t * P[3][1]]; }
-/* 2本の線の高さ: ロゴの中の「高さ」(v が小さいほど上)を、そのまま空中の高さにする(ロゴの立体版)。
-   藍は両足が床に着き、砂は床から立ち上がって右上で空中に抜ける。砂は少し手前の面にあり、交差して見えても触れない */
-export const ARC = { VB: 84, LAM: 1.0, SOFF: .28, I: { t0: -.05, t1: 1.07 }, S: { t0: -.12, t1: .97 } };
+/* 2本の線: ロゴの中の「高さ」(v が小さいほど上)を、そのまま空中の高さにする(ロゴの立体版)。高さは v に比例(足もとで跳ねない)
+   藍は両足が台座に沈み、砂は台座から立ち上がって右上で空中に抜ける(筆の線のように細って終わる)。砂は少し手前の面にあり、交差して見えても触れない
+   床には、ロゴの2本の線そのもの(藍の石と砂の石)を埋め込む。上から見てもロゴが読める */
+export const ARC = { VB: 84, LAM: 1.07, SOFF: .28, I: { t0: -.056, t1: 1.0 }, S: { t0: 0, t1: 1.0 } };
 export function plazaFrame() {
   const L = LAYOUT.plaza, [cx0, cz0] = polar(L.a, L.r);
   const right = [Math.cos(deg(L.a - 90)), Math.sin(deg(L.a - 90))], down = [Math.cos(deg(L.a)), Math.sin(deg(L.a))];
-  const s = 5.2 / 240, cx = cx0 + right[0] * -.2, cz = cz0 + right[1] * -.2;
+  const s = 5.0 / 240, cx = cx0 + right[0] * -.42, cz = cz0 + right[1] * -.42;
   const map = ([u, v]) => { const px = (u - 120) * s, pz = (v - 55) * s; return [cx + right[0] * px + down[0] * pz, cz + right[1] * px + down[1] * pz]; };
-  return { cx, cz, map, s, y: PLATEAU_H, arcTop: PLATEAU_H + ARC.LAM * s * (ARC.VB - 12) + .15 };
+  return { cx, cz, map, s, y: PLATEAU_H, arcTop: PLATEAU_H + PLINTH + ARC.LAM * s * (ARC.VB - 12) + .12 };
 }
-const arcH = (v, s) => { const x = ARC.VB - v; return x <= 0 ? 0 : ARC.LAM * s * x * smooth01(x / 14); };
-/* 3次元の細い帯(幅 w は水平、厚み th は曲線の法線の向き)。glow があれば、上の面の中央に灯りの細い線 */
-function arcRibbon(pts3, w, th, mat) {
+const PLINTH = .055;
+const arcH = (v, s) => Math.max(0, ARC.LAM * s * (ARC.VB - v));
+/* 筆の線の帯: 平たい断面(幅 w が広く、厚み th が薄い)。幅の向きは曲線の面の中(カメラに広い面を向ける)。wf(u) で端に向かって細る */
+function brushRibbon(pts3, wmax, th, wf, mat) {
   const pos = [], nor = [], idx = [], n = pts3.length, up = new THREE.Vector3(0, 1, 0), T = new THREE.Vector3(), S = new THREE.Vector3(), N = new THREE.Vector3(), P = new THREE.Vector3();
-  const frames = pts3.map((p, i) => { const a = pts3[Math.max(0, i - 1)], b = pts3[Math.min(n - 1, i + 1)]; T.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]).normalize(); S.crossVectors(T, up).normalize(); N.crossVectors(S, T).normalize(); return { p, S: S.clone(), N: N.clone() }; });
-  const corner = (fr, a, b) => { P.set(...fr.p).addScaledVector(fr.S, a * w / 2).addScaledVector(fr.N, b * th / 2); return [P.x, P.y, P.z]; };
-  for (const [a1, b1, a2, b2, nk] of [[-1, 1, 1, 1, 'N'], [1, -1, -1, -1, '-N'], [1, 1, 1, -1, 'S'], [-1, -1, -1, 1, '-S']]) {
+  const fr = pts3.map((p, i) => { const a = pts3[Math.max(0, i - 1)], b = pts3[Math.min(n - 1, i + 1)]; T.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]).normalize(); S.crossVectors(T, up).normalize(); N.crossVectors(S, T).normalize(); return { p, S: S.clone(), N: N.clone(), w: wmax * wf(i / (n - 1)) }; });
+  const corner = (f, a, b) => { P.set(...f.p).addScaledVector(f.N, a * f.w / 2).addScaledVector(f.S, b * th / 2); return [P.x, P.y, P.z]; };
+  for (const [a1, b1, a2, b2, nk] of [[-1, 1, 1, 1, 'S'], [1, -1, -1, -1, '-S'], [1, 1, 1, -1, 'N'], [-1, -1, -1, 1, '-N']]) {
     const base = pos.length / 3;
-    for (const fr of frames) { const nv = nk === 'N' ? fr.N : nk === '-N' ? fr.N.clone().negate() : nk === 'S' ? fr.S : fr.S.clone().negate(); pos.push(...corner(fr, a1, b1)); nor.push(nv.x, nv.y, nv.z); pos.push(...corner(fr, a2, b2)); nor.push(nv.x, nv.y, nv.z); }
+    for (const f of fr) { const nv = nk === 'S' ? f.S : nk === '-S' ? f.S.clone().negate() : nk === 'N' ? f.N : f.N.clone().negate(); pos.push(...corner(f, a1, b1)); nor.push(nv.x, nv.y, nv.z); pos.push(...corner(f, a2, b2)); nor.push(nv.x, nv.y, nv.z); }
     for (let i = 0; i < n - 1; i++) { const a = base + i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
   }
   return sh(new THREE.Mesh(geo(pos, nor, idx), mat));
 }
-function plaza(g, q) {
+/* 床に埋めた石の帯(平らで、端に向かって細る) */
+function floorBrush(pts, wmax, wf, y, mat) {
+  const pos = [], nor = [], idx = [], n = pts.length;
+  for (let i = 0; i < n; i++) {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz) || 1, sx = -dz / l, sz = dx / l, w = wmax * wf(i / (n - 1)) / 2, [x, z] = pts[i];
+    pos.push(x + sx * w, y, z + sz * w, x - sx * w, y, z - sz * w); nor.push(0, 1, 0, 0, 1, 0);
+  }
+  for (let i = 0; i < n - 1; i++) { const a = i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+  return tag(sh(new THREE.Mesh(geo(pos, nor, idx), mat), false), { surf: true });
+}
+function* plazaGen(g, q) {
   const pg = tag(new THREE.Group(), { bid: BID.plaza }); g.add(pg);
   const { cx, cz, map, s: ks } = plazaFrame(), H = PLATEAU_H;
-  // 床の石: 広場の形(角の丸い長方形)を、中心から放射にたどる。ごく淡い同心の帯(石の目地の代わり)
-  const pave = (s, f) => sdRBox(s, f, -.1, 2.25, 2.75, 2.6, 1.1);
-  const [pcs, pcf] = [-.1, 2.35], n = 120, K = 10, pos = [], nor = [], col = [], idx = [], c1 = new THREE.Color(C.pave), c2 = new THREE.Color(C.pave2);
-  for (let k = 0; k <= K; k++) for (let i = 0; i < n; i++) {
-    const th = i / n * TAU, ds = Math.sin(th), df = Math.cos(th);
-    let lo = 0, hi = 6; for (let it = 0; it < 24; it++) { const m = (lo + hi) / 2; if (pave(pcs + ds * m, pcf + df * m) < 0) lo = m; else hi = m; }
-    const u = k / K, [x, z] = SF(pcs + ds * lo * u, pcf + df * lo * u);
-    pos.push(x, H + .006, z); nor.push(0, 1, 0);
-    const dc = Math.hypot(x - cx, z - cz), band = .5 + .5 * Math.sin(dc * 7.5);
-    _col.copy(c1).lerp(c2, .25 + band * .2 + (k === K ? .35 : 0));
-    col.push(_col.r, _col.g, _col.b);
-  }
+  // 床: 目地の色の下地と、温かい石の敷石(画面にそろえた格子。石ごとにわずかに色が違う)
+  const pave = (s, f) => sdRBox(s, f, -.45, 2.25, 2.4, 2.6, 1.0);
+  const [pcs, pcf] = [-.45, 2.3], n = 96, K = 4, pos = [], nor = [], col = [], idx = [], cj = new THREE.Color(C.joint);
+  const outline = [];
+  for (let i = 0; i < n; i++) { const th = i / n * TAU, ds = Math.sin(th), df = Math.cos(th); let lo = 0, hi = 6; for (let it = 0; it < 24; it++) { const m = (lo + hi) / 2; if (pave(pcs + ds * m, pcf + df * m) < 0) lo = m; else hi = m; } outline.push(lo); }
+  for (let k = 0; k <= K; k++) for (let i = 0; i < n; i++) { const th = i / n * TAU, u = k / K, [x, z] = SF(pcs + Math.sin(th) * outline[i] * u, pcf + Math.cos(th) * outline[i] * u); pos.push(x, H + .005, z); nor.push(0, 1, 0); col.push(cj.r, cj.g, cj.b); }
   for (let k = 0; k < K; k++) for (let i = 0; i < n; i++) { const a = k * n + i, b = k * n + (i + 1) % n, c = a + n, d = b + n; idx.push(a, c, b, b, c, d); }
-  pg.add(surf(new THREE.Mesh(geo(pos, nor, idx, col), M('#FFFFFF', { vc: true, r: .88 }))));
-  // 2本の線: 床の帯から立ち上がり、空中でロゴを描く
-  const N = q === 'low' ? 70 : 140, down = [Math.cos(deg(LAYOUT.plaza.a)), Math.sin(deg(LAYOUT.plaza.a))];
-  const curve = (P, t0, t1, off) => { const out = []; for (let i = 0; i <= N; i++) { const t = lerp(t0, t1, i / N), [u, v] = bez(P, t), [x, z] = map([u, v]); out.push([x + down[0] * off, H + .012 + arcH(v, ks), z + down[1] * off]); } return out; };
+  pg.add(surf(new THREE.Mesh(geo(pos, nor, idx, col), M('#FFFFFF', { vc: true, r: .9 }))));
+  yield 'plaza';
+  // 敷石(縁の帯に収まる石だけ)。広場の縁は、明るい石の縁石でそろえる
+  const CELL = .38, TILE = .355, tp = [], tn = [], tc = [], ti = [], base = new THREE.Color(C.pave), rr = rng(41);
+  for (let a = -3.0; a < 2.2; a += CELL) for (let b = -.5; b < 5.0; b += CELL) {
+    const c0 = [a + (CELL - TILE) / 2, b + (CELL - TILE) / 2], c1 = [c0[0] + TILE, c0[1] + TILE];
+    if (![[c0[0], c0[1]], [c1[0], c0[1]], [c1[0], c1[1]], [c0[0], c1[1]]].every(([ss, ff]) => pave(ss, ff) < -.12)) continue;
+    _col.copy(base).offsetHSL((rr() - .5) * .01, (rr() - .5) * .03, (rr() - .5) * .045 + (rr() < .08 ? -.03 : 0));
+    const b0 = tp.length / 3;
+    for (const [ss, ff] of [[c0[0], c0[1]], [c1[0], c0[1]], [c1[0], c1[1]], [c0[0], c1[1]]]) { const [x, z] = SF(ss, ff); tp.push(x, H + .009, z); tn.push(0, 1, 0); tc.push(_col.r, _col.g, _col.b); }
+    ti.push(b0, b0 + 1, b0 + 2, b0, b0 + 2, b0 + 3);
+  }
+  pg.add(surf(new THREE.Mesh(geo(tp, tn, ti, tc), M('#FFFFFF', { vc: true, r: .88 }))));
+  const rim = []; for (let i = 0; i <= n; i++) { const th = i / n * TAU, o = outline[i % n]; rim.push(SF(pcs + Math.sin(th) * (o - .07), pcf + Math.cos(th) * (o - .07))); }
+  pg.add(tag(ribbon(rim, .13, H + .004, .012, M(C.coping, { r: .85 })), { surf: true }));
+  yield 'plaza';
+  // 2本の線
+  const N = q === 'low' ? 70 : 130, down = [Math.cos(deg(LAYOUT.plaza.a)), Math.sin(deg(LAYOUT.plaza.a))];
+  const curve = (P, t0, t1, off) => { const out = []; for (let i = 0; i <= N; i++) { const t = lerp(t0, t1, i / N), [u, v] = bez(P, t), [x, z] = map([u, v]); out.push({ t, v, x: x + down[0] * off, z: z + down[1] * off }); } return out; };
   const cI = curve(LOGO.I, ARC.I.t0, ARC.I.t1, 0), cS = curve(LOGO.S, ARC.S.t0, ARC.S.t1, ARC.SOFF);
-  const floorBand = (pts, w, mat, glow, lineCol) => {   // 床に埋めた石の帯(浮き上がる手前まで)
-    const segs = []; let cur = [];
-    for (const p of pts) { if (p[1] < H + .035) cur.push([p[0], p[2]]); else if (cur.length) { segs.push(cur); cur = []; } }
-    if (cur.length) segs.push(cur);
-    for (const sg of segs) if (sg.length > 1) { pg.add(tag(ribbon(sg, w, H + .004, .008, mat), { surf: true })); if (glow) { const l = ribbon(sg, .04, H + .01, .006, M(lineCol, { r: .5 })); l.userData.fx = [glow, 0]; pg.add(tag(l, { surf: true })); } }
-  };
-  floorBand(cI, .24, M(C.inlayI, { r: .5 }), 2, '#3A4870'); floorBand(cS, .24, M(C.inlayS, { r: .7 }), 3, '#C7AE80');
-  // 空中の弧(細く上品に)。床の帯から少しだけ重ねて立ち上げる
-  const air = c => { let i0 = c.findIndex(p => p[1] > H + .03), i1 = c.length - 1 - [...c].reverse().findIndex(p => p[1] > H + .03); i0 = Math.max(0, i0 - 2); i1 = Math.min(c.length - 1, i1 + 2); return c.slice(i0, i1 + 1); };
-  const aI = air(cI), aS = air(cS);
-  pg.add(arcRibbon(aI, .09, .06, M(C.arcI, { r: .4 })), arcRibbon(aS, .09, .06, M(C.arcS, { r: .6 })));
-  // 砂の先(空中で終わる所)は、丸く閉じる
-  const tip = aS[aS.length - 1], tipM = sph(.055, M(C.arcS, { r: .6 }), 10, 8); tipM.position.set(tip[0], tip[1], tip[2]); tipM.scale.set(1.0, .5, 1.0); pg.add(tipM);
-  const glowLine = (pts, k, c) => { const m = arcRibbon(pts.map(([x, y, z]) => [x, y + .031, z]), .03, .008, M(c, { r: .45 })); m.castShadow = false; m.userData.fx = [k, 0]; pg.add(m); };
-  glowLine(aI, 2, '#2A3858'); glowLine(aS, 3, '#B09668');
-  // まわり: ベンチ、細い街灯、植え込みの木(石の枠)
-  for (const [s, f, r] of [[-2.3, 1.2, 90], [-1.2, 4.75, 180], [.9, 4.75, 180], [1.95, 3.1, -90]]) { const bn = bench(.6), [x, z] = SF(s, f); bn.position.set(x, H + .006, z); bn.rotation.y = deg(r) + Math.PI / 4; pg.add(bn); }
-  for (const [s, f] of [[-2.45, .45], [-2.45, 4.35], [2.25, 4.1]]) { const l = lamp(1), [x, z] = SF(s, f); l.position.set(x, H, z); pg.add(l); }
-  const rr = rng(88);
-  for (const [s, f] of [[-2.55, 1.9], [-2.55, 3.15]]) { const [x, z] = SF(s, f), t = tree(rr, 'round', .78, q); t.position.set(x, H, z); pg.add(t); const pit = treePit(.36); pit.position.set(x, H + .004, z); pg.add(pit); }
+  // 床のロゴ(藍の石と砂の石。筆の線のように端で細る)。夜は柔らかく灯る
+  const fwI = u => .35 + .65 * Math.pow(Math.sin(Math.PI * clamp01(u)), .5), fwS = u => .3 + .7 * Math.pow(Math.sin(Math.PI * clamp01(u * .85 + .08)), .55);
+  const fI = floorBrush(cI.map(p => [p.x, p.z]), .11, fwI, H + .012, M(C.inlayI, { r: .6 })); fI.userData.fx = [7, 0]; pg.add(fI);
+  const fS = floorBrush(cS.map(p => [p.x, p.z]), .11, fwS, H + .013, M(C.inlayS, { r: .7 })); fS.userData.fx = [8, 0]; pg.add(fS);
+  // 空中の弧: 台座の上から、v に比例した高さで立ち上がる。筆の線のように細る
+  const lifted = (c, off) => { const out = []; for (const p of c) { const h = arcH(p.v, ks); if (h <= 0 && out.length && out[out.length - 1][1] > H + PLINTH + .001) { out.push([p.x, H + PLINTH - .03, p.z]); break; } if (h > 0 || !out.length) out.push([p.x, H + PLINTH + h - (h <= 0 ? .03 : 0), p.z]); } return out.filter((p, i, a) => i === 0 || p[1] > H + PLINTH - .031); };
+  const aI = lifted(cI), aS = lifted(cS.filter(p => arcH(p.v, ks) > 0 || p.t > .05));
+  const twI = u => .5 + .5 * Math.pow(Math.sin(Math.PI * u), .6), twS = u => (u < .5 ? .55 + .45 * Math.sin(Math.PI * u) : .25 + .75 * Math.pow(Math.cos(Math.PI * (u - .5)), .8));
+  const arcI = brushRibbon(aI, .15, .024, twI, M(C.arcI, { r: .72 })), arcS = brushRibbon(aS, .14, .022, twS, M(C.arcS, { r: .78 }));
+  arcI.userData.fx = [2, 0]; arcS.userData.fx = [3, 0]; pg.add(arcI, arcS);
+  // 台座(足が静かに沈む、小さな低い石)
+  const plinth = (p, nxt) => { const m = cbox(.3, PLINTH, .22, M(C.stone2, { r: .85 }), .012); m.position.set(p[0], H + PLINTH / 2, p[2]); m.rotation.y = Math.atan2(nxt[0] - p[0], nxt[2] - p[2]); pg.add(m); };
+  plinth(aI[0], aI[3]); plinth(aI[aI.length - 1], aI[aI.length - 4]); plinth(aS[0], aS[3]);
+  yield 'plaza';
+  // まわり: ベンチ(ロゴを向く)、細い街灯、植え込み(石の枠の低い箱)、植桝の木
+  for (const [s, f, r] of [[-2.55, 1.25, 90], [-.95, 4.45, 180], [.6, 4.45, 180], [1.6, 2.6, -90]]) { const bn = bench(.6), [x, z] = SF(s, f); bn.position.set(x, H + .009, z); bn.rotation.y = deg(r) + Math.PI / 4; pg.add(bn); }
+  for (const [s, f] of [[-2.7, .45], [-2.7, 4.2], [1.65, .5], [1.75, 4.25]]) { const l = lamp(1), [x, z] = SF(s, f); l.position.set(x, H, z); pg.add(l); }
+  const r8 = rng(88);
+  for (const [s, f, len] of [[-1.62, 4.95, .7], [1.42, 4.95, .7], [-2.75, 2.65, .9]]) {
+    const [x, z] = SF(s, f), pl = new THREE.Group(); pl.position.set(x, H, z); pl.rotation.y = (len > .8 ? 0 : Math.PI / 2) - Math.PI / 4 + Math.PI / 2;
+    pl.add(at(cbox(len, .12, .24, M(C.stoneWall, { r: .9 }), .015), 0, .06, 0), at(box(len - .06, .02, .18, M('#7E6E5B', { r: .95 })), 0, .115, 0));
+    for (let i = 0; i < 3; i++) { const sb = tree(r8, 'shrub', .62, q); sb.position.set((i - 1) * len * .3, .11, 0); pl.add(sb); }
+    pg.add(pl);
+  }
+  for (const [s, f] of [[-2.6, 1.95], [-2.6, 3.4]]) { const [x, z] = SF(s, f), t = tree(r8, 'round', .78, q); t.position.set(x, H, z); pg.add(t); const pit = treePit(.36); pit.position.set(x, H + .006, z); pg.add(pit); }
   const topI = aI.reduce((m, p) => p[1] > m[1] ? p : m, aI[0]), topS = aS.reduce((m, p) => p[1] > m[1] ? p : m, aS[0]);
   return { I: cI, S: cS, X: [topI[0], topI[2]], aI, aS, topI, topS };
 }
@@ -583,8 +670,8 @@ function busStop() {
 function personGeos() {
   const H = PERSON_H;
   const pts = [[0, 0], [.055, 0], [.06, .1], [.064, .2], [.075, .25], [.082, .3], [.07, .34], [.04, .355], [0, .36]].map(([x, y]) => new THREE.Vector2(x * H / .44, y * H / .44));
-  const body = new THREE.LatheGeometry(pts, 9);
-  const head = new THREE.SphereGeometry(.052 * H / .44, 9, 7); head.translate(0, .405 * H / .44, 0);
+  const body = new THREE.LatheGeometry(pts, 8);
+  const head = new THREE.SphereGeometry(.052 * H / .44, 8, 6); head.translate(0, .405 * H / .44, 0);
   const hc = new Float32Array(head.attributes.position.count * 3);
   for (let i = 0; i < head.attributes.position.count; i++) { const y = head.attributes.position.getY(i) - .405 * H / .44, z = head.attributes.position.getZ(i); const hair = y > -.004 || (z < -.01 && y > -.03); hc.set(hair ? [.32, .27, .24] : [1, 1, 1], i * 3); }
   head.setAttribute('color', new THREE.BufferAttribute(hc, 3));
@@ -593,15 +680,16 @@ function personGeos() {
 const CLOTH = { scrubT: '#4E9993', scrubI: '#33446A', coat: '#F3F1EB', officeG: '#5A646E', officeN: '#2F3B4E', c1: '#C79B87', c2: '#8FB1D1', c3: '#D7C7AC', c4: '#6F8A6A', c5: '#B07F5F', c6: '#E8E2D6' };
 
 /* ================================================================
-   シーン(live と capture で共通)。opts = { only, quality: 'high' | 'mid' | 'low' }
+   シーン(live と capture で共通)。opts = { only, quality: 'high' | 'mid' | 'low', ao }
+   作る段取りはジェネレーター(段ごとに yield)。makeScene は一気に(撮影用)、makeSceneAsync は段のあいだに主スレッドを返す
    ================================================================ */
 let QUALITY = 'high';
-export function makeScene(opts = {}) {
-  const only = opts.only || null, q = QUALITY = opts.quality || 'high';
+function* buildScene(opts = {}) {
+  const only = opts.only || null, q = QUALITY = opts.quality || 'high', T0 = performance.now();
   const scene = new THREE.Scene(), world = new THREE.Group(); scene.add(world);
   const rnd = rng(101), signs = [], B = {}, anchors = {};
   const dyn = { bus: null, cars: null, hcar: null, bikes: null, birds: null, clouds: null, steam: null, ripples: null, capsule: null, people: null, beam: null };
-  // 建物
+  // 建物(1棟ずつ)
   for (const id of IDS) {
     if (only && id !== only) continue;
     if (id === 'plaza') continue;
@@ -612,6 +700,7 @@ export function makeScene(opts = {}) {
     const anchor = new THREE.Object3D(); anchor.position.copy(grp.position); anchor.rotation.copy(grp.rotation); world.add(anchor);
     B[id] = { id, L, ex, grp, anchor, face, bid: L.bid, box: BOXES[id] };
     anchors[id] = anchor;
+    yield 'b-' + id;
   }
   // 地面の接地の陰に使う、建物の足もと(向きのある長方形)と木(円)
   const occ = [];
@@ -625,18 +714,19 @@ export function makeScene(opts = {}) {
   let plazaInfo = null, pathPts = {};
   const trees = [];
   if (!only) {
-    // 町の小さな家(奥の左に寄せて、家並みに)・木・街灯・バス停
+    // 町の小さな家(奥の左に寄せて、家並みに)
     const houses = [[-118, 6.55, C.houseA, C.roofA, 0, -40], [-131, 5.75, C.houseB, C.roofB, 1, -15], [-143, 6.35, C.houseC, C.roofC, 0, 10], [-156, 5.55, C.houseA, C.roofB, 0, 25], [-166, 6.6, C.houseB, C.roofA, 1, 5], [171, 6.65, C.houseC, C.roofA, 0, -20], [-104, 6.95, C.houseB, C.roofC, 0, -60]];
     for (const [psi, r, wc, rc, kind, fpsi] of houses) {
       const h = house(rnd, wc, rc, kind), [x, z] = SF(r * Math.sin(deg(psi)), r * Math.cos(deg(psi)));
-      h.position.set(x, 0, z); h.rotation.y = yawOf(45 - fpsi); world.add(h);
+      h.position.set(x, groundY(x, z), z); h.rotation.y = yawOf(45 - fpsi); world.add(h);
       occ.push({ x, z, c: 1, s: 0, hx: .5, hz: .5, k: .25, fall: .25, reach: 1.6 });
     }
-    // 木: 縁の木立・並木(手前の弧。植桝つき)・奥の木立。建物・道・倒れる壁の範囲は避ける
+    // 木: 建物・道・倒れる壁の範囲は避ける
     const keepOut = (x, z, pad = 0) => {
       const [s, f] = toSF(x, z);
       if (plateauSF(s, f) < .35 + pad) return true;
       const rr = Math.hypot(x, z); if (Math.abs(rr - ROAD_R) < ROAD_W / 2 + .22) return true;
+      if (rr > islandR(Math.atan2(z, x)) - .3) return true;
       for (const id in B) {
         const b = B[id], bx = BOXES[id], dx = x - b.grp.position.x, dz = z - b.grp.position.z, c = Math.cos(-b.grp.rotation.y), sn = Math.sin(-b.grp.rotation.y), lx = dx * c - dz * sn, lz = dx * sn + dz * c;
         if (id === 'park') { if (Math.abs(lx) < bx.w / 2 + .1 && Math.abs(lz) < bx.d / 2 + .1) return true; continue; }
@@ -648,18 +738,21 @@ export function makeScene(opts = {}) {
       return false;
     };
     const inFall = (x, z) => { for (const id in B) { const b = B[id], bx = BOXES[id]; if (b.ex.fall !== 'hinge' || id === 'hospital') continue; const dx = x - b.grp.position.x, dz = z - b.grp.position.z, c = Math.cos(-b.grp.rotation.y), sn = Math.sin(-b.grp.rotation.y), lx = dx * c - dz * sn, lz = dx * sn + dz * c; if (Math.abs(lx) < bx.w / 2 + .3 && lz > bx.d / 2 && lz < bx.d / 2 + bx.h + .4) return true; } return false; };
+    yield 'houses';
     pathPts = paths(world);
     const dp = drivePts(B); world.add(tag(ribbon(dp, .5, (x, z) => groundY(x, z) + .006, .01, M(C.road, { r: .95 })), { surf: true })); pathPts.drive = dp;
-    const plant = (x, z, kind, s, pit) => { if (keepOut(x, z)) return false; const t = tree(rnd, kind, s, q); t.position.set(x, groundY(x, z), z); t.rotation.y = rnd() * TAU; world.add(t); trees.push([x, z, s]); if (pit) { const p = treePit(.32); p.position.set(x, .004, z); world.add(p); } return true; };
-    // 縁の木立(島の縁にそって。ところどころ途切れる)
-    for (let i = 0; i < 64; i++) {
-      const a = i / 64 * TAU + rnd() * .05, R = islandR(a), rr = R - .45 - rnd() * .35, [s, f] = toSF(Math.cos(a), Math.sin(a));
-      if (f > .55 && Math.abs(s) < .82) continue;   // 手前の弧は並木にする
-      if (i % 5 === 2 || rnd() < .12) continue;
-      const k = rnd(); plant(Math.cos(a) * rr, Math.sin(a) * rr, k < .26 ? 'cone' : k < .36 ? 'ochre' : 'round', .78 + rnd() * .3);
+    yield 'houses+paths';
+    const plant = (x, z, kind, s, pit) => { if (keepOut(x, z)) return false; const t = tree(rnd, kind, s, q); t.position.set(x, groundY(x, z), z); t.rotation.y = rnd() * TAU; world.add(t); trees.push([x, z, s]); if (pit) { const p = treePit(.32); p.position.set(x, groundY(x, z) + .004, z); world.add(p); } return true; };
+    // 縁の木立: 群れと切れ目(群れごとに数・大きさ・種類を変える)。手前の弧は並木にする
+    for (const [ac, hw, n] of EDGE_GROVES) {
+      for (let i = 0; i < n; i++) {
+        const a = deg(ac + (rnd() * 2 - 1) * hw), R = islandR(a), rr = R - .45 - rnd() * .75, k = rnd();
+        plant(Math.cos(a) * rr, Math.sin(a) * rr, k < .3 ? 'cone' : k < .4 ? 'ochre' : 'round', .74 + rnd() * .38);
+      }
     }
-    // 並木(手前の弧。道の外側に、植桝つきの細長い木を等間隔に)
-    for (let i = 0; i < 9; i++) { const ps = -44 + i * 11, a = deg(45 - ps), rr = ROAD_R + ROAD_W / 2 + .42; plant(Math.cos(a) * rr, Math.sin(a) * rr, 'column', .88, true); }
+    yield 'groves';
+    // 並木(手前の弧。道の外側に、植桝つき。階段の正面はあけ、端は広葉樹で終える。高さに少し変化)
+    AVENUE.forEach(([ps, sc], i) => { const a = deg(45 - ps), rr = ROAD_R + ROAD_W / 2 + .42 + (i % 2 ? .06 : 0); plant(Math.cos(a) * rr, Math.sin(a) * rr, i === 0 || i === AVENUE.length - 1 ? 'round' : 'column', sc, true); });
     // 奥の木立(病院の後ろの緑の背景)と、町並みのあいだの木
     for (const [s, f, k, sc] of [[-1.6, -4.15, 'round', 1.05], [-2.4, -3.7, 'cone', 1], [1.3, -3.6, 'round', .95], [-.2, -5.9, 'cone', 1.1], [.6, -6.3, 'round', 1], [-3.3, -4.6, 'round', .9], [-4.6, -1.9, 'round', .95], [-3.9, -1.2, 'cone', .9], [3.6, -6.1, 'round', .9], [-3.0, 4.95, 'round', .9], [-5.0, 3.7, 'cone', .95], [5.6, 3.1, 'round', .85], [2.1, 6.4, 'shrub', 1.3], [-2.1, 6.3, 'shrub', 1.2], [4.2, -.3, 'shrub', 1.1], [-5.8, 1.6, 'shrub', 1.2], [5.1, -4.3, 'cone', .95]]) {
       const [x, z] = SF(s, f); plant(x, z, k, sc);
@@ -672,16 +765,21 @@ export function makeScene(opts = {}) {
     const stops = [[-16, ROAD_R - ROAD_W / 2 - .42], [-148, ROAD_R - ROAD_W / 2 - .42]];
     for (const [ps, r] of stops) { const s = busStop(), a = 45 - ps, [x, z] = polar(a, r); s.position.set(x, .01, z); s.rotation.y = yawOf(a + 180); world.add(s); }
     dyn.stops = stops.map(([ps]) => deg(45 - ps));
+    dyn.stopPos = stops.map(([ps, r]) => polar(45 - ps, r));
+    yield 'trees+lamps';
     // 島
-    const sk = skirt(rnd, q);
-    world.add(groundMesh(occ, q), sk.mesh, rockMass(rnd, sk.bottom, q));
-    plateau(world, occ, q);
+    const sk = yield* skirtGen(rnd, q); world.add(sk.mesh); yield 'skirt';
+    world.add(yield* groundMeshGen(occ, q));
+    world.add(yield* rockMassGen(rnd, sk.bottom, q)); yield 'rock';
+    yield* plateauGen(world, occ, q); yield 'plateau';
     roads(world, rnd);
   }
-  if (!only || only === 'plaza') plazaInfo = plaza(world, q);
+  if (!only || only === 'plaza') plazaInfo = yield* plazaGen(world, q);
+  yield 'plaza';
 
   // 文字のある小さな札(「診療中」と BRIDGE のマーク)。1枚の絵にまとめて、1回で描く
   const atlas = signAtlas();
+  yield 'atlas';
   for (const s of signs) {
     const b = Object.values(B).find(v => v.bid === s.bid); if (!b) continue;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(s.w, s.h), atlas.mat); m.userData.keep = true; m.userData.sign = s;
@@ -692,19 +790,45 @@ export function makeScene(opts = {}) {
 
   // 人と乗り物
   if (!only) people(world, dyn, rnd, B, plazaInfo, pathPts);
+  yield 'people';
   if (!only) vehicles(world, dyn, B);
+  yield 'vehicles';
   if (!only) sky(scene, world, dyn, rnd, q);
   steamAndWater(world, dyn, B, only);
   if (B.observatory) beam(dyn, B.observatory);
+  yield 'sky';
 
   // 低い品質: 小さな物は影を落とさない(木の影は残す)
   if (q === 'low') world.traverse(o => { if (o.isMesh && !o.isInstancedMesh && o.geometry && o.geometry.boundingSphere === null) o.geometry.computeBoundingSphere(); if (o.isMesh && !o.isInstancedMesh && o.geometry.boundingSphere && o.geometry.boundingSphere.radius * Math.max(o.scale.x, o.scale.y, o.scale.z) < .08) o.castShadow = false; });
   // 霧(奥ほどわずかに霞む。空の色に寄せる)
   scene.fog = new THREE.Fog('#E3EBEE', 82, 132);
-  // まとめる
+  // まとめる(接地の陰もこの中で、区切りながら)
   AO_MS = 0;
-  const tb = performance.now(), baked = bakeStatic(world, !only && (opts.ao ?? q !== 'low')), bakeMs = performance.now() - tb;
-  return { scene, world, B, anchors, dyn, signs, baked, plazaInfo, stats: { bakeMs, aoMs: AO_MS + GROUND_MS, groundMs: GROUND_MS, quality: q } };
+  const tb = performance.now(), baked = yield* bakeStaticGen(world, !only && (opts.ao ?? q !== 'low')), bakeMs = performance.now() - tb;
+  return { scene, world, B, anchors, dyn, signs, baked, plazaInfo, stats: { bakeMs, aoMs: AO_MS + GROUND_MS, groundMs: GROUND_MS, quality: q, totalMs: performance.now() - T0 } };
+}
+/* 縁の木立の群れ: [島の角度の中心, 半分の幅(度), 本数]。あいだは切れ目 */
+const EDGE_GROVES = [[118, 8, 4], [150, 12, 6], [181, 7, 3], [204, 9, 5], [236, 6, 3], [258, 11, 6], [288, 7, 4], [312, 5, 2], [333, 9, 4], [356, 5, 2]];
+/* 手前の並木: [画面の角度 ψ, 大きさ]。正面の階段の前(ψ ≈ 0)はあける */
+const AVENUE = [[-47, .9], [-37, .86], [-27, .92], [-16, .82], [11, .9], [22, .84], [33, .95], [44, .88]];
+/* 一気に作る(撮るとき)。返り値の stats に、作るのにかかった時間 */
+export function makeScene(opts = {}) { return runGen(buildScene(opts)); }
+/* 段のあいだに主スレッドを返しながら作る(ページで、止めた画像から立体へ替わるとき)。返り値は makeScene と同じ
+   opts.budget(ms)ごとに休む。stats.maxBlockMs に、いちばん長く主スレッドを止めた時間 */
+const yieldMain = () => new Promise(res => { const sch = globalThis.scheduler; if (sch && typeof sch.yield === 'function') sch.yield().then(res); else { const ch = new MessageChannel(); ch.port1.onmessage = () => res(); ch.port2.postMessage(0); } });
+export async function makeSceneAsync(opts = {}) {
+  const g = buildScene(opts), budget = opts.budget ?? 12;
+  let r, t0 = performance.now(), ts = t0, maxBlock = 0, slices = 0, worst = '';
+  const steps = {};
+  for (;;) {
+    r = g.next(); const now = performance.now(); if (r.done) break;
+    const lab = r.value || '?'; steps[lab] = Math.max(steps[lab] || 0, now - ts); ts = now;
+    const dt = now - t0;
+    if (dt > budget) { if (dt > maxBlock) { maxBlock = dt; worst = lab; } slices++; await yieldMain(); t0 = ts = performance.now(); }
+  }
+  maxBlock = Math.max(maxBlock, performance.now() - t0);
+  Object.assign(r.value.stats, { maxBlockMs: maxBlock, slices, worst, steps });
+  return r.value;
 }
 
 function signAtlas() {
@@ -725,91 +849,187 @@ function signAtlas() {
   return { mat, uv: { shinryo: [0, 0, .5, 1], bridge: [.5, 0, 1, 1] } };
 }
 
-/* ---------- 人: 建物の役割と時間帯に結びつけて動く(BRIEF 10.2「町の生活感」)。目立つ出来事は数秒に1つ程度 ---------- */
+/* ---------- 人: 建物の役割と時間帯に結びつけて動く(BRIEF 10.2「町の生活感」)。目立つ出来事は約5秒に1つ、騒がしくしない ----------
+   腕と腿は、中の担当(interiors.js)の LIMB_GEO・LIMB と同じ形と寸法(公園の中の人とそろえる)。interiors.js は建物をひらいたときに
+   読まれるので、町を先に出すために、同じ定義をここに置く */
+const LIMB_GEO = (() => { const g = new THREE.CylinderGeometry(1, .9, 1, 5, 1, true); g.translate(0, -.5, 0); return g; })();
+const LIMB = { shoulder: [.082, .3], upper: .085, fore: .08, armR: .016, foreR: .014, hip: [.036, .075], thigh: .12, legR: .021, shinR: .018 };
+/* 出来事の暦: CYC 秒の輪の中に、5.2 秒おきに出来事が始まる。時間帯(昼・夕・夜)ごとに並びが違う。夜は静か */
+const CYC = 36.4, SLOT = 5.2;
+const SCHED = [
+  ['commute', 'library', 'ambulance', 'lunch', 'clinic', 'gallery', 'commute2'],
+  ['bus', 'library', 'ambulance', 'clinic', 'gallery', 'bus2', null],
+  ['night', null, 'ambulance', null, 'night2', null, null]
+];
+const EVD = { commute: 16, commute2: 16, lunch: 27, library: 21, clinic: 13, gallery: 17, bus: 24, bus2: 24, night: 15, night2: 15, ambulance: 24 };
 function people(world, dyn, rnd, B, plazaInfo, pathPts) {
   const { body, head } = personGeos();
   const N = 42;
-  const bodyM = new THREE.InstancedMesh(body, new THREE.MeshStandardMaterial({ roughness: .85 }), N);
-  const headM = new THREE.InstancedMesh(head, new THREE.MeshStandardMaterial({ roughness: .8, vertexColors: true }), N);
-  for (const m of [bodyM, headM]) { m.castShadow = true; m.receiveShadow = false; m.frustumCulled = false; world.add(m); }
+  const mk = (g, vc) => { const m = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ roughness: .85, vertexColors: !!vc }), N); m.castShadow = true; m.receiveShadow = false; m.frustumCulled = false; world.add(m); return m; };
+  const bodyM = mk(body), headM = mk(head, true); headM.castShadow = false;
   const skins = ['#EECFB8', '#E0BB9B', '#CBA282'], col = new THREE.Color();
-  const P = [];
   const doorOf = (id, k = 0) => { const b = B[id]; if (!b) return null; const [dx, dz] = b.ex.door; const v = new THREE.Vector3(dx + k, 0, dz).applyEuler(b.grp.rotation).add(b.grp.position); v.y = 0; return v; };
   const fwd = id => new THREE.Vector3(0, 0, 1).applyEuler(B[id].grp.rotation);
   const kinds = [];
-  // 環状の道のわきを歩く人(昼は多く、夜は少ない)
+  // ふだんの人: 環状の道のわき、広場、建物の出入り、小道、立ち話(昼は多く、夜は少ない)
   const ringR = ROAD_R - ROAD_W / 2 - .12;
-  for (let i = 0; i < 12; i++) kinds.push({ k: 'ring', r: ringR + (i % 2 ? .04 : -.04), dir: i % 3 ? 1 : -1, ph: rnd() * TAU, sp: .04 + rnd() * .025, o: i % 4 === 0 ? 'scrubT' : null, when: i < 5 ? [1, 1, 1] : i < 9 ? [1, 1, 0] : [1, 0, 0] });
-  const { cx, cz } = plazaFrame();
-  // 広場を歩く人(弧のまわりを、ゆっくり)
-  for (let i = 0; i < 6; i++) kinds.push({ k: 'plaza', c: [cx, cz - .15], r: 2.55 + rnd() * .2, dir: i % 2 ? 1 : -1, ph: rnd() * TAU, sp: .07 + rnd() * .04, when: i < 2 ? [1, 1, 1] : i < 4 ? [1, 1, 0] : [1, 0, 0] });
-  // 建物に出入りする人(扉の前で消え、扉から現れる)。病院はスタッフ(スクラブ・白衣)、夜勤もいる。クリニックは患者(夜は閉まる)
-  const doorSet = [['hospital', 'scrubT', [1, 1, 1], 0], ['hospital', 'coat', [1, 1, 1], .35], ['hospital', 'scrubI', [1, 1, 1], -.3], ['hospital', 'c2', [1, 1, 0], .15], ['clinic', 'c1', [1, 1, 0], 0], ['clinic', 'c3', [1, 0, 0], .1], ['office', 'officeN', [1, 1, 0], 0], ['library', 'c4', [1, 1, 0], 0], ['atelier', 'c5', [1, 1, 1], 0], ['observatory', 'c2', [1, 1, 0], 0]];
+  for (let i = 0; i < 10; i++) kinds.push({ k: 'ring', r: ringR + (i % 2 ? .04 : -.04), dir: i % 3 ? 1 : -1, ph: rnd() * TAU, sp: .04 + rnd() * .025, o: i % 4 === 0 ? 'scrubT' : null, when: i < 4 ? [1, 1, 1] : i < 7 ? [1, 1, 0] : [1, 0, 0] });
+  // 広場を歩く人: 敷石の中の楕円(病院の前と、弧の高い所の下)。弧の足・台座・ベンチ・石垣にはかからない
+  for (let i = 0; i < 4; i++) { const v = rnd(); kinds.push({ k: 'plaza', e: [-.45, 2.0, 1.7 + v * .25, 1.25 + v * .22], dir: i % 2 ? 1 : -1, ph: rnd() * TAU, sp: .085 + rnd() * .04, when: i < 2 ? [1, 1, 0] : [1, 0, 0] }); }
+  const doorSet = [['hospital', 'scrubT', [1, 1, 1], -.35], ['hospital', 'coat', [1, 1, 0], .4], ['clinic', 'c1', [1, 1, 0], 0], ['office', 'officeN', [1, 1, 0], 0], ['library', 'c4', [1, 1, 0], 0], ['atelier', 'c5', [1, 1, 1], 0], ['observatory', 'c2', [1, 0, 0], 0]];
   for (const [id, o, when, k] of doorSet) { const d = doorOf(id, k); if (d) kinds.push({ k: 'door', id, door: d, out: fwd(id), ph: rnd() * 30, per: 16 + rnd() * 12, o, when }); }
-  // 小道を行き来する人(広場 → 階段 → 建物)。夕方は手前のバス停へ向かう人
-  for (const [id, o, when] of [['front', 'c3', [1, 1, 0]], ['front', 'officeG', [0, 1, 0]], ['clinic', 'c6', [1, 0, 0]], ['back', 'c1', [1, 1, 0]], ['library', 'c2', [1, 1, 0]], ['park', 'c4', [1, 1, 0]], ['obs', 'c5', [1, 0, 0]]]) {
+  for (const [id, o, when] of [['back', 'c1', [1, 1, 0]], ['park', 'c4', [1, 1, 0]], ['obs', 'c5', [1, 0, 0]], ['library', 'c2', [1, 0, 0]]]) {
     const pts = pathPts[id]; if (pts) kinds.push({ k: 'path', pts, ph: rnd() * 40, per: 22 + rnd() * 10, o, when });
   }
-  // 立ち話(2人ずつ)
-  const [p1x, p1z] = SF(-1.9, 4.2), [p2x, p2z] = SF(-3.2, -5.2), [p3x, p3z] = SF(4.0, 1.9);
-  for (const [x, z, when] of [[p1x, p1z, [1, 1, 0]], [p2x, p2z, [1, 1, 0]], [p3x, p3z, [1, 0, 0]]]) for (const s of [-1, 1]) kinds.push({ k: 'chat', p: new THREE.Vector3(x + s * .13, 0, z), face: s > 0 ? -Math.PI / 2 : Math.PI / 2, ph: rnd() * TAU, when });
-  // 図書館の階段を上る人
-  if (B.library) kinds.push({ k: 'stairs', id: 'library', ph: rnd() * 10, when: [1, 1, 0] });
-  // 広場のベンチに座る人
-  for (const [s, f, r] of [[-2.3, 1.2, 90], [-1.2, 4.75, 180]]) { const [x, z] = SF(s, f); kinds.push({ k: 'sit', p: new THREE.Vector3(x, 0, z), face: deg(r) + Math.PI / 4, when: [1, 1, 0] }); }
+  const [p2x, p2z] = SF(-3.2, -5.2), [p3x, p3z] = SF(4.0, 1.9);
+  for (const [x, z, when] of [[p2x, p2z, [1, 1, 0]], [p3x, p3z, [1, 0, 0]]]) for (const s of [-1, 1]) kinds.push({ k: 'chat', p: new THREE.Vector3(x + s * .13, 0, z), face: s > 0 ? -Math.PI / 2 : Math.PI / 2, ph: rnd() * TAU, when, gest: s > 0 });
+  // 出来事の人(暦で出てくる)
+  const toXZ = pts => pts.map(([s, f]) => SF(s, f));
+  const COMMUTE = curveSF([[-1.5, 6.72], [-.9, 6.38], [-.28, 6.1], [0, 5.95], [0, 5.12], [-.06, 4.4], [.05, 3.0], [0, 1.6], [0, .32]], .08);
+  const BUS = curveSF([[.1, 4.5], [0, 5.12], [0, 5.95], [-.4, 6.25], [-1.25, 6.6]], .08);
+  const LUNCH = curveSF([[0, .32], [-.8, .7], [-1.7, 1.05], [-2.3, 1.25]], .08);
+  const ev = (k, o, extra = {}) => kinds.push(Object.assign({ k: 'ev', ev: k, o }, extra));
+  ev('commute', 'scrubT', { pts: COMMUTE, d: 0 }); ev('commute', 'coat', { pts: COMMUTE, d: .9 });
+  ev('commute2', 'officeG', { pts: COMMUTE, d: 0 });
+  ev('lunch', 'scrubI', { pts: LUNCH, seat: -.15 }); ev('lunch', 'coat', { pts: LUNCH, seat: .15, d: .5 });
+  ev('library', 'c3', { seated: true });
+  ev('clinic', 'c6', { pts: pathPts.clinic });
+  ev('gallery', 'c2');
+  ev('bus', 'c1', { pts: BUS, wait: SF(-1.55, 6.78) }); ev('bus', 'officeG', { pts: BUS, wait: SF(-2.05, 6.86), d: .7 });
+  ev('bus2', 'c4', { pts: BUS, wait: SF(-1.75, 6.95) });
+  ev('night', 'scrubT', { pts: COMMUTE, d: 0 }); ev('night2', 'scrubI', { pts: COMMUTE, d: 0 });
+  void toXZ;
   while (kinds.length > N) kinds.pop();
+  // 服の色と袖(スクラブは半袖で、前腕は肌)。座る人には腿とすねも
   const outfits = ['scrubT', 'scrubI', 'coat', 'c1', 'officeG', 'c2', 'officeN', 'c3', 'c4', 'c5', 'c6', 'c2', 'c3'];
+  let nl = 0;
+  kinds.forEach((k, i) => { k.li = nl; k.ln = k.k === 'ev' && (k.ev === 'lunch' || k.seated) ? 8 : 4; nl += k.ln; });
+  const limbM = new THREE.InstancedMesh(LIMB_GEO, new THREE.MeshStandardMaterial({ roughness: .85 }), nl); limbM.frustumCulled = false; limbM.castShadow = false; world.add(limbM);
+  const P = [];
   kinds.forEach((k, i) => {
-    const o = k.o || outfits[i % outfits.length];
-    bodyM.setColorAt(i, col.set(CLOTH[o])); headM.setColorAt(i, col.set(skins[i % 3]));
-    P.push(Object.assign(k, { i, pos: new THREE.Vector3(), yaw: 0, s: 1, vis: 1 }));
+    const o = k.o || outfits[i % outfits.length], cloth = CLOTH[o], skin = skins[i % 3], pants = o === 'scrubT' || o === 'scrubI' ? cloth : ['#4B5563', '#5B544D', '#3E4A5C', '#6B6355'][i % 4];
+    const short = o === 'scrubT' || o === 'scrubI' || (o.startsWith('c') && i % 3 === 0);
+    bodyM.setColorAt(i, col.set(cloth)); headM.setColorAt(i, col.set(skin));
+    const cols = [cloth, short ? skin : cloth, cloth, short ? skin : cloth, pants, pants, pants, pants];
+    for (let j = 0; j < k.ln; j++) limbM.setColorAt(k.li + j, col.set(cols[j]));
+    P.push(Object.assign(k, { i, pos: new THREE.Vector3(), yaw: 0, s: 1 }));
   });
   for (let i = kinds.length; i < N; i++) { bodyM.setColorAt(i, col.set('#FFFFFF')); headM.setColorAt(i, col.set('#FFFFFF')); }
   bodyM.count = headM.count = kinds.length;
-  dyn.people = { bodyM, headM, P, B };
+  dyn.people = { bodyM, headM, limbM, P, B };
 }
 /* 時間帯(applyTod が覚える。0 昼 / 1 夕 / 2 夜)。live.js を変えずに、人の動きを時間帯で変える */
 let TODK = 0;
 const whenK = w => { const i = Math.min(1, Math.floor(TODK)), k = TODK - i; return lerp(w[i], w[Math.min(2, i + 1)], k); };
-const _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _mt = new THREE.Matrix4(), _p = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
+const _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _qt = new THREE.Quaternion(), _s = new THREE.Vector3(), _mt = new THREE.Matrix4(), _p = new THREE.Vector3(), _j = new THREE.Vector3(), _w = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
+const AXX = new THREE.Vector3(1, 0, 0), AXZ = new THREE.Vector3(0, 0, 1), ZERO3 = new THREE.Vector3(0, 0, 0);
 function alongPath(pts, u) { const n = pts.length - 1, f = clamp01(u) * n, i = Math.min(n - 1, Math.floor(f)), k = f - i, a = pts[i], b = pts[i + 1]; return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), Math.atan2(b[0] - a[0], b[1] - a[1])]; }
+/* いまの時間帯の暦で、出来事 name が動いていれば 0..1、動いていなければ -1 */
+function evU(name, t) {
+  const sch = SCHED[Math.round(clamp(TODK, 0, 2))], ct = ((t % CYC) + CYC) % CYC;
+  for (let k = 0; k < sch.length; k++) if (sch[k] === name) { const u = (((ct - k * SLOT) % CYC) + CYC) % CYC / EVD[name]; if (u <= 1) return u; }
+  return -1;
+}
 export function placePeople(dyn, t, blocked) {
   const D = dyn.people; if (!D) return;
+  const L = D.limbM, obsOpen = Math.abs(U.uOpenA.value - 2) < .5 || Math.abs(U.uOpenB.value - 2) < .5;
   for (const p of D.P) {
-    let x = 0, z = 0, y = 0, yaw = 0, s = 1, bob = 0;
+    let x = 0, z = 0, y = 0, yaw = 0, s = 1, bob = 0, walk = false, sit = false, read = false, gest = false, yAbs = null;
     if (p.k === 'ring') {
-      const a = p.ph + t * p.sp * p.dir; x = Math.cos(a) * p.r; z = Math.sin(a) * p.r; yaw = -a + (p.dir > 0 ? 0 : Math.PI); bob = Math.abs(Math.sin(t * 7 + p.i)) * .012;
+      const a = p.ph + t * p.sp * p.dir; x = Math.cos(a) * p.r; z = Math.sin(a) * p.r; yaw = -a + (p.dir > 0 ? 0 : Math.PI); walk = true;
     } else if (p.k === 'plaza') {
-      const a = p.ph + t * p.sp * p.dir; x = p.c[0] + Math.cos(a) * p.r; z = p.c[1] + Math.sin(a) * p.r; yaw = -a + (p.dir > 0 ? 0 : Math.PI); bob = Math.abs(Math.sin(t * 7 + p.i)) * .012;
+      const a = p.ph + t * p.sp * p.dir, [s0, f0, as, af] = p.e;
+      [x, z] = SF(s0 + Math.sin(a) * as, f0 + Math.cos(a) * af);
+      const [dx, dz] = SF(Math.cos(a) * as * p.dir, -Math.sin(a) * af * p.dir); yaw = Math.atan2(dx, dz); walk = true;
     } else if (p.k === 'door') {
-      // 扉から出て、少し歩いて、戻って入る(扉の前で消える)。建物の正面の向きへ歩く
       const u = ((t + p.ph) % p.per) / p.per, d = p.door, out = p.out;
-      const far = 1.2, walk = u < .45 ? u / .45 : u < .55 ? 1 : u < 1 ? 1 - (u - .55) / .45 : 0;
+      const far = 1.2, wk = u < .45 ? u / .45 : u < .55 ? 1 : u < 1 ? 1 - (u - .55) / .45 : 0;
       const side = new THREE.Vector3(-out.z, 0, out.x);
-      x = d.x + out.x * far * walk + side.x * Math.sin(walk * 3) * .22; z = d.z + out.z * far * walk + side.z * Math.sin(walk * 3) * .22;
-      yaw = Math.atan2(out.x, out.z) + (u < .5 ? 0 : Math.PI);
-      s = u < .04 ? u / .04 : u > .96 ? (1 - u) / .04 : 1; bob = Math.abs(Math.sin(t * 7 + p.i)) * .012;
+      x = d.x + out.x * far * wk + side.x * Math.sin(wk * 3) * .22; z = d.z + out.z * far * wk + side.z * Math.sin(wk * 3) * .22;
+      yaw = Math.atan2(out.x, out.z) + (u < .5 ? 0 : Math.PI); walk = !(u > .45 && u < .55);
+      s = u < .04 ? u / .04 : u > .96 ? (1 - u) / .04 : 1;
     } else if (p.k === 'path') {
       const u = ((t + p.ph) % p.per) / p.per, k = u < .46 ? u / .46 : u < .54 ? 1 : 1 - (u - .54) / .46, [px, pz, a] = alongPath(p.pts, smooth01(k) * .98 + .01);
-      x = px; z = pz; yaw = a + (u < .5 ? 0 : Math.PI); s = u < .03 ? u / .03 : u > .97 ? (1 - u) / .03 : 1; bob = Math.abs(Math.sin(t * 7 + p.i)) * .012;
+      x = px; z = pz; yaw = a + (u < .5 ? 0 : Math.PI); s = u < .03 ? u / .03 : u > .97 ? (1 - u) / .03 : 1; walk = !(u > .46 && u < .54);
     } else if (p.k === 'chat') {
-      x = p.p.x; z = p.p.z; yaw = p.face + Math.sin(t * .9 + p.ph) * .15; bob = Math.sin(t * 2 + p.ph) * .004;
-    } else if (p.k === 'sit') {
-      x = p.p.x; z = p.p.z; y = .05; s = .82; yaw = p.face;
-    } else if (p.k === 'stairs') {
-      const b = D.B.library; const u = ((t + p.ph) % 14) / 14;
-      const v = new THREE.Vector3(0, 0, 0); const zf = BOXES.library.d / 2 + WALL + 1.1, zt = BOXES.library.d / 2 + WALL + .3;
-      const k = u < .6 ? u / .6 : 1; v.set(.35, -.22 + k * .22, lerp(zf, zt, k)).applyEuler(b.grp.rotation).add(b.grp.position);
-      x = v.x; z = v.z; y = v.y + .02 - b.ex.y0 + .22 - groundY(v.x, v.z); yaw = b.grp.rotation.y + Math.PI; s = u > .9 ? (1 - u) / .1 : u < .05 ? u / .05 : 1; bob = Math.abs(Math.sin(t * 7)) * .01;
+      x = p.p.x; z = p.p.z; yaw = p.face + Math.sin(t * .9 + p.ph) * .15; bob = Math.sin(t * 2 + p.ph) * .004; gest = p.gest && Math.sin(t * .7 + p.ph) > .2;
+    } else if (p.k === 'ev') {
+      const u = evU(p.ev, t);
+      if (u < 0) s = 0;
+      else if (p.ev === 'commute' || p.ev === 'commute2' || p.ev === 'night' || p.ev === 'night2') {
+        // 朝の出勤・夜勤: バス停から階段を上り、広場を通って病院の正面へ(入口の前で消える)
+        const k = clamp01((u - (p.d || 0) * .06) / .92), [px, pz, a] = alongPath(p.pts, k); x = px; z = pz; yaw = a; walk = k < 1; s = Math.min(1, k * 25, (1 - k) * 25 + (k < 1 ? 0 : 0));
+      } else if (p.ev === 'lunch') {
+        // 昼の休憩: 病院から出て、広場のベンチで休み、戻る
+        const dd = (p.d || 0) * .03, k = u < .24 ? clamp01((u - dd) / .2) : u < .76 ? 1 : 1 - clamp01((u - .76 - dd) / .2);
+        const [px, pz, a] = alongPath(p.pts, k); x = px; z = pz; yaw = a + (u >= .76 ? Math.PI : 0); walk = k > 0 && k < 1;
+        if (k >= 1) { const [bx, bz] = SF(-2.55, 1.25 + p.seat); x = bx; z = bz; yaw = deg(90) + Math.PI / 4; sit = true; walk = false; }
+        s = Math.min(1, k * 20 + (u > .5 ? 1 : 0), u < .5 ? 1 : (1 - u) * 30);
+      } else if (p.ev === 'clinic') {
+        // 患者がクリニックの受付へ(扉の前で消える)
+        const [px, pz, a] = alongPath(p.pts, clamp01(u / .9)); x = px; z = pz; yaw = a; walk = u < .9; s = Math.min(1, u * 30, (1 - u) * 12);
+      } else if (p.ev === 'library') {
+        // 図書館の階段を上り、上の段に腰かけて本を読む
+        const b = D.B.library, bx2 = BOXES.library, F = bx2.d / 2 + WALL + .004, y0 = b.ex.y0;
+        const k = clamp01(u / .25), loc = new THREE.Vector3(.55, 0, 0);
+        if (k < 1) { loc.set(.55, lerp(-y0, -.01, smooth01(k)), lerp(F + 1.1, F + .3, k)); walk = true; yaw = b.grp.rotation.y + Math.PI; }
+        else { loc.set(.55, -.01, F + .3); sit = true; read = true; yaw = b.grp.rotation.y; }
+        loc.applyEuler(b.grp.rotation).add(b.grp.position); x = loc.x; z = loc.z; yAbs = loc.y + (sit ? .02 : 0);
+        s = Math.min(1, u * 25, (1 - u) * 20);
+      } else if (p.ev === 'gallery') {
+        // 展望台の回廊に人が出て、回廊を歩き、遠くを見る(ひらいている間は出ない)
+        const b = D.B.observatory, h = BOXES.observatory.h, k = clamp01(u / .4), ph = deg(lerp(18, 72, smooth01(k))), R0 = .8;
+        x = b.grp.position.x + Math.cos(ph) * R0; z = b.grp.position.z + Math.sin(ph) * R0; yAbs = b.grp.position.y + h + .115;
+        yaw = k < 1 ? Math.atan2(-Math.sin(ph), Math.cos(ph)) : Math.atan2(Math.cos(ph), Math.sin(ph)); walk = k < 1;
+        s = obsOpen ? 0 : Math.min(1, u * 25, (1 - u) * 20);
+      } else if (p.ev === 'bus' || p.ev === 'bus2') {
+        // 夕方: 広場から階段を下りてバス停へ。バスが前のバス停に止まったら乗る(消える)
+        const k = clamp01((u - (p.d || 0) * .05) / .4), [px, pz, a] = alongPath(p.pts, k);
+        x = px; z = pz; yaw = a; walk = k < 1;
+        if (k >= 1) { x = p.wait[0]; z = p.wait[1]; yaw = Math.atan2(-x, -z) + Math.PI; }
+        const bus = dyn.bus, boarded = k >= 1 && bus && bus.stopped !== null && bus.stopped !== undefined && Math.abs(angDiff(bus.stopped, dyn.stops[0])) < .01 && bus.wait < STOP_DWELL * .5;
+        s = boarded ? 0 : Math.min(1, u * 25, (1 - u) * 20);
+      }
     }
     // 時間帯で、外にいる人の数を変える(消えるときは、ゆっくり小さく)
-    if (p.when) { const w = whenK(p.when); s *= w; }
-    y += groundY(x, z);
-    if (blocked && blocked(x, z)) { y += WALL; }
-    _p.set(x, y + bob, z); _q.setFromAxisAngle(_up, yaw); _s.set(s, s, s); _mt.compose(_p, _q, _s);
-    D.bodyM.setMatrixAt(p.i, _mt); D.headM.setMatrixAt(p.i, _mt);
+    if (p.when) s *= whenK(p.when);
+    if (walk) bob = Math.abs(Math.sin(t * 7 + p.i)) * .012;
+    y = yAbs !== null ? yAbs : y + groundY(x, z) + (sit ? .19 : 0);
+    if (blocked && blocked(x, z)) y += WALL;
+    const sy = sit ? .7 : 1;
+    _p.set(x, y + bob, z); _q.setFromAxisAngle(_up, yaw); _s.set(s, s * sy, s); _mt.compose(_p, _q, _s);
+    D.bodyM.setMatrixAt(p.i, _mt);
+    _w.set(0, (sy * .36 + .045 - .405) * s, 0); _p.add(_w); _s.set(s, s, s); _mt.compose(_p, _q, _s); D.headM.setMatrixAt(p.i, _mt);
+    _p.sub(_w);
+    // 腕(肩から、ひじで曲がる)。歩く人は振り、話す人は片手で身ぶり、座る人は膝の上、読む人は本を胸の前に
+    const sw = walk ? Math.sin(t * 3.5 + p.i) * .38 : 0;
+    const arm = side => side > 0
+      ? (read ? [.85, .1, 1.25] : sit ? [.5, .08, .75] : gest ? [.55 + .2 * Math.sin(t * 1.3 + p.ph), .15, 1.05] : [.06 + sw, .1, .18 + Math.max(0, sw) * .4])
+      : (read ? [.85, .1, 1.25] : sit ? [.5, .08, .75] : [.06 - sw, .1, .18 + Math.max(0, -sw) * .4]);
+    for (const side of [1, -1]) {
+      const [a, sp, e] = arm(side), j = p.li + (side > 0 ? 0 : 2);
+      if (s < .01) { _mt.compose(_w.set(0, -20, 0), _q2.identity(), ZERO3); L.setMatrixAt(j, _mt); L.setMatrixAt(j + 1, _mt); continue; }
+      _j.set(side * LIMB.shoulder[0] * s, sy * LIMB.shoulder[1] * s, 0).applyQuaternion(_q).add(_p);
+      _q2.copy(_q).multiply(_qt.setFromAxisAngle(AXZ, side * sp)).multiply(_qt.setFromAxisAngle(AXX, -a));
+      _mt.compose(_j, _q2, _s.set(LIMB.armR * s, LIMB.upper * s, LIMB.armR * s)); L.setMatrixAt(j, _mt);
+      _j.add(_w.set(0, -LIMB.upper * s, 0).applyQuaternion(_q2));
+      _q2.multiply(_qt.setFromAxisAngle(AXX, -e));
+      _mt.compose(_j, _q2, _s.set(LIMB.foreR * s, LIMB.fore * s, LIMB.foreR * s)); L.setMatrixAt(j + 1, _mt);
+    }
+    // 座る人の腿とすね(腿は座面で前へ、すねは下へ)
+    if (p.ln > 4) for (const side of [1, -1]) {
+      const j = p.li + (side > 0 ? 4 : 6);
+      if (!sit || s < .01) { _mt.compose(_w.set(0, -20, 0), _q2.identity(), ZERO3); L.setMatrixAt(j, _mt); L.setMatrixAt(j + 1, _mt); continue; }
+      _j.set(side * LIMB.hip[0] * s, LIMB.hip[1] * sy * s, 0).applyQuaternion(_q).add(_p);
+      _q2.copy(_q).multiply(_qt.setFromAxisAngle(AXZ, side * .04)).multiply(_qt.setFromAxisAngle(AXX, -(Math.PI / 2 - .1)));
+      _mt.compose(_j, _q2, _s.set(LIMB.legR * s, LIMB.thigh * s, LIMB.legR * s)); L.setMatrixAt(j, _mt);
+      _j.add(_w.set(0, -LIMB.thigh * s, 0).applyQuaternion(_q2));
+      _q2.multiply(_qt.setFromAxisAngle(AXX, Math.PI / 2 - .1));
+      const shin = clamp(_j.y - (yAbs !== null ? yAbs - .14 : groundY(x, z)), .04, .2);
+      _mt.compose(_j, _q2, _s.set(LIMB.shinR * s, shin, LIMB.shinR * s)); L.setMatrixAt(j + 1, _mt);
+    }
   }
-  D.bodyM.instanceMatrix.needsUpdate = true; D.headM.instanceMatrix.needsUpdate = true;
+  D.bodyM.instanceMatrix.needsUpdate = true; D.headM.instanceMatrix.needsUpdate = true; L.instanceMatrix.needsUpdate = true;
 }
 
 /* ---------- 乗り物: 環状の道のバス(バス停で止まる)・車・自転車、救急口に着く白い車(青緑の線。赤十字は使わない) ---------- */
@@ -882,9 +1102,9 @@ export function placeVehicles(dyn, t, dt, blockedAng) {
   });
   cars.mesh.instanceMatrix.needsUpdate = true;
   // 病院の車: 環状の道から坂を上がり、救急口に着いて止まり、また出る(30秒でひとまわり)
-  const hc = dyn.hcar, u = (t % 30) / 30, pts = hc.pts;
+  const hc = dyn.hcar, u = evU('ambulance', t), pts = hc.pts;
   let k = -1, back = false;
-  if (u < .3) k = smooth01(u / .3); else if (u < .56) k = 1; else if (u < .86) { k = 1 - smooth01((u - .56) / .3); back = true; }
+  if (u < 0) k = -1; else if (u < .3) k = smooth01(u / .3); else if (u < .7) k = 1; else { k = 1 - smooth01((u - .7) / .3); back = true; }
   if (k >= 0) {
     const [px, pz, a] = alongPath(pts, k); hc.mesh.position.set(px, groundY(px, pz) + y0, pz);
     const [qx, qz] = alongPath(pts, Math.min(1, k + .02)), slope = Math.atan2(groundY(qx, qz) - groundY(px, pz), Math.hypot(qx - px, qz - pz) || 1);
@@ -903,31 +1123,63 @@ export function placeVehicles(dyn, t, dt, blockedAng) {
 function placeOnRing(o, a, r, y, dir) { o.position.set(Math.cos(a) * r, y, Math.sin(a) * r); o.rotation.set(0, -a + (dir > 0 ? Math.PI : 0), 0); }
 
 /* ---------- 空: 流れる雲・島の下の雲海の帯(島の幅の中に収める)・ときどき鳥の群れ ---------- */
+/* もやの帯: 縁の柔らかい雲の模様(キャンバスに、ぼかした丸を重ねる)を描いた横長の面。
+   上の組(島のすぐ下の帯と、左右に離れた塊)と下の組(手前の広い帯)の2つにまとめ、組ごとに色を変える(夕方は上が桃色、下が藤色)。描画は2回 */
+function hazeSheets(world, rnd) {
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256; const x = cv.getContext('2d');
+  for (let i = 0; i < 95; i++) {
+    const u = rnd(), cx = 40 + u * 432, cy = 128 + (rnd() - .5) * 110 * Math.sin(Math.PI * u), r = 30 + rnd() * 72 * Math.sin(Math.PI * u) + 16;
+    const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); const al = .1 + rnd() * .14; g.addColorStop(0, `rgba(255,255,255,${al})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, TAU); x.fill();
+  }
+  // 縁を消す(上下・左右のぼかし)
+  x.globalCompositeOperation = 'destination-in';
+  const gh = x.createLinearGradient(0, 0, 512, 0); gh.addColorStop(0, 'rgba(0,0,0,0)'); gh.addColorStop(.18, 'rgba(0,0,0,1)'); gh.addColorStop(.82, 'rgba(0,0,0,1)'); gh.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = gh; x.fillRect(0, 0, 512, 256);
+  const gv = x.createLinearGradient(0, 0, 0, 256); gv.addColorStop(0, 'rgba(0,0,0,0)'); gv.addColorStop(.3, 'rgba(0,0,0,1)'); gv.addColorStop(.7, 'rgba(0,0,0,1)'); gv.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = gv; x.fillRect(0, 0, 512, 256);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  // [s, y, f, 幅, 奥行き, 模様を裏返す]
+  const GROUPS = [
+    [[0, -6.6, 2.0, 20, 7.5, 0], [-6.6, -6.25, 1.5, 9.5, 4.4, 1], [6.4, -6.45, 1.1, 9, 4.0, 1]],
+    [[0, -7.6, 3.2, 24, 9, 0], [-3.6, -8.0, 4.4, 13, 5.2, 1], [4.4, -7.9, 4.0, 12, 5.0, 0]]
+  ];
+  const mats = [], out = [];
+  for (const grp of GROUPS) {
+    const parts = grp.map(([sx, y, f, w, d, flip]) => {
+      const g = new THREE.PlaneGeometry(w, d); if (flip) { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, 1 - uv.getX(i), 1 - uv.getY(i)); }
+      g.rotateX(-Math.PI / 2); g.rotateY(Math.PI / 4); const [px, pz] = SF(sx, f); g.translate(px, y, pz); return g;
+    });
+    const pos = [], uvs = [], idx = []; let base = 0;
+    for (const g of parts) { pos.push(...g.attributes.position.array); uvs.push(...g.attributes.uv.array); for (const i of g.index.array) idx.push(i + base); base += g.attributes.position.count; g.dispose(); }
+    const geom = new THREE.BufferGeometry(); geom.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geom.setIndex(idx); geom.computeBoundingSphere();
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false, color: '#FFFFFF', opacity: .78 });
+    const m = new THREE.Mesh(geom, mat); m.userData.keep = true; m.renderOrder = 2; world.add(m); out.push(m); mats.push(mat);
+  }
+  return { mat: mats[0], mats, meshes: out };
+}
 /* 雲の素材: 縁ほど透けて、空に溶ける(くっきりした綿の塊にしない) */
 function softCloudMat() {
   const m = new THREE.MeshStandardMaterial({ color: '#FFFFFF', roughness: 1, emissive: '#FFFFFF', emissiveIntensity: .5, transparent: true, depthWrite: false });
   m.onBeforeCompile = s => {
-    s.fragmentShader = s.fragmentShader.replace('#include <opaque_fragment>', 'float hkNdv = abs(dot(normalize(normal), isOrthographic ? vec3(0., 0., 1.) : normalize(vViewPosition)));\ndiffuseColor.a *= smoothstep(.02, .55, hkNdv) * .92;\n#include <opaque_fragment>');
+    s.fragmentShader = s.fragmentShader.replace('#include <opaque_fragment>', 'float hkNdv = abs(dot(normalize(normal), isOrthographic ? vec3(0., 0., 1.) : normalize(vViewPosition)));\ndiffuseColor.a *= smoothstep(.12, .85, hkNdv) * .92;\n#include <opaque_fragment>');
   };
   m.customProgramCacheKey = () => 'hk-cloud';
   return m;
 }
-const SEA = 22;
-const CLOUD = [{ c: '#FFFFFF', e: .5 }, { c: '#F2D2C6', e: .3 }, { c: '#4E5888', e: .03 }];
+/* 雲ともやの色と濃さ(昼・夕・夜)。ページの空のグラデーション(--sky-*)に溶ける値にする
+   昼は白。夕は桃色(上のもや・空の雲)から藤色(下のもや)へ。夜は空の藍に溶ける、ごく淡い藍 */
+const CLOUD = [
+  { c: '#FFFFFF', e: .5, o: .95, h: '#FFFFFF', h2: '#FFFFFF', ho: .95, r: '#F1EEE8', rk: .78 },
+  { c: '#FCDCD2', e: .3, o: .8, h: '#F7D2C4', h2: '#E8D0DC', ho: .74, r: '#EFD3C8', rk: .74 },
+  { c: '#414A7A', e: .02, o: .16, h: '#30396A', h2: '#2E3263', ho: .2, r: '#1E2244', rk: .4 }
+];
 function sky(scene, world, dyn, rnd, q) {
-  const sg = new THREE.SphereGeometry(1, 14, 9), N = 12 + SEA;
+  const sg = new THREE.SphereGeometry(1, 16, 10), N = 12;
   const cm = new THREE.InstancedMesh(sg, softCloudMat(), N);
   cm.frustumCulled = false; scene.add(cm);
   const clouds = [];
   for (let c = 0; c < 3; c++) { const base = { a: deg(196 + c * 34 + rnd() * 10), r: 11.2 + rnd() * 1.2, y: 4.1 + rnd() * 1.0, sp: .004 + rnd() * .003, puffs: [] }; for (let k = 0; k < 4; k++) base.puffs.push([(k - 1.5) * .7 + rnd() * .2, rnd() * .25, (rnd() - .5) * .5, .55 + rnd() * .45]); clouds.push(base); }
-  // 雲海: 岩の塊のまわりに、平たい雲の塊を輪に置く(手前と奥。島の左右の幅より外へは出さない)
-  const sea = [], o = new THREE.Object3D();
-  for (let i = 0; i < SEA; i++) {
-    const a = i / SEA * TAU + rnd() * .25, rr = 3.2 + rnd() * 3.6, [s] = toSF(Math.cos(a) * rr, Math.sin(a) * rr);
-    const sc = 1.0 + rnd() * .7, lim = 7.0 - sc * .8; const k = Math.abs(s) > lim ? lim / Math.abs(s) : 1;
-    sea.push([Math.cos(a) * rr * k, -6.5 - rnd() * .6, Math.sin(a) * rr * k, sc]);
-  }
-  sea.forEach(([x, y, z, sc], i) => { o.position.set(x, y, z); o.scale.set(sc * 1.35, sc * .4, sc * 1.1); o.rotation.set(0, rnd() * TAU, 0); o.updateMatrix(); cm.setMatrixAt(12 + i, o.matrix); });
+  // 島の下の雲の帯: 立体の塊は使わず、柔らかい模様の面だけで(縁が円盤のように見えないように)。島と入口のあいだを、空に溶ける色でうめる
+  dyn.haze = hazeSheets(world, rnd);
   dyn.clouds = { mesh: cm, list: clouds };
   void q;
   // 鳥(V の形。翼を羽ばたかせる)
@@ -943,7 +1195,10 @@ export function placeSky(dyn, t, night) {
   C2.mesh.instanceMatrix.needsUpdate = true;
   // 雲の色は時間帯に合わせる(昼は白、夕は桃色がかった灰、夜は沈んだ藍)。applyTod が覚えた時間帯を使う(撮るときもページでも同じ)
   const tk = TODK, ci = Math.min(1, Math.floor(tk)), ck = tk - ci;
-  C2.mesh.material.color.copy(_c1.set(CLOUD[ci].c)).lerp(_c2.set(CLOUD[ci + 1].c), ck); C2.mesh.material.emissiveIntensity = lerp(CLOUD[ci].e, CLOUD[ci + 1].e, ck);
+  const cmat = C2.mesh.material, A = CLOUD[ci], Bc = CLOUD[ci + 1];
+  cmat.color.copy(_c1.set(A.c)).lerp(_c2.set(Bc.c), ck); cmat.emissive.copy(cmat.color); cmat.emissiveIntensity = lerp(A.e, Bc.e, ck); cmat.opacity = lerp(A.o, Bc.o, ck);
+  if (dyn.haze) dyn.haze.mats.forEach((m, j) => { const key = j ? 'h2' : 'h'; m.color.copy(_c1.set(A[key])).lerp(_c2.set(Bc[key]), ck); m.opacity = lerp(A.ho, Bc.ho, ck); });
+  U.uHazeC.value.copy(_c1.set(A.r)).lerp(_c2.set(Bc.r), ck); U.uHazeK.value = lerp(A.rk, Bc.rk, ck);
   void night;
   // 鳥: 26 秒ごとに、島の上を横切る
   const Bd = dyn.birds, u = ((t - Bd.t0) % 26) / 26;
@@ -1009,9 +1264,10 @@ export function placeSmall(dyn, t, steamOn) {
    温かい主光(太陽)と、少し冷たい空の補光。霧の色は空に寄せる。ガラスの映り込みの強さも時間帯で変える
    ================================================================ */
 const TOD = [
-  { hemiS: '#DCE6F2', hemiG: '#CDBC9F', hemi: 1.15, sun: '#FFE8CC', sunI: 2.75, sunPos: [-3.2, 13, 16], fill: '#D2DFF0', fillI: .55, exp: 1.06, glow: 0, pt: 0, fog: '#E2EAED', env: .7 },
-  { hemiS: '#EFD2C2', hemiG: '#977E70', hemi: .86, sun: '#FFAA74', sunI: 2.15, sunPos: [-15, 5.5, 3], fill: '#B2AEDD', fillI: .5, exp: 1.0, glow: .55, pt: .35, fog: '#E6BEAA', env: .55 },
-  { hemiS: '#62709D', hemiG: '#2E2C47', hemi: .9, sun: '#B9C7F2', sunI: 1.0, sunPos: [-5, 14, 9], fill: '#7482C4', fillI: .34, exp: 1.08, glow: 1, pt: 1, fog: '#252D57', env: .35 }   // 夜: 手前の左上から月明かり。形と屋根の色が読めるように
+  { hemiS: '#D8E3F0', hemiG: '#C8B697', hemi: .96, sun: '#FFE6C6', sunI: 3.15, sunPos: [-3.2, 13, 16], fill: '#D2DFF0', fillI: .42, exp: 1.04, glow: 0, pt: 0, fog: '#E2EAED', env: .7, gC: '#FFE0B8' },
+  // 夕: 低い橙の主光と長い影。陰は桃色がかった藤色。窓の灯りがともり始める(白い窓も、夕方は暖かい色で点く)
+  { hemiS: '#DDBFC8', hemiG: '#8E7068', hemi: .74, sun: '#FF9C60', sunI: 2.5, sunPos: [-15, 4.6, 3.2], fill: '#A4A2DD', fillI: .52, exp: 1.0, glow: .62, pt: .45, fog: '#D9B7AF', env: .45, gC: '#FFDDB2' },
+  { hemiS: '#62709D', hemiG: '#2E2C47', hemi: .9, sun: '#B9C7F2', sunI: 1.0, sunPos: [-5, 14, 9], fill: '#7482C4', fillI: .34, exp: 1.08, glow: 1, pt: 1, fog: '#252D57', env: .35, gC: '#E4ECF7' }   // 夜: 手前の左上から月明かり。形と屋根の色が読めるように
 ];
 const _c1 = new THREE.Color(), _c2 = new THREE.Color();
 export function makeLights(scene, mapSize) {
@@ -1023,8 +1279,8 @@ export function makeLights(scene, mapSize) {
   // 夜の灯り: 広場の藍と砂(2本の弧のそば)、病院の入口、ひらいた建物の中(強さは 0 から)
   const { cx, cz, map } = plazaFrame();
   const pI = new THREE.PointLight('#7F95F4', 0, 4.4, 1.6), pS = new THREE.PointLight('#F5C27E', 0, 4.4, 1.6), pH = new THREE.PointLight('#FFE6C4', 0, 4.5, 1.6), pIn = new THREE.PointLight('#FFE2B8', 0, 5, 1.4);
-  const [ix, iz] = map([90, 50]), [sx, sz] = map([185, 45]), [hx, hz] = SF(0, .4);
-  pI.position.set(ix, PLATEAU_H + .9, iz); pS.position.set(sx, PLATEAU_H + 1.0, sz); pH.position.set(hx, PLATEAU_H + 1.3, hz); pIn.position.set(0, -5, 0);
+  const [ix, iz] = map([90, 50]), [sx, sz] = map([185, 45]), [hx, hz] = SF(0, .55);
+  pI.position.set(ix, PLATEAU_H + .9, iz); pS.position.set(sx, PLATEAU_H + 1.0, sz); pH.position.set(hx, PLATEAU_H + .75, hz); pH.distance = 3.2; pIn.position.set(0, -5, 0);
   for (const p of [pI, pS, pH, pIn]) scene.add(p);
   void cx; void cz;
   return { hemi, sun, fill, pI, pS, pH, pIn, scene };
@@ -1054,7 +1310,8 @@ export function applyTod(L, renderer, m, clouds) {
   renderer.toneMappingExposure = lerp(a.exp, b.exp, k);
   const glow = lerp(a.glow, b.glow, k), pt = lerp(a.pt, b.pt, k);
   U.uNight.value = glow;
-  L.pI.intensity = 7 * pt; L.pS.intensity = 7 * pt; L.pH.intensity = L.pH.userData.base = 4 * pt;
+  U.uGlowC.value.copy(_c1.set(a.gC)).lerp(_c2.set(b.gC), k);
+  L.pI.intensity = 5.5 * pt; L.pS.intensity = 5.5 * pt; L.pH.intensity = L.pH.userData.base = 1.4 * pt;
   const sc = L.scene || null; if (sc && sc.fog) sc.fog.color.copy(_c1.set(a.fog)).lerp(_c2.set(b.fog), k);
   if (envFor(renderer)) townMat('g').envMapIntensity = lerp(a.env, b.env, k);
   void clouds;
@@ -1072,7 +1329,7 @@ export function samplePoints() {
   const pts = [];
   for (let i = 0; i < 48; i++) { const a = i / 48 * TAU, R = islandR(a) + .08; pts.push(new THREE.Vector3(Math.cos(a) * R, .6, Math.sin(a) * R), new THREE.Vector3(Math.cos(a) * (R - .3), -1.72, Math.sin(a) * (R - .3))); }
   const [ox, oz] = polar(LAYOUT.observatory.a, LAYOUT.observatory.r);
-  pts.push(new THREE.Vector3(ox, 6.1, oz), new THREE.Vector3(.9, -8.4, .45));
+  pts.push(new THREE.Vector3(ox, 6.1, oz), new THREE.Vector3(.9, -8.3, .9));
   return pts;
 }
 export function fit(cam, pts, W, H, R) {
