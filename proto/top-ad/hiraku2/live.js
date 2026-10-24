@@ -214,7 +214,9 @@ export async function live(o) {
   /* ---- 寄る先(建物を正面に向け、安全な範囲 = パネルやシートを避けた所に収める) ---- */
   const tmpCam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
   function frameFor(id) {
-    const pl = placeOf(S, id), bd = boundsOf(id, id === 'plaza' ? null : S.B[id].ex);
+    const pl = placeOf(S, id), tower = id === 'observatory';
+    // 展望台は縦に長いので、中の階(床から箱の高さまで)を縦に収める。上の灯室と下の台ははみ出してよい
+    const bd = tower ? { pts: ring(1.05, 0, BOXES.observatory.h) } : boundsOf(id, id === 'plaza' ? null : S.B[id].ex);
     const r = nearestRot(rot.x, deg(pl.face - 45));
     const el = id === 'park' ? deg(small ? 16 : 22) : id === 'plaza' ? deg(30) : deg(26);   // 広場は、弧がロゴとして読める低めの角度から
     aimCamera(tmpCam, origin, el);
@@ -222,7 +224,7 @@ export async function live(o) {
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const p of bd.pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
     const sf = o.safe(), sw = sf.r - sf.l, shh = sf.b - sf.t;
-    const k = id === 'plaza' ? .7 : id === 'park' ? (small ? 1.12 : .94) : small ? .78 : .76;
+    const k = id === 'plaza' ? .7 : id === 'park' ? (small ? 1.12 : .94) : tower ? (small ? .98 : .9) : small ? .78 : .76;
     let ppu = Math.min(sw * k / (x1 - x0), shh * k / (y1 - y0));
     ppu = Math.min(ppu, base.ppu * (id === 'park' ? 6.5 : small ? 4.2 : 3.8));
     const bx = (x0 + x1) / 2, by = (y0 + y1) / 2, scx = (sf.l + sf.r) / 2, scy = (sf.t + sf.b) / 2;
