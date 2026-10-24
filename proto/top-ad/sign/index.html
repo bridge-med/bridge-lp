@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>BRIDGE 館内案内(試作)</title>
+<meta name="description" content="医療職のための、道具と経営ゲーム。BRIDGE のすべてを、病院のフロアガイドの形で案内する試作。">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   案C「館内案内」— サイン計画のグラフィック
+   病院のサインは、迷わないための道具。そのサインが、まだ行ったことのない階を示しはじめる。
+   素材: 平たい色面と図形だけ(グラデーション・ぼかし・立体のレンダーなし)。厚みは無彩の板の「縁」で示す
+   構図: 1F エレベーターホール(壁のフロアガイド+行先階ボタン)→ 各階のロビー(階の色で満ちた面・部屋番号の札・案内ディスプレイ)→ 1F 総合案内 → 出入口
+   ================================================================ */
+:root{
+  --wall:#E9E8E3; --wall-2:#DEDDD7; --ink:#15191C; --ink-2:#454C52; --ink-3:#5E656B;
+  --panel:#1D2226; --panel-edge:#0C0F11; --panel-line:#30373D; --panel-text:#B9C1C7;
+  --steel:#CDD2D6; --steel-edge:#A3AAB0; --steel-face:#EEF0F1; --steel-ring:#98A0A6;
+  --led:#FFB21A; --led-off:#272A2D; --here:#C62A21; --white:#FFFFFF;
+  --cR:#8ACFEA; --c7:#2356C4; --c6:#C24813; --c5:#087A4F; --c4:#6A45B2; --c3:#00737E; --c2:#F2C11C; --c1:#16233E;
+  --pad:clamp(16px,5vw,72px); --max:1240px;
+  --jp:'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif;
+  --en:'Barlow','Helvetica Neue',Arial,sans-serif;
+  --num:'Barlow Condensed','Arial Narrow',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--wall);-webkit-text-size-adjust:100%;scroll-behavior:auto}
+body{margin:0;font-family:var(--jp);color:var(--ink);background:var(--wall);-webkit-font-smoothing:antialiased;line-height:1.6;font-feature-settings:"palt" 1}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3,p,ol,ul,figure{margin:0}
+ol,ul{list-style:none;padding:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--led);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:12px;top:-60px;z-index:300;background:var(--panel);color:#fff;padding:12px 18px;border-radius:4px;text-decoration:none;font-weight:700}
+.skip:focus{top:12px}
+.en{font-family:var(--en);font-weight:500;letter-spacing:.14em;text-transform:uppercase}
+.pic{width:1em;height:1em;fill:currentColor;flex:none}
+
+/* ================= 1F エレベーターホール(最初の画面) ================= */
+.hall{position:relative;min-height:100svh;display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top,0px)) var(--pad) 0;background:var(--wall);overflow:hidden}
+.hall::after{content:"";position:absolute;left:0;right:0;bottom:0;height:72px;background:var(--wall-2);border-top:6px solid #CFCDC6;z-index:0} /* 床と幅木 */
+/* 廊下の手すり(病院の壁の手すり。平たい図形で) */
+.rail{position:absolute;left:0;right:0;bottom:118px;height:16px;z-index:0;background:#C9B38E;border-bottom:4px solid #A78F69;pointer-events:none}
+.rail::before,.rail::after{content:"";position:absolute;top:100%;width:10px;height:22px;background:#A9AFB4}
+.rail::before{left:12%}.rail::after{left:58%}
+.plaque{position:relative;z-index:1;display:flex;align-items:center;gap:14px;max-width:var(--max);width:100%;margin:0 auto}
+.plaque h1{display:flex;align-items:center;gap:14px;font:700 15px/1.3 var(--jp);letter-spacing:.02em}
+.plaque .logo{width:74px;height:auto}
+.plaque .word{font:600 21px/1 var(--en);letter-spacing:.32em;color:var(--ink)}
+.plaque .tag{padding-left:16px;border-left:1px solid #BDBBB4;color:var(--ink-2);font-weight:400;font-size:14px}
+.hall-main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:minmax(0,1fr) 248px;gap:clamp(28px,4vw,64px);align-items:start;max-width:var(--max);width:100%;margin:0 auto;padding:clamp(28px,6vh,64px) 0 calc(72px + 80px)}
+
+/* フロアガイド(壁に掛かったサイン) */
+.guide{position:relative;background:var(--panel);color:#fff;border-radius:6px;box-shadow:0 9px 0 var(--panel-edge);overflow:hidden}
+.bolt{position:absolute;width:9px;height:9px;border-radius:50%;background:#3B434A;box-shadow:inset 0 0 0 2px #2A3136;z-index:2}
+.bolt.a{left:9px;top:9px}.bolt.b{right:9px;top:9px}.bolt.c{left:9px;bottom:9px;background:#0E1214;box-shadow:none}.bolt.d{right:9px;bottom:9px;background:#0E1214;box-shadow:none}
+.guide-h{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 26px 16px 26px;border-bottom:4px solid var(--panel-edge)}
+.guide-t{display:flex;align-items:baseline;gap:14px}
+.guide-t b{font:700 22px/1 var(--jp);letter-spacing:.06em}
+.guide-t .en{font-size:12px;color:var(--panel-text)}
+.guide-h .pic{width:30px;height:30px;color:var(--panel-text)}
+.row{display:grid;grid-template-columns:100px 66px minmax(0,auto) minmax(0,1fr) 46px;align-items:center;min-height:clamp(54px,7.3vh,70px);color:#fff;text-decoration:none;border-top:1px solid var(--panel-line);position:relative;transition:background-color .14s,color .14s}
+.floors li:first-child .row{border-top:0}
+.tile{align-self:stretch;display:flex;align-items:center;justify-content:center;gap:1px;background:var(--c);color:var(--on);font:600 46px/1 var(--num);letter-spacing:.01em}
+.tile small{font-size:.56em;font-weight:600;margin-top:.34em}
+.row .pic{width:34px;height:34px;justify-self:center}
+.row .nm{display:flex;align-items:baseline;gap:12px;padding-right:20px;white-space:nowrap}
+.row .nm b{font:700 23px/1.2 var(--jp);letter-spacing:.04em}
+.row .nm .en{font-size:11.5px;color:var(--panel-text)}
+.row .rm{min-width:0;font-size:12.5px;line-height:1.4;color:var(--panel-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row[data-floor="1"] .rm{padding-right:210px}
+.row .go{justify-self:center;width:22px;height:22px;opacity:.45;transition:transform .16s,opacity .16s}
+.row .here{position:absolute;right:52px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:8px;font:700 12px/1 var(--jp);color:#fff;background:var(--here);padding:7px 11px 7px 9px;border-radius:3px}
+.row .here .en{font-size:10px;letter-spacing:.12em;color:#FFE0DC}
+.row .here i{width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.row:hover,.row.lit{background:var(--c);color:var(--on)}
+.row:hover .nm .en,.row.lit .nm .en,.row:hover .rm,.row.lit .rm{color:var(--on)}
+.row:hover .go,.row.lit .go{opacity:1;transform:translateX(3px)}
+.row:focus-visible{outline-offset:-4px}
+
+/* 行先階ボタン(エレベーターの操作盤) */
+.lift{position:relative;background:var(--steel);border-radius:10px;box-shadow:0 9px 0 var(--steel-edge);padding:22px 18px 24px}
+.lift .bolt{background:#B3BAC0;box-shadow:inset 0 0 0 2px #A2AAB0;width:8px;height:8px}
+.lift .bolt.a{left:50%;top:7px;margin-left:-4px}.lift .bolt.d{left:50%;right:auto;bottom:8px;margin-left:-4px}
+.ind{background:#0D0F10;border-radius:6px;padding:12px 10px;display:flex;align-items:center;justify-content:center;min-height:76px}
+.ind svg{width:100%;max-width:168px;height:auto}
+.lift-note{margin:14px 0 16px;text-align:center;font-size:11.5px;line-height:1.5;color:#3E454B;letter-spacing:.04em}
+.btns{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 10px}
+.lcell{display:flex;align-items:center;justify-content:center;gap:7px}
+.braille{width:13px;height:20px;flex:none;color:#7B848B}
+.lbtn{position:relative;display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:var(--steel-face);border:3px solid var(--steel-ring);box-shadow:0 3px 0 #8E979D;text-decoration:none;color:#22272B;font:600 25px/1 var(--en);transition:transform .08s,box-shadow .08s,background-color .12s,border-color .12s}
+.lbtn small{font-size:.62em;margin-left:1px}
+.lbtn:hover{border-color:var(--c)}
+.lbtn:active,.lbtn.press{transform:translateY(2px);box-shadow:0 1px 0 #8E979D}
+.lbtn.on{background:var(--c);color:var(--on);border-color:#fff;box-shadow:0 0 0 3px var(--c),0 3px 0 #8E979D}
+.lift-foot{margin-top:16px;display:flex;align-items:center;justify-content:center;gap:8px;font:500 10.5px/1 var(--en);letter-spacing:.16em;color:#4E555B}
+.lift-foot .pic{width:18px;height:18px}
+
+/* ================= 各階のロビー ================= */
+.lobby{position:relative;background:var(--c);color:var(--on);padding:clamp(56px,9vh,104px) var(--pad) clamp(64px,10vh,120px);overflow:hidden;scroll-margin-top:0}
+.lobby-in{max-width:var(--max);margin:0 auto}
+@media (min-width:920px){.lobby-in{max-width:min(var(--max),calc(100vw - 2 * max(var(--pad),104px)))}}
+.lobby-head{display:flex;align-items:flex-end;gap:clamp(18px,3vw,40px);flex-wrap:wrap}
+.lnum{display:flex;align-items:flex-start;font:700 clamp(132px,17vw,264px)/.76 var(--num);letter-spacing:-.01em;margin-bottom:-.02em}
+.lnum small{font-size:.42em;margin-top:.08em;margin-left:.04em}
+.lname{display:grid;gap:8px;padding-bottom:6px}
+.lname .pic{width:clamp(56px,6vw,80px);height:clamp(56px,6vw,80px)}
+.lname h2{font:700 clamp(28px,3.4vw,46px)/1.2 var(--jp);letter-spacing:.03em}
+.lname .en{font-size:13px}
+.lname .sub{font-size:13.5px;letter-spacing:.02em}
+.lobby-body{margin-top:clamp(36px,6vh,64px);display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,4vw,56px);align-items:start}
+
+/* 階ごとに扉の開く側を変える(偶数階は左右を入れ替え) */
+.flip .lobby-head{flex-direction:row-reverse}
+.flip .lname{justify-items:end;text-align:right}
+.flip .lobby-body{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+.flip .disp{order:2}
+
+/* 案内ディスプレイ(実際の画面を映す) */
+.disp{position:sticky;top:clamp(24px,6vh,64px)}
+.disp-label{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;letter-spacing:.06em}
+.disp-label i{width:8px;height:8px;border-radius:50%;background:var(--here);box-shadow:0 0 0 3px rgba(224,54,43,.25)}
+.disp-frame{background:#0B0C0D;border-radius:10px;padding:12px;box-shadow:0 9px 0 rgba(0,0,0,.28)}
+.disp-zoom{display:block;width:100%;border-radius:3px;overflow:hidden;background:#1B1D1F;cursor:zoom-in}
+.disp-zoom:disabled{cursor:default}
+.disp-zoom img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:left top;transition:opacity .16s}
+.disp-zoom img.out{opacity:0}
+.disp-cap{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.disp-now{display:flex;align-items:baseline;gap:10px;min-width:0;font-size:13px;line-height:1.5}
+.disp-now .rn{font:600 17px/1 var(--num);letter-spacing:.04em;padding:5px 8px;background:var(--panel);color:#fff;border-radius:3px;flex:none}
+.disp-now span:last-child{min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.disp-ctl{display:none;gap:8px;flex:none}
+.js .disp-ctl{display:flex}
+.disp-ctl button{width:44px;height:44px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center}
+.disp-ctl button:hover{opacity:1;background:rgba(255,255,255,.14)}
+.disp-ctl .pic{width:18px;height:18px}
+
+/* 部屋の札(プロダクト) */
+.rooms{display:grid;gap:10px}
+.room{display:grid;grid-template-columns:66px minmax(0,1fr) 36px;align-items:stretch;min-height:72px;background:#fff;color:var(--ink);text-decoration:none;border-radius:4px;box-shadow:0 5px 0 rgba(0,0,0,.22);transition:transform .12s,box-shadow .12s}
+.room .rn{display:grid;place-items:center;background:var(--panel);color:#fff;font:600 23px/1 var(--num);letter-spacing:.03em;border-radius:4px 0 0 4px;transition:background-color .12s,color .12s}
+.room .rb{padding:12px 0 12px 16px;display:grid;gap:3px;align-content:center}
+.room .rt{font:700 16px/1.35 var(--jp);letter-spacing:.02em}
+.room .rd{font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.room .rk{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:2px;font-size:11.5px;color:var(--ink-3)}
+.room .go{align-self:center;justify-self:center;width:18px;height:18px;color:var(--ink-3);transition:transform .14s}
+.room:hover,.room.cur{transform:translateY(-2px);box-shadow:0 7px 0 rgba(0,0,0,.24)}
+.room:hover .rn,.room.cur .rn{background:var(--ink);}
+.room:hover .go,.room.cur .go{transform:translateX(3px);color:var(--ink)}
+.room:focus-visible{outline-color:#fff;outline-offset:3px}
+.lobby[data-ink] .room:focus-visible,.lobby[data-ink] .disp-zoom:focus-visible{outline-color:var(--ink)}
+
+/* 屋上: 考え方 */
+.roof .lobby-body{grid-template-columns:minmax(0,1fr)}
+.roof-say{max-width:17em;font:700 clamp(30px,4.6vw,66px)/1.38 var(--jp);letter-spacing:.02em}
+.roof-say em{font-style:normal;background:var(--ink);color:var(--cR);padding:0 .14em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.plate-link{display:inline-flex;align-items:center;gap:14px;min-height:56px;padding:0 22px 0 0;background:var(--ink);color:#fff;text-decoration:none;border-radius:4px;box-shadow:0 5px 0 rgba(0,0,0,.25);font-weight:700;font-size:15px;transition:transform .12s}
+.plate-link .ico{align-self:stretch;display:grid;place-items:center;width:56px;background:var(--white);color:var(--ink);border-radius:4px 0 0 4px}
+.plate-link .ico .pic{width:24px;height:24px}
+.plate-link:hover{transform:translateY(-2px)}
+.roof .plate-link{margin-top:clamp(28px,5vh,48px)}
+.skyline{position:absolute;left:0;right:0;bottom:0;height:clamp(70px,12vh,120px);pointer-events:none}
+.skyline svg{width:100%;height:100%}
+
+/* 1F 総合案内 */
+.info .lobby-body{grid-template-columns:minmax(0,6fr) minmax(0,5fr)}
+.staff{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:#fff;color:var(--ink);border-radius:4px;padding:20px 24px;box-shadow:0 5px 0 rgba(0,0,0,.3);max-width:520px}
+.staff .face{width:72px;height:72px;border-radius:4px;background:var(--c1);color:#fff;display:grid;place-items:center}
+.staff .face .pic{width:44px;height:44px}
+.staff .role{font-size:12px;color:var(--ink-3);letter-spacing:.06em}
+.staff .name{font:700 22px/1.3 var(--jp);letter-spacing:.06em}
+.staff .what{font-size:13px;color:var(--ink-2)}
+.voice{margin-top:clamp(28px,5vh,44px);max-width:22em;font:700 clamp(19px,2vw,25px)/1.85 var(--jp);letter-spacing:.03em}
+.voice::before{content:"運営者のことば";display:block;margin-bottom:10px;font:400 12px/1 var(--jp);letter-spacing:.08em}
+.exit{margin-top:clamp(40px,7vh,72px);display:inline-flex;align-items:stretch;background:var(--c5);color:#fff;border-radius:4px;box-shadow:0 5px 0 rgba(0,0,0,.3);overflow:hidden}
+.exit .ico{display:grid;place-items:center;width:64px;background:#06603D}
+.exit .ico .pic{width:34px;height:34px}
+.exit p{padding:12px 22px 12px 18px;display:grid;gap:2px}
+.exit b{font:700 15px/1.3 var(--jp)}
+.exit span{font-size:12.5px}
+
+/* 出入口のあと */
+.foot{background:var(--wall);color:var(--ink-2);padding:28px var(--pad) calc(28px + env(safe-area-inset-bottom,0px))}
+.foot-in{max-width:var(--max);margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;font-size:12px}
+.foot .logo{width:44px}
+.foot a{display:inline-flex;align-items:center;min-height:44px;color:var(--ink-2)}
+.foot .l{display:flex;align-items:center;gap:12px}
+.proto{font:500 11px/1 var(--en);letter-spacing:.14em;color:var(--ink-3)}
+
+/* ================= 動いている間の操作盤(下の階へ移ったあと) ================= */
+.ride{position:fixed;z-index:50;display:none}
+.js .ride{display:flex}
+.ride{right:max(14px,env(safe-area-inset-right,0px));top:50%;transform:translate(calc(100% + 30px),-50%);flex-direction:column;align-items:center;gap:6px;padding:10px 8px;background:var(--steel);border-radius:10px;box-shadow:0 6px 0 var(--steel-edge);transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.ride.show{transform:translate(0,-50%)}
+.ride .ind{min-height:0;padding:8px 6px;width:64px}
+.ride .ind svg{max-width:52px}
+.rbtn{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--steel-face);border:3px solid var(--steel-ring);color:#22272B;text-decoration:none;font:600 17px/1 var(--en);transition:background-color .12s,border-color .12s}
+.rbtn small{font-size:.66em}
+.rbtn:hover{border-color:var(--c)}
+.rbtn.on{background:var(--c);color:var(--on);border-color:#fff;box-shadow:0 0 0 3px var(--c)}
+
+/* ================= 扉(階を移るときだけ) ================= */
+.doors{position:fixed;inset:0;z-index:200;pointer-events:none;visibility:hidden}
+.doors.run{visibility:visible;pointer-events:auto;cursor:pointer}
+.door{position:absolute;top:0;bottom:0;width:50.2%;background:#C6CBCF;transition:transform .34s cubic-bezier(.55,0,.35,1)}
+.door::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12%;background:#B3B9BE}
+.door.l{left:0;transform:translateX(-101%);border-right:2px solid #8D949A}
+.door.r{right:0;transform:translateX(101%);border-left:2px solid #8D949A}
+.doors.shut .door{transform:none}
+.doors.open .door{transition-duration:.5s;transition-timing-function:cubic-bezier(.3,.1,.2,1)}
+.doors.open .door.l{transform:translateX(-101%)}
+.doors.open .door.r{transform:translateX(101%)}
+.dlabel{position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:14px;opacity:0;transition:opacity .12s}
+.doors.shut .dlabel{opacity:1;transition-delay:.26s}
+.doors.open .dlabel{opacity:0}
+.dlabel .tile{width:132px;height:132px;font-size:72px;border-radius:6px;box-shadow:0 7px 0 rgba(0,0,0,.22)}
+.dlabel b{font:700 22px/1.2 var(--jp);color:var(--ink);letter-spacing:.06em;background:#C6CBCF;padding:2px 8px}
+
+/* ================= 大きく見る ================= */
+.lb{border:0;padding:0;background:transparent;max-width:min(1100px,calc(100vw - 32px));width:100%}
+.lb::backdrop{background:rgba(13,15,16,.86)}
+.lb-in{background:#0B0C0D;border-radius:10px;padding:12px;color:#fff}
+.lb img{width:100%;height:auto;max-height:calc(100svh - 190px);object-fit:contain;border-radius:3px;background:#1B1D1F}
+.lb-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:14px 6px 4px}
+.lb-t{display:flex;align-items:baseline;gap:10px;font-size:14px}
+.lb-t .rn{font:600 17px/1 var(--num);padding:5px 8px;background:#fff;color:var(--ink);border-radius:3px}
+.lb-act{display:flex;gap:10px}
+.lb-act a,.lb-act button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:4px;font-weight:700;font-size:14px;text-decoration:none}
+.lb-act a{background:var(--led);color:var(--ink)}
+.lb-act button{border:2px solid #fff}
+
+/* ================= スマホ ================= */
+@media (max-width:919px){
+  .hall{padding-top:calc(16px + env(safe-area-inset-top,0px))}
+  .hall::after{height:44px}
+  .plaque h1{gap:10px;flex-wrap:wrap}
+  .plaque .logo{width:50px}
+  .plaque .word{font-size:16px}
+  .plaque .tag{flex-basis:100%;padding-left:0;border-left:0;font-size:12.5px;margin-top:2px}
+  .hall-main{grid-template-columns:minmax(0,1fr);gap:22px;padding:14px 0 calc(44px + 18px);align-items:start}
+  .guide-h{padding:14px 16px 12px}
+  .guide-t b{font-size:18px}
+  .guide-h .pic{width:24px;height:24px}
+  .row{grid-template-columns:62px 46px minmax(0,1fr) 30px;min-height:58px}
+  .tile{font-size:30px}
+  .row .pic{width:26px;height:26px}
+  .row .nm{flex-direction:column;align-items:flex-start;gap:3px;padding-right:8px}
+  .row .nm b{font-size:16.5px}
+  .row .nm .en{font-size:10px}
+  .row .rm{display:none}
+  .row[data-floor="1"] .rm{padding-right:0}
+  .row .go{width:18px;height:18px}
+  .row .here{right:34px;padding:6px 8px;gap:6px}
+  .row .here .en{display:none}
+  .lift{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px 12px;align-items:center;padding:14px;box-shadow:0 7px 0 var(--steel-edge)}
+  .lift .bolt{display:none}
+  .lift .ind{min-height:0;height:100%;padding:10px 8px}
+  .lift .ind svg{max-width:62px}
+  .lift-note{grid-column:1/-1;margin:0;order:-1;text-align:left;font-size:12px}
+  .lift-note br{display:none}
+  .btns{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 4px;justify-items:center}
+  .braille,.lift-foot{display:none}
+  .lbtn{width:50px;height:50px;font-size:20px;border-width:3px}
+  .rail{display:none}
+  .ride{left:0;right:0;top:auto;bottom:0;transform:translateY(calc(100% + 12px));flex-direction:row;justify-content:center;gap:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));border-radius:12px 12px 0 0;box-shadow:0 -4px 0 var(--steel-edge);overflow-x:auto;scrollbar-width:none}
+  .ride::-webkit-scrollbar{display:none}
+  .ride.show{transform:none}
+  .ride .ind{display:none}
+  .ride a{flex:none;width:44px;height:44px;display:grid;place-items:center;border:0;background:none;box-shadow:none;border-radius:0}
+  .ride a span{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--steel-face);border:2px solid var(--steel-ring);font:600 15px/1 var(--en);color:#22272B}
+  .ride a.on span{background:var(--c);color:var(--on);border-color:#fff;box-shadow:0 0 0 2px var(--c)}
+  .lobby{padding:56px var(--pad) 72px}
+  .lobby-head{gap:14px 18px}
+  .lnum{font-size:clamp(104px,34vw,150px)}
+  .lname h2{font-size:clamp(26px,7.4vw,32px)}
+  .lobby-body{grid-template-columns:minmax(0,1fr);gap:28px;margin-top:30px}
+  .disp{position:static}
+  .flip .lobby-body{grid-template-columns:minmax(0,1fr)}
+  .flip .disp{order:0}
+  .ride a.rbtn,.ride a.rbtn.on,.ride a.rbtn:hover{background:none;box-shadow:none;border:0}
+  .room{grid-template-columns:56px minmax(0,1fr) 30px;min-height:68px}
+  .room .rn{font-size:20px}
+  .info .lobby-body{grid-template-columns:minmax(0,1fr)}
+  .staff{padding:16px 18px;gap:16px}
+  .staff .face{width:58px;height:58px}
+  .dlabel .tile{width:104px;height:104px;font-size:56px}
+  body.has-ride .foot{padding-bottom:calc(28px + 64px + env(safe-area-inset-bottom,0px))}
+}
+@media (min-width:600px) and (max-width:919px){
+  .hall-main{max-width:620px}
+}
+@media (max-width:359px){
+  .row{grid-template-columns:54px 38px minmax(0,1fr) 26px}
+  .tile{font-size:26px}
+  .row .pic{width:22px;height:22px}
+  .row .nm b{font-size:15px}
+  .row .here{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:0s !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">本文へ</a>
+
+<!-- ピクトグラム: 48 の格子、塗りの形、角の丸み 2、線にあたる部分の太さ 5 でそろえる -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="p-info" viewBox="0 0 48 48"><circle cx="24" cy="10.5" r="5"/><path d="M16.5 19h12v19.5h4.5V44h-17v-5.5H21v-14h-4.5z"/></symbol>
+    <symbol id="p-career" viewBox="0 0 48 48"><path d="M21.5 4h5v38h-5z"/><path d="M14 40.5h20V45H14z"/><path d="M8 8.5h26.5l6.5 6-6.5 6H8z"/><path d="M40 24.5H13.5l-6.5 6 6.5 6H40z"/></symbol>
+    <symbol id="p-learn" viewBox="0 0 48 48"><path fill-rule="evenodd" d="M24 5 43 20.5V44H5V20.5zM19.5 28.5v13l11-6.5zM10.5 25h7v6h-7zM30.5 25h7v6h-7z"/></symbol>
+    <symbol id="p-work" viewBox="0 0 48 48"><path fill-rule="evenodd" d="M17 4.5h14a2 2 0 0 1 2 2V8h5a2 2 0 0 1 2 2v32a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h5V6.5a2 2 0 0 1 2-2zM19 8.5v3h10v-3zM13.5 19.5v4.5H18v-4.5zM22 20v3.5h12V20zM13.5 28v4.5H18V28zM22 28.5V32h12v-3.5zM13.5 36.5V41H18v-4.5zM22 37v3.5h8V37z"/></symbol>
+    <symbol id="p-manage" viewBox="0 0 48 48"><path d="M7 27h8v13H7zM20 18h8v22h-8zM33 8h8v32h-8zM4 41.5h40V46H4z"/></symbol>
+    <symbol id="p-study" viewBox="0 0 48 48"><path d="M5 10.5c6.5-.2 12.5 1.3 17 4.6V41c-4.5-3.1-10.5-4.6-17-4.4zM43 10.5c-6.5-.2-12.5 1.3-17 4.6V41c4.5-3.1 10.5-4.6 17-4.4z"/></symbol>
+    <symbol id="p-play" viewBox="0 0 48 48"><path d="M14 4.5h4v10h-4zM22 3h4v11.5h-4zM30 4.5h4v10h-4z"/><path fill-rule="evenodd" d="M7 18h28v6.5h1.5a7.5 7.5 0 0 1 0 15H33.6A11 11 0 0 1 24 45h-6A11 11 0 0 1 7 34zM35 29v6h1.5a3 3 0 0 0 0-6z"/></symbol>
+    <symbol id="p-roof" viewBox="0 0 48 48"><path d="M10 31a14 14 0 0 1 28 0z"/><path d="M22 6.5h4v8h-4zM8.3 12.4l2.9-2.8 5.6 5.7-2.8 2.8zM33.9 15.3l5.6-5.7 2.9 2.8-5.6 5.7zM3 21.5h8v4H3zM37 21.5h8v4h-8z"/><path d="M3 34h42v4.5H3zM9 41h30v4H9z"/></symbol>
+    <symbol id="p-person" viewBox="0 0 48 48"><circle cx="24" cy="13" r="8.5"/><path d="M7 45c0-9.5 7.6-17 17-17s17 7.5 17 17z"/></symbol>
+    <symbol id="p-talk" viewBox="0 0 48 48"><path d="M5 6h26a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H15l-6 5.5V24H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M21 27.5h14.5V24h3.5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-1v5l-5.5-5H23a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="p-lift" viewBox="0 0 48 48"><path d="M24 5 35 18H13zM13 30h22L24 43z"/></symbol>
+    <symbol id="p-arrow" viewBox="0 0 48 48"><path d="M5 21h25V11l14 13-14 13V27H5z"/></symbol>
+    <symbol id="p-out" viewBox="0 0 48 48"><path d="M8 5h22v7h-5V10H13v28h12v-2h5v7H8z"/><path d="M27 21h10v-7l9 10-9 10v-7H27z"/></symbol>
+    <symbol id="p-ext" viewBox="0 0 48 48"><path d="M27 5h16v16h-5v-7.5L22.5 29 19 25.5 34.5 10H27z"/><path d="M6 11h15v5H11v21h21V27h5v15H6z"/></symbol>
+    <symbol id="p-prev" viewBox="0 0 48 48"><path d="M31 6 13 24l18 18 4-4-14-14 14-14z"/></symbol>
+    <symbol id="p-next" viewBox="0 0 48 48"><path d="M17 6l18 18-18 18-4-4 14-14-14-14z"/></symbol>
+    <symbol id="p-logo" viewBox="0 0 240 110"><path d="M8 74 C 62 16, 118 24, 176 84" fill="none" stroke="#16233E" stroke-width="6"/><path d="M58 94 C 118 60, 158 22, 232 12" fill="none" stroke="#A98F63" stroke-width="6"/></symbol>
+  </defs>
+</svg>
+
+<main id="main">
+
+<!-- ============ 1F エレベーターホール ============ -->
+<section class="hall" aria-labelledby="hallTitle">
+  <i class="rail" aria-hidden="true"></i>
+  <div class="plaque">
+    <h1 id="hallTitle"><svg class="logo" viewBox="0 0 240 110" role="img" aria-label="BRIDGE"><use href="#p-logo"/></svg><span class="word" aria-hidden="true">BRIDGE</span><span class="tag">医療職のための、道具と経営ゲーム</span></h1>
+  </div>
+
+  <div class="hall-main">
+    <nav class="guide" aria-label="フロアガイド">
+      <i class="bolt a" aria-hidden="true"></i><i class="bolt b" aria-hidden="true"></i>
+      <div class="guide-h">
+        <p class="guide-t"><b>フロアガイド</b><span class="en">Floor Guide</span></p>
+        <svg class="pic" aria-hidden="true"><use href="#p-lift"/></svg>
+      </div>
+      <ol class="floors">
+        <li><a class="row" href="#fR" data-floor="R" style="--c:var(--cR);--on:var(--ink)"><span class="tile">R<small>F</small></span><svg class="pic" aria-hidden="true"><use href="#p-roof"/></svg><span class="nm"><b>考え方</b><span class="en">Philosophy</span></span><span class="rm">屋上 ・ 選択肢を増やす</span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#f7" data-floor="7" style="--c:var(--c7);--on:#fff"><span class="tile">7<small>F</small></span><svg class="pic" aria-hidden="true"><use href="#p-career"/></svg><span class="nm"><b>キャリア</b><span class="en">Career</span></span><span class="rm">BRIDGE Compass ・ 経験の棚卸し ・ 言いかえ帳 ほか4室</span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#f6" data-floor="6" style="--c:var(--c6);--on:#fff"><span class="tile">6<small>F</small></span><svg class="pic" aria-hidden="true"><use href="#p-learn"/></svg><span class="nm"><b>経営を学ぶ</b><span class="en">Management Games</span></span><span class="rm">クリニックタウン3D ・ ターンアラウンド12 ・ PMIクエスト</span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#f5" data-floor="5" style="--c:var(--c5);--on:#fff"><span class="tile">5<small>F</small></span><svg class="pic" aria-hidden="true"><use href="#p-work"/></svg><span class="nm"><b>業務</b><span class="en">Daily Work</span></span><span class="rm">掲示じたく ・ 二度手間さがし ・ やわ返</span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#f4" data-floor="4" style="--c:var(--c4);--on:#fff"><span class="tile">4<small>F</small></span><svg class="pic" aria-hidden="true"><use href="#p-manage"/></svg><span class="nm"><b>経営・管理</b><span class="en">Managers</span></span><span class="rm">RehaBoard ・ MedBoard ・ HireBoard ほか6室</span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#f3" data-floor="3" style="--c:var(--c3);--on:#fff"><span class="tile">3<small>F</small></span><svg class="pic" aria-hidden="true"><use href="#p-study"/></svg><span class="nm"><b>学習</b><span class="en">Study</span></span><span class="rm">HIM Quiz ・ StudyBoard ・ Daily English</span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#f2" data-floor="2" style="--c:var(--c2);--on:var(--ink)"><span class="tile">2<small>F</small></span><svg class="pic" aria-hidden="true"><use href="#p-play"/></svg><span class="nm"><b>試す・作品</b><span class="en">Lounge</span></span><span class="rm">ごきげん回復ガチャ ・ 窓あかり ほか2室</span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#f1" data-floor="1" style="--c:var(--c1);--on:#fff"><span class="tile">1<small>F</small></span><svg class="pic" aria-hidden="true"><use href="#p-info"/></svg><span class="nm"><b>総合案内</b><span class="en">Information</span></span><span class="rm">運営者 ・ 話をする</span><span class="here"><i></i>現在地<span class="en">You are here</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      </ol>
+    </nav>
+
+    <div class="lift" role="group" aria-label="行先階ボタン">
+      <i class="bolt a" aria-hidden="true"></i><i class="bolt d" aria-hidden="true"></i>
+      <div class="ind" aria-hidden="true"><svg class="dm" data-dm="1" viewBox="0 0 168 48"></svg></div>
+      <p class="lift-note">行先階ボタンを<br>押してください</p>
+      <div class="btns">
+        <div class="lcell"><svg class="braille" data-br="R" viewBox="0 0 13 20" aria-hidden="true"></svg><a class="lbtn" href="#fR" data-floor="R" style="--c:var(--cR);--on:var(--ink)" aria-label="屋上 考え方へ">R</a></div>
+        <div class="lcell"><svg class="braille" data-br="7" viewBox="0 0 13 20" aria-hidden="true"></svg><a class="lbtn" href="#f7" data-floor="7" style="--c:var(--c7);--on:#fff" aria-label="7階 キャリアへ">7</a></div>
+        <div class="lcell"><svg class="braille" data-br="6" viewBox="0 0 13 20" aria-hidden="true"></svg><a class="lbtn" href="#f6" data-floor="6" style="--c:var(--c6);--on:#fff" aria-label="6階 経営を学ぶへ">6</a></div>
+        <div class="lcell"><svg class="braille" data-br="5" viewBox="0 0 13 20" aria-hidden="true"></svg><a class="lbtn" href="#f5" data-floor="5" style="--c:var(--c5);--on:#fff" aria-label="5階 業務へ">5</a></div>
+        <div class="lcell"><svg class="braille" data-br="4" viewBox="0 0 13 20" aria-hidden="true"></svg><a class="lbtn" href="#f4" data-floor="4" style="--c:var(--c4);--on:#fff" aria-label="4階 経営・管理へ">4</a></div>
+        <div class="lcell"><svg class="braille" data-br="3" viewBox="0 0 13 20" aria-hidden="true"></svg><a class="lbtn" href="#f3" data-floor="3" style="--c:var(--c3);--on:#fff" aria-label="3階 学習へ">3</a></div>
+        <div class="lcell"><svg class="braille" data-br="2" viewBox="0 0 13 20" aria-hidden="true"></svg><a class="lbtn" href="#f2" data-floor="2" style="--c:var(--c2);--on:var(--ink)" aria-label="2階 試す・作品へ">2</a></div>
+        <div class="lcell"><svg class="braille" data-br="1" viewBox="0 0 13 20" aria-hidden="true"></svg><a class="lbtn on" href="#f1" data-floor="1" style="--c:var(--c1);--on:#fff" aria-label="1階 総合案内へ">1</a></div>
+      </div>
+      <p class="lift-foot" aria-hidden="true"><svg class="pic"><use href="#p-lift"/></svg>BRIDGE</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RF 屋上: 考え方 ============ -->
+<section class="lobby roof" id="fR" data-floor="R" data-ink style="--c:var(--cR);--on:var(--ink)" aria-labelledby="hR">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">R<small>F</small></p>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-roof"/></svg><h2 id="hR" tabindex="-1">考え方</h2><p class="en">Rooftop ・ Philosophy</p></div>
+    </div>
+    <div class="lobby-body">
+      <div>
+        <p class="roof-say">正解を与えるのではなく、<br><em>選択肢を増やす</em></p>
+        <a class="plate-link" href="../../../philosophy/index.html"><span class="ico"><svg class="pic" aria-hidden="true"><use href="#p-arrow"/></svg></span>考え方をもう少し読む</a>
+      </div>
+    </div>
+  </div>
+  <div class="skyline" aria-hidden="true"><svg viewBox="0 0 1440 120" preserveAspectRatio="none"><path fill="#74BBD8" d="M0 120V78h60V52h44v26h36V64h58v-24h30v24h40v56zm300 0V70h52V44h28v26h64V58h40v20h50V36h36v42h46V60h70v60zm470 0V66h48V40h56v26h30V52h44v68zm260 0V74h40V48h60v26h52V30h36v44h60V58h62v62zm300 0V70h48V54h54v66z"/><path fill="#5EA8C7" d="M0 120v-18h1440v18z"/></svg></div>
+</section>
+
+<!-- ============ 7F キャリア ============ -->
+<section class="lobby" id="f7" data-floor="7" style="--c:var(--c7);--on:#fff" aria-labelledby="h7">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">7<small>F</small></p>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-career"/></svg><h2 id="h7" tabindex="-1">キャリア</h2><p class="en">Career</p><p class="sub">キャリア・経験を整理する ・ 7室</p></div>
+    </div>
+    <div class="lobby-body">
+      <figure class="disp" data-disp>
+        <p class="disp-label"><i></i>案内ディスプレイ ・ 実際の画面</p>
+        <div class="disp-frame"><button class="disp-zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../../../images/products/shots/compass-result-light.webp" alt="BRIDGE Compass の結果画面の実際の画面。答えの一例" width="1280" height="800" loading="lazy" decoding="async"></button></div>
+        <figcaption class="disp-cap"><span class="disp-now"><span class="rn">701</span><span>BRIDGE Compass ・ 答えの一例</span></span><span class="disp-ctl"><button type="button" data-step="-1" aria-label="前の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+      </figure>
+      <ol class="rooms">
+        <li><a class="room" href="../../../compass/index.html" data-img="../../../images/products/shots/compass-result-light.webp" data-alt="BRIDGE Compass の結果画面の実際の画面。答えの一例" data-note="答えの一例"><span class="rn">701</span><span class="rb"><span class="rt">BRIDGE Compass</span><span class="rd">10の質問で、これまでの経験を別の言葉に翻訳する</span><span class="rk"><span>10の質問・約3分</span><span>登録不要</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../tanaoroshi/index.html" data-img="../../../images/products/thumbs/tanaoroshi.webp" data-alt="経験の棚卸しの実際の画面"><span class="rn">702</span><span class="rb"><span class="rt">経験の棚卸し</span><span class="rd">18の質問で、職務経歴書のたねをつくる</span><span class="rk"><span>18の質問・約15分</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../iikae/index.html" data-img="../../../images/products/thumbs/iikae.webp" data-alt="現場のことば 言いかえ帳の実際の画面"><span class="rn">703</span><span class="rb"><span class="rt">現場のことば 言いかえ帳</span><span class="rd">現場のことばを、履歴書で通じる言葉に</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../moyamoya/index.html" data-img="../../../images/products/thumbs/moyamoya.webp" data-alt="職場モヤモヤ診断の実際の画面"><span class="rn">704</span><span class="rb"><span class="rt">職場モヤモヤ診断</span><span class="rd">職場の「なんとなくしんどい」を、10問で言葉に</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../karte/index.html" data-img="../../../images/products/thumbs/karte.webp" data-alt="現場のカルテの実際の画面"><span class="rn">705</span><span class="rb"><span class="rt">現場のカルテ</span><span class="rd">職場のしんどさを、カルテの形で読む</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../daily-app/index.html" data-img="../../../images/products/thumbs/careerlog.webp" data-alt="キャリアログの実際の画面"><span class="rn">706</span><span class="rb"><span class="rt">キャリアログ</span><span class="rd">日々の仕事と学びを記録して、キャリアの言葉に</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../growth-76a805/index.html" data-img="../../../images/products/thumbs/growth.webp" data-alt="Growth OS の実際の画面"><span class="rn">707</span><span class="rb"><span class="rt">Growth OS</span><span class="rd">仕事の記録を、企画や発信のたねに</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6F 経営を学ぶ ============ -->
+<section class="lobby flip" id="f6" data-floor="6" style="--c:var(--c6);--on:#fff" aria-labelledby="h6">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">6<small>F</small></p>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-learn"/></svg><h2 id="h6" tabindex="-1">経営を学ぶ</h2><p class="en">Management Games</p><p class="sub">医療経営を学ぶ ・ 3室</p></div>
+    </div>
+    <div class="lobby-body">
+      <figure class="disp" data-disp>
+        <p class="disp-label"><i></i>案内ディスプレイ ・ 実際の画面</p>
+        <div class="disp-frame"><button class="disp-zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../shared/shots/ct3d-play-pc.webp" alt="クリニックタウン3D の実際のゲーム画面" width="2560" height="1600" loading="lazy" decoding="async"></button></div>
+        <figcaption class="disp-cap"><span class="disp-now"><span class="rn">601</span><span>クリニックタウン3D</span></span><span class="disp-ctl"><button type="button" data-step="-1" aria-label="前の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+      </figure>
+      <ol class="rooms">
+        <li><a class="room" href="../../../clinic-flow-3d/index.html" data-img="../shared/shots/ct3d-play-pc.webp" data-alt="クリニックタウン3D の実際のゲーム画面"><span class="rn">601</span><span class="rb"><span class="rt">クリニックタウン3D</span><span class="rd">クリニック経営を、1日ずつ動かして学ぶ</span><span class="rk"><span>ブラウザのゲーム</span><span>いまの版は v99.3</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../turnaround12/index.html" data-img="../../../images/products/thumbs/turnaround12.webp" data-alt="ターンアラウンド12 の実際の画面"><span class="rn">602</span><span class="rb"><span class="rt">ターンアラウンド12</span><span class="rd">赤字クリニックを、12週で立て直す</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../pmi-quest/index.html" data-img="../../../images/products/thumbs/pmi-quest.webp" data-alt="クリニックPMIクエストの実際の画面"><span class="rn">603</span><span class="rb"><span class="rt">クリニックPMIクエスト</span><span class="rd">承継直後の30日を、10問で診断する</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5F 業務 ============ -->
+<section class="lobby" id="f5" data-floor="5" style="--c:var(--c5);--on:#fff" aria-labelledby="h5">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">5<small>F</small></p>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-work"/></svg><h2 id="h5" tabindex="-1">業務</h2><p class="en">Daily Work</p><p class="sub">明日の業務を楽にする ・ 3室</p></div>
+    </div>
+    <div class="lobby-body">
+      <figure class="disp" data-disp>
+        <p class="disp-label"><i></i>案内ディスプレイ ・ 実際の画面</p>
+        <div class="disp-frame"><button class="disp-zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../../../images/products/thumbs/keiji.webp" alt="掲示じたくの実際の画面。できあがった臨時休診のお知らせ" width="880" height="550" loading="lazy" decoding="async"></button></div>
+        <figcaption class="disp-cap"><span class="disp-now"><span class="rn">501</span><span>掲示じたく</span></span><span class="disp-ctl"><button type="button" data-step="-1" aria-label="前の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+      </figure>
+      <ol class="rooms">
+        <li><a class="room" href="../../../keiji/index.html" data-img="../../../images/products/thumbs/keiji.webp" data-alt="掲示じたくの実際の画面。できあがった臨時休診のお知らせ"><span class="rn">501</span><span class="rb"><span class="rt">掲示じたく</span><span class="rd">院内掲示を、選んで埋めるだけ</span><span class="rk"><span>受付・事務の方に</span><span>登録不要</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../nidodema/index.html" data-img="../../../images/products/thumbs/nidodema.webp" data-alt="二度手間さがしの実際の画面"><span class="rn">502</span><span class="rb"><span class="rt">二度手間さがし</span><span class="rd">部署の手作業を、減らせるものと守るものに分ける</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../yawagaeshi/index.html" data-img="../../../images/products/thumbs/yawagaeshi.webp" data-alt="やわ返の実際の画面"><span class="rn">503</span><span class="rb"><span class="rt">やわ返</span><span class="rd">角の立たない返信案を、3つつくる</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4F 経営・管理 ============ -->
+<section class="lobby flip" id="f4" data-floor="4" style="--c:var(--c4);--on:#fff" aria-labelledby="h4">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">4<small>F</small></p>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-manage"/></svg><h2 id="h4" tabindex="-1">経営・管理</h2><p class="en">Managers</p><p class="sub">経営・管理の実務に使う ・ 9室</p></div>
+    </div>
+    <div class="lobby-body">
+      <figure class="disp" data-disp>
+        <p class="disp-label"><i></i>案内ディスプレイ ・ 実際の画面</p>
+        <div class="disp-frame"><button class="disp-zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../shared/shots/rehaboard.webp" alt="RehaBoard の紹介ページの実際の画面" width="2560" height="1600" loading="lazy" decoding="async"></button></div>
+        <figcaption class="disp-cap"><span class="disp-now"><span class="rn">401</span><span>RehaBoard</span></span><span class="disp-ctl"><button type="button" data-step="-1" aria-label="前の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+      </figure>
+      <ol class="rooms">
+        <li><a class="room" href="../../../rehaboard/index.html" data-img="../shared/shots/rehaboard.webp" data-alt="RehaBoard の紹介ページの実際の画面"><span class="rn">401</span><span class="rb"><span class="rt">RehaBoard</span><span class="rd">リハ部門の運営を、1画面に</span><span class="rk"><span>紹介とデモ</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../medboard/index.html" data-img="../../../images/products/thumbs/medboard.webp" data-alt="MedBoard の実際の画面"><span class="rn">402</span><span class="rb"><span class="rt">MedBoard</span><span class="rd">外来の患者フローを、2施設で見比べる</span><span class="rk"><span>紹介とデモ</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../hire-board/index.html" data-img="../../../images/products/thumbs/hireboard.webp" data-alt="HireBoard の実際の画面"><span class="rn">403</span><span class="rb"><span class="rt">HireBoard</span><span class="rd">医療機関の採用を、カンバンで追う</span><span class="rk"><span>紹介とデモ</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../interview-kit/index.html" data-img="../../../images/products/thumbs/interview-kit.webp" data-alt="面接官の手帖の実際の画面"><span class="rn">404</span><span class="rb"><span class="rt">面接官の手帖</span><span class="rd">面接の質問を用意し、事実と印象を分けて記録する</span><span class="rk"><span>紹介</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../consult-simulator/index.html" data-img="../../../images/products/thumbs/consult-simulator.webp" data-alt="ConsultSim の実際の画面"><span class="rn">405</span><span class="rb"><span class="rt">ConsultSim</span><span class="rd">1診と2診で、待ち時間がどう変わるかを試す</span><span class="rk"><span>紹介とデモ</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../round-note/index.html" data-img="../../../images/products/thumbs/round-note.webp" data-alt="本部長の巡回手帖の実際の画面"><span class="rn">406</span><span class="rb"><span class="rt">本部長の巡回手帖</span><span class="rd">複数施設の巡回を、1冊の手帖に</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../manager-starter/index.html" data-img="../../../images/products/thumbs/manager-starter.webp" data-alt="医療管理職スターターの実際の画面"><span class="rn">407</span><span class="rb"><span class="rt">医療管理職スターター</span><span class="rd">初めて管理職になった人の、チェックリストと記入式シート</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../medops/index.html" data-img="../../../images/products/thumbs/medops.webp" data-alt="医療管理実務ライブラリの実際の画面"><span class="rn">408</span><span class="rb"><span class="rt">医療管理実務ライブラリ</span><span class="rd">医療管理の実務手順と、無料テンプレート</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer" data-img="../../../images/products/thumbs/reha-checklist.webp" data-alt="Reha Checklist の配布ページの実際の画面"><span class="rn">409</span><span class="rb"><span class="rt">Reha Checklist</span><span class="rd">リハ部門KPIのチェックリスト(PDF・スプレッドシート)</span><span class="rk"><span>配布ページ(別のサイト)</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-ext"/></svg></a></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3F 学習 ============ -->
+<section class="lobby" id="f3" data-floor="3" style="--c:var(--c3);--on:#fff" aria-labelledby="h3">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">3<small>F</small></p>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-study"/></svg><h2 id="h3" tabindex="-1">学習</h2><p class="en">Study</p><p class="sub">学習を続ける ・ 3室</p></div>
+    </div>
+    <div class="lobby-body">
+      <figure class="disp" data-disp>
+        <p class="disp-label"><i></i>案内ディスプレイ ・ 実際の画面</p>
+        <div class="disp-frame"><button class="disp-zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../../../images/products/thumbs/him-quiz.webp" alt="HIM Quiz の実際の画面" width="880" height="550" loading="lazy" decoding="async"></button></div>
+        <figcaption class="disp-cap"><span class="disp-now"><span class="rn">301</span><span>HIM Quiz</span></span><span class="disp-ctl"><button type="button" data-step="-1" aria-label="前の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+      </figure>
+      <ol class="rooms">
+        <li><a class="room" href="../../../him-quiz/index.html" data-img="../../../images/products/thumbs/him-quiz.webp" data-alt="HIM Quiz の実際の画面"><span class="rn">301</span><span class="rb"><span class="rt">HIM Quiz</span><span class="rd">診療情報管理士の模擬試験、全12章・360問</span><span class="rk"><span>紹介</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../study-board/index.html" data-img="../../../images/products/thumbs/studyboard.webp" data-alt="StudyBoard の実際の画面"><span class="rn">302</span><span class="rb"><span class="rt">StudyBoard</span><span class="rd">複数科目の学習を、1枚のボードで続ける</span><span class="rk"><span>紹介</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../english-trainer/index.html" data-img="../../../images/products/thumbs/english-trainer.webp" data-alt="Daily English の実際の画面"><span class="rn">303</span><span class="rb"><span class="rt">Daily English</span><span class="rd">瞬間英作文を、通勤の合間に</span><span class="rk"><span>紹介</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2F 試す・作品 ============ -->
+<section class="lobby flip" id="f2" data-floor="2" data-ink style="--c:var(--c2);--on:var(--ink)" aria-labelledby="h2">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">2<small>F</small></p>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-play"/></svg><h2 id="h2" tabindex="-1">試す・作品</h2><p class="en">Lounge</p><p class="sub">気軽に試す・作品を楽しむ ・ 4室</p></div>
+    </div>
+    <div class="lobby-body">
+      <figure class="disp" data-disp>
+        <p class="disp-label"><i></i>案内ディスプレイ ・ 実際の画面</p>
+        <div class="disp-frame"><button class="disp-zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../shared/shots/madoakari-pc.webp" alt="窓あかりの実際の画面。夜の病院の建物" width="2560" height="1600" loading="lazy" decoding="async"></button></div>
+        <figcaption class="disp-cap"><span class="disp-now"><span class="rn">203</span><span>窓あかり</span></span><span class="disp-ctl"><button type="button" data-step="-1" aria-label="前の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+      </figure>
+      <ol class="rooms">
+        <li><a class="room" href="../../../gokigen-gacha/index.html" data-img="../../../images/products/thumbs/gokigen-gacha.webp" data-alt="ごきげん回復ガチャの実際の画面"><span class="rn">201</span><span class="rb"><span class="rt">ごきげん回復ガチャ</span><span class="rd">疲れた日の回復行動を、ひとつだけ</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../ittan-horyu/index.html" data-img="../../../images/products/thumbs/ittan-horyu.webp" data-alt="いったん保留の実際の画面"><span class="rn">202</span><span class="rb"><span class="rt">いったん保留</span><span class="rd">買う前に、少しだけ寝かせる</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../madoakari/index.html" data-img="../shared/shots/madoakari-pc.webp" data-alt="窓あかりの実際の画面。夜の病院の建物"><span class="rn">203</span><span class="rb"><span class="rt">窓あかり</span><span class="rd">小さな病院の一日を、ただ眺める</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../futatsume/index.html" data-img="../../../images/products/thumbs/futatsume.webp" data-alt="ふたつめの波の実際の画面"><span class="rn">204</span><span class="rb"><span class="rt">ふたつめの波</span><span class="rd">二つの波が重なる、水面のパズル</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1F 総合案内 ============ -->
+<section class="lobby info" id="f1" data-floor="1" style="--c:var(--c1);--on:#fff" aria-labelledby="h1x">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">1<small>F</small></p>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-info"/></svg><h2 id="h1x" tabindex="-1">総合案内</h2><p class="en">Information</p><p class="sub">6つの階に、ぜんぶで29室</p></div>
+    </div>
+    <div class="lobby-body">
+      <div>
+        <div class="staff">
+          <span class="face"><svg class="pic" aria-hidden="true"><use href="#p-person"/></svg></span>
+          <span><span class="role">運営者</span><br><span class="name">理学療法士 橋本渉</span><br><span class="what">BRIDGE を、ひとりで運営しています</span></span>
+        </div>
+        <p class="voice">外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p>
+      </div>
+      <div>
+        <ol class="rooms">
+          <li><a class="room" href="../../../philosophy/index.html"><span class="rn"><svg class="pic" style="width:26px;height:26px" aria-hidden="true"><use href="#p-roof"/></svg></span><span class="rb"><span class="rt">考え方</span><span class="rd">BRIDGE が何を大切にしているか</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../about/index.html"><span class="rn"><svg class="pic" style="width:26px;height:26px" aria-hidden="true"><use href="#p-person"/></svg></span><span class="rb"><span class="rt">運営者について</span><span class="rd">名前の由来と、これまでの歩み</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../community/index.html"><span class="rn"><svg class="pic" style="width:26px;height:26px" aria-hidden="true"><use href="#p-talk"/></svg></span><span class="rb"><span class="rt">話をする</span><span class="rd">共感も、異論も、相談も</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer"><span class="rn"><svg class="pic" style="width:24px;height:24px" aria-hidden="true"><use href="#p-ext"/></svg></span><span class="rb"><span class="rt">note</span><span class="rd">書いていること(別のサイト)</span></span><svg class="pic go" aria-hidden="true"><use href="#p-ext"/></svg></a></li>
+        </ol>
+        <div class="exit"><span class="ico"><svg class="pic" aria-hidden="true"><use href="#p-out"/></svg></span><p><b>出入口</b><span>見るだけで帰っても、それで十分です。</span></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span class="l"><svg class="logo" viewBox="0 0 240 110" aria-hidden="true"><use href="#p-logo"/></svg>理学療法士の橋本渉が、ひとりで運営しています</span>
+    <span class="l"><a href="../../../legal/privacy.html">プライバシー</a><span class="proto">Prototype ・ 未公開</span></span>
+  </div>
+</footer>
+
+<!-- 下の階へ移ったあとの操作盤(PC は右端、スマホは画面下) -->
+<nav class="ride" aria-label="階の移動">
+  <div class="ind" aria-hidden="true"><svg class="dm" data-dm="1" viewBox="0 0 168 48"></svg></div>
+  <a class="rbtn" href="#fR" data-floor="R" style="--c:var(--cR);--on:var(--ink)" aria-label="屋上 考え方"><span>R</span></a>
+  <a class="rbtn" href="#f7" data-floor="7" style="--c:var(--c7);--on:#fff" aria-label="7階 キャリア"><span>7</span></a>
+  <a class="rbtn" href="#f6" data-floor="6" style="--c:var(--c6);--on:#fff" aria-label="6階 経営を学ぶ"><span>6</span></a>
+  <a class="rbtn" href="#f5" data-floor="5" style="--c:var(--c5);--on:#fff" aria-label="5階 業務"><span>5</span></a>
+  <a class="rbtn" href="#f4" data-floor="4" style="--c:var(--c4);--on:#fff" aria-label="4階 経営・管理"><span>4</span></a>
+  <a class="rbtn" href="#f3" data-floor="3" style="--c:var(--c3);--on:#fff" aria-label="3階 学習"><span>3</span></a>
+  <a class="rbtn" href="#f2" data-floor="2" style="--c:var(--c2);--on:var(--ink)" aria-label="2階 試す・作品"><span>2</span></a>
+  <a class="rbtn" href="#f1" data-floor="1" style="--c:var(--c1);--on:#fff" aria-label="1階 総合案内"><span>1</span></a>
+</nav>
+
+<div class="doors" aria-hidden="true"><div class="door l"></div><div class="door r"></div><div class="dlabel"><span class="tile" data-dtile style="--c:var(--c1);--on:#fff">1<small>F</small></span><b data-dname>総合案内</b></div></div>
+
+<dialog class="lb" aria-labelledby="lbTitle">
+  <div class="lb-in">
+    <img src="data:," alt="" width="1280" height="800">
+    <div class="lb-bar">
+      <p class="lb-t" id="lbTitle"><span class="rn">701</span><span data-lbname>BRIDGE Compass</span></p>
+      <p class="lb-act"><a href="#" data-lbgo>この部屋へ入る</a><button type="button" data-lbclose>閉じる</button></p>
+    </div>
+  </div>
+</dialog>
+
+<p class="sr" aria-live="polite" id="arrive"></p>
+
+<script>
+(function () {
+  'use strict';
+  var d = document, R = d.documentElement;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)');
+  var still = function () { return !!(reduce && reduce.matches); };
+  var LEVEL = { '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, 'R': 8 };
+  var NAMES = { R: '屋上 考え方', '7': '7階 キャリア', '6': '6階 経営を学ぶ', '5': '5階 業務', '4': '4階 経営・管理', '3': '3階 学習', '2': '2階 試す・作品', '1': '1階 総合案内' };
+  var SHORT = { R: '考え方', '7': 'キャリア', '6': '経営を学ぶ', '5': '業務', '4': '経営・管理', '3': '学習', '2': '試す・作品', '1': '総合案内' };
+  var COLOR = { R: ['var(--cR)', 'var(--ink)'], '7': ['var(--c7)', '#fff'], '6': ['var(--c6)', '#fff'], '5': ['var(--c5)', '#fff'], '4': ['var(--c4)', '#fff'], '3': ['var(--c3)', '#fff'], '2': ['var(--c2)', 'var(--ink)'], '1': ['var(--c1)', '#fff'] };
+
+  /* ---- 階数表示: 5×7 のドットで描く(エレベーターの表示器) ---- */
+  var GLYPH = {
+    '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+    '2': ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+    '3': ['11111', '00010', '00100', '00010', '00001', '10001', '01110'],
+    '4': ['00010', '00110', '01010', '10010', '11111', '00010', '00010'],
+    '5': ['11111', '10000', '11110', '00001', '00001', '10001', '01110'],
+    '6': ['00110', '01000', '10000', '11110', '10001', '10001', '01110'],
+    '7': ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+    'R': ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+    'F': ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+    'u': ['00000', '00100', '01110', '11111', '00000', '00000', '00000'],
+    'd': ['00000', '00000', '11111', '01110', '00100', '00000', '00000'],
+    ' ': ['00000', '00000', '00000', '00000', '00000', '00000', '00000']
+  };
+  var NS = 'http://www.w3.org/2000/svg';
+  function drawDM(svg, text) {
+    var P = 6, cell = 5 * P + P, w = text.length * cell - P, h = 7 * P;
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    var frag = d.createDocumentFragment();
+    for (var c = 0; c < text.length; c++) {
+      var g = GLYPH[text[c]] || GLYPH[' '];
+      for (var y = 0; y < 7; y++) for (var x = 0; x < 5; x++) {
+        var dot = d.createElementNS(NS, 'circle');
+        dot.setAttribute('cx', c * cell + x * P + P / 2); dot.setAttribute('cy', y * P + P / 2); dot.setAttribute('r', 2.35);
+        dot.setAttribute('fill', g[y][x] === '1' ? '#FFB21A' : '#25282B');
+        frag.appendChild(dot);
+      }
+    }
+    svg.textContent = ''; svg.appendChild(frag);
+  }
+  var dms = [].slice.call(d.querySelectorAll('.dm'));
+  function showFloor(f, dir) { var t = (dir === 1 ? 'u' : dir === -1 ? 'd' : '') + (f === 'R' ? 'RF' : f + 'F'); dms.forEach(function (s) { drawDM(s, t); }); }
+
+  /* ---- 点字(数符+数字。屋上は外字符+r) ---- */
+  var BR = { '1': [1], '2': [1, 2], '3': [1, 4], '4': [1, 4, 5], '5': [1, 5], '6': [1, 2, 4], '7': [1, 2, 4, 5] };
+  var POS = { 1: [0, 0], 2: [0, 1], 3: [0, 2], 4: [1, 0], 5: [1, 1], 6: [1, 2] };
+  d.querySelectorAll('.braille').forEach(function (s) {
+    var k = s.getAttribute('data-br'), cells = k === 'R' ? [[5, 6], [1, 2, 3, 5]] : [[3, 4, 5, 6], BR[k]];
+    s.setAttribute('viewBox', '0 0 ' + (cells.length * 13 - 3) + ' 20'); s.style.width = (cells.length * 13 - 3) + 'px';
+    cells.forEach(function (dots, ci) { dots.forEach(function (n) { var c = d.createElementNS(NS, 'circle'); c.setAttribute('cx', ci * 13 + 2.5 + POS[n][0] * 5); c.setAttribute('cy', 3 + POS[n][1] * 6.5); c.setAttribute('r', 1.9); c.setAttribute('fill', 'currentColor'); s.appendChild(c); }); });
+  });
+
+  /* ---- いまの階と、ボタンの灯り ---- */
+  var cur = '1', busy = false;
+  var rows = [].slice.call(d.querySelectorAll('.row')), lbtns = [].slice.call(d.querySelectorAll('.lbtn')), rbtns = [].slice.call(d.querySelectorAll('.rbtn'));
+  function light(f) {
+    lbtns.concat(rbtns).forEach(function (b) { var on = b.getAttribute('data-floor') === f; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+  }
+  function litRow(f) { rows.forEach(function (r) { r.classList.toggle('lit', r.getAttribute('data-floor') === f); }); }
+  showFloor('1', 0); light('1');
+
+  /* ---- 扉 ---- */
+  var doors = d.querySelector('.doors'), dtile = d.querySelector('[data-dtile]'), dname = d.querySelector('[data-dname]'), arrive = d.getElementById('arrive');
+  var skip = null;
+  function wait(ms) { return new Promise(function (res) { var t = setTimeout(res, ms); skip = function () { clearTimeout(t); res('skip'); }; }); }
+  function sectionOf(f) { return d.getElementById('f' + f); }
+  function land(f) {
+    var sec = sectionOf(f); if (!sec) return;
+    window.scrollTo(0, sec.getBoundingClientRect().top + window.pageYOffset);
+    var h = sec.querySelector('h2'); if (h) h.focus({ preventScroll: true });
+    try { history.replaceState(null, '', '#f' + f); } catch (e) {}
+    cur = f; light(f); showFloor(f, 0);
+    arrive.textContent = NAMES[f] + 'に着きました';
+  }
+  function go(f) {
+    if (busy) return; if (!sectionOf(f)) return;
+    light(f); litRow(f);
+    if (still()) { land(f); litRow(null); return; }
+    busy = true;
+    var from = LEVEL[cur] || 1, to = LEVEL[f], dir = to > from ? 1 : to < from ? -1 : 0;
+    var seq = []; for (var n = from + dir; dir && n !== to + dir; n += dir) seq.push(n);
+    var keys = Object.keys(LEVEL);
+    var floorOf = function (lv) { for (var i = 0; i < keys.length; i++) if (LEVEL[keys[i]] === lv) return keys[i]; };
+    var skipped = false;
+    (async function () {
+      for (var i = 0; i < seq.length && !skipped; i++) { showFloor(floorOf(seq[i]), dir); if ((await wait(seq.length > 5 ? 70 : 110)) === 'skip') skipped = true; }
+      dtile.style.setProperty('--c', COLOR[f][0]); dtile.style.setProperty('--on', COLOR[f][1]);
+      dtile.innerHTML = (f === 'R' ? 'R' : f) + '<small>F</small>'; dname.textContent = SHORT[f];
+      doors.classList.remove('open'); doors.classList.add('run');
+      void doors.offsetWidth; doors.classList.add('shut');
+      if (!skipped && (await wait(380)) === 'skip') skipped = true;
+      land(f); litRow(null);
+      if (!skipped && (await wait(skipped ? 0 : 220)) === 'skip') skipped = true;
+      doors.classList.add('open'); doors.classList.remove('shut');
+      await wait(skipped ? 0 : 520);
+      doors.classList.remove('run', 'open'); busy = false; skip = null;
+    })();
+  }
+  doors.addEventListener('click', function () { if (skip) skip(); });
+  d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && busy && skip) skip(); });
+  [].concat(rows, lbtns, rbtns).forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+      e.preventDefault(); a.classList.add('press'); setTimeout(function () { a.classList.remove('press'); }, 160);
+      go(a.getAttribute('data-floor'));
+    });
+  });
+  rows.forEach(function (r) {
+    var f = r.getAttribute('data-floor');
+    var b = lbtns.filter(function (x) { return x.getAttribute('data-floor') === f; })[0];
+    r.addEventListener('mouseenter', function () { if (b && !busy) b.style.borderColor = 'var(--c)'; });
+    r.addEventListener('mouseleave', function () { if (b) b.style.borderColor = ''; });
+  });
+
+  /* ---- 下の階に移ったあとの操作盤と、いまいる階の表示 ---- */
+  var ride = d.querySelector('.ride'), hall = d.querySelector('.hall'), ticking = false;
+  function rideCheck() { ticking = false; var show = window.pageYOffset > hall.offsetHeight * 0.55; ride.classList.toggle('show', show); d.body.classList.toggle('has-ride', show); }
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(rideCheck); } }, { passive: true });
+  window.addEventListener('resize', rideCheck); rideCheck();
+  if ('IntersectionObserver' in window) {
+    var lobbies = [].slice.call(d.querySelectorAll('.lobby'));
+    var spy = new IntersectionObserver(function (es) {
+      if (busy) return;
+      es.forEach(function (e) { if (e.isIntersecting) { var f = e.target.getAttribute('data-floor'); if (f !== cur) { cur = f; light(f); showFloor(f, 0); } } });
+    }, { rootMargin: '-45% 0px -54% 0px', threshold: 0 });
+    lobbies.forEach(function (l) { spy.observe(l); });
+    new IntersectionObserver(function (es) { if (es[0].isIntersecting && !busy && cur !== '1') { cur = '1'; light('1'); showFloor('1', 0); } }, { threshold: .5 }).observe(hall);
+  }
+
+  /* ---- 案内ディスプレイ(部屋の札に合わせて映す) ---- */
+  d.querySelectorAll('.lobby').forEach(function (lob) {
+    var disp = lob.querySelector('[data-disp]'); if (!disp) return;
+    var img = disp.querySelector('img'), rn = disp.querySelector('.disp-now .rn'), nm = disp.querySelector('.disp-now span:last-child');
+    var rooms = [].slice.call(lob.querySelectorAll('.room[data-img]')); if (!rooms.length) return;
+    var at = 0;
+    function show(i) {
+      if (i === at && img.getAttribute('src') === rooms[i].getAttribute('data-img')) { mark(); return; }
+      at = (i + rooms.length) % rooms.length; var r = rooms[at];
+      var src = r.getAttribute('data-img');
+      img.classList.add('out');
+      var pre = new Image(); pre.src = src;
+      var swap = function () { img.src = src; img.alt = r.getAttribute('data-alt') || ''; img.classList.remove('out'); };
+      if (still()) swap(); else (pre.decode ? pre.decode().then(swap, swap) : setTimeout(swap, 120));
+      rn.textContent = r.querySelector('.rn').textContent;
+      nm.textContent = r.querySelector('.rt').textContent + (r.getAttribute('data-note') ? ' ・ ' + r.getAttribute('data-note') : '');
+      mark();
+    }
+    function mark() { rooms.forEach(function (r, i) { r.classList.toggle('cur', i === at); }); }
+    rooms.forEach(function (r, i) { r.addEventListener('mouseenter', function () { show(i); }); r.addEventListener('focus', function () { show(i); }); });
+    disp.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () { show(at + (+b.getAttribute('data-step'))); }); });
+    var zb = disp.querySelector('.disp-zoom'); zb.disabled = false;
+    zb.addEventListener('click', function () { openLB(rooms[at], this); });
+    mark();
+  });
+
+  /* ---- 大きく見る ---- */
+  var lb = d.querySelector('.lb'), lbImg = lb.querySelector('img'), lbRn = lb.querySelector('.lb-t .rn'), lbName = lb.querySelector('[data-lbname]'), lbGo = lb.querySelector('[data-lbgo]'), opener = null;
+  function openLB(room, from) {
+    opener = from; lbImg.src = room.getAttribute('data-img'); lbImg.alt = room.getAttribute('data-alt') || '';
+    lbRn.textContent = room.querySelector('.rn').textContent; lbName.textContent = room.querySelector('.rt').textContent;
+    lbGo.href = room.getAttribute('href');
+    if (room.target) { lbGo.target = '_blank'; lbGo.rel = 'noopener noreferrer'; } else { lbGo.removeAttribute('target'); lbGo.removeAttribute('rel'); }
+    if (lb.showModal) lb.showModal(); else lb.setAttribute('open', '');
+    lb.querySelector('[data-lbclose]').focus();
+  }
+  lb.querySelector('[data-lbclose]').addEventListener('click', function () { lb.close(); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
+  lb.addEventListener('close', function () { if (opener) opener.focus(); });
+
+  /* ---- 直接 #f7 などで開いたとき ---- */
+  var h = location.hash.replace('#f', '');
+  if (LEVEL[h]) { cur = h; light(h); showFloor(h, 0); }
+})();
+</script>
+</body>
+</html>
