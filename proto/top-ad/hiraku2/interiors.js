@@ -181,8 +181,10 @@ class Batch {
   }
 }
 /* 箱(中心の x・z と底の y)・最小最大の箱・円柱・球 */
-function bx(b, x, y, z, w, h, d, c, ry = 0, glow = 0) { b.add(G.box, mtx(x, y, z, w, h, d, ry), c, glow); }
-function bb(b, x0, x1, y0, y1, z0, z1, c, glow = 0) { bx(b, (x0 + x1) / 2, y0, (z0 + z1) / 2, x1 - x0, y1 - y0, z1 - z0, c, 0, glow); }
+function bx(b, x, y, z, w, h, d, c, ry = 0, glow = 0, flat = 0) { b.add(G.box, mtx(x, y, z, w, h, d, ry), c, glow, flat); }
+function bb(b, x0, x1, y0, y1, z0, z1, c, glow = 0, flat = 0) { bx(b, (x0 + x1) / 2, y0, (z0 + z1) / 2, x1 - x0, y1 - y0, z1 - z0, c, 0, glow, flat); }
+/* 窓のガラス(flat .15): 夕方から夜は、外の暗さ(深い藍)になる。部屋の灯りのにじみは受けない */
+const PANE = .15;
 function cy(b, x, y, z, r, h, c, seg6, glow = 0) { b.add(seg6 ? G.cyl6 : G.cyl, mtx(x, y, z, r * 2, h, r * 2), c, glow); }
 function sp(b, x, y, z, r, c, sy = 1, glow = 0) { b.add(G.sph, mtx(x, y, z, r * 2, r * 2 * sy, r * 2), c, glow); }
 /* 切り口の塗り: 藍の線は光を受けない平らな色(flat 1)。淡い面(cutLight)は光を受けるが、部屋の陰はつけない(flat .5。夜は暗くなる) */
@@ -236,7 +238,7 @@ function grp(b, x, y, z, ry = 0, s = 1) {
   const cs = Math.cos(ry) * s, sn = Math.sin(ry) * s;
   const P = (lx, lz) => [x + lx * cs + lz * sn, z - lx * sn + lz * cs];
   return {
-    box(lx, ly, lz, w, h, d, c, rx = 0, rz = 0, glow = 0) { const [wx, wz] = P(lx, lz); b.add(G.box, mtx(wx, y + ly * s, wz, w * s, h * s, d * s, ry, rx, rz), c, glow); return this; },
+    box(lx, ly, lz, w, h, d, c, rx = 0, rz = 0, glow = 0, flat = 0) { const [wx, wz] = P(lx, lz); b.add(G.box, mtx(wx, y + ly * s, wz, w * s, h * s, d * s, ry, rx, rz), c, glow, flat); return this; },
     rbox(lx, ly, lz, w, h, d, r, c) { const [wx, wz] = P(lx, lz); b.add(rbGeo(w * s, h * s, d * s, r * s), mtx(wx, y + ly * s, wz, 1, 1, 1, ry), c); return this; },
     cyl(lx, ly, lz, r, h, c, seg6, rx = 0, rz = 0, glow = 0) { const [wx, wz] = P(lx, lz); b.add(seg6 ? G.cyl6 : G.cyl, mtx(wx, y + ly * s, wz, r * 2 * s, h * s, r * 2 * s, ry, rx, rz), c, glow); return this; },
     sph(lx, ly, lz, r, c, sy = 1, glow = 0) { const [wx, wz] = P(lx, lz); b.add(G.sph, mtx(wx, y + ly * s, wz, r * 2 * s, r * 2 * sy * s, r * 2 * s, ry), c, glow); return this; },
@@ -250,11 +252,23 @@ function grp(b, x, y, z, ry = 0, s = 1) {
    室内の光(描画を増やさない。建物の中の座標で、画素ごとに):
      床は壁ぎわと隅ほど暗く / 壁と家具と人は床に近いほど暗く(接地) / 奥ほどわずかに暗く
      天井の灯り: 床に暖かいにじみ(灯りの列の下)、壁の上のほうに暖かい明るさ */
-const SELF_DAY = [.12, .11, .1], SELF_NIGHT = [.2, .16, .1], PSELF_DAY = [.13, .12, .11], PSELF_NIGHT = [.26, .21, .15];
-const LAMP_DAY = .24, LAMP_NIGHT = .62;
+const SELF_DAY = [.12, .11, .1], PSELF_DAY = [.13, .12, .11], LAMP_DAY = .24;
+/* 中の光の調子(昼・夕・夜。setNight の k は 0・.62・1)。町の光を、中ではこの割合で受ける:
+     dir 太陽と月(夜は弱く受け、屋根のない最上階に壁の影を落とさない)・pt ひらいた建物の灯り・amb 空の光
+   self は中の自分の光、pself は人の自分の光、lamp は天井の灯りのにじみ、top は最上階の灯り(屋根がないので、天井の灯りの代わり) */
+const GRADE = {
+  dir: [[1, 1, 1], [.86, .84, .82], [.3, .3, .32]],
+  pt: [[1, 1, 1], [.8, .74, .68], [.7, .62, .52]],
+  amb: [[1, 1, 1], [.86, .84, .86], [.5, .5, .56]],
+  self: [SELF_DAY, [.12, .1, .075], [.13, .1, .065]],
+  pself: [PSELF_DAY, [.17, .14, .11], [.24, .19, .14]],
+  lamp: [LAMP_DAY, .5, .9], top: [0, .18, .4]
+};
+const DUSK_K = .62, key3 = (k, a, b, c) => k <= DUSK_K ? lerp(a, b, k / DUSK_K) : lerp(b, c, (k - DUSK_K) / (1 - DUSK_K));
 function makeUniforms() {
   return {
     uSelf: { value: new THREE.Vector3(...SELF_DAY) }, uGlow: { value: 0 },
+    uDirK: { value: new THREE.Vector3(1, 1, 1) }, uPtK: { value: new THREE.Vector3(1, 1, 1) }, uAmbK: { value: new THREE.Vector3(1, 1, 1) }, uTop: { value: 0 },
     uRoom: { value: new THREE.Vector4(1, -1, 1, 1) },       // 側面の壁の内側(±x)・奥の壁の内側 z・前の z・階の高さ
     uRoom2: { value: new THREE.Vector4(2, 0, 0, 0) },       // 形(0 箱・1 塔・2 なし)・塔の半径・灯りの間隔・灯りの列の z
     uRoom3: { value: new THREE.Vector4(0, 0, 0, 0) },       // 灯りの列の x のずれ
@@ -296,22 +310,30 @@ float roomShade(out float pool) {
   float dx = sp > .01 ? mod(vLoc.x - uRoom3.x + sp * 50.5, sp) - sp * .5 : vLoc.x;
   float dz = vLoc.z - uRoom2.w;
   pool = exp(-(dx * dx + dz * dz) / .34) * (.5 + .5 * up) * (1.0 - .6 * smoothstep(fh * .55, fh, hy)) + smoothstep(fh * .5, fh * .98, hy) * vert * .5;
+  pool += uTop * step(uRoom3.y, vLoc.y) * (.6 + .4 * up);
   return shade;
 }`;
+/* 町の光の受け方(GRADE): 光の計算の中で、太陽と月・灯り・空の光に、それぞれ割合を掛ける */
+const LIGHTS_IN = [
+  ['getDirectionalLightInfo( directionalLight, directLight );', 'getDirectionalLightInfo( directionalLight, directLight );\n\t\tdirectLight.color *= uDirK;'],
+  ['getPointLightInfo( pointLight, geometryPosition, directLight );', 'getPointLightInfo( pointLight, geometryPosition, directLight );\n\t\tdirectLight.color *= uPtK;'],
+  ['irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometryNormal );', 'irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometryNormal ) * uAmbK;']
+].reduce((s, [a, b]) => s.replace(a, b), THREE.ShaderChunk.lights_fragment_begin);
 function inMat(u, o = {}) {
   const vc = o.vc !== false, glow = !!o.glow, flat = !!o.flat, ppl = !!o.ppl;
   const m = new THREE.MeshStandardMaterial({ vertexColors: vc, roughness: .86, metalness: 0 });
   m.onBeforeCompile = sh => {
-    for (const k of ['uSelf', 'uGlow', 'uRoom', 'uRoom2', 'uRoom3', 'uLamp']) sh.uniforms[k] = u[k];
+    for (const k of ['uSelf', 'uGlow', 'uRoom', 'uRoom2', 'uRoom3', 'uLamp', 'uDirK', 'uPtK', 'uAmbK', 'uTop']) sh.uniforms[k] = u[k];
     if (ppl) sh.uniforms.uPpl = u.uPpl;
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vLoc;\nvarying vec3 vNrm;' + (glow ? '\nattribute float aGlow;\nvarying float vGlow;' : '') + (flat ? '\nattribute float aFlat;\nvarying float vFlat;' : ''))
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvec4 lp = vec4(transformed, 1.0);\nvec3 ln = objectNormal;\n#ifdef USE_INSTANCING\nlp = instanceMatrix * lp;\nln = mat3(instanceMatrix) * ln;\n#endif\nvLoc = lp.xyz;\nvNrm = ln;' + (glow ? '\nvGlow = aGlow;' : '') + (flat ? '\nvFlat = aFlat;' : ''));
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 uSelf;\nuniform float uGlow;\nuniform vec4 uRoom;\nuniform vec4 uRoom2;\nuniform vec4 uRoom3;\nuniform vec4 uLamp;\nvarying vec3 vLoc;\nvarying vec3 vNrm;' + (glow ? '\nvarying float vGlow;' : '') + (flat ? '\nvarying float vFlat;' : '') + (ppl ? '\nuniform vec4 uPpl[' + NPPL + '];' : '') + ROOM_GLSL + (ppl ? PPL_GLSL : ''))
-      .replace('#include <color_fragment>', '#include <color_fragment>\nfloat pool = 0.0;\nfloat shade = roomShade(pool);' + (ppl ? '\nshade *= 1.0 - .32 * pplShade() * step(.6, normalize(vNrm).y);' : '') + (flat ? '\nfloat cutK = step(.25, vFlat);\nshade = mix(shade, 1.0, cutK);\npool *= 1.0 - cutK;' : '') + '\ndiffuseColor.rgb *= shade;')
+      .replace('#include <common>', '#include <common>\nuniform vec3 uSelf;\nuniform float uGlow;\nuniform vec4 uRoom;\nuniform vec4 uRoom2;\nuniform vec4 uRoom3;\nuniform vec4 uLamp;\nuniform vec3 uDirK;\nuniform vec3 uPtK;\nuniform vec3 uAmbK;\nuniform float uTop;\nvarying vec3 vLoc;\nvarying vec3 vNrm;' + (glow ? '\nvarying float vGlow;' : '') + (flat ? '\nvarying float vFlat;' : '') + (ppl ? '\nuniform vec4 uPpl[' + NPPL + '];' : '') + ROOM_GLSL + (ppl ? PPL_GLSL : ''))
+      .replace('#include <lights_fragment_begin>', LIGHTS_IN)
+      .replace('#include <color_fragment>', '#include <color_fragment>\nfloat pool = 0.0;\nfloat shade = roomShade(pool);' + (ppl ? '\nshade *= 1.0 - .32 * pplShade() * step(.6, normalize(vNrm).y);' : '') + (flat ? '\nfloat cutK = step(.25, vFlat), winK = step(.1, vFlat) * (1.0 - cutK);\nshade = mix(shade, 1.0, cutK);\npool *= (1.0 - cutK) * (1.0 - winK);\ndiffuseColor.rgb = mix(diffuseColor.rgb, vec3(.12, .15, .26), winK * smoothstep(.25, 1.0, uGlow / 2.3));' : '') + '\ndiffuseColor.rgb *= shade;')
       // 淡い切り口(cutK)は中の自分の光を受けない: 外の殻の切り口と同じ「普通に光を受ける面」にして、境目を見せない
-      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * (uSelf' + (flat ? ' * (1.0 - cutK)' : '') + ' + uLamp.rgb * (uLamp.a * pool))' + (glow ? ' + (mix(vec3(1.0, .8, .56), diffuseColor.rgb, .45) * max(vGlow, 0.0) + vec3(.62, .74, 1.0) * max(-vGlow, 0.0)) * uGlow' : '') + ';');
+      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * (uSelf' + (flat ? ' * (1.0 - cutK)' : '') + ' + uLamp.rgb * (uLamp.a * pool))' + (glow ? ' + (mix(vec3(1.0, .8, .56), diffuseColor.rgb, .45) * max(vGlow, 0.0) + vec3(.62, .74, 1.0) * max(-vGlow, 0.0)) * uGlow' : '') + ';' + (flat ? '\ntotalEmissiveRadiance += vec3(.03, .04, .085) * winK * smoothstep(.25, 1.0, uGlow / 2.3);' : ''));
     if (flat) sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', 'outgoingLight = mix(outgoingLight, diffuseColor.rgb, step(.75, vFlat));\n#include <opaque_fragment>');
   };
   m.customProgramCacheKey = () => 'hiraku-in2-' + (vc ? 'v' : 'i') + (glow ? 'g' : '') + (flat ? 'f' : '') + (ppl ? 'p' : '');
@@ -360,7 +382,7 @@ export function buildInterior(kind, box, ctx = {}) {
   const u = makeUniforms();
   const E = {
     kind, box, P, low, r: rng(kind.length * 131 + 7),
-    S: new Batch(), H: new Batch(), SC: new Batch(), HL: new Batch(), people: [], stations: [], rings: [], extra: {}, rugs: [], fc: [], movers: [],
+    S: new Batch(), H: new Batch(), SC: new Batch(), HL: new Batch(), people: [], stations: [], rings: [], extra: {}, rugs: [], fc: [], holders: [],
     noContact: kind === 'park',            // 公園の芝には床の陰を置かない(日の影に任せる)
     limbs: ctx.limbs !== false,
     floors: Math.max(1, box.floors | 0), fh: box.floors ? box.h / Math.max(1, box.floors | 0) : 0,
@@ -386,6 +408,7 @@ export function buildInterior(kind, box, ctx = {}) {
     const hx = box.w / 2 - .049, zb = -box.d / 2 + .049, zf = E.zf;
     u.uRoom.value.set(hx, zb, zf, E.fh); u.uRoom2.value.set(0, 0, E.lamps.sp, E.lamps.z); u.uRoom3.value.set(E.lamps.off, 0, 0, 0);
   }
+  u.uRoom3.value.y = E.floors > 1 ? E.fy(E.floors - 1) - .01 : 99;   // 最上階の床の高さ(1階だけの建物は、ひらいた建物の灯りが届くので足さない)
 
   const group = new THREE.Group(); group.name = 'interior-' + kind;
   const staticMat = inMat(u, { glow: true, flat: true, ppl: true });
@@ -431,6 +454,7 @@ export function buildInterior(kind, box, ctx = {}) {
 
   /* ---- 道具の物: 持ち上げと明るさ(頂点を書き換える。物はどれも小さいので軽い) ---- */
   const hBase = hGeo ? sGeo.attributes.position.array.slice(hOff * 3, (hOff + hN) * 3) : null, hCol = hGeo ? sGeo.attributes.color.array.slice(hOff * 3, (hOff + hN) * 3) : null;
+  const hNrm = hGeo ? sGeo.attributes.normal.array.slice(hOff * 3, (hOff + hN) * 3) : null;
   // 書き換えた範囲だけを送る
   const touch = (attr, v0, v1) => { attr.addUpdateRange(v0 * attr.itemSize, (v1 - v0) * attr.itemSize); attr.needsUpdate = true; };
   const scBase = scGeo ? scGeo.attributes.position.array.slice() : null;
@@ -518,19 +542,26 @@ export function buildInterior(kind, box, ctx = {}) {
       hlGeo.attributes.position.needsUpdate = true; hlGeo.attributes.color.needsUpdate = true;
     }
     if (cap) moveCapsule(t);
-    // 歩く人が持つ物(人の位置と向きに合わせて置き直す)
-    if (hGeo) for (const m of E.movers) {
-      const p = m.p, a = p.wry ?? p.ry, c = Math.cos(a), sn = Math.sin(a), bx2 = p.wx ?? p.x, bz2 = p.wz ?? p.z, by2 = p.wb || 0, Pp = sGeo.attributes.position.array;
-      for (let v = m.v[0]; v < m.v[1]; v++) { const o = (v + hOff) * 3, b = v * 3, lx = hBase[b], lz = hBase[b + 2]; Pp[o] = bx2 + lx * c + lz * sn; Pp[o + 1] = hBase[b + 1] + by2; Pp[o + 2] = bz2 - lx * sn + lz * c; }
-      touch(sGeo.attributes.position, m.v[0] + hOff, m.v[1] + hOff);
+    // 手に持つ物(そのときの手の位置と体の向きに置き直す。向きに合わせて面の向きも回す。見えない人の物は隠す)
+    if (hGeo) for (const m of E.holders) {
+      const p = m.p, Pp = sGeo.attributes.position.array, Nn = sGeo.attributes.normal.array, hide = (mode === 'night' && !p.night) || (mode !== 'night' && !p.day);
+      const q = poseOf(p, t), at = m.both ? handOf(p, 1, t).add(handOf(p, -1, t)).multiplyScalar(.5) : handOf(p, -1, t);
+      const a = q.ry + q.yawO, c = Math.cos(a), sn = Math.sin(a), y0 = hide ? -10 : at.y;
+      for (let v = m.v[0]; v < m.v[1]; v++) {
+        const o = (v + hOff) * 3, b = v * 3, lx = hBase[b], lz = hBase[b + 2], nx = hNrm[b], nz = hNrm[b + 2];
+        Pp[o] = at.x + lx * c + lz * sn; Pp[o + 1] = y0 + hBase[b + 1]; Pp[o + 2] = at.z - lx * sn + lz * c;
+        Nn[o] = nx * c + nz * sn; Nn[o + 2] = -nx * sn + nz * c;
+      }
+      touch(sGeo.attributes.position, m.v[0] + hOff, m.v[1] + hOff); touch(sGeo.attributes.normal, m.v[0] + hOff, m.v[1] + hOff);
     }
   }
   function setNight(k) {
     k = clamp01(k);
-    u.uSelf.value.set(...SELF_DAY.map((v, i) => lerp(v, SELF_NIGHT[i], k)));
+    const v3 = (un, g) => un.value.set(key3(k, g[0][0], g[1][0], g[2][0]), key3(k, g[0][1], g[1][1], g[2][1]), key3(k, g[0][2], g[1][2], g[2][2]));
+    v3(u.uSelf, GRADE.self); v3(u.uDirK, GRADE.dir); v3(u.uPtK, GRADE.pt); v3(u.uAmbK, GRADE.amb);
     u.uGlow.value = lerp(0, 2.3, k);
-    u.uLamp.value.w = lerp(LAMP_DAY, LAMP_NIGHT, k);
-    if (ppl) ppl.uniforms.uSelf.value.set(...PSELF_DAY.map((v, i) => lerp(v, PSELF_NIGHT[i], k)));
+    u.uLamp.value.w = key3(k, ...GRADE.lamp); u.uTop.value = key3(k, ...GRADE.top);
+    if (ppl) v3(ppl.uniforms.uSelf, GRADE.pself);
     if (Math.abs(nightK - k) > 1e-3) { nightK = k; E.stations.forEach(writeStation); }
   }
   setNight(0);
@@ -676,22 +707,18 @@ function handOf(p, side, t = 0) {
   _qA.multiply(_qT.setFromAxisAngle(AXX, -e));
   return el.add(_v2.set(0, -LIMB.fore, 0).applyQuaternion(_qA));
 }
-/* 手に持つ物。両手の間(本・カード)か、左手(カルテ・カップ)に置き、人の向きに合わせる */
+/* 手に持つ物。両手の間(本・カード・運ぶ板)か、左手(カルテ・カップ)に。
+   手を原点・人の向きを 0 とした形で作り、毎フレーム、そのときの手の位置と体の向きに置き直す
+   (話す人の体の揺れや、歩く人についていく。人が帰って見えない時間は、物も隠す) */
 function held(E, p) {
   if (!p.hold) return;
-  const P = E.P, both = p.kind === 'read' || p.carry, q = poseOf(p, 0);
-  const hR = handOf(p, 1), hL = handOf(p, -1), at = both ? hR.clone().add(hL).multiplyScalar(.5) : hL;
-  const moving = p.kind === 'walk';
-  // 歩く人の物は、人の足もとを原点・人の向きを 0 とした座標で作り、毎フレーム人に合わせて置き直す
-  let lx = 0, lz = 0;
-  if (moving) { const dx = at.x - q.x, dz = at.z - q.z, c = Math.cos(q.ry), s2 = Math.sin(q.ry); lx = dx * c - dz * s2; lz = dx * s2 + dz * c; }
-  const B = moving ? E.H : E.S, v0 = B.n, g = moving ? grp(B, 0, at.y - q.bob, 0, 0) : grp(B, at.x, at.y, at.z, q.ry + q.yawO);
-  if (p.hold === 'book') g.box(lx - .026, .012, lz, .05, .005, .064, P.paper, 0, .22).box(lx + .026, .012, lz, .05, .005, .064, P.paper, 0, -.22).box(lx, .006, lz, .1, .006, .068, P.books[(p.li ?? 3) % P.books.length]);
-  else if (p.hold === 'card') g.box(lx, .01, lz, .05, .004, .07, P.paper, -.6);
-  else if (p.hold === 'chart') g.box(lx, -.04, lz + .01, .055, .075, .006, P.woodDark, -.25).box(lx, -.036, lz + .014, .048, .062, .003, P.paper, -.25);
-  else if (p.hold === 'clip') g.box(lx, .0, lz, .07, .006, .09, P.woodDark, -.5).box(lx, .004, lz, .062, .004, .078, P.paper, -.5);
-  else if (p.hold === 'cup') g.cyl(lx, -.006, lz, .013, .024, P.trim).cyl(lx, .017, lz, .011, .002, '#6B4A35');
-  if (moving) E.movers.push({ p, v: [v0, B.n] });
+  const P = E.P, B = E.H, v0 = B.n, g = grp(B, 0, 0, 0, 0);
+  if (p.hold === 'book') g.box(-.026, .012, 0, .05, .005, .064, P.paper, 0, .22).box(.026, .012, 0, .05, .005, .064, P.paper, 0, -.22).box(0, .006, 0, .1, .006, .068, P.books[3 % P.books.length]);
+  else if (p.hold === 'card') g.box(0, .01, 0, .05, .004, .07, P.paper, -.6);
+  else if (p.hold === 'chart') g.box(0, -.04, .01, .055, .075, .006, P.woodDark, -.25).box(0, -.036, .014, .048, .062, .003, P.paper, -.25);
+  else if (p.hold === 'clip') g.box(0, 0, 0, .07, .006, .09, P.woodDark, -.5).box(0, .004, 0, .062, .004, .078, P.paper, -.5);
+  else if (p.hold === 'cup') g.cyl(0, -.006, 0, .013, .024, P.trim).cyl(0, .017, 0, .011, .002, '#6B4A35');
+  E.holders.push({ p, both: p.kind === 'read' || !!p.carry, v: [v0, B.n] });
 }
 /* 手に持つ物を、すべての人に(話す組の向きが決まったあとで)置く */
 function heldAll(E) { for (const p of E.people) held(E, p); }
@@ -814,7 +841,7 @@ function pendants(E, yc) {
 function backWindow(E, x, y, w, h, zb) {
   const S = E.S, P = E.P;
   bb(S, x - w / 2 - .02, x + w / 2 + .02, y - .02, y + h + .02, zb, zb + .012, P.trim);
-  bb(S, x - w / 2, x + w / 2, y, y + h, zb + .006, zb + .016, mix(P.glass, '#DDEBF2', .45));
+  bb(S, x - w / 2, x + w / 2, y, y + h, zb + .006, zb + .016, mix(P.glass, '#DDEBF2', .45), 0, PANE);
   bb(S, x - .006, x + .006, y, y + h, zb + .016, zb + .02, P.trim);
 }
 
@@ -864,7 +891,7 @@ function station(E, id, o) {
   }
   S.h = [h0, E.H.n];
   // 夜、画面の光が机に落ちる所(昼は面の色のままで見えない)。o.spill: [x, y, z, 幅, 奥行き, 面の色](物の座標)
-  if (o.spill) { const [lx2, ly2, lz2, sw2, sd2, sc2] = o.spill, cs2 = Math.cos(base.ry), sn2 = Math.sin(base.ry), q2 = base.s; E.S.add(spillGeo(sw2 * q2, sd2 * q2, .05), mtx(base.x + (lx2 * cs2 + lz2 * sn2) * q2, base.y + ly2 * q2 + .0016, base.z + (-lx2 * sn2 + lz2 * cs2) * q2, 1, 1, 1, base.ry), sc2, -.3); }
+  if (o.spill) { const [lx2, ly2, lz2, sw2, sd2, sc2] = o.spill, cs2 = Math.cos(base.ry), sn2 = Math.sin(base.ry), q2 = base.s; E.S.add(spillGeo(sw2 * q2, sd2 * q2, .05), mtx(base.x + (lx2 * cs2 + lz2 * sn2) * q2, base.y + ly2 * q2 + .0016, base.z + (-lx2 * sn2 + lz2 * cs2) * q2, 1, 1, 1, base.ry), sc2, -.17); }
   // 画面: 物の座標(sx, sy, sz)に、幅 sw・高さ sh、向き(ry と、上向きの傾き tilt。0=正面を向く、π/2=上を向く)
   const q = base.s, sc = Object.assign({}, o.screen, { x: o.screen.x * q, y: o.screen.y * q, z: o.screen.z * q, w: o.screen.w * q, h: o.screen.h * q });
   const cs = Math.cos(base.ry), sn = Math.sin(base.ry);
@@ -1018,7 +1045,7 @@ const BUILD = {
       // 窓(奥の壁に2つ)
       for (const a of [-.55, .55]) {
         const ax = Math.sin(a) * (R - .01), az = -Math.cos(a) * (R - .01);
-        grp(S, ax, y + .5 * k, az, -a).box(0, 0, 0, .16 * k, .28 * k, .012, P.trim).box(0, .02, .006, .12 * k, .24 * k, .01, mix(P.glass, '#DDEBF2', .45));
+        grp(S, ax, y + .5 * k, az, -a).box(0, 0, 0, .16 * k, .28 * k, .012, P.trim).box(0, .02, .006, .12 * k, .24 * k, .01, mix(P.glass, '#DDEBF2', .45), 0, 0, 0, PANE);
       }
     }
     // らせん階段(壁に沿って、各階から上の階へ)

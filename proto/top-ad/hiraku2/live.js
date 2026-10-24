@@ -599,14 +599,15 @@ export async function live(o) {
     signMats();
     U.uTime.value = t;
     // 昼・夕・夜
-    if (tod.moving) { const g = applyTod(L, renderer, tod.x); for (const id in interiors) interiors[id] && interiors[id].setNight && interiors[id].setNight(g); }
+    if (tod.moving) { const g = applyTod(L, renderer, tod.x); for (const id in interiors) interiors[id] && interiors[id].setNight && interiors[id].setNight(g); o.onTod && o.onTod(tod.x); }   // ページの空も、同じ道筋(夕方を通る)・同じ速さで
     // 中の灯り
     if (A.id || Bk.id) {
       const id = A.id || Bk.id; if (id !== 'plaza') { const pl = placeOf(S, id), il = inLightOf(id); L.pIn.position.copy(il.p).applyAxisAngle(Y, pl.yaw).add(pl.p); L.pIn.distance = il.dist; inK = il.k; }
     }
     L.pIn.intensity = Math.max(0, inLight.x) * (1.4 + U.uNight.value * 2) * inK;
     L.pH.intensity = (L.pH.userData.base || 0) * ((A.id || Bk.id) === 'plaza' ? 1 : 1 - 1.4 * U.uDim.value);   // 建物をひらいている間は、広場の灯りを半分に(寄ったとき白く飛ばない)
-    // 町の暮らし
+    // 町の暮らし(止めているあいだに時刻を変えたときも、空・雲・もやの色だけは合わせる)
+    if (paused && tod.moving) placeSky(S.dyn, t, U.uNight.value);
     if (!paused) {
       const blockedAng = A.id && A.kind === 'hinge' && A.id !== 'hospital' ? deg(LAYOUT[A.id].a) : null;
       const blocked = A.id && A.kind === 'hinge' ? footprint(A) : null;

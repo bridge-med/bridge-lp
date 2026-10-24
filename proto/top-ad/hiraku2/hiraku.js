@@ -31,7 +31,14 @@ function boot() {
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 使えなくても壊れない */ } } };
   let nudgeOn = !store.get('bridge-hiraku-touched') && Q.get('nudge') !== '0';   // 最初の訪問だけ
 
-  /* ---------- 昼・夕・夜(ボタンで 昼 → 夕 → 夜 → 昼) ---------- */
+  /* ---------- 昼・夕・夜(ボタンで 昼 → 夕 → 夜 → 昼) ----------
+     立体が動いているときは、ページの空(3枚の層)の濃さを立体の時刻(0 昼・1 夕・2 夜)から決める。夜 → 昼も夕方を通り、立体と同じ速さで移る */
+  const skyL = [$('.sky .s-day'), $('.sky .s-dusk'), $('.sky .s-night')];
+  function skyMix(x) {
+    x = Math.max(0, Math.min(2, x));
+    const op = [Math.max(0, 1 - x), Math.max(0, 1 - Math.abs(x - 1)), Math.max(0, x - 1)];
+    skyL.forEach((el, i) => { if (el) el.style.opacity = op[i].toFixed(3); });
+  }
   const btnTod = $('#btnTod'), btnPause = $('#btnPause');
   const todLabel = () => ({ day: '夕方にする', dusk: '夜にする', night: '昼にする' })[R.dataset.tod];
   btnTod.setAttribute('aria-label', todLabel());
@@ -311,6 +318,7 @@ function boot() {
         onHover(id) { hoverId = id; if (openId) return; if (id) { firstTouchSoft(); showTag(id, true, true); } else showTag(null); },
         onPress(id) { firstTouch(); ringAt(id); },
         onQuality(q) { store.set('bridge-hiraku-q', q); },
+        onTod(x) { R.classList.add('skylive'); skyMix(x); },
         onPick(id) { firstTouch(); if (id === openId) { if (findNow()) { clearFind(); applyFind(); } return; } openB(id, hits.get(id)); },
         onEmpty() { if (!openId) return; if (findNow()) { clearFind(); applyFind(); } else closeB(false); },   // 寄っているときは、まず建物ぜんたいに戻る
         onStation(sid, how) {

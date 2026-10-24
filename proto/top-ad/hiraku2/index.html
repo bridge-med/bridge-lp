@@ -30,7 +30,7 @@
   --jp:'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif;
   --en:'Barlow','Helvetica Neue',Arial,sans-serif;
   --ease:cubic-bezier(.2,.8,.2,1);
-  --cl:10.0;--cr:82.3;--ct:5.7;--cb:66.9;
+  --cl:11.9;--cr:82.2;--ct:6.7;--cb:66.2;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--paper)}
@@ -76,6 +76,7 @@ html[data-tod="night"] .hero::after{background:linear-gradient(180deg,rgba(13,21
 .sky .s-night{background:radial-gradient(70% 50% at 66% 30%,rgba(108,124,214,.3),rgba(108,124,214,0) 70%),linear-gradient(180deg,var(--sky-n1) 0%,var(--sky-n2) 55%,var(--sky-n3) 100%)}
 .stars{position:absolute;inset:0;background-image:radial-gradient(1.4px 1.4px at 12% 18%,#fff 98%,transparent),radial-gradient(1px 1px at 28% 32%,#fff 98%,transparent),radial-gradient(1.4px 1.4px at 44% 12%,#fff 98%,transparent),radial-gradient(1px 1px at 62% 24%,#fff 98%,transparent),radial-gradient(1.4px 1.4px at 81% 10%,#fff 98%,transparent),radial-gradient(1px 1px at 90% 36%,#fff 98%,transparent),radial-gradient(1px 1px at 55% 6%,#fff 98%,transparent),radial-gradient(1px 1px at 7% 44%,#fff 98%,transparent),radial-gradient(1.4px 1.4px at 94% 58%,#fff 98%,transparent);opacity:.8}
 html[data-tod="day"] .s-day,html[data-tod="dusk"] .s-dusk,html[data-tod="night"] .s-night,html:not([data-tod]) .s-day{opacity:1}
+html.skylive .sky i{transition:none}   /* 立体が動いているときは、空の濃さを立体の時刻から決める(hiraku.js の skyMix) */
 html:not(.js) #poster{display:none}
 
 #world{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .5s var(--ease);touch-action:pan-y;-webkit-tap-highlight-color:transparent}
@@ -351,14 +352,14 @@ html.capture body > *:not(#cap){display:none!important}
     <p class="meta">10の質問・約3分・登録不要</p>
   </div>
   <nav class="hits" id="hits" aria-label="町の建物">
-    <a class="hit" href="#g-hospital" data-id="hospital" data-tag="49.05,23.8" data-box="37.25,20.3,65.5,47.27" data-nudge="54.22,28.77" aria-label="病院 — 明日の業務を楽にする"></a>
-    <a class="hit" href="#g-observatory" data-id="observatory" data-tag="62.51,5.83" data-box="54.83,3.19,70.2,40.09" aria-label="展望台 — キャリア・経験を整理する"></a>
-    <a class="hit" href="#g-clinic" data-id="clinic" data-tag="70.97,52.89" data-box="62.02,48.98,80.69,68.1" aria-label="クリニック — 医療経営を学ぶ"></a>
-    <a class="hit" href="#g-office" data-id="office" data-tag="74.44,21.16" data-box="66.31,17.29,82.57,44.65" aria-label="事務所 — 経営・管理の実務に使う"></a>
-    <a class="hit" href="#g-library" data-id="library" data-tag="20.66,33.27" data-box="7.51,28.5,30.42,56.18" aria-label="図書館 — 学習を続ける"></a>
-    <a class="hit" href="#g-park" data-id="park" data-tag="76.42,47.46" data-box="66.72,40.65,86.11,59.18" aria-label="公園 — 気軽に試す・作品を楽しむ"></a>
-    <a class="hit" href="#g-atelier" data-id="atelier" data-tag="26.38,51.15" data-box="19.25,47.66,33.87,66.63" aria-label="アトリエ — 運営者"></a>
-    <a class="hit" href="#g-plaza" data-id="plaza" data-tag="48.02,48.91" data-box="35.88,49.39,60.16,64.76" aria-label="広場 — 正解を与えるのではなく、選択肢を増やす"></a>
+    <a class="hit" href="#g-hospital" data-id="hospital" data-tag="49.93,24.31" data-box="38.46,20.91,65.92,47.13" data-nudge="54.95,29.14" aria-label="病院 — 明日の業務を楽にする"></a>
+    <a class="hit" href="#g-observatory" data-id="observatory" data-tag="63.02,6.84" data-box="55.55,4.28,70.49,40.14" aria-label="展望台 — キャリア・経験を整理する"></a>
+    <a class="hit" href="#g-clinic" data-id="clinic" data-tag="71.24,52.59" data-box="62.54,48.79,80.68,67.37" aria-label="クリニック — 医療経営を学ぶ"></a>
+    <a class="hit" href="#g-office" data-id="office" data-tag="74.61,21.74" data-box="66.71,17.99,82.51,44.58" aria-label="事務所 — 経営・管理の実務に使う"></a>
+    <a class="hit" href="#g-library" data-id="library" data-tag="22.33,33.52" data-box="9.55,28.88,31.82,55.79" aria-label="図書館 — 学習を続ける"></a>
+    <a class="hit" href="#g-park" data-id="park" data-tag="76.54,47.31" data-box="67.11,40.69,85.96,58.71" aria-label="公園 — 気軽に試す・作品を楽しむ"></a>
+    <a class="hit" href="#g-atelier" data-id="atelier" data-tag="27.9,50.9" data-box="20.96,47.51,35.17,65.95" aria-label="アトリエ — 運営者"></a>
+    <a class="hit" href="#g-plaza" data-id="plaza" data-tag="47.82,48.39" data-box="36.02,49.19,59.62,64.13" aria-label="広場 — 正解を与えるのではなく、選択肢を増やす"></a>
   </nav>
   <p class="hint" id="hint">建物にふれると、中がひらきます</p>
 </section>
