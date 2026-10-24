@@ -524,7 +524,7 @@ function makeScene(onlyId) {
   world.add(bus); movers.bus = { mesh: bus, a: deg(70), v: .085 };
   // 雲
   for (let i = 0; i < 5; i++) {
-    const c = new THREE.Group(), cm = M(C.cloud, { r: 1, e: '#FFFFFF', ei: .42 });
+    const c = new THREE.Group(), cm = M(C.cloud, { r: 1, e: '#FFFFFF', ei: .42, t: true, o: 1 });
     for (const [x, y, z, s] of [[0, 0, 0, .78], [.72, .08, .12, .6], [-.7, .02, -.08, .56], [.22, .38, .02, .55], [-.25, .3, .2, .45]]) { const s2 = shadow(new THREE.Mesh(new THREE.SphereGeometry(s, 16, 12), cm), true, false); s2.position.set(x, y, z); c.add(s2); }
     c.scale.set(1, .72, .9).multiplyScalar(.9 + r() * .6);
     scene.add(c);
@@ -564,7 +564,7 @@ function applyLight(L, renderer, t) {
   WIN_LIT.color.set('#86A8C3').lerp(new THREE.Color('#6B5A3E'), t);
   for (const m of LAMPS) m.emissiveIntensity = lerp(d.lamp, n.lamp, t);
   for (const p of L.pts) p.intensity = lerp(d.pt, n.pt, t);
-  const cm = M(C.cloud, { r: 1, e: '#FFFFFF', ei: .42 }); cm.color.set('#FFFFFF').lerp(new THREE.Color('#8E97C2'), t); cm.emissiveIntensity = lerp(.42, .04, t);
+  const cm = M(C.cloud, { r: 1, e: '#FFFFFF', ei: .42, t: true, o: 1 }); cm.color.set('#FFFFFF').lerp(new THREE.Color('#7F89BE'), t); cm.emissiveIntensity = lerp(.42, .06, t); cm.opacity = 1 - t; cm.depthWrite = t < .5; for (const c of (L.clouds || [])) c.g.visible = t < .98;
 }
 
 /* ================================================================
@@ -686,14 +686,14 @@ function live() {
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const { scene, world, spots, movers } = makeScene(null);
-  const L = makeLights(scene, big);
+  const L = makeLights(scene, big); L.clouds = movers.clouds;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 200);
   aimCamera(camera, new THREE.Vector3(0, 0, 0));
   const SAMPLE = samplePoints();
   const pinOf = id => pinEls.find(p => p.dataset.id === id);
 
   let W = 1, H = 1, base = null;
-  let night = 0, nightTo = 0, paused = false, running = true, visible = true;
+  let night = 0, nightTo = 0, nightFrom = 0, nightT0 = 0, paused = false, running = true, visible = true;
   let rot = 0, rotV = 0, t = 0, last = performance.now();
   let focus = null; // { id, k(0..1), dir(+1/-1), from, to }
   let hover = null, dirty = true;
@@ -721,8 +721,8 @@ function live() {
     const s = spots[id], sp = W < 900;
     const a = s.L.a, rTarget = deg(a - 45);
     const p = new THREE.Vector3(Math.cos(deg(45)) * s.L.r, s.L.id === 'hospital' ? 1.9 : Math.min(s.L.pinY * .5, 2.2), Math.sin(deg(45)) * s.L.r).applyMatrix4(camera.matrixWorldInverse);
-    const z = sp ? 2.25 : 2.35;
-    const scale = base.s * z, fx = sp ? W * .5 : W * .33, fy = sp ? H * .27 : H * .5;
+    const z = sp ? 2.0 : 1.85;
+    const scale = base.s * z, fx = sp ? W * .5 : W * .36, fy = sp ? H * .2 : H * .52;
     const left = p.x - fx / scale, top = p.y + fy / scale;
     return { rot: rTarget, left, right: left + W / scale, top, bottom: top - H / scale };
   }
@@ -733,14 +733,14 @@ function live() {
     opener = from || pinOf(id);
     fillCard(id);
     const to = focusFrame(id); to.rot = nearestRot(rot, to.rot);
-    focus = { id, k: 0, dir: 1, from: { rot, left: camera.left, right: camera.right, top: camera.top, bottom: camera.bottom }, to };
+    focus = { id, k: 0, t0: performance.now(), dir: 1, from: { rot, left: camera.left, right: camera.right, top: camera.top, bottom: camera.bottom }, to };
     rotV = 0; ROOT.classList.add('focused'); pinEls.forEach(p => p.classList.toggle('is-on', p.dataset.id === id));
     dialog.showModal(); dialog.querySelector('.card-h').focus({ preventScroll: true });
     kick();
   }
   function closeSpot() {
     if (!focus) return;
-    focus = { id: focus.id, k: 0, dir: -1, from: { rot, left: camera.left, right: camera.right, top: camera.top, bottom: camera.bottom }, to: { rot, left: base.left, right: base.right, top: base.top, bottom: base.bottom } };
+    focus = { id: focus.id, k: 0, t0: performance.now(), dir: -1, from: { rot, left: camera.left, right: camera.right, top: camera.top, bottom: camera.bottom }, to: { rot, left: base.left, right: base.right, top: base.top, bottom: base.bottom } };
     ROOT.classList.remove('focused'); pinEls.forEach(p => p.classList.remove('is-on'));
     kick();
   }
@@ -782,9 +782,9 @@ function live() {
   btnL.addEventListener('click', () => { hideHint(); rotV = 0; spinTo(rot - deg(45)); });
   btnR.addEventListener('click', () => { hideHint(); rotV = 0; spinTo(rot + deg(45)); });
   let spin = null;
-  function spinTo(r) { spin = { from: rot, to: r, k: 0 }; kick(); }
+  function spinTo(r) { spin = { from: rot, to: r, k: 0, t0: performance.now() }; kick(); }
 
-  btnNight.addEventListener('click', () => { nightTo = nightTo ? 0 : 1; btnNight.setAttribute('aria-pressed', String(!!nightTo)); ROOT.classList.toggle('night', !!nightTo); kick(); });
+  btnNight.addEventListener('click', () => { nightFrom = night; nightT0 = performance.now(); nightTo = nightTo ? 0 : 1; btnNight.setAttribute('aria-pressed', String(!!nightTo)); ROOT.classList.toggle('night', !!nightTo); kick(); });
   btnPause.addEventListener('click', () => { paused = !paused; btnPause.setAttribute('aria-pressed', String(paused)); btnPause.setAttribute('aria-label', paused ? '町の動きを再生する' : '町の動きを止める'); kick(); });
 
   new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible) kick(); }, { threshold: 0 }).observe(stage);
@@ -812,10 +812,10 @@ function live() {
     if (!paused) { t += dt; active = true; }
     // 回す(慣性)
     if (!down && Math.abs(rotV) > .0005 && !focus) { rot += rotV * dt; rotV *= Math.pow(.04, dt); active = true; }
-    if (spin) { spin.k = Math.min(1, spin.k + dt / .7); rot = lerp(spin.from, spin.to, easeIO(spin.k)); active = true; if (spin.k >= 1) spin = null; }
+    if (spin) { spin.k = clamp01((performance.now() - spin.t0) / 700); rot = lerp(spin.from, spin.to, easeIO(spin.k)); active = true; if (spin.k >= 1) spin = null; }
     // 寄る・戻る
     if (focus) {
-      focus.k = Math.min(1, focus.k + dt / (focus.dir > 0 ? .95 : .8));
+      focus.k = clamp01((now - focus.t0) / (focus.dir > 0 ? 950 : 800));
       const e = easeIO(focus.k), f = focus.from, to = focus.to;
       rot = lerp(f.rot, to.rot, e);
       camera.left = lerp(f.left, to.left, e); camera.right = lerp(f.right, to.right, e); camera.top = lerp(f.top, to.top, e); camera.bottom = lerp(f.bottom, to.bottom, e);
@@ -823,7 +823,7 @@ function live() {
       if (focus.k >= 1 && focus.dir < 0) focus = null;
     }
     // 昼夜
-    if (Math.abs(night - nightTo) > .001) { night += Math.sign(nightTo - night) * Math.min(Math.abs(nightTo - night), dt / 1.3); applyLight(L, renderer, easeIO(night)); active = true; }
+    if (Math.abs(night - nightTo) > .001) { const k = clamp01((now - nightT0) / 1300); night = lerp(nightFrom, nightTo, k); applyLight(L, renderer, easeIO(night)); active = true; }
     world.rotation.y = rot;
     // 選んだ建物・指した建物を少し持ち上げる
     for (const id in spots) {

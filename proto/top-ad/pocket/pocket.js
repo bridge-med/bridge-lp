@@ -153,15 +153,15 @@
 
   /* ---------- BRIDGE の道具: 手に取る ---------- */
   var TOOLS = {
-    compass: { no: '01', name: 'BRIDGE Compass', desc: '10の質問で、これまでの経験を別の言葉に翻訳する', meta: '10の質問・約3分・登録不要',
+    compass: { cat: 'キャリア・経験を整理する', name: 'BRIDGE Compass', desc: '10の質問で、これまでの経験を別の言葉に翻訳する', meta: '10の質問・約3分・登録不要',
       note: '画面は、実際の結果画面です(理学療法士で、調整やチームに関わる答えを選んだ一例)。画面を上下に動かせます。', go: '質問に答える' },
-    town: { no: '02', name: 'クリニックタウン3D', desc: 'クリニック経営を、1日ずつ動かして学ぶ', meta: 'ブラウザで遊べる経営ゲーム・いまの版は v99.3',
+    town: { cat: '医療経営を学ぶ', name: 'クリニックタウン3D', desc: 'クリニック経営を、1日ずつ動かして学ぶ', meta: 'ブラウザで遊べる経営ゲーム・いまの版は v99.3',
       note: '画面は、実際のゲーム画面です(院内を歩いて見る視察の画面と、整形外科で始めた1日目の経営の画面)。', go: 'ゲームを始める', alt: '経営の画面を見る', altBack: '視察の画面にもどす' },
-    keiji: { no: '04', name: '掲示じたく', desc: '院内掲示を、選んで埋めるだけ', meta: '受付・事務の方に・A4の掲示とHP・SNS用の文面',
+    keiji: { cat: '明日の業務を楽にする', name: '掲示じたく', desc: '院内掲示を、選んで埋めるだけ', meta: '受付・事務の方に・A4の掲示とHP・SNS用の文面',
       note: '紙は、掲示じたくの「臨時休診」の型でつくった例です。日付と院名は空欄のままです。', go: '掲示をつくる' },
-    iikae: { no: '05', name: '現場のことば 言いかえ帳', desc: '現場のことばを、履歴書で通じる言葉に', meta: '54の現場のことば・登録不要',
+    iikae: { cat: 'キャリア・経験を整理する', name: '現場のことば 言いかえ帳', desc: '現場のことばを、履歴書で通じる言葉に', meta: '54の現場のことば・登録不要',
       note: 'カードの言葉は、言いかえ帳に載っている対訳です。', go: '言いかえ帳を開く', alt: 'カードをめくる' },
-    tana: { no: '03', name: '経験の棚卸し', desc: '18の質問で、職務経歴書のたねをつくる', meta: '18の質問・約15分・登録不要',
+    tana: { cat: 'キャリア・経験を整理する', name: '経験の棚卸し', desc: '18の質問で、職務経歴書のたねをつくる', meta: '18の質問・約15分・登録不要',
       note: 'ノートの問いは、経験の棚卸しの実際の質問です(18問のうち、はじめの3問)。', go: '質問に答える' }
   };
   var pick = document.getElementById('pick'), scrim = document.getElementById('scrim');
@@ -232,7 +232,7 @@
     if (!info) return;
     current = el; lastFocus = el;
     /* 札の中身 */
-    pkNo.textContent = 'No. ' + info.no;
+    pkNo.textContent = info.cat;
     pkName.textContent = info.name;
     pkDesc.textContent = info.desc;
     pkMeta.textContent = info.meta;

@@ -78,7 +78,7 @@ html.live #town{display:block}
 .still{position:absolute;right:1.5%;top:9%;width:min(63%,calc((100% - 9%) * 1600 / 1300));aspect-ratio:1600/1300}
 .still img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity 1.2s var(--ease)}
 .still .night-img{opacity:0} html.night .still .night-img{opacity:1} html.night .still .day-img{opacity:0}
-@media (max-width:899px){.still{left:0;right:0;width:100%;top:clamp(178px,25%,240px);aspect-ratio:auto;bottom:clamp(150px,20%,190px)}}
+@media (max-width:899px){.still{left:-7%;right:auto;width:114%;top:clamp(232px,31%,300px);aspect-ratio:1600/1300}}
 html.live .still{inset:0;width:auto;top:0;aspect-ratio:auto}
 html.live .still img{display:none}
 
@@ -119,7 +119,11 @@ h1 .br{display:block}
 .btn-sub:hover{transform:translateY(-2px)}
 .btn .arr{transition:transform .3s var(--ease)} .btn:hover .arr{transform:translateX(3px)}
 .meta{width:100%;font-size:12.5px;color:var(--ink-3);letter-spacing:.06em}
+.copy,.eyebrow,h1,.lead,.meta,.hd .logo,.nav a{transition:color 1.3s var(--ease),opacity .45s var(--ease),transform .45s var(--ease)}
 html.night .copy,html.night .eyebrow,html.night h1,html.night .lead,html.night .meta{color:#F4EFE6}
+html.focused .copy,html.focused .tools,html.focused .hint,html.focused .sp-cta,html.focused .hd{opacity:0;pointer-events:none;transform:translateY(-8px)}
+.hd{transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.tools,.hint,.sp-cta{transition:opacity .45s var(--ease),transform .45s var(--ease)}
 html.night .hd .logo,html.night .nav a:not(.talk){color:#F4EFE6}
 html.night .logo .l-navy{stroke:#F4EFE6}
 html.night .nav a:not(.talk):hover{background:rgba(255,255,255,.12)}
@@ -172,7 +176,8 @@ h2{font-size:clamp(28px,3.6vw,46px);line-height:1.3;font-weight:900;letter-spaci
 .sec-head p.note{font-size:15px;color:var(--ink-2);max-width:30em}
 .blds{max-width:1200px;margin:clamp(36px,5vw,56px) auto 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
 .bld{position:relative;display:flex;flex-direction:column;background:var(--paper);border-radius:30px;padding:16px 22px 22px;box-shadow:0 1px 0 #fff inset,0 18px 40px -26px rgba(31,40,64,.45),0 2px 8px rgba(31,40,64,.05);overflow:hidden}
-.bld::before{content:'';position:absolute;left:0;right:0;top:0;height:198px;background:radial-gradient(70% 80% at 50% 92%,var(--tint) 0,var(--tint) 46%,rgba(255,255,255,0) 72%);opacity:.95}
+.bld > *{position:relative;z-index:1}
+.bld::before{content:'';position:absolute;z-index:0;left:0;right:0;top:0;height:198px;background:radial-gradient(70% 80% at 50% 92%,var(--tint) 0,var(--tint) 46%,rgba(255,255,255,0) 72%);opacity:.95}
 .bld-fig{position:relative;height:190px;margin:0 -10px 6px}
 .bld-fig img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 10px 12px rgba(31,40,64,.12));transition:transform .5s var(--ease)}
 .bld:hover .bld-fig img{transform:translateY(-4px) scale(1.03)}
@@ -198,6 +203,8 @@ h2{font-size:clamp(28px,3.6vw,46px);line-height:1.3;font-weight:900;letter-spaci
   .blds{grid-template-columns:1fr;gap:16px}
   .bld.wide{grid-column:auto;grid-template-columns:116px 1fr}
   .bld.wide .bld-name{font-size:21px}
+  .bld.wide .bld-cat{margin-top:0}
+  .bld.wide::before{inset:auto;left:0;top:0;height:100%;width:140px;background:radial-gradient(80% 60% at 46% 50%,var(--tint) 0,var(--tint) 40%,rgba(255,255,255,0) 72%)}
   .bld{display:grid;grid-template-columns:116px 1fr;column-gap:14px;padding:16px 18px 18px;border-radius:26px}
   .bld::before{height:100%;width:140px;background:radial-gradient(80% 60% at 46% 50%,var(--tint) 0,var(--tint) 40%,rgba(255,255,255,0) 72%)}
   .bld-fig,.bld.wide .bld-fig{grid-row:1 / span 6;height:118px;margin:0;align-self:start}
@@ -216,7 +223,7 @@ h2{font-size:clamp(28px,3.6vw,46px);line-height:1.3;font-weight:900;letter-spaci
 .maker .links{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px}
 .btn.bld-go{margin:0;padding:0 26px;color:#fff;font-size:15px}
 .btn.bld-go .arr{display:inline;width:auto;height:auto;background:none}
-@media (max-width:760px){.maker-in{grid-template-columns:1fr}.maker-fig{max-width:300px;width:78%;margin:0 auto}}
+@media (max-width:760px){.maker-in{grid-template-columns:1fr}.maker-fig{max-width:250px;width:68%;margin:0 auto}}
 
 /* ===== 閉じ(夜) ===== */
 .close{position:relative;overflow:hidden;color:#F4EFE6;padding:clamp(72px,10vw,128px) var(--pad) clamp(56px,8vw,96px);background:
@@ -301,6 +308,17 @@ html.capture #town{display:block;position:static}
   <div class="sky sky-day" aria-hidden="true"></div>
   <div class="sky sky-night" aria-hidden="true"><div class="stars"></div><div class="moon"></div></div>
 
+  <div class="copy">
+    <p class="eyebrow">医療職のための、道具と経営ゲーム</p>
+    <h1 id="h1"><span class="br">病院の外にも、</span><span class="br">町がある</span></h1>
+    <p class="lead">建物を押すと、中にある道具が見られます。</p>
+    <div class="ctas">
+      <a class="btn btn-main" href="../../../compass/index.html">BRIDGE Compass をはじめる <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn btn-sub" href="#guide">町の案内</a>
+      <p class="meta">BRIDGE Compass は 10の質問・約3分・登録不要</p>
+    </div>
+  </div>
+
   <div class="stage" id="stage">
     <canvas id="town" aria-hidden="true"></canvas>
     <div class="still" id="still">
@@ -317,17 +335,6 @@ html.capture #town{display:block;position:static}
         <button class="pin" type="button" data-id="library" data-pos="35.09,26.69" aria-haspopup="dialog" aria-label="図書館(学習を続ける道具)を見る"><span class="pin-in" style="--c:#A9845A"><span class="pin-ic"><svg viewBox="0 0 24 24"><path d="M3.5 6.5C6 5 9 5 12 6.8 15 5 18 5 20.5 6.5V19c-2.5-1.4-5.5-1.4-8.5.4-3-1.8-6-1.8-8.5-.4z"/><path d="M12 6.8v12.6"/></svg></span>図書館<span class="pin-sub">学習</span></span></button>
         <button class="pin" type="button" data-id="hospital" data-pos="50,31.16" aria-haspopup="dialog" aria-label="病院(いまの職場。窓あかり)を見る"><span class="pin-in" style="--c:#4C8FB6"><span class="pin-ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 8v8M15 8v8M9 12h6"/></svg></span>病院<span class="pin-sub">いまの職場</span></span></button>
       </div>
-    </div>
-  </div>
-
-  <div class="copy">
-    <p class="eyebrow">医療職のための、道具と経営ゲーム</p>
-    <h1 id="h1"><span class="br">病院の外にも、</span><span class="br">町がある</span></h1>
-    <p class="lead">建物を押すと、中にある道具が見られます。</p>
-    <div class="ctas">
-      <a class="btn btn-main" href="../../../compass/index.html">BRIDGE Compass をはじめる <span class="arr" aria-hidden="true">→</span></a>
-      <a class="btn btn-sub" href="#guide">町の案内</a>
-      <p class="meta">BRIDGE Compass は 10の質問・約3分・登録不要</p>
     </div>
   </div>
 
