@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>BRIDGE トップ試作</title>
+<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<!-- 試作の切り替え(読み込みで一度だけ決める。ちらつかせないため head で同期実行)
+     ?plan=1|2  案1「言葉が分かれる」/ 案2「実物が動く」(既定は 1。JS なしも 1)。#p1 / #p2 でも同じ
+     &still=1   動きを減らす設定・JS なし・再訪で見える完成形を、OS の設定を変えずに見る(#still でも同じ)。左下の切り替えは読み込み直さずに入れ替える
+     &bare=1    左下の切り替えを隠す
+     動かすのは、still でなく・動きを減らす設定でなく・データセーバーでないときだけ(wb-anim)。本番は同じタブでの再訪も止めるが、試作は比べるために毎回動かす -->
+<script>(function(){var r=document.documentElement,q=new URLSearchParams(location.search),h=location.hash.slice(1),c=r.classList;c.add(q.get('plan')==='2'||h==='p2'?'p2':'p1');if(q.get('still')==='1'||h==='still')c.add('still');if(q.get('bare')==='1')c.add('bare');var save=navigator.connection&&navigator.connection.saveData;window.WB_OK=!save&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);if(!c.contains('still')&&window.WB_OK)c.add('wb-anim')})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/bridge.css">
+<style>
+/* ================================================================
+   トップ試作(2026-10-21 社長決裁: 案1と案2を試作で比べる・並びは守り各節の伝え方を文章から動きへ・筆の線は新しい主役とぶつからない形で)
+   言葉は editor 2026-10-21 の原稿、構図は designer 2026-10-21 の絵コンテ。未結線(noindex・NAV と sitemap の外)
+   範囲: 最初の画面 → 代表作 → 用途 → 本人の言葉 → 次の行動。閉じの帯(.kz)は本番のものを残す前提で、試作には入れていない
+   ================================================================ */
+main{overflow-x:clip}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--pad-x)}
+.p1 .only-2,.p2 .only-1{display:none}
+
+/* ===== 最初の画面(両案に共通の頭) ===== */
+.fv{padding:calc(88px + clamp(8px,3vh,40px)) 0 clamp(40px,7vh,80px)}
+.fv-h{font:900 clamp(20px,2.4vw,30px)/1.5 var(--sans);letter-spacing:.02em;color:var(--ink)}
+.fv-d{margin-top:10px;max-width:30em;font:400 14px/1.85 var(--sans);color:var(--ink-2)}
+.fv-cta{margin-top:26px;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px;min-height:44px;white-space:nowrap}
+.btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn.glass:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.h-meta{font:500 12.5px/1.6 var(--sans);letter-spacing:.04em;color:var(--ink-3)}
+.ex-note{font:500 12px/1.6 var(--sans);letter-spacing:.03em;color:var(--ink-3)}
+.pick{margin-top:14px;align-items:center}
+.pick[hidden]{display:none}
+.pick .tag{font-size:13px;padding:10px 15px}
+.pick .tag[aria-pressed="true"]{cursor:default}
+.pick .tag:focus-visible,.nx:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.nx{min-height:44px;padding:0 4px;font:700 13px/1 var(--sans);color:var(--ink-2);border-bottom:1px solid var(--ink-4);background:none;cursor:pointer}
+.nx:hover{color:var(--ink);border-color:var(--ink)}
+
+/* ===== 案1: 言葉が分かれる(.wb) =====
+   経験の語 → 幹 → 分岐点(砂)→ 枝B が外の言葉の手前で止まる / 開いた枝は真下へ。線は --mark-line の 2px、砂は分岐点の1か所だけ。
+   線の寸法は px で決め打ち(viewBox と表示の大きさを一致させ、歪めない)。既定は完成形で、動くときだけ keyframes の from 側から引く */
+.wb{margin-top:clamp(22px,4vh,40px);--x:6px;--dot:44px;--to:70px;--rh:156px}
+.wb-from{font:700 clamp(22px,6.7vw,26px)/1.35 var(--sans);letter-spacing:.02em;color:var(--ink-2);white-space:nowrap}
+.wb-row{position:relative;height:var(--rh)}
+.wb-l{position:absolute;left:0;top:0;width:40px;height:var(--rh);overflow:visible}
+.wb-l path{fill:none;stroke:var(--mark-line);stroke-width:2;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.wb-dot{position:absolute;left:calc(var(--x) - 4.5px);top:calc(var(--dot) - 4.5px);width:9px;height:9px;border-radius:50%;background:var(--dawn)}
+.wb-to{position:absolute;left:42px;right:0;top:calc(var(--to) - 21px);font:700 30px/1.4 var(--sans);letter-spacing:.01em;color:var(--ink);word-break:auto-phrase}
+@keyframes wb-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes wb-pop{from{transform:scale(0);opacity:0}to{transform:none;opacity:1}}
+@keyframes wb-in{from{opacity:.35}to{opacity:1}}
+html.wb-anim .wb.run .wb-l path{stroke-dasharray:1 1}
+html.wb-anim .wb.run .wb-trunk{animation:wb-draw .3s cubic-bezier(.4,0,.6,1) .15s both}
+html.wb-anim .wb.run .wb-dot{animation:wb-pop .22s var(--ease) .4s both}
+html.wb-anim .wb.run .wb-b{animation:wb-draw .65s var(--ease) .45s both}
+html.wb-anim .wb.run .wb-o{animation:wb-draw .4s cubic-bezier(.4,0,.6,1) .45s both}
+html.wb-anim .wb.swap .wb-to{animation:wb-in .3s var(--ease) both}
+/* 入れ替え(タップ)は幹を引き直さず、枝から(0.7 秒以内) */
+html.wb-anim .wb.run.swap .wb-trunk,html.wb-anim .wb.run.swap .wb-dot{animation:none}
+html.wb-anim .wb.run.swap .wb-b{animation-delay:.05s}
+html.wb-anim .wb.run.swap .wb-o{animation-delay:.05s}
+.wb .ex-note{margin-top:2px}
+
+/* ===== 案2: 実物が動く(窓)と、触れる行 ===== */
+.win{position:relative;margin-top:26px;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg-2);aspect-ratio:4/5;max-width:520px}
+.win video,.win img{display:block;width:100%;height:100%;object-fit:cover}
+.win-cap{margin-top:8px}
+@media(max-width:919px){.wk-cap{padding:0 var(--pad-x);margin-left:calc(-1 * var(--pad-x));margin-right:calc(-1 * var(--pad-x))}}
+.win .motion-toggle{z-index:2}
+.tw{margin-top:clamp(36px,6vh,56px)}
+.tw-out{margin-top:18px;font:700 clamp(20px,2.2vw,26px)/1.6 var(--sans);color:var(--ink)}
+.tw-out .f{display:block;font-size:14px;font-weight:500;color:var(--ink-2)}
+.tw-out .t{background:linear-gradient(var(--dawn),var(--dawn)) no-repeat 0 100%/100% 2px;padding-bottom:2px}
+html.wb-anim .tw-out.draw .t{animation:tw-line .6s var(--ease) both}
+@keyframes tw-line{from{background-size:0 2px}to{background-size:100% 2px}}
+
+/* ===== 代表作 ===== */
+.lab{padding:clamp(40px,7vh,80px) 0 clamp(32px,5vh,56px)}
+.lab-h{font:700 22px/1.5 var(--sans)}
+.lab-lead{margin-top:8px;font:400 13px/1.85 var(--sans);color:var(--ink-3);max-width:34em}
+.works{margin-top:28px;display:grid;gap:44px}
+.wk-shot{display:block;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--bg-2)}
+.wk-shot img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:left top}
+.wk-shot:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.wk-name{margin-top:16px;font:900 24px/1.4 var(--sans);letter-spacing:.01em}
+.wk-p{margin-top:6px;font:400 14px/1.85 var(--sans);color:var(--ink-2)}
+.wk-v{margin-top:2px;font:400 13px/1.8 var(--sans);color:var(--ink-3)}
+.wk .btn.ghost{margin-top:16px;min-height:44px}
+.lab-all{margin-top:36px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font:400 13px/1.8 var(--sans);color:var(--ink-3)}
+/* スマホ: タウンの実画面は左右を裁ち落とす(大きさの差は使われ方の差) */
+@media(max-width:919px){
+  .wk.big .wk-shot,.wk.big .win{margin-left:calc(-1 * var(--pad-x));margin-right:calc(-1 * var(--pad-x));border-left:0;border-right:0;border-radius:0;max-width:none}
+}
+@media(min-width:920px){
+  .works{grid-template-columns:7fr 5fr;gap:56px;align-items:start}
+}
+
+/* ===== 用途(.ub): 一本の幹から6本の枝。点・順序・砂を持たない(道のりの型にしない) ===== */
+.uses{padding:clamp(24px,4vh,48px) 0 clamp(40px,7vh,72px)}
+.uses-h{font:700 18px/1.5 var(--sans)}
+.ub{position:relative;margin-top:14px;padding-left:4px;list-style:none}
+.ub::before{content:'';position:absolute;left:4px;top:22px;bottom:22px;width:2px;background:var(--mark-line);transform-origin:top}
+.ub li{position:relative}
+.ub li::before{content:'';position:absolute;left:0;top:50%;width:24px;height:2px;margin-top:-1px;background:var(--mark-line);transform-origin:left}
+.ub a{display:flex;align-items:center;min-height:48px;padding-left:36px;font:700 16px/1.4 var(--sans);color:var(--ink);transition:color .25s}
+.ub a:hover{color:var(--blue)}
+.ub a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.ub .ar{margin-left:8px;color:var(--ink-3);font-weight:500}
+html.wb-anim.p1 .ub:not(.in)::before{transform:scaleY(0)}
+html.wb-anim.p1 .ub:not(.in) li::before{transform:scaleX(0)}
+html.wb-anim.p1 .ub.in::before{transition:transform .5s cubic-bezier(.4,0,.6,1)}
+html.wb-anim.p1 .ub.in li::before{transition:transform .25s var(--ease) calc(.45s + var(--i) * .06s)}
+@media(min-width:920px){
+  .ub{display:flex;flex-wrap:wrap;padding:24px 0 0}
+  .ub::before{left:0;right:0;top:0;bottom:auto;width:auto;height:2px;transform-origin:left}
+  html.wb-anim.p1 .ub:not(.in)::before{transform:scaleX(0)}
+  .ub li{flex:1 1 0}
+  .ub li::before{left:0;top:-24px;width:2px;height:24px;margin:0;transform-origin:top}
+  html.wb-anim.p1 .ub:not(.in) li::before{transform:scaleY(0)}
+  .ub a{padding:8px 16px 0 0;min-height:44px;font-size:15px}
+}
+
+/* ===== 本人の言葉 → 明朝の一文 → 出口(閉じの帯 .kz は本番のものを残す。試作には入れていない) ===== */
+.me{padding:clamp(48px,9vh,96px) 0 clamp(64px,10vh,120px)}
+.me-p{max-width:23em;font:500 clamp(19px,2vw,26px)/2.05 var(--sans);letter-spacing:.04em;word-break:auto-phrase}
+.me-sign{margin-top:18px;font:400 13px/1.8 var(--sans);color:var(--ink-3)}
+.idea-h{margin-top:clamp(56px,9vh,96px);font-family:'Shippori Mincho B1',serif;font-weight:600;font-size:clamp(24px,3.2vw,38px);line-height:1.6;letter-spacing:.03em}
+.idea-h .a{color:var(--dawn-deep)}
+.me-links{margin-top:28px;display:flex;flex-wrap:wrap;gap:4px 24px}
+.me-links a{display:inline-flex;align-items:center;min-height:44px;font:500 14px/1.4 var(--sans);color:var(--ink-2);border-bottom:1px solid var(--line)}
+.me-links a:hover{color:var(--ink);border-color:var(--ink-3)}
+.me-links a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.me-note{margin-top:22px;font:400 13px/1.8 var(--sans);color:var(--ink-3)}
+
+/* ===== PC: 案1は中央の一列、案2は文字と窓の二列 ===== */
+@media(min-width:920px){
+  .fv{padding-top:calc(96px + 6vh)}
+  .p1 .fv .wrap{max-width:860px}
+  .wb{--x:8.4px;--dot:53.6px;--to:85.3px;--rh:190px} /* 線は 40×156 の座標を 56×190 に伸ばす。点と語の位置は同じ比で */
+  .wb-from{font-size:40px}
+  .wb-l{width:56px}
+  .wb-to{left:60px;top:calc(var(--to) - 31px);font-size:44px}
+  .p2 .fv2{display:grid;grid-template-columns:5fr 7fr;gap:56px;align-items:center}
+  .win{aspect-ratio:16/9;max-width:none}
+  .fv2 .win{margin-top:0}
+}
+
+/* ===== 試作の切り替え(本番には持ち込まない) ===== */
+.sw{position:fixed;left:12px;bottom:12px;z-index:200;display:flex;gap:4px;padding:4px;border-radius:100px;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font:700 12px/1 var(--sans)}
+.sw button{display:grid;place-items:center;min-width:44px;height:44px;padding:0 12px;border-radius:100px;font:inherit;color:var(--ink-2);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--blue);color:var(--on-fill)}
+.sw button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.bare .sw{display:none}
+</style>
+</head>
+<body data-root="../../" data-page="">
+<nav class="site-nav"></nav>
+
+<main>
+
+<!-- ============ 最初の画面 ============ -->
+<section class="fv" aria-labelledby="fvTitle">
+  <div class="wrap">
+    <div class="fv2">
+      <div class="fv-text">
+        <h1 class="fv-h" id="fvTitle">いつもの仕事を、外の言葉で言うと</h1>
+        <p class="fv-d">医療の現場で働く人へ。いつもの仕事が、医療の外でどんな言葉になるかを見つけられます。</p>
+
+        <!-- 案1: 言葉が分かれる。JS なしは退院支援の1組を完成形で見せる。読み上げは .sr-only の一文(線と語の層は aria-hidden) -->
+        <div class="only-1">
+          <div class="wb" id="wb">
+            <div aria-hidden="true">
+              <p class="wb-from" id="wbFrom">退院支援</p>
+              <div class="wb-row">
+                <svg class="wb-l" id="wbL" viewBox="0 0 40 156" preserveAspectRatio="none" focusable="false">
+                  <path class="wb-trunk" pathLength="1" d="M6 0 V44"/>
+                  <path class="wb-b" pathLength="1" d="M6 44 C 6 62, 14 70, 32 70"/>
+                  <path class="wb-o" pathLength="1" d="M6 44 V156"/>
+                </svg>
+                <span class="wb-dot"></span>
+                <p class="wb-to" id="wbTo">プロジェクト推進・合意形成</p>
+              </div>
+            </div>
+            <p class="sr-only" id="wbSr" aria-live="polite" aria-atomic="true">退院支援は、外の言葉で、プロジェクト推進・合意形成</p>
+            <p class="ex-note">BRIDGE Compass にある言いかえの例</p>
+          </div>
+          <div class="pick tag-row" id="pick1" role="group" aria-label="職種を選ぶ" hidden></div>
+        </div>
+
+        <div class="fv-cta">
+          <a class="btn glass" href="../../compass/index.html">自分の仕事で見てみる <span aria-hidden="true">→</span></a>
+          <p class="h-meta">10の質問・約3分・登録不要</p>
+        </div>
+      </div>
+
+      <!-- 案2: Compass の実物の操作(加工なし・上に描かない)。最後のコマがポスター -->
+      <figure class="only-2 fv-win">
+        <div class="win" data-win>
+          <video muted playsinline preload="none" data-tall="./media/compass-tall.mp4" data-wide="./media/compass-wide.mp4" data-poster-tall="./media/compass-tall.webp" data-poster-wide="./media/compass-wide.webp" aria-describedby="cmpCap"></video>
+          <button class="motion-toggle" type="button" aria-label="映像を止める" aria-pressed="false" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M4.5 2.5v9M9.5 2.5v9"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.5l7 4.5-7 4.5z"/></svg></button>
+        </div>
+        <figcaption class="ex-note win-cap" id="cmpCap">答えの一例で撮った実際の画面。職種は理学療法士、調整やチームに関わる答えを選んだ場合(<time datetime="2026-10-22">2026-10-22</time> 撮影)</figcaption>
+      </figure>
+    </div>
+
+    <!-- 案2: 触れる行(線は描かない。選ぶと語を入れ替えて砂の下線) -->
+    <div class="only-2 tw">
+      <p class="ex-note">BRIDGE Compass にある言いかえの例</p>
+      <div class="pick tag-row" id="pick2" role="group" aria-label="職種を選ぶ" hidden></div>
+      <p class="tw-out" id="twOut" aria-live="polite" aria-atomic="true"><span class="f">「<b id="twFrom">退院支援</b>」は</span><span class="t" id="twTo">プロジェクト推進・合意形成</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 代表作 ============ -->
+<section class="lab" aria-labelledby="labTitle">
+  <div class="wrap">
+    <h2 class="lab-h" id="labTitle">ほかにも作っています</h2>
+    <p class="lab-lead">ここに並べたものは無料で、登録もいりません。入力はこの端末の中にだけ残ります。</p>
+    <div class="works">
+      <article class="wk big">
+        <a class="wk-shot only-1" href="../../clinic-flow-3d/index.html" tabindex="-1" aria-hidden="true"><img src="../../images/products/shots/clinic-flow-3d-decision.webp" alt="" width="1440" height="900" loading="lazy" decoding="async"></a>
+        <figure class="only-2">
+          <div class="win" data-win>
+            <video muted playsinline preload="none" data-tall="./media/town-tall.mp4" data-wide="./media/town-wide.mp4" data-poster-tall="./media/town-tall.webp" data-poster-wide="./media/town-wide.webp" aria-describedby="townCap"></video>
+            <button class="motion-toggle" type="button" aria-label="映像を止める" aria-pressed="false" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M4.5 2.5v9M9.5 2.5v9"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.5l7 4.5-7 4.5z"/></svg></button>
+          </div>
+          <figcaption class="ex-note win-cap wk-cap" id="townCap">実際のゲーム画面。経営の相談で選択肢を1つ選んだところ。数値はゲーム上の仮定です(<time datetime="2026-10-22">2026-10-22</time> 撮影)</figcaption>
+        </figure>
+        <h3 class="wk-name">クリニックタウン3D</h3>
+        <p class="wk-p">クリニックの経営を、1日ずつ動かして学ぶゲームです。</p>
+        <p class="wk-v">いまの版は v99.3 です。</p>
+        <a class="btn ghost" href="../../clinic-flow-3d/index.html">遊んでみる <span aria-hidden="true">→</span></a>
+      </article>
+      <article class="wk">
+        <a class="wk-shot" href="../../tanaoroshi/index.html" tabindex="-1" aria-hidden="true"><img src="../../images/products/thumbs/tanaoroshi.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></a>
+        <h3 class="wk-name">経験の棚卸し</h3>
+        <p class="wk-p">18の質問に答えると、職務経歴書のたねと面接で話す材料ができます。</p>
+        <a class="btn ghost" href="../../tanaoroshi/index.html">思い出せるものから答える <span aria-hidden="true">→</span></a>
+      </article>
+    </div>
+    <p class="lab-all"><span>ぜんぶで29点あります。</span><a class="tx-link" href="../../products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
+  </div>
+</section>
+
+<!-- ============ 用途 ============ -->
+<section class="uses" aria-labelledby="usesTitle">
+  <div class="wrap">
+    <h2 class="uses-h" id="usesTitle">目的から探す</h2>
+    <ul class="ub" id="ub">
+      <li style="--i:0"><a href="../../products/index.html#work">業務<span class="ar" aria-hidden="true">→</span></a></li>
+      <li style="--i:1"><a href="../../products/index.html#manage">経営・管理<span class="ar" aria-hidden="true">→</span></a></li>
+      <li style="--i:2"><a href="../../products/index.html#learn">経営を学ぶ<span class="ar" aria-hidden="true">→</span></a></li>
+      <li style="--i:3"><a href="../../products/index.html#career">キャリア<span class="ar" aria-hidden="true">→</span></a></li>
+      <li style="--i:4"><a href="../../products/index.html#study">学習<span class="ar" aria-hidden="true">→</span></a></li>
+      <li style="--i:5"><a href="../../products/index.html#play">試す・作品<span class="ar" aria-hidden="true">→</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 本人の言葉 → 次の行動 ============ -->
+<section class="me" aria-labelledby="ideaTitle">
+  <div class="wrap">
+    <p class="me-p">外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p>
+    <p class="me-sign">理学療法士 橋本渉</p>
+    <h2 class="idea-h" id="ideaTitle">正解を与えるのではなく、<br class="br-pc"><span class="a">選択肢を増やす</span></h2>
+    <p class="me-links"><a href="../../philosophy/index.html">考え方を読む <span aria-hidden="true">→</span></a><a href="../../about/index.html">運営者について</a><a href="../../community/index.html">話をする</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">noteを読む <span aria-hidden="true">↗</span></a></p>
+    <p class="me-note">見るだけで帰っても、それで十分です。</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer"></footer>
+
+<nav class="sw" aria-label="試作の切り替え">
+  <button type="button" data-k="p1">案1</button>
+  <button type="button" data-k="p2">案2</button>
+  <button type="button" data-k="still">止めた姿</button>
+</nav>
+
+<script src="../../shared/bridge.js" defer></script>
+<script src="../../compass/app/data.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var R = document.documentElement, C = R.classList;
+  var anim = function () { return C.contains('wb-anim'); };
+  var replay = function (el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  var wb = document.getElementById('wb'), ub = document.getElementById('ub');
+
+  /* ---- 言いかえ: compass/app/data.js の TRANSLATIONS をそのまま読む(写しを持たない)。組と順は editor 2026-10-21 ---- */
+  var D = window.COMPASS_DATA;
+  var ORDER = [['pt', '退院支援'], ['nurse', '申し送り'], ['ot', '作業分析'], ['judo', '問診'], ['st', 'コミュニケーション評価'], ['nurse', '患者・家族への説明'], ['other', '多職種との連携']];
+  var pairs = [];
+  if (D && D.TRANSLATIONS && D.PROFESSIONS) {
+    ORDER.forEach(function (o) {
+      var hit = (D.TRANSLATIONS[o[0]] || []).filter(function (t) { return t.from === o[1]; })[0];
+      if (hit) pairs.push({ p: o[0], from: hit.from, to: hit.to });
+    });
+  }
+  if (pairs.length) {
+    var at = 0;
+    var wbFrom = document.getElementById('wbFrom'), wbTo = document.getElementById('wbTo'), wbSr = document.getElementById('wbSr');
+    var twOut = document.getElementById('twOut'), twFrom = document.getElementById('twFrom'), twTo = document.getElementById('twTo');
+    var groups = [document.getElementById('pick1'), document.getElementById('pick2')];
+    var label = function (id) { var p = D.PROFESSIONS.filter(function (x) { return x.id === id; })[0]; return p ? p.label.replace(/\(.*?\)/, '') : id; };
+    var show = function (i, user) {
+      at = i; var t = pairs[i];
+      wbFrom.textContent = t.from; wbTo.textContent = t.to; wbSr.textContent = t.from + 'は、外の言葉で、' + t.to;
+      twFrom.textContent = t.from; twTo.textContent = t.to;
+      groups.forEach(function (g) { [].forEach.call(g.querySelectorAll('.tag'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.p === t.p)); }); });
+      if (user && anim()) { wb.classList.add('swap'); replay(wb, 'run'); replay(twOut, 'draw'); }
+    };
+    var profs = [];
+    pairs.forEach(function (t) { if (profs.indexOf(t.p) < 0) profs.push(t.p); });
+    groups.forEach(function (g, gi) {
+      profs.forEach(function (p) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'tag'; b.dataset.p = p; b.textContent = label(p);
+        b.addEventListener('click', function () { if (pairs[at].p === p) return; for (var i = 0; i < pairs.length; i++) if (pairs[i].p === p) return show(i, true); });
+        g.appendChild(b);
+      });
+      if (gi === 0) {
+        var n = document.createElement('button'); n.type = 'button'; n.className = 'nx'; n.innerHTML = '次の例 <span aria-hidden="true">→</span>';
+        n.addEventListener('click', function () { show((at + 1) % pairs.length, true); });
+        g.appendChild(n);
+      }
+      g.hidden = false;
+    });
+    show(0, false);
+  }
+
+  /* ---- 案2: 窓。画面に半分入ったら一度だけ再生。止めた姿・動きを減らす設定では、最後のコマ(ポスター)と再生ボタン ---- */
+  var wins = [];
+  var setupWins = function () {
+    if (wins.length) return;
+    var tall = matchMedia('(max-width: 919px)').matches;
+    document.querySelectorAll('[data-win]').forEach(function (w) {
+      var v = w.querySelector('video'), b = w.querySelector('.motion-toggle'), st = { v: v, played: false };
+      v.poster = tall ? v.dataset.posterTall : v.dataset.posterWide;
+      v.src = tall ? v.dataset.tall : v.dataset.wide;
+      if (anim()) v.preload = 'auto';
+      var sync = function () { var paused = v.paused || v.ended; b.setAttribute('aria-pressed', String(paused)); b.setAttribute('aria-label', paused ? '映像を再生する' : '映像を止める'); };
+      v.addEventListener('play', sync); v.addEventListener('pause', sync); v.addEventListener('ended', sync);
+      b.hidden = false; sync();
+      b.addEventListener('click', function () { st.played = true; if (v.paused || v.ended) { if (v.ended) v.currentTime = 0; v.play().catch(function () {}); } else v.pause(); });
+      if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {
+        var e = es[0];
+        if (e.intersectionRatio >= .5 && !st.played && anim() && C.contains('p2')) { st.played = true; v.play().catch(function () {}); }
+        else if (!e.isIntersecting && !v.paused) v.pause();
+      }, { threshold: [0, .5] }).observe(w);
+      wins.push(st);
+    });
+  };
+
+  /* ---- 用途の分岐(案1)は、画面に4割入ったら一度だけ ---- */
+  var uio = null;
+  var setUses = function () {
+    if (uio) { uio.disconnect(); uio = null; }
+    ub.classList.remove('in');
+    if (anim() && C.contains('p1') && 'IntersectionObserver' in window) {
+      uio = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { ub.classList.add('in'); uio.disconnect(); uio = null; } }, { threshold: .4 });
+      uio.observe(ub);
+    } else ub.classList.add('in');
+  };
+
+  /* ---- 状態を当てる(読み込みと、左下の切り替え)。切り替えは読み込み直さずに入れ替え、最初の画面から見せ直す ---- */
+  var apply = function (k, user) {
+    if (user) {
+      C.remove('p1', 'p2', 'still', 'wb-anim');
+      C.add(k === 'p2' ? 'p2' : 'p1');
+      if (k === 'still') C.add('still'); else if (window.WB_OK) C.add('wb-anim');
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll('.sw button').forEach(function (a) { a.setAttribute('aria-pressed', String(a.dataset.k === k)); });
+    wb.classList.remove('run', 'swap');
+    if (anim() && C.contains('p1')) replay(wb, 'run');
+    setUses();
+    if (C.contains('p2')) { setupWins(); wins.forEach(function (st) { st.played = false; st.v.pause(); try { st.v.currentTime = 0; } catch (e) {} }); }
+    else wins.forEach(function (st) { st.v.pause(); });
+  };
+  document.querySelectorAll('.sw button').forEach(function (a) {
+    a.addEventListener('click', function () { apply(a.dataset.k, true); try { history.replaceState(null, '', '#' + a.dataset.k); } catch (err) {} });
+  });
+  apply(C.contains('still') ? 'still' : (C.contains('p2') ? 'p2' : 'p1'), false);
+  window.addEventListener('hashchange', function () { var h = location.hash.slice(1); if (h === 'p1' || h === 'p2' || h === 'still') apply(h, true); });
+});
+</script>
+</body>
+</html>
