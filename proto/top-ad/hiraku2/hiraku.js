@@ -52,7 +52,7 @@ function boot() {
   /* ---------- 見えないボタンと名前の札の位置(止めた画像のときは、撮ったときの位置から) ---------- */
   const heroRect = () => hero.getBoundingClientRect();
   function placeHit(a, cx, cy, w, h) { w = Math.max(44, w); h = Math.max(44, h); a.style.transform = `translate(${(cx - w / 2).toFixed(1)}px,${(cy - h / 2).toFixed(1)}px)`; a.style.width = w.toFixed(0) + 'px'; a.style.height = h.toFixed(0) + 'px'; }
-  let tagPos = {}, footPos = {}, hitPos = {};
+  let tagPos = {}, footPos = {}, hitPos = {}, nudgePos = null;
   function stillLayout() {
     if (ctl) return;
     const hr = heroRect(), br = still.getBoundingClientRect(); if (!br.width) return;
@@ -62,6 +62,7 @@ function boot() {
       placeHit(a, cx, cy, (x1 - x0) / 100 * br.width, (y1 - y0) / 100 * br.height);
       tagPos[id] = [L + tx / 100 * br.width, T + ty / 100 * br.height];
       footPos[id] = [cx, T + (y1 - (y1 - y0) * .08) / 100 * br.height];
+      if (a.dataset.nudge) { const [nx, ny] = a.dataset.nudge.split(',').map(Number); nudgePos = [L + nx / 100 * br.width, T + ny / 100 * br.height]; }
       hitPos[id] = [L + x0 / 100 * br.width, T + y0 / 100 * br.height, L + x1 / 100 * br.width, T + y1 / 100 * br.height];
     }
     if (tagFor) showTag(tagFor, true);
@@ -80,8 +81,9 @@ function boot() {
 
   /* ---------- ふれられることの気づき(最初の訪問だけ)と、押したときの輪 ---------- */
   function placeNudge() {
-    if (!nudgeOn || !footPos.hospital) return;
-    nudge.style.transform = `translate(${footPos.hospital[0].toFixed(1)}px,${footPos.hospital[1].toFixed(1)}px)`;
+    const p = nudgePos || footPos.hospital;
+    if (!nudgeOn || !p) return;
+    nudge.style.transform = `translate(${p[0].toFixed(1)}px,${p[1].toFixed(1)}px)`;
     nudge.hidden = false;
   }
   function endNudge() {
@@ -303,7 +305,7 @@ function boot() {
         },
         onLayout(L2) {
           const hr = heroRect(), cr = canvas.getBoundingClientRect(), ox = cr.left - hr.left, oy = cr.top - hr.top;
-          for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; footPos[id] = [ox + p.foot[0], oy + p.foot[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }
+          for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; footPos[id] = [ox + p.foot[0], oy + p.foot[1]]; if (p.nudge) nudgePos = [ox + p.nudge[0], oy + p.nudge[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }
           placeNudge();
           if (tagFor) { const p = tagPos[tagFor]; tagB.style.left = p[0].toFixed(1) + 'px'; tagB.style.top = p[1].toFixed(1) + 'px'; }
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };

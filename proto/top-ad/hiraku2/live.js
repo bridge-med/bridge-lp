@@ -24,7 +24,7 @@ class Spring {
 /* ---------- 建物の枠(寄るときに画面に収める範囲)と、名前の札の位置 ---------- */
 function boundsOf(id, ex) {
   const b = BOXES[id];
-  if (id === 'plaza') return { pts: ring(2.35, 0, .3), top: .5 };
+  if (id === 'plaza') { const F = plazaFrame(), hh = F.arcTop - F.y; return { pts: ring(2.35, 0, hh), top: hh + .1 }; }   // 広場は台地の上。弧(ロゴの立体)の上まで
   if (b.shape === 'tower') return { pts: ring(1.05, -ex.y0, ex.top), top: ex.top };
   if (b.shape === 'open') return { pts: rect(b.w / 2 + .1, b.d / 2 + .1, 0, ex.top), top: ex.top };
   const X = b.w / 2 + E + WALL, Z = b.d / 2 + E + WALL;
@@ -33,6 +33,15 @@ function boundsOf(id, ex) {
   return { pts, top: ex.top };
 }
 function rect(X, Z, y0, y1) { const o = []; for (const x of [-X, X]) for (const z of [-Z, Z]) for (const y of [y0, y1]) o.push(new THREE.Vector3(x, y, z)); return o; }
+/* 押せる範囲: 箱の外の部分(病院の翼など)も、地面に接する範囲 ex.foot から足す。広場は床だけ(弧は live の中で、弧に沿った小さな箱を足す) */
+function hitParts(id, ex) {
+  if (id === 'plaza') return [ring(2.35, 0, .3)];
+  const b = BOXES[id], lim = b.d / 2 + .2, main = boundsOf(id, ex).pts.filter(p => !(p.z > lim)), fh = Math.min(ex.top, (b.h || 1) * .7);
+  return [main, ...(ex.foot || []).map(([x0, z0, x1, z1]) => rect3(x0, z0, x1, z1, -ex.y0, fh))];
+}
+/* 気づきの輪を出す所(建物の中の座標): 病院の屋上のヘリポート。広場の弧とも、病院の正面とも重ならない */
+function nudgeAt(id, ex) { return id === 'hospital' ? (ex.heli || [1.0, BOXES.hospital.h + .12, .1]) : null; }
+function rect3(x0, z0, x1, z1, y0, y1) { const o = []; for (const x of [x0, x1]) for (const z of [z0, z1]) for (const y of [y0, y1]) o.push(new THREE.Vector3(x, y, z)); return o; }
 function ring(r, y0, y1) { const o = []; for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; for (const y of [y0, y1]) o.push(new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r)); } return o; }
 
 /* 中の灯り: 建物の中ほど(前へ出しすぎると、ひらいた前の地面が照らされすぎる)。小さな建物ほど弱く */
@@ -43,7 +52,7 @@ function inLightOf(id) {
 
 /* 建物の島の上での置き方(島のグループの中の座標) */
 function placeOf(S, id) {
-  if (id === 'plaza') { const { cx, cz } = plazaFrame(); return { p: new THREE.Vector3(cx, 0, cz), yaw: deg(90 - 45), face: 45, y0: 0 }; }
+  if (id === 'plaza') { const { cx, cz, y } = plazaFrame(); return { p: new THREE.Vector3(cx, y || 0, cz), yaw: deg(90 - 45), face: 45, y0: 0 }; }
   const b = S.B[id]; return { p: b.grp.position.clone(), yaw: b.grp.rotation.y, face: b.face, y0: b.ex.y0 };
 }
 
@@ -86,7 +95,7 @@ export async function capture(Q) {
     const spin = deg(pl.face - 45), el = cut === 'park' ? deg(17) : deg(26);
     S.world.rotation.y = spin; S.world.updateMatrixWorld(true);
     aimCamera(camera, new THREE.Vector3(), el);
-    const bd = boundsOf(cut, b.ex), m = new THREE.Matrix4().makeRotationY(spin).multiply(tb), pts = bd.pts.map(p => p.clone().applyMatrix4(m));
+    const bd = boundsOf(cut, b && b.ex), m = new THREE.Matrix4().makeRotationY(spin).multiply(tb), pts = bd.pts.map(p => p.clone().applyMatrix4(m));
     fit(camera, pts, W, H, { x0: W * .06, x1: W * .94, y0: H * .06, y1: H * .94 });
     // 中の灯り(断面の絵でも、中が暗くならないように)
     const pIn = L.pIn, il = inLightOf(cut), c = il.p.applyMatrix4(tb); S.world.localToWorld(c);
@@ -104,12 +113,13 @@ export async function capture(Q) {
   // 建物ごとの位置(枠の %): 名前の札(上)と、押せる範囲
   const pins = {};
   if (mode === 'poster') for (const id of IDS) {
-    const pl = placeOf(S, id), bd = boundsOf(id, id === 'plaza' ? { y0: 0, top: .5 } : S.B[id].ex), m = new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), pl.yaw), new THREE.Vector3(1, 1, 1));
+    const ex = id === 'plaza' ? null : S.B[id].ex, pl = placeOf(S, id), bd = boundsOf(id, ex), m = new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), pl.yaw), new THREE.Vector3(1, 1, 1));
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-    for (const p of bd.pts) { if (p.z > (BOXES[id] ? BOXES[id].d / 2 + .2 : 9) && id !== 'plaza') continue; const v = p.clone().applyMatrix4(m).project(camera); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+    for (const p of hitParts(id, ex).flat()) { const v = p.clone().applyMatrix4(m).project(camera); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
     const tp = new THREE.Vector3(0, bd.top, 0).applyMatrix4(m).project(camera);
     const pc = (vx, vy) => [+((vx + 1) / 2 * 100).toFixed(2), +((1 - vy) / 2 * 100).toFixed(2)];
     pins[id] = { tag: pc(tp.x, tp.y), box: [...pc(x0, y1), ...pc(x1, y0)] };
+    const na = ex && nudgeAt(id, ex); if (na) { const v = new THREE.Vector3(...na).applyMatrix4(m).project(camera); pins[id].nudge = pc(v.x, v.y); }
   }
   window.__done = { pins, calls: renderer.info.render.calls, tris: renderer.info.render.triangles };
 }
@@ -201,9 +211,9 @@ export function live(o) {
   /* ---- 寄る先(建物を正面に向け、安全な範囲 = パネルやシートを避けた所に収める) ---- */
   const tmpCam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
   function frameFor(id) {
-    const pl = placeOf(S, id), bd = boundsOf(id, id === 'plaza' ? { y0: 0, top: .5 } : S.B[id].ex);
+    const pl = placeOf(S, id), bd = boundsOf(id, id === 'plaza' ? null : S.B[id].ex);
     const r = nearestRot(rot.x, deg(pl.face - 45));
-    const el = id === 'park' ? deg(small ? 16 : 22) : id === 'plaza' ? deg(54) : deg(26);
+    const el = id === 'park' ? deg(small ? 16 : 22) : id === 'plaza' ? deg(30) : deg(26);   // 広場は、弧がロゴとして読める低めの角度から
     aimCamera(tmpCam, origin, el);
     const m = new THREE.Matrix4().makeRotationY(r).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), pl.yaw), new THREE.Vector3(1, 1, 1)));
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
@@ -393,13 +403,18 @@ export function live(o) {
 
   /* ---- 選ぶ(レイキャスト)。建物ごとに見えない箱を置く ---- */
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), hits = [];
+  const hitMat = new THREE.MeshBasicMaterial({ visible: false });
   for (const id of IDS) {
-    const pl = placeOf(S, id), bd = boundsOf(id, id === 'plaza' ? { y0: 0, top: .5 } : S.B[id].ex);
-    const bb = new THREE.Box3(); for (const p of bd.pts) if (!(p.z > (BOXES[id] ? BOXES[id].d / 2 + .2 : 9) && id !== 'plaza')) bb.expandByPoint(p);
-    const sz = bb.getSize(new THREE.Vector3()), c = bb.getCenter(new THREE.Vector3());
-    const hm = new THREE.Mesh(new THREE.BoxGeometry(sz.x, sz.y, sz.z), new THREE.MeshBasicMaterial({ visible: false }));
-    hm.position.copy(c); const holder = new THREE.Object3D(); holder.position.copy(pl.p); holder.rotation.y = pl.yaw; holder.add(hm); S.world.add(holder);
-    hm.userData.id = id; hits.push(hm);
+    const pl = placeOf(S, id), holder = new THREE.Object3D(); holder.position.copy(pl.p); holder.rotation.y = pl.yaw; S.world.add(holder);
+    for (const part of hitParts(id, id === 'plaza' ? null : S.B[id].ex)) {
+      const bb = new THREE.Box3().setFromPoints(part), sz = bb.getSize(new THREE.Vector3()), c = bb.getCenter(new THREE.Vector3());
+      const hm = new THREE.Mesh(new THREE.BoxGeometry(Math.max(sz.x, .05), Math.max(sz.y, .05), Math.max(sz.z, .05)), hitMat);
+      hm.position.copy(c); holder.add(hm); hm.userData.id = id; hits.push(hm);
+    }
+  }
+  if (S.plazaInfo) for (const arc of [S.plazaInfo.aI, S.plazaInfo.aS]) for (let i = 0; i < (arc || []).length; i += 2) {   // 弧(島の座標)に沿って
+    const [x, y, z] = arc[i]; if (y < plazaFrame().y + .12) continue;
+    const hm = new THREE.Mesh(new THREE.BoxGeometry(.32, .32, .32), hitMat); hm.position.set(x, y, z); S.world.add(hm); hm.userData.id = 'plaza'; hits.push(hm);
   }
   const groundHit = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, .1, 24), new THREE.MeshBasicMaterial({ visible: false })); S.world.add(groundHit);
   let rects = {};
@@ -592,15 +607,16 @@ export function live(o) {
   function layout() {
     const out = { b: {}, st: [] };
     for (const id of IDS) {
-      const pl = placeOf(S, id), bd = boundsOf(id, id === 'plaza' ? { y0: 0, top: .5 } : S.B[id].ex);
+      const ex = id === 'plaza' ? null : S.B[id].ex, pl = placeOf(S, id), bd = boundsOf(id, ex);
       const m = new THREE.Matrix4().makeRotationY(rot.x).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(Y, pl.yaw), one));
       const tp = new THREE.Vector3(0, bd.top + (liftId === id ? lift.x : 0), 0).applyMatrix4(m).project(camera);
       const cp = new THREE.Vector3(0, bd.top * .45, 0).applyMatrix4(m).project(camera);
-      const dr = id === 'plaza' ? [0, 0] : S.B[id].ex.door || [0, 0], fp = new THREE.Vector3(dr[0], 0, dr[1]).applyMatrix4(m).project(camera);
+      const dr = id === 'plaza' ? [0, 0] : ex.door || [0, 0], fp = new THREE.Vector3(dr[0], 0, dr[1]).applyMatrix4(m).project(camera);
       let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-      for (const p of bd.pts) { const v = p.clone().applyMatrix4(m).project(camera), sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H; x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
+      for (const p of hitParts(id, ex).flat()) { const v = p.clone().applyMatrix4(m).project(camera), sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H; x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
       rects[id] = [x0, y0, x1, y1];
       out.b[id] = { tag: [(tp.x + 1) / 2 * W, (1 - tp.y) / 2 * H], c: [(cp.x + 1) / 2 * W, (1 - cp.y) / 2 * H], foot: [(fp.x + 1) / 2 * W, (1 - fp.y) / 2 * H], r: rects[id] };
+      const na = ex && nudgeAt(id, ex); if (na) { const v = new THREE.Vector3(...na); if (liftId === id) v.y += lift.x; v.applyMatrix4(m).project(camera); out.b[id].nudge = [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]; }
     }
     if (A.id) out.st = stationsOnScreen();
     o.onLayout(out);
