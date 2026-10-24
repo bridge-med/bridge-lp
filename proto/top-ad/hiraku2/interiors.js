@@ -1000,13 +1000,16 @@ const BUILD = {
     const ringG = (r0, r1) => { const g = new THREE.RingGeometry(r0, r1, seg, 1, 0, Math.PI); g.rotateX(-Math.PI / 2); return ni(g); };
     S.add(ringG(R - .002, Rn), mtx(0, H, 0, 1, 1, 1), pc, 0, 1); S.add(ringG(Rn, Ro), mtx(0, H - .0005, 0, 1, 1, 1), pl, 0, .5);
     for (const sd of [1, -1]) { const [a0, a1] = sd > 0 ? [R - .004, Rn] : [-Rn, -R + .004], [b0, b1] = sd > 0 ? [Rn, Ro] : [-Ro, -Rn]; pb(S, a0, a1, -.05, H, -.006, 0, pc); pb(S, b0, b1, -.05, H - .0005, -.0065, -.0005, pl); }
-    // 床と階の床(階段の穴をあける)。階の床の切り口は藍
+    // 床と階の床(階段の穴は、階段が上の階へ抜ける奥の左)。階の床の切り口は藍。
+    //   藍は床の外の輪と側面だけにする(床の上面と重ねると、遠くから見たときに放射状にちらつく)
     for (let i = 0; i < fl; i++) {
-      const y = E.fy(i);
-      const floorDisc = ni(new THREE.CylinderGeometry(R, R, 1, seg * 2, 1, false, i ? 2.95 : 0, i ? TAU - .8 : TAU)).translate(0, .5, 0);
-      const slabDisc = ni(new THREE.CylinderGeometry(Rn, Rn, 1, seg * 2, 1, false, i ? 2.95 : 0, i ? TAU - .8 : TAU)).translate(0, .5, 0);
+      const y = E.fy(i), th0 = i ? 4.35 : 0, thL = i ? TAU - 1.2 : TAU;
+      const floorDisc = ni(new THREE.CylinderGeometry(R, R, 1, seg * 2, 1, false, th0, thL)).translate(0, .5, 0);
+      const slabSide = ni(new THREE.CylinderGeometry(Rn, Rn, 1, seg * 2, 1, true, th0, thL)).translate(0, .5, 0);
+      const slabTop = (() => { const g = new THREE.RingGeometry(R, Rn, seg * 2, 1, th0 - Math.PI / 2, thL); g.rotateX(-Math.PI / 2); return ni(g); })();
       S.add(floorDisc, mtx(0, y, 0, 1, .012, 1), P.floorWood); E.fc[i] = P.floorWood;
-      S.add(slabDisc, i ? mtx(0, y + .0115 - N, 0, 1, N, 1) : mtx(0, -.05, 0, 1, .0615, 1), pc, 0, 1);
+      S.add(slabSide, i ? mtx(0, y + .012 - N, 0, 1, N, 1) : mtx(0, -.05, 0, 1, .062, 1), pc, 0, 1);
+      S.add(slabTop, mtx(0, y + .012, 0, 1, 1, 1), pc, 0, 1);
       if (i) grp(S, .12, y + .012 - N - .1 * k, -.12).box(0, .055 * k, 0, .004, .045 * k, .004, P.dark).cone(0, 0, 0, .05 * k, .055 * k, mix(P.trim, '#F4E3C2', .4), .9).cyl(0, -.004, 0, .03 * k, .006, '#FFF3D6', false, 0, 0, 1.6);   // 下の階の天井の灯り
       // 窓(奥の壁に2つ)
       for (const a of [-.55, .55]) {
@@ -1056,11 +1059,11 @@ const BUILD = {
     });
     chair(E, S, y2, .14, -.08, Math.PI - .4, P.chair2);
     person(E, .14, y2, -.08, Math.PI - .4, { kind: 'write', cloth: P.casual[0] });
-    grp(S, -.24, y2, -.05, .9).rbox(0, 0, 0, .2 * k, .09 * k, .18 * k, .03, P.sofa).rbox(0, .09 * k, -.07 * k, .2 * k, .12 * k, .04 * k, .02, P.sofa).rbox(-.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa).rbox(.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa);
-    const mp = person(E, -.24, y2 + .015, -.05, .9, { kind: 'read', cloth: P.casual[3], fy: y2 });
+    grp(S, -.25, y2, .09, 1.15).rbox(0, 0, 0, .2 * k, .09 * k, .18 * k, .03, P.sofa).rbox(0, .09 * k, -.07 * k, .2 * k, .12 * k, .04 * k, .02, P.sofa).rbox(-.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa).rbox(.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa);
+    const mp = person(E, -.25, y2 + .015, .09, 1.15, { kind: 'read', cloth: P.casual[3], fy: y2 });
     const hm1 = handOf(mp, 1).add(handOf(mp, -1)).multiplyScalar(.5);      // タブレットは両手の間に
     station(E, 'moyamoya', {
-      x: hm1.x, y: hm1.y - .01, z: hm1.z, ry: .9, lift: [0, .035, .02], glass: true, bezel: .006, scale: 1.2,
+      x: hm1.x, y: hm1.y - .01, z: hm1.z, ry: 1.15, lift: [0, .035, .02], glass: true, bezel: .006, scale: 1.2,
       holder: g => g.rbox(0, 0, 0, .13 * k, .1 * k, .01, .008, '#2A2F35'),
       screen: { x: 0, y: .05 * k, z: .0055, w: .118 * k, h: .088 * k, tilt: .55 }
     });
@@ -1077,7 +1080,7 @@ const BUILD = {
         .box(0, .24 * k, -.05 * k, .4 * k, .02, .28 * k, P.deskWood, ta).box(0, .16 * k, .05 * k, .36 * k, .012, .03, P.woodDark),
       screen: { x: 0, y: .24 * k + .022 * Math.cos(ta), z: -.05 * k + .022 * Math.sin(ta), w: .36 * k, h: .24 * k, tilt: Math.PI / 2 - ta }
     });
-    person(E, -.33, y3, -.04, Math.PI / 2, { kind: 'bend', cloth: P.casual[0], lean: .3 });       // 地図をのぞきこむ
+    person(E, -.33, y3, .03, Math.PI / 2, { kind: 'bend', cloth: P.casual[0], lean: .3 });        // 地図をのぞきこむ
     person(E, .31, y3, -.1, -Math.PI / 2, { kind: 'talk', cloth: P.casual[4] });                    // 向かいで話す
     person(E, .4, y3, .38, Math.PI - .55, { kind: 'bend', cloth: P.casual[1], lean: .28, night: true, day: false });   // 夜は望遠鏡をのぞく
     station(E, 'growth-76a805', {
