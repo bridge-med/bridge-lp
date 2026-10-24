@@ -19,12 +19,12 @@
 <main>
 
 <!-- ============ 最初の画面: 真上から見た平置き ============
-     座標は 1440×900(PC)と 390×1640(スマホ)の仮想の面で持つ。--u は面の1単位(JS が幅から決め直す)。
+     座標は 1440×900(PC)と 390×1410(スマホ)の仮想の面で持つ。--u は面の1単位(JS が幅から決め直す)。
      BRIDGE の道具は <a>(JS なしでは道具へ直接行く。JS があると「手に取る」)。毎日の道具は飾り(aria-hidden) -->
 <section class="hero" aria-labelledby="h1">
   <div class="board" id="board">
 
-    <h1 class="obj tag" id="h1" data-id="tag" style="--x:72;--y:56;--w:232;--h:176;--xs:20;--ys:74;--ws:210;--hs:150">
+    <h1 class="obj tag" id="h1" data-id="tag" style="--x:72;--y:56;--w:232;--h:176;--xs:16;--ys:14;--ws:178;--hs:112">
       <span class="lift">
         <span class="tag-paper">
           <span class="tag-eye" aria-hidden="true"></span>
@@ -36,7 +36,7 @@
       </span>
     </h1>
 
-    <nav class="obj navt" aria-label="サイト" style="--x:1126;--y:64;--w:242;--h:120;--xs:150;--ys:8;--ws:228;--hs:44">
+    <nav class="obj navt" aria-label="サイト" style="--x:1126;--y:64;--w:242;--h:120;--xs:206;--ys:18;--ws:168;--hs:100">
       <a href="../../../products/index.html">プロダクト</a>
       <a href="../../../philosophy/index.html">考え方</a>
       <a href="../../../about/index.html">運営者</a>
@@ -44,7 +44,7 @@
     </nav>
 
     <!-- BRIDGE の道具 -->
-    <a class="obj tool phone" id="o-compass" data-id="compass" href="../../../compass/index.html" aria-label="BRIDGE Compass。10の質問で、これまでの経験を別の言葉に翻訳する。手に取る" style="--x:72;--y:268;--w:232;--h:480;--xs:20;--ys:262;--ws:170;--hs:352">
+    <a class="obj tool phone" id="o-compass" data-id="compass" href="../../../compass/index.html" aria-label="BRIDGE Compass。10の質問で、これまでの経験を別の言葉に翻訳する。手に取る" style="--x:72;--y:268;--w:232;--h:480;--xs:16;--ys:142;--ws:168;--hs:348">
       <span class="lift">
         <span class="phone-body">
           <span class="phone-btn pb1"></span><span class="phone-btn pb2"></span><span class="phone-btn pb3"></span>
@@ -54,7 +54,7 @@
       </span>
     </a>
 
-    <a class="obj tool tablet" id="o-town" data-id="town" href="../../../clinic-flow-3d/index.html" aria-label="クリニックタウン3D。クリニック経営を、1日ずつ動かして学ぶ。手に取る" style="--x:340;--y:268;--w:500;--h:326;--xs:20;--ys:790;--ws:350;--hs:228">
+    <a class="obj tool tablet" id="o-town" data-id="town" href="../../../clinic-flow-3d/index.html" aria-label="クリニックタウン3D。クリニック経営を、1日ずつ動かして学ぶ。手に取る" style="--x:340;--y:268;--w:500;--h:326;--xs:16;--ys:584;--ws:358;--hs:233">
       <span class="lift">
         <span class="tab-body">
           <span class="tab-screen"><img class="ts-a" src="../shared/shots/ct3d-3d-pc.webp" alt="" width="2560" height="1600" decoding="async"><img class="ts-b" src="../shared/shots/ct3d-play-pc.webp" alt="" width="2560" height="1600" loading="lazy" decoding="async"></span>
@@ -63,7 +63,7 @@
       </span>
     </a>
 
-    <a class="obj tool notebook" id="o-tana" data-id="tana" href="../../../tanaoroshi/index.html" aria-label="経験の棚卸し。18の質問で、職務経歴書のたねをつくる。手に取る" style="--x:876;--y:268;--w:214;--h:304;--xs:20;--ys:1120;--ws:156;--hs:222">
+    <a class="obj tool notebook" id="o-tana" data-id="tana" href="../../../tanaoroshi/index.html" aria-label="経験の棚卸し。18の質問で、職務経歴書のたねをつくる。手に取る" style="--x:876;--y:268;--w:214;--h:304;--xs:16;--ys:904;--ws:156;--hs:222">
       <span class="lift">
         <span class="nb-page">
           <span class="nb-q"><span class="nb-qn">Q1</span>なかなか心を開いてくれなかった患者さん・利用者さんが、少しずつ変わっていった場面を思い出せますか</span>
@@ -82,7 +82,7 @@
       </span>
     </a>
 
-    <a class="obj tool paper" id="o-keiji" data-id="keiji" href="../../../keiji/index.html" aria-label="掲示じたく。院内掲示を、選んで埋めるだけ。手に取る" style="--x:1126;--y:268;--w:242;--h:342;--xs:206;--ys:452;--ws:164;--hs:232">
+    <a class="obj tool paper" id="o-keiji" data-id="keiji" href="../../../keiji/index.html" aria-label="掲示じたく。院内掲示を、選んで埋めるだけ。手に取る" style="--x:1126;--y:268;--w:242;--h:342;--xs:216;--ys:316;--ws:140;--hs:198">
       <span class="lift">
         <span class="pp">
           <span class="pp-title">臨時休診のお知らせ</span>
@@ -97,7 +97,7 @@
       </span>
     </a>
 
-    <a class="obj tool cards" id="o-iikae" data-id="iikae" href="../../../iikae/index.html" aria-label="現場のことば 言いかえ帳。現場のことばを、履歴書で通じる言葉に。手に取る" style="--x:340;--y:698;--w:236;--h:136;--xs:206;--ys:262;--ws:164;--hs:100">
+    <a class="obj tool cards" id="o-iikae" data-id="iikae" href="../../../iikae/index.html" aria-label="現場のことば 言いかえ帳。現場のことばを、履歴書で通じる言葉に。手に取る" style="--x:340;--y:698;--w:236;--h:136;--xs:202;--ys:146;--ws:172;--hs:104">
       <span class="lift">
         <span class="card k4"><span class="k-g">物品の置き場所変えた</span><span class="k-k">動線に合わせた物品配置の見直し</span></span>
         <span class="card k3"><span class="k-g">送り見てから動いてた</span><span class="k-k">申し送りに基づく優先順位づけ</span></span>
@@ -108,14 +108,14 @@
     </a>
 
     <!-- 道具の札(面に貼ったラベル)。中身は各道具の名前と同じなので読み上げない -->
-    <span class="obj label" aria-hidden="true" data-for="compass" style="--x:72;--y:768;--w:232;--h:52;--xs:20;--ys:630;--ws:170;--hs:52"><span class="tape">BRIDGE Compass</span><span class="meta">10の質問・約3分・登録不要</span></span>
-    <span class="obj label" aria-hidden="true" data-for="town" style="--x:340;--y:612;--w:500;--h:52;--xs:20;--ys:1032;--ws:350;--hs:52"><span class="tape">クリニックタウン3D</span><span class="meta">ブラウザで遊べる経営ゲーム</span></span>
-    <span class="obj label" aria-hidden="true" data-for="tana" style="--x:876;--y:590;--w:214;--h:52;--xs:20;--ys:1356;--ws:156;--hs:52"><span class="tape">経験の棚卸し</span><span class="meta">18の質問・約15分</span></span>
-    <span class="obj label" aria-hidden="true" data-for="keiji" style="--x:1126;--y:628;--w:242;--h:52;--xs:206;--ys:698;--ws:164;--hs:52"><span class="tape">掲示じたく</span><span class="meta">院内掲示を、選んで埋める</span></span>
-    <span class="obj label" aria-hidden="true" data-for="iikae" style="--x:600;--y:698;--w:240;--h:52;--xs:206;--ys:376;--ws:164;--hs:52"><span class="tape">言いかえ帳</span><span class="meta">54の現場のことば</span></span>
+    <span class="obj label" aria-hidden="true" data-for="compass" style="--x:72;--y:768;--w:232;--h:52;--xs:16;--ys:500;--ws:170;--hs:46"><span class="tape">BRIDGE Compass</span><span class="meta">10の質問・約3分・登録不要</span></span>
+    <span class="obj label" aria-hidden="true" data-for="town" style="--x:340;--y:612;--w:500;--h:52;--xs:16;--ys:826;--ws:358;--hs:46"><span class="tape">クリニックタウン3D</span><span class="meta">ブラウザで遊べる経営ゲーム</span></span>
+    <span class="obj label" aria-hidden="true" data-for="tana" style="--x:876;--y:590;--w:214;--h:52;--xs:16;--ys:1136;--ws:156;--hs:46"><span class="tape">経験の棚卸し</span><span class="meta">18の質問・約15分</span></span>
+    <span class="obj label" aria-hidden="true" data-for="keiji" style="--x:1126;--y:628;--w:242;--h:52;--xs:202;--ys:522;--ws:172;--hs:46"><span class="tape">掲示じたく</span><span class="meta">院内掲示を、選んで埋める</span></span>
+    <span class="obj label" aria-hidden="true" data-for="iikae" style="--x:600;--y:698;--w:240;--h:52;--xs:202;--ys:258;--ws:172;--hs:46"><span class="tape">言いかえ帳</span><span class="meta">54の現場のことば</span></span>
 
     <!-- 毎日の道具(飾り) -->
-    <div class="obj item gonio" aria-hidden="true" style="--x:340;--y:72;--w:500;--h:72;--xs:20;--ys:1440;--ws:350;--hs:58">
+    <div class="obj item gonio" aria-hidden="true" style="--x:340;--y:72;--w:500;--h:72;--xs:16;--ys:1214;--ws:358;--hs:58">
       <span class="lift"><svg class="rot" viewBox="0 0 420 70" preserveAspectRatio="none" focusable="false">
         <defs>
           <linearGradient id="gArm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4FAFB" stop-opacity=".62"/><stop offset=".5" stop-color="#DDEDEF" stop-opacity=".40"/><stop offset="1" stop-color="#C9E0E3" stop-opacity=".52"/></linearGradient>
@@ -136,7 +136,7 @@
       </svg></span>
     </div>
 
-    <div class="obj item penlight o-vs" aria-hidden="true" style="--x:340;--y:168;--w:300;--h:24;--xs:316;--ys:1120;--ws:20;--hs:222">
+    <div class="obj item penlight o-vs" aria-hidden="true" style="--x:340;--y:168;--w:300;--h:24;--xs:312;--ys:1004;--ws:20;--hs:196">
       <span class="lift"><svg class="rot" viewBox="0 0 250 22" preserveAspectRatio="none" focusable="false">
         <defs>
           <linearGradient id="plBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8E979C"/><stop offset=".22" stop-color="#F2F4F5"/><stop offset=".48" stop-color="#B8C0C4"/><stop offset=".8" stop-color="#6E777C"/><stop offset="1" stop-color="#4C5459"/></linearGradient>
@@ -152,7 +152,7 @@
       </svg></span>
     </div>
 
-    <div class="obj item pen o-vs" aria-hidden="true" style="--x:340;--y:206;--w:300;--h:24;--xs:346;--ys:1120;--ws:20;--hs:222">
+    <div class="obj item pen o-vs" aria-hidden="true" style="--x:340;--y:206;--w:300;--h:24;--xs:346;--ys:1004;--ws:20;--hs:196">
       <span class="lift"><svg class="rot" viewBox="0 0 250 22" preserveAspectRatio="none" focusable="false">
         <defs>
           <linearGradient id="pnBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9CED0"/><stop offset=".25" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#E6E9EA"/><stop offset="1" stop-color="#A3AAAE"/></linearGradient>
@@ -169,18 +169,18 @@
       </svg></span>
     </div>
 
-    <div class="obj item taperoll" aria-hidden="true" style="--x:990;--y:80;--w:100;--h:100;--xs:196;--ys:1272;--ws:86;--hs:86">
+    <div class="obj item taperoll" aria-hidden="true" style="--x:990;--y:80;--w:100;--h:100;--xs:194;--ys:1084;--ws:92;--hs:92">
       <span class="lift"><span class="tr-roll"><span class="tr-core"></span></span></span>
     </div>
 
-    <div class="obj item watch" aria-hidden="true" style="--x:876;--y:82;--w:100;--h:100;--xs:262;--ys:96;--ws:96;--hs:96">
+    <div class="obj item watch" aria-hidden="true" style="--x:876;--y:82;--w:100;--h:100;--xs:304;--ys:912;--ws:72;--hs:72">
       <span class="lift">
         <span class="w-case"><span class="w-face"><span class="w-dial"></span><span class="w-n w12">12</span><span class="w-n w3">3</span><span class="w-n w6">6</span><span class="w-n w9">9</span><span class="w-h" id="wH"></span><span class="w-m" id="wM"></span><span class="w-c"></span></span></span>
         <span class="w-pin"></span>
       </span>
     </div>
 
-    <div class="obj item badge" aria-hidden="true" style="--x:876;--y:676;--w:124;--h:176;--xs:194;--ys:1120;--ws:104;--hs:150">
+    <div class="obj item badge" aria-hidden="true" style="--x:876;--y:676;--w:124;--h:176;--xs:190;--ys:912;--ws:104;--hs:150">
       <span class="lift">
         <span class="bd-clip"></span>
         <span class="bd-card">
@@ -211,8 +211,8 @@
       </span>
     </div>
 
-    <p class="obj hint" style="--x:600;--y:772;--w:240;--h:30;--xs:20;--ys:1528;--ws:350;--hs:40"><span class="hint-pc">押すと手に取れます。ドラッグで動かせます。</span><span class="hint-sp">押すと手に取れます。長押しで動かせます。</span></p>
-    <button class="obj mess" id="mess" type="button" style="--x:600;--y:806;--w:150;--h:48;--xs:20;--ys:1572;--ws:150;--hs:48">ちらかす</button>
+    <p class="obj hint" style="--x:600;--y:772;--w:240;--h:30;--xs:16;--ys:1294;--ws:358;--hs:40"><span class="hint-pc">押すと手に取れます。ドラッグで動かせます。</span><span class="hint-sp">押すと手に取れます。長押しで動かせます。</span></p>
+    <button class="obj mess" id="mess" type="button" style="--x:600;--y:806;--w:150;--h:48;--xs:16;--ys:1336;--ws:150;--hs:48">ちらかす</button>
   </div>
 </section>
 
@@ -226,62 +226,62 @@
     <div class="drawer">
       <div class="drawer-in">
         <section class="cmp cmp-career" aria-labelledby="cmp-career">
-          <h3 class="cmp-h" id="cmp-career"><span class="tape">キャリア・経験を整理する</span><span class="cmp-n">7点</span></h3>
+          <h3 class="cmp-h" id="cmp-career"><span class="tepra">キャリア・経験を整理する</span><span class="dymo">7点</span></h3>
           <ul class="cmp-list">
-            <li><a class="lam" href="../../../compass/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/compass.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">BRIDGE Compass</span><span class="lam-t">10の質問で、これまでの経験を別の言葉に翻訳する</span></a></li>
-            <li><a class="lam" href="../../../tanaoroshi/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/tanaoroshi.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">経験の棚卸し</span><span class="lam-t">18の質問で、職務経歴書のたねをつくる</span></a></li>
-            <li><a class="lam" href="../../../iikae/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/iikae.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">現場のことば 言いかえ帳</span><span class="lam-t">現場のことばを、履歴書で通じる言葉に</span></a></li>
-            <li><a class="lam" href="../../../moyamoya/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/moyamoya.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">職場モヤモヤ診断</span><span class="lam-t">職場の「なんとなくしんどい」を、10問で言葉に</span></a></li>
-            <li><a class="lam" href="../../../karte/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/karte.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">現場のカルテ</span><span class="lam-t">職場のしんどさを、カルテの形で読む</span></a></li>
-            <li><a class="lam" href="../../../daily-app/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/careerlog.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">キャリアログ</span><span class="lam-t">日々の仕事と学びを記録して、キャリアの言葉に</span></a></li>
-            <li><a class="lam" href="../../../growth-76a805/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/growth.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">Growth OS</span><span class="lam-t">仕事の記録を、企画や発信のたねに</span></a></li>
-          </ul>
-        </section>
-        <section class="cmp cmp-manage" aria-labelledby="cmp-manage">
-          <h3 class="cmp-h" id="cmp-manage"><span class="tape">経営・管理の実務に使う</span><span class="cmp-n">9点</span></h3>
-          <ul class="cmp-list">
-            <li><a class="lam" href="../../../rehaboard/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/rehaboard.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">RehaBoard</span><span class="lam-t">リハ部門の運営を、1画面に</span></a></li>
-            <li><a class="lam" href="../../../medboard/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/medboard.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">MedBoard</span><span class="lam-t">外来の患者フローを、2施設で見比べる</span></a></li>
-            <li><a class="lam" href="../../../hire-board/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/hireboard.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">HireBoard</span><span class="lam-t">医療機関の採用を、カンバンで追う</span></a></li>
-            <li><a class="lam" href="../../../interview-kit/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/interview-kit.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">面接官の手帖</span><span class="lam-t">面接の質問を用意し、事実と印象を分けて記録する</span></a></li>
-            <li><a class="lam" href="../../../consult-simulator/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/consult-simulator.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">ConsultSim</span><span class="lam-t">1診と2診で、待ち時間がどう変わるかを試す</span></a></li>
-            <li><a class="lam" href="../../../round-note/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/round-note.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">本部長の巡回手帖</span><span class="lam-t">複数施設の巡回を、1冊の手帖に</span></a></li>
-            <li><a class="lam" href="../../../manager-starter/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/manager-starter.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">医療管理職スターター</span><span class="lam-t">初めて管理職になった人の、チェックリストと記入式シート</span></a></li>
-            <li><a class="lam" href="../../../medops/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/medops.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">医療管理実務ライブラリ</span><span class="lam-t">医療管理の実務手順と、無料テンプレート</span></a></li>
-            <li><a class="lam" href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer"><span class="lam-shot"><img src="../../../images/products/thumbs/reha-checklist.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">Reha Checklist</span><span class="lam-t">リハ部門KPIのチェックリスト(PDF・スプレッドシート)</span></a></li>
-          </ul>
-        </section>
-        <section class="cmp cmp-work" aria-labelledby="cmp-work">
-          <h3 class="cmp-h" id="cmp-work"><span class="tape">明日の業務を楽にする</span><span class="cmp-n">3点</span></h3>
-          <ul class="cmp-list">
-            <li><a class="lam" href="../../../keiji/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/keiji.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">掲示じたく</span><span class="lam-t">院内掲示を、選んで埋めるだけ</span></a></li>
-            <li><a class="lam" href="../../../nidodema/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/nidodema.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">二度手間さがし</span><span class="lam-t">部署の手作業を、減らせるものと守るものに分ける</span></a></li>
-            <li><a class="lam" href="../../../yawagaeshi/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/yawagaeshi.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">やわ返</span><span class="lam-t">角の立たない返信案を、3つつくる</span></a></li>
+            <li class="lam-li tall" style="--r:-0.42deg;--dx:1px;--dy:2px"><a class="lam" href="../../../compass/index.html"><span class="lam-in"><span class="lam-shot"><img src="../shared/shots/compass-result.webp" alt="" width="780" height="1688" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.01</span><span class="lam-cap">実際の画面・答えの一例</span></span><span class="lam-name">BRIDGE Compass</span><span class="lam-t">10の質問で、これまでの経験を別の言葉に翻訳する</span></span><span class="clip clip-b" aria-hidden="true"></span></a></li>
+            <li class="lam-li tall" style="--r:1.26deg;--dx:-2px;--dy:1px"><a class="lam" href="../../../tanaoroshi/index.html"><span class="lam-in"><span class="lam-shot"><img src="../shared/shots/tanaoroshi.webp" alt="" width="780" height="1688" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.02</span><span class="lam-cap">実際の画面</span></span><span class="lam-name">経験の棚卸し</span><span class="lam-t">18の質問で、職務経歴書のたねをつくる</span></span><span class="clip clip-b" aria-hidden="true"></span></a></li>
+            <li class="lam-li tall" style="--r:-1.68deg;--dx:2px;--dy:0px"><a class="lam" href="../../../iikae/index.html"><span class="lam-in"><span class="lam-shot"><img src="../shared/shots/iikae.webp" alt="" width="780" height="1688" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.03</span><span class="lam-cap">実際の画面</span></span><span class="lam-name">現場のことば 言いかえ帳</span><span class="lam-t">現場のことばを、履歴書で通じる言葉に</span></span><span class="clip clip-b" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:0.00deg;--dx:-1px;--dy:-1px"><a class="lam" href="../../../moyamoya/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/moyamoya.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.04</span></span><span class="lam-name">職場モヤモヤ診断</span><span class="lam-t">職場の「なんとなくしんどい」を、10問で言葉に</span></span><span class="clip clip-t" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:1.68deg;--dx:3px;--dy:-2px"><a class="lam" href="../../../karte/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/karte.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.05</span></span><span class="lam-name">現場のカルテ</span><span class="lam-t">職場のしんどさを、カルテの形で読む</span></span></a></li>
+            <li class="lam-li small" style="--r:-1.26deg;--dx:0px;--dy:2px"><a class="lam" href="../../../daily-app/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/careerlog.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.06</span></span><span class="lam-name">キャリアログ</span><span class="lam-t">日々の仕事と学びを記録して、キャリアの言葉に</span></span></a></li>
+            <li class="lam-li small" style="--r:0.42deg;--dx:-3px;--dy:1px"><a class="lam" href="../../../growth-76a805/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/growth.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.07</span></span><span class="lam-name">Growth OS</span><span class="lam-t">仕事の記録を、企画や発信のたねに</span></span><span class="clip clip-p" aria-hidden="true"></span></a></li>
           </ul>
         </section>
         <section class="cmp cmp-learn" aria-labelledby="cmp-learn">
-          <h3 class="cmp-h" id="cmp-learn"><span class="tape">医療経営を学ぶ</span><span class="cmp-n">3点</span></h3>
+          <h3 class="cmp-h" id="cmp-learn"><span class="tepra">医療経営を学ぶ</span><span class="dymo">3点</span></h3>
           <ul class="cmp-list">
-            <li><a class="lam" href="../../../clinic-flow-3d/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/clinic-flow-3d.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">クリニックタウン3D</span><span class="lam-t">クリニック経営を、1日ずつ動かして学ぶ</span></a></li>
-            <li><a class="lam" href="../../../turnaround12/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/turnaround12.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">ターンアラウンド12</span><span class="lam-t">赤字クリニックを、12週で立て直す</span></a></li>
-            <li><a class="lam" href="../../../pmi-quest/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/pmi-quest.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">クリニックPMIクエスト</span><span class="lam-t">承継直後の30日を、10問で診断する</span></a></li>
+            <li class="lam-li wide" style="--r:2.10deg;--dx:1px;--dy:0px"><a class="lam" href="../../../clinic-flow-3d/index.html"><span class="lam-in"><span class="lam-shot"><img src="../shared/shots/ct3d-play-pc.webp" alt="" width="2560" height="1600" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.08</span><span class="lam-cap">実際のゲーム画面</span></span><span class="lam-name">クリニックタウン3D</span><span class="lam-t">クリニック経営を、1日ずつ動かして学ぶ</span></span><span class="clip clip-b" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:-0.84deg;--dx:-2px;--dy:-1px"><a class="lam" href="../../../turnaround12/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/turnaround12.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.09</span></span><span class="lam-name">ターンアラウンド12</span><span class="lam-t">赤字クリニックを、12週で立て直す</span></span></a></li>
+            <li class="lam-li small" style="--r:0.84deg;--dx:2px;--dy:-2px"><a class="lam" href="../../../pmi-quest/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/pmi-quest.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.10</span></span><span class="lam-name">クリニックPMIクエスト</span><span class="lam-t">承継直後の30日を、10問で診断する</span></span></a></li>
           </ul>
         </section>
-        <section class="cmp cmp-study" aria-labelledby="cmp-study">
-          <h3 class="cmp-h" id="cmp-study"><span class="tape">学習を続ける</span><span class="cmp-n">3点</span></h3>
+        <section class="cmp cmp-manage" aria-labelledby="cmp-manage">
+          <h3 class="cmp-h" id="cmp-manage"><span class="tepra">経営・管理の実務に使う</span><span class="dymo">9点</span></h3>
           <ul class="cmp-list">
-            <li><a class="lam" href="../../../him-quiz/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/him-quiz.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">HIM Quiz</span><span class="lam-t">診療情報管理士の模擬試験、全12章・360問</span></a></li>
-            <li><a class="lam" href="../../../study-board/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/studyboard.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">StudyBoard</span><span class="lam-t">複数科目の学習を、1枚のボードで続ける</span></a></li>
-            <li><a class="lam" href="../../../english-trainer/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/english-trainer.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">Daily English</span><span class="lam-t">瞬間英作文を、通勤の合間に</span></a></li>
+            <li class="lam-li wide" style="--r:-2.10deg;--dx:-1px;--dy:2px"><a class="lam" href="../../../rehaboard/index.html"><span class="lam-in"><span class="lam-shot"><img src="../shared/shots/rehaboard.webp" alt="" width="2560" height="1600" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.11</span><span class="lam-cap">紹介ページ</span></span><span class="lam-name">RehaBoard</span><span class="lam-t">リハ部門の運営を、1画面に</span></span><span class="clip clip-b" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:-0.42deg;--dx:3px;--dy:1px"><a class="lam" href="../../../medboard/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/medboard.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.12</span></span><span class="lam-name">MedBoard</span><span class="lam-t">外来の患者フローを、2施設で見比べる</span></span><span class="clip clip-p" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:1.26deg;--dx:0px;--dy:0px"><a class="lam" href="../../../hire-board/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/hireboard.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.13</span></span><span class="lam-name">HireBoard</span><span class="lam-t">医療機関の採用を、カンバンで追う</span></span></a></li>
+            <li class="lam-li small" style="--r:-1.68deg;--dx:-3px;--dy:-1px"><a class="lam" href="../../../interview-kit/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/interview-kit.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.14</span></span><span class="lam-name">面接官の手帖</span><span class="lam-t">面接の質問を用意し、事実と印象を分けて記録する</span></span></a></li>
+            <li class="lam-li small" style="--r:0.00deg;--dx:1px;--dy:-2px"><a class="lam" href="../../../consult-simulator/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/consult-simulator.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.15</span></span><span class="lam-name">ConsultSim</span><span class="lam-t">1診と2診で、待ち時間がどう変わるかを試す</span></span></a></li>
+            <li class="lam-li small" style="--r:1.68deg;--dx:-2px;--dy:2px"><a class="lam" href="../../../round-note/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/round-note.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.16</span></span><span class="lam-name">本部長の巡回手帖</span><span class="lam-t">複数施設の巡回を、1冊の手帖に</span></span></a></li>
+            <li class="lam-li small" style="--r:-1.26deg;--dx:2px;--dy:1px"><a class="lam" href="../../../manager-starter/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/manager-starter.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.17</span></span><span class="lam-name">医療管理職スターター</span><span class="lam-t">初めて管理職になった人の、チェックリストと記入式シート</span></span><span class="clip clip-p" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:0.42deg;--dx:-1px;--dy:0px"><a class="lam" href="../../../medops/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/medops.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.18</span></span><span class="lam-name">医療管理実務ライブラリ</span><span class="lam-t">医療管理の実務手順と、無料テンプレート</span></span><span class="clip clip-t" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:2.10deg;--dx:3px;--dy:-1px"><a class="lam" href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/reha-checklist.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.19</span></span><span class="lam-name">Reha Checklist</span><span class="lam-t">リハ部門KPIのチェックリスト(PDF・スプレッドシート)</span></span></a></li>
+          </ul>
+        </section>
+        <section class="cmp cmp-work" aria-labelledby="cmp-work">
+          <h3 class="cmp-h" id="cmp-work"><span class="tepra">明日の業務を楽にする</span><span class="dymo">3点</span></h3>
+          <ul class="cmp-list">
+            <li class="lam-li wide" style="--r:-0.84deg;--dx:0px;--dy:-2px"><a class="lam" href="../../../keiji/index.html"><span class="lam-in"><span class="lam-shot"><img src="../shared/shots/keiji-output.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.20</span><span class="lam-cap">できあがりの例</span></span><span class="lam-name">掲示じたく</span><span class="lam-t">院内掲示を、選んで埋めるだけ</span></span><span class="clip clip-b" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:0.84deg;--dx:-3px;--dy:2px"><a class="lam" href="../../../nidodema/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/nidodema.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.21</span></span><span class="lam-name">二度手間さがし</span><span class="lam-t">部署の手作業を、減らせるものと守るものに分ける</span></span></a></li>
+            <li class="lam-li small" style="--r:-2.10deg;--dx:1px;--dy:1px"><a class="lam" href="../../../yawagaeshi/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/yawagaeshi.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.22</span></span><span class="lam-name">やわ返</span><span class="lam-t">角の立たない返信案を、3つつくる</span></span><span class="clip clip-p" aria-hidden="true"></span></a></li>
           </ul>
         </section>
         <section class="cmp cmp-play" aria-labelledby="cmp-play">
-          <h3 class="cmp-h" id="cmp-play"><span class="tape">気軽に試す・作品を楽しむ</span><span class="cmp-n">4点</span></h3>
+          <h3 class="cmp-h" id="cmp-play"><span class="tepra">気軽に試す・作品を楽しむ</span><span class="dymo">4点</span></h3>
           <ul class="cmp-list">
-            <li><a class="lam" href="../../../gokigen-gacha/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/gokigen-gacha.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">ごきげん回復ガチャ</span><span class="lam-t">疲れた日の回復行動を、ひとつだけ</span></a></li>
-            <li><a class="lam" href="../../../ittan-horyu/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/ittan-horyu.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">いったん保留</span><span class="lam-t">買う前に、少しだけ寝かせる</span></a></li>
-            <li><a class="lam" href="../../../madoakari/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/madoakari.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">窓あかり</span><span class="lam-t">小さな病院の一日を、ただ眺める</span></a></li>
-            <li><a class="lam" href="../../../futatsume/index.html"><span class="lam-shot"><img src="../../../images/products/thumbs/futatsume.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-name">ふたつめの波</span><span class="lam-t">二つの波が重なる、水面のパズル</span></a></li>
+            <li class="lam-li tall" style="--r:-0.42deg;--dx:-2px;--dy:0px"><a class="lam" href="../../../gokigen-gacha/index.html"><span class="lam-in"><span class="lam-shot"><img src="../shared/shots/gacha.webp" alt="" width="780" height="1688" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.23</span><span class="lam-cap">実際の画面</span></span><span class="lam-name">ごきげん回復ガチャ</span><span class="lam-t">疲れた日の回復行動を、ひとつだけ</span></span><span class="clip clip-b" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:1.26deg;--dx:2px;--dy:-1px"><a class="lam" href="../../../ittan-horyu/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/ittan-horyu.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.24</span></span><span class="lam-name">いったん保留</span><span class="lam-t">買う前に、少しだけ寝かせる</span></span></a></li>
+            <li class="lam-li wide" style="--r:-1.68deg;--dx:-1px;--dy:-2px"><a class="lam" href="../../../madoakari/index.html"><span class="lam-in"><span class="lam-shot"><img src="../shared/shots/madoakari-pc.webp" alt="" width="2560" height="1600" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.25</span><span class="lam-cap">実際の画面</span></span><span class="lam-name">窓あかり</span><span class="lam-t">小さな病院の一日を、ただ眺める</span></span><span class="clip clip-b" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:0.00deg;--dx:3px;--dy:2px"><a class="lam" href="../../../futatsume/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/futatsume.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.26</span></span><span class="lam-name">ふたつめの波</span><span class="lam-t">二つの波が重なる、水面のパズル</span></span></a></li>
+          </ul>
+        </section>
+        <section class="cmp cmp-study" aria-labelledby="cmp-study">
+          <h3 class="cmp-h" id="cmp-study"><span class="tepra">学習を続ける</span><span class="dymo">3点</span></h3>
+          <ul class="cmp-list">
+            <li class="lam-li small" style="--r:1.68deg;--dx:0px;--dy:1px"><a class="lam" href="../../../him-quiz/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/him-quiz.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.27</span></span><span class="lam-name">HIM Quiz</span><span class="lam-t">診療情報管理士の模擬試験、全12章・360問</span></span><span class="clip clip-p" aria-hidden="true"></span></a></li>
+            <li class="lam-li small" style="--r:-1.26deg;--dx:-3px;--dy:0px"><a class="lam" href="../../../study-board/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/studyboard.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.28</span></span><span class="lam-name">StudyBoard</span><span class="lam-t">複数科目の学習を、1枚のボードで続ける</span></span></a></li>
+            <li class="lam-li small" style="--r:0.42deg;--dx:1px;--dy:-1px"><a class="lam" href="../../../english-trainer/index.html"><span class="lam-in"><span class="lam-shot"><img src="../../../images/products/thumbs/english-trainer.webp" alt="" width="880" height="550" loading="lazy" decoding="async"></span><span class="lam-meta"><span class="lam-no">No.29</span></span><span class="lam-name">Daily English</span><span class="lam-t">瞬間英作文を、通勤の合間に</span></span></a></li>
           </ul>
         </section>
       </div>

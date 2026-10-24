@@ -701,7 +701,7 @@ function live() {
   function region() {
     const sp = W < 900;
     if (sp) {
-      const top = Math.max(H * .3, 252), bottom = H - Math.max(H * .235, 192);
+      const top = Math.max(H * .3, H < 740 ? 172 : 252), bottom = H - Math.max(H * .235, 192);
       return { x0: -W * .15, x1: W * 1.15, y0: top, y1: bottom };
     }
     return { x0: W * .37, x1: W * .99, y0: H * .115, y1: H * .955 };
