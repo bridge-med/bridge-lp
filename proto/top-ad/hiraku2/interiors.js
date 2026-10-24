@@ -4,11 +4,15 @@
      kind: 'hospital' | 'observatory' | 'clinic' | 'office' | 'library' | 'park' | 'atelier'
      box : { w, d, h, floors, shape }  原点は建物の床の中心、+Y が上、+Z が正面(ひらく側)
            中は x∈[-w/2, w/2]、z∈[-d/2, d/2-0.04]、y∈[0, h]。正面の壁と屋根は作らない(外側の持ち物)。公園は y=0 が芝の面
-     ctx : { palette, loadTexture(url) → Promise<Texture>(.image を canvas に描ける物), quality: 'high' | 'low', layout?: { 道具の id: { x, z, ry } } }
+     ctx : { palette, loadTexture(url) → Promise<Texture>(.image を canvas に描ける物), quality: 'high' | 'low', layout?: { 道具の id: { x, z, ry } }, limbs?: false で腕と腿を描かない }
+           palette.poche があれば、切り口の塗りの色(なければ '#16233E')
      ready: 画面の画像がそろったら解ける Promise。そろった時点で、画面が 60ms ずつ順に点る。reveal() を呼ぶと、その時から点し直す
-   描画の回数(1つの建物): 止まっている形 1・道具の物 1・画面 1・人の体 1・人の頭 1(+公園の波紋 1)。影を落とすのは止まっている形と人の体(影 +2)
+   描画の回数(1つの建物): 形(止まっている物と道具の物)1・画面 1・画面のにじみ(と公園の波紋)1・人の体 1・人の頭 1・腕と腿 1 = 6。影を落とすのは形と人の体(影 +2。合わせて 8)
    画面は、建物ごとに1枚の画像(アトラス)にまとめて貼る。実際の画面は ctx.loadTexture で読み、その画像を写す
-   形は、外側の町と同じ世界: 生成りの壁・テラコッタ・セージ・砂。人は hiraku/world.js と同じ形と色(PERSON)、顔は描かない
+   形は、外側の町と同じ世界: 生成りの壁・テラコッタ・セージ・砂。人は world.js と同じ形と色(PERSON)、顔は描かない
+   磨き込み(BRIEF 10.2): 切った壁・床・天井の切り口は、断面図のように藍(palette.poche)で平らに塗る。
+     室内の光は描画を増やさずに素材の中で作る(床と壁の境・隅の陰、奥ほどわずかに暗く、天井の灯りの暖かいにじみ)。
+     床の接地の陰は、柔らかい縁の四角を床に重ねる。人は座る・かがむ・話す・歩くの姿勢を持つ
    ================================================================ */
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from '../shared/vendor/three-0.160.0/RoundedBoxGeometry.js';
@@ -57,6 +61,7 @@ function makePalette(p) {
     notes: ['#F2D46B', '#F0AFA5', '#A4CDEA', '#BFE2B0'], books: [P.terra, mix(P.sage, '#5D7F70', .5), '#E6C76E', mix(pe[5], '#2E5A8A', .3), P.navy, mix(P.wood, '#6E4B36', .3), mix(P.terra, P.sand, .4), '#F3EFE6', pe[0], '#8E5A6B', mix(P.glassDark, '#3E5C7A', .3)],
     hair: '#3A302A'
   });
+  R.poche = (p && p.poche) || '#16233E';      // 切り口の塗り(断面図の poché)
   if (outer) {
     const one = v => Array.isArray(v) ? v[0] : v;
     if (p.scrubs) { R.scrub = R.teal = p.scrubs[0]; R.scrubNavy = p.scrubs[1] || R.scrubNavy; R.tealSoft = mix(R.teal, '#FFFFFF', .5); R.blanket = mix(R.teal, '#FFFFFF', .55); }
@@ -148,22 +153,26 @@ const col = h => { if (!COLS.has(h)) COLS.set(h, new THREE.Color(h)); return COL
 
 class Batch {
   constructor() { this.list = []; this.n = 0; }
-  add(geo, m, c, glow = 0) { const g = geo.clone().applyMatrix4(m); this.list.push([g, typeof c === 'string' ? col(c) : c, glow]); this.n += g.attributes.position.count; }
+  // c: 色(形に頂点の色があれば、それに掛ける)。glow: 夜に灯る強さ。flat: 1 なら光を受けない平らな色(切り口の塗り)
+  add(geo, m, c, glow = 0, flat = 0) { const g = geo.clone().applyMatrix4(m); this.list.push([g, typeof c === 'string' ? col(c) : c, glow, flat]); this.n += g.attributes.position.count; }
   geometry(uv) {
     if (!this.n) return null;
-    const P = new Float32Array(this.n * 3), N = new Float32Array(this.n * 3), K = new Float32Array(this.n * 3), L = new Float32Array(this.n), U = uv ? new Float32Array(this.n * 2) : null;
+    const P = new Float32Array(this.n * 3), N = new Float32Array(this.n * 3), K = new Float32Array(this.n * 3), L = new Float32Array(this.n), F = new Float32Array(this.n), U = uv ? new Float32Array(this.n * 2) : null;
     let o = 0;
-    for (const [g, c, glow] of this.list) {
-      const k = g.attributes.position.count;
+    for (const [g, c, glow, flat] of this.list) {
+      const k = g.attributes.position.count, vc = g.attributes.color;
       P.set(g.attributes.position.array, o * 3); N.set(g.attributes.normal.array, o * 3);
       if (U && g.attributes.uv) U.set(g.attributes.uv.array, o * 2);
-      for (let i = 0; i < k; i++) { const j = (o + i) * 3; K[j] = c.r; K[j + 1] = c.g; K[j + 2] = c.b; L[o + i] = glow; }
+      for (let i = 0; i < k; i++) {
+        const j = (o + i) * 3, a = vc ? vc.getX(i) : 1, b = vc ? vc.getY(i) : 1, d = vc ? vc.getZ(i) : 1;
+        K[j] = c.r * a; K[j + 1] = c.g * b; K[j + 2] = c.b * d; L[o + i] = glow; F[o + i] = flat;
+      }
       o += k; g.dispose();
     }
     this.list.length = 0;
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(K, 3)); geo.setAttribute('aGlow', new THREE.BufferAttribute(L, 1));
+    geo.setAttribute('color', new THREE.BufferAttribute(K, 3)); geo.setAttribute('aGlow', new THREE.BufferAttribute(L, 1)); geo.setAttribute('aFlat', new THREE.BufferAttribute(F, 1));
     if (U) geo.setAttribute('uv', new THREE.BufferAttribute(U, 2));
     geo.computeBoundingSphere();
     return geo;
@@ -174,6 +183,40 @@ function bx(b, x, y, z, w, h, d, c, ry = 0, glow = 0) { b.add(G.box, mtx(x, y, z
 function bb(b, x0, x1, y0, y1, z0, z1, c, glow = 0) { bx(b, (x0 + x1) / 2, y0, (z0 + z1) / 2, x1 - x0, y1 - y0, z1 - z0, c, 0, glow); }
 function cy(b, x, y, z, r, h, c, seg6, glow = 0) { b.add(seg6 ? G.cyl6 : G.cyl, mtx(x, y, z, r * 2, h, r * 2), c, glow); }
 function sp(b, x, y, z, r, c, sy = 1, glow = 0) { b.add(G.sph, mtx(x, y, z, r * 2, r * 2 * sy, r * 2), c, glow); }
+/* 切り口の塗り(光を受けない平らな藍) */
+function pb(b, x0, x1, y0, y1, z0, z1, c) { b.add(G.box, mtx((x0 + x1) / 2, y0, (z0 + z1) / 2, x1 - x0, y1 - y0, z1 - z0), c, 0, 1); }
+/* 床の接地の陰: 中ほどは暗く(k)、縁(幅 s)で床の色に溶ける四角。床と同じ素材なので、床の光の具合とそろう */
+const SOFT = new Map();
+function softGeo(w, d, s, k, round) {
+  const key = [w, d, s, k, round ? 1 : 0].map(v => (+v).toFixed(3)).join('|');
+  if (SOFT.has(key)) return SOFT.get(key);
+  const pos = [], cl = [], a = w / 2, b = d / 2, n = round ? 12 : 4;
+  const ring = (rx, rz) => Array.from({ length: n }, (_, i) => { const t = round ? i / n * TAU : [Math.PI * 1.25, Math.PI * 1.75, Math.PI * .25, Math.PI * .75][i]; return round ? [Math.cos(t) * rx, Math.sin(t) * rz] : [Math.sign(Math.cos(t)) * rx, Math.sign(Math.sin(t)) * rz]; });
+  const inn = ring(a, b), out = ring(a + s, b + s);
+  const tri = (p, q, r, cp, cq, cr) => {
+    if ((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]) > 0) { [q, r] = [r, q]; [cq, cr] = [cr, cq]; }   // 上を向く面にそろえる
+    for (const [v, c] of [[p, cp], [q, cq], [r, cr]]) { pos.push(v[0], 0, v[1]); cl.push(c, c, c); }
+  };
+  for (let i = 1; i < n - 1; i++) tri(inn[0], inn[i], inn[i + 1], k, k, k);
+  for (let i = 0; i < n; i++) { const j = (i + 1) % n; tri(inn[i], out[i], out[j], k, 1, 1); tri(inn[i], out[j], inn[j], k, 1, k); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(pos.map((_, i) => i % 3 === 1 ? 1 : 0), 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cl, 3));
+  SOFT.set(key, g); return g;
+}
+let CUR = null;                            // 組み立て中の建物(床の色を引くため)
+function floorAt(E, x, z, y) {
+  for (const r of E.rugs) if (Math.abs(r.y - y) < .03 && x > r.x0 && x < r.x1 && z > r.z0 && z < r.z1) return r.c;
+  const i = E.fh ? clamp(Math.floor((y + .02) / E.fh), 0, E.floors - 1) : 0;
+  return E.fc[i] || E.fc[0] || '#D9CFBF';
+}
+/* (x, z) に w × d の陰。y は床の仕上げの上の高さ */
+function contact(E, x, y, z, w, d, o = {}) {
+  if (!E || E.noContact) return;
+  const c = o.c || floorAt(E, x, z, y);
+  E.S.add(softGeo(w, d, o.s ?? .05, o.k ?? .74, o.round), mtx(x, y + .0015, z, 1, 1, 1, o.ry || 0), c);
+}
+/* 敷物を置き、その上の陰が敷物の色になるように覚える */
+function rug(E, x0, x1, z0, z1, y, c) { bb(E.S, x0, x1, y, y + .005, z0, z1, c); E.rugs.push({ x0, x1, z0, z1, y: y + .005, c }); return y + .005; }
 /* 向きのある物: (x, y, z) を原点に ry だけ回し、s 倍した座標で部品を置く */
 function grp(b, x, y, z, ry = 0, s = 1) {
   const cs = Math.cos(ry) * s, sn = Math.sin(ry) * s;
@@ -183,24 +226,80 @@ function grp(b, x, y, z, ry = 0, s = 1) {
     rbox(lx, ly, lz, w, h, d, r, c) { const [wx, wz] = P(lx, lz); b.add(rbGeo(w * s, h * s, d * s, r * s), mtx(wx, y + ly * s, wz, 1, 1, 1, ry), c); return this; },
     cyl(lx, ly, lz, r, h, c, seg6, rx = 0, rz = 0, glow = 0) { const [wx, wz] = P(lx, lz); b.add(seg6 ? G.cyl6 : G.cyl, mtx(wx, y + ly * s, wz, r * 2 * s, h * s, r * 2 * s, ry, rx, rz), c, glow); return this; },
     sph(lx, ly, lz, r, c, sy = 1, glow = 0) { const [wx, wz] = P(lx, lz); b.add(G.sph, mtx(wx, y + ly * s, wz, r * 2 * s, r * 2 * sy * s, r * 2 * s, ry), c, glow); return this; },
-    cone(lx, ly, lz, r, h, c, glow = 0) { const [wx, wz] = P(lx, lz); b.add(G.cone, mtx(wx, y + ly * s, wz, r * 2 * s, h * s, r * 2 * s, ry), c, glow); return this; }
+    cone(lx, ly, lz, r, h, c, glow = 0) { const [wx, wz] = P(lx, lz); b.add(G.cone, mtx(wx, y + ly * s, wz, r * 2 * s, h * s, r * 2 * s, ry), c, glow); return this; },
+    // 床に立つ物の接地の陰(物の足もとの大きさ w × d)
+    foot(lx, lz, w, d, k = .72, sft = .05) { const [wx, wz] = P(lx, lz); contact(CUR, wx, y, wz, w * s, d * s, { ry, k, s: sft }); return this; }
   };
 }
 
-/* ---------- 素材: 頂点の色 × 中の灯り(uSelf)+ 夜に灯る所(aGlow × uGlow) ---------- */
-/* 中の灯り: 昼も少し(下の階は上の床の影になるので、部屋の灯りの分だけ明るくする)。夜は暖かく */
-const SELF_DAY = [.14, .13, .115], SELF_NIGHT = [.24, .19, .12], PSELF_DAY = [.14, .13, .12], PSELF_NIGHT = [.3, .25, .18];
-function makeUniforms() { return { uSelf: { value: new THREE.Vector3(...SELF_DAY) }, uGlow: { value: 0 } }; }
-function inMat(u, vc = true, glowAttr = true) {
+/* ---------- 素材: 頂点の色 × 室内の光 + 夜に灯る所(aGlow × uGlow)。切り口(aFlat)は光を受けない ----------
+   室内の光(描画を増やさない。建物の中の座標で、画素ごとに):
+     床は壁ぎわと隅ほど暗く / 壁と家具と人は床に近いほど暗く(接地) / 奥ほどわずかに暗く
+     天井の灯り: 床に暖かいにじみ(灯りの列の下)、壁の上のほうに暖かい明るさ */
+const SELF_DAY = [.12, .11, .1], SELF_NIGHT = [.2, .16, .1], PSELF_DAY = [.13, .12, .11], PSELF_NIGHT = [.26, .21, .15];
+const LAMP_DAY = .24, LAMP_NIGHT = .62;
+function makeUniforms() {
+  return {
+    uSelf: { value: new THREE.Vector3(...SELF_DAY) }, uGlow: { value: 0 },
+    uRoom: { value: new THREE.Vector4(1, -1, 1, 1) },       // 側面の壁の内側(±x)・奥の壁の内側 z・前の z・階の高さ
+    uRoom2: { value: new THREE.Vector4(2, 0, 0, 0) },       // 形(0 箱・1 塔・2 なし)・塔の半径・灯りの間隔・灯りの列の z
+    uRoom3: { value: new THREE.Vector4(0, 0, 0, 0) },       // 灯りの列の x のずれ
+    uLamp: { value: new THREE.Vector4(1, .84, .62, LAMP_DAY) },
+    uPpl: { value: Array.from({ length: NPPL }, () => new THREE.Vector4(0, -9, 0, 0)) }   // 人の足もと(xyz)と陰の半径(w)。床の上に、人と一緒に動く接地の陰
+  };
+}
+const NPPL = 32;
+const PPL_GLSL = `
+float pplShade() {
+  float s = 0.0;
+  for (int i = 0; i < ${NPPL}; i++) {
+    vec4 p = uPpl[i];
+    if (p.w <= 0.0) continue;
+    vec3 d = vLoc - p.xyz;
+    if (abs(d.y) > .05) continue;
+    s = max(s, 1.0 - smoothstep(.3, 1.0, length(d.xz) / p.w));
+  }
+  return s;
+}`;
+const ROOM_GLSL = `
+float roomShade(out float pool) {
+  pool = 0.0;
+  if (uRoom2.x > 1.5) return 1.0;
+  vec3 n = normalize(vNrm);
+  float fh = max(uRoom.w, .3);
+  float hy = vLoc.y - floor((vLoc.y + .006) / fh) * fh;
+  float up = step(.6, n.y), vert = 1.0 - step(.6, abs(n.y));
+  float dB = 9.0, dS = 9.0;
+  if (uRoom2.x < .5) { dB = vLoc.z - uRoom.y; dS = uRoom.x - abs(vLoc.x); }
+  else if (vLoc.z < .05) { dB = uRoom2.y - length(vLoc.xz); }
+  float nearW = 1.0 - smoothstep(0.0, .28, min(dB, dS));
+  float base = 1.0 - smoothstep(0.0, .14, hy);
+  float edge = abs(n.z) > .5 ? dS : dB;
+  float corner = 1.0 - smoothstep(0.0, .2, edge);
+  float depth = clamp((uRoom.z - vLoc.z) / max(uRoom.z - uRoom.y, .3), 0.0, 1.0);
+  float shade = 1.0 - .3 * nearW * up - (.28 * base + .16 * corner) * vert - .1 * depth;
+  float sp = uRoom2.z;
+  float dx = sp > .01 ? mod(vLoc.x - uRoom3.x + sp * 50.5, sp) - sp * .5 : vLoc.x;
+  float dz = vLoc.z - uRoom2.w;
+  pool = exp(-(dx * dx + dz * dz) / .34) * (.5 + .5 * up) * (1.0 - .6 * smoothstep(fh * .55, fh, hy)) + smoothstep(fh * .5, fh * .98, hy) * vert * .5;
+  return shade;
+}`;
+function inMat(u, o = {}) {
+  const vc = o.vc !== false, glow = !!o.glow, flat = !!o.flat, ppl = !!o.ppl;
   const m = new THREE.MeshStandardMaterial({ vertexColors: vc, roughness: .86, metalness: 0 });
   m.onBeforeCompile = sh => {
-    sh.uniforms.uSelf = u.uSelf; sh.uniforms.uGlow = u.uGlow;
-    if (glowAttr) sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aGlow;\nvarying float vGlow;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvGlow = aGlow;');
+    for (const k of ['uSelf', 'uGlow', 'uRoom', 'uRoom2', 'uRoom3', 'uLamp']) sh.uniforms[k] = u[k];
+    if (ppl) sh.uniforms.uPpl = u.uPpl;
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vLoc;\nvarying vec3 vNrm;' + (glow ? '\nattribute float aGlow;\nvarying float vGlow;' : '') + (flat ? '\nattribute float aFlat;\nvarying float vFlat;' : ''))
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvec4 lp = vec4(transformed, 1.0);\nvec3 ln = objectNormal;\n#ifdef USE_INSTANCING\nlp = instanceMatrix * lp;\nln = mat3(instanceMatrix) * ln;\n#endif\nvLoc = lp.xyz;\nvNrm = ln;' + (glow ? '\nvGlow = aGlow;' : '') + (flat ? '\nvFlat = aFlat;' : ''));
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 uSelf;\nuniform float uGlow;' + (glowAttr ? '\nvarying float vGlow;' : ''))
-      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * uSelf' + (glowAttr ? ' + vec3(1.0, .78, .5) * vGlow * uGlow' : '') + ';');
+      .replace('#include <common>', '#include <common>\nuniform vec3 uSelf;\nuniform float uGlow;\nuniform vec4 uRoom;\nuniform vec4 uRoom2;\nuniform vec4 uRoom3;\nuniform vec4 uLamp;\nvarying vec3 vLoc;\nvarying vec3 vNrm;' + (glow ? '\nvarying float vGlow;' : '') + (flat ? '\nvarying float vFlat;' : '') + (ppl ? '\nuniform vec4 uPpl[' + NPPL + '];' : '') + ROOM_GLSL + (ppl ? PPL_GLSL : ''))
+      .replace('#include <color_fragment>', '#include <color_fragment>\nfloat pool = 0.0;\nfloat shade = roomShade(pool);' + (ppl ? '\nshade *= 1.0 - .32 * pplShade() * step(.6, normalize(vNrm).y);' : '') + (flat ? '\nshade = mix(shade, 1.0, vFlat);\npool *= 1.0 - vFlat;' : '') + '\ndiffuseColor.rgb *= shade;')
+      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * (uSelf + uLamp.rgb * (uLamp.a * pool))' + (glow ? ' + mix(vec3(1.0, .8, .56), diffuseColor.rgb, .45) * vGlow * uGlow' : '') + ';');
+    if (flat) sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', 'outgoingLight = mix(outgoingLight, diffuseColor.rgb, vFlat);\n#include <opaque_fragment>');
   };
-  m.customProgramCacheKey = () => 'hiraku-in-' + (vc ? 'v' : 'i') + (glowAttr ? 'g' : '');
+  m.customProgramCacheKey = () => 'hiraku-in2-' + (vc ? 'v' : 'i') + (glow ? 'g' : '') + (flat ? 'f' : '') + (ppl ? 'p' : '');
   return m;
 }
 
@@ -216,6 +315,14 @@ const HEAD_GEO = (() => {
 })();
 /* 立つ人: 頭の中心 +.405。座る人: 体を縦 .7 にして +.06 から、頭 +.356。寝る人: 体を横にして、頭は枕の上 */
 export const PERSON = { headY: .405, sitY: .06, sitScale: .7, sitHeadY: .356, height: .457 };
+/* 姿勢: [体の縦の縮み, 前への傾き(rad), 頭の俯き(+ で下を向く)]。座る姿勢は椅子の高さ(sitY)から */
+const POSE = {
+  stand: [1, 0, 0], talk: [1, .035, .05], walk: [1, .06, .04], climb: [1, .13, .1], bend: [.96, .5, .4], crouch: [.56, .32, .3], reach: [1, -.06, -.3],
+  sit: [.7, -.05, .06], listen: [.7, .02, .1], type: [.7, .15, .22], write: [.7, .2, .42], read: [.7, .1, .5], look: [.7, -.06, -.16], lie: [1, 0, 0]
+};
+const SEATED = new Set(['sit', 'listen', 'type', 'write', 'read', 'look']);
+/* 腕と腿(1つのインスタンスの形を、肩・腰を軸に回す)。長さ .16、太さ .034。袖の色は服と同じ。腿は座る人だけ */
+const LIMB_GEO = (() => { const g = new THREE.CylinderGeometry(.017, .015, .16, 5, 1); g.translate(0, -.08, 0); return g; })();
 
 /* ================================================================
    画面のアトラス(建物ごとに1枚)
@@ -236,7 +343,9 @@ export function buildInterior(kind, box, ctx = {}) {
   const u = makeUniforms();
   const E = {
     kind, box, P, low, r: rng(kind.length * 131 + 7),
-    S: new Batch(), H: new Batch(), SC: new Batch(), people: [], stations: [], rings: [], extra: {},
+    S: new Batch(), H: new Batch(), SC: new Batch(), HL: new Batch(), people: [], stations: [], rings: [], extra: {}, rugs: [], fc: [],
+    noContact: kind === 'park',            // 公園の芝には床の陰を置かない(日の影に任せる)
+    limbs: ctx.limbs !== false,
     floors: Math.max(1, box.floors | 0), fh: box.floors ? box.h / Math.max(1, box.floors | 0) : 0,
     // 最初の箱に対する比で置く。家具の大きさは k 倍(小さい箱では縮める)
     sx: box.w / def.w, sz: box.d / def.d,
@@ -246,25 +355,34 @@ export function buildInterior(kind, box, ctx = {}) {
   E.X = x => x * E.sx; E.Z = z => z * E.sz;
   E.fy = i => i * E.fh;                                  // その階の床の高さ(床の仕上げの下)
   E.zf = box.d / 2 - .04; E.zb = -box.d / 2;
-  BUILD[kind](E);
+  CUR = E;
+  try { BUILD[kind](E); } finally { CUR = null; }
+  // 室内の光の物差し(素材の中で使う)
+  if (kind === 'park') u.uRoom2.value.set(2, 0, 0, 0);
+  else if (box.shape === 'tower') { const R = box.w / 2 - .04; u.uRoom.value.set(R, -R, R, E.fh); u.uRoom2.value.set(1, R, 0, -.08); }
+  else {
+    const hx = box.w / 2 - .049, zb = -box.d / 2 + .049, zf = E.zf, nL = Math.max(1, Math.round(box.w / 1.15)), sp = box.w / nL;
+    u.uRoom.value.set(hx, zb, zf, E.fh); u.uRoom2.value.set(0, 0, sp, (zb + zf) / 2 - .05); u.uRoom3.value.set(nL % 2 ? 0 : sp / 2, 0, 0, 0);
+  }
 
   const group = new THREE.Group(); group.name = 'interior-' + kind;
-  const staticMat = inMat(u, true, true);
+  const staticMat = inMat(u, { glow: true, flat: true, ppl: true });
+  // 道具の物(持ち上がる)も、止まっている形と同じ1つの形にまとめる(描画を1回減らす)。物の頂点の範囲は hOff から
+  const hOff = E.S.n, hN = E.H.n;
+  for (const it of E.H.list) E.S.list.push(it); E.S.n += hN; E.H.list.length = 0;
   const sGeo = E.S.geometry();
   const sMesh = new THREE.Mesh(sGeo, staticMat); sMesh.castShadow = true; sMesh.receiveShadow = true; group.add(sMesh);
-  // 道具の物(持ち上がる)。1つの形にまとめ、物ごとの頂点の範囲を覚えておく
-  const hGeo = E.H.geometry();
-  const hMesh = hGeo ? new THREE.Mesh(hGeo, staticMat) : null; if (hMesh) { hMesh.receiveShadow = true; group.add(hMesh); }
+  const hGeo = hN ? sGeo : null;
   // 画面(アトラス)
-  const asz = low ? 512 : 1024, slot = asz / 4, A = atlasCanvas(asz, P.screenOff);
+  const nS = E.stations.length, cols = nS <= 4 ? 2 : nS <= 9 ? 3 : 4, slot = low ? 256 : 512, asz = cols * slot, A = atlasCanvas(asz, P.screenOff);
   const atlas = new THREE.CanvasTexture(A.c); atlas.colorSpace = THREE.SRGBColorSpace; atlas.anisotropy = 4;
   const scGeo = E.SC.geometry(true);
   const scMat = new THREE.MeshBasicMaterial({ map: atlas, vertexColors: true, toneMapped: false });
   const scMesh = scGeo ? new THREE.Mesh(scGeo, scMat) : null; if (scMesh) group.add(scMesh);
   // 画面の UV をアトラスの区画に合わせる(物の縦横比で、区画の中に収める)
   E.stations.forEach((s, i) => {
-    const col0 = i % 4, row = Math.floor(i / 4), a = s.sw / s.sh;
-    const dw = a >= 1 ? slot - 8 : (slot - 8) * a, dh = a >= 1 ? (slot - 8) / a : slot - 8;
+    const col0 = i % cols, row = Math.floor(i / cols), a = s.sw / s.sh, m = slot * .03;
+    const dw = a >= 1 ? slot - 2 * m : (slot - 2 * m) * a, dh = a >= 1 ? (slot - 2 * m) / a : slot - 2 * m;
     const x0 = col0 * slot + (slot - dw) / 2, y0 = row * slot + (slot - dh) / 2;
     s.rect = [x0, y0, dw, dh];
     const U = scGeo.attributes.uv;
@@ -276,17 +394,21 @@ export function buildInterior(kind, box, ctx = {}) {
   if (scGeo) scGeo.attributes.uv.needsUpdate = true;
   // 人
   const ppl = buildPeople(E, u);
-  if (ppl) group.add(ppl.body, ppl.head);
-  // 波紋(公園)
-  let rings = null;
-  if (E.rings.length) {
-    const rg = new THREE.RingGeometry(.92, 1, 40); rg.rotateX(-Math.PI / 2);
-    const rm = new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
-    rings = new THREE.InstancedMesh(rg, rm, E.rings.length); rings.frustumCulled = false; group.add(rings);
-  }
+  if (ppl) { group.add(ppl.body, ppl.head); if (ppl.limbs) group.add(ppl.limbs); }
+  // 画面のまわりの、わずかなにじみ(足し算の光)。公園の池の波紋も同じ形に入れる
+  const RING = (() => { const g = new THREE.RingGeometry(.9, 1, 40); g.rotateX(-Math.PI / 2); return ni(g); })();
+  for (const rr of E.rings) { rr.v = [E.HL.n, 0]; E.HL.add(RING, mtx(0, 0, 0, 1, 1, 1), '#FFFFFF'); rr.v[1] = E.HL.n; }
+  const hlGeo = E.HL.geometry();
+  // 色だけを足し、透明度は変えない(空に重なる所で、キャンバスに黒い跡を残さない)
+  const hlMat = new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, toneMapped: false, blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor, blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor });
+  const hlMesh = hlGeo ? new THREE.Mesh(hlGeo, hlMat) : null; if (hlMesh) { hlMesh.renderOrder = 2; hlMesh.frustumCulled = false; group.add(hlMesh); }
+  const hlBase = hlGeo ? hlGeo.attributes.position.array.slice() : null, hlCol = hlGeo ? hlGeo.attributes.color.array.slice() : null;
+  let nightK = 0;
 
   /* ---- 道具の物: 持ち上げと明るさ(頂点を書き換える。物はどれも小さいので軽い) ---- */
-  const hBase = hGeo ? hGeo.attributes.position.array.slice() : null, hCol = hGeo ? hGeo.attributes.color.array.slice() : null;
+  const hBase = hGeo ? sGeo.attributes.position.array.slice(hOff * 3, (hOff + hN) * 3) : null, hCol = hGeo ? sGeo.attributes.color.array.slice(hOff * 3, (hOff + hN) * 3) : null;
+  // 書き換えた範囲だけを送る
+  const touch = (attr, v0, v1) => { attr.addUpdateRange(v0 * attr.itemSize, (v1 - v0) * attr.itemSize); attr.needsUpdate = true; };
   const scBase = scGeo ? scGeo.attributes.position.array.slice() : null;
   const stations = E.stations.map((s, i) => {
     const anchor = new THREE.Vector3(...s.anchor);
@@ -301,14 +423,21 @@ export function buildInterior(kind, box, ctx = {}) {
     const k = s.lift, [lx, ly, lz] = s.liftVec, [ox, oy, oz] = s.offset;
     const dx = lx * k + ox, dy = ly * k + oy, dz = lz * k + oz;
     if (hGeo && s.h[1] > s.h[0]) {
-      const Pp = hGeo.attributes.position.array, Cc = hGeo.attributes.color.array, br = 1 + .14 * k;
-      for (let v = s.h[0]; v < s.h[1]; v++) { Pp[v * 3] = hBase[v * 3] + dx; Pp[v * 3 + 1] = hBase[v * 3 + 1] + dy; Pp[v * 3 + 2] = hBase[v * 3 + 2] + dz; Cc[v * 3] = hCol[v * 3] * br; Cc[v * 3 + 1] = hCol[v * 3 + 1] * br; Cc[v * 3 + 2] = hCol[v * 3 + 2] * br; }
-      hGeo.attributes.position.needsUpdate = true; hGeo.attributes.color.needsUpdate = true;
+      const Pp = sGeo.attributes.position.array, Cc = sGeo.attributes.color.array, br = 1 + .14 * k;
+      for (let v = s.h[0]; v < s.h[1]; v++) { const o = (v + hOff) * 3, b = v * 3; Pp[o] = hBase[b] + dx; Pp[o + 1] = hBase[b + 1] + dy; Pp[o + 2] = hBase[b + 2] + dz; Cc[o] = hCol[b] * br; Cc[o + 1] = hCol[b + 1] * br; Cc[o + 2] = hCol[b + 2] * br; }
+      touch(sGeo.attributes.position, s.h[0] + hOff, s.h[1] + hOff); touch(sGeo.attributes.color, s.h[0] + hOff, s.h[1] + hOff);
     }
     if (scGeo) {
-      const Pp = scGeo.attributes.position.array, Cc = scGeo.attributes.color.array, b = clamp01(s.on) * (.8 + .2 * Math.max(k, s.hoverK || 0) - s.flick);
-      for (let v = s.sc[0]; v < s.sc[1]; v++) { Pp[v * 3] = scBase[v * 3] + dx; Pp[v * 3 + 1] = scBase[v * 3 + 1] + dy + .0005; Pp[v * 3 + 2] = scBase[v * 3 + 2] + dz; const bb2 = .07 + b * .93; Cc[v * 3] = bb2; Cc[v * 3 + 1] = bb2; Cc[v * 3 + 2] = bb2; }
+      const Pp = scGeo.attributes.position.array, Cc = scGeo.attributes.color.array, b = clamp01(s.on) * (.93 + .07 * Math.max(k, s.hoverK || 0) - s.flick);
+      for (let v = s.sc[0]; v < s.sc[1]; v++) { Pp[v * 3] = scBase[v * 3] + dx; Pp[v * 3 + 1] = scBase[v * 3 + 1] + dy + .0005; Pp[v * 3 + 2] = scBase[v * 3 + 2] + dz; const bb2 = .06 + b * .94; Cc[v * 3] = bb2; Cc[v * 3 + 1] = bb2; Cc[v * 3 + 2] = bb2; }
       scGeo.attributes.position.needsUpdate = true; scGeo.attributes.color.needsUpdate = true;
+    }
+    if (hlGeo && s.hl) {
+      // 画面は昼もわずかに、夜はもう少し光る。ふれた物は、紙や板でも柔らかく光る
+      const glowK = clamp01(s.on) * (s.glass ? lerp(0, .1, nightK) : 0) * (1 - s.flick * 2) + .3 * k + .12 * (s.hoverK || 0);
+      const Pp = hlGeo.attributes.position.array, Cc = hlGeo.attributes.color.array;
+      for (let v = s.hl[0]; v < s.hl[1]; v++) { Pp[v * 3] = hlBase[v * 3] + dx; Pp[v * 3 + 1] = hlBase[v * 3 + 1] + dy; Pp[v * 3 + 2] = hlBase[v * 3 + 2] + dz; Cc[v * 3] = hlCol[v * 3] * glowK; Cc[v * 3 + 1] = hlCol[v * 3 + 1] * glowK; Cc[v * 3 + 2] = hlCol[v * 3 + 2] * glowK; }
+      hlGeo.attributes.position.needsUpdate = true; hlGeo.attributes.color.needsUpdate = true;
     }
     s.api.anchor.set(s.anchor0[0] + dx, s.anchor0[1] + dy, s.anchor0[2] + dz);
   }
@@ -324,19 +453,19 @@ export function buildInterior(kind, box, ctx = {}) {
     else if (c < .88) { d = .38; yy = .035; }
     else { d = .38; yy = .035 - (c - .88) / .12 * .1; }
     d *= q; yy *= q;
-    const Pp = hGeo.attributes.position.array;
-    for (let v = a0; v < a1; v++) { Pp[v * 3] = hBase[v * 3] + ox + fx * d; Pp[v * 3 + 1] = hBase[v * 3 + 1] + b.y + yy; Pp[v * 3 + 2] = hBase[v * 3 + 2] + oz + fz * d; }
-    hGeo.attributes.position.needsUpdate = true;
+    const Pp = sGeo.attributes.position.array;
+    for (let v = a0; v < a1; v++) { const o = (v + hOff) * 3, q2 = v * 3; Pp[o] = hBase[q2] + ox + fx * d; Pp[o + 1] = hBase[q2 + 1] + b.y + yy; Pp[o + 2] = hBase[q2 + 2] + oz + fz * d; }
+    touch(sGeo.attributes.position, a0 + hOff, a1 + hOff);
   }
 
   /* ---- 実際の画面を読み、アトラスに写す。全部そろったら一度だけ送る ---- */
   let disposed = false, revealAt = 0;
   const load = ctx.loadTexture || (url => new Promise((res, rej) => { const im = new Image(); im.onload = () => { const t = new THREE.Texture(im); res(t); }; im.onerror = rej; im.src = url; }));
   const jobs = E.stations.map(s => {
-    if (s.canvas) { drawCanvasSlot(A.g, s, P); return Promise.resolve(); }
+    if (s.canvas) { drawCanvasSlot(A.g, s, P); if (s.glass) sheen(A.g, s); return Promise.resolve(); }
     const spec = IMG[s.id]; if (!spec) return Promise.resolve();
     const url = new URL(spec[0], import.meta.url).href;
-    return Promise.resolve().then(() => load(url)).then(tex => { if (!disposed && tex && tex.image) drawImageSlot(A.g, s, tex.image, spec[1]); }).catch(() => { /* 読めないときは消えた画面のまま */ });
+    return Promise.resolve().then(() => load(url)).then(tex => { if (!disposed && tex && tex.image) { drawImageSlot(A.g, s, tex.image, spec[1]); if (s.glass) sheen(A.g, s); } }).catch(() => { /* 読めないときは消えた画面のまま */ });
   });
   const ready = Promise.all(jobs).then(() => { if (disposed) return; atlas.needsUpdate = true; if (!revealAt) revealAt = performance.now(); });
 
@@ -356,14 +485,13 @@ export function buildInterior(kind, box, ctx = {}) {
       if (s.move) s.move(s, t);
       if (Math.abs(s.lift - prevLift) > 1e-4 || s.on !== prevOn || Math.abs(s.flick - prevFlick) > 1e-3 || s.offset.join() !== prevOff) writeStation(s);
     }
-    if (rings) {
-      const M = new THREE.Matrix4(), c = new THREE.Color();
-      E.rings.forEach((rr, i) => {
-        const k = (t * .28 + rr.ph) % 1, sc = rr.r0 + k * rr.r1;
-        rings.setMatrixAt(i, M.compose(_p.set(rr.x, rr.y, rr.z), _q.identity(), _s.set(sc, 1, sc)));
-        rings.setColorAt(i, c.setScalar((1 - k) * .55));
-      });
-      rings.instanceMatrix.needsUpdate = true; if (rings.instanceColor) rings.instanceColor.needsUpdate = true;
+    if (E.rings.length && hlGeo) {
+      const Pp = hlGeo.attributes.position.array, Cc = hlGeo.attributes.color.array;
+      for (const rr of E.rings) {
+        const k = (t * .28 + rr.ph) % 1, sc = rr.r0 + k * rr.r1, c = (1 - k) * (1 - k) * .6;
+        for (let v = rr.v[0]; v < rr.v[1]; v++) { Pp[v * 3] = rr.x + hlBase[v * 3] * sc; Pp[v * 3 + 1] = rr.y; Pp[v * 3 + 2] = rr.z + hlBase[v * 3 + 2] * sc; Cc[v * 3] = Cc[v * 3 + 1] = Cc[v * 3 + 2] = c; }
+      }
+      hlGeo.attributes.position.needsUpdate = true; hlGeo.attributes.color.needsUpdate = true;
     }
     if (cap) moveCapsule(t);
   }
@@ -371,7 +499,9 @@ export function buildInterior(kind, box, ctx = {}) {
     k = clamp01(k);
     u.uSelf.value.set(...SELF_DAY.map((v, i) => lerp(v, SELF_NIGHT[i], k)));
     u.uGlow.value = lerp(0, 2.3, k);
+    u.uLamp.value.w = lerp(LAMP_DAY, LAMP_NIGHT, k);
     if (ppl) ppl.uniforms.uSelf.value.set(...PSELF_DAY.map((v, i) => lerp(v, PSELF_NIGHT[i], k)));
+    if (Math.abs(nightK - k) > 1e-3) { nightK = k; E.stations.forEach(writeStation); }
   }
   setNight(0);
   update(0, 0, 'day');
@@ -383,10 +513,9 @@ export function buildInterior(kind, box, ctx = {}) {
     ready,
     dispose() {
       disposed = true;
-      for (const m of [sMesh, hMesh, scMesh]) if (m) m.geometry.dispose();
-      staticMat.dispose(); scMat.dispose(); atlas.dispose();
+      for (const m of [sMesh, scMesh, hlMesh]) if (m) m.geometry.dispose();
+      staticMat.dispose(); scMat.dispose(); hlMat.dispose(); atlas.dispose();
       if (ppl) ppl.dispose();
-      if (rings) { rings.geometry.dispose(); rings.material.dispose(); }
       group.removeFromParent();
     }
   };
@@ -400,6 +529,14 @@ function drawImageSlot(g, s, img, crop) {
   const want = dw / dh, have = cw / ch;
   if (have > want) { const nw = ch * want; cx += (cw - nw) / 2; cw = nw; } else { const nh = cw / want; ch = nh; }
   g.drawImage(img, cx, cyy, cw, ch, x0, y0, dw, dh);
+}
+/* ガラスの画面: 左上からのごく淡い映り込みと、縁のわずかな暗さ(画面がガラスの奥に光って見える) */
+function sheen(g, s) {
+  const [x0, y0, w, h] = s.rect;
+  const gr = g.createLinearGradient(x0, y0, x0 + w * .55, y0 + h);
+  gr.addColorStop(0, 'rgba(255,255,255,.16)'); gr.addColorStop(.42, 'rgba(255,255,255,.04)'); gr.addColorStop(.43, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(x0, y0, w, h);
+  g.strokeStyle = 'rgba(10,14,20,.28)'; g.lineWidth = Math.max(2, w * .012); g.strokeRect(x0 + g.lineWidth / 2, y0 + g.lineWidth / 2, w - g.lineWidth, h - g.lineWidth);
 }
 /* 運営者の部屋の3つは、絵で描く(実際の製品の画面ではないため) */
 function drawCanvasSlot(g, s, P) {
@@ -432,60 +569,115 @@ function drawCanvasSlot(g, s, P) {
 
 /* ================================================================
    人のインスタンス
-   kind: stand / sit / type / write / walk / lie / climb。night: true なら夜もいる
+   kind: stand / talk / walk / climb / bend / crouch / reach / sit / listen / type / write / read / look / lie。night: true なら夜もいる
+   write・read は stand: true で立ったまま。talk は partner と向き合い、話す番と聞く番を交代する
    ================================================================ */
 function person(E, x, y, z, ry, o = {}) {
   const p = Object.assign({ x, y, z, ry, kind: 'stand', cloth: E.P.casual[Math.floor(E.r() * E.P.casual.length)], skin: E.P.skin[Math.floor(E.r() * E.P.skin.length)], ph: E.r() * TAU, night: false, day: true }, o);
-  E.people.push(p); return p;
+  E.people.push(p);
+  return p;
+}
+/* p を (x, z) の方へ k だけ向ける */
+function turnTo(p, x, z, k = 1) { const want = Math.atan2(x - p.x, z - p.z); let d = want - p.ry; d = Math.atan2(Math.sin(d), Math.cos(d)); p.ry += d * k; return p; }
+/* 2人を向き合わせて話させる */
+function talk(a, b) {
+  a.kind = SEATED.has(a.kind) && !a.stand ? 'listen' : 'talk'; b.kind = SEATED.has(b.kind) && !b.stand ? 'listen' : 'talk';
+  a.ry = Math.atan2(b.x - a.x, b.z - a.z); b.ry = Math.atan2(a.x - b.x, a.z - b.z);
+  a.partner = b; b.partner = a; b.ph = a.ph + Math.PI;
 }
 function buildPeople(E, u0) {
   const L = E.people; if (!L.length) return null;
-  const uniforms = { uSelf: { value: new THREE.Vector3(...PSELF_DAY) }, uGlow: { value: 0 } };
-  const bodyMat = inMat(uniforms, false, false), headMat = inMat(uniforms, true, false);
-  const body = new THREE.InstancedMesh(BODY_GEO, bodyMat, L.length), head = new THREE.InstancedMesh(HEAD_GEO, headMat, L.length);
-  body.castShadow = true; body.receiveShadow = true; head.receiveShadow = true;
+  const feet = u0.uPpl.value;
+  const uniforms = Object.assign({}, u0, { uSelf: { value: new THREE.Vector3(...PSELF_DAY) } });
+  const bodyMat = inMat(uniforms, { vc: false }), headMat = inMat(uniforms, {});
+  // 腕は2本、座る人は腿も2本。人ごとに、腕と腿のインスタンスの場所を割り当てる
+  let nl = 0; for (const p of L) { p.li = nl; p.ln = !E.limbs ? 0 : SEATED.has(p.kind) && !p.stand ? 4 : 2; nl += p.ln; }
+  const body = new THREE.InstancedMesh(BODY_GEO, bodyMat, L.length), head = new THREE.InstancedMesh(HEAD_GEO, headMat, L.length), limbs = nl ? new THREE.InstancedMesh(LIMB_GEO, bodyMat, nl) : null;
+  body.castShadow = true; body.receiveShadow = true; head.receiveShadow = true; if (limbs) limbs.receiveShadow = true;
   const c = new THREE.Color();
-  L.forEach((p, i) => { body.setColorAt(i, c.set(p.cloth)); head.setColorAt(i, c.set(p.skin)); });
-  const M = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3(), ZERO = new THREE.Vector3(0, 0, 0);
+  L.forEach((p, i) => { body.setColorAt(i, c.set(p.cloth)); head.setColorAt(i, c.set(p.skin)); for (let j = 0; j < p.ln; j++) limbs.setColorAt(p.li + j, c.set(p.cloth)); });
+  const M = new THREE.Matrix4(), qB = new THREE.Quaternion(), qH = new THREE.Quaternion(), qL = new THREE.Quaternion(), qZ = new THREE.Quaternion(), eB = new THREE.Euler(), eH = new THREE.Euler(), v = new THREE.Vector3(), w = new THREE.Vector3(), s = new THREE.Vector3(), ZERO = new THREE.Vector3(0, 0, 0);
+  const AX = new THREE.Vector3(1, 0, 0), AZ = new THREE.Vector3(0, 0, 1);
+  // 腕・腿を1本置く: 体の座標の (lx, ly, lz) を軸に、前へ phi(0 = 下、π/2 = 前、π = 上)、外へ psi 開く
+  const limb = (j, lx, ly, lz, phi, psi, len) => {
+    if (!limbs) return;
+    w.set(lx, ly, lz).applyQuaternion(qB).add(v);
+    qL.setFromAxisAngle(AX, -phi).multiply(qZ.setFromAxisAngle(AZ, psi)).premultiply(qB);
+    limbs.setMatrixAt(j, M.compose(w, qL, s.set(1, len, 1)));
+  };
+  const hideLimbs = p => { for (let j = 0; j < p.ln; j++) limbs.setMatrixAt(p.li + j, M.compose(w.set(0, -10, 0), qL.identity(), ZERO)); };   // p.ln が 0 なら何もしない
   let mode = 'day';
   function place(t) {
     L.forEach((p, i) => {
       const hidden = (mode === 'night' && !p.night) || (mode !== 'night' && !p.day);
-      if (hidden) { body.setMatrixAt(i, M.compose(v.set(0, -10, 0), q.identity(), ZERO)); head.setMatrixAt(i, M.compose(v.set(0, -10, 0), q.identity(), ZERO)); return; }
-      let x = p.x, y = p.y, z = p.z, ry = p.ry, bob = 0, nod = 0, sway = 0;
-      const sit = !p.stand && (p.kind === 'sit' || p.kind === 'type' || p.kind === 'write');
-      if (p.kind === 'walk') {
-        const amp = (p.x1 - p.x0) / 2, mid = (p.x0 + p.x1) / 2, om = (p.v || .3) / Math.max(.25, amp), ss = Math.sin(t * om + p.ph), vel = Math.cos(t * om + p.ph);
-        if (p.axis === 'z') z = mid + amp * ss; else x = mid + amp * ss;
-        const want = p.axis === 'z' ? (vel >= 0 ? 0 : Math.PI) : (vel >= 0 ? Math.PI / 2 : -Math.PI / 2);
-        let d = want - (p.cur ?? want); d = Math.atan2(Math.sin(d), Math.cos(d)); p.cur = (p.cur ?? want) + d * .2; ry = p.cur;
-        bob = Math.abs(Math.sin(t * 7 + p.ph)) * .02 * Math.min(1, Math.abs(vel) * 3);
-        p.wx = x; p.wz = z;
-      } else if (p.kind === 'climb' && p.path) {
-        const k = ((t * (p.v || .06) + p.ph / TAU) % 1), pt = p.path(k); x = pt[0]; y = pt[1]; z = pt[2]; ry = pt[3]; bob = Math.abs(Math.sin(t * 7)) * .015;
-      } else if (p.kind === 'type') { nod = Math.sin(t * 9 + p.ph) * .004 + Math.sin(t * 2.3 + p.ph) * .003; }
-      else if (p.kind === 'write') { nod = (Math.sin(t * 1.3 + p.ph) * .5 + .5) * -.012; sway = Math.sin(t * .9 + p.ph) * .06; }
-      else if (p.kind === 'sit') { bob = Math.sin(t * 1.4 + p.ph) * .002; }
-      else if (p.kind === 'stand') { sway = Math.sin(t * .6 + p.ph) * .12; }
+      if (hidden) { body.setMatrixAt(i, M.compose(v.set(0, -10, 0), qB.identity(), ZERO)); head.setMatrixAt(i, M.compose(v.set(0, -10, 0), qB.identity(), ZERO)); hideLimbs(p); if (i < NPPL) feet[i].w = 0; return; }
+      let x = p.x, y = p.y, z = p.z, ry = p.ry, bob = 0, roll = 0, yawO = 0, hy = 0;
+      let aR = .1, sR = .13, aL = .1, sL = .13;           // 腕: 前への上げ(右・左)と、外への開き
+      const seated = SEATED.has(p.kind) && !p.stand, ph = p.ph;
+      let [sy, lean, hp] = POSE[p.kind] || POSE.stand;
+      if (!seated && SEATED.has(p.kind)) { sy = 1; lean *= .45; }            // 立ったまま書く・読む
+      if (p.lean != null) lean = p.lean;
+      if (p.hp != null) hp = p.hp;
+
+      switch (p.kind) {
+        case 'walk': {
+          const amp = (p.x1 - p.x0) / 2, mid = (p.x0 + p.x1) / 2, om = (p.v || .3) / Math.max(.25, amp), ss = Math.sin(t * om + ph), vel = Math.cos(t * om + ph), mv = Math.min(1, Math.abs(vel) * 3);
+          if (p.axis === 'z') z = mid + amp * ss; else x = mid + amp * ss;
+          const want = p.axis === 'z' ? (vel >= 0 ? 0 : Math.PI) : (vel >= 0 ? Math.PI / 2 : -Math.PI / 2);
+          let d = want - (p.cur ?? want); d = Math.atan2(Math.sin(d), Math.cos(d)); p.cur = (p.cur ?? want) + d * .2; ry = p.cur;
+          bob = Math.abs(Math.sin(t * 7 + ph)) * .018 * mv; roll = Math.sin(t * 7 + ph) * .035 * mv; lean *= mv; hy = (1 - mv) * Math.sin(t * .5 + ph) * .5;
+          if (p.carry) { aR = aL = .95; sR = sL = -.25; } else { aR = Math.sin(t * 7 + ph) * .42 * mv + .08; aL = -Math.sin(t * 7 + ph) * .42 * mv + .08; sR = sL = .1; }
+          p.wx = x; p.wz = z; break;
+        }
+        case 'climb': { const k = ((t * (p.v || .06) + ph / TAU) % 1), pt = p.path(k); x = pt[0]; y = pt[1]; z = pt[2]; ry = pt[3]; bob = Math.abs(Math.sin(t * 7)) * .015; roll = Math.sin(t * 7) * .03; aR = Math.sin(t * 7) * .3 + .1; aL = -Math.sin(t * 7) * .3 + .1; break; }
+        case 'stand': roll = Math.sin(t * .5 + ph) * .022; yawO = Math.sin(t * .23 + ph) * .1; hy = Math.sin(t * .17 + ph * 2) * .45; aR = .1 + Math.sin(t * .5 + ph) * .04; aL = .1 - Math.sin(t * .5 + ph) * .04; if (p.hands) { aR = aL = .8; sR = sL = -.35; } break;
+        case 'talk': case 'listen': {
+          const speak = Math.sin(t * .75 + ph) > 0;   // 話す番と聞く番。話す人は片手で身ぶりをする
+          lean += speak ? .06 : 0; hp += speak ? Math.sin(t * 5.2 + ph) * .06 : (Math.sin(t * 1.3 + ph) * .5 + .5) * .08;
+          roll = Math.sin(t * .6 + ph) * .016; yawO = speak ? Math.sin(t * 1.7 + ph) * .06 : 0; bob = seated ? Math.sin(t * 1.4 + ph) * .002 : 0;
+          const g = speak ? .55 + .4 * (Math.sin(t * 2.6 + ph) * .5 + .5) : 0;
+          if (seated) { aR = .6 + g * .5; sR = speak ? .2 : -.1; aL = .55; sL = -.1; } else { aR = .12 + g; sR = speak ? .3 : .12; aL = .12; sL = .12; }
+          break;
+        }
+        case 'sit': bob = Math.sin(t * 1.4 + ph) * .002; hy = Math.sin(t * .2 + ph) * .35; aR = aL = .55; sR = sL = -.1; break;
+        case 'type': hp += Math.sin(t * 9 + ph) * .025; lean += Math.sin(t * 2.3 + ph) * .012; aR = 1.05 + Math.sin(t * 9 + ph) * .04; aL = 1.05 + Math.sin(t * 9 + ph + 1.7) * .04; sR = sL = -.2; break;
+        case 'write': hp += Math.sin(t * 1.3 + ph) * .08; yawO = Math.sin(t * .9 + ph) * .05; aR = 1 + Math.sin(t * 3 + ph) * .05; sR = -.22; aL = .72; sL = -.06; break;
+        case 'read': { const q = (t * .15 + ph / TAU) % 1; hp -= q > .9 ? Math.sin((q - .9) / .1 * Math.PI) * .55 : 0; aR = aL = 1.02; sR = sL = -.34; break; }
+        case 'look': hy = Math.sin(t * .3 + ph) * .12; aR = aL = .5; sR = sL = -.08; break;
+        case 'bend': lean += Math.sin(t * .8 + ph) * .05; hp += Math.sin(t * .8 + ph) * .05; aR = .55 + Math.sin(t * 1.6 + ph) * .1; aL = .4; sR = sL = .05; break;
+        case 'crouch': bob = Math.sin(t * 1.1 + ph) * .004; hy = Math.sin(t * .4 + ph) * .2; aR = .95; aL = .7; sR = .05; sL = .1; break;
+        case 'reach': bob = (Math.sin(t * .9 + ph) * .5 + .5) * .012; aR = 2.6 + Math.sin(t * .9 + ph) * .12; sR = .12; aL = .12; break;
+      }
+      hy += p.hy0 || 0;
+      // 足もとの陰(座る人・寝る人は、椅子やベッドの陰に任せる)
+      if (i < NPPL && !E.noContact) feet[i].set(x, y + .012, z, seated || p.kind === 'lie' ? 0 : p.kind === 'crouch' ? .13 : .11);
       if (p.kind === 'lie') {
         // 体を倒して(顔は上)、ry の向きに頭。(x, y, z) は体の真ん中の芯
-        e.set(-Math.PI / 2, ry, 0, 'YXZ'); q.setFromEuler(e);
-        const hx = -Math.sin(ry), hz = -Math.cos(ry), br = Math.sin(t * 1.1 + p.ph) * .002;
-        body.setMatrixAt(i, M.compose(v.set(x - hx * .2, y + br, z - hz * .2), q, s.set(1, 1, 1)));
-        head.setMatrixAt(i, M.compose(v.set(x + hx * .205, y + .006, z + hz * .205), q, s.set(1, 1, 1)));
+        eB.set(-Math.PI / 2, ry, 0, 'YXZ'); qB.setFromEuler(eB);
+        const hx = -Math.sin(ry), hz = -Math.cos(ry), br = Math.sin(t * 1.1 + ph) * .002;
+        body.setMatrixAt(i, M.compose(v.set(x - hx * .2, y + br, z - hz * .2), qB, s.set(1, 1, 1)));
+        head.setMatrixAt(i, M.compose(v.set(x + hx * .205, y + .006, z + hz * .205), qB, s.set(1, 1, 1)));
+        hideLimbs(p);
         return;
       }
-      e.set(0, ry + sway, 0); q.setFromEuler(e);
-      body.setMatrixAt(i, M.compose(v.set(x, y + (sit ? PERSON.sitY : 0) + bob, z), q, s.set(1, sit ? PERSON.sitScale : 1, 1)));
-      head.setMatrixAt(i, M.compose(v.set(x, y + (sit ? PERSON.sitHeadY : PERSON.headY) + bob + nod, z), q, s.set(1, 1, 1)));
+      // 体は足もと(座る人は座面)を軸に傾ける。頭は体の上に乗り、俯き・振り向きで向きが変わる(髪の見え方で分かる)
+      eB.set(lean, ry + yawO, roll, 'YXZ'); qB.setFromEuler(eB);
+      v.set(x, y + (seated ? PERSON.sitY : 0) + bob, z);
+      body.setMatrixAt(i, M.compose(v, qB, s.set(1, sy, 1)));
+      w.set(0, sy * .36 + .045, 0).applyQuaternion(qB).add(v);
+      eH.set(hp, hy, 0, 'YXZ'); qH.setFromEuler(eH).premultiply(qB);
+      head.setMatrixAt(i, M.compose(w, qH, s.set(1, 1, 1)));
+      // 腕(肩から)と、座る人の腿(座面の高さで前へ)
+      limb(p.li, .082, sy * .3, 0, aR, sR, 1); limb(p.li + 1, -.082, sy * .3, 0, aL, -sL, 1);
+      if (p.ln > 2) { limb(p.li + 2, .036, .075, 0, Math.PI / 2 - .08, .05, .76); limb(p.li + 3, -.036, .075, 0, Math.PI / 2 - .08, -.05, .76); }
     });
-    body.instanceMatrix.needsUpdate = true; head.instanceMatrix.needsUpdate = true;
+    body.instanceMatrix.needsUpdate = true; head.instanceMatrix.needsUpdate = true; if (limbs) limbs.instanceMatrix.needsUpdate = true;
   }
   place(0);
   return {
-    body, head, uniforms, update: place,
+    body, head, limbs, uniforms, update: place,
     setMode(m) { mode = m; },
-    dispose() { bodyMat.dispose(); headMat.dispose(); body.dispose(); head.dispose(); }
+    dispose() { bodyMat.dispose(); headMat.dispose(); body.dispose(); head.dispose(); if (limbs) limbs.dispose(); }
   };
 }
 
@@ -493,26 +685,31 @@ function buildPeople(E, u0) {
    部屋の殻: 側面と奥の壁の内側・床・階の床(天井の厚み)・切り口
    ================================================================ */
 function shellRect(E, o = {}) {
-  const { w, d } = E.box, S = E.S, P = E.P, wt = .045;
+  const { w, d } = E.box, S = E.S, P = E.P, wt = .045, pc = P.poche;
   const x0 = -w / 2 + .004, x1 = w / 2 - .004, zb = E.zb + .004, zf = E.zf;
-  const H = E.box.h;
-  // 奥の壁と側面の壁(内側の面)。上の端は切り口の色
-  bb(S, x0, x1, 0, H, zb, zb + wt, o.wall || P.inWall);
-  bb(S, x0, x0 + wt, 0, H, zb, zf, o.side || P.inWall2);
-  bb(S, x1 - wt, x1, 0, H, zb, zf, o.side || P.inWall2);
-  bb(S, x0, x1, H - .012, H, zb, zb + wt + .002, P.cut);
-  bb(S, x0, x0 + wt + .002, H - .012, H, zb, zf, P.cut); bb(S, x1 - wt - .002, x1, H - .012, H, zb, zf, P.cut);
-  // 側面の壁の切り口(正面に向く細い面)
-  bb(S, x0, x0 + wt, 0, H, zf - .006, zf, P.cutLine); bb(S, x1 - wt, x1, 0, H, zf - .006, zf, P.cutLine);
+  const X0 = -w / 2 - .006, X1 = w / 2 + .006, ZB = E.zb - .006;   // 外側の壁の内側の面まで(すき間を残さない)
+  const H = E.box.h, sl = .1;                                        // sl: 階の床の厚み(切り口の太さ)
+  // 奥の壁と側面の壁(内側の面)
+  bb(S, x0, x1, 0, H - .012, zb, zb + wt, o.wall || P.inWall);
+  bb(S, x0, x0 + wt, 0, H - .012, zb, zf - .006, o.side || P.inWall2);
+  bb(S, x1 - wt, x1, 0, H - .012, zb, zf - .006, o.side || P.inWall2);
+  // 切り口の塗り(断面図の poché): 屋根を外した上の端・側面の壁の前の端・階の床の前の端・地面の床の前の端
+  pb(S, X0, X1, H - .012, H, ZB, zb + wt, pc);
+  pb(S, X0, x0 + wt, H - .012, H, ZB, zf, pc); pb(S, x1 - wt, X1, H - .012, H, ZB, zf, pc);
+  pb(S, X0, x0 + wt, -.05, H, zf - .006, zf, pc); pb(S, x1 - wt, X1, -.05, H, zf - .006, zf, pc);
+  pb(S, X0, X1, -.05, .012, zf - .006, zf, pc);
   for (let i = 0; i < E.floors; i++) {
     const y = E.fy(i);
-    if (i > 0) { bb(S, x0 + wt, x1 - wt, y - .085, y, zb + wt, zf - .006, P.cut); bb(S, x0, x1, y - .085, y + .012, zf - .006, zf, P.cutLine); }
+    if (i > 0) { pb(S, x0 + wt, x1 - wt, y - sl, y, zb + wt, zf - .006, pc); pb(S, X0, X1, y - sl, y + .012, zf - .006, zf, pc); }
     const fc = Array.isArray(o.floor) ? o.floor[i] : o.floor || P.vinyl;
+    E.fc[i] = fc;
     bb(S, x0 + wt, x1 - wt, y, y + .012, zb + wt, zf - .006, fc);
     // 腰壁と幅木(奥の壁)
     bb(S, x0 + wt, x1 - wt, y + .012, y + .2, zb + wt, zb + wt + .006, o.wainscot || P.wainscot);
     bb(S, x0 + wt, x1 - wt, y + .012, y + .035, zb + wt, zb + wt + .01, o.skirt || P.cutLine);
     bb(S, x0 + wt, x1 - wt, y + .2, y + .212, zb + wt, zb + wt + .01, o.band || P.cut);
+    // 側面の壁の幅木
+    for (const sx of [x0 + wt, x1 - wt]) bb(S, sx - (sx > 0 ? .008 : 0), sx + (sx > 0 ? 0 : .008), y + .012, y + .035, zb + wt, zf - .01, o.skirt || P.cutLine);
   }
   return { x0: x0 + wt, x1: x1 - wt, zb: zb + wt, zf, wt };
 }
@@ -525,16 +722,34 @@ function backWindow(E, x, y, w, h, zb) {
 }
 
 /* ---------- 家具 ---------- */
-function chair(E, b, y, x, z, ry, c) { const k = E.k; grp(b, x, y, z, ry).box(0, 0, 0, .025 * k, .1 * k, .025 * k, E.P.metalDark).box(0, .1 * k, 0, .1 * k, .022 * k, .1 * k, c || E.P.chair).box(0, .12 * k, -.045 * k, .1 * k, .11 * k, .016 * k, c || E.P.chair); }
-function desk(E, b, y, x, z, w, d, ry = 0, top, hgt = .19) { const k = E.k; grp(b, x, y, z, ry).box(0, hgt * k - .016, 0, w, .016, d, top || E.P.desk).box(-w / 2 + .02, 0, 0, .016, hgt * k - .016, d - .02, E.P.metal).box(w / 2 - .02, 0, 0, .016, hgt * k - .016, d - .02, E.P.metal); }
-function plant(E, b, y, x, z, s = 1, i = 0) { const k = E.k * s; cy(b, x, y, z, .05 * k, .09 * k, E.P.pot); sp(b, x, y + .15 * k, z, .085 * k, E.P.leaf[i % 4], 1.15); sp(b, x + .035 * k, y + .21 * k, z - .01, .055 * k, E.P.leaf[(i + 1) % 4]); }
+function chair(E, b, y, x, z, ry, c) { const k = E.k; grp(b, x, y, z, ry).foot(0, 0, .1 * k, .1 * k, .7, .045).cyl(0, 0, 0, .04 * k, .008, E.P.metalDark).box(0, 0, 0, .022 * k, .1 * k, .022 * k, E.P.metalDark).rbox(0, .098 * k, 0, .1 * k, .024 * k, .1 * k, .008, c || E.P.chair).rbox(0, .12 * k, -.046 * k, .1 * k, .11 * k, .018 * k, .008, c || E.P.chair); }
+function desk(E, b, y, x, z, w, d, ry = 0, top, hgt = .19) { const k = E.k; grp(b, x, y, z, ry).foot(0, 0, w * .9, d * .8, .76, .06).box(0, hgt * k - .016, 0, w, .016, d, top || E.P.desk).box(-w / 2 + .02, 0, 0, .016, hgt * k - .016, d - .02, E.P.metal).box(w / 2 - .02, 0, 0, .016, hgt * k - .016, d - .02, E.P.metal); }
+function plant(E, b, y, x, z, s = 1, i = 0) { const k = E.k * s; contact(E, x, y, z, .09 * k, .09 * k, { round: true, k: .7, s: .05 }); cy(b, x, y, z, .05 * k, .09 * k, E.P.pot); sp(b, x, y + .15 * k, z, .085 * k, E.P.leaf[i % 4], 1.15); sp(b, x + .035 * k, y + .21 * k, z - .01, .055 * k, E.P.leaf[(i + 1) % 4]); }
 function lampTable(E, b, y, x, z, c) { const k = E.k; cy(b, x, y, z, .018 * k, .004, E.P.dark); bx(b, x, y, z, .006, .07 * k, .006, E.P.dark); grp(b, x, y + .07 * k, z).cone(0, 0, 0, .03 * k, .03 * k, c || '#F4EAD4', 1); }
+
+/* にじみの枠: 画面(w × h)の縁から m 外を内側の縁に、g の幅で 0 へ消える。色 c は内側の縁の色 */
+const HALO = new Map();
+function haloGeo(w, h, m, g, c) {
+  const key = [w, h, m, g, ...c].map(v => (+v).toFixed(3)).join('|');
+  if (HALO.has(key)) return HALO.get(key);
+  const a = w / 2 + m, b = h / 2 + m, pos = [], cl = [];
+  const ring = d => [[-a - d, -b - d], [a + d, -b - d], [a + d, b + d], [-a - d, b + d]];
+  const R = [[ring(0), 1], [ring(g * .3), .28], [ring(g), 0]];    // 内の縁から、柔らかく消える
+  const put = (v, k) => { pos.push(v[0], v[1], 0); cl.push(c[0] * k, c[1] * k, c[2] * k); };
+  for (let r = 0; r < 2; r++) {
+    const [I, ki] = R[r], [O, ko] = R[r + 1];
+    for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; put(I[i], ki); put(O[i], ko); put(O[j], ko); put(I[i], ki); put(O[j], ko); put(I[j], ki); }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(pos.map((_, i) => i % 3 === 2 ? 1 : 0), 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(cl, 3));
+  HALO.set(key, geo); return geo;
+}
 
 /* ---------- 道具の物(station) ----------
    holder(H) に物の体、SC に画面の四角。lift は持ち上がる向き、anchor は札の位置 */
 function station(E, id, o) {
   const lay = E.layout[id] || {};
-  const S = { id, liftVec: o.lift || [0, .03, .015], flicker: o.flicker || 0, move: o.move || null, canvas: o.canvas || null };
+  const S = { id, liftVec: o.lift || [0, .03, .015], flicker: o.flicker || 0, move: o.move || null, canvas: o.canvas || null, glass: !!o.glass };
   const h0 = E.H.n;
   // scale: 物ぜんたいを何倍にするか(公園の小物を、ひらいた画面で見分けやすくする)
   const base = { x: lay.x ?? o.x, y: o.y, z: lay.z ?? o.z, ry: lay.ry ?? (o.ry || 0), s: o.scale || 1 };
@@ -547,6 +762,11 @@ function station(E, id, o) {
   const s0 = E.SC.n;
   E.SC.add(G.plane, mtx(wx, wy, wz, sc.w, sc.h, 1, base.ry + (sc.ry || 0), -(sc.tilt || 0)), '#FFFFFF');
   S.sc = [s0, E.SC.n];
+  // にじみの枠(画面の縁の外へ、柔らかく消える)。ガラスの画面は青白く、紙や板は暖かく
+  const h0l = E.HL.n, nrm = new THREE.Vector3(0, 0, 1).applyEuler(new THREE.Euler(-(sc.tilt || 0), base.ry + (sc.ry || 0), 0, 'YXZ'));
+  // にじみは縁(枠)の外から始める(枠の上に重ねると、白い縁取りに見えるため)。o.bezel: 画面の外の枠の幅
+  E.HL.add(haloGeo(sc.w, sc.h, (o.bezel ?? .012) * q, Math.min(.07, .024 + .08 * Math.max(sc.w, sc.h)), S.glass ? [.82, .9, 1] : [1, .9, .74]), mtx(wx + nrm.x * .003, wy + nrm.y * .003, wz + nrm.z * .003, 1, 1, 1, base.ry + (sc.ry || 0), -(sc.tilt || 0)), '#FFFFFF');
+  S.hl = [h0l, E.HL.n];
   S.sw = sc.w; S.sh = sc.h;
   S.anchor = [wx, wy + (sc.tilt > .9 ? .05 : sc.h / 2 + .05), wz];
   S.base = base;
@@ -566,25 +786,24 @@ const BUILD = {
     const f = [E.fy(0) + .012, E.fy(1) + .012, E.fy(2) + .012];
     // ---- 1階 受付(手前に寄せる。下の階は上の床に隠れやすい) ----
     const cz = Z(.32);
-    grp(S, X(-.75), f[0], cz).rbox(0, 0, 0, 1.3 * k, .25 * k, .2 * k, .02, P.trim).box(0, .25 * k, -.01, 1.34 * k, .022, .25 * k, P.deskWood).box(0, .09 * k, .102 * k, 1.3 * k, .022, .004, P.teal);
+    grp(S, X(-.75), f[0], cz).foot(0, 0, 1.3 * k, .2 * k).rbox(0, 0, 0, 1.3 * k, .25 * k, .2 * k, .02, P.trim).box(0, .25 * k, -.01, 1.34 * k, .022, .25 * k, P.deskWood).box(0, .09 * k, .102 * k, 1.3 * k, .022, .004, P.teal);
     station(E, 'nidodema', {
-      x: X(-.72), y: f[0] + .272 * k, z: cz - .02, ry: -.28,
+      x: X(-.72), y: f[0] + .272 * k, z: cz - .02, ry: -.28, glass: true,
       holder: g => g.box(-.03, 0, -.02, .05, .012, .05, P.dark).box(-.03, .01, -.025, .014, .06, .014, P.dark).box(-.03, .055, -.02, .3 * k, .19 * k, .018, P.frame)
         .box(-.27, 0, 0, .12, .05, .09, '#5E656D').box(-.27, .05, -.02, .1, .012, .05, P.paper).box(-.27, .052, .03, .06, .004, .03, '#C9D3DA')
         .box(.17, 0, -.01, .08, .05, .06, P.paper).box(.18, .05, -.008, .078, .03, .058, '#F1EDE4').box(.27, 0, .01, .07, .035, .06, P.paper),
       screen: { x: -.03, y: .055 + .095 * k, z: -.01, w: .27 * k, h: .165 * k }
     });
     person(E, X(-1.05), f[0], cz - .26, 0, { kind: 'type', cloth: P.office, night: false });
-    person(E, X(-.38), f[0], cz - .27, 0, { kind: 'stand', cloth: P.coat, night: true });
-    person(E, X(-.62), f[0], cz + .3, Math.PI, { kind: 'stand', cloth: P.casual[0] });
+    talk(person(E, X(-.38), f[0], cz - .27, 0, { cloth: P.coat, night: true }), person(E, X(-.5), f[0], cz + .3, Math.PI, { cloth: P.casual[0] }));   // 受付で話す
     // 待合のベンチ(受付を向く)
-    for (const bz of [Z(.2), Z(.66)]) grp(S, X(.88), f[0], bz).box(0, 0, 0, .8 * k, .012, .012, P.metalDark).box(-.34 * k, 0, 0, .016, .1 * k, .13 * k, P.metalDark).box(.34 * k, 0, 0, .016, .1 * k, .13 * k, P.metalDark).rbox(0, .1 * k, 0, .8 * k, .03 * k, .14 * k, .01, P.chair).rbox(0, .13 * k, -.06 * k, .8 * k, .12 * k, .025 * k, .01, P.chair);
-    person(E, X(.65), f[0] + .015, Z(.2), 0, { kind: 'sit', cloth: P.casual[1] });
-    person(E, X(1.1), f[0] + .015, Z(.2), 0, { kind: 'sit', cloth: P.casual[4] });
+    for (const bz of [Z(.2), Z(.66)]) grp(S, X(.88), f[0], bz).foot(0, 0, .8 * k, .13 * k).box(0, 0, 0, .8 * k, .012, .012, P.metalDark).box(-.34 * k, 0, 0, .016, .1 * k, .13 * k, P.metalDark).box(.34 * k, 0, 0, .016, .1 * k, .13 * k, P.metalDark).rbox(0, .1 * k, 0, .8 * k, .03 * k, .14 * k, .01, P.chair).rbox(0, .13 * k, -.06 * k, .8 * k, .12 * k, .025 * k, .01, P.chair);
+    person(E, X(.65), f[0] + .015, Z(.2), 0, { kind: 'read', cloth: P.casual[1] });
+    person(E, X(1.1), f[0] + .015, Z(.2), 0, { kind: 'look', cloth: P.casual[4], hy0: -.5 });
     person(E, X(.8), f[0] + .015, Z(.66), 0, { kind: 'sit', cloth: P.casual[2] });
     // 車いすの人
     const wc = grp(S, X(.2), f[0], Z(.72), -Math.PI / 2);
-    wc.box(0, .1 * k, 0, .1 * k, .015, .1 * k, P.dark).box(0, .11 * k, -.05 * k, .1 * k, .1 * k, .012, P.dark).cyl(-.06 * k, 0, 0, .07 * k, .01, P.metalDark, false, 0, Math.PI / 2).cyl(.06 * k, 0, 0, .07 * k, .01, P.metalDark, false, 0, Math.PI / 2);
+    wc.foot(0, 0, .14 * k, .12 * k).box(0, .1 * k, 0, .1 * k, .015, .1 * k, P.dark).box(0, .11 * k, -.05 * k, .1 * k, .1 * k, .012, P.dark).cyl(-.06 * k, 0, 0, .07 * k, .01, P.metalDark, false, 0, Math.PI / 2).cyl(.06 * k, 0, 0, .07 * k, .01, P.metalDark, false, 0, Math.PI / 2);
     person(E, X(.2), f[0] - .03, Z(.72), -Math.PI / 2, { kind: 'sit', cloth: P.casual[3] });
     // 1階の奥の壁: 案内の札と時計
     bb(S, X(-.95), X(-.35), f[0] + .52, f[0] + .64, R.zb, R.zb + .01, P.teal); bb(S, X(-.9), X(-.6), f[0] + .565, f[0] + .595, R.zb + .01, R.zb + .014, '#FFFFFF');
@@ -595,7 +814,7 @@ const BUILD = {
 
     // ---- 2階 ナースステーション ----
     const nz = Z(.3);
-    grp(S, X(.35), f[1], nz).rbox(0, 0, 0, 1.25 * k, .26 * k, .18 * k, .02, P.trim).box(0, .26 * k, 0, 1.3 * k, .02, .23 * k, P.tealSoft).box(0, .06 * k, .092 * k, 1.25 * k, .018, .004, P.teal);
+    grp(S, X(.35), f[1], nz).foot(0, 0, 1.25 * k, .18 * k).rbox(0, 0, 0, 1.25 * k, .26 * k, .18 * k, .02, P.trim).box(0, .26 * k, 0, 1.3 * k, .02, .23 * k, P.tealSoft).box(0, .06 * k, .092 * k, 1.25 * k, .018, .004, P.teal);
     grp(S, X(.35), f[1] + .26 * k + .02, nz - .03).box(-.35, 0, 0, .05, .01, .04, P.dark).box(-.35, 0, -.01, .012, .05, .012, P.dark).box(-.35, .04, 0, .2 * k, .12 * k, .014, P.frame).box(.25, 0, 0, .05, .01, .04, P.dark).box(.25, 0, -.01, .012, .05, .012, P.dark).box(.25, .04, 0, .2 * k, .12 * k, .014, P.frame);
     for (const dx of [-.35, .25]) bx(S, X(.35) + dx, f[1] + .26 * k + .02 + .05, nz - .022, .17 * k, .1 * k, .004, '#BCD5DC', 0, .6);
     person(E, X(.0), f[1], nz - .22, 0, { kind: 'type', cloth: P.scrub, night: true });
@@ -610,8 +829,9 @@ const BUILD = {
       screen: { x: -.02 * k, y: .345 * k, z: .014, w: .17 * k, h: .23 * k }
     });
     // 薬のカート
-    grp(S, X(1.35), f[1], Z(.55)).rbox(0, .02, 0, .16 * k, .2 * k, .11 * k, .01, P.trim).box(0, .22 * k, 0, .17 * k, .012, .12 * k, P.tealSoft).box(0, .06 * k, .056 * k, .15 * k, .03 * k, .004, '#A4CDEA').box(0, .12 * k, .056 * k, .15 * k, .03 * k, .004, '#BFE2B0').box(0, .18 * k, .056 * k, .15 * k, .025 * k, .004, '#F2D46B');
-    person(E, X(.4), f[1], Z(.82), Math.PI / 2, { kind: 'walk', x0: X(-.35), x1: X(1.2), v: .3, cloth: P.scrub, night: true });
+    grp(S, X(1.35), f[1], Z(.55)).foot(0, 0, .16 * k, .11 * k).rbox(0, .02, 0, .16 * k, .2 * k, .11 * k, .01, P.trim).box(0, .22 * k, 0, .17 * k, .012, .12 * k, P.tealSoft).box(0, .06 * k, .056 * k, .15 * k, .03 * k, .004, '#A4CDEA').box(0, .12 * k, .056 * k, .15 * k, .03 * k, .004, '#BFE2B0').box(0, .18 * k, .056 * k, .15 * k, .025 * k, .004, '#F2D46B');
+    person(E, X(.4), f[1], Z(.82), Math.PI / 2, { kind: 'walk', x0: X(-.35), x1: X(1.2), v: .3, cloth: P.scrub, night: true, carry: true });
+    person(E, X(1.14), f[1], Z(.56), Math.PI / 2, { kind: 'bend', cloth: P.scrubNavy, lean: .34 });   // 薬のカートで支度をする
     person(E, X(.1), f[1], Z(.6), Math.PI / 2, { kind: 'walk', x0: X(-.45), x1: X(.6), v: .07, cloth: P.blanket });   // 病衣でゆっくり歩く人
     for (let i = 0; i < 2; i++) grp(S, X(-.8 + i * 1.6), f[1] + E.fh - .085, Z(.6)).box(0, 0, 0, .28 * k, .014, .06, '#FFF5DE', 0, 0, 1);
 
@@ -625,22 +845,22 @@ const BUILD = {
     bb(S, X(-1.4), X(-.5), y3, y3 + .005, R.zb + .06, R.zb + .66 * k, mix(P.terraLight, P.sand, .45));
     bb(S, X(-.62), X(-.38), y3 + .5, y3 + .66, R.zb, R.zb + .01, P.cork);
     for (const [px, py, pc] of [[-.58, .55, P.paper], [-.48, .57, P.notes[0]], [-.43, .53, P.paper]]) bb(S, X(px), X(px) + .05, y3 + py, y3 + py + .06, R.zb + .01, R.zb + .014, pc);
-    grp(S, X(-.95), y3, sz0).rbox(0, 0, 0, .62 * k, .09 * k, .2 * k, .03, P.sofa).rbox(0, .09 * k, .01, .56 * k, .03 * k, .17 * k, .02, P.cushion).rbox(0, .09 * k, -.085 * k, .62 * k, .14 * k, .05 * k, .02, P.sofa).rbox(-.29 * k, .09 * k, 0, .05 * k, .07 * k, .2 * k, .02, P.sofa).rbox(.29 * k, .09 * k, 0, .05 * k, .07 * k, .2 * k, .02, P.sofa);
-    grp(S, X(-.95), y3, sz0 + .28 * k).rbox(0, .08 * k, 0, .34 * k, .018, .16 * k, .008, P.deskWood).box(-.14 * k, 0, 0, .016, .08 * k, .12 * k, P.woodDark).box(.14 * k, 0, 0, .016, .08 * k, .12 * k, P.woodDark).cyl(-.06, .1 * k, .02, .013, .022, P.paper).cyl(.05, .1 * k, -.02, .013, .022, P.terraLight);
-    const sp0 = person(E, X(-1.07), y3 + .015, sz0 + .04, 0, { kind: 'sit', cloth: P.scrub, night: true });
+    grp(S, X(-.95), y3, sz0).foot(0, 0, .62 * k, .2 * k).rbox(0, 0, 0, .62 * k, .09 * k, .2 * k, .03, P.sofa).rbox(0, .09 * k, .01, .56 * k, .03 * k, .17 * k, .02, P.cushion).rbox(0, .09 * k, -.085 * k, .62 * k, .14 * k, .05 * k, .02, P.sofa).rbox(-.29 * k, .09 * k, 0, .05 * k, .07 * k, .2 * k, .02, P.sofa).rbox(.29 * k, .09 * k, 0, .05 * k, .07 * k, .2 * k, .02, P.sofa);
+    grp(S, X(-.95), y3, sz0 + .28 * k).foot(0, 0, .3 * k, .14 * k, .8).rbox(0, .08 * k, 0, .34 * k, .018, .16 * k, .008, P.deskWood).box(-.14 * k, 0, 0, .016, .08 * k, .12 * k, P.woodDark).box(.14 * k, 0, 0, .016, .08 * k, .12 * k, P.woodDark).cyl(-.06, .1 * k, .02, .013, .022, P.paper).cyl(.05, .1 * k, -.02, .013, .022, P.terraLight);
+    const sp0 = person(E, X(-1.07), y3 + .015, sz0 + .04, 0, { kind: 'read', cloth: P.scrub, night: true });   // 返信を考える人(スマホを見る)
     station(E, 'yawagaeshi', {
-      x: sp0.x + .015, y: y3 + .015 + .24, z: sp0.z + .085, ry: 0, lift: [0, .035, .02],
+      x: sp0.x + .01, y: y3 + .015 + .2, z: sp0.z + .14, ry: 0, lift: [0, .035, .02], glass: true,
       holder: g => g.rbox(0, 0, 0, .075 * k, .14 * k, .012, .006, '#2A2F35'),
       screen: { x: 0, y: .07 * k, z: .0075, w: .064 * k, h: .128 * k, tilt: .35 }
     });
     person(E, X(-.72), y3 + .015, sz0 + .04, -.25, { kind: 'sit', cloth: P.coat });
-    grp(S, X(-.3), y3, R.zb + .1).rbox(0, 0, 0, .2 * k, .44 * k, .14 * k, .015, P.trim).box(0, .2 * k, .072 * k, .16 * k, .2 * k, .004, '#E7EEF2', 0, 0, .9).box(0, .07 * k, .072 * k, .12 * k, .05 * k, .004, P.dark);
-    person(E, X(-.48), y3, Z(.25), Math.PI * .85, { kind: 'stand', cloth: P.scrubNavy });
+    grp(S, X(-.3), y3, R.zb + .1).foot(0, 0, .2 * k, .14 * k).rbox(0, 0, 0, .2 * k, .44 * k, .14 * k, .015, P.trim).box(0, .2 * k, .072 * k, .16 * k, .2 * k, .004, '#E7EEF2', 0, 0, .9).box(0, .07 * k, .072 * k, .12 * k, .05 * k, .004, P.dark);
+    talk(person(E, X(-.56), y3, Z(.28), 0, { cloth: P.scrubNavy }), person(E, X(-.26), y3, Z(.33), 0, { cloth: P.blanket }));   // 看護師と、病衣の人
     plant(E, S, y3, X(-1.45), Z(.4), 1.2, 1);
     // 病室: 横向きのベッド2台(頭は外の壁の側。寝ている人が横から見える)。見舞いの人と看護師はベッドの奥にいて、こちらを向く
     const bz = R.zb + .36 * k, bl = .54 * k, bw2 = .28 * k, mt = .145 * k;
     for (const [bx0, flip] of [[X(.5), 0], [X(1.18), 1]]) {
-      grp(S, bx0, y3, bz, flip ? Math.PI : 0)
+      grp(S, bx0, y3, bz, flip ? Math.PI : 0).foot(0, 0, bl, bw2)
         .box(0, 0, 0, bl, .1 * k, bw2, P.metal).rbox(0, .1 * k, 0, bl - .02, .045 * k, bw2 - .02, .015, P.sheet)
         .box(-bl / 2 - .01, 0, 0, .02, .26 * k, bw2, P.metal).box(bl / 2 + .01, 0, 0, .02, .17 * k, bw2, P.metal)
         .rbox(-bl / 2 + .075 * k, mt, 0, .09 * k, .035 * k, .17 * k, .014, '#FFFFFF')
@@ -652,8 +872,8 @@ const BUILD = {
     bb(S, cx3 - .005, cx3 + .005, y3 + .03, y3 + .64 * k, R.zb + .03, R.zb + .56 * k, mix(P.tealSoft, '#FFFFFF', .25)); bb(S, cx3 - .015, cx3 + .015, y3 + .64 * k, y3 + .66 * k, R.zb + .02, R.zb + .6 * k, P.metal);
     grp(S, X(1.18) + bl / 2 - .04, y3, R.zb + .1).box(0, 0, 0, .1, .012, .1, P.metalDark).box(0, 0, 0, .012, .56 * k, .012, P.metal).box(0, .5 * k, 0, .04 * k, .07 * k, .02, '#DDE6EA', 0, 0, .5);
     chair(E, S, y3, X(.5) + .12, R.zb + .1, 0, P.chair2);
-    person(E, X(.5) + .12, y3, R.zb + .1, -.15, { kind: 'sit', cloth: P.casual[0] });
-    person(E, X(1.18) - .1, y3, R.zb + .1, .2, { kind: 'write', stand: true, cloth: P.scrub, night: true });
+    person(E, X(.5) + .12, y3, R.zb + .1, -.15, { kind: 'read', cloth: P.casual[0] });          // 見舞いの人が本を読む
+    person(E, X(1.18) - .1, y3, R.zb + .1, .5, { kind: 'bend', cloth: P.scrub, night: true, lean: .3 });   // 看護師が患者をのぞく
     person(E, X(.8), y3, Z(.72), Math.PI / 2, { kind: 'walk', x0: X(.2), x1: X(1.4), v: .14, cloth: P.casual[3] });
     lampTable(E, S, y3 + .08 * k + .02, X(-.82), sz0 + .28 * k + .05, '#F3E3C2');
   },
@@ -668,13 +888,19 @@ const BUILD = {
       g.translate(0, .5, 0); g.scale(-1, 1, 1); g.computeVertexNormals(); // 内側を表に
       return ni(g);
     })();
-    S.add(wallGeo, mtx(0, 0, 0, 1, H, 1), P.inWall);
-    // 床と階の床(階段の穴をあける)
+    S.add(wallGeo, mtx(0, 0, 0, 1, H - .012, 1), P.inWall);
+    // 切り口の塗り: 壁の上の端(半分の輪)と、正面で切った壁の両端。外側の塔の内側の面(Ro)まで
+    const Ro = E.box.w / 2 + .006, pc = P.poche;
+    const capGeo = (() => { const g = new THREE.RingGeometry(R - .002, Ro, seg, 1, 0, Math.PI); g.rotateX(-Math.PI / 2); return ni(g); })();
+    S.add(capGeo, mtx(0, H, 0, 1, 1, 1), pc, 0, 1);
+    pb(S, R - .004, Ro, -.05, H, -.006, 0, pc); pb(S, -Ro, -R + .004, -.05, H, -.006, 0, pc);
+    // 床と階の床(階段の穴をあける)。階の床の切り口は藍
     for (let i = 0; i < fl; i++) {
       const y = E.fy(i);
       const floorDisc = ni(new THREE.CylinderGeometry(R, R, 1, seg * 2, 1, false, i ? 2.95 : 0, i ? TAU - .8 : TAU)).translate(0, .5, 0);
-      S.add(floorDisc, mtx(0, y, 0, 1, .012, 1), P.floorWood);
-      if (i) S.add(floorDisc, mtx(0, y - .07, 0, 1, .07, 1), P.cut);
+      const slabDisc = ni(new THREE.CylinderGeometry(Ro, Ro, 1, seg * 2, 1, false, i ? 2.95 : 0, i ? TAU - .8 : TAU)).translate(0, .5, 0);
+      S.add(floorDisc, mtx(0, y, 0, 1, .012, 1), P.floorWood); E.fc[i] = P.floorWood;
+      S.add(slabDisc, i ? mtx(0, y - .09, 0, 1, .09, 1) : mtx(0, -.05, 0, 1, .05, 1), pc, 0, 1);
       // 窓(奥の壁に2つ)
       for (const a of [-.55, .55]) {
         const ax = Math.sin(a) * (R - .01), az = -Math.cos(a) * (R - .01);
@@ -712,7 +938,7 @@ const BUILD = {
         .box(-.06 * k, .02, .042 * k, .05 * k, .3 * k, .004, '#C8D7C4').box(.0, .02, .042 * k, .05 * k, .3 * k, .004, '#E7D2C2').box(.06 * k, .02, .042 * k, .05 * k, .3 * k, .004, '#C9D6E2'),
       screen: { x: 0, y: .5 * k, z: .02, w: .13 * k, h: .18 * k, tilt: .12 }
     });
-    person(E, .02, f(0), .12, Math.PI * .95, { kind: 'stand', cloth: P.casual[2] });
+    person(E, .02, f(0), .12, Math.PI * .78, { kind: 'read', stand: true, cloth: P.casual[2] });   // カードを読む
     // ---- 2階: 開いたノートの机・窓辺の椅子とタブレット・日誌の机 ----
     const y2 = f(1);
     desk(E, S, y2, .2, -.24, .28 * k, .16 * k, -.4, P.deskWood);
@@ -724,14 +950,14 @@ const BUILD = {
     chair(E, S, y2, .14, -.08, Math.PI - .4, P.chair2);
     person(E, .14, y2, -.08, Math.PI - .4, { kind: 'write', cloth: P.casual[0] });
     grp(S, -.24, y2, -.05, .9).rbox(0, 0, 0, .2 * k, .09 * k, .18 * k, .03, P.sofa).rbox(0, .09 * k, -.07 * k, .2 * k, .12 * k, .04 * k, .02, P.sofa).rbox(-.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa).rbox(.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa);
-    const mp = person(E, -.24, y2 + .015, -.05, .9, { kind: 'sit', cloth: P.casual[3] });
+    const mp = person(E, -.24, y2 + .015, -.05, .9, { kind: 'read', cloth: P.casual[3] });
     station(E, 'moyamoya', {
-      x: mp.x + Math.sin(.9) * .08, y: y2 + .2, z: mp.z + Math.cos(.9) * .08, ry: .9, lift: [0, .035, .02],
+      x: mp.x + Math.sin(.9) * .08, y: y2 + .2, z: mp.z + Math.cos(.9) * .08, ry: .9, lift: [0, .035, .02], glass: true,
       holder: g => g.rbox(0, 0, 0, .13 * k, .1 * k, .01, .008, '#2A2F35'),
       screen: { x: 0, y: .05 * k, z: .0055, w: .118 * k, h: .088 * k, tilt: .55 }
     });
     station(E, 'daily-app', {
-      x: .05, y: y2, z: .22, ry: -.15,
+      x: .05, y: y2, z: .22, ry: -.15, glass: true,
       holder: g => g.box(0, .16 * k, 0, .24 * k, .016, .14 * k, P.deskWood).box(0, 0, 0, .03, .16 * k, .03, P.woodDark).box(0, 0, 0, .12, .012, .1, P.woodDark).box(.07, .176 * k, -.03, .07 * k, .008, .05 * k, P.terraLight),
       screen: { x: -.03, y: .177 * k, z: .01, w: .14 * k, h: .1 * k, tilt: Math.PI / 2 - .25 }
     });
@@ -743,8 +969,9 @@ const BUILD = {
         .box(0, .24 * k, -.05 * k, .4 * k, .02, .28 * k, P.deskWood, ta).box(0, .16 * k, .05 * k, .36 * k, .012, .03, P.woodDark),
       screen: { x: 0, y: .24 * k + .022 * Math.cos(ta), z: -.05 * k + .022 * Math.sin(ta), w: .36 * k, h: .24 * k, tilt: Math.PI / 2 - ta }
     });
-    person(E, -.33, y3, -.04, Math.PI / 2, { kind: 'stand', cloth: P.casual[0] });
-    person(E, .31, y3, -.1, -Math.PI * .42, { kind: 'stand', cloth: P.casual[4], night: true });
+    person(E, -.33, y3, -.04, Math.PI / 2, { kind: 'bend', cloth: P.casual[0], lean: .3 });       // 地図をのぞきこむ
+    person(E, .31, y3, -.1, -Math.PI / 2, { kind: 'talk', cloth: P.casual[4] });                    // 向かいで話す
+    person(E, .4, y3, .38, Math.PI - .55, { kind: 'bend', cloth: P.casual[1], lean: .28, night: true, day: false });   // 夜は望遠鏡をのぞく
     station(E, 'growth-76a805', {
       x: 0, y: y3 + .3 * k, z: -R + .03, ry: 0, lift: [0, .01, .03],
       holder: g => g.box(0, 0, 0, .36 * k, .26 * k, .016, P.cork).box(0, -.006, 0, .38 * k, .012, .022, P.woodDark)
@@ -774,9 +1001,9 @@ const BUILD = {
     chair(E, S, y, X(-.52), R.zb + .28, Math.PI, P.chair);
     person(E, X(-.52), y, R.zb + .28, Math.PI, { kind: 'write', cloth: P.coat });
     grp(S, X(-.8), y, Z(.12), 0).box(0, 0, 0, .2 * k, .14 * k, .44 * k, P.metal).rbox(0, .14 * k, 0, .2 * k, .04 * k, .44 * k, .015, mix(P.sage, '#FFFFFF', .4)).rbox(0, .18 * k, -.17 * k, .12 * k, .025 * k, .07 * k, .01, '#FFFFFF');
-    person(E, X(-.5), y, Z(.3), -Math.PI / 2, { kind: 'stand', cloth: P.scrub });
+    const cn = person(E, X(-.5), y, Z(.3), -Math.PI / 2, { cloth: P.scrub });
     chair(E, S, y, X(-.42), R.zb + .52, Math.PI * 1.25, P.chair2);
-    person(E, X(-.42), y, R.zb + .52, Math.PI * 1.25, { kind: 'sit', cloth: P.casual[2] });
+    talk(cn, person(E, X(-.42), y, R.zb + .52, Math.PI * 1.25, { kind: 'sit', cloth: P.casual[2] }));   // 看護師と患者
     // 受付と、引き継ぎの机(30日のチェック表)
     const ry0 = R.zb + .32;
     grp(S, X(.12), y, ry0).rbox(0, 0, 0, .52 * k, .22 * k, .16 * k, .02, P.trim).box(0, .22 * k, 0, .55 * k, .02, .2 * k, P.deskWood).box(0, .07 * k, .082 * k, .52 * k, .016, .004, mix(P.sage, '#6E8C68', .4));
@@ -787,16 +1014,16 @@ const BUILD = {
       holder: g => g.box(0, 0, 0, .13 * k, .008, .17 * k, P.woodDark).box(0, .008, -.075 * k, .05 * k, .012, .02, P.metal),
       screen: { x: 0, y: .0095, z: .008, w: .115 * k, h: .145 * k, tilt: Math.PI / 2 - .2 }
     });
-    person(E, X(.5), y, ry0 + .18, -Math.PI * .7, { kind: 'stand', cloth: P.scrubNavy });
+    person(E, X(.5), y, ry0 + .18, -Math.PI * .7, { kind: 'write', stand: true, cloth: P.scrubNavy });   // 引き継ぎを書く
     // 待合: ベンチ(テレビを向く)・テレビ(クリニックタウン3D)
     station(E, 'clinic-flow-3d', {
-      x: X(.68), y: y + .32 * k, z: R.zb + .004, ry: 0, lift: [0, .01, .03], flicker: .05,
+      x: X(.68), y: y + .32 * k, z: R.zb + .004, ry: 0, lift: [0, .01, .03], flicker: .05, glass: true, bezel: .022,
       holder: g => g.box(0, 0, 0, .44 * k, .27 * k, .03, P.frame).box(0, -.06, -.005, .06, .06, .012, P.dark),
       screen: { x: 0, y: .135 * k, z: .016, w: .41 * k, h: .24 * k }
     });
     for (const bz of [Z(.18), Z(.48)]) grp(S, X(.68), y, bz).box(0, 0, 0, .6 * k, .012, .012, P.metalDark).box(-.26 * k, 0, 0, .016, .1 * k, .12 * k, P.metalDark).box(.26 * k, 0, 0, .016, .1 * k, .12 * k, P.metalDark).rbox(0, .1 * k, 0, .6 * k, .028 * k, .13 * k, .01, P.bench).rbox(0, .128 * k, .05 * k, .6 * k, .1 * k, .022 * k, .01, P.bench);
-    person(E, X(.55), y + .015, Z(.18), Math.PI, { kind: 'sit', cloth: P.casual[0] });
-    person(E, X(.86), y + .015, Z(.18), Math.PI, { kind: 'sit', cloth: P.casual[4] });
+    person(E, X(.55), y + .015, Z(.18), Math.PI, { kind: 'look', cloth: P.casual[0] });     // テレビを見上げる
+    person(E, X(.86), y + .015, Z(.18), Math.PI, { kind: 'read', cloth: P.casual[4] });
     grp(S, X(.93), y, Z(-.05)).box(0, 0, 0, .1 * k, .3 * k, .09 * k, P.trim).box(0, .3 * k, 0, .05, .06, .05, mix(P.glass, '#DDEBF2', .5));
     grp(S, X(.25), y, Z(.62)).box(0, 0, 0, .16 * k, .2 * k, .05, P.deskWood).box(-.04, .05 * k, .028, .05, .06, .004, P.notes[2]).box(.04, .05 * k, .028, .05, .06, .004, P.paper).box(0, .13 * k, .028, .05, .05, .004, P.notes[1]);
     plant(E, S, y, X(.92), Z(.6), 1.1, 1); plant(E, S, y, X(-.93), Z(.58), .9, 3);
@@ -832,12 +1059,13 @@ const BUILD = {
       screen: { x: .0, y: .19 * k, z: .12 * k, w: .1 * k, h: .13 * k, tilt: Math.PI / 2 - .35 }
     });
     plant(E, S, f[0], X(.74), Z(.75), 1.1, 0);
+    person(E, X(-.34), f[0], Z(.3), Math.PI + .95, { kind: 'crouch', cloth: P.casual[2] });   // バインダーを下の段から探す
     // 入口のそばのコート掛け
     grp(S, X(-.72), f[0], Z(.66)).cyl(0, 0, 0, .05, .012, P.woodDark).cyl(0, 0, 0, .01, .46 * k, P.woodDark).box(-.02, .3 * k, .0, .06, .14 * k, .05, mix(P.navy, '#4A5568', .45)).box(.03, .33 * k, .01, .05, .1 * k, .04, P.terraLight);
     // ---- 2階 ----
     desk(E, S, f[1], X(-.42), Z(.36), .44 * k, .18 * k, 0, P.desk);
     station(E, 'medboard', {
-      x: X(-.42), y: f[1] + .19 * k, z: Z(.38), ry: 0, lift: [0, .025, .012], flicker: .04,
+      x: X(-.42), y: f[1] + .19 * k, z: Z(.38), ry: 0, lift: [0, .025, .012], flicker: .04, glass: true,
       holder: g => g.box(-.11 * k, 0, 0, .04, .008, .04, P.dark).box(-.11 * k, 0, -.005, .012, .05, .012, P.dark).box(-.11 * k, .045, 0, .2 * k, .13 * k, .014, P.frame)
         .box(.11 * k, 0, 0, .04, .008, .04, P.dark).box(.11 * k, 0, -.005, .012, .05, .012, P.dark).box(.11 * k, .045, 0, .2 * k, .13 * k, .014, P.frame),
       screen: { x: 0, y: .045 + .065 * k, z: .008, w: .4 * k, h: .118 * k }
@@ -846,14 +1074,14 @@ const BUILD = {
     person(E, X(-.42), f[1], Z(.18), 0, { kind: 'type', cloth: P.office, night: true });
     desk(E, S, f[1], X(.45), Z(.4), .36 * k, .18 * k, 0, P.desk);
     station(E, 'consult-simulator', {
-      x: X(.45), y: f[1] + .19 * k, z: Z(.42), ry: -.12, lift: [0, .025, .012], flicker: .03,
+      x: X(.45), y: f[1] + .19 * k, z: Z(.42), ry: -.12, lift: [0, .025, .012], flicker: .03, glass: true,
       holder: g => g.box(0, 0, 0, .05, .008, .04, P.dark).box(0, 0, -.005, .012, .05, .012, P.dark).box(0, .045, 0, .27 * k, .16 * k, .014, P.frame),
       screen: { x: 0, y: .045 + .08 * k, z: .008, w: .25 * k, h: .145 * k }
     });
     chair(E, S, f[1], X(.45), Z(.22), 0, P.chair);
     person(E, X(.45), f[1], Z(.22), 0, { kind: 'type', cloth: P.casual[4] });
     // 手帖を持って階を回る人(本部長の巡回手帖)。手帖は人といっしょに動く
-    const rn = person(E, X(0), f[1], Z(.75), Math.PI / 2, { kind: 'walk', x0: X(-.7), x1: X(.7), v: .2, cloth: mix(P.navy, '#4A5568', .3) });
+    const rn = person(E, X(0), f[1], Z(.75), Math.PI / 2, { kind: 'walk', x0: X(-.7), x1: X(.7), v: .2, cloth: mix(P.navy, '#4A5568', .3), carry: true });
     station(E, 'round-note', {
       x: X(0), y: f[1] + .2, z: Z(.75) + .07, ry: 0, lift: [0, .04, .02],
       holder: g => g.box(0, 0, 0, .085 * k, .11 * k, .01, P.terra),
@@ -870,9 +1098,10 @@ const BUILD = {
       screen: { x: 0, y: .18 * k, z: .008, w: .5 * k, h: .31 * k }
     });
     rbTable(E, S, y3, X(-.4), Z(.05), k);
-    person(E, X(-.62), y3, Z(.05), Math.PI / 2, { kind: 'sit', cloth: P.office });
-    person(E, X(-.18), y3, Z(.05), -Math.PI / 2, { kind: 'sit', cloth: P.casual[0] });
-    person(E, X(-.08), y3, R.zb + .14, -Math.PI * .1, { kind: 'stand', cloth: P.coat });
+    const pr = person(E, X(-.06), y3, R.zb + .16, 0, { kind: 'talk', cloth: P.coat });          // ボードの前で話す人
+    turnTo(person(E, X(-.62), y3, Z(.05), Math.PI / 2, { kind: 'listen', cloth: P.office }), pr.x, pr.z, .55);
+    turnTo(person(E, X(-.18), y3, Z(.05), -Math.PI / 2, { kind: 'listen', cloth: P.casual[0] }), pr.x, pr.z, .55);
+    turnTo(pr, X(-.4), Z(.05));
     station(E, 'hire-board', {
       x: X(.45), y: y3 + .26 * k, z: R.zb + .004, ry: 0, lift: [0, .01, .03],
       holder: g => {
@@ -885,7 +1114,7 @@ const BUILD = {
     grp(S, X(.42), y3, Z(.42)).rbox(0, .17 * k, 0, .3 * k, .016, .18 * k, .01, P.deskWood).box(0, 0, 0, .03, .17 * k, .03, P.woodDark).box(0, 0, 0, .14, .01, .1, P.woodDark);
     chair(E, S, y3, X(.22), Z(.42), Math.PI / 2, P.chair2); chair(E, S, y3, X(.62), Z(.42), -Math.PI / 2, P.chair2);
     person(E, X(.22), y3, Z(.42), Math.PI / 2, { kind: 'write', cloth: P.office });
-    person(E, X(.62), y3, Z(.42), -Math.PI / 2, { kind: 'sit', cloth: P.casual[3] });
+    person(E, X(.62), y3, Z(.42), -Math.PI / 2, { kind: 'listen', cloth: P.casual[3] });     // 面接で話す人
     station(E, 'interview-kit', {
       x: X(.36), y: y3 + .186 * k, z: Z(.43), ry: .3, lift: [0, .03, .012],
       holder: g => g.box(0, 0, 0, .13 * k, .006, .1 * k, P.woodDark),
@@ -937,7 +1166,7 @@ const BUILD = {
       screen: { x: 0, y: .0175, z: 0, w: .12 * k, h: .085 * k, tilt: Math.PI / 2 - .3 }
     });
     for (const [cx, cz, ry] of [[X(-.62), Z(.06), 0], [X(-.28), Z(.06), 0], [X(-.62), Z(.45), Math.PI], [X(-.28), Z(.45), Math.PI]]) chair(E, S, y, cx, cz, ry, P.chair2);
-    person(E, X(-.62), y, Z(.06), 0, { kind: 'write', cloth: P.casual[0] });
+    person(E, X(-.62), y, Z(.06), 0, { kind: 'read', cloth: P.casual[0] });
     person(E, X(-.28), y, Z(.45), Math.PI, { kind: 'write', cloth: P.casual[1] });
     lampTable(E, S, y + .2 * k, X(-.2), Z(.22), '#9DBE96');
     // 学習計画のボード(自立する板)
@@ -946,19 +1175,20 @@ const BUILD = {
       holder: g => g.box(-.2 * k, 0, 0, .014, .52 * k, .014, P.metalDark).box(.2 * k, 0, 0, .014, .52 * k, .014, P.metalDark).box(0, .01, 0, .44 * k, .012, .1, P.metalDark).box(0, .2 * k, 0, .44 * k, .3 * k, .014, '#FFFFFF'),
       screen: { x: 0, y: .35 * k, z: .009, w: .4 * k, h: .26 * k }
     });
-    person(E, X(.48), y, Z(.32), Math.PI * .9, { kind: 'stand', cloth: P.casual[3] });
+    turnTo(person(E, X(.44), y, Z(.3), Math.PI * .9, { kind: 'reach', cloth: P.casual[3] }), X(.62), Z(.05));   // ボードに書きこむ
     // ヘッドホンの席(囲いのある机)。画面は目の高さの板に掛け、座る人の頭の上に見える
     const cx2 = X(.72), cz2 = Z(.6);
     grp(S, cx2, y, cz2).box(0, .18 * k, 0, .32 * k, .016, .16 * k, P.deskWood).box(-.16 * k, 0, 0, .014, .3 * k, .18 * k, P.woodDark).box(.16 * k, 0, 0, .014, .3 * k, .18 * k, P.woodDark).box(0, .18 * k, -.08 * k, .32 * k, .3 * k, .012, P.woodDark);
     station(E, 'english-trainer', {
-      x: cx2, y: y + .33 * k, z: cz2 - .072 * k, ry: 0, lift: [0, .02, .02],
+      x: cx2, y: y + .33 * k, z: cz2 - .072 * k, ry: 0, lift: [0, .02, .02], glass: true,
       holder: g => g.box(0, 0, 0, .19 * k, .125 * k, .012, P.frame),
       screen: { x: 0, y: .0625 * k, z: .007, w: .175 * k, h: .11 * k }
     });
     chair(E, S, y, cx2 - .03, cz2 + .15 * k, Math.PI, P.chair2);
-    const hp = person(E, cx2 - .03, y, cz2 + .15 * k, Math.PI, { kind: 'sit', cloth: P.casual[4] });
+    const hp = person(E, cx2 - .03, y, cz2 + .15 * k, Math.PI, { kind: 'look', cloth: P.casual[4], hp: -.08 });
     grp(S, hp.x, y + PERSON.sitHeadY + .044, hp.z).box(0, 0, 0, .118, .014, .02, P.dark).box(-.058, -.046, 0, .016, .044, .036, P.dark).box(.058, -.046, 0, .016, .044, .036, P.dark);
     plant(E, S, y, X(1.08), Z(.78), 1.2, 1); plant(E, S, y, X(-1.08), Z(.78), 1.1, 3);
+    person(E, X(.12), y, R.zb + .3 * k, Math.PI * .92, { kind: 'crouch', cloth: P.casual[1] });   // いちばん下の段の本を探す
   },
 
   /* ---------- 公園: 壁はない。小物が道具 ---------- */
@@ -967,7 +1197,7 @@ const BUILD = {
     // ガチャ(ときどきカプセルが転がる)
     let capRange = null;
     station(E, 'gokigen-gacha', {
-      x: X(-1.25), y, z: Z(.1), ry: .35, lift: [0, .03, .02], scale: pk,
+      x: X(-1.25), y, z: Z(.1), ry: .35, lift: [0, .03, .02], scale: pk, glass: true,
       holder: g => {
         g.rbox(0, 0, 0, .3, .34, .26, .03, P.terraLight).box(0, .34, 0, .28, .03, .24, P.trim)
           .cyl(0, .37, 0, .13, .06, mix(P.glass, '#FFFFFF', .55)).cyl(0, .43, 0, .135, .012, P.trim);
@@ -978,7 +1208,7 @@ const BUILD = {
     });
     // 転がるカプセル(道具の物の形の中で、毎フレーム頂点を動かす)
     const c0 = H.n; sp(H, 0, 0, 0, .035 * pk, '#F0C434'); capRange = [c0, H.n];
-    person(E, X(-.95), y, Z(.6), Math.PI * .88, { kind: 'stand', cloth: P.casual[4] });
+    person(E, X(-.84), y, Z(.46), -.2, { kind: 'crouch', cloth: P.casual[4] });   // 転がってくるカプセルを待つ
     // 保留の棚
     station(E, 'ittan-horyu', {
       x: X(-.25), y, z: Z(-.9), ry: .05, lift: [0, .02, .03], scale: pk,
@@ -991,7 +1221,7 @@ const BUILD = {
     });
     // 窓の額(夜の病院の窓)
     station(E, 'madoakari', {
-      x: X(.75), y, z: Z(-.55), ry: -.3, lift: [0, .02, .03], scale: pk,
+      x: X(.75), y, z: Z(-.55), ry: -.3, lift: [0, .02, .03], scale: pk, glass: true,
       holder: g => g.box(0, 0, 0, .02, .34, .02, P.woodDark).box(-.06, 0, -.06, .016, .3, .016, P.woodDark).box(.06, 0, -.06, .016, .3, .016, P.woodDark)
         .box(0, .3, .0, .3, .26, .03, P.trim).box(0, .3, -.002, .32, .015, .036, P.woodDark).box(0, .43 - .0, .017, .008, .2, .004, P.trim),
       screen: { x: 0, y: .43, z: .017, w: .26, h: .22 }
@@ -1007,11 +1237,11 @@ const BUILD = {
       holder: g => g.box(0, 0, 0, .025, .26, .025, P.woodDark).box(0, .26, 0, .2, .15, .02, P.trim, -pa),
       screen: { x: 0, y: .26 + .075 * Math.cos(pa) + .011 * Math.sin(pa), z: -.075 * Math.sin(pa) + .011 * Math.cos(pa), w: .17, h: .12, tilt: pa }
     });
-    person(E, px - .2, y, pz - .62, .3, { kind: 'stand', cloth: P.casual[0] });
-    person(E, X(-.02), y, Z(-.42), Math.PI * 1.08, { kind: 'stand', cloth: P.casual[2] });
+    talk(person(E, px - .3, y, pz - .62, 0, { cloth: P.casual[0] }), person(E, px + .02, y, pz - .68, 0, { cloth: P.casual[3] }));   // 池のそばで話す
+    person(E, X(-.02), y, Z(-.42), Math.PI * 1.08, { kind: 'reach', cloth: P.casual[2] });   // 保留の棚に手をのばす
     // ベンチと街灯(町の街灯と同じ色)。夜もベンチに一人いる
     grp(S, X(.12), y, Z(.78)).box(-.22, 0, 0, .03, .1, .12, P.metalDark).box(.22, 0, 0, .03, .1, .12, P.metalDark).box(0, .1, 0, .52, .028, .14, P.bench).box(0, .128, -.06, .52, .12, .022, P.bench);
-    person(E, X(.0), y, Z(.8), 0, { kind: 'sit', cloth: P.casual[1], night: true });
+    person(E, X(.0), y, Z(.8), 0, { kind: 'read', cloth: P.casual[1], night: true });
     grp(S, X(-1.62), y, Z(.75)).cyl(0, 0, 0, .05, .02, P.metalDark).cyl(0, 0, 0, .014, .78, P.lampPole).box(0, .78, 0, .07, .06, .07, P.lampHead, 0, 0, 1.2).box(0, .84, 0, .09, .012, .09, P.lampPole);
     E.extra.capRange = capRange;
   },
@@ -1036,7 +1266,7 @@ const BUILD = {
     // ノートパソコン: 蓋は奥へ la だけ倒す。画面は蓋の面に合わせる
     const la = .2;
     station(E, 'note', {
-      x: X(-.12), y: y + .21 * k, z: R.zb + .15, ry: -.35, lift: [0, .025, .012], canvas: 'note',
+      x: X(-.12), y: y + .21 * k, z: R.zb + .15, ry: -.35, lift: [0, .025, .012], canvas: 'note', glass: true,
       holder: g => g.box(0, 0, .03, .17 * k, .008, .11 * k, '#C9CDD1').box(0, .006, -.025, .17 * k, .11 * k, .008, '#C9CDD1', -la),
       screen: { x: 0, y: .006 + .055 * k * Math.cos(la) + .0055 * Math.sin(la), z: -.025 - .055 * k * Math.sin(la) + .0055 * Math.cos(la), w: .15 * k, h: .095 * k, tilt: la }
     });
@@ -1067,4 +1297,4 @@ const BUILD = {
     plant(E, S, y, R.x1 - .1, Z(.6), 1.25, 0); plant(E, S, y, R.x0 + .1, Z(.55), 1, 2);
   }
 };
-function rbTable(E, S, y, x, z, k) { grp(S, x, y, z).rbox(0, .17 * k, 0, .4 * k, .016, .22 * k, .01, E.P.desk).box(0, 0, 0, .03, .17 * k, .03, E.P.metalDark).box(0, 0, 0, .18, .01, .12, E.P.metalDark); }
+function rbTable(E, S, y, x, z, k) { grp(S, x, y, z).foot(0, 0, .36 * k, .2 * k, .76, .06).rbox(0, .17 * k, 0, .4 * k, .016, .22 * k, .01, E.P.desk).box(0, 0, 0, .03, .17 * k, .03, E.P.metalDark).box(0, 0, 0, .18, .01, .12, E.P.metalDark); }

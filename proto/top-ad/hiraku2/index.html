@@ -30,6 +30,7 @@
   --jp:'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif;
   --en:'Barlow','Helvetica Neue',Arial,sans-serif;
   --ease:cubic-bezier(.2,.8,.2,1);
+  --cl:15.6;--cr:82.0;--ct:4.9;--cb:74.3;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--paper)}
@@ -135,6 +136,19 @@ html:not(.js) .hit{outline:0}
 .tag.st{background:#fff;color:var(--ink);box-shadow:0 6px 18px -8px rgba(0,0,0,.4)}
 .tag.st::after{background:#fff}
 
+/* 最初の訪問だけ: 病院の足もとに柔らかい輪と「ふれてみる」。押した瞬間: 押した建物の足もとに輪 */
+.nudge{position:absolute;left:0;top:0;width:0;height:0;transition:opacity .5s var(--ease)}
+.nudge.gone{opacity:0}
+.nr{position:absolute;left:-50px;top:-26px;width:100px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(22,35,62,.16),0 0 18px rgba(255,255,255,.55);opacity:0;transform:scale(.3);animation:nr 2.8s cubic-bezier(.2,.7,.3,1) infinite}
+.nr.n2{animation-delay:1.4s}
+@keyframes nr{0%{opacity:0;transform:scale(.3)}14%{opacity:.95}100%{opacity:0;transform:scale(1.45)}}
+.nt{position:absolute;left:0;top:-34px;transform:translate(-50%,-100%);padding:6px 11px 7px;border-radius:999px;background:#fff;color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.06em;white-space:nowrap;box-shadow:0 6px 18px -8px rgba(0,0,0,.45)}
+.nt::after{content:'';position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;background:#fff;transform:rotate(45deg);border-radius:1px}
+html[data-tod="night"] .nr{border-color:rgba(255,228,186,.95);box-shadow:0 0 20px rgba(255,210,150,.5)}
+.pring{position:absolute;margin:-22px 0 0 -42px;width:84px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.95);box-shadow:0 0 14px rgba(255,255,255,.5);pointer-events:none;animation:pr .8s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes pr{0%{opacity:.95;transform:scale(.25)}100%{opacity:0;transform:scale(1.6)}}
+html[data-tod="night"] .pring{border-color:rgba(255,228,186,.95)}
+
 /* ================= ひらいたときのパネル(PC は右、スマホは下からのシート) ================= */
 .panel{position:fixed;z-index:60;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;box-shadow:0 24px 60px -24px rgba(20,24,30,.45),0 0 0 1px rgba(30,30,30,.06)}
 .panel[hidden]{display:none}
@@ -235,11 +249,18 @@ html:not(.js) .hit{outline:0}
 @media (max-width:899px){
   .nav{display:none}
   .menu{display:inline-flex}
-  .copy{left:var(--pad);right:var(--pad);top:calc(64px + env(safe-area-inset-top,0px))}
-  .still{width:min(132vw,calc((100svh - 360px) * 1.111));top:calc(162px + env(safe-area-inset-top,0px));transform:translateX(-48.5%)}
-  .cta-wrap{left:var(--pad);right:var(--pad);bottom:calc(18px + env(safe-area-inset-bottom,0px))}
-  .ctrl{right:calc(var(--pad) - 6px);bottom:calc(112px + env(safe-area-inset-bottom,0px))}
-  .hint{left:var(--pad);right:var(--pad);bottom:calc(122px + env(safe-area-inset-bottom,0px));padding-right:96px;text-align:left}
+  .copy{left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px))}
+  .eyebrow{font-size:11.5px;gap:8px}
+  h1{margin-top:6px;font-size:clamp(22px,6.2vw,24px);line-height:1.34}
+  /* 町の大きさは、撮った画像の中の建物の群れ(--cl〜--cr)が画面の幅の 98% になるように。高さが足りないときは、高さで決める */
+  .hero{--top0:max(136px,calc(150px + (100svh - 844px) * .35));--bot0:150px}   /* 背の高い画面では、町を少し下げて、下の空きを減らす */
+  .still{--W:min(calc(98vw * 100 / (var(--cr) - var(--cl))),calc((100svh - var(--top0) - var(--bot0)) * 100 / ((var(--cb) - var(--ct)) * .9)));width:var(--W);left:calc(50% - var(--W) * (var(--cl) + var(--cr)) / 200);transform:none;top:calc(var(--top0) + env(safe-area-inset-top,0px) - var(--W) * .9 * var(--ct) / 100)}
+  .cta-wrap{left:var(--pad);right:var(--pad);bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  .ctrl{top:calc(10px + env(safe-area-inset-top,0px));right:calc(var(--pad) + 96px);bottom:auto;gap:0}
+  .ctrl .cbtn .face{width:30px;height:30px;background:rgba(255,255,255,.46);box-shadow:0 0 0 1px rgba(30,40,50,.1);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .ctrl .cbtn .ico{width:15px;height:15px}
+  html[data-tod="night"] .ctrl .cbtn .face{background:rgba(20,28,58,.4);box-shadow:0 0 0 1px rgba(255,255,255,.16)}
+  .hint{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .panel{left:0;right:0;bottom:0;height:45svh;max-height:88svh;border-radius:18px 18px 0 0;transition:height .32s var(--ease),transform .32s var(--ease);touch-action:none}
   .panel.full{height:88svh}
   .p-grab{display:block;position:absolute;left:0;right:0;top:0;height:28px;cursor:grab}
@@ -253,7 +274,8 @@ html:not(.js) .hit{outline:0}
   .g-tools{grid-column:1 / -1}
   .maker .sec-in,.closing .sec-in{grid-template-columns:minmax(0,1fr)}
 }
-@media (max-width:899px) and (max-height:700px){.eyebrow{display:none}h1{margin-top:0}.still{top:calc(112px + env(safe-area-inset-top,0px));width:min(128vw,calc((100svh - 300px) * 1.111))}.ctrl{bottom:calc(98px + env(safe-area-inset-bottom,0px))}.hint{bottom:calc(108px + env(safe-area-inset-bottom,0px))}}
+@media (max-width:899px) and (max-height:700px){.eyebrow{display:none}h1{margin-top:0}.hero{--top0:112px;--bot0:128px}}
+@media (max-width:374px){.menu .mt{display:none}.menu{padding:0 11px}.ctrl{right:calc(var(--pad) + 40px)}.logo{gap:9px}.logo svg{width:42px}.logo b{font-size:13.5px;letter-spacing:.28em}}
 @media (max-width:359px){.cta{gap:8px;padding:0 14px;font-size:14px;white-space:nowrap}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0s!important;animation:none!important}}
 
@@ -280,7 +302,7 @@ html.capture body > *:not(#cap){display:none!important}
     <a href="../../../about/index.html">運営者</a>
     <a href="../../../community/index.html">話をする</a>
   </nav>
-  <button class="menu" id="menuBtn" type="button" aria-haspopup="dialog" aria-controls="menu">メニュー<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <button class="menu" id="menuBtn" type="button" aria-haspopup="dialog" aria-controls="menu" aria-label="メニュー"><span class="mt" aria-hidden="true">メニュー</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 </header>
 
 <main>
@@ -292,7 +314,10 @@ html.capture body > *:not(#cap){display:none!important}
     <script>(function () { var p = document.getElementById('poster'); p.src = p.dataset[document.documentElement.dataset.tod] || p.dataset.day; })();</script>
     <noscript><img class="poster" src="img/town-day.webp" width="1600" height="1440" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある"></noscript>
   </div>
-  <div class="tags" aria-hidden="true"><span class="tag" id="tagB"></span><span class="tag st" id="tagS"></span></div>
+  <div class="tags" aria-hidden="true"><span class="tag" id="tagB"></span><span class="tag st" id="tagS"></span>
+    <div class="nudge" id="nudge" hidden><i class="nr"></i><i class="nr n2"></i><span class="nt">ふれてみる</span></div>
+    <div class="rings" id="rings"></div>
+  </div>
 
   <div class="copy">
     <p class="eyebrow">医療職のための、道具と経営ゲーム</p>

@@ -1,5 +1,7 @@
 /* ================================================================
-   融合3「ひらく町」— ページの動き(three.js は読まない)
+   「ひらく町」磨き込み — ページの動き(three.js は読まない)
+   最初の訪問だけ、病院の足もとに柔らかい輪と「ふれてみる」の札(最初にふれたら消え、次の訪問では出さない)
+   押した瞬間、その建物の足もとに輪が広がる。指が外れても、近い建物を選ぶ
    最初は止めた画像(見る人の時刻の昼・夕・夜)。読み込みが終わって手が空いたら、live.js を読んで立体と入れ替える
    ふれる → 建物がわずかに沈む → 島が回ってその建物が正面を向き、カメラが寄る → 前の壁が倒れ、屋根が抜け、中が見える
    パネル(PC は右、スマホは下からのシート)の行と、町の中の物は、乗せると互いに光る
@@ -16,7 +18,7 @@ function boot() {
   R.classList.add('js');
   const $ = (s, el = document) => el.querySelector(s), $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const hero = $('#top'), canvas = $('#world'), still = $('#still'), poster = $('#poster');
-  const tagB = $('#tagB'), tagS = $('#tagS'), hint = $('#hint'), say = $('#say');
+  const tagB = $('#tagB'), tagS = $('#tagS'), hint = $('#hint'), say = $('#say'), nudge = $('#nudge'), rings = $('#rings');
   const panel = $('#panel'), pTitle = $('#pTitle'), pRole = $('#pRole'), pLine = $('#pLine'), pTools = $('#pTools'), pStill = $('#pStill');
   const hits = new Map($$('.hit').map(a => [a.dataset.id, a]));
   const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
@@ -26,6 +28,8 @@ function boot() {
   const TODS = ['day', 'dusk', 'night'];
   let ctl = null, openId = null, opener = null, touched = false, paused = false;
   let tagFor = null, tagTimer = 0, hoverId = null;
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 使えなくても壊れない */ } } };
+  let nudgeOn = !store.get('bridge-hiraku-touched') && Q.get('nudge') !== '0';   // 最初の訪問だけ
 
   /* ---------- 昼・夕・夜(ボタンで 昼 → 夕 → 夜 → 昼) ---------- */
   const btnTod = $('#btnTod'), btnPause = $('#btnPause');
@@ -48,21 +52,47 @@ function boot() {
   /* ---------- 見えないボタンと名前の札の位置(止めた画像のときは、撮ったときの位置から) ---------- */
   const heroRect = () => hero.getBoundingClientRect();
   function placeHit(a, cx, cy, w, h) { w = Math.max(44, w); h = Math.max(44, h); a.style.transform = `translate(${(cx - w / 2).toFixed(1)}px,${(cy - h / 2).toFixed(1)}px)`; a.style.width = w.toFixed(0) + 'px'; a.style.height = h.toFixed(0) + 'px'; }
-  let tagPos = {};
+  let tagPos = {}, footPos = {}, hitPos = {};
   function stillLayout() {
     if (ctl) return;
     const hr = heroRect(), br = still.getBoundingClientRect(); if (!br.width) return;
     for (const [id, a] of hits) {
       const [x0, y0, x1, y1] = a.dataset.box.split(',').map(Number), [tx, ty] = a.dataset.tag.split(',').map(Number);
-      const L = br.left - hr.left, T = br.top - hr.top;
-      placeHit(a, L + (x0 + x1) / 200 * br.width, T + (y0 + y1) / 200 * br.height, (x1 - x0) / 100 * br.width, (y1 - y0) / 100 * br.height);
+      const L = br.left - hr.left, T = br.top - hr.top, cx = L + (x0 + x1) / 200 * br.width, cy = T + (y0 + y1) / 200 * br.height;
+      placeHit(a, cx, cy, (x1 - x0) / 100 * br.width, (y1 - y0) / 100 * br.height);
       tagPos[id] = [L + tx / 100 * br.width, T + ty / 100 * br.height];
+      footPos[id] = [cx, T + (y1 - (y1 - y0) * .08) / 100 * br.height];
+      hitPos[id] = [L + x0 / 100 * br.width, T + y0 / 100 * br.height, L + x1 / 100 * br.width, T + y1 / 100 * br.height];
     }
     if (tagFor) showTag(tagFor, true);
+    placeNudge();
   }
   addEventListener('resize', () => { stillLayout(); if (ctl) ctl.resize(); });
+  hero.addEventListener('click', e => {
+    if (ctl || openId || e.target.closest('a,button,.panel')) return;
+    const hr = heroRect(), x = e.clientX - hr.left, y = e.clientY - hr.top, tol = e.pointerType === 'mouse' ? 10 : 30;
+    let best = null, bd = tol;
+    for (const id in hitPos) { if (id === 'plaza' || id === 'park') continue; const [x0, y0, x1, y1] = hitPos[id], d = Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(y0 - y, 0, y - y1)); if (d <= bd) { bd = d; best = id; } }
+    if (best) hits.get(best).click();
+  });
   stillLayout();
   poster.addEventListener('load', stillLayout);
+
+  /* ---------- ふれられることの気づき(最初の訪問だけ)と、押したときの輪 ---------- */
+  function placeNudge() {
+    if (!nudgeOn || !footPos.hospital) return;
+    nudge.style.transform = `translate(${footPos.hospital[0].toFixed(1)}px,${footPos.hospital[1].toFixed(1)}px)`;
+    nudge.hidden = false;
+  }
+  function endNudge() {
+    if (!nudgeOn) return; nudgeOn = false; store.set('bridge-hiraku-touched', '1');
+    nudge.classList.add('gone'); setTimeout(() => { nudge.hidden = true; }, 600);
+  }
+  function ringAt(id) {
+    const p = footPos[id]; if (!p || reduce()) return;
+    const r = document.createElement('i'); r.className = 'pring'; r.style.left = p[0].toFixed(1) + 'px'; r.style.top = p[1].toFixed(1) + 'px';
+    r.addEventListener('animationend', () => r.remove()); rings.append(r);
+  }
 
   /* ---------- 名前の札 ---------- */
   function showTag(id, on, sub) {
@@ -95,10 +125,11 @@ function boot() {
       showTag(id, true); tagTimer = setTimeout(() => { if (tagFor === id && !hoverId) showTag(null); }, 1500);
       invT = setTimeout(step, 4200);
     };
-    invT = setTimeout(step, 2600);
+    invT = setTimeout(step, nudgeOn ? 4200 : 2600);   // 気づきの輪が出ているときは、名前の札を少し遅らせる
   }
   function stopInvite() { clearTimeout(invT); }
   function firstTouch() {
+    endNudge();
     if (touched) return; touched = true; stopInvite();
     hint.classList.add('gone'); setTimeout(() => { hint.hidden = true; }, 700);
   }
@@ -107,7 +138,7 @@ function boot() {
   /* ---------- 建物にふれる → ひらく ---------- */
   for (const [id, a] of hits) {
     a.setAttribute('role', 'button'); a.setAttribute('aria-haspopup', 'dialog');
-    a.addEventListener('click', e => { e.preventDefault(); firstTouch(); openB(id, a); });
+    a.addEventListener('click', e => { e.preventDefault(); firstTouch(); if (openId !== id) { ringAt(id); if (ctl) ctl.press(id); } openB(id, a); });
     a.addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); a.click(); } });
     a.addEventListener('focus', () => { if (openId) return; hoverId = id; showTag(id, true, true); if (ctl) ctl.hover(id); });
     a.addEventListener('blur', () => { if (hoverId === id) { hoverId = null; if (!openId) showTag(null); if (ctl) ctl.hover(null); } });
@@ -248,8 +279,12 @@ function boot() {
     const t0 = performance.now();
     const mod = Q.get('stub') === '1' ? import('./interiors-stub.js') : import('./interiors.js').then(m => { if (typeof m.buildInterior !== 'function') throw new Error('no buildInterior'); return m; }).catch(() => import('./interiors-stub.js'));
     import('./live.js').then(L => {
+      const mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8, saved = store.get('bridge-hiraku-q');
+      let quality = Q.get('q') || saved || (phone() ? 'mid' : 'high');
+      if (!Q.get('q') && quality === 'high' && (mem <= 4 || cores <= 4)) quality = 'mid';
+      if (!Q.get('q') && (mem <= 2 || cores <= 2)) quality = 'low';
       ctl = L.live({
-        canvas, box: still, tod: TODS.indexOf(R.dataset.tod), mod, reduce,
+        canvas, box: still, tod: TODS.indexOf(R.dataset.tod), mod, reduce, quality,
         safe() {
           const w = canvas.clientWidth, h = canvas.clientHeight;
           if (phone()) return { l: 10, t: 64, r: w - 10, b: h - Math.round(innerHeight * .45) - 6 };
@@ -257,7 +292,8 @@ function boot() {
           return { l: 40, t: 90, r: w - pw - 16, b: h - 36 };
         },
         onHover(id) { hoverId = id; if (openId) return; if (id) { firstTouchSoft(); showTag(id, true, true); } else showTag(null); },
-        onPress() { firstTouch(); },
+        onPress(id) { firstTouch(); ringAt(id); },
+        onQuality(q) { store.set('bridge-hiraku-q', q); },
         onPick(id) { firstTouch(); if (id === openId) { if (findNow()) { clearFind(); applyFind(); } return; } openB(id, hits.get(id)); },
         onEmpty() { if (!openId) return; if (findNow()) { clearFind(); applyFind(); } else closeB(false); },   // 寄っているときは、まず建物ぜんたいに戻る
         onStation(sid, how) {
@@ -267,7 +303,8 @@ function boot() {
         },
         onLayout(L2) {
           const hr = heroRect(), cr = canvas.getBoundingClientRect(), ox = cr.left - hr.left, oy = cr.top - hr.top;
-          for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }
+          for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; footPos[id] = [ox + p.foot[0], oy + p.foot[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }
+          placeNudge();
           if (tagFor) { const p = tagPos[tagFor]; tagB.style.left = p[0].toFixed(1) + 'px'; tagB.style.top = p[1].toFixed(1) + 'px'; }
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };
           if (sTagFor) showSTag(sTagFor);

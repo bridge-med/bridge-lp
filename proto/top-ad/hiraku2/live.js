@@ -1,7 +1,11 @@
 /* ================================================================
-   融合3「ひらく町」— 立体を動かす(ふれる → ひらく)と、止めた画像を撮る(capture)
-   手触り(BRIEF 9.6): 線形の補間を使わない。カメラと回転は臨界減衰のばね、壁は小さく弾むばね、屋根はゆっくり抜ける。
-   ドラッグには慣性。どの操作も 100ms 以内に何かが応える(押した建物がわずかに沈む)
+   「ひらく町」磨き込み — 立体を動かす(ふれる → ひらく)と、止めた画像を撮る(capture)
+   手触り(BRIEF 9.6・10.2): 線形の補間を使わない。カメラと回転は臨界減衰のばね。
+   ・押した瞬間(100ms 以内): 建物が少し沈んで明るくなる(足もとの輪はページの側)
+   ・寄る・戻る・渡る: 弧を描く(少し上がり、少し引いてから降りる)。行き先が遠いほど長く
+   ・ひらく: 屋根が真上に持ち上がってから後ろへ抜け、前の壁が扉のように倒れて小さく弾む
+   ・閉じる: 壁が戻り、屋根が降り、カメラが弧を描いて戻り、建物が小さく落ち着く
+   ・品質の段: 高(画素比2・影2048)/中(画素比1.5・影1024)/低(画素比1・影なし)。重いときは自動で一段下げる
    ================================================================ */
 import { THREE, makeScene, makeLights, applyTod, aimCamera, capFrame, makeRenderer, fit, ELEV, U, LAYOUT, IDS, CAP_W, CAP_H, placePeople, placeVehicles, placeSky, placeSmall, angDiff, plazaFrame, PALETTE } from './world.js';
 import { BOXES, WALL } from './buildings.js';
@@ -125,8 +129,12 @@ export function live(o) {
   const clock = () => manual ? vnow : performance.now();
   const small = Math.min(innerWidth, innerHeight) < 700 || innerWidth < 900;
   let W = o.canvas.clientWidth, H = o.canvas.clientHeight;
-  const renderer = makeRenderer(o.canvas, Math.min(devicePixelRatio || 1, small ? 1.5 : 2), W, H, false);
-  const S = makeScene(), L = makeLights(S.scene, small ? 1024 : 2048);
+  /* 品質の段(高・中・低)。最初はページが端末の手がかりで選ぶ。動かしてみて重ければ、ここで一段ずつ下げる */
+  const DPR = { high: 2, mid: 1.5, low: 1 }, SHADOW = { high: 2048, mid: 1024, low: 0 };
+  let tier = DPR[o.quality] ? o.quality : small ? 'mid' : 'high';
+  const renderer = makeRenderer(o.canvas, Math.min(devicePixelRatio || 1, DPR[tier]), W, H, false);
+  const S = makeScene({ quality: tier }), L = makeLights(S.scene, SHADOW[tier] || 1024);
+  if (!SHADOW[tier]) L.sun.castShadow = false;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
   const CAPF = capFrame(camera);
   const origin = new THREE.Vector3();
@@ -135,6 +143,10 @@ export function live(o) {
   const rot = new Spring(0, 7.5, 1), camX = new Spring(0, 7.5, 1), camY = new Spring(0, 7.5, 1), camZ = new Spring(0, 7.5, 1), elev = new Spring(ELEV, 7, 1);
   const dim = new Spring(0, 8, 1), lift = new Spring(0, 24, .55), hiAmt = new Spring(0, 11, 1), tod = new Spring(o.tod || 0, 4.2, 1), inLight = new Spring(0, 7, 1);
   const nearK = new Spring(0, 6, 1);   // 道具に寄るとき、手前の物(人・机・上の階の床)を切り落とす面を、画面の少し手前まで進める
+  /* 飛ぶ: 0 → 1 の進み具合。途中で少し上がり(仰角)、少し引く(拡大を戻す)。hump(fly.x) が山の形 */
+  const fly = new Spring(1, 6, 1); let flyAmp = { el: 0, z: 0 };
+  const hump = p => Math.pow(Math.sin(Math.PI * clamp01(p)), 1.3);
+  let flash = null;   // 押した建物を一瞬明るく
   const slot = () => ({ id: null, wall: new Spring(0, 11, .5), roof: new Spring(0, 6, 1), roofT0: -1, end: 0, kind: 'hinge', t0: 0, steps: [] });
   let A = slot(), Bk = slot();
   let base = null, paused = false, running = false, visible = true, t = 0, last = clock(), lastInput = 0, dirty = true, frameN = 0;
@@ -142,9 +154,20 @@ export function live(o) {
   /* 後で一度だけ動かす段取り(時計の時刻で) */
   const later = [];
   function after(ms, f) { later.push({ at: clock() + ms, f }); later.sort((a, b) => a.at - b.at); }
-  /* 遠い建物ほど、島をゆっくり回す(回す角度に応じて、ばねを柔らかく) */
-  const turnW = a => a > .87 ? clamp(7.5 * Math.pow(.87 / a, .9), 3, 7.5) : 7.5;
-  function easeTurn(ms) { const tok = ++turnTok; rot.w = turnW(Math.abs(rot.t - rot.x)); after(ms, () => { if (tok === turnTok) rot.w = 7.5; }); }
+  /* 行き先までの遠さ(回す角度・拡大の比・画面の上の移動)から、飛ぶ長さを決める。ばねの速さをそろえ、着いたら元に戻す */
+  function farness() {
+    const z0 = Math.exp(camZ.x), dz = Math.abs(camZ.t - camZ.x), dxy = Math.hypot(camX.t - camX.x, camY.t - camY.x) * z0 / Math.max(1, Math.min(W, H));
+    return Math.abs(rot.t - rot.x) + dz * .5 + dxy * .6 + Math.abs(elev.t - elev.x) * .5;
+  }
+  function flight(arc = 1, zoomArc = 1) {
+    const d = farness(), T = clamp(.68 + d * .3, .68, 1.7), w = 6.2 / T, tok = ++turnTok;
+    for (const s of [rot, camX, camY, camZ, elev]) s.w = w;
+    fly.x = 0; fly.v = 0; fly.t = 1; fly.w = w * 1.1;
+    flyAmp = { el: deg(clamp(3 + d * 4, 3, 12)) * arc, z: clamp(.05 + d * .09, .05, .3) * zoomArc };
+    after(T * 1000 + 300, () => { if (tok === turnTok) { rot.w = camX.w = camY.w = camZ.w = 7.5; elev.w = 7; } });
+    return T * 1000;
+  }
+  function easeTurn() { flight(.4, 0); }
   const interiors = {};
   let inK = 1;
   tod.set(o.tod || 0);
@@ -158,8 +181,9 @@ export function live(o) {
   }
   const nv = new THREE.Vector3();
   function setCamera() {
-    aimCamera(camera, origin, elev.x);
-    const ppu = Math.exp(camZ.x);
+    const hk = hump(fly.x);
+    aimCamera(camera, origin, elev.x + flyAmp.el * hk);
+    const ppu = Math.exp(camZ.x) * (1 - flyAmp.z * hk);
     camera.left = camX.x - W / 2 / ppu; camera.right = camX.x + W / 2 / ppu; camera.top = camY.x + H / 2 / ppu; camera.bottom = camY.x - H / 2 / ppu;
     camera.near = .1;
     if (findC && nearK.x > .001) { const fd = -nv.copy(findC).applyAxisAngle(Y, rot.x).applyMatrix4(camera.matrixWorldInverse).z; camera.near = .1 + Math.max(0, fd - .3) * clamp01(nearK.x); }
@@ -264,32 +288,31 @@ export function live(o) {
     lastInput = clock();
     if (A.id === id) return;
     if (!A.id) preRot = rot.x;
-    if (A.id) { closeSlot(A); Bk = A; }
+    const transfer = !!A.id;
+    if (A.id) { closeSlot(A); Bk = A; }   // 前の建物は、渡る途中で閉じる
     A = slot(); A.id = id; A.t0 = clock();
     A.kind = id === 'plaza' || id === 'park' ? 'none' : BOXES[id].shape === 'tower' ? 'spin' : 'hinge';
     if (A.kind === 'hinge') { const b = S.B[id]; A.end = Math.PI / 2 + Math.asin(clamp((b.ex.y0 + .01) / BOXES[id].h, 0, .4)); }
     if (A.kind === 'spin') A.end = Math.PI;
     dragOff.set(0); findSid = null; nearK.t = 0;
     U.uOpenA.value = LAYOUT[id].bid; U.uFocus.value = LAYOUT[id].bid; dim.t = .34;
-    liftId = id; lift.t = 0;           // 乗せたときの浮き(.07)は戻す。中の形は浮かないので、外と中がずれないように
-    lift.v = -.85;                     // 押した手応え
+    pressFx(id);                       // 押した手応え(沈んで明るく)。乗せたときの浮き(.07)は戻す。中の形は浮かないので、外と中がずれないように
     hover = null; o.onHover(null);
     interiorOf(id);
     const it = interiors[id];
     if (it) it.group.visible = true;
     const reduce = o.reduce && o.reduce();
-    openCam = frameFor(id); rot.t = openCam.rot;
-    const turn = Math.abs(rot.t - rot.x), wait = reduce || turn <= .87 ? 0 : Math.round((turn - .87) / turnW(turn) * 900);
-    easeTurn(wait + 1100);
-    if (wait) { camX.t = base.x; camY.t = base.y; camZ.t = Math.log(base.ppu); elev.t = ELEV; after(wait, () => { if (A.id === id) retarget(); }); }   // 回る間は町ぜんたいを見せる
-    else retarget();
-    const at = ms => reduce ? 0 : ms + wait;
+    retarget();
+    // 町ぜんたいからは少し上がって降りる。ひらいたまま移るときは、町の上空を渡る(高く・大きく引く)
+    const T = reduce ? 0 : transfer ? flight(1.5, 1.3) : flight(1, .35);
+    const arrive = Math.round(T * .55);
+    const at = ms => reduce ? 0 : ms + arrive;
     A.steps = [
-      ...(reduce ? [] : [{ t: at(230), f: () => { A.roofT0 = clock(); } }]),
-      { t: at(330), f: () => { A.wall.t = A.end; } },
-      { t: at(520), f: () => { inLight.t = 1; } },
-      ...stationSeq(id, at(700), reduce),
-      { t: at(1150), f: () => { o.onOpened && o.onOpened(id); } }
+      ...(reduce ? [] : [{ t: at(-120), f: () => { A.roofT0 = clock(); } }]),
+      { t: at(0), f: () => { A.wall.t = A.end; } },
+      { t: at(190), f: () => { inLight.t = 1; } },
+      ...stationSeq(id, at(370), reduce),
+      { t: at(820), f: () => { o.onOpened && o.onOpened(id); } }
     ];
     if (reduce) { A.wall.set(A.end); A.roof.set(1); for (const s of [rot, camX, camY, camZ, elev, dim]) s.set(s.t); }
     kick();
@@ -301,14 +324,15 @@ export function live(o) {
       { t: t0 + (reduce ? 0 : it.stations.length * 60 + 320), f: () => setActive(findSid || it.stations[0].id) }
     ];
   }
-  function closeSlot(s) { s.wall.t = 0; s.roof.t = 0; s.roofT0 = -1; s.steps = []; s.closing = true; const it = interiors[s.id]; if (it) for (const st of it.stations) { st.setActive(false); st.setHover(false); } }
+  function closeSlot(s) { s.wall.t = 0; s.roof.t = 0; s.roofT0 = -1; s.steps = []; s.closing = true; s.settled = false; const it = interiors[s.id]; if (it) for (const st of it.stations) { st.setActive(false); st.setHover(false); } }
   function close() {
     lastInput = clock();
     if (!A.id) return;
     closeSlot(A); Bk = A; A = slot();
     U.uOpenA.value = -1; U.uFocus.value = Bk.id ? LAYOUT[Bk.id].bid : -1; dim.t = 0; inLight.t = 0; curStation = null; dragOff.set(0); findSid = null; nearK.t = 0;
-    retarget(); easeTurn(1400);
+    retarget();
     if (o.reduce && o.reduce()) { Bk.wall.set(0); Bk.roof.set(0); for (const s of [rot, camX, camY, camZ, elev, dim]) s.set(s.t); }
+    else flight(.8, 0);
     kick();
   }
   function setActive(sid) {
@@ -343,7 +367,10 @@ export function live(o) {
     const z = b.d / 2 + E + WALL;
     return out.makeTranslation(0, 0, z).multiply(tmpM.makeRotationX(s.wall.x)).multiply(new THREE.Matrix4().makeTranslation(0, 0, -z));
   }
-  function roofLocal(s, out) { return out.makeTranslation(0, s.roof.x * 7, 0); }
+  function roofLocal(s, out) {
+    const u = clamp01(s.roof.x), up = 1.25 * (1 - Math.pow(1 - Math.min(1, u / .45), 3)), v = Math.max(0, (u - .45) / .55);
+    return out.makeTranslation(0, up + 2.4 * v * v, -6.5 * v * v);
+  }
   function slotMats(s, iF, iR, idU, cutU) {
     if (!s.id || s.kind === 'none') { U[idU].value = s.id && s.kind === 'none' ? -1 : -1; U[cutU].value = 1; U.uPM.value[iF].identity(); U.uPM.value[iR].identity(); return; }
     bldM(s.id);
@@ -375,12 +402,24 @@ export function live(o) {
     hm.userData.id = id; hits.push(hm);
   }
   const groundHit = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, .1, 24), new THREE.MeshBasicMaterial({ visible: false })); S.world.add(groundHit);
+  let rects = {};
   function pick(e) {
     const r = o.canvas.getBoundingClientRect(); ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
     ray.setFromCamera(ndc, camera);
     const h = ray.intersectObjects(hits, false)[0];
     if (h) return h.object.userData.id;
+    const near = nearest(e.clientX - r.left, e.clientY - r.top, e.pointerType === 'mouse' ? 10 : 30);
+    if (near) return near;
     return ray.intersectObject(groundHit, false).length ? '' : null;
+  }
+  function nearest(x, y, tol) {
+    let best = null, bd = tol;
+    for (const id in rects) {
+      if (id === 'plaza' || id === 'park' || id === A.id) continue;   // 広い面(広場・公園)と、ひらいている建物は、外れたときの候補にしない
+      const [x0, y0, x1, y1] = rects[id], d = Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(y0 - y, 0, y - y1));
+      if (d <= bd) { bd = d; best = id; }
+    }
+    return best;
   }
   /* 中の物(ひらいているとき): 画面の上の距離で選ぶ */
   const v3 = new THREE.Vector3();
@@ -403,7 +442,7 @@ export function live(o) {
     down = { x: e.clientX, y: e.clientY, t: clock(), moved: 0, id: e.pointerId, lastX: e.clientX, lastT: clock(), base: rot.x };
     rotV = 0;
     const id = pick(e);
-    if (id && id !== A.id && !(A.id && pickStation(e))) { liftId = id; lift.v = -.85; o.onPress && o.onPress(id); }
+    if (id && id !== A.id && !(A.id && pickStation(e))) { pressFx(id); o.onPress && o.onPress(id); }
     kick();
   });
   o.canvas.addEventListener('pointermove', e => {
@@ -446,6 +485,7 @@ export function live(o) {
   o.canvas.addEventListener('pointerup', up);
   o.canvas.addEventListener('pointercancel', () => { down = null; if (A.id) dragOff.t = 0; });
   o.canvas.addEventListener('pointerleave', () => { if (hover) { setHover(null); o.onHover(null); } if (A.id && curHover) { curHover = null; stationHover(null); o.onStation(null, 'hover'); } });
+  function pressFx(id) { liftId = id; lift.t = 0; lift.v = -.85; flash = { id, t0: clock() }; hiAmt.v = 6; dirty = true; kick(); }
   function setHover(id) { hover = id; if (!A.id) { liftId = id; lift.t = id ? .07 : 0; } dirty = true; kick(); }
 
   /* ---- 誘い: ひとつの建物がふっと明るくなる ---- */
@@ -456,11 +496,29 @@ export function live(o) {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(); });
 
   /* ---- 1こま ---- */
-  const springs = [rot, camX, camY, camZ, elev, dim, lift, hiAmt, tod, inLight, dragOff, nearK];
+  const springs = [rot, camX, camY, camZ, elev, dim, lift, hiAmt, tod, inLight, dragOff, nearK, fly];
+  /* 重さの計測: 動いている間のフレームの間隔(中央値)。42ms(24fps)を超えたら一段下げる。下げたらページに知らせる(次の訪問はその段から) */
+  const ft = [];
+  function measure(gap) {
+    if (manual || tier === 'low' || frameN < 8 || gap > 400) return;
+    ft.push(gap);
+    if (ft.length < 36) return;
+    const m = ft.sort((a, b) => a - b)[ft.length >> 1]; ft.length = 0;
+    if (m > 42) setTier(tier === 'high' ? 'mid' : 'low');
+  }
+  function setTier(q) {
+    tier = q;
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, DPR[q]));
+    if (!SHADOW[q]) L.sun.castShadow = false;
+    else if (L.sun.shadow.mapSize.x !== SHADOW[q]) { L.sun.shadow.mapSize.set(SHADOW[q], SHADOW[q]); if (L.sun.shadow.map) { L.sun.shadow.map.dispose(); L.sun.shadow.map = null; } }
+    renderer.setSize(W, H, false); dirty = true; kick();
+    o.onQuality && o.onQuality(q);
+  }
   function kick() { if (manual) { dirty = true; return; } if (!running) { running = true; last = clock(); requestAnimationFrame(loop); } }
   function loop(now) { frame(now); }
   function frame(now, force) {
-    const dt = Math.min(.05, (now - last) / 1000); last = now; frameN++;
+    const gap = now - last, dt = Math.min(.05, gap / 1000); last = now; frameN++;
+    if (running && visible && !document.hidden) measure(gap);
     if (!paused) t += dt;
     // 慣性(ひらいていないときのドラッグ)
     if (!down && !A.id && Math.abs(inertia) > .002) { rot.x += inertia * dt; rot.t = rot.x; inertia *= Math.pow(.05, dt); }
@@ -472,14 +530,16 @@ export function live(o) {
     for (const s of springs) s.step(dt);
     for (const s of [A, Bk]) if (s.id) {
       s.wall.step(dt);
-      if (!s.closing && s.roofT0 >= 0) { const u = clamp01((now - s.roofT0) / 480); s.roof.set(u * u); if (u >= 1) s.roofT0 = -1; }   // 持ち上がり、加速して上へ抜ける
+      if (!s.closing && s.roofT0 >= 0) { const u = clamp01((now - s.roofT0) / 640); s.roof.set(u); if (u >= 1) s.roofT0 = -1; }   // 真上に持ち上がり、後ろへ抜ける
       else s.roof.step(dt);
+      if (s.closing && !s.settled && s.roof.x < .02 && Math.abs(s.wall.x) < .05) { s.settled = true; if (!hover && !A.id) { liftId = s.id; lift.v = -.32; } }   // 屋根が降りたら、建物が小さく落ち着く
       if (s.kind === 'hinge' && !s.closing && s.wall.x > s.end) { s.wall.x = s.end; if (s.wall.v > 0) s.wall.v = -s.wall.v * .3; }
       if (s.closing && s.wall.x < 0) { s.wall.x = 0; s.wall.v = 0; }
     }
     if (Bk.id && Bk.closing && !Bk.wall.moving && !Bk.roof.moving) { const it = interiors[Bk.id]; if (it && Bk.id !== A.id && Bk.id !== 'park') it.group.visible = false; if (!A.id) { U.uFocus.value = -1; o.onClosed && o.onClosed(); } Bk = slot(); }
     // 選んだ建物の光(乗せた・誘い)
     let hiId = hover && !A.id ? hover : null, amt = hiId ? .1 : 0;
+    if (flash) { const k = (now - flash.t0) / 420; if (k < 1) { hiId = flash.id; amt = .17 * (1 - k * k); } else flash = null; }
     if (!hiId && invite && !A.id) { const k = (now - invite.t0) / 1700; if (k < 1) { hiId = invite.id; amt = Math.sin(Math.PI * Math.min(1, k * 1.15)) * .26; } else invite = null; }
     hiAmt.t = amt; if (hiId) U.uHi.value = LAYOUT[hiId].bid; else if (hiAmt.x < .004) U.uHi.value = -1;
     U.uHiAmt.value = Math.max(0, hiAmt.x);
@@ -536,7 +596,11 @@ export function live(o) {
       const m = new THREE.Matrix4().makeRotationY(rot.x).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(Y, pl.yaw), one));
       const tp = new THREE.Vector3(0, bd.top + (liftId === id ? lift.x : 0), 0).applyMatrix4(m).project(camera);
       const cp = new THREE.Vector3(0, bd.top * .45, 0).applyMatrix4(m).project(camera);
-      out.b[id] = { tag: [(tp.x + 1) / 2 * W, (1 - tp.y) / 2 * H], c: [(cp.x + 1) / 2 * W, (1 - cp.y) / 2 * H] };
+      const dr = id === 'plaza' ? [0, 0] : S.B[id].ex.door || [0, 0], fp = new THREE.Vector3(dr[0], 0, dr[1]).applyMatrix4(m).project(camera);
+      let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      for (const p of bd.pts) { const v = p.clone().applyMatrix4(m).project(camera), sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H; x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
+      rects[id] = [x0, y0, x1, y1];
+      out.b[id] = { tag: [(tp.x + 1) / 2 * W, (1 - tp.y) / 2 * H], c: [(cp.x + 1) / 2 * W, (1 - cp.y) / 2 * H], foot: [(fp.x + 1) / 2 * W, (1 - fp.y) / 2 * H], r: rects[id] };
     }
     if (A.id) out.st = stationsOnScreen();
     o.onLayout(out);
@@ -553,7 +617,7 @@ export function live(o) {
     open, close, setActive, stationHover, find, info, renderer,
     get findId() { return findSid; },
     hover(id) { setHover(id); },
-    press(id) { liftId = id; lift.v = -.85; kick(); },
+    press(id) { pressFx(id); },
     invite: doInvite,
     setTod(m) { tod.t = m; kick(); },
     setPaused(p) { paused = p; kick(); },
@@ -562,6 +626,7 @@ export function live(o) {
     resize, kick,
     /* 手動の時計で ms だけ進めて、1枚描く(撮るとき) */
     advance(ms) { const n = Math.max(1, Math.round(ms / (1000 / 60))); for (let i = 0; i < n; i++) { vnow += ms / n; frame(vnow, i === n - 1); } },
-    get manual() { return manual; }
+    get manual() { return manual; },
+    get tier() { return tier; }
   };
 }
