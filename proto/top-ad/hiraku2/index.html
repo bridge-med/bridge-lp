@@ -76,6 +76,7 @@ html[data-tod="night"] .hero::after{background:linear-gradient(180deg,rgba(13,21
 .sky .s-night{background:radial-gradient(70% 50% at 66% 30%,rgba(108,124,214,.3),rgba(108,124,214,0) 70%),linear-gradient(180deg,var(--sky-n1) 0%,var(--sky-n2) 55%,var(--sky-n3) 100%)}
 .stars{position:absolute;inset:0;background-image:radial-gradient(1.4px 1.4px at 12% 18%,#fff 98%,transparent),radial-gradient(1px 1px at 28% 32%,#fff 98%,transparent),radial-gradient(1.4px 1.4px at 44% 12%,#fff 98%,transparent),radial-gradient(1px 1px at 62% 24%,#fff 98%,transparent),radial-gradient(1.4px 1.4px at 81% 10%,#fff 98%,transparent),radial-gradient(1px 1px at 90% 36%,#fff 98%,transparent),radial-gradient(1px 1px at 55% 6%,#fff 98%,transparent),radial-gradient(1px 1px at 7% 44%,#fff 98%,transparent),radial-gradient(1.4px 1.4px at 94% 58%,#fff 98%,transparent);opacity:.8}
 html[data-tod="day"] .s-day,html[data-tod="dusk"] .s-dusk,html[data-tod="night"] .s-night,html:not([data-tod]) .s-day{opacity:1}
+.sky .s-day{opacity:1}   /* いちばん下の層は不透明のまま(上の層を重ねて移る。半透明どうしの重なりで、紙の色が透けないように) */
 html.skylive .sky i{transition:none}   /* 立体が動いているときは、空の濃さを立体の時刻から決める(hiraku.js の skyMix) */
 html:not(.js) #poster{display:none}
 
@@ -138,6 +139,14 @@ html:not(.js) .hit{outline:0}
 .tag.st{background:#fff;color:var(--ink);box-shadow:0 6px 18px -8px rgba(0,0,0,.4)}
 .tag.st::after{background:#fff}
 
+/* スマホ: 最初の画面の下に、空の下の色のやわらかいもや。島がもやの海に浮かび、島の下の端が溶ける(入口の後ろまで) */
+.mist{display:none}
+@media (max-width:899px){
+  .mist{display:block;position:absolute;left:0;right:0;bottom:0;height:42%;z-index:3;pointer-events:none;--mist:242 238 230;background:linear-gradient(180deg,rgb(var(--mist) / 0) 0%,rgb(var(--mist) / .5) 30%,rgb(var(--mist) / .86) 56%,rgb(var(--mist)) 76%);transition:opacity .5s var(--ease)}
+  html[data-tod="dusk"] .mist{--mist:246 220 192}
+  html[data-tod="night"] .mist{--mist:46 44 88}
+  html.opened .mist{opacity:0}
+}
 /* 最初の訪問だけ: 病院の足もとに柔らかい輪と「ふれてみる」。押した瞬間: 押した建物の足もとに輪 */
 .nudge{position:absolute;left:0;top:0;width:0;height:0;transition:opacity .5s var(--ease)}
 .nudge.gone{opacity:0}
@@ -333,15 +342,16 @@ html.capture body > *:not(#cap){display:none!important}
   <div class="sky" aria-hidden="true"><i class="s-day"></i><i class="s-dusk"></i><i class="s-night"><span class="stars"></span></i></div>
   <canvas id="world" aria-hidden="true"></canvas>
   <div class="still" id="still">
-    <img class="poster" id="poster" width="1600" height="1440" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある" data-day="img/town-day.webp" data-dusk="img/town-dusk.webp" data-night="img/town-night.webp">
-    <script>(function () { var p = document.getElementById('poster'); p.src = p.dataset[document.documentElement.dataset.tod] || p.dataset.day; })();</script>
-    <noscript><img class="poster" src="img/town-day.webp" width="1600" height="1440" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある"></noscript>
+    <img class="poster" id="poster" width="1600" height="1440" sizes="(max-width: 899px) 330px, 66vw" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある" data-day="img/town-day.webp" data-dusk="img/town-dusk.webp" data-night="img/town-night.webp">
+    <script>/* 幅の違う2枚。スマホは 1000 の絵(画素比 3 でも。立体が画素比 1.5 で入れ替わるので、それより細かい) */(function () { var p = document.getElementById('poster'), s = p.dataset[document.documentElement.dataset.tod] || p.dataset.day; p.srcset = s.replace('.webp', '-1000.webp') + ' 1000w, ' + s + ' 1600w'; p.src = s; })();</script>
+    <noscript><img class="poster" src="img/town-day.webp" srcset="img/town-day-1000.webp 1000w, img/town-day.webp 1600w" sizes="(max-width: 899px) 330px, 66vw" width="1600" height="1440" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある"></noscript>
   </div>
   <div class="tags" aria-hidden="true"><span class="tag" id="tagB"></span><span class="tag st" id="tagS"></span>
     <div class="nudge" id="nudge" hidden><i class="nr"></i><i class="nr n2"></i><span class="nt">ふれてみる</span></div>
     <div class="rings" id="rings"></div>
   </div>
 
+  <div class="mist" aria-hidden="true"></div>
   <div class="copy">
     <p class="eyebrow">医療職のための、道具と経営ゲーム</p>
     <h1 id="h1" tabindex="-1"><span class="br">病院の外にも、</span><span class="br">町がある</span></h1>
@@ -449,7 +459,7 @@ html.capture body > *:not(#cap){display:none!important}
 <section class="sec closing" id="closing" aria-labelledby="cTitle">
   <span class="stars" aria-hidden="true"></span>
   <div class="sec-in" id="g-plaza">
-    <figure class="night-town"><img src="img/town-night.webp" width="1600" height="1440" alt="夜の町。窓に灯りがともり、広場の二本の小道が藍と砂に灯っている" loading="lazy" decoding="async"></figure>
+    <figure class="night-town"><img src="img/town-night.webp" srcset="img/town-night-1000.webp 1000w, img/town-night.webp 1600w" sizes="(max-width: 899px) 100vw, 46vw" width="1600" height="1440" alt="夜の町。窓に灯りがともり、広場の二本の小道が藍と砂に灯っている" loading="lazy" decoding="async"></figure>
     <div>
       <h2 class="say" id="cTitle">正解を与えるのではなく、<br><em>選択肢を増やす</em></h2>
       <ul class="exits">

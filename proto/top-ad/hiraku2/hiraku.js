@@ -33,18 +33,22 @@ function boot() {
 
   /* ---------- 昼・夕・夜(ボタンで 昼 → 夕 → 夜 → 昼) ----------
      立体が動いているときは、ページの空(3枚の層)の濃さを立体の時刻(0 昼・1 夕・2 夜)から決める。夜 → 昼も夕方を通り、立体と同じ速さで移る */
-  const skyL = [$('.sky .s-day'), $('.sky .s-dusk'), $('.sky .s-night')];
+  const skyL = [$('.sky .s-day'), $('.sky .s-dusk'), $('.sky .s-night')], mist = $('.mist');
+  const MIST = [[242, 238, 230], [246, 220, 192], [46, 44, 88]];   // 空の下の色(--sky-d3・--sky-e3・--sky-n3)
   function skyMix(x) {
     x = Math.max(0, Math.min(2, x));
-    const op = [Math.max(0, 1 - x), Math.max(0, 1 - Math.abs(x - 1)), Math.max(0, x - 1)];
+    // 下の層は不透明のまま、上の層を重ねて移る(半透明どうしを重ねると、紙の色が透けて白っぽくなるため)
+    const op = [1, Math.min(1, x), Math.max(0, x - 1)];
     skyL.forEach((el, i) => { if (el) el.style.opacity = op[i].toFixed(3); });
+    if (mist) { const i = x < 1 ? 0 : 1, k = x - i, c = MIST[i].map((v, j) => Math.round(v + (MIST[i + 1][j] - v) * k)); mist.style.setProperty('--mist', c.join(' ')); }
   }
   const btnTod = $('#btnTod'), btnPause = $('#btnPause');
+  const posterSet = t => poster.dataset[t].replace('.webp', '-1000.webp') + ' 1000w, ' + poster.dataset[t] + ' 1600w';   // 幅の違う2枚(スマホは 1000)
   const todLabel = () => ({ day: '夕方にする', dusk: '夜にする', night: '昼にする' })[R.dataset.tod];
   btnTod.setAttribute('aria-label', todLabel());
   btnTod.addEventListener('click', () => {
     const next = TODS[(TODS.indexOf(R.dataset.tod) + 1) % 3];
-    if (!ctl) { const im = new Image(); im.src = poster.dataset[next]; (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => { poster.src = im.src; R.dataset.tod = next; }); }
+    if (!ctl) { const im = new Image(); im.sizes = poster.sizes; im.srcset = posterSet(next); im.src = poster.dataset[next]; (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => { poster.srcset = im.srcset; poster.src = im.src; R.dataset.tod = next; }); }
     else { R.dataset.tod = next; ctl.setTod(TODS.indexOf(next)); }
     btnTod.setAttribute('aria-label', todLabel());
     say.textContent = { day: '昼', dusk: '夕方', night: '夜' }[next] + 'になりました';
@@ -101,6 +105,7 @@ function boot() {
     const p = footPos[id]; if (!p || reduce()) return;
     const r = document.createElement('i'); r.className = 'pring'; r.style.left = p[0].toFixed(1) + 'px'; r.style.top = p[1].toFixed(1) + 'px';
     r.addEventListener('animationend', () => r.remove()); rings.append(r);
+    setTimeout(() => r.remove(), 650);   // 描画が重く、動きが進まない端末でも、ひらいたあとに残らないように
   }
 
   /* ---------- 名前の札(上の帯=ヘッダーに重ねない。左右も画面の中に) ---------- */
