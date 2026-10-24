@@ -197,18 +197,16 @@ export function live(o) {
       return texCache.get(url);
     }
   };
-  /* 公園は最初から町に置くが、画面の画像はひらいたときに読む(それまでは消えた画面) */
-  let parkGo = null; const parkGate = new Promise(r => { parkGo = r; });
-  const parkCtx = { ...ctx, loadTexture: url => parkGate.then(() => ctx.loadTexture(url)) };
   let MOD = null;
   const modP = (o.mod || Promise.reject()).then(m => (MOD = m)).catch(() => null);
-  /* 公園だけは最初から中を組む(池・カプセルの機械・保留の棚・窓の額が、町の景色として見えるように) */
+  /* 公園だけは最初から中を組む(池・カプセルの機械・保留の棚・窓の額が、町の景色として見えるように)。
+     公園の画面の画像(約85KB)も、このとき読む。後にすると、止めた画像と入れ替えた直後に、小さな黒い画面が町に出るため */
   modP.then(() => { if (MOD) { interiorOf('park'); dirty = true; kick(); } });
   function interiorOf(id) {
     if (interiors[id] || !MOD || id === 'plaza') return interiors[id] || null;
     const b = S.B[id];
     try {
-      const it = MOD.buildInterior(id, BOXES[id], id === 'park' ? parkCtx : ctx);
+      const it = MOD.buildInterior(id, BOXES[id], ctx);
       if (id === 'park') it.group.position.y = .05;
       b.anchor.add(it.group); it.group.visible = true;
       it.setNight && it.setNight(U.uNight.value);
@@ -232,7 +230,7 @@ export function live(o) {
     liftId = id; lift.t = 0;           // 乗せたときの浮き(.07)は戻す。中の形は浮かないので、外と中がずれないように
     lift.v = -.85;                     // 押した手応え
     hover = null; o.onHover(null);
-    interiorOf(id); if (id === 'park') parkGo();
+    interiorOf(id);
     const it = interiors[id];
     if (it) it.group.visible = true;
     retarget();
@@ -363,16 +361,16 @@ export function live(o) {
       }
       return;
     }
-    if (e.pointerType === 'mouse' && performance.now() - touchT > 1500) {   // 指でふれた直後の、互換のためのマウスの動きは見ない
+    if (e.pointerType === 'mouse' && performance.now() - touchT > 1500 && !(touchXY && Math.hypot(e.clientX - touchXY[0], e.clientY - touchXY[1]) < 3)) {   // 指でふれたあとの、互換のためのマウスの動き(同じ位置)は見ない
       if (A.id) { const sid = pickStation(e); if (sid !== curHover) { curHover = sid; stationHover(sid); o.onStation(sid, 'hover'); } o.canvas.style.cursor = sid ? 'pointer' : (pick(e) ? 'pointer' : ''); return; }
       const id = pick(e) || null;
       if (id !== hover) { setHover(id); o.onHover(id); }
       o.canvas.style.cursor = id ? 'pointer' : '';
     }
   });
-  let curHover = null, touchT = -1e9;
+  let curHover = null, touchT = -1e9, touchXY = null;
   const up = e => {
-    if (e.pointerType !== 'mouse') touchT = performance.now();
+    if (e.pointerType !== 'mouse') { touchT = performance.now(); touchXY = [e.clientX, e.clientY]; }
     if (!down || e.pointerId !== down.id) return;
     const tap = down.moved < 7;
     if (o.canvas.hasPointerCapture(e.pointerId)) o.canvas.releasePointerCapture(e.pointerId);
@@ -503,7 +501,6 @@ export function live(o) {
     resize, kick,
     /* 手動の時計で ms だけ進めて、1枚描く(撮るとき) */
     advance(ms) { const n = Math.max(1, Math.round(ms / (1000 / 60))); for (let i = 0; i < n; i++) { vnow += ms / n; frame(vnow, i === n - 1); } },
-    get manual() { return manual; },
-    dbg() { return { rot: rot.x, rotT: rot.t, x: camX.x, y: camY.x, ppu: Math.exp(camZ.x), elev: elev.x, base, openCam, W, H, safe: o.safe() }; }
+    get manual() { return manual; }
   };
 }

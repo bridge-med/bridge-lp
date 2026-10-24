@@ -127,7 +127,7 @@ function boot() {
       if (t.status) { const c = document.createElement('span'); c.className = 'chip'; c.textContent = t.status; nb.append(c); }
       const tt = document.createElement('span'); tt.className = 't'; tt.textContent = t.t;
       a.append(nb, tt);
-      if (t.note || t.ext) { const n = document.createElement('span'); n.className = 'n'; n.textContent = [t.ext ? '別のサイト' : '', t.note].filter(Boolean).join('・'); a.append(n); }
+      if (t.note || t.ext) { const n = document.createElement('span'); n.className = 'n'; n.textContent = t.note || '別のサイト'; a.append(n); }
       const go = document.createElement('span'); go.className = 'go'; go.innerHTML = '開く<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
       a.append(go);
       a.addEventListener('mouseenter', () => rowHover(tid, true)); a.addEventListener('mouseleave', () => rowHover(tid, false));
@@ -155,7 +155,7 @@ function boot() {
     if (ctl) ctl.open(id);
     const show = () => {
       panel.hidden = false; panel.classList.remove('full');
-      requestAnimationFrame(() => { pTitle.focus({ preventScroll: true }); });
+      pTitle.focus({ preventScroll: true });          // 描画が重い端末でも遅れないように、その場で移す
     };
     if (wasOpen || !ctl || reduce()) show(); else setTimeout(show, 260);
     say.textContent = BY_ID[id].name + 'がひらきました';
@@ -165,7 +165,7 @@ function boot() {
     const id = openId; openId = null;
     panel.hidden = true; R.classList.remove('opened'); showSTag(null);
     if (ctl) ctl.close();
-    if (back && opener) { const o = opener; requestAnimationFrame(() => o.focus({ preventScroll: true })); }
+    if (back && opener) opener.focus({ preventScroll: true });
     say.textContent = BY_ID[id].name + 'を閉じました';
   }
   $('#pClose').addEventListener('click', () => closeB());
