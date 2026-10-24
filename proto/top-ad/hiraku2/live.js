@@ -48,6 +48,8 @@ function ring(r, y0, y1) { const o = []; for (let i = 0; i < 12; i++) { const a 
 /* 中の灯り: 建物の中ほど(前へ出しすぎると、ひらいた前の地面が照らされすぎる)。小さな建物ほど弱く */
 function inLightOf(id) {
   const b = BOXES[id], h = b.h || 1;
+  // 展望台は、塔の中だけを照らす(最上階は中の形が自分の灯りを持つ。遠くまで届くと、夕方と夜に隣の病院の壁が明るく浮く)
+  if (b.shape === 'tower') return { p: new THREE.Vector3(0, h * .42, 0), dist: 1.5, k: .3 };
   return { p: new THREE.Vector3(0, h * .62, (b.d || 1) * .08), dist: Math.max(2.2, Math.max(b.w, h) * 1.3), k: clamp((b.w * (b.h || .6)) / 9.3, .22, 1) };
 }
 
