@@ -306,7 +306,7 @@ function boot() {
   function upgrade() {
     if (reduce() || save || !hasWebGL() || Q.get('static') === '1') return;
     const t0 = performance.now(); swap.start = t0;
-    const mod = Q.get('stub') === '1' ? import('./interiors-stub.js') : import('./interiors.js').then(m => { if (typeof m.buildInterior !== 'function') throw new Error('no buildInterior'); return m; }).catch(() => import('./interiors-stub.js'));
+    const mod = () => Q.get('stub') === '1' ? import('./interiors-stub.js') : import('./interiors.js').then(m => { if (typeof m.buildInterior !== 'function') throw new Error('no buildInterior'); return m; }).catch(() => import('./interiors-stub.js'));   // 立体の側が、手が空いたとき(か、最初に押されたとき)に読む
     import('./live.js').then(async L => {
       const mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8, saved = store.get('bridge-hiraku-q');
       let quality = Q.get('q') || saved || (phone() ? 'mid' : 'high');
@@ -353,19 +353,32 @@ function boot() {
 
   /* ---------- 下の節: 帯が画面に入ると、閉じた肖像から、ひらいた中へ(前の壁が倒れる向き。1回だけ) ----------
      JS なし・動きを減らす設定では、最初からひらいた絵 */
+  // 閉じた絵(data-src)は、帯が1画面ぶん手前に来たら読む。読めたときに帯がまだ見えていなければ、閉じた姿にしておき(armed)、
+  // 帯が画面に入ったら倒す。間に合わなかった帯(速いスクロール・#g- で直接来た)は、中の絵のまま(切り替えない)
   const pairs = $$('.pair[data-wipe]');
   if (pairs.length && !reduce() && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver(es => {
+    const seen = new WeakSet();
+    const go = f => { f.classList.add('go'); requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove('armed'))); };
+    const view = new IntersectionObserver(es => {
       for (const en of es) {
         if (!en.isIntersecting) continue;
-        const f = en.target; io.unobserve(f);
-        const go = () => { f.classList.add('go'); requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove('armed'))); };
-        // 閉じた絵とひらいた絵の両方が読めてから(読めないときも、待ちすぎない)
-        const ims = [...f.querySelectorAll('img')].filter(im => !im.complete);
-        Promise.race([Promise.all(ims.map(im => new Promise(r => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }))), new Promise(r => setTimeout(r, 2500))]).then(() => setTimeout(go, 160));
+        const f = en.target; view.unobserve(f); seen.add(f);
+        if (!f.classList.contains('armed')) continue;
+        const op = f.querySelector('.open');
+        (op.complete ? Promise.resolve() : Promise.race([new Promise(r => { op.addEventListener('load', r, { once: true }); op.addEventListener('error', r, { once: true }); }), new Promise(r => setTimeout(r, 2500))])).then(() => setTimeout(() => go(f), 160));
       }
     }, { threshold: .55 });
-    for (const f of pairs) { f.classList.add('armed'); io.observe(f); }
+    const near = new IntersectionObserver(es => {
+      for (const en of es) {
+        if (!en.isIntersecting) continue;
+        const f = en.target; near.unobserve(f);
+        const sh = f.querySelector('.shut'); if (!sh || !sh.dataset.src) continue;
+        sh.addEventListener('load', () => { if (!seen.has(f)) f.classList.add('armed'); }, { once: true });
+        if (sh.dataset.srcset) sh.srcset = sh.dataset.srcset;
+        sh.src = sh.dataset.src;
+      }
+    }, { rootMargin: '100% 0px' });
+    for (const f of pairs) { near.observe(f); view.observe(f); }
   }
 
   /* 下の案内から直接 #g-hospital などで来たとき: そのまま(リンクの一覧が答え) */

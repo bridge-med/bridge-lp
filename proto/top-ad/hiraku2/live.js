@@ -306,11 +306,34 @@ export async function live(o) {
       return texCache.get(url);
     }
   };
-  let MOD = null;
-  const modP = (o.mod || Promise.reject()).then(m => (MOD = m)).catch(() => null);
+  /* 中の形のモジュール(圧縮で約30KB)は、立体に替わったあと手が空いたときに読む(最初の画面の読み込みと競合しないように)。
+     先に建物を押されたら、そのときに読む(寄る動きの間に届く)。届いたら、公園の小物は芝から立ち上がり、ひらいている建物の中を組んで画面を点す */
+  let MOD = null, modP = null, grow = 0;
+  function loadMod() {
+    if (!modP) modP = Promise.resolve().then(() => typeof o.mod === 'function' ? o.mod() : o.mod).then(m => { MOD = m || null; modReady(); return MOD; }).catch(() => null);
+    return modP;
+  }
+  function modReady() {
+    if (!MOD) return;
+    const pk = interiorOf('park'); if (pk) { pk.group.scale.y = .001; grow = clock(); }
+    const id = A.id;
+    if (id && id !== 'plaza') {
+      const it = interiorOf(id);
+      if (it && it.stations.length) {
+        it.group.visible = true;
+        after(Math.max(0, A.t0 + 1200 - clock()), () => {   // 壁が倒れきってから
+          if (A.id !== id) return;
+          if (it.reveal) it.reveal();
+          after(it.stations.length * 60 + 320, () => { if (A.id === id) setActive(findSid || it.stations[0].id); });
+          if (findSid) retarget();
+        });
+      }
+    }
+    dirty = true; kick();
+  }
   /* 公園だけは最初から中を組む(池・カプセルの機械・保留の棚・窓の額が、町の景色として見えるように)。
      公園の画面の画像(約85KB)も、このとき読む。後にすると、止めた画像と入れ替えた直後に、小さな黒い画面が町に出るため */
-  modP.then(() => { if (MOD) { interiorOf('park'); dirty = true; kick(); } });
+
   function interiorOf(id) {
     if (interiors[id] || !MOD || id === 'plaza') return interiors[id] || null;
     const b = S.B[id];
@@ -328,6 +351,7 @@ export async function live(o) {
   function open(id) {
     lastInput = clock();
     if (A.id === id) return;
+    if (!MOD) loadMod();
     if (!A.id) preRot = rot.x;
     const transfer = !!A.id;
     if (A.id) { closeSlot(A); Bk = A; }   // 前の建物は、渡る途中で閉じる
@@ -573,6 +597,7 @@ export async function live(o) {
     if (A.id) rot.t = (openCam ? openCam.rot : rot.t) + dragOff.x;
     // 段取り
     while (later.length && later[0].at <= now) later.shift().f();
+    if (grow) { const k = clamp01((now - grow) / 650), pk = interiors.park; if (pk) pk.group.scale.y = Math.max(.001, 1 - Math.pow(1 - k, 3)); if (k >= 1) grow = 0; }
     for (const s of [A, Bk]) if (s.id && s.steps.length) { const el = now - s.t0; while (s.steps.length && s.steps[0].t <= el) s.steps.shift().f(); }
     // ばね
     for (const s of springs) s.step(dt);
@@ -618,7 +643,7 @@ export async function live(o) {
     for (const id in interiors) { const it = interiors[id]; if (it && it.group.visible) it.update(dt, t, tod.x < .5 ? 'day' : tod.x < 1.5 ? 'dusk' : 'night'); }
     S.world.rotation.y = rot.x;
     setCamera();
-    const active = springs.some(s => s.moving) || [A, Bk].some(s => s.id && (s.wall.moving || s.roof.moving || s.steps.length || s.roofT0 >= 0)) || later.length || down || Math.abs(inertia) > .002 || invite;
+    const active = springs.some(s => s.moving) || [A, Bk].some(s => s.id && (s.wall.moving || s.roof.moving || s.steps.length || s.roofT0 >= 0)) || later.length || grow || down || Math.abs(inertia) > .002 || invite;
     const idle = !active && now - lastInput > 1600;
     // 操作していないときは 30fps
     if (manual && !force) return;
@@ -673,7 +698,7 @@ export async function live(o) {
   renderer.render(S.scene, camera); layout();
   const info = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures };
   kick();
-  modP.then(() => {});
+  setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(() => loadMod(), { timeout: 1500 }) : loadMod()), 700);   // 止めた画像からの入れ替わり(0.5 秒)が済んでから
   return {
     open, close, setActive, stationHover, find, info, renderer,
     get findId() { return findSid; },
