@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>建物の中の試し場(試作)</title>
+<meta name="description" content="融合3「ひらく町」の、建物の中(interiors.js)を7つ並べて確かめる試し場。">
+<script type="importmap">{"imports":{"three":"../../shared/vendor/three-0.160.0/three.module.min.js"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* 試し場: 7つの中を、壁のない正面から、町と同じ光で撮る。?only=hospital で1つを大きく、?time=night、?elev=31、?active=keiji、?outer=1(外側の箱と色)、?focus=x,y,z&span=0.5 */
+:root{--bg:#EEF1F4;--ink:#15191C;--ink-2:#4A5157;--panel:#FFFFFF}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif}
+.night body,body.night{background:#1A2140;color:#E8ECF4}
+h1{margin:0;padding:18px 20px 6px;font-size:16px}
+p.note{margin:0;padding:0 20px 14px;color:var(--ink-2);font-size:12.5px}
+.night p.note{color:#AEB6C8}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px;padding:0 20px 20px}
+.cell{background:var(--panel);border-radius:8px;overflow:hidden}
+body.night .cell{background:#232B4D}
+.cell canvas{display:block;width:100%;height:auto;aspect-ratio:4/3}
+.cap{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;font-size:12.5px}
+.cap b{font-size:13.5px}
+.cap span{color:var(--ink-2);font-variant-numeric:tabular-nums}
+body.night .cap span{color:#AEB6C8}
+body.one .grid{display:block;padding:0}
+body.one .cell{border-radius:0}
+body.one h1,body.one p.note,body.one .cap{display:none}
+</style>
+</head>
+<body>
+<h1>建物の中(interiors.js)の試し場</h1>
+<p class="note">壁と屋根をひらいた正面から、町と同じ光で見る。外側の壁と地面は、この試し場だけの仮のもの。</p>
+<main class="grid" id="grid"></main>
+<script type="module">
+import * as THREE from 'three';
+import { buildInterior, DEFAULT_BOXES } from '../interiors.js';
+
+const Q = new URLSearchParams(location.search);
+const ONLY = Q.get('only'), TIME = Q.get('time') || 'day', ACTIVE = Q.get('active'), HOVER = Q.get('hover');
+/* ひらいたときの見下ろす角度(外側 live.js の frameFor と同じ: 公園 22°、ほか 26°)。?elev=31 で町の角度 */
+const elevOf = kind => (+Q.get('elev') || (kind === 'park' ? 22 : 26)) * Math.PI / 180;
+/* ?focus=x,y,z&span=0.5 で、その点のまわりだけを大きく撮る */
+const FOCUS = Q.get('focus') ? Q.get('focus').split(',').map(Number) : null, SPAN = +(Q.get('span') || .5);
+const NIGHT = TIME === 'night' ? 1 : TIME === 'dusk' ? .55 : 0;
+const NAMES = { hospital: '病院', observatory: '展望台', clinic: 'クリニック', office: '事務所', library: '図書館', park: '公園', atelier: 'アトリエ' };
+const KINDS = ONLY ? [ONLY] : ['hospital', 'observatory', 'clinic', 'office', 'library', 'park', 'atelier'];
+if (ONLY) document.body.classList.add('one');
+if (NIGHT > .5) document.body.classList.add('night');
+
+/* ?outer=1 で、外側(../buildings.js)の BOXES と PALETTE を使う(統合したときと同じ大きさと色) */
+let BOXES = DEFAULT_BOXES, PAL = null;
+if (Q.get('outer') === '1') { try { const m = await import('../buildings.js'); BOXES = Object.assign({}, DEFAULT_BOXES, m.BOXES || {}); PAL = m.PALETTE || null; } catch (e) { /* まだ無ければ最初の値 */ } }
+
+/* 外の町と同じ色・光(hiraku/world.js の TOD と makeLights。町は建物を正面に回すので、光はカメラに対して同じ向き。
+   町のカメラの方位 45° をこの試し場の正面へ合わせるため、光の位置を方位で +45° 回す)。ひらいた建物の中の灯り pIn も同じ */
+const C = { wall: '#F4F1EA', wall2: '#E9E4DA', trim: '#FBF8F1', slab: '#D9CFBF', terra: '#C4735A', sage: '#B7C7A3', sand: '#EAD7B5', grass: '#AFC58E', soil: '#D6A884', lawn: '#B8CD98' };
+const TOD = {
+  day: { hemiS: '#E9F1F7', hemiG: '#CBB89C', hemi: 1.1, sun: '#FFF2DF', sunI: 2.4, sunPos: [-2.5, 15, 12.5], fill: '#DCE7F4', fillI: .55, exp: 1.0, glow: 0 },
+  dusk: { hemiS: '#F3D3C0', hemiG: '#9A7F70', hemi: .82, sun: '#FFAE7A', sunI: 2.0, sunPos: [-15, 5.5, 3], fill: '#B4AEDF', fillI: .5, exp: .98, glow: .55 },
+  night: { hemiS: '#4D5A8C', hemiG: '#24223A', hemi: .62, sun: '#A6B6EA', sunI: .6, sunPos: [8, 14, -6], fill: '#6F7DC2', fillI: .28, exp: 1.06, glow: 1 }
+};
+const turn45 = ([x, y, z]) => [(x - z) * Math.SQRT1_2, y, (x + z) * Math.SQRT1_2];
+const loader = new THREE.TextureLoader();
+const loadTexture = url => new Promise((res, rej) => loader.load(url, res, undefined, rej));
+
+/* 試し場だけの外側: 側面と奥の壁の外、地面(正面の壁と屋根は、ひらいた状態なので置かない) */
+function standIn(kind, b) {
+  const g = new THREE.Group(), M = c => new THREE.MeshStandardMaterial({ color: c, roughness: .9 });
+  if (kind === 'park') {
+    const lawn = new THREE.Mesh(new THREE.CylinderGeometry(b.w * .62, b.w * .64, .08, 48), M(C.lawn)); lawn.position.y = -.04; lawn.receiveShadow = true; g.add(lawn);
+    const soil = new THREE.Mesh(new THREE.CylinderGeometry(b.w * .64, b.w * .5, .4, 48), M(C.soil)); soil.position.y = -.28; g.add(soil);
+    return g;
+  }
+  const t = .06;
+  if (b.shape === 'tower') {
+    const r = b.w / 2;
+    const wall = new THREE.Mesh(new THREE.CylinderGeometry(r + t, r + t, b.h, 28, 1, true, Math.PI / 2, Math.PI), M(C.sand)); wall.position.y = b.h / 2; wall.castShadow = true; g.add(wall);
+  } else {
+    const side = new THREE.BoxGeometry(t, b.h, b.d + t);
+    for (const s of [-1, 1]) { const m = new THREE.Mesh(side, M(C.wall)); m.position.set(s * (b.w / 2 + t / 2), b.h / 2, -t / 2); m.castShadow = true; m.receiveShadow = true; g.add(m); }
+    const back = new THREE.Mesh(new THREE.BoxGeometry(b.w + 2 * t, b.h, t), M(C.wall)); back.position.set(0, b.h / 2, -b.d / 2 - t / 2); back.castShadow = true; g.add(back);
+  }
+  const R = Math.max(b.w, b.d) * .78 + .4;
+  const plot = new THREE.Mesh(new THREE.CylinderGeometry(R, R, .1, 48), M(C.grass)); plot.position.y = -.05; plot.receiveShadow = true; g.add(plot);
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(b.w + .3, .04, b.d + .3), M(C.sand)); pad.position.set(0, -.02, 0); pad.receiveShadow = true; g.add(pad);
+  return g;
+}
+
+function fit(cam, pts, W, H, m) {
+  cam.left = -1; cam.right = 1; cam.top = 1; cam.bottom = -1; cam.updateProjectionMatrix(); cam.updateMatrixWorld();
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; const v = new THREE.Vector3();
+  for (const p of pts) { v.copy(p).applyMatrix4(cam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+  const s = Math.min(W * (1 - 2 * m) / (x1 - x0), H * (1 - 2 * m) / (y1 - y0)), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  Object.assign(cam, { left: cx - W / 2 / s, right: cx + W / 2 / s, top: cy + H / 2 / s, bottom: cy - H / 2 / s }); cam.updateProjectionMatrix();
+}
+
+const views = [], stats = {};
+const W = ONLY ? +(Q.get('w') || 1200) : 840, H = ONLY ? +(Q.get('h') || 900) : 630;
+for (const kind of KINDS) {
+  const cell = document.createElement('section'); cell.className = 'cell';
+  const canvas = document.createElement('canvas'); canvas.setAttribute('aria-hidden', 'true');
+  const cap = document.createElement('p'); cap.className = 'cap'; cap.innerHTML = `<b>${NAMES[kind]}</b><span data-st>…</span>`;
+  cell.append(canvas, cap); document.getElementById('grid').append(cell);
+  if (ONLY) { canvas.style.width = W + 'px'; canvas.style.height = H + 'px'; canvas.style.aspectRatio = 'auto'; }
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  const scene = new THREE.Scene();
+  const T = TOD[TIME] || TOD.day;
+  scene.add(new THREE.HemisphereLight(T.hemiS, T.hemiG, T.hemi));
+  const sun = new THREE.DirectionalLight(T.sun, T.sunI); sun.position.set(...turn45(T.sunPos)); sun.castShadow = true;
+  Object.assign(sun.shadow.camera, { left: -4, right: 4, top: 5, bottom: -4, near: .5, far: 60 }); sun.shadow.mapSize.set(1024, 1024); sun.shadow.bias = -.0004; sun.shadow.normalBias = .02;
+  scene.add(sun, sun.target);
+  const fill = new THREE.DirectionalLight(T.fill, T.fillI); fill.position.set(...turn45([10, 6, -8])); scene.add(fill);
+  renderer.toneMappingExposure = T.exp;
+  const box = Object.assign({}, BOXES[kind]);
+  // ?box=w,d,h で大きさを変えて試す(どの大きさでも中が収まるか)
+  if (Q.get('box')) { const [bw, bd, bh] = Q.get('box').split(',').map(Number); Object.assign(box, { w: bw || box.w, d: bd || box.d, h: bh ?? box.h }); }
+  // ひらいた建物の中の灯り(live.js の pIn と同じ置き方・強さ)
+  const pIn = new THREE.PointLight('#FFE2B8', 2.2 + T.glow * 4, Math.max(3, (box.h || 1) * 2.2), 1.4); pIn.position.set(0, (box.h || 1) * .62, (box.d || 1) * .25); scene.add(pIn);
+  const shell = standIn(kind, box); scene.add(shell);
+  const api = buildInterior(kind, box, { palette: PAL, loadTexture, quality: Q.get('q') || 'high' });
+  api.setNight(NIGHT);
+  scene.add(api.group);
+  if (ACTIVE) api.stations.forEach(s => s.setActive(s.id === ACTIVE));
+  if (HOVER) api.stations.forEach(s => s.setHover(s.id === HOVER));
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 200);
+  const tgt = new THREE.Vector3(0, (box.h || .4) / 2, 0), EL = elevOf(kind);
+  cam.position.set(0, tgt.y + 60 * Math.sin(EL), 60 * Math.cos(EL)); cam.lookAt(tgt);
+  const pts = [];
+  const hw = box.w / 2 + .1, hd = box.d / 2 + .1, hh = (box.h || .6) + .05;
+  if (FOCUS) { for (const x of [-1, 1]) for (const y of [-1, 1]) for (const z of [-1, 1]) pts.push(new THREE.Vector3(FOCUS[0] + x * SPAN, FOCUS[1] + y * SPAN * .75, FOCUS[2] + z * SPAN * .3)); }
+  else for (const x of [-hw, hw]) for (const z of [-hd, hd]) for (const y of [0, hh]) pts.push(new THREE.Vector3(x, y, z));
+  fit(cam, pts, W, H, ONLY ? .06 : .05);
+  views.push({ kind, renderer, scene, cam, api, shell, el: cap.querySelector('[data-st]') });
+}
+
+/* 中だけの描画の回数と三角形(外側の仮の壁と地面を隠して数える)。影の分は別に数える */
+function measure(v) {
+  const info = v.renderer.info;
+  v.shell.visible = false;
+  info.autoReset = false; info.reset(); v.renderer.render(v.scene, v.cam);
+  const all = { calls: info.render.calls, tris: info.render.triangles };
+  info.autoReset = true; v.renderer.render(v.scene, v.cam);
+  const out = { calls: info.render.calls, tris: info.render.triangles, shadowCalls: all.calls - info.render.calls, shadowTris: all.tris - info.render.triangles, stations: v.api.stations.length };
+  v.shell.visible = true; return out;
+}
+const mode = NIGHT > .7 ? 'night' : NIGHT > .2 ? 'dusk' : 'day';
+let t0 = performance.now(), last = t0;
+function loop(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  const t = (now - t0) / 1000;
+  for (const v of views) { v.api.update(dt, t, mode); v.renderer.render(v.scene, v.cam); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+await Promise.all(views.map(v => v.api.ready));
+await new Promise(r => setTimeout(r, 1400));
+for (const v of views) { const s = stats[v.kind] = measure(v); v.el.textContent = `描画 ${s.calls} 回(影 +${s.shadowCalls})・ 三角形 ${s.tris.toLocaleString()} ・ 道具 ${s.stations}`; }
+window.__done = { stats };
+</script>
+</body>
+</html>
