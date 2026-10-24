@@ -285,7 +285,7 @@ function office() {
   const g = new THREE.Group(), b = BOXES.office, y0 = .08, wallM = M(C.officeWall, { r: .75 }), fin = M(C.slate, { r: .55 });
   const s = walls(g, b, wallM), { fw, X, Z, t, W, D } = s, h = b.h, fh = h / b.floors, F = Z + t;
   plinth(g, W, D, y0, M(C.stone2));
-  const gw = M(C.glassWall, { r: .22 }), blind = M(C.blind);
+  const gw = M(C.glassWall, { r: .22 }), blind = M(C.blind), ceilM = M('#EEF0F0', { r: .5 }), hintM = M('#8F9CA6', { r: .6 }), lowM = M('#A3B1BA', { r: .6 }), rr = rng(404);
   for (let f = 0; f < 3; f++) {
     const cy = fh * f + fh * .53, ph = fh * (f === 0 ? .8 : .7);
     for (const face of ['back', 'left', 'right', 'front']) {
@@ -310,6 +310,22 @@ function office() {
           if (face === 'right') { bl.position.set(X + t + off + .021, by, u); bl.scale.set(.006, bh, pw * .96); }
           tgt.add(bl);
         }
+        // 中の気配: 天井の灯りの帯(窓と同じ番号で、窓が点いているときだけ明るい)・机の線・座っている人の影。ガラスのすぐ前の薄い板。
+        // 夜は暗くなる(fx の2つめ)ので、点いた窓の中にだけ影として見える。ブラインドが下りている窓には天井の帯を付けない
+        const hasBlind = (i + f) % 3 === 0 && f > 0;
+        const put = (du, y, w, h, mat) => {
+          const mesh = box(1, 1, 1, mat), d = off + .0185, th = .003; mesh.castShadow = false; mesh.userData.fx = [0, 1];
+          if (face === 'front') { mesh.position.set(u + du, y, F + d); mesh.scale.set(w, h, th); }
+          if (face === 'back') { mesh.position.set(u - du, y, -F - d); mesh.scale.set(w, h, th); }
+          if (face === 'left') { mesh.position.set(-(X + t) - d, y, u + du); mesh.scale.set(th, h, w); }
+          if (face === 'right') { mesh.position.set(X + t + d, y, u - du); mesh.scale.set(th, h, w); }
+          tgt.add(mesh); return mesh;
+        };
+        if (!hasBlind) { const st = put(0, py + ph2 / 2 - ph2 * .06, pw * .9, ph2 * .05, ceilM); st.userData.fx = [6, 1]; st.userData.wid = p.userData.wid; }
+        const deskY = py - ph2 / 2 + ph2 * .3, low = ph2 * (.3 - .0225);
+        put(0, deskY, pw * .94, ph2 * .045, hintM);
+        put(0, py - ph2 / 2 + low / 2, pw * .94, low, lowM);   // 机の手前(床の近く)は暗い: 夜は灯りが窓の上の方にだけ見える
+        if (rr() < .55) { const du = (rr() - .5) * pw * .6; put(du, deskY + .062, .085, .09, hintM); put(du, deskY + .135, .046, .05, hintM); }
       }
     }
     // 床の線(各階の境。白い石の細い帯)

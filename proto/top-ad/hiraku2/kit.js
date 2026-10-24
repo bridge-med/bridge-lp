@@ -25,7 +25,7 @@ export function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 |
    主役(病院の白と青緑・広場の藍と砂)だけを少し明るく、脇役は明るさと彩度を一段落とす */
 export const C = {
   // 地面と島
-  grass: '#AABA90', grass2: '#9FAF86', grassEdge: '#93A67D', lawn: '#B4C39C', lawn2: '#A6B78E',
+  grass: '#AAC18E', grass2: '#A0B683', grassEdge: '#93AD79', lawn: '#B6CA9B', lawn2: '#A7BE8B',   // 第3回: 灰色に寄らないよう、彩度を一段上げた(落ち着きは保つ)
   soil1: '#957A63', soil2: '#C9AE89', soil3: '#BDB3A4', soil4: '#A88F78', rock: '#B19F8D', rockD: '#958473',
   pave: '#D9CDB7', pave2: '#CBBEA7', joint: '#C5B8A1', curb: '#D1C7B6', walk: '#E1D8C7', road: '#BFB6A5', roadEdge: '#D3CBBC', line: '#F2EDE2',
   stoneWall: '#ADA18D', stoneWall2: '#9B8F7B', coping: '#E6DFD1',
@@ -43,7 +43,7 @@ export const C = {
   // 背景の家(くすんだテラコッタ・灰青・生成り)
   houseA: '#E3D8C5', houseB: '#D9CDB9', houseC: '#CFCBC3', roofA: '#A97C6A', roofB: '#7E8994', roofC: '#CFC3AC',
   glass: '#97AEBC', glassDark: '#62768A', door: '#5C6B7C',
-  trunk: '#7B695C', leaf: ['#8FA67C', '#9BAF87', '#82996F', '#A5B890'], conifer: ['#5F7F66', '#6B8B70'], ochre: ['#C1A06C', '#B79365'],
+  trunk: '#7B695C', leaf: ['#8EAE78', '#9BB683', '#80A26A', '#A4BE8B'], conifer: ['#5D8667', '#67916E'], ochre: ['#C1A06C', '#B79365'],
   wood: '#A88468', woodL: '#C7A982', lampPole: '#6E7682', lampHead: '#FFF4DA', steel: '#8D979F',
   water: '#8FBCCB', sandPath: '#D6BE91', sandEdge: '#C2A678',
   bus: '#F4F0E8', busBand: '#579C95', tire: '#3A3F48', cloud: '#FFFFFF', poche: '#16233E',
