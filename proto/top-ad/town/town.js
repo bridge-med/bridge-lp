@@ -523,16 +523,16 @@ function makeScene(onlyId) {
   for (const z of [-.15, .15]) bus.add(at(new THREE.Mesh(new THREE.SphereGeometry(.045, 8, 6), hlMat), .58, .3, z));
   LAMPS.push(hlMat);
   world.add(bus); movers.bus = { mesh: bus, a: deg(70), v: .085 };
-  // 雲(町の手前を横切らないよう、左右の奥の弧だけを流れる。弧の端で消えて、また現れる)
-  const ARCS = [[100, 172], [278, 350]];
-  for (let i = 0; i < 6; i++) {
+  // 雲(町の手前と見出しの後ろを横切らないよう、町の奥の空の弧だけを流れる。弧の端で消えて、また現れる)
+  const ARCS = [[172, 216], [252, 300]];
+  for (let i = 0; i < 4; i++) {
     const c = new THREE.Group();
     const cm = new THREE.MeshStandardMaterial({ color: C.cloud, roughness: 1, emissive: new THREE.Color('#FFFFFF'), emissiveIntensity: .42, transparent: true, opacity: 1 });
-    for (const [x, y, z, s] of [[0, 0, 0, .78], [.72, .08, .12, .6], [-.7, .02, -.08, .56], [.22, .38, .02, .55], [-.25, .3, .2, .45]]) { const s2 = shadow(new THREE.Mesh(new THREE.SphereGeometry(s, 16, 12), cm), true, false); s2.position.set(x, y, z); c.add(s2); }
-    c.scale.set(1, .72, .9).multiplyScalar(.9 + r() * .55);
+    for (const [x, y, z, s] of [[0, 0, 0, .78], [.72, .08, .12, .6], [-.7, .02, -.08, .56], [.22, .38, .02, .55], [-.25, .3, .2, .45]]) { const s2 = shadow(new THREE.Mesh(new THREE.SphereGeometry(s, 16, 12), cm), false, false); s2.position.set(x, y, z); c.add(s2); }
+    c.scale.set(1, .72, .9).multiplyScalar(.85 + r() * .45);
     scene.add(c); CLOUD_MATS.push(cm);
     const arc = ARCS[i % 2];
-    movers.clouds.push({ g: c, mat: cm, a0: deg(arc[0]), a1: deg(arc[1]), r: 12.6 + r() * 3.2, y: 5.2 + r() * 3.2, v: .011 + r() * .007, ph: (i >> 1) / 3 + r() * .12 });
+    movers.clouds.push({ g: c, mat: cm, a0: deg(arc[0]), a1: deg(arc[1]), r: 10.8 + r() * 1.6, y: 3.0 + r() * 2.0, v: .012 + r() * .006, ph: (i >> 1) / 2 + r() * .15 });
   }
   return { scene, world, spots, movers };
 }
@@ -669,7 +669,8 @@ function hasWebGL() { try { const c = document.createElement('canvas'); return !
 /* ---------- 札の重なりをなくす(画面上の位置で判定) ----------
    大事な札・手前の札から順に置き、重なるときは 上へ少しずらす → 丸いピクトグラムだけにする、の順で試す。
    見出し・ボタンなどの文字の上にも札を置かない。どの札もタップ領域は 44px 以上(CSS の .pin-in::before) */
-const PRI = ['observatory', 'hospital', 'clinic', 'park', 'workshop', 'post', 'atelier', 'library', 'office'];
+const PRI = ['observatory', 'hospital', 'clinic', 'post', 'workshop', 'park', 'atelier', 'library', 'office'];
+const KEY = ['observatory', 'hospital', 'clinic'];
 const PM = new Map();
 function measurePins() {
   for (const el of pinEls) {
@@ -692,24 +693,34 @@ function obstaclesIn(frame) {
 }
 /* items: { el, id, x, y, back }。base は札の下端(三角の上)の、基準点からのずれ(live は -8・still は 0) */
 function declutter(items, obstacles, base) {
-  items.sort((a, b) => (a.back - b.back) || (PRI.indexOf(a.id) - PRI.indexOf(b.id)));
-  const placed = obstacles.slice(), pad = 3;
-  const hit = r => placed.some(p => p.x0 < r.x1 && p.x1 > r.x0 && p.y0 < r.y1 && p.y1 > r.y0);
-  for (const it of items) {
-    const m = PM.get(it.id); if (!m) continue;
-    let pick = null;
-    for (const [c, dy] of [[0, 0], [0, -12], [1, 0], [1, -12], [1, 12], [1, -24]]) {
-      const w = c ? m.cw : m.fw, h = c ? m.ch : m.fh;
-      const r = { x0: it.x - w / 2 - pad, x1: it.x + w / 2 + pad, y0: it.y + base + dy - h - pad, y1: it.y + base + dy + 6 + pad };
-      if (!hit(r)) { pick = { c, dy, r }; break; }
-      if (!pick && c) pick = { c, dy: 0, r: { x0: it.x - m.cw / 2 - pad, x1: it.x + m.cw / 2 + pad, y0: it.y + base - m.ch - pad, y1: it.y + base + 6 + pad }, fallback: true };
-    }
-    if (pick.fallback) pick = { c: 1, dy: 0, r: pick.r };
-    placed.push(pick.r);
-    it.el.classList.toggle('is-compact', !!pick.c);
-    it.el.style.setProperty('--ny', pick.dy + 'px');
+  items.sort((a, b) => PRI.indexOf(a.id) - PRI.indexOf(b.id));
+  const pad = 3;
+  const box = (it, c, dx, dy) => { const m = PM.get(it.id), w = c ? m.cw : m.fw, h = c ? m.ch : m.fh; return { x0: it.x + dx - w / 2 - pad, x1: it.x + dx + w / 2 + pad, y0: it.y + base + dy - h - pad, y1: it.y + base + dy + 6 + pad }; };
+  const area = (a, b) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+  const cost = (r, others) => others.reduce((s, o) => s + area(r, o), 0);
+  const list = items.filter(it => PM.get(it.id));
+  // 1 大事な3つ(展望台・病院・クリニック)は名前つきを先に試す。ほかは丸だけで、重ならない所に置く(置けなければ重なりの最も少ない所)
+  const placed = obstacles.slice();
+  for (const it of list) {
+    let best = null;
+    if (KEY.includes(it.id)) for (const dy of [0, -12]) { const r = box(it, 0, 0, dy); if (!cost(r, placed)) { best = { c: 0, dx: 0, dy, r, k: 0 }; break; } }
+    if (!best) for (const [dx, dy] of NUDGE) { const r = box(it, 1, dx, dy), k = cost(r, placed); if (!best || k < best.k) best = { c: 1, dx, dy, r, k }; if (!k) break; }
+    Object.assign(it, best); placed.push(best.r);
+  }
+  // 2 残りも、名前つきに戻せるなら戻す(ほかの札と文字に重ならないときだけ)
+  for (const it of list) {
+    if (!it.c) continue;
+    const others = obstacles.concat(list.filter(o => o !== it).map(o => o.r));
+    for (const dy of [0, -12]) { const r = box(it, 0, 0, dy); if (!cost(r, others)) { Object.assign(it, { c: 0, dx: 0, dy, r }); break; } }
+  }
+  for (const it of list) {
+    it.el.classList.toggle('is-compact', !!it.c);
+    it.el.style.setProperty('--nx', it.dx + 'px');
+    it.el.style.setProperty('--ny', it.dy + 'px');
   }
 }
+/* 丸だけの札を置く場所の候補(そのまま → 上下 → 左右 → 斜め → 遠め) */
+const NUDGE = [[0, 0], [0, -12], [0, 12], [-20, 0], [20, 0], [0, -24], [-20, -14], [20, -14], [-20, 14], [20, 14], [-34, 0], [34, 0], [0, 26], [-34, -18], [34, -18], [-34, 18], [34, 18]];
 
 /* ---------- 札の中身(案内の一覧のカードから写す。中身の元はひとつ) ---------- */
 function fillCard(id) {

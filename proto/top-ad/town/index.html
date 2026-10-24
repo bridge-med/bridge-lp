@@ -84,10 +84,10 @@ html.live .still img{display:none}
 
 /* 札 */
 .pins{position:absolute;inset:0;pointer-events:none}
-.pin{position:absolute;left:0;top:0;display:none;pointer-events:auto;will-change:transform;--ny:0px}
+.pin{position:absolute;left:0;top:0;display:none;pointer-events:auto;will-change:transform;--ny:0px;--nx:0px}
 .pin:hover,.pin:focus-visible,.pin.is-hover{z-index:600!important}
 html.js .pin{display:block}
-.pin-in{display:flex;align-items:center;gap:6px;transform:translate(-50%,calc(-100% - 8px + var(--ny)));padding:4px 12px 4px 4px;border-radius:999px;background:rgba(255,253,248,.95);box-shadow:var(--clay);white-space:nowrap;font-weight:700;font-size:13px;line-height:1;color:var(--ink);transition:transform .35s var(--ease),background .25s,opacity .35s}
+.pin-in{display:flex;align-items:center;gap:6px;transform:translate(calc(-50% + var(--nx)),calc(-100% - 8px + var(--ny)));padding:4px 12px 4px 4px;border-radius:999px;background:rgba(255,253,248,.95);box-shadow:var(--clay);white-space:nowrap;font-weight:700;font-size:13px;line-height:1;color:var(--ink);transition:transform .35s var(--ease),background .25s,opacity .35s}
 .pin-in::after{content:'';position:absolute;left:50%;bottom:-6px;width:12px;height:12px;background:inherit;border-radius:2px;transform:translateX(-50%) rotate(45deg);z-index:-1;box-shadow:3px 3px 6px -3px rgba(31,40,64,.25)}
 /* タップ領域: 見た目の札(高さ34px・丸だけのとき34×34)を上下左右に6px広げて、どの札も 44px 以上 */
 .pin-in::before{content:'';position:absolute;inset:-6px;border-radius:999px}
@@ -99,14 +99,15 @@ html.js .pin{display:block}
 .pin-ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .pin-sub{font-weight:500;font-size:12px;color:var(--ink-3);display:inline-block;max-width:0;overflow:hidden;opacity:0;transition:max-width .4s var(--ease),opacity .3s}
 @media (min-width:900px){.pin:hover .pin-sub,.pin.is-hover .pin-sub,.pin:focus-visible .pin-sub{max-width:9em;opacity:1}}
-.pin:hover .pin-in,.pin.is-hover .pin-in,.pin:focus-visible .pin-in{transform:translate(-50%,calc(-100% - 14px + var(--ny))) scale(1.06);background:#fff}
+.pin:hover .pin-in,.pin.is-hover .pin-in,.pin:focus-visible .pin-in{transform:translate(calc(-50% + var(--nx)),calc(-100% - 14px + var(--ny))) scale(1.06);background:#fff}
 .pin:focus-visible{outline:none}
 .pin:focus-visible .pin-in{outline:3px solid #3C6FD8;outline-offset:3px}
-.pin.is-back .pin-in{opacity:.6;transform:translate(-50%,calc(-100% - 8px + var(--ny))) scale(.9)}
+.pin.is-back .pin-in{opacity:.6;transform:translate(calc(-50% + var(--nx)),calc(-100% - 8px + var(--ny))) scale(.9)}
+.pin.is-back .pin-in::before{inset:-9px}
 .pin.is-back:hover .pin-in,.pin.is-back:focus-visible .pin-in{opacity:1}
 html.focused .pin .pin-in{opacity:0;pointer-events:none}
-html.still-on .pin .pin-in{transform:translate(-50%,calc(-100% + var(--ny)))}
-html.still-on .pin:hover .pin-in,html.still-on .pin:focus-visible .pin-in{transform:translate(-50%,calc(-100% - 6px + var(--ny))) scale(1.06)}
+html.still-on .pin .pin-in{transform:translate(calc(-50% + var(--nx)),calc(-100% + var(--ny)))}
+html.still-on .pin:hover .pin-in,html.still-on .pin:focus-visible .pin-in{transform:translate(calc(-50% + var(--nx)),calc(-100% - 6px + var(--ny))) scale(1.06)}
 @media (max-width:899px){.pin-in{font-size:12px;padding:4px 10px 4px 4px;gap:5px}.pin-ic{width:26px;height:26px}.pin-ic svg{width:15px;height:15px}}
 @media (max-width:899px) and (max-height:740px){.pin-in{font-size:11.5px}}
 
