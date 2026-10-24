@@ -716,6 +716,7 @@ export async function live(o) {
     get tier() { return tier; },
     get compileMs() { return compileMs; },
     /* 撮る・確かめるため: 建物の中の点(その建物の座標)が、いま画面のどこにあるか */
+    pickAt(x, y) { return pick({ clientX: x, clientY: y, pointerType: 'touch' }); },   // 確かめるため: 画面のその点で選ばれる建物
     screenOf(id, l) { const pl = placeOf(S, id), v = new THREE.Vector3(...l).applyAxisAngle(Y, pl.yaw).add(pl.p).applyAxisAngle(Y, rot.x).project(camera), r = o.canvas.getBoundingClientRect(); return [r.left + (v.x + 1) / 2 * W, r.top + (1 - v.y) / 2 * H]; }
   };
 }

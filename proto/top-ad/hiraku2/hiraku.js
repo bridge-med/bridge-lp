@@ -344,7 +344,7 @@ function boot() {
       });
       window.__ctl = ctl; window.__t3 = Math.round(performance.now() - t0); swap.live = performance.now();
       if (paused) ctl.setPaused(true);
-      requestAnimationFrame(() => R.classList.add('live'));
+      requestAnimationFrame(() => { R.classList.add('live'); dispatchEvent(new Event('hiraku:live')); });
     }).catch(err => console.warn(err));
   }
   function firstTouchSoft() { /* 乗せただけでは誘いを止めない(PC の誘いは、乗せている間だけ休む) */ }
@@ -378,7 +378,12 @@ function boot() {
         sh.src = sh.dataset.src;
       }
     }, { rootMargin: '100% 0px' });
-    for (const f of pairs) { near.observe(f); view.observe(f); }
+    for (const f of pairs) view.observe(f);
+    // 先読みは、最初の画面が済んでから(立体に替わったとき・最初にスクロールしたとき)。最初の画面の読み込みと競合しないように
+    let started = false;
+    const startNear = () => { if (started) return; started = true; for (const f of pairs) near.observe(f); };
+    addEventListener('scroll', startNear, { once: true, passive: true });
+    addEventListener('hiraku:live', startNear, { once: true });
   }
 
   /* 下の案内から直接 #g-hospital などで来たとき: そのまま(リンクの一覧が答え) */
