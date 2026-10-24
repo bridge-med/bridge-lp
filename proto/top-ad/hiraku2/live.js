@@ -428,7 +428,7 @@ export async function live(o) {
     ray.setFromCamera(ndc, camera);
     const h = ray.intersectObjects(hits, false)[0];
     if (h) return h.object.userData.id;
-    const near = nearest(e.clientX - r.left, e.clientY - r.top, e.pointerType === 'mouse' ? 10 : 30);
+    const near = nearest(e.clientX - r.left, e.clientY - r.top, e.pointerType === 'mouse' ? 10 : A.id ? 12 : 30);   // ひらいて寄っているときは、何もない所を押して閉じたいことが多いので、許容を狭く
     if (near) return near;
     return ray.intersectObject(groundHit, false).length ? '' : null;
   }
