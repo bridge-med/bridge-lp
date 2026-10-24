@@ -143,6 +143,7 @@ function tree(r, kind) {
   return g;
 }
 const LAMPS = [];
+const CLOUD_MATS = []; let CLOUD_DAY = 1;
 function lamp() {
   const g = new THREE.Group();
   g.add(at(cyl(.025, .035, .82, M(C.lampPole), 8), 0, .41, 0));
@@ -522,13 +523,16 @@ function makeScene(onlyId) {
   for (const z of [-.15, .15]) bus.add(at(new THREE.Mesh(new THREE.SphereGeometry(.045, 8, 6), hlMat), .58, .3, z));
   LAMPS.push(hlMat);
   world.add(bus); movers.bus = { mesh: bus, a: deg(70), v: .085 };
-  // 雲
-  for (let i = 0; i < 5; i++) {
-    const c = new THREE.Group(), cm = M(C.cloud, { r: 1, e: '#FFFFFF', ei: .42, t: true, o: 1 });
+  // 雲(町の手前を横切らないよう、左右の奥の弧だけを流れる。弧の端で消えて、また現れる)
+  const ARCS = [[100, 172], [278, 350]];
+  for (let i = 0; i < 6; i++) {
+    const c = new THREE.Group();
+    const cm = new THREE.MeshStandardMaterial({ color: C.cloud, roughness: 1, emissive: new THREE.Color('#FFFFFF'), emissiveIntensity: .42, transparent: true, opacity: 1 });
     for (const [x, y, z, s] of [[0, 0, 0, .78], [.72, .08, .12, .6], [-.7, .02, -.08, .56], [.22, .38, .02, .55], [-.25, .3, .2, .45]]) { const s2 = shadow(new THREE.Mesh(new THREE.SphereGeometry(s, 16, 12), cm), true, false); s2.position.set(x, y, z); c.add(s2); }
-    c.scale.set(1, .72, .9).multiplyScalar(.9 + r() * .6);
-    scene.add(c);
-    movers.clouds.push({ g: c, a: i / 5 * TAU + r() * .5, r: 9.5 + r() * 4.5, y: 7.2 + r() * 2.2, v: .012 + r() * .01 });
+    c.scale.set(1, .72, .9).multiplyScalar(.9 + r() * .55);
+    scene.add(c); CLOUD_MATS.push(cm);
+    const arc = ARCS[i % 2];
+    movers.clouds.push({ g: c, mat: cm, a0: deg(arc[0]), a1: deg(arc[1]), r: 12.6 + r() * 3.2, y: 5.2 + r() * 3.2, v: .011 + r() * .007, ph: (i >> 1) / 3 + r() * .12 });
   }
   return { scene, world, spots, movers };
 }
@@ -564,7 +568,8 @@ function applyLight(L, renderer, t) {
   WIN_LIT.color.set('#86A8C3').lerp(new THREE.Color('#6B5A3E'), t);
   for (const m of LAMPS) m.emissiveIntensity = lerp(d.lamp, n.lamp, t);
   for (const p of L.pts) p.intensity = lerp(d.pt, n.pt, t);
-  const cm = M(C.cloud, { r: 1, e: '#FFFFFF', ei: .42, t: true, o: 1 }); cm.color.set('#FFFFFF').lerp(new THREE.Color('#7F89BE'), t); cm.emissiveIntensity = lerp(.42, .06, t); cm.opacity = 1 - t; cm.depthWrite = t < .5; for (const c of (L.clouds || [])) c.g.visible = t < .98;
+  for (const cm of CLOUD_MATS) { cm.color.set('#FFFFFF').lerp(new THREE.Color('#7F89BE'), t); cm.emissiveIntensity = lerp(.42, .06, t); }
+  CLOUD_DAY = 1 - t;
 }
 
 /* ================================================================
@@ -632,6 +637,12 @@ function placeWalker(w, t) {
   w.mesh.position.set(x, .03 + Math.abs(Math.sin(t * 7 + w.ph)) * .025, z);
   w.mesh.rotation.y = -a + (w.v > 0 ? 0 : Math.PI);
 }
+function placeCloud(c, t) {
+  const u = (c.ph + t * c.v) % 1, a = lerp(c.a0, c.a1, u);
+  const fade = Math.min(1, u / .16, (1 - u) / .16) * CLOUD_DAY;
+  c.g.position.set(Math.cos(a) * c.r, c.y + Math.sin(t * .3 + c.ph * 6) * .15, Math.sin(a) * c.r);
+  c.mat.opacity = fade; c.mat.depthWrite = fade > .6; c.g.visible = fade > .02;
+}
 function placeBus(b, t) {
   const a = b.a + b.v * t;
   b.mesh.position.set(Math.cos(a) * (ROAD_R + .24), .03, Math.sin(a) * (ROAD_R + .24));
@@ -654,6 +665,51 @@ const hint = document.getElementById('hint');
 let opener = null;
 
 function hasWebGL() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
+
+/* ---------- 札の重なりをなくす(画面上の位置で判定) ----------
+   大事な札・手前の札から順に置き、重なるときは 上へ少しずらす → 丸いピクトグラムだけにする、の順で試す。
+   見出し・ボタンなどの文字の上にも札を置かない。どの札もタップ領域は 44px 以上(CSS の .pin-in::before) */
+const PRI = ['observatory', 'hospital', 'clinic', 'park', 'workshop', 'post', 'atelier', 'library', 'office'];
+const PM = new Map();
+function measurePins() {
+  for (const el of pinEls) {
+    const inn = el.querySelector('.pin-in'), had = el.classList.contains('is-compact');
+    el.classList.remove('is-compact'); const fw = inn.offsetWidth, fh = inn.offsetHeight;
+    el.classList.add('is-compact'); const cw = inn.offsetWidth, ch = inn.offsetHeight;
+    el.classList.toggle('is-compact', had);
+    PM.set(el.dataset.id, { fw, fh, cw, ch });
+  }
+}
+function obstaclesIn(frame) {
+  const out = [];
+  for (const q of ['.hd .logo', '.hd .nav', '.copy .eyebrow', '.copy h1', '.copy .lead', '.copy .ctas', '.tools', '.hint', '.sp-cta']) {
+    const e = document.querySelector(q); if (!e || e.hidden) continue;
+    const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+    const r = e.getBoundingClientRect(); if (!r.width || !r.height) continue;
+    out.push({ x0: r.left - frame.left, x1: r.right - frame.left, y0: r.top - frame.top, y1: r.bottom - frame.top });
+  }
+  return out;
+}
+/* items: { el, id, x, y, back }。base は札の下端(三角の上)の、基準点からのずれ(live は -8・still は 0) */
+function declutter(items, obstacles, base) {
+  items.sort((a, b) => (a.back - b.back) || (PRI.indexOf(a.id) - PRI.indexOf(b.id)));
+  const placed = obstacles.slice(), pad = 3;
+  const hit = r => placed.some(p => p.x0 < r.x1 && p.x1 > r.x0 && p.y0 < r.y1 && p.y1 > r.y0);
+  for (const it of items) {
+    const m = PM.get(it.id); if (!m) continue;
+    let pick = null;
+    for (const [c, dy] of [[0, 0], [0, -12], [1, 0], [1, -12], [1, 12], [1, -24]]) {
+      const w = c ? m.cw : m.fw, h = c ? m.ch : m.fh;
+      const r = { x0: it.x - w / 2 - pad, x1: it.x + w / 2 + pad, y0: it.y + base + dy - h - pad, y1: it.y + base + dy + 6 + pad };
+      if (!hit(r)) { pick = { c, dy, r }; break; }
+      if (!pick && c) pick = { c, dy: 0, r: { x0: it.x - m.cw / 2 - pad, x1: it.x + m.cw / 2 + pad, y0: it.y + base - m.ch - pad, y1: it.y + base + 6 + pad }, fallback: true };
+    }
+    if (pick.fallback) pick = { c: 1, dy: 0, r: pick.r };
+    placed.push(pick.r);
+    it.el.classList.toggle('is-compact', !!pick.c);
+    it.el.style.setProperty('--ny', pick.dy + 'px');
+  }
+}
 
 /* ---------- 札の中身(案内の一覧のカードから写す。中身の元はひとつ) ---------- */
 function fillCard(id) {
@@ -686,7 +742,7 @@ function live() {
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const { scene, world, spots, movers } = makeScene(null);
-  const L = makeLights(scene, big); L.clouds = movers.clouds;
+  const L = makeLights(scene, big);
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 200);
   aimCamera(camera, new THREE.Vector3(0, 0, 0));
   const SAMPLE = samplePoints();
@@ -706,13 +762,16 @@ function live() {
     }
     return { x0: W * .37, x1: W * .99, y0: H * .115, y1: H * .955 };
   }
+  let OBS = [];
   function resize() {
     W = stage.clientWidth; H = stage.clientHeight;
     renderer.setSize(W, H, false);
     aimCamera(camera, new THREE.Vector3(0, 0, 0));
     base = fit(camera, SAMPLE, W, H, region());
+    measurePins(); OBS = obstaclesIn(stage.getBoundingClientRect());
     dirty = true;
   }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { measurePins(); OBS = obstaclesIn(stage.getBoundingClientRect()); dirty = true; kick(); });
   new ResizeObserver(resize).observe(stage);
   resize();
 
@@ -793,16 +852,19 @@ function live() {
   const v3 = new THREE.Vector3(), camDir = new THREE.Vector3();
   function placePins() {
     camera.getWorldDirection(camDir); camDir.y = 0; camDir.normalize();
+    const items = [];
     for (const id in spots) {
       const s = spots[id], el = pinOf(id); if (!el) continue;
       v3.copy(s.anchor); v3.y += s.lift; world.localToWorld(v3);
       const depth = v3.x * camDir.x + v3.z * camDir.z; // 大きいほど奥
       v3.project(camera);
-      const x = (v3.x + 1) / 2 * W, y = (1 - v3.y) / 2 * H;
+      const x = (v3.x + 1) / 2 * W, y = (1 - v3.y) / 2 * H, back = depth > 3.2;
       el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-      el.classList.toggle('is-back', depth > 3.2);
+      el.classList.toggle('is-back', back);
       el.style.zIndex = String(100 - Math.round(depth * 3));
+      items.push({ el, id, x, y, back: back ? 1 : 0 });
     }
+    if (!focus) declutter(items, OBS, -8);
   }
 
   function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
@@ -833,7 +895,7 @@ function live() {
     if (!paused) {
       for (const w of movers.walkers) placeWalker(w, t);
       placeBus(movers.bus, t);
-      for (const c of movers.clouds) { const a = c.a + c.v * t; c.g.position.set(Math.cos(a) * c.r, c.y + Math.sin(t * .3 + c.a) * .15, Math.sin(a) * c.r); }
+      for (const c of movers.clouds) placeCloud(c, t);
       for (const k of movers.rocks) k.m.position.y = k.y + Math.sin(t * .6 + k.p) * .18;
       if (ANIM.needle) ANIM.needle.rotation.y = Math.sin(t * .45) * .9 + Math.sin(t * 1.3) * .12;
       for (const rp of ANIM.ripples) { const k = (t * .32 + rp.phase) % 1; rp.mesh.scale.setScalar(.12 + k * .62); rp.mat.opacity = (1 - k) * .55; }
@@ -844,7 +906,7 @@ function live() {
     if ((active || down) && visible && !document.hidden) requestAnimationFrame(loop); else running = false;
   }
   applyLight(L, renderer, 0);
-  for (const c of movers.clouds) { c.g.position.set(Math.cos(c.a) * c.r, c.y, Math.sin(c.a) * c.r); }
+  for (const c of movers.clouds) placeCloud(c, 0);
   running = false; kick();
   window.__town = { openSpot, closeSpot, setNight: v => { if (!!nightTo !== v) btnNight.click(); }, spots, camera };
   return true;
@@ -853,6 +915,16 @@ function live() {
 /* ---------- still(撮っておいた町の画像に札を重ねる) ---------- */
 function still() {
   ROOT.classList.add('still-on');
+  const box = document.getElementById('still');
+  const lay = () => {
+    const fr = box.getBoundingClientRect(); if (!fr.width) return;
+    measurePins();
+    const items = pinEls.map(p => { const [x, y] = (p.dataset.pos || '50,50').split(',').map(Number); return { el: p, id: p.dataset.id, x: x / 100 * fr.width, y: y / 100 * fr.height, back: ['observatory', 'office', 'library'].includes(p.dataset.id) ? 1 : 0 }; });
+    declutter(items, obstaclesIn(fr), 0);
+  };
+  addEventListener('resize', lay);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(lay);
+  requestAnimationFrame(lay);
   for (const p of pinEls) {
     const [x, y] = (p.dataset.pos || '50,50').split(',').map(Number);
     p.style.left = x + '%'; p.style.top = y + '%';

@@ -84,24 +84,31 @@ html.live .still img{display:none}
 
 /* 札 */
 .pins{position:absolute;inset:0;pointer-events:none}
-.pin{position:absolute;left:0;top:0;display:none;pointer-events:auto;will-change:transform}
+.pin{position:absolute;left:0;top:0;display:none;pointer-events:auto;will-change:transform;--ny:0px}
+.pin:hover,.pin:focus-visible,.pin.is-hover{z-index:600!important}
 html.js .pin{display:block}
-.pin-in{display:flex;align-items:center;gap:6px;transform:translate(-50%,calc(-100% - 8px));padding:4px 12px 4px 4px;border-radius:999px;background:rgba(255,253,248,.95);box-shadow:var(--clay);white-space:nowrap;font-weight:700;font-size:13px;line-height:1;color:var(--ink);transition:transform .35s var(--ease),background .25s,opacity .35s}
+.pin-in{display:flex;align-items:center;gap:6px;transform:translate(-50%,calc(-100% - 8px + var(--ny)));padding:4px 12px 4px 4px;border-radius:999px;background:rgba(255,253,248,.95);box-shadow:var(--clay);white-space:nowrap;font-weight:700;font-size:13px;line-height:1;color:var(--ink);transition:transform .35s var(--ease),background .25s,opacity .35s}
 .pin-in::after{content:'';position:absolute;left:50%;bottom:-6px;width:12px;height:12px;background:inherit;border-radius:2px;transform:translateX(-50%) rotate(45deg);z-index:-1;box-shadow:3px 3px 6px -3px rgba(31,40,64,.25)}
-.pin::before{content:'';position:absolute;left:-30px;right:-30px;top:-52px;height:52px;transform:translateX(0)}
+/* タップ領域: 見た目の札(高さ34px・丸だけのとき34×34)を上下左右に6px広げて、どの札も 44px 以上 */
+.pin-in::before{content:'';position:absolute;inset:-6px;border-radius:999px}
+/* 重なる札は丸いピクトグラムだけ(名前は読み上げとホバーで出る) */
+.pin.is-compact .pin-t,.pin.is-compact .pin-sub{display:none}
+.pin.is-compact .pin-in{padding:4px;gap:0}
+@media (hover:hover){.pin.is-compact:hover .pin-t,.pin.is-compact:focus-visible .pin-t{display:inline}.pin.is-compact:hover .pin-in,.pin.is-compact:focus-visible .pin-in{padding:4px 12px 4px 4px;gap:6px}}
 .pin-ic{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;flex:none}
 .pin-ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .pin-sub{font-weight:500;font-size:12px;color:var(--ink-3);display:inline-block;max-width:0;overflow:hidden;opacity:0;transition:max-width .4s var(--ease),opacity .3s}
 @media (min-width:900px){.pin:hover .pin-sub,.pin.is-hover .pin-sub,.pin:focus-visible .pin-sub{max-width:9em;opacity:1}}
-.pin:hover .pin-in,.pin.is-hover .pin-in,.pin:focus-visible .pin-in{transform:translate(-50%,calc(-100% - 14px)) scale(1.06);background:#fff}
+.pin:hover .pin-in,.pin.is-hover .pin-in,.pin:focus-visible .pin-in{transform:translate(-50%,calc(-100% - 14px + var(--ny))) scale(1.06);background:#fff}
 .pin:focus-visible{outline:none}
 .pin:focus-visible .pin-in{outline:3px solid #3C6FD8;outline-offset:3px}
-.pin.is-back .pin-in{opacity:.58;transform:translate(-50%,calc(-100% - 8px)) scale(.9)}
+.pin.is-back .pin-in{opacity:.6;transform:translate(-50%,calc(-100% - 8px + var(--ny))) scale(.9)}
 .pin.is-back:hover .pin-in,.pin.is-back:focus-visible .pin-in{opacity:1}
 html.focused .pin .pin-in{opacity:0;pointer-events:none}
-html.still-on .pin .pin-in{transform:translate(-50%,-100%)}
-html.still-on .pin:hover .pin-in,html.still-on .pin:focus-visible .pin-in{transform:translate(-50%,calc(-100% - 6px)) scale(1.06)}
-@media (max-width:899px){.pin-in{font-size:12.5px;padding:4px 11px 4px 4px;gap:6px}.pin-ic{width:24px;height:24px}.pin-ic svg{width:14px;height:14px}}
+html.still-on .pin .pin-in{transform:translate(-50%,calc(-100% + var(--ny)))}
+html.still-on .pin:hover .pin-in,html.still-on .pin:focus-visible .pin-in{transform:translate(-50%,calc(-100% - 6px + var(--ny))) scale(1.06)}
+@media (max-width:899px){.pin-in{font-size:12px;padding:4px 10px 4px 4px;gap:5px}.pin-ic{width:26px;height:26px}.pin-ic svg{width:15px;height:15px}}
+@media (max-width:899px) and (max-height:740px){.pin-in{font-size:11.5px}}
 
 /* 文字の帯 */
 .copy{position:absolute;z-index:30;left:var(--pad);top:clamp(130px,21vh,220px);max-width:470px;pointer-events:none}
@@ -240,7 +247,7 @@ h2{font-size:clamp(28px,3.6vw,46px);line-height:1.3;font-weight:900;letter-spaci
 .close .links{margin-top:28px;display:flex;flex-wrap:wrap;gap:10px}
 .close .btn-sub{background:rgba(255,255,255,.1);color:#FFF8EA;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.25)}
 .close .btn-sub:hover{background:rgba(255,255,255,.16)}
-@media (max-width:760px){.close-in{grid-template-columns:1fr}.close-fig{order:-1}.close-fig img{max-width:420px;margin:0 auto}}
+@media (max-width:760px){.close-in{grid-template-columns:1fr;gap:8px}.close-fig img{width:112%;max-width:470px;margin:20px 0 0 -6%}}
 
 .ft{background:var(--night-1);color:#BFC3D6;padding:28px var(--pad) max(28px,env(safe-area-inset-bottom));font-size:13px}
 .ft-in{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;justify-content:space-between}
@@ -281,7 +288,7 @@ dialog.card[open]{animation:card-in .5s var(--ease) both}
   .card-shot{display:grid;grid-template-columns:auto;padding:14px}
   .card-shot img{max-height:230px}
 }
-@media (max-width:899px) and (max-height:740px){.eyebrow{display:none}h1{margin-top:0}.pin-t{display:none}.pin-in{padding:4px;gap:0}}
+@media (max-width:899px) and (max-height:740px){.eyebrow{display:none}h1{margin-top:0}}
 @media (prefers-reduced-motion: reduce){dialog.card[open]{animation:none}.sky,.still img,.pin-in,.btn,.tool,.bld-fig img{transition:none}}
 
 /* 画像を作るとき */
@@ -362,7 +369,7 @@ html.capture #town{display:block;position:static}
       <p class="kicker">町の案内</p>
       <h2 id="guideTitle">8つの建物に、29の道具</h2>
     </div>
-    <p class="note">ここに並べた道具のほとんどは、登録なしでブラウザから使えます。入力はその端末の中にだけ残ります。</p>
+    <p class="note">ほとんどの道具は、登録なしでブラウザから使えます。建物を押すと、中の道具と実際の画面が見られます。</p>
   </div>
   <div class="blds">
     <article class="bld wide" id="b-observatory" style="--c:#E2B04A;--tint:#FBEBC4" data-shot="../shared/shots/compass-result.webp" data-shot-kind="phone" data-shot-alt="BRIDGE Compass の結果の実際の画面。理学療法士で、調整やチームに関わる答えを選んだ一例">
@@ -464,7 +471,7 @@ html.capture #town{display:block;position:static}
         <a class="btn btn-sub" href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note <span aria-hidden="true">↗</span></a>
       </div>
     </div>
-    <div class="close-fig"><img src="img/island-night.webp" width="1600" height="1300" alt="夜の町。病院や建物の窓に灯りがともっている" loading="lazy"></div>
+    <div class="close-fig"><img src="img/island-night.webp" width="1600" height="1300" alt="夜の町。病院や建物の窓に灯りがともっている" decoding="async"></div>
   </div>
 </section>
 </main>
