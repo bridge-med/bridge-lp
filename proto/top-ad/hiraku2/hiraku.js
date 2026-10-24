@@ -321,5 +321,22 @@ function boot() {
   const idle = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 1500 }) : setTimeout(f, 300));
   if (document.readyState === 'complete') idle(upgrade); else addEventListener('load', () => idle(upgrade));
 
+  /* ---------- 下の節: 帯が画面に入ると、閉じた肖像から、ひらいた中へ(前の壁が倒れる向き。1回だけ) ----------
+     JS なし・動きを減らす設定では、最初からひらいた絵 */
+  const pairs = $$('.pair[data-wipe]');
+  if (pairs.length && !reduce() && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => {
+      for (const en of es) {
+        if (!en.isIntersecting) continue;
+        const f = en.target; io.unobserve(f);
+        const go = () => { f.classList.add('go'); requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove('armed'))); };
+        // 閉じた絵とひらいた絵の両方が読めてから(読めないときも、待ちすぎない)
+        const ims = [...f.querySelectorAll('img')].filter(im => !im.complete);
+        Promise.race([Promise.all(ims.map(im => new Promise(r => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }))), new Promise(r => setTimeout(r, 2500))]).then(() => setTimeout(go, 160));
+      }
+    }, { threshold: .55 });
+    for (const f of pairs) { f.classList.add('armed'); io.observe(f); }
+  }
+
   /* 下の案内から直接 #g-hospital などで来たとき: そのまま(リンクの一覧が答え) */
 }

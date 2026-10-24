@@ -71,17 +71,17 @@ export async function capture(Q) {
   const mstr = tod < .5 ? 'day' : tod < 1.5 ? 'dusk' : 'night', glow = U.uNight.value;
   const built = [];
   if (MOD && S.B.park) { const it = MOD.buildInterior('park', BOXES.park, cctx); it.group.position.y = .05; S.B.park.anchor.add(it.group); built.push(it); }
-  const cut = mode === 'cutaway' ? Q.get('id') : null;
-  if (MOD && cut && cut !== 'park' && cut !== 'plaza') { const it = MOD.buildInterior(cut, BOXES[cut], cctx); S.B[cut].anchor.add(it.group); built.push(it); }
+  const cut = mode === 'cutaway' ? Q.get('id') : null, closed = Q.get('closed') === '1';   // closed: 同じ構図で、閉じたまま(下の節の帯で、ひらく前の絵)
+  if (MOD && cut && !closed && cut !== 'park' && cut !== 'plaza') { const it = MOD.buildInterior(cut, BOXES[cut], cctx); S.B[cut].anchor.add(it.group); built.push(it); }
   for (const it of built) { await it.ready; it.setNight(glow); if (it.reveal) it.reveal(); }
   if (built.length) await new Promise(r => setTimeout(r, 1400));
   for (const it of built) it.update(.016, t, mstr);
   if (cut) {
     const b = S.B[cut], bx = BOXES[cut], pl = placeOf(S, cut), tb = new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), pl.yaw), new THREE.Vector3(1, 1, 1)), tbi = tb.clone().invert();
-    U.uOpenA.value = LAYOUT[cut].bid; U.uRoofA.value = 0;
-    if (bx.shape === 'tower') U.uPM.value[1].copy(tb).multiply(new THREE.Matrix4().makeRotationY(Math.PI)).multiply(tbi);
+    if (!closed) U.uOpenA.value = LAYOUT[cut].bid, U.uRoofA.value = 0;
+    if (closed) { /* 壁も屋根もそのまま */ } else if (bx.shape === 'tower') U.uPM.value[1].copy(tb).multiply(new THREE.Matrix4().makeRotationY(Math.PI)).multiply(tbi);
     else if (bx.shape !== 'open') { const z = bx.d / 2 + E + WALL, end = Math.PI / 2 + Math.asin(clamp((b.ex.y0 + .01) / bx.h, 0, .4)); U.uPM.value[1].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, 0, z)).multiply(new THREE.Matrix4().makeRotationX(end)).multiply(new THREE.Matrix4().makeTranslation(0, 0, -z)).multiply(tbi); }
-    U.uPM.value[2].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, 40, 0)).multiply(tbi);
+    if (!closed) U.uPM.value[2].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, 40, 0)).multiply(tbi);
     // その建物を正面に向けて(島を回す)、少し低い角度から寄る
     const spin = deg(pl.face - 45), el = cut === 'park' ? deg(17) : deg(26);
     S.world.rotation.y = spin; S.world.updateMatrixWorld(true);
@@ -91,7 +91,7 @@ export async function capture(Q) {
     // 中の灯り(断面の絵でも、中が暗くならないように)
     const pIn = L.pIn, il = inLightOf(cut), c = il.p.applyMatrix4(tb); S.world.localToWorld(c);
     pIn.position.copy(c); pIn.distance = il.dist; pIn.intensity = (1.4 + glow * 2) * il.k;
-    if (cut === 'park' || cut === 'plaza') pIn.intensity = 0;
+    if (cut === 'park' || cut === 'plaza' || closed) pIn.intensity = 0;
   } else if (mode === 'portrait') {
     aimCamera(camera, new THREE.Vector3());
     const bb = new THREE.Box3().setFromObject(S.world), pts = [];
@@ -163,7 +163,7 @@ export function live(o) {
     const d = farness(), T = clamp(.68 + d * .3, .68, 1.7), w = 6.2 / T, tok = ++turnTok;
     for (const s of [rot, camX, camY, camZ, elev]) s.w = w;
     fly.x = 0; fly.v = 0; fly.t = 1; fly.w = w * 1.1;
-    flyAmp = { el: deg(clamp(3 + d * 4, 3, 12)) * arc, z: clamp(.05 + d * .09, .05, .3) * zoomArc };
+    flyAmp = { el: deg(clamp(5 + d * 4, 5, 13)) * arc, z: clamp(.08 + d * .08, .08, .3) * zoomArc };
     after(T * 1000 + 300, () => { if (tok === turnTok) { rot.w = camX.w = camY.w = camZ.w = 7.5; elev.w = 7; } });
     return T * 1000;
   }
@@ -246,7 +246,7 @@ export function live(o) {
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const p of q.pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
     const sf = o.safe(), sw = sf.r - sf.l, shh = sf.b - sf.t, w = Math.max(1e-3, x1 - x0), h = Math.max(1e-3, y1 - y0);
-    const ppu = Math.min(Math.sqrt(.3 * sw * shh / (w * h)), sw * .8 / w, shh * .66 / h, base.ppu * 40);
+    const ppu = Math.min(Math.sqrt(.3 * sw * shh / (w * h)), sw * .8 / w, shh * .66 / h, base.ppu * 110);
     const bx = (x0 + x1) / 2, by = (y0 + y1) / 2, scx = (sf.l + sf.r) / 2, scy = (sf.t + sf.b) / 2;
     return { rot: r, elev: el, x: bx - (scx - W / 2) / ppu, y: by + (scy - H / 2) / ppu, ppu };
   }
@@ -304,7 +304,7 @@ export function live(o) {
     const reduce = o.reduce && o.reduce();
     retarget();
     // 町ぜんたいからは少し上がって降りる。ひらいたまま移るときは、町の上空を渡る(高く・大きく引く)
-    const T = reduce ? 0 : transfer ? flight(1.5, 1.3) : flight(1, .35);
+    const T = reduce ? 0 : transfer ? flight(1.3, 1.2) : flight(1.1, .55);
     const arrive = Math.round(T * .55);
     const at = ms => reduce ? 0 : ms + arrive;
     A.steps = [
@@ -485,7 +485,7 @@ export function live(o) {
   o.canvas.addEventListener('pointerup', up);
   o.canvas.addEventListener('pointercancel', () => { down = null; if (A.id) dragOff.t = 0; });
   o.canvas.addEventListener('pointerleave', () => { if (hover) { setHover(null); o.onHover(null); } if (A.id && curHover) { curHover = null; stationHover(null); o.onStation(null, 'hover'); } });
-  function pressFx(id) { liftId = id; lift.t = 0; lift.v = -.85; flash = { id, t0: clock() }; hiAmt.v = 6; dirty = true; kick(); }
+  function pressFx(id) { liftId = id; lift.t = 0; lift.v = -1.35; flash = { id, t0: clock() }; hiAmt.v = 9; dirty = true; kick(); }
   function setHover(id) { hover = id; if (!A.id) { liftId = id; lift.t = id ? .07 : 0; } dirty = true; kick(); }
 
   /* ---- 誘い: ひとつの建物がふっと明るくなる ---- */
@@ -539,7 +539,7 @@ export function live(o) {
     if (Bk.id && Bk.closing && !Bk.wall.moving && !Bk.roof.moving) { const it = interiors[Bk.id]; if (it && Bk.id !== A.id && Bk.id !== 'park') it.group.visible = false; if (!A.id) { U.uFocus.value = -1; o.onClosed && o.onClosed(); } Bk = slot(); }
     // 選んだ建物の光(乗せた・誘い)
     let hiId = hover && !A.id ? hover : null, amt = hiId ? .1 : 0;
-    if (flash) { const k = (now - flash.t0) / 420; if (k < 1) { hiId = flash.id; amt = .17 * (1 - k * k); } else flash = null; }
+    if (flash) { const k = (now - flash.t0) / 380; if (k < 1) { hiId = flash.id; amt = .26 * (1 - k * k); } else flash = null; }
     if (!hiId && invite && !A.id) { const k = (now - invite.t0) / 1700; if (k < 1) { hiId = invite.id; amt = Math.sin(Math.PI * Math.min(1, k * 1.15)) * .26; } else invite = null; }
     hiAmt.t = amt; if (hiId) U.uHi.value = LAYOUT[hiId].bid; else if (hiAmt.x < .004) U.uHi.value = -1;
     U.uHiAmt.value = Math.max(0, hiAmt.x);

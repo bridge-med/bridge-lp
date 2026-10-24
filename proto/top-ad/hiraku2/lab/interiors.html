@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* 試し場: 7つの中を、ひらいたときと同じ正面・同じ光(町の world.js の光とトーンマッピング、ひらいた建物の中の灯り)で撮る。
-   ?only=hospital で1つを大きく、?time=dusk|night、?elev=31、?active=keiji、?hover=keiji、?focus=x,y,z&span=0.5、?box=w,d,h、?q=low、?outer=0(最初の箱と色)、?limbs=0(腕と腿なし)、?t=秒(動きの時刻) */
+   ?only=hospital で1つを大きく、?time=dusk|night、?elev=31、?active=keiji、?hover=keiji、?focus=x,y,z&span=0.5、?box=w,d,h、?q=low、?outer=0(最初の箱と色)、?limbs=0(腕と腿なし)、?t=秒(動きの時刻)、?cut=navy(外の壁の切り口も藍にして比べる) */
 :root{--bg:#EEF1F4;--ink:#15191C;--ink-2:#4A5157;--panel:#FFFFFF}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif}
@@ -59,15 +59,16 @@ try { B3 = await import('../buildings.js'); } catch (e) { /* 最初の箱と色 
 const useOuter = Q.get('outer') !== '0' && B3;
 const BOXES = useOuter ? Object.assign({}, DEFAULT_BOXES, B3.BOXES) : DEFAULT_BOXES;
 const PAL = useOuter ? B3.PALETTE : null;
-const WALL = (B3 && B3.WALL) || .08, POCHE = (PAL && PAL.poche) || '#16233E';
+const WALL = (B3 && B3.WALL) || .08, POCHE = (PAL && PAL.poche) || '#16233E', CUTL = (PAL && PAL.cutLight) || '#E8E1D6';
 const AZ = Math.PI / 4;                       // 町のカメラの方位。建物はこちらへ正面を向ける
 
 const loader = new THREE.TextureLoader();
 const loadTexture = url => new Promise((res, rej) => loader.load(url, t => { t.colorSpace = THREE.SRGBColorSpace; res(t); }, undefined, rej));
 
-/* 試し場だけの外側: 外の壁(buildings.js の walls と同じ置き方)と、その前の端・上の端の切り口(藍)、地面 */
+/* 試し場だけの外側: 外の壁(buildings.js の walls と同じ置き方)と、その前の端・上の端の切り口、地面。
+   切り口の決まり(第2回の案): 藍の細い線は中(interiors.js)が部屋の縁に描く。外の壁の切り口は、光を受けない淡い色(cutLight) */
 function standIn(kind, b) {
-  const g = new THREE.Group(), M = c => new THREE.MeshStandardMaterial({ color: c, roughness: .9 }), PM = new THREE.MeshBasicMaterial({ color: POCHE });
+  const g = new THREE.Group(), M = c => new THREE.MeshStandardMaterial({ color: c, roughness: .9 }), PM = Q.get('cut') === 'navy' ? new THREE.MeshBasicMaterial({ color: POCHE }) : new THREE.MeshStandardMaterial({ color: CUTL, roughness: .9 });
   const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = mat !== PM; m.receiveShadow = true; g.add(m); return m; };
   if (kind === 'park') {
     add(new THREE.CylinderGeometry(b.w * .62, b.w * .64, .08, 48), M('#B8CD98'), 0, -.04, 0);

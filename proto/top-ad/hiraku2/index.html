@@ -103,7 +103,8 @@ html[data-tod="night"] .cta .ico{color:var(--sand)}
 html[data-tod="night"] .meta{color:#C3C8D8}
 
 /* 小さなアイコンのボタン2つ(昼夜・止める) */
-.ctrl{position:absolute;z-index:7;display:flex;gap:6px}
+.hd-r{display:flex;align-items:center;gap:2px}
+.ctrl{display:flex;gap:0;margin-left:6px}
 .cbtn{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--ink-2);transition:background-color .2s,color .2s}
 .cbtn .face{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.62);box-shadow:0 0 0 1px rgba(30,40,50,.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .cbtn .ico{width:17px;height:17px}
@@ -139,15 +140,15 @@ html:not(.js) .hit{outline:0}
 /* 最初の訪問だけ: 病院の足もとに柔らかい輪と「ふれてみる」。押した瞬間: 押した建物の足もとに輪 */
 .nudge{position:absolute;left:0;top:0;width:0;height:0;transition:opacity .5s var(--ease)}
 .nudge.gone{opacity:0}
-.nr{position:absolute;left:-50px;top:-26px;width:100px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(22,35,62,.16),0 0 18px rgba(255,255,255,.55);opacity:0;transform:scale(.3);animation:nr 2.8s cubic-bezier(.2,.7,.3,1) infinite}
+.nr{position:absolute;left:-50px;top:-26px;width:100px;height:52px;border-radius:50%;border:3px solid #E9D19A;box-shadow:0 0 0 1px rgba(22,35,62,.55),inset 0 0 0 1px rgba(22,35,62,.4),0 0 16px rgba(255,236,190,.65);opacity:0;transform:scale(.3);animation:nr 2.8s cubic-bezier(.2,.7,.3,1) infinite}
 .nr.n2{animation-delay:1.4s}
 @keyframes nr{0%{opacity:0;transform:scale(.3)}14%{opacity:.95}100%{opacity:0;transform:scale(1.45)}}
-.nt{position:absolute;left:0;top:-34px;transform:translate(-50%,-100%);padding:6px 11px 7px;border-radius:999px;background:#fff;color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.06em;white-space:nowrap;box-shadow:0 6px 18px -8px rgba(0,0,0,.45)}
-.nt::after{content:'';position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;background:#fff;transform:rotate(45deg);border-radius:1px}
-html[data-tod="night"] .nr{border-color:rgba(255,228,186,.95);box-shadow:0 0 20px rgba(255,210,150,.5)}
-.pring{position:absolute;margin:-22px 0 0 -42px;width:84px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.95);box-shadow:0 0 14px rgba(255,255,255,.5);pointer-events:none;animation:pr .8s cubic-bezier(.2,.7,.3,1) forwards}
-@keyframes pr{0%{opacity:.95;transform:scale(.25)}100%{opacity:0;transform:scale(1.6)}}
-html[data-tod="night"] .pring{border-color:rgba(255,228,186,.95)}
+.nt{position:absolute;left:0;top:34px;transform:translate(-50%,0);padding:6px 11px 7px;border-radius:999px;background:#fff;color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.06em;white-space:nowrap;box-shadow:0 6px 18px -8px rgba(0,0,0,.45)}
+.nt::after{content:'';position:absolute;left:50%;top:-4px;width:8px;height:8px;margin-left:-4px;background:#fff;transform:rotate(45deg);border-radius:1px}
+html[data-tod="night"] .nr{border-color:#FFDCA2;box-shadow:0 0 0 1px rgba(8,12,28,.6),0 0 20px rgba(255,210,150,.6)}
+.pring{position:absolute;margin:-24px 0 0 -46px;width:92px;height:48px;border-radius:50%;border:3px solid #F1DCA8;box-shadow:0 0 0 1px rgba(22,35,62,.5),0 0 18px rgba(255,236,190,.75);pointer-events:none;animation:pr .7s cubic-bezier(.15,.7,.3,1) forwards}
+@keyframes pr{0%{opacity:1;transform:scale(.35)}70%{opacity:.6}100%{opacity:0;transform:scale(1.7)}}
+html[data-tod="night"] .pring{border-color:#FFDCA2;box-shadow:0 0 0 1px rgba(8,12,28,.6),0 0 20px rgba(255,210,150,.7)}
 
 /* ================= ひらいたときのパネル(PC は右、スマホは下からのシート) ================= */
 .panel{position:fixed;z-index:60;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;box-shadow:0 24px 60px -24px rgba(20,24,30,.45),0 0 0 1px rgba(30,30,30,.06)}
@@ -185,22 +186,37 @@ html[data-tod="night"] .pring{border-color:rgba(255,228,186,.95)}
 .sec{padding:clamp(56px,9vw,104px) var(--pad)}
 .sec-in{max-width:1080px;margin:0 auto}
 .sec h2{font:700 clamp(22px,3vw,30px)/1.4 var(--jp);letter-spacing:.04em}
-.g-list{margin-top:clamp(24px,4vw,40px);border-top:1px solid var(--line)}
-.g-item{display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 22px;padding:22px 0;border-bottom:1px solid var(--line);scroll-margin-top:24px}
-.g-pic{grid-row:1 / span 2;width:96px;aspect-ratio:480/420;object-fit:contain}
-.g-item h3{font:700 18px/1.4 var(--jp);letter-spacing:.04em;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.g-item h3 span{font-size:12.5px;font-weight:400;color:var(--ink-3);letter-spacing:.06em}
-.g-line{font-size:13.5px;color:var(--ink-2)}
-.g-tools{grid-column:2;margin-top:10px;display:grid;gap:6px 28px}
-.g-tools a{font-weight:700;font-size:14.5px;text-decoration:underline;text-decoration-color:rgba(28,34,39,.25);text-underline-offset:4px}
-.g-tools a:hover{text-decoration-color:currentColor}
-.g-tools span{display:block;font-size:12.5px;color:var(--ink-3);line-height:1.6}
-.g-tools .chip{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;background:var(--paper-2);font-size:11px;font-weight:700;color:var(--ink-3)}
+/* 町の案内: 建物ごとの帯。町の中のその建物の絵が、画面に入ると前の壁が倒れるように、中の絵へ切り替わる(1回だけ) */
+.g-intro{margin-top:12px;font-size:14.5px;line-height:1.9;color:var(--ink-2);max-width:36em}
+.all{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:700;color:var(--indigo);text-decoration:underline;text-decoration-color:rgba(22,35,62,.3);text-underline-offset:5px;white-space:nowrap}
+.all .n{font:600 13px/1 var(--en);letter-spacing:.02em}
+.all .ico{width:15px;height:15px}
+.bands{margin-top:clamp(36px,6vw,72px);display:grid;gap:clamp(60px,9vw,120px)}
+.band{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);gap:clamp(22px,4.5vw,68px);align-items:center;scroll-margin-top:24px}
+.band.r .pair{order:2}
+.pair{position:relative;margin:0;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#E9E3D8;box-shadow:0 22px 44px -32px rgba(30,30,30,.5)}
+.pair img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pair .open{clip-path:inset(0)}
+html.js .pair.armed .open{clip-path:inset(0 0 100% 0)}
+.pair.go .open{transition:clip-path .74s cubic-bezier(.32,.72,.24,1)}
+.b-text h3,.maker .b-text h2{font:700 clamp(21px,2.3vw,26px)/1.35 var(--jp);letter-spacing:.04em;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.b-text h3 span{font-size:12.5px;font-weight:400;color:var(--ink-3);letter-spacing:.06em}
+.b-line{margin-top:6px;font-size:14px;color:var(--ink-2)}
+.b-tools{margin-top:18px}
+.b-tools li{padding:10px 0;border-top:1px solid var(--line)}
+.b-tools a{font-weight:700;font-size:15px;text-decoration:underline;text-decoration-color:rgba(28,34,39,.22);text-underline-offset:4px}
+.b-tools a:hover{text-decoration-color:currentColor}
+.b-tools .d{display:block;margin-top:2px;font-size:12.5px;line-height:1.65;color:var(--ink-3)}
+.b-tools .chip{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;background:var(--paper-2);font-size:11px;font-weight:700;color:var(--ink-3);vertical-align:1px}
+.more{border-top:1px solid var(--line)}
+.more summary{display:flex;align-items:center;gap:8px;min-height:44px;font-size:13.5px;font-weight:700;color:var(--ink-2);cursor:pointer;list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.more summary .n{font:600 12.5px/1 var(--en);color:var(--ink-3)}
+.more summary::after{content:'';width:7px;height:7px;margin-left:2px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.more[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.more .b-tools{margin-top:0}
 .maker{background:var(--paper-2)}
-.maker .sec-in{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(24px,5vw,64px);align-items:center}
-.maker figure{border-radius:14px;overflow:hidden;background:#E7E0D3}
-.maker p{margin-top:14px;font-size:15px;color:var(--ink-2)}
-.maker .more{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:14px;font-weight:700;font-size:14px;color:var(--indigo)}
+.maker .band{max-width:1080px;margin:0 auto}
 .closing{position:relative;background:linear-gradient(180deg,var(--sky-n1),#0B1128);color:#F1EDE5;overflow:hidden}
 .closing .stars{opacity:.55}
 .closing .sec-in{position:relative;display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:clamp(24px,5vw,72px);align-items:center}
@@ -237,11 +253,9 @@ html[data-tod="night"] .pring{border-color:rgba(255,228,186,.95)}
   .cta{display:inline-flex;padding:0 26px}
   .meta{text-align:left}
   .still{left:auto;right:calc(-1 * clamp(0px,2vw,40px));top:50%;transform:translateY(-50%);height:min(98%,calc(100vw * .66 / 1.111))}
-  .ctrl{left:var(--pad);bottom:clamp(18px,4vh,40px)}
-  .hint{left:calc(var(--pad) + 108px);bottom:calc(clamp(18px,4vh,40px) + 13px);text-align:left}
+  .hint{left:var(--pad);bottom:clamp(22px,4vh,44px);text-align:left}
   .panel{right:24px;top:84px;bottom:24px;width:min(400px,34vw);border-radius:16px}
   html.opened .copy,html.opened .cta-wrap,html.opened .hint{opacity:0;pointer-events:none}
-  .g-tools{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (min-width:900px) and (max-height:760px){.copy{top:110px}.lead{display:none}.cta-wrap{top:270px}}
 
@@ -256,7 +270,7 @@ html[data-tod="night"] .pring{border-color:rgba(255,228,186,.95)}
   .hero{--top0:max(136px,calc(150px + (100svh - 844px) * .35));--bot0:150px}   /* 背の高い画面では、町を少し下げて、下の空きを減らす */
   .still{--W:min(calc(98vw * 100 / (var(--cr) - var(--cl))),calc((100svh - var(--top0) - var(--bot0)) * 100 / ((var(--cb) - var(--ct)) * .9)));width:var(--W);left:calc(50% - var(--W) * (var(--cl) + var(--cr)) / 200);transform:none;top:calc(var(--top0) + env(safe-area-inset-top,0px) - var(--W) * .9 * var(--ct) / 100)}
   .cta-wrap{left:var(--pad);right:var(--pad);bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-  .ctrl{top:calc(10px + env(safe-area-inset-top,0px));right:calc(var(--pad) + 96px);bottom:auto;gap:0}
+  .ctrl{margin-left:0}
   .ctrl .cbtn .face{width:30px;height:30px;background:rgba(255,255,255,.46);box-shadow:0 0 0 1px rgba(30,40,50,.1);backdrop-filter:none;-webkit-backdrop-filter:none}
   .ctrl .cbtn .ico{width:15px;height:15px}
   html[data-tod="night"] .ctrl .cbtn .face{background:rgba(20,28,58,.4);box-shadow:0 0 0 1px rgba(255,255,255,.16)}
@@ -269,13 +283,13 @@ html[data-tod="night"] .pring{border-color:rgba(255,228,186,.95)}
   .p-head h2{font-size:22px}
   .p-body{padding:0 8px 18px;touch-action:pan-y}
   html.opened .copy,html.opened .cta-wrap,html.opened .ctrl,html.opened .hint{opacity:0;pointer-events:none}
-  .g-item{grid-template-columns:72px minmax(0,1fr);gap:2px 16px}
-  .g-pic{width:72px}
-  .g-tools{grid-column:1 / -1}
-  .maker .sec-in,.closing .sec-in{grid-template-columns:minmax(0,1fr)}
+  .band{grid-template-columns:minmax(0,1fr);gap:18px}
+  .band .pair{width:68%}
+  .band.r .pair{order:0;margin-left:auto}
+  .closing .sec-in{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:899px) and (max-height:700px){.eyebrow{display:none}h1{margin-top:0}.hero{--top0:112px;--bot0:128px}}
-@media (max-width:374px){.menu .mt{display:none}.menu{padding:0 11px}.ctrl{right:calc(var(--pad) + 40px)}.logo{gap:9px}.logo svg{width:42px}.logo b{font-size:13.5px;letter-spacing:.28em}}
+@media (max-width:374px){.menu .mt{display:none}.menu{padding:0 11px}.logo{gap:9px}.logo svg{width:42px}.logo b{font-size:13.5px;letter-spacing:.28em}}
 @media (max-width:359px){.cta{gap:8px;padding:0 14px;font-size:14px;white-space:nowrap}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0s!important;animation:none!important}}
 
@@ -296,13 +310,19 @@ html.capture body > *:not(#cap){display:none!important}
 
 <header class="hd">
   <a class="logo" href="../../../index.html" aria-label="BRIDGE ホーム"><svg viewBox="0 0 240 110" aria-hidden="true"><use class="lg-d" href="#lg"/><use class="lg-n" href="#lg-w"/></svg><b aria-hidden="true">BRIDGE</b></a>
+  <div class="hd-r">
   <nav class="nav" aria-label="サイト">
     <a href="#guide">町の案内</a>
     <a href="../../../philosophy/index.html">考え方</a>
     <a href="../../../about/index.html">運営者</a>
     <a href="../../../community/index.html">話をする</a>
   </nav>
+  <div class="ctrl" role="group" aria-label="町の操作">
+    <button class="cbtn" id="btnTod" type="button" aria-label="時刻を変える"><span class="face"><svg class="ico t-day" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><svg class="ico t-dusk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18M6 17a6 6 0 0 1 12 0M12 5v3M4.6 9.6l2 1.6M19.4 9.6l-2 1.6M7 20.5h10"/></svg><svg class="ico t-night" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5z"/></svg></span></button>
+    <button class="cbtn" id="btnPause" type="button" aria-pressed="false" aria-label="町の動きを止める"><span class="face"><svg class="ico i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="ico i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg></span></button>
+  </div>
   <button class="menu" id="menuBtn" type="button" aria-haspopup="dialog" aria-controls="menu" aria-label="メニュー"><span class="mt" aria-hidden="true">メニュー</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
 </header>
 
 <main>
@@ -338,10 +358,6 @@ html.capture body > *:not(#cap){display:none!important}
     <a class="hit" href="#g-atelier" data-id="atelier" data-tag="26.65,48.33" data-box="20.6,44.76,32.69,63.51" aria-label="アトリエ — 運営者"></a>
     <a class="hit" href="#g-plaza" data-id="plaza" data-tag="50,57.21" data-box="37.33,50.99,62.67,67.04" aria-label="広場 — 正解を与えるのではなく、選択肢を増やす"></a>
   </nav>
-  <div class="ctrl" role="group" aria-label="町の操作">
-    <button class="cbtn" id="btnTod" type="button" aria-label="時刻を変える"><span class="face"><svg class="ico t-day" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><svg class="ico t-dusk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18M6 17a6 6 0 0 1 12 0M12 5v3M4.6 9.6l2 1.6M19.4 9.6l-2 1.6M7 20.5h10"/></svg><svg class="ico t-night" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5z"/></svg></span></button>
-    <button class="cbtn" id="btnPause" type="button" aria-pressed="false" aria-label="町の動きを止める"><span class="face"><svg class="ico i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="ico i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg></span></button>
-  </div>
   <p class="hint" id="hint">建物にふれると、中がひらきます</p>
 </section>
 
@@ -362,73 +378,74 @@ html.capture body > *:not(#cap){display:none!important}
 <section class="sec guide" id="guide" aria-labelledby="gTitle">
   <div class="sec-in">
     <h2 id="gTitle">町の案内</h2>
-    <ol class="g-list">
-    <li class="g-item" id="g-hospital">
-      <img class="g-pic" src="img/b-hospital.webp" width="480" height="420" alt="" loading="lazy" decoding="async">
-      <h3>病院<span>いつもの職場</span></h3>
-      <p class="g-line">明日の業務を楽にする</p>
-      <ul class="g-tools"><li><a href="../../../keiji/index.html">掲示じたく</a><span>院内掲示を、選んで埋めるだけ</span></li><li><a href="../../../nidodema/index.html">二度手間さがし</a><span>部署の手作業を、減らせるものと守るものに分ける</span></li><li><a href="../../../yawagaeshi/index.html">やわ返</a><span>角の立たない返信案を、3つつくる</span></li></ul>
+    <p class="g-intro">町の建物ごとに、医療職のための道具と経営ゲームが置いてあります。<a class="all" href="../../../products/index.html">すべての道具を一覧で見る<span class="n">29</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+    <ol class="bands">
+    <li class="band" id="g-hospital">
+      <figure class="pair" data-wipe><img class="shut" src="img/shut-hospital.webp" width="1200" height="900" alt="" loading="lazy" decoding="async"><img class="open" src="img/cut-hospital.webp" width="1200" height="900" alt="病院の中。明日の業務を楽にするの道具が置かれている" loading="lazy" decoding="async"></figure>
+      <div class="b-text">
+        <h3>病院<span>いつもの職場</span></h3>
+        <p class="b-line">明日の業務を楽にする</p>
+        <ul class="b-tools"><li><a href="../../../keiji/index.html">掲示じたく</a><span class="d">院内掲示を、選んで埋めるだけ</span></li><li><a href="../../../nidodema/index.html">二度手間さがし</a><span class="d">部署の手作業を、減らせるものと守るものに分ける</span></li><li><a href="../../../yawagaeshi/index.html">やわ返</a><span class="d">角の立たない返信案を、3つつくる</span></li></ul>
+      </div>
     </li>
-    <li class="g-item" id="g-observatory">
-      <img class="g-pic" src="img/b-observatory.webp" width="480" height="420" alt="" loading="lazy" decoding="async">
-      <h3>展望台<span>キャリアの地図</span></h3>
-      <p class="g-line">キャリア・経験を整理する</p>
-      <ul class="g-tools"><li><a href="../../../compass/index.html">BRIDGE Compass</a><span>10の質問で、これまでの経験を別の言葉に翻訳する ・ 10の質問・約3分・登録不要</span></li><li><a href="../../../tanaoroshi/index.html">経験の棚卸し</a><span>18の質問で、職務経歴書のたねをつくる</span></li><li><a href="../../../iikae/index.html">現場のことば 言いかえ帳</a><span>現場のことばを、履歴書で通じる言葉に</span></li><li><a href="../../../moyamoya/index.html">職場モヤモヤ診断</a><span>職場の「なんとなくしんどい」を、10問で言葉に</span></li><li><a href="../../../karte/index.html">現場のカルテ</a><span>職場のしんどさを、カルテの形で読む</span></li><li><a href="../../../daily-app/index.html">キャリアログ</a><span class="chip">更新休止</span><span>日々の仕事と学びを記録して、キャリアの言葉に</span></li><li><a href="../../../growth-76a805/index.html">Growth OS</a><span>仕事の記録を、企画や発信のたねに</span></li></ul>
+    <li class="band r" id="g-observatory">
+      <figure class="pair" data-wipe><img class="shut" src="img/shut-observatory.webp" width="1200" height="900" alt="" loading="lazy" decoding="async"><img class="open" src="img/cut-observatory.webp" width="1200" height="900" alt="展望台の中。キャリア・経験を整理するの道具が置かれている" loading="lazy" decoding="async"></figure>
+      <div class="b-text">
+        <h3>展望台<span>キャリアの地図</span></h3>
+        <p class="b-line">キャリア・経験を整理する</p>
+        <ul class="b-tools"><li><a href="../../../compass/index.html">BRIDGE Compass</a><span class="d">10の質問で、これまでの経験を別の言葉に翻訳する ・ 10の質問・約3分・登録不要</span></li><li><a href="../../../tanaoroshi/index.html">経験の棚卸し</a><span class="d">18の質問で、職務経歴書のたねをつくる</span></li><li><a href="../../../iikae/index.html">現場のことば 言いかえ帳</a><span class="d">現場のことばを、履歴書で通じる言葉に</span></li></ul><details class="more"><summary>ほかの道具<span class="n">4</span></summary><ul class="b-tools"><li><a href="../../../moyamoya/index.html">職場モヤモヤ診断</a><span class="d">職場の「なんとなくしんどい」を、10問で言葉に</span></li><li><a href="../../../karte/index.html">現場のカルテ</a><span class="d">職場のしんどさを、カルテの形で読む</span></li><li><a href="../../../daily-app/index.html">キャリアログ</a><span class="chip">更新休止</span><span class="d">日々の仕事と学びを記録して、キャリアの言葉に</span></li><li><a href="../../../growth-76a805/index.html">Growth OS</a><span class="d">仕事の記録を、企画や発信のたねに</span></li></ul></details>
+      </div>
     </li>
-    <li class="g-item" id="g-clinic">
-      <img class="g-pic" src="img/b-clinic.webp" width="480" height="420" alt="" loading="lazy" decoding="async">
-      <h3>クリニック<span>経営を学ぶ</span></h3>
-      <p class="g-line">医療経営を学ぶ</p>
-      <ul class="g-tools"><li><a href="../../../clinic-flow-3d/index.html">クリニックタウン3D</a><span>クリニック経営を、1日ずつ動かして学ぶ</span></li><li><a href="../../../turnaround12/index.html">ターンアラウンド12</a><span>赤字クリニックを、12週で立て直す</span></li><li><a href="../../../pmi-quest/index.html">クリニックPMIクエスト</a><span>承継直後の30日を、10問で診断する</span></li></ul>
+    <li class="band" id="g-clinic">
+      <figure class="pair" data-wipe><img class="shut" src="img/shut-clinic.webp" width="1200" height="900" alt="" loading="lazy" decoding="async"><img class="open" src="img/cut-clinic.webp" width="1200" height="900" alt="クリニックの中。医療経営を学ぶの道具が置かれている" loading="lazy" decoding="async"></figure>
+      <div class="b-text">
+        <h3>クリニック<span>経営を学ぶ</span></h3>
+        <p class="b-line">医療経営を学ぶ</p>
+        <ul class="b-tools"><li><a href="../../../clinic-flow-3d/index.html">クリニックタウン3D</a><span class="d">クリニック経営を、1日ずつ動かして学ぶ</span></li><li><a href="../../../turnaround12/index.html">ターンアラウンド12</a><span class="d">赤字クリニックを、12週で立て直す</span></li><li><a href="../../../pmi-quest/index.html">クリニックPMIクエスト</a><span class="d">承継直後の30日を、10問で診断する</span></li></ul>
+      </div>
     </li>
-    <li class="g-item" id="g-office">
-      <img class="g-pic" src="img/b-office.webp" width="480" height="420" alt="" loading="lazy" decoding="async">
-      <h3>事務所<span>経営・管理</span></h3>
-      <p class="g-line">経営・管理の実務に使う</p>
-      <ul class="g-tools"><li><a href="../../../rehaboard/index.html">RehaBoard</a><span>リハ部門の運営を、1画面に ・ 紹介とデモ</span></li><li><a href="../../../medboard/index.html">MedBoard</a><span>外来の患者フローを、2施設で見比べる ・ 紹介とデモ</span></li><li><a href="../../../hire-board/index.html">HireBoard</a><span>医療機関の採用を、カンバンで追う ・ 紹介とデモ</span></li><li><a href="../../../interview-kit/index.html">面接官の手帖</a><span>面接の質問を用意し、事実と印象を分けて記録する</span></li><li><a href="../../../consult-simulator/index.html">ConsultSim</a><span>1診と2診で、待ち時間がどう変わるかを試す ・ 紹介とデモ</span></li><li><a href="../../../round-note/index.html">本部長の巡回手帖</a><span>複数施設の巡回を、1冊の手帖に</span></li><li><a href="../../../manager-starter/index.html">医療管理職スターター</a><span>初めて管理職になった人の、チェックリストと記入式シート</span></li><li><a href="../../../medops/index.html">医療管理実務ライブラリ</a><span>医療管理の実務手順と、無料テンプレート</span></li><li><a href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer">Reha Checklist<span class="sr">(別のサイト)</span></a><span>リハ部門KPIのチェックリスト(PDF・スプレッドシート) ・ 配布ページ(別のサイト)・メールアドレスの登録が必要</span></li></ul>
+    <li class="band r" id="g-office">
+      <figure class="pair" data-wipe><img class="shut" src="img/shut-office.webp" width="1200" height="900" alt="" loading="lazy" decoding="async"><img class="open" src="img/cut-office.webp" width="1200" height="900" alt="事務所の中。経営・管理の実務に使うの道具が置かれている" loading="lazy" decoding="async"></figure>
+      <div class="b-text">
+        <h3>事務所<span>経営・管理</span></h3>
+        <p class="b-line">経営・管理の実務に使う</p>
+        <ul class="b-tools"><li><a href="../../../rehaboard/index.html">RehaBoard</a><span class="d">リハ部門の運営を、1画面に ・ 紹介とデモ</span></li><li><a href="../../../medboard/index.html">MedBoard</a><span class="d">外来の患者フローを、2施設で見比べる ・ 紹介とデモ</span></li><li><a href="../../../hire-board/index.html">HireBoard</a><span class="d">医療機関の採用を、カンバンで追う ・ 紹介とデモ</span></li></ul><details class="more"><summary>ほかの道具<span class="n">6</span></summary><ul class="b-tools"><li><a href="../../../interview-kit/index.html">面接官の手帖</a><span class="d">面接の質問を用意し、事実と印象を分けて記録する</span></li><li><a href="../../../consult-simulator/index.html">ConsultSim</a><span class="d">1診と2診で、待ち時間がどう変わるかを試す ・ 紹介とデモ</span></li><li><a href="../../../round-note/index.html">本部長の巡回手帖</a><span class="d">複数施設の巡回を、1冊の手帖に</span></li><li><a href="../../../manager-starter/index.html">医療管理職スターター</a><span class="d">初めて管理職になった人の、チェックリストと記入式シート</span></li><li><a href="../../../medops/index.html">医療管理実務ライブラリ</a><span class="d">医療管理の実務手順と、無料テンプレート</span></li><li><a href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer">Reha Checklist<span class="sr">(別のサイト)</span></a><span class="d">リハ部門KPIのチェックリスト(PDF・スプレッドシート) ・ 配布ページ(別のサイト)・メールアドレスの登録が必要</span></li></ul></details>
+      </div>
     </li>
-    <li class="g-item" id="g-library">
-      <img class="g-pic" src="img/b-library.webp" width="480" height="420" alt="" loading="lazy" decoding="async">
-      <h3>図書館<span>学習</span></h3>
-      <p class="g-line">学習を続ける</p>
-      <ul class="g-tools"><li><a href="../../../him-quiz/index.html">HIM Quiz</a><span>診療情報管理士の模擬試験、全12章・360問</span></li><li><a href="../../../study-board/index.html">StudyBoard</a><span>複数科目の学習を、1枚のボードで続ける</span></li><li><a href="../../../english-trainer/index.html">Daily English</a><span>瞬間英作文を、通勤の合間に</span></li></ul>
+    <li class="band" id="g-library">
+      <figure class="pair" data-wipe><img class="shut" src="img/shut-library.webp" width="1200" height="900" alt="" loading="lazy" decoding="async"><img class="open" src="img/cut-library.webp" width="1200" height="900" alt="図書館の中。学習を続けるの道具が置かれている" loading="lazy" decoding="async"></figure>
+      <div class="b-text">
+        <h3>図書館<span>学習</span></h3>
+        <p class="b-line">学習を続ける</p>
+        <ul class="b-tools"><li><a href="../../../him-quiz/index.html">HIM Quiz</a><span class="d">診療情報管理士の模擬試験、全12章・360問</span></li><li><a href="../../../study-board/index.html">StudyBoard</a><span class="d">複数科目の学習を、1枚のボードで続ける</span></li><li><a href="../../../english-trainer/index.html">Daily English</a><span class="d">瞬間英作文を、通勤の合間に</span></li></ul>
+      </div>
     </li>
-    <li class="g-item" id="g-park">
-      <img class="g-pic" src="img/b-park.webp" width="480" height="420" alt="" loading="lazy" decoding="async">
-      <h3>公園<span>試す・作品</span></h3>
-      <p class="g-line">気軽に試す・作品を楽しむ</p>
-      <ul class="g-tools"><li><a href="../../../gokigen-gacha/index.html">ごきげん回復ガチャ</a><span>疲れた日の回復行動を、ひとつだけ</span></li><li><a href="../../../ittan-horyu/index.html">いったん保留</a><span>買う前に、少しだけ寝かせる</span></li><li><a href="../../../madoakari/index.html">窓あかり</a><span>小さな病院の一日を、ただ眺める</span></li><li><a href="../../../futatsume/index.html">ふたつめの波</a><span>二つの波が重なる、水面のパズル</span></li></ul>
-    </li>
-    <li class="g-item" id="g-atelier">
-      <img class="g-pic" src="img/b-atelier.webp" width="480" height="420" alt="" loading="lazy" decoding="async">
-      <h3>アトリエ<span>運営者</span></h3>
-      <p class="g-line">理学療法士の橋本渉が、ひとりで運営しています</p>
-      <ul class="g-tools"><li><a href="../../../about/index.html">運営者について</a><span>名前の由来と、これまでの歩み</span></li><li><a href="../../../community/index.html">話をする</a><span>共感も、異論も、相談も</span></li><li><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note<span class="sr">(別のサイト)</span></a><span>書いていること ・ 別のサイト</span></li></ul>
-    </li>
-    <li class="g-item" id="g-plaza">
-      <img class="g-pic" src="img/b-plaza.webp" width="480" height="420" alt="" loading="lazy" decoding="async">
-      <h3>広場<span>考え方</span></h3>
-      <p class="g-line">正解を与えるのではなく、選択肢を増やす</p>
-      <ul class="g-tools"><li><a href="../../../philosophy/index.html">考え方</a><span>BRIDGE が何を大切にしているか</span></li></ul>
+    <li class="band r" id="g-park">
+      <figure class="pair"><img class="open" src="img/cut-park.webp" width="1200" height="900" alt="公園の中。気軽に試す・作品を楽しむの道具が置かれている" loading="lazy" decoding="async"></figure>
+      <div class="b-text">
+        <h3>公園<span>試す・作品</span></h3>
+        <p class="b-line">気軽に試す・作品を楽しむ</p>
+        <ul class="b-tools"><li><a href="../../../gokigen-gacha/index.html">ごきげん回復ガチャ</a><span class="d">疲れた日の回復行動を、ひとつだけ</span></li><li><a href="../../../ittan-horyu/index.html">いったん保留</a><span class="d">買う前に、少しだけ寝かせる</span></li><li><a href="../../../madoakari/index.html">窓あかり</a><span class="d">小さな病院の一日を、ただ眺める</span></li></ul><details class="more"><summary>ほかの道具<span class="n">1</span></summary><ul class="b-tools"><li><a href="../../../futatsume/index.html">ふたつめの波</a><span class="d">二つの波が重なる、水面のパズル</span></li></ul></details>
+      </div>
     </li>
     </ol>
   </div>
 </section>
 
 <section class="sec maker" id="maker" aria-labelledby="mTitle">
-  <div class="sec-in">
-    <figure><img src="img/maker.webp" width="1200" height="900" alt="町はずれの煉瓦と木の小さなアトリエ。大きな窓の奥に作業机がある" loading="lazy" decoding="async"></figure>
-    <div>
+  <div class="band" id="g-atelier">
+    <figure class="pair" data-wipe><img class="shut" src="img/shut-atelier.webp" width="1200" height="900" alt="" loading="lazy" decoding="async"><img class="open" src="img/cut-atelier.webp" width="1200" height="900" alt="煉瓦と木のアトリエの中。作業机に一人" loading="lazy" decoding="async"></figure>
+    <div class="b-text">
       <h2 id="mTitle">運営者</h2>
-      <p>理学療法士の橋本渉が、ひとりで運営しています</p>
-      <a class="more" href="../../../about/index.html">運営者について<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <p class="b-line">理学療法士の橋本渉が、ひとりで運営しています</p>
+      <ul class="b-tools"><li><a href="../../../about/index.html">運営者について</a><span class="d">名前の由来と、これまでの歩み</span></li><li><a href="../../../community/index.html">話をする</a><span class="d">共感も、異論も、相談も</span></li><li><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note<span class="sr">(別のサイト)</span></a><span class="d">書いていること ・ 別のサイト</span></li></ul>
     </div>
   </div>
 </section>
 
 <section class="sec closing" id="closing" aria-labelledby="cTitle">
   <span class="stars" aria-hidden="true"></span>
-  <div class="sec-in">
+  <div class="sec-in" id="g-plaza">
     <figure class="night-town"><img src="img/town-night.webp" width="1600" height="1440" alt="夜の町。窓に灯りがともり、広場の二本の小道が藍と砂に灯っている" loading="lazy" decoding="async"></figure>
     <div>
       <h2 class="say" id="cTitle">正解を与えるのではなく、<br><em>選択肢を増やす</em></h2>
