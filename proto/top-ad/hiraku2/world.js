@@ -909,7 +909,6 @@ function people(world, dyn, rnd, B, plazaInfo, pathPts) {
   // 出来事の人(暦で出てくる)
   const toXZ = pts => pts.map(([s, f]) => SF(s, f));
   const COMMUTE = curveSF([[-1.5, 6.72], [-.9, 6.38], [-.28, 6.1], [0, 5.95], [0, 5.12], [-.06, 4.4], [.05, 3.0], [0, 1.6], [0, .32]], .08);
-  const BUS = curveSF([[.1, 4.5], [0, 5.12], [0, 5.95], [-.4, 6.25], [-1.25, 6.6]], .08);
   const LUNCH = curveSF([[0, .32], [-.8, .7], [-1.7, 1.05], [-2.3, 1.25]], .08);
   const ev = (k, o, extra = {}) => kinds.push(Object.assign({ k: 'ev', ev: k, o }, extra));
   ev('commute', 'scrubT', { pts: COMMUTE, d: 0 }); ev('commute', 'coat', { pts: COMMUTE, d: .9 });
@@ -918,8 +917,10 @@ function people(world, dyn, rnd, B, plazaInfo, pathPts) {
   ev('library', 'c3', { seated: true });
   ev('clinic', 'c6', { pts: pathPts.clinic });
   ev('gallery', 'c2');
-  ev('bus', 'c1', { pts: BUS, wait: SF(-1.55, 6.78) }); ev('bus', 'officeG', { pts: BUS, wait: SF(-2.05, 6.86), d: .7 });
-  ev('bus2', 'c4', { pts: BUS, wait: SF(-1.75, 6.95) });
+  // バスを待つ人: 道の内側の縁(車線にかからない所)。歩く道の終わりを、その人の待つ所にする(着いたときに跳ばない)
+  const BUSC = [[.1, 4.5], [0, 5.12], [0, 5.95], [-.4, 6.25], [-1.0, 6.5]], toWait = w => ({ pts: curveSF([...BUSC, w], .08), wait: SF(...w) });
+  ev('bus', 'c1', toWait([-1.32, 6.74])); ev('bus', 'officeG', Object.assign(toWait([-1.12, 6.56]), { d: .7 }));
+  ev('bus2', 'c4', toWait([-1.26, 6.4]));
   ev('night', 'scrubT', { pts: COMMUTE, d: 0 }); ev('night2', 'scrubI', { pts: COMMUTE, d: 0 });
   void toXZ;
   while (kinds.length > N) kinds.pop();
@@ -1088,7 +1089,8 @@ function vehicles(world, dyn, B) {
   // 車(3台・色違い。くすんだ色)
   const cg = new THREE.InstancedMesh(bakeGeo(carGroup('#FFFFFF')), vcMat({ r: .55 }), 3); cg.castShadow = true; cg.frustumCulled = false; world.add(cg);
   ['#E6E1D7', '#9AAA98', '#C2AE8E'].forEach((c, i) => cg.setColorAt(i, new THREE.Color(c)));
-  dyn.cars = { mesh: cg, list: [{ a: deg(10), sp: .085, lane: -1 }, { a: deg(190), sp: .07, lane: 1 }, { a: deg(300), sp: .09, lane: -1 }] };
+  // 車線: 外の車線はバスだけ(左回り)。車と自転車は内の車線を右回り(前の物には近づきすぎず、追い越さない)。最初の位置は、ひらいた建物の倒れた壁の範囲の外
+  dyn.cars = { mesh: cg, list: [{ a: deg(40), sp: .08, ph: 0, half: .33 }, { a: deg(200), sp: .08, ph: 2.1, half: .33 }, { a: deg(322), sp: .08, ph: 4.2, half: .33 }] };
   // 病院の白い車(青緑の線。赤十字は使わない)。環状の道から坂を上がって、救急口の庇の下に着く
   const hc = new THREE.Mesh(bakeGeo(carGroup('#F7F6F2', C.scrub)), vcMat({ r: .5 })); hc.castShadow = true; hc.userData.keep = true; hc.visible = false; world.add(hc);
   roadCrossings(B);
@@ -1100,10 +1102,21 @@ function vehicles(world, dyn, B) {
   const rd = new THREE.InstancedMesh(rider.body, new THREE.MeshStandardMaterial({ roughness: .85 }), 2), rh = new THREE.InstancedMesh(rider.head, new THREE.MeshStandardMaterial({ roughness: .8, vertexColors: true }), 2);
   for (const m of [rd, rh]) { m.castShadow = true; m.frustumCulled = false; world.add(m); }
   rd.setColorAt(0, new THREE.Color(CLOTH.c2)); rd.setColorAt(1, new THREE.Color(CLOTH.scrubT)); rh.setColorAt(0, new THREE.Color('#E0BB9B')); rh.setColorAt(1, new THREE.Color('#EECFB8'));
-  dyn.bikes = { mesh: bk, rd, rh, list: [{ a: deg(60), sp: .055 }, { a: deg(250), sp: -.05 }] };
+  dyn.bikes = { mesh: bk, rd, rh, list: [{ a: deg(66), sp: .08, ph: 1.3, half: .29 }, { a: deg(262), sp: .08, ph: 3.4, half: .29 }] };
 }
 const STOP_DWELL = 2.6, BUS_P = 2 * CYC, BUS_PH = 11.0;
+const LANE_OUT = ROAD_R + .14, LANE_IN = ROAD_R - .14, FALL_HALF = .26;   // FALL_HALF: ひらいた建物の倒れた壁の前で待つ角度
 const ROADX = {};
+/* 角度 a の乗り物(長さの半分 half、rad)が、どの建物の倒れた壁の範囲(ROADX ± FALL_HALF)にもかからない位置へ、進む向き dir にずらす。
+   止めた画像(ひらいた姿の絵も)と、立体の最初のこまで、乗り物が倒れた壁の上やひらいた建物の前に来ないように */
+function clearOfFalls(a, half, dir) {
+  for (let n = 0; n < 4; n++) {
+    let moved = false;
+    for (const id in ROADX) { const z = ROADX[id]; if (z === null) continue; const d = angDiff(a, z); if (Math.abs(d) < FALL_HALF + half) { a = z + dir * (FALL_HALF + half + .01); moved = true; } }
+    if (!moved) break;
+  }
+  return a;
+}
 function roadCrossings(B) {
   for (const id in B) {
     const b = B[id], bx = BOXES[id]; if (b.ex.fall !== 'hinge') continue;
@@ -1119,8 +1132,11 @@ export function placeVehicles(dyn, t, dt, blockedAng) {
   const y0 = .012;
   // バス: 外の車線を左回り。バス停の前でゆっくり止まって、また出る。ひらいた建物の倒れた壁の手前では待つ
   // 時刻表: BUS_P 秒で一周し、偶数の輪の ct = BUS_PH 秒に前のバス停(stops[0])に着く(夕方の乗る出来事と合わせる)。速さを少しだけ変えて合わせる
-  const bus = dyn.bus, R = ROAD_R + .14, S0 = dyn.stops[0], S1 = dyn.stops[1];
-  if (bus.init === undefined) { bus.init = true; const ph = ((((t - BUS_PH) / BUS_P) % 1) + 1) % 1; bus.a = S0 + .02 + TAU * ph * .985; }   // 初めは時刻表の位置から
+  const bus = dyn.bus, R = LANE_OUT, S0 = dyn.stops[0], S1 = dyn.stops[1];
+  if (bus.init === undefined) {   // 初めは時刻表の位置から(倒れた壁の範囲にかかれば、その先へ)。車と自転車も、最初の位置を範囲の外へ
+    bus.init = true; const ph = ((((t - BUS_PH) / BUS_P) % 1) + 1) % 1; bus.a = clearOfFalls(S0 + .02 + TAU * ph * .985, .6 / LANE_OUT, 1);
+    for (const c of [...dyn.cars.list, ...dyn.bikes.list]) c.a = clearOfFalls(c.a, c.half / LANE_IN, -1);
+  }
   const fw = (a, b) => ((b - a) % TAU + TAU) % TAU, d0 = fw(bus.a, S0), d1 = fw(bus.a, S1), over = 2.1 + (d1 > .004 && d1 < d0 ? STOP_DWELL + 6.2 : 0);
   let T = Math.floor((t - BUS_PH) / BUS_P) * BUS_P + BUS_PH; while (T <= t + .5) T += BUS_P;
   let need = d0 / Math.max(.5, T - t - over); while (need > .14) { T += BUS_P; need = d0 / Math.max(.5, T - t - over); }
@@ -1132,14 +1148,19 @@ export function placeVehicles(dyn, t, dt, blockedAng) {
   if (blockedAng !== null) { const d = angDiff(blockedAng - .26, bus.a); if (d > 0 && d < .3) want = Math.min(want, .11 * clamp01((d - .02) / .28)); }
   bus.v += (want - bus.v) * clamp01(dt * 2.2); bus.a += bus.v * dt;
   placeOnRing(bus.mesh, bus.a, R, y0, 1);
-  // 車
-  const cars = dyn.cars;
-  cars.list.forEach((c, i) => {
-    let sp = c.sp;
-    if (blockedAng !== null) { const d = c.lane < 0 ? angDiff(blockedAng - .26, c.a) : angDiff(c.a, blockedAng + .26); if (d > 0 && d < .3) sp *= clamp01((d - .02) / .28); }
-    c.v = (c.v ?? sp) + (sp - (c.v ?? sp)) * clamp01(dt * 2); c.a += c.v * dt * (c.lane < 0 ? 1 : -1);
-    const m = new THREE.Object3D(); placeOnRing(m, c.a, ROAD_R + (c.lane < 0 ? .14 : -.14), y0, c.lane < 0 ? 1 : -1); m.updateMatrix(); cars.mesh.setMatrixAt(i, m.matrix);
-  });
+  // 内の車線(右回り): 車と自転車。速さは同じ(ゆっくり少し揺らぐ)。倒れた壁の手前では待ち、前の物(車でも自転車でも)に近づくと止まる
+  const cars = dyn.cars, bk = dyn.bikes, lane = [...cars.list, ...bk.list];
+  for (const c of lane) {
+    let sp = c.sp * (1 + .08 * Math.sin(t * .23 + c.ph));
+    if (blockedAng !== null) { const d = angDiff(c.a, blockedAng + FALL_HALF); if (d > 0 && d < .3) sp *= clamp01((d - .02) / .28); }
+    let gap = Infinity, ah = 0; for (const o of lane) if (o !== c) { const d = ((c.a - o.a) % TAU + TAU) % TAU; if (d < gap) { gap = d; ah = o.half; } }
+    const gl = gap * LANE_IN - c.half - ah;   // 前の物までのすき間(町の単位)
+    sp = Math.min(sp, Math.max(0, gl - .14) / (1.1 * LANE_IN));
+    c.v = (c.v ?? sp) + (sp - (c.v ?? sp)) * clamp01(dt * 2);
+    if (dt > 0) c.v = Math.min(c.v, Math.max(0, gl - .05) / LANE_IN / dt);   // どんなにこまが飛んでも、前の物に重ならない
+    c.a -= c.v * dt;
+  }
+  cars.list.forEach((c, i) => { const m = new THREE.Object3D(); placeOnRing(m, c.a, LANE_IN, y0, -1); m.updateMatrix(); cars.mesh.setMatrixAt(i, m.matrix); });
   cars.mesh.instanceMatrix.needsUpdate = true;
   // 病院の車: 環状の道から坂を上がり、救急口に着いて止まり、また出る(30秒でひとまわり)
   const hc = dyn.hcar, u = evU('ambulance', t), pts = hc.pts;
@@ -1151,11 +1172,9 @@ export function placeVehicles(dyn, t, dt, blockedAng) {
     hc.mesh.rotation.set(0, a - Math.PI / 2 + (back ? Math.PI : 0), back ? -slope : slope, 'YXZ');
     hc.mesh.visible = true;
   } else hc.mesh.visible = false;
-  // 自転車(内の道のわき)
-  const bk = dyn.bikes;
+  // 自転車(内の車線の内側の寄り。動きは上の車線の計算で)
   bk.list.forEach((b, i) => {
-    b.a += b.sp * dt;
-    const m = new THREE.Object3D(); placeOnRing(m, b.a, ROAD_R - ROAD_W / 2 + .08, y0, Math.sign(b.sp)); m.updateMatrix(); bk.mesh.setMatrixAt(i, m.matrix);
+    const m = new THREE.Object3D(); placeOnRing(m, b.a, LANE_IN - .04, y0, -1); m.updateMatrix(); bk.mesh.setMatrixAt(i, m.matrix);
     m.position.y += .14; m.updateMatrix(); bk.rd.setMatrixAt(i, m.matrix); bk.rh.setMatrixAt(i, m.matrix);
   });
   bk.mesh.instanceMatrix.needsUpdate = bk.rd.instanceMatrix.needsUpdate = bk.rh.instanceMatrix.needsUpdate = true;

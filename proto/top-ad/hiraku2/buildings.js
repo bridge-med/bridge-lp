@@ -372,8 +372,6 @@ function library() {
   const winO = { flicker: true, mode: 3, glow: 5, frame: C.column };
   grid(g, 'left', W, D, h * .5, 3, 1, .5, 0, .2, .8, winO); grid(g, 'right', W, D, h * .5, 3, 1, .5, 0, .2, .8, winO);
   grid(g, 'back', W, D, h * .5, 4, 1, .5, 0, .2, .8, winO);
-  // 石の帯(上の縁)
-  g.add(at(cbox(W + .06, .08, D + .02, col, .012), 0, h - .04, -.01));
   // 正面: 柱廊(4本の柱・梁・破風)と扉。前の壁と一緒に倒れる
   fw.add(at(box(.5, .9, .03, M(C.wood)), 0, .45, F + .012));
   fw.add(at(cbox(.62, .06, .06, col, .01), 0, .93, F + .03));
@@ -383,6 +381,8 @@ function library() {
   const ped = gable(W + .04, .42, .44, col); ped.position.set(0, h - .02, F + .24); fw.add(ped);
   // 屋根と緑青のドーム
   const rf = roofGroup(g);
+  // 石の帯(上の縁)。壁の上を蓋のように覆う箱なので、屋根の部品にする(ひらくと屋根と一緒に抜ける。残すと、中の上の半分をふさぐ)
+  rf.add(at(cbox(W + .06, .08, D + .02, col, .012), 0, h - .04, -.01));
   rf.add(at(cbox(W + .1, .12, D + .1, M(C.stone2), .02), 0, h + .06 + E, 0));
   rf.add(at(cyl(.56, .6, .3, col, 28), 0, h + .27, -.1));
   for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; rf.add(at(box(.04, .26, .04, M(C.stone2)), Math.sin(a) * .585, h + .27, -.1 + Math.cos(a) * .585)); }
