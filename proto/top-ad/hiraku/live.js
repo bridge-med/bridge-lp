@@ -134,10 +134,17 @@ export function live(o) {
   /* ---- 状態 ---- */
   const rot = new Spring(0, 7.5, 1), camX = new Spring(0, 7.5, 1), camY = new Spring(0, 7.5, 1), camZ = new Spring(0, 7.5, 1), elev = new Spring(ELEV, 7, 1);
   const dim = new Spring(0, 8, 1), lift = new Spring(0, 24, .55), hiAmt = new Spring(0, 11, 1), tod = new Spring(o.tod || 0, 4.2, 1), inLight = new Spring(0, 7, 1);
-  const slot = () => ({ id: null, wall: new Spring(0, 11, .5), roof: new Spring(0, 5.5, 1), end: 0, kind: 'hinge', t0: 0, steps: [] });
+  const nearK = new Spring(0, 6, 1);   // 道具に寄るとき、手前の物(人・机・上の階の床)を切り落とす面を、画面の少し手前まで進める
+  const slot = () => ({ id: null, wall: new Spring(0, 11, .5), roof: new Spring(0, 6, 1), roofT0: -1, end: 0, kind: 'hinge', t0: 0, steps: [] });
   let A = slot(), Bk = slot();
   let base = null, paused = false, running = false, visible = true, t = 0, last = clock(), lastInput = 0, dirty = true, frameN = 0;
-  let hover = null, liftId = null, invite = null, preRot = 0, dragOff = new Spring(0, 9, 1), openCam = null, curStation = null;
+  let hover = null, liftId = null, invite = null, preRot = 0, dragOff = new Spring(0, 9, 1), openCam = null, curStation = null, findSid = null, findC = null, turnTok = 0;
+  /* 後で一度だけ動かす段取り(時計の時刻で) */
+  const later = [];
+  function after(ms, f) { later.push({ at: clock() + ms, f }); later.sort((a, b) => a.at - b.at); }
+  /* 遠い建物ほど、島をゆっくり回す(回す角度に応じて、ばねを柔らかく) */
+  const turnW = a => a > .87 ? clamp(7.5 * Math.pow(.87 / a, .9), 3, 7.5) : 7.5;
+  function easeTurn(ms) { const tok = ++turnTok; rot.w = turnW(Math.abs(rot.t - rot.x)); after(ms, () => { if (tok === turnTok) rot.w = 7.5; }); }
   const interiors = {};
   let inK = 1;
   tod.set(o.tod || 0);
@@ -149,10 +156,13 @@ export function live(o) {
     const k = (CAPF.right - CAPF.left) / br.width, left = CAPF.left - (br.left - sr.left) * k, top = CAPF.top + (br.top - sr.top) * k;
     return { x: left + W * k / 2, y: top - H * k / 2, ppu: 1 / k };
   }
+  const nv = new THREE.Vector3();
   function setCamera() {
     aimCamera(camera, origin, elev.x);
     const ppu = Math.exp(camZ.x);
     camera.left = camX.x - W / 2 / ppu; camera.right = camX.x + W / 2 / ppu; camera.top = camY.x + H / 2 / ppu; camera.bottom = camY.x - H / 2 / ppu;
+    camera.near = .1;
+    if (findC && nearK.x > .001) { const fd = -nv.copy(findC).applyAxisAngle(Y, rot.x).applyMatrix4(camera.matrixWorldInverse).z; camera.near = .1 + Math.max(0, fd - .3) * clamp01(nearK.x); }
     camera.updateProjectionMatrix();
   }
   function resize() {
@@ -182,16 +192,50 @@ export function live(o) {
     return { rot: r, elev: el, x: bx - (scx - W / 2) / ppu, y: by + (scy - H / 2) / ppu, ppu };
   }
   function nearestRot(cur, target) { let d = ((target - cur) % TAU + TAU) % TAU; if (d > Math.PI) d -= TAU; return cur + d; }
+  /* 道具を見つける: その物の画面(中の形の、物ごとの板)が、見える範囲の約3割を占めるまで寄る */
+  function screenQuad(it, st) {
+    const sc = it.group.children.find(m => m.isMesh && !m.isInstancedMesh && m.material && m.material.map);
+    const P = sc && sc.geometry.attributes.position, i0 = st.index * 6;
+    if (!P || i0 + 6 > P.count) return null;
+    S.world.updateMatrixWorld(true);
+    const toIsland = new THREE.Matrix4().copy(S.world.matrixWorld).invert().multiply(sc.matrixWorld);
+    const vs = []; for (let i = 0; i < 6; i++) vs.push(new THREE.Vector3().fromBufferAttribute(P, i0 + i).applyMatrix4(toIsland));
+    const pts = vs.filter((v, i) => vs.findIndex(q => q.distanceToSquared(v) < 1e-10) === i);
+    const n = new THREE.Vector3().subVectors(vs[1], vs[0]).cross(new THREE.Vector3().subVectors(vs[2], vs[0])).normalize();
+    const c = pts.reduce((a, v) => a.add(v), new THREE.Vector3()).multiplyScalar(1 / pts.length);
+    return { pts, n, c };
+  }
+  function findFrame(sid) {
+    const it = A.id && interiors[A.id], st = it && it.stations.find(s => s.id === sid);
+    const q = st && screenQuad(it, st); if (!q) return null;
+    const bf = frameFor(A.id);
+    // 画面がこちらを向くまで島を回す。立てた画面はほぼ正面から、上を向いた画面は上から見る。
+    // 手前の物(人・机・壁・上の階の床)は、カメラの手前の面で切り落とす(setCamera の near)ので、見下ろさなくてよい
+    findC = q.c;
+    aimCamera(tmpCam, origin, bf.elev);
+    const phC = Math.atan2(tmpCam.position.x - origin.x, tmpCam.position.z - origin.z), hz = Math.hypot(q.n.x, q.n.z);
+    let r = bf.rot;
+    if (hz > .3) { let d = phC - Math.atan2(q.n.x, q.n.z) - bf.rot; d = Math.atan2(Math.sin(d), Math.cos(d)); r = bf.rot + d; }
+    const el = clamp(Math.asin(clamp(q.n.y, -1, 1)) + deg(5), deg(9), deg(60));
+    aimCamera(tmpCam, origin, el);
+    const m = new THREE.Matrix4().makeRotationY(r);
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const p of q.pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+    const sf = o.safe(), sw = sf.r - sf.l, shh = sf.b - sf.t, w = Math.max(1e-3, x1 - x0), h = Math.max(1e-3, y1 - y0);
+    const ppu = Math.min(Math.sqrt(.3 * sw * shh / (w * h)), sw * .8 / w, shh * .66 / h, base.ppu * 40);
+    const bx = (x0 + x1) / 2, by = (y0 + y1) / 2, scx = (sf.l + sf.r) / 2, scy = (sf.t + sf.b) / 2;
+    return { rot: r, elev: el, x: bx - (scx - W / 2) / ppu, y: by + (scy - H / 2) / ppu, ppu };
+  }
   function retarget() {
     if (!A.id) { rot.t = preRot; camX.t = base.x; camY.t = base.y; camZ.t = Math.log(base.ppu); elev.t = ELEV; return; }
-    openCam = frameFor(A.id);
+    openCam = (findSid && findFrame(findSid)) || frameFor(A.id);
     rot.t = openCam.rot + dragOff.x; elev.t = openCam.elev; camX.t = openCam.x; camY.t = openCam.y; camZ.t = Math.log(openCam.ppu);
   }
 
   /* ---- 中の形(初めてひらいたときに作る)。画面のテクスチャも、そのとき読む ---- */
   const texLoader = new THREE.TextureLoader(), texCache = new Map();
   const ctx = {
-    palette: PALETTE, quality: small ? 'low' : 'high',
+    palette: PALETTE, quality: 'high',   // 寄ったときに何の画面か読めるよう、スマホでも画面の画像は細かく
     loadTexture(url) {
       if (!texCache.has(url)) texCache.set(url, texLoader.loadAsync(url).then(tx => { tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 4; dirty = true; kick(); return tx; }));
       return texCache.get(url);
@@ -225,7 +269,7 @@ export function live(o) {
     A.kind = id === 'plaza' || id === 'park' ? 'none' : BOXES[id].shape === 'tower' ? 'spin' : 'hinge';
     if (A.kind === 'hinge') { const b = S.B[id]; A.end = Math.PI / 2 + Math.asin(clamp((b.ex.y0 + .01) / BOXES[id].h, 0, .4)); }
     if (A.kind === 'spin') A.end = Math.PI;
-    dragOff.set(0);
+    dragOff.set(0); findSid = null; nearK.t = 0;
     U.uOpenA.value = LAYOUT[id].bid; U.uFocus.value = LAYOUT[id].bid; dim.t = .34;
     liftId = id; lift.t = 0;           // 乗せたときの浮き(.07)は戻す。中の形は浮かないので、外と中がずれないように
     lift.v = -.85;                     // 押した手応え
@@ -233,12 +277,16 @@ export function live(o) {
     interiorOf(id);
     const it = interiors[id];
     if (it) it.group.visible = true;
-    retarget();
     const reduce = o.reduce && o.reduce();
-    const at = ms => reduce ? 0 : ms;
+    openCam = frameFor(id); rot.t = openCam.rot;
+    const turn = Math.abs(rot.t - rot.x), wait = reduce || turn <= .87 ? 0 : Math.round((turn - .87) / turnW(turn) * 900);
+    easeTurn(wait + 1100);
+    if (wait) { camX.t = base.x; camY.t = base.y; camZ.t = Math.log(base.ppu); elev.t = ELEV; after(wait, () => { if (A.id === id) retarget(); }); }   // 回る間は町ぜんたいを見せる
+    else retarget();
+    const at = ms => reduce ? 0 : ms + wait;
     A.steps = [
+      ...(reduce ? [] : [{ t: at(230), f: () => { A.roofT0 = clock(); } }]),
       { t: at(330), f: () => { A.wall.t = A.end; } },
-      { t: at(420), f: () => { A.roof.t = 1; } },
       { t: at(520), f: () => { inLight.t = 1; } },
       ...stationSeq(id, at(700), reduce),
       { t: at(1150), f: () => { o.onOpened && o.onOpened(id); } }
@@ -250,16 +298,16 @@ export function live(o) {
     const it = interiors[id]; if (!it || !it.stations.length) return [];
     return [
       { t: t0, f: () => { if (it.reveal) it.reveal(); else it.stations.forEach(s => s.setActive(false)); } },
-      { t: t0 + (reduce ? 0 : it.stations.length * 60 + 320), f: () => setActive(it.stations[0].id) }
+      { t: t0 + (reduce ? 0 : it.stations.length * 60 + 320), f: () => setActive(findSid || it.stations[0].id) }
     ];
   }
-  function closeSlot(s) { s.wall.t = 0; s.roof.t = 0; s.steps = []; s.closing = true; const it = interiors[s.id]; if (it) for (const st of it.stations) { st.setActive(false); st.setHover(false); } }
+  function closeSlot(s) { s.wall.t = 0; s.roof.t = 0; s.roofT0 = -1; s.steps = []; s.closing = true; const it = interiors[s.id]; if (it) for (const st of it.stations) { st.setActive(false); st.setHover(false); } }
   function close() {
     lastInput = clock();
     if (!A.id) return;
     closeSlot(A); Bk = A; A = slot();
-    U.uOpenA.value = -1; U.uFocus.value = Bk.id ? LAYOUT[Bk.id].bid : -1; dim.t = 0; inLight.t = 0; curStation = null; dragOff.set(0);
-    retarget();
+    U.uOpenA.value = -1; U.uFocus.value = Bk.id ? LAYOUT[Bk.id].bid : -1; dim.t = 0; inLight.t = 0; curStation = null; dragOff.set(0); findSid = null; nearK.t = 0;
+    retarget(); easeTurn(1400);
     if (o.reduce && o.reduce()) { Bk.wall.set(0); Bk.roof.set(0); for (const s of [rot, camX, camY, camZ, elev, dim]) s.set(s.t); }
     kick();
   }
@@ -267,6 +315,16 @@ export function live(o) {
     const it = A.id && interiors[A.id]; if (!it) return;
     for (const s of it.stations) s.setActive(s.id === sid);
     curStation = sid; dirty = true; kick();
+  }
+  function find(sid) {
+    if (!A.id) return;
+    sid = sid || null; if (sid === findSid) return;
+    findSid = sid; lastInput = clock();
+    if (sid) { findC = null; setActive(sid); }
+    retarget(); nearK.t = sid && findC ? 1 : 0; easeTurn(1200);
+    if (o.reduce && o.reduce()) for (const s of [rot, camX, camY, camZ, elev, nearK]) s.set(s.t);
+    else if (sid) after(450, () => { if (findSid === sid) retarget(); });   // 物が持ち上がりきった位置で、もう一度合わせる
+    kick();
   }
   function stationHover(sid) {
     const it = A.id && interiors[A.id]; if (!it) return;
@@ -285,14 +343,13 @@ export function live(o) {
     const z = b.d / 2 + E + WALL;
     return out.makeTranslation(0, 0, z).multiply(tmpM.makeRotationX(s.wall.x)).multiply(new THREE.Matrix4().makeTranslation(0, 0, -z));
   }
-  function roofLocal(s, out) { const k = s.roof.x; return out.makeTranslation(0, k * (s.id === 'observatory' ? 2.6 : 2.2), 0); }
-  const roofCut = k => 1 - clamp01((k - .12) / .4);
+  function roofLocal(s, out) { return out.makeTranslation(0, s.roof.x * 7, 0); }
   function slotMats(s, iF, iR, idU, cutU) {
     if (!s.id || s.kind === 'none') { U[idU].value = s.id && s.kind === 'none' ? -1 : -1; U[cutU].value = 1; U.uPM.value[iF].identity(); U.uPM.value[iR].identity(); return; }
     bldM(s.id);
     U.uPM.value[iF].copy(tb).multiply(wallLocal(s, lm)).multiply(tbi);
     U.uPM.value[iR].copy(tb).multiply(roofLocal(s, lm)).multiply(tbi);
-    U[idU].value = LAYOUT[s.id].bid; U[cutU].value = roofCut(s.roof.x);
+    U[idU].value = LAYOUT[s.id].bid; U[cutU].value = !s.closing && s.roof.x > .999 ? 0 : 1;
   }
   function signMats() {
     for (const sg of S.signs) {
@@ -399,7 +456,7 @@ export function live(o) {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(); });
 
   /* ---- 1こま ---- */
-  const springs = [rot, camX, camY, camZ, elev, dim, lift, hiAmt, tod, inLight, dragOff];
+  const springs = [rot, camX, camY, camZ, elev, dim, lift, hiAmt, tod, inLight, dragOff, nearK];
   function kick() { if (manual) { dirty = true; return; } if (!running) { running = true; last = clock(); requestAnimationFrame(loop); } }
   function loop(now) { frame(now); }
   function frame(now, force) {
@@ -409,11 +466,14 @@ export function live(o) {
     if (!down && !A.id && Math.abs(inertia) > .002) { rot.x += inertia * dt; rot.t = rot.x; inertia *= Math.pow(.05, dt); }
     if (A.id) rot.t = (openCam ? openCam.rot : rot.t) + dragOff.x;
     // 段取り
+    while (later.length && later[0].at <= now) later.shift().f();
     for (const s of [A, Bk]) if (s.id && s.steps.length) { const el = now - s.t0; while (s.steps.length && s.steps[0].t <= el) s.steps.shift().f(); }
     // ばね
     for (const s of springs) s.step(dt);
     for (const s of [A, Bk]) if (s.id) {
-      s.wall.step(dt); s.roof.step(dt);
+      s.wall.step(dt);
+      if (!s.closing && s.roofT0 >= 0) { const u = clamp01((now - s.roofT0) / 480); s.roof.set(u * u); if (u >= 1) s.roofT0 = -1; }   // 持ち上がり、加速して上へ抜ける
+      else s.roof.step(dt);
       if (s.kind === 'hinge' && !s.closing && s.wall.x > s.end) { s.wall.x = s.end; if (s.wall.v > 0) s.wall.v = -s.wall.v * .3; }
       if (s.closing && s.wall.x < 0) { s.wall.x = 0; s.wall.v = 0; }
     }
@@ -449,7 +509,7 @@ export function live(o) {
     for (const id in interiors) { const it = interiors[id]; if (it && it.group.visible) it.update(dt, t, tod.x < .5 ? 'day' : tod.x < 1.5 ? 'dusk' : 'night'); }
     S.world.rotation.y = rot.x;
     setCamera();
-    const active = springs.some(s => s.moving) || [A, Bk].some(s => s.id && (s.wall.moving || s.roof.moving || s.steps.length)) || down || Math.abs(inertia) > .002 || invite;
+    const active = springs.some(s => s.moving) || [A, Bk].some(s => s.id && (s.wall.moving || s.roof.moving || s.steps.length || s.roofT0 >= 0)) || later.length || down || Math.abs(inertia) > .002 || invite;
     const idle = !active && now - lastInput > 1600;
     // 操作していないときは 30fps
     if (manual && !force) return;
@@ -490,7 +550,8 @@ export function live(o) {
   kick();
   modP.then(() => {});
   return {
-    open, close, setActive, stationHover, info, renderer,
+    open, close, setActive, stationHover, find, info, renderer,
+    get findId() { return findSid; },
     hover(id) { setHover(id); },
     press(id) { liftId = id; lift.v = -.85; kick(); },
     invite: doInvite,

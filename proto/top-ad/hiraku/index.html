@@ -151,16 +151,20 @@ html:not(.js) .hit{outline:0}
 .p-still{margin:4px 12px 14px;border-radius:10px;overflow:hidden;background:#E9E3D8}
 .p-still img{width:100%;height:auto}
 .p-tools li + li{border-top:1px solid var(--line)}
-.ptool{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 14px;padding:13px 12px;border-radius:10px;text-decoration:none;color:inherit;transition:background-color .15s}
-.ptool b{font-size:15.5px;letter-spacing:.02em}
-.ptool .t{grid-column:1;font-size:12.5px;line-height:1.6;color:var(--ink-2)}
-.ptool .n{grid-column:1;font-size:11.5px;color:var(--ink-3)}
-.ptool .go{grid-column:2;grid-row:1 / span 3;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--indigo);white-space:nowrap}
-.ptool .go .ico{width:15px;height:15px;transition:transform .15s}
-.ptool .chip{display:inline-block;margin-left:8px;padding:2px 7px;border-radius:4px;background:var(--paper-2);font-size:11px;font-weight:700;color:var(--ink-3);vertical-align:2px}
-.ptool:hover,.ptool.on{background:#fff;box-shadow:0 0 0 1px var(--line)}
-.ptool:hover .go .ico,.ptool.on .go .ico{transform:translateX(3px)}
-.ptool.on{box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--mk,#999)}
+/* 行: 本体は「中で見る」(その物に寄る)、右の「開く」は道具へ */
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;border-radius:10px;transition:background-color .15s,box-shadow .15s}
+.pfind{display:grid;gap:4px;width:100%;min-height:44px;padding:13px 6px 13px 12px;border-radius:10px;text-align:left;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pfind b{font-size:15.5px;letter-spacing:.02em}
+.pfind .t{font-size:12.5px;line-height:1.6;color:var(--ink-2)}
+.pfind .n{font-size:11.5px;color:var(--ink-3)}
+.prow .go{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-right:4px;padding:0 10px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--indigo);white-space:nowrap;text-decoration:none;-webkit-tap-highlight-color:transparent}
+@media (hover:hover){a.go:hover{background:var(--paper-2)}}
+.prow .go .ico{width:15px;height:15px;transition:transform .15s}
+@media (hover:hover){.prow .go:hover .ico,.prow a.pfind:hover + .go .ico{transform:translateX(3px)}}
+.prow .chip{display:inline-block;margin-left:8px;padding:2px 7px;border-radius:4px;background:var(--paper-2);font-size:11px;font-weight:700;color:var(--ink-3);vertical-align:2px}
+.prow.on{background:#fff;box-shadow:0 0 0 1px var(--line)}
+@media (hover:hover){.prow:hover{background:#fff;box-shadow:0 0 0 1px var(--line)}}
+.prow.on{box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--mk,#999)}
 .p-grab{display:none}
 
 /* ================= 下の節(短く) ================= */
@@ -232,7 +236,7 @@ html:not(.js) .hit{outline:0}
   .nav{display:none}
   .menu{display:inline-flex}
   .copy{left:var(--pad);right:var(--pad);top:calc(64px + env(safe-area-inset-top,0px))}
-  .still{width:min(138vw,calc((100svh - 360px) * 1.111));top:calc(154px + env(safe-area-inset-top,0px))}
+  .still{width:min(132vw,calc((100svh - 360px) * 1.111));top:calc(162px + env(safe-area-inset-top,0px));transform:translateX(-48.5%)}
   .cta-wrap{left:var(--pad);right:var(--pad);bottom:calc(18px + env(safe-area-inset-bottom,0px))}
   .ctrl{right:calc(var(--pad) - 6px);bottom:calc(112px + env(safe-area-inset-bottom,0px))}
   .hint{left:var(--pad);right:var(--pad);bottom:calc(122px + env(safe-area-inset-bottom,0px));padding-right:96px;text-align:left}

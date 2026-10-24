@@ -114,42 +114,81 @@ function boot() {
     a.addEventListener('mouseenter', () => { if (ctl || openId) return; showTag(id, true, true); });
     a.addEventListener('mouseleave', () => { if (ctl || openId) return; showTag(null); });
   }
+  /* パネルの行: 本体は「中で見る」ボタン(その物に寄る)、右の「開く」は道具へのリンク。広場(考え方)は中がないので、行ぜんたいがリンク */
+  const GO = '開く<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  const mouseHover = matchMedia('(hover: hover) and (pointer: fine)');
   function fillPanel(id) {
-    const b = BY_ID[id];
+    const b = BY_ID[id], inside = id !== 'plaza';
     panel.style.setProperty('--mk', b.mark);
     pRole.textContent = b.role; pTitle.textContent = b.name; pLine.textContent = b.line;
-    pTools.innerHTML = '';
+    pTools.innerHTML = ''; defSid = b.tools[0]; pinSid = hovSid = focSid = null;
     for (const tid of b.tools) {
-      const t = TOOLS[tid], li = document.createElement('li'), a = document.createElement('a');
-      a.className = 'ptool'; a.href = t.href; a.dataset.sid = tid;
-      if (t.ext) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+      const t = TOOLS[tid], li = document.createElement('li'); li.className = 'prow'; li.dataset.sid = tid;
+      const body = document.createElement(inside ? 'button' : 'a'); body.className = 'pfind';
       const nb = document.createElement('b'); nb.textContent = t.name;
       if (t.status) { const c = document.createElement('span'); c.className = 'chip'; c.textContent = t.status; nb.append(c); }
       const tt = document.createElement('span'); tt.className = 't'; tt.textContent = t.t;
-      a.append(nb, tt);
-      if (t.note || t.ext) { const n = document.createElement('span'); n.className = 'n'; n.textContent = t.note || '別のサイト'; a.append(n); }
-      const go = document.createElement('span'); go.className = 'go'; go.innerHTML = '開く<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
-      a.append(go);
-      a.addEventListener('mouseenter', () => rowHover(tid, true)); a.addEventListener('mouseleave', () => rowHover(tid, false));
-      a.addEventListener('focus', () => rowHover(tid, true)); a.addEventListener('blur', () => rowHover(tid, false));
-      li.append(a); pTools.append(li);
+      body.append(nb, tt);
+      if (t.note || t.ext) { const n = document.createElement('span'); n.className = 'n'; n.textContent = t.note || '別のサイト'; body.append(n); }
+      const go = document.createElement(inside ? 'a' : 'span'); go.className = 'go'; go.innerHTML = GO;
+      const link = inside ? go : body;
+      link.href = t.href; if (t.ext) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
+      if (inside) {
+        body.type = 'button'; body.setAttribute('aria-label', t.name + 'を中で見る'); body.setAttribute('aria-pressed', 'false');
+        go.setAttribute('aria-label', t.name + 'を開く' + (t.ext ? '(別のサイト)' : ''));
+        body.addEventListener('click', () => rowPick(tid));
+        li.addEventListener('mouseenter', () => rowEnter(tid));
+        for (const el of [body, go]) el.addEventListener('focus', () => { if (el.matches(':focus-visible')) { focSid = tid; applyFind(); } });
+      }
+      li.append(body, go); pTools.append(li);
     }
     // 動かないとき: その建物の断面の止めた画像
     const showStill = !ctl;
     pStill.hidden = !showStill;
-    if (showStill) { const im = pStill.querySelector('img'); im.src = 'img/cut-' + id + '.webp'; im.alt = b.name + 'の中。' + b.line + 'の道具が置かれている'; im.onerror = () => { im.onerror = null; im.src = 'img/b-' + id + '.webp'; }; }
-    markRow(b.tools[0]);
+    if (showStill) stillShot(null);
+    markRow(defSid);
   }
-  function markRow(sid) { for (const a of $$('.ptool', pTools)) a.classList.toggle('on', a.dataset.sid === sid); }
-  function rowHover(sid, on) {
-    if (on) { markRow(sid); if (ctl) ctl.stationHover(sid); requestAnimationFrame(() => showSTag(sid)); }
-    else { if (ctl) ctl.stationHover(null); showSTag(null); }
+  function markRow(sid) { for (const li of $$('.prow', pTools)) li.classList.toggle('on', li.dataset.sid === sid); }
+
+  /* ---------- 道具を見つける: 行(PC は乗せる・Tab、スマホは行を押す)か中の物を押すと、その物に寄る。外すと建物ぜんたいに戻る ---------- */
+  let defSid = null, pinSid = null, hovSid = null, focSid = null, hovT = 0;
+  /* パネルが出た直後、止まっているマウスの下に来た行では寄らない(マウスを実際に動かしてから) */
+  let mouseXY = [-1, -1], armXY = null;
+  addEventListener('mousemove', e => { mouseXY = [e.clientX, e.clientY]; }, { passive: true });
+  pTools.addEventListener('mousemove', e => { if (armXY && Math.hypot(e.clientX - armXY[0], e.clientY - armXY[1]) > 4) { armXY = null; const li = e.target.closest('.prow'); if (li) rowEnter(li.dataset.sid); } });
+  const findNow = () => hovSid || focSid || pinSid;
+  function applyFind() {
+    const sid = findNow();
+    markRow(sid || defSid);
+    for (const li of $$('.prow', pTools)) { const bt = li.querySelector('button.pfind'); if (bt) bt.setAttribute('aria-pressed', String(li.dataset.sid === pinSid)); }
+    if (ctl) { ctl.find(sid); ctl.stationHover(sid); showSTag(null); }   // 寄っているときは、画面そのものが答え(名前の札は出さない)
+    else stillShot(sid);
+  }
+  function clearFind() { clearTimeout(hovT); pinSid = hovSid = focSid = null; }
+  function rowEnter(sid) {
+    if (!mouseHover.matches || armXY) return;
+    markRow(sid); if (ctl) ctl.stationHover(sid);
+    clearTimeout(hovT); hovT = setTimeout(() => { hovSid = sid; applyFind(); }, 110);   // 行の上を通り過ぎただけでは動かさない
+  }
+  pTools.addEventListener('mouseleave', () => { if (!mouseHover.matches) return; clearTimeout(hovT); hovT = setTimeout(() => { hovSid = null; applyFind(); }, 220); });
+  pTools.addEventListener('focusout', e => { if (focSid && !pTools.contains(e.relatedTarget)) { focSid = null; applyFind(); } });
+  function rowPick(sid) {
+    const go = () => { pinSid = pinSid === sid ? null : sid; if (!pinSid && hovSid === sid) hovSid = null; applyFind(); };
+    // スマホでシートを広げているときは、物が見える高さに戻してから寄る
+    if (phone() && panel.classList.contains('full')) { panel.classList.remove('full'); setTimeout(go, 340); } else go();
+  }
+  /* 動かないとき(動きを減らす・WebGL なし): 寄る代わりに、その道具の画面をパネルに出す */
+  function stillShot(sid) {
+    const im = pStill.querySelector('img'), t = sid && TOOLS[sid], b = BY_ID[openId];
+    im.onerror = null;
+    if (t && t.thumb) { im.src = '../../../images/products/thumbs/' + t.thumb + '.webp'; im.alt = t.name + 'の画面'; }
+    else if (b) { im.src = 'img/cut-' + openId + '.webp'; im.alt = b.name + 'の中。' + b.line + 'の道具が置かれている'; im.onerror = () => { im.onerror = null; im.src = 'img/b-' + openId + '.webp'; }; }
   }
   function openB(id, from) {
     if (openId === id) return;
     const wasOpen = !!openId;
     openId = id; opener = from || hits.get(id);
-    showTag(null); hoverId = null;
+    showTag(null); hoverId = null; clearFind(); armXY = mouseXY.slice();
     fillPanel(id);
     R.classList.add('opened');
     if (ctl) ctl.open(id);
@@ -162,7 +201,7 @@ function boot() {
   }
   function closeB(back = true) {
     if (!openId) return;
-    const id = openId; openId = null;
+    const id = openId; openId = null; clearFind();
     panel.hidden = true; R.classList.remove('opened'); showSTag(null);
     if (ctl) ctl.close();
     if (back && opener) opener.focus({ preventScroll: true });
@@ -219,9 +258,13 @@ function boot() {
         },
         onHover(id) { hoverId = id; if (openId) return; if (id) { firstTouchSoft(); showTag(id, true, true); } else showTag(null); },
         onPress() { firstTouch(); },
-        onPick(id) { firstTouch(); if (id === openId) return; openB(id, hits.get(id)); },
-        onEmpty() { if (openId) closeB(false); },
-        onStation(sid, how) { if (!openId) return; if (sid) { markRow(sid); showSTag(sid); } else showSTag(null); if (how === 'tap' && sid) { const a = $(`.ptool[data-sid="${CSS.escape(sid)}"]`, pTools); if (a) a.scrollIntoView({ block: 'nearest', behavior: reduce() ? 'auto' : 'smooth' }); } },
+        onPick(id) { firstTouch(); if (id === openId) { if (findNow()) { clearFind(); applyFind(); } return; } openB(id, hits.get(id)); },
+        onEmpty() { if (!openId) return; if (findNow()) { clearFind(); applyFind(); } else closeB(false); },   // 寄っているときは、まず建物ぜんたいに戻る
+        onStation(sid, how) {
+          if (!openId) return;
+          if (how === 'tap' && sid) { pinSid = sid; applyFind(); const li = $(`.prow[data-sid="${CSS.escape(sid)}"]`, pTools); if (li) li.scrollIntoView({ block: 'nearest', behavior: reduce() ? 'auto' : 'smooth' }); return; }
+          if (sid) { markRow(sid); if (!findNow()) showSTag(sid); } else { markRow(findNow() || defSid); showSTag(null); }
+        },
         onLayout(L2) {
           const hr = heroRect(), cr = canvas.getBoundingClientRect(), ox = cr.left - hr.left, oy = cr.top - hr.top;
           for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }

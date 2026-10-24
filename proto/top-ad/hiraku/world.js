@@ -599,7 +599,7 @@ export function placeSmall(dyn, t, steamOn) {
 const TOD = [
   { hemiS: '#EDF3F8', hemiG: '#CDBB9F', hemi: 1.18, sun: '#FFF3E2', sunI: 2.45, sunPos: [-2.5, 15, 12.5], fill: '#DCE7F4', fillI: .6, exp: 1.07, glow: 0, pt: 0 },
   { hemiS: '#F3D3C0', hemiG: '#9A7F70', hemi: .82, sun: '#FFAE7A', sunI: 2.0, sunPos: [-15, 5.5, 3], fill: '#B4AEDF', fillI: .5, exp: .98, glow: .55, pt: .35 },
-  { hemiS: '#4D5A8C', hemiG: '#24223A', hemi: .62, sun: '#A6B6EA', sunI: .6, sunPos: [8, 14, -6], fill: '#6F7DC2', fillI: .28, exp: 1.06, glow: 1, pt: 1 }
+  { hemiS: '#64729F', hemiG: '#302D48', hemi: .86, sun: '#B9C7F2', sunI: 1.0, sunPos: [-5, 14, 9], fill: '#7684C6', fillI: .34, exp: 1.06, glow: 1, pt: 1 }   // 夜: 手前の左上から月明かり。形と屋根の色が読めるように
 ];
 const _c1 = new THREE.Color(), _c2 = new THREE.Color();
 export function makeLights(scene, mapSize) {
