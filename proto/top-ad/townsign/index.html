@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>BRIDGE 町の案内板(試作 融合1)</title>
+<meta name="description" content="医療職のための、道具と経営ゲーム。BRIDGE の29の道具がある小さな町を、病院のサインで案内する試作です。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   融合1「町の案内板」— B の町に、C のサイン
+   町のジオラマを、病院のサインで案内する。建物には行き先の色の目印(番号とピクトグラム)、横に町の案内図(フロアガイドの町版)。
+   業務の道具は真ん中の病院の中(いまの職場 = 現在地)。建物は行き先ごとに1つ、色は C の階色。下は色のロビー、最後は夜の町
+   素材: 立体の町(B)+ 平たい色面のサイン(C)。書体: BIZ UDPGothic(和文)・Barlow / Barlow Condensed(英字・数字)
+   ================================================================ */
+:root{
+  --wall:#E9E8E3; --ink:#15191C; --ink-2:#454C52; --ink-3:#5E656B;
+  --panel:#1D2226; --panel-edge:#0C0F11; --panel-line:#30373D; --panel-text:#B9C1C7;
+  --steel:#CDD2D6; --steel-edge:#A3AAB0; --steel-face:#EEF0F1; --steel-ring:#98A0A6;
+  --wood:#C9B38E; --wood-edge:#A78F69; --here:#C62A21; --led:#FFB21A; --screen:#0B0C0D;
+  --c-work:#087A4F; --c-career:#2356C4; --c-learn:#C24813; --c-manage:#6A45B2; --c-study:#00737E; --c-play:#F2C11C; --c-info:#16233E;
+  --sky-1:#C9DCE7; --sky-2:#E0E9EC; --sky-3:#ECEAE4;
+  --night-1:#0D1430; --night-2:#1A2349; --night-3:#2C2B56;
+  --pad:clamp(16px,4.6vw,64px); --max:1240px;
+  --jp:'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif;
+  --en:'Barlow','Helvetica Neue',Arial,sans-serif;
+  --num:'Barlow Condensed','Arial Narrow',sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:var(--wall)}
+body{margin:0;font-family:var(--jp);color:var(--ink);background:var(--wall);line-height:1.6;font-feature-settings:"palt" 1;-webkit-font-smoothing:antialiased}
+img,svg{display:block;max-width:100%}
+img{height:auto}
+a{color:inherit}
+h1,h2,h3,p,ol,ul,figure{margin:0}
+ol,ul{list-style:none;padding:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--led);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:12px;top:-60px;z-index:400;background:var(--panel);color:#fff;padding:12px 18px;border-radius:4px;text-decoration:none;font-weight:700}
+.skip:focus{top:12px}
+.en{font-family:var(--en);font-weight:500;letter-spacing:.14em;text-transform:uppercase}
+.pic{width:1em;height:1em;fill:currentColor;flex:none}
+.pic.ln{fill:none;stroke:currentColor;stroke-width:4.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* ================= 見出しの帯 ================= */
+.hd{position:absolute;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:calc(14px + env(safe-area-inset-top,0px)) var(--pad) 0}
+.logo{display:inline-flex;align-items:center;gap:12px;min-height:44px;text-decoration:none;color:var(--ink)}
+.logo svg{width:56px;height:auto}
+.logo b{font:600 17px/1 var(--en);letter-spacing:.32em}
+.nav{display:flex;align-items:center;gap:2px}
+.nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 13px;font-size:14px;font-weight:700;text-decoration:none;color:var(--ink-2);border-radius:4px}
+.nav a:hover{background:rgba(255,255,255,.5);color:var(--ink)}
+.nav .talk{background:var(--panel);color:#fff;box-shadow:0 4px 0 var(--panel-edge);margin-left:6px}
+.nav .talk:hover{background:#2A3036;color:#fff}
+@media (max-width:899px){.nav a:not(.talk){display:none}.nav .talk{font-size:13px;padding:0 14px}}
+.logo .lg-n{display:none}
+html.night .logo{color:#F4EFE6} html.night .logo .lg-d{display:none} html.night .logo .lg-n{display:inline}
+html.night .nav a:not(.talk){color:#C9CCDA} html.night .nav a:not(.talk):hover{background:rgba(255,255,255,.1);color:#fff}
+html.night .nav .talk{background:#F4EFE6;color:var(--ink);box-shadow:0 4px 0 #9EA3B8}
+.logo,.nav a{transition:color 1.3s var(--ease),background-color .2s}
+
+/* ================= 最初の画面 =================
+   PC: 左に「見出し・入口・町の案内図」、右に町。スマホ: 見出し → 町 → 入口 → 町の案内図(390×844 の中に入口まで) */
+.hero{position:relative;isolation:isolate;overflow:hidden;overflow:clip}
+.sky{position:absolute;inset:0;z-index:-2;transition:opacity 1.3s var(--ease)}
+.sky-day{background:radial-gradient(110% 70% at 70% 12%,rgba(255,255,255,.7),rgba(255,255,255,0) 60%),linear-gradient(180deg,var(--sky-1) 0%,var(--sky-2) 48%,var(--sky-3) 100%)}
+.sky-night{opacity:0;background:radial-gradient(70% 50% at 70% 28%,rgba(108,124,214,.32),rgba(108,124,214,0) 70%),linear-gradient(180deg,var(--night-1) 0%,var(--night-2) 55%,var(--night-3) 100%)}
+.stars{position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 98%,transparent),radial-gradient(1px 1px at 28% 32%,#fff 98%,transparent),radial-gradient(1.5px 1.5px at 44% 12%,#fff 98%,transparent),radial-gradient(1px 1px at 62% 24%,#fff 98%,transparent),radial-gradient(1.5px 1.5px at 81% 10%,#fff 98%,transparent),radial-gradient(1px 1px at 90% 36%,#fff 98%,transparent),radial-gradient(1px 1px at 55% 6%,#fff 98%,transparent),radial-gradient(1px 1px at 72% 46%,#fff 98%,transparent),radial-gradient(1.5px 1.5px at 94% 64%,#fff 98%,transparent);opacity:.85}
+.moon{position:absolute;right:9%;top:9.5%;width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 38% 36%,#FFF8E2,#F3DFAE 70%);box-shadow:0 0 60px 10px rgba(255,236,190,.22)}
+html.night .sky-day{opacity:0} html.night .sky-night{opacity:1}
+
+.hero-in{position:relative;display:grid}
+.info{grid-area:info}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--here);box-shadow:0 0 0 4px rgba(198,42,33,.18)}
+h1{margin-top:12px;font:700 clamp(28px,2.6vw,40px)/1.32 var(--jp);letter-spacing:.04em}
+h1 .br{display:block}
+html.night .eyebrow,html.night h1{color:#F4EFE6}
+.eyebrow,h1{transition:color 1.3s var(--ease)}
+
+/* 入口(C のサイン板の形で、Compass へ) */
+.cta-wrap{grid-area:cta}
+.cta{display:inline-flex;align-items:stretch;min-height:56px;background:var(--panel);color:#fff;text-decoration:none;border-radius:5px;box-shadow:0 5px 0 var(--panel-edge);transition:transform .12s}
+.cta .tl{display:grid;place-items:center;width:56px;background:var(--c-career);border-radius:5px 0 0 5px}
+.cta .tl .pic{width:28px;height:28px}
+.cta .tx{display:flex;align-items:center;gap:14px;padding:0 20px 0 16px;font-weight:700;font-size:15.5px;letter-spacing:.02em}
+.cta .tx .pic{width:18px;height:18px}
+.cta:hover{transform:translateY(-2px)}
+.meta{margin-top:10px;font-size:12.5px;color:var(--ink-3);letter-spacing:.04em}
+html.night .meta{color:#C9CCDA}
+
+/* 町(止めた画像に目印を重ね、読み込み後に立体と入れ替える) */
+.stage{grid-area:stage;position:relative;min-width:0}
+.stage{container-type:size}
+.still{position:absolute;left:50%;top:50%;aspect-ratio:1600/1440;transform:translate(-50%,-50%)}
+.still .poster{position:absolute;inset:0;width:100%;height:100%;transition:opacity .6s var(--ease)}
+.still .p-night{opacity:0;display:none}
+html.warm .still .p-night,html.night .still .p-night{display:block}
+html.night .still .p-night{opacity:1} html.night .still .p-day{opacity:0}
+html.live .still .p-night{display:none}
+#town{position:absolute;left:0;right:0;top:-24%;height:128%;width:100%;opacity:0;transition:opacity .6s var(--ease);touch-action:pan-y;-webkit-tap-highlight-color:transparent;-webkit-mask-image:linear-gradient(#0000,#000 48px);mask-image:linear-gradient(#0000,#000 48px)}
+html.live #town{opacity:1}
+html.live .still .poster{opacity:0}
+
+/* 町の目印(C の案内の目印)。行き先の色の正方形に、番号と白抜きのピクトグラム。細い柱で建物に立つ
+   名前は、乗せた・フォーカスした・押したときだけ、横に小さな暗い札として伸ばす(名前の一覧は案内図が担う)
+   見た目 36px(スマホ 34px)・押せる範囲 44px(.tg::before)。読み上げは aria-label の「番号 名前 ・ 建物」 */
+.pins{position:absolute;inset:0;pointer-events:none}
+.mk{position:absolute;display:none;width:0;height:0;pointer-events:auto;text-decoration:none;color:var(--on,#fff);--nx:0px;--ny:0px;--t:36px;--pole:22px;--lift:calc(var(--pole) - var(--ny));will-change:transform}
+html:not(.js) .mk{display:block}
+html.js .mk{display:block;left:0!important;top:0!important}
+.mk::after{content:'';position:absolute;left:-1px;top:calc(-1 * var(--lift));width:2px;height:var(--lift);background:#2A3036;transition:background-color .18s}
+.mk .tg{position:absolute;left:calc(var(--nx) - var(--t) / 2);top:calc(-1 * var(--lift) - var(--t));width:var(--t);height:var(--t);display:flex;align-items:center;justify-content:center;gap:2px;padding-right:1px;background:var(--c);border-radius:4px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 3px 0 rgba(12,15,17,.35),0 8px 14px -6px rgba(12,15,17,.45)}
+.mk .tg::before{content:'';position:absolute;inset:calc((44px - var(--t)) / -2)}
+.mk .n{font:600 17px/1 var(--num)}
+.mk .tg .pic{width:16px;height:16px}
+.mk .here{position:absolute;right:-5px;top:-5px;width:11px;height:11px;border-radius:50%;background:var(--here);box-shadow:0 0 0 2px #fff}
+.mk .mkl{position:absolute;left:calc(var(--nx) + var(--t) / 2);top:calc(-1 * var(--lift) - var(--t));height:var(--t);display:flex;align-items:center;gap:8px;padding:0 12px 0 10px;background:var(--panel);color:#fff;border-radius:0 4px 4px 0;white-space:nowrap;box-shadow:0 3px 0 var(--panel-edge);clip-path:inset(0 100% 0 0);visibility:hidden;transition:clip-path .2s var(--ease),visibility 0s .2s}
+.mk .mkl b{font:700 13.5px/1 var(--jp);letter-spacing:.04em}
+.mk .mkl span{font-size:11px;letter-spacing:.04em;color:var(--panel-text)}
+.mk.flip .mkl{left:auto;right:calc(var(--t) / 2 - var(--nx));border-radius:4px 0 0 4px;clip-path:inset(0 0 0 100%)}
+.mk:hover .mkl,.mk:focus-visible .mkl,.mk.is-hi .mkl{clip-path:inset(0 0 0 0);visibility:visible;transition:clip-path .2s var(--ease),visibility 0s}
+.mk:hover::after,.mk:focus-visible::after,.mk.is-hi::after{background:var(--c)}
+.mk:hover .tg,.mk.is-hi .tg{box-shadow:inset 0 0 0 1px rgba(255,255,255,.3),0 0 0 2px #fff,0 3px 0 2px rgba(12,15,17,.3)}
+.mk:focus-visible{outline:none}
+.mk:focus-visible .tg{outline:3px solid var(--led);outline-offset:3px}
+.mk:hover,.mk:focus-visible,.mk.is-hi{z-index:600!important}
+.mk{transition:opacity .25s}
+html.focused .mk:not(.is-hi){opacity:0;pointer-events:none}
+html.night .mk::after{background:#A9AFC4}
+
+/* 町の操作(エレベーターの操作盤のボタンの形) */
+.tools{position:absolute;z-index:5;display:flex;gap:10px;align-items:center}
+.tool{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--steel-face);border:3px solid var(--steel-ring);box-shadow:0 3px 0 #8E979D;color:#22272B;transition:transform .08s,background-color .12s,border-color .12s}
+.tool .pic{width:20px;height:20px}
+.tool:hover{border-color:#22272B}
+.tool:active{transform:translateY(2px);box-shadow:0 1px 0 #8E979D}
+.tool .i-on{display:none}
+.tool[aria-pressed="true"] .i-off{display:none} .tool[aria-pressed="true"] .i-on{display:block}
+.tool[aria-pressed="true"]{background:var(--panel);color:#FFE7A8;border-color:#fff;box-shadow:0 0 0 3px var(--panel),0 3px 0 #8E979D}
+.rot,.pause{display:none} html.live .rot,html.live .pause{display:grid}
+html:not(.js) .tools{display:none}
+.hint{position:absolute;z-index:5;display:flex;align-items:center;gap:10px;padding:9px 14px 9px 10px;background:var(--panel);color:#fff;border-radius:4px;box-shadow:0 4px 0 var(--panel-edge);font-size:12.5px;font-weight:700;transition:opacity .4s,transform .4s var(--ease)}
+.hint .pic{width:20px;height:20px;color:var(--led)}
+.hint.is-gone{opacity:0;transform:translateY(6px)}
+html:not(.js) .hint{display:none}
+
+/* 町の案内図(C のフロアガイドの町版)。町の脇の道具として小さく: 番号と色と名前、建物の名前は小さく */
+.dir{grid-area:dir;position:relative;align-self:start;background:var(--panel);color:#fff;border-radius:6px;box-shadow:0 5px 0 var(--panel-edge)}
+.dir-h{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:38px;padding:0 12px 0 14px;border-bottom:3px solid var(--panel-edge)}
+.dir-t{display:flex;align-items:baseline;gap:10px}
+.dir-t b{font:700 13.5px/1 var(--jp);letter-spacing:.06em}
+.dir-t .en{font-size:9px;color:var(--panel-text)}
+.dir-h .pic{width:17px;height:17px;color:var(--panel-text)}
+.row{display:grid;grid-template-columns:40px minmax(0,1fr) auto 26px;align-items:center;height:44px;color:#fff;text-decoration:none;border-top:1px solid var(--panel-line);transition:background-color .14s,color .14s}
+.rows li:first-child .row{border-top:0}
+.rows li:last-child .row{border-radius:0 0 6px 6px;overflow:hidden}
+.row .tile{align-self:stretch;display:grid;place-items:center;background:var(--c);color:var(--on,#fff);font:600 22px/1 var(--num);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.row .nm{min-width:0;padding:0 8px 0 12px;font:700 14.5px/1.2 var(--jp);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .where{display:flex;align-items:center;gap:7px;justify-self:end;font-size:11px;letter-spacing:.04em;color:var(--panel-text);white-space:nowrap}
+.row .here{display:inline-flex;align-items:center;gap:5px;font:700 10px/1 var(--jp);color:#fff;background:var(--here);padding:4px 6px 4px 5px;border-radius:3px}
+.row .here i{width:6px;height:6px;border-radius:50%;background:#fff}
+.row .go{justify-self:center;width:13px;height:13px;opacity:.45;transition:transform .16s,opacity .16s}
+.row:hover,.row.lit{background:var(--c);color:var(--on,#fff)}
+.row:hover .where,.row.lit .where{color:var(--on,#fff)}
+.row:hover .go,.row.lit .go{opacity:1;transform:translateX(3px)}
+.row:focus-visible{outline-offset:-4px}
+
+/* ---- PC ---- */
+@media (min-width:900px){
+  .hero{height:100svh;min-height:680px;max-height:1060px}
+  .hero-in{height:100%;grid-template-columns:minmax(320px,min(360px,27vw)) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"info stage" "cta stage" "dir stage";column-gap:clamp(16px,2vw,36px);padding:86px var(--pad) clamp(22px,3.4vh,40px)}
+  .info{padding-top:clamp(6px,2vh,26px)}
+  .cta-wrap{padding:clamp(16px,2.6vh,30px) 0 clamp(18px,2.8vh,30px)}
+  .stage{margin-right:calc(-1 * var(--pad) + 8px)}
+  .cta{display:flex;width:100%}
+  .cta .tx{flex:1;justify-content:space-between;gap:10px;padding:0 18px 0 16px;font-size:15px;white-space:nowrap}
+  .still{top:51%;width:min(100cqw + 60px,(100cqh + 40px) * 1.1111)}
+  .tools{left:6px;bottom:2px}
+  .hint{right:10px;bottom:6px}
+  .moon{right:auto;left:46%;top:12%}
+}
+@media (min-width:900px) and (max-width:1180px){.cta .tx{font-size:14px;padding:0 14px 0 12px}.cta .tl{width:50px}}
+@media (min-width:900px) and (max-height:760px){.row{height:40px}.dir-h{min-height:36px}h1{font-size:clamp(26px,2.3vw,34px)}.cta-wrap{padding:14px 0 16px}}
+
+/* ---- スマホとタブレット ---- */
+@media (max-width:899px){
+  .hero-in{grid-template-columns:minmax(0,1fr);grid-template-areas:"info" "stage" "cta" "dir";padding:72px var(--pad) 36px}
+  .eyebrow{font-size:12px}
+  h1{margin-top:8px;font-size:clamp(27px,7.8vw,36px)}
+  .stage{height:clamp(330px,47svh,450px);margin:0 calc(-1 * var(--pad))}
+  .still{width:min(112cqw,100cqh * 1.1111)}
+  .tools{left:var(--pad);bottom:6px;gap:8px}
+  .tool{width:44px;height:44px}
+  .hint{right:var(--pad);bottom:10px;padding:8px 11px 8px 9px;font-size:12px}
+  .hint .long{display:none}
+  .cta-wrap{padding:6px 0 0}
+  .cta{display:flex;width:100%}
+  .cta .tx{flex:1;justify-content:center;gap:10px;padding:0 14px;font-size:15px;white-space:nowrap}
+  .meta{text-align:center}
+  .dir{margin-top:22px}
+  .row{grid-template-columns:46px minmax(0,1fr) auto 28px;height:48px}
+  .row .tile{font-size:24px}
+  .row .nm{font-size:15px}
+  .mk{--t:34px;--pole:18px}
+  .info{transition:opacity .3s var(--ease)}
+  html.focused .info{opacity:0}
+}
+@media (max-width:899px) and (max-height:740px){.eyebrow{display:none}h1{margin-top:0}.stage{height:clamp(300px,49svh,400px)}}
+@media (max-width:359px){.row{grid-template-columns:42px minmax(0,1fr) auto 24px}.row .where .w{display:none}}
+
+/* ================= ロビー(C の色のロビー。頭に、その建物の肖像) ================= */
+.lobby{position:relative;background:var(--c);color:var(--on,#fff);padding:clamp(56px,9vh,104px) var(--pad) clamp(64px,10vh,120px);overflow:hidden}
+.lobby-in{max-width:var(--max);margin:0 auto}
+.lobby-head{display:flex;align-items:flex-end;gap:clamp(14px,2.6vw,36px);flex-wrap:wrap}
+.lnum{font:700 clamp(132px,15vw,232px)/.76 var(--num);letter-spacing:-.01em;margin-bottom:-.02em}
+.medal{width:clamp(150px,15vw,210px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;box-shadow:0 7px 0 rgba(0,0,0,.18);flex:none}
+.medal img{width:92%;height:auto;filter:drop-shadow(0 10px 10px rgba(0,0,0,.16))}
+.lname{display:grid;gap:7px;padding-bottom:6px}
+.lname .pic{width:clamp(50px,5vw,70px);height:clamp(50px,5vw,70px)}
+.lname .where{font-size:13px;letter-spacing:.06em;opacity:.92}
+.lname h2{font:700 clamp(28px,3.4vw,46px)/1.2 var(--jp);letter-spacing:.03em}
+.lname .en{font-size:12.5px}
+.lname .sub{font-size:13.5px;letter-spacing:.02em}
+.flip .lobby-head{flex-direction:row-reverse}
+.flip .lname{justify-items:end;text-align:right}
+.lobby-body{margin-top:clamp(36px,6vh,64px);display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,4vw,56px);align-items:start}
+.back{display:inline-flex;align-items:center;gap:10px;min-height:44px;margin-top:clamp(28px,5vh,44px);font-size:13px;font-weight:700;text-decoration:none;color:inherit;border-bottom:2px solid currentColor}
+.back .pic{width:18px;height:18px}
+
+/* 部屋番号の札 */
+.rooms{display:grid;gap:10px}
+.room{display:grid;grid-template-columns:66px minmax(0,1fr) 36px;align-items:stretch;min-height:72px;background:#fff;color:var(--ink);text-decoration:none;border-radius:4px;box-shadow:0 5px 0 rgba(0,0,0,.22);transition:transform .12s,box-shadow .12s}
+.room .rn{display:grid;place-items:center;background:var(--panel);color:#fff;font:600 23px/1 var(--num);letter-spacing:.03em;border-radius:4px 0 0 4px;transition:background-color .12s}
+.room .rb{padding:12px 0 12px 16px;display:grid;gap:3px;align-content:center}
+.room .rt{font:700 16px/1.35 var(--jp);letter-spacing:.02em}
+.room .rd{font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.room .rk{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:2px;font-size:11.5px;color:var(--ink-3)}
+.room .go{align-self:center;justify-self:center;width:18px;height:18px;color:var(--ink-3);transition:transform .14s}
+.room:hover,.room.cur{transform:translateY(-2px);box-shadow:0 7px 0 rgba(0,0,0,.24)}
+.room:hover .rn,.room.cur .rn{background:var(--ink)}
+.room:hover .go,.room.cur .go{transform:translateX(3px);color:var(--ink)}
+.room:focus-visible{outline-color:#fff;outline-offset:3px}
+.lobby[data-ink] .room:focus-visible,.lobby[data-ink] .zoom:focus-visible{outline-color:var(--ink)}
+.rooms.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* 実際の画面を映すもの */
+.zoom{display:block;width:100%;cursor:zoom-in;background:#1B1D1F;overflow:hidden;position:relative}
+.zoom:disabled{cursor:default}
+.zoom img{width:100%;height:auto;object-fit:cover;object-position:left top;transition:opacity .16s}
+.zoom img.out{opacity:0}
+.label{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;letter-spacing:.06em}
+.label i{width:8px;height:8px;border-radius:50%;background:var(--here);box-shadow:0 0 0 3px rgba(198,42,33,.25)}
+.cap{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.now{display:flex;align-items:baseline;gap:10px;min-width:0;font-size:13px;line-height:1.5}
+.now .rn{font:600 17px/1 var(--num);letter-spacing:.04em;padding:5px 8px;background:var(--panel);color:#fff;border-radius:3px;flex:none}
+.now .nm{min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.ctl{display:none;gap:8px;flex:none}
+html.js .ctl{display:flex}
+.ctl button{width:44px;height:44px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center}
+.ctl button:hover{background:rgba(255,255,255,.14)}
+.ctl .pic{width:18px;height:18px}
+.screen-frame{background:var(--screen);border-radius:10px;padding:12px;box-shadow:0 9px 0 rgba(0,0,0,.28)}
+.screen-frame .zoom{border-radius:3px}
+.disp .zoom img{aspect-ratio:16/10}
+/* 縦型の案内端末(Compass) */
+.career-body{grid-template-columns:minmax(0,4fr) minmax(0,8fr)}
+.kiosk{justify-self:center;width:min(100%,330px)}
+.kiosk-frame{background:var(--screen);border-radius:30px;padding:16px 14px 26px;box-shadow:0 10px 0 rgba(0,0,0,.28)}
+.kiosk-frame .zoom{border-radius:16px}
+.kiosk-frame .zoom img{aspect-ratio:390/844;object-position:center top}
+.kiosk-frame::after{content:"";display:block;width:44px;height:6px;margin:14px auto 0;border-radius:3px;background:#2A2E31}
+.kiosk-stand{width:16px;height:clamp(28px,5vh,52px);margin:0 auto;background:var(--screen)}
+.kiosk-base{width:62%;height:14px;margin:0 auto;border-radius:3px 3px 0 0;background:var(--screen)}
+.feature{display:grid;grid-template-columns:clamp(88px,9vw,120px) minmax(0,1fr);background:#fff;color:var(--ink);text-decoration:none;border-radius:6px;box-shadow:0 7px 0 rgba(0,0,0,.24);overflow:hidden;transition:transform .12s;margin-bottom:14px}
+.feature .rn{display:grid;place-items:center;background:var(--panel);color:#fff;font:600 clamp(34px,3.4vw,46px)/1 var(--num)}
+.feature .rb{padding:clamp(18px,2.4vw,30px);display:grid;gap:8px}
+.feature .kicker{font-size:12px;letter-spacing:.08em;color:var(--ink-3)}
+.feature .rt{font:700 clamp(24px,2.6vw,34px)/1.2 var(--jp);letter-spacing:.02em}
+.feature .rd{font-size:15px;line-height:1.7;color:var(--ink-2)}
+.feature .rk{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-3)}
+.feature .act{justify-self:start;margin-top:6px;display:inline-flex;align-items:center;gap:12px;min-height:48px;padding:0 20px;background:var(--c-career);color:#fff;border-radius:4px;font-weight:700;font-size:15px}
+.feature .act .pic{width:18px;height:18px}
+.feature:hover{transform:translateY(-2px)}
+.feature:focus-visible{outline-color:#fff;outline-offset:4px}
+/* 大きなスクリーン(視察 3D) */
+.wide-body{display:block}
+.cinema .screen-frame{padding:14px;border-radius:12px}
+.cinema .zoom img{aspect-ratio:16/9;object-position:center 58%}
+.rooms.row3{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:clamp(28px,4vh,40px)}
+/* 受付カウンターと掲示(病院の中の業務) */
+.counter{position:relative;display:grid;padding-top:8px}
+.board{justify-self:start;margin-left:clamp(8px,2vw,28px);display:grid;gap:10px;justify-items:start}
+.paper{position:relative;width:clamp(220px,24vw,320px);background:#fff;padding:12px 12px 4px;box-shadow:0 6px 0 rgba(0,0,0,.2);transform:rotate(-1.5deg)}
+.paper .zoom{background:#fff;aspect-ratio:560/325}
+.paper .zoom img{position:absolute;left:0;top:0;width:157.14%;max-width:none;height:auto;margin-left:-28.57%;margin-top:-40.18%}
+.paper .pin{position:absolute;top:-7px;width:14px;height:14px;border-radius:50%;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.paper .pin.l{left:18px;background:var(--here)}.paper .pin.r{right:18px;background:var(--c-play)}
+.paper-cap{font-size:12px;letter-spacing:.04em}
+.desk{position:relative;margin-top:clamp(18px,3vh,32px);display:flex;align-items:flex-end;justify-content:center;gap:clamp(18px,3vw,44px);padding:0 clamp(12px,3vw,40px)}
+.desk::after{content:"";position:absolute;left:0;right:0;bottom:-26px;height:26px;background:var(--wood);border-bottom:6px solid var(--wood-edge);z-index:0}
+.phone{position:relative;z-index:1;display:grid;justify-items:center;gap:10px;width:clamp(150px,15vw,210px)}
+.phone .shell{width:100%;background:var(--screen);border-radius:24px;padding:10px 9px 16px;box-shadow:0 8px 0 rgba(0,0,0,.26)}
+.phone .shell .zoom{border-radius:14px}
+.phone .shell .zoom img{aspect-ratio:390/844;object-position:center top}
+.phone .tagp{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.phone .tagp .rn{font:600 15px/1 var(--num);padding:4px 7px;background:var(--panel);color:#fff;border-radius:3px}
+.manage-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:clamp(24px,4vw,56px);align-items:end}
+.manage-top .screen-frame .zoom img{aspect-ratio:16/10}
+.manage-rooms{margin-top:clamp(36px,6vh,60px)}
+/* 窓の向こうの窓あかり */
+.play-body{grid-template-columns:minmax(0,8fr) minmax(0,4fr);align-items:end}
+.window{position:relative;background:#F6F3EA;padding:14px;border-radius:4px;box-shadow:0 7px 0 rgba(0,0,0,.18)}
+.window .zoom{position:relative;aspect-ratio:1960/840;border-radius:2px;background:#22262F}
+.window .zoom img{position:absolute;left:0;top:0;width:130.6%;max-width:none;height:auto;margin-left:-15.3%;margin-top:-8.16%}
+.window .mull{position:absolute;left:50%;top:14px;bottom:14px;width:12px;margin-left:-6px;background:#F6F3EA;pointer-events:none}
+.window .sill{position:absolute;left:-14px;right:-14px;bottom:-22px;height:22px;background:#E3DCC9;border-bottom:5px solid #CFC6AE}
+.window-cap{margin-top:40px}
+.lounge{display:flex;justify-content:center;align-items:flex-end}
+.play-rooms{margin-top:clamp(36px,6vh,56px)}
+
+/* ================= 7 アトリエ(運営者)= 夜の町で閉じる ================= */
+.night-close{background:linear-gradient(180deg,var(--c-info) 0%,var(--night-1) 100%);color:#fff}
+.night-close .stars{opacity:.5}
+.night-close .medal{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 2px rgba(255,255,255,.22)}
+.close-body{grid-template-columns:minmax(0,6fr) minmax(0,6fr);align-items:center}
+.staff{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:#fff;color:var(--ink);border-radius:4px;padding:20px 24px;box-shadow:0 5px 0 rgba(0,0,0,.3);max-width:520px}
+.staff .face{width:72px;height:72px;border-radius:4px;background:var(--c-info);color:#fff;display:grid;place-items:center}
+.staff .face .pic{width:44px;height:44px}
+.staff .role{font-size:12px;color:var(--ink-3);letter-spacing:.06em}
+.staff .name{font:700 22px/1.3 var(--jp);letter-spacing:.06em}
+.staff .what{font-size:13px;color:var(--ink-2)}
+.voice{margin-top:clamp(26px,4vh,40px);max-width:22em;font:700 clamp(18px,1.9vw,24px)/1.85 var(--jp);letter-spacing:.03em}
+.voice::before{content:"運営者のことば";display:block;margin-bottom:10px;font:400 12px/1 var(--jp);letter-spacing:.08em;opacity:.85}
+.say{margin-top:clamp(32px,6vh,60px);font:700 clamp(24px,2.9vw,42px)/1.45 var(--jp);letter-spacing:.03em}
+.say .nw{white-space:nowrap}
+.say em{font-style:normal;color:#E9CF9A}
+.close-links{margin-top:22px}
+.exit{margin-top:clamp(26px,4vh,40px);display:inline-flex;align-items:stretch;background:var(--c-work);color:#fff;border-radius:4px;box-shadow:0 5px 0 rgba(0,0,0,.3);overflow:hidden}
+.exit .ico{display:grid;place-items:center;width:64px;background:#06603D}
+.exit .ico .pic{width:34px;height:34px}
+.exit p{padding:12px 22px 12px 18px;display:grid;gap:2px}
+.exit b{font:700 15px/1.3 var(--jp)}
+.exit span{font-size:12.5px}
+.night-town img{width:112%;max-width:none;margin-left:-6%;filter:drop-shadow(0 30px 40px rgba(0,0,0,.35))}
+
+.foot{background:var(--night-1);color:#BFC3D6;padding:20px var(--pad) calc(20px + env(safe-area-inset-bottom,0px))}
+.foot-in{max-width:var(--max);margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 24px;font-size:12px}
+.foot a{display:inline-flex;align-items:center;min-height:44px;color:#BFC3D6}
+.foot .l{display:flex;align-items:center;gap:12px}
+.foot .logo-m{width:44px}
+.proto{font:500 11px/1 var(--en);letter-spacing:.14em;color:#8E93A8}
+
+/* ================= ほかの行き先へ(町を離れたあと。PC は右端、スマホは画面下) ================= */
+.ride{position:fixed;z-index:50;display:none;right:max(14px,env(safe-area-inset-right,0px));top:50%;transform:translate(calc(100% + 30px),-50%);flex-direction:column;align-items:center;gap:6px;padding:8px;background:var(--panel);border-radius:8px;box-shadow:0 6px 0 var(--panel-edge);transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+html.js .ride{display:flex}
+.ride.show{transform:translate(0,-50%)}
+.ride a{display:grid;place-items:center;width:44px;height:44px;border-radius:4px;background:var(--c);color:var(--on,#fff);text-decoration:none;font:600 20px/1 var(--num);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.ride a.on{box-shadow:0 0 0 3px #fff}
+.ride a.town{background:var(--steel-face);color:#22272B;margin-bottom:4px}
+.ride a.town .pic{width:22px;height:22px}
+
+/* ================= 入るとき(建物に寄って、行き先の色が広がる) ================= */
+.iris{position:fixed;inset:0;z-index:300;pointer-events:none;visibility:hidden;background:var(--c,#16233E);clip-path:circle(0px at var(--x,50%) var(--y,50%))}
+.iris.run{visibility:visible;pointer-events:auto;cursor:pointer;transition:clip-path .52s cubic-bezier(.6,0,.3,1)}
+.iris.on{clip-path:circle(160vmax at var(--x,50%) var(--y,50%))}
+.iris.out{opacity:0;transition:opacity .32s ease}
+.iris .il{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:14px;color:var(--on,#fff);opacity:0;transition:opacity .16s}
+.iris.on .il{opacity:1;transition-delay:.3s}
+.iris .il b{font:700 clamp(124px,16vw,200px)/.8 var(--num)}
+.iris .il span{font:700 22px/1.2 var(--jp);letter-spacing:.08em}
+
+/* ================= 大きく見る ================= */
+.lb{border:0;padding:0;background:transparent;max-width:min(1100px,calc(100vw - 32px));width:100%}
+.lb.tall{max-width:min(460px,calc(100vw - 32px))}
+.lb::backdrop{background:rgba(13,15,16,.86)}
+.lb-in{background:var(--screen);border-radius:10px;padding:12px;color:#fff}
+.lb img{width:100%;height:auto;max-height:calc(100svh - 190px);object-fit:contain;border-radius:3px;background:#1B1D1F}
+.lb-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:14px 6px 4px}
+.lb-t{display:flex;align-items:baseline;gap:10px;font-size:14px}
+.lb-t .rn{font:600 17px/1 var(--num);padding:5px 8px;background:#fff;color:var(--ink);border-radius:3px}
+.lb-act{display:flex;gap:10px}
+.lb-act a,.lb-act button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:4px;font-weight:700;font-size:14px;text-decoration:none}
+.lb-act a{background:var(--led);color:var(--ink)}
+.lb-act button{border:2px solid #fff}
+
+@media (max-width:899px){
+  .lobby{padding:56px var(--pad) 72px}
+  .lobby-head{gap:12px 16px}
+  .lnum{font-size:clamp(104px,30vw,140px)}
+  .medal{width:clamp(118px,32vw,150px)}
+  .lname{flex-basis:100%}
+  .flip .lobby-head{flex-direction:row}
+  .flip .lname{justify-items:start;text-align:left}
+  .lname h2{font-size:clamp(26px,7.4vw,32px)}
+  .lobby-body,.career-body,.play-body,.close-body{grid-template-columns:minmax(0,1fr);gap:28px;margin-top:30px}
+  .kiosk{width:min(78%,300px)}
+  .room{grid-template-columns:56px minmax(0,1fr) 30px;min-height:68px}
+  .room .rn{font-size:20px}
+  .rooms.two,.rooms.row3{grid-template-columns:minmax(0,1fr)}
+  .feature{grid-template-columns:72px minmax(0,1fr)}
+  .feature .rn{font-size:30px}
+  .cinema .zoom img{aspect-ratio:16/10}
+  .manage-top{grid-template-columns:minmax(0,1fr)}
+  .window .zoom{aspect-ratio:1440/840}
+  .window .zoom img{width:177.8%;margin-left:-38.9%;margin-top:-11.1%}
+  .phone{width:clamp(130px,38vw,170px)}
+  .desk{gap:16px}
+  .paper{width:min(78vw,300px)}
+  .staff{padding:16px 18px;gap:16px}
+  .staff .face{width:58px;height:58px}
+  .ride{left:0;right:0;top:auto;bottom:0;transform:translateY(calc(100% + 12px));flex-direction:row;justify-content:center;gap:4px;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));border-radius:10px 10px 0 0;box-shadow:0 -4px 0 var(--panel-edge)}
+  .ride.show{transform:none}
+  .ride a{width:40px;height:44px;font-size:18px}
+  .ride a.town{margin:0 6px 0 0}
+  body.has-ride .foot{padding-bottom:calc(20px + 64px + env(safe-area-inset-bottom,0px))}
+  .night-town img{width:118%;margin-left:-9%}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0s!important;animation:none!important}}
+
+/* 画像を作るとき */
+html.capture,html.capture body{background:transparent}
+html.capture body > *:not(#cap){display:none!important}
+</style>
+<script type="importmap">{"imports":{"three":"../shared/vendor/three-0.160.0/three.module.min.js"}}</script>
+</head>
+<body>
+<a class="skip" href="#dirTitle">町の案内図へ</a>
+
+<!-- ピクトグラム(C と同じ: 48 の格子、塗りの形、角の丸み 2、線にあたる部分の太さ 5) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="p-info" viewBox="0 0 48 48"><circle cx="24" cy="10.5" r="5"/><path d="M16.5 19h12v19.5h4.5V44h-17v-5.5H21v-14h-4.5z"/></symbol>
+    <symbol id="p-career" viewBox="0 0 48 48"><path d="M21.5 4h5v38h-5z"/><path d="M14 40.5h20V45H14z"/><path d="M8 8.5h26.5l6.5 6-6.5 6H8z"/><path d="M40 24.5H13.5l-6.5 6 6.5 6H40z"/></symbol>
+    <symbol id="p-learn" viewBox="0 0 48 48"><path fill-rule="evenodd" d="M24 5 43 20.5V44H5V20.5zM19.5 28.5v13l11-6.5zM10.5 25h7v6h-7zM30.5 25h7v6h-7z"/></symbol>
+    <symbol id="p-work" viewBox="0 0 48 48"><path fill-rule="evenodd" d="M17 4.5h14a2 2 0 0 1 2 2V8h5a2 2 0 0 1 2 2v32a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h5V6.5a2 2 0 0 1 2-2zM19 8.5v3h10v-3zM13.5 19.5v4.5H18v-4.5zM22 20v3.5h12V20zM13.5 28v4.5H18V28zM22 28.5V32h12v-3.5zM13.5 36.5V41H18v-4.5zM22 37v3.5h8V37z"/></symbol>
+    <symbol id="p-manage" viewBox="0 0 48 48"><path d="M7 27h8v13H7zM20 18h8v22h-8zM33 8h8v32h-8zM4 41.5h40V46H4z"/></symbol>
+    <symbol id="p-study" viewBox="0 0 48 48"><path d="M5 10.5c6.5-.2 12.5 1.3 17 4.6V41c-4.5-3.1-10.5-4.6-17-4.4zM43 10.5c-6.5-.2-12.5 1.3-17 4.6V41c4.5-3.1 10.5-4.6 17-4.4z"/></symbol>
+    <symbol id="p-play" viewBox="0 0 48 48"><path d="M14 4.5h4v10h-4zM22 3h4v11.5h-4zM30 4.5h4v10h-4z"/><path fill-rule="evenodd" d="M7 18h28v6.5h1.5a7.5 7.5 0 0 1 0 15H33.6A11 11 0 0 1 24 45h-6A11 11 0 0 1 7 34zM35 29v6h1.5a3 3 0 0 0 0-6z"/></symbol>
+    <symbol id="p-roof" viewBox="0 0 48 48"><path d="M10 31a14 14 0 0 1 28 0z"/><path d="M22 6.5h4v8h-4zM8.3 12.4l2.9-2.8 5.6 5.7-2.8 2.8zM33.9 15.3l5.6-5.7 2.9 2.8-5.6 5.7zM3 21.5h8v4H3zM37 21.5h8v4h-8z"/><path d="M3 34h42v4.5H3zM9 41h30v4H9z"/></symbol>
+    <symbol id="p-person" viewBox="0 0 48 48"><circle cx="24" cy="13" r="8.5"/><path d="M7 45c0-9.5 7.6-17 17-17s17 7.5 17 17z"/></symbol>
+    <symbol id="p-talk" viewBox="0 0 48 48"><path d="M5 6h26a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H15l-6 5.5V24H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M21 27.5h14.5V24h3.5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-1v5l-5.5-5H23a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="p-arrow" viewBox="0 0 48 48"><path d="M5 21h25V11l14 13-14 13V27H5z"/></symbol>
+    <symbol id="p-out" viewBox="0 0 48 48"><path d="M8 5h22v7h-5V10H13v28h12v-2h5v7H8z"/><path d="M27 21h10v-7l9 10-9 10v-7H27z"/></symbol>
+    <symbol id="p-ext" viewBox="0 0 48 48"><path d="M27 5h16v16h-5v-7.5L22.5 29 19 25.5 34.5 10H27z"/><path d="M6 11h15v5H11v21h21V27h5v15H6z"/></symbol>
+    <symbol id="p-prev" viewBox="0 0 48 48"><path d="M31 6 13 24l18 18 4-4-14-14 14-14z"/></symbol>
+    <symbol id="p-next" viewBox="0 0 48 48"><path d="M17 6l18 18-18 18-4-4 14-14-14-14z"/></symbol>
+    <symbol id="p-map" viewBox="0 0 48 48"><path d="M3 9.5 15.5 4.5V38.5L3 43.5zM19 4.6l10 4.4V43l-10-4.4zM32.5 9 45 4v34l-12.5 5z"/></symbol>
+    <symbol id="p-tap" viewBox="0 0 48 48"><path d="M19.5 4a3.5 3.5 0 0 1 3.5 3.5v13.2l1.5-.4v-2.8a3.5 3.5 0 0 1 7 0v2.4l1.6-.2a3.5 3.5 0 0 1 3.9 3.4v2.1l.5-.1a3.5 3.5 0 0 1 4.1 3.4V34c0 6.1-5 11-11 11h-4a11 11 0 0 1-8.8-4.4l-6.4-8.5a3.4 3.4 0 0 1 5.2-4.4l1.4 1.4V7.5A3.5 3.5 0 0 1 19.5 4z"/></symbol>
+    <symbol id="p-moon" viewBox="0 0 48 48"><path d="M29 5a19 19 0 1 0 14.5 31.8A16 16 0 0 1 29 5z"/></symbol>
+    <symbol id="p-sun" viewBox="0 0 48 48"><circle cx="24" cy="24" r="9"/><path d="M22 2.5h4v8h-4zM22 37.5h4v8h-4zM2.5 22h8v4h-8zM37.5 22h8v4h-8zM8 11l2.8-2.8 5.7 5.6-2.9 2.8zM31.5 34.3l2.9-2.8 5.6 5.7-2.8 2.8zM8 37.1l5.6-5.6 2.9 2.8-5.7 5.7zM31.5 13.8l5.7-5.6 2.8 2.8-5.6 5.7z"/></symbol>
+    <symbol id="p-rotl" viewBox="0 0 48 48"><path d="M12 10v11h11" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="M13.5 20A15 15 0 1 1 15 36" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></symbol>
+    <symbol id="p-rotr" viewBox="0 0 48 48"><path d="M36 10v11H25" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="M34.5 20A15 15 0 1 0 33 36" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></symbol>
+    <symbol id="p-pause" viewBox="0 0 48 48"><path d="M12 8h8v32h-8zM28 8h8v32h-8z"/></symbol>
+    <symbol id="p-play2" viewBox="0 0 48 48"><path d="M13 7l26 17-26 17z"/></symbol>
+    <symbol id="p-logo" viewBox="0 0 240 110"><path d="M8 74 C 62 16, 118 24, 176 84" fill="none" stroke="#16233E" stroke-width="6"/><path d="M58 94 C 118 60, 158 22, 232 12" fill="none" stroke="#A98F63" stroke-width="6"/></symbol>
+    <symbol id="p-logo-w" viewBox="0 0 240 110"><path d="M8 74 C 62 16, 118 24, 176 84" fill="none" stroke="#F4EFE6" stroke-width="6"/><path d="M58 94 C 118 60, 158 22, 232 12" fill="none" stroke="#A98F63" stroke-width="6"/></symbol>
+  </defs>
+</svg>
+
+<header class="hd">
+  <a class="logo" href="../../../index.html" aria-label="BRIDGE ホーム"><svg viewBox="0 0 240 110" aria-hidden="true"><use class="lg-d" href="#p-logo"/><use class="lg-n" href="#p-logo-w"/></svg><b aria-hidden="true">BRIDGE</b></a>
+  <nav class="nav" aria-label="サイト">
+    <a href="#dirTitle">町の案内図</a>
+    <a href="../../../philosophy/index.html">考え方</a>
+    <a href="../../../about/index.html">運営者</a>
+    <a class="talk" href="../../../community/index.html">話をする</a>
+  </nav>
+</header>
+
+<main>
+<section class="hero" id="top" aria-labelledby="h1">
+  <div class="sky sky-day" aria-hidden="true"></div>
+  <div class="sky sky-night" aria-hidden="true"><div class="stars"></div><div class="moon"></div></div>
+  <div class="hero-in">
+    <div class="info">
+      <p class="eyebrow">医療職のための、道具と経営ゲーム</p>
+      <h1 id="h1" tabindex="-1"><span class="br">病院の外にも、</span><span class="br">町がある</span></h1>
+    </div>
+
+    <div class="cta-wrap">
+      <a class="cta" href="../../../compass/index.html"><span class="tl" aria-hidden="true"><svg class="pic"><use href="#p-career"/></svg></span><span class="tx">BRIDGE Compass をはじめる<svg class="pic" aria-hidden="true"><use href="#p-arrow"/></svg></span></a>
+      <p class="meta">10の質問・約3分・登録不要</p>
+    </div>
+
+    <!-- 町の案内図(名前の一覧はここが担う。町の上の目印とは、番号と色で結ぶ) -->
+    <nav class="dir" aria-labelledby="dirTitle">
+      <div class="dir-h"><p class="dir-t" id="dirTitle" tabindex="-1"><b>町の案内図</b><span class="en">Town Directory</span></p><svg class="pic" aria-hidden="true"><use href="#p-map"/></svg></div>
+      <ol class="rows">
+        <li><a class="row" href="#l1" data-id="hospital" style="--c:var(--c-work)"><span class="tile">1</span><span class="nm">業務</span><span class="where"><span class="here"><i></i>現在地</span><span class="w">病院</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#l2" data-id="observatory" style="--c:var(--c-career)"><span class="tile">2</span><span class="nm">キャリア</span><span class="where"><span class="w">展望台</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#l3" data-id="clinic" style="--c:var(--c-learn)"><span class="tile">3</span><span class="nm">経営を学ぶ</span><span class="where"><span class="w">クリニック</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#l4" data-id="office" style="--c:var(--c-manage)"><span class="tile">4</span><span class="nm">経営・管理</span><span class="where"><span class="w">事務所</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#l5" data-id="library" style="--c:var(--c-study)"><span class="tile">5</span><span class="nm">学習</span><span class="where"><span class="w">図書館</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#l6" data-id="park" style="--c:var(--c-play);--on:var(--ink)"><span class="tile">6</span><span class="nm">試す・作品</span><span class="where"><span class="w">公園</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="row" href="#l7" data-id="atelier" style="--c:var(--c-info)"><span class="tile">7</span><span class="nm">運営者</span><span class="where"><span class="w">アトリエ</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      </ol>
+    </nav>
+
+    <!-- 町(止めた画像に目印を重ね、読み込み後に立体と入れ替える)。読む順・Tab の順は、案内図のあと -->
+    <div class="stage" id="stage">
+      <div class="still" id="still">
+        <img class="poster p-day" src="img/island-day.webp" width="1600" height="1440" alt="小さな町の模型。真ん中に病院、まわりに展望台・事務所・クリニック・公園・アトリエ・図書館が並んでいる" fetchpriority="high">
+        <img class="poster p-night" src="img/island-night.webp" width="1600" height="1440" alt="" loading="lazy">
+        <canvas id="town" aria-hidden="true"></canvas>
+        <div class="pins" id="pins">
+          <a class="mk" href="#l1" data-id="hospital" data-pos="50,35.73" style="left:50%;top:35.73%;--c:var(--c-work)" aria-label="1 業務 ・ 病院"><span class="tg"><span class="n">1</span><svg class="pic" aria-hidden="true"><use href="#p-work"/></svg><i class="here"></i></span><span class="mkl" aria-hidden="true"><b>業務</b><span>病院</span></span></a>
+          <a class="mk" href="#l2" data-id="observatory" data-pos="50,6.66" style="left:50%;top:6.66%;--c:var(--c-career)" aria-label="2 キャリア ・ 展望台"><span class="tg"><span class="n">2</span><svg class="pic" aria-hidden="true"><use href="#p-career"/></svg></span><span class="mkl" aria-hidden="true"><b>キャリア</b><span>展望台</span></span></a>
+          <a class="mk" href="#l3" data-id="clinic" data-pos="71.39,51.02" style="left:71.39%;top:51.02%;--c:var(--c-learn)" aria-label="3 経営を学ぶ ・ クリニック"><span class="tg"><span class="n">3</span><svg class="pic" aria-hidden="true"><use href="#p-learn"/></svg></span><span class="mkl" aria-hidden="true"><b>経営を学ぶ</b><span>クリニック</span></span></a>
+          <a class="mk" href="#l4" data-id="office" data-pos="70.98,26.88" style="left:70.98%;top:26.88%;--c:var(--c-manage)" aria-label="4 経営・管理 ・ 事務所"><span class="tg"><span class="n">4</span><svg class="pic" aria-hidden="true"><use href="#p-manage"/></svg></span><span class="mkl" aria-hidden="true"><b>経営・管理</b><span>事務所</span></span></a>
+          <a class="mk" href="#l5" data-id="library" data-pos="29.02,30.99" style="left:29.02%;top:30.99%;--c:var(--c-study)" aria-label="5 学習 ・ 図書館"><span class="tg"><span class="n">5</span><svg class="pic" aria-hidden="true"><use href="#p-study"/></svg></span><span class="mkl" aria-hidden="true"><b>学習</b><span>図書館</span></span></a>
+          <a class="mk" href="#l6" data-id="park" data-pos="50,64.8" style="left:50%;top:64.8%;--c:var(--c-play);--on:var(--ink)" aria-label="6 試す・作品 ・ 公園"><span class="tg"><span class="n">6</span><svg class="pic" aria-hidden="true"><use href="#p-play"/></svg></span><span class="mkl" aria-hidden="true"><b>試す・作品</b><span>公園</span></span></a>
+          <a class="mk" href="#l7" data-id="atelier" data-pos="28.61,48.44" style="left:28.61%;top:48.44%;--c:var(--c-info)" aria-label="7 運営者 ・ アトリエ"><span class="tg"><span class="n">7</span><svg class="pic" aria-hidden="true"><use href="#p-person"/></svg></span><span class="mkl" aria-hidden="true"><b>運営者</b><span>アトリエ</span></span></a>
+        </div>
+      </div>
+      <div class="tools" role="group" aria-label="町の操作">
+        <button class="tool" id="btnNight" type="button" aria-pressed="false" aria-label="夜にする"><svg class="pic i-off" aria-hidden="true"><use href="#p-moon"/></svg><svg class="pic i-on" aria-hidden="true"><use href="#p-sun"/></svg></button>
+        <button class="tool rot" id="btnLeft" type="button" aria-label="町を左に回す"><svg class="pic" aria-hidden="true"><use href="#p-rotl"/></svg></button>
+        <button class="tool rot" id="btnRight" type="button" aria-label="町を右に回す"><svg class="pic" aria-hidden="true"><use href="#p-rotr"/></svg></button>
+        <button class="tool pause" id="btnPause" type="button" aria-pressed="false" aria-label="町の動きを止める"><svg class="pic i-off" aria-hidden="true"><use href="#p-pause"/></svg><svg class="pic i-on" aria-hidden="true"><use href="#p-play2"/></svg></button>
+      </div>
+      <p class="hint" id="hint"><svg class="pic" aria-hidden="true"><use href="#p-tap"/></svg><span><span class="long">建物か案内図を押すと、</span>中へ入れます</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1 病院 ・ 業務(いつもの職場の中で使う道具) ============ -->
+<section class="lobby" id="l1" data-id="hospital" style="--c:var(--c-work)" aria-labelledby="hL1">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">1</p>
+      <figure class="medal"><img src="img/b-hospital.webp" width="640" height="560" alt="" loading="lazy" decoding="async"></figure>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-work"/></svg><p class="where">病院 ・ いつもの職場の中</p><h2 id="hL1" tabindex="-1">業務</h2><p class="en">Hospital ・ Daily Work</p><p class="sub">明日の業務を楽にする ・ 3室</p></div>
+    </div>
+    <div class="lobby-body">
+      <div class="counter">
+        <div class="board">
+          <div class="paper"><span class="pin l" aria-hidden="true"></span><span class="pin r" aria-hidden="true"></span><button class="zoom" type="button" aria-label="掲示を大きく見る" disabled data-img="../shared/shots/keiji-output.webp" data-alt="掲示じたくの実際の画面。できあがった臨時休診のお知らせ" data-rn="101" data-name="掲示じたく ・ できあがり" data-href="../../../keiji/index.html"><img src="../shared/shots/keiji-output.webp" alt="掲示じたくでできあがった、臨時休診のお知らせ(実際の画面の一部)" width="880" height="550" loading="lazy" decoding="async"></button></div>
+          <p class="paper-cap">101 掲示じたくで、そのまま貼れるA4の掲示</p>
+        </div>
+        <div class="desk">
+          <figure class="phone"><div class="shell"><button class="zoom" type="button" aria-label="掲示じたくの画面を大きく見る" disabled data-img="../shared/shots/keiji.webp" data-alt="掲示じたくの実際の画面" data-rn="101" data-name="掲示じたく" data-href="../../../keiji/index.html"><img src="../shared/shots/keiji.webp" alt="掲示じたくの実際の画面" width="780" height="1688" loading="lazy" decoding="async"></button></div><figcaption class="tagp"><span class="rn">101</span>掲示じたく</figcaption></figure>
+          <figure class="phone"><div class="shell"><button class="zoom" type="button" aria-label="やわ返の画面を大きく見る" disabled data-img="../shared/shots/yawagaeshi.webp" data-alt="やわ返の実際の画面" data-rn="103" data-name="やわ返" data-href="../../../yawagaeshi/index.html"><img src="../shared/shots/yawagaeshi.webp" alt="やわ返の実際の画面" width="780" height="1688" loading="lazy" decoding="async"></button></div><figcaption class="tagp"><span class="rn">103</span>やわ返</figcaption></figure>
+        </div>
+      </div>
+      <div>
+        <ol class="rooms">
+          <li><a class="room" href="../../../keiji/index.html"><span class="rn">101</span><span class="rb"><span class="rt">掲示じたく</span><span class="rd">院内掲示を、選んで埋めるだけ</span><span class="rk"><span>受付・事務の方に</span><span>登録不要</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../nidodema/index.html"><span class="rn">102</span><span class="rb"><span class="rt">二度手間さがし</span><span class="rd">部署の手作業を、減らせるものと守るものに分ける</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../yawagaeshi/index.html"><span class="rn">103</span><span class="rb"><span class="rt">やわ返</span><span class="rd">角の立たない返信案を、3つつくる</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        </ol>
+        <a class="back" href="#top"><svg class="pic" aria-hidden="true"><use href="#p-map"/></svg>町の案内図へ戻る</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 展望台 ・ キャリア(Compass) ============ -->
+<section class="lobby flip" id="l2" data-id="observatory" style="--c:var(--c-career)" aria-labelledby="hL2">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">2</p>
+      <figure class="medal"><img src="img/b-observatory.webp" width="640" height="560" alt="" loading="lazy" decoding="async"></figure>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-career"/></svg><p class="where">展望台</p><h2 id="hL2" tabindex="-1">キャリア</h2><p class="en">Observatory ・ Career</p><p class="sub">キャリア・経験を整理する ・ 7室</p></div>
+    </div>
+    <div class="lobby-body career-body">
+      <figure class="kiosk" data-chan>
+        <p class="label"><i></i>案内端末 ・ 実際の画面</p>
+        <div class="kiosk-frame"><button class="zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../shared/shots/compass-result.webp" alt="BRIDGE Compass の結果画面の実際の画面。答えの一例" width="780" height="1688" loading="lazy" decoding="async"></button></div>
+        <div class="kiosk-stand" aria-hidden="true"></div><div class="kiosk-base" aria-hidden="true"></div>
+        <figcaption class="cap"><span class="now"><span class="rn">201</span><span class="nm">BRIDGE Compass ・ 答えの一例</span></span><span class="ctl"><button type="button" data-step="-1" aria-label="前の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+        <ul class="chans" hidden>
+          <li data-img="../shared/shots/compass-result.webp" data-alt="BRIDGE Compass の結果画面の実際の画面。答えの一例" data-rn="201" data-name="BRIDGE Compass ・ 答えの一例" data-href="../../../compass/index.html"></li>
+          <li data-img="../shared/shots/tanaoroshi.webp" data-alt="経験の棚卸しの実際の画面" data-rn="202" data-name="経験の棚卸し" data-href="../../../tanaoroshi/index.html"></li>
+          <li data-img="../shared/shots/iikae.webp" data-alt="現場のことば 言いかえ帳の実際の画面" data-rn="203" data-name="現場のことば 言いかえ帳" data-href="../../../iikae/index.html"></li>
+          <li data-img="../shared/shots/moyamoya.webp" data-alt="職場モヤモヤ診断の実際の画面" data-rn="204" data-name="職場モヤモヤ診断" data-href="../../../moyamoya/index.html"></li>
+        </ul>
+      </figure>
+      <div>
+        <a class="feature" href="../../../compass/index.html" data-ch="0"><span class="rn">201</span><span class="rb"><span class="kicker">展望台のいちばん上の部屋</span><span class="rt">BRIDGE Compass</span><span class="rd">10の質問で、これまでの経験を別の言葉に翻訳する</span><span class="rk"><span>10の質問・約3分</span><span>登録不要</span></span><span class="act">質問に答える<svg class="pic" aria-hidden="true"><use href="#p-arrow"/></svg></span></span></a>
+        <ol class="rooms two">
+          <li><a class="room" href="../../../tanaoroshi/index.html" data-ch="1"><span class="rn">202</span><span class="rb"><span class="rt">経験の棚卸し</span><span class="rd">18の質問で、職務経歴書のたねをつくる</span><span class="rk"><span>18の質問・約15分</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../iikae/index.html" data-ch="2"><span class="rn">203</span><span class="rb"><span class="rt">現場のことば 言いかえ帳</span><span class="rd">現場のことばを、履歴書で通じる言葉に</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../moyamoya/index.html" data-ch="3"><span class="rn">204</span><span class="rb"><span class="rt">職場モヤモヤ診断</span><span class="rd">職場の「なんとなくしんどい」を、10問で言葉に</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../karte/index.html"><span class="rn">205</span><span class="rb"><span class="rt">現場のカルテ</span><span class="rd">職場のしんどさを、カルテの形で読む</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../daily-app/index.html"><span class="rn">206</span><span class="rb"><span class="rt">キャリアログ</span><span class="rd">日々の仕事と学びを記録して、キャリアの言葉に</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../growth-76a805/index.html"><span class="rn">207</span><span class="rb"><span class="rt">Growth OS</span><span class="rd">仕事の記録を、企画や発信のたねに</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        </ol>
+        <a class="back" href="#top"><svg class="pic" aria-hidden="true"><use href="#p-map"/></svg>町の案内図へ戻る</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 クリニック ・ 経営を学ぶ ============ -->
+<section class="lobby" id="l3" data-id="clinic" style="--c:var(--c-learn)" aria-labelledby="hL3">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">3</p>
+      <figure class="medal"><img src="img/b-clinic.webp" width="640" height="560" alt="" loading="lazy" decoding="async"></figure>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-learn"/></svg><p class="where">クリニック</p><h2 id="hL3" tabindex="-1">経営を学ぶ</h2><p class="en">Clinic ・ Learn Management</p><p class="sub">医療経営を学ぶ ・ 3室</p></div>
+    </div>
+    <div class="lobby-body wide-body">
+      <figure class="cinema" data-chan>
+        <p class="label"><i></i>スクリーン ・ 実際のゲーム画面</p>
+        <div class="screen-frame"><button class="zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../shared/shots/ct3d-3d-pc.webp" alt="クリニックタウン3D の実際の画面。視察(3D)で見た受付" width="2560" height="1600" loading="lazy" decoding="async"></button></div>
+        <figcaption class="cap"><span class="now"><span class="rn">301</span><span class="nm">クリニックタウン3D ・ 視察(3D)</span></span><span class="ctl"><button type="button" data-step="-1" aria-label="前の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+        <ul class="chans" hidden>
+          <li data-img="../shared/shots/ct3d-3d-pc.webp" data-alt="クリニックタウン3D の実際の画面。視察(3D)で見た受付" data-rn="301" data-name="クリニックタウン3D ・ 視察(3D)" data-href="../../../clinic-flow-3d/index.html"></li>
+          <li data-img="../shared/shots/ct3d-play-pc.webp" data-alt="クリニックタウン3D の実際の画面。整形外科で始めた Day 1 の盤面" data-rn="301" data-name="クリニックタウン3D ・ 盤面" data-href="../../../clinic-flow-3d/index.html"></li>
+        </ul>
+      </figure>
+      <ol class="rooms row3">
+        <li><a class="room" href="../../../clinic-flow-3d/index.html" data-ch="0"><span class="rn">301</span><span class="rb"><span class="rt">クリニックタウン3D</span><span class="rd">クリニック経営を、1日ずつ動かして学ぶ</span><span class="rk"><span>ブラウザのゲーム</span><span>いまの版は v99.3</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../turnaround12/index.html"><span class="rn">302</span><span class="rb"><span class="rt">ターンアラウンド12</span><span class="rd">赤字クリニックを、12週で立て直す</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        <li><a class="room" href="../../../pmi-quest/index.html"><span class="rn">303</span><span class="rb"><span class="rt">クリニックPMIクエスト</span><span class="rd">承継直後の30日を、10問で診断する</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      </ol>
+      <a class="back" href="#top"><svg class="pic" aria-hidden="true"><use href="#p-map"/></svg>町の案内図へ戻る</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4 事務所 ・ 経営・管理 ============ -->
+<section class="lobby flip" id="l4" data-id="office" style="--c:var(--c-manage)" aria-labelledby="hL4">
+  <div class="lobby-in">
+    <div class="manage-top">
+      <div class="lobby-head">
+        <p class="lnum" aria-hidden="true">4</p>
+        <figure class="medal"><img src="img/b-office.webp" width="640" height="560" alt="" loading="lazy" decoding="async"></figure>
+        <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-manage"/></svg><p class="where">事務所</p><h2 id="hL4" tabindex="-1">経営・管理</h2><p class="en">Office ・ Management</p><p class="sub">経営・管理の実務に使う ・ 9室</p></div>
+      </div>
+      <figure>
+        <p class="label"><i></i>案内ディスプレイ ・ 実際の画面</p>
+        <div class="screen-frame"><button class="zoom" type="button" aria-label="映っている画面を大きく見る" disabled data-img="../shared/shots/rehaboard.webp" data-alt="RehaBoard の紹介ページの実際の画面" data-rn="401" data-name="RehaBoard" data-href="../../../rehaboard/index.html"><img src="../shared/shots/rehaboard.webp" alt="RehaBoard の紹介ページの実際の画面" width="2560" height="1600" loading="lazy" decoding="async"></button></div>
+        <figcaption class="cap"><span class="now"><span class="rn">401</span><span class="nm">RehaBoard</span></span></figcaption>
+      </figure>
+    </div>
+    <ol class="rooms two manage-rooms">
+      <li><a class="room" href="../../../rehaboard/index.html"><span class="rn">401</span><span class="rb"><span class="rt">RehaBoard</span><span class="rd">リハ部門の運営を、1画面に</span><span class="rk"><span>紹介とデモ</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../medboard/index.html"><span class="rn">402</span><span class="rb"><span class="rt">MedBoard</span><span class="rd">外来の患者フローを、2施設で見比べる</span><span class="rk"><span>紹介とデモ</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../hire-board/index.html"><span class="rn">403</span><span class="rb"><span class="rt">HireBoard</span><span class="rd">医療機関の採用を、カンバンで追う</span><span class="rk"><span>紹介とデモ</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../interview-kit/index.html"><span class="rn">404</span><span class="rb"><span class="rt">面接官の手帖</span><span class="rd">面接の質問を用意し、事実と印象を分けて記録する</span><span class="rk"><span>紹介</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../consult-simulator/index.html"><span class="rn">405</span><span class="rb"><span class="rt">ConsultSim</span><span class="rd">1診と2診で、待ち時間がどう変わるかを試す</span><span class="rk"><span>紹介とデモ</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../round-note/index.html"><span class="rn">406</span><span class="rb"><span class="rt">本部長の巡回手帖</span><span class="rd">複数施設の巡回を、1冊の手帖に</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../manager-starter/index.html"><span class="rn">407</span><span class="rb"><span class="rt">医療管理職スターター</span><span class="rd">初めて管理職になった人の、チェックリストと記入式シート</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../medops/index.html"><span class="rn">408</span><span class="rb"><span class="rt">医療管理実務ライブラリ</span><span class="rd">医療管理の実務手順と、無料テンプレート</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer"><span class="rn">409</span><span class="rb"><span class="rt">Reha Checklist</span><span class="rd">リハ部門KPIのチェックリスト(PDF・スプレッドシート)</span><span class="rk"><span>配布ページ(別のサイト)</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-ext"/></svg></a></li>
+    </ol>
+    <a class="back" href="#top"><svg class="pic" aria-hidden="true"><use href="#p-map"/></svg>町の案内図へ戻る</a>
+  </div>
+</section>
+
+<!-- ============ 5 図書館 ・ 学習 ============ -->
+<section class="lobby" id="l5" data-id="library" style="--c:var(--c-study)" aria-labelledby="hL5">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">5</p>
+      <figure class="medal"><img src="img/b-library.webp" width="640" height="560" alt="" loading="lazy" decoding="async"></figure>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-study"/></svg><p class="where">図書館</p><h2 id="hL5" tabindex="-1">学習</h2><p class="en">Library ・ Study</p><p class="sub">学習を続ける ・ 3室</p></div>
+    </div>
+    <div class="lobby-body">
+      <figure class="disp" data-chan>
+        <p class="label"><i></i>案内ディスプレイ ・ 実際の画面</p>
+        <div class="screen-frame"><button class="zoom" type="button" aria-label="映っている画面を大きく見る" disabled><img src="../../../images/products/shots/studyboard.png" alt="StudyBoard の実際の画面" width="1440" height="900" loading="lazy" decoding="async"></button></div>
+        <figcaption class="cap"><span class="now"><span class="rn">502</span><span class="nm">StudyBoard</span></span><span class="ctl"><button type="button" data-step="-1" aria-label="前の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-prev"/></svg></button><button type="button" data-step="1" aria-label="次の部屋の画面"><svg class="pic" aria-hidden="true"><use href="#p-next"/></svg></button></span></figcaption>
+        <ul class="chans" hidden>
+          <li data-img="../../../images/products/shots/studyboard.png" data-alt="StudyBoard の実際の画面" data-rn="502" data-name="StudyBoard" data-href="../../../study-board/index.html"></li>
+          <li data-img="../../../images/products/thumbs/him-quiz.webp" data-alt="HIM Quiz の実際の画面" data-rn="501" data-name="HIM Quiz" data-href="../../../him-quiz/index.html"></li>
+          <li data-img="../../../images/products/thumbs/english-trainer.webp" data-alt="Daily English の実際の画面" data-rn="503" data-name="Daily English" data-href="../../../english-trainer/index.html"></li>
+        </ul>
+      </figure>
+      <div>
+        <ol class="rooms">
+          <li><a class="room" href="../../../him-quiz/index.html" data-ch="1"><span class="rn">501</span><span class="rb"><span class="rt">HIM Quiz</span><span class="rd">診療情報管理士の模擬試験、全12章・360問</span><span class="rk"><span>紹介</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../study-board/index.html" data-ch="0"><span class="rn">502</span><span class="rb"><span class="rt">StudyBoard</span><span class="rd">複数科目の学習を、1枚のボードで続ける</span><span class="rk"><span>紹介</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../english-trainer/index.html" data-ch="2"><span class="rn">503</span><span class="rb"><span class="rt">Daily English</span><span class="rd">瞬間英作文を、通勤の合間に</span><span class="rk"><span>紹介</span></span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+        </ol>
+        <a class="back" href="#top"><svg class="pic" aria-hidden="true"><use href="#p-map"/></svg>町の案内図へ戻る</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6 公園 ・ 試す・作品 ============ -->
+<section class="lobby flip" id="l6" data-id="park" data-ink style="--c:var(--c-play);--on:var(--ink)" aria-labelledby="hL6">
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">6</p>
+      <figure class="medal"><img src="img/b-park.webp" width="640" height="560" alt="" loading="lazy" decoding="async"></figure>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-play"/></svg><p class="where">公園</p><h2 id="hL6" tabindex="-1">試す・作品</h2><p class="en">Park ・ Try &amp; Enjoy</p><p class="sub">気軽に試す・作品を楽しむ ・ 4室</p></div>
+    </div>
+    <div class="lobby-body play-body">
+      <figure>
+        <div class="window"><button class="zoom" type="button" aria-label="窓あかりの画面を大きく見る" disabled data-img="../shared/shots/madoakari-pc.webp" data-alt="窓あかりの実際の画面。夜の病院の建物" data-rn="603" data-name="窓あかり" data-href="../../../madoakari/index.html"><img src="../shared/shots/madoakari-pc.webp" alt="窓あかりの実際の画面。夜の病院の建物" width="2560" height="1600" loading="lazy" decoding="async"></button><span class="mull" aria-hidden="true"></span><span class="sill" aria-hidden="true"></span></div>
+        <figcaption class="cap window-cap"><span class="now"><span class="rn">603</span><span class="nm">窓あかり ・ 実際の画面(夜の病院)</span></span></figcaption>
+      </figure>
+      <div class="lounge">
+        <figure class="phone"><div class="shell"><button class="zoom" type="button" aria-label="ごきげん回復ガチャの画面を大きく見る" disabled data-img="../shared/shots/gacha.webp" data-alt="ごきげん回復ガチャの実際の画面" data-rn="601" data-name="ごきげん回復ガチャ" data-href="../../../gokigen-gacha/index.html"><img src="../shared/shots/gacha.webp" alt="ごきげん回復ガチャの実際の画面" width="780" height="1688" loading="lazy" decoding="async"></button></div><figcaption class="tagp"><span class="rn">601</span>ごきげん回復ガチャ</figcaption></figure>
+      </div>
+    </div>
+    <ol class="rooms two play-rooms">
+      <li><a class="room" href="../../../gokigen-gacha/index.html"><span class="rn">601</span><span class="rb"><span class="rt">ごきげん回復ガチャ</span><span class="rd">疲れた日の回復行動を、ひとつだけ</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../ittan-horyu/index.html"><span class="rn">602</span><span class="rb"><span class="rt">いったん保留</span><span class="rd">買う前に、少しだけ寝かせる</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../madoakari/index.html"><span class="rn">603</span><span class="rb"><span class="rt">窓あかり</span><span class="rd">小さな病院の一日を、ただ眺める</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+      <li><a class="room" href="../../../futatsume/index.html"><span class="rn">604</span><span class="rb"><span class="rt">ふたつめの波</span><span class="rd">二つの波が重なる、水面のパズル</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+    </ol>
+    <a class="back" href="#top"><svg class="pic" aria-hidden="true"><use href="#p-map"/></svg>町の案内図へ戻る</a>
+  </div>
+</section>
+
+<!-- ============ 7 アトリエ ・ 運営者(夜の町で閉じる) ============ -->
+<section class="lobby night-close" id="l7" data-id="atelier" style="--c:var(--c-info)" aria-labelledby="hL7">
+  <div class="stars" aria-hidden="true"></div>
+  <div class="lobby-in">
+    <div class="lobby-head">
+      <p class="lnum" aria-hidden="true">7</p>
+      <figure class="medal"><img src="img/b-atelier.webp" width="640" height="560" alt="" loading="lazy" decoding="async"></figure>
+      <div class="lname"><svg class="pic" aria-hidden="true"><use href="#p-person"/></svg><p class="where">町はずれのアトリエ</p><h2 id="hL7" tabindex="-1">運営者</h2><p class="en">Atelier ・ About</p><p class="sub">理学療法士の橋本渉が、ひとりで運営しています</p></div>
+    </div>
+    <div class="lobby-body close-body">
+      <div>
+        <div class="staff">
+          <span class="face"><svg class="pic" aria-hidden="true"><use href="#p-person"/></svg></span>
+          <span><span class="role">運営者</span><br><span class="name">理学療法士 橋本渉</span><br><span class="what">BRIDGE を、ひとりで運営しています</span></span>
+        </div>
+        <p class="voice">外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p>
+        <ol class="rooms close-links">
+          <li><a class="room" href="../../../philosophy/index.html"><span class="rn"><svg class="pic" style="width:26px;height:26px" aria-hidden="true"><use href="#p-roof"/></svg></span><span class="rb"><span class="rt">考え方</span><span class="rd">BRIDGE が何を大切にしているか</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../about/index.html"><span class="rn"><svg class="pic" style="width:26px;height:26px" aria-hidden="true"><use href="#p-person"/></svg></span><span class="rb"><span class="rt">運営者について</span><span class="rd">名前の由来と、これまでの歩み</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="../../../community/index.html"><span class="rn"><svg class="pic" style="width:26px;height:26px" aria-hidden="true"><use href="#p-talk"/></svg></span><span class="rb"><span class="rt">話をする</span><span class="rd">共感も、異論も、相談も</span></span><svg class="pic go" aria-hidden="true"><use href="#p-arrow"/></svg></a></li>
+          <li><a class="room" href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer"><span class="rn"><svg class="pic" style="width:24px;height:24px" aria-hidden="true"><use href="#p-ext"/></svg></span><span class="rb"><span class="rt">note</span><span class="rd">書いていること(別のサイト)</span></span><svg class="pic go" aria-hidden="true"><use href="#p-ext"/></svg></a></li>
+        </ol>
+      </div>
+      <div>
+        <figure class="night-town"><img src="img/island-night.webp" width="1600" height="1440" alt="夜の町。病院やまわりの建物の窓に、灯りがともっている" loading="lazy" decoding="async"></figure>
+        <p class="say"><span class="nw">正解を与えるのではなく、</span><br><em>選択肢を増やす</em></p>
+        <div class="exit"><span class="ico"><svg class="pic" aria-hidden="true"><use href="#p-out"/></svg></span><p><b>出入口</b><span>見るだけで帰っても、それで十分です。</span></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span class="l"><svg class="logo-m" viewBox="0 0 240 110" aria-hidden="true"><use href="#p-logo-w"/></svg>理学療法士の橋本渉が、ひとりで運営しています</span>
+    <span class="l"><a href="../../../products/index.html">プロダクト一覧</a><a href="../../../legal/privacy.html">プライバシー</a><span class="proto">Prototype ・ 未公開</span></span>
+  </div>
+</footer>
+
+<nav class="ride" aria-label="ほかの行き先">
+  <a class="town" href="#top" aria-label="町の案内図へ戻る"><svg class="pic" aria-hidden="true"><use href="#p-map"/></svg></a>
+  <a href="#l1" data-id="hospital" style="--c:var(--c-work)" aria-label="1 業務">1</a>
+  <a href="#l2" data-id="observatory" style="--c:var(--c-career)" aria-label="2 キャリア">2</a>
+  <a href="#l3" data-id="clinic" style="--c:var(--c-learn)" aria-label="3 経営を学ぶ">3</a>
+  <a href="#l4" data-id="office" style="--c:var(--c-manage)" aria-label="4 経営・管理">4</a>
+  <a href="#l5" data-id="library" style="--c:var(--c-study)" aria-label="5 学習">5</a>
+  <a href="#l6" data-id="park" style="--c:var(--c-play);--on:var(--ink)" aria-label="6 試す・作品">6</a>
+  <a href="#l7" data-id="atelier" style="--c:var(--c-info)" aria-label="7 運営者">7</a>
+</nav>
+
+<div class="iris" aria-hidden="true"><div class="il"><b data-in></b><span data-iname></span></div></div>
+
+<dialog class="lb" aria-labelledby="lbTitle">
+  <div class="lb-in">
+    <img src="data:," alt="" width="1280" height="800">
+    <div class="lb-bar">
+      <p class="lb-t" id="lbTitle"><span class="rn">201</span><span data-lbname>BRIDGE Compass</span></p>
+      <p class="lb-act"><a href="#" data-lbgo>この部屋へ入る</a><button type="button" data-lbclose>閉じる</button></p>
+    </div>
+  </div>
+</dialog>
+
+<p class="sr" aria-live="polite" id="arrive"></p>
+
+<script type="module" src="townsign.js"></script>
+</body>
+</html>
