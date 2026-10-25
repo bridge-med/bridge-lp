@@ -105,7 +105,7 @@ export async function capture(Q) {
     const spin = sect ? deg(45) - pl.yaw : deg(pl.face - 45), el = sect ? deg(+(Q.get('el') ?? 8)) : cut === 'park' ? deg(17) : deg(26);
     S.world.rotation.y = spin; S.world.updateMatrixWorld(true);
     if (sect) {   // 断面は主棟だけ: 横の壁の外側で切る(右の別棟と、左の車寄せを外す)。島のグループの回転だけを掛けた、世界の座標の面
-      const X1 = bx.w / 2 + E + WALL + .006, ax = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), spin + pl.yaw);
+      const X1 = bx.w / 2 + E + WALL - .002, ax = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), spin + pl.yaw);
       renderer.clippingPlanes = [new THREE.Plane(ax.clone().negate(), X1), new THREE.Plane(ax.clone(), X1)];
     }
     aimCamera(camera, new THREE.Vector3(), el);

@@ -593,6 +593,14 @@ function boot() {
   const idle = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 1500 }) : setTimeout(f, 300));
   if (document.readyState === 'complete') idle(upgrade); else addEventListener('load', () => idle(upgrade));
 
+  /* ---------- 比べるための版(?day=1): 第2幕の断面を、階ごとに継がない昼の1枚にする(社長の判断用。既定は上=昼・下=夕) ---------- */
+  const sectImg = $('#sectImg');
+  if (sectImg && Q.get('day') === '1') {
+    sectImg.srcset = sectImg.srcset.replace(/sect-(\d+)/g, 'sect-day-$1'); sectImg.src = sectImg.src.replace(/sect-(\d+)/, 'sect-day-$1');
+    sectImg.alt = sectImg.alt.replace('3階は昼の光、2階と1階は夕方の光。', 'どの階も昼の光。');
+    const lead = $('#day .act-lead'); if (lead) lead.textContent = '3つの道具を、置いてみました。';
+  }
+
   /* ---------- 第3幕: 実際の画面(と、その横のリンク)を押すと、その画面が広がって道具になる(町の入口と同じ 280ms。動きを減らす設定では動かさない) ---------- */
   for (const a of $$('a[data-leap]')) {
     const t = TOOLS[a.dataset.leap]; if (!t) continue;
@@ -605,7 +613,7 @@ function boot() {
   const finIn = $('.fin-in');
   if (finIn) {
     let q = 0;
-    const upd = () => { q = 0; R.classList.toggle('hd-night', finIn.getBoundingClientRect().top < 60); };
+    const upd = () => { q = 0; R.classList.toggle('hd-night', finIn.getBoundingClientRect().top < 60); if (!openId) R.classList.toggle('past', hero.getBoundingClientRect().bottom < 72); };   // 固定の見出しの帯も位置で(一気に下へ移ったときも出す。ひらいている間は、町の側に任せる)
     const req = () => { if (!q) q = requestAnimationFrame(upd); };
     addEventListener('scroll', req, { passive: true }); addEventListener('resize', req); upd();
   }
