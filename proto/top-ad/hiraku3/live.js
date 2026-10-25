@@ -246,15 +246,19 @@ export async function live(o) {
     return { rot: r, elev: el, x: q.cx - (scx - W / 2) / ppu, y: q.cy + (scy - H / 2) / ppu, ppu };
   }
   /* 広場の見晴らし: 広場の上へ上がり、2本の弧を手前(画面の下の真ん中)に、町の建物すべてを安全な範囲に収める。上には名前の札の余白。
-     町の側(world.js)が OVERLOOK = { rot, elev }(度)を出したら、それを使う。いまは仮(正面のまま、仰角 40°) */
+     角度・収める点・札の位置は町の側(world.js の plazaOverlook(S): rot・elev は度、pts・tags は島の座標)。なければ、建物の枠から */
+  let ovData;
+  function ovInfo() { if (ovData === undefined) { try { ovData = WORLD.plazaOverlook ? WORLD.plazaOverlook(S) : null; } catch (e) { ovData = null; } } return ovData; }
   function overlook() {
-    const OV = WORLD.OVERLOOK || {}, r = nearestRot(rot.x, deg(OV.rot || 0)), el = deg(OV.elev || 40);
+    const OV = ovInfo() || WORLD.OVERLOOK || {}, r = nearestRot(rot.x, deg(OV.rot || 0)), el = deg(OV.elev || 40);
     const sf = o.safe(), top = 46, sw = sf.r - sf.l - 12, shh = sf.b - sf.t - top - 6;
     aimCamera(tmpCam, origin, el);
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-    for (const id of IDS) {
-      const pl = placeOf(S, id), m = new THREE.Matrix4().makeRotationY(r).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(Y, pl.yaw), one));
-      for (const p of boundsOf(id, id === 'plaza' ? null : S.B[id].ex).pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+    const grow = v => { v.applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }, mr = new THREE.Matrix4().makeRotationY(r);
+    if (OV.pts && OV.pts.length) for (const p of OV.pts) grow(p.clone().applyMatrix4(mr));
+    else for (const id of IDS) {
+      const pl = placeOf(S, id), m = mr.clone().multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(Y, pl.yaw), one));
+      for (const p of boundsOf(id, id === 'plaza' ? null : S.B[id].ex).pts) grow(p.clone().applyMatrix4(m));
     }
     const ppu = Math.min(sw * .92 / (x1 - x0), shh * .94 / (y1 - y0), base.ppu * 3);   // 少し余白を残す(島の縁が見えて、見晴らしらしく)
     const scx = (sf.l + sf.r) / 2, scy = sf.t + top + shh / 2;
@@ -306,10 +310,13 @@ export async function live(o) {
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const p of q.pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
     const sf = o.safe(), sw = sf.r - sf.l, shh = sf.b - sf.t, w = Math.max(1e-3, x1 - x0), h = Math.max(1e-3, y1 - y0);
-    const ppu = Math.min(Math.sqrt(.3 * sw * shh / (w * h)), sw * .8 / w, shh * .66 / h, base.ppu * 110);
+    // 画面が、見える範囲の 3〜4 割を占めるまで(スマホ 390 でシートの上 390×464 に対し、横長で約 35%・縦長で約 30%)。縦長は高さで、横長は幅で頭打ち
+    const ppu = Math.min(Math.sqrt(.45 * sw * shh / (w * h)), sw * .88 / w, shh * .86 / h, base.ppu * 110);
+    lastFind = { sid, w: w * ppu, h: h * ppu };
     const bx = (x0 + x1) / 2, by = (y0 + y1) / 2, scx = (sf.l + sf.r) / 2, scy = (sf.t + sf.b) / 2;
     return { rot: r, elev: el, x: bx - (scx - W / 2) / ppu, y: by + (scy - H / 2) / ppu, ppu };
   }
+  let lastFind = null;   // 確かめるため: 最後に寄った画面の、画面の上の大きさ(px)
   function retarget() {
     if (!A.id) { rot.t = preRot; camX.t = base.x; camY.t = base.y; camZ.t = Math.log(base.ppu); elev.t = ELEV; return; }
     openCam = (findSid && findFrame(findSid)) || frameFor(A.id);
@@ -334,7 +341,7 @@ export async function live(o) {
   }
   function modReady() {
     if (!MOD) return;
-    const pk = interiorOf('park'); if (pk) { pk.group.scale.y = .001; grow = clock(); }
+    const pk = interiorOf('park'); if (pk) { pk.group.scale.y = .001; grow = clock() || 1e-3; }   // 手動の時計(撮るとき)は 0 から始まるので、0 にしない(0 だと伸びずに潰れたまま)
     const id = A.id;
     if (id && id !== 'plaza') {
       const it = interiorOf(id);
@@ -716,6 +723,10 @@ export async function live(o) {
       const na = ex && nudgeAt(id, ex); if (na) { const v = new THREE.Vector3(...na); if (liftId === id) v.y += lift.x; v.applyMatrix4(m).project(camera); out.b[id].nudge = [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]; }
     }
     if (A.id) out.st = stationsOnScreen();
+    if (A.id === 'plaza' && ovInfo() && ovInfo().tags) {   // 見晴らしの名前の札(町の側が決めた、建物のいちばん上の少し上)
+      out.ov = {}; S.world.updateMatrixWorld();
+      for (const id in ovData.tags) { const v = S.world.localToWorld(ovData.tags[id].clone()).project(camera); out.ov[id] = [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]; }
+    }
     o.onLayout(out);
   }
 
@@ -753,6 +764,7 @@ export async function live(o) {
     get manual() { return manual; },
     get tier() { return tier; },
     get compileMs() { return compileMs; },
+    get findSize() { return lastFind; },
     /* 撮る・確かめるため: 建物の中の点(その建物の座標)が、いま画面のどこにあるか */
     pickAt(x, y) { return pick({ clientX: x, clientY: y, pointerType: 'touch' }); },   // 確かめるため: 画面のその点で選ばれる建物
     screenOf(id, l) { const pl = placeOf(S, id), v = new THREE.Vector3(...l).applyAxisAngle(Y, pl.yaw).add(pl.p).applyAxisAngle(Y, rot.x).project(camera), r = o.canvas.getBoundingClientRect(); return [r.left + (v.x + 1) / 2 * W, r.top + (1 - v.y) / 2 * H]; }

@@ -402,14 +402,15 @@ export function buildInterior(kind, box, ctx = {}) {
   const nS = E.stations.length, cols = nS <= 4 ? 2 : nS <= 9 ? 3 : 4, slot = low ? 256 : 512, asz = cols * slot, A = atlasCanvas(asz, P.screenOff);
   const atlas = new THREE.CanvasTexture(A.c); atlas.colorSpace = THREE.SRGBColorSpace; atlas.anisotropy = 4;
   const scGeo = E.SC.geometry(true);
-  const scMat = new THREE.MeshBasicMaterial({ map: atlas, vertexColors: true, toneMapped: false });
+  // 写しは加工しない: 光・霧・トーンマッピング・頂点の色を受けず、ふだんも見つけたときも元の色のまま映す
+  const scMat = new THREE.MeshBasicMaterial({ map: atlas, toneMapped: false, fog: false });
   const scMesh = scGeo ? new THREE.Mesh(scGeo, scMat) : null; if (scMesh) group.add(scMesh);
   // 画面の UV をアトラスの区画に合わせる(物の縦横比で、区画の中に収める)
   E.stations.forEach((s, i) => {
     const col0 = i % cols, row = Math.floor(i / cols), a = s.sw / s.sh, m = slot * .03;
     const dw = a >= 1 ? slot - 2 * m : (slot - 2 * m) * a, dh = a >= 1 ? (slot - 2 * m) / a : slot - 2 * m;
     const x0 = col0 * slot + (slot - dw) / 2, y0 = row * slot + (slot - dh) / 2;
-    s.rect = [x0, y0, dw, dh];
+    s.rect = [x0, y0, dw, dh]; s.pad = m;
     const U = scGeo.attributes.uv;
     for (let v = s.sc[0]; v < s.sc[1]; v++) {
       const uu = U.getX(v), vv = U.getY(v);
@@ -430,10 +431,10 @@ export function buildInterior(kind, box, ctx = {}) {
   hlMat.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <colorspace_fragment>', ''); };
   const hlMesh = hlGeo ? new THREE.Mesh(hlGeo, hlMat) : null; if (hlMesh) { hlMesh.renderOrder = 2; hlMesh.frustumCulled = false; group.add(hlMesh); }
   const hlBase = hlGeo ? hlGeo.attributes.position.array.slice() : null, hlCol = hlGeo ? hlGeo.attributes.color.array.slice() : null;
-  let nightK = 0;
+  let nightK = 0, atlasReady = false;
 
   /* ---- 道具の物: 持ち上げと明るさ(頂点を書き換える。物はどれも小さいので軽い) ---- */
-  const hBase = hGeo ? sGeo.attributes.position.array.slice(hOff * 3, (hOff + hN) * 3) : null, hCol = hGeo ? sGeo.attributes.color.array.slice(hOff * 3, (hOff + hN) * 3) : null;
+  const hBase = hGeo ? sGeo.attributes.position.array.slice(hOff * 3, (hOff + hN) * 3) : null;
   const hNrm = hGeo ? sGeo.attributes.normal.array.slice(hOff * 3, (hOff + hN) * 3) : null;
   // 書き換えた範囲だけを送る
   const touch = (attr, v0, v1) => { attr.addUpdateRange(v0 * attr.itemSize, (v1 - v0) * attr.itemSize); attr.needsUpdate = true; };
@@ -448,24 +449,28 @@ export function buildInterior(kind, box, ctx = {}) {
       setActive(on) { s.active = !!on; }, setHover(on) { s.hover = !!on; }
     };
     s.api = st; s.index = i; s.lift = 0; s.on = 0; s.flick = 0; s.offset = [0, 0, 0]; s.anchor0 = s.anchor.slice();
+    if (scGeo) { const N = scGeo.attributes.normal.array, i0 = s.sc[0] * 3; s.scN = [N[i0], N[i0 + 1], N[i0 + 2]]; }   // 画面の板の表の向き(点く前は、この逆へ少し下げて枠の奥に隠す)
     return st;
   });
   function writeStation(s) {
     const k = s.lift, [lx, ly, lz] = s.liftVec, [ox, oy, oz] = s.offset;
     const dx = lx * k + ox, dy = ly * k + oy, dz = lz * k + oz;
     if (hGeo && s.h[1] > s.h[0]) {
-      const Pp = sGeo.attributes.position.array, Cc = sGeo.attributes.color.array, br = 1 + .14 * k;
-      for (let v = s.h[0]; v < s.h[1]; v++) { const o = (v + hOff) * 3, b = v * 3; Pp[o] = hBase[b] + dx; Pp[o + 1] = hBase[b + 1] + dy; Pp[o + 2] = hBase[b + 2] + dz; Cc[o] = hCol[b] * br; Cc[o + 1] = hCol[b + 1] * br; Cc[o + 2] = hCol[b + 2] * br; }
-      touch(sGeo.attributes.position, s.h[0] + hOff, s.h[1] + hOff); touch(sGeo.attributes.color, s.h[0] + hOff, s.h[1] + hOff);
+      const Pp = sGeo.attributes.position.array;
+      for (let v = s.h[0]; v < s.h[1]; v++) { const o = (v + hOff) * 3, b = v * 3; Pp[o] = hBase[b] + dx; Pp[o + 1] = hBase[b + 1] + dy; Pp[o + 2] = hBase[b + 2] + dz; }
+      touch(sGeo.attributes.position, s.h[0] + hOff, s.h[1] + hOff);
     }
     if (scGeo) {
-      const Pp = scGeo.attributes.position.array, Cc = scGeo.attributes.color.array, b = clamp01(s.on) * (.9 + .1 * Math.max(k, s.hoverK || 0) - s.flick * (1 - k));   // 見つけたとき(k=1)は写しの色そのまま(ちらつきも止める)。ふだんはわずかに落とす
-      for (let v = s.sc[0]; v < s.sc[1]; v++) { Pp[v * 3] = scBase[v * 3] + dx; Pp[v * 3 + 1] = scBase[v * 3 + 1] + dy + .0005; Pp[v * 3 + 2] = scBase[v * 3 + 2] + dz; const bb2 = .06 + b * .94; Cc[v * 3] = bb2; Cc[v * 3 + 1] = bb2; Cc[v * 3 + 2] = bb2; }
-      scGeo.attributes.position.needsUpdate = true; scGeo.attributes.color.needsUpdate = true;
+      // 写しの色はいつも同じ(動かすだけ)。読めるまでと、ガラスの画面が点く順番が来るまでは、板を枠の奥へ 2cm 下げて見せない
+      // (形と向きはそのまま。枠の暗い面が、消えた画面に見える)
+      const Pp = scGeo.attributes.position.array, bk = atlasReady && (!s.glass || s.on > 0) ? 0 : .02, n = s.scN;
+      for (let v = s.sc[0]; v < s.sc[1]; v++) { const b = v * 3; Pp[b] = scBase[b] + dx - n[0] * bk; Pp[b + 1] = scBase[b + 1] + dy + .0005 - n[1] * bk; Pp[b + 2] = scBase[b + 2] + dz - n[2] * bk; }
+      scGeo.attributes.position.needsUpdate = true;
     }
     if (hlGeo && s.hl) {
-      // 夜はガラスの画面がわずかに光る。見つけた物は、縁がわずかに光る(紙や板でも。にじみの色は写しの色を使わない)
-      const glowK = clamp01(s.on) * (s.glass ? lerp(0, .15, nightK) : 0) * (1 - s.flick * 2) + .16 * k + .08 * (s.hoverK || 0);
+      // 縁の光(画面の外。色は写しの色を使わない): 夜のガラスの画面のにじみ・点いた瞬間にふっと光って消える・ちらつき・見つけたとき・ふれたとき
+      const on = clamp01(s.on), blink = on > 0 && on < 1 ? (1 - on) * (s.glass ? .3 : .15) : 0;
+      const glowK = on * (s.glass ? lerp(0, .15, nightK) : 0) * (1 - s.flick * 2) + .8 * s.flick + blink + .16 * k + .08 * (s.hoverK || 0);
       const Pp = hlGeo.attributes.position.array, Cc = hlGeo.attributes.color.array;
       for (let v = s.hl[0]; v < s.hl[1]; v++) { Pp[v * 3] = hlBase[v * 3] + dx; Pp[v * 3 + 1] = hlBase[v * 3 + 1] + dy; Pp[v * 3 + 2] = hlBase[v * 3 + 2] + dz; Cc[v * 3] = hlCol[v * 3] * glowK; Cc[v * 3 + 1] = hlCol[v * 3 + 1] * glowK; Cc[v * 3 + 2] = hlCol[v * 3 + 2] * glowK; }
       hlGeo.attributes.position.needsUpdate = true; hlGeo.attributes.color.needsUpdate = true;
@@ -498,7 +503,7 @@ export function buildInterior(kind, box, ctx = {}) {
     const url = new URL(spec[0], import.meta.url).href;
     return Promise.resolve().then(() => load(url)).then(tex => { if (!disposed && tex && tex.image) drawImageSlot(A.g, s, tex.image); }).catch(() => { /* 読めないときは消えた画面のまま */ });
   });
-  const ready = Promise.all(jobs).then(() => { if (disposed) return; atlas.needsUpdate = true; if (!revealAt) revealAt = performance.now(); });
+  const ready = Promise.all(jobs).then(() => { if (disposed) return; atlas.needsUpdate = true; atlasReady = true; if (!revealAt) revealAt = performance.now(); E.stations.forEach(writeStation); });
 
   /* ---- 動き ---- */
   let lastMode = null;
@@ -552,8 +557,8 @@ export function buildInterior(kind, box, ctx = {}) {
 
   return {
     group, stations, update, setNight,
-    /* ひらく動きに合わせて、画面を順に点す(60ms ずつ)。呼ばなければ、画面が読めた時点で点る */
-    reveal() { revealAt = performance.now(); for (const s of E.stations) s.on = 0; },
+    /* ひらく動きに合わせて、ガラスの画面を順に点す(60ms ずつ。写しは元の明るさのまま映り、縁がふっと光る)。呼ばなければ、画面が読めた時点で点る */
+    reveal() { revealAt = performance.now(); for (const s of E.stations) { s.on = 0; writeStation(s); } },
     ready,
     dispose() {
       disposed = true;
@@ -565,11 +570,13 @@ export function buildInterior(kind, box, ctx = {}) {
   };
 }
 
-/* 画像を区画に写す: 画像の全体を、区画に収まる大きさに縮めるだけ(切り取らない・重ねない。区画は画面の板と同じ縦横比) */
+/* 画像を区画に写す: 画像の全体を、区画に収まる大きさに縮めるだけ(切り取らない・重ねない。区画は画面の板と同じ縦横比)。
+   区画のまわりの余白にも同じ画像を少し大きく敷く(画面には映らない。遠くで縮んだとき、縁に区画の地の暗い色がにじまないように) */
 function drawImageSlot(g, s, img) {
-  const [x0, y0, dw, dh] = s.rect, iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
-  const k = Math.min(dw / iw, dh / ih), w = iw * k, h = ih * k;
-  g.drawImage(img, 0, 0, iw, ih, x0 + (dw - w) / 2, y0 + (dh - h) / 2, w, h);
+  const [x0, y0, dw, dh] = s.rect, iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height, m = s.pad || 0;
+  const k = Math.min(dw / iw, dh / ih), w = iw * k, h = ih * k, x = x0 + (dw - w) / 2, y = y0 + (dh - h) / 2;
+  if (m) g.drawImage(img, 0, 0, iw, ih, x - m, y - m, w + 2 * m, h + 2 * m);
+  g.drawImage(img, 0, 0, iw, ih, x, y, w, h);
 }
 /* 運営者の部屋の3つは、絵で描く(実際の製品の画面ではないため) */
 function drawCanvasSlot(g, s, P) {
@@ -1193,7 +1200,7 @@ const BUILD = {
     // ---- 2階 ----
     desk(E, S, f[1], X(-.42), Z(.36), .44 * k, .18 * k, 0, P.desk);
     station(E, 'medboard', {
-      x: X(-.42), y: f[1] + .19 * k, z: Z(.38), ry: 0, lift: [0, .025, .012], flicker: .04, glass: true, bezel: .007, spill: [0, 0, .065, .36, .1, P.desk],
+      x: X(-.42), y: f[1] + .19 * k, z: Z(.38), ry: 0, lift: [0, .008, .022], flicker: .04, glass: true, bezel: .007, spill: [0, 0, .065, .36, .1, P.desk],
       holder: g => g.box(0, 0, 0, .06, .008, .05, P.dark).box(0, 0, -.005, .014, .05, .014, P.dark).box(0, .045, 0, .32 * k, .2 * k, .014, P.frame),
       screen: { x: 0, y: .045 + .1 * k, z: .008, w: .3 * k, h: .1875 * k }
     });
@@ -1201,7 +1208,7 @@ const BUILD = {
     person(E, X(-.42), f[1], Z(.18), 0, { kind: 'type', cloth: P.office, night: true });
     desk(E, S, f[1], X(.45), Z(.4), .36 * k, .18 * k, 0, P.desk);
     station(E, 'consult-simulator', {
-      x: X(.45), y: f[1] + .19 * k, z: Z(.42), ry: -.12, lift: [0, .025, .012], flicker: .03, glass: true, bezel: .01, spill: [0, 0, .065, .24, .1, P.desk],
+      x: X(.45), y: f[1] + .19 * k, z: Z(.42), ry: -.12, lift: [0, .008, .022], flicker: .03, glass: true, bezel: .01, spill: [0, 0, .065, .24, .1, P.desk],
       holder: g => g.box(0, 0, 0, .05, .008, .04, P.dark).box(0, 0, -.005, .012, .05, .012, P.dark).box(0, .045, 0, .27 * k, .16 * k, .014, P.frame),
       screen: { x: 0, y: .045 + .08 * k, z: .008, w: .25 * k, h: .145 * k }
     });

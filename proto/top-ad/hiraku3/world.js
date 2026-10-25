@@ -712,7 +712,7 @@ const CLOTH = { scrubT: '#4E9993', scrubI: '#33446A', coat: '#F3F1EB', officeG: 
    シーン(live と capture で共通)。opts = { only, quality: 'high' | 'mid' | 'low', ao }
    作る段取りはジェネレーター(段ごとに yield)。makeScene は一気に(撮影用)、makeSceneAsync は段のあいだに主スレッドを返す
    ================================================================ */
-let QUALITY = 'high';
+let QUALITY = 'high', LAST_S = null;   // LAST_S: いちばん新しく作った町(plazaOverlook() を引数なしで呼べるように)
 function* buildScene(opts = {}) {
   const only = opts.only || null, q = QUALITY = opts.quality || 'high', T0 = performance.now();
   const scene = new THREE.Scene(), world = new THREE.Group(); scene.add(world);
@@ -836,7 +836,7 @@ function* buildScene(opts = {}) {
   // まとめる(接地の陰もこの中で、区切りながら)
   AO_MS = 0;
   const tb = performance.now(), baked = yield* bakeStaticGen(world, !only && (opts.ao ?? q !== 'low')), bakeMs = performance.now() - tb;
-  return { scene, world, B, anchors, dyn, signs, baked, plazaInfo, stats: { bakeMs, aoMs: AO_MS + GROUND_MS, groundMs: GROUND_MS, quality: q, totalMs: performance.now() - T0 } };
+  return (LAST_S = { scene, world, B, anchors, dyn, signs, baked, plazaInfo, stats: { bakeMs, aoMs: AO_MS + GROUND_MS, groundMs: GROUND_MS, quality: q, totalMs: performance.now() - T0 } });
 }
 /* 夜の街灯の光のたまり(環状の道の上に、控えめに)。柔らかい丸の模様を足し算で重ねる面を、1つにまとめて1回で描く。
    強さは U.uNight(夕方から夜に灯る)。昼は描かない(placeSky が見えなくする) */
@@ -1483,8 +1483,8 @@ export function aimCamera(cam, target, elev = ELEV) {
    rot = 島を回す角度(度。0 = いつもの正面で、広場が手前)、elev = 見下ろす角度(度)。live.js の overlook() が読む */
 export const OVERLOOK = { rot: 0, elev: 42 };
 /* 見晴らしの目と的と、建物の名前の札を置く所(島の座標 = S.world の中。島を回しているときは S.world.matrixWorld を掛ける)。
-   tags[id] は建物のいちばん上(屋根・ドーム・灯室)の少し上。pts は画面に収める点(建物の箱と、広場の床と弧)。S は makeScene の返り値 */
-export function plazaOverlook(S) {
+   tags[id] は建物のいちばん上(屋根・ドーム・灯室)の少し上。pts は画面に収める点(建物の箱と、広場の床と弧)。S は makeScene の返り値(省くと、いちばん新しく作った町) */
+export function plazaOverlook(S = LAST_S) {
   const el = deg(OVERLOOK.elev), F = plazaFrame(), tags = {}, pts = [];
   for (const id of IDS) {
     if (id === 'plaza') {

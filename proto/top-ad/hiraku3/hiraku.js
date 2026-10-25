@@ -76,7 +76,7 @@ function boot() {
   /* ---------- 見えないボタンと名前の札の位置(止めた画像のときは、撮ったときの位置から) ---------- */
   const heroRect = () => hero.getBoundingClientRect();
   function placeHit(a, cx, cy, w, h) { w = Math.max(44, w); h = Math.max(44, h); a.style.transform = `translate(${(cx - w / 2).toFixed(1)}px,${(cy - h / 2).toFixed(1)}px)`; a.style.width = w.toFixed(0) + 'px'; a.style.height = h.toFixed(0) + 'px'; }
-  let tagPos = {}, footPos = {}, hitPos = {}, nudgePos = null;
+  let tagPos = {}, footPos = {}, hitPos = {}, nudgePos = null, ovPos = {};
   function stillLayout() {
     if (ctl) return;
     const hr = heroRect(), br = still.getBoundingClientRect(); if (!br.width) return;
@@ -381,7 +381,7 @@ function boot() {
     const hr = heroRect(), pr = panel.hidden ? null : panel.getBoundingClientRect();
     const yMax = pr && phone() ? pr.top - hr.top - 6 : hero.clientHeight - 8, xMax = pr && !phone() ? pr.left - hr.left - 8 : hero.clientWidth;   // シート・パネルの下に隠れる札は出さない
     for (const b of oTags.children) {
-      const p = tagPos[b.dataset.id]; if (!p) { b.classList.add('off'); continue; }
+      const p = ovPos[b.dataset.id] || tagPos[b.dataset.id]; if (!p) { b.classList.add('off'); continue; }
       const [x, y] = tagXY(p, 36);
       b.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,calc(-100% - 8px))`;
       b.classList.toggle('off', y > yMax || x > xMax);
@@ -526,6 +526,7 @@ function boot() {
           for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; footPos[id] = [ox + p.foot[0], oy + p.foot[1]]; if (p.nudge) nudgePos = [ox + p.nudge[0], oy + p.nudge[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }
           placeNudge(); placeOv();
           if (tagFor) { const [x, y] = tagXY(tagPos[tagFor], 64); tagB.style.left = x.toFixed(1) + 'px'; tagB.style.top = y.toFixed(1) + 'px'; }
+          ovPos = {}; if (L2.ov) for (const id in L2.ov) ovPos[id] = [ox + L2.ov[id][0], oy + L2.ov[id][1]];   // 見晴らしの札の位置(町の側から)
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };
           if (sTagFor) showSTag(sTagFor);
         },
