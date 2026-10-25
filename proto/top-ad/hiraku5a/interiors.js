@@ -636,6 +636,7 @@ export function buildInterior(kind, box, ctx = {}) {
 
   return {
     group, stations, update, setNight,
+    people: E.people,   // 確かめるため(live.js の peopleOnScreen)
     /* ひらく動きに合わせて、ガラスの画面を順に点す(60ms ずつ。写しは元の明るさのまま映り、縁がふっと光る)。呼ばなければ、画面が読めた時点で点る */
     reveal() { revealAt = performance.now(); for (const s of E.stations) { s.on = 0; writeStation(s); } },
     ready,
@@ -819,7 +820,8 @@ function buildPeople(E, u0) {
     const ease = dt ? 1 - Math.pow(.00002, dt) : 1;
     L.forEach((p, i) => {
       const off = (mode === 'night' && !p.night) || (mode !== 'night' && !p.day), q = off ? null : poseOf(p, t, { turn: true });
-      if (q) {
+      p.vis = !off;   // 確かめるため(札が頭にかからないか): いまの頭の位置(この中の形の座標)
+      if (q) { p.hp = [q.x, q.y + (q.seated ? PERSON.sitHeadY : PERSON.headY), q.z];
         if (p.kind === 'walk') { p.wx = q.x; p.wz = q.z; p.wry = q.ry; p.wb = q.bob; }
         seg[0].set(q.x, q.y, q.z); seg[1].set(q.x, q.y + (q.seated ? PERSON.sitHeadY : PERSON.headY), q.z);
         p.fk += ((f && f.covers(seg, .08) ? 0 : 1) - p.fk) * ease;
