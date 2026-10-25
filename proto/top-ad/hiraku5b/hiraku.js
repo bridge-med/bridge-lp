@@ -71,6 +71,7 @@ function boot() {
     paused = btnPause.getAttribute('aria-pressed') !== 'true'; R.classList.toggle('paused', paused);   // 気づきの輪(CSS)も止める
     btnPause.setAttribute('aria-pressed', String(paused)); btnPause.setAttribute('aria-label', paused ? '町の動きを再生する' : '町の動きを止める');
     if (ctl) ctl.setPaused(paused);
+    if (sect) sect.setPaused(paused);   // 下の病院の断面の人も
     if (paused) stopInvite(); else if (!touched) startInvite();
   });
 
@@ -540,7 +541,12 @@ function boot() {
   };
   /* 止めた画像がそのまま残るとき: sizes を実際の幅にして、画素の細かい端末では大きい方(1600w)を選ばせる。立体に替わる人は小さい画像のまま */
   function stillSharp() { if (save) return; const w = Math.round(still.getBoundingClientRect().width); if (w > 0) poster.sizes = w + 'px'; }
-  function hasWebGL() { try { const c = document.createElement('canvas'); return !!(window.WebGL2RenderingContext && c.getContext('webgl2')); } catch (e) { return false; } }
+  let glOk = null;
+  function hasWebGL() {   // 調べるのは一度だけ(下の断面も同じ答えを使う)。調べるために作った描画の面は、すぐ手放す
+    if (glOk !== null) return glOk;
+    try { const g = window.WebGL2RenderingContext && document.createElement('canvas').getContext('webgl2'); glOk = !!g; const lc = g && g.getExtension('WEBGL_lose_context'); if (lc) lc.loseContext(); } catch (e) { glOk = false; }
+    return glOk;
+  }
   function upgrade() {
     if (reduce() || save || !hasWebGL() || Q.get('static') === '1') { stillSharp(); return; }
     const t0 = performance.now(); swap.start = t0;
@@ -626,10 +632,10 @@ function boot() {
     const mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8, quality = Q.get('q') || (phone() || mem <= 4 || cores <= 4 ? 'mid' : 'high');
     inTags.classList.add('wait');
     sectP = import('./sect.js').then(M => M.section({
-      canvas: inCanvas, tod: TODS.indexOf(R.dataset.tod), quality, reduce,
+      canvas: inCanvas, tod: TODS.indexOf(R.dataset.tod), quality, paused, reveal: inReveal, reduce,
       onLayout(L) { placeIn(L); inTags.classList.toggle('wait', L.k < .82); },
       onReady() { requestAnimationFrame(() => R.classList.add('inlive')); }
-    })).then(api => { sect = api; sect.setVisible(sectVis); sect.setReveal(inReveal()); window.__sect = api; })
+    })).then(api => { sect = api; sect.setPaused(paused); sect.setVisible(sectVis); sect.setReveal(inReveal()); window.__sect = api; })
       .catch(err => { console.warn(err); inTags.classList.remove('wait'); stillIn(); });
   }
   addEventListener('hiraku:live', () => setTimeout(() => idle(sectBoot), 1600));   // 町の立体が替わって、町の側の後の読み込み(公園の中)が済んでから

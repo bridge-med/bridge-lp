@@ -81,9 +81,8 @@ function slice(world, ctx, K, BOXES, WALL) {
   // 車寄せの前の広場(石の床)と縁石。病院の正面から一切れの手前の縁まで
   const fz0 = ex.Z + .2, fz1 = ex.z1 - .18, pv = K.box(2 * ex.X - .1, .012, fz1 - fz0, M(C.pave, { r: .9 })); pv.position.set(0, .006, (fz0 + fz1) / 2); pv.castShadow = false; pv.userData.surf = true; world.add(pv);
   for (const s of [-1, 1]) { const cb = K.box(.035, .03, fz1 - fz0, M(C.curb, { r: .85 })); cb.position.set(s * (ex.X - .03), .015, (fz0 + fz1) / 2); cb.castShadow = false; world.add(cb); }
-  // まわりの小物(建物の正面にかからない所): 奥の木2本、右手前の街灯、左手前の植え込み
+  // まわりの小物(建物の正面にかからない所): 右奥の木、右手前の街灯、左手前の植え込み(左奥は建物の陰に隠れて、葉の端だけが浮いて見えるので置かない)
   const plant = (t, x, z, ry) => { t.position.set(x, 0, z); t.rotation.y = ry; world.add(t); };
-  plant(K.tree(rnd, 'round', .86, q), ex.x0 + .28, ex.z0 + .5, rnd() * 6);
   plant(K.tree(rnd, 'column', .78, q), ex.x1 - .2, ex.z0 + .45, rnd() * 6);
   plant(K.tree(rnd, 'shrub', 1.05, q), ex.x0 + .25, ex.Z + .45, rnd() * 6);
   const lp = K.lamp(1); lp.position.set(ex.x1 - .16, 0, ex.z1 - .3); world.add(lp);
@@ -95,12 +94,12 @@ async function parts() {
   return { W, BOXES: Bd.BOXES, WALL: Bd.WALL, K, MOD };
 }
 function sceneOpts(P, q) { return { only: 'hospital', quality: q, ao: false, exterior: { solo: true }, extra: (world, ctx) => slice(world, ctx, P.K, P.BOXES, P.WALL) }; }
-/* 枠に収める点: 一切れの上の縁と下の端、建物の箱(屋上の設備まで)、木のてっぺん */
+/* 枠に収める点: 一切れの上の縁と下の端、建物の箱(屋上の設備まで)、右奥の木のてっぺん */
 function framePts(P) {
   const ex = slabExtent(P.BOXES, P.WALL), b = P.BOXES.hospital, top = b.h + .1 + .62 + .35 + .06, pts = [];
   for (const [x, z] of [[ex.x0, ex.z0], [ex.x1, ex.z0], [ex.x0, ex.z1], [ex.x1, ex.z1]]) pts.push(new THREE.Vector3(x, 0, z), new THREE.Vector3(x * .7, -1.45, z * .7 + (ex.z0 + ex.z1) * .15));
   for (const x of [-ex.X, ex.X]) for (const z of [-ex.Z, ex.Z]) pts.push(new THREE.Vector3(x, top, z));
-  pts.push(new THREE.Vector3(ex.x0 + .28, 1.25, ex.z0 + .5), new THREE.Vector3(ex.x1 - .2, 1.24, ex.z0 + .45));
+  pts.push(new THREE.Vector3(ex.x1 - .2, 1.24, ex.z0 + .45));
   return pts;
 }
 function aim(P, camera, world, W, H, mg) {
@@ -138,17 +137,18 @@ function labels(P, it, camera, world, W, H) {
 }
 
 /* ================================================================
-   ページの中で描く: o = { canvas, tod(0..2), quality, reduce(), onLayout({ st, fl, W, H }), onReady() }
-   返す: { setReveal(p), setTod(m), setVisible(on), resize(), info }
+   ページの中で描く: o = { canvas, tod(0..2), quality, paused, reveal(), reduce(), onLayout({ st, fl, W, H }), onReady() }
+   返す: { setReveal(p), setTod(m), setPaused(on), setVisible(on), resize(), info }
    ================================================================ */
 export async function section(o) {
-  const P = await parts(), { W: Wd } = P;
+  const T0 = performance.now(), boot = {}, mark = k => { boot[k] = Math.round(performance.now() - T0); };   // 作る手順ごとの時刻(ms。info.boot)
+  const P = await parts(), { W: Wd } = P; mark('parts');
   const q = o.quality === 'high' ? 'high' : o.quality === 'low' ? 'low' : 'mid';
-  const S = Wd.makeSceneAsync ? await Wd.makeSceneAsync(sceneOpts(P, q)) : Wd.makeScene(sceneOpts(P, q));
+  const S = Wd.makeSceneAsync ? await Wd.makeSceneAsync(sceneOpts(P, q)) : Wd.makeScene(sceneOpts(P, q)); mark('scene');
   const L = Wd.makeLights(S.scene, q === 'high' ? 2048 : 1024), U = Wd.U, LAY = Wd.LAYOUT;
   if (q === 'low') L.sun.castShadow = false;
   let CW = o.canvas.clientWidth || 360, CH = o.canvas.clientHeight || 450;
-  const renderer = Wd.makeRenderer(o.canvas, Math.min(devicePixelRatio || 1, q === 'high' ? 2 : q === 'mid' ? 1.6 : 1), CW, CH, false);
+  const renderer = Wd.makeRenderer(o.canvas, Math.min(devicePixelRatio || 1, q === 'high' ? 2 : q === 'mid' ? 1.6 : 1), CW, CH, false); mark('context');
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
   // 一棟だけ: 病院を「ひらいた建物」にして、前の壁の動き(沈む)を uPM[1] に。屋根は残す。前の壁は地面の高さより下を描かない
   U.uOpenA.value = LAY.hospital.bid; U.uRoofA.value = 1; U.uGroundCut.value = -.004; U.uFocus.value = -1;
@@ -163,7 +163,7 @@ export async function section(o) {
   setTodNow(todX);
   inLight(P, L, S.world);
   const BH = P.BOXES.hospital.h, SINK = BH + .25;
-  let rv = o.reduce && o.reduce() ? 1 : 0, rvT = rv, revealed = false, visible = true, running = false, last = performance.now(), lastDraw = 0, t = 0;
+  let rv = o.reduce && o.reduce() ? 1 : 0, rvT = rv, revealed = false, visible = true, running = false, paused = !!o.paused, ready = false, last = performance.now(), lastDraw = 0, t = 0;
   function applyReveal() {
     const k = ease(rv);
     U.uPM.value[1].makeTranslation(0, -SINK * k, 0);
@@ -174,7 +174,7 @@ export async function section(o) {
   function layout() { const r = labels(P, it, camera, S.world, CW, CH); r.W = CW; r.H = CH; r.k = rv; o.onLayout && o.onLayout(r); }
   function resize() {
     CW = o.canvas.clientWidth; CH = o.canvas.clientHeight; if (!CW || !CH) return;
-    renderer.setSize(CW, CH, false); aim(P, camera, S.world, CW, CH, VIEW.m); inLight(P, L, S.world); draw(true);
+    renderer.setSize(CW, CH, false); aim(P, camera, S.world, CW, CH, VIEW.m); inLight(P, L, S.world); if (ready) draw(true);   // シェーダーの準備の前には描かない(描くと、その場で全部を作って主スレッドが止まる)
   }
   function draw(force) {
     applyReveal(); U.uTime.value = t;
@@ -183,30 +183,35 @@ export async function section(o) {
   }
   function frame(now) {
     if (!visible || document.hidden) { running = false; return; }
-    requestAnimationFrame(frame);
     const moving = Math.abs(rvT - rv) > 1e-3 || Math.abs(todT - todX) > 1e-3;
+    if (paused && !moving) { running = false; return; }   // 町の動きを止めている間は、人は止めたまま。壁と時刻が移る間だけ描く
+    requestAnimationFrame(frame);
     if (!moving && now - lastDraw < 31) return;   // 動いていないときは 30 こま/秒
-    const gap = Math.min(.25, (now - last) / 1000), dt = Math.min(.05, gap); last = now; lastDraw = now; t += dt;
+    const gap = Math.min(.25, (now - last) / 1000), dt = Math.min(.05, gap); last = now; lastDraw = now;
     if (o.reduce && o.reduce()) rv = rvT; else { rv += (rvT - rv) * (1 - Math.exp(-gap * 7)); if (Math.abs(rvT - rv) < .002) rv = rvT; }   // スクロールに少し遅れて、なめらかに(こまの間隔によらず、同じ時間で追いつく)
     if (Math.abs(todT - todX) > 1e-3) { todX += (todT - todX) * (1 - Math.exp(-gap * 3.2)); if (Math.abs(todT - todX) < .004) todX = todT; setTodNow(todX); }
-    it.update(dt, t, mode);
+    if (!paused) { t += dt; it.update(dt, t, mode); }
     draw();
   }
-  function kick() { if (!running && visible && !document.hidden) { running = true; last = lastDraw = performance.now(); requestAnimationFrame(frame); } }
+  function kick() { if (ready && !running && visible && !document.hidden) { running = true; last = lastDraw = performance.now(); requestAnimationFrame(frame); } }
   document.addEventListener('visibilitychange', kick);
   new ResizeObserver(resize).observe(o.canvas);
   aim(P, camera, S.world, CW, CH, VIEW.m);
   // 画像(実際の画面)がそろってから、最初の1枚を描く。シェーダーの準備は分けて(主スレッドを長く止めない)
-  await it.ready;
+  await it.ready; mark('interior');
   try { if (renderer.compileAsync && renderer.extensions.has('KHR_parallel_shader_compile')) await renderer.compileAsync(S.scene, camera); else { renderer.compile(S.scene, camera); await new Promise(r => requestAnimationFrame(r)); } } catch (e) { /* そのまま描く */ }
-  it.update(.016, 0, mode); draw(true); kick();
+  mark('compile');
+  ready = true;
+  if (o.reveal && !(o.reduce && o.reduce())) rv = rvT = clamp01(o.reveal());   // 区画がもう見えているときは、いまのスクロールの位置の姿から(止めた画像から替わるときに、壁が戻って見えないように)
+  it.update(.016, 0, mode); draw(true); kick(); mark('draw');
   o.onReady && o.onReady();
   return {
     setReveal(p) { rvT = clamp01(p); if (o.reduce && o.reduce()) rvT = 1; kick(); },
     setTod(m) { todT = m; kick(); },
+    setPaused(on) { paused = !!on; kick(); },
     setVisible(on) { visible = !!on; if (visible) kick(); },
     resize,
-    get info() { return { calls: renderer.info.render.calls, tris: renderer.info.render.triangles, tex: renderer.info.memory.textures }; },
+    get info() { return { calls: renderer.info.render.calls, tris: renderer.info.render.triangles, tex: renderer.info.memory.textures, programs: renderer.info.programs.length, boot }; },
     renderer
   };
 }
