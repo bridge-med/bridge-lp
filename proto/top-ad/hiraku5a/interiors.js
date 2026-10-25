@@ -1001,7 +1001,7 @@ const BUILD = {
       screen: { x: -.03, y: .055 + .095 * k, z: -.01, w: .27 * k, h: .165 * k }
     });
     person(E, X(-1.05), f[0], cz - .26, 0, { kind: 'type', cloth: P.office, night: true });   // 夜は夜間受付として残る
-    talk(person(E, X(-.38), f[0], cz - .27, 0, { cloth: P.coat, night: true, hold: 'chart' }), person(E, X(-.5), f[0], cz + .3, Math.PI, { cloth: P.casual[0] }));   // 受付で話す(カルテを持つ)
+    talk(person(E, X(-.38), f[0], cz - .27, 0, { cloth: P.coat, night: true, hold: 'chart' }), person(E, X(-.5), f[0], cz + .3, Math.PI, { cloth: P.casual[0], night: true }));   // 夜も、家族が夜間受付で話す   // 受付で話す(カルテを持つ)
     // 待合のベンチ(受付を向く)
     for (const bz of [Z(.2), Z(.66)]) grp(S, X(.88), f[0], bz).foot(0, 0, .8 * k, .13 * k).box(0, 0, 0, .8 * k, .012, .012, P.metalDark).box(-.34 * k, 0, 0, .016, .1 * k, .13 * k, P.metalDark).box(.34 * k, 0, 0, .016, .1 * k, .13 * k, P.metalDark).rbox(0, .1 * k, 0, .8 * k, .03 * k, .14 * k, .01, P.chair).rbox(0, .13 * k, -.06 * k, .8 * k, .12 * k, .025 * k, .01, P.chair);
     person(E, X(.65), f[0] + .015, Z(.2), 0, { kind: 'read', cloth: P.casual[1], fy: f[0], hold: 'book' });
@@ -1061,7 +1061,7 @@ const BUILD = {
     });
     person(E, X(-.72), y3 + .015, sz0 + .04, -.25, { kind: 'sit', cloth: P.coat, fy: y3, hold: 'cup' });
     grp(S, X(-.3), y3, R.zb + .1).foot(0, 0, .2 * k, .14 * k).rbox(0, 0, 0, .2 * k, .44 * k, .14 * k, .015, P.trim).box(0, .2 * k, .072 * k, .16 * k, .2 * k, .004, '#E7EEF2', 0, 0, .9).box(0, .07 * k, .072 * k, .12 * k, .05 * k, .004, P.dark);
-    talk(person(E, X(-.56), y3, Z(.28), 0, { cloth: P.scrubNavy, hold: 'chart' }), person(E, X(-.26), y3, Z(.33), 0, { cloth: P.blanket }));   // 看護師と、病衣の人
+    talk(person(E, X(-.56), y3, Z(.28), 0, { cloth: P.scrubNavy, hold: 'chart', night: true }), person(E, X(-.26), y3, Z(.33), 0, { cloth: P.blanket, night: true }));   // 看護師と、病衣の人
     plant(E, S, y3, X(-1.45), Z(.4), 1.2, 1);
     // 病室: 横向きのベッド2台(頭は外の壁の側。寝ている人が横から見える)。見舞いの人と看護師はベッドの奥にいて、こちらを向く
     const bz = R.zb + .36 * k, bl = .54 * k, bw2 = .28 * k, mt = .145 * k;
