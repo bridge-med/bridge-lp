@@ -256,7 +256,7 @@ export async function live(o) {
       const pl = placeOf(S, id), m = new THREE.Matrix4().makeRotationY(r).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(Y, pl.yaw), one));
       for (const p of boundsOf(id, id === 'plaza' ? null : S.B[id].ex).pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
     }
-    const ppu = Math.min(sw / (x1 - x0), shh / (y1 - y0), base.ppu * 3);
+    const ppu = Math.min(sw * .92 / (x1 - x0), shh * .94 / (y1 - y0), base.ppu * 3);   // 少し余白を残す(島の縁が見えて、見晴らしらしく)
     const scx = (sf.l + sf.r) / 2, scy = sf.t + top + shh / 2;
     return { rot: r, elev: el, x: (x0 + x1) / 2 - (scx - W / 2) / ppu, y: (y0 + y1) / 2 + (scy - H / 2) / ppu, ppu };
   }

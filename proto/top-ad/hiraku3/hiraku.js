@@ -289,7 +289,12 @@ function boot() {
     if (phone() && panel.classList.contains('full')) { panel.classList.remove('full'); setTimeout(go, 340); } else go();
   }
   /* ひらいた入口が、パネル(シート)の見える範囲に入るように */
-  function revealRow(sid) { const li = $(`.prow[data-sid="${CSS.escape(sid)}"]`, pTools); if (li) requestAnimationFrame(() => li.scrollIntoView({ block: 'nearest', behavior: reduce() ? 'auto' : 'smooth' })); }
+  function revealRow(sid) {
+    const li = $(`.prow[data-sid="${CSS.escape(sid)}"]`, pTools); if (!li) return;
+    const now = reduce() || Q.get('clock') === 'manual';   // 撮るとき(手動の時計)は、描かないとなめらかなスクロールが進まないので瞬時に
+    li.scrollIntoView({ block: 'nearest', behavior: now ? 'auto' : 'smooth' });
+    if (!now) setTimeout(() => { const r = li.getBoundingClientRect(), bb = pBody.getBoundingClientRect(); if (r.bottom > bb.bottom + 2 && r.top > bb.top + 2) li.scrollIntoView({ block: 'nearest' }); }, 500);   // なめらかに動かなかったときは、そのまま合わせる
+  }
   /* 動かないとき(動きを減らす・WebGL なし): パネルの上に、その建物の断面の止めた画像 */
   function stillShot() {
     const im = pStill.querySelector('img'), b = BY_ID[openId];
@@ -321,6 +326,7 @@ function boot() {
       if (opt.focus !== false) pTitle.focus({ preventScroll: true });   // 描画が重い端末でも遅れないように、その場で移す
     };
     if (wasOpen || !ctl || reduce() || opt.now) show(); else setTimeout(show, 260);
+    if (!save) idle(() => { if (openId !== id) return; for (const tid of BY_ID[id].tools) { const t = TOOLS[tid]; if (t.thumb) { const im = new Image(); im.decoding = 'async'; im.fetchPriority = 'low'; im.src = THUMB(t.thumb); } } });   // 入口の写しを先に読んでおく(押したときに枠が空にならないように)
     writeHash();
     if (PERF) PERF.mark('open', id);
     say.textContent = BY_ID[id].name + 'がひらきました';
@@ -390,14 +396,15 @@ function boot() {
     if (t.ext || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (ctl) ctl.setPaused(true);   // 移る間は町を描かない(次のページの読み込みに手を譲る)
     if (reduce() || !im || !im.naturalWidth || !document.body.animate) return;
-    if (leapEl) leapEl.remove();
+    if (leapEl) unleap(false);
     const nw = im.naturalWidth, nh = im.naturalHeight, bx = im.getBoundingClientRect();
     const s0 = Math.min(bx.width / nw, bx.height / nh), w0 = nw * s0, x0 = bx.left + (bx.width - w0) / 2, y0 = bx.top + (bx.height - nh * s0) / 2;   // object-fit: contain の中身
     const vw = R.clientWidth, vh = innerHeight, s1 = Math.min(vw / nw, vh / nh), w1 = nw * s1, h1 = nh * s1, x1 = (vw - w1) / 2, y1 = phone() ? 0 : (vh - h1) / 2;   // スマホはページの上の端へ
-    const lp = el('div', 'leap'), bg = el('i', 'lp-bg'), li = new Image();
-    lp.setAttribute('aria-hidden', 'true'); li.className = 'lp-im'; li.alt = ''; li.src = im.currentSrc || im.src;
+    // 写しそのもの(読み終えた画像)を上の層へ移して広げる。読み直さないので、押した瞬間から見える。戻ったら枠へ返す
+    const lp = el('div', 'leap'), bg = el('i', 'lp-bg'), li = im, fig = im.parentNode;
+    lp.setAttribute('aria-hidden', 'true'); li.classList.add('lp-im');
     Object.assign(li.style, { left: x1.toFixed(1) + 'px', top: y1.toFixed(1) + 'px', width: w1.toFixed(1) + 'px', height: h1.toFixed(1) + 'px' });
-    lp.append(bg, li); document.body.append(lp);
+    lp.append(bg, li); document.body.append(lp); lp.home = fig;
     const k = w0 / w1, from = `translate(${(x0 - x1).toFixed(1)}px,${(y0 - y1).toFixed(1)}px) scale(${k.toFixed(4)})`;
     lp.dataset.from = from;
     li.animate([{ transform: from, borderRadius: (8 / k).toFixed(1) + 'px' }, { transform: 'none', borderRadius: '0px' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' });
@@ -409,11 +416,12 @@ function boot() {
     const lp = leapEl; leapEl = null;
     if (ctl) ctl.setPaused(paused);
     if (!lp) return;
-    if (!anim || reduce()) { lp.remove(); return; }
+    const li = $('.lp-im', lp), done = () => { lp.remove(); li.getAnimations().forEach(x => x.cancel()); li.classList.remove('lp-im'); li.removeAttribute('style'); lp.home.append(li); };
+    if (!anim || reduce()) { done(); return; }
     const D = 240;
-    $('.lp-im', lp).animate([{ transform: 'none' }, { transform: lp.dataset.from }], { duration: D, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' });
+    li.animate([{ transform: 'none' }, { transform: lp.dataset.from }], { duration: D, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' });
     $('.lp-bg', lp).animate([{ opacity: 1 }, { opacity: 0 }], { duration: D, fill: 'both' });
-    setTimeout(() => lp.remove(), D + 40);
+    setTimeout(done, D + 40);
   }
   addEventListener('pageshow', e => { if (e.persisted) unleap(true); });
 

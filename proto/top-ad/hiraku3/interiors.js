@@ -459,7 +459,7 @@ export function buildInterior(kind, box, ctx = {}) {
       touch(sGeo.attributes.position, s.h[0] + hOff, s.h[1] + hOff); touch(sGeo.attributes.color, s.h[0] + hOff, s.h[1] + hOff);
     }
     if (scGeo) {
-      const Pp = scGeo.attributes.position.array, Cc = scGeo.attributes.color.array, b = clamp01(s.on) * (.9 + .1 * Math.max(k, s.hoverK || 0) - s.flick);   // 見つけたとき(k=1)は写しの色そのまま。ふだんはわずかに落とす
+      const Pp = scGeo.attributes.position.array, Cc = scGeo.attributes.color.array, b = clamp01(s.on) * (.9 + .1 * Math.max(k, s.hoverK || 0) - s.flick * (1 - k));   // 見つけたとき(k=1)は写しの色そのまま(ちらつきも止める)。ふだんはわずかに落とす
       for (let v = s.sc[0]; v < s.sc[1]; v++) { Pp[v * 3] = scBase[v * 3] + dx; Pp[v * 3 + 1] = scBase[v * 3 + 1] + dy + .0005; Pp[v * 3 + 2] = scBase[v * 3 + 2] + dz; const bb2 = .06 + b * .94; Cc[v * 3] = bb2; Cc[v * 3 + 1] = bb2; Cc[v * 3 + 2] = bb2; }
       scGeo.attributes.position.needsUpdate = true; scGeo.attributes.color.needsUpdate = true;
     }
@@ -1065,23 +1065,25 @@ const BUILD = {
     // ---- 2階: 開いたノートの机・窓辺の椅子とタブレット・日誌の机 ----
     const y2 = f(1);
     desk(E, S, y2, .2, -.24, .28 * k, .16 * k, -.4, P.deskWood);
+    const tnB = slant(.05, .2 * k, .13 * k, .01, .55);   // 開いたノートを、机の上の小さな書見台に
     station(E, 'tanaoroshi', {
-      x: .2, y: y2 + .19 * k, z: -.24, ry: -.12, lift: [0, .03, .01], scale: 1.25,
-      holder: g => g.box(0, 0, 0, .2 * k, .008, .13 * k, '#E9E1D2'),
-      screen: { x: 0, y: .0095, z: 0, w: .19 * k, h: .12 * k, tilt: Math.PI / 2 - .18 }
+      x: .2, y: y2 + .19 * k, z: -.22, ry: -.12, lift: [0, .03, .01], scale: 1.25,
+      holder: g => { g.box(0, 0, -.035, .14 * k, .04, .02, P.woodDark); tnB.add(g, '#E9E1D2'); },
+      screen: tnB.screen
     });
     chair(E, S, y2, .42, -.1, -2.14, P.chair2);
     person(E, .42, y2, -.1, -2.14, { kind: 'write', cloth: P.casual[0] });   // 机の右の端から書く(前から見るノートを遮らない)
-    grp(S, -.25, y2, .09, 1.15).rbox(0, 0, 0, .2 * k, .09 * k, .18 * k, .03, P.sofa).rbox(0, .09 * k, -.07 * k, .2 * k, .12 * k, .04 * k, .02, P.sofa).rbox(-.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa).rbox(.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa);
-    const mp = person(E, -.25, y2 + .015, .09, 1.15, { kind: 'read', cloth: P.casual[3], fy: y2 });
+    const mr = .45;   // ソファの人は手前の右を向き、タブレットの画面を見る人へ向けて持つ
+    grp(S, -.25, y2, .09, mr).rbox(0, 0, 0, .2 * k, .09 * k, .18 * k, .03, P.sofa).rbox(0, .09 * k, -.07 * k, .2 * k, .12 * k, .04 * k, .02, P.sofa).rbox(-.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa).rbox(.09 * k, .09 * k, 0, .03 * k, .06 * k, .18 * k, .015, P.sofa);
+    const mp = person(E, -.25, y2 + .015, .09, mr, { kind: 'read', cloth: P.casual[3], fy: y2 });
     const hm1 = handOf(mp, 1).add(handOf(mp, -1)).multiplyScalar(.5);      // タブレットは両手の間に。画面は前(見る人の側)へ向けて見せる
     station(E, 'moyamoya', {
-      x: hm1.x + Math.sin(1.15) * .02, y: hm1.y - .035, z: hm1.z + Math.cos(1.15) * .02, ry: 1.15, lift: [0, .035, .02], glass: true, bezel: .006, scale: 1.2,
+      x: hm1.x + Math.sin(mr) * .02, y: hm1.y - .035, z: hm1.z + Math.cos(mr) * .02, ry: mr, lift: [0, .035, .02], glass: true, bezel: .006, scale: 1.2,
       holder: g => g.rbox(0, 0, -.006, .15 * k, .1 * k, .01, .008, '#2A2F35'),
       screen: { x: 0, y: .05 * k, z: .0002, w: .136 * k, h: .085 * k }
     });
     station(E, 'daily-app', {
-      x: .05, y: y2, z: .22, ry: -.15, glass: true, rim: false, scale: 1.25,
+      x: .3, y: y2, z: .16, ry: -.3, glass: true, rim: false, scale: 1.25,
       holder: g => g.box(0, .16 * k, 0, .24 * k, .016, .14 * k, P.deskWood).box(0, 0, 0, .03, .16 * k, .03, P.woodDark).box(0, 0, 0, .12, .012, .1, P.woodDark).box(.08, .176 * k, -.03, .06 * k, .008, .05 * k, P.terraLight)
         .box(-.02, .176 * k, -.02, .05 * k, .012, .04 * k, P.woodDark).rbox(-.02, .18 * k, -.012, .078 * k, .17 * k, .01, .008, '#2A2F35'),   // 台に立てたスマホ
       screen: { x: -.02, y: .18 * k + .085 * k, z: -.0065, w: .07 * k, h: .156 * k }
@@ -1237,9 +1239,9 @@ const BUILD = {
     });
     // 面接の机と2脚の椅子(手前)
     grp(S, X(.42), y3, Z(.42)).rbox(0, .17 * k, 0, .3 * k, .016, .18 * k, .01, P.deskWood).box(0, 0, 0, .03, .17 * k, .03, P.woodDark).box(0, 0, 0, .14, .01, .1, P.woodDark);
-    chair(E, S, y3, X(.22), Z(.42), Math.PI / 2, P.chair2); chair(E, S, y3, X(.62), Z(.42), -Math.PI / 2, P.chair2);
-    person(E, X(.22), y3, Z(.42), Math.PI / 2, { kind: 'write', cloth: P.office });
-    person(E, X(.62), y3, Z(.42), -Math.PI / 2, { kind: 'listen', cloth: P.casual[3] });     // 面接で話す人
+    chair(E, S, y3, X(.42) - .25, Z(.42), Math.PI / 2, P.chair2); chair(E, S, y3, X(.42) + .25, Z(.42), -Math.PI / 2, P.chair2);   // 手帖(机の手前)に重ならない間隔
+    person(E, X(.42) - .25, y3, Z(.42), Math.PI / 2, { kind: 'write', cloth: P.office });
+    person(E, X(.42) + .25, y3, Z(.42), -Math.PI / 2, { kind: 'listen', cloth: P.casual[3] });     // 面接で話す人
     station(E, 'interview-kit', {
       x: X(.42), y: y3 + .186 * k, z: Z(.42) + .05, ry: 0, lift: [0, .03, .012],
       holder: g => g.box(0, 0, -.02, .12 * k, .01, .04, P.woodDark).rbox(0, .004, -.008, .2 * k, .13 * k, .01, .006, P.paper),   // 机に立てた手帖

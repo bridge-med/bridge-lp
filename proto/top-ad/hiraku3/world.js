@@ -41,7 +41,7 @@ export const angDiff = (a, b) => { let d = (a - b) % TAU; if (d > Math.PI) d -= 
 const BUMPS = [[300, .72, 17], [326, -.42, 9], [8, -.62, 11], [45, .5, 15], [102, -.6, 12], [142, .6, 15], [172, .3, 18], [232, -.32, 20], [205, .16, 12], [268, .25, 13]];
 export function islandR(a) {
   let r = ISLAND_R + .07 * Math.sin(a * 7 + .4) + .05 * Math.sin(a * 11 + 1.3);
-  for (const [c, A, w] of BUMPS) { const d = angDiff(a, deg(c)) / deg(w); r += A * Math.exp(-d * d); }
+  for (let i = 0; i < BUMPS.length; i++) { const B = BUMPS[i], d = angDiff(a, deg(B[0])) / deg(B[2]); r += B[1] * Math.exp(-d * d); }   // 毎こま呼ばれる(人の足もと)。分割代入で物を作らない
   return r;
 }
 /* 縁の一段低い段(手前右・公園の側)。島の角度 a で、縁から内へ LEDGE.w の幅が LEDGE.d だけ低い */
@@ -61,9 +61,10 @@ const STAIRS = [
   { s: -.6, f: -3.15, dir: [0, -1], w: .8, len: .55 }      // 奥 → 家並み・展望台
 ];
 const RAMP = { a: [1.9, 3.95], b: [2.62, 5.45], w: .58 };  // 救急の車の坂(台地の右前)
-function inRect(s, f, st) { const [dx, dz] = st.dir, px = s - st.s, pf = f - st.f, along = px * dx + pf * dz, across = -px * dz + pf * dx; return { along, across, inside: along > -.25 && along < st.len && Math.abs(across) < st.w / 2 }; }
+const _IR = { along: 0, across: 0, inside: false };   // 作業用(groundY は毎こま人ごとに呼ばれる。新しい物を作らない)
+function inRect(s, f, st) { const dx = st.dir[0], dz = st.dir[1], px = s - st.s, pf = f - st.f, along = px * dx + pf * dz, across = -px * dz + pf * dx; _IR.along = along; _IR.across = across; _IR.inside = along > -.25 && along < st.len && Math.abs(across) < st.w / 2; return _IR; }
 function rampK(s, f) {
-  const [ax, af] = RAMP.a, [bx, bf] = RAMP.b, dx = bx - ax, df = bf - af, L2 = dx * dx + df * df, u = ((s - ax) * dx + (f - af) * df) / L2;
+  const ax = RAMP.a[0], af = RAMP.a[1], bx = RAMP.b[0], bf = RAMP.b[1], dx = bx - ax, df = bf - af, L2 = dx * dx + df * df, u = ((s - ax) * dx + (f - af) * df) / L2;
   if (u < -.05 || u > 1.05) return -1; const px = ax + dx * u - s, pf = af + df * u - f, rw = RAMP.w / 2 + .04; if (px * px + pf * pf > rw * rw) return -1; return clamp01(u);
 }
 /* 地面の高さ(人・車・接地の陰に使う) */
@@ -73,7 +74,7 @@ export function groundY(x, z) {
   if (s < -4.2 || s > 4.8 || f < -4.4 || f > 6.6) { const r2 = x * x + z * z; if (r2 < 60) return 0; const a = Math.atan2(z, x); return -ledgeDrop(a, Math.sqrt(r2), islandR(a)); }
   const d = plateauSF(s, f);
   if (d < -.02) return PLATEAU_H;
-  for (const st of STAIRS) { const q = inRect(s, f, st); if (q.inside) return PLATEAU_H * (1 - smooth01(q.along / st.len)); }
+  for (let i = 0; i < STAIRS.length; i++) { const st = STAIRS[i], q = inRect(s, f, st); if (q.inside) return PLATEAU_H * (1 - smooth01(q.along / st.len)); }
   const rk = rampK(s, f); if (rk >= 0) return PLATEAU_H * (1 - rk);
   return d < 0 ? PLATEAU_H : 0;
 }
@@ -90,7 +91,9 @@ export const U = {
   uPM: { value: Array.from({ length: 8 }, () => new THREE.Matrix4()) },
   uGlowW: { value: new THREE.Color('#FFB873') }, uGlowI: { value: new THREE.Color('#9DB2FF') }, uGlowS: { value: new THREE.Color('#FFC77A') },
   uGlowC: { value: new THREE.Color('#E4ECF7') }, uGlowL: { value: new THREE.Color('#FFC27A') }, uGlowK: { value: new THREE.Color('#FFF0D2') },
-  uHazeC: { value: new THREE.Color('#FFFFFF') }, uHazeK: { value: .8 }   // 岩の先が下へ行くほど溶ける、もやの色と強さ。placeSky が時間帯で変える
+  uHazeC: { value: new THREE.Color('#FFFFFF') }, uHazeK: { value: .8 },   // 岩の先が下へ行くほど溶ける、もやの色と強さ。placeSky が時間帯で変える
+  // 交差の広場の時刻ごとの表情(applyTod が決める): uArc = 弧と床の帯が灯る強さ(夜だけ)、uRim = 夕方の低い光(砂の弧の縁が金、藍の弧は影絵)
+  uArc: { value: 0 }, uRim: { value: 0 }, uGlowR: { value: new THREE.Color('#FFC46E') }
 };
 const VCOMMON = `
 attribute vec2 aFx; attribute float aBid; attribute float aPart; attribute float aWin;
@@ -112,7 +115,7 @@ if (abs(aBid - uLiftBid) < .5) transformed.y += uLift;
 vFx = aFx; vBid = aBid; vWin = aWin; vCut = hkC; vHkY = (modelMatrix * vec4(transformed, 1.0)).y;`;
 const FCOMMON = `
 uniform float uNight; uniform float uTime; uniform float uHi; uniform float uHiAmt; uniform vec3 uHiColor;
-uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK; uniform vec3 uHazeC; uniform float uHazeK;
+uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK; uniform vec3 uHazeC; uniform float uHazeK; uniform float uArc; uniform float uRim; uniform vec3 uGlowR;
 varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY;
 float hkBayer(vec2 p) { vec2 q = mod(floor(p), 4.0); float i = q.x + q.y * 4.0;
   return (i < 1.0 ? 0. : i < 2.0 ? 8. : i < 3.0 ? 2. : i < 4.0 ? 10. : i < 5.0 ? 12. : i < 6.0 ? 4. : i < 7.0 ? 14. : i < 8.0 ? 6. : i < 9.0 ? 3. : i < 10.0 ? 11. : i < 11.0 ? 1. : i < 12.0 ? 9. : i < 13.0 ? 15. : i < 14.0 ? 7. : i < 15.0 ? 13. : 5.) / 16.0 + 1.0 / 32.0; }
@@ -128,10 +131,12 @@ if (vWin > .5) {
   else if (md < 2.5) { float cyc = floor(uTime * (.02 + h * .03) + h * 5.0); hkLit = step(.72, hkHash(id * 5.31 + cyc * 3.7)) * .34; }
   else if (md < 3.5) { hkLit = step(.12, h); }
 }
-float gk = vFx.x;
-vec3 hkG = gk < 1.5 ? uGlowW : gk < 2.5 ? uGlowI : gk < 3.5 ? uGlowS : gk < 4.5 ? uGlowC : gk < 5.5 ? uGlowL : gk < 6.5 ? uGlowK : gk < 7.5 ? uGlowI : uGlowS;
-float gi = gk < 1.5 ? 1.9 : gk < 3.5 ? 1.15 : gk < 4.5 ? .95 : gk < 5.5 ? 1.6 : gk < 6.5 ? 1.3 : .42;
-totalEmissiveRadiance += hkG * gi * step(.5, gk) * step(gk, 8.5) * hkLit * uNight;
+float gk = vFx.x, gq = abs(gk - 10.0) < .5 ? 3.0 : gk;   // 砂の弧の縁(10)は、夜は砂の弧(3)と同じに灯る
+vec3 hkG = gq < 1.5 ? uGlowW : gq < 2.5 ? uGlowI : gq < 3.5 ? uGlowS : gq < 4.5 ? uGlowC : gq < 5.5 ? uGlowL : gq < 6.5 ? uGlowK : gq < 7.5 ? uGlowI : uGlowS;
+float gi = gq < 1.5 ? 1.9 : gq < 3.5 ? 1.15 : gq < 4.5 ? .95 : gq < 5.5 ? 1.6 : gq < 6.5 ? 1.3 : .42;
+float hkN = (gq > 1.5 && gq < 3.5) || (gq > 6.5 && gq < 8.5) ? uArc : uNight;   // 広場の弧と床の帯は、夜だけ灯る(夕方は灯らない)
+totalEmissiveRadiance += hkG * gi * step(.5, gq) * step(gq, 8.5) * hkLit * hkN;
+totalEmissiveRadiance += uGlowR * (1.0 - step(.5, abs(gk - 10.0))) * uRim * 1.4;   // 夕方: 砂の弧の縁が金に光る
 totalEmissiveRadiance += uHiColor * (1.0 - step(.5, abs(vBid - uHi))) * uHiAmt;`;
 const TM = {};
 function townMat(cls) {
@@ -146,9 +151,10 @@ function townMat(cls) {
       .replace('#include <clipping_planes_fragment>', 'if (vCut < .999 && hkBayer(gl_FragCoord.xy) >= vCut) discard;\n#include <clipping_planes_fragment>')
       .replace('#include <color_fragment>', `#include <color_fragment>
 if (vFx.y > .5) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.075, .095, .15), uNight * .82);
+if (abs(vFx.x - 2.0) < .5) diffuseColor.rgb *= 1.0 - .15 * uRim;   // 夕方の藍の弧は、逆光の影絵に(真っ黒にはしない。深い藍)
 if (uFocus > -.5 && abs(vBid - uFocus) > .5) { float k = vBid > .5 ? uDim : uDim * .55; float l = dot(diffuseColor.rgb, vec3(.3, .59, .11)); diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(l), vec3(.93, .92, .9), .22), k); }`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + FWIN)
-      .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5) outgoingLight = diffuseColor.rgb;\n#include <opaque_fragment>')
+      .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5 && vFx.x < 9.5) outgoingLight = diffuseColor.rgb;\n#include <opaque_fragment>')
       .replace('#include <tonemapping_fragment>', '#include <tonemapping_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uHazeC, (1.0 - smoothstep(-7.9, -6.2, vHkY)) * uHazeK);');
   };
   m.customProgramCacheKey = () => 'hk-town2-' + cls;
@@ -541,6 +547,7 @@ function drivePts(B) {
    中心で2本はそれぞれ細い弧として持ち上がり、空中で交差するが接続しない(ロゴの立体版)。夜は弧と床の帯が、藍(白みのある)と砂(温かい)に灯る
    文字どおりの「橋」(水路に架けた小さな橋)はやめる ---------- */
 const LOGO = { I: [[8, 74], [62, 16], [118, 24], [176, 84]], S: [[58, 94], [118, 60], [158, 22], [232, 12]] };
+const LOGO_X = { u: 132.0, v: 48.48, tI: .745, tS: .4515 };   // ロゴの2本の線が交差する所(ロゴの座標。計算で確かめた値)
 function bez(P, t) { const u = 1 - t; return [u * u * u * P[0][0] + 3 * u * u * t * P[1][0] + 3 * u * t * t * P[2][0] + t * t * t * P[3][0], u * u * u * P[0][1] + 3 * u * u * t * P[1][1] + 3 * u * t * t * P[2][1] + t * t * t * P[3][1]]; }
 /* 2本の線: ロゴの中の「高さ」(v が小さいほど上)を、そのまま空中の高さにする(ロゴの立体版)。高さは v に比例(足もとで跳ねない)
    藍は両足が台座に沈み、砂は台座から立ち上がって右上で空中に抜ける(筆の線のように細って終わる)。砂は少し手前の面にあり、交差して見えても触れない
@@ -566,6 +573,20 @@ function brushRibbon(pts3, wmax, th, wf, mat) {
     for (let i = 0; i < n - 1; i++) { const a = base + i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
   }
   return sh(new THREE.Mesh(geo(pos, nor, idx), mat));
+}
+/* 筆の線の帯の、上の縁だけの細い帯(brushRibbon と同じ断面の向き)。frac は広い面の幅のうち縁の帯の割合。面から少し浮かせて重ならないように */
+function brushRim(pts3, wmax, th, wf, frac, mat) {
+  const pos = [], nor = [], idx = [], n = pts3.length, up = new THREE.Vector3(0, 1, 0), T = new THREE.Vector3(), S = new THREE.Vector3(), N = new THREE.Vector3(), P = new THREE.Vector3(), E2 = .0016;
+  const fr = pts3.map((p, i) => { const a = pts3[Math.max(0, i - 1)], b = pts3[Math.min(n - 1, i + 1)]; T.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]).normalize(); S.crossVectors(T, up).normalize(); N.crossVectors(S, T).normalize(); return { p, S: S.clone(), N: N.clone(), w: wmax * wf(i / (n - 1)) }; });
+  const corner = (f, a, b, eN, eS) => { P.set(...f.p).addScaledVector(f.N, a * f.w / 2 + eN).addScaledVector(f.S, b * (th / 2 + eS)); return [P.x, P.y, P.z]; };
+  const a0 = 1 - 2 * frac;
+  // 角の継ぎ目に元の面がのぞかないよう、縁の帯は角を少し越えて重ねる(a は 1.04 まで、上の面は b を ±1.2 に)
+  for (const [a1, b1, a2, b2, nk] of [[a0, 1, 1.04, 1, 'S'], [1.04, -1, a0, -1, '-S'], [1, 1.2, 1, -1.2, 'N']]) {
+    const base = pos.length / 3, eN = nk === 'N' ? E2 : 0, eS = nk === 'N' ? 0 : E2;
+    for (const f of fr) { const nv = nk === 'S' ? f.S : nk === '-S' ? f.S.clone().negate() : f.N; pos.push(...corner(f, a1, b1, eN, eS)); nor.push(nv.x, nv.y, nv.z); pos.push(...corner(f, a2, b2, eN, eS)); nor.push(nv.x, nv.y, nv.z); }
+    for (let i = 0; i < n - 1; i++) { const a = base + i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+  }
+  return sh(new THREE.Mesh(geo(pos, nor, idx), mat), false);
 }
 /* 床に埋めた石の帯(平らで、端に向かって細る) */
 function floorBrush(pts, wmax, wf, y, mat) {
@@ -606,17 +627,24 @@ function* plazaGen(g, q) {
   // 2本の線
   const N = q === 'low' ? 70 : 130, down = [Math.cos(deg(LAYOUT.plaza.a)), Math.sin(deg(LAYOUT.plaza.a))];
   const curve = (P, t0, t1, off) => { const out = []; for (let i = 0; i <= N; i++) { const t = lerp(t0, t1, i / N), [u, v] = bez(P, t), [x, z] = map([u, v]); out.push({ t, v, x: x + down[0] * off, z: z + down[1] * off }); } return out; };
-  const cI = curve(LOGO.I, ARC.I.t0, ARC.I.t1, 0), cS = curve(LOGO.S, ARC.S.t0, ARC.S.t1, ARC.SOFF);
+  // 床のロゴは、ロゴの2本の線そのもの(t = 0..1。ずらさない。上から見ると、ロゴと同じ形で交差する)。
+  // 空中の弧は、構造のために2か所だけロゴから離れる: 藍は左の足を同じ曲線のまま地面まで延ばす(t0 < 0)。
+  // 砂は高さに応じて少し手前へずらす(足もとでは床の帯から立ち上がり、交差する高さで藍から ARC.SOFF 離れる。2本は交差して見えても触れない)
+  const cI = curve(LOGO.I, ARC.I.t0, ARC.I.t1, 0), cIf = curve(LOGO.I, 0, 1, 0), cSf = curve(LOGO.S, ARC.S.t0, ARC.S.t1, 0);
+  const hX = arcH(LOGO_X.v, ks) * .85;
+  const cS = cSf.map(p => { const o = ARC.SOFF * smooth01(arcH(p.v, ks) / hX); return { t: p.t, v: p.v, x: p.x + down[0] * o, z: p.z + down[1] * o }; });
   // 床のロゴ(藍の石と砂の石。筆の線のように端で細る)。夜は柔らかく灯る
   const fwI = u => .35 + .65 * Math.pow(Math.sin(Math.PI * clamp01(u)), .5), fwS = u => .3 + .7 * Math.pow(Math.sin(Math.PI * clamp01(u * .85 + .08)), .55);
-  const fI = floorBrush(cI.map(p => [p.x, p.z]), .11, fwI, H + .012, M(C.inlayI, { r: .6 })); fI.userData.fx = [7, 0]; pg.add(fI);
-  const fS = floorBrush(cS.map(p => [p.x, p.z]), .11, fwS, H + .013, M(C.inlayS, { r: .7 })); fS.userData.fx = [8, 0]; pg.add(fS);
+  const fI = floorBrush(cIf.map(p => [p.x, p.z]), .11, fwI, H + .012, M(C.inlayI, { r: .6 })); fI.userData.fx = [7, 0]; pg.add(fI);
+  const fS = floorBrush(cSf.map(p => [p.x, p.z]), .11, fwS, H + .013, M(C.inlayS, { r: .7 })); fS.userData.fx = [8, 0]; pg.add(fS);
   // 空中の弧: 台座の上から、v に比例した高さで立ち上がる。筆の線のように細る
   const lifted = (c, off) => { const out = []; for (const p of c) { const h = arcH(p.v, ks); if (h <= 0 && out.length && out[out.length - 1][1] > H + PLINTH + .001) { out.push([p.x, H + PLINTH - .03, p.z]); break; } if (h > 0 || !out.length) out.push([p.x, H + PLINTH + h - (h <= 0 ? .03 : 0), p.z]); } return out.filter((p, i, a) => i === 0 || p[1] > H + PLINTH - .031); };
   const aI = lifted(cI), aS = lifted(cS.filter(p => arcH(p.v, ks) > 0 || p.t > .05));
   const twI = u => .5 + .5 * Math.pow(Math.sin(Math.PI * u), .6), twS = u => (u < .5 ? .55 + .45 * Math.sin(Math.PI * u) : .25 + .75 * Math.pow(Math.cos(Math.PI * (u - .5)), .8));
   const arcI = brushRibbon(aI, .15, .024, twI, M(C.arcI, { r: .72 })), arcS = brushRibbon(aS, .14, .022, twS, M(C.arcS, { r: .78 }));
   arcI.userData.fx = [2, 0]; arcS.userData.fx = [3, 0]; pg.add(arcI, arcS);
+  // 砂の弧の縁(夕方だけ、低い光が金に照らす): 広い面の上の縁の帯と、上の細い面。昼と夜は弧と同じ色で、見分けられない
+  const rimS = brushRim(aS, .14, .022, twS, .3, M(C.arcS, { r: .78 })); rimS.userData.fx = [10, 0]; rimS.castShadow = false; pg.add(rimS);
   // 台座(足が静かに沈む、小さな低い石)
   const plinth = (p, nxt) => { const m = cbox(.3, PLINTH, .22, M(C.stone2, { r: .85 }), .012); m.position.set(p[0], H + PLINTH / 2, p[2]); m.rotation.y = Math.atan2(nxt[0] - p[0], nxt[2] - p[2]); pg.add(m); };
   plinth(aI[0], aI[3]); plinth(aI[aI.length - 1], aI[aI.length - 4]); plinth(aS[0], aS[3]);
@@ -633,7 +661,7 @@ function* plazaGen(g, q) {
   }
   for (const [s, f] of [[-2.6, 1.95], [-2.6, 3.4]]) { const [x, z] = SF(s, f), t = tree(r8, 'round', .78, q); t.position.set(x, H, z); pg.add(t); const pit = treePit(.36); pit.position.set(x, H + .006, z); pg.add(pit); }
   const topI = aI.reduce((m, p) => p[1] > m[1] ? p : m, aI[0]), topS = aS.reduce((m, p) => p[1] > m[1] ? p : m, aS[0]);
-  return { I: cI, S: cS, X: [topI[0], topI[2]], aI, aS, topI, topS };
+  return { I: cI, S: cS, If: cIf, Sf: cSf, X: [topI[0], topI[2]], aI, aS, topI, topS };
 }
 
 /* ---------- 小さな家(町らしさのため。ふれない)。くすんだテラコッタ・灰青・生成りの屋根。夜は窓が少し灯る ---------- */
@@ -947,7 +975,9 @@ let TODK = 0;
 const whenK = w => { const i = Math.min(1, Math.floor(TODK)), k = TODK - i; return lerp(w[i], w[Math.min(2, i + 1)], k); };
 const _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _qt = new THREE.Quaternion(), _s = new THREE.Vector3(), _mt = new THREE.Matrix4(), _p = new THREE.Vector3(), _j = new THREE.Vector3(), _w = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
 const AXX = new THREE.Vector3(1, 0, 0), AXZ = new THREE.Vector3(0, 0, 1), ZERO3 = new THREE.Vector3(0, 0, 0);
-function alongPath(pts, u) { const n = pts.length - 1, f = clamp01(u) * n, i = Math.min(n - 1, Math.floor(f)), k = f - i, a = pts[i], b = pts[i + 1]; return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), Math.atan2(b[0] - a[0], b[1] - a[1])]; }
+/* 毎こま呼ばれる関数は、新しい物を作らない(下の作業用の物を使い回す)。長く動かしても記憶域が増えず、ごみ集めで止まらないように */
+const _AP = [0, 0, 0], _o3 = new THREE.Object3D(), _loc = new THREE.Vector3(), _cR = new THREE.Color();
+function alongPath(pts, u) { const n = pts.length - 1, f = clamp01(u) * n, i = Math.min(n - 1, Math.floor(f)), k = f - i, a = pts[i], b = pts[i + 1]; _AP[0] = lerp(a[0], b[0], k); _AP[1] = lerp(a[1], b[1], k); _AP[2] = Math.atan2(b[0] - a[0], b[1] - a[1]); return _AP; }
 /* いまの時間帯の暦で、出来事 name が動いていれば 0..1、動いていなければ -1 */
 /* バスに乗る出来事は、バスの時刻表(2つの輪 = BUS_P 秒で一周、偶数の輪の ct = BUS_PH 秒に前のバス停)に合わせて、
    bus は偶数の輪、bus2 は奇数の輪(待っているあいだに、次の偶数の輪の初めにバスが来る)だけ起こす */
@@ -966,24 +996,24 @@ const evStart = (name, t, u) => Math.round((t - u * EVD[name]) * 10);
 export function placePeople(dyn, t, blocked) {
   const D = dyn.people; if (!D) return;
   const L = D.limbM, obsOpen = Math.abs(U.uOpenA.value - 2) < .5 || Math.abs(U.uOpenB.value - 2) < .5;
-  for (const p of D.P) {
+  for (let pi = 0; pi < D.P.length; pi++) {
+    const p = D.P[pi];
     let x = 0, z = 0, y = 0, yaw = 0, s = 1, bob = 0, walk = false, sit = false, read = false, gest = false, yAbs = null;
     if (p.k === 'ring') {
       const a = p.ph + t * p.sp * p.dir; x = Math.cos(a) * p.r; z = Math.sin(a) * p.r; yaw = -a + (p.dir > 0 ? 0 : Math.PI); walk = true;
     } else if (p.k === 'plaza') {
-      const a = p.ph + t * p.sp * p.dir, [s0, f0, as, af] = p.e;
-      [x, z] = SF(s0 + Math.sin(a) * as, f0 + Math.cos(a) * af);
-      const [dx, dz] = SF(Math.cos(a) * as * p.dir, -Math.sin(a) * af * p.dir); yaw = Math.atan2(dx, dz); walk = true;
+      const a = p.ph + t * p.sp * p.dir, e = p.e, ps = e[0] + Math.sin(a) * e[2], pf = e[1] + Math.cos(a) * e[3], ds = Math.cos(a) * e[2] * p.dir, df = -Math.sin(a) * e[3] * p.dir;
+      x = (ps + pf) * R2; z = (pf - ps) * R2; yaw = Math.atan2((ds + df) * R2, (df - ds) * R2); walk = true;
     } else if (p.k === 'door') {
       const u = ((t + p.ph) % p.per) / p.per, d = p.door, out = p.out;
       const far = 1.2, wk = u < .45 ? u / .45 : u < .55 ? 1 : u < 1 ? 1 - (u - .55) / .45 : 0;
-      const side = new THREE.Vector3(-out.z, 0, out.x);
-      x = d.x + out.x * far * wk + side.x * Math.sin(wk * 3) * .22; z = d.z + out.z * far * wk + side.z * Math.sin(wk * 3) * .22;
+      const sw = Math.sin(wk * 3) * .22;   // 横へのふらつき(出入りの向きに直角)
+      x = d.x + out.x * far * wk - out.z * sw; z = d.z + out.z * far * wk + out.x * sw;
       yaw = Math.atan2(out.x, out.z) + (u < .5 ? 0 : Math.PI); walk = !(u > .45 && u < .55);
       s = u < .04 ? u / .04 : u > .96 ? (1 - u) / .04 : 1;
     } else if (p.k === 'path') {
-      const u = ((t + p.ph) % p.per) / p.per, k = u < .46 ? u / .46 : u < .54 ? 1 : 1 - (u - .54) / .46, [px, pz, a] = alongPath(p.pts, smooth01(k) * .98 + .01);
-      x = px; z = pz; yaw = a + (u < .5 ? 0 : Math.PI); s = u < .03 ? u / .03 : u > .97 ? (1 - u) / .03 : 1; walk = !(u > .46 && u < .54);
+      const u = ((t + p.ph) % p.per) / p.per, k = u < .46 ? u / .46 : u < .54 ? 1 : 1 - (u - .54) / .46, ap = alongPath(p.pts, smooth01(k) * .98 + .01);
+      x = ap[0]; z = ap[1]; yaw = ap[2] + (u < .5 ? 0 : Math.PI); s = u < .03 ? u / .03 : u > .97 ? (1 - u) / .03 : 1; walk = !(u > .46 && u < .54);
     } else if (p.k === 'chat') {
       x = p.p.x; z = p.p.z; yaw = p.face + Math.sin(t * .9 + p.ph) * .15; bob = Math.sin(t * 2 + p.ph) * .004; gest = p.gest && Math.sin(t * .7 + p.ph) > .2;
     } else if (p.k === 'ev') {
@@ -991,20 +1021,20 @@ export function placePeople(dyn, t, blocked) {
       if (u < 0) s = 0;
       else if (p.ev === 'commute' || p.ev === 'commute2' || p.ev === 'night' || p.ev === 'night2') {
         // 朝の出勤・夜勤: バス停から階段を上り、広場を通って病院の正面へ(入口の前で消える)
-        const k = clamp01((u - (p.d || 0) * .06) / .92), [px, pz, a] = alongPath(p.pts, k); x = px; z = pz; yaw = a; walk = k < 1; s = Math.min(1, k * 25, (1 - k) * 25 + (k < 1 ? 0 : 0));
+        const k = clamp01((u - (p.d || 0) * .06) / .92), ap = alongPath(p.pts, k); x = ap[0]; z = ap[1]; yaw = ap[2]; walk = k < 1; s = Math.min(1, k * 25, (1 - k) * 25 + (k < 1 ? 0 : 0));
       } else if (p.ev === 'lunch') {
         // 昼の休憩: 病院から出て、広場のベンチで休み、戻る
         const dd = (p.d || 0) * .03, k = u < .24 ? clamp01((u - dd) / .2) : u < .76 ? 1 : 1 - clamp01((u - .76 - dd) / .2);
-        const [px, pz, a] = alongPath(p.pts, k); x = px; z = pz; yaw = a + (u >= .76 ? Math.PI : 0); walk = k > 0 && k < 1;
-        if (k >= 1) { const [bx, bz] = SF(-2.55, 1.25 + p.seat); x = bx; z = bz; yaw = deg(90) + Math.PI / 4; sit = true; walk = false; }
+        const ap = alongPath(p.pts, k); x = ap[0]; z = ap[1]; yaw = ap[2] + (u >= .76 ? Math.PI : 0); walk = k > 0 && k < 1;
+        if (k >= 1) { const bf = 1.25 + p.seat; x = (-2.55 + bf) * R2; z = (bf + 2.55) * R2; yaw = deg(90) + Math.PI / 4; sit = true; walk = false; }
         s = Math.min(1, k * 20 + (u > .5 ? 1 : 0), u < .5 ? 1 : (1 - u) * 30);
       } else if (p.ev === 'clinic') {
         // 患者がクリニックの受付へ(扉の前で消える)
-        const [px, pz, a] = alongPath(p.pts, clamp01(u / .9)); x = px; z = pz; yaw = a; walk = u < .9; s = Math.min(1, u * 30, (1 - u) * 12);
+        const ap = alongPath(p.pts, clamp01(u / .9)); x = ap[0]; z = ap[1]; yaw = ap[2]; walk = u < .9; s = Math.min(1, u * 30, (1 - u) * 12);
       } else if (p.ev === 'library') {
         // 図書館の階段を上り、上の段に腰かけて本を読む
         const b = D.B.library, bx2 = BOXES.library, F = bx2.d / 2 + WALL + .004, y0 = b.ex.y0;
-        const k = clamp01(u / .25), loc = new THREE.Vector3(.55, 0, 0);
+        const k = clamp01(u / .25), loc = _loc.set(.55, 0, 0);
         if (k < 1) { loc.set(.55, lerp(-y0, -.01, smooth01(k)), lerp(F + 1.1, F + .3, k)); walk = true; yaw = b.grp.rotation.y + Math.PI; }
         else { loc.set(.55, -.01, F + .3); sit = true; read = true; yaw = b.grp.rotation.y; }
         loc.applyEuler(b.grp.rotation).add(b.grp.position); x = loc.x; z = loc.z; yAbs = loc.y + (sit ? .02 : 0);
@@ -1017,8 +1047,8 @@ export function placePeople(dyn, t, blocked) {
         s = obsOpen ? 0 : Math.min(1, u * 25, (1 - u) * 20);
       } else if (p.ev === 'bus' || p.ev === 'bus2') {
         // 夕方: 広場から階段を下りてバス停へ。バスが前のバス停に止まったら乗る(消える)
-        const k = clamp01((u - (p.d || 0) * .05) / .4), [px, pz, a] = alongPath(p.pts, k);
-        x = px; z = pz; yaw = a; walk = k < 1;
+        const k = clamp01((u - (p.d || 0) * .05) / .4), ap = alongPath(p.pts, k);
+        x = ap[0]; z = ap[1]; yaw = ap[2]; walk = k < 1;
         if (k >= 1) { x = p.wait[0]; z = p.wait[1]; yaw = Math.atan2(-x, -z) + Math.PI; }
         const bus = dyn.bus, id = evStart(p.ev, t, u), boarded = k >= 1 && bus && bus.stopped !== null && bus.stopped !== undefined && Math.abs(angDiff(bus.stopped, dyn.stops[0])) < .01 && bus.wait < STOP_DWELL * .5;
         if (boarded) p.gone = id;
@@ -1036,12 +1066,11 @@ export function placePeople(dyn, t, blocked) {
     _w.set(0, (sy * .36 + .045 - .405) * s, 0); _p.add(_w); _s.set(s, s, s); _mt.compose(_p, _q, _s); D.headM.setMatrixAt(p.i, _mt);
     _p.sub(_w);
     // 腕(肩から、ひじで曲がる)。歩く人は振り、話す人は片手で身ぶり、座る人は膝の上、読む人は本を胸の前に
-    const sw = walk ? Math.sin(t * 3.5 + p.i) * .38 : 0;
-    const arm = side => side > 0
-      ? (read ? [.85, .1, 1.25] : sit ? [.5, .08, .75] : gest ? [.55 + .2 * Math.sin(t * 1.3 + p.ph), .15, 1.05] : [.06 + sw, .1, .18 + Math.max(0, sw) * .4])
-      : (read ? [.85, .1, 1.25] : sit ? [.5, .08, .75] : [.06 - sw, .1, .18 + Math.max(0, -sw) * .4]);
-    for (const side of [1, -1]) {
-      const [a, sp, e] = arm(side), j = p.li + (side > 0 ? 0 : 2);
+    const sw = walk ? Math.sin(t * 3.5 + p.i) * .38 : 0, gA = .55 + .2 * Math.sin(t * 1.3 + p.ph);
+    for (let si = 0; si < 2; si++) {
+      const side = si ? -1 : 1, j = p.li + (side > 0 ? 0 : 2);
+      let a, sp, e;   // 肩の前への振り・横への開き・ひじの曲げ
+      if (read) { a = .85; sp = .1; e = 1.25; } else if (sit) { a = .5; sp = .08; e = .75; } else if (gest && side > 0) { a = gA; sp = .15; e = 1.05; } else { const w = side * sw; a = .06 + w; sp = .1; e = .18 + Math.max(0, w) * .4; }
       if (s < .01) { _mt.compose(_w.set(0, -20, 0), _q2.identity(), ZERO3); L.setMatrixAt(j, _mt); L.setMatrixAt(j + 1, _mt); continue; }
       _j.set(side * LIMB.shoulder[0] * s, sy * LIMB.shoulder[1] * s, 0).applyQuaternion(_q).add(_p);
       _q2.copy(_q).multiply(_qt.setFromAxisAngle(AXZ, side * sp)).multiply(_qt.setFromAxisAngle(AXX, -a));
@@ -1051,8 +1080,8 @@ export function placePeople(dyn, t, blocked) {
       _mt.compose(_j, _q2, _s.set(LIMB.foreR * s, LIMB.fore * s, LIMB.foreR * s)); L.setMatrixAt(j + 1, _mt);
     }
     // 座る人の腿とすね(腿は座面で前へ、すねは下へ)
-    if (p.ln > 4) for (const side of [1, -1]) {
-      const j = p.li + (side > 0 ? 4 : 6);
+    if (p.ln > 4) for (let si = 0; si < 2; si++) {
+      const side = si ? -1 : 1, j = p.li + (side > 0 ? 4 : 6);
       if (!sit || s < .01) { _mt.compose(_w.set(0, -20, 0), _q2.identity(), ZERO3); L.setMatrixAt(j, _mt); L.setMatrixAt(j + 1, _mt); continue; }
       _j.set(side * LIMB.hip[0] * s, LIMB.hip[1] * sy * s, 0).applyQuaternion(_q).add(_p);
       _q2.copy(_q).multiply(_qt.setFromAxisAngle(AXZ, side * .04)).multiply(_qt.setFromAxisAngle(AXX, -(Math.PI / 2 - .1)));
@@ -1103,6 +1132,7 @@ function vehicles(world, dyn, B) {
   for (const m of [rd, rh]) { m.castShadow = true; m.frustumCulled = false; world.add(m); }
   rd.setColorAt(0, new THREE.Color(CLOTH.c2)); rd.setColorAt(1, new THREE.Color(CLOTH.scrubT)); rh.setColorAt(0, new THREE.Color('#E0BB9B')); rh.setColorAt(1, new THREE.Color('#EECFB8'));
   dyn.bikes = { mesh: bk, rd, rh, list: [{ a: deg(66), sp: .08, ph: 1.3, half: .29 }, { a: deg(262), sp: .08, ph: 3.4, half: .29 }] };
+  dyn.lane = [...dyn.cars.list, ...dyn.bikes.list];   // 内の車線の物(毎こま並べ直さない)
 }
 const STOP_DWELL = 2.6, BUS_P = 2 * CYC, BUS_PH = 11.0;
 const LANE_OUT = ROAD_R + .14, LANE_IN = ROAD_R - .14, FALL_HALF = .26;   // FALL_HALF: ひらいた建物の倒れた壁の前で待つ角度
@@ -1128,57 +1158,60 @@ function roadCrossings(B) {
 }
 export function placeVehicles(dyn, t, dt, blockedAng) {
   if (!dyn.bus) return;
-  if (blockedAng !== null && blockedAng !== undefined) { const id = IDS.find(k => Math.abs(angDiff(deg(LAYOUT[k].a), blockedAng)) < 1e-4); if (id && id in ROADX) blockedAng = ROADX[id]; } else blockedAng = null;
+  if (blockedAng !== null && blockedAng !== undefined) { for (let i = 0; i < IDS.length; i++) { const id = IDS[i]; if (Math.abs(angDiff(deg(LAYOUT[id].a), blockedAng)) < 1e-4) { if (id in ROADX) blockedAng = ROADX[id]; break; } } } else blockedAng = null;
   const y0 = .012;
   // バス: 外の車線を左回り。バス停の前でゆっくり止まって、また出る。ひらいた建物の倒れた壁の手前では待つ
   // 時刻表: BUS_P 秒で一周し、偶数の輪の ct = BUS_PH 秒に前のバス停(stops[0])に着く(夕方の乗る出来事と合わせる)。速さを少しだけ変えて合わせる
   const bus = dyn.bus, R = LANE_OUT, S0 = dyn.stops[0], S1 = dyn.stops[1];
   if (bus.init === undefined) {   // 初めは時刻表の位置から(倒れた壁の範囲にかかれば、その先へ)。車と自転車も、最初の位置を範囲の外へ
     bus.init = true; const ph = ((((t - BUS_PH) / BUS_P) % 1) + 1) % 1; bus.a = clearOfFalls(S0 + .02 + TAU * ph * .985, .6 / LANE_OUT, 1);
-    for (const c of [...dyn.cars.list, ...dyn.bikes.list]) c.a = clearOfFalls(c.a, c.half / LANE_IN, -1);
+    for (const c of dyn.lane) c.a = clearOfFalls(c.a, c.half / LANE_IN, -1);
   }
-  const fw = (a, b) => ((b - a) % TAU + TAU) % TAU, d0 = fw(bus.a, S0), d1 = fw(bus.a, S1), over = 2.1 + (d1 > .004 && d1 < d0 ? STOP_DWELL + 6.2 : 0);
+  const d0 = fwdAng(bus.a, S0), d1 = fwdAng(bus.a, S1), over = 2.1 + (d1 > .004 && d1 < d0 ? STOP_DWELL + 6.2 : 0);
   let T = Math.floor((t - BUS_PH) / BUS_P) * BUS_P + BUS_PH; while (T <= t + .5) T += BUS_P;
   let need = d0 / Math.max(.5, T - t - over); while (need > .14) { T += BUS_P; need = d0 / Math.max(.5, T - t - over); }
   const cruise = clamp(need, .075, .14);
   let want = cruise;
-  for (const s of dyn.stops) { const d = angDiff(s, bus.a); if (d > 0 && d < .2) want = Math.min(want, cruise * clamp01(d / .2) + .004); }
-  if (bus.wait > 0) { bus.wait -= dt; want = 0; } else for (const s of dyn.stops) if (Math.abs(angDiff(s, bus.a)) < .006 && !bus.stopped) { bus.wait = STOP_DWELL; bus.stopped = s; }
+  const stops = dyn.stops;
+  for (let i = 0; i < stops.length; i++) { const d = angDiff(stops[i], bus.a); if (d > 0 && d < .2) want = Math.min(want, cruise * clamp01(d / .2) + .004); }
+  if (bus.wait > 0) { bus.wait -= dt; want = 0; } else for (let i = 0; i < stops.length; i++) if (Math.abs(angDiff(stops[i], bus.a)) < .006 && !bus.stopped) { bus.wait = STOP_DWELL; bus.stopped = stops[i]; }
   if (bus.stopped !== undefined && bus.stopped !== null && Math.abs(angDiff(bus.stopped, bus.a)) > .05) bus.stopped = null;
   if (blockedAng !== null) { const d = angDiff(blockedAng - .26, bus.a); if (d > 0 && d < .3) want = Math.min(want, .11 * clamp01((d - .02) / .28)); }
   bus.v += (want - bus.v) * clamp01(dt * 2.2); bus.a += bus.v * dt;
   placeOnRing(bus.mesh, bus.a, R, y0, 1);
   // 内の車線(右回り): 車と自転車。速さは同じ(ゆっくり少し揺らぐ)。倒れた壁の手前では待ち、前の物(車でも自転車でも)に近づくと止まる
-  const cars = dyn.cars, bk = dyn.bikes, lane = [...cars.list, ...bk.list];
-  for (const c of lane) {
+  const cars = dyn.cars, bk = dyn.bikes, lane = dyn.lane;
+  for (let ci = 0; ci < lane.length; ci++) {
+    const c = lane[ci];
     let sp = c.sp * (1 + .08 * Math.sin(t * .23 + c.ph));
     if (blockedAng !== null) { const d = angDiff(c.a, blockedAng + FALL_HALF); if (d > 0 && d < .3) sp *= clamp01((d - .02) / .28); }
-    let gap = Infinity, ah = 0; for (const o of lane) if (o !== c) { const d = ((c.a - o.a) % TAU + TAU) % TAU; if (d < gap) { gap = d; ah = o.half; } }
+    let gap = Infinity, ah = 0; for (let oi = 0; oi < lane.length; oi++) { const o = lane[oi]; if (o === c) continue; const d = ((c.a - o.a) % TAU + TAU) % TAU; if (d < gap) { gap = d; ah = o.half; } }
     const gl = gap * LANE_IN - c.half - ah;   // 前の物までのすき間(町の単位)
     sp = Math.min(sp, Math.max(0, gl - .14) / (1.1 * LANE_IN));
     c.v = (c.v ?? sp) + (sp - (c.v ?? sp)) * clamp01(dt * 2);
     if (dt > 0) c.v = Math.min(c.v, Math.max(0, gl - .05) / LANE_IN / dt);   // どんなにこまが飛んでも、前の物に重ならない
     c.a -= c.v * dt;
   }
-  cars.list.forEach((c, i) => { const m = new THREE.Object3D(); placeOnRing(m, c.a, LANE_IN, y0, -1); m.updateMatrix(); cars.mesh.setMatrixAt(i, m.matrix); });
+  for (let i = 0; i < cars.list.length; i++) { placeOnRing(_o3, cars.list[i].a, LANE_IN, y0, -1); _o3.updateMatrix(); cars.mesh.setMatrixAt(i, _o3.matrix); }
   cars.mesh.instanceMatrix.needsUpdate = true;
   // 病院の車: 環状の道から坂を上がり、救急口に着いて止まり、また出る(30秒でひとまわり)
   const hc = dyn.hcar, u = evU('ambulance', t), pts = hc.pts;
   let k = -1, back = false;
   if (u < 0) k = -1; else if (u < .3) k = smooth01(u / .3); else if (u < .7) k = 1; else { k = 1 - smooth01((u - .7) / .3); back = true; }
   if (k >= 0) {
-    const [px, pz, a] = alongPath(pts, k); hc.mesh.position.set(px, groundY(px, pz) + y0, pz);
-    const [qx, qz] = alongPath(pts, Math.min(1, k + .02)), slope = Math.atan2(groundY(qx, qz) - groundY(px, pz), Math.hypot(qx - px, qz - pz) || 1);
+    let ap = alongPath(pts, k); const px = ap[0], pz = ap[1], a = ap[2]; hc.mesh.position.set(px, groundY(px, pz) + y0, pz);
+    ap = alongPath(pts, Math.min(1, k + .02)); const qx = ap[0], qz = ap[1], slope = Math.atan2(groundY(qx, qz) - groundY(px, pz), Math.hypot(qx - px, qz - pz) || 1);
     hc.mesh.rotation.set(0, a - Math.PI / 2 + (back ? Math.PI : 0), back ? -slope : slope, 'YXZ');
     hc.mesh.visible = true;
   } else hc.mesh.visible = false;
   // 自転車(内の車線の内側の寄り。動きは上の車線の計算で)
-  bk.list.forEach((b, i) => {
-    const m = new THREE.Object3D(); placeOnRing(m, b.a, LANE_IN - .04, y0, -1); m.updateMatrix(); bk.mesh.setMatrixAt(i, m.matrix);
+  for (let i = 0; i < bk.list.length; i++) {
+    const m = _o3; placeOnRing(m, bk.list[i].a, LANE_IN - .04, y0, -1); m.updateMatrix(); bk.mesh.setMatrixAt(i, m.matrix);
     m.position.y += .14; m.updateMatrix(); bk.rd.setMatrixAt(i, m.matrix); bk.rh.setMatrixAt(i, m.matrix);
-  });
+  }
   bk.mesh.instanceMatrix.needsUpdate = bk.rd.instanceMatrix.needsUpdate = bk.rh.instanceMatrix.needsUpdate = true;
 }
+const fwdAng = (a, b) => ((b - a) % TAU + TAU) % TAU;   // a から前へ b までの角度
 function placeOnRing(o, a, r, y, dir) { o.position.set(Math.cos(a) * r, y, Math.sin(a) * r); o.rotation.set(0, -a + (dir > 0 ? Math.PI : 0), 0); }
 
 /* ---------- 空: 流れる雲・島の下の雲海の帯(島の幅の中に収める)・ときどき鳥の群れ ---------- */
@@ -1249,6 +1282,7 @@ const CLOUD = [
   { lit: '#FAD9C7', shade: '#C2B9D9', o: .85, h: '#F8D9C7', h2: '#EAD1D8', ho: .8, ho2: .8, r: '#F3D6C6', rk: .72 },
   { lit: '#3A4072', shade: '#272B52', o: .3, h: '#33386A', h2: '#2E2F5E', ho: .3, ho2: .3, r: '#2B2D57', rk: .45 }
 ];
+const CLOUD_C = CLOUD.map(c => ({ ...c, lit: new THREE.Color(c.lit), shade: new THREE.Color(c.shade), h: new THREE.Color(c.h), h2: new THREE.Color(c.h2), r: new THREE.Color(c.r) }));
 function sky(scene, world, dyn, rnd, q) {
   const sg = new THREE.SphereGeometry(1, 16, 10), N = 12;
   const cm = new THREE.InstancedMesh(sg, softCloudMat(), N);
@@ -1272,22 +1306,23 @@ function sky(scene, world, dyn, rnd, q) {
 const CLOUD_PER = 220, CLOUD_RANGE = 5.5;   // 雲がひと流れにかける秒と、流れる幅(画面の右へ)
 export function placeSky(dyn, t, night) {
   const C2 = dyn.clouds; if (!C2) return;
-  let i = 0; const o = new THREE.Object3D();
-  for (const c of C2.list) {
-    const p = (((c.ph + t / CLOUD_PER) % 1) + 1) % 1, sc = c.s + (p - .5) * CLOUD_RANGE, al = smooth01(p / .12) * smooth01((1 - p) / .12);
-    for (const [px, py, pz, s] of c.puffs) {
-      const [x, z] = SF(sc + px * .8 * c.sc, c.f + pz); o.position.set(x, c.y + py * c.sc, z); o.rotation.set(0, Math.PI / 4, 0); o.scale.set(s * .8 * c.sc, s * .5 * c.sc, s * .66 * c.sc); o.updateMatrix();
+  let i = 0; const o = _o3;
+  for (let ci = 0; ci < C2.list.length; ci++) {
+    const c = C2.list[ci], p = (((c.ph + t / CLOUD_PER) % 1) + 1) % 1, sc = c.s + (p - .5) * CLOUD_RANGE, al = smooth01(p / .12) * smooth01((1 - p) / .12);
+    for (let k = 0; k < c.puffs.length; k++) {
+      const pf = c.puffs[k], ps = sc + pf[0] * .8 * c.sc, pff = c.f + pf[2], s = pf[3];
+      o.position.set((ps + pff) * R2, c.y + pf[1] * c.sc, (pff - ps) * R2); o.rotation.set(0, Math.PI / 4, 0); o.scale.set(s * .8 * c.sc, s * .5 * c.sc, s * .66 * c.sc); o.updateMatrix();
       C2.mesh.setMatrixAt(i, o.matrix); C2.mesh.setColorAt(i, _c1.setRGB(al, 0, 0)); i++;
     }
   }
   o.rotation.set(0, 0, 0);
   C2.mesh.instanceMatrix.needsUpdate = true; if (C2.mesh.instanceColor) C2.mesh.instanceColor.needsUpdate = true;
-  // 雲の色は時間帯に合わせる(上の CLOUD)。applyTod が覚えた時間帯と光の向きを使う(撮るときもページでも同じ)
+  // 雲の色は時間帯に合わせる(上の CLOUD。色は最初に一度だけ Color にしておく)。applyTod が覚えた時間帯と光の向きを使う(撮るときもページでも同じ)
   const tk = TODK, ci = Math.min(1, Math.floor(tk)), ck = tk - ci;
-  const cu = C2.mesh.material.uniforms, A = CLOUD[ci], Bc = CLOUD[ci + 1];
-  cu.uLit.value.copy(_c1.set(A.lit)).lerp(_c2.set(Bc.lit), ck); cu.uShade.value.copy(_c1.set(A.shade)).lerp(_c2.set(Bc.shade), ck); cu.uOp.value = lerp(A.o, Bc.o, ck); cu.uSun.value.copy(SUNDIR);
-  if (dyn.haze) dyn.haze.mats.forEach((m, j) => { const key = j ? 'h2' : 'h', ok = j ? 'ho2' : 'ho'; m.color.copy(_c1.set(A[key])).lerp(_c2.set(Bc[key]), ck); m.opacity = lerp(A[ok], Bc[ok], ck); });
-  U.uHazeC.value.copy(_c1.set(A.r)).lerp(_c2.set(Bc.r), ck); U.uHazeK.value = lerp(A.rk, Bc.rk, ck);
+  const cu = C2.mesh.material.uniforms, A = CLOUD_C[ci], Bc = CLOUD_C[ci + 1];
+  cu.uLit.value.copy(A.lit).lerp(Bc.lit, ck); cu.uShade.value.copy(A.shade).lerp(Bc.shade, ck); cu.uOp.value = lerp(A.o, Bc.o, ck); cu.uSun.value.copy(SUNDIR);
+  if (dyn.haze) for (let j = 0; j < dyn.haze.mats.length; j++) { const m = dyn.haze.mats[j]; m.color.copy(j ? A.h2 : A.h).lerp(j ? Bc.h2 : Bc.h, ck); m.opacity = lerp(j ? A.ho2 : A.ho, j ? Bc.ho2 : Bc.ho, ck); }
+  U.uHazeC.value.copy(A.r).lerp(Bc.r, ck); U.uHazeK.value = lerp(A.rk, Bc.rk, ck);
   if (dyn.pools) dyn.pools.mesh.visible = U.uNight.value > .02;
   // 夕方の病院の正面の光: 建物をひらいている間は弱める(live.js の広場の灯りと同じ考え方。中が白く飛ばないように)
   if (LREF && LREF.pF) LREF.pF.intensity = (LREF.pF.userData.base || 0) * Math.max(0, 1 - 1.4 * U.uDim.value);
@@ -1332,7 +1367,7 @@ function beam(dyn, ob) {
   dyn.beam = m;
 }
 export function placeSmall(dyn, t, steamOn) {
-  const o = new THREE.Object3D();
+  const o = _o3; o.rotation.set(0, 0, 0);   // 作業用の物は、ほかの関数の向きが残っているので戻す
   if (dyn.steam) {
     const S = dyn.steam;
     for (let i = 0; i < S.n; i++) { const u = ((t * .32 + i / S.n) % 1); o.position.set(S.src.x + Math.sin(u * 5 + i) * .05 + u * .12, S.src.y + u * .7, S.src.z - u * .05); const s = steamOn ? (.4 + u * 1.3) * (1 - u) * 1.6 : 0; o.scale.setScalar(s); o.updateMatrix(); S.mesh.setMatrixAt(i, o.matrix); }
@@ -1340,7 +1375,7 @@ export function placeSmall(dyn, t, steamOn) {
   }
   if (dyn.beam) dyn.beam.visible = U.uNight.value > .02;
   if (dyn.ripples) {
-    const R = dyn.ripples, c = new THREE.Color();
+    const R = dyn.ripples, c = _cR;
     for (let i = 0; i < 2; i++) { const u = (t * .28 + i * .5) % 1; o.position.set(R.c.x + (i ? .18 : -.18), R.c.y, R.c.z + (i ? .08 : -.08)); o.scale.setScalar(.06 + u * .42); o.updateMatrix(); R.mesh.setMatrixAt(i, o.matrix); R.mesh.setColorAt(i, c.setScalar(1 - u * .9)); }
     R.mesh.instanceMatrix.needsUpdate = true; if (R.mesh.instanceColor) R.mesh.instanceColor.needsUpdate = true;
   }
@@ -1355,8 +1390,10 @@ export function placeSmall(dyn, t, steamOn) {
    光(昼・夕・夜)。m は 0 昼 / 1 夕 / 2 夜 のあいだをなめらかに動く
    温かい主光(太陽)と、少し冷たい空の補光。霧の色は空に寄せる。ガラスの映り込みの強さも時間帯で変える
    ================================================================ */
+/* 昼の太陽は、手前の左(島の角度 72°・高さ 42°)。2本の弧の影が広場の床で交差し、正面のカメラから見て、ロゴとほぼ同じ形と縦横の比で床に描かれる
+   (影は弧を 1 + 1.07 / tan(高さ) × cos(太陽と正面の角) 倍に縦へ伸ばした形。31° から見るとちょうど縮んで、ロゴの比に近くなる) */
 const TOD = [
-  { hemiS: '#D8E3F0', hemiG: '#C8B697', hemi: .96, sun: '#FFE6C6', sunI: 3.15, sunPos: [-3.2, 13, 16], fill: '#D2DFF0', fillI: .42, exp: 1.04, glow: 0, pt: 0, fog: '#E2EAED', env: .7, gC: '#FFE0B8', face: 0 },
+  { hemiS: '#D8E3F0', hemiG: '#C8B697', hemi: .96, sun: '#FFE6C6', sunI: 3.15, sunPos: [4.79, 13.96, 14.74], fill: '#D2DFF0', fillI: .42, exp: 1.04, glow: 0, pt: 0, fog: '#E2EAED', env: .7, gC: '#FFE0B8', face: 0 },
   // 夕: 低い橙の主光と長い影。陰は桃色がかった藤色。窓の灯りがともり始める(白い窓も、夕方は暖かい色で点く)
   { hemiS: '#DDBFC8', hemiG: '#8E7068', hemi: .74, sun: '#FF9C60', sunI: 2.5, sunPos: [-15, 4.6, 3.2], fill: '#A4A2DD', fillI: .52, exp: 1.0, glow: .62, pt: .45, fog: '#D9B7AF', env: .45, gC: '#FFDDB2', face: 1 },
   { hemiS: '#62709D', hemiG: '#2E2C47', hemi: .9, sun: '#B9C7F2', sunI: 1.0, sunPos: [-5, 14, 9], fill: '#7482C4', fillI: .34, exp: 1.08, glow: 1, pt: 1, fog: '#252D57', env: .35, gC: '#E4ECF7', face: 0 }   // 夜: 手前の左上から月明かり。形と屋根の色が読めるように
@@ -1382,38 +1419,58 @@ export function makeLights(scene, mapSize) {
   void cx; void cz;
   return (LREF = { hemi, sun, fill, pI, pS, pH, pIn, pF, scene });
 }
-/* ガラスの軽い映り込み(PMREM。品質 high だけ): 空のグラデーションの球を、1度だけ焼く */
+/* ガラスの軽い映り込み(PMREM。品質 high と mid。low はなし): 空のグラデーションの球を、1度だけ焼く。
+   中の段(スマホ)でも高の段と同じ窓の見え方にする(段の差は影の解像度だけ) */
 let ENV = null;
 function envFor(renderer) {
-  if (ENV !== null || QUALITY !== 'high') return ENV;
+  if (ENV !== null || QUALITY === 'low') return ENV;
   try {
     const sc = new THREE.Scene(), g = new THREE.SphereGeometry(10, 24, 12), c = [], P = g.attributes.position, top = new THREE.Color('#BFD3E6'), hor = new THREE.Color('#F4EEE4'), gnd = new THREE.Color('#A8A08F');
     for (let i = 0; i < P.count; i++) { const y = P.getY(i) / 10; _c1.copy(y > 0 ? hor : gnd).lerp(y > 0 ? top : gnd, Math.pow(Math.abs(y), .6)); c.push(_c1.r, _c1.g, _c1.b); }
     g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
     sc.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
-    const sunDisc = new THREE.Mesh(new THREE.SphereGeometry(1.4, 12, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color('#FFF6E6').multiplyScalar(3) })); sunDisc.position.set(-3, 7, 6); sc.add(sunDisc);
+    const sunDisc = new THREE.Mesh(new THREE.SphereGeometry(1.4, 12, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color('#FFF6E6').multiplyScalar(3) })); sunDisc.position.set(2.1, 6.2, 6.6); sc.add(sunDisc);   // 昼の太陽の向き
     const pm = new THREE.PMREMGenerator(renderer); ENV = pm.fromScene(sc, .02).texture; pm.dispose(); g.dispose();
     const m = townMat('g'); m.envMap = ENV; m.envMapIntensity = .7; m.needsUpdate = true;
   } catch (e) { ENV = false; }
   return ENV;
 }
+/* 時刻の色は、最初に一度だけ Color にしておく(切り替えの間、毎こま文字列から色を作らない) */
+const TOD_C = TOD.map(t => ({ hemiS: new THREE.Color(t.hemiS), hemiG: new THREE.Color(t.hemiG), sun: new THREE.Color(t.sun), fill: new THREE.Color(t.fill), gC: new THREE.Color(t.gC), fog: new THREE.Color(t.fog) }));
 export function applyTod(L, renderer, m, clouds) {
-  const i = Math.min(1, Math.floor(m)), k = m - i, a = TOD[i], b = TOD[Math.min(2, i + 1)];
+  const i = Math.min(1, Math.floor(m)), k = m - i, a = TOD[i], b = TOD[Math.min(2, i + 1)], ac = TOD_C[i], bc = TOD_C[Math.min(2, i + 1)];
   TODK = m;
-  L.hemi.color.copy(_c1.set(a.hemiS)).lerp(_c2.set(b.hemiS), k); L.hemi.groundColor.copy(_c1.set(a.hemiG)).lerp(_c2.set(b.hemiG), k); L.hemi.intensity = lerp(a.hemi, b.hemi, k);
-  L.sun.color.copy(_c1.set(a.sun)).lerp(_c2.set(b.sun), k); L.sun.intensity = lerp(a.sunI, b.sunI, k);
+  L.hemi.color.copy(ac.hemiS).lerp(bc.hemiS, k); L.hemi.groundColor.copy(ac.hemiG).lerp(bc.hemiG, k); L.hemi.intensity = lerp(a.hemi, b.hemi, k);
+  L.sun.color.copy(ac.sun).lerp(bc.sun, k); L.sun.intensity = lerp(a.sunI, b.sunI, k);
   L.sun.position.set(lerp(a.sunPos[0], b.sunPos[0], k), lerp(a.sunPos[1], b.sunPos[1], k), lerp(a.sunPos[2], b.sunPos[2], k)); SUNDIR.copy(L.sun.position).normalize();
-  L.fill.color.copy(_c1.set(a.fill)).lerp(_c2.set(b.fill), k); L.fill.intensity = lerp(a.fillI, b.fillI, k);
+  L.fill.color.copy(ac.fill).lerp(bc.fill, k); L.fill.intensity = lerp(a.fillI, b.fillI, k);
   renderer.toneMappingExposure = lerp(a.exp, b.exp, k);
   const glow = lerp(a.glow, b.glow, k), pt = lerp(a.pt, b.pt, k);
   U.uNight.value = glow;
-  U.uGlowC.value.copy(_c1.set(a.gC)).lerp(_c2.set(b.gC), k);
-  L.pI.intensity = 5.5 * pt; L.pS.intensity = 5.5 * pt; L.pH.intensity = L.pH.userData.base = 1.4 * pt;
+  U.uGlowC.value.copy(ac.gC).lerp(bc.gC, k);
+  // 交差の広場: 弧と床の帯(とそばの藍と砂の灯り)は夜だけ灯る(夕方の終わりから)。夕方は、低い光で砂の弧の縁が金、藍の弧は影絵
+  const arcK = smooth01((m - 1.2) / .7), rimK = smooth01(1 - Math.abs(m - 1) / .65);
+  U.uArc.value = arcK; U.uRim.value = rimK;
+  L.pI.intensity = 5.5 * arcK; L.pS.intensity = 5.5 * arcK; L.pH.intensity = L.pH.userData.base = 1.4 * pt;
   if (L.pF) L.pF.intensity = L.pF.userData.base = FACE_I * lerp(a.face, b.face, k);
-  const sc = L.scene || null; if (sc && sc.fog) sc.fog.color.copy(_c1.set(a.fog)).lerp(_c2.set(b.fog), k);
+  const sc = L.scene || null; if (sc && sc.fog) sc.fog.color.copy(ac.fog).lerp(bc.fog, k);
   if (envFor(renderer)) townMat('g').envMapIntensity = lerp(a.env, b.env, k);
+  fitShadow(L.sun);
   void clouds;
   return glow;
+}
+/* 影の範囲(太陽から見た島)を、太陽の向きに合わせて狭める。島が回っても収まるよう、回しても変わらない輪(半径・高さ)で測る。
+   範囲が狭いほど、同じ解像度でも影が細かい(段の間の柔らかさの差も小さくなる)。昼は約 1.7 倍、夕方は約 2.3 倍細かい */
+const SH_RINGS = [[10.4, 1.6], [10.4, -1.9], [6.7, 6.6], [3.5, 4.7]];
+const _shM = new THREE.Matrix4(), _shO = new THREE.Vector3(), _shU = new THREE.Vector3(0, 1, 0);
+function fitShadow(sun) {
+  const sc = sun.shadow.camera, e = _shM.lookAt(sun.position, _shO, _shU).elements;
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (let ri = 0; ri < SH_RINGS.length; ri++) for (let i = 0; i < 24; i++) {
+    const r = SH_RINGS[ri][0], h = SH_RINGS[ri][1], a = i / 24 * TAU, px = Math.cos(a) * r, pz = Math.sin(a) * r, x = px * e[0] + h * e[1] + pz * e[2], y = px * e[4] + h * e[5] + pz * e[6];
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+  }
+  sc.left = x0 - .3; sc.right = x1 + .3; sc.bottom = y0 - .3; sc.top = y1 + .3; sc.updateProjectionMatrix();
 }
 
 /* ---------- カメラ(正投影・斜め上から) ---------- */
@@ -1421,6 +1478,29 @@ export const ELEV = deg(31), AZ = deg(45), DIST = 80;
 export function aimCamera(cam, target, elev = ELEV) {
   cam.position.set(target.x + DIST * Math.cos(elev) * Math.cos(AZ), target.y + DIST * Math.sin(elev), target.z + DIST * Math.cos(elev) * Math.sin(AZ));
   cam.up.set(0, 1, 0); cam.lookAt(target); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+}
+/* 交差の広場の見晴らし(広場をひらいたとき): 広場の上へ上がり、2本の弧を手前(画面の下の真ん中)に、町の建物すべてを見渡す。
+   rot = 島を回す角度(度。0 = いつもの正面で、広場が手前)、elev = 見下ろす角度(度)。live.js の overlook() が読む */
+export const OVERLOOK = { rot: 0, elev: 42 };
+/* 見晴らしの目と的と、建物の名前の札を置く所(島の座標 = S.world の中。島を回しているときは S.world.matrixWorld を掛ける)。
+   tags[id] は建物のいちばん上(屋根・ドーム・灯室)の少し上。pts は画面に収める点(建物の箱と、広場の床と弧)。S は makeScene の返り値 */
+export function plazaOverlook(S) {
+  const el = deg(OVERLOOK.elev), F = plazaFrame(), tags = {}, pts = [];
+  for (const id of IDS) {
+    if (id === 'plaza') {
+      tags.plaza = new THREE.Vector3(F.cx, F.arcTop + .25, F.cz);
+      for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; pts.push(new THREE.Vector3(F.cx + Math.cos(a) * 2.35, F.y, F.cz + Math.sin(a) * 2.35)); }
+      pts.push(new THREE.Vector3(F.cx, F.arcTop, F.cz)); continue;
+    }
+    const b = S && S.B && S.B[id]; if (!b) continue;
+    const bx = BOXES[id], p = b.grp.position, top = b.ex.top, tower = bx.shape === 'tower';
+    tags[id] = new THREE.Vector3(p.x, p.y + top + .3, p.z);
+    const hw = tower ? bx.w / 2 + .45 : bx.w / 2 + WALL, hd = tower ? hw : bx.d / 2 + WALL, c = Math.cos(b.grp.rotation.y), sn = Math.sin(b.grp.rotation.y);
+    for (const x of [-hw, hw]) for (const z of [-hd, hd]) for (const y of [-b.ex.y0, top]) pts.push(new THREE.Vector3(p.x + x * c + z * sn, p.y + y, p.z - x * sn + z * c));
+  }
+  const target = pts.reduce((acc, v) => acc.add(v), new THREE.Vector3()).multiplyScalar(1 / Math.max(1, pts.length));
+  const eye = new THREE.Vector3(target.x + DIST * Math.cos(el) * Math.cos(AZ), target.y + DIST * Math.sin(el), target.z + DIST * Math.cos(el) * Math.sin(AZ));
+  return { rot: OVERLOOK.rot, elev: OVERLOOK.elev, eye, target, up: new THREE.Vector3(0, 1, 0), tags, pts };
 }
 /* 画面に町を収めるための点: 島の輪郭(上の縁と地層の下)、展望台のてっぺん、岩の塊のいちばん下 */
 export function samplePoints() {

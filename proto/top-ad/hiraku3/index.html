@@ -164,7 +164,7 @@ html[data-tod="night"] .pring{border-color:#FFDCA2;box-shadow:0 0 0 1px rgba(8,1
 .panel{position:fixed;z-index:60;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;box-shadow:0 24px 60px -24px rgba(20,24,30,.45),0 0 0 1px rgba(30,30,30,.06)}
 .panel[hidden]{display:none}
 /* 上: ‹ 前 | 建物の名前 | 次 ›(名前にふれると、建物の一覧)。その下に、短い呼び名・一行と、閉じる */
-.p-head{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 8px;padding:14px 14px 10px}
+.p-head{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 8px;padding:14px 14px 10px;transition:transform .22s var(--ease)}   /* 横に引いたあと、元の位置へ */
 .p-nav{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px}
 .p-step{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:66px;height:44px;padding:0 12px;border-radius:22px;font-size:13px;font-weight:700;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line);-webkit-tap-highlight-color:transparent;transition:background-color .15s,color .15s}
 .p-step .ico{width:17px;height:17px}
@@ -224,6 +224,7 @@ html[data-tod="night"] .pring{border-color:#FFDCA2;box-shadow:0 0 0 1px rgba(8,1
 .pz-mark{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:14px;padding:14px 14px 14px 12px;border-radius:12px;background:#fff;box-shadow:0 0 0 1px var(--line)}
 .pz-mark svg{width:92px}
 .pz-mark p{font-size:13px;line-height:1.85;color:var(--ink-2)}
+.pz-mark p span,.pz-aim span{display:inline-block}   /* 言葉の切れ目で折り返す */
 .pz-aim{margin:14px 6px 0;font-size:14.5px;font-weight:700;line-height:1.75;letter-spacing:.02em}
 .pz-h{margin:18px 6px 4px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-3)}
 .pz-links{display:flex;flex-wrap:wrap;gap:8px;margin:14px 6px 2px}
@@ -452,8 +453,8 @@ html.capture body > *:not(#cap){display:none!important}
     <div class="p-main" id="pMain">
       <figure class="p-still" id="pStill" hidden><img alt="" width="1200" height="900"></figure>
       <div class="p-plaza" id="pPlaza" hidden>
-        <div class="pz-mark"><svg viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><p>交差するが、接続しない<br>二本の線が交わり、新しい方向へ伸びていく</p></div>
-        <p class="pz-aim">人が、自ら選び、納得して生きられる社会をつくる</p>
+        <div class="pz-mark"><svg viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><p><span>交差するが、</span><span>接続しない</span><br><span>二本の線が交わり、</span><span>新しい方向へ伸びていく</span></p></div>
+        <p class="pz-aim"><span>人が、自ら選び、</span><span>納得して生きられる社会をつくる</span></p>
         <h3 class="pz-h" id="pzH">行き先を選ぶ</h3>
         <ol class="lrows" id="pzList" aria-labelledby="pzH"></ol>
         <p class="pz-links"><a href="../../../philosophy/index.html">考え方<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="../../../about/index.html">BRIDGEについて<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
