@@ -438,8 +438,10 @@ function boot() {
     lp.setAttribute('aria-hidden', 'true'); cap.textContent = t.name; cap.append(el('i', 'lp-line')); lp.append(bg);
     const nw = im && (im.naturalWidth || im.width), nh = im && (im.naturalHeight || im.height);
     if (nw && from && from.w > 2) {
-      const s1 = Math.min((phone() ? vw : Math.min(vw * .7, 1120)) / nw, vh * (phone() ? .62 : .66) / nh), w1 = nw * s1, h1 = nh * s1, x1 = (vw - w1) / 2, y1 = Math.max(10, (vh - h1 - 44) / 2);
-      const cv = el('canvas', 'lp-im'); cv.width = nw; cv.height = nh; cv.getContext('2d').drawImage(im, 0, 0);   // 読み終えた画像を、そのまま写す(読み直さない・加工しない)
+      let s1 = Math.min((phone() ? vw : Math.min(vw * .7, 1120)) / nw, vh * (phone() ? .62 : .66) / nh);
+      if (own) s1 = Math.min(Math.max(s1, from.w / nw), (vw - 20) / nw, (vh - 64) / nh);   // 第3幕: 押した画面より小さくしない(広がって道具になる)
+      const w1 = nw * s1, h1 = nh * s1, x1 = (vw - w1) / 2, y1 = Math.max(10, (vh - h1 - 44) / 2);
+      const cv = el('canvas', 'lp-im'), kd = own ? Math.min(2, devicePixelRatio || 1) : 1; cv.width = Math.round(nw * kd); cv.height = Math.round(nh * kd); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);   // 読み終えた画像を、そのまま写す(読み直さない・加工しない)
       Object.assign(cv.style, { left: x1.toFixed(1) + 'px', top: y1.toFixed(1) + 'px', width: w1.toFixed(1) + 'px', height: h1.toFixed(1) + 'px' });
       const k = Math.min(from.w / w1, from.h / h1), tf = `translate(${(from.x + (from.w - w1 * k) / 2 - x1).toFixed(1)}px,${(from.y + (from.h - h1 * k) / 2 - y1).toFixed(1)}px) scale(${k.toFixed(4)})`;   // 元の枠に収まる大きさから(着く画面の写しが縦長でも)
       lp.dataset.from = tf; lp.append(cv); cap.style.top = (y1 + h1 + 14).toFixed(1) + 'px';

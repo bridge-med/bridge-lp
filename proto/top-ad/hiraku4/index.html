@@ -39,6 +39,7 @@
   /* 夜の面(閉じ・フッター) */
   --night-bg:#0B1128; --night-fg:#F1EDE5; --night-fg-2:#C7CCDB; --night-fg-3:#AEB4C8; --night-link:#C9CED9; --night-dim:#8C92A8;
   --night-line:rgba(255,255,255,.1); --night-edge:rgba(255,255,255,.28); --night-hover:rgba(255,255,255,.08);
+  --night-hd:rgba(11,17,40,.92); --night-hd-fg-2:#CBD0E0; --night-ring:rgba(255,255,255,.4);   /* 終幕の夜の上の、見出しの帯 */
   /* 空 */
   --sky-d1:#CFDFEA; --sky-d2:#E6EEF0; --sky-d3:#F2EEE6; --sky-d0:255 255 255;
   --sky-e1:#9EA8CF; --sky-e2:#E9B9A3; --sky-e3:#F6DCC0; --sky-e0:255 196 150;
@@ -317,6 +318,7 @@ main:focus{outline:none}
 /* 第2幕: 最初の画面の下端の色(時刻ごとの --mist。昼は空の下の色)から紙へ。境目に線や帯を置かない */
 .day{padding-top:clamp(28px,7vh,80px);background:linear-gradient(180deg,rgb(var(--mist)) 0,var(--paper) clamp(120px,22vh,240px))}
 .day-in{max-width:1328px;margin:0 auto}
+html[data-tod="night"] .day{padding-top:calc(clamp(120px,22vh,240px) + 12px)}   /* 夜: 夜の色から紙へ移る帯の上に文字を置かない(4.5:1) */
 /* PC: 断面は右に寄せて幅の 56%(1440 で建物 約750px・高さ 約1画面)。札は左の余白に、道具と同じ高さ。細い線で道具へ(線の長さは cqw で、断面の幅から) */
 .sect{position:relative;margin:0;container-type:inline-size;--iw:56}
 .sect-pic{position:relative;width:calc(var(--iw) * 1cqw);margin-left:auto}
@@ -327,7 +329,7 @@ main:focus{outline:none}
 .sect-tags li{position:absolute;right:calc(100% + 56px);top:calc(var(--y) * 1%);transform:translateY(-50%);width:calc((100 - var(--iw)) * 1cqw - 56px);display:grid;justify-items:end;text-align:right}
 .sect-tags li::after{content:'';position:absolute;left:calc(100% + 10px);top:50%;height:1px;width:calc(46px + var(--x) * var(--iw) / 100 * 1cqw - 13px);background:var(--ink-3)}
 .sect-tags .fl{font-size:11.5px;letter-spacing:.08em;color:var(--ink-3)}
-.sect-tags a{display:inline-flex;align-items:center;min-height:40px;font-size:17px;font-weight:700;color:var(--ink);text-decoration:underline;text-decoration-color:var(--underline-2);text-underline-offset:5px}
+.sect-tags a{display:inline-flex;align-items:center;min-height:44px;font-size:17px;font-weight:700;color:var(--ink);text-decoration:underline;text-decoration-color:var(--underline-2);text-underline-offset:5px}
 .sect-tags a:hover{text-decoration-color:currentColor}
 .sect-tags .t{font-size:13px;line-height:1.7;color:var(--ink-2)}
 
@@ -402,7 +404,7 @@ html.tw-on .tw-to.draw .tw-to-t{animation:twIn .5s var(--ease) both}
 /* 最初の画面を過ぎたら、見出しの帯を小さく上に固定(下の節からもヘッダーに届く)。ひらいている間は、いまのまま */
 html.past:not(.opened) .hd{position:fixed;padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:4px;background:var(--hd-stuck);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 1px 0 var(--line);animation:hdIn .32s var(--ease);--hd-fg:var(--ink);--hd-fg-2:var(--ink-2);--navcta-ring:rgba(28,34,39,.32);--navcta-h:rgba(255,255,255,.6);--logo-1:var(--indigo);--logo-2:var(--sand);--focus:var(--indigo)}
 @keyframes hdIn{from{transform:translateY(-100%)}to{transform:none}}
-html.past.hd-night:not(.opened) .hd{background:rgba(11,17,40,.92);box-shadow:0 1px 0 var(--night-line);--hd-fg:var(--kinari);--hd-fg-2:#CBD0E0;--navcta-ring:rgba(255,255,255,.4);--navcta-h:rgba(255,255,255,.08);--logo-1:var(--kinari);--logo-2:var(--sand-2);--focus:var(--kinari)}   /* 終幕の夜の上では、見出しの帯も夜の色 */
+html.past.hd-night:not(.opened) .hd{background:var(--night-hd);box-shadow:0 1px 0 var(--night-line);--hd-fg:var(--kinari);--hd-fg-2:var(--night-hd-fg-2);--navcta-ring:var(--night-ring);--navcta-h:var(--night-hover);--logo-1:var(--kinari);--logo-2:var(--sand-2);--focus:var(--kinari)}   /* 終幕の夜の上では、見出しの帯も夜の色 */
 html.past:not(.opened) .hd .ctrl{display:none}
 html.past:not(.opened) .logo svg{width:42px}
 
@@ -474,6 +476,7 @@ html.past:not(.opened) .logo svg{width:42px}
   .act-h{position:static;width:auto;margin-bottom:22px}
   .sect-pic{width:auto;margin:0 calc(-1 * var(--pad))}
   .sect-tags li{right:auto;left:calc(var(--rx) * 1% + 12px);top:calc(var(--ry) * 1% + 6px);transform:none;width:auto;display:block}
+  @media (max-width:374px){.sect-tags li{top:calc(var(--ry) * 1% + 1px)}}
   .sect-tags li::after{content:none}
   .sect-tags .fl,.sect-tags .t{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* 階は読み上げだけ(一行は道具のページにある) */
   .sect-tags a{position:relative;display:inline-block;min-height:0;padding:3px 6px;border-radius:2px;background:var(--paper);font-size:12px;font-weight:700;line-height:1.4;color:var(--ink);text-decoration:none}
@@ -656,7 +659,7 @@ html.capture body > *:not(#cap){display:none!important}
 <section class="act tana" id="tanaoroshi" aria-labelledby="tnTitle">
   <div class="tana-in">
     <figure class="tn-shot">
-      <a href="../../../tanaoroshi/index.html" data-leap="tanaoroshi" tabindex="-1" aria-hidden="true"><img src="../shared/shots/tanaoroshi.webp" width="780" height="1688" alt="" loading="lazy" decoding="async"></a>
+      <a href="../../../tanaoroshi/index.html" data-leap="tanaoroshi" tabindex="-1" aria-hidden="true"><img src="../shared/shots/tanaoroshi.webp" srcset="img/tanaoroshi-540.webp 540w, ../shared/shots/tanaoroshi.webp 780w" sizes="(max-width: 920px) 68vw, calc(min(88vh, 800px) * .4621)" width="780" height="1688" alt="" loading="lazy" decoding="async"></a>
       <figcaption class="cap">経験の棚卸しの最初の画面(2026-10-24 撮影)</figcaption>
     </figure>
     <div class="tn-text">
