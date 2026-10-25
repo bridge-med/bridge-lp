@@ -1000,7 +1000,7 @@ const BUILD = {
         .box(.17, 0, -.01, .08, .05, .06, P.paper).box(.18, .05, -.008, .078, .03, .058, '#F1EDE4').box(.27, 0, .01, .07, .035, .06, P.paper),
       screen: { x: -.03, y: .055 + .095 * k, z: -.01, w: .27 * k, h: .165 * k }
     });
-    person(E, X(-1.05), f[0], cz - .26, 0, { kind: 'type', cloth: P.office, night: false });
+    person(E, X(-1.05), f[0], cz - .26, 0, { kind: 'type', cloth: P.office, night: true });   // 夜は夜間受付として残る
     talk(person(E, X(-.38), f[0], cz - .27, 0, { cloth: P.coat, night: true, hold: 'chart' }), person(E, X(-.5), f[0], cz + .3, Math.PI, { cloth: P.casual[0] }));   // 受付で話す(カルテを持つ)
     // 待合のベンチ(受付を向く)
     for (const bz of [Z(.2), Z(.66)]) grp(S, X(.88), f[0], bz).foot(0, 0, .8 * k, .13 * k).box(0, 0, 0, .8 * k, .012, .012, P.metalDark).box(-.34 * k, 0, 0, .016, .1 * k, .13 * k, P.metalDark).box(.34 * k, 0, 0, .016, .1 * k, .13 * k, P.metalDark).rbox(0, .1 * k, 0, .8 * k, .03 * k, .14 * k, .01, P.chair).rbox(0, .13 * k, -.06 * k, .8 * k, .12 * k, .025 * k, .01, P.chair);
@@ -1024,7 +1024,7 @@ const BUILD = {
     grp(S, X(.35), f[1] + .26 * k + .02, nz - .03).box(-.35, 0, 0, .05, .01, .04, P.dark).box(-.35, 0, -.01, .012, .05, .012, P.dark).box(-.35, .04, 0, .2 * k, .12 * k, .014, P.frame).box(.25, 0, 0, .05, .01, .04, P.dark).box(.25, 0, -.01, .012, .05, .012, P.dark).box(.25, .04, 0, .2 * k, .12 * k, .014, P.frame);
     for (const dx of [-.35, .25]) bx(S, X(.35) + dx, f[1] + .26 * k + .02 + .05, nz - .022, .17 * k, .1 * k, .004, '#BCD5DC', 0, .6);
     person(E, X(.0), f[1], nz - .22, 0, { kind: 'type', cloth: P.scrub, night: true });
-    person(E, X(.75), f[1], nz - .24, -.3, { kind: 'write', stand: true, cloth: P.scrubNavy });
+    person(E, X(.75), f[1], nz - .24, -.3, { kind: 'write', stand: true, cloth: P.scrubNavy, night: true });   // 夜勤の記録
     // 掲示板(掲示じたく)。キャスター付きのコルクの板に、紙
     station(E, 'keiji', {
       x: X(-1.0), y: f[1], z: Z(.45), ry: .32, lift: [0, .012, .035],
@@ -1037,7 +1037,7 @@ const BUILD = {
     // 薬のカート
     grp(S, X(1.35), f[1], Z(.55)).foot(0, 0, .16 * k, .11 * k).rbox(0, .02, 0, .16 * k, .2 * k, .11 * k, .01, P.trim).box(0, .22 * k, 0, .17 * k, .012, .12 * k, P.tealSoft).box(0, .06 * k, .056 * k, .15 * k, .03 * k, .004, '#A4CDEA').box(0, .12 * k, .056 * k, .15 * k, .03 * k, .004, '#BFE2B0').box(0, .18 * k, .056 * k, .15 * k, .025 * k, .004, '#F2D46B');
     person(E, X(.4), f[1], Z(.82), Math.PI / 2, { kind: 'walk', x0: X(-.35), x1: X(1.2), v: .3, cloth: P.scrub, night: true, carry: true, hold: 'clip' });
-    person(E, X(1.14), f[1], Z(.56), Math.PI / 2, { kind: 'bend', cloth: P.scrubNavy, lean: .34 });   // 薬のカートで支度をする
+    person(E, X(1.14), f[1], Z(.56), Math.PI / 2, { kind: 'bend', cloth: P.scrubNavy, lean: .34, night: true });   // 薬のカートで支度をする
     person(E, X(.1), f[1], Z(.6), Math.PI / 2, { kind: 'walk', x0: X(-.45), x1: X(.6), v: .07, cloth: P.blanket });   // 病衣でゆっくり歩く人
 
     // ---- 3階 休憩室(左)と病室(右)。屋根がひらくので、ここがいちばんよく見える ----
