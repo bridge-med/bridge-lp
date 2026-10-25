@@ -29,7 +29,7 @@ function boot() {
   const hits = new Map($$('.hit').map(a => [a.dataset.id, a]));
   const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
   const reduce = () => reduceQ.matches || Q.get('still') === '1';
-  const phone = () => innerWidth < 900;
+  const phone = () => innerWidth < 920;   // 下層のナビがドロワーに替わる幅にそろえる
   const save = !!(navigator.connection && navigator.connection.saveData);
   const TODS = ['day', 'dusk', 'night'];
   const ICO = {
@@ -67,7 +67,7 @@ function boot() {
     say.textContent = { day: '昼', dusk: '夕方', night: '夜' }[next] + 'になりました';
   });
   btnPause.addEventListener('click', () => {
-    paused = btnPause.getAttribute('aria-pressed') !== 'true';
+    paused = btnPause.getAttribute('aria-pressed') !== 'true'; R.classList.toggle('paused', paused);   // 気づきの輪(CSS)も止める
     btnPause.setAttribute('aria-pressed', String(paused)); btnPause.setAttribute('aria-label', paused ? '町の動きを再生する' : '町の動きを止める');
     if (ctl) ctl.setPaused(paused);
     if (paused) stopInvite(); else if (!touched) startInvite();
@@ -204,10 +204,12 @@ function boot() {
   }
   /* 道具の入口(初めてひらいたときに作る)。立体が見えているときは、写しは町の中の画面ひとつ(入口には出さず、軽く: 誰向け・利用条件・ボタン)。
      止めた画像のとき(WebGL なし・動きを減らす設定)は、入口に写しを出す(そのとき読む) */
+  const landImg = {};   // 着く画面の写し(移る瞬間に広げる。入口をひらいたときに読む)
   function fillEntrance(ent, tid) {
     if (ent.childElementCount) return;
     const t = TOOLS[tid];
-    if (t.thumb && !ctl) { const f = el('figure', 'pshot'), im = new Image(); im.width = 880; im.height = 550; im.decoding = 'async'; im.alt = t.name + 'の画面'; im.src = THUMB(t.thumb); f.append(im); ent.append(f); ent.classList.add('shot'); }
+    if (t.land && !landImg[t.land]) { const im = new Image(); im.decoding = 'async'; im.src = t.land; landImg[t.land] = im; }
+    if (t.thumb && !ctl) { const f = el('figure', 'pshot'), im = new Image(); im.width = 880; im.height = 550; im.decoding = 'async'; im.alt = t.name + 'の実際の画面'; im.src = THUMB(t.thumb); f.append(im); ent.append(f); ent.classList.add('shot'); }
     if (t.for || t.facts) {
       const info = el('div', 'pinfo');
       if (t.for) { const p = el('p', 'pfor'); p.textContent = t.for; info.append(p); }
@@ -227,7 +229,7 @@ function boot() {
     ol.innerHTML = '';
     for (const id of ids) {
       const b = BY_ID[id], li = el('li'), bt = el('button', 'lrow');
-      bt.type = 'button'; bt.style.setProperty('--mk', b.mark);
+      bt.type = 'button';
       const im = new Image(); im.width = 480; im.height = 420; im.alt = ''; im.decoding = 'async'; im.src = 'img/b-' + id + '.webp';
       const tx = el('span'), nb = el('b'), sm = el('small'); nb.textContent = b.name; sm.textContent = b.line; tx.append(nb, sm);
       bt.append(im, tx);
@@ -239,7 +241,7 @@ function boot() {
   function fillPanel(id) {
     const b = BY_ID[id], plaza = id === 'plaza', i = RING.indexOf(id);
     const pv = BY_ID[RING[(i + RING.length - 1) % RING.length]], nx = BY_ID[RING[(i + 1) % RING.length]];
-    panel.style.setProperty('--mk', b.mark);
+    panel.classList.toggle('is-plaza', plaza);   // 広場の一文は明朝
     pRole.textContent = b.role; pNameT.textContent = b.name; pLine.textContent = b.line;
     pPrev.setAttribute('aria-label', '前の建物(' + pv.name + ')へ'); pPrev.title = pv.name;
     pNext.setAttribute('aria-label', '次の建物(' + nx.name + ')へ'); pNext.title = nx.name;
@@ -263,7 +265,7 @@ function boot() {
   let mouseXY = [-1, -1], armXY = null;
   addEventListener('mousemove', e => { mouseXY = [e.clientX, e.clientY]; }, { passive: true });
   pTools.addEventListener('mousemove', e => { if (armXY && Math.hypot(e.clientX - armXY[0], e.clientY - armXY[1]) > 4) { armXY = null; const li = e.target.closest('.prow'); if (li) rowEnter(li.dataset.sid); } });
-  const findNow = () => hovSid || focSid || pinSid;
+  const findNow = () => pinSid || hovSid || focSid;   // 入口をひらいている間は、乗せても・Tab で移っても、ひらいた道具のまま
   function applyFind() {
     const sid = findNow();
     markRow(sid || defSid);
@@ -277,7 +279,7 @@ function boot() {
   }
   function clearFind() { clearTimeout(hovT); pinSid = hovSid = focSid = null; }
   function rowEnter(sid) {
-    if (!mouseHover.matches || armXY) return;
+    if (!mouseHover.matches || armXY || pinSid) return;
     markRow(sid); if (ctl) ctl.stationHover(sid);
     clearTimeout(hovT); hovT = setTimeout(() => { hovSid = sid; applyFind(); }, 110);   // 行の上を通り過ぎただけでは動かさない
   }
@@ -305,7 +307,7 @@ function boot() {
   function stillShot() {
     const im = pStill.querySelector('img'), b = BY_ID[openId];
     im.onerror = () => { im.onerror = null; im.src = 'img/b-' + openId + '.webp'; };
-    im.src = 'img/cut-' + openId + (phone() ? '-800' : '') + '.webp'; im.alt = b.name + 'の中。' + b.line + 'の道具が置かれている';
+    im.src = 'img/cut-' + openId + (phone() ? '-800' : '') + '.webp'; im.alt = b.name + 'の中。' + b.line + '道具が置かれている';
   }
 
   /* ---------- 状態を URL のハッシュに残す(#town/建物/道具)。戻るボタンで町に戻ったとき、その状態から始める ---------- */
@@ -386,9 +388,16 @@ function boot() {
     if (oTags.hidden) return;
     const hr = heroRect(), pr = panel.hidden ? null : panel.getBoundingClientRect();
     const yMax = pr && phone() ? pr.top - hr.top - 6 : hero.clientHeight - 8, xMax = pr && !phone() ? pr.left - hr.left - 8 : hero.clientWidth;   // シート・パネルの下に隠れる札は出さない
-    for (const b of oTags.children) {
+    const placed = [];
+    for (const b of [...oTags.children].sort((a, c) => ((ovPos[c.dataset.id] || tagPos[c.dataset.id] || [0, 0])[1]) - ((ovPos[a.dataset.id] || tagPos[a.dataset.id] || [0, 0])[1]))) {   // 下(手前)の札から
       const p = ovPos[b.dataset.id] || tagPos[b.dataset.id]; if (!p) { b.classList.add('off'); continue; }
-      const [x, y] = tagXY(p, 36);
+      let [x, y] = tagXY(p, 36);
+      const w = b.offsetWidth || 64, h = b.offsetHeight || 28;
+      for (let i = 0; i < 4; i++) {   // 近い札(押せる範囲が重なる)とは、上へずらして間を空ける
+        const hit = placed.find(q => Math.abs(q.x - x) < (q.w + w) / 2 + 10 && Math.abs(q.y - y) < h + 20);
+        if (!hit) break; y = hit.y - (h + 20);
+      }
+      placed.push({ x, y, w });
       b.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,calc(-100% - 8px))`;
       b.classList.toggle('off', y > yMax || x > xMax);
     }
@@ -404,11 +413,14 @@ function boot() {
     if (ctl) ctl.setPaused(true);   // 移る間は町を描かない(次のページの読み込みに手を譲る)
     if (reduce() || !document.body.animate) return;
     if (leapEl) unleap(false);
+    // 広げるのは、着く画面と同じ写しだけ。紹介のページへ行く物(kind=intro)と、着く画面の写しがない物(land: false)は、紙の地に名前だけ
     let im = null, from = null;
-    if (ctl) { const url = t.shot || (t.thumb && THUMB(t.thumb)); im = url && ctl.imageOf(url); from = im && ctl.screenRect(sid); }
-    else if (shotImg && shotImg.naturalWidth) {   // object-fit: contain の中身
-      im = shotImg; const bx = shotImg.getBoundingClientRect(), k0 = Math.min(bx.width / im.naturalWidth, bx.height / im.naturalHeight);
-      from = { x: bx.left + (bx.width - im.naturalWidth * k0) / 2, y: bx.top + (bx.height - im.naturalHeight * k0) / 2, w: im.naturalWidth * k0, h: im.naturalHeight * k0 };
+    const bare = t.kind === 'intro' || t.land === false, land = t.land && landImg[t.land];
+    if (!bare && ctl) { im = land && land.naturalWidth ? land : ctl.imageOf(t.shot || (t.thumb && THUMB(t.thumb))); from = im && ctl.screenRect(sid); }
+    else if (!bare && shotImg && shotImg.naturalWidth) {   // 止めた画像のとき: 入口の写しの枠から(object-fit: contain の中身)
+      const bx = shotImg.getBoundingClientRect(), k0 = Math.min(bx.width / shotImg.naturalWidth, bx.height / shotImg.naturalHeight);
+      from = { x: bx.left + (bx.width - shotImg.naturalWidth * k0) / 2, y: bx.top + (bx.height - shotImg.naturalHeight * k0) / 2, w: shotImg.naturalWidth * k0, h: shotImg.naturalHeight * k0 };
+      im = land && land.naturalWidth ? land : shotImg;
     }
     const lp = el('div', 'leap'), bg = el('i', 'lp-bg'), cap = el('p', 'lp-name'), vw = R.clientWidth, vh = innerHeight;
     lp.setAttribute('aria-hidden', 'true'); cap.textContent = t.name; cap.append(el('i', 'lp-line')); lp.append(bg);
@@ -417,7 +429,7 @@ function boot() {
       const s1 = Math.min((phone() ? vw : Math.min(vw * .7, 1120)) / nw, vh * (phone() ? .62 : .66) / nh), w1 = nw * s1, h1 = nh * s1, x1 = (vw - w1) / 2, y1 = Math.max(10, (vh - h1 - 44) / 2);
       const cv = el('canvas', 'lp-im'); cv.width = nw; cv.height = nh; cv.getContext('2d').drawImage(im, 0, 0);   // 読み終えた画像を、そのまま写す(読み直さない・加工しない)
       Object.assign(cv.style, { left: x1.toFixed(1) + 'px', top: y1.toFixed(1) + 'px', width: w1.toFixed(1) + 'px', height: h1.toFixed(1) + 'px' });
-      const k = from.w / w1, tf = `translate(${(from.x - x1).toFixed(1)}px,${(from.y + (from.h - h1 * k) / 2 - y1).toFixed(1)}px) scale(${k.toFixed(4)})`;
+      const k = Math.min(from.w / w1, from.h / h1), tf = `translate(${(from.x + (from.w - w1 * k) / 2 - x1).toFixed(1)}px,${(from.y + (from.h - h1 * k) / 2 - y1).toFixed(1)}px) scale(${k.toFixed(4)})`;   // 元の枠に収まる大きさから(着く画面の写しが縦長でも)
       lp.dataset.from = tf; lp.append(cv); cap.style.top = (y1 + h1 + 14).toFixed(1) + 'px';
       cv.animate([{ transform: tf }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' });
     } else cap.style.top = (vh / 2 - 12).toFixed(1) + 'px';   // 写しのない行き先(アトリエ): 紙の地に名前だけ
@@ -492,7 +504,7 @@ function boot() {
   panel.addEventListener('click', e => { if (performance.now() - swallow < 350 && head.contains(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);   // 引いたあとの click は押したことにしない
 
   /* ---------- 見出しの帯: 最初の画面を過ぎたら、小さく上に固定(下の節からもヘッダーに届く)。ひらいている間は、いまのまま ---------- */
-  if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => R.classList.toggle('past', !en.isIntersecting), { rootMargin: '-72px 0px 0px 0px' }).observe(hero);
+  if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => { R.classList.toggle('past', !en.isIntersecting); if (!en.isIntersecting && openId) closeB(false); }, { rootMargin: '-72px 0px 0px 0px' }).observe(hero);   // ひらいたまま町が画面から出たら閉じる(ハッシュも消える)
 
   /* ---------- メニュー(スマホ) ---------- */
   const menu = $('#menu'), menuBtn = $('#menuBtn');
@@ -510,9 +522,11 @@ function boot() {
     const sum = a => a.reduce((t, [, d]) => t + d, 0);
     return { count: lts.length, total: sum(lts), max: Math.max(0, ...lts.map(([, d]) => d)), swapStart: Math.round(swap.start), swapLive: Math.round(swap.live), swapCount: inSwap.length, swapTotal: sum(inSwap), swapMax: Math.max(0, ...inSwap.map(([, d]) => d)) };
   };
+  /* 止めた画像がそのまま残るとき: sizes を実際の幅にして、画素の細かい端末では大きい方(1600w)を選ばせる。立体に替わる人は小さい画像のまま */
+  function stillSharp() { if (save) return; const w = Math.round(still.getBoundingClientRect().width); if (w > 0) poster.sizes = w + 'px'; }
   function hasWebGL() { try { const c = document.createElement('canvas'); return !!(window.WebGL2RenderingContext && c.getContext('webgl2')); } catch (e) { return false; } }
   function upgrade() {
-    if (reduce() || save || !hasWebGL() || Q.get('static') === '1') return;
+    if (reduce() || save || !hasWebGL() || Q.get('static') === '1') { stillSharp(); return; }
     const t0 = performance.now(); swap.start = t0;
     const mod = () => Q.get('stub') === '1' ? import('./interiors-stub.js') : import('./interiors.js').then(m => { if (typeof m.buildInterior !== 'function') throw new Error('no buildInterior'); return m; }).catch(() => import('./interiors-stub.js'));   // 立体の側が、手が空いたとき(か、最初に押されたとき)に読む
     import('./live.js').then(async L => {
@@ -525,7 +539,7 @@ function boot() {
         safe() {
           const w = canvas.clientWidth, h = canvas.clientHeight;
           if (phone()) return { l: 10, t: 64, r: w - 10, b: h - Math.round(innerHeight * .45) - 6 };
-          const pw = Math.min(400, innerWidth * .34) + 48;
+          const pw = Math.min(400, Math.max(340, innerWidth * .34)) + 48;
           return { l: 40, t: 90, r: w - pw - 16, b: h - 36 };
         },
         onHover(id) { hoverId = id; if (openId) return; if (id) showTag(id, true, true); else showTag(null); },   // 乗せただけでは誘いを止めない
@@ -537,6 +551,7 @@ function boot() {
         onStation(sid, how) {
           if (!openId) return;
           if (how === 'tap' && sid) { pinSid = sid; applyFind(); revealRow(sid); return; }
+          if (pinSid) return;   // 入口をひらいている間は、中の物に乗せても印を動かさない
           if (sid) { markRow(sid); if (!findNow()) showSTag(sid); } else { markRow(findNow() || defSid); showSTag(null); }
         },
         onFlick(d) { if (openId) step(d); },   // 町の上の横のはじき(指)
@@ -559,7 +574,7 @@ function boot() {
       for (const f of $$('.pent .pshot', pTools)) { f.parentNode.classList.remove('shot'); f.remove(); }   // 写しの元は、町の中の画面ひとつに
       if (openId) { pStill.hidden = true; await ctl.restore(openId, openId === 'plaza' ? null : pinSid); if (openId) { applyFind(); if (openId === 'plaza') ovTags(true); revealRow(pinSid); } }
       requestAnimationFrame(() => { R.classList.add('live'); dispatchEvent(new Event('hiraku:live')); });
-    }).catch(err => console.warn(err));
+    }).catch(err => { console.warn(err); stillSharp(); });
   }
   const idle = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 1500 }) : setTimeout(f, 300));
   if (document.readyState === 'complete') idle(upgrade); else addEventListener('load', () => idle(upgrade));

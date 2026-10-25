@@ -154,7 +154,7 @@ export async function live(o) {
   const manual = new URLSearchParams(location.search).get('clock') === 'manual';
   let vnow = 0;
   const clock = () => manual ? vnow : performance.now();
-  const small = Math.min(innerWidth, innerHeight) < 700 || innerWidth < 900;
+  const small = Math.min(innerWidth, innerHeight) < 700 || innerWidth < 920;
   let W = o.canvas.clientWidth, H = o.canvas.clientHeight;
   /* 品質の段(高・中・低)。最初はページが端末の手がかりで選ぶ。動かしてみて重ければ、ここで一段ずつ下げる */
   const DPR = { high: 2, mid: 1.5, low: 1 }, SHADOW = { high: 2048, mid: 1024, low: 0 };

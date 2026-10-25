@@ -2,13 +2,14 @@
    融合3「ひらく町」— 町の建物と、中にある道具(products/index.html の PRODUCTS と同じ名前・一行)
    for(誰向け)・facts(利用条件)・cta(ボタンの動詞)・kind(行き先の種類 app/intro/dist)も PRODUCTS の写し。ここで文言を作らない
    shot: 町の中の画面が products の縮小画像と違う物(縦長の画面)。移る瞬間に、町の中の画面と同じ画像を広げるため(interiors.js の IMG と同じ)
+   land: 移る瞬間に広げる、着く画面の写し(町の中の画面が着く画面と違うとき)。false は写しを広げず、紙の地に名前だけ(着く画面の写しがない)
    行き先の色(mark)は、ひらいたあとの UI の小さな印にだけ使う(立体には塗らない)
    ================================================================ */
 const P = '../../../';
 export const TOOLS = {
   /* 明日の業務を楽にする */
-  keiji: { name: '掲示じたく', t: '院内掲示を、選んで埋めるだけ', href: P + 'keiji/index.html', thumb: 'keiji', for: '受付・事務の方に', facts: ['無料', '登録不要', '端末内保存'], cta: '掲示をつくる', kind: 'app' },
-  nidodema: { name: '二度手間さがし', t: '部署の手作業を、減らせるものと守るものに分ける', href: P + 'nidodema/index.html', thumb: 'nidodema', for: '転記やFAXの手間が多い部署に', facts: ['無料', '登録不要', '端末内保存'], cta: 'チェックを始める', kind: 'app' },
+  keiji: { name: '掲示じたく', t: '院内掲示を、選んで埋めるだけ', href: P + 'keiji/index.html', thumb: 'keiji', land: '../shared/shots/keiji.webp', for: '受付・事務の方に', facts: ['無料', '登録不要', '端末内保存'], cta: '掲示をつくる', kind: 'app' },
+  nidodema: { name: '二度手間さがし', t: '部署の手作業を、減らせるものと守るものに分ける', href: P + 'nidodema/index.html', thumb: 'nidodema', land: false, for: '転記やFAXの手間が多い部署に', facts: ['無料', '登録不要', '端末内保存'], cta: 'チェックを始める', kind: 'app' },
   yawagaeshi: { name: 'やわ返', t: '角の立たない返信案を、3つつくる', href: P + 'yawagaeshi/index.html', thumb: 'yawagaeshi', shot: '../shared/shots/yawagaeshi.webp', for: '返信の言い方に迷う人に', facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'], cta: '返信案をつくる', kind: 'app' },
   /* 経営・管理の実務に使う */
   rehaboard: { name: 'RehaBoard', t: 'リハ部門の運営を、1画面に', href: P + 'rehaboard/index.html', thumb: 'rehaboard', note: '紹介とデモ', for: 'リハ部門の責任者・主任に', facts: ['デモは無料', '本体は買い切り ¥1,980', '登録不要', '端末内保存'], cta: '紹介とデモを見る', kind: 'intro' },
