@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<script>document.documentElement.classList.add('js')</script>
 <title>BRIDGE ひらく町(試作 v5 案A 町から病院の中へ)</title>
 <meta name="description" content="医療職のための道具と経営ゲーム。病院の外にも町がある。スクロールすると、町の病院に寄って中がひらく試作です。">
 <!-- 本番の index.html と同じ OGP と favicon(noindex はこの試作では残す) -->
@@ -300,10 +301,12 @@ html.paused .nr{animation-play-state:paused}   /* 止めるボタンで、この
 @media (hover:hover){.otag:hover{background:var(--card);box-shadow:0 6px 16px -6px rgba(0,0,0,.55),0 0 0 1px rgba(30,40,50,.2)}}
 
 /* ================= 案A: 町から病院の中へ =================
-   最初の画面(町)を止めたまま、スクロールで病院に寄る。屋根が持ち上がって抜け、前の壁が倒れ、中の人と道具が見える。続けて 3階 → 2階 → 1階 へ降りる。
+   最初の画面(町)を止めたまま、スクロールで病院に寄る。屋根は残し、前の壁が倒れて広場の下へ沈み、中の人と道具が見える。
+   カメラは病院ぜんたいで止まり、そのあとは 3階 → 2階 → 1階 と、その階の道具の札と灯りだけが降りる(一行は上の小さな見出しの一文の場所に)。
    空・光・見出しの帯は最初の画面のまま(紙の面に切り替えない)。言葉は最初の画面の一行と同じ場所に小さく、道具の札は町の名前の札と同じ形 */
 main:focus{outline:none}
-.stage{position:relative;height:calc(100svh + 270svh)}   /* 最初の画面 + 寄る・ひらく(約1.1画面)・ぜんたい(約0.4)・3つの階(約1.2) */
+.stage{position:relative}
+html.js .stage{height:calc(100svh + 180svh)}   /* JS が動くときだけ: 最初の画面 + 寄る・ひらく(約0.8画面)・ぜんたいと3つの階(約1.0)。JS なしでは止まったままの長い面を作らない */
 .stage > .hero{position:sticky;top:0}
 /* 寄り始めたら、最初の画面の言葉・入口・誘い・建物の見えないボタンを外す(ページの側が --cp を 1 → 0) */
 .copy,.cta-wrap,.hint{opacity:var(--cp,1);translate:0 calc((1 - var(--cp,1)) * -14px)}
@@ -311,24 +314,26 @@ html.scrub .copy,html.scrub .cta-wrap,html.scrub .hint{pointer-events:none}
 html.scrub .hits,html.scrub .nudge{visibility:hidden}
 html.scrub #tagB,html.scrub #tagS{opacity:0}
 .mist{opacity:var(--mk,1)}   /* 島の下のもやは、病院に寄るにつれて消す(1階を隠さない) */
-html.scrub .hero::after{opacity:var(--hz,0);transition:none}
-.endfade{position:absolute;left:0;right:0;bottom:0;height:24%;z-index:3;pointer-events:none;opacity:var(--ek,0);background:linear-gradient(180deg,rgb(var(--mist) / 0),rgb(var(--mist)) 88%)}   /* 舞台の終わり: 下の端を、次の面の色(空の下の色)へ */   /* 病院の中が画面の上まで来たら、見出しの帯と「病院の中」の下に、地の色の薄い霞(ひらいたときと同じ) */
-/* 病院の中: 最初の画面の一行と同じ場所・同じ形の小さな見出しと、一文 */
+html.scrub .hero::after{opacity:var(--hz,0);transition:none}   /* 病院の中が画面の上まで来たら、見出しの帯と「病院の中」の下に、地の色の薄い霞(ひらいたときと同じ) */
+.endfade{position:absolute;left:0;right:0;bottom:0;height:24%;z-index:3;pointer-events:none;opacity:var(--ek,0);background:linear-gradient(180deg,rgb(var(--mist) / 0),rgb(var(--mist)) 88%)}   /* 舞台の終わり: 下の端を、次の面の色(空の下の色)へ */
+/* 病院の中: 最初の画面の一行と同じ場所・同じ形の小さな見出しと、一文。階ごとに降りるときは、一文の場所に、その階の道具の一行 */
 .ins{position:absolute;z-index:7;left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px));pointer-events:none;opacity:0;visibility:hidden}
-.ins-line{margin-top:7px;font-size:14px;line-height:1.75;color:var(--hero-fg-2);opacity:var(--lk,1)}
 .ins .eyebrow{transition:none}
-/* 道具の札: 町の名前の札と同じ形(暗い札・白い字・下に小さな三角)。押すとその道具へ。ふれる範囲は 44px 以上 */
+.ins-lines{display:grid;margin-top:7px}
+.ins-line,.ins-fl{grid-area:1 / 1;font-size:14px;line-height:1.75;color:var(--hero-fg-2);transition:opacity .25s var(--ease)}
+.ins-fl{opacity:0}
+.ins-fl .fl{margin-right:.7em;font-size:12px;letter-spacing:.06em}
+.ins-fl b{margin-right:.5em;font-weight:700;color:var(--hero-fg)}
+.ins.fl .ins-line{opacity:0}
+.ins.fl .ins-fl.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.ins-line,.ins-fl{transition:none}}
+/* 道具の札: 町の名前の札と同じ形(暗い札・白い字・角の丸み 7px・下に小さな三角)と置き方(三角の先が指す点の上)。指す点は物の真上の、その階の天井の切り口(藍の帯)。押すとその道具へ */
 .chips{position:absolute;inset:0;z-index:8;pointer-events:none}
-.chip{position:absolute;left:0;top:0;display:grid;justify-items:start;padding:7px 12px 8px;background:var(--tag-bg);color:var(--tag-fg);border-radius:8px;font-size:13.5px;font-weight:700;line-height:1.35;letter-spacing:.04em;text-decoration:none;white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(-50%);box-shadow:0 8px 20px -10px rgba(0,0,0,.55);-webkit-tap-highlight-color:transparent}   /* 道具の画面の横(同じ階の中)。小さな三角が画面を指す */
-.chip::after{content:'';position:absolute;left:-4px;top:var(--ay,50%);width:10px;height:10px;margin-top:-5px;background:inherit;transform:rotate(45deg);border-radius:1px}
-.chip.flip::after{left:auto;right:-4px}   /* 画面の右に置けないときは左に */
-.chip::before{content:'';position:absolute;inset:-8px -6px}   /* ふれる範囲は 44px 以上 */
-.chip .c-fl,.chip .c-t{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* 畳んだ札: 名前だけ(階と一行は読み上げだけ) */
-.chip.big{padding:8px 13px 10px;border-radius:10px}
-.chip.big .c-fl,.chip.big .c-t{position:static;width:auto;height:auto;margin:0;overflow:visible;clip:auto}
-.chip.big .c-fl{order:-1;font-size:11px;font-weight:400;letter-spacing:.06em;color:var(--tag-sub)}
-.chip.big b{font-size:15px}
-.chip.big .c-t{margin-top:2px;font-size:12px;font-weight:400;letter-spacing:.02em;white-space:normal;width:max-content;max-width:min(17em,calc(100vw - 48px));color:var(--tag-sub)}
+.chip{position:absolute;left:0;top:0;display:flex;align-items:center;padding:5px 10px 6px;background:var(--tag-bg);color:var(--tag-fg);border-radius:7px;font-size:12.5px;font-weight:700;line-height:1.3;letter-spacing:.04em;text-decoration:none;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,calc(-100% - 7px));box-shadow:0 8px 20px -10px rgba(0,0,0,.55);transition:background-color .25s var(--ease),box-shadow .25s var(--ease);-webkit-tap-highlight-color:transparent}
+.chip::after{content:'';position:absolute;left:calc(50% + var(--ax,0px));bottom:-5px;width:10px;height:10px;margin-left:-5px;background:inherit;transform:rotate(45deg);border-radius:1px}
+.chip::before{content:'';position:absolute;inset:-10px -6px}   /* ふれる範囲は 44px 以上 */
+.chip .c-fl,.chip .c-t{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* 階と一行は読み上げだけ(見える一行は上の見出しの場所に) */
+.chip.on{background:var(--indigo);box-shadow:0 0 0 1.5px var(--sand-2),0 8px 20px -10px rgba(0,0,0,.55)}   /* いま降りている階の道具 */
 .chip:focus-visible{outline:2px solid var(--kinari);outline-offset:2px;box-shadow:0 0 0 6px var(--indigo)}
 @media (hover:hover){.chip:hover{background:var(--indigo)}}
 /* 病院の道具を一覧で(下に小さく) */
@@ -337,9 +342,12 @@ html.scrub .hero::after{opacity:var(--hz,0);transition:none}
 .ins-go .ico{width:16px;height:16px;color:var(--sand)}
 html[data-tod="night"] .ins-go .ico{color:var(--sand-2)}
 @media (hover:hover){.ins-go a:hover{box-shadow:0 0 0 1.5px var(--cbtn-fg)}}   /* 面は明るい部屋や広場の上でも読める濃さ(押せる時刻の丸と同じ、濃い方の面) */
-/* 動かないとき(動きを減らす・WebGL なし・立体に替わる前): 町の止めた画像から、ひらいた病院の止めた画像へ、重ねて替える */
-.shut{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;visibility:hidden}
+/* 動かないとき(動きを減らす・WebGL なし・立体に替わる前): 町の止めた画像を病院へ寄せてから(動きを減らす設定では寄せない)、ひらいた病院の止めた画像へ 0.25 秒で替える(重ねたまま進めない) */
+.shut{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .25s var(--ease),visibility 0s .25s}
 .shut img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+html.shut-on .shut{opacity:1;visibility:visible;transition:opacity .25s var(--ease)}
+.still .poster{transition:opacity .25s var(--ease)}
+html.shut-on:not(.live) .still .poster{opacity:0}
 html.live .shut{opacity:0!important;visibility:hidden!important;transition:opacity .5s var(--ease),visibility 0s .5s}   /* 立体に替わったら、立体の下で消える */
 /* 試作の終わり: 最初の画面の下の空の色のまま(紙にしない)。そのあとフッター */
 .end{--end-bg:var(--sky-d3);background:linear-gradient(180deg,var(--end-bg) 0%,var(--end-bg) 55%,var(--night-bg) 100%);padding:clamp(56px,12vh,120px) var(--pad) clamp(72px,14vh,140px);text-align:center}
@@ -524,7 +532,10 @@ html.capture body > *:not(#cap){display:none!important}
   </nav>
   <p class="hint" id="hint">建物にふれると、中がひらきます</p>
   <!-- 病院の中: 最初の画面の一行と同じ場所に小さな見出しと一文。札は道具の物の上(位置は立体の側から。止めた画像では撮ったときの位置) -->
-  <div class="ins" id="ins" aria-hidden="true"><p class="eyebrow">病院の中</p><p class="ins-line"><span class="ph">いつもの仕事のそばに、</span><span class="ph">3つの道具を</span><span class="ph">置いてみました。</span></p></div>
+  <div class="ins" id="ins" aria-hidden="true"><p class="eyebrow">病院の中</p><div class="ins-lines"><p class="ins-line"><span class="ph">いつもの仕事のそばに、</span><span class="ph">3つの道具を</span><span class="ph">置いてみました。</span></p>
+    <p class="ins-fl" data-sid="yawagaeshi"><span class="fl">3階 休憩室</span><b>やわ返</b><span class="ph">角の立たない返信案を、</span><span class="ph">3つつくる</span></p>
+    <p class="ins-fl" data-sid="keiji"><span class="fl">2階 ナースステーション</span><b>掲示じたく</b><span class="ph">院内掲示を、</span><span class="ph">選んで埋めるだけ</span></p>
+    <p class="ins-fl" data-sid="nidodema"><span class="fl">1階 受付</span><b>二度手間さがし</b><span class="ph">部署の手作業を、</span><span class="ph">減らせるものと</span><span class="ph">守るものに分ける</span></p></div></div>
   <nav class="chips" id="chips" aria-label="病院の中の道具">
     <a class="chip" data-sid="yawagaeshi" data-fl="2" href="../../../yawagaeshi/index.html"><span class="c-fl">3階 休憩室</span><b>やわ返</b><span class="c-t">角の立たない返信案を、3つつくる</span></a>
     <a class="chip" data-sid="keiji" data-fl="1" href="../../../keiji/index.html"><span class="c-fl">2階 ナースステーション</span><b>掲示じたく</b><span class="c-t">院内掲示を、選んで埋めるだけ</span></a>

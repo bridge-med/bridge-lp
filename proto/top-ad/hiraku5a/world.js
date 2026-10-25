@@ -92,6 +92,8 @@ export const U = {
   uGlowW: { value: new THREE.Color('#FFB873') }, uGlowI: { value: new THREE.Color('#9DB2FF') }, uGlowS: { value: new THREE.Color('#FFC77A') },
   uGlowC: { value: new THREE.Color('#E4ECF7') }, uGlowL: { value: new THREE.Color('#FFC27A') }, uGlowK: { value: new THREE.Color('#FFF0D2') },
   uHazeC: { value: new THREE.Color('#FFFFFF') }, uHazeK: { value: .8 },   // 岩の先が下へ行くほど溶ける、もやの色と強さ。placeSky が時間帯で変える
+  uGroundCut: { value: -1e4 },   // 案A: ひらいた建物の前の壁を、この高さ(世界の y)より下は描かない(倒れた壁を広場の面の下へ沈める。町ではいつも描く)
+  uArcFade: { value: 0 },        // 案A: 広場の弧(藍と砂)を点描で消す割合(0 = 描く、1 = 消す)。病院に寄ると、ひらいた病院の1階に掛からないように
   // 交差の広場の時刻ごとの表情(applyTod が決める): uArc = 弧と床の帯が灯る強さ(夜だけ)、uRim = 夕方の低い光(砂の弧の縁が金、藍の弧は影絵)
   uArc: { value: 0 }, uRim: { value: 0 }, uGlowR: { value: new THREE.Color('#FFC46E') },
   // 藍の弧の夕方の縁(空の藤色を拾う、冷たい細い縁。砂の弧の金の縁と対)と、昼に床のロゴの帯を目地の濃さへ寄せる強さ(昼は影がロゴを描くので、弧を主役に)
@@ -108,7 +110,7 @@ mat4 hkPart(out float cut) {
   mat4 m = mat4(1.0);
   if (an > 4.5 && an < 5.5) m = uPM[5]; else if (an > 5.5 && an < 6.5) m = uPM[6]; else if (an > 6.5) m = uPM[7];
   bool A = abs(aBid - uOpenA) < .5; bool B = abs(aBid - uOpenB) < .5;
-  if (pa > .5 && pa < 1.5) { if (A) m = uPM[1] * m; else if (B) m = uPM[3] * m; }
+  if (pa > .5 && pa < 1.5) { if (A) { m = uPM[1] * m; cut = 2.0; } else if (B) m = uPM[3] * m; }   // 2.0: ひらいた建物の前の壁の印(地面より下を描かない。点描の消え方はしない)
   else if (pa > 1.5 && pa < 2.5) { if (A) { m = uPM[2] * m; cut = uRoofA; } else if (B) { m = uPM[4] * m; cut = uRoofB; } }
   return m;
 }`;
@@ -117,6 +119,7 @@ if (abs(aBid - uLiftBid) < .5) transformed.y += uLift;
 vFx = aFx; vBid = aBid; vWin = aWin; vCut = hkC; vHkY = (modelMatrix * vec4(transformed, 1.0)).y;`;
 const FCOMMON = `
 uniform float uNight; uniform float uTime; uniform float uHi; uniform float uHiAmt; uniform vec3 uHiColor;
+uniform float uGroundCut; uniform float uArcFade;
 uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK; uniform vec3 uHazeC; uniform float uHazeK; uniform float uArc; uniform float uRim; uniform vec3 uGlowR; uniform vec3 uGlowV; uniform float uDay; uniform vec3 uJoint;
 varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY;
 float hkBayer(vec2 p) { vec2 q = mod(floor(p), 4.0); float i = q.x + q.y * 4.0;
@@ -152,7 +155,7 @@ function townMat(cls) {
       .replace('#include <beginnormal_vertex>', 'float hkC0; mat4 hkM0 = hkPart(hkC0); vec3 objectNormal = mat3(hkM0) * vec3(normal);')
       .replace('#include <begin_vertex>', VBEGIN);
     s.fragmentShader = s.fragmentShader.replace('#include <common>', '#include <common>\n' + FCOMMON)
-      .replace('#include <clipping_planes_fragment>', 'if (vCut < .999 && hkBayer(gl_FragCoord.xy) >= vCut) discard;\n#include <clipping_planes_fragment>')
+      .replace('#include <clipping_planes_fragment>', 'if (vCut < .999 && hkBayer(gl_FragCoord.xy) >= vCut) discard;\nif (vCut > 1.5 && vHkY < uGroundCut) discard;\nif (uArcFade > .001 && (abs(vFx.x - 2.0) < .5 || abs(vFx.x - 3.0) < .5 || abs(vFx.x - 10.0) < .5 || abs(vFx.x - 11.0) < .5) && hkBayer(gl_FragCoord.xy) < uArcFade) discard;\n#include <clipping_planes_fragment>')
       .replace('#include <color_fragment>', `#include <color_fragment>
 if (vFx.y > .5) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.075, .095, .15), uNight * .82);
 // 夕方の藍の弧は、逆光の影絵(真っ黒にはしない。空の照り返しで、深い藍が残る。下の emissive)
@@ -173,7 +176,7 @@ function depthMat() {
     Object.assign(s.uniforms, U);
     s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\n' + VCOMMON).replace('#include <begin_vertex>', VBEGIN);
     s.fragmentShader = s.fragmentShader.replace('#include <common>', '#include <common>\n' + FCOMMON)
-      .replace('#include <clipping_planes_fragment>', 'if (vCut < .999 && hkBayer(gl_FragCoord.xy) >= vCut) discard;\n#include <clipping_planes_fragment>');
+      .replace('#include <clipping_planes_fragment>', 'if (vCut < .999 && hkBayer(gl_FragCoord.xy) >= vCut) discard;\nif (vCut > 1.5 && vHkY < uGroundCut) discard;\nif (uArcFade > .001 && (abs(vFx.x - 2.0) < .5 || abs(vFx.x - 3.0) < .5 || abs(vFx.x - 10.0) < .5 || abs(vFx.x - 11.0) < .5) && hkBayer(gl_FragCoord.xy) < uArcFade) discard;\n#include <clipping_planes_fragment>');
   };
   DEPTH.customProgramCacheKey = () => 'hk-depth';
   return DEPTH;
