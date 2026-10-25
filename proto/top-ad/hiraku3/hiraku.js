@@ -29,7 +29,7 @@ function boot() {
   const hits = new Map($$('.hit').map(a => [a.dataset.id, a]));
   const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
   const reduce = () => reduceQ.matches || Q.get('still') === '1';
-  const phone = () => innerWidth < 920;   // 下層のナビがドロワーに替わる幅にそろえる
+  const phone = () => innerWidth < 921;   // 本番の bridge.css と同じく、920px まではドロワー(スマホの形)
   const save = !!(navigator.connection && navigator.connection.saveData);
   const TODS = ['day', 'dusk', 'night'];
   const ICO = {
@@ -286,7 +286,7 @@ function boot() {
   pTools.addEventListener('mouseleave', () => { if (!mouseHover.matches) return; clearTimeout(hovT); hovT = setTimeout(() => { hovSid = null; applyFind(); }, 220); });
   pTools.addEventListener('focusout', e => { if (focSid && !pTools.contains(e.relatedTarget)) { focSid = null; applyFind(); } });
   function rowPick(sid) {
-    const go = () => { pinSid = pinSid === sid ? null : sid; if (!pinSid && hovSid === sid) hovSid = null; applyFind(); if (pinSid) revealRow(sid); };
+    const go = () => { pinSid = pinSid === sid ? null : sid; if (!pinSid && hovSid === sid) hovSid = null; applyFind(); if (pinSid) revealRow(sid); else panel.style.height = ''; };   // 閉じたら、伸ばしたシートを戻す
     // スマホでシートを広げているときは、物が見える高さに戻してから寄る
     if (phone() && panel.classList.contains('full')) { panel.classList.remove('full'); setTimeout(go, 340); } else go();
   }
@@ -298,7 +298,16 @@ function boot() {
       if (r.top < bb.top + pad || r.height > bb.height - pad * 2) return r.top - bb.top - pad;
       return r.bottom > bb.bottom - pad ? r.bottom - bb.bottom + pad : 0;
     };
-    const now = reduce() || Q.get('clock') === 'manual', dy = need();   // 撮るとき(手動の時計)は、描かないとなめらかなスクロールが進まないので瞬時に
+    const now = reduce() || Q.get('clock') === 'manual';   // 撮るとき(手動の時計)は、描かないとなめらかなスクロールが進まないので瞬時に
+    if (phone()) {   // 入口(名前からボタンまで)がシートの見える範囲より高いときは、シートを要るだけ伸ばす(画面の 88% まで)
+      const over = li.getBoundingClientRect().height - (pBody.getBoundingClientRect().height - 12);
+      if (over > 0 && !panel.classList.contains('full')) {
+        panel.style.height = Math.min(innerHeight * .88, panel.getBoundingClientRect().height + over) + 'px';
+        setTimeout(() => { const d = need(); if (Math.abs(d) > 1) pBody.scrollBy({ top: d }); }, now ? 0 : 340);
+        return;
+      }
+    }
+    const dy = need();
     if (Math.abs(dy) < 1) return;
     pBody.scrollBy({ top: dy, behavior: now ? 'auto' : 'smooth' });
     if (!now) setTimeout(() => { const d2 = need(); if (Math.abs(d2) > 2) pBody.scrollBy({ top: d2 }); }, 500);   // なめらかに動かなかったときは、そのまま合わせる
@@ -328,12 +337,11 @@ function boot() {
     R.classList.add('opened');
     if (ctl) ctl.open(id);
     if (id === 'plaza' && (!ctl || reduce())) ovTags(true);   // 動いているときは、見晴らしに着いてから(onOpened)
-    const show = () => {
-      if (openId !== id) return;
-      panel.hidden = false; panel.classList.remove('full');
-      if (opt.focus !== false) pTitle.focus({ preventScroll: true });   // 描画が重い端末でも遅れないように、その場で移す
-    };
-    if (wasOpen || !ctl || reduce() || opt.now) show(); else setTimeout(show, 260);
+    // パネルは押したその場で出し、町に寄る動きの間に現れる(0.26 秒後。CSS の時計なので、描画が重い端末でも、こまの数によらない)
+    const enter = !(wasOpen || !ctl || reduce() || opt.now);
+    panel.classList.remove('enter', 'full'); panel.style.height = ''; panel.hidden = false;
+    if (enter) { void panel.offsetWidth; panel.classList.add('enter'); }
+    if (opt.focus !== false) pTitle.focus({ preventScroll: true });
     if (!save) idle(() => { if (openId !== id) return; for (const tid of BY_ID[id].tools) { const t = TOOLS[tid]; if (t.thumb) { const im = new Image(); im.decoding = 'async'; im.fetchPriority = 'low'; im.src = THUMB(t.thumb); } } });   // 入口の写しを先に読んでおく(押したときに枠が空にならないように)
     writeHash();
     if (PERF) PERF.mark('open', id);
@@ -342,7 +350,7 @@ function boot() {
   function closeB(back = true) {
     if (!openId) return;
     const id = openId; openId = null; clearFind(); listOpen(false, true); ovTags(false);
-    panel.hidden = true; R.classList.remove('opened'); showSTag(null);
+    panel.hidden = true; panel.classList.remove('enter'); panel.style.height = ''; R.classList.remove('opened'); showSTag(null);
     if (ctl) ctl.close();
     writeHash();
     if (PERF) PERF.mark('close', id);
@@ -423,6 +431,9 @@ function boot() {
       im = land && land.naturalWidth ? land : shotImg;
     }
     const lp = el('div', 'leap'), bg = el('i', 'lp-bg'), cap = el('p', 'lp-name'), vw = R.clientWidth, vh = innerHeight;
+    if (im && !(from && from.w > 2 && from.w < vw * 2 && from.x + from.w > 0 && from.y + from.h > 0 && from.x < vw && from.y < vh)) {   // 画面の外(カメラが動いている途中など): 入口の位置から
+      const r = (e.currentTarget.closest('.prow') || e.currentTarget).getBoundingClientRect(); from = { x: r.left + 12, y: r.top + 8, w: Math.max(40, r.width - 24), h: Math.max(30, r.height - 16) };
+    }
     lp.setAttribute('aria-hidden', 'true'); cap.textContent = t.name; cap.append(el('i', 'lp-line')); lp.append(bg);
     const nw = im && (im.naturalWidth || im.width), nh = im && (im.naturalHeight || im.height);
     if (nw && from && from.w > 2) {
@@ -455,6 +466,7 @@ function boot() {
 
   /* ---------- キーボード: Esc で閉じる(一覧がひらいていれば一覧を)、←/→ で隣の建物へ、Tab はパネルの中を回る ---------- */
   addEventListener('keydown', e => {
+    if (menu.open) return;   // メニュー(モーダル)の中のキー操作は、メニューに任せる
     if (e.key === 'Escape' && openId) { e.preventDefault(); if (!pList.hidden) { listOpen(false); pName.focus(); } else closeB(); return; }
     if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && openId && !panel.hidden && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && !menu.open) { e.preventDefault(); step(e.key === 'ArrowLeft' ? -1 : 1); return; }
     if (e.key === 'Tab' && openId && !panel.hidden) {           // パネルの中を Tab で回る
@@ -462,7 +474,7 @@ function boot() {
       if (!f.length) return;
       const first = f[0], lastEl = f[f.length - 1];
       if (!panel.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
-      else if (e.shiftKey && (document.activeElement === first || document.activeElement === pTitle)) { e.preventDefault(); lastEl.focus(); }
+      else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); lastEl.focus(); }
       else if (!e.shiftKey && document.activeElement === lastEl) { e.preventDefault(); first.focus(); }
     }
   });
@@ -564,7 +576,8 @@ function boot() {
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };
           if (sTagFor) showSTag(sTagFor);
         },
-        onOpened(id) { if (id === 'plaza' && openId === 'plaza') ovTags(true); },   // 見晴らしに着いてから、名前の札
+        onOpened() {},
+        onArrive(id) { if (id === 'plaza' && openId === 'plaza') ovTags(true); },   // カメラが見晴らしに着いてから、名前の札(遅い端末でも、カメラより先に出さない)
         onClosed() {},
         onFrame() { if (PERF) PERF.frame(); }
       });

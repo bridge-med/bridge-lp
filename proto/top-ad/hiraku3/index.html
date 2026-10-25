@@ -6,6 +6,15 @@
 <meta name="robots" content="noindex, nofollow">
 <title>BRIDGE ひらく町(試作 融合3・v3)</title>
 <meta name="description" content="医療職のための、道具と経営ゲーム。病院の外にも、町がある。建物にふれると、中がひらく試作です。">
+<!-- 本番の index.html と同じ OGP と favicon(noindex はこの試作では残す) -->
+<meta property="og:title" content="BRIDGE — その経験に、次の可能性を">
+<meta property="og:description" content="毎日やっていること、たぶん今の職場の外でも使えます。理学療法士がひとりで作っている、医療職のための道具と経営ゲーム。登録なしでブラウザから。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bridge-med.github.io/bridge-lp/">
+<meta property="og:site_name" content="BRIDGE">
+<meta property="og:image" content="https://bridge-med.github.io/bridge-lp/images/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Barlow:wght@500;600&display=swap" rel="stylesheet">
@@ -159,8 +168,8 @@ html:not(.js) .hint{display:none}
 .hit{position:absolute;left:0;top:0;display:block;border-radius:14px;pointer-events:auto;-webkit-tap-highlight-color:transparent}
 html.live .hit{pointer-events:none}
 .hit:focus{outline:none}
-.hit:focus-visible{outline:2px dashed var(--focus);outline-offset:2px}
-html:not(.js) .hit{outline:0}
+.hit:focus-visible{outline:2px solid var(--kinari);outline-offset:2px;box-shadow:0 0 0 6px var(--indigo)}   /* 藍・生成り・藍の三重の輪(町のどの色の上でも、どれかが 3:1 以上) */
+html:not(.js) .hits,html:not(.js) .menu{display:none}
 
 /* 名前の札(乗せたとき・誘い・中の物) */
 .tags{position:absolute;inset:0;z-index:8;pointer-events:none}
@@ -172,7 +181,7 @@ html:not(.js) .hit{outline:0}
 
 /* スマホ: 最初の画面の下に、空の下の色のやわらかいもや。島がもやの海に浮かび、島の下の端が溶ける(入口の後ろまで) */
 .mist{display:none}
-@media (max-width:919px){
+@media (max-width:920px){
   .mist{display:block;position:absolute;left:0;right:0;bottom:0;height:42%;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgb(var(--mist) / 0) 0%,rgb(var(--mist) / .5) 30%,rgb(var(--mist) / .86) 56%,rgb(var(--mist)) 76%);transition:opacity .5s var(--ease)}
   html.opened .mist{opacity:0}
 }
@@ -191,6 +200,8 @@ html.paused .nr{animation-play-state:paused}   /* 止めるボタンで、この
 /* ================= ひらいたときのパネル(PC は右、スマホは下からのシート) ================= */
 .panel{position:fixed;z-index:60;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;box-shadow:0 24px 60px -24px rgba(20,24,30,.45),0 0 0 1px rgba(30,30,30,.06)}
 .panel[hidden]{display:none}
+.panel.enter{animation:pIn .22s var(--ease) .26s both}
+@keyframes pIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 /* 上: ‹ 前 | 建物の名前 | 次 ›(名前にふれると、建物の一覧)。その下に、短い呼び名・一行と、閉じる */
 .p-head{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 8px;padding:14px 14px 10px;transition:transform .22s var(--ease)}   /* 横に引いたあと、元の位置へ */
 .p-nav{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px}
@@ -341,12 +352,13 @@ html.js .pair.armed .open{clip-path:inset(0 0 100% 0)}
 .f-brand{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 12px;align-content:start}
 .f-brand .logo-m{width:42px}
 .f-brand b{font:600 14px/1 var(--en);letter-spacing:.3em;color:var(--night-fg)}
+.f-brand .tg{display:block;margin-top:6px;font:500 10.5px/1 var(--en);letter-spacing:.2em;color:var(--night-dim)}
 .f-brand p{grid-column:1/-1;font-size:12.5px;line-height:1.8}
 .f-col .h{margin-bottom:4px;font-size:11.5px;letter-spacing:.12em;color:var(--night-dim)}
 .f-col a{display:flex;align-items:center;min-height:44px;font:500 14px/1.3 var(--en);letter-spacing:.02em;color:var(--night-link);text-decoration:none}   /* 英語の語は Barlow(メニューとそろえる) */
 .f-col a:hover{color:var(--card);text-decoration:underline;text-underline-offset:4px}
 .foot-base{max-width:1080px;margin:26px auto 0;padding-top:12px;border-top:1px solid var(--night-line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 20px;font:500 12.5px/1.4 var(--en)}
-.foot-base a{display:inline-flex;align-items:center;min-height:44px;color:var(--night-link)}
+.foot-base a{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;color:var(--night-link)}
 .proto{margin-left:14px;font:500 11px/1 var(--en);letter-spacing:.14em;color:var(--night-dim)}
 
 /* 最初の画面を過ぎたら、見出しの帯を小さく上に固定(下の節からもヘッダーに届く)。ひらいている間は、いまのまま */
@@ -369,8 +381,8 @@ html.past:not(.opened) .logo svg{width:42px}
 .mdlg .x{position:absolute;right:12px;top:12px;display:grid;place-items:center;width:44px;height:44px;border-radius:50%}
 .mdlg .x .ico{width:20px;height:20px}
 
-/* ---- PC(920px 以上。下層のナビがドロワーに替わる幅にそろえる): 島が右の約3分の2。左に一行・見出し・一文・入口・小さな誘い ---- */
-@media (min-width:920px){
+/* ---- PC(921px から。本番の bridge.css は 920px までドロワー): 島が右の約3分の2。左に一行・見出し・一文・入口・小さな誘い ---- */
+@media (min-width:921px){
   .hero{min-height:680px}
   .copy{left:var(--pad);top:clamp(120px,22vh,220px);width:min(31vw,420px)}
   h1{font-size:clamp(32px,3.1vw,44px)}
@@ -384,17 +396,17 @@ html.past:not(.opened) .logo svg{width:42px}
   .sky .stars{-webkit-mask-image:linear-gradient(90deg,transparent 0,transparent 36%,#000 44%);mask-image:linear-gradient(90deg,transparent 0,transparent 36%,#000 44%)}   /* PC は左の文字の列にかけない */
   html.opened .copy,html.opened .cta-wrap,html.opened .hint{opacity:0;pointer-events:none}
 }
-@media (min-width:920px) and (max-height:760px){.copy{top:110px}.lead{display:none}.cta-wrap{top:270px}}
+@media (min-width:921px) and (max-height:760px){.copy{top:110px}.lead{display:none}.cta-wrap{top:270px}}
 
-/* ---- スマホ(919px まで): 上にロゴとメニュー、一行と見出し、島が画面の大半、下に入口 ---- */
-@media (max-width:919px){
+/* ---- スマホ(920px まで): 上にロゴとメニュー、一行と見出し、島が画面の大半、下に入口 ---- */
+@media (max-width:920px){
   .nav{display:none}
   .menu{display:inline-flex}
   .copy{left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px))}
   .eyebrow{font-size:11.5px;gap:8px}
   h1{margin-top:6px;font-size:clamp(22px,6.2vw,24px);line-height:1.34}
   /* 町の大きさは、撮った画像の中の7つの建物の外形(--cl〜--cr)が、左右に 8px の余白で画面の幅に収まるように。高さが足りないときは、高さで決める */
-  .hero{--top0:max(136px,calc(150px + (100svh - 700px) * .45));--bot0:150px}   /* 背の高い画面では、町を下げて、入口との間の空きを減らす */
+  .hero{min-height:440px;--top0:max(136px,calc(150px + (100svh - 700px) * .45));--bot0:150px}   /* 背の低い画面(ブラウザの帯が出た iPhone SE など)でも、入口と条件の一行まで最初の画面に */   /* 背の高い画面では、町を下げて、入口との間の空きを減らす */
   .still{--W:min(calc((100vw - 16px) * 100 / (var(--cr) - var(--cl))),calc((100svh - var(--top0) - var(--bot0)) * 100 / ((var(--cb) - var(--ct)) * .9)));width:var(--W);left:calc(50% - var(--W) * (var(--cl) + var(--cr)) / 200);transform:none;top:calc(var(--top0) + env(safe-area-inset-top,0px) - var(--W) * .9 * var(--ct) / 100)}
   .cta-wrap{left:var(--pad);right:var(--pad);bottom:calc(16px + env(safe-area-inset-bottom,0px))}
   .ctrl{margin-left:0}
@@ -427,7 +439,8 @@ html.past:not(.opened) .logo svg{width:42px}
   .f-brand{grid-column:1/-1}
 }
 /* 背の低いスマホ(700px 以下): 一行(誰に何を)は残し、町を一行ぶん下げる */
-@media (max-width:919px) and (max-height:700px){h1{margin-top:4px}.hero{--top0:132px;--bot0:128px}}
+@media (max-width:920px) and (max-height:700px){h1{margin-top:4px}.hero{--top0:132px;--bot0:128px}}
+@media (max-width:920px) and (max-height:599px){.eyebrow{display:none}h1{margin-top:0}.hero{--top0:118px;--bot0:116px}}   /* 600px 未満: 一行の説明は外し、町を高さで縮める */
 @media (max-width:389px){.menu .mt{display:none}.menu{padding:0 11px}}
 @media (max-width:374px){.logo{gap:9px}.logo svg{width:42px}.logo b{font-size:13.5px;letter-spacing:.28em}}
 @media (max-width:359px){.cta{gap:8px;padding:0 14px;font-size:14px;white-space:nowrap}.closing .say{font-size:22px}}
@@ -448,7 +461,7 @@ html.capture body > *:not(#cap){display:none!important}
 </svg>
 
 <header class="hd">
-  <a class="logo" href="../../../index.html" aria-label="BRIDGE ホーム"><svg viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><b aria-hidden="true">BRIDGE</b></a>
+  <a class="logo" href="../../../index.html" aria-label="BRIDGE ホームへ"><svg viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><b aria-hidden="true">BRIDGE</b></a>
   <div class="hd-r">
   <nav class="nav" aria-label="サイト"><!-- shared/bridge.js の NAV の primary と CTA と同じ語・同じ順・同じ行き先(本番では window.BRIDGE のデータから描く) -->
     <a href="../../../products/index.html">Products</a>
@@ -470,9 +483,9 @@ html.capture body > *:not(#cap){display:none!important}
   <div class="sky" aria-hidden="true"><i class="s-day"></i><i class="s-dusk"></i><i class="s-night"><span class="stars"></span></i></div>
   <canvas id="world" aria-hidden="true"></canvas>
   <div class="still" id="still">
-    <img class="poster" id="poster" width="1600" height="1440" sizes="(max-width: 919px) 330px, 66vw" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある" data-day="img/town-day.webp" data-dusk="img/town-dusk.webp" data-night="img/town-night.webp">
-    <script>/* 止めた画像は、その端末が描く品質の段で撮ったもの(スマホは中 -mid、PC は高。hiraku.js の段の選び方と同じ)。幅の違う2枚(スマホは 1000) */(function () { var p = document.getElementById('poster'), q = new URLSearchParams(location.search).get('q'), s = null; try { s = localStorage.getItem('bridge-hiraku-q'); } catch (e) {} var t = q || s || (innerWidth < 920 ? 'mid' : 'high'), m = navigator.deviceMemory || 8, c = navigator.hardwareConcurrency || 8; if (!q && t === 'high' && (m <= 4 || c <= 4)) t = 'mid'; var k = t === 'high' ? '' : '-mid', u = (p.dataset[document.documentElement.dataset.tod] || p.dataset.day).replace('.webp', k + '.webp'); p.dataset.tier = k; p.srcset = u.replace('.webp', '-1000.webp') + ' 1000w, ' + u + ' 1600w'; p.src = u; })();</script>
-    <noscript><img class="poster" src="img/town-day.webp" srcset="img/town-day-1000.webp 1000w, img/town-day.webp 1600w" sizes="(max-width: 919px) 330px, 66vw" width="1600" height="1440" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある"></noscript>
+    <img class="poster" id="poster" width="1600" height="1440" sizes="(max-width: 920px) 330px, 66vw" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある" data-day="img/town-day.webp" data-dusk="img/town-dusk.webp" data-night="img/town-night.webp">
+    <script>/* 止めた画像は、その端末が描く品質の段で撮ったもの(スマホは中 -mid、PC は高。hiraku.js の段の選び方と同じ)。幅の違う2枚(スマホは 1000) */(function () { var p = document.getElementById('poster'), q = new URLSearchParams(location.search).get('q'), s = null; try { s = localStorage.getItem('bridge-hiraku-q'); } catch (e) {} var t = q || s || (innerWidth < 921 ? 'mid' : 'high'), m = navigator.deviceMemory || 8, c = navigator.hardwareConcurrency || 8; if (!q && t === 'high' && (m <= 4 || c <= 4)) t = 'mid'; var k = t === 'high' ? '' : '-mid', u = (p.dataset[document.documentElement.dataset.tod] || p.dataset.day).replace('.webp', k + '.webp'); p.dataset.tier = k; p.srcset = u.replace('.webp', '-1000.webp') + ' 1000w, ' + u + ' 1600w'; p.src = u; })();</script>
+    <noscript><img class="poster" src="img/town-day.webp" srcset="img/town-day-1000.webp 1000w, img/town-day.webp 1600w" sizes="(max-width: 920px) 330px, 66vw" width="1600" height="1440" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある"></noscript>
   </div>
   <div class="tags" aria-hidden="true"><span class="tag" id="tagB"></span><span class="tag st" id="tagS"></span>
     <div class="nudge" id="nudge" hidden><i class="nr"></i><i class="nr n2"></i><span class="nt">ふれてみる</span></div>
@@ -537,7 +550,7 @@ html.capture body > *:not(#cap){display:none!important}
     <p class="g-intro">町の建物ごとに、医療職のための道具と経営ゲームが置いてあります。<a class="all" href="../../../products/index.html">すべての道具を一覧で見る<span class="n">29</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
     <ol class="bands">
     <li class="band" id="g-hospital">
-      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-hospital.webp" data-srcset="img/shut-hospital-800.webp 800w, img/shut-hospital.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-hospital.webp" srcset="img/cut-hospital-800.webp 800w, img/cut-hospital.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="病院の中。明日の業務を楽にする道具が置かれている" loading="lazy" decoding="async"></figure>
+      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-hospital.webp" data-srcset="img/shut-hospital-800.webp 800w, img/shut-hospital.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-hospital.webp" srcset="img/cut-hospital-800.webp 800w, img/cut-hospital.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="病院の中。明日の業務を楽にする道具が置かれている" loading="lazy" decoding="async"></figure>
       <div class="b-text">
         <h3>病院<span>いつもの職場</span></h3>
         <p class="b-line">明日の業務を楽にする</p>
@@ -546,7 +559,7 @@ html.capture body > *:not(#cap){display:none!important}
       </div>
     </li>
     <li class="band r" id="g-observatory">
-      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-observatory.webp" data-srcset="img/shut-observatory-800.webp 800w, img/shut-observatory.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-observatory.webp" srcset="img/cut-observatory-800.webp 800w, img/cut-observatory.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="展望台の中。キャリア・経験を整理する道具が置かれている" loading="lazy" decoding="async"></figure>
+      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-observatory.webp" data-srcset="img/shut-observatory-800.webp 800w, img/shut-observatory.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-observatory.webp" srcset="img/cut-observatory-800.webp 800w, img/cut-observatory.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="展望台の中。キャリア・経験を整理する道具が置かれている" loading="lazy" decoding="async"></figure>
       <div class="b-text">
         <h3>展望台<span>キャリアの地図</span></h3>
         <p class="b-line">キャリア・経験を整理する</p>
@@ -555,7 +568,7 @@ html.capture body > *:not(#cap){display:none!important}
       </div>
     </li>
     <li class="band" id="g-clinic">
-      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-clinic.webp" data-srcset="img/shut-clinic-800.webp 800w, img/shut-clinic.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-clinic.webp" srcset="img/cut-clinic-800.webp 800w, img/cut-clinic.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="クリニックの中。医療経営を学ぶ道具が置かれている" loading="lazy" decoding="async"></figure>
+      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-clinic.webp" data-srcset="img/shut-clinic-800.webp 800w, img/shut-clinic.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-clinic.webp" srcset="img/cut-clinic-800.webp 800w, img/cut-clinic.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="クリニックの中。医療経営を学ぶ道具が置かれている" loading="lazy" decoding="async"></figure>
       <div class="b-text">
         <h3>クリニック<span>経営を学ぶ</span></h3>
         <p class="b-line">医療経営を学ぶ</p>
@@ -564,16 +577,16 @@ html.capture body > *:not(#cap){display:none!important}
       </div>
     </li>
     <li class="band r" id="g-office">
-      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-office.webp" data-srcset="img/shut-office-800.webp 800w, img/shut-office.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-office.webp" srcset="img/cut-office-800.webp 800w, img/cut-office.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="事務所の中。経営・管理の実務に使う道具が置かれている" loading="lazy" decoding="async"></figure>
+      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-office.webp" data-srcset="img/shut-office-800.webp 800w, img/shut-office.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-office.webp" srcset="img/cut-office-800.webp 800w, img/cut-office.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="事務所の中。経営・管理の実務に使う道具が置かれている" loading="lazy" decoding="async"></figure>
       <div class="b-text">
         <h3>事務所<span>経営・管理</span></h3>
         <p class="b-line">経営・管理の実務に使う</p>
-        <ul class="b-tools"><li><a href="../../../rehaboard/index.html">RehaBoard</a><span class="d">リハ部門の運営を、1画面に ・ 紹介とデモ</span></li><li><a href="../../../medboard/index.html">MedBoard</a><span class="d">外来の患者フローを、2施設で見比べる ・ 紹介とデモ</span></li><li><a href="../../../hire-board/index.html">HireBoard</a><span class="d">医療機関の採用を、カンバンで追う ・ 紹介とデモ</span></li></ul><details class="more"><summary>ほかの道具<span class="n">6</span></summary><ul class="b-tools"><li><a href="../../../interview-kit/index.html">面接官の手帖</a><span class="d">面接の質問を用意し、事実と印象を分けて記録する ・ 紹介のページ</span></li><li><a href="../../../consult-simulator/index.html">ConsultSim</a><span class="d">1診と2診で、待ち時間がどう変わるかを試す ・ 紹介とデモ</span></li><li><a href="../../../round-note/index.html">本部長の巡回手帖</a><span class="d">複数施設の巡回を、1冊の手帖に</span></li><li><a href="../../../manager-starter/index.html">医療管理職スターター</a><span class="d">初めて管理職になった人の、チェックリストと記入式シート</span></li><li><a href="../../../medops/index.html">医療管理実務ライブラリ</a><span class="d">医療管理の実務手順と、無料テンプレート</span></li><li><a href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer">Reha Checklist<span class="sr">(別のサイト)</span></a><span class="d">リハ部門KPIのチェックリスト(PDF・スプレッドシート) ・ 配布ページ(別のサイト)・メールアドレスの登録が必要</span></li></ul></details>
+        <ul class="b-tools"><li><a href="../../../rehaboard/index.html">RehaBoard</a><span class="d">リハ部門の運営を、1画面に ・ 紹介とデモ</span></li><li><a href="../../../medboard/index.html">MedBoard</a><span class="d">外来の患者フローを、2施設で見比べる ・ 紹介とデモ</span></li><li><a href="../../../hire-board/index.html">HireBoard</a><span class="d">医療機関の採用を、カンバンで追う ・ 紹介とデモ</span></li></ul><details class="more"><summary>ほかの道具<span class="n">6</span></summary><ul class="b-tools"><li><a href="../../../interview-kit/index.html">面接官の手帖</a><span class="d">面接の質問を用意し、事実と印象を分けて記録する ・ 紹介のページ</span></li><li><a href="../../../consult-simulator/index.html">ConsultSim</a><span class="d">1診と2診で、待ち時間がどう変わるかを試す ・ 紹介とデモ</span></li><li><a href="../../../round-note/index.html">本部長の巡回手帖</a><span class="d">複数施設の巡回を、1冊の手帖に</span></li><li><a href="../../../manager-starter/index.html">医療管理職スターター</a><span class="d">初めて管理職になった人の、チェックリストと記入式シート</span></li><li><a href="../../../medops/index.html">医療管理実務ライブラリ</a><span class="d">医療管理の実務手順と、無料テンプレート</span></li><li><a href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer">Reha Checklist<span class="sr">(別のサイト・新しいタブで開きます)</span></a><span class="d">リハ部門KPIのチェックリスト(PDF・スプレッドシート) ・ 配布ページ(別のサイト)・メールアドレスの登録が必要</span></li></ul></details>
         <p class="b-more"><a class="all" href="../../../products/index.html#manage">この用途を一覧で比べる(9点)<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
       </div>
     </li>
     <li class="band" id="g-library">
-      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-library.webp" data-srcset="img/shut-library-800.webp 800w, img/shut-library.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-library.webp" srcset="img/cut-library-800.webp 800w, img/cut-library.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="図書館の中。学習を続ける道具が置かれている" loading="lazy" decoding="async"></figure>
+      <figure class="pair" data-wipe><img class="shut" data-src="img/shut-library.webp" data-srcset="img/shut-library-800.webp 800w, img/shut-library.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-library.webp" srcset="img/cut-library-800.webp 800w, img/cut-library.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="図書館の中。学習を続ける道具が置かれている" loading="lazy" decoding="async"></figure>
       <div class="b-text">
         <h3>図書館<span>学習</span></h3>
         <p class="b-line">学習を続ける</p>
@@ -582,7 +595,7 @@ html.capture body > *:not(#cap){display:none!important}
       </div>
     </li>
     <li class="band r" id="g-park">
-      <figure class="pair"><img class="open" src="img/cut-park.webp" srcset="img/cut-park-800.webp 800w, img/cut-park.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="公園の中。気軽に試す・作品を楽しむ道具が置かれている" loading="lazy" decoding="async"></figure>
+      <figure class="pair"><img class="open" src="img/cut-park.webp" srcset="img/cut-park-800.webp 800w, img/cut-park.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="公園の中。気軽に試す・作品を楽しむ道具が置かれている" loading="lazy" decoding="async"></figure>
       <div class="b-text">
         <h3>公園<span>試す・作品</span></h3>
         <p class="b-line">気軽に試す・作品を楽しむ</p>
@@ -596,7 +609,7 @@ html.capture body > *:not(#cap){display:none!important}
 
 <section class="sec maker" id="maker" aria-labelledby="mTitle">
   <div class="band" id="g-atelier">
-    <figure class="pair" data-wipe><img class="shut" data-src="img/shut-atelier.webp" data-srcset="img/shut-atelier-800.webp 800w, img/shut-atelier.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-atelier.webp" srcset="img/cut-atelier-800.webp 800w, img/cut-atelier.webp 1200w" sizes="(max-width: 919px) 68vw, 40vw" width="1200" height="900" alt="煉瓦と木のアトリエの中。作業机に一人" loading="lazy" decoding="async"></figure>
+    <figure class="pair" data-wipe><img class="shut" data-src="img/shut-atelier.webp" data-srcset="img/shut-atelier-800.webp 800w, img/shut-atelier.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="" decoding="async"><img class="open" src="img/cut-atelier.webp" srcset="img/cut-atelier-800.webp 800w, img/cut-atelier.webp 1200w" sizes="(max-width: 920px) 68vw, 40vw" width="1200" height="900" alt="煉瓦と木のアトリエの中。作業机に一人" loading="lazy" decoding="async"></figure>
     <div class="b-text">
       <h2 id="mTitle">運営者</h2>
       <p class="b-line">理学療法士の橋本渉が、ひとりで運営しています</p>
@@ -608,14 +621,14 @@ html.capture body > *:not(#cap){display:none!important}
 <section class="sec closing" id="closing" aria-labelledby="cTitle">
   <span class="stars" aria-hidden="true"></span>
   <div class="sec-in" id="g-plaza">
-    <figure class="night-town"><img src="img/town-night.webp" srcset="img/town-night-1000.webp 1000w, img/town-night.webp 1600w" sizes="(max-width: 919px) 100vw, 46vw" width="1600" height="1440" alt="夜の町。窓に灯りがともり、広場の二本の弧が藍と砂に灯っている" loading="lazy" decoding="async"></figure>
+    <figure class="night-town"><img src="img/town-night.webp" srcset="img/town-night-1000.webp 1000w, img/town-night.webp 1600w" sizes="(max-width: 920px) 100vw, 46vw" width="1600" height="1440" alt="夜の町。窓に灯りがともり、広場の二本の弧が藍と砂に灯っている" loading="lazy" decoding="async"></figure>
     <div>
       <h2 class="say" id="cTitle">正解を与えるのではなく、<br><em>選択肢を増やす</em></h2>
       <ul class="exits">
         <li><a href="../../../philosophy/index.html">考え方</a></li>
         <li><a href="../../../about/index.html">BRIDGEについて</a></li>
         <li><a href="../../../community/index.html">話をする</a></li>
-        <li><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr">(別のサイト)</span></a></li>
+        <li><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr">(別のサイト・新しいタブで開きます)</span></a></li>
       </ul>
       <p class="enough">見るだけで帰っても、それで十分です。</p>
     </div>
@@ -625,11 +638,11 @@ html.capture body > *:not(#cap){display:none!important}
 
 <footer class="foot"><!-- shared/bridge.js のフッターと同じ4列と Privacy。本番では window.BRIDGE のデータから町の CSS で描く(この試作では静的に書いた) -->
   <div class="foot-in">
-    <div class="f-brand"><svg class="logo-m" viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><b>BRIDGE</b><p>理学療法士の橋本渉が、ひとりで運営しています</p></div>
+    <div class="f-brand"><svg class="logo-m" viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><b>BRIDGE<span class="tg">EXPAND CHOICES.</span></b><p>選択肢を増やし、人と社会の可能性を広げるプロジェクト。</p></div>
     <div class="f-col"><div class="h">思想</div><a href="../../../philosophy/index.html">Philosophy</a><a href="../../../philosophy/index.html#manifesto">Manifesto</a><a href="../../../stories/index.html">Stories</a></div>
     <div class="f-col"><div class="h">活動</div><a href="../../../projects/index.html">Projects</a><a href="../../../journal/index.html">Journal</a><a href="../../../about/index.html">About</a></div>
     <div class="f-col"><div class="h">つくったもの</div><a href="../../../products/index.html">Products</a><a href="../../../compass/index.html">BRIDGE Compass</a><a href="../../../starter-kits/index.html">Starter Kits</a></div>
-    <div class="f-col"><div class="h">つながる</div><a href="../../../services/index.html">Services</a><a href="../../../community/index.html">Contact</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note ↗<span class="sr">(別のサイト)</span></a><a href="https://x.com/WataruPT1013" target="_blank" rel="noopener noreferrer">X ↗<span class="sr">(別のサイト)</span></a></div>
+    <div class="f-col"><div class="h">つながる</div><a href="../../../services/index.html">Services</a><a href="../../../community/index.html">Contact</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note ↗<span class="sr">(別のサイト・新しいタブで開きます)</span></a><a href="https://x.com/WataruPT1013" target="_blank" rel="noopener noreferrer">X ↗<span class="sr">(別のサイト・新しいタブで開きます)</span></a></div>
   </div>
   <div class="foot-base"><span>© 2026 BRIDGE. All rights reserved.</span><span><a href="../../../legal/privacy.html">Privacy</a><span class="proto">Prototype ・ 未公開</span></span></div>
 </footer>

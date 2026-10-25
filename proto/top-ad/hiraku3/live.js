@@ -154,7 +154,7 @@ export async function live(o) {
   const manual = new URLSearchParams(location.search).get('clock') === 'manual';
   let vnow = 0;
   const clock = () => manual ? vnow : performance.now();
-  const small = Math.min(innerWidth, innerHeight) < 700 || innerWidth < 920;
+  const small = Math.min(innerWidth, innerHeight) < 700 || innerWidth < 921;
   let W = o.canvas.clientWidth, H = o.canvas.clientHeight;
   /* 品質の段(高・中・低)。最初はページが端末の手がかりで選ぶ。動かしてみて重ければ、ここで一段ずつ下げる */
   const DPR = { high: 2, mid: 1.5, low: 1 }, SHADOW = { high: 2048, mid: 1024, low: 0 };
@@ -179,6 +179,7 @@ export async function live(o) {
   const slot = () => ({ id: null, wall: new Spring(0, 11, .5), roof: new Spring(0, 6, 1), roofT0: -1, end: 0, kind: 'hinge', t0: 0, steps: [] });
   let A = slot(), Bk = slot();
   let base = null, paused = false, running = false, visible = true, t = 0, last = clock(), lastInput = 0, dirty = true, frameN = 0;
+  let arriveId = null;   // ひらいた建物に、カメラが着くのを待っている
   let hover = null, liftId = null, invite = null, preRot = 0, dragOff = new Spring(0, 9, 1), openCam = null, curStation = null, findSid = null, findC = null, turnTok = 0;
   /* 後で一度だけ動かす段取り(時計の時刻で) */
   const later = [];
@@ -382,7 +383,7 @@ export async function live(o) {
     if (!A.id) preRot = rot.x;
     const transfer = !!A.id;
     if (A.id) { closeSlot(A); Bk = A; }   // 前の建物は、渡る途中で閉じる
-    A = slot(); A.id = id; A.t0 = clock();
+    A = slot(); A.id = id; A.t0 = clock(); arriveId = id;
     A.kind = id === 'plaza' || id === 'park' ? 'none' : BOXES[id].shape === 'tower' ? 'spin' : 'hinge';
     if (A.kind === 'hinge') { const b = S.B[id]; A.end = Math.PI / 2 + Math.asin(clamp((b.ex.y0 + .01) / BOXES[id].h, 0, .4)); }
     if (A.kind === 'spin') A.end = Math.PI;
@@ -689,6 +690,7 @@ export async function live(o) {
     for (const id in interiors) { const it = interiors[id]; if (it && it.group.visible) it.update(dt, t, tod.x < .5 ? 'day' : tod.x < 1.5 ? 'dusk' : 'night'); }
     S.world.rotation.y = rot.x;
     setCamera();
+    if (arriveId && (A.id !== arriveId || ![rot, camX, camY, camZ, elev, fly].some(s => s.moving))) { const id = arriveId; arriveId = null; if (A.id === id) o.onArrive && o.onArrive(id); }
     const active = springs.some(s => s.moving) || [A, Bk].some(s => s.id && (s.wall.moving || s.roof.moving || s.steps.length || s.roofT0 >= 0)) || later.length || grow || down || Math.abs(inertia) > .002 || invite;
     const idle = !active && now - lastInput > 1600;
     // 操作していないときは 30fps
