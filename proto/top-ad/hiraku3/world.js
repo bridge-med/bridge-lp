@@ -93,7 +93,9 @@ export const U = {
   uGlowC: { value: new THREE.Color('#E4ECF7') }, uGlowL: { value: new THREE.Color('#FFC27A') }, uGlowK: { value: new THREE.Color('#FFF0D2') },
   uHazeC: { value: new THREE.Color('#FFFFFF') }, uHazeK: { value: .8 },   // 岩の先が下へ行くほど溶ける、もやの色と強さ。placeSky が時間帯で変える
   // 交差の広場の時刻ごとの表情(applyTod が決める): uArc = 弧と床の帯が灯る強さ(夜だけ)、uRim = 夕方の低い光(砂の弧の縁が金、藍の弧は影絵)
-  uArc: { value: 0 }, uRim: { value: 0 }, uGlowR: { value: new THREE.Color('#FFC46E') }
+  uArc: { value: 0 }, uRim: { value: 0 }, uGlowR: { value: new THREE.Color('#FFC46E') },
+  // 藍の弧の夕方の縁(空の藤色を拾う、冷たい細い縁。砂の弧の金の縁と対)と、昼に床のロゴの帯を目地の濃さへ寄せる強さ(昼は影がロゴを描くので、弧を主役に)
+  uGlowV: { value: new THREE.Color('#B7AEEA') }, uDay: { value: 1 }, uJoint: { value: new THREE.Color(C.joint) }
 };
 const VCOMMON = `
 attribute vec2 aFx; attribute float aBid; attribute float aPart; attribute float aWin;
@@ -115,7 +117,7 @@ if (abs(aBid - uLiftBid) < .5) transformed.y += uLift;
 vFx = aFx; vBid = aBid; vWin = aWin; vCut = hkC; vHkY = (modelMatrix * vec4(transformed, 1.0)).y;`;
 const FCOMMON = `
 uniform float uNight; uniform float uTime; uniform float uHi; uniform float uHiAmt; uniform vec3 uHiColor;
-uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK; uniform vec3 uHazeC; uniform float uHazeK; uniform float uArc; uniform float uRim; uniform vec3 uGlowR;
+uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK; uniform vec3 uHazeC; uniform float uHazeK; uniform float uArc; uniform float uRim; uniform vec3 uGlowR; uniform vec3 uGlowV; uniform float uDay; uniform vec3 uJoint;
 varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY;
 float hkBayer(vec2 p) { vec2 q = mod(floor(p), 4.0); float i = q.x + q.y * 4.0;
   return (i < 1.0 ? 0. : i < 2.0 ? 8. : i < 3.0 ? 2. : i < 4.0 ? 10. : i < 5.0 ? 12. : i < 6.0 ? 4. : i < 7.0 ? 14. : i < 8.0 ? 6. : i < 9.0 ? 3. : i < 10.0 ? 11. : i < 11.0 ? 1. : i < 12.0 ? 9. : i < 13.0 ? 15. : i < 14.0 ? 7. : i < 15.0 ? 13. : 5.) / 16.0 + 1.0 / 32.0; }
@@ -131,12 +133,14 @@ if (vWin > .5) {
   else if (md < 2.5) { float cyc = floor(uTime * (.02 + h * .03) + h * 5.0); hkLit = step(.72, hkHash(id * 5.31 + cyc * 3.7)) * .34; }
   else if (md < 3.5) { hkLit = step(.12, h); }
 }
-float gk = vFx.x, gq = abs(gk - 10.0) < .5 ? 3.0 : gk;   // 砂の弧の縁(10)は、夜は砂の弧(3)と同じに灯る
+float gk = vFx.x, gq = abs(gk - 10.0) < .5 ? 3.0 : abs(gk - 11.0) < .5 ? 2.0 : gk;   // 弧の縁(砂 10・藍 11)は、夜はそれぞれの弧と同じに灯る
 vec3 hkG = gq < 1.5 ? uGlowW : gq < 2.5 ? uGlowI : gq < 3.5 ? uGlowS : gq < 4.5 ? uGlowC : gq < 5.5 ? uGlowL : gq < 6.5 ? uGlowK : gq < 7.5 ? uGlowI : uGlowS;
 float gi = gq < 1.5 ? 1.9 : gq < 3.5 ? 1.15 : gq < 4.5 ? .95 : gq < 5.5 ? 1.6 : gq < 6.5 ? 1.3 : .42;
 float hkN = (gq > 1.5 && gq < 3.5) || (gq > 6.5 && gq < 8.5) ? uArc : uNight;   // 広場の弧と床の帯は、夜だけ灯る(夕方は灯らない)
 totalEmissiveRadiance += hkG * gi * step(.5, gq) * step(gq, 8.5) * hkLit * hkN;
 totalEmissiveRadiance += uGlowR * (1.0 - step(.5, abs(gk - 10.0))) * uRim * 1.4;   // 夕方: 砂の弧の縁が金に光る
+totalEmissiveRadiance += uGlowV * (1.0 - step(.5, abs(gk - 11.0))) * uRim * .4;   // 夕方: 藍の弧の上の縁が、空の藤色を拾う(冷たく、金より控えめ)
+totalEmissiveRadiance += vec3(.007, .01, .027) * (1.0 - step(.5, abs(gk - 2.0))) * uRim;   // 夕方: 藍の弧の影絵に、藍が残る程度の空の照り返し
 totalEmissiveRadiance += uHiColor * (1.0 - step(.5, abs(vBid - uHi))) * uHiAmt;`;
 const TM = {};
 function townMat(cls) {
@@ -151,7 +155,8 @@ function townMat(cls) {
       .replace('#include <clipping_planes_fragment>', 'if (vCut < .999 && hkBayer(gl_FragCoord.xy) >= vCut) discard;\n#include <clipping_planes_fragment>')
       .replace('#include <color_fragment>', `#include <color_fragment>
 if (vFx.y > .5) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.075, .095, .15), uNight * .82);
-if (abs(vFx.x - 2.0) < .5) diffuseColor.rgb *= 1.0 - .15 * uRim;   // 夕方の藍の弧は、逆光の影絵に(真っ黒にはしない。深い藍)
+// 夕方の藍の弧は、逆光の影絵(真っ黒にはしない。空の照り返しで、深い藍が残る。下の emissive)
+if (vFx.x > 6.5 && vFx.x < 8.5) diffuseColor.rgb = mix(diffuseColor.rgb, uJoint, uDay * (vFx.x < 7.5 ? .6 : .45));   // 昼の床のロゴの帯は、目地に近い濃さ(真上からは読める)
 if (uFocus > -.5 && abs(vBid - uFocus) > .5) { float k = vBid > .5 ? uDim : uDim * .55; float l = dot(diffuseColor.rgb, vec3(.3, .59, .11)); diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(l), vec3(.93, .92, .9), .22), k); }`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + FWIN)
       .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5 && vFx.x < 9.5) outgoingLight = diffuseColor.rgb;\n#include <opaque_fragment>')
@@ -645,6 +650,8 @@ function* plazaGen(g, q) {
   arcI.userData.fx = [2, 0]; arcS.userData.fx = [3, 0]; pg.add(arcI, arcS);
   // 砂の弧の縁(夕方だけ、低い光が金に照らす): 広い面の上の縁の帯と、上の細い面。昼と夜は弧と同じ色で、見分けられない
   const rimS = brushRim(aS, .14, .022, twS, .3, M(C.arcS, { r: .78 })); rimS.userData.fx = [10, 0]; rimS.castShadow = false; pg.add(rimS);
+  // 藍の弧の上の縁(夕方だけ、空の藤色を拾う細い冷たい縁。砂の金より細く)。昼と夜は弧と同じ色
+  const rimI = brushRim(aI, .15, .024, twI, .14, M(C.arcI, { r: .72 })); rimI.userData.fx = [11, 0]; rimI.castShadow = false; pg.add(rimI);
   // 台座(足が静かに沈む、小さな低い石)
   const plinth = (p, nxt) => { const m = cbox(.3, PLINTH, .22, M(C.stone2, { r: .85 }), .012); m.position.set(p[0], H + PLINTH / 2, p[2]); m.rotation.y = Math.atan2(nxt[0] - p[0], nxt[2] - p[2]); pg.add(m); };
   plinth(aI[0], aI[3]); plinth(aI[aI.length - 1], aI[aI.length - 4]); plinth(aS[0], aS[3]);
@@ -1450,7 +1457,7 @@ export function applyTod(L, renderer, m, clouds) {
   U.uGlowC.value.copy(ac.gC).lerp(bc.gC, k);
   // 交差の広場: 弧と床の帯(とそばの藍と砂の灯り)は夜だけ灯る(夕方の終わりから)。夕方は、低い光で砂の弧の縁が金、藍の弧は影絵
   const arcK = smooth01((m - 1.2) / .7), rimK = smooth01(1 - Math.abs(m - 1) / .65);
-  U.uArc.value = arcK; U.uRim.value = rimK;
+  U.uArc.value = arcK; U.uRim.value = rimK; U.uDay.value = smooth01(1 - m / .8);
   L.pI.intensity = 5.5 * arcK; L.pS.intensity = 5.5 * arcK; L.pH.intensity = L.pH.userData.base = 1.4 * pt;
   if (L.pF) L.pF.intensity = L.pF.userData.base = FACE_I * lerp(a.face, b.face, k);
   const sc = L.scene || null; if (sc && sc.fog) sc.fog.color.copy(ac.fog).lerp(bc.fog, k);
@@ -1481,11 +1488,13 @@ export function aimCamera(cam, target, elev = ELEV) {
 }
 /* 交差の広場の見晴らし(広場をひらいたとき): 広場の上へ上がり、2本の弧を手前(画面の下の真ん中)に、町の建物すべてを見渡す。
    rot = 島を回す角度(度。0 = いつもの正面で、広場が手前)、elev = 見下ろす角度(度)。live.js の overlook() が読む */
+// 2026-10-25 第2回: 広場の手前の低い位置から弧越しに見る案(B)と比べた。正投影では弧が額縁にならず、低い角度ほど札が重なる(クリニック/公園)。
+// 透視で弧を額縁にすると、スマホで7つの建物が収まらず、札も重なる。いまの見下ろし(A)は PC・スマホとも、7つが入り札が重ならないので、A のまま
 export const OVERLOOK = { rot: 0, elev: 42 };
 /* 見晴らしの目と的と、建物の名前の札を置く所(島の座標 = S.world の中。島を回しているときは S.world.matrixWorld を掛ける)。
    tags[id] は建物のいちばん上(屋根・ドーム・灯室)の少し上。pts は画面に収める点(建物の箱と、広場の床と弧)。S は makeScene の返り値(省くと、いちばん新しく作った町) */
 export function plazaOverlook(S = LAST_S) {
-  const el = deg(OVERLOOK.elev), F = plazaFrame(), tags = {}, pts = [];
+  const OV = OVERLOOK, el = deg(OV.elev), F = plazaFrame(), tags = {}, pts = [];
   for (const id of IDS) {
     if (id === 'plaza') {
       tags.plaza = new THREE.Vector3(F.cx, F.arcTop + .25, F.cz);
@@ -1500,7 +1509,7 @@ export function plazaOverlook(S = LAST_S) {
   }
   const target = pts.reduce((acc, v) => acc.add(v), new THREE.Vector3()).multiplyScalar(1 / Math.max(1, pts.length));
   const eye = new THREE.Vector3(target.x + DIST * Math.cos(el) * Math.cos(AZ), target.y + DIST * Math.sin(el), target.z + DIST * Math.cos(el) * Math.sin(AZ));
-  return { rot: OVERLOOK.rot, elev: OVERLOOK.elev, eye, target, up: new THREE.Vector3(0, 1, 0), tags, pts };
+  return { rot: OV.rot, elev: OV.elev, eye, target, up: new THREE.Vector3(0, 1, 0), tags, pts };
 }
 /* 画面に町を収めるための点: 島の輪郭(上の縁と地層の下)、展望台のてっぺん、岩の塊のいちばん下 */
 export function samplePoints() {

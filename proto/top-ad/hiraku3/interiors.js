@@ -362,7 +362,7 @@ export function buildInterior(kind, box, ctx = {}) {
   const u = makeUniforms();
   const E = {
     kind, box, P, low, r: rng(kind.length * 131 + 7),
-    S: new Batch(), H: new Batch(), SC: new Batch(), HL: new Batch(), people: [], stations: [], rings: [], extra: {}, rugs: [], fc: [], holders: [],
+    S: new Batch(), H: new Batch(), SC: new Batch(), HL: new Batch(), people: [], stations: [], rings: [], extra: {}, rugs: [], fc: [], holders: [], props: [],
     noContact: kind === 'park',            // 公園の芝には床の陰を置かない(日の影に任せる)
     limbs: ctx.limbs !== false,
     floors: Math.max(1, box.floors | 0), fh: box.floors ? box.h / Math.max(1, box.floors | 0) : 0,
@@ -397,6 +397,12 @@ export function buildInterior(kind, box, ctx = {}) {
   for (const it of E.H.list) E.S.list.push(it); E.S.n += hN; E.H.list.length = 0;
   const sGeo = E.S.geometry();
   const sMesh = new THREE.Mesh(sGeo, staticMat); sMesh.castShadow = true; sMesh.receiveShadow = true; group.add(sMesh);
+  // 小物の元の形(縮めて消す・戻すときに使う)と、まわりの箱の8つの角
+  for (const pr of E.props) {
+    const [a, b] = pr.v, bx3 = new THREE.Box3(); pr.base = sGeo.attributes.position.array.slice(a * 3, b * 3);
+    for (let i = 0; i < pr.base.length; i += 3) bx3.expandByPoint(_v1.set(pr.base[i], pr.base[i + 1], pr.base[i + 2]));
+    pr.c = bx3.getCenter(new THREE.Vector3()); pr.box = [0, 1, 2, 3, 4, 5, 6, 7].map(j => new THREE.Vector3(j & 1 ? bx3.max.x : bx3.min.x, j & 2 ? bx3.max.y : bx3.min.y, j & 4 ? bx3.max.z : bx3.min.z));
+  }
   const hGeo = hN ? sGeo : null;
   // 画面(アトラス)
   const nS = E.stations.length, cols = nS <= 4 ? 2 : nS <= 9 ? 3 : 4, slot = low ? 256 : 512, asz = cols * slot, A = atlasCanvas(asz, P.screenOff);
@@ -469,8 +475,8 @@ export function buildInterior(kind, box, ctx = {}) {
     }
     if (hlGeo && s.hl) {
       // 縁の光(画面の外。色は写しの色を使わない): 夜のガラスの画面のにじみ・点いた瞬間にふっと光って消える・ちらつき・見つけたとき・ふれたとき
-      const on = clamp01(s.on), blink = on > 0 && on < 1 ? (1 - on) * (s.glass ? .3 : .15) : 0;
-      const glowK = on * (s.glass ? lerp(0, .15, nightK) : 0) * (1 - s.flick * 2) + .8 * s.flick + blink + .16 * k + .08 * (s.hoverK || 0);
+      const on = clamp01(s.on), blink = on > 0 && on < 1 ? (1 - on) * (s.glass ? .18 : .09) : 0;
+      const glowK = on * (s.glass ? lerp(0, .1, nightK) : 0) * (1 - s.flick * 2) + .6 * s.flick + blink + .07 * k + .035 * (s.hoverK || 0);
       const Pp = hlGeo.attributes.position.array, Cc = hlGeo.attributes.color.array;
       for (let v = s.hl[0]; v < s.hl[1]; v++) { Pp[v * 3] = hlBase[v * 3] + dx; Pp[v * 3 + 1] = hlBase[v * 3 + 1] + dy; Pp[v * 3 + 2] = hlBase[v * 3 + 2] + dz; Cc[v * 3] = hlCol[v * 3] * glowK; Cc[v * 3 + 1] = hlCol[v * 3 + 1] * glowK; Cc[v * 3 + 2] = hlCol[v * 3 + 2] * glowK; }
       hlGeo.attributes.position.needsUpdate = true; hlGeo.attributes.color.needsUpdate = true;
@@ -505,11 +511,50 @@ export function buildInterior(kind, box, ctx = {}) {
   });
   const ready = Promise.all(jobs).then(() => { if (disposed) return; atlas.needsUpdate = true; atlasReady = true; if (!revealAt) revealAt = performance.now(); E.stations.forEach(writeStation); });
 
+  /* ---- 見つけている物の手前の人と小物を、ふっと消す ----
+     画面を描くときに受け取るカメラで、選ばれた物の画面が大きく映っていれば「見つけている」(見える範囲の 4% 以上)。
+     そのあいだ、画面より手前にいて、画面(とまわり少し)に重なって見える人と小物を縮めて消し、見つけ終われば戻す。人の数と配置は変えない */
+  let cam = null; if (scMesh) scMesh.onBeforeRender = (r, sc, c) => { cam = c; };
+  const F = { c: new THREE.Vector3(), x: new THREE.Vector3(), y: new THREE.Vector3(), z: new THREE.Vector3(), hx: 0, hy: 0, G: null, covers: null }, Q6 = Array.from({ length: 6 }, () => new THREE.Vector3()), _w = new THREE.Vector3();
+  function focusView() {
+    const s = cam && cam.isOrthographicCamera && scGeo ? E.stations.find(s => s.active) : null; if (!s) return null;
+    group.updateWorldMatrix(true, false);
+    const G = group.matrixWorld, Pp = scGeo.attributes.position.array, n = Math.min(6, s.sc[1] - s.sc[0]);
+    F.x.setFromMatrixColumn(cam.matrixWorld, 0).normalize(); F.y.setFromMatrixColumn(cam.matrixWorld, 1).normalize(); F.z.setFromMatrixColumn(cam.matrixWorld, 2).normalize();
+    F.c.set(0, 0, 0);
+    for (let j = 0; j < n; j++) { const v = s.sc[0] + j; Q6[j].set(Pp[v * 3], Pp[v * 3 + 1], Pp[v * 3 + 2]).applyMatrix4(G); F.c.add(Q6[j]); }
+    F.c.multiplyScalar(1 / n); F.hx = F.hy = 0;
+    for (let j = 0; j < n; j++) { _w.subVectors(Q6[j], F.c); F.hx = Math.max(F.hx, Math.abs(_w.dot(F.x))); F.hy = Math.max(F.hy, Math.abs(_w.dot(F.y))); }
+    const vw = (cam.right - cam.left) / cam.zoom, vh = (cam.top - cam.bottom) / cam.zoom;
+    if (4 * F.hx * F.hy < .04 * vw * vh) return null;
+    F.G = G; return F;
+  }
+  // 手前(カメラの側へ .03 より前)にあって、画面とまわり(幅と高さの 1/4 ずつ広げた範囲)に重なって見えるか。pts は建物の中の座標、r は太さ
+  F.covers = (pts, r) => {
+    let al = -1e9, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const p of pts) { _w.copy(p).applyMatrix4(F.G).sub(F.c); al = Math.max(al, _w.dot(F.z)); const x = _w.dot(F.x), y = _w.dot(F.y); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    const mx = F.hx * 1.25 + r, my = F.hy * 1.25 + r;
+    return al > .03 && x1 > -mx && x0 < mx && y1 > -my && y0 < my;
+  };
+
   /* ---- 動き ---- */
   let lastMode = null;
   function update(dt, t, mode = 'day') {
     if (mode !== lastMode) { lastMode = mode; if (ppl) ppl.setMode(mode); }
-    if (ppl) ppl.update(t);
+    const f = focusView();
+    if (ppl) ppl.update(t, f, dt);
+    // 見つけている物の手前の小物も、同じように縮めて消す
+    if (E.props.length) {
+      const Pa = sGeo.attributes.position.array, ease = 1 - Math.pow(.00002, dt);
+      for (const pr of E.props) {
+        const want = f && f.covers(pr.box, 0) ? 0 : 1;
+        if (want === pr.fk) continue;
+        pr.fk = Math.abs(want - pr.fk) < .01 ? want : pr.fk + (want - pr.fk) * ease;
+        const [a, b] = pr.v, k = pr.fk, c = pr.c, B = pr.base;
+        for (let i = 0, o = a * 3; o < b * 3; i += 3, o += 3) { Pa[o] = c.x + (B[i] - c.x) * k; Pa[o + 1] = c.y + (B[i + 1] - c.y) * k; Pa[o + 2] = c.z + (B[i + 2] - c.z) * k; }
+        touch(sGeo.attributes.position, a, b);
+      }
+    }
     const now = performance.now();
     for (const s of E.stations) {
       const want = s.active ? 1 : s.hover ? .55 : 0;
@@ -532,7 +577,7 @@ export function buildInterior(kind, box, ctx = {}) {
     if (cap) moveCapsule(t);
     // 手に持つ物(そのときの手の位置と体の向きに置き直す。向きに合わせて面の向きも回す。見えない人の物は隠す)
     if (hGeo) for (const m of E.holders) {
-      const p = m.p, Pp = sGeo.attributes.position.array, Nn = sGeo.attributes.normal.array, hide = (mode === 'night' && !p.night) || (mode !== 'night' && !p.day);
+      const p = m.p, Pp = sGeo.attributes.position.array, Nn = sGeo.attributes.normal.array, hide = (mode === 'night' && !p.night) || (mode !== 'night' && !p.day) || p.fk < .5;
       const q = poseOf(p, t), at = m.both ? handOf(p, 1, t).add(handOf(p, -1, t)).multiplyScalar(.5) : handOf(p, -1, t);
       const a = q.ry + q.yawO, c = Math.cos(a), sn = Math.sin(a), y0 = hide ? -10 : at.y;
       for (let v = m.v[0]; v < m.v[1]; v++) {
@@ -719,41 +764,53 @@ function buildPeople(E, u0) {
   });
   const M = new THREE.Matrix4(), qB = new THREE.Quaternion(), qH = new THREE.Quaternion(), qL = new THREE.Quaternion(), qT = new THREE.Quaternion(), eB = new THREE.Euler(), eH = new THREE.Euler(), v = new THREE.Vector3(), w = new THREE.Vector3(), j1 = new THREE.Vector3(), s = new THREE.Vector3(), ZERO = new THREE.Vector3(0, 0, 0);
   // 2節の腕・脚を置く: 体の座標 (lx, ly, 0) の関節から、前へ a・外へ sp に向け、長さ l1。そこから曲げ e で長さ l2
+  // 縮めて消すとき(見つけている物の手前にいる人): 体の中ほどを中心に、fk 倍にする
+  const SH = new THREE.Matrix4(), _t = new THREE.Matrix4(), seg = [new THREE.Vector3(), new THREE.Vector3()], C = new THREE.Vector3();
+  let shrink = false;
+  const put = (mesh, j) => mesh.setMatrixAt(j, shrink ? M.premultiply(SH) : M);
   const chain = (j, lx, ly, a, sp2, e, l1, l2, r1, r2) => {
     if (!limbs) return;
     w.set(lx, ly, 0).applyQuaternion(qB).add(v);
     qL.setFromAxisAngle(AXX, -a).multiply(qT.setFromAxisAngle(AXZ, sp2)).premultiply(qB);
-    limbs.setMatrixAt(j, M.compose(w, qL, s.set(r1, l1, r1)));
+    M.compose(w, qL, s.set(r1, l1, r1)); put(limbs, j);
     j1.set(0, -l1, 0).applyQuaternion(qL).add(w);
     qL.multiply(qT.setFromAxisAngle(AXX, -e));
-    limbs.setMatrixAt(j + 1, M.compose(j1, qL, s.set(r2, l2, r2)));
+    M.compose(j1, qL, s.set(r2, l2, r2)); put(limbs, j + 1);
   };
   const hideLimbs = p => { for (let j = 0; j < p.ln; j++) limbs.setMatrixAt(p.li + j, M.compose(w.set(0, -10, 0), qL.identity(), ZERO)); };   // p.ln が 0 なら何もしない
   let mode = 'day';
-  function place(t) {
+  for (const p of L) p.fk = 1;
+  // f: 見つけている物(なければ null)。その手前に重なって見える人を、ふっと縮めて消す。見つけ終われば戻す
+  function place(t, f = null, dt = 0) {
+    const ease = dt ? 1 - Math.pow(.00002, dt) : 1;
     L.forEach((p, i) => {
-      const hidden = (mode === 'night' && !p.night) || (mode !== 'night' && !p.day);
-      if (hidden) { body.setMatrixAt(i, M.compose(v.set(0, -10, 0), qB.identity(), ZERO)); head.setMatrixAt(i, M.compose(v.set(0, -10, 0), qB.identity(), ZERO)); hideLimbs(p); if (i < NPPL) feet[i].w = 0; return; }
-      const q = poseOf(p, t, { turn: true });
-      if (p.kind === 'walk') { p.wx = q.x; p.wz = q.z; p.wry = q.ry; p.wb = q.bob; }
+      const off = (mode === 'night' && !p.night) || (mode !== 'night' && !p.day), q = off ? null : poseOf(p, t, { turn: true });
+      if (q) {
+        if (p.kind === 'walk') { p.wx = q.x; p.wz = q.z; p.wry = q.ry; p.wb = q.bob; }
+        seg[0].set(q.x, q.y, q.z); seg[1].set(q.x, q.y + (q.seated ? PERSON.sitHeadY : PERSON.headY), q.z);
+        p.fk += ((f && f.covers(seg, .08) ? 0 : 1) - p.fk) * ease;
+      }
+      if (off || p.fk < .02) { body.setMatrixAt(i, M.compose(v.set(0, -10, 0), qB.identity(), ZERO)); head.setMatrixAt(i, M.compose(v.set(0, -10, 0), qB.identity(), ZERO)); hideLimbs(p); if (i < NPPL) feet[i].w = 0; return; }
+      shrink = p.fk < .999;
+      if (shrink) { C.addVectors(seg[0], seg[1]).multiplyScalar(.5); SH.makeTranslation(C.x, C.y, C.z).multiply(_t.makeScale(p.fk, p.fk, p.fk)).multiply(_t.makeTranslation(-C.x, -C.y, -C.z)); }
       // 足もとの陰(座る人・寝る人は、椅子やベッドの陰に任せる)
-      if (i < NPPL && !E.noContact) feet[i].set(q.x, q.y + .012, q.z, q.seated || p.kind === 'lie' ? 0 : p.kind === 'crouch' ? .13 : .11);
+      if (i < NPPL && !E.noContact) feet[i].set(q.x, q.y + .012, q.z, (q.seated || p.kind === 'lie' ? 0 : p.kind === 'crouch' ? .13 : .11) * p.fk);
       if (p.kind === 'lie') {
         // 体を倒して(顔は上)、ry の向きに頭。(x, y, z) は体の真ん中の芯
         eB.set(-Math.PI / 2, q.ry, 0, 'YXZ'); qB.setFromEuler(eB);
         const hx = -Math.sin(q.ry), hz = -Math.cos(q.ry), br = Math.sin(t * 1.1 + p.ph) * .002;
-        body.setMatrixAt(i, M.compose(v.set(q.x - hx * .2, q.y + br, q.z - hz * .2), qB, s.set(1, 1, 1)));
-        head.setMatrixAt(i, M.compose(v.set(q.x + hx * .205, q.y + .006, q.z + hz * .205), qB, s.set(1, 1, 1)));
+        M.compose(v.set(q.x - hx * .2, q.y + br, q.z - hz * .2), qB, s.set(1, 1, 1)); put(body, i);
+        M.compose(v.set(q.x + hx * .205, q.y + .006, q.z + hz * .205), qB, s.set(1, 1, 1)); put(head, i);
         hideLimbs(p);
         return;
       }
       // 体は足もと(座る人は座面)を軸に傾ける。頭は体の上に乗り、俯き・振り向きで向きが変わる(髪の見え方で分かる)
       eB.set(q.lean, q.ry + q.yawO, q.roll, 'YXZ'); qB.setFromEuler(eB);
       v.set(q.x, q.y + (q.seated ? PERSON.sitY : 0) + q.bob, q.z);
-      body.setMatrixAt(i, M.compose(v, qB, s.set(1, q.sy, 1)));
+      M.compose(v, qB, s.set(1, q.sy, 1)); put(body, i);
       w.set(0, q.sy * .36 + .045, 0).applyQuaternion(qB).add(v);
       eH.set(q.hp, q.hy, 0, 'YXZ'); qH.setFromEuler(eH).premultiply(qB);
-      head.setMatrixAt(i, M.compose(w, qH, s.set(1, 1, 1)));
+      M.compose(w, qH, s.set(1, 1, 1)); put(head, i);
       // 腕(肩から、ひじで曲がる)と、座る人の脚(腿は座面の高さで前へ、すねは床へ)
       const shY = q.sy * LIMB.shoulder[1];
       chain(p.li, LIMB.shoulder[0], shY, q.R[0], q.R[1], q.R[2], LIMB.upper, LIMB.fore, LIMB.armR, LIMB.foreR);
@@ -825,19 +882,21 @@ function backWindow(E, x, y, w, h, zb) {
 }
 
 /* ---------- 家具 ---------- */
-function chair(E, b, y, x, z, ry, c) { const k = E.k; grp(b, x, y, z, ry).foot(0, 0, .1 * k, .1 * k, .7, .045).cyl(0, 0, 0, .04 * k, .008, E.P.metalDark).box(0, 0, 0, .022 * k, .1 * k, .022 * k, E.P.metalDark).rbox(0, .098 * k, 0, .1 * k, .024 * k, .1 * k, .008, c || E.P.chair).rbox(0, .12 * k, -.046 * k, .1 * k, .11 * k, .018 * k, .008, c || E.P.chair); }
+/* 小物: fn で S に足した頂点の範囲を覚える(見つけた物の手前に入ったとき、ふっと縮めて消すため) */
+function prop(E, b, fn) { const v0 = b.n; fn(); if (b === E.S) E.props.push({ v: [v0, b.n], fk: 1 }); }
+function chair(E, b, y, x, z, ry, c) { const k = E.k; prop(E, b, () => grp(b, x, y, z, ry).foot(0, 0, .1 * k, .1 * k, .7, .045).cyl(0, 0, 0, .04 * k, .008, E.P.metalDark).box(0, 0, 0, .022 * k, .1 * k, .022 * k, E.P.metalDark).rbox(0, .098 * k, 0, .1 * k, .024 * k, .1 * k, .008, c || E.P.chair).rbox(0, .12 * k, -.046 * k, .1 * k, .11 * k, .018 * k, .008, c || E.P.chair)); }
 function desk(E, b, y, x, z, w, d, ry = 0, top, hgt = .19) { const k = E.k; grp(b, x, y, z, ry).foot(0, 0, w * .9, d * .8, .76, .06).box(0, hgt * k - .016, 0, w, .016, d, top || E.P.desk).box(-w / 2 + .02, 0, 0, .016, hgt * k - .016, d - .02, E.P.metal).box(w / 2 - .02, 0, 0, .016, hgt * k - .016, d - .02, E.P.metal); }
-function plant(E, b, y, x, z, s = 1, i = 0) { const k = E.k * s; contact(E, x, y, z, .09 * k, .09 * k, { round: true, k: .7, s: .05 }); cy(b, x, y, z, .05 * k, .09 * k, E.P.pot); sp(b, x, y + .15 * k, z, .085 * k, E.P.leaf[i % 4], 1.15); sp(b, x + .035 * k, y + .21 * k, z - .01, .055 * k, E.P.leaf[(i + 1) % 4]); }
-function lampTable(E, b, y, x, z, c) { const k = E.k; cy(b, x, y, z, .018 * k, .004, E.P.dark); bx(b, x, y, z, .006, .07 * k, .006, E.P.dark); grp(b, x, y + .07 * k, z).cone(0, 0, 0, .03 * k, .03 * k, c || '#F4EAD4', 1); }
+function plant(E, b, y, x, z, s = 1, i = 0) { const k = E.k * s; prop(E, b, () => { contact(E, x, y, z, .09 * k, .09 * k, { round: true, k: .7, s: .05 }); cy(b, x, y, z, .05 * k, .09 * k, E.P.pot); sp(b, x, y + .15 * k, z, .085 * k, E.P.leaf[i % 4], 1.15); sp(b, x + .035 * k, y + .21 * k, z - .01, .055 * k, E.P.leaf[(i + 1) % 4]); }); }
+function lampTable(E, b, y, x, z, c) { const k = E.k; prop(E, b, () => { cy(b, x, y, z, .018 * k, .004, E.P.dark); bx(b, x, y, z, .006, .07 * k, .006, E.P.dark); grp(b, x, y + .07 * k, z).cone(0, 0, 0, .03 * k, .03 * k, c || '#F4EAD4', 1); }); }
 
-/* にじみの枠: 画面(w × h)の縁から m 外を内側の縁に、g の幅で 0 へ消える。色 c は内側の縁の色 */
+/* にじみ: 画面(w × h)の縁から m 外を内側の縁に、g の幅で 0 へ消える。色 c は内側の縁の色 */
 const HALO = new Map();
 function haloGeo(w, h, m, g, c) {
   const key = [w, h, m, g, ...c].map(v => (+v).toFixed(3)).join('|');
   if (HALO.has(key)) return HALO.get(key);
   const a = w / 2 + m, b = h / 2 + m, pos = [], cl = [];
   const ring = d => [[-a - d, -b - d], [a + d, -b - d], [a + d, b + d], [-a - d, b + d]];
-  const R = [[ring(0), 1], [ring(g * .22), .55], [ring(g * .55), .2], [ring(g), 0]];    // 内の縁から、尾を引いて柔らかく消える
+  const R = [[ring(0), 1], [ring(g * .12), .6], [ring(g * .3), .3], [ring(g * .6), .1], [ring(g), 0]];    // 内の縁から、尾を引いて柔らかく消える(段のない減り方)
   const put = (v, k) => { pos.push(v[0], v[1], 0); cl.push(c[0] * k, c[1] * k, c[2] * k); };
   for (let r = 0; r < R.length - 1; r++) {
     const [I, ki] = R[r], [O, ko] = R[r + 1];
@@ -866,17 +925,6 @@ function station(E, id, o) {
   // scale: 物ぜんたいを何倍にするか(公園の小物を、ひらいた画面で見分けやすくする)
   const base = { x: lay.x ?? o.x, y: o.y, z: lay.z ?? o.z, ry: lay.ry ?? (o.ry || 0), s: o.scale || 1 };
   if (o.holder) o.holder(grp(E.H, base.x, base.y, base.z, base.ry, base.s), base);
-  // ガラスの画面の縁: 枠のまわりに、細い明るい縁(アルミの面取りのように)。o.bezel は画面の外の枠の幅
-  if (o.glass && o.rim !== false && o.screen) {
-    const q0 = base.s, sw = o.screen.w * q0, sh = o.screen.h * q0, bz = (o.bezel ?? .012) * q0, lw = .0035, gr = grp(E.H, base.x, base.y, base.z, base.ry);
-    const cx = o.screen.x * q0, cy2 = o.screen.y * q0, cz = o.screen.z * q0 + .0012, t2 = -(o.screen.tilt || 0), rc = mix(E.P.metal, '#FFFFFF', .35);
-    const W2 = sw / 2 + bz, H2 = sh / 2 + bz, ct = Math.cos(-t2), st = Math.sin(-t2);
-    // 縁の4本(画面の傾きに合わせて、画面の面の上に置く)
-    for (const [ux, uy, bw, bh] of [[0, H2, 2 * W2 + lw, lw], [0, -H2, 2 * W2 + lw, lw], [-W2, 0, lw, 2 * H2], [W2, 0, lw, 2 * H2]]) {
-      const yy = cy2 + uy * ct - bh / 2 * ct, zz = cz - uy * st + bh / 2 * st;
-      gr.box(cx + ux, yy, zz, bw, bh, .003, rc, t2);
-    }
-  }
   S.h = [h0, E.H.n];
   // 夜、画面の光が机に落ちる所(昼は面の色のままで見えない)。o.spill: [x, y, z, 幅, 奥行き, 面の色](物の座標)
   if (o.spill) { const [lx2, ly2, lz2, sw2, sd2, sc2] = o.spill, cs2 = Math.cos(base.ry), sn2 = Math.sin(base.ry), q2 = base.s; E.S.add(spillGeo(sw2 * q2, sd2 * q2, .05), mtx(base.x + (lx2 * cs2 + lz2 * sn2) * q2, base.y + ly2 * q2 + .0016, base.z + (-lx2 * sn2 + lz2 * cs2) * q2, 1, 1, 1, base.ry), sc2, -.17); }
@@ -887,10 +935,9 @@ function station(E, id, o) {
   const s0 = E.SC.n;
   E.SC.add(G.plane, mtx(wx, wy, wz, sc.w, sc.h, 1, base.ry + (sc.ry || 0), -(sc.tilt || 0)), '#FFFFFF');
   S.sc = [s0, E.SC.n];
-  // にじみの枠(画面の縁の外へ、柔らかく消える)。ガラスの画面は青白く、紙や板は暖かく
+  // にじみ(写しの縁にくっついて、外へやわらかく消える光)。ガラスの画面は青白く、紙や板は暖かく。写しの上には重ねない(縁から 2mm 外から始める)
   const h0l = E.HL.n, nrm = new THREE.Vector3(0, 0, 1).applyEuler(new THREE.Euler(-(sc.tilt || 0), base.ry + (sc.ry || 0), 0, 'YXZ'));
-  // にじみは縁(枠)の外から始める(枠の上に重ねると、白い縁取りに見えるため)。o.bezel: 画面の外の枠の幅
-  E.HL.add(haloGeo(sc.w, sc.h, (o.bezel ?? .012) * q, Math.min(.07, .024 + .08 * Math.max(sc.w, sc.h)), S.glass ? [.82, .9, 1] : [1, .9, .74]), mtx(wx + nrm.x * .003, wy + nrm.y * .003, wz + nrm.z * .003, 1, 1, 1, base.ry + (sc.ry || 0), -(sc.tilt || 0)), '#FFFFFF');
+  E.HL.add(haloGeo(sc.w, sc.h, .002, Math.min(.07, .024 + .08 * Math.max(sc.w, sc.h)), S.glass ? [.82, .9, 1] : [1, .9, .74]), mtx(wx + nrm.x * .002, wy + nrm.y * .002, wz + nrm.z * .002, 1, 1, 1, base.ry + (sc.ry || 0), -(sc.tilt || 0)), '#FFFFFF');
   S.hl = [h0l, E.HL.n];
   S.sw = sc.w; S.sh = sc.h;
   S.anchor = [wx, wy + (sc.tilt > .9 ? .05 : sc.h / 2 + .05), wz];
@@ -913,7 +960,7 @@ const BUILD = {
     const cz = Z(.32);
     grp(S, X(-.75), f[0], cz).foot(0, 0, 1.3 * k, .2 * k).rbox(0, 0, 0, 1.3 * k, .25 * k, .2 * k, .02, P.trim).box(0, .25 * k, -.01, 1.34 * k, .022, .25 * k, P.deskWood).box(0, .09 * k, .102 * k, 1.3 * k, .022, .004, P.teal);
     station(E, 'nidodema', {
-      x: X(-.72), y: f[0] + .272 * k, z: cz - .02, ry: -.28, glass: true, bezel: .013, spill: [-.03, 0, .07, .26, .1, P.deskWood],
+      x: X(-.72), y: f[0] + .272 * k, z: cz - .02, ry: -.28, glass: true, spill: [-.03, 0, .07, .26, .1, P.deskWood],
       holder: g => g.box(-.03, 0, -.02, .05, .012, .05, P.dark).box(-.03, .01, -.025, .014, .06, .014, P.dark).box(-.03, .055, -.02, .3 * k, .19 * k, .018, P.frame)
         .box(-.27, 0, 0, .12, .05, .09, '#5E656D').box(-.27, .05, -.02, .1, .012, .05, P.paper).box(-.27, .052, .03, .06, .004, .03, '#C9D3DA')
         .box(.17, 0, -.01, .08, .05, .06, P.paper).box(.18, .05, -.008, .078, .03, .058, '#F1EDE4').box(.27, 0, .01, .07, .035, .06, P.paper),
@@ -974,7 +1021,7 @@ const BUILD = {
     const sp0 = person(E, X(-1.07), y3 + .015, sz0 + .04, 0, { kind: 'read', cloth: P.scrub, night: true, fy: y3 });   // 返信の案を見せる人(スマホを前へ向けて持つ)
     const hm0 = handOf(sp0, 1).add(handOf(sp0, -1)).multiplyScalar(.5);     // スマホは両手の間に。画面は前(見る人の側)へ向ける
     station(E, 'yawagaeshi', {
-      x: hm0.x, y: hm0.y - .03, z: hm0.z + .02, ry: 0, lift: [0, .035, .02], glass: true, bezel: .0055,
+      x: hm0.x, y: hm0.y - .03, z: hm0.z + .02, ry: 0, lift: [0, .035, .02], glass: true,
       holder: g => g.rbox(0, 0, -.007, .086 * k, .176 * k, .012, .008, '#2A2F35'),
       screen: { x: 0, y: .088 * k, z: .0002, w: .076 * k, h: .164 * k }
     });
@@ -1085,12 +1132,12 @@ const BUILD = {
     const mp = person(E, -.25, y2 + .015, .09, mr, { kind: 'read', cloth: P.casual[3], fy: y2 });
     const hm1 = handOf(mp, 1).add(handOf(mp, -1)).multiplyScalar(.5);      // タブレットは両手の間に。画面は前(見る人の側)へ向けて見せる
     station(E, 'moyamoya', {
-      x: hm1.x + Math.sin(mr) * .02, y: hm1.y - .035, z: hm1.z + Math.cos(mr) * .02, ry: mr, lift: [0, .035, .02], glass: true, bezel: .006, scale: 1.2,
+      x: hm1.x + Math.sin(mr) * .02, y: hm1.y - .035, z: hm1.z + Math.cos(mr) * .02, ry: mr, lift: [0, .035, .02], glass: true, scale: 1.2,
       holder: g => g.rbox(0, 0, -.006, .15 * k, .1 * k, .01, .008, '#2A2F35'),
       screen: { x: 0, y: .05 * k, z: .0002, w: .136 * k, h: .085 * k }
     });
     station(E, 'daily-app', {
-      x: .3, y: y2, z: .16, ry: -.3, glass: true, rim: false, scale: 1.25,
+      x: .3, y: y2, z: .16, ry: -.3, glass: true, scale: 1.25,
       holder: g => g.box(0, .16 * k, 0, .24 * k, .016, .14 * k, P.deskWood).box(0, 0, 0, .03, .16 * k, .03, P.woodDark).box(0, 0, 0, .12, .012, .1, P.woodDark).box(.08, .176 * k, -.03, .06 * k, .008, .05 * k, P.terraLight)
         .box(-.02, .176 * k, -.02, .05 * k, .012, .04 * k, P.woodDark).rbox(-.02, .18 * k, -.012, .078 * k, .17 * k, .01, .008, '#2A2F35'),   // 台に立てたスマホ
       screen: { x: -.02, y: .18 * k + .085 * k, z: -.0065, w: .07 * k, h: .156 * k }
@@ -1151,7 +1198,7 @@ const BUILD = {
     person(E, X(.5), y, ry0 + .18, -Math.PI * .7, { kind: 'write', stand: true, cloth: P.scrubNavy });   // 引き継ぎを書く
     // 待合: ベンチ(テレビを向く)・テレビ(クリニックタウン3D)
     station(E, 'clinic-flow-3d', {
-      x: X(.68), y: y + .32 * k, z: R.zb + .004, ry: 0, lift: [0, .01, .03], flicker: .05, glass: true, bezel: .022,
+      x: X(.68), y: y + .32 * k, z: R.zb + .004, ry: 0, lift: [0, .01, .03], flicker: .05, glass: true,
       holder: g => g.box(0, 0, 0, .44 * k, .27 * k, .03, P.frame).box(0, -.06, -.005, .06, .06, .012, P.dark),
       screen: { x: 0, y: .135 * k, z: .016, w: .41 * k, h: .24 * k }
     });
@@ -1200,7 +1247,7 @@ const BUILD = {
     // ---- 2階 ----
     desk(E, S, f[1], X(-.42), Z(.36), .44 * k, .18 * k, 0, P.desk);
     station(E, 'medboard', {
-      x: X(-.42), y: f[1] + .19 * k, z: Z(.38), ry: 0, lift: [0, .008, .022], flicker: .04, glass: true, bezel: .007, spill: [0, 0, .065, .36, .1, P.desk],
+      x: X(-.42), y: f[1] + .19 * k, z: Z(.38), ry: 0, lift: [0, .008, .022], flicker: .04, glass: true, spill: [0, 0, .065, .36, .1, P.desk],
       holder: g => g.box(0, 0, 0, .06, .008, .05, P.dark).box(0, 0, -.005, .014, .05, .014, P.dark).box(0, .045, 0, .32 * k, .2 * k, .014, P.frame),
       screen: { x: 0, y: .045 + .1 * k, z: .008, w: .3 * k, h: .1875 * k }
     });
@@ -1208,7 +1255,7 @@ const BUILD = {
     person(E, X(-.42), f[1], Z(.18), 0, { kind: 'type', cloth: P.office, night: true });
     desk(E, S, f[1], X(.45), Z(.4), .36 * k, .18 * k, 0, P.desk);
     station(E, 'consult-simulator', {
-      x: X(.45), y: f[1] + .19 * k, z: Z(.42), ry: -.12, lift: [0, .008, .022], flicker: .03, glass: true, bezel: .01, spill: [0, 0, .065, .24, .1, P.desk],
+      x: X(.45), y: f[1] + .19 * k, z: Z(.42), ry: -.12, lift: [0, .008, .022], flicker: .03, glass: true, spill: [0, 0, .065, .24, .1, P.desk],
       holder: g => g.box(0, 0, 0, .05, .008, .04, P.dark).box(0, 0, -.005, .012, .05, .012, P.dark).box(0, .045, 0, .27 * k, .16 * k, .014, P.frame),
       screen: { x: 0, y: .045 + .08 * k, z: .008, w: .25 * k, h: .145 * k }
     });
@@ -1315,7 +1362,7 @@ const BUILD = {
     const cx2 = X(.72), cz2 = Z(.6);
     grp(S, cx2, y, cz2).box(0, .18 * k, 0, .32 * k, .016, .16 * k, P.deskWood).box(-.16 * k, 0, 0, .014, .3 * k, .18 * k, P.woodDark).box(.16 * k, 0, 0, .014, .3 * k, .18 * k, P.woodDark).box(0, .18 * k, -.08 * k, .32 * k, .3 * k, .012, P.woodDark);
     station(E, 'english-trainer', {
-      x: cx2, y: y + .38 * k, z: cz2 - .072 * k, ry: 0, lift: [0, .02, .02], glass: true, bezel: .0075, spill: [0, -.184 * k, .1, .24, .1, P.deskWood],
+      x: cx2, y: y + .38 * k, z: cz2 - .072 * k, ry: 0, lift: [0, .02, .02], glass: true, spill: [0, -.184 * k, .1, .24, .1, P.deskWood],
       holder: g => g.box(0, 0, 0, .19 * k, .125 * k, .012, P.frame),
       screen: { x: 0, y: .0625 * k, z: .007, w: .175 * k, h: .11 * k }
     });
@@ -1332,7 +1379,7 @@ const BUILD = {
     // ガチャ(ときどきカプセルが転がる)
     let capRange = null;
     station(E, 'gokigen-gacha', {
-      x: X(-1.25), y, z: Z(.1), ry: .35, lift: [0, .03, .02], scale: pk, glass: true, rim: false,
+      x: X(-1.25), y, z: Z(.1), ry: .35, lift: [0, .03, .02], scale: pk, glass: true,
       holder: g => {
         g.rbox(0, 0, 0, .3, .34, .26, .03, P.terraLight).box(0, .34, 0, .28, .03, .24, P.trim)
           .cyl(0, .37, 0, .13, .06, mix(P.glass, '#FFFFFF', .55)).cyl(0, .43, 0, .135, .012, P.trim);
@@ -1401,7 +1448,7 @@ const BUILD = {
     // ノートパソコン: 蓋は奥へ la だけ倒す。画面は蓋の面に合わせる
     const la = .2;
     station(E, 'note', {
-      x: X(-.12), y: y + .21 * k, z: R.zb + .15, ry: -.35, lift: [0, .025, .012], canvas: 'note', glass: true, bezel: .0075, spill: [0, 0, .08, .2, .1, P.deskWood],
+      x: X(-.12), y: y + .21 * k, z: R.zb + .15, ry: -.35, lift: [0, .025, .012], canvas: 'note', glass: true, spill: [0, 0, .08, .2, .1, P.deskWood],
       holder: g => g.box(0, 0, .03, .17 * k, .008, .11 * k, '#C9CDD1').box(0, .006, -.025, .17 * k, .11 * k, .008, '#C9CDD1', -la),
       screen: { x: 0, y: .006 + .055 * k * Math.cos(la) + .0055 * Math.sin(la), z: -.025 - .055 * k * Math.sin(la) + .0055 * Math.cos(la), w: .15 * k, h: .095 * k, tilt: la }
     });
