@@ -358,7 +358,7 @@ export async function live(o) {
   const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
   const ease = t => (t = clamp01(t)) < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;   // 出だしと着きがやわらかい(臨界減衰のばね sp を、さらに通す)
   // 進み p の区切り(調整はここだけ)。階ごとに [移り始め, 着く, 次へ]
-  const SQ = { move: [.02, .32], dim: [.05, .26], roof: [.16, .28], wall: [.2, .33], light: [.22, .33], floors: [[.48, .54, .64], [.64, .71, .8], [.8, .87, 1.01]] };
+  const SQ = { move: [.02, .29], dim: [.05, .24], roof: [.14, .25], wall: [.18, .3], light: [.2, .3], floors: [[.5, .56, .66], [.66, .73, .82], [.82, .88, 1.01]] };
   const FLOOR_OF = [['yawagaeshi', 2], ['keiji', 1], ['nidodema', 0]];   // 降りる順: 3階 休憩室 → 2階 ナースステーション → 1階 受付
   const STX = { yawagaeshi: -1.07, keiji: -1.0, nidodema: -.72 };     // 中の形が届く前の、道具のおよその位置(建物の中の x)
   const toIsl = new THREE.Matrix4();
@@ -395,8 +395,14 @@ export async function live(o) {
       const cx = clamp(sx0 + .5, -bx.w / 2 + hw, bx.w / 2 - hw), y0 = fi * fh, y1 = y0 + fh * .9, z0 = -bx.d / 2, z1 = bx.d / 2;
       const pts = islandPts([[cx - hw, y0, z0], [cx + hw, y0, z0], [cx - hw, y1, z0], [cx + hw, y1, z0], [cx - hw, y0, z1], [cx + hw, y0, z1], [cx - hw, y1, z1], [cx + hw, y1, z1]]);
       const e = extent(pts, r1, elF), c = pts.reduce((a, p) => a.add(p), new THREE.Vector3()).multiplyScalar(1 / pts.length);
-      const front = islandPts([[0, (y0 + y1) / 2, bx.d / 2 + WALL + .02]])[0];   // その階の前の面の真ん中(ここより手前を切る)
-      return { r: r1, el: elF, ppu: Math.min(sw * (small ? .98 : .62) / e.w, shh * .8 / e.h), F: c, sx: (sf.l + sf.r) / 2, sy: sf.t + shh * syK, front };
+      const [front, gnd] = islandPts([[0, (y0 + y1) / 2, bx.d / 2 + WALL + .02], [0, -ex.y0, bx.d / 2 + WALL + .02]]);   // その階の前の面の真ん中(ここより手前を切る)と、その下の地面
+      const ppu = Math.min(sw * (small ? .98 : .62) / e.w, shh * .8 / e.h);
+      // 手前を切る面は、地面も切る。その切り口(地面が終わって空の色になる線)は、F から画面で cut だけ下。画面の下より下へ送る(低い階で、地面の切れ目が見えないように)
+      // 切る面は前の面の点より .35 手前(setCamera)。前の面の点より dy 低い地面との交わりは、画面で dy / cos(el) + .35 tan(el) だけ下
+      aimCamera(tmpCam, origin, elF);
+      const vy = p => p.clone().applyAxisAngle(Y, r1).applyMatrix4(tmpCam.matrixWorldInverse).y;
+      const cut = (vy(c) - vy(front) + (front.y - gnd.y) / Math.cos(elF) + .35 * Math.tan(elF)) * ppu;
+      return { r: r1, el: elF, ppu, F: c, sx: (sf.l + sf.r) / 2, sy: Math.min(Math.max(sf.t + shh * syK, H + 8 - cut), sf.b - e.h * ppu * .35), front };
     });
     return [K0, K1, ...floors];
   }

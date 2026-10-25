@@ -333,10 +333,10 @@ html.scrub .hero::after{opacity:var(--hz,0);transition:none}
 @media (hover:hover){.chip:hover{background:var(--indigo)}}
 /* 病院の道具を一覧で(下に小さく) */
 .ins-go{position:absolute;z-index:7;left:var(--pad);right:var(--pad);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none;opacity:0;visibility:hidden}
-.ins-go a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:22px;background:var(--cbtn-face);box-shadow:0 0 0 1px var(--cbtn-ring);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--hero-fg);font-size:13.5px;font-weight:700;letter-spacing:.03em;text-decoration:none;pointer-events:auto}
+.ins-go a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:22px;background:var(--cbtn-face-h);box-shadow:0 0 0 1px var(--cbtn-ring);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--hero-fg);font-size:13.5px;font-weight:700;letter-spacing:.03em;text-decoration:none;pointer-events:auto}
 .ins-go .ico{width:16px;height:16px;color:var(--sand)}
 html[data-tod="night"] .ins-go .ico{color:var(--sand-2)}
-@media (hover:hover){.ins-go a:hover{background:var(--cbtn-face-h)}}
+@media (hover:hover){.ins-go a:hover{box-shadow:0 0 0 1.5px var(--cbtn-fg)}}   /* 面は明るい部屋や広場の上でも読める濃さ(押せる時刻の丸と同じ、濃い方の面) */
 /* 動かないとき(動きを減らす・WebGL なし・立体に替わる前): 町の止めた画像から、ひらいた病院の止めた画像へ、重ねて替える */
 .shut{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;visibility:hidden}
 .shut img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}

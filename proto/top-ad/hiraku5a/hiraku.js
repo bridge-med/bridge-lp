@@ -542,7 +542,7 @@ function boot() {
   const OPEN_STILL = {};
   for (const t of TODS) { OPEN_STILL[t + '-sp'] = { w: 786, h: 1448, st: ST_SP }; OPEN_STILL[t + '-pc'] = { w: 1600, h: 1000, st: ST_PC }; }
   // 階ごとの札の出入り(live.js の SQ.floors の「着く」の少し前から「次へ」の少し前まで)。ぜんたいのときは3つを小さく
-  const FL_SHOW = { yawagaeshi: [.5, .54, .62, .65], keiji: [.66, .71, .78, .81], nidodema: [.82, .87, 2, 3] };
+  const FL_SHOW = { yawagaeshi: [.52, .56, .64, .67], keiji: [.68, .73, .8, .83], nidodema: [.84, .88, 2, 3] };
   let rawP = 0, chipPos = {}, lastQ = -1, sq = 0;
   const stageP = () => { const r = stage.getBoundingClientRect(), span = stage.offsetHeight - innerHeight; return span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0; };
   const show = (e, k) => { e.style.opacity = k.toFixed(3); e.style.visibility = k > .01 ? 'visible' : 'hidden'; };
@@ -550,16 +550,16 @@ function boot() {
     if (q === lastQ && q === 0) return;
     lastQ = q;
     R.style.setProperty('--cp', (1 - SM(.02, .12, q)).toFixed(3));   // 最初の画面の言葉と入口
-    R.style.setProperty('--mk', (1 - SM(.05, .3, q)).toFixed(3));    // 島の下のもや
-    R.style.setProperty('--hz', SM(.2, .34, q).toFixed(3));           // 見出しの帯の下の霞(中が上まで来たら)
+    R.style.setProperty('--mk', (1 - SM(.05, .28, q)).toFixed(3));   // 島の下のもや
+    R.style.setProperty('--hz', SM(.18, .31, q).toFixed(3));          // 見出しの帯の下の霞(中が上まで来たら)
     R.style.setProperty('--ek', SM(.94, 1, q).toFixed(3));            // 舞台の終わり: 画面の下を、次の面(空の下の色)へ溶かす
-    show(ins, SM(.29, .36, q));
-    ins.style.setProperty('--lk', (1 - SM(.47, .51, q)).toFixed(3));   // 階へ降りたら、一文は外す(小さな見出しは残す)
-    show(insGo, SM(.32, .39, q));
-    const fl = q >= .495, hr = hero.clientWidth;
+    show(ins, SM(.26, .33, q));
+    ins.style.setProperty('--lk', (1 - SM(.49, .53, q)).toFixed(3));   // 階へ降りたら、一文は外す(小さな見出しは残す)
+    show(insGo, SM(.29, .35, q));
+    const fl = q >= .51, hr = hero.clientWidth;
     for (const c of chips) {
       const sid = c.dataset.sid, p = chipPos[sid], f = FL_SHOW[sid];
-      const k = !p ? 0 : fl ? SM(f[0], f[1], q) * (1 - SM(f[2], f[3], q)) : SM(.33, .39, q) * (1 - SM(.45, .48, q));
+      const k = !p ? 0 : fl ? SM(f[0], f[1], q) * (1 - SM(f[2], f[3], q)) : SM(.3, .35, q) * (1 - SM(.47, .5, q));   // ぜんたい: .35〜.47 で止まって見せる(約 0.3 画面)
       c.classList.toggle('big', fl);
       c.style.opacity = k.toFixed(3); c.style.pointerEvents = k > .5 ? 'auto' : 'none';   // 見えないときも Tab では届く(届いたら、札が見える所まで舞台を進める)
       if (!p || k <= .01) continue;
@@ -608,7 +608,7 @@ function boot() {
   // 札を押すと、町の中のその画面が広がって道具になる(町の入口と同じ)
   for (const c of chips) c.addEventListener('click', e => { const t = TOOLS[c.dataset.sid]; if (t) leap(e, null, t, c.dataset.sid); });
   // キーボードで札に来たら、札が見える所(ひらいた病院ぜんたい)まで舞台を進める
-  for (const c of chips) c.addEventListener('focus', () => { if (rawP < .34 || rawP > .48) { const span = stage.offsetHeight - innerHeight; scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span * .42, behavior: reduce() ? 'auto' : 'smooth' }); } });
+  for (const c of chips) c.addEventListener('focus', () => { if (rawP < .35 || rawP > .47) { const span = stage.offsetHeight - innerHeight; scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span * .41, behavior: reduce() ? 'auto' : 'smooth' }); } });
   // 舞台を過ぎたら、見出しの帯を小さく上に固定。夜は夜の色の帯
   const hdNight = () => R.classList.toggle('hd-night', R.dataset.tod === 'night');
   hdNight(); btnTod.addEventListener('click', hdNight);
