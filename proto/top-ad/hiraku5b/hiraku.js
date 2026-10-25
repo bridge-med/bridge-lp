@@ -610,7 +610,7 @@ function boot() {
   const ifls = $$('.ifl', inTags), itags = $$('.itag', inTags);
   let sect = null, sectP = null, sectVis = false;
   /* 止めた画像の札の位置(撮るときに書き出した値。枠の %) */
-  const IN_POS = { st: { yawagaeshi: [40.25, 29.36], keiji: [35.4, 46.44], nidodema: [40.73, 60.26] }, fl: [[19.57, 33.43], [19.57, 48.4], [19.57, 63.38]] };
+  const IN_POS = { st: { yawagaeshi: [31.93, 41.66], keiji: [26.14, 58.97], nidodema: [32.51, 72.98] }, fl: [[75.61, 41.85], [75.61, 57.03], [75.61, 72.21]] };
   function inStillSrc() { const b = inStill.dataset[R.dataset.tod] || inStill.dataset.day; inStill.srcset = b + '-800.webp 800w, ' + b + '-1200.webp 1200w'; inStill.src = b + '-800.webp'; }
   inStillSrc();
   function placeIn(px) {   // px: { st: {sid: [x, y]}, fl: [[x, y]] } 枠の中の px
@@ -633,7 +633,7 @@ function boot() {
     inTags.classList.add('wait');
     sectP = import('./sect.js').then(M => M.section({
       canvas: inCanvas, tod: TODS.indexOf(R.dataset.tod), quality, paused, reveal: inReveal, reduce,
-      onLayout(L) { placeIn(L); inTags.classList.toggle('wait', L.k < .82); },
+      onLayout(L) { placeIn(L); inTags.classList.toggle('wait', L.k < .82); window.__inK = L.k; },   // __inK: 壁の沈み具合(確かめるため)
       onReady() { requestAnimationFrame(() => R.classList.add('inlive')); }
     })).then(api => { sect = api; sect.setPaused(paused); sect.setVisible(sectVis); sect.setReveal(inReveal()); window.__sect = api; })
       .catch(err => { console.warn(err); inTags.classList.remove('wait'); stillIn(); });
@@ -645,11 +645,14 @@ function boot() {
   }
   /* スクロール: 壁の沈み具合と、町の病院の目印 */
   let inQ = 0, hospMark = false;
+  const inCopy = $('.in-copy', $('#inside'));
   const inUpd = () => {
     inQ = 0;
+    if (!openId) R.classList.toggle('past', hero.getBoundingClientRect().bottom < 72);   // 上の帯の固定も位置で決める(一気に下へ移ったときも、帯と一文の重なりを正しく測るため。ひらいている間は町の側に任せる)
     if (sect) sect.setReveal(inReveal());
+    if (inCopy) { const ct = inCopy.getBoundingClientRect().top, hb = R.classList.contains('past') ? hd.offsetHeight : hd.getBoundingClientRect().bottom; inCopy.style.opacity = Math.max(0, Math.min(1, (ct - hb) / 36)).toFixed(3); }   // 空に重ねた一文は、上の帯の下へ入る前に消す(帯の向こうに透けて重ならないように)。固定した帯は、出てくる動きの途中でも止まった位置で測る
     const hr = hero.getBoundingClientRect(), k = -hr.top / Math.max(1, hr.height);
-    const on = k > .16 && k < .95 && !openId;
+    const on = k > .03 && k < .6 && !openId;   // スクロールし始めたらすぐ(下に断面の屋上が出てくる間、町の病院を目で追えるように)
     if (on !== hospMark) {
       hospMark = on;
       if (on) { stopInvite(); if (ctl) ctl.hover('hospital'); showTag('hospital', true); }

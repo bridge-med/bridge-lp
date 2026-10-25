@@ -11,23 +11,31 @@ import * as THREE from 'three';
 
 const deg = d => d * Math.PI / 180, clamp01 = v => Math.max(0, Math.min(1, v));
 const ease = v => { v = clamp01(v); return v < .5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2; };
-/* 構図: az = 正面からの回し(度。負で右の側面が見える)、el = 見下ろす角度(度)。m = 枠の余白(幅・高さに対する比) */
-export const VIEW = { az: -16, el: 11, m: { l: .02, r: .02, t: .025, b: .02 } };
+/* 構図: az = 正面からの回し(度。負で右の側面が見える)、el = 見下ろす角度(度)。m = 枠の余白(幅・高さに対する比)。
+   上の余白は、スマホで「病院の中」と一文を空に重ねる所(屋上の設備の上。約 78px) */
+export const VIEW = { az: -16, el: 11, m: { l: .015, r: .015, t: .142, b: .01 } };
+/* 枠に収める横の幅: 建物の左右に side だけ(一切れの左右の端は、画面の外へ出てよい)。スマホで各階が約 80px になる幅 */
+const FR = { side: .27 };
 /* 一切れの大きさ(主棟の外の面から): 左右・奥・手前(車寄せの前の広場) */
-const SLAB = { l: .72, r: .3, back: .3, front: .95 };   // 左は階の札の場所(左の切り口の外)
+const SLAB = { l: .45, r: .45, back: .3, front: .55 };
 const TOD_I = { day: 0, dusk: 1, night: 2 };
-const ROOMS = [2, 1, 0];   // 階の札(3F・2F・1F の順)。左の切り口の外、その階の真ん中の高さ
+const ROOMS = [2, 1, 0];   // 階の札(3F・2F・1F の順)。その階の部屋の右上の角(病院の階の案内の札のように)
 const STATIONS = ['yawagaeshi', 'keiji', 'nidodema'];
+/* 一切れの土にかける空気: 区画の空の色(時刻ごと)。上の草のすぐ下から掛かり始め、下の端で空へ溶けきる */
+const HAZE = [new THREE.Color('#DAE6ED'), new THREE.Color('#C4B1B9'), new THREE.Color('#141D41')];   // 昼・夕・夜(区画の空の --in-1 と --in-2 の間)
+/* 夜の月明かり: 町と同じ色と強さのまま、向きだけ右手前の上から(右の側面と軒・角に光が乗り、夜空の中で立体が読める) */
+const MOON = new THREE.Vector3(10, 11, 3);
 
 /* ---------- 島の一切れ(角の丸い長方形の地層。島の縁と同じ層と色) ---------- */
-const STRATA = [   // 島の縁(world.js)と同じ層と色。縦はおよそ 0.6 倍(低い角度から見ると、層の面が正面に近く、厚く見えるため)
+const STRATA = [   // 島の縁(world.js)と同じ層と色。土の厚みは、第1回の半分(草の下から -0.78 まで)
   { y: 0, d: 0, c: null }, { y: -.04, d: .03, c: 'grassEdge' }, { y: -.09, d: -.012, c: 'grassEdge' },
-  { y: -.1, d: -.03, c: 'soil1' }, { y: -.22, d: -.05, c: 'soil1' },
-  { y: -.23, d: -.09, c: 'soil2' }, { y: -.55, d: -.11, c: 'soil2' },
-  { y: -.56, d: -.15, c: 'soil3' }, { y: -.8, d: -.19, c: 'soil3' },
-  { y: -.81, d: -.24, c: 'soil4' }, { y: -1.0, d: -.32, c: 'soil4' },
-  { y: -1.03, d: -.42, c: 'rock' }, { y: -1.22, d: -.66, c: 'rock' }, { y: -1.25, d: -.74, c: 'rockD' }, { y: -1.45, d: -1.1, c: 'rockD' }
+  { y: -.1, d: -.03, c: 'soil1' }, { y: -.16, d: -.045, c: 'soil1' },
+  { y: -.165, d: -.07, c: 'soil2' }, { y: -.325, d: -.085, c: 'soil2' },
+  { y: -.33, d: -.11, c: 'soil3' }, { y: -.45, d: -.14, c: 'soil3' },
+  { y: -.455, d: -.17, c: 'soil4' }, { y: -.55, d: -.22, c: 'soil4' },
+  { y: -.565, d: -.29, c: 'rock' }, { y: -.66, d: -.45, c: 'rock' }, { y: -.675, d: -.5, c: 'rockD' }, { y: -.775, d: -.75, c: 'rockD' }
 ];
+const SOIL_BOTTOM = -.775;
 function rimPoints(x0, x1, z0, z1, rad, step) {   // 外向きの向きつきの縁の点 [x, z, nx, nz]。正面(+z)の左から右へ、時計回り
   const out = [], line = (ax, az, bx, bz, nx, nz) => { const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L / step)); for (let i = 0; i < n; i++) { const u = i / n; out.push([ax + (bx - ax) * u, az + (bz - az) * u, nx, nz]); } };
   const arc = (cx, cz, a0, a1) => { const n = 5; for (let i = 0; i < n; i++) { const a = a0 + (a1 - a0) * i / n; out.push([cx + Math.cos(a) * rad, cz + Math.sin(a) * rad, Math.cos(a), Math.sin(a)]); } };
@@ -58,7 +66,7 @@ function slice(world, ctx, K, BOXES, WALL) {
     const cc = STRATA[k + 1].c; if (!cc) continue;
     for (let i = 0; i < N; i++) {
       const a = rows[k][i], b2 = rows[k][(i + 1) % N], c = rows[k + 1][(i + 1) % N], d = rows[k + 1][i], nx = (a[3] + b2[3]) / 2, nz = (a[4] + b2[4]) / 2;
-      tmp.set(C[cc]).offsetHSL(0, (rnd() - .5) * .02, (rnd() - .5) * .035 - (k > 6 ? .02 : 0));
+      tmp.set(C[cc]).offsetHSL(0, (cc === 'grassEdge' ? 0 : -.14) + (rnd() - .5) * .02, (rnd() - .5) * .035 - (k > 6 ? .02 : 0));   // 土と岩は彩度を落とす(最初の画面の島の下と同じ落ち着き。ケーキの断面に見えないように)
       const b0 = pos.length / 3;
       for (const v of [a, b2, c, d]) { pos.push(v[0], v[1], v[2]); nor.push(nx, -.15 * (k > 10 ? 1 : 0), nz); col.push(tmp.r, tmp.g, tmp.b); }
       idx.push(b0, b0 + 1, b0 + 2, b0, b0 + 2, b0 + 3);
@@ -94,13 +102,26 @@ async function parts() {
   return { W, BOXES: Bd.BOXES, WALL: Bd.WALL, K, MOD };
 }
 function sceneOpts(P, q) { return { only: 'hospital', quality: q, ao: false, exterior: { solo: true }, extra: (world, ctx) => slice(world, ctx, P.K, P.BOXES, P.WALL) }; }
-/* 枠に収める点: 一切れの上の縁と下の端、建物の箱(屋上の設備まで)、右奥の木のてっぺん */
+/* 枠に収める点: 建物の箱(屋上の設備の高さまで)の左右に FR.side を足した幅と、一切れの手前の縁・土の下の端(高さだけ。一切れの左右の端は画面の外へ出てよい) */
 function framePts(P) {
   const ex = slabExtent(P.BOXES, P.WALL), b = P.BOXES.hospital, top = b.h + .1 + .62 + .35 + .06, pts = [];
-  for (const [x, z] of [[ex.x0, ex.z0], [ex.x1, ex.z0], [ex.x0, ex.z1], [ex.x1, ex.z1]]) pts.push(new THREE.Vector3(x, 0, z), new THREE.Vector3(x * .7, -1.45, z * .7 + (ex.z0 + ex.z1) * .15));
-  for (const x of [-ex.X, ex.X]) for (const z of [-ex.Z, ex.Z]) pts.push(new THREE.Vector3(x, top, z));
-  pts.push(new THREE.Vector3(ex.x1 - .2, 1.24, ex.z0 + .45));
+  for (const x of [-ex.X - FR.side, ex.X + FR.side]) for (const z of [-ex.Z, ex.Z]) pts.push(new THREE.Vector3(x, top, z), new THREE.Vector3(x, 0, z));
+  pts.push(new THREE.Vector3(0, 0, ex.z1), new THREE.Vector3(0, SOIL_BOTTOM, ex.z1 - .3));
   return pts;
+}
+/* 断面の輪郭: 左右の壁と屋根の床の切り口、地面の線を、階の床の切り口と同じ藍で太く(光に左右されない図面の線)。
+   左右は前の壁のあった厚みの中(前の壁があるうちは隠れる)、屋根は屋根の板の前の面。壁が沈んでから濃くする */
+function frameCut(P, anchor) {
+  const b = P.BOXES.hospital, t = P.WALL, X = b.w / 2 + .004, Z = b.d / 2 + .004, h = b.h, out = X + t, sw = .115;
+  const mat = new THREE.MeshBasicMaterial({ color: '#16233E', toneMapped: false, transparent: true, opacity: 0 });
+  const g = new THREE.Group(), add = (w, hh, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, hh, d), mat); m.position.set(x, y, z); g.add(m); };
+  const zc = Z + .074;   // 前の壁の厚みの中(側面の石の水切りの前の端より手前。壁があるうちは隠れ、透明のまま)
+  add(sw + .035, h + .1, .006, -out - .035 + (sw + .035) / 2, (h + .1) / 2, zc);
+  add(sw + .035, h + .1, .006, out + .035 - (sw + .035) / 2, (h + .1) / 2, zc);
+  add(2 * out, .085, .006, 0, .012, zc);                                    // 地面の線(1階の床の切り口の下)
+  add(2 * out + .1, .12, .004, 0, h + .044, (2 * (Z + t) + .1) / 2 + .002);   // 屋根の板の前の面
+  anchor.add(g);
+  return mat;
 }
 function aim(P, camera, world, W, H, mg) {
   world.rotation.y = deg(45 + VIEW.az); world.updateMatrixWorld(true);
@@ -127,12 +148,24 @@ function fitLights(L) {
   sc.left = x0; sc.right = x1; sc.bottom = y0; sc.top = y1; sc.updateProjectionMatrix();
 }
 const MODE = m => m < .5 ? 'day' : m < 1.5 ? 'dusk' : 'night';
-/* 札の位置: 道具は物の上(画面の板の少し上)、階の札は左の切り口の角の外(その階の真ん中の高さ)。枠の中の px */
+/* 時刻の灯り(町と同じ applyTod)に、断面の場だけの2つを足す: 夜の月を右手前の上から(MOON)、一切れの土にかける空気の色を区画の空に(HAZE) */
+function atmos(P, L, renderer, m) {
+  const U = P.W.U, glow = P.W.applyTod(L, renderer, m), nk = clamp01((m - 1.2) / .8);
+  if (nk > 0) L.sun.position.lerp(MOON, nk);
+  fitLights(L);
+  const i = Math.min(1, Math.floor(m)), k = m - i; U.uHazeC.value.copy(HAZE[i]).lerp(HAZE[Math.min(2, i + 1)], k);
+  return glow;
+}
+/* 土の空気: 草のすぐ下から掛かり始め、下の端で区画の空へ(色を寄せ、透明へ) */
+function soilAir(U) { U.uHazeY.value.set(SOIL_BOTTOM, -.1); U.uHazeK.value = .78; U.uHazeA.value = .9; }
+/* 札の位置: 道具は物の上(画面の板の少し上)、階の札はその階の部屋の右上の角。枠の中の px */
 function labels(P, it, camera, world, W, H) {
-  const v = new THREE.Vector3(), out = { st: {}, fl: [] }, b = P.BOXES.hospital, fh = b.h / b.floors, ex = slabExtent(P.BOXES, P.WALL);
+  const v = new THREE.Vector3(), out = { st: {}, fl: [] }, b = P.BOXES.hospital, fh = b.h / b.floors;
   it.group.updateWorldMatrix(true, true);
   for (const s of it.stations) { if (!STATIONS.includes(s.id)) continue; v.copy(s.anchor); it.group.localToWorld(v); v.project(camera); out.st[s.id] = [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]; }
-  for (const f of ROOMS) { v.set(-ex.X, .06 + fh * (f + .5), ex.Z); world.localToWorld(v); v.project(camera); out.fl.push([(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]); }
+  // 階の札: その階の部屋の右上の角(右の切り口のすぐ内側・上の床の切り口のすぐ下。部屋の前の面の高さで)。道具の札は左寄りなので重ならない。
+  // 3階の右は病棟、2階の右はナースステーションのカウンター(札の名前の場所そのもの)
+  for (const f of ROOMS) { v.set(b.w / 2 - .085, .06 + fh * (f + 1) - .085, b.d / 2 - .04); world.localToWorld(v); v.project(camera); out.fl.push([(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]); }
   return out;
 }
 
@@ -153,13 +186,14 @@ export async function section(o) {
   // 一棟だけ: 病院を「ひらいた建物」にして、前の壁の動き(沈む)を uPM[1] に。屋根は残す。前の壁は地面の高さより下を描かない
   U.uOpenA.value = LAY.hospital.bid; U.uRoofA.value = 1; U.uGroundCut.value = -.004; U.uFocus.value = -1;
   for (const M4 of U.uPM.value) M4.identity();
-  U.uHazeY.value.set(-1.45, -.82); U.uHazeK.value = 0; U.uHazeA.value = 1;   // 一切れの下の端は、透明へ溶かす(ページの空の色がそのまま見える)
+  soilAir(U);   // 一切れの土は、下へ行くほど区画の空の色へ溶ける(最初の画面の島の下と同じ空気)
   // 中の形(人と道具)。画像は絶対の URL で読む
   const loader = new THREE.TextureLoader();
   const cctx = { palette: Wd.PALETTE, quality: q, loadTexture: url => loader.loadAsync(url).then(tx => { tx.colorSpace = THREE.SRGBColorSpace; return tx; }) };
   const it = P.MOD.buildInterior('hospital', P.BOXES.hospital, cctx); S.B.hospital.anchor.add(it.group); it.group.visible = true;
+  const cutMat = frameCut(P, S.B.hospital.anchor);
   let todX = o.tod || 0, todT = todX, mode = MODE(todX);
-  function setTodNow(m) { const glow = Wd.applyTod(L, renderer, m); fitLights(L); it.setNight(glow); mode = MODE(m); }
+  function setTodNow(m) { const glow = atmos(P, L, renderer, m); it.setNight(glow); mode = MODE(m); }
   setTodNow(todX);
   inLight(P, L, S.world);
   const BH = P.BOXES.hospital.h, SINK = BH + .25;
@@ -167,6 +201,7 @@ export async function section(o) {
   function applyReveal() {
     const k = ease(rv);
     U.uPM.value[1].makeTranslation(0, -SINK * k, 0);
+    cutMat.opacity = clamp01((k - .45) / .35);   // 断面の輪郭は、壁が沈むのに合わせて濃く
     const il = clamp01((rv - .28) / .6), glow = U.uNight.value;
     L.pIn.intensity = (1.4 + glow * 2) * il;
     if (!revealed && rv > .3) { revealed = true; if (it.reveal) it.reveal(); }
@@ -230,11 +265,12 @@ export async function capture(Q) {
   U.uOpenA.value = Wd.LAYOUT.hospital.bid; U.uRoofA.value = 1; U.uGroundCut.value = -.004;
   for (const M4 of U.uPM.value) M4.identity();
   U.uPM.value[1].makeTranslation(0, -(P.BOXES.hospital.h + .25), 0);
-  U.uHazeY.value.set(-1.45, -.82); U.uHazeK.value = 0; U.uHazeA.value = 1;
-  const glow = Wd.applyTod(L, renderer, tod); fitLights(L);
+  soilAir(U);
+  const glow = atmos(P, L, renderer, tod);
   const loader = new THREE.TextureLoader();
   const cctx = { palette: Wd.PALETTE, quality: 'high', loadTexture: url => loader.loadAsync(url).then(tx => { tx.colorSpace = THREE.SRGBColorSpace; return tx; }) };
   const it = P.MOD.buildInterior('hospital', P.BOXES.hospital, cctx); S.B.hospital.anchor.add(it.group);
+  frameCut(P, S.B.hospital.anchor).opacity = 1;
   await it.ready; it.setNight(glow); if (it.reveal) it.reveal();
   await new Promise(r => setTimeout(r, 1400));
   const t = +(Q.get('t') || 0);
