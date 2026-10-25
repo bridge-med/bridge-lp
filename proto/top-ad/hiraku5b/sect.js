@@ -164,7 +164,7 @@ function labels(P, it, camera, world, W, H) {
   it.group.updateWorldMatrix(true, true);
   for (const s of it.stations) { if (!STATIONS.includes(s.id)) continue; v.copy(s.anchor); it.group.localToWorld(v); v.project(camera); out.st[s.id] = [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]; }
   // 階の札: その階の部屋の右上の角(右の切り口のすぐ内側・上の床の切り口のすぐ下。部屋の前の面の高さで)。道具の札は左寄りなので重ならない。
-  // 3階の右は病棟、2階の右はナースステーションのカウンター(札の名前の場所そのもの)
+  // 3階の右は病室(札は道具のある休憩室の名前)、2階の右はナースステーションのカウンター(札の名前の場所そのもの)
   for (const f of ROOMS) { v.set(b.w / 2 - .085, .06 + fh * (f + 1) - .085, b.d / 2 - .04); world.localToWorld(v); v.project(camera); out.fl.push([(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]); }
   return out;
 }
