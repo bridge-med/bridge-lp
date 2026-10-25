@@ -311,14 +311,15 @@ html.scrub .copy,html.scrub .cta-wrap,html.scrub .hint{pointer-events:none}
 html.scrub .hits,html.scrub .nudge{visibility:hidden}
 html.scrub #tagB,html.scrub #tagS{opacity:0}
 .mist{opacity:var(--mk,1)}   /* 島の下のもやは、病院に寄るにつれて消す(1階を隠さない) */
-html.scrub .hero::after{opacity:var(--hz,0);transition:none}   /* 病院の中が画面の上まで来たら、見出しの帯と「病院の中」の下に、地の色の薄い霞(ひらいたときと同じ) */
+html.scrub .hero::after{opacity:var(--hz,0);transition:none}
+.endfade{position:absolute;left:0;right:0;bottom:0;height:24%;z-index:3;pointer-events:none;opacity:var(--ek,0);background:linear-gradient(180deg,rgb(var(--mist) / 0),rgb(var(--mist)) 88%)}   /* 舞台の終わり: 下の端を、次の面の色(空の下の色)へ */   /* 病院の中が画面の上まで来たら、見出しの帯と「病院の中」の下に、地の色の薄い霞(ひらいたときと同じ) */
 /* 病院の中: 最初の画面の一行と同じ場所・同じ形の小さな見出しと、一文 */
 .ins{position:absolute;z-index:7;left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px));pointer-events:none;opacity:0;visibility:hidden}
 .ins-line{margin-top:7px;font-size:14px;line-height:1.75;color:var(--hero-fg-2);opacity:var(--lk,1)}
 .ins .eyebrow{transition:none}
 /* 道具の札: 町の名前の札と同じ形(暗い札・白い字・下に小さな三角)。押すとその道具へ。ふれる範囲は 44px 以上 */
 .chips{position:absolute;inset:0;z-index:8;pointer-events:none}
-.chip{position:absolute;left:0;top:0;display:grid;justify-items:start;padding:7px 12px 8px;background:var(--tag-bg);color:var(--tag-fg);border-radius:8px;font-size:13.5px;font-weight:700;line-height:1.35;letter-spacing:.04em;text-decoration:none;white-space:nowrap;pointer-events:auto;opacity:0;visibility:hidden;transform:translateY(-50%);box-shadow:0 8px 20px -10px rgba(0,0,0,.55);-webkit-tap-highlight-color:transparent}   /* 道具の画面の横(同じ階の中)。小さな三角が画面を指す */
+.chip{position:absolute;left:0;top:0;display:grid;justify-items:start;padding:7px 12px 8px;background:var(--tag-bg);color:var(--tag-fg);border-radius:8px;font-size:13.5px;font-weight:700;line-height:1.35;letter-spacing:.04em;text-decoration:none;white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(-50%);box-shadow:0 8px 20px -10px rgba(0,0,0,.55);-webkit-tap-highlight-color:transparent}   /* 道具の画面の横(同じ階の中)。小さな三角が画面を指す */
 .chip::after{content:'';position:absolute;left:-4px;top:var(--ay,50%);width:10px;height:10px;margin-top:-5px;background:inherit;transform:rotate(45deg);border-radius:1px}
 .chip.flip::after{left:auto;right:-4px}   /* 画面の右に置けないときは左に */
 .chip::before{content:'';position:absolute;inset:-8px -6px}   /* ふれる範囲は 44px 以上 */
@@ -501,6 +502,7 @@ html.capture body > *:not(#cap){display:none!important}
   <div class="otags" id="oTags" aria-hidden="true" hidden></div>
 
   <div class="mist" aria-hidden="true"></div>
+  <div class="endfade" aria-hidden="true"></div>
   <div class="copy">
     <p class="eyebrow">医療職のための道具と経営ゲーム</p>
     <h1 id="h1" tabindex="-1"><span class="br">病院の外にも</span><span class="br">町がある</span></h1>

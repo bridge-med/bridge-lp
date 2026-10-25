@@ -10,6 +10,8 @@
    広場をひらくと、町を見渡す高さへ上がり、建物の上に小さな名前の札が並ぶ(ふれると、その建物へ渡る)
    動きを減らす設定・WebGL なし: 止めた画像のまま。ひらくのは瞬時で、パネルにその建物の断面の止めた画像を出す
    ?perf=1: 開閉のフレーム時間・入力から最初の描画までの時間・開閉を繰り返したときの記憶域を測る道具(window.__perf)
+   v5 案A: 最初の画面を止めたまま(sticky)、スクロールで町の病院に寄る。屋根が抜け、前の壁が倒れ、中の人と道具が見え、3階 → 2階 → 1階へ降りる
+   (進みは live.js の scrubTo。動かないときは、ひらいた病院の止めた画像へ重ねて替える)
    ================================================================ */
 import { BY_ID, TOOLS, RING } from './data.js';
 
@@ -519,7 +521,7 @@ function boot() {
   panel.addEventListener('click', e => { if (performance.now() - swallow < 350 && head.contains(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);   // 引いたあとの click は押したことにしない
 
   /* ---------- 見出しの帯: 最初の画面を過ぎたら、小さく上に固定(下の節からもヘッダーに届く)。ひらいている間は、いまのまま ---------- */
-  if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => { R.classList.toggle('past', !en.isIntersecting); if (!en.isIntersecting && openId) closeB(false); }, { rootMargin: '-72px 0px 0px 0px' }).observe(hero);   // ひらいたまま町が画面から出たら閉じる(ハッシュも消える)
+  if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => { if (!en.isIntersecting && openId) closeB(false); }, { rootMargin: '-72px 0px 0px 0px' }).observe(hero);   // ひらいたまま町が画面から出たら閉じる(ハッシュも消える)。帯の固定は、舞台の位置で決める(onStage)
 
   /* ---------- メニュー(スマホ) ---------- */
   const menu = $('#menu'), menuBtn = $('#menuBtn');
@@ -535,7 +537,10 @@ function boot() {
   const stage = $('#stage'), ins = $('#ins'), insGo = $('#insGo'), shut = $('#shut'), shutImg = $('#shutImg'), chips = $$('#chips .chip');
   const SM = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   // ひらいた病院の止めた画像(img/open-<時刻>-<sp|pc>.webp)。w・h は画像の大きさ、st は道具の画面の位置(画像の %。capture=cutaway の出力)
+  const ST_SP = { nidodema: [26.16, 66.42, 33.09, 69.08], keiji: [18.65, 55.95, 26.95, 59.26], yawagaeshi: [19.74, 36.13, 21.81, 38.23] };
+  const ST_PC = { nidodema: [39.81, 69.91, 42.77, 73.26], keiji: [36.6, 56.72, 40.15, 60.89], yawagaeshi: [37.07, 31.74, 37.95, 34.4] };
   const OPEN_STILL = {};
+  for (const t of TODS) { OPEN_STILL[t + '-sp'] = { w: 786, h: 1448, st: ST_SP }; OPEN_STILL[t + '-pc'] = { w: 1600, h: 1000, st: ST_PC }; }
   // 階ごとの札の出入り(live.js の SQ.floors の「着く」の少し前から「次へ」の少し前まで)。ぜんたいのときは3つを小さく
   const FL_SHOW = { yawagaeshi: [.5, .54, .62, .65], keiji: [.66, .71, .78, .81], nidodema: [.82, .87, 2, 3] };
   let rawP = 0, chipPos = {}, lastQ = -1, sq = 0;
@@ -547,6 +552,7 @@ function boot() {
     R.style.setProperty('--cp', (1 - SM(.02, .12, q)).toFixed(3));   // 最初の画面の言葉と入口
     R.style.setProperty('--mk', (1 - SM(.05, .3, q)).toFixed(3));    // 島の下のもや
     R.style.setProperty('--hz', SM(.2, .34, q).toFixed(3));           // 見出しの帯の下の霞(中が上まで来たら)
+    R.style.setProperty('--ek', SM(.94, 1, q).toFixed(3));            // 舞台の終わり: 画面の下を、次の面(空の下の色)へ溶かす
     show(ins, SM(.29, .36, q));
     ins.style.setProperty('--lk', (1 - SM(.47, .51, q)).toFixed(3));   // 階へ降りたら、一文は外す(小さな見出しは残す)
     show(insGo, SM(.32, .39, q));
@@ -555,8 +561,7 @@ function boot() {
       const sid = c.dataset.sid, p = chipPos[sid], f = FL_SHOW[sid];
       const k = !p ? 0 : fl ? SM(f[0], f[1], q) * (1 - SM(f[2], f[3], q)) : SM(.33, .39, q) * (1 - SM(.45, .48, q));
       c.classList.toggle('big', fl);
-      show(c, k);
-      c.tabIndex = k > .5 ? 0 : -1;
+      c.style.opacity = k.toFixed(3); c.style.pointerEvents = k > .5 ? 'auto' : 'none';   // 見えないときも Tab では届く(届いたら、札が見える所まで舞台を進める)
       if (!p || k <= .01) continue;
       // 道具の画面の横(右。入らなければ左)に、画面の縦の真ん中の高さで。上下は見出しの帯と下の入口を避ける
       const w = c.offsetWidth, h = c.offsetHeight, bx = p.box || [p.x - 8, p.y, p.x + 8, p.y + 16], cy = (bx[1] + bx[3]) / 2, flip = bx[2] + 12 + w > hr - 8;
@@ -569,7 +574,7 @@ function boot() {
   // 動かないときの止めた画像(時刻 × スマホ・PC)。札の位置は、撮ったときの道具の画面の位置(画像の %)
   let shutKey = null, shutSt = null;
   function stillScrub(q) {
-    const k = SM(.1, .35, q), key = R.dataset.tod + (phone() ? '-sp' : '-pc');
+    const k = SM(.12, .26, q), key = R.dataset.tod + (phone() ? '-sp' : '-pc');
     if (k > 0 && shutKey !== key) {
       shutKey = key; const D = OPEN_STILL[key];
       shutSt = D ? D.st : null; if (D) { shutImg.width = D.w; shutImg.height = D.h; shutImg.src = 'img/open-' + key + '.webp'; }
@@ -582,11 +587,12 @@ function boot() {
       const iw = shutImg.naturalWidth * s0, ih = shutImg.naturalHeight * s0, L = b.left - hr.left + (b.width - iw) / 2, T = b.top - hr.top + (b.height - ih) / 2;
       for (const sid in shutSt) { const [x0, y0, x1, y1] = shutSt[sid]; chipPos[sid] = { x: L + (x0 + x1) / 200 * iw, y: T + y0 / 100 * ih, box: [L + x0 / 100 * iw, T + y0 / 100 * ih, L + x1 / 100 * iw, T + y1 / 100 * ih] }; }
     }
-    overlays(Math.min(q, .47));   // 止めた画像では、階へは降りない(ぜんたいのまま)
+    overlays(Math.min(q, .44));   // 止めた画像では、階へは降りない(ぜんたいのまま)
   }
   shutImg.addEventListener('load', () => { if (!ctl) stillScrub(rawP); });
   function onStage() {
     sq = 0; rawP = stageP();
+    R.classList.toggle('past', hero.getBoundingClientRect().top < -2);   // 舞台を過ぎて町が上へ動き始めたら、見出しの帯を小さく固定(中の明るい部屋の上で、帯の字が消えないように)
     const on = rawP > .02;
     if (on !== R.classList.contains('scrub')) {
       R.classList.toggle('scrub', on);
@@ -598,6 +604,9 @@ function boot() {
   }
   addEventListener('scroll', () => { if (!sq) sq = requestAnimationFrame(onStage); }, { passive: true });
   addEventListener('resize', () => { if (!sq) sq = requestAnimationFrame(onStage); });
+  onStage();   // 読み込んだ時点の位置から(戻るボタンなどで、途中から始まるとき)
+  // 札を押すと、町の中のその画面が広がって道具になる(町の入口と同じ)
+  for (const c of chips) c.addEventListener('click', e => { const t = TOOLS[c.dataset.sid]; if (t) leap(e, null, t, c.dataset.sid); });
   // キーボードで札に来たら、札が見える所(ひらいた病院ぜんたい)まで舞台を進める
   for (const c of chips) c.addEventListener('focus', () => { if (rawP < .34 || rawP > .48) { const span = stage.offsetHeight - innerHeight; scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span * .42, behavior: reduce() ? 'auto' : 'smooth' }); } });
   // 舞台を過ぎたら、見出しの帯を小さく上に固定。夜は夜の色の帯
