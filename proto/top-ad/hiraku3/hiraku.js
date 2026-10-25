@@ -25,7 +25,7 @@ function boot() {
   const hero = $('#top'), canvas = $('#world'), still = $('#still'), poster = $('#poster');
   const tagB = $('#tagB'), tagS = $('#tagS'), hint = $('#hint'), say = $('#say'), nudge = $('#nudge'), rings = $('#rings'), oTags = $('#oTags');
   const panel = $('#panel'), pTitle = $('#pTitle'), pName = $('#pName'), pNameT = $('#pNameT'), pRole = $('#pRole'), pLine = $('#pLine'), pTools = $('#pTools'), pStill = $('#pStill');
-  const pBody = $('.p-body', panel), pList = $('#pList'), pMain = $('#pMain'), pPlaza = $('#pPlaza'), pzList = $('#pzList'), pPrev = $('#pPrev'), pNext = $('#pNext');
+  const pBody = $('.p-body', panel), pList = $('#pList'), pMain = $('#pMain'), pPlaza = $('#pPlaza'), pzList = $('#pzList'), pPrev = $('#pPrev'), pNext = $('#pNext'), pMore = $('#pMore');
   const hits = new Map($$('.hit').map(a => [a.dataset.id, a]));
   const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
   const reduce = () => reduceQ.matches || Q.get('still') === '1';
@@ -185,11 +185,8 @@ function boot() {
      入口の文言は data.js(products/index.html の PRODUCTS の写し)のまま。行き先の種類だけは kind と cta から決める */
   const mouseHover = matchMedia('(hover: hover) and (pointer: fine)');
   const THUMB = s => '../../../images/products/thumbs/' + s + '.webp';
-  function kindOf(t) {
-    if (t.ext) return '別のサイト';
-    if (t.kind === 'intro') return /デモ/.test(t.cta || '') ? '紹介とデモ' : '紹介のページ';   // デモのない紹介(cta が「紹介を見る」)に「デモ」とは書かない
-    return t.kind === 'app' ? '道具そのもの' : '';
-  }
+  /* 行き先の種類の札は、ボタンの言葉(本体の動詞・「紹介とデモを見る」・「紹介を見る」)で分からない、別のサイトだけ(文字を減らす) */
+  const kindOf = t => t.ext ? '別のサイト・新しいタブで開きます' : '';
   function toolRow(tid) {
     const t = TOOLS[tid], li = el('li', 'prow'); li.dataset.sid = tid;
     const head = el('button', 'pfind'), ent = el('div', 'pent');
@@ -205,11 +202,12 @@ function boot() {
     li.append(head, ent);
     return li;
   }
-  /* 道具の入口(初めてひらいたときに作る。写しの画像もそのとき読む) */
+  /* 道具の入口(初めてひらいたときに作る)。立体が見えているときは、写しは町の中の画面ひとつ(入口には出さず、軽く: 誰向け・利用条件・ボタン)。
+     止めた画像のとき(WebGL なし・動きを減らす設定)は、入口に写しを出す(そのとき読む) */
   function fillEntrance(ent, tid) {
     if (ent.childElementCount) return;
     const t = TOOLS[tid];
-    if (t.thumb) { const f = el('figure', 'pshot'), im = new Image(); im.width = 880; im.height = 550; im.decoding = 'async'; im.alt = t.name + 'の画面'; im.src = THUMB(t.thumb); f.append(im); ent.append(f); }
+    if (t.thumb && !ctl) { const f = el('figure', 'pshot'), im = new Image(); im.width = 880; im.height = 550; im.decoding = 'async'; im.alt = t.name + 'の画面'; im.src = THUMB(t.thumb); f.append(im); ent.append(f); ent.classList.add('shot'); }
     if (t.for || t.facts) {
       const info = el('div', 'pinfo');
       if (t.for) { const p = el('p', 'pfor'); p.textContent = t.for; info.append(p); }
@@ -217,11 +215,11 @@ function boot() {
       ent.append(info);
     }
     const act = el('div', 'pact'), k = kindOf(t);
-    if (k) { const s = el('span', 'pkind'); s.textContent = k + (t.ext ? '・新しいタブで開きます' : ''); act.append(s); }
+    if (k) { const s = el('span', 'pkind'); s.textContent = k; act.append(s); }
     const a = el('a', 'pcta'); a.href = t.href; a.textContent = t.cta || '開く';
     if (t.ext) { a.target = '_blank'; a.rel = 'noopener noreferrer'; const s = el('span', 'sr'); s.textContent = '(別のサイト・新しいタブで開きます)'; a.append(s); }
     a.insertAdjacentHTML('beforeend', t.ext ? ICO.ext : ICO.arrow);
-    a.addEventListener('click', e => leap(e, ent.querySelector('.pshot img'), t));
+    a.addEventListener('click', e => leap(e, ent.querySelector('.pshot img'), t, tid));
     act.append(a); ent.append(act);
   }
   /* 建物の一覧(名前にふれたとき・広場の「行き先を選ぶ」): 小さな肖像・名前・一行。選ぶと、町の上空を渡って移る */
@@ -247,6 +245,8 @@ function boot() {
     pNext.setAttribute('aria-label', '次の建物(' + nx.name + ')へ'); pNext.title = nx.name;
     pTools.innerHTML = ''; defSid = plaza ? null : b.tools[0]; pinSid = hovSid = focSid = null;
     pPlaza.hidden = !plaza; pTools.hidden = plaza;
+    pMore.hidden = !b.use;   // 用途のある6棟: この用途を一覧で比べる(n点)→ products/index.html#用途
+    if (b.use) { const a = $('a', pMore); a.href = '../../../products/index.html#' + b.use; a.firstChild.textContent = 'この用途を一覧で比べる(' + b.tools.length + '点)'; }
     if (plaza) listRows(pzList, RING.filter(x => x !== 'plaza'));
     else for (const tid of b.tools) pTools.append(toolRow(tid));
     // 動かないとき: その建物の断面の止めた画像
@@ -290,10 +290,16 @@ function boot() {
   }
   /* ひらいた入口が、パネル(シート)の見える範囲に入るように */
   function revealRow(sid) {
-    const li = $(`.prow[data-sid="${CSS.escape(sid)}"]`, pTools); if (!li) return;
-    const now = reduce() || Q.get('clock') === 'manual';   // 撮るとき(手動の時計)は、描かないとなめらかなスクロールが進まないので瞬時に
-    li.scrollIntoView({ block: 'nearest', behavior: now ? 'auto' : 'smooth' });
-    if (!now) setTimeout(() => { const r = li.getBoundingClientRect(), bb = pBody.getBoundingClientRect(); if (r.bottom > bb.bottom + 2 && r.top > bb.top + 2) li.scrollIntoView({ block: 'nearest' }); }, 500);   // なめらかに動かなかったときは、そのまま合わせる
+    const li = sid && $(`.prow[data-sid="${CSS.escape(sid)}"]`, pTools); if (!li || panel.hidden) return;
+    const need = () => {   // 動かす量: 行の名前(上)が隠れていれば上を、下が切れていれば下をそろえる。見える範囲より高い入口は上をそろえる
+      const bb = pBody.getBoundingClientRect(), r = li.getBoundingClientRect(), pad = 6;
+      if (r.top < bb.top + pad || r.height > bb.height - pad * 2) return r.top - bb.top - pad;
+      return r.bottom > bb.bottom - pad ? r.bottom - bb.bottom + pad : 0;
+    };
+    const now = reduce() || Q.get('clock') === 'manual', dy = need();   // 撮るとき(手動の時計)は、描かないとなめらかなスクロールが進まないので瞬時に
+    if (Math.abs(dy) < 1) return;
+    pBody.scrollBy({ top: dy, behavior: now ? 'auto' : 'smooth' });
+    if (!now) setTimeout(() => { const d2 = need(); if (Math.abs(d2) > 2) pBody.scrollBy({ top: d2 }); }, 500);   // なめらかに動かなかったときは、そのまま合わせる
   }
   /* 動かないとき(動きを減らす・WebGL なし): パネルの上に、その建物の断面の止めた画像 */
   function stillShot() {
@@ -388,40 +394,50 @@ function boot() {
     }
   }
 
-  /* ---------- 移る瞬間: ボタンを押したら、すぐに移り始める(待たせない)。その間に、写しが画面いっぱいへ広がる(280ms) ----------
-     読み込みが速ければ途中で切れてよい。動きを減らす設定では動かさない。別のサイトは新しいタブで開くので、広げない。
-     戻ったとき(bfcache): 広がった写しを、入口の枠へ縮めて戻す */
-  let leapEl = null, leapT = 0;
-  function leap(e, im, t) {
+  /* ---------- 移る瞬間: ボタンを押したら、すぐに移り始める(待たせない)。その間に、町の中のその画面が広がって道具になる(280ms) ----------
+     元は、立体が見えているときは町の中の画面(同じ画像)、止めた画像のときは入口の写し。終わりは紙の地の真ん中に写し(PC は大きく、スマホは幅いっぱい)と、
+     その下に道具の名前を小さく。移るのに 800ms 以上かかったら、名前の下に細い線が流れる。読み込みが速ければ途中で切れてよい。
+     動きを減らす設定では動かさない。別のサイトは新しいタブで開くので、広げない。戻ったとき(bfcache): 写しが元の画面へ縮んで戻る */
+  let leapEl = null, leapT = 0, waitT = 0;
+  function leap(e, shotImg, t, sid) {
     if (t.ext || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (ctl) ctl.setPaused(true);   // 移る間は町を描かない(次のページの読み込みに手を譲る)
-    if (reduce() || !im || !im.naturalWidth || !document.body.animate) return;
+    if (reduce() || !document.body.animate) return;
     if (leapEl) unleap(false);
-    const nw = im.naturalWidth, nh = im.naturalHeight, bx = im.getBoundingClientRect();
-    const s0 = Math.min(bx.width / nw, bx.height / nh), w0 = nw * s0, x0 = bx.left + (bx.width - w0) / 2, y0 = bx.top + (bx.height - nh * s0) / 2;   // object-fit: contain の中身
-    const vw = R.clientWidth, vh = innerHeight, s1 = Math.min(vw / nw, vh / nh), w1 = nw * s1, h1 = nh * s1, x1 = (vw - w1) / 2, y1 = phone() ? 0 : (vh - h1) / 2;   // スマホはページの上の端へ
-    // 写しそのもの(読み終えた画像)を上の層へ移して広げる。読み直さないので、押した瞬間から見える。戻ったら枠へ返す
-    const lp = el('div', 'leap'), bg = el('i', 'lp-bg'), li = im, fig = im.parentNode;
-    lp.setAttribute('aria-hidden', 'true'); li.classList.add('lp-im');
-    Object.assign(li.style, { left: x1.toFixed(1) + 'px', top: y1.toFixed(1) + 'px', width: w1.toFixed(1) + 'px', height: h1.toFixed(1) + 'px' });
-    lp.append(bg, li); document.body.append(lp); lp.home = fig;
-    const k = w0 / w1, from = `translate(${(x0 - x1).toFixed(1)}px,${(y0 - y1).toFixed(1)}px) scale(${k.toFixed(4)})`;
-    lp.dataset.from = from;
-    li.animate([{ transform: from, borderRadius: (8 / k).toFixed(1) + 'px' }, { transform: 'none', borderRadius: '0px' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' });
+    let im = null, from = null;
+    if (ctl) { const url = t.shot || (t.thumb && THUMB(t.thumb)); im = url && ctl.imageOf(url); from = im && ctl.screenRect(sid); }
+    else if (shotImg && shotImg.naturalWidth) {   // object-fit: contain の中身
+      im = shotImg; const bx = shotImg.getBoundingClientRect(), k0 = Math.min(bx.width / im.naturalWidth, bx.height / im.naturalHeight);
+      from = { x: bx.left + (bx.width - im.naturalWidth * k0) / 2, y: bx.top + (bx.height - im.naturalHeight * k0) / 2, w: im.naturalWidth * k0, h: im.naturalHeight * k0 };
+    }
+    const lp = el('div', 'leap'), bg = el('i', 'lp-bg'), cap = el('p', 'lp-name'), vw = R.clientWidth, vh = innerHeight;
+    lp.setAttribute('aria-hidden', 'true'); cap.textContent = t.name; cap.append(el('i', 'lp-line')); lp.append(bg);
+    const nw = im && (im.naturalWidth || im.width), nh = im && (im.naturalHeight || im.height);
+    if (nw && from && from.w > 2) {
+      const s1 = Math.min((phone() ? vw : Math.min(vw * .7, 1120)) / nw, vh * (phone() ? .62 : .66) / nh), w1 = nw * s1, h1 = nh * s1, x1 = (vw - w1) / 2, y1 = Math.max(10, (vh - h1 - 44) / 2);
+      const cv = el('canvas', 'lp-im'); cv.width = nw; cv.height = nh; cv.getContext('2d').drawImage(im, 0, 0);   // 読み終えた画像を、そのまま写す(読み直さない・加工しない)
+      Object.assign(cv.style, { left: x1.toFixed(1) + 'px', top: y1.toFixed(1) + 'px', width: w1.toFixed(1) + 'px', height: h1.toFixed(1) + 'px' });
+      const k = from.w / w1, tf = `translate(${(from.x - x1).toFixed(1)}px,${(from.y + (from.h - h1 * k) / 2 - y1).toFixed(1)}px) scale(${k.toFixed(4)})`;
+      lp.dataset.from = tf; lp.append(cv); cap.style.top = (y1 + h1 + 14).toFixed(1) + 'px';
+      cv.animate([{ transform: tf }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' });
+    } else cap.style.top = (vh / 2 - 12).toFixed(1) + 'px';   // 写しのない行き先(アトリエ): 紙の地に名前だけ
+    lp.append(cap); document.body.append(lp);
     bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'cubic-bezier(.3,.6,.3,1)', fill: 'both' });
-    leapEl = lp; clearTimeout(leapT); leapT = setTimeout(() => unleap(true), 8000);   // 移れなかったとき(止めた・失敗した)は、元に戻す
+    cap.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, delay: 200, fill: 'both' });
+    leapEl = lp; clearTimeout(leapT); clearTimeout(waitT);
+    waitT = setTimeout(() => lp.classList.add('wait'), 800);   // 待っていることが分かる細い線
+    leapT = setTimeout(() => unleap(true), Q.get('clock') === 'manual' ? 60000 : 8000);   // 移れなかったとき(止めた・失敗した)は、元に戻す(撮るときは、こまを撮り終えるまで待つ)
   }
   function unleap(anim) {
-    clearTimeout(leapT);
+    clearTimeout(leapT); clearTimeout(waitT);
     const lp = leapEl; leapEl = null;
     if (ctl) ctl.setPaused(paused);
     if (!lp) return;
-    const li = $('.lp-im', lp), done = () => { lp.remove(); li.getAnimations().forEach(x => x.cancel()); li.classList.remove('lp-im'); li.removeAttribute('style'); lp.home.append(li); };
-    if (!anim || reduce()) { done(); return; }
-    const D = 240;
-    li.animate([{ transform: 'none' }, { transform: lp.dataset.from }], { duration: D, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' });
-    $('.lp-bg', lp).animate([{ opacity: 1 }, { opacity: 0 }], { duration: D, fill: 'both' });
-    setTimeout(done, D + 40);
+    if (!anim || reduce()) { lp.remove(); return; }
+    const D = 240, cv = $('.lp-im', lp);
+    if (cv) cv.animate([{ transform: 'none' }, { transform: lp.dataset.from }], { duration: D, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' });
+    for (const x of [$('.lp-bg', lp), $('.lp-name', lp)]) x.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D, fill: 'both' });
+    setTimeout(() => lp.remove(), D + 40);
   }
   addEventListener('pageshow', e => { if (e.persisted) unleap(true); });
 
@@ -474,6 +490,9 @@ function boot() {
     x.addEventListener('pointerup', e => bandEnd(e)); x.addEventListener('pointercancel', e => bandEnd(e, true));
   }
   panel.addEventListener('click', e => { if (performance.now() - swallow < 350 && head.contains(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);   // 引いたあとの click は押したことにしない
+
+  /* ---------- 見出しの帯: 最初の画面を過ぎたら、小さく上に固定(下の節からもヘッダーに届く)。ひらいている間は、いまのまま ---------- */
+  if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => R.classList.toggle('past', !en.isIntersecting), { rootMargin: '-72px 0px 0px 0px' }).observe(hero);
 
   /* ---------- メニュー(スマホ) ---------- */
   const menu = $('#menu'), menuBtn = $('#menuBtn');
@@ -537,7 +556,8 @@ function boot() {
       window.__ctl = ctl; window.__t3 = Math.round(performance.now() - t0); swap.live = performance.now();
       if (paused) ctl.setPaused(true);
       // 止めた画像のうちにひらいていた建物(戻ってきたときのハッシュも)は、飛ばずに、その姿から立体にする
-      if (openId) { pStill.hidden = true; await ctl.restore(openId, openId === 'plaza' ? null : pinSid); if (openId) { applyFind(); if (openId === 'plaza') ovTags(true); } }
+      for (const f of $$('.pent .pshot', pTools)) { f.parentNode.classList.remove('shot'); f.remove(); }   // 写しの元は、町の中の画面ひとつに
+      if (openId) { pStill.hidden = true; await ctl.restore(openId, openId === 'plaza' ? null : pinSid); if (openId) { applyFind(); if (openId === 'plaza') ovTags(true); revealRow(pinSid); } }
       requestAnimationFrame(() => { R.classList.add('live'); dispatchEvent(new Event('hiraku:live')); });
     }).catch(err => console.warn(err));
   }
@@ -580,13 +600,21 @@ function boot() {
   }
 
   /* 下の案内から直接 #g-hospital などで来たとき: そのまま(リンクの一覧が答え) */
-  /* 戻ってきたとき(#town/建物/道具): その建物をひらき、その道具の入口をひらいた状態から(止めた画像のうちは瞬時に。立体は替わるときに飛ばずに合わせる) */
-  const hs = /^#town\/([a-z]+)(?:\/([a-z0-9-]+))?$/.exec(location.hash);
-  if (hs && BY_ID[hs[1]]) {
-    firstTouch(); openB(hs[1], null, { now: true });
-    const sid = hs[1] !== 'plaza' && hs[2] && BY_ID[hs[1]].tools.includes(hs[2]) ? hs[2] : null;
-    if (sid) { pinSid = sid; applyFind(); revealRow(sid); }
+  /* 戻ってきたとき(#town/建物/道具): その建物をひらき、その道具の入口をひらいた状態から(止めた画像のうちは瞬時に。立体は替わるときに飛ばずに合わせる)。
+     同じページの中の #town/… のリンクと、アドレスの書き換え(hashchange)にも応える */
+  function hashState() {
+    const m = /^#town\/([a-z]+)(?:\/([a-z0-9-]+))?$/.exec(location.hash); if (!m || !BY_ID[m[1]]) return null;
+    return { id: m[1], sid: m[1] !== 'plaza' && m[2] && BY_ID[m[1]].tools.includes(m[2]) ? m[2] : null };
   }
+  function fromHash(boot) {
+    const st = hashState();
+    if (!st) { if (!boot && !location.hash && openId) closeB(false); return; }   // #guide などは、そのまま(ページの中を移るだけ)
+    firstTouch();
+    if (st.id !== openId) openB(st.id, null, boot ? { now: true } : {});
+    if (st.sid !== pinSid) { clearFind(); pinSid = st.sid; applyFind(); if (st.sid) revealRow(st.sid); }
+  }
+  fromHash(true);
+  addEventListener('hashchange', () => fromHash(false));
 
   /* ---------- 計測の道具(?perf=1): 開閉のフレーム時間・入力から最初の描画まで・開閉を繰り返したときの記憶域 ----------
      立体が1枚描くたびに時刻を記録する(onFrame)。入力は、指・キーを押した時刻(event.timeStamp)から、次の1枚を描き終えるまで(画面に出るのは次の垂直同期) */

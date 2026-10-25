@@ -1,6 +1,7 @@
 /* ================================================================
    融合3「ひらく町」— 町の建物と、中にある道具(products/index.html の PRODUCTS と同じ名前・一行)
    for(誰向け)・facts(利用条件)・cta(ボタンの動詞)・kind(行き先の種類 app/intro/dist)も PRODUCTS の写し。ここで文言を作らない
+   shot: 町の中の画面が products の縮小画像と違う物(縦長の画面)。移る瞬間に、町の中の画面と同じ画像を広げるため(interiors.js の IMG と同じ)
    行き先の色(mark)は、ひらいたあとの UI の小さな印にだけ使う(立体には塗らない)
    ================================================================ */
 const P = '../../../';
@@ -8,7 +9,7 @@ export const TOOLS = {
   /* 明日の業務を楽にする */
   keiji: { name: '掲示じたく', t: '院内掲示を、選んで埋めるだけ', href: P + 'keiji/index.html', thumb: 'keiji', for: '受付・事務の方に', facts: ['無料', '登録不要', '端末内保存'], cta: '掲示をつくる', kind: 'app' },
   nidodema: { name: '二度手間さがし', t: '部署の手作業を、減らせるものと守るものに分ける', href: P + 'nidodema/index.html', thumb: 'nidodema', for: '転記やFAXの手間が多い部署に', facts: ['無料', '登録不要', '端末内保存'], cta: 'チェックを始める', kind: 'app' },
-  yawagaeshi: { name: 'やわ返', t: '角の立たない返信案を、3つつくる', href: P + 'yawagaeshi/index.html', thumb: 'yawagaeshi', for: '返信の言い方に迷う人に', facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'], cta: '返信案をつくる', kind: 'app' },
+  yawagaeshi: { name: 'やわ返', t: '角の立たない返信案を、3つつくる', href: P + 'yawagaeshi/index.html', thumb: 'yawagaeshi', shot: '../shared/shots/yawagaeshi.webp', for: '返信の言い方に迷う人に', facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'], cta: '返信案をつくる', kind: 'app' },
   /* 経営・管理の実務に使う */
   rehaboard: { name: 'RehaBoard', t: 'リハ部門の運営を、1画面に', href: P + 'rehaboard/index.html', thumb: 'rehaboard', note: '紹介とデモ', for: 'リハ部門の責任者・主任に', facts: ['デモは無料', '本体は買い切り ¥1,980', '登録不要', '端末内保存'], cta: '紹介とデモを見る', kind: 'intro' },
   medboard: { name: 'MedBoard', t: '外来の患者フローを、2施設で見比べる', href: P + 'medboard/index.html', thumb: 'medboard', note: '紹介とデモ', for: '外来クリニックの院長・事務長に', facts: ['デモは無料', '登録不要', '端末内保存'], cta: '紹介とデモを見る', kind: 'intro' },
@@ -36,28 +37,28 @@ export const TOOLS = {
   'study-board': { name: 'StudyBoard', t: '複数科目の学習を、1枚のボードで続ける', href: P + 'study-board/index.html', thumb: 'studyboard', for: '複数科目を並行して学ぶ社会人に', facts: ['無料', 'ログイン不要', '端末内保存'], cta: '紹介を見る', kind: 'intro' },
   'english-trainer': { name: 'Daily English', t: '瞬間英作文を、通勤の合間に', href: P + 'english-trainer/index.html', thumb: 'english-trainer', for: '医療経営の英語まで学びたい人に', facts: ['無料', 'ログイン不要', '端末内保存', 'スマホ最適化'], cta: '紹介を見る', kind: 'intro' },
   /* 気軽に試す・作品を楽しむ */
-  'gokigen-gacha': { name: 'ごきげん回復ガチャ', t: '疲れた日の回復行動を、ひとつだけ', href: P + 'gokigen-gacha/index.html', thumb: 'gokigen-gacha', for: '疲れた日、やる気が出ない日の自分に', facts: ['無料', '登録不要', '端末内保存'], cta: 'ガチャを回す', kind: 'app' },
+  'gokigen-gacha': { name: 'ごきげん回復ガチャ', t: '疲れた日の回復行動を、ひとつだけ', href: P + 'gokigen-gacha/index.html', thumb: 'gokigen-gacha', shot: '../shared/shots/gacha.webp', for: '疲れた日、やる気が出ない日の自分に', facts: ['無料', '登録不要', '端末内保存'], cta: 'ガチャを回す', kind: 'app' },
   'ittan-horyu': { name: 'いったん保留', t: '買う前に、少しだけ寝かせる', href: P + 'ittan-horyu/index.html', thumb: 'ittan-horyu', for: '衝動買いを減らしたい人に', facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'], cta: '保留してみる', kind: 'app' },
   madoakari: { name: '窓あかり', t: '小さな病院の一日を、ただ眺める', href: P + 'madoakari/index.html', thumb: 'madoakari', for: '夜中も続く病院の仕事を、眺めてみたい人に', facts: ['無料', '登録不要', 'ホーム画面に追加できる'], cta: '眺める', kind: 'app' },
   futatsume: { name: 'ふたつめの波', t: '二つの波が重なる、水面のパズル', href: P + 'futatsume/index.html', thumb: 'futatsume', for: '点数も時間制限もないパズルで、一息つきたい人に', facts: ['無料', '登録不要', '端末内保存', 'ホーム画面に追加できる'], cta: '遊ぶ', kind: 'app' },
-  /* アトリエ(運営者)と広場(考え方)。道具ではない */
-  about: { name: '運営者について', t: '名前の由来と、これまでの歩み', href: P + 'about/index.html' },
+  /* アトリエ(運営者)と広場(考え方)。道具ではない。アトリエの3つめは、物の id は note のまま、行き先を手記(journal)に(情報設計の提案。一行は NAV の journal の一言) */
+  about: { name: '運営者について', t: '名前の由来と、これまでの歩み', href: P + 'about/index.html#founder' },
   community: { name: '話をする', t: '共感も、異論も、相談も', href: P + 'community/index.html' },
-  note: { name: 'note', t: '書いていること', href: 'https://note.com/prime_duck4944', ext: true, note: '別のサイト' },
+  note: { name: '手記', t: '完成していない考えも、そのまま公開しています。', href: P + 'journal/index.html' },
   philosophy: { name: '考え方', t: 'BRIDGE が何を大切にしているか', href: P + 'philosophy/index.html' }
 };
 
 /* 前後の順(島を一周する順。ひらいたまま、前・次で移る) */
 export const RING = ['hospital', 'plaza', 'observatory', 'office', 'clinic', 'park', 'atelier', 'library'];
 
-/* 町の建物(順番は、案内と Tab の順)。role は短い呼び名、line はひらいたときの一行 */
+/* 町の建物(順番は、案内と Tab の順)。role は短い呼び名、line はひらいたときの一行。use は Products の用途(products/index.html#work など。一覧で比べる入口) */
 export const BUILDINGS = [
-  { id: 'hospital', name: '病院', role: 'いつもの職場', mark: '#087A4F', line: '明日の業務を楽にする', tools: ['keiji', 'nidodema', 'yawagaeshi'] },
-  { id: 'observatory', name: '展望台', role: 'キャリアの地図', mark: '#2356C4', line: 'キャリア・経験を整理する', tools: ['compass', 'tanaoroshi', 'iikae', 'moyamoya', 'karte', 'daily-app', 'growth-76a805'] },
-  { id: 'clinic', name: 'クリニック', role: '経営を学ぶ', mark: '#C24813', line: '医療経営を学ぶ', tools: ['clinic-flow-3d', 'turnaround12', 'pmi-quest'] },
-  { id: 'office', name: '事務所', role: '経営・管理', mark: '#6A45B2', line: '経営・管理の実務に使う', tools: ['rehaboard', 'medboard', 'hire-board', 'interview-kit', 'consult-simulator', 'round-note', 'manager-starter', 'medops', 'reha-checklist'] },
-  { id: 'library', name: '図書館', role: '学習', mark: '#00737E', line: '学習を続ける', tools: ['him-quiz', 'study-board', 'english-trainer'] },
-  { id: 'park', name: '公園', role: '試す・作品', mark: '#B8920F', line: '気軽に試す・作品を楽しむ', tools: ['gokigen-gacha', 'ittan-horyu', 'madoakari', 'futatsume'] },
+  { id: 'hospital', use: 'work', name: '病院', role: 'いつもの職場', mark: '#087A4F', line: '明日の業務を楽にする', tools: ['keiji', 'nidodema', 'yawagaeshi'] },
+  { id: 'observatory', use: 'career', name: '展望台', role: 'キャリアの地図', mark: '#2356C4', line: 'キャリア・経験を整理する', tools: ['compass', 'tanaoroshi', 'iikae', 'moyamoya', 'karte', 'daily-app', 'growth-76a805'] },
+  { id: 'clinic', use: 'learn', name: 'クリニック', role: '経営を学ぶ', mark: '#C24813', line: '医療経営を学ぶ', tools: ['clinic-flow-3d', 'turnaround12', 'pmi-quest'] },
+  { id: 'office', use: 'manage', name: '事務所', role: '経営・管理', mark: '#6A45B2', line: '経営・管理の実務に使う', tools: ['rehaboard', 'medboard', 'hire-board', 'interview-kit', 'consult-simulator', 'round-note', 'manager-starter', 'medops', 'reha-checklist'] },
+  { id: 'library', use: 'study', name: '図書館', role: '学習', mark: '#00737E', line: '学習を続ける', tools: ['him-quiz', 'study-board', 'english-trainer'] },
+  { id: 'park', use: 'play', name: '公園', role: '試す・作品', mark: '#B8920F', line: '気軽に試す・作品を楽しむ', tools: ['gokigen-gacha', 'ittan-horyu', 'madoakari', 'futatsume'] },
   { id: 'atelier', name: 'アトリエ', role: '運営者', mark: '#16233E', line: '理学療法士の橋本渉が、ひとりで運営しています', tools: ['about', 'community', 'note'] },
   { id: 'plaza', name: '広場', role: '考え方', mark: '#A98F63', line: '正解を与えるのではなく、選択肢を増やす', tools: ['philosophy'] }
 ];

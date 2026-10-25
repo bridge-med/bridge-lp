@@ -310,8 +310,9 @@ export async function live(o) {
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const p of q.pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
     const sf = o.safe(), sw = sf.r - sf.l, shh = sf.b - sf.t, w = Math.max(1e-3, x1 - x0), h = Math.max(1e-3, y1 - y0);
-    // 画面が、見える範囲の 3〜4 割を占めるまで(スマホ 390 でシートの上 390×464 に対し、横長で約 35%・縦長で約 30%)。縦長は高さで、横長は幅で頭打ち
-    const ppu = Math.min(Math.sqrt(.45 * sw * shh / (w * h)), sw * .88 / w, shh * .86 / h, base.ppu * 110);
+    // 画面が、見える範囲の 3〜4 割を占めるまで(スマホ 390 でシートの上 390×464 に対し、横長で約 35%・縦長で約 30%)。縦長は高さで、横長は幅で頭打ち。
+    // PC は画面が大きいので 22〜25%(まわりの机と人が見えて、部屋のままに)
+    const ppu = Math.min(Math.sqrt((small ? .45 : .3) * sw * shh / (w * h)), sw * .88 / w, shh * .86 / h, base.ppu * 110);
     lastFind = { sid, w: w * ppu, h: h * ppu };
     const bx = (x0 + x1) / 2, by = (y0 + y1) / 2, scx = (sf.l + sf.r) / 2, scy = (sf.t + sf.b) / 2;
     return { rot: r, elev: el, x: bx - (scx - W / 2) / ppu, y: by + (scy - H / 2) / ppu, ppu };
@@ -324,11 +325,11 @@ export async function live(o) {
   }
 
   /* ---- 中の形(初めてひらいたときに作る)。画面のテクスチャも、そのとき読む ---- */
-  const texLoader = new THREE.TextureLoader(), texCache = new Map();
+  const texLoader = new THREE.TextureLoader(), texCache = new Map(), imgOf = new Map();   // imgOf: 読み終えた画面の画像(移る瞬間に、ページがそのまま使う)
   const ctx = {
     palette: PALETTE, quality: 'high',   // 寄ったときに何の画面か読めるよう、スマホでも画面の画像は細かく
     loadTexture(url) {
-      if (!texCache.has(url)) texCache.set(url, texLoader.loadAsync(url).then(tx => { tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 4; dirty = true; kick(); return tx; }));
+      if (!texCache.has(url)) texCache.set(url, texLoader.loadAsync(url).then(tx => { tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 4; imgOf.set(url, tx.image); dirty = true; kick(); return tx; }));
       return texCache.get(url);
     }
   };
@@ -765,6 +766,14 @@ export async function live(o) {
     get tier() { return tier; },
     get compileMs() { return compileMs; },
     get findSize() { return lastFind; },
+    /* 移る瞬間のため: その道具の画面(中の物の板)が、いまページのどこに見えているか(ページの座標の四角)と、読み終えた画像 */
+    screenRect(sid) {
+      const it = A.id && interiors[A.id], st = it && it.stations.find(s => s.id === sid), q = st && screenQuad(it, st); if (!q) return null;
+      const r = o.canvas.getBoundingClientRect(); let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+      for (const p of q.pts) { const v = S.world.localToWorld(p.clone()).project(camera), x = r.left + (v.x + 1) / 2 * W, y = r.top + (1 - v.y) / 2 * H; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+      return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+    },
+    imageOf(url) { return imgOf.get(new URL(url, document.baseURI).href) || imgOf.get(url) || null; },   // 中の形は画像を絶対の URL で読む(import.meta.url から)。ページの相対の URL でも引けるように
     /* 撮る・確かめるため: 建物の中の点(その建物の座標)が、いま画面のどこにあるか */
     pickAt(x, y) { return pick({ clientX: x, clientY: y, pointerType: 'touch' }); },   // 確かめるため: 画面のその点で選ばれる建物
     screenOf(id, l) { const pl = placeOf(S, id), v = new THREE.Vector3(...l).applyAxisAngle(Y, pl.yaw).add(pl.p).applyAxisAngle(Y, rot.x).project(camera), r = o.canvas.getBoundingClientRect(); return [r.left + (v.x + 1) / 2 * W, r.top + (1 - v.y) / 2 * H]; }
