@@ -46,6 +46,7 @@ const BASE = {
 };
 const mix = (a, b, t) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), t).getHexString();
 const enc = x => x <= .0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - .055;   // 光の量 → 画面の色の値(にじみの枠は値のまま足すため)
+const HI_NONE = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1); HI_NONE.needsUpdate = true;   // 元の大きさの写しを映していないとき
 function makePalette(p) {
   const outer = !!(p && p.wallIn);
   const P = Object.assign({}, BASE, outer ? {} : p || {});
@@ -410,8 +411,19 @@ export function buildInterior(kind, box, ctx = {}) {
   const scGeo = E.SC.geometry(true);
   // 写しは加工しない: 光・霧・トーンマッピング・頂点の色を受けず、ふだんも見つけたときも元の色のまま映す
   const scMat = new THREE.MeshBasicMaterial({ map: atlas, toneMapped: false, fog: false });
+  // 見つけている物(uHiSid 番)の画面だけは、アトラスの区画ではなく元の大きさの写し(uHiTex)を映す。同じ素材の中で選ぶので、描画の回数は増えない
+  const scU = { uHiTex: { value: HI_NONE }, uHiSid: { value: -1 } };
+  scMat.onBeforeCompile = sh => {
+    Object.assign(sh.uniforms, scU);
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec2 aUv0;\nattribute float aSid;\nvarying vec2 vUv0;\nvarying float vSid;')
+      .replace('#include <uv_vertex>', '#include <uv_vertex>\nvUv0 = aUv0;\nvSid = aSid;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D uHiTex;\nuniform float uHiSid;\nvarying vec2 vUv0;\nvarying float vSid;')
+      .replace('#include <map_fragment>', '#ifdef USE_MAP\n\tdiffuseColor *= mix(texture2D(map, vMapUv), texture2D(uHiTex, vUv0), step(abs(vSid - uHiSid), .5));\n#endif');
+  };
+  scMat.customProgramCacheKey = () => 'hiraku-screen-hi';
   const scMesh = scGeo ? new THREE.Mesh(scGeo, scMat) : null; if (scMesh) group.add(scMesh);
-  // 画面の UV をアトラスの区画に合わせる(物の縦横比で、区画の中に収める)
+  // 画面の UV をアトラスの区画に合わせる(物の縦横比で、区画の中に収める)。元の板の上の位置(0〜1)と物の番号は、別に持つ(元の大きさの写しを映すとき用)
+  const U0 = scGeo ? new Float32Array(scGeo.attributes.position.count * 2) : null, SID = scGeo ? new Float32Array(scGeo.attributes.position.count) : null;
   E.stations.forEach((s, i) => {
     const col0 = i % cols, row = Math.floor(i / cols), a = s.sw / s.sh, m = slot * .03;
     const dw = a >= 1 ? slot - 2 * m : (slot - 2 * m) * a, dh = a >= 1 ? (slot - 2 * m) / a : slot - 2 * m;
@@ -420,10 +432,11 @@ export function buildInterior(kind, box, ctx = {}) {
     const U = scGeo.attributes.uv;
     for (let v = s.sc[0]; v < s.sc[1]; v++) {
       const uu = U.getX(v), vv = U.getY(v);
+      U0[v * 2] = uu; U0[v * 2 + 1] = vv; SID[v] = i;
       U.setXY(v, (x0 + uu * dw) / asz, 1 - (y0 + (1 - vv) * dh) / asz);
     }
   });
-  if (scGeo) scGeo.attributes.uv.needsUpdate = true;
+  if (scGeo) { scGeo.attributes.uv.needsUpdate = true; scGeo.setAttribute('aUv0', new THREE.BufferAttribute(U0, 2)); scGeo.setAttribute('aSid', new THREE.BufferAttribute(SID, 1)); }
   // 人
   const ppl = buildPeople(E, u);
   if (ppl) { group.add(ppl.body, ppl.head); if (ppl.limbs) group.add(ppl.limbs); }
@@ -527,7 +540,7 @@ export function buildInterior(kind, box, ctx = {}) {
     for (let j = 0; j < n; j++) { _w.subVectors(Q6[j], F.c); F.hx = Math.max(F.hx, Math.abs(_w.dot(F.x))); F.hy = Math.max(F.hy, Math.abs(_w.dot(F.y))); }
     const vw = (cam.right - cam.left) / cam.zoom, vh = (cam.top - cam.bottom) / cam.zoom;
     if (4 * F.hx * F.hy < .04 * vw * vh) return null;
-    F.G = G; return F;
+    F.G = G; F.s = s; return F;
   }
   // 手前(カメラの側へ .03 より前)にあって、画面とまわり(幅と高さの 1/4 ずつ広げた範囲)に重なって見えるか。pts は建物の中の座標、r は太さ
   F.covers = (pts, r) => {
@@ -537,11 +550,32 @@ export function buildInterior(kind, box, ctx = {}) {
     return al > .03 && x1 > -mx && x0 < mx && y1 > -my && y0 < my;
   };
 
+  /* ---- 見つけている間だけ、その物の画面を元の大きさの写し(products の thumbs 880px・shared/shots の大きい写し)に差し替える ----
+     読めてから差し替え(ちらつかない)、見つけ終われば戻してすぐ手放す(記憶域は見つけている間の1枚分だけ増える)。写しは縮めるだけ */
+  const hi = { id: null, tex: null };
+  function hiRes(s) {
+    const id = s && IMG[s.id] ? s.id : null;
+    if (id === hi.id) return;
+    hi.id = id; scU.uHiSid.value = -1; scU.uHiTex.value = HI_NONE;
+    if (hi.tex) { hi.tex.dispose(); hi.tex = null; }
+    if (!id) return;
+    const idx = s.index;
+    Promise.resolve().then(() => load(new URL(IMG[id][0], import.meta.url).href)).then(tex => {
+      const im = tex && tex.image; if (!im) return;
+      return Promise.resolve(im.decode ? im.decode().catch(() => {}) : null).then(() => {
+        if (disposed || hi.id !== id) return;
+        tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+        hi.tex = tex; scU.uHiTex.value = tex; scU.uHiSid.value = idx;
+      });
+    }).catch(() => { /* 読めないときは、アトラスの区画のまま */ });
+  }
+
   /* ---- 動き ---- */
   let lastMode = null;
   function update(dt, t, mode = 'day') {
     if (mode !== lastMode) { lastMode = mode; if (ppl) ppl.setMode(mode); }
     const f = focusView();
+    hiRes(f && f.s);
     if (ppl) ppl.update(t, f, dt);
     // 見つけている物の手前の小物も、同じように縮めて消す
     if (E.props.length) {
@@ -608,7 +642,7 @@ export function buildInterior(kind, box, ctx = {}) {
     dispose() {
       disposed = true;
       for (const m of [sMesh, scMesh, hlMesh]) if (m) m.geometry.dispose();
-      staticMat.dispose(); scMat.dispose(); hlMat.dispose(); atlas.dispose();
+      staticMat.dispose(); scMat.dispose(); hlMat.dispose(); atlas.dispose(); if (hi.tex) hi.tex.dispose();
       if (ppl) ppl.dispose();
       group.removeFromParent();
     }
