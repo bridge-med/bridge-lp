@@ -595,9 +595,9 @@ function boot() {
   const idle = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 1500 }) : setTimeout(f, 300));
   if (document.readyState === 'complete') idle(upgrade); else addEventListener('load', () => idle(upgrade));
 
-  /* ---------- 比べるための版(?day=1): 第2幕の断面を、階ごとに継がない昼の1枚にする(社長の判断用。既定は上=昼・下=夕) ---------- */
+  /* ---------- 比べるための版(?day=1 か #day1): 第2幕の断面を、階ごとに継がない昼の1枚にする(社長の判断用。既定は上=昼・下=夕) ---------- */
   const sectImg = $('#sectImg');
-  if (sectImg && Q.get('day') === '1') {
+  if (sectImg && (Q.get('day') === '1' || location.hash === '#day1')) {   // #day1: 問い合わせの文字列を渡せない場所(共有のページ)から
     sectImg.srcset = sectImg.srcset.replace(/sect-(\d+)/g, 'sect-day-$1'); sectImg.src = sectImg.src.replace(/sect-(\d+)/, 'sect-day-$1');
     sectImg.alt = sectImg.alt.replace('3階は昼の光、2階と1階は夕方の光。', 'どの階も昼の光。');
     const lead = $('#day .act-lead'); if (lead) lead.textContent = '3つの道具を、置いてみました。';
