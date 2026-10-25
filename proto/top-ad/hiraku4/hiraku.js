@@ -316,7 +316,7 @@ function boot() {
   function stillShot() {
     const im = pStill.querySelector('img'), b = BY_ID[openId];
     im.onerror = () => { im.onerror = null; im.src = 'img/b-' + openId + '.webp'; };
-    im.src = 'img/cut-' + openId + (phone() ? '-800' : '') + '.webp'; im.alt = b.name + 'の中。' + b.line + '道具が置かれている';
+    im.src = 'img/cut-' + openId + (phone() ? '-800' : '') + '.webp'; im.alt = b.name + 'の中を描いた絵';   // 道具は、下の一覧が言う
   }
 
   /* ---------- 状態を URL のハッシュに残す(#town/建物/道具)。戻るボタンで町に戻ったとき、その状態から始める ---------- */

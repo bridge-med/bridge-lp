@@ -45,7 +45,7 @@ export const TOOLS = {
   /* アトリエ(運営者)と広場(考え方)。道具ではない。アトリエの3つめは、物の id は note のまま、行き先を手記(journal)に(情報設計の提案。一行は NAV の journal の一言) */
   about: { name: '運営者について', t: '名前の由来と、これまでの歩み', href: P + 'about/index.html#founder' },
   community: { name: '話をする', t: '共感も、異論も、相談も', href: P + 'community/index.html' },
-  note: { name: '手記', t: '完成していない考えも、そのまま公開しています。', href: P + 'journal/index.html' },
+  note: { name: '手記', t: '完成していない考えも、そのまま公開しています', href: P + 'journal/index.html' },
   philosophy: { name: '考え方', t: 'BRIDGE が何を大切にしているか', href: P + 'philosophy/index.html' }
 };
 
@@ -60,7 +60,7 @@ export const BUILDINGS = [
   { id: 'office', use: 'manage', name: '事務所', role: '経営・管理', mark: '#6A45B2', line: '経営・管理の実務に使う', tools: ['rehaboard', 'medboard', 'hire-board', 'interview-kit', 'consult-simulator', 'round-note', 'manager-starter', 'medops', 'reha-checklist'] },
   { id: 'library', use: 'study', name: '図書館', role: '学習', mark: '#00737E', line: '学習を続ける', tools: ['him-quiz', 'study-board', 'english-trainer'] },
   { id: 'park', use: 'play', name: '公園', role: '試す・作品', mark: '#B8920F', line: '気軽に試す・作品を楽しむ', tools: ['gokigen-gacha', 'ittan-horyu', 'madoakari', 'futatsume'] },
-  { id: 'atelier', name: 'アトリエ', role: '運営者', mark: '#16233E', line: '理学療法士の橋本渉が、ひとりで運営しています', tools: ['about', 'community', 'note'] },
+  { id: 'atelier', name: 'アトリエ', role: '運営者', mark: '#16233E', line: '理学療法士の私(橋本渉)が、ひとりで運営しています', tools: ['about', 'community', 'note'] },
   { id: 'plaza', name: '広場', role: '考え方', mark: '#A98F63', line: '正解を与えるのではなく、選択肢を増やす', tools: ['philosophy'] }
 ];
 export const BY_ID = Object.fromEntries(BUILDINGS.map(b => [b.id, b]));

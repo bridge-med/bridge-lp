@@ -98,7 +98,7 @@ const LABEL = {
   'clinic-flow-3d': 'クリニックタウン3D', turnaround12: 'ターンアラウンド12', 'pmi-quest': 'クリニックPMIクエスト', compass: 'BRIDGE Compass', tanaoroshi: '経験の棚卸し',
   iikae: '現場のことば 言いかえ帳', moyamoya: '職場モヤモヤ診断', karte: '現場のカルテ', 'daily-app': 'キャリアログ', 'growth-76a805': 'Growth OS', 'him-quiz': 'HIM Quiz',
   'study-board': 'StudyBoard', 'english-trainer': 'Daily English', 'gokigen-gacha': 'ごきげん回復ガチャ', 'ittan-horyu': 'いったん保留', madoakari: '窓あかり', futatsume: 'ふたつめの波',
-  about: '運営者について', community: '話をする', note: 'note'
+  about: '運営者について', community: '話をする', note: '手記'
 };
 export const STATION_IDS = {
   hospital: ['keiji', 'nidodema', 'yawagaeshi'],
