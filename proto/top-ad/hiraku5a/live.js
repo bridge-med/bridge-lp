@@ -363,7 +363,7 @@ export async function live(o) {
   const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
   const ease = t => (t = clamp01(t)) < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;   // 出だしと着きがやわらかい(臨界減衰のばね sp を、さらに通す)
   // 進み p の区切り(調整はここだけ。舞台は 1.8 画面ぶん: 寄る・ひらく 約0.8 + ぜんたい 約1.0)。floors: 階ごとに [その階の札と灯りになる p, 次の階へ]
-  const SQ = { move: [.03, .435], dim: [.075, .36], arcs: [.1, .3], wall: [.27, .43], sink: [.43, .5], light: [.3, .45], floors: [[.48, .66], [.66, .845], [.845, 9]] };
+  const SQ = { move: [.03, .435], dim: [.075, .36], arcs: [.1, .3], wall: [.27, .43], sink: [.43, .5], light: [.3, .45], floors: [[.55, .7], [.7, .85], [.85, 9]] };   // ぜんたいに着いてから少し(約 0.2 画面)は「病院の中」の一文のまま、そのあと 3階 → 2階 → 1階
   const FLOOR_OF = [['yawagaeshi', 2], ['keiji', 1], ['nidodema', 0]];   // 降りる順: 3階 休憩室 → 2階 ナースステーション → 1階 受付
   const FI = { yawagaeshi: 2, keiji: 1, nidodema: 0 };
   const QS = new URLSearchParams(location.search), EL1 = deg(+(QS.get('el1') ?? 14)), TURN1 = deg(+(QS.get('turn') ?? 0)), KEEP_WALL = QS.get('wall') === 'keep';   // ぜんたいを見る角度は 14°(屋根を残したまま、3階の奥のソファの人と道具が天井の板に隠れない角度。20°では隠れる)。el1・turn(横の面を見せる回し。既定 0): 見比べるため / wall=keep: 倒れた壁を沈めない(前の版の見え方と比べるため)

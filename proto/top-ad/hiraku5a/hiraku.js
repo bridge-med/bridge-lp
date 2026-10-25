@@ -545,7 +545,7 @@ function boot() {
   const OPEN_STILL = {};
   for (const t of TODS) { OPEN_STILL[t + '-sp'] = { w: 786, h: 1448, band: BAND_SP }; OPEN_STILL[t + '-pc'] = { w: 1600, h: 1000, band: BAND_PC }; }
   // 階ごとに降りる区切り(live.js の SQ.floors と同じ)。止めた画像のときも、札と一行は同じ進みで降りる
-  const FLOORS = [['yawagaeshi', .48, .66], ['keiji', .66, .845], ['nidodema', .845, 9]];
+  const FLOORS = [['yawagaeshi', .55, .7], ['keiji', .7, .85], ['nidodema', .85, 9]];
   const floorAt = q => { for (const [sid, a, b] of FLOORS) if (q >= a && q < b) return sid; return null; };
   const HOSP_O = '52.19% 34.02%';   // 町の止めた画像の中の病院(押せる範囲の真ん中)。止めた画像を寄せるときの中心
   let rawP = 0, chipPos = {}, lastQ = -1, lastSid, sq = 0;
@@ -558,7 +558,7 @@ function boot() {
     R.style.setProperty('--mk', (1 - SM(.075, .42, q)).toFixed(3));  // 島の下のもや
     R.style.setProperty('--hz', SM(.27, .465, q).toFixed(3));         // 見出しの帯の下の霞(中が上まで来たら)
     R.style.setProperty('--ek', SM(.94, 1, q).toFixed(3));            // 舞台の終わり: 画面の下を、次の面(空の下の色)へ溶かす
-    show(ins, SM(.39, .48, q));
+    show(ins, SM(.36, .44, q));   // 壁が倒れきる前に出し、着いてから約 0.2 画面は一文のまま読める
     show(insGo, SM(.43, .52, q));
     // 階: その階の道具の一行を、上の一文の場所に(替わるときは .25 秒で)。ぜんたいに着いた直後は、いつもの一文
     if (sid === undefined) sid = floorAt(q);
