@@ -601,11 +601,13 @@ function boot() {
   }
 
   /* ---------- 見出しの帯: 終幕の夜の上では、夜の色に替える ---------- */
-  // 夜の地の上の端に置いた細い印が、見出しの帯の下(60px)より上へ出たら夜(夜の地が画面より高いスマホでも、境を越えるたびに知らせが来る)
+  // 夜の地の上の端が、見出しの帯の下(60px)より上へ出たら夜。速いスクロールや、ページの中の移動で境を飛び越えても取りこぼさないよう、位置で決める
   const finIn = $('.fin-in');
-  if (finIn && 'IntersectionObserver' in window) {
-    const mark = el('i', 'fin-mark'); mark.setAttribute('aria-hidden', 'true'); finIn.prepend(mark);
-    new IntersectionObserver(es => { for (const en of es) R.classList.toggle('hd-night', !en.isIntersecting && en.boundingClientRect.top < 60); }, { rootMargin: '-60px 0px 0px 0px', threshold: 0 }).observe(mark);
+  if (finIn) {
+    let q = 0;
+    const upd = () => { q = 0; R.classList.toggle('hd-night', finIn.getBoundingClientRect().top < 60); };
+    const req = () => { if (!q) q = requestAnimationFrame(upd); };
+    addEventListener('scroll', req, { passive: true }); addEventListener('resize', req); upd();
   }
 
   /* 戻ってきたとき(#town/建物/道具): その建物をひらき、その道具の入口をひらいた状態から(止めた画像のうちは瞬時に。立体は替わるときに飛ばずに合わせる)。
