@@ -319,14 +319,18 @@ html.scrub .hero::after{opacity:var(--hz,0);transition:none}   /* 病院の中�
 /* 病院の中: 最初の画面の一行と同じ場所・同じ形の小さな見出しと、一文。階ごとに降りるときは、一文の場所に、その階の道具の一行 */
 .ins{position:absolute;z-index:7;left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px));pointer-events:none;opacity:0;visibility:hidden}
 .ins .eyebrow{transition:none}
+.ins-eb{display:grid}
+.ins-eb .eyebrow{grid-area:1 / 1;transition:opacity .25s var(--ease)}
+.ins-where{opacity:0}
+.ins.fl .ins-main{opacity:0}
+.ins.fl .ins-where.on{opacity:1}   /* 階を降りるときは、見出しの場所にその階の居場所(3F 休憩室)、一文の場所にその道具の一行 */
 .ins-lines{display:grid;margin-top:7px}
 .ins-line,.ins-fl{grid-area:1 / 1;font-size:14px;line-height:1.75;color:var(--hero-fg-2);transition:opacity .25s var(--ease)}
 .ins-fl{opacity:0}
-.ins-fl .fl{margin-right:.7em;font-size:12px;letter-spacing:.06em}
 .ins-fl b{margin-right:.5em;font-weight:700;color:var(--hero-fg)}
 .ins.fl .ins-line{opacity:0}
 .ins.fl .ins-fl.on{opacity:1}
-@media (prefers-reduced-motion:reduce){.ins-line,.ins-fl{transition:none}}
+@media (prefers-reduced-motion:reduce){.ins-line,.ins-fl,.ins-eb .eyebrow{transition:none}}
 /* 道具の札: 町の名前の札と同じ形(暗い札・白い字・角の丸み 7px・下に小さな三角)と置き方(三角の先が指す点の上)。指す点は物の真上の、その階の天井の切り口(藍の帯)。押すとその道具へ */
 .chips{position:absolute;inset:0;z-index:8;pointer-events:none}
 .chip{position:absolute;left:0;top:0;display:flex;align-items:center;padding:5px 10px 6px;background:var(--tag-bg);color:var(--tag-fg);border-radius:7px;font-size:12.5px;font-weight:700;line-height:1.3;letter-spacing:.04em;text-decoration:none;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,calc(-100% - 7px));box-shadow:0 8px 20px -10px rgba(0,0,0,.55);transition:background-color .25s var(--ease),box-shadow .25s var(--ease);-webkit-tap-highlight-color:transparent}
@@ -532,16 +536,16 @@ html.capture body > *:not(#cap){display:none!important}
   </nav>
   <p class="hint" id="hint">建物にふれると、中がひらきます</p>
   <!-- 病院の中: 最初の画面の一行と同じ場所に小さな見出しと一文。札は道具の物の上(位置は立体の側から。止めた画像では撮ったときの位置) -->
-  <div class="ins" id="ins" aria-hidden="true"><p class="eyebrow">病院の中</p><div class="ins-lines"><p class="ins-line"><span class="ph">いつもの仕事のそばに、</span><span class="ph">3つの道具を</span><span class="ph">置いてみました。</span></p>
-    <p class="ins-fl" data-sid="yawagaeshi"><span class="fl">3階 休憩室</span><b>やわ返</b><span class="ph">角の立たない返信案を、</span><span class="ph">3つつくる</span></p>
-    <p class="ins-fl" data-sid="keiji"><span class="fl">2階 ナースステーション</span><b>掲示じたく</b><span class="ph">院内掲示を、</span><span class="ph">選んで埋めるだけ</span></p>
-    <p class="ins-fl" data-sid="nidodema"><span class="fl">1階 受付</span><b>二度手間さがし</b><span class="ph">部署の手作業を、</span><span class="ph">減らせるものと</span><span class="ph">守るものに分ける</span></p></div></div>
+  <div class="ins" id="ins"><div class="ins-eb"><p class="eyebrow ins-main">病院の中</p><p class="eyebrow ins-where" data-sid="yawagaeshi" aria-hidden="true">3F 休憩室</p><p class="eyebrow ins-where" data-sid="keiji" aria-hidden="true">2F ナースステーション</p><p class="eyebrow ins-where" data-sid="nidodema" aria-hidden="true">1F 受付</p></div><div class="ins-lines"><p class="ins-line"><span class="ph">いつもの仕事のそばに、</span><span class="ph">道具を置いています。</span></p>
+    <p class="ins-fl" data-sid="yawagaeshi" aria-hidden="true"><b>やわ返</b><span class="ph">角の立たない返信案を、</span><span class="ph">3つつくる</span></p>
+    <p class="ins-fl" data-sid="keiji" aria-hidden="true"><b>掲示じたく</b><span class="ph">院内掲示を、</span><span class="ph">選んで埋めるだけ</span></p>
+    <p class="ins-fl" data-sid="nidodema" aria-hidden="true"><b>二度手間さがし</b><span class="ph">部署の手作業を、</span><span class="ph">減らせるものと</span><span class="ph">守るものに分ける</span></p></div></div>
   <nav class="chips" id="chips" aria-label="病院の中の道具">
     <a class="chip" data-sid="yawagaeshi" data-fl="2" href="../../../yawagaeshi/index.html"><span class="c-fl">3階 休憩室</span><b>やわ返</b><span class="c-t">角の立たない返信案を、3つつくる</span></a>
     <a class="chip" data-sid="keiji" data-fl="1" href="../../../keiji/index.html"><span class="c-fl">2階 ナースステーション</span><b>掲示じたく</b><span class="c-t">院内掲示を、選んで埋めるだけ</span></a>
     <a class="chip" data-sid="nidodema" data-fl="0" href="../../../nidodema/index.html"><span class="c-fl">1階 受付</span><b>二度手間さがし</b><span class="c-t">部署の手作業を、減らせるものと守るものに分ける</span></a>
   </nav>
-  <p class="ins-go" id="insGo"><a href="../../../products/index.html#work">業務の道具を一覧で見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+  <p class="ins-go" id="insGo"><a href="../../../products/index.html#work">明日の業務に使える道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
 </section>
 </div>
 
@@ -586,8 +590,8 @@ html.capture body > *:not(#cap){display:none!important}
 <!-- 試作の終わり: 最初の画面の下の空の色のまま。このあとフッター -->
 <section class="end" aria-labelledby="endT">
   <h2 class="sr" id="endT">試作の終わり</h2>
-  <p class="end-note"><span class="ph">試作はここまでです。</span><span class="ph">最初の画面のすぐ後の2案を</span><span class="ph">比べるための版です。</span></p>
-  <p class="end-links"><a class="tx" href="../../../products/index.html">すべての道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="tx" href="../hiraku4/index.html">v4 を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+  <p class="end-note"><span class="ph">試作はここまでです。</span><span class="ph">最初の画面のすぐ後だけを、</span><span class="ph">2案で比べています。</span></p>
+  <p class="end-links"><a class="tx" href="../hiraku5b/index.html">案B を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="tx" href="../../../products/index.html">すべての道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="tx" href="../hiraku4/index.html">v4 を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
 </section>
 </main>
 

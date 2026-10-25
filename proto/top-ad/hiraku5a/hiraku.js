@@ -533,11 +533,11 @@ function boot() {
   /* ---------- 案A: スクロールで、町の病院に寄り、中へ(最初の画面は止めたまま) ----------
      進み p = 舞台(最初の画面と、その下の寄る道のり 1.8 画面)をどれだけ下りたか(0..1)。立体があれば live.js の scrubTo(p) へ渡し、
      言葉と札は、カメラと同じ(ばねでなめらかにした)進みで出し入れする(onLayout から)。カメラはひらいた病院ぜんたいで止まり、
-     そのあとは 3階 → 2階 → 1階 と、その階の道具の札と灯りだけが降りる(その道具の一行は、上の小さな見出しの一文の場所に)。
+     そのあとは 3階 → 2階 → 1階 と、その階の道具の札と灯りだけが降りる(見出しの場所にその階の居場所、一文の場所にその道具の一行)。
      札は、着いたあとは出たまま(演出に中身の見え方を預けない)。物の真上の、その階の天井(上の階との間の藍の帯)に置く。
      立体がないとき(動きを減らす・WebGL なし・立体に替わる前): 町の止めた画像を病院へ寄せてから(動きを減らす設定では寄せない)、
      ひらいた病院の止めた画像へ 0.25 秒で替える(重ねたまま進めない。二重写しにしない) */
-  const stage = $('#stage'), ins = $('#ins'), insGo = $('#insGo'), shut = $('#shut'), shutImg = $('#shutImg'), chips = $$('#chips .chip'), insFl = $$('#ins .ins-fl');
+  const stage = $('#stage'), ins = $('#ins'), insGo = $('#insGo'), shut = $('#shut'), shutImg = $('#shutImg'), chips = $$('#chips .chip'), insFl = $$('#ins .ins-fl, #ins .ins-where');
   const SM = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   // ひらいた病院の止めた画像(img/open-<時刻>-<sp|pc>.webp)。w・h は画像の大きさ、band は札の置き場(その道具の階の天井の切り口。画像の %。capture=cutaway&open5=1 の出力)
   const BAND_SP = { yawagaeshi: [22.27, 40.23], keiji: [24.2, 53.42], nidodema: [30.67, 66.61] };
