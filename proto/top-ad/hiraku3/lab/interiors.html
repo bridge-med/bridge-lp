@@ -144,6 +144,8 @@ for (const kind of KINDS) {
   const api = buildInterior(kind, box, { palette: PAL, loadTexture, quality: Q.get('q') || 'high', limbs: Q.get('limbs') !== '0' });
   api.setNight(glow);
   hold.add(api.group);
+  // 確かめるため: 道具の画面の四隅(建物の中の座標)と持ち上がる向き。ページの中で、見つけたときの大きさを測るのに使う
+  (window.__quads = window.__quads || {})[kind] = Object.fromEntries(api.stations.map(s => [s.id, { quad: s.quad, lift: s.lift }]));
   if (L.pIn) { const il = inLightOf(box); L.pIn.position.copy(il.p).applyAxisAngle(new THREE.Vector3(0, 1, 0), AZ); L.pIn.distance = il.dist; L.pIn.intensity = (1.4 + glow * 2) * il.k; }
   if (ACTIVE) api.stations.forEach(s => s.setActive(s.id === ACTIVE));
   if (HOVER) api.stations.forEach(s => s.setHover(s.id === HOVER));

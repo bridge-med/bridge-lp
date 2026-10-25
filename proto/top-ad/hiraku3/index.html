@@ -163,34 +163,89 @@ html[data-tod="night"] .pring{border-color:#FFDCA2;box-shadow:0 0 0 1px rgba(8,1
 /* ================= ひらいたときのパネル(PC は右、スマホは下からのシート) ================= */
 .panel{position:fixed;z-index:60;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;box-shadow:0 24px 60px -24px rgba(20,24,30,.45),0 0 0 1px rgba(30,30,30,.06)}
 .panel[hidden]{display:none}
-.p-head{position:relative;padding:22px 26px 14px}
-.p-role{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.08em;color:var(--ink-3)}
+/* 上: ‹ 前 | 建物の名前 | 次 ›(名前にふれると、建物の一覧)。その下に、短い呼び名・一行と、閉じる */
+.p-head{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 8px;padding:14px 14px 10px}
+.p-nav{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px}
+.p-step{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:66px;height:44px;padding:0 12px;border-radius:22px;font-size:13px;font-weight:700;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line);-webkit-tap-highlight-color:transparent;transition:background-color .15s,color .15s}
+.p-step .ico{width:17px;height:17px}
+@media (hover:hover){.p-step:hover{background:#fff;color:var(--ink)}}
+.p-step:active{background:var(--paper-2)}
+.p-title{min-width:0;text-align:center}
+.p-title:focus{outline:none}   /* ひらいたときにフォーカスを移す見出し。枠は出さない(中の名前のボタンには出す) */
+.p-name{display:inline-flex;align-items:center;justify-content:center;gap:5px;max-width:100%;min-height:44px;padding:0 8px 0 12px;border-radius:10px;font:700 24px/1.2 var(--jp);letter-spacing:.04em;-webkit-tap-highlight-color:transparent}
+.p-name .ico{width:18px;height:18px;color:var(--ink-3);transition:transform .2s var(--ease)}
+.p-name[aria-expanded="true"] .ico{transform:rotate(180deg)}
+@media (hover:hover){.p-name:hover{background:#fff}}
+.p-meta{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;padding-left:6px;font-size:13px;line-height:1.6;color:var(--ink-2)}
+.p-role{display:inline-flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.06em;color:var(--ink-3)}
 .p-role i{width:9px;height:9px;border-radius:2px;background:var(--mk,#999)}
-.p-head h2{margin-top:6px;font:700 26px/1.25 var(--jp);letter-spacing:.04em}
-.p-head h2:focus{outline:none}   /* ひらいたときにフォーカスを移す見出し(操作できる物ではない)。枠は出さない */
-.p-line{margin-top:6px;font-size:14px;color:var(--ink-2)}
-.p-close{position:absolute;right:12px;top:12px;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--ink-2)}
+.p-close{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--ink-2)}
 .p-close:hover{background:var(--paper-2);color:var(--ink)}
 .p-close .ico{width:20px;height:20px}
 .p-body{flex:1;min-height:0;overflow:auto;padding:4px 14px 22px;overscroll-behavior:contain}
 .p-still{margin:4px 12px 14px;border-radius:10px;overflow:hidden;background:#E9E3D8}
 .p-still img{width:100%;height:auto}
-.p-tools li + li{border-top:1px solid var(--line)}
-/* 行: 本体は「中で見る」(その物に寄る)、右の「開く」は道具へ */
-.prow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;border-radius:10px;transition:background-color .15s,box-shadow .15s}
-.pfind{display:grid;gap:4px;width:100%;min-height:44px;padding:13px 6px 13px 12px;border-radius:10px;text-align:left;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.p-tools > li + li{border-top:1px solid var(--line)}
+/* 行: ふれると、その物に寄り(見つける)、行が道具の入口にひらく(写し・誰向け・利用条件・行き先の種類・ボタン) */
+.prow{border-radius:10px;transition:background-color .15s,box-shadow .15s}
+.pfind{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:3px;align-items:center;width:100%;min-height:44px;padding:13px 10px 13px 12px;border-radius:10px;text-align:left;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pfind b{font-size:15.5px;letter-spacing:.02em}
 .pfind .t{font-size:12.5px;line-height:1.6;color:var(--ink-2)}
-.pfind .n{font-size:11.5px;color:var(--ink-3)}
-.prow .go{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-right:4px;padding:0 10px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--indigo);white-space:nowrap;text-decoration:none;-webkit-tap-highlight-color:transparent}
-@media (hover:hover){a.go:hover{background:var(--paper-2)}}
-.prow .go .ico{width:15px;height:15px;transition:transform .15s}
-@media (hover:hover){.prow .go:hover .ico,.prow a.pfind:hover + .go .ico{transform:translateX(3px)}}
+.pfind .chev{grid-column:2;grid-row:1/3;width:18px;height:18px;color:var(--ink-3);transition:transform .2s var(--ease)}
+.prow.open .pfind .chev{transform:rotate(180deg)}
 .prow .chip{display:inline-block;margin-left:8px;padding:2px 7px;border-radius:4px;background:var(--paper-2);font-size:11px;font-weight:700;color:var(--ink-3);vertical-align:2px}
-.prow.on{background:#fff;box-shadow:0 0 0 1px var(--line)}
-@media (hover:hover){.prow:hover{background:#fff;box-shadow:0 0 0 1px var(--line)}}
-.prow.on{box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--mk,#999)}
+.prow.on{background:#fff;box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--mk,#999)}
+@media (hover:hover){.prow:hover{background:#fff;box-shadow:0 0 0 1px var(--line)}.prow.on:hover{box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--mk,#999)}}
+.pent{padding:0 12px 14px 15px}
+.pent[hidden]{display:none}
+.pshot{aspect-ratio:16/10;border-radius:8px;overflow:hidden;background:#E9E3D8;box-shadow:0 0 0 1px rgba(30,34,39,.1)}   /* 実際の画面の写し(加工しない)。枠の内側はプロダクト */
+.pshot img{width:100%;height:100%;object-fit:contain}
+.pinfo{margin-top:10px}
+.pfor{font-size:13px;line-height:1.6;color:var(--ink-2)}
+.pfacts{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.pfacts li{padding:1px 7px;border-radius:4px;background:var(--paper-2);font-size:11.5px;line-height:1.7;color:var(--ink-2)}
+.pact{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin-top:12px}
+.pkind{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--ink-3)}
+.pcta{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;margin-left:auto;padding:0 18px;border-radius:12px;background:var(--indigo);color:#fff;font-size:14.5px;font-weight:700;letter-spacing:.02em;text-decoration:none;box-shadow:0 8px 18px -12px rgba(16,24,44,.6);-webkit-tap-highlight-color:transparent}
+.pcta .ico{width:16px;height:16px;color:var(--sand-2)}
+@media (hover:hover){.pcta:hover{background:var(--indigo-2)}}
+/* 建物の一覧(名前にふれると。8つ: 小さな肖像・名前・一行)。広場のパネルの「行き先を選ぶ」も同じ形 */
+.p-list{padding:2px 0 8px}
+.p-list[hidden],.p-main[hidden],.p-plaza[hidden]{display:none}
+.lrows > li + li{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:60px minmax(0,1fr);align-items:center;gap:12px;width:100%;min-height:56px;padding:5px 10px 5px 6px;border-radius:10px;text-align:left;-webkit-tap-highlight-color:transparent}
+.lrow img{width:60px;height:52px;object-fit:contain}
+.lrow b{display:block;font-size:15px;letter-spacing:.03em}
+.lrow small{display:block;font-size:12px;line-height:1.55;color:var(--ink-3)}
+.lrow[aria-current="true"]{background:#fff;box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--mk,#999)}
+@media (hover:hover){.lrow:hover{background:#fff}}
+/* 広場: ロゴの意味と BRIDGE の目的(憲法の言葉)を短く。行き先を選ぶ一覧と、考え方・BRIDGEについて への入口 */
+.p-plaza{padding:4px 2px 0}
+.pz-mark{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:14px;padding:14px 14px 14px 12px;border-radius:12px;background:#fff;box-shadow:0 0 0 1px var(--line)}
+.pz-mark svg{width:92px}
+.pz-mark p{font-size:13px;line-height:1.85;color:var(--ink-2)}
+.pz-aim{margin:14px 6px 0;font-size:14.5px;font-weight:700;line-height:1.75;letter-spacing:.02em}
+.pz-h{margin:18px 6px 4px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-3)}
+.pz-links{display:flex;flex-wrap:wrap;gap:8px;margin:14px 6px 2px}
+.pz-links a{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:22px;box-shadow:inset 0 0 0 1px var(--line);font-size:13.5px;font-weight:700;color:var(--indigo);text-decoration:none}
+.pz-links .ico{width:15px;height:15px}
+@media (hover:hover){.pz-links a:hover{background:#fff}}
 .p-grab{display:none}
+
+/* 移る瞬間: 押したらすぐに移動を始め、その間に写しが画面いっぱいへ広がる(280ms。動きを減らす設定では出さない) */
+.leap{position:fixed;inset:0;z-index:500;pointer-events:none}
+.leap .lp-bg{position:absolute;inset:0;background:var(--paper)}
+.leap .lp-im{position:absolute;max-width:none;transform-origin:0 0;will-change:transform}
+
+/* 広場の見晴らし: 建物の上の小さな名前の札(ふれると、その建物へ渡る) */
+.otags{position:absolute;inset:0;z-index:9;pointer-events:none}
+.otags[hidden]{display:none}
+.otag{position:absolute;left:0;top:0;padding:5px 11px 6px;border-radius:999px;background:rgba(255,255,255,.95);color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.05em;white-space:nowrap;box-shadow:0 5px 14px -7px rgba(0,0,0,.5),0 0 0 1px rgba(30,40,50,.12);pointer-events:auto;opacity:0;transition:opacity .3s var(--ease);-webkit-tap-highlight-color:transparent}
+.otag::before{content:'';position:absolute;inset:-9px -4px}   /* ふれる範囲は 44px 以上 */
+.otag::after{content:'';position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;background:inherit;transform:rotate(45deg);border-radius:1px}
+.otags.on .otag{opacity:1}
+.otag.off{visibility:hidden}
+@media (hover:hover){.otag:hover{background:#fff;box-shadow:0 6px 16px -6px rgba(0,0,0,.55),0 0 0 1px rgba(30,40,50,.2)}}
 
 /* ================= 下の節(短く) ================= */
 .sec{padding:clamp(56px,9vw,104px) var(--pad)}
@@ -289,9 +344,15 @@ html.js .pair.armed .open{clip-path:inset(0 0 100% 0)}
   .panel.full{height:88svh}
   .p-grab{display:block;position:absolute;left:0;right:0;top:0;height:28px;cursor:grab}
   .p-grab::before{content:'';position:absolute;left:50%;top:9px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:#CFC7B8}
-  .p-head{padding:24px 20px 10px}
-  .p-head h2{font-size:22px}
+  .p-head{padding:26px 8px 4px}   /* 上の端の左右に前・次(片手で届く位置) */
+  .p-name{font-size:21px}
+  .p-meta{padding-left:10px}
   .p-body{padding:0 8px 18px;touch-action:pan-y}
+  .pent{display:grid;grid-template-columns:minmax(0,44%) minmax(0,1fr);column-gap:12px;padding:0 10px 12px 12px}
+  .pshot{grid-column:1;grid-row:1;align-self:start}
+  .pinfo{grid-column:2;grid-row:1;margin-top:0}
+  .pact{grid-column:1/-1}
+  .pcta{flex:1 1 auto}
   html.opened .copy,html.opened .cta-wrap,html.opened .ctrl,html.opened .hint{opacity:0;pointer-events:none}
   .band{grid-template-columns:minmax(0,1fr);gap:18px}
   .band .pair{width:68%}
@@ -343,13 +404,14 @@ html.capture body > *:not(#cap){display:none!important}
   <canvas id="world" aria-hidden="true"></canvas>
   <div class="still" id="still">
     <img class="poster" id="poster" width="1600" height="1440" sizes="(max-width: 899px) 330px, 66vw" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある" data-day="img/town-day.webp" data-dusk="img/town-dusk.webp" data-night="img/town-night.webp">
-    <script>/* 幅の違う2枚。スマホは 1000 の絵(画素比 3 でも。立体が画素比 1.5 で入れ替わるので、それより細かい) */(function () { var p = document.getElementById('poster'), s = p.dataset[document.documentElement.dataset.tod] || p.dataset.day; p.srcset = s.replace('.webp', '-1000.webp') + ' 1000w, ' + s + ' 1600w'; p.src = s; })();</script>
+    <script>/* 止めた画像は、その端末が描く品質の段で撮ったもの(スマホは中 -mid、PC は高。hiraku.js の段の選び方と同じ)。幅の違う2枚(スマホは 1000) */(function () { var p = document.getElementById('poster'), q = new URLSearchParams(location.search).get('q'), s = null; try { s = localStorage.getItem('bridge-hiraku-q'); } catch (e) {} var t = q || s || (innerWidth < 900 ? 'mid' : 'high'), m = navigator.deviceMemory || 8, c = navigator.hardwareConcurrency || 8; if (!q && t === 'high' && (m <= 4 || c <= 4)) t = 'mid'; var k = t === 'high' ? '' : '-mid', u = (p.dataset[document.documentElement.dataset.tod] || p.dataset.day).replace('.webp', k + '.webp'); p.dataset.tier = k; p.srcset = u.replace('.webp', '-1000.webp') + ' 1000w, ' + u + ' 1600w'; p.src = u; })();</script>
     <noscript><img class="poster" src="img/town-day.webp" srcset="img/town-day-1000.webp 1000w, img/town-day.webp 1600w" sizes="(max-width: 899px) 330px, 66vw" width="1600" height="1440" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある"></noscript>
   </div>
   <div class="tags" aria-hidden="true"><span class="tag" id="tagB"></span><span class="tag st" id="tagS"></span>
     <div class="nudge" id="nudge" hidden><i class="nr"></i><i class="nr n2"></i><span class="nt">ふれてみる</span></div>
     <div class="rings" id="rings"></div>
   </div>
+  <div class="otags" id="oTags" aria-hidden="true" hidden></div>
 
   <div class="mist" aria-hidden="true"></div>
   <div class="copy">
@@ -374,17 +436,30 @@ html.capture body > *:not(#cap){display:none!important}
   <p class="hint" id="hint">建物にふれると、中がひらきます</p>
 </section>
 
-<div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="pTitle" hidden>
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="pNameT" hidden>
   <div class="p-grab" id="pGrab" aria-hidden="true"></div>
   <div class="p-head">
-    <p class="p-role"><i></i><span id="pRole"></span></p>
-    <h2 id="pTitle" tabindex="-1"></h2>
-    <p class="p-line" id="pLine"></p>
+    <div class="p-nav">
+      <button class="p-step" id="pPrev" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg><span aria-hidden="true">前</span></button>
+      <h2 class="p-title" id="pTitle" tabindex="-1"><button class="p-name" id="pName" type="button" aria-expanded="false" aria-controls="pList"><span id="pNameT"></span><span class="sr">(建物の一覧)</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9.5l5.5 5.5 5.5-5.5"/></svg></button></h2>
+      <button class="p-step" id="pNext" type="button"><span aria-hidden="true">次</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg></button>
+    </div>
+    <p class="p-meta"><span class="p-role"><i></i><span id="pRole"></span></span><span id="pLine"></span></p>
     <button class="p-close" id="pClose" type="button" aria-label="閉じる"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
   <div class="p-body">
-    <figure class="p-still" id="pStill" hidden><img alt="" width="1200" height="900"></figure>
-    <ul class="p-tools" id="pTools"></ul>
+    <div class="p-list" id="pList" hidden><ol class="lrows" aria-label="町の建物"></ol></div>
+    <div class="p-main" id="pMain">
+      <figure class="p-still" id="pStill" hidden><img alt="" width="1200" height="900"></figure>
+      <div class="p-plaza" id="pPlaza" hidden>
+        <div class="pz-mark"><svg viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><p>交差するが、接続しない<br>二本の線が交わり、新しい方向へ伸びていく</p></div>
+        <p class="pz-aim">人が、自ら選び、納得して生きられる社会をつくる</p>
+        <h3 class="pz-h" id="pzH">行き先を選ぶ</h3>
+        <ol class="lrows" id="pzList" aria-labelledby="pzH"></ol>
+        <p class="pz-links"><a href="../../../philosophy/index.html">考え方<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="../../../about/index.html">BRIDGEについて<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+      </div>
+      <ul class="p-tools" id="pTools"></ul>
+    </div>
   </div>
 </div>
 

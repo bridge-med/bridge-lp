@@ -1,13 +1,17 @@
 /* ================================================================
-   「ひらく町」磨き込み — ページの動き(three.js は読まない)
+   「ひらく町」v3 — ページの動き(three.js は読まない)
    最初の訪問だけ、病院の足もとに柔らかい輪と「ふれてみる」の札(最初にふれたら消え、次の訪問では出さない)
    押した瞬間、その建物の足もとに輪が広がる。指が外れても、近い建物を選ぶ
-   最初は止めた画像(見る人の時刻の昼・夕・夜)。読み込みが終わって手が空いたら、live.js を読んで立体と入れ替える
+   最初は止めた画像(見る人の時刻の昼・夕・夜。その端末が描く品質の段で撮ったもの)。読み込みが終わって手が空いたら、live.js を読んで立体と入れ替える
    ふれる → 建物がわずかに沈む → 島が回ってその建物が正面を向き、カメラが寄る → 前の壁が倒れ、屋根が抜け、中が見える
-   パネル(PC は右、スマホは下からのシート)の行と、町の中の物は、乗せると互いに光る
+   道具の行(または中の物)にふれる → その物に寄り(見つける)、行が「道具の入口」にひらく(写し・誰向け・利用条件・行き先の種類・ボタン)
+   入口のボタン → すぐに移り始め、その間に写しが画面いっぱいへ広がる。戻ると、その建物・その道具の状態から(URL のハッシュ #town/建物/道具)
+   パネルの上の「‹ 前 | 建物の名前 | 次 ›」で、町ぜんたいに戻らずに隣の建物へ(名前にふれると一覧。スマホは上の帯と町の横のはじき、PC は ←/→ も)
+   広場をひらくと、町を見渡す高さへ上がり、建物の上に小さな名前の札が並ぶ(ふれると、その建物へ渡る)
    動きを減らす設定・WebGL なし: 止めた画像のまま。ひらくのは瞬時で、パネルにその建物の断面の止めた画像を出す
+   ?perf=1: 開閉のフレーム時間・入力から最初の描画までの時間・開閉を繰り返したときの記憶域を測る道具(window.__perf)
    ================================================================ */
-import { BUILDINGS, BY_ID, TOOLS } from './data.js';
+import { BY_ID, TOOLS, RING } from './data.js';
 
 const Q = new URLSearchParams(location.search);
 const R = document.documentElement;
@@ -17,19 +21,27 @@ else boot();
 function boot() {
   R.classList.add('js');
   const $ = (s, el = document) => el.querySelector(s), $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const el = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
   const hero = $('#top'), canvas = $('#world'), still = $('#still'), poster = $('#poster');
-  const tagB = $('#tagB'), tagS = $('#tagS'), hint = $('#hint'), say = $('#say'), nudge = $('#nudge'), rings = $('#rings');
-  const panel = $('#panel'), pTitle = $('#pTitle'), pRole = $('#pRole'), pLine = $('#pLine'), pTools = $('#pTools'), pStill = $('#pStill');
+  const tagB = $('#tagB'), tagS = $('#tagS'), hint = $('#hint'), say = $('#say'), nudge = $('#nudge'), rings = $('#rings'), oTags = $('#oTags');
+  const panel = $('#panel'), pTitle = $('#pTitle'), pName = $('#pName'), pNameT = $('#pNameT'), pRole = $('#pRole'), pLine = $('#pLine'), pTools = $('#pTools'), pStill = $('#pStill');
+  const pBody = $('.p-body', panel), pList = $('#pList'), pMain = $('#pMain'), pPlaza = $('#pPlaza'), pzList = $('#pzList'), pPrev = $('#pPrev'), pNext = $('#pNext');
   const hits = new Map($$('.hit').map(a => [a.dataset.id, a]));
   const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
   const reduce = () => reduceQ.matches || Q.get('still') === '1';
   const phone = () => innerWidth < 900;
   const save = !!(navigator.connection && navigator.connection.saveData);
   const TODS = ['day', 'dusk', 'night'];
+  const ICO = {
+    arrow: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    ext: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+    chev: '<svg class="ico chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9.5l5.5 5.5 5.5-5.5"/></svg>'
+  };
   let ctl = null, openId = null, opener = null, touched = false, paused = false;
   let tagFor = null, tagTimer = 0, hoverId = null;
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 使えなくても壊れない */ } } };
   let nudgeOn = !store.get('bridge-hiraku-touched') && Q.get('nudge') !== '0';   // 最初の訪問だけ
+  const PERF = Q.get('perf') === '1' ? perfTools() : null;
 
   /* ---------- 昼・夕・夜(ボタンで 昼 → 夕 → 夜 → 昼) ----------
      立体が動いているときは、ページの空(3枚の層)の濃さを立体の時刻(0 昼・1 夕・2 夜)から決める。夜 → 昼も夕方を通り、立体と同じ速さで移る */
@@ -43,12 +55,13 @@ function boot() {
     if (mist) { const i = x < 1 ? 0 : 1, k = x - i, c = MIST[i].map((v, j) => Math.round(v + (MIST[i + 1][j] - v) * k)); mist.style.setProperty('--mist', c.join(' ')); }
   }
   const btnTod = $('#btnTod'), btnPause = $('#btnPause');
-  const posterSet = t => poster.dataset[t].replace('.webp', '-1000.webp') + ' 1000w, ' + poster.dataset[t] + ' 1600w';   // 幅の違う2枚(スマホは 1000)
+  const posterSrc = t => poster.dataset[t].replace('.webp', (poster.dataset.tier || '') + '.webp');   // 品質の段(-mid か、なし)は、読み込みの前に小さなスクリプトが決めた
+  const posterSet = t => posterSrc(t).replace('.webp', '-1000.webp') + ' 1000w, ' + posterSrc(t) + ' 1600w';   // 幅の違う2枚(スマホは 1000)
   const todLabel = () => ({ day: '夕方にする', dusk: '夜にする', night: '昼にする' })[R.dataset.tod];
   btnTod.setAttribute('aria-label', todLabel());
   btnTod.addEventListener('click', () => {
     const next = TODS[(TODS.indexOf(R.dataset.tod) + 1) % 3];
-    if (!ctl) { const im = new Image(); im.sizes = poster.sizes; im.srcset = posterSet(next); im.src = poster.dataset[next]; (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => { poster.srcset = im.srcset; poster.src = im.src; R.dataset.tod = next; }); }
+    if (!ctl) { const im = new Image(); im.sizes = poster.sizes; im.srcset = posterSet(next); im.src = posterSrc(next); (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => { poster.srcset = im.srcset; poster.src = im.src; R.dataset.tod = next; }); }
     else { R.dataset.tod = next; ctl.setTod(TODS.indexOf(next)); }
     btnTod.setAttribute('aria-label', todLabel());
     say.textContent = { day: '昼', dusk: '夕方', night: '夜' }[next] + 'になりました';
@@ -77,7 +90,7 @@ function boot() {
       hitPos[id] = [L + x0 / 100 * br.width, T + y0 / 100 * br.height, L + x1 / 100 * br.width, T + y1 / 100 * br.height];
     }
     if (tagFor) showTag(tagFor, true);
-    placeNudge();
+    placeNudge(); placeOv();
   }
   addEventListener('resize', () => { stillLayout(); if (ctl) ctl.resize(); });
   hero.addEventListener('click', e => {
@@ -166,38 +179,80 @@ function boot() {
     a.addEventListener('mouseenter', () => { if (ctl || openId) return; showTag(id, true, true); });
     a.addEventListener('mouseleave', () => { if (ctl || openId) return; showTag(null); });
   }
-  /* パネルの行: 本体は「中で見る」ボタン(その物に寄る)、右の「開く」は道具へのリンク。広場(考え方)は中がないので、行ぜんたいがリンク */
-  const GO = '開く<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+  /* ---------- パネルの中身 ----------
+     道具の行: ふれると、その物に寄り、行が道具の入口にひらく(もう一度ふれると閉じて、建物ぜんたいに戻る)。
+     入口の文言は data.js(products/index.html の PRODUCTS の写し)のまま。行き先の種類だけは kind と cta から決める */
   const mouseHover = matchMedia('(hover: hover) and (pointer: fine)');
-  function fillPanel(id) {
-    const b = BY_ID[id], inside = id !== 'plaza';
-    panel.style.setProperty('--mk', b.mark);
-    pRole.textContent = b.role; pTitle.textContent = b.name; pLine.textContent = b.line;
-    pTools.innerHTML = ''; defSid = b.tools[0]; pinSid = hovSid = focSid = null;
-    for (const tid of b.tools) {
-      const t = TOOLS[tid], li = document.createElement('li'); li.className = 'prow'; li.dataset.sid = tid;
-      const body = document.createElement(inside ? 'button' : 'a'); body.className = 'pfind';
-      const nb = document.createElement('b'); nb.textContent = t.name;
-      if (t.status) { const c = document.createElement('span'); c.className = 'chip'; c.textContent = t.status; nb.append(c); }
-      const tt = document.createElement('span'); tt.className = 't'; tt.textContent = t.t;
-      body.append(nb, tt);
-      if (t.note || t.ext) { const n = document.createElement('span'); n.className = 'n'; n.textContent = t.note || '別のサイト'; body.append(n); }
-      const go = document.createElement(inside ? 'a' : 'span'); go.className = 'go'; go.innerHTML = GO;
-      const link = inside ? go : body;
-      link.href = t.href; if (t.ext) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
-      if (inside) {
-        body.type = 'button'; body.setAttribute('aria-label', t.name + 'を中で見る'); body.setAttribute('aria-pressed', 'false');
-        go.setAttribute('aria-label', t.name + 'を開く' + (t.ext ? '(別のサイト)' : ''));
-        body.addEventListener('click', () => rowPick(tid));
-        li.addEventListener('mouseenter', () => rowEnter(tid));
-        for (const el of [body, go]) el.addEventListener('focus', () => { if (el.matches(':focus-visible')) { focSid = tid; applyFind(); } });
-      }
-      li.append(body, go); pTools.append(li);
+  const THUMB = s => '../../../images/products/thumbs/' + s + '.webp';
+  function kindOf(t) {
+    if (t.ext) return '別のサイト';
+    if (t.kind === 'intro') return /デモ/.test(t.cta || '') ? '紹介とデモ' : '紹介のページ';   // デモのない紹介(cta が「紹介を見る」)に「デモ」とは書かない
+    return t.kind === 'app' ? '道具そのもの' : '';
+  }
+  function toolRow(tid) {
+    const t = TOOLS[tid], li = el('li', 'prow'); li.dataset.sid = tid;
+    const head = el('button', 'pfind'), ent = el('div', 'pent');
+    head.type = 'button'; ent.id = 'pe-' + tid; ent.hidden = true;
+    const nb = el('b'); nb.textContent = t.name;
+    if (t.status) { const c = el('span', 'chip'); c.textContent = t.status; nb.append(c); }
+    const tt = el('span', 't'); tt.textContent = t.t;
+    head.append(nb, tt); head.insertAdjacentHTML('beforeend', ICO.chev);
+    head.setAttribute('aria-expanded', 'false'); head.setAttribute('aria-controls', ent.id);
+    head.addEventListener('click', () => rowPick(tid));
+    li.addEventListener('mouseenter', () => rowEnter(tid));
+    li.addEventListener('focusin', e => { if (e.target.matches(':focus-visible')) { focSid = tid; applyFind(); } });
+    li.append(head, ent);
+    return li;
+  }
+  /* 道具の入口(初めてひらいたときに作る。写しの画像もそのとき読む) */
+  function fillEntrance(ent, tid) {
+    if (ent.childElementCount) return;
+    const t = TOOLS[tid];
+    if (t.thumb) { const f = el('figure', 'pshot'), im = new Image(); im.width = 880; im.height = 550; im.decoding = 'async'; im.alt = t.name + 'の画面'; im.src = THUMB(t.thumb); f.append(im); ent.append(f); }
+    if (t.for || t.facts) {
+      const info = el('div', 'pinfo');
+      if (t.for) { const p = el('p', 'pfor'); p.textContent = t.for; info.append(p); }
+      if (t.facts) { const ul = el('ul', 'pfacts'); ul.setAttribute('aria-label', '利用の条件'); for (const f of t.facts) { const li = el('li'); li.textContent = f; ul.append(li); } info.append(ul); }
+      ent.append(info);
     }
+    const act = el('div', 'pact'), k = kindOf(t);
+    if (k) { const s = el('span', 'pkind'); s.textContent = k + (t.ext ? '・新しいタブで開きます' : ''); act.append(s); }
+    const a = el('a', 'pcta'); a.href = t.href; a.textContent = t.cta || '開く';
+    if (t.ext) { a.target = '_blank'; a.rel = 'noopener noreferrer'; const s = el('span', 'sr'); s.textContent = '(別のサイト・新しいタブで開きます)'; a.append(s); }
+    a.insertAdjacentHTML('beforeend', t.ext ? ICO.ext : ICO.arrow);
+    a.addEventListener('click', e => leap(e, ent.querySelector('.pshot img'), t));
+    act.append(a); ent.append(act);
+  }
+  /* 建物の一覧(名前にふれたとき・広場の「行き先を選ぶ」): 小さな肖像・名前・一行。選ぶと、町の上空を渡って移る */
+  function listRows(ol, ids) {
+    ol.innerHTML = '';
+    for (const id of ids) {
+      const b = BY_ID[id], li = el('li'), bt = el('button', 'lrow');
+      bt.type = 'button'; bt.style.setProperty('--mk', b.mark);
+      const im = new Image(); im.width = 480; im.height = 420; im.alt = ''; im.decoding = 'async'; im.src = 'img/b-' + id + '.webp';
+      const tx = el('span'), nb = el('b'), sm = el('small'); nb.textContent = b.name; sm.textContent = b.line; tx.append(nb, sm);
+      bt.append(im, tx);
+      if (id === openId) bt.setAttribute('aria-current', 'true');
+      bt.addEventListener('click', () => { if (id === openId) { listOpen(false); pName.focus(); return; } firstTouch(); openB(id, hits.get(id)); });
+      li.append(bt); ol.append(li);
+    }
+  }
+  function fillPanel(id) {
+    const b = BY_ID[id], plaza = id === 'plaza', i = RING.indexOf(id);
+    const pv = BY_ID[RING[(i + RING.length - 1) % RING.length]], nx = BY_ID[RING[(i + 1) % RING.length]];
+    panel.style.setProperty('--mk', b.mark);
+    pRole.textContent = b.role; pNameT.textContent = b.name; pLine.textContent = b.line;
+    pPrev.setAttribute('aria-label', '前の建物(' + pv.name + ')へ'); pPrev.title = pv.name;
+    pNext.setAttribute('aria-label', '次の建物(' + nx.name + ')へ'); pNext.title = nx.name;
+    pTools.innerHTML = ''; defSid = plaza ? null : b.tools[0]; pinSid = hovSid = focSid = null;
+    pPlaza.hidden = !plaza; pTools.hidden = plaza;
+    if (plaza) listRows(pzList, RING.filter(x => x !== 'plaza'));
+    else for (const tid of b.tools) pTools.append(toolRow(tid));
     // 動かないとき: その建物の断面の止めた画像
-    const showStill = !ctl;
-    pStill.hidden = !showStill;
-    if (showStill) stillShot(null);
+    pStill.hidden = !!ctl || plaza;
+    if (!pStill.hidden) stillShot();
+    pBody.scrollTop = 0;
     markRow(defSid);
   }
   function markRow(sid) { for (const li of $$('.prow', pTools)) li.classList.toggle('on', li.dataset.sid === sid); }
@@ -212,9 +267,13 @@ function boot() {
   function applyFind() {
     const sid = findNow();
     markRow(sid || defSid);
-    for (const li of $$('.prow', pTools)) { const bt = li.querySelector('button.pfind'); if (bt) bt.setAttribute('aria-pressed', String(li.dataset.sid === pinSid)); }
+    for (const li of $$('.prow', pTools)) {   // 選んだ(押した)行だけが入口にひらく。乗せただけでは、ひらかない(寄るだけ)
+      const on = li.dataset.sid === pinSid, ent = li.querySelector('.pent');
+      if (on) fillEntrance(ent, li.dataset.sid);
+      ent.hidden = !on; li.classList.toggle('open', on); li.querySelector('.pfind').setAttribute('aria-expanded', String(on));
+    }
     if (ctl) { ctl.find(sid); ctl.stationHover(sid); showSTag(null); }   // 寄っているときは、画面そのものが答え(名前の札は出さない)
-    else stillShot(sid);
+    writeHash();
   }
   function clearFind() { clearTimeout(hovT); pinSid = hovSid = focSid = null; }
   function rowEnter(sid) {
@@ -225,43 +284,143 @@ function boot() {
   pTools.addEventListener('mouseleave', () => { if (!mouseHover.matches) return; clearTimeout(hovT); hovT = setTimeout(() => { hovSid = null; applyFind(); }, 220); });
   pTools.addEventListener('focusout', e => { if (focSid && !pTools.contains(e.relatedTarget)) { focSid = null; applyFind(); } });
   function rowPick(sid) {
-    const go = () => { pinSid = pinSid === sid ? null : sid; if (!pinSid && hovSid === sid) hovSid = null; applyFind(); };
+    const go = () => { pinSid = pinSid === sid ? null : sid; if (!pinSid && hovSid === sid) hovSid = null; applyFind(); if (pinSid) revealRow(sid); };
     // スマホでシートを広げているときは、物が見える高さに戻してから寄る
     if (phone() && panel.classList.contains('full')) { panel.classList.remove('full'); setTimeout(go, 340); } else go();
   }
-  /* 動かないとき(動きを減らす・WebGL なし): 寄る代わりに、その道具の画面をパネルに出す */
-  function stillShot(sid) {
-    const im = pStill.querySelector('img'), t = sid && TOOLS[sid], b = BY_ID[openId];
-    im.onerror = null;
-    if (t && t.thumb) { im.src = '../../../images/products/thumbs/' + t.thumb + '.webp'; im.alt = t.name + 'の画面'; }
-    else if (b) { im.src = 'img/cut-' + openId + '.webp'; im.alt = b.name + 'の中。' + b.line + 'の道具が置かれている'; im.onerror = () => { im.onerror = null; im.src = 'img/b-' + openId + '.webp'; }; }
+  /* ひらいた入口が、パネル(シート)の見える範囲に入るように */
+  function revealRow(sid) { const li = $(`.prow[data-sid="${CSS.escape(sid)}"]`, pTools); if (li) requestAnimationFrame(() => li.scrollIntoView({ block: 'nearest', behavior: reduce() ? 'auto' : 'smooth' })); }
+  /* 動かないとき(動きを減らす・WebGL なし): パネルの上に、その建物の断面の止めた画像 */
+  function stillShot() {
+    const im = pStill.querySelector('img'), b = BY_ID[openId];
+    im.onerror = () => { im.onerror = null; im.src = 'img/b-' + openId + '.webp'; };
+    im.src = 'img/cut-' + openId + (phone() ? '-800' : '') + '.webp'; im.alt = b.name + 'の中。' + b.line + 'の道具が置かれている';
   }
-  function openB(id, from) {
+
+  /* ---------- 状態を URL のハッシュに残す(#town/建物/道具)。戻るボタンで町に戻ったとき、その状態から始める ---------- */
+  function writeHash() {
+    const h = openId ? '#town/' + openId + (pinSid ? '/' + pinSid : '') : '';
+    if (h === location.hash || (!h && !location.hash.startsWith('#town/'))) return;   // ほかの印(#guide など)は消さない
+    try { history.replaceState(history.state, '', location.pathname + location.search + h); } catch (e) { /* 使えなくても壊れない */ }
+  }
+
+  /* ---------- ひらく・閉じる・隣へ ---------- */
+  function openB(id, from, opt = {}) {
     if (openId === id) return;
     const wasOpen = !!openId;
     openId = id; opener = from || hits.get(id);
     showTag(null); hoverId = null; clearFind(); armXY = mouseXY.slice();
+    listOpen(false, true); ovTags(false);
     fillPanel(id);
     R.classList.add('opened');
     if (ctl) ctl.open(id);
+    if (id === 'plaza' && (!ctl || reduce())) ovTags(true);   // 動いているときは、見晴らしに着いてから(onOpened)
     const show = () => {
+      if (openId !== id) return;
       panel.hidden = false; panel.classList.remove('full');
-      pTitle.focus({ preventScroll: true });          // 描画が重い端末でも遅れないように、その場で移す
+      if (opt.focus !== false) pTitle.focus({ preventScroll: true });   // 描画が重い端末でも遅れないように、その場で移す
     };
-    if (wasOpen || !ctl || reduce()) show(); else setTimeout(show, 260);
+    if (wasOpen || !ctl || reduce() || opt.now) show(); else setTimeout(show, 260);
+    writeHash();
+    if (PERF) PERF.mark('open', id);
     say.textContent = BY_ID[id].name + 'がひらきました';
   }
   function closeB(back = true) {
     if (!openId) return;
-    const id = openId; openId = null; clearFind();
+    const id = openId; openId = null; clearFind(); listOpen(false, true); ovTags(false);
     panel.hidden = true; R.classList.remove('opened'); showSTag(null);
     if (ctl) ctl.close();
+    writeHash();
+    if (PERF) PERF.mark('close', id);
     if (back && opener) opener.focus({ preventScroll: true });
     say.textContent = BY_ID[id].name + 'を閉じました';
   }
+  /* 前・次: 島を一周する順(病院 → 広場 → 展望台 → 事務所 → クリニック → 公園 → アトリエ → 図書館 → 病院)。ひらいたまま、町の上空を渡る */
+  function step(d) {
+    if (!openId) return;
+    const i = RING.indexOf(openId), id = RING[(i + d + RING.length) % RING.length];
+    const keep = document.activeElement === pPrev || document.activeElement === pNext;   // 続けて押せるように、押したボタンにフォーカスを残す
+    firstTouch(); openB(id, hits.get(id), { focus: !keep });
+  }
+  pPrev.addEventListener('click', () => step(-1));
+  pNext.addEventListener('click', () => step(1));
+  let listFull = false;
+  function listOpen(on, quiet) {
+    if (on === !pList.hidden) return;
+    pList.hidden = !on; pMain.hidden = on; pName.setAttribute('aria-expanded', String(on));
+    if (on) {
+      listRows($('ol', pList), RING);
+      if (phone() && !panel.classList.contains('full')) { panel.classList.add('full'); listFull = true; }   // スマホは、8つが見える高さに広げる
+      pBody.scrollTop = 0;
+      const cur = $('[aria-current="true"]', pList); if (cur && !quiet) cur.focus({ preventScroll: true });
+    } else if (listFull) { listFull = false; if (phone()) panel.classList.remove('full'); }
+  }
+  pName.addEventListener('click', () => listOpen(pList.hidden));
   $('#pClose').addEventListener('click', () => closeB());
+
+  /* ---------- 広場の見晴らし: 建物の上の名前の札(ふれると、その建物へ渡る)。キーボードと読み上げは、パネルの「行き先を選ぶ」で ---------- */
+  function ovTags(on) {
+    oTags.classList.remove('on'); oTags.hidden = !on;
+    if (!on) return;
+    if (!oTags.childElementCount) for (const id of RING) {
+      if (id === 'plaza') continue;
+      const b = el('button', 'otag'); b.type = 'button'; b.tabIndex = -1; b.dataset.id = id; b.textContent = BY_ID[id].name;
+      b.addEventListener('click', e => { e.stopPropagation(); if (openId === 'plaza') { ringAt(id); if (ctl) ctl.press(id); openB(id, hits.get(id)); } });
+      oTags.append(b);
+    }
+    placeOv(); requestAnimationFrame(() => oTags.classList.add('on'));
+  }
+  function placeOv() {
+    if (oTags.hidden) return;
+    const hr = heroRect(), pr = panel.hidden ? null : panel.getBoundingClientRect();
+    const yMax = pr && phone() ? pr.top - hr.top - 6 : hero.clientHeight - 8, xMax = pr && !phone() ? pr.left - hr.left - 8 : hero.clientWidth;   // シート・パネルの下に隠れる札は出さない
+    for (const b of oTags.children) {
+      const p = tagPos[b.dataset.id]; if (!p) { b.classList.add('off'); continue; }
+      const [x, y] = tagXY(p, 36);
+      b.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,calc(-100% - 8px))`;
+      b.classList.toggle('off', y > yMax || x > xMax);
+    }
+  }
+
+  /* ---------- 移る瞬間: ボタンを押したら、すぐに移り始める(待たせない)。その間に、写しが画面いっぱいへ広がる(280ms) ----------
+     読み込みが速ければ途中で切れてよい。動きを減らす設定では動かさない。別のサイトは新しいタブで開くので、広げない。
+     戻ったとき(bfcache): 広がった写しを、入口の枠へ縮めて戻す */
+  let leapEl = null, leapT = 0;
+  function leap(e, im, t) {
+    if (t.ext || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (ctl) ctl.setPaused(true);   // 移る間は町を描かない(次のページの読み込みに手を譲る)
+    if (reduce() || !im || !im.naturalWidth || !document.body.animate) return;
+    if (leapEl) leapEl.remove();
+    const nw = im.naturalWidth, nh = im.naturalHeight, bx = im.getBoundingClientRect();
+    const s0 = Math.min(bx.width / nw, bx.height / nh), w0 = nw * s0, x0 = bx.left + (bx.width - w0) / 2, y0 = bx.top + (bx.height - nh * s0) / 2;   // object-fit: contain の中身
+    const vw = R.clientWidth, vh = innerHeight, s1 = Math.min(vw / nw, vh / nh), w1 = nw * s1, h1 = nh * s1, x1 = (vw - w1) / 2, y1 = phone() ? 0 : (vh - h1) / 2;   // スマホはページの上の端へ
+    const lp = el('div', 'leap'), bg = el('i', 'lp-bg'), li = new Image();
+    lp.setAttribute('aria-hidden', 'true'); li.className = 'lp-im'; li.alt = ''; li.src = im.currentSrc || im.src;
+    Object.assign(li.style, { left: x1.toFixed(1) + 'px', top: y1.toFixed(1) + 'px', width: w1.toFixed(1) + 'px', height: h1.toFixed(1) + 'px' });
+    lp.append(bg, li); document.body.append(lp);
+    const k = w0 / w1, from = `translate(${(x0 - x1).toFixed(1)}px,${(y0 - y1).toFixed(1)}px) scale(${k.toFixed(4)})`;
+    lp.dataset.from = from;
+    li.animate([{ transform: from, borderRadius: (8 / k).toFixed(1) + 'px' }, { transform: 'none', borderRadius: '0px' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' });
+    bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'cubic-bezier(.3,.6,.3,1)', fill: 'both' });
+    leapEl = lp; clearTimeout(leapT); leapT = setTimeout(() => unleap(true), 8000);   // 移れなかったとき(止めた・失敗した)は、元に戻す
+  }
+  function unleap(anim) {
+    clearTimeout(leapT);
+    const lp = leapEl; leapEl = null;
+    if (ctl) ctl.setPaused(paused);
+    if (!lp) return;
+    if (!anim || reduce()) { lp.remove(); return; }
+    const D = 240;
+    $('.lp-im', lp).animate([{ transform: 'none' }, { transform: lp.dataset.from }], { duration: D, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' });
+    $('.lp-bg', lp).animate([{ opacity: 1 }, { opacity: 0 }], { duration: D, fill: 'both' });
+    setTimeout(() => lp.remove(), D + 40);
+  }
+  addEventListener('pageshow', e => { if (e.persisted) unleap(true); });
+
+  /* ---------- キーボード: Esc で閉じる(一覧がひらいていれば一覧を)、←/→ で隣の建物へ、Tab はパネルの中を回る ---------- */
   addEventListener('keydown', e => {
-    if (e.key === 'Escape' && openId) { e.preventDefault(); closeB(); }
+    if (e.key === 'Escape' && openId) { e.preventDefault(); if (!pList.hidden) { listOpen(false); pName.focus(); } else closeB(); return; }
+    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && openId && !panel.hidden && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && !menu.open) { e.preventDefault(); step(e.key === 'ArrowLeft' ? -1 : 1); return; }
     if (e.key === 'Tab' && openId && !panel.hidden) {           // パネルの中を Tab で回る
       const f = $$('a,button,[tabindex="0"]', panel).filter(el => !el.hidden && el.offsetParent !== null);
       if (!f.length) return;
@@ -272,19 +431,41 @@ function boot() {
     }
   });
 
-  /* ---------- スマホのシート: 上に引くと広がる、下に払うと閉じる ---------- */
-  const grab = $('#pGrab');
-  let drag = null;
-  const sheetDown = e => { if (!phone()) return; drag = { y: e.clientY, h: panel.getBoundingClientRect().height, t: performance.now() }; panel.style.transition = 'none'; e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId); };
-  const sheetMove = e => { if (!drag) return; const dy = e.clientY - drag.y; panel.style.height = Math.max(120, Math.min(innerHeight * .88, drag.h - dy)) + 'px'; };
-  const sheetUp = e => {
-    if (!drag) return;
-    const dy = e.clientY - drag.y, v = dy / Math.max(1, performance.now() - drag.t);
-    panel.style.transition = ''; panel.style.height = '';
-    if (dy > 70 || v > .6) closeB(); else if (dy < -40) panel.classList.add('full'); else if (dy > 30) panel.classList.remove('full');
-    drag = null;
-  };
-  for (const el of [grab, $('.p-head')]) { el.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; sheetDown(e); }); el.addEventListener('pointermove', sheetMove); el.addEventListener('pointerup', sheetUp); el.addEventListener('pointercancel', sheetUp); }
+  /* ---------- スマホのシート: 上の帯(つまみ・前後・名前)を縦に引くと広がる・下に払うと閉じる。横にはじくと前後の建物へ ----------
+     ふれただけ(動かさない)なら、ボタンはそのまま押せる。動かし始めた向き(縦か横か)で決め、混ぜない */
+  const grab = $('#pGrab'), head = $('.p-head', panel);
+  let drag = null, swallow = 0;
+  function bandDown(e) {
+    if (!phone() || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    drag = { x: e.clientX, y: e.clientY, h: panel.getBoundingClientRect().height, t: performance.now(), mode: null, id: e.pointerId, el: e.currentTarget };
+  }
+  function bandMove(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.mode) {
+      if (Math.hypot(dx, dy) < 9) return;
+      drag.mode = Math.abs(dx) > Math.abs(dy) * 1.3 ? 'h' : 'v';
+      try { drag.el.setPointerCapture(e.pointerId); } catch (er) { /* 取れなくても動く */ }
+      if (drag.mode === 'v') panel.style.transition = 'none'; else head.style.transition = 'none';
+    }
+    if (drag.mode === 'v') panel.style.height = Math.max(120, Math.min(innerHeight * .88, drag.h - dy)) + 'px';
+    else head.style.transform = `translateX(${(Math.sign(dx) * Math.min(26, Math.abs(dx) * .22)).toFixed(1)}px)`;   // 少しだけ付いてくる(移る手応え)
+  }
+  function bandEnd(e, cancel) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    panel.style.transition = ''; panel.style.height = ''; head.style.transition = ''; head.style.transform = '';
+    if (!d.mode || cancel) return;   // ふれただけ: ボタンは click で動く
+    swallow = performance.now();
+    const dx = e.clientX - d.x, dy = e.clientY - d.y, ms = Math.max(1, performance.now() - d.t);
+    if (d.mode === 'v') { if (dy > 70 || dy / ms > .6) closeB(); else if (dy < -40) panel.classList.add('full'); else if (dy > 30) panel.classList.remove('full'); }
+    else if (Math.abs(dx) > 48 || Math.abs(dx) / ms > .45) step(dx < 0 ? 1 : -1);
+  }
+  for (const x of [grab, head]) {
+    x.addEventListener('pointerdown', bandDown); x.addEventListener('pointermove', bandMove);
+    x.addEventListener('pointerup', e => bandEnd(e)); x.addEventListener('pointercancel', e => bandEnd(e, true));
+  }
+  panel.addEventListener('click', e => { if (performance.now() - swallow < 350 && head.contains(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);   // 引いたあとの click は押したことにしない
 
   /* ---------- メニュー(スマホ) ---------- */
   const menu = $('#menu'), menuBtn = $('#menuBtn');
@@ -320,7 +501,7 @@ function boot() {
           const pw = Math.min(400, innerWidth * .34) + 48;
           return { l: 40, t: 90, r: w - pw - 16, b: h - 36 };
         },
-        onHover(id) { hoverId = id; if (openId) return; if (id) { firstTouchSoft(); showTag(id, true, true); } else showTag(null); },
+        onHover(id) { hoverId = id; if (openId) return; if (id) showTag(id, true, true); else showTag(null); },   // 乗せただけでは誘いを止めない
         onPress(id) { firstTouch(); ringAt(id); },
         onQuality(q) { store.set('bridge-hiraku-q', q); },
         onTod(x) { R.classList.add('skylive'); skyMix(x); },
@@ -328,26 +509,29 @@ function boot() {
         onEmpty() { if (!openId) return; if (findNow()) { clearFind(); applyFind(); } else closeB(false); },   // 寄っているときは、まず建物ぜんたいに戻る
         onStation(sid, how) {
           if (!openId) return;
-          if (how === 'tap' && sid) { pinSid = sid; applyFind(); const li = $(`.prow[data-sid="${CSS.escape(sid)}"]`, pTools); if (li) li.scrollIntoView({ block: 'nearest', behavior: reduce() ? 'auto' : 'smooth' }); return; }
+          if (how === 'tap' && sid) { pinSid = sid; applyFind(); revealRow(sid); return; }
           if (sid) { markRow(sid); if (!findNow()) showSTag(sid); } else { markRow(findNow() || defSid); showSTag(null); }
         },
+        onFlick(d) { if (openId) step(d); },   // 町の上の横のはじき(指)
         onLayout(L2) {
           const hr = heroRect(), cr = canvas.getBoundingClientRect(), ox = cr.left - hr.left, oy = cr.top - hr.top;
           for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; footPos[id] = [ox + p.foot[0], oy + p.foot[1]]; if (p.nudge) nudgePos = [ox + p.nudge[0], oy + p.nudge[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }
-          placeNudge();
+          placeNudge(); placeOv();
           if (tagFor) { const [x, y] = tagXY(tagPos[tagFor], 64); tagB.style.left = x.toFixed(1) + 'px'; tagB.style.top = y.toFixed(1) + 'px'; }
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };
           if (sTagFor) showSTag(sTagFor);
         },
-        onOpened() {},
-        onClosed() {}
+        onOpened(id) { if (id === 'plaza' && openId === 'plaza') ovTags(true); },   // 見晴らしに着いてから、名前の札
+        onClosed() {},
+        onFrame() { if (PERF) PERF.frame(); }
       });
       window.__ctl = ctl; window.__t3 = Math.round(performance.now() - t0); swap.live = performance.now();
       if (paused) ctl.setPaused(true);
+      // 止めた画像のうちにひらいていた建物(戻ってきたときのハッシュも)は、飛ばずに、その姿から立体にする
+      if (openId) { pStill.hidden = true; await ctl.restore(openId, openId === 'plaza' ? null : pinSid); if (openId) { applyFind(); if (openId === 'plaza') ovTags(true); } }
       requestAnimationFrame(() => { R.classList.add('live'); dispatchEvent(new Event('hiraku:live')); });
     }).catch(err => console.warn(err));
   }
-  function firstTouchSoft() { /* 乗せただけでは誘いを止めない(PC の誘いは、乗せている間だけ休む) */ }
   const idle = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 1500 }) : setTimeout(f, 300));
   if (document.readyState === 'complete') idle(upgrade); else addEventListener('load', () => idle(upgrade));
 
@@ -387,4 +571,32 @@ function boot() {
   }
 
   /* 下の案内から直接 #g-hospital などで来たとき: そのまま(リンクの一覧が答え) */
+  /* 戻ってきたとき(#town/建物/道具): その建物をひらき、その道具の入口をひらいた状態から(止めた画像のうちは瞬時に。立体は替わるときに飛ばずに合わせる) */
+  const hs = /^#town\/([a-z]+)(?:\/([a-z0-9-]+))?$/.exec(location.hash);
+  if (hs && BY_ID[hs[1]]) {
+    firstTouch(); openB(hs[1], null, { now: true });
+    const sid = hs[1] !== 'plaza' && hs[2] && BY_ID[hs[1]].tools.includes(hs[2]) ? hs[2] : null;
+    if (sid) { pinSid = sid; applyFind(); revealRow(sid); }
+  }
+
+  /* ---------- 計測の道具(?perf=1): 開閉のフレーム時間・入力から最初の描画まで・開閉を繰り返したときの記憶域 ----------
+     立体が1枚描くたびに時刻を記録する(onFrame)。入力は、指・キーを押した時刻(event.timeStamp)から、次の1枚を描き終えるまで(画面に出るのは次の垂直同期) */
+  function perfTools() {
+    const P = { frames: [], inputs: [], marks: [], pend: null };
+    const note = e => { if (P.pend == null) P.pend = e.timeStamp; };
+    addEventListener('pointerdown', note, true); addEventListener('keydown', note, true);
+    P.frame = () => { const now = performance.now(); P.frames.push(now); if (P.frames.length > 30000) P.frames.splice(0, 15000); if (P.pend != null) { P.inputs.push(Math.round(now - P.pend)); P.pend = null; } };
+    P.mark = (k, id) => P.marks.push({ k, id, t: performance.now() });
+    const stat = a => { const s = a.slice().sort((x, y) => x - y), q = f => s.length ? Math.round(s[Math.min(s.length - 1, Math.floor(s.length * f))] * 10) / 10 : 0; return { n: s.length, med: q(.5), p95: q(.95), max: q(1), over50: s.filter(v => v > 50).length }; };
+    const gaps = (t0, t1) => { const f = P.frames.filter(t => t >= t0 && t <= t1), g = []; for (let i = 1; i < f.length; i++) g.push(f[i] - f[i - 1]); return g; };
+    P.report = (win = 1600) => ({ tier: ctl && ctl.tier, open: stat(P.marks.filter(m => m.k === 'open').flatMap(m => gaps(m.t, m.t + win))), close: stat(P.marks.filter(m => m.k === 'close').flatMap(m => gaps(m.t, m.t + win))), input: stat(P.inputs), each: P.marks.map(m => ({ k: m.k, id: m.id, ...stat(gaps(m.t, m.t + win)) })) });
+    P.mem = () => { const r = ctl && ctl.renderer, m = performance.memory; return { heapMB: m ? Math.round(m.usedJSHeapSize / 104857.6) / 10 : null, geo: r ? r.info.memory.geometries : null, tex: r ? r.info.memory.textures : null, prog: r && r.info.programs ? r.info.programs.length : null }; };
+    P.cycle = async (n = 24, gap = [1800, 1300]) => {   // 建物を順に開いて閉じる(n 回)。8 回ごとに記憶域を記録
+      const wait = ms => new Promise(r => setTimeout(r, ms)), out = [{ i: 0, ...P.mem() }];
+      for (let i = 0; i < n; i++) { openB(RING[i % RING.length], null, { focus: false }); await wait(gap[0]); closeB(false); await wait(gap[1]); if ((i + 1) % 8 === 0) out.push({ i: i + 1, ...P.mem() }); }
+      return out;
+    };
+    window.__perf = P;
+    return P;
+  }
 }

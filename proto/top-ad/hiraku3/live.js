@@ -5,7 +5,9 @@
    ・寄る・戻る・渡る: 弧を描く(少し上がり、少し引いてから降りる)。行き先が遠いほど長く
    ・ひらく: 屋根が真上に持ち上がってから後ろへ抜け、前の壁が扉のように倒れて小さく弾む
    ・閉じる: 壁が戻り、屋根が降り、カメラが弧を描いて戻り、建物が小さく落ち着く
-   ・品質の段: 高(画素比2・影2048)/中(画素比1.5・影1024)/低(画素比1・影なし)。重いときは自動で一段下げる
+   ・品質の段: 高(画素比2・影2048)/中(画素比1.5・影1024)/低(画素比1・影なし)。重いときは一段下げる(目立たないよう、次に飛ぶときか、6 秒後に)
+   v3: 広場は町を見渡す高さへ上がる(見晴らし)。戻ってきたときは、飛ばずにその建物・その道具の状態から始める(restore)。
+       ひらいている間、指の横の速いはじきは前後の建物へ(回さない)。マウスの横ドラッグは、これまでどおり少し回して戻る
    ================================================================ */
 import { THREE, makeScene, makeLights, applyTod, aimCamera, capFrame, makeRenderer, fit, ELEV, U, LAYOUT, IDS, CAP_W, CAP_H, placePeople, placeVehicles, placeSky, placeSmall, angDiff, plazaFrame, PALETTE } from './world.js';
 import * as WORLD from './world.js';   // makeSceneAsync(段ごとに休みを入れて作る入口)があれば、それを使う
@@ -68,8 +70,8 @@ export async function capture(Q) {
   let canvas = document.getElementById('cap'); if (!canvas) { canvas = document.createElement('canvas'); canvas.id = 'cap'; document.body.appendChild(canvas); }
   canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   const renderer = makeRenderer(canvas, +(Q.get('dpr') || 1), W, H, true);
-  const only = mode === 'portrait' ? Q.get('id') : null;
-  const S = makeScene({ only }), L = makeLights(S.scene, 2048);
+  const only = mode === 'portrait' ? Q.get('id') : null, qt = Q.get('q') === 'mid' ? 'mid' : 'high';   // 品質の段(最初の画像は、スマホが描く中の段でも撮る)
+  const S = makeScene({ only, quality: qt }), L = makeLights(S.scene, qt === 'mid' ? 1024 : 2048);
   applyTod(L, renderer, tod);
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
   const t = +(Q.get('t') || 0);
@@ -187,6 +189,7 @@ export async function live(o) {
     return Math.abs(rot.t - rot.x) + dz * .5 + dxy * .6 + Math.abs(elev.t - elev.x) * .5;
   }
   function flight(arc = 1, zoomArc = 1) {
+    if (pendTier) applyTier();   // 品質の段を下げるのは、動きの切り替わりに合わせて(止まっている絵が急に粗くならないように)
     const d = farness(), T = clamp(.68 + d * .3, .68, 1.7), w = 6.2 / T, tok = ++turnTok;
     for (const s of [rot, camX, camY, camZ, elev]) s.w = w;
     fly.x = 0; fly.v = 0; fly.t = 1; fly.w = w * 1.1;
@@ -229,6 +232,7 @@ export async function live(o) {
   const tmpCam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
   /* ひらいたときの寄る先(建物を正面に向け、安全な範囲 = パネルやシートを避けた所に収める) */
   function frameFor(id) {
+    if (id === 'plaza') return overlook();
     const pl = placeOf(S, id), r = nearestRot(rot.x, deg(pl.face - 45)), bldg = id !== 'plaza' && id !== 'park';
     // 広場は、弧がロゴとして読める低めの角度から。病院は少し見下ろして、手前の広場の弧を画面の下へ逃がす
     const el = id === 'park' ? deg(small ? 16 : 22) : id === 'plaza' ? deg(30) : id === 'hospital' ? deg(31) : deg(26);
@@ -240,6 +244,21 @@ export async function live(o) {
     // 建物は、中の階を安全な範囲の少し上(46%)に。手前の倒れた壁と広場は下へ
     const scx = (sf.l + sf.r) / 2, scy = sf.t + shh * (bldg ? .46 : .5);
     return { rot: r, elev: el, x: q.cx - (scx - W / 2) / ppu, y: q.cy + (scy - H / 2) / ppu, ppu };
+  }
+  /* 広場の見晴らし: 広場の上へ上がり、2本の弧を手前(画面の下の真ん中)に、町の建物すべてを安全な範囲に収める。上には名前の札の余白。
+     町の側(world.js)が OVERLOOK = { rot, elev }(度)を出したら、それを使う。いまは仮(正面のまま、仰角 40°) */
+  function overlook() {
+    const OV = WORLD.OVERLOOK || {}, r = nearestRot(rot.x, deg(OV.rot || 0)), el = deg(OV.elev || 40);
+    const sf = o.safe(), top = 46, sw = sf.r - sf.l - 12, shh = sf.b - sf.t - top - 6;
+    aimCamera(tmpCam, origin, el);
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const id of IDS) {
+      const pl = placeOf(S, id), m = new THREE.Matrix4().makeRotationY(r).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(Y, pl.yaw), one));
+      for (const p of boundsOf(id, id === 'plaza' ? null : S.B[id].ex).pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(tmpCam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+    }
+    const ppu = Math.min(sw / (x1 - x0), shh / (y1 - y0), base.ppu * 3);
+    const scx = (sf.l + sf.r) / 2, scy = sf.t + top + shh / 2;
+    return { rot: r, elev: el, x: (x0 + x1) / 2 - (scx - W / 2) / ppu, y: (y0 + y1) / 2 + (scy - H / 2) / ppu, ppu };
   }
   /* 建物の、カメラから見た範囲(カメラの座標)。建物は中の階(床から箱の高さまで。倒れた壁と屋上ははみ出してよい)、展望台は塔の中の階 */
   function viewBox(id, r, el, bldg) {
@@ -348,7 +367,7 @@ export async function live(o) {
   }
 
   /* ---- ひらく・閉じる ---- */
-  function open(id) {
+  function open(id, opt = {}) {
     lastInput = clock();
     if (A.id === id) return;
     if (!MOD) loadMod();
@@ -360,13 +379,13 @@ export async function live(o) {
     if (A.kind === 'hinge') { const b = S.B[id]; A.end = Math.PI / 2 + Math.asin(clamp((b.ex.y0 + .01) / BOXES[id].h, 0, .4)); }
     if (A.kind === 'spin') A.end = Math.PI;
     dragOff.set(0); findSid = null; nearK.t = 0;
-    U.uOpenA.value = LAYOUT[id].bid; U.uFocus.value = LAYOUT[id].bid; dim.t = .34;
+    U.uOpenA.value = LAYOUT[id].bid; U.uFocus.value = LAYOUT[id].bid; dim.t = id === 'plaza' ? 0 : .34;   // 見晴らしでは、まわりの建物を暗くしない(どれも行き先)
     pressFx(id);                       // 押した手応え(沈んで明るく)。乗せたときの浮き(.07)は戻す。中の形は浮かないので、外と中がずれないように
     hover = null; o.onHover(null);
     interiorOf(id);
     const it = interiors[id];
     if (it) it.group.visible = true;
-    const reduce = o.reduce && o.reduce();
+    const reduce = (o.reduce && o.reduce()) || !!opt.instant;   // instant: 戻ってきたとき(飛ばずに、ひらいた姿から)
     retarget();
     // 町ぜんたいからは少し上がって降りる。ひらいたまま移るときは、町の上空を渡る(高く・大きく引く)
     const T = reduce ? 0 : transfer ? flight(1.3, 1.2) : flight(1.1, .55);
@@ -375,7 +394,7 @@ export async function live(o) {
     A.steps = [
       ...(reduce ? [] : [{ t: at(-120), f: () => { A.roofT0 = clock(); } }]),
       { t: at(0), f: () => { A.wall.t = A.end; } },
-      { t: at(190), f: () => { inLight.t = 1; } },
+      { t: at(190), f: () => { inLight.t = id === 'plaza' ? 0 : 1; } },   // 広場には中がない
       ...stationSeq(id, at(370), reduce),
       { t: at(820), f: () => { o.onOpened && o.onOpened(id); } }
     ];
@@ -405,15 +424,24 @@ export async function live(o) {
     for (const s of it.stations) s.setActive(s.id === sid);
     curStation = sid; dirty = true; kick();
   }
-  function find(sid) {
+  function find(sid, opt = {}) {
     if (!A.id) return;
     sid = sid || null; if (sid === findSid) return;
     findSid = sid; lastInput = clock();
     if (sid) { findC = null; setActive(sid); }
     retarget(); nearK.t = sid && findC ? 1 : 0; easeTurn(1200);
-    if (o.reduce && o.reduce()) for (const s of [rot, camX, camY, camZ, elev, nearK]) s.set(s.t);
+    const still = () => { for (const s of [rot, camX, camY, camZ, elev, nearK]) s.set(s.t); };
+    if ((o.reduce && o.reduce()) || opt.instant) still();
     else if (sid) after(450, () => { if (findSid === sid) retarget(); });   // 物が持ち上がりきった位置で、もう一度合わせる
     kick();
+  }
+  /* 戻ってきたとき(URL のハッシュ): 飛ばずに、その建物がひらき、その道具に寄った姿から始める。中の形を読み、物が持ち上がりきってから整える */
+  async function restore(id, sid) {
+    await loadMod();
+    open(id, { instant: true });
+    if (sid) find(sid, { instant: true });
+    await new Promise(r => after(520, () => { if (A.id === id) { retarget(); nearK.t = findSid && findC ? 1 : 0; for (const s of [rot, camX, camY, camZ, elev, nearK, dim]) s.set(s.t); } r(); }));
+    dirty = true; kick();
   }
   function stationHover(sid) {
     const it = A.id && interiors[A.id]; if (!it) return;
@@ -509,7 +537,7 @@ export async function live(o) {
   let down = null, rotV = 0;
   o.canvas.addEventListener('pointerdown', e => {
     lastInput = clock();
-    down = { x: e.clientX, y: e.clientY, t: clock(), moved: 0, id: e.pointerId, lastX: e.clientX, lastT: clock(), base: rot.x };
+    down = { x: e.clientX, y: e.clientY, t: clock(), ts: e.timeStamp, moved: 0, id: e.pointerId, lastX: e.clientX, lastT: clock(), base: rot.x, touch: e.pointerType !== 'mouse' };
     rotV = 0;
     const id = pick(e);
     if (id && id !== A.id && !(A.id && pickStation(e))) { pressFx(id); o.onPress && o.onPress(id); }
@@ -519,9 +547,11 @@ export async function live(o) {
     if (down && e.pointerId === down.id) {
       const dx = e.clientX - down.lastX, now = clock(); down.lastX = e.clientX; down.moved += Math.abs(dx) + Math.abs(e.clientY - down.y) * 0;
       if (down.moved > 6) {
+        if (!down.t6) down.t6 = e.timeStamp;   // 動き始めた時刻(はじきの速さは、ここから測る)
         if (!o.canvas.hasPointerCapture(e.pointerId)) o.canvas.setPointerCapture(e.pointerId);
+        if (pendTier) applyTier();
         const d = dx * .0072;
-        if (A.id) { dragOff.t = clamp(dragOff.t + d, -deg(25), deg(25)); dragOff.x = dragOff.t; dragOff.v = 0; }
+        if (A.id) { if (!down.touch) { dragOff.t = clamp(dragOff.t + d, -deg(25), deg(25)); dragOff.x = dragOff.t; dragOff.v = 0; } }   // ひらいている間、指の横の動きは回さない(はじきで前後へ)
         else { rot.x += d; rot.t = rot.x; rot.v = 0; rotV = d / Math.max(.008, (now - down.lastT) / 1000); }
         down.lastT = now; lastInput = now; dirty = true; kick();
       }
@@ -542,8 +572,13 @@ export async function live(o) {
     if (o.canvas.hasPointerCapture(e.pointerId)) o.canvas.releasePointerCapture(e.pointerId);
     if (!tap && !A.id && Math.abs(rotV) > .05) { inertia = clamp(rotV, -4, 4); }
     if (A.id && !tap) { dragOff.t = 0; }
-    down = null;
-    if (!tap) { kick(); return; }
+    const d0 = down; down = null;
+    if (!tap) {
+      // ひらいている間の、指の横の速く短いはじき → 前後の建物へ(縦はページのスクロールのまま)
+      const fx = e.clientX - d0.x, fy = e.clientY - d0.y;
+      if (A.id && d0.touch && Math.abs(fx) > 40 && Math.abs(fx) > Math.abs(fy) * 1.4 && e.timeStamp - (d0.t6 || d0.ts) < 400) o.onFlick && o.onFlick(fx < 0 ? 1 : -1);
+      kick(); return;
+    }
     if (A.id) {
       const sid = pickStation(e);
       if (sid) { stationHover(sid); o.onStation(sid, 'tap'); return; }
@@ -569,13 +604,15 @@ export async function live(o) {
   const springs = [rot, camX, camY, camZ, elev, dim, lift, hiAmt, tod, inLight, dragOff, nearK, fly];
   /* 重さの計測: 動いている間のフレームの間隔(中央値)。42ms(24fps)を超えたら一段下げる。下げたらページに知らせる(次の訪問はその段から) */
   const ft = [];
+  let pendTier = null, pendAt = 0;   // 下げると決めた段。次に飛ぶとき・回すとき(なければ 6 秒後)に下げる
   function measure(gap) {
     if (manual || tier === 'low' || frameN < 8 || gap > 400) return;
     ft.push(gap);
     if (ft.length < 36) return;
     const m = ft.sort((a, b) => a - b)[ft.length >> 1]; ft.length = 0;
-    if (m > 42) setTier(tier === 'high' ? 'mid' : 'low');
+    if (m > 42 && !pendTier) { pendTier = tier === 'high' ? 'mid' : 'low'; pendAt = clock(); }
   }
+  function applyTier() { const q = pendTier; pendTier = null; if (q && q !== tier) setTier(q); }
   function setTier(q) {
     tier = q;
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, DPR[q]));
@@ -596,6 +633,7 @@ export async function live(o) {
     if (!down && !A.id && Math.abs(inertia) > .002) { rot.x += inertia * dt; rot.t = rot.x; inertia *= Math.pow(.05, dt); }
     if (A.id) rot.t = (openCam ? openCam.rot : rot.t) + dragOff.x;
     // 段取り
+    if (pendTier && now - pendAt > 6000) applyTier();
     while (later.length && later[0].at <= now) later.shift().f();
     if (grow) { const k = clamp01((now - grow) / 650), pk = interiors.park; if (pk) pk.group.scale.y = Math.max(.001, 1 - Math.pow(1 - k, 3)); if (k >= 1) grow = 0; }
     for (const s of [A, Bk]) if (s.id && s.steps.length) { const el = now - s.t0; while (s.steps.length && s.steps[0].t <= el) s.steps.shift().f(); }
@@ -700,7 +738,7 @@ export async function live(o) {
   kick();
   setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(() => loadMod(), { timeout: 1500 }) : loadMod()), 700);   // 止めた画像からの入れ替わり(0.5 秒)が済んでから
   return {
-    open, close, setActive, stationHover, find, info, renderer,
+    open, close, setActive, stationHover, find, restore, info, renderer,
     get findId() { return findSid; },
     hover(id) { setHover(id); },
     press(id) { pressFx(id); },
