@@ -322,7 +322,7 @@ function boot() {
   /* ---------- 状態を URL のハッシュに残す(#town/建物/道具)。戻るボタンで町に戻ったとき、その状態から始める ---------- */
   function writeHash() {
     const h = openId ? '#town/' + openId + (pinSid ? '/' + pinSid : '') : '';
-    if (h === location.hash || (!h && !location.hash.startsWith('#town/'))) return;   // ほかの印(#guide など)は消さない
+    if (h === location.hash || (!h && !location.hash.startsWith('#town/'))) return;   // ほかの印(#main など)は消さない
     try { history.replaceState(history.state, '', location.pathname + location.search + h); } catch (e) { /* 使えなくても壊れない */ }
   }
 
@@ -416,7 +416,7 @@ function boot() {
      その下に道具の名前を小さく。移るのに 800ms 以上かかったら、名前の下に細い線が流れる。読み込みが速ければ途中で切れてよい。
      動きを減らす設定では動かさない。別のサイトは新しいタブで開くので、広げない。戻ったとき(bfcache): 写しが元の画面へ縮んで戻る */
   let leapEl = null, leapT = 0, waitT = 0;
-  function leap(e, shotImg, t, sid) {
+  function leap(e, shotImg, t, sid, own) {
     if (t.ext || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (ctl) ctl.setPaused(true);   // 移る間は町を描かない(次のページの読み込みに手を譲る)
     if (reduce() || !document.body.animate) return;
@@ -424,7 +424,8 @@ function boot() {
     // 広げるのは、着く画面と同じ写しだけ。紹介のページへ行く物(kind=intro)と、着く画面の写しがない物(land: false)は、紙の地に名前だけ
     let im = null, from = null;
     const bare = t.kind === 'intro' || t.land === false, land = t.land && landImg[t.land];
-    if (!bare && ctl) { im = land && land.naturalWidth ? land : ctl.imageOf(t.shot || (t.thumb && THUMB(t.thumb))); from = im && ctl.screenRect(sid); }
+    if (own && own.naturalWidth) { const bx = own.getBoundingClientRect(); from = { x: bx.left, y: bx.top, w: bx.width, h: bx.height }; im = own; }   // 第3幕: 押した画面そのものから
+    else if (!bare && ctl) { im = land && land.naturalWidth ? land : ctl.imageOf(t.shot || (t.thumb && THUMB(t.thumb))); from = im && ctl.screenRect(sid); }
     else if (!bare && shotImg && shotImg.naturalWidth) {   // 止めた画像のとき: 入口の写しの枠から(object-fit: contain の中身)
       const bx = shotImg.getBoundingClientRect(), k0 = Math.min(bx.width / shotImg.naturalWidth, bx.height / shotImg.naturalHeight);
       from = { x: bx.left + (bx.width - shotImg.naturalWidth * k0) / 2, y: bx.top + (bx.height - shotImg.naturalHeight * k0) / 2, w: shotImg.naturalWidth * k0, h: shotImg.naturalHeight * k0 };
@@ -592,42 +593,21 @@ function boot() {
   const idle = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 1500 }) : setTimeout(f, 300));
   if (document.readyState === 'complete') idle(upgrade); else addEventListener('load', () => idle(upgrade));
 
-  /* ---------- 下の節: 帯が画面に入ると、閉じた肖像から、ひらいた中へ(前の壁が倒れる向き。1回だけ) ----------
-     JS なし・動きを減らす設定では、最初からひらいた絵 */
-  // 閉じた絵(data-src)は、帯が1画面ぶん手前に来たら読む。読めたときに帯がまだ見えていなければ、閉じた姿にしておき(armed)、
-  // 帯が画面に入ったら倒す。間に合わなかった帯(速いスクロール・#g- で直接来た)は、中の絵のまま(切り替えない)
-  const pairs = $$('.pair[data-wipe]');
-  if (pairs.length && !reduce() && 'IntersectionObserver' in window) {
-    const seen = new WeakSet();
-    const go = f => { f.classList.add('go'); requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove('armed'))); };
-    const view = new IntersectionObserver(es => {
-      for (const en of es) {
-        if (!en.isIntersecting) continue;
-        const f = en.target; view.unobserve(f); seen.add(f);
-        if (!f.classList.contains('armed')) continue;
-        const op = f.querySelector('.open');
-        (op.complete ? Promise.resolve() : Promise.race([new Promise(r => { op.addEventListener('load', r, { once: true }); op.addEventListener('error', r, { once: true }); }), new Promise(r => setTimeout(r, 2500))])).then(() => setTimeout(() => go(f), 160));
-      }
-    }, { threshold: .55 });
-    const near = new IntersectionObserver(es => {
-      for (const en of es) {
-        if (!en.isIntersecting) continue;
-        const f = en.target; near.unobserve(f);
-        const sh = f.querySelector('.shut'); if (!sh || !sh.dataset.src) continue;
-        sh.addEventListener('load', () => { if (!seen.has(f)) f.classList.add('armed'); }, { once: true });
-        if (sh.dataset.srcset) sh.srcset = sh.dataset.srcset;
-        sh.src = sh.dataset.src;
-      }
-    }, { rootMargin: '100% 0px' });
-    for (const f of pairs) view.observe(f);
-    // 先読みは、最初の画面が済んでから(立体に替わったとき・最初にスクロールしたとき)。最初の画面の読み込みと競合しないように
-    let started = false;
-    const startNear = () => { if (started) return; started = true; for (const f of pairs) near.observe(f); };
-    addEventListener('scroll', startNear, { once: true, passive: true });
-    addEventListener('hiraku:live', startNear, { once: true });
+  /* ---------- 第3幕: 実際の画面(と、その横のリンク)を押すと、その画面が広がって道具になる(町の入口と同じ 280ms。動きを減らす設定では動かさない) ---------- */
+  for (const a of $$('a[data-leap]')) {
+    const t = TOOLS[a.dataset.leap]; if (!t) continue;
+    const own = () => { const sec = a.closest('.act'); return sec && sec.querySelector('figure img'); };
+    a.addEventListener('click', e => leap(e, null, t, null, own()));
   }
 
-  /* 下の案内から直接 #g-hospital などで来たとき: そのまま(リンクの一覧が答え) */
+  /* ---------- 見出しの帯: 終幕の夜の上では、夜の色に替える ---------- */
+  // 夜の地の上の端に置いた細い印が、見出しの帯の下(60px)より上へ出たら夜(夜の地が画面より高いスマホでも、境を越えるたびに知らせが来る)
+  const finIn = $('.fin-in');
+  if (finIn && 'IntersectionObserver' in window) {
+    const mark = el('i', 'fin-mark'); mark.setAttribute('aria-hidden', 'true'); finIn.prepend(mark);
+    new IntersectionObserver(es => { for (const en of es) R.classList.toggle('hd-night', !en.isIntersecting && en.boundingClientRect.top < 60); }, { rootMargin: '-60px 0px 0px 0px', threshold: 0 }).observe(mark);
+  }
+
   /* 戻ってきたとき(#town/建物/道具): その建物をひらき、その道具の入口をひらいた状態から(止めた画像のうちは瞬時に。立体は替わるときに飛ばずに合わせる)。
      同じページの中の #town/… のリンクと、アドレスの書き換え(hashchange)にも応える */
   function hashState() {
@@ -636,7 +616,7 @@ function boot() {
   }
   function fromHash(boot) {
     const st = hashState();
-    if (!st) { if (!boot && !location.hash && openId) closeB(false); return; }   // #guide などは、そのまま(ページの中を移るだけ)
+    if (!st) { if (!boot && !location.hash && openId) closeB(false); return; }   // #main などは、そのまま(ページの中を移るだけ)
     firstTouch();
     if (st.id !== openId) openB(st.id, null, boot ? { now: true } : {});
     if (st.sid !== pinSid) { clearFind(); pinSid = st.sid; applyFind(); if (st.sid) revealRow(st.sid); }

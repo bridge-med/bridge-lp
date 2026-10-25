@@ -65,7 +65,8 @@ function placeOf(S, id) {
    止めた画像を撮る(?capture=poster&tod=day|dusk|night / portrait&id= / cutaway&id=)
    ================================================================ */
 export async function capture(Q) {
-  const mode = Q.get('capture'), tod = { day: 0, dusk: 1, night: 2 }[Q.get('tod') || 'day'] ?? 0, W = +(Q.get('w') || CAP_W), H = +(Q.get('h') || CAP_H);
+  const tq = Q.get('tod') || 'day';   // 時刻は名前(day・dusk・night)か、その間の数(0 = 昼、1 = 夕、2 = 夜)
+  const mode = Q.get('capture'), tod = isFinite(+tq) ? +tq : ({ day: 0, dusk: 1, night: 2 }[tq] ?? 0), W = +(Q.get('w') || CAP_W), H = +(Q.get('h') || CAP_H);
   document.documentElement.classList.add('capture');
   let canvas = document.getElementById('cap'); if (!canvas) { canvas = document.createElement('canvas'); canvas.id = 'cap'; document.body.appendChild(canvas); }
   canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
@@ -79,6 +80,7 @@ export async function capture(Q) {
   const t = +(Q.get('t') || 0);
   placePeople(S.dyn, t, null); placeVehicles(S.dyn, t, 0, null); placeSky(S.dyn, t, tod > 1.5 ? 1 : 0); placeSmall(S.dyn, t, true);
   if (S.dyn.clouds && Q.get('clouds') === '0') S.dyn.clouds.mesh.visible = false;
+  if (S.dyn.haze && Q.get('haze') === '0') for (const m of S.dyn.haze.meshes) m.visible = false;   // 島の下のもや(終幕の遠景では、絵の四角で切れないように外す)
   setStatic(S);
   // 中の形: 公園はいつも(町の景色の一部)。断面(cutaway)のときは、その建物をひらいた姿にする
   const MOD = await import('./interiors.js').catch(() => null);
@@ -100,8 +102,12 @@ export async function capture(Q) {
     else if (bx.shape !== 'open') { const z = bx.d / 2 + E + WALL, end = Math.PI / 2 + Math.asin(clamp((b.ex.y0 + .01) / bx.h, 0, .4)); U.uPM.value[1].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, 0, z)).multiply(new THREE.Matrix4().makeRotationX(end)).multiply(new THREE.Matrix4().makeTranslation(0, 0, -z)).multiply(tbi); }
     if (!closed && !sect) U.uPM.value[2].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, 40, 0)).multiply(tbi);
     // その建物を正面に向けて(島を回す)、少し低い角度から寄る。断面は、ほぼ水平(el の度)から
-    const spin = sect ? deg(45) - pl.yaw : deg(pl.face - 45), el = sect ? deg(+(Q.get('el') ?? 5)) : cut === 'park' ? deg(17) : deg(26);
+    const spin = sect ? deg(45) - pl.yaw : deg(pl.face - 45), el = sect ? deg(+(Q.get('el') ?? 8)) : cut === 'park' ? deg(17) : deg(26);
     S.world.rotation.y = spin; S.world.updateMatrixWorld(true);
+    if (sect) {   // 断面は主棟だけ: 横の壁の外側で切る(右の別棟と、左の車寄せを外す)。島のグループの回転だけを掛けた、世界の座標の面
+      const X1 = bx.w / 2 + E + WALL + .006, ax = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), spin + pl.yaw);
+      renderer.clippingPlanes = [new THREE.Plane(ax.clone().negate(), X1), new THREE.Plane(ax.clone(), X1)];
+    }
     aimCamera(camera, new THREE.Vector3(), el);
     const bd = boundsOf(cut, b && b.ex), m = new THREE.Matrix4().makeRotationY(spin).multiply(tb), pts = (sect ? bd.pts.filter(p => p.z <= bx.d / 2 + E + WALL + 1e-3) : bd.pts).map(p => p.clone().applyMatrix4(m));
     const mg = +(Q.get('m') ?? .06);
@@ -142,7 +148,18 @@ export async function capture(Q) {
     const ob = obs[LAYOUT[id].bid]; if (ob) pins[id].ob = [...pc(ob[0], ob[3]), ...pc(ob[2], ob[1])];
     const na = ex && nudgeAt(id, ex); if (na) { const v = new THREE.Vector3(...na).applyMatrix4(m).project(camera); pins[id].nudge = pc(v.x, v.y); }
   }
-  window.__done = { pins, calls: renderer.info.render.calls, tris: renderer.info.render.triangles };
+  // 道具の画面の位置(枠の %。左上 x0,y0 と右下 x1,y1): 断面の絵の札と引き出し線は、この値で置く(手で合わせない)
+  const st = {};
+  if (cut && built.length) {
+    const it = built[built.length - 1], pc = (vx, vy) => [+((vx + 1) / 2 * 100).toFixed(2), +((1 - vy) / 2 * 100).toFixed(2)];
+    it.group.updateWorldMatrix(true, true);
+    for (const s of it.stations || []) {
+      let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+      for (const q of s.quad || []) { const v = new THREE.Vector3(...q).applyMatrix4(it.group.matrixWorld).project(camera); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+      if (x0 <= x1) st[s.id] = [...pc(x0, y1), ...pc(x1, y0)];
+    }
+  }
+  window.__done = { pins, st, calls: renderer.info.render.calls, tris: renderer.info.render.triangles };
 }
 function setStatic(S) {
   for (const M of U.uPM.value) M.identity();
