@@ -592,7 +592,7 @@ export async function live(o) {
   function modReady() {
     if (!MOD) return;
     const pk = interiorOf('park'); if (pk) { pk.group.scale.y = .001; grow = clock() || 1e-3; }   // 手動の時計(撮るとき)は 0 から始まるので、0 にしない(0 だと伸びずに潰れたまま)
-    if (!scrub && !A.id) setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(prewarm, { timeout: 2000 }) : prewarm()), 900);   // 案A: 病院の中を先に作って、シェーダーを用意しておく(スクロールして壁がひらく1こまで止まらないように)
+    if (!scrub && !A.id) setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(prewarm, { timeout: 300 }) : prewarm()), 700);   // 案A: 病院の中を先に作って、シェーダーを用意しておく(スクロールして壁がひらく1こまで止まらないように)。公園が芝から伸び終わったらすぐに(早くスクロールを始めた人に当たる間を短く。v6)
     const id = A.id;
     if (scrub) { const it = interiorOf(SCRUB_ID); if (it) it.group.visible = true; scrub.kf = null; }   // 案A: 中の形が届いたら、壁をひらく(進みはスクロールが決める)
     else if (id && id !== 'plaza') {
@@ -612,8 +612,9 @@ export async function live(o) {
   /* 公園だけは最初から中を組む(池・カプセルの機械・保留の棚・窓の額が、町の景色として見えるように)。
      公園の画面の画像(約85KB)も、このとき読む。後にすると、止めた画像と入れ替えた直後に、小さな黒い画面が町に出るため */
 
-  /* 病院の中を、手が空いたときに先に作る(見えないまま)。描く形の準備(シェーダー)も、ここで済ませる。
-     スクロールの途中で初めて作ると、その1こまで主スレッドが止まり、カメラが引っかかるため */
+  /* 病院の中を、中の形が届いて公園が芝から伸び終わったら(約0.7秒後)、先に作る(見えないまま)。描く形の準備(シェーダー)も、ここで済ませる。
+     スクロールの途中で初めて作ると、その1こまで主スレッドが止まり、カメラが引っかかるため。
+     v6 の病院の中は、公園と違う描き方を5つ使う(病院の式の3つ・外枠の2つ)。v5 の病院は公園の描き方を使い回していたので、この用意が要らなかった */
   let warm = null;
   function prewarm() {
     if (warm || !MOD || scrub || A.id || interiors[SCRUB_ID] !== undefined) return;
@@ -625,15 +626,25 @@ export async function live(o) {
     try { pr = renderer.compileAsync ? renderer.compileAsync(S.scene, camera) : (renderer.compile(S.scene, camera), null); } catch (e) { /* そのまま(最初に描くときに用意される) */ }
     if (!scrub && A.id !== SCRUB_ID) it.group.visible = false;
     if (!scrub) frameG.visible = false;
-    // 描き方を初めて使うときの確かめ(仕上がりを待つ)も、手が空いているうちに済ませる。1画素だけ描く(寄り始めの1こまで待つと、そこで長く止まる)
+    // 描き方を初めて使うときの確かめ(仕上がりを待つ)も、手が空いているうちに済ませる(寄り始めの1こまで待つと、そこで長く止まる)。
+    // 待ちが出た描き方が2つになったら、次の手の空いたときへ回す(まとめて待つと、1つの長い止まりになる)。待ちの多くが描く側の仕事の溜まりなら、一度待てば残りは待たずに済む。済んだら1画素だけ描く(描く形の用意)
+    let todo = null;
     const firstUse = () => {
       if (scrub || A.id) return;
+      if (!todo) todo = (renderer.info.programs || []).slice();
+      let slow = 0;
+      while (todo.length) {
+        const pg = todo.shift(), t = performance.now();
+        try { if (pg.getUniforms) pg.getUniforms(); } catch (e) { /* 描くときに確かめる */ }   // 確かめ済みの描き方は、すぐ返る
+        if (performance.now() - t > 8 && ++slow >= 2) break;
+      }
+      if (todo.length) return idle();
       it.group.visible = true; frameG.visible = true;
       try { renderer.setScissorTest(true); renderer.setScissor(0, 0, 1, 1); renderer.render(S.scene, camera); } catch (e) { /* 次に描くときに確かめる */ }
       renderer.setScissorTest(false);
       it.group.visible = false; frameG.visible = false; dirty = true; kick();
     };
-    const idle = () => (window.requestIdleCallback ? requestIdleCallback(firstUse, { timeout: 2000 }) : setTimeout(firstUse, 200));
+    const idle = () => (window.requestIdleCallback ? requestIdleCallback(firstUse, { timeout: 500 }) : setTimeout(firstUse, 200));
     if (pr && pr.then) pr.then(idle, idle); else idle();
   }
   function interiorOf(id) {
@@ -940,7 +951,7 @@ export async function live(o) {
     if (!down && !A.id && Math.abs(inertia) > .002) { rot.x += inertia * dt; rot.t = rot.x; inertia *= Math.pow(.05, dt); }
     if (A.id && !scrub) rot.t = (openCam ? openCam.rot : rot.t) + dragOff.x;
     // 段取り
-    if (pendTier && (now - pendAt > 6000 || (scrub && !sp.moving))) applyTier();   // 舞台では、スクロールが止まったときに下げる(指が動いている間に絵の細かさを変えない)
+    if (pendTier && !sp.moving && now - lastInput > 1200 && (scrub || now - pendAt > 6000)) applyTier();   // 指と舞台が止まって 1.2 秒たってから下げる(描く大きさを替える1こまは長く止まるので、動いている間に替えない。v6)。舞台ではすぐ、ほかは決めて 6 秒後(飛ぶ・回す始めにも下げる)
     while (later.length && later[0].at <= now) later.shift().f();
     if (grow) { const k = clamp01((now - grow) / 650), pk = interiors.park; if (pk) pk.group.scale.y = Math.max(.001, 1 - Math.pow(1 - k, 3)); if (k >= 1) grow = 0; }
     for (const s of [A, Bk]) if (s.id && s.steps.length) { const el = now - s.t0; while (s.steps.length && s.steps[0].t <= el) s.steps.shift().f(); }

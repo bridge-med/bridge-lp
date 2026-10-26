@@ -32,7 +32,8 @@ function boot() {
   const hits = new Map($$('.hit').map(a => [a.dataset.id, a]));
   const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
   const reduce = () => reduceQ.matches || Q.get('still') === '1';
-  const phone = () => innerWidth < 921;   // 本番の bridge.css と同じく、920px まではドロワー(スマホの形)
+  let vwN = 0; addEventListener('resize', () => { vwN = 0; });   // 画面の幅は、大きさが変わったときだけ読み直す(innerWidth は読むたびに組み直しを走らせるので、毎こまは読まない)
+  const phone = () => (vwN || (vwN = innerWidth)) < 921;   // 本番の bridge.css と同じく、920px まではドロワー(スマホの形)
   const save = !!(navigator.connection && navigator.connection.saveData);
   const TODS = ['day', 'dusk', 'night'];
   const ICO = {
@@ -567,22 +568,30 @@ function boot() {
   const stageP = () => { const r = stage.getBoundingClientRect(), sp = span(); return sp > 0 ? Math.max(0, Math.min(1, -r.top / sp)) : 0; };
   // 帯が出ているときの画面の高さ(svh。言葉と入口を置く範囲)。測る印を1つ置いて、その高さを読む(帯の開閉では変わらない)
   const svhEl = document.createElement('div'); svhEl.setAttribute('aria-hidden', 'true'); svhEl.style.cssText = 'position:absolute;left:0;top:0;width:0;height:100svh;visibility:hidden;pointer-events:none'; document.body.append(svhEl);
-  const svhH = () => svhEl.offsetHeight || innerHeight;
+  let svhV = 0, chipWH = null;   // svh と札の大きさも、画面の大きさ・字が変わったときだけ測り直す(毎こま測ると、書いた後に読むたびに組み直しが走る)
+  addEventListener('resize', () => { svhV = 0; chipWH = null; });
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { chipWH = null; });
+  const svhH = () => svhV || (svhV = svhEl.offsetHeight || innerHeight);
   const show = (e, k) => { e.style.opacity = k.toFixed(3); e.classList.toggle('off', k <= .01); };   // 透明で隠すだけ(読み上げの順には残す)。押せるのは見えている間だけ
   // v6(designer の順序。区切りは 1.5 画面の舞台の p): 寄る間は文字なし → 着いたら(.43)絵だけ → 上に「病院の中」と一文(.45–.49)→ 階ごとに居場所と道具の一行(.565・.7・.835)、
   // その階の札が物の上に出る(出た札は、目立たない見た目で残る)→ 下の入口(1F と一緒に .84–.88)。外枠と階の印は壁が沈むのに合わせて(mk.fk)。下の帯は着く前から
-  function overlays(q, sid, mk) {
+  function overlays(q, sid, mk, hr, cr) {
     if (q === lastQ && q === 0) return;
     lastQ = q;
+    // 読む物を先に、書くのは後に(書いた後に読むと、読むたびに組み直しが走る)。hr・cr は、呼ぶ側が書く前に読んだもの
+    const ph = phone(), sv = svhH();
+    if (!hr) hr = heroRect();
+    if (!cr) cr = canvas.getBoundingClientRect();
+    if (chips.length && (!chipWH || !chipWH[0][0])) chipWH = chips.map(c => [c.offsetWidth, c.offsetHeight]);
+    const ox = cr.left - hr.left, oy = cr.top - hr.top;
     const cp = 1 - SM(.024, .144, q);
     R.style.setProperty('--cp', cp.toFixed(3));   // 最初の画面の言葉と入口
     R.classList.toggle('cp-off', cp < .02);       // 消えきったら Tab と読み上げからも外す
     R.style.setProperty('--mk', (1 - SM(.072, .41, q)).toFixed(3));  // 島の下のもや
-    R.style.setProperty('--hz', Math.max(phone() ? 0 : SM(.048, .192, q), SM(.288, .48, q)).toFixed(3));   // 見出しの帯の下の霞(中が上まで来たら。PC は寄り始めから)
+    R.style.setProperty('--hz', Math.max(ph ? 0 : SM(.048, .192, q), SM(.288, .48, q)).toFixed(3));   // 見出しの帯の下の霞(中が上まで来たら。PC は寄り始めから)
     R.style.setProperty('--ek', SM(.36, .48, q).toFixed(3));   // 下の帯: 正面の地面の線の 40px 下から、下の入口の文字の高さまでで地の色へ(次の面の上の色と同じ)
-    const hr = heroRect(), cr = canvas.getBoundingClientRect(), ox = cr.left - hr.left, oy = cr.top - hr.top;
     const gy = mk && mk.gy != null ? oy + mk.gy : stillMarks && stillMarks.gy;
-    if (gy != null) { R.style.setProperty('--gy', gy.toFixed(1) + 'px'); R.style.setProperty('--bf', Math.max(80, svhH() - 38 - (gy + 40)).toFixed(1) + 'px'); }
+    if (gy != null) { R.style.setProperty('--gy', gy.toFixed(1) + 'px'); R.style.setProperty('--bf', Math.max(80, sv - 38 - (gy + 40)).toFixed(1) + 'px'); }
     show(ins, SM(.45, .49, q));
     show(insGo, SM(.84, .88, q));   // 下の入口は 1F と一緒に(見直し 第1回)
     // 階: その階の道具の一行を、上の一文の場所に(替わるときは .25 秒で)。ぜんたいに着いた直後は、いつもの一文
@@ -593,13 +602,13 @@ function boot() {
       for (const e of insFl) e.classList.toggle('on', e.dataset.sid === sid);
       for (const c of chips) c.classList.toggle('on', c.dataset.sid === sid);
     }
-    const hh = hero.clientHeight, hw = hero.clientWidth, bot = Math.min(hh, svhH()) - 76;
-    for (const c of chips) {
-      const f = FLOORS.find(x => x[0] === c.dataset.sid), p = chipPos[c.dataset.sid], kk = p && f ? SM(f[1], f[1] + .03, q) : 0;   // その階に来たら出て、そのあとは出たまま
+    const hw = hr.width, bot = Math.min(hr.height, sv) - 76;
+    for (let i = 0; i < chips.length; i++) {
+      const c = chips[i], f = FLOORS.find(x => x[0] === c.dataset.sid), p = chipPos[c.dataset.sid], kk = p && f ? SM(f[1], f[1] + .03, q) : 0;   // その階に来たら出て、そのあとは出たまま
       c.style.opacity = kk.toFixed(3); c.style.pointerEvents = kk > .5 ? 'auto' : 'none';   // 見えないときも Tab では届く(届いたら、札が見える所まで舞台を進める)
       if (!p) continue;   // 置き場は、まだ出ていない階の札にも入れる(Tab で来たとき、画面の外に残った札を見せようとしてページが巻き戻らないように)
       // 物の真上、その階の天井の切り口(藍の帯)のすぐ上に札、三角が帯を越えて物を指す。上は「病院の中」の見出しと一文、下は一覧への入口を避ける。左右は画面の中に
-      const w = c.offsetWidth, h = c.offsetHeight, x = Math.min(Math.max(p.x, 10 + w / 2), hw - 10 - w / 2), y = Math.min(Math.max(p.y, 112 + h + 6), bot);
+      const [w, h] = chipWH[i], x = Math.min(Math.max(p.x, 10 + w / 2), hw - 10 - w / 2), y = Math.min(Math.max(p.y, 112 + h + 6), bot);
       c.style.left = x.toFixed(1) + 'px'; c.style.top = y.toFixed(1) + 'px';
       c.style.setProperty('--ax', (p.x - x).toFixed(1) + 'px');   // 三角は、ずらしたぶん物の真上へ
     }
@@ -731,7 +740,7 @@ function boot() {
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };
           if (sTagFor) showSTag(sTagFor);
           if (L2.scrub) { chipPos = {}; for (const s of L2.st) if (s.band) chipPos[s.id] = { x: ox + s.band[0], y: oy + s.band[1] }; }   // 案A: 道具の札は、物の真上の、その階の天井の切り口
-          overlays(L2.scrub ? L2.scrub.p : rawP > .02 ? rawP : 0, L2.scrub ? L2.scrub.sid : undefined, L2.scrub || null);   // 立体に替わった直後(まだ寄っていないこま)は、いまの進みの言葉のまま
+          overlays(L2.scrub ? L2.scrub.p : rawP > .02 ? rawP : 0, L2.scrub ? L2.scrub.sid : undefined, L2.scrub || null, hr, cr);   // 立体に替わった直後(まだ寄っていないこま)は、いまの進みの言葉のまま
         },
         scrubSafe() {   // 案A: 寄った病院を置く範囲(上は「病院の中」の見出しと一文、下は一覧への入口を避ける)。下は帯が出ているときの画面(svh)の中に(帯が畳まれると、広場が下に少し多く見えるだけで、病院は動かない)
           const w = canvas.clientWidth, h = Math.min(canvas.clientHeight, svhH());
