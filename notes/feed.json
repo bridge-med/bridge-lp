@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-25T22:36:18+00:00",
+  "updated_at": "2026-10-26T23:55:36+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "転職先で最初に戸惑ったのは、仕事の難しさではなく「言葉」だった",
+      "url": "https://note.com/prime_duck4944/n/n3cd5b49a632e",
+      "guid": "https://note.com/prime_duck4944/n/n3cd5b49a632e",
+      "pubDate": "2026-10-27T07:00:00+09:00",
+      "date": "2026-10-27",
+      "excerpt": "「それ、誰がオーナーですか？」医療現場にいた頃、この質問を聞いたら、少し不思議に感じたと思います。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/328564481/rectangle_large_type_2_596698f694ce16118ea33855a8ca7724.png?width=800"
+    },
+    {
+      "title": "優秀だけど協調性がないスタッフに、どう向き合うか",
+      "url": "https://note.com/prime_duck4944/n/n5320af96faa0",
+      "guid": "https://note.com/prime_duck4944/n/n5320af96faa0",
+      "pubDate": "2026-10-26T07:44:58+09:00",
+      "date": "2026-10-26",
+      "excerpt": "仕事はできる。患者さんからの評判も悪くない。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/328562928/rectangle_large_type_2_f6ac7cdf92645e1a2280074de0b9101f.png?width=800"
+    },
     {
       "title": "毎週同じ報告書を作っているなら、AIでどこまで減らせるか",
       "url": "https://note.com/prime_duck4944/n/n67af51ac7a44",
@@ -38,24 +56,6 @@
       "date": "2026-10-23",
       "excerpt": "「このやり方に変えた方が、絶対に効率がいいのに」そう思って提案した業務改善が、現場のスタッフから反対されることがあります。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/327046528/rectangle_large_type_2_cd71c7b4b4fdfe539e78b4aa97254574.png?width=800"
-    },
-    {
-      "title": "事業会社に入って、医療現場の見え方が変わった",
-      "url": "https://note.com/prime_duck4944/n/n1e847df71011",
-      "guid": "https://note.com/prime_duck4944/n/n1e847df71011",
-      "pubDate": "2026-10-23T07:00:00+09:00",
-      "date": "2026-10-23",
-      "excerpt": "病院で働いていた頃、私は医療現場のことを、それなりに理解しているつもりでした。理学療法士として臨床に携わり、スタッフ教育や40人規模のチームマネジメントも経験しました。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/327045629/rectangle_large_type_2_dd054e9addc46af258697ec91b6863ea.png?width=800"
-    },
-    {
-      "title": "【100円】医療職向け・AIに業務を任せるための指示書テンプレート集",
-      "url": "https://note.com/prime_duck4944/n/n96e7948a7a8e",
-      "guid": "https://note.com/prime_duck4944/n/n96e7948a7a8e",
-      "pubDate": "2026-10-22T19:00:00+09:00",
-      "date": "2026-10-22",
-      "excerpt": "ChatGPTを仕事で使っていると、こんなことはないでしょうか。「もう少し具体的にしてほしい」",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/327044501/rectangle_large_type_2_5fac631b0ab5257c10a1786fefe70021.png?width=800"
     }
   ]
 }
