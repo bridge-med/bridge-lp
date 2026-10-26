@@ -550,13 +550,15 @@ function boot() {
   const HOSP_O = '52.19% 34.02%';   // 町の止めた画像の中の病院(押せる範囲の真ん中)。止めた画像を寄せるときの中心
   let rawP = 0, chipPos = {}, lastQ = -1, lastSid, sq = 0;
   const stageP = () => { const r = stage.getBoundingClientRect(), span = stage.offsetHeight - innerHeight; return span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0; };
-  const show = (e, k) => { e.style.opacity = k.toFixed(3); e.style.visibility = k > .01 ? 'visible' : 'hidden'; };
+  const show = (e, k) => { e.style.opacity = k.toFixed(3); e.classList.toggle('off', k <= .01); };   // 透明で隠すだけ(読み上げの順には残す)。押せるのは見えている間だけ
   function overlays(q, sid) {
     if (q === lastQ && q === 0) return;
     lastQ = q;
-    R.style.setProperty('--cp', (1 - SM(.03, .18, q)).toFixed(3));   // 最初の画面の言葉と入口
+    const cp = 1 - SM(.03, .18, q);
+    R.style.setProperty('--cp', cp.toFixed(3));   // 最初の画面の言葉と入口
+    R.classList.toggle('cp-off', cp < .02);       // 消えきったら Tab と読み上げからも外す
     R.style.setProperty('--mk', (1 - SM(.075, .42, q)).toFixed(3));  // 島の下のもや
-    R.style.setProperty('--hz', SM(.27, .465, q).toFixed(3));         // 見出しの帯の下の霞(中が上まで来たら)
+    R.style.setProperty('--hz', Math.max(phone() ? 0 : SM(.04, .16, q), SM(.27, .465, q)).toFixed(3));   // 見出しの帯の下の霞(中が上まで来たら。PC は寄り始めから: 帯のナビが展望台の上でも読めるように)
     R.style.setProperty('--ek', SM(.94, 1, q).toFixed(3));            // 舞台の終わり: 画面の下を、次の面(空の下の色)へ溶かす
     show(ins, SM(.36, .44, q));   // 壁が倒れきる前に出し、着いてから約 0.2 画面は一文のまま読める
     show(insGo, SM(.43, .52, q));
@@ -623,6 +625,9 @@ function boot() {
     const f = FLOORS.find(x => x[0] === c.dataset.sid), to = f ? Math.min(.97, (f[1] + Math.min(f[2], 1)) / 2) : .5;
     if (Math.abs(rawP - to) > .08) { const span = stage.offsetHeight - innerHeight; scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span * to, behavior: reduce() ? 'auto' : 'smooth' }); }
   });
+  // キーボードで一覧への入口に来たら、それが見える所(ひらいた病院ぜんたい)まで舞台を進める
+  const goA = $('a', insGo);
+  if (goA) goA.addEventListener('focus', () => { if (rawP < .5) { const span = stage.offsetHeight - innerHeight; scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span * .53, behavior: reduce() ? 'auto' : 'smooth' }); } });
   // 舞台を過ぎたら、見出しの帯を小さく上に固定。夜は夜の色の帯
   const hdNight = () => R.classList.toggle('hd-night', R.dataset.tod === 'night');
   hdNight(); btnTod.addEventListener('click', hdNight);
@@ -678,7 +683,7 @@ function boot() {
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };
           if (sTagFor) showSTag(sTagFor);
           if (L2.scrub) { chipPos = {}; for (const s of L2.st) if (s.band) chipPos[s.id] = { x: ox + s.band[0], y: oy + s.band[1] }; }   // 案A: 道具の札は、物の真上の、その階の天井の切り口
-          overlays(L2.scrub ? L2.scrub.p : 0, L2.scrub ? L2.scrub.sid : null);
+          overlays(L2.scrub ? L2.scrub.p : rawP > .02 ? rawP : 0, L2.scrub ? L2.scrub.sid : undefined);   // 立体に替わった直後(まだ寄っていないこま)は、いまの進みの言葉のまま
         },
         scrubSafe() {   // 案A: 寄った病院を置く範囲(上は「病院の中」の見出しと一文、下は一覧への入口を避ける)
           const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -696,7 +701,9 @@ function boot() {
       // 止めた画像のうちにひらいていた建物(戻ってきたときのハッシュも)は、飛ばずに、その姿から立体にする
       for (const f of $$('.pent .pshot', pTools)) { f.parentNode.classList.remove('shot'); f.remove(); }   // 写しの元は、町の中の画面ひとつに
       if (openId) { pStill.hidden = true; await ctl.restore(openId, openId === 'plaza' ? null : pinSid); if (openId) { applyFind(); if (openId === 'plaza') ovTags(true); revealRow(pinSid); } }
-      poster.style.opacity = ''; poster.style.transform = ''; R.classList.remove('shut-on'); if (rawP > 0) ctl.scrubTo(rawP, true);   // 寄っている途中で立体に替わったら、いまの進みの姿から(止めた画像の上に、立体が重なって出る)
+      // 寄っている途中で立体に替わったら、いまの進みの姿から。止めた画像は、立体がその姿を描いてから外す(最初の画面の言葉や閉じた病院が、1こま出ないように)
+      const unshut = () => { poster.style.opacity = ''; poster.style.transform = ''; R.classList.remove('shut-on'); };
+      if (rawP > .02) { ctl.scrubTo(rawP, true); requestAnimationFrame(() => requestAnimationFrame(unshut)); } else unshut();
       requestAnimationFrame(() => { R.classList.add('live'); dispatchEvent(new Event('hiraku:live')); });
     }).catch(err => { console.warn(err); stillSharp(); });
   }
