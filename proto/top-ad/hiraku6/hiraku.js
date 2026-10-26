@@ -597,7 +597,7 @@ function boot() {
     for (const c of chips) {
       const f = FLOORS.find(x => x[0] === c.dataset.sid), p = chipPos[c.dataset.sid], kk = p && f ? SM(f[1], f[1] + .03, q) : 0;   // その階に来たら出て、そのあとは出たまま
       c.style.opacity = kk.toFixed(3); c.style.pointerEvents = kk > .5 ? 'auto' : 'none';   // 見えないときも Tab では届く(届いたら、札が見える所まで舞台を進める)
-      if (!p || kk <= .01) continue;
+      if (!p) continue;   // 置き場は、まだ出ていない階の札にも入れる(Tab で来たとき、画面の外に残った札を見せようとしてページが巻き戻らないように)
       // 物の真上、その階の天井の切り口(藍の帯)のすぐ上に札、三角が帯を越えて物を指す。上は「病院の中」の見出しと一文、下は一覧への入口を避ける。左右は画面の中に
       const w = c.offsetWidth, h = c.offsetHeight, x = Math.min(Math.max(p.x, 10 + w / 2), hw - 10 - w / 2), y = Math.min(Math.max(p.y, 112 + h + 6), bot);
       c.style.left = x.toFixed(1) + 'px'; c.style.top = y.toFixed(1) + 'px';
@@ -673,6 +673,7 @@ function boot() {
     rmin.style.setProperty('--gy', D.gy + '%'); rmin.style.setProperty('--rk', (rmin.clientWidth / (phone() ? 393 : 1440)).toFixed(3));
     for (const c of $$('.rmin-chips .chip', rmin)) { const b = D.band[c.dataset.sid]; if (b) { c.style.left = b[0] + '%'; c.style.top = b[1] + '%'; } }
     $$('.rmin-fl .flm', rmin).forEach((e, i) => { const f = D.fl[i]; if (f) { e.style.left = f[0] + '%'; e.style.top = f[1] + '%'; } });
+    onStage();   // 畳んだ舞台の進みで、言葉と札の状態を合わせ直す(途中の位置から読み込んだとき、前の進みの状態を残さない)
   }
   rminSet();
   if (reduceQ.addEventListener) reduceQ.addEventListener('change', rminSet);
@@ -758,7 +759,8 @@ function boot() {
       if (openId) { pStill.hidden = true; await ctl.restore(openId, openId === 'plaza' ? null : pinSid); if (openId) { applyFind(); if (openId === 'plaza') ovTags(true); revealRow(pinSid); } }
       // 寄っている途中で立体に替わったら、いまの進みの姿から。止めた画像は、立体がその姿を描いてから外す(最初の画面の言葉や閉じた病院が、1こま出ないように)
       const unshut = () => { poster.style.opacity = ''; poster.style.transform = ''; R.classList.remove('shut-on'); };
-      if (rawP > .02) { ctl.scrubTo(rawP, true); requestAnimationFrame(() => requestAnimationFrame(unshut)); } else unshut();
+      if (rawP > .02 && stageStill === 'pending') { poster.style.opacity = ''; poster.style.transform = ''; goStill(); }   // 舞台を止めた画像で見せる指定(#slow)なら、立体の舞台には入らない
+      else if (rawP > .02) { ctl.scrubTo(rawP, true); requestAnimationFrame(() => requestAnimationFrame(unshut)); } else unshut();
       requestAnimationFrame(() => { R.classList.add('live'); dispatchEvent(new Event('hiraku:live')); });
     }).catch(err => { console.warn(err); stillSharp(); });
   }

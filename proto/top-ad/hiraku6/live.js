@@ -900,7 +900,8 @@ export async function live(o) {
   let pendTier = null, pendAt = 0;   // 下げると決めた段。次に飛ぶとき・回すとき(なければ 6 秒後)に下げる
   const slowT = [];   // 低の段でも舞台が重いとき(中央 60ms 超): ページに知らせて、舞台を止めた画像に替える(低性能の端末でも、寄る・ひらくを止めた画像で見せる)
   function measure(gap) {
-    if (manual || frameN < 8 || gap > 400) return;
+    if (manual || frameN < 8) return;
+    if (gap > 400) { if (!(scrub && sp.moving)) return; gap = 400; }   // 舞台を動かしている間は、とても遅いこまも遅いこまとして数える(裏のタブなどの長い空きは数えない)
     if (tier === 'low') {
       if (!scrub || !sp.moving || !o.onSlow) return;
       slowT.push(gap); if (slowT.length < 24) return;
@@ -999,7 +1000,7 @@ export async function live(o) {
     if (manual && !force) return;
     if (!idle || frameN % 2 === 0 || dirty || force) {
       // 舞台を動かしている間は、影の描き直しを1こまおきに(島の回りと人の動きは1こまでは見分けられない)。止まったら毎こまに戻す
-      renderer.shadowMap.autoUpdate = !(scrub && sp.moving) || (frameN & 1) === 0;
+      renderer.shadowMap.autoUpdate = !(scrub && sp.moving && sp.x < SQ.move[1]) || (frameN & 1) === 0;   // 着いた後(階を替える間)は毎こま(持ち上がる道具の画面が、古い影で1こまおきに黒くならないように)
       renderer.render(S.scene, camera); dirty = false;
       layout();
       o.onFrame && o.onFrame(renderer.info.render);
