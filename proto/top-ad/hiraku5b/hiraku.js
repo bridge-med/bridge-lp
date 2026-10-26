@@ -639,7 +639,7 @@ function boot() {
       .catch(err => { console.warn(err); inTags.classList.remove('wait'); stillIn(); });
   }
   addEventListener('hiraku:live', () => setTimeout(() => idle(sectBoot), 1600));   // 町の立体が替わって、町の側の後の読み込み(公園の中)が済んでから
-  addEventListener('scroll', () => idle(sectBoot), { passive: true, once: true });   // 町が立体になる前にスクロールし始めたら、そのときに(最初の画面の読み込みとは競わせない)
+  // 町が立体になる前にスクロールし始めても、ここでは作らない(2つめの立体の最初の描画の重さを、最初の画面から断面へ移る瞬間に重ねない。それまでは止めた断面の画像)
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(([en]) => { sectVis = en.isIntersecting; if (sect) sect.setVisible(sectVis); }, { rootMargin: '80px 0px 80px 0px' }).observe(inStage);   // 見える間だけ描く
   }

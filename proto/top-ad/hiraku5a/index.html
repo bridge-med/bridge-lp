@@ -305,7 +305,7 @@ html.paused .nr{animation-play-state:paused}   /* 止めるボタンで、この
    カメラは病院ぜんたいで止まり、そのあとは 3階 → 2階 → 1階 と、その階の道具の札と灯りだけが降りる(一行は上の小さな見出しの一文の場所に)。
    空・光・見出しの帯は最初の画面のまま(紙の面に切り替えない)。言葉は最初の画面の一行と同じ場所に小さく、道具の札は町の名前の札と同じ形 */
 main:focus{outline:none}
-.stage{position:relative}
+.stage{position:relative;background:rgb(var(--mist))}   /* 舞台の地は、その時刻の空の下の色(スマホのブラウザの帯が畳まれて画面が伸びても、舞台の下に紙の色を覗かせない) */
 html.js .stage{height:calc(100svh + 180svh)}   /* JS が動くときだけ: 最初の画面 + 寄る・ひらく(約0.8画面)・ぜんたいと3つの階(約1.0)。JS なしでは止まったままの長い面を作らない */
 .stage > .hero{position:sticky;top:0;max-height:none}   /* 背の高い画面(iPad の縦など)でも、舞台の下に紙の帯を出さない */
 /* 寄り始めたら、最初の画面の言葉・入口・誘い・建物の見えないボタンを外す(ページの側が --cp を 1 → 0) */
