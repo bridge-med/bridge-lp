@@ -475,6 +475,7 @@ export async function live(o) {
   function modReady() {
     if (!MOD) return;
     const pk = interiorOf('park'); if (pk) { pk.group.scale.y = .001; grow = clock() || 1e-3; }   // 手動の時計(撮るとき)は 0 から始まるので、0 にしない(0 だと伸びずに潰れたまま)
+    if (!scrub && !A.id) setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(prewarm, { timeout: 2000 }) : prewarm()), 900);   // 案A: 病院の中を先に作って、シェーダーを用意しておく(スクロールして壁がひらく1こまで止まらないように)
     const id = A.id;
     if (scrub) { const it = interiorOf(SCRUB_ID); if (it) it.group.visible = true; scrub.kf = null; }   // 案A: 中の形が届いたら、壁をひらく(進みはスクロールが決める)
     else if (id && id !== 'plaza') {
@@ -494,6 +495,19 @@ export async function live(o) {
   /* 公園だけは最初から中を組む(池・カプセルの機械・保留の棚・窓の額が、町の景色として見えるように)。
      公園の画面の画像(約85KB)も、このとき読む。後にすると、止めた画像と入れ替えた直後に、小さな黒い画面が町に出るため */
 
+  /* 病院の中を、手が空いたときに先に作る(見えないまま)。描く形の準備(シェーダー)も、ここで済ませる。
+     スクロールの途中で初めて作ると、その1こまで主スレッドが止まり、カメラが引っかかるため */
+  let warm = null;
+  function prewarm() {
+    if (warm || !MOD || scrub || A.id || interiors[SCRUB_ID] !== undefined) return;
+    const it = interiorOf(SCRUB_ID); if (!it) return;
+    warm = clock() || 1;
+    it.group.visible = true;   // 準備の対象に入れる(このこまでは描かない)
+    let pr = null;
+    try { pr = renderer.compileAsync ? renderer.compileAsync(S.scene, camera) : (renderer.compile(S.scene, camera), null); } catch (e) { /* そのまま(最初に描くときに用意される) */ }
+    if (!scrub && A.id !== SCRUB_ID) it.group.visible = false;
+    if (pr && pr.catch) pr.catch(() => {});
+  }
   function interiorOf(id) {
     if (interiors[id] || !MOD || id === 'plaza') return interiors[id] || null;
     const b = S.B[id];
@@ -760,13 +774,25 @@ export async function live(o) {
   /* 重さの計測: 動いている間のフレームの間隔(中央値)。42ms(24fps)を超えたら一段下げる。下げたらページに知らせる(次の訪問はその段から) */
   const ft = [];
   let pendTier = null, pendAt = 0;   // 下げると決めた段。次に飛ぶとき・回すとき(なければ 6 秒後)に下げる
+  const slowT = [];   // 低の段でも舞台が重いとき(中央 60ms 超): ページに知らせて、舞台を止めた画像に替える(低性能の端末でも、寄る・ひらくを止めた画像で見せる)
   function measure(gap) {
-    if (manual || tier === 'low' || frameN < 8 || gap > 400) return;
+    if (manual || frameN < 8 || gap > 400) return;
+    if (tier === 'low') {
+      if (!scrub || !sp.moving || !o.onSlow) return;
+      slowT.push(gap); if (slowT.length < 24) return;
+      const m = slowT.sort((a, b) => a - b)[slowT.length >> 1]; slowT.length = 0;
+      if (m > 60) o.onSlow();
+      return;
+    }
     ft.push(gap);
     if (ft.length < 36) return;
     const m = ft.sort((a, b) => a - b)[ft.length >> 1]; ft.length = 0;
     if (m > 42 && !pendTier) { pendTier = tier === 'high' ? 'mid' : 'low'; pendAt = clock(); }
   }
+  /* こまの記録(?perf=1 の表示と計測): 描いたこまの間隔と、そのこまの手番の時間。直近 240 こま */
+  const PS = { gap: [], js: [], n: 0 };
+  function pstat(gap, js) { PS.n++; PS.gap.push(gap); PS.js.push(js); if (PS.gap.length > 240) { PS.gap.shift(); PS.js.shift(); } }
+  const qtl = (a, f) => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return Math.round(s[Math.min(s.length - 1, Math.floor(s.length * f))] * 10) / 10; };
   function applyTier() { const q = pendTier; pendTier = null; if (q && q !== tier) setTier(q); }
   function setTier(q) {
     tier = q;
@@ -781,6 +807,7 @@ export async function live(o) {
   let ready = false;   // シェーダーの準備が済むまでは描かない(止めた画像が見えている)
   function frame(now, force) {
     if (!ready) { running = false; return; }
+    const f0 = performance.now();   // このこまの手番の時間(JS と描く命令。?perf=1 の表示と計測に)
     const gap = now - last, dt = Math.min(.05, gap / 1000); last = now; frameN++;
     if (running && visible && !document.hidden) measure(gap);
     if (!paused) t += dt;
@@ -788,7 +815,7 @@ export async function live(o) {
     if (!down && !A.id && Math.abs(inertia) > .002) { rot.x += inertia * dt; rot.t = rot.x; inertia *= Math.pow(.05, dt); }
     if (A.id && !scrub) rot.t = (openCam ? openCam.rot : rot.t) + dragOff.x;
     // 段取り
-    if (pendTier && now - pendAt > 6000) applyTier();
+    if (pendTier && (now - pendAt > 6000 || (scrub && !sp.moving))) applyTier();   // 舞台では、スクロールが止まったときに下げる(指が動いている間に絵の細かさを変えない)
     while (later.length && later[0].at <= now) later.shift().f();
     if (grow) { const k = clamp01((now - grow) / 650), pk = interiors.park; if (pk) pk.group.scale.y = Math.max(.001, 1 - Math.pow(1 - k, 3)); if (k >= 1) grow = 0; }
     for (const s of [A, Bk]) if (s.id && s.steps.length) { const el = now - s.t0; while (s.steps.length && s.steps[0].t <= el) s.steps.shift().f(); }
@@ -844,9 +871,12 @@ export async function live(o) {
     // 操作していないときは 30fps
     if (manual && !force) return;
     if (!idle || frameN % 2 === 0 || dirty || force) {
+      // 舞台を動かしている間は、影の描き直しを1こまおきに(島の回りと人の動きは1こまでは見分けられない)。止まったら毎こまに戻す
+      renderer.shadowMap.autoUpdate = !(scrub && sp.moving) || (frameN & 1) === 0;
       renderer.render(S.scene, camera); dirty = false;
       layout();
       o.onFrame && o.onFrame(renderer.info.render);
+      pstat(gap, performance.now() - f0);
     }
     if (manual) return;
     if ((active || !paused || dirty) && visible && !document.hidden) requestAnimationFrame(loop); else running = false;
@@ -933,6 +963,9 @@ export async function live(o) {
     advance(ms) { const n = Math.max(1, Math.round(ms / (1000 / 60))); for (let i = 0; i < n; i++) { vnow += ms / n; frame(vnow, i === n - 1); } },
     get manual() { return manual; },
     get tier() { return tier; },
+    /* 計測(?perf=1): 直近のこまの間隔と手番の時間(中央・95%)、50ms を超えた数、品質の段、画素比、描く回数・三角形・影の描き直し */
+    perfStats() { const ri = renderer.info.render; return { n: PS.n, gapMed: qtl(PS.gap, .5), gapP95: qtl(PS.gap, .95), over50: PS.gap.filter(g => g > 50).length, jsMed: qtl(PS.js, .5), jsP95: qtl(PS.js, .95), tier, dpr: renderer.getPixelRatio(), px: Math.round(W * H * renderer.getPixelRatio() ** 2), calls: ri.calls, tris: ri.triangles, scrub: !!scrub }; },
+    perfReset() { PS.gap.length = 0; PS.js.length = 0; PS.n = 0; },
     get compileMs() { return compileMs; },
     get findSize() { return lastFind; },
     /* 移る瞬間のため: その道具の画面(中の物の板)が、いまページのどこに見えているか(ページの座標の四角)と、読み終えた画像 */

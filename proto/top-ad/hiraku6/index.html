@@ -306,8 +306,12 @@ html.paused .nr{animation-play-state:paused}   /* 止めるボタンで、この
    空・光・見出しの帯は最初の画面のまま(紙の面に切り替えない)。言葉は最初の画面の一行と同じ場所に小さく、道具の札は町の名前の札と同じ形 */
 main:focus{outline:none}
 .stage{position:relative;background:rgb(var(--mist))}   /* 舞台の地は、その時刻の空の下の色(スマホのブラウザの帯が畳まれて画面が伸びても、舞台の下に紙の色を覗かせない) */
-html.js .stage{height:calc(100svh + 180svh)}   /* JS が動くときだけ: 最初の画面 + 寄る・ひらく(約0.8画面)・ぜんたいと3つの階(約1.0)。JS なしでは止まったままの長い面を作らない */
-.stage > .hero{position:sticky;top:0;max-height:none}   /* 背の高い画面(iPad の縦など)でも、舞台の下に紙の帯を出さない */
+html.js .stage{height:calc(100vh + var(--span,180vh));height:calc(100lvh + var(--span,180svh))}   /* JS が動くときだけ: 最初の画面 + 舞台の進み(--span)。JS なしでは止まったままの長い面を作らない */
+.stage > .hero{position:sticky;top:0;max-height:none;height:100vh;height:100lvh}   /* 舞台の間の町と病院は、ブラウザの帯が畳まれたときの高さ(lvh)で描く: 帯が開閉しても絵の大きさは変わらず、病院の下に地の色を覗かせない。言葉と入口は帯が出ているときの高さ(svh)の中に置く(--tb) */
+:root{--tb:0px}
+@supports (height:100lvh){:root{--tb:calc(100lvh - 100svh)}}   /* ブラウザの帯の高さ(帯が出ている間は、絵の下の端の --tb ぶんが帯の下に隠れる) */
+html.js .stage .ins-go{bottom:calc(16px + var(--tb) + env(safe-area-inset-bottom,0px))}
+@media (max-width:920px){html.js .stage .cta-wrap{bottom:calc(16px + var(--tb) + env(safe-area-inset-bottom,0px))}}   /* スマホの最初の画面の入口も、帯が出ているときの画面の中に */
 /* 寄り始めたら、最初の画面の言葉・入口・誘い・建物の見えないボタンを外す(ページの側が --cp を 1 → 0) */
 .copy,.cta-wrap,.hint{opacity:var(--cp,1);translate:0 calc((1 - var(--cp,1)) * -14px)}
 html.scrub .copy,html.scrub .cta-wrap,html.scrub .hint{pointer-events:none}
@@ -351,12 +355,16 @@ html:not(.js) .chips,html:not(.js) .ins,html:not(.js) .ins-go{display:none}   /*
 html[data-tod="night"] .ins-go .ico{color:var(--sand-2)}
 @media (hover:hover){.ins-go a:hover{box-shadow:0 0 0 1.5px var(--cbtn-fg)}}   /* 面は明るい部屋や広場の上でも読める濃さ(押せる時刻の丸と同じ、濃い方の面) */
 /* 動かないとき(動きを減らす・WebGL なし・立体に替わる前): 町の止めた画像を病院へ寄せてから(動きを減らす設定では寄せない)、ひらいた病院の止めた画像へ 0.25 秒で替える(重ねたまま進めない) */
+.perf-hud{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:200;max-width:calc(100vw - 16px);padding:6px 8px;border-radius:8px;background:var(--night-hd);color:var(--night-fg);font:11px/1.45 ui-monospace,Menlo,monospace;white-space:pre-wrap;pointer-events:auto}   /* ?perf=1 のときだけ出す計測の表示 */
 .shut{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .25s var(--ease),visibility 0s .25s}
 .shut img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 html.shut-on .shut{opacity:1;visibility:visible;transition:opacity .25s var(--ease)}
 .still .poster{transition:opacity .25s var(--ease)}
 html.shut-on:not(.live) .still .poster{opacity:0}
 html.live .shut{opacity:0!important;visibility:hidden!important;transition:opacity .5s var(--ease),visibility 0s .5s}   /* 立体に替わったら、立体の下で消える */
+html.live.stage-still.shut-on .shut{opacity:1!important;visibility:visible!important;transition:opacity .25s var(--ease)!important}   /* 低性能の端末: 立体を止めた舞台では、ひらいた病院の止めた画像を出す */
+html.stage-still #world{transform-origin:50% 40%}
+html.stage-still.shut-on #world{opacity:0;transition:opacity .25s var(--ease)}   /* ひらいた病院の止めた画像に替わったら、寄せた町の絵は下で消す(二重写しにしない) */
 /* 試作の終わり: 最初の画面の下の空の色のまま(紙にしない)。そのあとフッター */
 .end{--end-bg:var(--sky-d3);background:linear-gradient(180deg,var(--end-bg) 0%,var(--end-bg) 55%,var(--night-bg) 100%);padding:clamp(56px,12vh,120px) var(--pad) clamp(72px,14vh,140px);text-align:center}
 html[data-tod="dusk"] .end{--end-bg:var(--sky-e3)}

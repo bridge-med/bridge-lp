@@ -549,7 +549,21 @@ function boot() {
   const floorAt = q => { for (const [sid, a, b] of FLOORS) if (q >= a && q < b) return sid; return null; };
   const HOSP_O = '52.19% 34.02%';   // 町の止めた画像の中の病院(押せる範囲の真ん中)。止めた画像を寄せるときの中心
   let rawP = 0, chipPos = {}, lastQ = -1, lastSid, sq = 0;
-  const stageP = () => { const r = stage.getBoundingClientRect(), span = stage.offsetHeight - innerHeight; return span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0; };
+  // 低性能の端末(立体の低の段でも重い)は、舞台を止めた画像で見せる: 町の絵(立体を止めたもの)を病院へ寄せてから、ひらいた病院の止めた画像へ。?slow=1 で確かめられる
+  let stageStill = Q.get('slow') === '1' ? 'pending' : false, stillO = null;
+  function goStill() {
+    if (stageStill === true || !ctl) return;
+    stageStill = true; R.classList.add('stage-still');
+    const c = ctl.screenOf('hospital', [0, 1.45, 0]), cr = canvas.getBoundingClientRect(); stillO = (c[0] - cr.left).toFixed(1) + 'px ' + (c[1] - cr.top).toFixed(1) + 'px';
+    if (ctl.scrubbing) ctl.scrubTo(0, true);
+    ctl.setPaused(true); onStage();
+  }
+  // 舞台の進み: 画面に留まる町(hero)の高さで割る。innerHeight(ブラウザの帯の開閉で変わる)を使わないので、帯が畳まれても進みが跳ばない
+  const span = () => stage.offsetHeight - hero.offsetHeight;
+  const stageP = () => { const r = stage.getBoundingClientRect(), sp = span(); return sp > 0 ? Math.max(0, Math.min(1, -r.top / sp)) : 0; };
+  // 帯が出ているときの画面の高さ(svh。言葉と入口を置く範囲)。測る印を1つ置いて、その高さを読む(帯の開閉では変わらない)
+  const svhEl = document.createElement('div'); svhEl.setAttribute('aria-hidden', 'true'); svhEl.style.cssText = 'position:absolute;left:0;top:0;width:0;height:100svh;visibility:hidden;pointer-events:none'; document.body.append(svhEl);
+  const svhH = () => svhEl.offsetHeight || innerHeight;
   const show = (e, k) => { e.style.opacity = k.toFixed(3); e.classList.toggle('off', k <= .01); };   // 透明で隠すだけ(読み上げの順には残す)。押せるのは見えている間だけ
   function overlays(q, sid) {
     if (q === lastQ && q === 0) return;
@@ -577,7 +591,7 @@ function boot() {
       if (!p || kk <= .01) continue;
       // 物の真上、その階の天井の切り口(藍の帯)のすぐ上に札、三角が帯を越えて物を指す(町の名前の札と同じ置き方。奥の人の頭は帯の下なので隠さない)。
       // 上は「病院の中」の見出しと一文、下は一覧への入口を避ける。左右は画面の中に
-      const w = c.offsetWidth, h = c.offsetHeight, x = Math.min(Math.max(p.x, 10 + w / 2), hw - 10 - w / 2), y = Math.min(Math.max(p.y, 112 + h + 7), hh - 76);
+      const w = c.offsetWidth, h = c.offsetHeight, x = Math.min(Math.max(p.x, 10 + w / 2), hw - 10 - w / 2), y = Math.min(Math.max(p.y, 112 + h + 7), Math.min(hh, svhH()) - 76);
       c.style.left = x.toFixed(1) + 'px'; c.style.top = y.toFixed(1) + 'px';
       c.style.setProperty('--ax', (p.x - x).toFixed(1) + 'px');   // 三角は、ずらしたぶん物の真上へ
     }
@@ -590,9 +604,9 @@ function boot() {
       shutKey = key; const D = OPEN_STILL[key];
       shutBand = D ? D.band : null; if (D) { shutImg.width = D.w; shutImg.height = D.h; shutImg.src = 'img/open-' + key + '.webp'; }
     }
-    // 寄せる: 動きを減らす設定でなければ、町の止めた画像を病院へ(替わるまで)
-    const z = reduce() ? 1 : 1 + .85 * SM(.03, .3, q);
-    poster.style.transformOrigin = HOSP_O; poster.style.transform = z > 1.001 ? `scale(${z.toFixed(4)})` : '';
+    // 寄せる: 動きを減らす設定でなければ、町の止めた画像を病院へ(替わるまで)。立体を止めた舞台(低性能の端末)では、止めた立体の絵を寄せる
+    const z = reduce() ? 1 : 1 + .85 * SM(.03, .3, q), zEl = stageStill === true ? canvas : poster;
+    zEl.style.transformOrigin = stageStill === true ? stillO : HOSP_O; zEl.style.transform = z > 1.001 ? `scale(${z.toFixed(4)})` : '';
     R.classList.toggle('shut-on', on && !!shutImg.naturalWidth);
     chipPos = {};
     if (on && shutBand && shutImg.naturalWidth) {   // object-fit: contain の中身の枠
@@ -602,7 +616,7 @@ function boot() {
     }
     overlays(q);
   }
-  shutImg.addEventListener('load', () => { if (!ctl) stillScrub(rawP); });
+  shutImg.addEventListener('load', () => { if (!ctl || stageStill === true) stillScrub(rawP); });
   function onStage() {
     sq = 0; rawP = stageP();
     R.classList.toggle('past', hero.getBoundingClientRect().top < -2);   // 舞台を過ぎて町が上へ動き始めたら、見出しの帯を小さく固定(中の明るい部屋の上で、帯の字が消えないように)
@@ -612,8 +626,9 @@ function boot() {
       if (on) { if (openId) closeB(false); stopInvite(); showTag(null); hoverId = null; if (ctl) ctl.hover(null); }
       else if (!touched) startInvite();
     }
-    if (ctl) ctl.scrubTo(rawP);
-    else stillScrub(rawP);
+    if (ctl && stageStill === 'pending' && on) { goStill(); return; }
+    if (ctl && stageStill !== true) ctl.scrubTo(rawP);
+    else { stillScrub(rawP); if (ctl && !on) { canvas.style.transform = ''; ctl.setPaused(paused); } else if (ctl && on) ctl.setPaused(true); }   // 最初の画面に戻ったら、町はまた動く
   }
   addEventListener('scroll', () => { if (!sq) sq = requestAnimationFrame(onStage); }, { passive: true });
   addEventListener('resize', () => { if (!sq) sq = requestAnimationFrame(onStage); });
@@ -623,11 +638,11 @@ function boot() {
   // キーボードで札に来たら、札が見える所(ひらいた病院ぜんたいの、その道具の階)まで舞台を進める
   for (const c of chips) c.addEventListener('focus', () => {
     const f = FLOORS.find(x => x[0] === c.dataset.sid), to = f ? Math.min(.97, (f[1] + Math.min(f[2], 1)) / 2) : .5;
-    if (Math.abs(rawP - to) > .08) { const span = stage.offsetHeight - innerHeight; scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span * to, behavior: reduce() ? 'auto' : 'smooth' }); }
+    if (Math.abs(rawP - to) > .08) scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span() * to, behavior: reduce() ? 'auto' : 'smooth' });
   });
   // キーボードで一覧への入口に来たら、それが見える所(ひらいた病院ぜんたい)まで舞台を進める
   const goA = $('a', insGo);
-  if (goA) goA.addEventListener('focus', () => { if (rawP < .5) { const span = stage.offsetHeight - innerHeight; scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span * .53, behavior: reduce() ? 'auto' : 'smooth' }); } });
+  if (goA) goA.addEventListener('focus', () => { if (rawP < .5) scrollTo({ top: stage.getBoundingClientRect().top + scrollY + span() * .53, behavior: reduce() ? 'auto' : 'smooth' }); });
   // 舞台を過ぎたら、見出しの帯を小さく上に固定。夜は夜の色の帯
   const hdNight = () => R.classList.toggle('hd-night', R.dataset.tod === 'night');
   hdNight(); btnTod.addEventListener('click', hdNight);
@@ -656,7 +671,7 @@ function boot() {
       ctl = await L.live({
         canvas, box: still, tod: TODS.indexOf(R.dataset.tod), mod, reduce, quality,
         safe() {
-          const w = canvas.clientWidth, h = canvas.clientHeight;
+          const w = canvas.clientWidth, h = Math.min(canvas.clientHeight, innerHeight);   // 絵は帯が畳まれたときの高さで描くので、いま見えている高さまでを使う(下のシートの上に建物を)
           if (phone()) return { l: 10, t: 64, r: w - 10, b: h - Math.round(innerHeight * .45) - 6 };
           const pw = Math.min(400, Math.max(340, innerWidth * .34)) + 48;
           return { l: 40, t: 90, r: w - pw - 16, b: h - 36 };
@@ -685,8 +700,8 @@ function boot() {
           if (L2.scrub) { chipPos = {}; for (const s of L2.st) if (s.band) chipPos[s.id] = { x: ox + s.band[0], y: oy + s.band[1] }; }   // 案A: 道具の札は、物の真上の、その階の天井の切り口
           overlays(L2.scrub ? L2.scrub.p : rawP > .02 ? rawP : 0, L2.scrub ? L2.scrub.sid : undefined);   // 立体に替わった直後(まだ寄っていないこま)は、いまの進みの言葉のまま
         },
-        scrubSafe() {   // 案A: 寄った病院を置く範囲(上は「病院の中」の見出しと一文、下は一覧への入口を避ける)
-          const w = canvas.clientWidth, h = canvas.clientHeight;
+        scrubSafe() {   // 案A: 寄った病院を置く範囲(上は「病院の中」の見出しと一文、下は一覧への入口を避ける)。下は帯が出ているときの画面(svh)の中に(帯が畳まれると、広場が下に少し多く見えるだけで、病院は動かない)
+          const w = canvas.clientWidth, h = Math.min(canvas.clientHeight, svhH());
           if (phone()) return { l: 10, t: 132, r: w - 10, b: h - 86 };
           return { l: 40, t: 150, r: w - 40, b: h - 92 };
         },
@@ -694,7 +709,8 @@ function boot() {
         onOpened() {},
         onArrive(id) { if (id === 'plaza' && openId === 'plaza') ovTags(true); },   // カメラが見晴らしに着いてから、名前の札(遅い端末でも、カメラより先に出さない)
         onClosed() {},
-        onFrame() { if (PERF) PERF.frame(); }
+        onFrame() { if (PERF) PERF.frame(); },
+        onSlow() { goStill(); }
       });
       window.__ctl = ctl; window.__t3 = Math.round(performance.now() - t0); swap.live = performance.now();
       if (paused) ctl.setPaused(true);
@@ -743,6 +759,14 @@ function boot() {
       for (let i = 0; i < n; i++) { openB(RING[i % RING.length], null, { focus: false }); await wait(gap[0]); closeB(false); await wait(gap[1]); if ((i + 1) % 8 === 0) out.push({ i: i + 1, ...P.mem() }); }
       return out;
     };
+    /* 画面の表示(社長の iPhone で見るため): 左下に小さく。直近のこまの間隔と手番の時間、50ms を超えたこまの数、品質の段・画素比・描く量。押すと数え直す */
+    const hud = document.createElement('div'); hud.className = 'perf-hud'; hud.setAttribute('aria-hidden', 'true'); document.body.append(hud);
+    hud.addEventListener('click', () => { if (ctl && ctl.perfReset) ctl.perfReset(); });
+    setInterval(() => {
+      if (!ctl || !ctl.perfStats) { hud.textContent = '計測: 立体に替わるのを待っています'; return; }
+      const r = ctl.perfStats();
+      hud.textContent = `こまの間隔 中央 ${r.gapMed}ms・95% ${r.gapP95}ms(50ms超 ${r.over50}/${Math.min(r.n, 240)})\n手番 中央 ${r.jsMed}ms・95% ${r.jsP95}ms\n段 ${r.tier}・画素比 ${r.dpr}・${Math.round(r.px / 1e4)}万画素・描く ${r.calls}回・${Math.round(r.tris / 1e3)}千三角形${r.scrub ? '・舞台' : ''}`;
+    }, 500);
     window.__perf = P;
     return P;
   }
