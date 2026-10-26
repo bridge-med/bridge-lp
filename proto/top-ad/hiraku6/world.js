@@ -86,6 +86,7 @@ export const U = {
   uNight: { value: 0 }, uTime: { value: 0 },
   uHi: { value: -1 }, uHiAmt: { value: 0 }, uHiColor: { value: new THREE.Color('#FFE7C2') },
   uFocus: { value: -1 }, uDim: { value: 0 },
+  uAir: { value: 0 }, uMainInv: { value: new THREE.Matrix4() }, uMainB: { value: new THREE.Vector2(0, 0) },   // v6: 病院に着いたとき、主棟(uFocus の建物の uMainB の内側)のほかを、光の計算のあとでその時刻の空気(uHazeC)へ溶かす割合(建物 .45・地面 .25)。最初の画面は 0
   uOpenA: { value: -1 }, uOpenB: { value: -1 }, uRoofA: { value: 1 }, uRoofB: { value: 1 },
   uLiftBid: { value: -1 }, uLift: { value: 0 },
   uPM: { value: Array.from({ length: 8 }, () => new THREE.Matrix4()) },
@@ -103,7 +104,7 @@ const VCOMMON = `
 attribute vec2 aFx; attribute float aBid; attribute float aPart; attribute float aWin;
 uniform float uOpenA; uniform float uOpenB; uniform float uRoofA; uniform float uRoofB; uniform float uLiftBid; uniform float uLift;
 uniform mat4 uPM[8];
-varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY;
+varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY; varying vec3 vHkW;
 mat4 hkPart(out float cut) {
   cut = 1.0;
   float an = floor(aPart / 10.0 + .01), pa = aPart - an * 10.0;
@@ -116,12 +117,12 @@ mat4 hkPart(out float cut) {
 }`;
 const VBEGIN = `float hkC; mat4 hkM = hkPart(hkC); vec3 transformed = (hkM * vec4(position, 1.0)).xyz;
 if (abs(aBid - uLiftBid) < .5) transformed.y += uLift;
-vFx = aFx; vBid = aBid; vWin = aWin; vCut = hkC; vHkY = (modelMatrix * vec4(transformed, 1.0)).y;`;
+vFx = aFx; vBid = aBid; vWin = aWin; vCut = hkC; vHkW = (modelMatrix * vec4(transformed, 1.0)).xyz; vHkY = vHkW.y;`;
 const FCOMMON = `
 uniform float uNight; uniform float uTime; uniform float uHi; uniform float uHiAmt; uniform vec3 uHiColor;
-uniform float uGroundCut; uniform float uArcFade;
+uniform float uGroundCut; uniform float uArcFade; uniform float uAir; uniform mat4 uMainInv; uniform vec2 uMainB;
 uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK; uniform vec3 uHazeC; uniform float uHazeK; uniform float uArc; uniform float uRim; uniform vec3 uGlowR; uniform vec3 uGlowV; uniform float uDay; uniform vec3 uJoint;
-varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY;
+varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY; varying vec3 vHkW;
 float hkBayer(vec2 p) { vec2 q = mod(floor(p), 4.0); float i = q.x + q.y * 4.0;
   return (i < 1.0 ? 0. : i < 2.0 ? 8. : i < 3.0 ? 2. : i < 4.0 ? 10. : i < 5.0 ? 12. : i < 6.0 ? 4. : i < 7.0 ? 14. : i < 8.0 ? 6. : i < 9.0 ? 3. : i < 10.0 ? 11. : i < 11.0 ? 1. : i < 12.0 ? 9. : i < 13.0 ? 15. : i < 14.0 ? 7. : i < 15.0 ? 13. : 5.) / 16.0 + 1.0 / 32.0; }
 float hkHash(float n) { return fract(sin(n) * 43758.5453123); }`;
@@ -144,7 +145,15 @@ totalEmissiveRadiance += hkG * gi * step(.5, gq) * step(gq, 8.5) * hkLit * hkN;
 totalEmissiveRadiance += uGlowR * (1.0 - step(.5, abs(gk - 10.0))) * uRim * 1.4;   // 夕方: 砂の弧の縁が金に光る
 totalEmissiveRadiance += uGlowV * (1.0 - step(.5, abs(gk - 11.0))) * uRim * .4;   // 夕方: 藍の弧の上の縁が、空の藤色を拾う(冷たく、金より控えめ)
 totalEmissiveRadiance += vec3(.007, .01, .027) * (1.0 - step(.5, abs(gk - 2.0))) * uRim;   // 夕方: 藍の弧の影絵に、藍が残る程度の空の照り返し
-totalEmissiveRadiance += uHiColor * (1.0 - step(.5, abs(vBid - uHi))) * uHiAmt;`;
+totalEmissiveRadiance += uHiColor * (1.0 - step(.5, abs(vBid - uHi))) * uHiAmt;
+if (uAir > .001 && abs(vBid - uFocus) < .5) totalEmissiveRadiance *= 1.0 - .55 * uAir;   // v6: 着いた病院の外の灯り(塔屋の帯の窓・横の窓)は、部屋より明るくしない`;
+/* v6: 病院に着いたとき、町を暗くせず、光の計算のあとでその時刻の空気の色へ溶かす(主役は切った主棟だけ。右の翼・車寄せ・広場・ほかの建物は溶かす側) */
+const HKAIR = `
+if (uAir > .001) {
+  vec3 hkL = (uMainInv * vec4(vHkW, 1.0)).xyz;
+  float hkMain = abs(vBid - uFocus) < .5 && abs(hkL.x) < uMainB.x && abs(hkL.z) < uMainB.y ? 0.0 : 1.0;
+  gl_FragColor.rgb = mix(gl_FragColor.rgb, uHazeC, (vBid > .5 ? .45 : .25) * uAir * hkMain);
+}`;
 const TM = {};
 function townMat(cls) {
   if (TM[cls]) return TM[cls];
@@ -163,7 +172,7 @@ if (vFx.x > 6.5 && vFx.x < 8.5) diffuseColor.rgb = mix(diffuseColor.rgb, uJoint,
 if (uFocus > -.5 && abs(vBid - uFocus) > .5) { float k = vBid > .5 ? uDim : uDim * .55; float l = dot(diffuseColor.rgb, vec3(.3, .59, .11)); diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(l), vec3(.93, .92, .9), .22), k); }`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + FWIN)
       .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5 && vFx.x < 9.5) outgoingLight = diffuseColor.rgb;\n#include <opaque_fragment>')
-      .replace('#include <tonemapping_fragment>', '#include <tonemapping_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uHazeC, (1.0 - smoothstep(-7.9, -6.2, vHkY)) * uHazeK);');
+      .replace('#include <tonemapping_fragment>', '#include <tonemapping_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uHazeC, (1.0 - smoothstep(-7.9, -6.2, vHkY)) * uHazeK);' + HKAIR);
   };
   m.customProgramCacheKey = () => 'hk-town2-' + cls;
   return (TM[cls] = m);
@@ -1003,7 +1012,7 @@ function evU(name, t) {
 }
 /* 出来事のその回の番号(始まった時刻)。乗った人が、バスが出たあとにまた現れないように覚えておく */
 const evStart = (name, t, u) => Math.round((t - u * EVD[name]) * 10);
-export function placePeople(dyn, t, blocked) {
+export function placePeople(dyn, t, blocked, hide) {   // hide(x, z): v6 の舞台で、病院の正面に人を立たせない(最初の画面では渡さない)
   const D = dyn.people; if (!D) return;
   const L = D.limbM, obsOpen = Math.abs(U.uOpenA.value - 2) < .5 || Math.abs(U.uOpenB.value - 2) < .5;
   for (let pi = 0; pi < D.P.length; pi++) {
@@ -1070,6 +1079,7 @@ export function placePeople(dyn, t, blocked) {
     if (walk) bob = Math.abs(Math.sin(t * 7 + p.i)) * .012;
     y = yAbs !== null ? yAbs : y + groundY(x, z) + (sit ? .19 : 0);
     if (blocked && blocked(x, z)) y += WALL;
+    if (hide && hide(x, z)) s = 0;
     const sy = sit ? .7 : 1;
     _p.set(x, y + bob, z); _q.setFromAxisAngle(_up, yaw); _s.set(s, s * sy, s); _mt.compose(_p, _q, _s);
     D.bodyM.setMatrixAt(p.i, _mt);

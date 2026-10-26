@@ -160,7 +160,7 @@ export async function capture(Q) {
       let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
       for (const q of s.quad || []) { const v = new THREE.Vector3(...q).applyMatrix4(it.group.matrixWorld).project(camera); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
       if (x0 <= x1) st[s.id] = [...pc(x0, y1), ...pc(x1, y0)];
-      const FIX = { yawagaeshi: 2, keiji: 1, nidodema: 0 };   // 案A: 札の置き場(その階の天井の切り口。物の真上)。枠の %
+      const FIX = { yawagaeshi: 2, nidodema: 1, keiji: 0 };   // 札の置き場(その階の天井の切り口。物の真上)。枠の %。階と道具の対応は BRIEF 14.2
       if (cut === 'hospital' && FIX[s.id] !== undefined) { const fh = bx.h / (bx.floors || 3), v = new THREE.Vector3(s.anchor.x, fh * (FIX[s.id] + 1) - .035, bx.d / 2 + WALL + .01).applyMatrix4(it.group.matrixWorld).project(camera); band[s.id] = pc(v.x, v.y); }
     }
   }
@@ -366,23 +366,51 @@ export async function live(o) {
   const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
   const ease = t => (t = clamp01(t)) < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;   // 出だしと着きがやわらかい(臨界減衰のばね sp を、さらに通す)
   // 進み p の区切り(調整はここだけ。舞台は 1.8 画面ぶん: 寄る・ひらく 約0.8 + ぜんたい 約1.0)。floors: 階ごとに [その階の札と灯りになる p, 次の階へ]
-  const SQ = { move: [.03, .435], dim: [.075, .36], arcs: [.1, .3], wall: [.27, .43], sink: [.43, .5], light: [.3, .45], floors: [[.55, .7], [.7, .85], [.85, 9]] };   // ぜんたいに着いてから少し(約 0.2 画面)は「病院の中」の一文のまま、そのあと 3階 → 2階 → 1階
-  const FLOOR_OF = [['yawagaeshi', 2], ['keiji', 1], ['nidodema', 0]];   // 降りる順: 3階 休憩室 → 2階 ナースステーション → 1階 受付
-  const FI = { yawagaeshi: 2, keiji: 1, nidodema: 0 };
-  const QS = new URLSearchParams(location.search), EL1 = deg(+(QS.get('el1') ?? 14)), TURN1 = deg(+(QS.get('turn') ?? 0)), KEEP_WALL = QS.get('wall') === 'keep';   // ぜんたいを見る角度は 14°(屋根を残したまま、3階の奥のソファの人と道具が天井の板に隠れない角度。20°では隠れる)。el1・turn(横の面を見せる回し。既定 0): 見比べるため / wall=keep: 倒れた壁を沈めない(前の版の見え方と比べるため)
+  // v6(designer の配分): 寄る .03–.36(約0.6画面)・町を空気へ溶かす .06–.34・弧を消す .05–.2・前の壁が倒れる .22–.35・中の灯り .24–.38・壁が沈み外枠と階の印が出る .35–.42・ぜんたい .36–.58(約0.4画面)・3F .58 / 2F .72 / 1F .86–1
+  const SQ = { move: [.03, .36], dim: [.06, .34], air: [.06, .34], arcs: [.05, .2], wall: [.22, .35], sink: [.35, .42], light: [.24, .38], frame: [.35, .42], floors: [[.58, .72], [.72, .86], [.86, 9]] };
+  const FLOOR_OF = [['yawagaeshi', 2], ['nidodema', 1], ['keiji', 0]];   // 降りる順: 3階 休憩室(やわ返)→ 2階 ナースステーション(二度手間さがし)→ 1階 受付と待合(掲示じたく)。BRIEF 14.2
+  const FI = { yawagaeshi: 2, nidodema: 1, keiji: 0 };
+  // 中の灯りの高さ(階の数。0 = 1階)。着いた直後は建物の中ほど、そこから p に合わせて 3F → 2F → 1F へ続けて降り、各階の真ん中で少し留まる(段にしない)
+  const LF = [[.52, 1.24], [.6, 2], [.68, 2], [.76, 1], [.82, 1], [.9, 0]];
+  const lightF = x => { if (x <= LF[0][0]) return LF[0][1]; for (let i = 1; i < LF.length; i++) if (x <= LF[i][0]) return LF[i - 1][1] + (LF[i][1] - LF[i - 1][1]) * smooth(LF[i - 1][0], LF[i][0], x); return LF[LF.length - 1][1]; };
+  const QS = new URLSearchParams(location.search), EL1 = deg(+(QS.get('el1') ?? 11)), TURN1 = deg(+(QS.get('turn') ?? -16)), KEEP_WALL = QS.get('wall') === 'keep';   // ぜんたいを見る角度は 14°(屋根を残したまま、3階の奥のソファの人と道具が天井の板に隠れない角度。20°では隠れる)。el1・turn(横の面を見せる回し。既定 0): 見比べるため / wall=keep: 倒れた壁を沈めない(前の版の見え方と比べるため)
   function scrubKeys() {
-    const sf = o.scrubSafe ? o.scrubSafe() : { l: 12, t: 110, r: W - 12, b: H - 100 }, sw = sf.r - sf.l, shh = sf.b - sf.t;
+    const sf = o.scrubSafe ? o.scrubSafe() : { l: 16, t: 110, r: W - 16, b: H - 86 };
     const pl = placeOf(S, SCRUB_ID), bx = BOXES[SCRUB_ID], ex = S.B[SCRUB_ID].ex;
     const F = pl.p.clone().add(new THREE.Vector3(0, (bx.h - ex.y0) / 2, 0));   // 建物の箱の真ん中(島の座標)
     // K0: いまの町。F が画面のどこにあるか
     const r0 = scrub.r0; aimCamera(tmpCam, origin, ELEV);
     const v0 = F.clone().applyAxisAngle(Y, r0).applyMatrix4(tmpCam.matrixWorldInverse);
     const K0 = { r: r0, el: ELEV, ppu: base.ppu, F, sx: W / 2 + (v0.x - base.x) * base.ppu, sy: H / 2 - (v0.y - base.y) * base.ppu };
-    // K1: ひらいた病院ぜんたい(正面を向け、安全な範囲の幅の 92%。PC は幅の 60% か高さで)。屋上の設備ぶん、少し下へ
-    const r1 = nearestRot(r0, deg(pl.face - 45)) + TURN1, q = viewBox(SCRUB_ID, r1, EL1, true);
-    const ppu1 = Math.min(sw * (small ? .92 : .6) / q.w, shh * .86 / q.h);
-    const K1 = { r: r1, el: EL1, ppu: ppu1, F, sx: (sf.l + sf.r) / 2, sy: sf.t + shh * .54 };
-    return [K0, K1];
+    // K1: ひらいた病院ぜんたい(案B と同じ視点 turn −16°・el 11°。arriveKey)
+    const r1 = nearestRot(r0, deg(pl.face - 45)) + TURN1;
+    return [K0, arriveKey(r1, EL1, sf, F)];
+  }
+  /* 到着の画(v6・designer の目安。393×724 の帯が出ている状態で): 各階 82〜86px、外形(塔屋の設備の上から正面の地面の線まで)375〜405px、
+     外形の横は安全な範囲の中、正面の地面の線は帯が出ているときの高さの 77%(724 で y 557)、上の2行の下端(安全な範囲の上)から塔屋の上まで 24px 以上。
+     PC は外形の高さを画面の 62% にして、安全な範囲の真ん中に。大きさ・位置は、帯が出ているときの高さ(svh)で決める(帯が畳まれても動かない) */
+  function arriveKey(r1, el, sf, F) {
+    const pl = placeOf(S, SCRUB_ID), bx = BOXES[SCRUB_ID], ex = S.B[SCRUB_ID].ex, fh = bx.h / (bx.floors || 3);
+    const X0 = bx.w / 2 + E + WALL + .04, Z0 = bx.d / 2 + E + WALL + .03;
+    const pts = rect3(-X0, -Z0, X0, Z0, -ex.y0, bx.h + .14);
+    for (const x of [-1.55, .31]) for (const z of [-.93, .33]) pts.push(new THREE.Vector3(x, ex.top, z));   // 塔屋と設備の上(buildings.js の病院のセットバック)
+    aimCamera(tmpCam, origin, el);
+    const m = new THREE.Matrix4().makeRotationY(r1).multiply(new THREE.Matrix4().compose(pl.p, new THREE.Quaternion().setFromAxisAngle(Y, pl.yaw), one)), inv = tmpCam.matrixWorldInverse;
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const p of pts) { const v = p.clone().applyMatrix4(m).applyMatrix4(inv); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+    const g = new THREE.Vector3(0, -ex.y0, Z0).applyMatrix4(m).applyMatrix4(inv), vF = F.clone().applyAxisAngle(Y, r1).applyMatrix4(inv);
+    const hv = o.svh ? Math.min(H, o.svh()) : H, sw = sf.r - sf.l;
+    let ppu, sy;
+    if (small) {
+      ppu = Math.min(84 * hv / 724 / (fh * Math.cos(el)), sw / (x1 - x0));
+      const gy = hv * .77;
+      if (gy - (y1 - g.y) * ppu < sf.t + 24) ppu = (gy - sf.t - 24) / (y1 - g.y);   // 塔屋が上の2行に近づきすぎるときは、小さく
+      sy = gy - (vF.y - g.y) * ppu;
+    } else {
+      ppu = Math.min(.62 * hv / (y1 - y0), sw * .8 / (x1 - x0));
+      sy = (sf.t + sf.b) / 2 + ((y0 + y1) / 2 - vF.y) * ppu;
+    }
+    return { r: r1, el, ppu, F, sx: (sf.l + sf.r) / 2 + (vF.x - (x0 + x1) / 2) * ppu, sy };
   }
   function scrubCam(x) {
     const K = scrub.kf, a = K[0], b = K[1], t = x >= SQ.move[1] ? 1 : x > SQ.move[0] ? ease((x - SQ.move[0]) / (SQ.move[1] - SQ.move[0])) : 0;
@@ -407,6 +435,30 @@ export async function live(o) {
     const bx = BOXES[SCRUB_ID], ex = S.B[SCRUB_ID].ex; S.world.updateMatrixWorld(true);
     return S.B[SCRUB_ID].anchor.localToWorld(new THREE.Vector3(0, -ex.y0 + .006, bx.d / 2 + .6)).y;
   }
+  /* 外枠の太い切り口(案B の frameCut を移す): 左右の壁と屋根の板の前の切り口、地面の線を、階の床の切り口と同じ藍で太く(光に左右されない図面の線)。
+     前の壁の厚みの中に置くので、壁があるうちは隠れる。壁が沈むのに合わせて濃くする(SQ.frame) */
+  let frameG = null, frameMat = null;
+  function frameCut() {
+    if (frameG) return;
+    const b = BOXES[SCRUB_ID], X = b.w / 2 + E, Z = b.d / 2 + E, h = b.h, out = X + WALL, sw = .115;
+    frameMat = new THREE.MeshBasicMaterial({ color: '#16233E', toneMapped: false, transparent: true, opacity: 0 });
+    frameG = new THREE.Group(); frameG.visible = false;
+    const add = (w, hh, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, hh, d), frameMat); m.position.set(x, y, z); frameG.add(m); };
+    const zc = Z + .074;
+    add(sw + .035, h + .1, .006, -out - .035 + (sw + .035) / 2, (h + .1) / 2, zc);
+    add(sw + .035, h + .1, .006, out + .035 - (sw + .035) / 2, (h + .1) / 2, zc);
+    add(2 * out, .085, .006, 0, .012, zc);                                    // 地面の線(1階の床の切り口の下)
+    add(2 * out + .1, .12, .004, 0, h + .044, (2 * (Z + WALL) + .1) / 2 + .002);   // 屋根の板の前の面
+    S.B[SCRUB_ID].anchor.add(frameG);
+  }
+  /* 病院の正面の広場(正面から約2.6の奥行き。el 11° で立つ人の頭が 1階の床の線に掛かる範囲)には、舞台の間は人を立たせない */
+  const hideFront = (() => {
+    let c = 1, sn = 0, px = 0, pz = 0, X1 = 0, Z0 = 0, Z1 = 0;
+    return {
+      set() { const pl = placeOf(S, SCRUB_ID), b = BOXES[SCRUB_ID]; c = Math.cos(pl.yaw); sn = Math.sin(pl.yaw); px = pl.p.x; pz = pl.p.z; X1 = b.w / 2 + WALL + .35; Z0 = b.d / 2 + WALL - .1; Z1 = Z0 + 2.7; },
+      f: (x, z) => { const dx = x - px, dz = z - pz, lx = dx * c - dz * sn, lz = dx * sn + dz * c; return lx > -X1 && lx < X1 && lz > Z0 && lz < Z1; }   // 島の座標 → 病院の座標(rotation.y = yaw の逆)
+    };
+  })();
   function beginScrub() {
     const wasOpen = !!A.id;
     for (const s of [A, Bk]) if (s.id && s.id !== 'park') { const it = interiors[s.id]; if (it) { for (const st of it.stations) { st.setActive(false); st.setHover(false); } it.group.visible = false; } }
@@ -424,12 +476,15 @@ export async function live(o) {
     gate.set(it ? 1 : 0);
     scrub = { r0, kf: null, sid: null, fi: -1, lit: false, t: 0 };
     U.uGroundCut.value = groundY();
+    { const b = BOXES[SCRUB_ID]; U.uMainB.value.set(b.w / 2 + E + WALL + .09, b.d / 2 + E + WALL + .12); }   // 主棟(角の付け柱・水切り・屋根の縁まで)。右の翼と車寄せは外
+    frameCut(); frameG.visible = true; hideFront.set();
   }
   function endScrub() {
     const it = interiors[SCRUB_ID];
     if (it) { for (const s of it.stations) { s.setActive(false); s.setHover(false); } it.group.visible = false; }
     const r0 = scrub.r0; scrub = null;
-    A = slot(); U.uOpenA.value = -1; U.uFocus.value = -1; U.uGroundCut.value = -1e4; U.uArcFade.value = 0;
+    A = slot(); U.uOpenA.value = -1; U.uFocus.value = -1; U.uGroundCut.value = -1e4; U.uArcFade.value = 0; U.uAir.value = 0;
+    if (frameG) { frameG.visible = false; frameMat.opacity = 0; }
     dim.set(0); inLight.set(0); gate.set(0); sp.set(0); curStation = null; findC = null; nearK.set(0);
     preRot = r0; rot.set(r0); elev.set(ELEV); camX.set(base.x); camY.set(base.y); camZ.set(Math.log(base.ppu));
     dirty = true; kick();
@@ -442,7 +497,10 @@ export async function live(o) {
     const it = interiors[SCRUB_ID];
     gate.t = it ? 1 : 0;
     const g = gate.x, wallK = smooth(SQ.wall[0], SQ.wall[1], x) * g, sinkK = smooth(SQ.sink[0], SQ.sink[1], x) * g;
-    dim.set(.3 * smooth(SQ.dim[0], SQ.dim[1], x));
+    dim.set(.2 * smooth(SQ.dim[0], SQ.dim[1], x));   // 色を抜くのは .2 まで(暗くはしない)
+    U.uAir.value = smooth(SQ.air[0], SQ.air[1], x);   // 主棟のほかを、その時刻の空気の色へ(world.js の HKAIR)
+    S.B[SCRUB_ID].anchor.updateWorldMatrix(true, false); U.uMainInv.value.copy(S.B[SCRUB_ID].anchor.matrixWorld).invert();
+    if (frameMat) frameMat.opacity = smooth(SQ.frame[0], SQ.frame[1], x) * g;   // 外枠の太い切り口(案B の frameCut)は、壁が沈むのに合わせて
     U.uArcFade.value = smooth(SQ.arcs[0], SQ.arcs[1], x);
     A.roof.set(0); A.wall.set(A.end * wallK); A.sink = KEEP_WALL ? 0 : sinkK * (S.B[SCRUB_ID].ex.y0 + .24);   // 屋根は残す。壁は倒れきってから、広場の面の下へ
     if (KEEP_WALL) U.uGroundCut.value = -1e4;
@@ -853,7 +911,7 @@ export async function live(o) {
     if (tod.moving) { const g = applyTod(L, renderer, tod.x); for (const id in interiors) interiors[id] && interiors[id].setNight && interiors[id].setNight(g); o.onTod && o.onTod(tod.x); }   // ページの空も、同じ道筋(夕方を通る)・同じ速さで
     // 中の灯り
     if (A.id || Bk.id) {
-      const id = A.id || Bk.id; if (id !== 'plaza') { const pl = placeOf(S, id), il = inLightOf(id); if (scrub && scrub.fi >= 0) { const bx = BOXES[id]; il.p.y = bx.h / (bx.floors || 3) * (scrub.fi + .62); }   // 案A: 階ごとに降りるとき、灯りもその階へ
+      const id = A.id || Bk.id; if (id !== 'plaza') { const pl = placeOf(S, id), il = inLightOf(id); if (scrub) { const bx = BOXES[id]; il.p.y = bx.h / (bx.floors || 3) * (lightF(sp.x) + .62); }   // v6: 中の灯りは p に合わせて 3F から 1F へ続けて降りる(各階の真ん中で少し留まる)
         L.pIn.position.copy(il.p).applyAxisAngle(Y, pl.yaw).add(pl.p); L.pIn.distance = il.dist; inK = il.k; }
     }
     L.pIn.intensity = Math.max(0, inLight.x) * (1.4 + U.uNight.value * 2) * inK;
@@ -863,7 +921,7 @@ export async function live(o) {
     if (!paused) {
       const blockedAng = A.id && A.kind === 'hinge' && A.id !== 'hospital' ? deg(LAYOUT[A.id].a) : null;
       const blocked = A.id && A.kind === 'hinge' ? footprint(A) : null;
-      placePeople(S.dyn, t, blocked); placeVehicles(S.dyn, t, dt, blockedAng); placeSky(S.dyn, t, U.uNight.value); placeSmall(S.dyn, t, !(A.id === 'atelier'));
+      placePeople(S.dyn, t, blocked, scrub && sp.x > .12 ? hideFront.f : null); placeVehicles(S.dyn, t, dt, blockedAng); placeSky(S.dyn, t, U.uNight.value); placeSmall(S.dyn, t, !(A.id === 'atelier'));
     }
     for (const id in interiors) { const it = interiors[id]; if (it && it.group.visible) it.update(dt, t, tod.x < .5 ? 'day' : tod.x < 1.5 ? 'dusk' : 'night'); }
     S.world.rotation.y = rot.x;
@@ -891,6 +949,12 @@ export async function live(o) {
     return (x, z) => { const dx = x - pl.p.x, dz = z - pl.p.z, lx = dx * c - dz * sn, lz = dx * sn + dz * c; return lx > -X && lx < X && lz > z0 && lz < z1; };
   }
 
+  /* v6: 階の印(右の外枠の、各階の上の方)と、正面の地面の線の真ん中の画面の位置(ページの下の帯の置き場) */
+  function scrubMarks() {
+    const b = BOXES[SCRUB_ID], ex = S.B[SCRUB_ID].ex, fh = b.h / (b.floors || 3), out = b.w / 2 + E + WALL, z = b.d / 2 + E + .08;
+    const sc = l => { const pl = placeOf(S, SCRUB_ID), v = new THREE.Vector3(...l).applyAxisAngle(Y, pl.yaw).add(pl.p).applyAxisAngle(Y, rot.x).project(camera); return [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]; };
+    return { fl: [2, 1, 0].map(f => sc([out - .04, fh * f + fh * .84, z])), gy: sc([0, -ex.y0, b.d / 2 + E + WALL])[1], fk: frameMat ? frameMat.opacity : 0 };
+  }
   /* ---- 画面の上の位置を、ページへ(見えないボタン・名前の札) ---- */
   function layout() {
     const out = { b: {}, st: [] };
@@ -907,7 +971,7 @@ export async function live(o) {
       const na = ex && nudgeAt(id, ex); if (na) { const v = new THREE.Vector3(...na); if (liftId === id) v.y += lift.x; v.applyMatrix4(m).project(camera); out.b[id].nudge = [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]; }
     }
     if (A.id) out.st = stationsOnScreen();
-    out.scrub = scrub ? { p: sp.x, sid: scrub.sid, fi: scrub.fi } : null;   // 案A: ページの言葉と札は、カメラと同じ(なめらかにした)進みで出し入れする
+    out.scrub = scrub ? { p: sp.x, sid: scrub.sid, fi: scrub.fi, ...scrubMarks() } : null;   // 案A: ページの言葉と札は、カメラと同じ(なめらかにした)進みで出し入れする。v6: 階の印の位置・正面の地面の線の高さ・外枠の濃さも
     if (A.id === 'plaza' && ovInfo() && ovInfo().tags) {   // 見晴らしの名前の札(町の側が決めた、建物のいちばん上の少し上)
       out.ov = {}; S.world.updateMatrixWorld();
       for (const id in ovData.tags) { const v = S.world.localToWorld(ovData.tags[id].clone()).project(camera); out.ov[id] = [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]; }
