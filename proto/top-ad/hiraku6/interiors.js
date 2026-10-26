@@ -1113,6 +1113,8 @@ const BUILD = {
     grp(S, (wx0 + wx1) / 2, y1 + .32 * k, cz + .03)
       .box(-(wx1 - wx0) / 2, 0, 0, .018, .23 * k, .018, P.trim).box((wx1 - wx0) / 2, 0, 0, .018, .23 * k, .018, P.trim).box(0, .23 * k, 0, wx1 - wx0 + .02, .028, .028, P.trim)
       .box(0, .235 * k, .015, .13, .02, .004, '#FFF1D8', 0, 0, 1.3);
+    // 奥の壁の窓(下端は頭より上。el 11° では上の階の床の板のすぐ下に細い帯で見える)
+    hWindow(E, X(-.68), y1 + .44, .34 * k, .4, R.zb, 1, true); hWindow(E, X(.8), y1 + .44, .34 * k, .4, R.zb, 1, true);
     // 受付の上の細長い灯った表示(奥の壁。光を受けない平らな色で、昼も夜も灯って見える)
     const sg0 = X(-.42), sg1 = X(.36), sgy = y1 + .432;
     bb(S, sg0 - .012, sg1 + .012, sgy - .012, sgy + .07, R.zb, R.zb + .012, P.metalDark);
@@ -1128,6 +1130,7 @@ const BUILD = {
         .box(0, .385 * k, .014, .016, .016, .006, '#C9583F').box(-.238 * k, .368 * k, .014, .013, .013, .006, '#E2B23E'),
       screen: { x: 0, y: .2 * k, z: .0135, w: .4 * k, h: .25 * k }
     });
+    grp(S, kx, y1 + .485, R.zb + .02).box(0, 0, -.008, .5 * k, .014, .02, P.metalDark).box(0, -.004, .004, .46 * k, .006, .012, '#FFF1D8', 0, 0, 1.1);   // 掲示板を照らす細い灯り
     turnTo(person(E, X(-.8), y1, Z(-.84), 0, { kind: 'reach', cloth: P.office }), kx + .14, R.zb);   // 紙を貼る受付の人
     // 受付の人(昼も夜も。夜は夜間の窓口)と、カウンターの前の人
     person(E, X(.3), y1, Z(-.8), 0, { kind: 'type', stand: true, cloth: P.office, night: true });
@@ -1141,8 +1144,8 @@ const BUILD = {
     const sit1 = (x, z, o) => person(E, x, y1 + .015, z, Math.PI, Object.assign({ kind: 'sit', fy: y1 }, o));
     sit1(X(-.26), rowA, { cloth: mix(P.casual[2], '#7E7A76', .45), hold: 'cane', lean: .12, hp: .14 });   // 杖の高齢の人
     sit1(X(.5), rowA, { kind: 'look', cloth: mix(P.navy, '#4A5568', .3), hp: -.14 });                     // 会社員(表示を見上げる)
-    sit1(X(.4), rowB, { cloth: P.casual[3] });                                                             // 親と子
-    person(E, X(.6), y1 + .062, rowB, Math.PI, { kind: 'sit', cloth: '#E3A65B', fy: y1, s: .62 });
+    sit1(X(-.16), rowB, { cloth: P.casual[3] });                                                           // 親と子
+    person(E, X(.04), y1 + .062, rowB, Math.PI, { kind: 'sit', cloth: '#E3A65B', fy: y1, s: .62 });
     // 車いすの人(列の右の端。横を向いて、受付のほうへ)
     const wcx = X(1.02), wcz = Z(.4), wcr = -2.3;
     grp(S, wcx, y1, wcz, wcr).foot(0, 0, .14 * k, .12 * k).box(0, .1 * k, 0, .1 * k, .015, .1 * k, P.dark).box(0, .11 * k, -.05 * k, .1 * k, .1 * k, .012, P.dark)
@@ -1154,7 +1157,8 @@ const BUILD = {
     H.push(
       { p: [X(-.2), y1 + .35, Z(.05)], r: [2.0, .6, 1.6], c: '#FFF3E4', k: [.3, .45, .03] },       // 待合と受付(夜は落とす)
       { p: [X(-1.45), y1 + .32, Z(.4)], r: [.55, .55, 1.1], c: '#DCE5F7', k: [.06, .15, .42] },      // 入口のガラス戸から入る外の光(夜は広場の灯り)
-      { p: [X(.3), y1 + .36, Z(-.48)], r: [.7, .55, 1.0], c: '#FFEBCF', k: [.04, .25, .85] }       // 夜間の窓口(奥の壁まで回る)
+      { p: [X(.3), y1 + .36, Z(-.48)], r: [.7, .55, 1.0], c: '#FFEBCF', k: [.04, .25, .85] },
+      { p: [X(-1.15), y1 + .32, Z(-.9)], r: [.46, .4, .37], c: '#FFEBCF', k: [.04, .2, .5] }      // 掲示板の灯り       // 夜間の窓口(奥の壁まで回る)
     );
 
     // ================= 2F ナースステーション =================
@@ -1178,13 +1182,15 @@ const BUILD = {
     // 奥の側に座る2人(ノートの画面は低く、顔を隠さない)・右の端の画面・医師
     for (const lx of [X(-.22), X(.08)]) grp(S, lx, top2, iz - .08, Math.PI).box(0, 0, 0, .15, .008, .1, '#C9CDD1').box(0, .006, -.048, .15, .085, .008, '#C9CDD1', .22);
     person(E, X(-.22), y2, Z(-.44), 0, { kind: 'type', cloth: P.scrub, night: true });
-    const n2 = person(E, X(.08), y2, Z(-.44), 0, { kind: 'write', cloth: P.scrubNavy });
-    for (const lx of [X(-.22), X(.08)]) chair(E, S, y2, lx, Z(-.5), 0, P.chair);
+    const n2 = person(E, X(.1), y2, Z(-.4), 0, { kind: 'write', stand: true, cloth: P.scrubNavy });   // 立って書く
+    chair(E, S, y2, X(-.22), Z(-.5), 0, P.chair);
     grp(S, X(.4), top2, iz + .02, .25).box(0, 0, -.02, .06, .008, .05, P.dark).box(0, 0, -.025, .014, .05, .014, P.dark).box(0, .045, -.02, .2, .13, .016, P.frame).box(0, .05, -.0115, .18, .11, .004, '#D3E6EC', 0, 0, 0, 1);
-    talk(n2, person(E, X(.66), y2, Z(.33), 0, { cloth: P.coat, hold: 'chart' }));   // 医師がカウンターで話す
+    turnTo(person(E, X(.66), y2, Z(.33), 0, { kind: 'talk', cloth: P.coat, hold: 'chart' }), n2.x, n2.z);   // 医師がカウンターで話す
     // 薬のカートで支度をする人(右)
     grp(S, X(1.02), y2, Z(.22)).foot(0, 0, .16 * k, .11 * k).rbox(0, .02, 0, .16 * k, .2 * k, .11 * k, .01, P.trim).box(0, .22 * k, 0, .17 * k, .012, .12 * k, P.tealSoft).box(0, .06 * k, .056 * k, .15 * k, .03 * k, .004, '#A4CDEA').box(0, .12 * k, .056 * k, .15 * k, .03 * k, .004, '#BFE2B0').box(0, .18 * k, .056 * k, .15 * k, .025 * k, .004, '#F2D46B');
     person(E, X(.86), y2, Z(.26), Math.PI / 2, { kind: 'bend', cloth: P.scrubNavy, lean: .32, night: true });
+    // 奥の壁の窓(下端は頭より上)
+    hWindow(E, X(-1.02), y2 + .44, .76 * k, .4, R.zb, 2, true); hWindow(E, X(.58), y2 + .44, .3 * k, .4, R.zb, 1, true);
     // 奥の壁: カルテの棚・ナースコールの灯りの並び(夜は1つ点く。点滅しない)・時計
     const shA = X(-.5), shB = X(.54);
     grp(S, (shA + shB) / 2, y2, R.zb + .075).foot(0, 0, shB - shA, .14, .78).box(0, 0, 0, shB - shA, .3 * k, .14, P.trim).box(0, .3 * k, 0, shB - shA + .02, .014, .15, P.deskWood);
@@ -1255,15 +1261,14 @@ const BUILD = {
     person(E, X(.12), y3, Z(-.42), Math.PI - .55, { kind: 'listen', cloth: P.casual[0], fy: y3 });                         // 見舞いの人(枕のほうを向いて話す)
     person(E, X(.74), y3, Z(-.46), 0, { kind: 'bend', cloth: P.scrub, lean: .3 });                                       // 看護師が手前のベッドの人をのぞく
     H.push(
-      { p: [X(-.4), y3 + .2, Z(-.55)], r: [.6, .45, .62], c: '#FFD9A8', k: [0, .3, .9] },                  // 卓上の灯り(ソファと奥の壁まで)
+      { p: [X(-.4), y3 + .17, Z(-.55)], r: [.6, .45, .62], c: '#FFD9A8', k: [0, .3, .9] },                  // 卓上の灯り(ソファと奥の壁まで)
       { p: [hm0.x, hm0.y, hm0.z + .03], r: [.17, .17, .17], c: '#DCE8FF', k: [0, .22, .85] },            // スマホの光
       { p: [X(.1), y3 + .24, Z(-.86)], r: [.32, .3, .28], c: '#FFDFB0', k: [0, .2, .7] },                   // ベッド脇(奥)
       { p: [X(1.02), y3 + .24, Z(-.38)], r: [.28, .3, .26], c: '#FFDFB0', k: [0, .18, .62] },               // ベッド脇(手前)
       { p: [X(.9), y3 + .37, Z(-.39)], r: [.09, .09, .09], c: '#E8FFF4', k: [0, .2, .55] },                // 点滴の小さな灯り
       { p: [X(-1.36), y3 + .3, Z(-.84)], r: [.28, .3, .26], c: '#FFE6C4', k: [0, .2, .6] },                // 流しの手元
-      { p: [X(-1.42), y3 + .3, Z(-.2)], r: [.45, .55, .8], c: '#FFF0DC', k: [0, .14, .42] },               // 廊下の戸口からの常夜灯
-      { p: [X(-.1), y3 + .3, Z(.1)], r: [1.9, .7, 1.3], c: '#E6ECFA', k: [0, .06, .14] },                  // 夜の部屋の弱い光(床を真っ黒にしない)
-      { p: [X(-.2), y3 + .4, Z(-.6)], r: [1.8, .6, 1.2], c: '#FFF8EE', k: [.14, .1, 0] },                  // 昼の窓からの光
+      { p: [X(-1.42), y3 + .3, Z(-.2)], r: [.45, .55, .8], c: '#FFF0DC', k: [0, .15, .5] },                // 廊下の戸口からの常夜灯
+      { p: [X(-.4), y3 + .36, Z(-.25)], r: [1.9, .65, 1.35], c: ['#FFF8EE', '#F4EFE8', '#E6ECFA'], k: [.16, .07, .1] },   // 昼は窓からの光、夜は部屋の弱い光(床を真っ黒にしない)
       { type: 1, p: [X(-.62), y3, Z(-.12)], r: [.3, 0, .15], skew: .45, c: ['#FFF4DE', '#FFD2A0', '#FFF4DE'], k: [1.0, .5, 0] },   // 日だまり
       { type: 1, p: [X(.3), y3, Z(-.36)], r: [.2, 0, .15], skew: .45, c: ['#FFF4DE', '#FFD2A0', '#FFF4DE'], k: [.95, .46, 0] },
       { type: 1, p: [X(.6), y3, Z(.24)], r: [.22, 0, .16], skew: .45, c: ['#FFF4DE', '#FFD2A0', '#FFF4DE'], k: [.9, .44, 0] }
@@ -1710,13 +1715,13 @@ function seatRow(E, b, y, xs, z, ry, c) {
   for (const e of [-1, 1]) g.box(e * (L / 2 - .03), 0, -.01, .018, .07 * k, .11 * k, P.metalDark);
   for (const x of xs) { const lx = (x - cx) * cs; g.rbox(lx, .1 * k, .005, .1 * k, .03 * k, .11 * k, .008, c).rbox(lx, .1 * k, -.05 * k, .1 * k, .15 * k, .02 * k, .008, c); }
 }
-/* 奥の壁の横長の窓: 枠・ガラス(夕方から夜は暗い空)・桟・窓台 */
-function hWindow(E, x, y, w, h, zb, n) {
-  const S = E.S, P = E.P;
-  bb(S, x - w / 2 - .02, x + w / 2 + .02, y - .02, y + h + .02, zb, zb + .012, P.trim);
+/* 奥の壁の横長の窓: 枠・ガラス(夕方から夜は暗い空)・桟・窓台。thin: 細い枠で窓台なし(上の階の床の板のすぐ下に細く見える高い窓) */
+function hWindow(E, x, y, w, h, zb, n, thin) {
+  const S = E.S, P = E.P, fr = thin ? .01 : .02;
+  bb(S, x - w / 2 - fr, x + w / 2 + fr, y - fr, y + h + fr, zb, zb + .012, P.trim);
   bb(S, x - w / 2, x + w / 2, y, y + h, zb + .006, zb + .016, mix(P.glass, '#DDEBF2', .45), 0, PANE);
   for (let j = 1; j < n; j++) { const mx = x - w / 2 + j * w / n; bb(S, mx - .007, mx + .007, y, y + h, zb + .016, zb + .021, P.trim); }
-  bb(S, x - w / 2 - .03, x + w / 2 + .03, y - .032, y - .016, zb, zb + .034, P.trim);
+  if (!thin) bb(S, x - w / 2 - .03, x + w / 2 + .03, y - .032, y - .016, zb, zb + .034, P.trim);
 }
 /* 左の壁の戸口: 部屋の側の白い枠と、奥の暗い廊下(壁の外の面のすぐ外)。glass: 入口のガラス戸(昼は外の明るさ、夜は暗い空) */
 function doorway(E, R, y, z0, z1, h, glass) {
