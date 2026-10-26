@@ -774,9 +774,6 @@ function person(E, x, y, z, ry, o = {}) {
   const scrub = [P.scrub, P.scrubNavy, P.tealSoft, P.blanket].includes(p.cloth);
   p.sleeve = p.sleeve || (scrub ? 'short' : [P.coat, P.office].includes(p.cloth) ? 'long' : E.r() < .5 ? 'short' : 'long');
   p.pants = p.pants || (scrub ? p.cloth : p.cloth === P.coat ? '#5B6470' : mix(p.cloth, '#363B44', .55));
-  // 病院(v6): 頭の傾きの指定は hpitch に持つ。p.hp は描くたびに「いまの頭の位置」(確かめるための値)で上書きされ、
-  // 傾きとして読むと頭が描かれなくなるため(ほかの建物と公園は、最初の画面を変えないよう元のまま)
-  if (E.hosp) { p.hfix = true; if (typeof o.hp === 'number') p.hpitch = o.hp; }
   E.people.push(p);
   return p;
 }
@@ -796,8 +793,7 @@ function poseOf(p, t, o = {}) {
   let [sy, lean, hp] = POSE[p.kind] || POSE.stand;
   if (!seated && SEATED.has(p.kind)) { sy = 1; lean *= .45; }            // 立ったまま書く・読む
   if (p.lean != null) lean = p.lean;
-  if (p.hfix) { if (p.hpitch != null) hp = p.hpitch; }
-  else if (p.hp != null) hp = p.hp;
+  if (p.hp != null) hp = p.hp;   // 頭の傾きの指定(数)。いまの頭の位置(確かめるための値)は p.hpos に持つ(v5 で同じ名前にしていて、2こま目から頭が描かれなかった)
   let R = [.1, .13, .15], Lh = [.1, .13, .15];
   switch (p.kind) {
     case 'walk': {
@@ -901,7 +897,7 @@ function buildPeople(E, u0) {
     L.forEach((p, i) => {
       const off = (mode === 'night' && !p.night) || (mode !== 'night' && !p.day), q = off ? null : poseOf(p, t, { turn: true }), S = p.s || 1;   // S: 人の縮尺(子ども。ふだんは 1)
       p.vis = !off;   // 確かめるため(札が頭にかからないか): いまの頭の位置(この中の形の座標)
-      if (q) { p.hp = [q.x, q.y + (q.seated ? PERSON.sitHeadY : PERSON.headY) * S, q.z];
+      if (q) { p.hpos = [q.x, q.y + (q.seated ? PERSON.sitHeadY : PERSON.headY) * S, q.z];
         if (p.kind === 'walk') { p.wx = q.x; p.wz = q.z; p.wry = q.ry; p.wb = q.bob; }
         seg[0].set(q.x, q.y, q.z); seg[1].set(q.x, q.y + (q.seated ? PERSON.sitHeadY : PERSON.headY) * S, q.z);
         p.fk += ((f && f.covers(seg, .08) ? 0 : 1) - p.fk) * ease;

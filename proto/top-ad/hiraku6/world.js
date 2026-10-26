@@ -146,7 +146,7 @@ totalEmissiveRadiance += uGlowR * (1.0 - step(.5, abs(gk - 10.0))) * uRim * 1.4;
 totalEmissiveRadiance += uGlowV * (1.0 - step(.5, abs(gk - 11.0))) * uRim * .4;   // 夕方: 藍の弧の上の縁が、空の藤色を拾う(冷たく、金より控えめ)
 totalEmissiveRadiance += vec3(.007, .01, .027) * (1.0 - step(.5, abs(gk - 2.0))) * uRim;   // 夕方: 藍の弧の影絵に、藍が残る程度の空の照り返し
 totalEmissiveRadiance += uHiColor * (1.0 - step(.5, abs(vBid - uHi))) * uHiAmt;
-if (uAir > .001 && abs(vBid - uFocus) < .5) totalEmissiveRadiance *= 1.0 - .55 * uAir;   // v6: 着いた病院の外の灯り(塔屋の帯の窓・横の窓)は、部屋より明るくしない`;
+if (uAir > .001 && abs(vBid - uFocus) < .5) totalEmissiveRadiance *= 1.0 - .9 * uAir;   // v6: 着いた病院の外の灯り(塔屋の帯の窓・横の窓)は、部屋より明るくしない(いちばん明るいのは部屋)`;
 /* v6: 病院に着いたとき、町を暗くせず、光の計算のあとでその時刻の空気の色へ溶かす(主役は切った主棟だけ。右の翼・車寄せ・広場・ほかの建物は溶かす側) */
 const HKAIR = `
 if (uAir > .001) {

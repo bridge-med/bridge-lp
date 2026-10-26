@@ -1043,11 +1043,11 @@ export async function live(o) {
       lastInput = clock(); dirty = true; kick();
     },
     get scrubbing() { return !!scrub; },
-    /* 確かめるため: 病院の中で、いま見えている人の頭(画面の座標。中の形の place が書く p.hp) */
+    /* 確かめるため: 病院の中で、いま見えている人の頭(画面の座標。中の形の place が書く p.hpos) */
     peopleOnScreen() {
       const it = interiors[SCRUB_ID]; if (!it || !it.people) return [];
       const r = o.canvas.getBoundingClientRect(), out = [], v = new THREE.Vector3(), w = new THREE.Vector3();
-      for (const p of it.people) { if (!p.vis || !p.hp) continue; v.set(p.hp[0], p.hp[1], p.hp[2]); it.group.localToWorld(v); w.copy(v); v.project(camera); out.push({ x: r.left + (v.x + 1) / 2 * W, y: r.top + (1 - v.y) / 2 * H, f: p.fy, kind: p.kind, seen: !hiddenInside(w) }); }
+      for (const p of it.people) { if (!p.vis || !p.hpos) continue; v.set(p.hpos[0], p.hpos[1], p.hpos[2]); it.group.localToWorld(v); w.copy(v); v.project(camera); out.push({ x: r.left + (v.x + 1) / 2 * W, y: r.top + (1 - v.y) / 2 * H, f: p.fy, kind: p.kind, seen: !hiddenInside(w) }); }
       return out;
     },
     /* 確かめるため: 建物の中の点(この中の形の座標)が、建物の中の物(上の階の床・天井・壁・家具)に隠れずに見えるか */

@@ -543,8 +543,8 @@ function boot() {
   // ひらいた病院の止めた画像(img/open-<時刻>-<sp|pc>.webp)。w・h は画像の大きさ、band は札の置き場(その道具の階の天井の切り口。画像の %。capture=cutaway&open5=1 の出力)
   // ひらいた病院の止めた画像(img/open-<時刻>-<sp|pc>.webp。到着の画と同じ視点・同じ枠: capture=cutaway&id=hospital&arrive=1。撮り方は tools/README.md)。
   // band は道具の札の置き場(その道具の階の天井の切り口。物の真上)、fl は階の印(3F・2F・1F)、gy は正面の地面の線。どれも画像の %(撮ったときの出力)
-  const STILL_SP = { w: 786, h: 1448, band: { yawagaeshi: [19.44, 41.15], nidodema: [26.46, 52.96], keiji: [21.05, 64.4] }, fl: [[78.25, 44.32], [78.25, 55.92], [78.25, 67.52]], gy: 76.93 };
-  const STILL_PC = { w: 1600, h: 1000, band: { yawagaeshi: [38.37, 42.77], nidodema: [41.04, 56.02], keiji: [38.99, 68.85] }, fl: [[60.75, 46.33], [60.75, 59.34], [60.75, 72.35]], gy: 82.9 };
+  const STILL_SP = { w: 786, h: 1448, band: { yawagaeshi: [25.72, 41.34], nidodema: [31.66, 53.12], keiji: [16.63, 64.27] }, fl: [[78.25, 44.32], [78.25, 55.92], [78.25, 67.52]], gy: 76.93 };
+  const STILL_PC = { w: 1600, h: 1000, band: { yawagaeshi: [40.76, 42.98], nidodema: [43.02, 56.19], keiji: [37.3, 68.7] }, fl: [[60.75, 46.33], [60.75, 59.34], [60.75, 72.35]], gy: 82.9 };
   const OPEN_STILL = {};
   for (const t of TODS) { OPEN_STILL[t + '-sp'] = STILL_SP; OPEN_STILL[t + '-pc'] = STILL_PC; }
   // 階ごとに降りる区切り(live.js の SQ.floors と同じ)。止めた画像のときも、札と一行は同じ進みで降りる
