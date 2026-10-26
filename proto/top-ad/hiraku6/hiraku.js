@@ -16,6 +16,7 @@
 import { BY_ID, TOOLS, RING } from './data.js';
 
 const Q = new URLSearchParams(location.search);
+{ const h = location.hash.slice(1); if (h === 'perf' || h === 'slow') Q.set(h, '1'); }   // 実機で確かめるため: #perf(重さの表示)・#slow(舞台を止めた画像で)。共有のページの中では ?… がページに届かないので、#… でも受ける
 const R = document.documentElement;
 if (Q.get('capture')) import('./live.js').then(m => m.capture(Q));
 else boot();

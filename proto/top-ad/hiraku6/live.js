@@ -283,7 +283,7 @@ export async function live(o) {
   const small = Math.min(innerWidth, innerHeight) < 700 || innerWidth < 921;
   let W = o.canvas.clientWidth, H = o.canvas.clientHeight;
   /* 品質の段(高・中・低)。最初はページが端末の手がかりで選ぶ。動かしてみて重ければ、ここで一段ずつ下げる */
-  const DPR = { high: 2, mid: 1.5, low: 1 }, SHADOW = { high: 2048, mid: 1024, low: 0 };
+  const DPR = { high: 2, mid: 1.5, low: 1 }, SHADOW = { high: 2048, mid: 1024, low: 512 };   // 低の段も影は切らずに細かさだけ下げる(影を切ると、町と病院の中の描き方をすべて作り直すので、その1こまで長く止まる。v6)
   let tier = DPR[o.quality] ? o.quality : small ? 'mid' : 'high';
   const renderer = makeRenderer(o.canvas, Math.min(devicePixelRatio || 1, DPR[tier]), W, H, false);
   // 町を作るあいだ主スレッドを長く止めないよう、分けて作る入口があれば待つ(止めた画像は、そのあいだも見えている)
@@ -620,10 +620,21 @@ export async function live(o) {
     const it = interiorOf(SCRUB_ID); if (!it) return;
     warm = clock() || 1;
     it.group.visible = true;   // 準備の対象に入れる(このこまでは描かない)
+    frameCut(); frameG.visible = true;   // 外枠の太い切り口の描き方も先に用意する(寄り始めの1こまで作ると、そこで長く止まる)
     let pr = null;
     try { pr = renderer.compileAsync ? renderer.compileAsync(S.scene, camera) : (renderer.compile(S.scene, camera), null); } catch (e) { /* そのまま(最初に描くときに用意される) */ }
     if (!scrub && A.id !== SCRUB_ID) it.group.visible = false;
-    if (pr && pr.catch) pr.catch(() => {});
+    if (!scrub) frameG.visible = false;
+    // 描き方を初めて使うときの確かめ(仕上がりを待つ)も、手が空いているうちに済ませる。1画素だけ描く(寄り始めの1こまで待つと、そこで長く止まる)
+    const firstUse = () => {
+      if (scrub || A.id) return;
+      it.group.visible = true; frameG.visible = true;
+      try { renderer.setScissorTest(true); renderer.setScissor(0, 0, 1, 1); renderer.render(S.scene, camera); } catch (e) { /* 次に描くときに確かめる */ }
+      renderer.setScissorTest(false);
+      it.group.visible = false; frameG.visible = false; dirty = true; kick();
+    };
+    const idle = () => (window.requestIdleCallback ? requestIdleCallback(firstUse, { timeout: 2000 }) : setTimeout(firstUse, 200));
+    if (pr && pr.then) pr.then(idle, idle); else idle();
   }
   function interiorOf(id) {
     if (interiors[id] || !MOD || id === 'plaza') return interiors[id] || null;
@@ -1087,6 +1098,7 @@ export async function live(o) {
     /* 計測(?perf=1): 直近のこまの間隔と手番の時間(中央・95%)、50ms を超えた数、品質の段、画素比、描く回数・三角形・影の描き直し */
     perfStats() { const ri = renderer.info.render; return { n: PS.n, gapMed: qtl(PS.gap, .5), gapP95: qtl(PS.gap, .95), over50: PS.gap.filter(g => g > 50).length, jsMed: qtl(PS.js, .5), jsP95: qtl(PS.js, .95), tier, dpr: renderer.getPixelRatio(), px: Math.round(W * H * renderer.getPixelRatio() ** 2), calls: ri.calls, tris: ri.triangles, scrub: !!scrub }; },
     perfReset() { PS.gap.length = 0; PS.js.length = 0; PS.n = 0; },
+    get programs() { return (renderer.info.programs || []).length; },   // 計測: 作った描き方(シェーダー)の数(途中で増えると、その1こまで止まる)
     get compileMs() { return compileMs; },
     get findSize() { return lastFind; },
     /* 移る瞬間のため: その道具の画面(中の物の板)が、いまページのどこに見えているか(ページの座標の四角)と、読み終えた画像 */
