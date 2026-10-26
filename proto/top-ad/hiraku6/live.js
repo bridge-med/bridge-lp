@@ -250,8 +250,11 @@ export async function live(o) {
     camera.updateProjectionMatrix();
   }
   function resize() {
-    W = o.canvas.clientWidth; H = o.canvas.clientHeight; renderer.setSize(W, H, false);
-    base = baseFrame();
+    const w = o.canvas.clientWidth, h = o.canvas.clientHeight, nb = baseFrame();
+    // iOS はブラウザの帯の出入りでも resize を出す。絵の大きさと最初の画面の枠が同じなら、何も作り直さない(着いた病院が跳ばないように)
+    if (base && w === W && h === H && Math.abs(nb.x - base.x) < 1e-6 && Math.abs(nb.y - base.y) < 1e-6 && Math.abs(nb.ppu - base.ppu) < 1e-6) return;
+    if (w !== W || h !== H) { W = w; H = h; renderer.setSize(W, H, false); }
+    base = nb;
     if (scrub) scrub.kf = null;   // 案A: 寄る道筋を、新しい大きさで作り直す(次のこまで)
     else if (!A.id) { camX.set(base.x); camY.set(base.y); camZ.set(Math.log(base.ppu)); }
     else retarget();

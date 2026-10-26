@@ -13,7 +13,7 @@ for (const t of (process.env.TODS || 'day,dusk,night').split(',')) {
 for (const [q, name] of JOBS) {
   const b = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const p = await b.newPage({ viewport: { width: 1700, height: 1600 } });
-  await p.goto(`${BASE}proto/top-ad/hiraku5a/index.html?${q}`, { waitUntil: 'networkidle' });
+  await p.goto(`${BASE}proto/top-ad/hiraku6/index.html?${q}`, { waitUntil: 'networkidle' });
   await p.waitForFunction(() => window.__done, null, { timeout: 300000 });
   const done = await p.evaluate(() => window.__done);
   await (await p.$('#cap')).screenshot({ path: `${OUT}/${name}`, omitBackground: true });

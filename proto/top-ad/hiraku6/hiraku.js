@@ -713,6 +713,13 @@ function boot() {
         onSlow() { goStill(); }
       });
       window.__ctl = ctl; window.__t3 = Math.round(performance.now() - t0); swap.live = performance.now();
+      // 描く器(WebGL)を失ったら(iOS の記憶域の不足など)、止めた画像に戻る(町は止めた絵、舞台は寄せてから、ひらいた病院の止めた画像へ)
+      canvas.addEventListener('webglcontextlost', e => {
+        e.preventDefault();
+        const c = ctl; ctl = null; window.__ctl = null; stageStill = false;
+        try { c.setPaused(true); } catch (err) { /* そのまま */ }
+        canvas.style.transform = ''; R.classList.remove('live', 'stage-still'); stillSharp(); onStage();
+      }, { once: true });
       if (paused) ctl.setPaused(true);
       // 止めた画像のうちにひらいていた建物(戻ってきたときのハッシュも)は、飛ばずに、その姿から立体にする
       for (const f of $$('.pent .pshot', pTools)) { f.parentNode.classList.remove('shot'); f.remove(); }   // 写しの元は、町の中の画面ひとつに
