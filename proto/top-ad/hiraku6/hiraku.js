@@ -541,10 +541,12 @@ function boot() {
   if (Q.get('bare') === '1') R.classList.add('bare');   // 札と言葉を隠して、絵だけを撮る(案B と比べるため)
   const SM = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   // ひらいた病院の止めた画像(img/open-<時刻>-<sp|pc>.webp)。w・h は画像の大きさ、band は札の置き場(その道具の階の天井の切り口。画像の %。capture=cutaway&open5=1 の出力)
-  const BAND_SP = { yawagaeshi: [22.27, 40.23], keiji: [24.2, 53.42], nidodema: [30.67, 66.61] };
-  const BAND_PC = { yawagaeshi: [37.8, 35.82], keiji: [38.65, 52.94], nidodema: [41.49, 70.05] };
+  // ひらいた病院の止めた画像(img/open-<時刻>-<sp|pc>.webp。到着の画と同じ視点・同じ枠: capture=cutaway&id=hospital&arrive=1。撮り方は tools/README.md)。
+  // band は道具の札の置き場(その道具の階の天井の切り口。物の真上)、fl は階の印(3F・2F・1F)、gy は正面の地面の線。どれも画像の %(撮ったときの出力)
+  const STILL_SP = { w: 786, h: 1448, band: { yawagaeshi: [19.44, 41.15], nidodema: [26.46, 52.96], keiji: [21.05, 64.4] }, fl: [[78.25, 44.32], [78.25, 55.92], [78.25, 67.52]], gy: 76.93 };
+  const STILL_PC = { w: 1600, h: 1000, band: { yawagaeshi: [38.37, 42.77], nidodema: [41.04, 56.02], keiji: [38.99, 68.85] }, fl: [[60.75, 46.33], [60.75, 59.34], [60.75, 72.35]], gy: 82.9 };
   const OPEN_STILL = {};
-  for (const t of TODS) { OPEN_STILL[t + '-sp'] = { w: 786, h: 1448, band: BAND_SP }; OPEN_STILL[t + '-pc'] = { w: 1600, h: 1000, band: BAND_PC }; }
+  for (const t of TODS) { OPEN_STILL[t + '-sp'] = STILL_SP; OPEN_STILL[t + '-pc'] = STILL_PC; }
   // 階ごとに降りる区切り(live.js の SQ.floors と同じ)。止めた画像のときも、札と一行は同じ進みで降りる
   const FLOORS = [['yawagaeshi', .58, .72], ['nidodema', .72, .86], ['keiji', .86, 9]];   // 3F 休憩室(やわ返)→ 2F ナースステーション(二度手間さがし)→ 1F 受付(掲示じたく)。BRIEF 14.2
   const floorAt = q => { for (const [sid, a, b] of FLOORS) if (q >= a && q < b) return sid; return null; };
@@ -659,6 +661,22 @@ function boot() {
   // 舞台を過ぎたら、見出しの帯を小さく上に固定。夜は夜の色の帯
   const hdNight = () => R.classList.toggle('hd-night', R.dataset.tod === 'night');
   hdNight(); btnTod.addEventListener('click', hdNight);
+
+  /* 動きを減らす設定(と ?still=1): 舞台を畳み、止めた断面画像を普通の区画に(html.rm)。札3つと階の印は、撮ったときの置き場(画像の %)に最初から */
+  const rmin = $('#rminFig'), rminImg = $('#rminImg');
+  function rminSet() {
+    R.classList.toggle('rm', reduce());
+    if (!reduce() || !rmin) return;
+    const key = R.dataset.tod + (phone() ? '-sp' : '-pc'), D = OPEN_STILL[key];
+    rminImg.width = D.w; rminImg.height = D.h; rminImg.src = 'img/open-' + key + '.webp';
+    rmin.style.setProperty('--gy', D.gy + '%'); rmin.style.setProperty('--rk', (rmin.clientWidth / (phone() ? 393 : 1440)).toFixed(3));
+    for (const c of $$('.rmin-chips .chip', rmin)) { const b = D.band[c.dataset.sid]; if (b) { c.style.left = b[0] + '%'; c.style.top = b[1] + '%'; } }
+    $$('.rmin-fl .flm', rmin).forEach((e, i) => { const f = D.fl[i]; if (f) { e.style.left = f[0] + '%'; e.style.top = f[1] + '%'; } });
+  }
+  rminSet();
+  if (reduceQ.addEventListener) reduceQ.addEventListener('change', rminSet);
+  btnTod.addEventListener('click', () => requestAnimationFrame(rminSet));
+  addEventListener('resize', () => { if (reduce()) rminSet(); });
 
   /* ---------- 立体と入れ替える(読み込みのあと、手が空いたときに) ---------- */
   /* 計測: 長いタスク(50ms 超)。止めた画像から立体へ替わる前後(読み込み開始から、替わって 2 秒後まで)で、スクロールやタップが止まる長さ */

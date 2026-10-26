@@ -352,6 +352,23 @@ html:not(.js) .chips,html:not(.js) .ins,html:not(.js) .ins-go{display:none}   /*
 .flm{position:absolute;left:0;top:0;padding:3px 5px 3px;border-radius:3px;background:var(--indigo);color:var(--kinari);font:600 11px/1 var(--en);letter-spacing:.05em;opacity:0;transform:translate(-50%,-50%)}
 html:not(.js) .flms{display:none}
 html.bare .ins,html.bare .chips,html.bare .ins-go,html.bare .flms{display:none!important}   /* ?bare=1: 札と言葉を隠して、絵だけを撮る(案B と比べるため) */
+/* 動きを減らす設定(html.rm): 舞台を畳み(固定なし・寄せなし)、止めた断面画像を普通の区画に。札3つと上の2行は最初から出す */
+.rmin{display:none;position:relative;background:rgb(var(--mist))}
+html.rm .rmin{display:block}
+html.rm .stage{height:auto}
+html.rm .stage > .hero{position:relative;height:100svh}
+html.rm .stage .ins,html.rm .stage .chips,html.rm .stage .ins-go,html.rm .stage .flms,html.rm .stage .shut,html.rm .stage .endfade{display:none}
+.rmin-fig{position:relative;max-width:1440px;margin:0 auto;--gy:77%}
+.rmin-fig img{display:block;width:100%;height:auto}
+.rmin-fig::after{content:'';position:absolute;left:0;right:0;top:calc(var(--gy) + 40px);bottom:0;pointer-events:none;background:linear-gradient(180deg,rgb(var(--mist) / 0),rgb(var(--mist)) 80%)}   /* 広場は、正面の地面の線の 40px 下から地の色へ(立体の舞台の下の帯と同じ) */
+.rmin-text{position:absolute;z-index:2;left:var(--pad);right:var(--pad);top:calc(58px * var(--rk,1))}
+.rmin-text h2{margin:0}
+.rmin-line{margin:7px 0 0;font-size:14px;line-height:1.75;color:var(--hero-fg-2)}
+.rmin-chips{position:absolute;inset:0;z-index:3;pointer-events:none}
+.rmin-chips .chip{opacity:1;pointer-events:auto}
+.rmin-fl{position:absolute;inset:0;z-index:2;pointer-events:none}
+.rmin-fl .flm{opacity:1}
+.rmin .rmin-go{position:relative;bottom:auto;left:auto;right:auto;opacity:1;margin:0;padding:4px var(--pad) 28px}
 /* 病院の道具を一覧で(下に小さく) */
 .ins-go{position:absolute;z-index:7;left:var(--pad);right:var(--pad);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none;opacity:0}
 .ins-go.off a{pointer-events:none}
@@ -565,6 +582,21 @@ html.capture body > *:not(#cap){display:none!important}
   <p class="ins-go" id="insGo"><a href="../../../products/index.html#work">明日の業務に使える道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
 </section>
 </div>
+
+<!-- 動きを減らす設定のとき(と ?still=1): 舞台を畳み、最初の画面の次に、到着の画と同じ視点の止めた断面画像を普通の区画として置く(札3つと上の2行は最初から) -->
+<section class="rmin" id="rmin" aria-labelledby="rminH">
+  <div class="rmin-fig" id="rminFig">
+    <img id="rminImg" alt="町の病院を斜め前から見た断面。3階は休憩室と病室、2階はナースステーション、1階は受付と待合。それぞれの階で人が働き、過ごしている。" width="786" height="1448" decoding="async" loading="lazy">
+    <div class="rmin-text"><h2 class="eyebrow" id="rminH">病院の中</h2><p class="rmin-line">いつもの仕事のそばに、道具を置いています。</p></div>
+    <nav class="rmin-chips" aria-label="病院の中の道具(動きを減らす設定)">
+      <a class="chip" data-sid="yawagaeshi" href="../../../yawagaeshi/index.html"><span class="c-fl">3階 休憩室</span><b>やわ返</b><span class="c-t">角の立たない返信案を、3つつくる</span></a>
+      <a class="chip" data-sid="nidodema" href="../../../nidodema/index.html"><span class="c-fl">2階 ナースステーション</span><b>二度手間さがし</b><span class="c-t">部署の手作業を、減らせるものと守るものに分ける</span></a>
+      <a class="chip" data-sid="keiji" href="../../../keiji/index.html"><span class="c-fl">1階 受付</span><b>掲示じたく</b><span class="c-t">院内掲示を、選んで埋めるだけ</span></a>
+    </nav>
+    <div class="rmin-fl" aria-hidden="true"><span class="flm">3F</span><span class="flm">2F</span><span class="flm">1F</span></div>
+  </div>
+  <p class="ins-go rmin-go"><a href="../../../products/index.html#work">明日の業務に使える道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+</section>
 
 <!-- JS が動かないときだけ: 町の建物ごとの29の道具(建物名と道具名のリンクだけ。PRODUCTS と同じ29件。JS が動くときは、町のパネルが同じ29件を持つ) -->
 <noscript><nav class="nojs" aria-labelledby="njTitle"><h2 id="njTitle">町の道具</h2><ul class="nj-b">
