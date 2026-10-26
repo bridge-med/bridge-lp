@@ -8,13 +8,14 @@ v6 は、立体が動かないとき(WebGL なし・データ節約・立体に�
    ```
    PW=/opt/node22/lib/node_modules/playwright/index.mjs OUT=<出力先> node capture-open.mjs
    ```
-   出力の JSON は、道具の札の置き場(`band`。その道具の階の天井の切り口)、階の印(`marks.fl`。3F・2F・1F)、正面の地面の線(`marks.gy`)。どれも画像の %。`hiraku.js` の `STILL_SP`・`STILL_PC` に写す
+   出力の JSON は、道具の札の置き場(`band`。その道具の階の天井の前の切り口の上で、横は物が画面に映る位置。live.js の `bandAt`)、階の印(`marks.fl`。3F・2F・1F)、正面の地面の線(`marks.gy`)。どれも画像の %。`hiraku.js` の `STILL_SP`・`STILL_PC` に写す
 3. webp にする(品質 82 くらい)。大きさは変えない(スマホ 786×1448・PC 1600×1000。`STILL_SP`・`STILL_PC` の w・h と同じ)
 
 撮る見え方は live.js の capture の `cutaway&id=hospital&arrive=1` で決める。立体の到着の画と同じ式(`arriveFrame`)で、同じ大きさの画面(`cw`・`ch`。スマホ 393×724・PC 1440×900)の枠を求め、その2倍(PC は 1600/1440 倍)で描く:
 - 視点: turn −16°・el 11°(案B と同じ。`turn`・`el` で変えられる)
 - 屋根を残し、前の壁は外し(沈んだ後)、広場の弧は消す。外枠の太い切り口つき
 - 町は暗くせず、主棟のほかをその時刻の空気の色へ(`uAir` = 1)。正面の広場には人を立たせない
+- 一個の物として切り出す(live.js の `mainAir`。立体の舞台と同じ): 主棟の外形に重なる物と 8px 以内に接する物のうち、手前の物と病院の主棟の外の部分(右の翼・救急口)は消し、奥と脇の物は空気の色へ .85 まで。夜は右の側面に月の光
 
 ## 案B と同じ視点で、病院の中だけを撮る(bview)
 

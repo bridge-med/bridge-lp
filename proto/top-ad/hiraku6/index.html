@@ -306,7 +306,7 @@ html.paused .nr{animation-play-state:paused}   /* 止めるボタンで、この
    空・光・見出しの帯は最初の画面のまま(紙の面に切り替えない)。言葉は最初の画面の一行と同じ場所に小さく、道具の札は町の名前の札と同じ形 */
 main:focus{outline:none}
 .stage{position:relative;background:rgb(var(--mist))}   /* 舞台の地は、その時刻の空の下の色(スマホのブラウザの帯が畳まれて画面が伸びても、舞台の下に紙の色を覗かせない) */
-html.js .stage{height:calc(100vh + var(--span,180vh));height:calc(100lvh + var(--span,180svh))}   /* JS が動くときだけ: 最初の画面 + 舞台の進み(--span)。JS なしでは止まったままの長い面を作らない */
+html.js .stage{height:calc(100vh + var(--span,150vh));height:calc(100lvh + var(--span,150svh))}   /* JS が動くときだけ: 最初の画面 + 舞台の進み(--span)。JS なしでは止まったままの長い面を作らない */
 .stage > .hero{position:sticky;top:0;max-height:none;height:100vh;height:100lvh}   /* 舞台の間の町と病院は、ブラウザの帯が畳まれたときの高さ(lvh)で描く: 帯が開閉しても絵の大きさは変わらず、病院の下に地の色を覗かせない。言葉と入口は帯が出ているときの高さ(svh)の中に置く(--tb) */
 :root{--tb:0px}
 @supports (height:100lvh){:root{--tb:calc(100lvh - 100svh)}}   /* ブラウザの帯の高さ(帯が出ている間は、絵の下の端の --tb ぶんが帯の下に隠れる) */
