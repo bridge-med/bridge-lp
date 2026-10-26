@@ -634,7 +634,7 @@ function boot() {
   shutImg.addEventListener('load', () => { if (!ctl || stageStill === true) stillScrub(rawP); });
   function onStage() {
     sq = 0; rawP = stageP();
-    R.classList.toggle('past', hero.getBoundingClientRect().top < -2);   // 舞台を過ぎて町が上へ動き始めたら、見出しの帯を小さく固定(中の明るい部屋の上で、帯の字が消えないように)
+    const hb = hero.getBoundingClientRect(); R.classList.toggle('past', hb.top < -2); R.classList.toggle('gone', hb.bottom < 0);   // 舞台を過ぎて町が上へ動き始めたら、見出しの帯を小さく固定(中の明るい部屋の上で、帯の字が消えないように)
     const on = rawP > .02;
     if (on !== R.classList.contains('scrub')) {
       R.classList.toggle('scrub', on);

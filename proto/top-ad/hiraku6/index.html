@@ -418,7 +418,7 @@ html[data-tod="night"] .end{--end-bg:var(--sky-n3)}
 html.past:not(.opened) .hd{position:fixed;padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:4px;background:var(--hd-stuck);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 1px 0 var(--line);animation:hdIn .32s var(--ease);--hd-fg:var(--ink);--hd-fg-2:var(--ink-2);--navcta-ring:rgba(28,34,39,.32);--navcta-h:rgba(255,255,255,.6);--logo-1:var(--indigo);--logo-2:var(--sand);--focus:var(--indigo)}
 @keyframes hdIn{from{transform:translateY(-100%)}to{transform:none}}
 html.past.hd-night:not(.opened) .hd{background:var(--night-hd);box-shadow:0 1px 0 var(--night-line);--hd-fg:var(--kinari);--hd-fg-2:var(--night-hd-fg-2);--navcta-ring:var(--night-ring);--navcta-h:var(--night-hover);--logo-1:var(--kinari);--logo-2:var(--sand-2);--focus:var(--kinari)}   /* 終幕の夜の上では、見出しの帯も夜の色 */
-html.past:not(.opened) .hd .ctrl{display:none}
+html.past.gone:not(.opened) .hd .ctrl{display:none}   /* 止めるボタン(時刻・一時停止)は、動く町と病院が画面に見えている間は残す(WCAG 2.2.2)。見えなくなってから外す */
 html.past:not(.opened) .logo svg{width:42px}
 
 /* メニュー(スマホ) */
@@ -639,8 +639,8 @@ html.capture body > *:not(#cap){display:none!important}
 <!-- 試作の終わり: 最初の画面の下の空の色のまま。このあとフッター -->
 <section class="end" aria-labelledby="endT">
   <h2 class="sr" id="endT">試作の終わり</h2>
-  <p class="end-note"><span class="ph">試作はここまでです。</span><span class="ph">最初の画面のすぐ後だけを、</span><span class="ph">2案で比べています。</span></p>
-  <p class="end-links"><a class="tx" href="../hiraku5b/index.html">案B を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="tx" href="../../../products/index.html">すべての道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="tx" href="../hiraku4/index.html">v4 を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+  <p class="end-note"><span class="ph">試作はここまでです。</span><span class="ph">最初の画面から病院の中までを、</span><span class="ph">仕上げています。</span></p>
+  <p class="end-links"><a class="tx" href="../hiraku5a/index.html">v5 の案A を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="tx" href="../hiraku5b/index.html">案B を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="tx" href="../../../products/index.html">すべての道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
 </section>
 </main>
 
