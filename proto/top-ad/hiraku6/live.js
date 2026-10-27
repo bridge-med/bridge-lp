@@ -909,6 +909,7 @@ export async function live(o) {
   /* 重さの計測: 動いている間のフレームの間隔(中央値)。42ms(24fps)を超えたら一段下げる。下げたらページに知らせる(次の訪問はその段から) */
   const ft = [];
   let pendTier = null, pendAt = 0;   // 下げると決めた段。次に飛ぶとき・回すとき(なければ 6 秒後)に下げる
+  let seenInput = 0, inputFrame = 0;   // 指が動いたのを見た、いちばん新しいこま
   const slowT = [];   // 低の段でも舞台が重いとき(中央 60ms 超): ページに知らせて、舞台を止めた画像に替える(低性能の端末でも、寄る・ひらくを止めた画像で見せる)
   function measure(gap) {
     if (manual || frameN < 8) return;
@@ -951,7 +952,8 @@ export async function live(o) {
     if (!down && !A.id && Math.abs(inertia) > .002) { rot.x += inertia * dt; rot.t = rot.x; inertia *= Math.pow(.05, dt); }
     if (A.id && !scrub) rot.t = (openCam ? openCam.rot : rot.t) + dragOff.x;
     // 段取り
-    if (pendTier && now - lastInput > 1200 && (scrub || now - pendAt > 6000)) applyTier();   // この道では、指が止まって 1.2 秒たってから下げる(描く大きさを替える1こまは長く止まるので、指が動いている間に替えない。v6)。舞台ではすぐ、ほかは決めて 6 秒後。舞台のばねが落ち着くのは待たない(とても遅い端末では落ち着く前に次のスクロールが来て、いつまでも下がらず、止めた画像にも替わらないため)。飛ぶ・回す始めにも下げる(flight・pointermove)
+    if (lastInput !== seenInput) { seenInput = lastInput; inputFrame = frameN; }   // 指が動いたこま(1こまが長い端末では、こまの間が 1.2 秒を超えるので、時間だけでは止まったと分からない)
+    if (pendTier && now - lastInput > 1200 && frameN - inputFrame >= 3 && (scrub || now - pendAt > 6000)) applyTier();   // この道では、指が止まって 1.2 秒かつ 3 こまたってから下げる(描く大きさを替える1こまは長く止まるので、指が動いている間に替えない。v6)。舞台ではすぐ、ほかは決めて 6 秒後。舞台のばねが落ち着くのは待たない(とても遅い端末では落ち着く前に次のスクロールが来て、いつまでも下がらず、止めた画像にも替わらないため)。飛ぶ・回す始めにも下げる(flight・pointermove)
     while (later.length && later[0].at <= now) later.shift().f();
     if (grow) { const k = clamp01((now - grow) / 650), pk = interiors.park; if (pk) pk.group.scale.y = Math.max(.001, 1 - Math.pow(1 - k, 3)); if (k >= 1) grow = 0; }
     for (const s of [A, Bk]) if (s.id && s.steps.length) { const el = now - s.t0; while (s.steps.length && s.steps[0].t <= el) s.steps.shift().f(); }
