@@ -951,7 +951,7 @@ export async function live(o) {
     if (!down && !A.id && Math.abs(inertia) > .002) { rot.x += inertia * dt; rot.t = rot.x; inertia *= Math.pow(.05, dt); }
     if (A.id && !scrub) rot.t = (openCam ? openCam.rot : rot.t) + dragOff.x;
     // 段取り
-    if (pendTier && !sp.moving && now - lastInput > 1200 && (scrub || now - pendAt > 6000)) applyTier();   // 指と舞台が止まって 1.2 秒たってから下げる(描く大きさを替える1こまは長く止まるので、動いている間に替えない。v6)。舞台ではすぐ、ほかは決めて 6 秒後(飛ぶ・回す始めにも下げる)
+    if (pendTier && now - lastInput > 1200 && (scrub || now - pendAt > 6000)) applyTier();   // この道では、指が止まって 1.2 秒たってから下げる(描く大きさを替える1こまは長く止まるので、指が動いている間に替えない。v6)。舞台ではすぐ、ほかは決めて 6 秒後。舞台のばねが落ち着くのは待たない(とても遅い端末では落ち着く前に次のスクロールが来て、いつまでも下がらず、止めた画像にも替わらないため)。飛ぶ・回す始めにも下げる(flight・pointermove)
     while (later.length && later[0].at <= now) later.shift().f();
     if (grow) { const k = clamp01((now - grow) / 650), pk = interiors.park; if (pk) pk.group.scale.y = Math.max(.001, 1 - Math.pow(1 - k, 3)); if (k >= 1) grow = 0; }
     for (const s of [A, Bk]) if (s.id && s.steps.length) { const el = now - s.t0; while (s.steps.length && s.steps[0].t <= el) s.steps.shift().f(); }
