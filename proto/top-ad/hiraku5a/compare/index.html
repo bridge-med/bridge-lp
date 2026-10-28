@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>町の続き 2案(試作)</title>
+<style>
+:root{--paper:#F7F3EC;--card:#fff;--ink:#1C2227;--ink-2:#465058;--ink-3:#5F6870;--line:#E1D9CB;--indigo:#16233E;--box:#EFE9DE;--pad:clamp(16px,4vw,48px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Hiragino Sans','Noto Sans JP',sans-serif;line-height:1.8;font-feature-settings:"palt" 1}
+main{max-width:1120px;margin:0 auto;padding-block:36px 80px;padding-left:max(var(--pad),env(safe-area-inset-left,0px));padding-right:max(var(--pad),env(safe-area-inset-right,0px))}
+h1{font-size:clamp(22px,3.2vw,32px);line-height:1.45;margin:0;text-wrap:balance}
+h2{font-size:clamp(18px,2.2vw,23px);line-height:1.5;margin:52px 0 0;padding-top:18px;border-top:1px solid var(--line);text-wrap:balance}
+h3{font-size:15px;margin:26px 0 0}
+p,li{color:var(--ink-2);font-size:15px}
+.note{font-size:12.5px;color:var(--ink-3)}
+.top span{display:inline-block}   /* 区切りの所で折り返す */
+.lead{margin-top:10px;max-width:44em}
+.how{margin:18px 0 0;padding:12px 18px;background:var(--box);border-radius:10px;max-width:46em}
+.how ul{margin:0;padding-left:1.2em}
+.how li{margin:4px 0;font-size:14px}
+.links{display:flex;flex-wrap:wrap;gap:6px 22px;margin:16px 0 0;padding:0;list-style:none}
+.links a{display:inline-flex;align-items:center;min-height:44px;font-weight:700;color:var(--indigo);text-underline-offset:5px}
+a:focus-visible{outline:2px solid var(--indigo);outline-offset:3px;border-radius:4px}
+.strip{display:flex;gap:10px;overflow-x:auto;margin-top:14px;padding-bottom:10px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.strip .shot{flex:none;width:min(46vw,220px);scroll-snap-align:start}
+.shot{margin:0}
+.shot img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:var(--card)}
+figcaption{margin-top:5px;font-size:12px;color:var(--ink-3)}
+.pairs{margin-top:14px;display:grid;gap:18px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;max-width:560px}
+.pair .pos{grid-column:1 / -1;margin:0;font-size:13px;font-weight:700;color:var(--ink)}
+.moves{font-weight:700;color:var(--ink)}
+ul.dots{padding-left:1.2em}
+ul.dots li{margin-top:6px}
+b{color:var(--ink)}
+
+</style>
+</head>
+<body>
+<main>
+<p class="note top"><span>PR168</span> ・ <span>トップの試作 ひらく町 v5</span> ・ <span>本番には出していません</span></p>
+<h1>町の続き 2案</h1>
+<p class="lead">v4 の最初の画面(町)はそのままに、スクロールした直後の1〜2画面だけを2案で作りました。案A は、町のカメラのまま病院へ寄り、前の壁が倒れて中が見えます。案B は、町のすぐ下に、同じ空と時刻の光で、島から切り出した病院の断面が現れます。どちらも、道具は部屋の中の物として小さな札で示し、夜は夜のまま続きます。成功の条件は「町を見た人がスクロールしたとき、まだこの世界が続いていると感じること」です。</p>
+<ul class="links"><li><a href="../index.html">案A を開く</a></li><li><a href="../../hiraku5b/index.html">案B を開く</a></li><li><a href="../../hiraku4/index.html">v4(比べる)</a></li><li><a href="../../cutaway/index.html">以前の断面の試作</a></li></ul>
+<div class="how"><ul><li>実物はスマホで開けます(上の「案A を開く」「案B を開く」)。止めた画面では動きが伝わらないので、比べるときは実物でスクロールしてください</li><li>動く所。案A: 寄る・壁が沈む・階は札と灯りで降りる。案B: 区画が画面に入ると壁が沈む</li><li>画面は Chromium の端末の模擬(393×724・画素比2)とソフトウェア描画で撮りました。iPhone の実機では未確認です</li><li>2画面より下(試作の終わり・フッター)は、比べる対象に含めていません</li></ul></div>
+
+<h2>1. 同じ位置で並べる</h2>
+<p>同じスクロールの位置で、案A(左)と案B(右)を並べました。主に見ていただきたいのはこの比べです。</p>
+<p class="note">Chromium の端末の模擬とソフトウェア描画で撮影。iPhone の実機では未確認</p>
+<h3>夜</h3><div class="pairs"><div class="pair"><p class="pos">0.5画面</p><figure class="shot"><img src="img/p0-a0.webp" width="420" height="774" alt="案A、夜、0.5画面" loading="lazy" decoding="async"><figcaption>案A</figcaption></figure><figure class="shot"><img src="img/p0-b0.webp" width="420" height="774" alt="案B、夜、0.5画面" loading="lazy" decoding="async"><figcaption>案B</figcaption></figure></div><div class="pair"><p class="pos">1画面</p><figure class="shot"><img src="img/p0-a1.webp" width="420" height="774" alt="案A、夜、1画面" loading="lazy" decoding="async"><figcaption>案A</figcaption></figure><figure class="shot"><img src="img/p0-b1.webp" width="420" height="774" alt="案B、夜、1画面" loading="lazy" decoding="async"><figcaption>案B</figcaption></figure></div><div class="pair"><p class="pos">1.5画面</p><figure class="shot"><img src="img/p0-a2.webp" width="420" height="774" alt="案A、夜、1.5画面" loading="lazy" decoding="async"><figcaption>案A</figcaption></figure><figure class="shot"><img src="img/p0-b2.webp" width="420" height="774" alt="案B、夜、1.5画面" loading="lazy" decoding="async"><figcaption>案B</figcaption></figure></div></div><h3>昼</h3><div class="pairs"><div class="pair"><p class="pos">0.5画面</p><figure class="shot"><img src="img/p1-a0.webp" width="420" height="774" alt="案A、昼、0.5画面" loading="lazy" decoding="async"><figcaption>案A</figcaption></figure><figure class="shot"><img src="img/p1-b0.webp" width="420" height="774" alt="案B、昼、0.5画面" loading="lazy" decoding="async"><figcaption>案B</figcaption></figure></div><div class="pair"><p class="pos">1画面</p><figure class="shot"><img src="img/p1-a1.webp" width="420" height="774" alt="案A、昼、1画面" loading="lazy" decoding="async"><figcaption>案A</figcaption></figure><figure class="shot"><img src="img/p1-b1.webp" width="420" height="774" alt="案B、昼、1画面" loading="lazy" decoding="async"><figcaption>案B</figcaption></figure></div><div class="pair"><p class="pos">1.5画面</p><figure class="shot"><img src="img/p1-a2.webp" width="420" height="774" alt="案A、昼、1.5画面" loading="lazy" decoding="async"><figcaption>案A</figcaption></figure><figure class="shot"><img src="img/p1-b2.webp" width="420" height="774" alt="案B、昼、1.5画面" loading="lazy" decoding="async"><figcaption>案B</figcaption></figure></div></div>
+
+<h2>2. 案A 町から病院の中へ</h2>
+<p class="moves">動く所: 寄る・壁が沈む・階は札と灯りで降りる</p>
+<p>最初の画面を止めたまま、スクロールで町のカメラが病院へ寄ります(約0.8画面)。前の壁が倒れて広場の下へ沈み、屋根を残した病院の中が見えます。そこでカメラは止まり、3つの札が出ます。続けてスクロールすると、3階 → 2階 → 1階 の順に、その階の札が明るくなり、灯りもその階へ降ります(上の見出しの場所に居場所、その下に道具の一行)。舞台は最初の画面の下 1.8画面ぶんです。</p>
+<p class="note">Chromium の端末の模擬とソフトウェア描画で撮影。iPhone の実機では未確認</p>
+<h3>夜</h3><div class="strip" role="group" aria-label="案A、夜の連続した画面(横にスクロール)"><figure class="shot"><img src="img/a0-0.webp" width="480" height="884" alt="案A、夜、最初の画面" loading="lazy" decoding="async"><figcaption>最初の画面</figcaption></figure><figure class="shot"><img src="img/a0-1.webp" width="480" height="884" alt="案A、夜、0.5画面" loading="lazy" decoding="async"><figcaption>0.5画面</figcaption></figure><figure class="shot"><img src="img/a0-2.webp" width="480" height="884" alt="案A、夜、0.9画面(着いたところ)" loading="lazy" decoding="async"><figcaption>0.9画面(着いたところ)</figcaption></figure><figure class="shot"><img src="img/a0-3.webp" width="480" height="884" alt="案A、夜、1画面(3階)" loading="lazy" decoding="async"><figcaption>1画面(3階)</figcaption></figure><figure class="shot"><img src="img/a0-4.webp" width="480" height="884" alt="案A、夜、1.5画面(2階)" loading="lazy" decoding="async"><figcaption>1.5画面(2階)</figcaption></figure><figure class="shot"><img src="img/a0-5.webp" width="480" height="884" alt="案A、夜、2画面(1階)" loading="lazy" decoding="async"><figcaption>2画面(1階)</figcaption></figure></div><h3>昼</h3><div class="strip" role="group" aria-label="案A、昼の連続した画面(横にスクロール)"><figure class="shot"><img src="img/a1-0.webp" width="480" height="884" alt="案A、昼、最初の画面" loading="lazy" decoding="async"><figcaption>最初の画面</figcaption></figure><figure class="shot"><img src="img/a1-1.webp" width="480" height="884" alt="案A、昼、0.5画面" loading="lazy" decoding="async"><figcaption>0.5画面</figcaption></figure><figure class="shot"><img src="img/a1-2.webp" width="480" height="884" alt="案A、昼、0.9画面(着いたところ)" loading="lazy" decoding="async"><figcaption>0.9画面(着いたところ)</figcaption></figure><figure class="shot"><img src="img/a1-3.webp" width="480" height="884" alt="案A、昼、1画面(3階)" loading="lazy" decoding="async"><figcaption>1画面(3階)</figcaption></figure><figure class="shot"><img src="img/a1-4.webp" width="480" height="884" alt="案A、昼、1.5画面(2階)" loading="lazy" decoding="async"><figcaption>1.5画面(2階)</figcaption></figure><figure class="shot"><img src="img/a1-5.webp" width="480" height="884" alt="案A、昼、2画面(1階)" loading="lazy" decoding="async"><figcaption>2画面(1階)</figcaption></figure></div>
+<ul class="dots"><li>最初のスクロールから、同じカメラのまま病院へ寄るので、町が途切れない</li><li>病院ぜんたいで止まり、各階は約96px(393×724)。道具の札は町の名前の札と同じ形で、物の真上の階の切り口に置く。札が隠す人は0</li><li>夜も各階に2人以上(夜勤・夜間受付の家族・3階の看護師と病衣の人の立ち話)</li><li>立体に替わる前・動きを減らす設定・WebGL なしでは、町の止めた画像を病院へ寄せてから(動きを減らす設定では寄せない)、ひらいた病院の止めた画像へ 0.25秒で替える</li></ul>
+
+<h2>3. 案B 病院の断面</h2>
+<p class="moves">動く所: 区画が画面に入ると壁が沈む</p>
+<p>最初の画面のあとに、町と同じ空と時刻の光の中で、島から切り出した一切れの上に立つ病院の断面が現れます。画面に入ると前の壁が地面へ沈み、中の灯りが上がります。少し斜め上から見るドールハウスで、中の人が動いています。</p>
+<p class="note">Chromium の端末の模擬とソフトウェア描画で撮影。iPhone の実機では未確認</p>
+<h3>夜</h3><div class="strip" role="group" aria-label="案B、夜の連続した画面(横にスクロール)"><figure class="shot"><img src="img/b0-0.webp" width="480" height="884" alt="案B、夜、最初の画面" loading="lazy" decoding="async"><figcaption>最初の画面</figcaption></figure><figure class="shot"><img src="img/b0-1.webp" width="480" height="884" alt="案B、夜、0.5画面" loading="lazy" decoding="async"><figcaption>0.5画面</figcaption></figure><figure class="shot"><img src="img/b0-2.webp" width="480" height="884" alt="案B、夜、1画面" loading="lazy" decoding="async"><figcaption>1画面</figcaption></figure><figure class="shot"><img src="img/b0-3.webp" width="480" height="884" alt="案B、夜、1.5画面" loading="lazy" decoding="async"><figcaption>1.5画面</figcaption></figure></div><h3>昼</h3><div class="strip" role="group" aria-label="案B、昼の連続した画面(横にスクロール)"><figure class="shot"><img src="img/b1-0.webp" width="480" height="884" alt="案B、昼、最初の画面" loading="lazy" decoding="async"><figcaption>最初の画面</figcaption></figure><figure class="shot"><img src="img/b1-1.webp" width="480" height="884" alt="案B、昼、0.5画面" loading="lazy" decoding="async"><figcaption>0.5画面</figcaption></figure><figure class="shot"><img src="img/b1-2.webp" width="480" height="884" alt="案B、昼、1画面" loading="lazy" decoding="async"><figcaption>1画面</figcaption></figure><figure class="shot"><img src="img/b1-3.webp" width="480" height="884" alt="案B、昼、1.5画面" loading="lazy" decoding="async"><figcaption>1.5画面</figcaption></figure></div>
+<ul class="dots"><li>第2画面が、建物そのものの一枚の絵として完成している(昼は2案で最も整った画)</li><li>建物は画面の高さの約49%、各階は約82px、人は約39px(393×724)。夜は右の側壁に月の光、土は下へ行くほど空に溶ける</li><li>最初の画面の病院の「病院」の札が、屋根が見えるまで残り、同じ建物だと分かる</li><li>町とは別の2つめの 3D を、町が立体に替わったあと、手の空いたときに作る(それまでは止めた断面の画像)</li></ul>
+
+<h2>4. 参考 いまの画面と以前の断面の試作</h2>
+<p>社長がご覧になったのと同じ夜の時刻で、iPhone の大きさ(393×724)で、最初の画面から1画面ずつ撮りました。</p>
+<p class="note">Chromium の端末の模擬とソフトウェア描画で撮影。iPhone の実機では未確認</p>
+<h3>以前の断面の試作(夜)</h3><div class="strip" role="group" aria-label="以前の断面の試作(夜)、以前の断面の試作(夜)の連続した画面(横にスクロール)"><figure class="shot"><img src="img/now0-0.webp" width="480" height="884" alt="以前の断面の試作(夜)、最初の画面" loading="lazy" decoding="async"><figcaption>最初の画面</figcaption></figure><figure class="shot"><img src="img/now0-1.webp" width="480" height="884" alt="以前の断面の試作(夜)、1画面" loading="lazy" decoding="async"><figcaption>1画面</figcaption></figure><figure class="shot"><img src="img/now0-2.webp" width="480" height="884" alt="以前の断面の試作(夜)、2画面" loading="lazy" decoding="async"><figcaption>2画面</figcaption></figure></div><h3>v4(夜)</h3><div class="strip" role="group" aria-label="v4(夜)、v4(夜)の連続した画面(横にスクロール)"><figure class="shot"><img src="img/now1-0.webp" width="480" height="884" alt="v4(夜)、最初の画面" loading="lazy" decoding="async"><figcaption>最初の画面</figcaption></figure><figure class="shot"><img src="img/now1-1.webp" width="480" height="884" alt="v4(夜)、1画面" loading="lazy" decoding="async"><figcaption>1画面</figcaption></figure></div><h3>v3(夜)</h3><div class="strip" role="group" aria-label="v3(夜)、v3(夜)の連続した画面(横にスクロール)"><figure class="shot"><img src="img/now2-0.webp" width="480" height="884" alt="v3(夜)、最初の画面" loading="lazy" decoding="async"><figcaption>最初の画面</figcaption></figure><figure class="shot"><img src="img/now2-1.webp" width="480" height="884" alt="v3(夜)、1画面" loading="lazy" decoding="async"><figcaption>1画面</figcaption></figure></div>
+<ul class="dots"><li>v4 は、夜の町のすぐ下でヘッダーが紙の帯に変わり、ベージュの紙に見出し・リード・昼と夕方の断面が並ぶ。時刻・光・背景・文字の組み方が一度に切り替わる</li><li>v3 は、町のすぐ下が「町の案内」の見出しと一覧になる</li><li>以前の断面の試作は、建物そのものが絵の主役で、人が働き、下へ読むと階を降りるように進む。2案はこの良さ(建物が主役・人と仕事・同じ世界の光)を取り込み、階ごとの大きな番号・見出し・大きな実画面の繰り返しは持ち込んでいない</li></ul>
+
+<h2>5. 見直し</h2>
+<ul class="dots"><li><b>designer(アートディレクター)</b>: 推しは案A。最初のスクロールで「まだこの世界が続いている」と感じさせるのは案A、第2画面の一枚の絵としての完成度は案B が上、という見立て。案A の終わり方に案B の一枚の絵の質を入れることを条件にした(病院ぜんたいで止めて札と灯りで階を降りる・屋根を残す・見下ろす角を下げる・倒れた壁を広場の下へ沈める・札を物の真上に・止めた画像の二重写しをなくす)。案B には、建物を約1.2倍・夜の土と側壁・入り方・切り口・札の文字。2回目の直しですべて反映し、現場が測った(上の各案の数字)。<b>直した後の画面は、designer はまだ見ていない</b></li><li><b>editor(編集長)</b>: 一文を「いつもの仕事のそばに、道具を置いています。」に(「置いてみました」の守りの言い方と、「3つの」という品揃えの前置きを外す)。下のリンクは「明日の業務に使える道具を見る」(本番のトップと同じ語で、着いた先の見出しとも合う)。階の札は「3F 休憩室」「2F ナースステーション」「1F 受付」(部屋の名前でそろえる)。すべて反映。保留は掲示じたくの場所(6の②)</li><li><b>qa(品質管理)</b>: リンク切れ・横のはみ出し・コンソールのエラーは0。最初の画面は v4 と同じ。直す8点(見えないまま Tab が止まる所・読み上げに届かない一文・途中からの再読み込み・背の高い画面の下の紙の帯・背の低い画面で消える見出し・JS なしの並び・夜に昼の画像を先に読む・PC の昼のナビのコントラスト)は現場が直し、同じ検査で確かめた。qa の再実行はしていない(本番へ進むときに再実行する)</li><li><b>pm(右腕)</b>: 判定は held(試作として見せてよい)。本番には出していない(検索に載せない設定で、どこからもつないでいない)。病院の3つの道具の名前・一行・行き先は、道具の一覧と一致。見せ方の条件3つ(実物を開ける形・動く所の一行・推奨の横の但し書き)は、このページに入れた。PM の追加の指摘2点(案A: スマホのブラウザの帯が畳まれたとき、舞台の下に紙の色が覗くおそれ / 案B: 町が立体になる前にスクロールすると、二つめの立体を場面の替わり目で作り始める)も直した</li></ul>
+
+<h2>6. 社長に決めていただくこと</h2>
+<ul class="dots"><li><b>① 方向。推奨は案A(designer・PM とも)</b>。案A は同じ絵のままカメラが寄るので、作りそのもので「まだこの世界が続いている」を満たす。案B も同じ空と光で続くが、町の島と病院の一切れの間で絵が替わり、0.5画面の位置では最初の画面の入口のボタンがその間に挟まる</li><li>案A の弱み: 着いてから約1画面はカメラが止まり、札と一行と灯りだけが階ごとに替わるので、止まって見えるおそれがある。指の動きに結びついた動きなので、引っかかりもそのまま見える。案B の強み: ふつうのスクロールのまま、3つの階と道具を一枚の絵で一度に読める。止めた画像だけでも成り立つので、重いときの逃げ道がある</li><li>案A を採ることは、町の場面に限って、画面に固定した舞台・スクロールで動くカメラ・物が見えてから出る札を認めることでもある(舞台の固定は以前の改訂で外した動き。札の出し方は 2026-10-11 の指示「演出に内容の可視性を依存させない」の字面から外れる)。案B なら、画面に入ると壁が沈む動き(v4 で外した種類)と二つめの立体を認めることになる</li><li>条件: 社長の iPhone と Android の中位機で、寄る間に引っかからず、舞台の下が覗かないこと。だめなら案B の一枚の絵へ寄せる(案A は、動かないときにひらいた病院の止めた画像へ替える作りをすでに持つので、寄せる手間は小さい)</li><li><b>この推奨の但し書き</b>: designer の推しは第1回の時点のもので、直した後の画面は見ていない。重さの数字はソフトウェア描画での推定で、実機では測っていない</li><li><b>② 掲示じたくの場所。推奨は 1F 受付(待合の掲示)へ移し、二度手間さがしを 2F へ</b>。掲示じたくの対象は「受付・事務の方に」で、作る掲示は外来向け。いまの 2F ナースステーションでは「ナースステーションで院内掲示をつくる」と読める。2案に共通なので、直すのは方向が決まってから</li><li>今回は伺わないもの: v4 から持ち越しの判断(最初の画面のボタンの言葉、見出し「病院の外にも」、規定の改定、昼夕夜とダーク)。下の幕を作るときにまとめる</li></ul>
+
+<h2>7. 重さ・アクセシビリティ</h2>
+<p class="note">393×724・画素比2・CPU 等倍・各1回。Chromium のソフトウェア描画での値です。iPhone の実機の GPU と Safari では測っていないので、推定として見てください。</p>
+<ul class="dots"><li>立体に替わるまで: v4 4.4秒、案A 4.1秒、案B 4.7秒(それまでに読む量は 案A 1,954KB・案B 1,953KB・v4 2,178KB)</li><li>案B: 二つめの立体の最初の描画で長いタスク 2.4秒(CPU を4倍遅くすると 3.3〜4.9秒)。町が立体に替わったあと、手の空いたときに作る。それまでは止めた断面の画像</li><li>案A: CPU を4倍遅くすると、舞台を進む間に長いタスク 25件(最大 345ms。等倍では1件)。3D をスクロールに合わせて毎こま描くため</li><li>画面のずれ(CLS): 案A 0.0055〜0.0065、案B 0.0003〜0.0014(v4 0.0005)</li><li>動きを減らす設定・WebGL なし: 案A は町の止めた画像を病院へ寄せてから(動きを減らす設定では寄せない)、ひらいた病院の止めた画像へ 0.25秒で替える。案B は止めた断面と札。JS なしでは、2案とも道具の一覧(29件)に届く</li><li>キーボードと読み上げ: 帯 → 町の建物 → 道具の札 → 一覧へ → 終わり → フッターの順。案A は Tab で舞台が各階まで進み、札が見える所に出る。「病院の中」と一文は、2案とも読み上げに届く</li><li>未確認: 実機(iPhone の Safari・Android の Chrome)、VoiceOver と TalkBack の実際の読み、ブラウザの帯が畳まれて画面が伸びるとき(案A の舞台の地は、その時刻の空の下の色にした)</li></ul>
+</main>
+</body>
+</html>

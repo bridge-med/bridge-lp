@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>建物の中の試し場(磨き込み)</title>
+<meta name="description" content="「ひらく町」磨き込みの、建物の中(interiors.js)を7つ並べて確かめる試し場。">
+<script type="importmap">{"imports":{"three":"../../shared/vendor/three-0.160.0/three.module.min.js"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* 試し場: 7つの中を、ひらいたときと同じ正面・同じ光(町の world.js の光とトーンマッピング、ひらいた建物の中の灯り)で撮る。
+   ?only=hospital で1つを大きく、?time=dusk|night、?elev=31、?active=keiji、?hover=keiji、?focus=x,y,z&span=0.5、?box=w,d,h、?q=low、?outer=0(最初の箱と色)、?limbs=0(腕と腿なし)、?t=秒(動きの時刻)、?cut=navy(外の壁の切り口も藍にして比べる) */
+:root{--bg:#EEF1F4;--ink:#15191C;--ink-2:#4A5157;--panel:#FFFFFF}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif}
+body.night{background:#1A2140;color:#E8ECF4}
+h1{margin:0;padding:18px 20px 6px;font-size:16px}
+p.note{margin:0;padding:0 20px 14px;color:var(--ink-2);font-size:12.5px}
+body.night p.note{color:#AEB6C8}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px;padding:0 20px 20px}
+.cell{background:var(--panel);border-radius:8px;overflow:hidden}
+body.night .cell{background:#232B4D}
+.cell canvas{display:block;width:100%;height:auto;aspect-ratio:4/3}
+.cap{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;font-size:12.5px}
+.cap b{font-size:13.5px}
+.cap span{color:var(--ink-2);font-variant-numeric:tabular-nums}
+body.night .cap span{color:#AEB6C8}
+body.one .grid{display:block;padding:0}
+body.one .cell{border-radius:0}
+body.one h1,body.one p.note,body.one .cap{display:none}
+</style>
+</head>
+<body>
+<h1>建物の中(interiors.js)の試し場 — 磨き込み</h1>
+<p class="note">ひらいたときと同じ正面から、町と同じ光で見る。外側の壁(切り口は淡い面。?cut=navy で藍)と地面は、この試し場だけの仮のもの。</p>
+<main class="grid" id="grid"></main>
+<script type="module">
+import * as THREE from 'three';
+import { buildInterior, DEFAULT_BOXES } from '../interiors.js';
+
+const Q = new URLSearchParams(location.search);
+const ONLY = Q.get('only'), TIME = Q.get('time') || 'day', ACTIVE = Q.get('active'), HOVER = Q.get('hover');
+const TOD = { day: 0, dusk: 1, night: 2 }[TIME] ?? 0;
+const NAMES = { hospital: '病院', observatory: '展望台', clinic: 'クリニック', office: '事務所', library: '図書館', park: '公園', atelier: 'アトリエ' };
+const KINDS = ONLY ? [ONLY] : ['hospital', 'observatory', 'clinic', 'office', 'library', 'park', 'atelier'];
+if (ONLY) document.body.classList.add('one');
+if (TOD === 2) document.body.classList.add('night');
+/* ひらいたときの見下ろす角度(live.js の frameFor と同じ: 公園 22°、ほか 26°)。?elev=31 で町の角度 */
+const elevOf = kind => (+Q.get('elev') || (kind === 'park' ? 22 : 26)) * Math.PI / 180;
+const FOCUS = Q.get('focus') ? Q.get('focus').split(',').map(Number) : null, SPAN = +(Q.get('span') || .5);
+
+/* 町の光・トーンマッピング・箱・色は、町のファイルから借りる(読めなければ、ここの仮の値) */
+let W3 = null, B3 = null;
+try { W3 = await import('../world.js'); } catch (e) { console.warn('world.js を読めないので、仮の光で撮る', e); }
+try { B3 = await import('../buildings.js'); } catch (e) { /* 最初の箱と色 */ }
+const useOuter = Q.get('outer') !== '0' && B3;
+const BOXES = useOuter ? Object.assign({}, DEFAULT_BOXES, B3.BOXES) : DEFAULT_BOXES;
+const PAL = useOuter ? B3.PALETTE : null;
+const WALL = (B3 && B3.WALL) || .08, POCHE = (PAL && PAL.poche) || '#16233E', CUTL = (PAL && PAL.cutLight) || '#E8E1D6';
+const AZ = Math.PI / 4;                       // 町のカメラの方位。建物はこちらへ正面を向ける
+
+const loader = new THREE.TextureLoader();
+const loadTexture = url => new Promise((res, rej) => loader.load(url, t => { t.colorSpace = THREE.SRGBColorSpace; res(t); }, undefined, rej));
+
+/* 試し場だけの外側: 外の壁(buildings.js の walls と同じ置き方)と、その前の端・上の端の切り口、地面。
+   切り口の決まり(第2回の案): 藍の細い線は中(interiors.js)が部屋の縁に描く。外の壁の切り口は、光を受けない淡い色(cutLight) */
+function standIn(kind, b) {
+  const g = new THREE.Group(), M = c => new THREE.MeshStandardMaterial({ color: c, roughness: .9 }), PM = Q.get('cut') === 'navy' ? new THREE.MeshBasicMaterial({ color: POCHE }) : new THREE.MeshStandardMaterial({ color: CUTL, roughness: .9 });
+  const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = mat !== PM; m.receiveShadow = true; g.add(m); return m; };
+  if (kind === 'park') {
+    add(new THREE.CylinderGeometry(b.w * .62, b.w * .64, .08, 48), M('#B8CD98'), 0, -.04, 0);
+    add(new THREE.CylinderGeometry(b.w * .64, b.w * .5, .4, 48), M('#D6A884'), 0, -.28, 0);
+    return g;
+  }
+  const E = .004, t = WALL, h = b.h;
+  if (b.shape === 'tower') {
+    const r0 = b.w / 2 + E, r1 = r0 + t;
+    add(new THREE.CylinderGeometry(r1, r1, h, 36, 1, true, Math.PI / 2, Math.PI), M('#E2CFAA'), 0, h / 2, 0);
+    const cap = new THREE.RingGeometry(r0, r1, 36, 1, 0, Math.PI); cap.rotateX(-Math.PI / 2); add(cap, PM, 0, h + .001, 0);
+    for (const sx of [-1, 1]) add(new THREE.BoxGeometry(t, h, .004), PM, sx * (r0 + t / 2), h / 2, .002);
+  } else {
+    const X = b.w / 2 + E, Z = b.d / 2 + E;
+    for (const sx of [-1, 1]) {
+      add(new THREE.BoxGeometry(t, h, 2 * Z + t), M('#F4F1EA'), sx * (X + t / 2), h / 2, -t / 2);
+      add(new THREE.BoxGeometry(t, h, .004), PM, sx * (X + t / 2), h / 2, Z + .002);
+      add(new THREE.BoxGeometry(t, .004, 2 * Z + t), PM, sx * (X + t / 2), h + .002, -t / 2);
+    }
+    add(new THREE.BoxGeometry(2 * X, h, t), M('#F4F1EA'), 0, h / 2, -(Z + t / 2));
+    add(new THREE.BoxGeometry(2 * X, .004, t), PM, 0, h + .002, -(Z + t / 2));
+  }
+  const R = Math.max(b.w, b.d) * .78 + .4;
+  add(new THREE.CylinderGeometry(R, R, .1, 48), M('#AFC58E'), 0, -.05, 0);
+  add(new THREE.BoxGeometry(b.w + .3, .04, b.d + .3), M('#ECE3D2'), 0, -.02, 0);
+  return g;
+}
+
+/* live.js の inLightOf と同じ: ひらいた建物の中の灯り */
+function inLightOf(b) {
+  const h = b.h || 1;
+  return { p: new THREE.Vector3(0, h * .62, (b.d || 1) * .08), dist: Math.max(2.2, Math.max(b.w, h) * 1.3), k: Math.min(1, Math.max(.22, (b.w * (b.h || .6)) / 9.3)) };
+}
+
+function fit(cam, pts, W, H, m) {
+  cam.left = -1; cam.right = 1; cam.top = 1; cam.bottom = -1; cam.updateProjectionMatrix(); cam.updateMatrixWorld();
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; const v = new THREE.Vector3();
+  for (const p of pts) { v.copy(p).applyMatrix4(cam.matrixWorldInverse); x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+  const s = Math.min(W * (1 - 2 * m) / (x1 - x0), H * (1 - 2 * m) / (y1 - y0)), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  Object.assign(cam, { left: cx - W / 2 / s, right: cx + W / 2 / s, top: cy + H / 2 / s, bottom: cy - H / 2 / s }); cam.updateProjectionMatrix();
+}
+
+const views = [], stats = {};
+const W = ONLY ? +(Q.get('w') || 1200) : 840, H = ONLY ? +(Q.get('h') || 900) : 630;
+for (const kind of KINDS) {
+  const cell = document.createElement('section'); cell.className = 'cell';
+  const canvas = document.createElement('canvas'); canvas.setAttribute('aria-hidden', 'true');
+  const cap = document.createElement('p'); cap.className = 'cap'; cap.innerHTML = `<b>${NAMES[kind]}</b><span data-st>…</span>`;
+  cell.append(canvas, cap); document.getElementById('grid').append(cell);
+  if (ONLY) { canvas.style.width = W + 'px'; canvas.style.height = H + 'px'; canvas.style.aspectRatio = 'auto'; }
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  let renderer;
+  if (W3) renderer = W3.makeRenderer(canvas, dpr, W, H, true);
+  else {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(dpr); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  }
+  const scene = new THREE.Scene();
+  let L = null, glow = TOD === 2 ? 1 : TOD === 1 ? .55 : 0;
+  if (W3) { L = W3.makeLights(scene, 2048); glow = W3.applyTod(L, renderer, TOD); }
+  else {
+    scene.add(new THREE.HemisphereLight('#EDF3F8', '#CDBB9F', 1.18));
+    const sun = new THREE.DirectionalLight('#FFF3E2', 2.45); sun.position.set(-2.5, 15, 12.5); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+    Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 1, far: 60 }); scene.add(sun, sun.target);
+    L = { pIn: new THREE.PointLight('#FFE2B8', 0, 5, 1.4) }; scene.add(L.pIn);
+  }
+  const box = Object.assign({}, BOXES[kind]);
+  if (Q.get('box')) { const [bw, bd, bh] = Q.get('box').split(',').map(Number); Object.assign(box, { w: bw || box.w, d: bd || box.d, h: bh ?? box.h }); }
+  // 建物ごと正面をカメラ(方位 45°)へ向ける。光は町と同じ場所のまま
+  const hold = new THREE.Group(); hold.rotation.y = AZ; scene.add(hold);
+  const shell = standIn(kind, box); hold.add(shell);
+  const api = buildInterior(kind, box, { palette: PAL, loadTexture, quality: Q.get('q') || 'high', limbs: Q.get('limbs') !== '0' });
+  api.setNight(glow);
+  hold.add(api.group);
+  // 確かめるため: 道具の画面の四隅(建物の中の座標)と持ち上がる向き。ページの中で、見つけたときの大きさを測るのに使う
+  (window.__quads = window.__quads || {})[kind] = Object.fromEntries(api.stations.map(s => [s.id, { quad: s.quad, lift: s.lift }]));
+  if (L.pIn) { const il = inLightOf(box); L.pIn.position.copy(il.p).applyAxisAngle(new THREE.Vector3(0, 1, 0), AZ); L.pIn.distance = il.dist; L.pIn.intensity = (1.4 + glow * 2) * il.k; }
+  if (ACTIVE) api.stations.forEach(s => s.setActive(s.id === ACTIVE));
+  if (HOVER) api.stations.forEach(s => s.setHover(s.id === HOVER));
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
+  const tgt = new THREE.Vector3(0, (box.h || .4) / 2, 0), EL = elevOf(kind);
+  if (W3) W3.aimCamera(cam, tgt, EL);
+  else { cam.position.set(tgt.x + 80 * Math.cos(EL) * Math.cos(AZ), tgt.y + 80 * Math.sin(EL), tgt.z + 80 * Math.cos(EL) * Math.sin(AZ)); cam.lookAt(tgt); }
+  const pts = [], hw = box.w / 2 + .1, hd = box.d / 2 + .1, hh = (box.h || .6) + .05;
+  if (FOCUS) { for (const x of [-1, 1]) for (const y of [-1, 1]) for (const z of [-1, 1]) pts.push(new THREE.Vector3(FOCUS[0] + x * SPAN, FOCUS[1] + y * SPAN * .75, FOCUS[2] + z * SPAN * .3)); }
+  else for (const x of [-hw, hw]) for (const z of [-hd, hd]) for (const y of [0, hh]) pts.push(new THREE.Vector3(x, y, z));
+  for (const p of pts) p.applyAxisAngle(new THREE.Vector3(0, 1, 0), AZ);
+  fit(cam, pts, W, H, ONLY ? .06 : .05);
+  views.push({ kind, renderer, scene, cam, api, shell, el: cap.querySelector('[data-st]') });
+}
+
+/* 中だけの描画の回数と三角形(外側の仮の壁と地面を隠して数える)。影の分は別に数える */
+function measure(v) {
+  const info = v.renderer.info;
+  v.shell.visible = false;
+  info.autoReset = false; info.reset(); v.renderer.render(v.scene, v.cam);
+  const all = { calls: info.render.calls, tris: info.render.triangles };
+  info.autoReset = true; v.renderer.render(v.scene, v.cam);
+  const out = { calls: info.render.calls, tris: info.render.triangles, shadowCalls: all.calls - info.render.calls, shadowTris: all.tris - info.render.triangles, stations: v.api.stations.length };
+  v.shell.visible = true; return out;
+}
+const mode = TOD === 2 ? 'night' : TOD === 1 ? 'dusk' : 'day';
+let t0 = performance.now(), last = t0;
+const T0 = +(Q.get('t') || 0);
+function loop(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  const t = T0 + (now - t0) / 1000;
+  for (const v of views) { v.api.update(dt, t, mode); v.renderer.render(v.scene, v.cam); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+await Promise.all(views.map(v => v.api.ready));
+await new Promise(r => setTimeout(r, 1400));
+for (const v of views) { const s = stats[v.kind] = measure(v); v.el.textContent = `描画 ${s.calls} 回(影 +${s.shadowCalls})・ 三角形 ${s.tris.toLocaleString()} ・ 道具 ${s.stations}`; }
+window.__done = { stats };
+</script>
+</body>
+</html>
