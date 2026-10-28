@@ -29,6 +29,20 @@ document.documentElement.classList.add('js');
   ];
   const CTA = { id: 'community', en: 'Contact', jp: '話をする', d: '共感も、異論も、相談も。', href: 'community/index.html' };
 
+  /* ---- 外へ出す項目の形(フッターの列と window.BRIDGE の NAV・CTA・FOOTER・PRIVACY が使う)
+     { id, en: 英語(画面に出す語), label: 日本語, d: 一言の説明, href: ROOT 解決済み(外部はそのまま), ext: 外部なら true }
+     NAV にある項目は NAV から作る(語と行き先は NAV が唯一の情報源)。NAV にない項目の label は、サイトに日本語名がなければ en と同じ ---- */
+  const link = (n) => ({ id: n.id || '', en: n.en, label: n.jp || n.en, d: n.d || '', href: (n.ext ? '' : ROOT) + n.href, ext: !!n.ext, primary: !!n.primary });
+  const navLink = (id) => link(NAV.concat([CTA]).filter(n => n.id === id)[0]);
+  /* フッターの列(最後にもう一度、地図を渡す)。h は列の見出し、links は上の形 */
+  const FOOTER = [
+    { h: '思想', links: [navLink('philosophy'), link({ en: 'Manifesto', jp: '宣言', href: 'philosophy/index.html#manifesto' }), navLink('stories')] },
+    { h: '活動', links: [navLink('projects'), navLink('journal'), navLink('about')] },
+    { h: 'つくったもの', links: [navLink('products'), link({ id: 'compass', en: 'BRIDGE Compass', href: 'compass/index.html' }), link({ id: 'starter-kits', en: 'Starter Kits', href: 'starter-kits/index.html' })] },
+    { h: 'つながる', links: [navLink('services'), navLink('community'), link({ en: 'note', href: 'https://note.com/prime_duck4944', ext: true }), link({ en: 'X', href: 'https://x.com/WataruPT1013', ext: true })] },
+  ];
+  const PRIVACY = link({ en: 'Privacy', jp: 'プライバシーポリシー', href: 'legal/privacy.html' });
+
   /* ---- 正式ロゴ(交差する二本の線。接続はしない) ---- */
   const MARK =
     '<svg class="logo-mark" viewBox="0 0 240 110" aria-hidden="true">' +
@@ -90,39 +104,19 @@ document.documentElement.classList.add('js');
   /* ---- フッター(最後にもう一度、地図を渡す) ---- */
   const footEl = document.querySelector('.site-footer');
   if (footEl) {
-    const col = (h, links) =>
-      '<div class="footer-col"><div class="h">' + h + '</div>' +
-      links.map(l => '<a href="' + (l.ext ? '' : ROOT) + l.href + '"' + (l.ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + l.t + (l.ext ? ' ↗' : '') + '</a>').join('') +
+    const col = (c) =>
+      '<div class="footer-col"><div class="h">' + c.h + '</div>' +
+      c.links.map(l => '<a href="' + l.href + '"' + (l.ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + l.en + (l.ext ? ' ↗' : '') + '</a>').join('') +
       '</div>';
     footEl.innerHTML =
       '<div class="footer-grid">' +
         '<div><div class="footer-brand">' + MARK + '<span>BRIDGE<span class="tg">EXPAND CHOICES.</span></span></div>' +
         '<p class="footer-tagline">選択肢を増やし、人と社会の可能性を広げるプロジェクト。</p></div>' +
-        col('思想', [
-          { t: 'Philosophy', href: 'philosophy/index.html' },
-          { t: 'Manifesto', href: 'philosophy/index.html#manifesto' },
-          { t: 'Stories', href: 'stories/index.html' },
-        ]) +
-        col('活動', [
-          { t: 'Projects', href: 'projects/index.html' },
-          { t: 'Journal', href: 'journal/index.html' },
-          { t: 'About', href: 'about/index.html' },
-        ]) +
-        col('つくったもの', [
-          { t: 'Products', href: 'products/index.html' },
-          { t: 'BRIDGE Compass', href: 'compass/index.html' },
-          { t: 'Starter Kits', href: 'starter-kits/index.html' },
-        ]) +
-        col('つながる', [
-          { t: 'Services', href: 'services/index.html' },
-          { t: 'Contact', href: 'community/index.html' },
-          { t: 'note', href: 'https://note.com/prime_duck4944', ext: true },
-          { t: 'X', href: 'https://x.com/WataruPT1013', ext: true },
-        ]) +
+        FOOTER.map(col).join('') +
       '</div>' +
       '<div class="footer-base">' +
         '<span>© 2026 BRIDGE. All rights reserved.</span>' +
-        '<span><a href="' + ROOT + 'legal/privacy.html">Privacy</a></span>' +
+        '<span><a href="' + PRIVACY.href + '">' + PRIVACY.en + '</a></span>' +
       '</div>';
   }
 
@@ -269,6 +263,10 @@ document.documentElement.classList.add('js');
     });
   }
 
-  window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll, applyBudoux: applyBudoux };
+  /* 町のトップなど、bridge.css を読まずにヘッダー・メニュー・フッターを自分の CSS で描くページへの口。
+     NAV: 8つのうち CTA を除く7つ(primary はヘッダーに常時出すもの)。CTA: Contact。メニューは NAV.concat([CTA])。
+     FOOTER: 4列 [{ h, links }]。PRIVACY: フッターの下の行。項目の形は上の link()。データの元は NAV・CTA・FOOTER の1か所 */
+  window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll, applyBudoux: applyBudoux,
+    NAV: NAV.map(link), CTA: link(CTA), FOOTER: FOOTER, PRIVACY: PRIVACY };
   document.documentElement.classList.add('js-ready'); // 安全弁(bridge.css の rv-safe)を解除
 })();
