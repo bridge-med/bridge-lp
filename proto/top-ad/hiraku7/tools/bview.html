@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>案B と同じ視点で病院の断面を撮る(試作の道具)</title>
+<style>html,body{margin:0;background:transparent}#cap{display:block}</style>
+<script>
+/* 案B の断面の撮り方(hiraku5b/sect.js の capture: 視点 az −16°・el 11°・島の一切れ・枠の余白)のまま、病院の中の形(interiors.js)だけを差し替えて撮る。
+   ?src=6(既定。この試作の中)・5a(v5 の案A)・5b(案B そのもの)。撮り方は README.md の「案B と同じ視点」 */
+(function () {
+  var src = new URLSearchParams(location.search).get('src') || '6';
+  var map = { imports: { three: '../../shared/vendor/three-0.160.0/three.module.min.js' } };
+  if (src === '6') map.imports['../../hiraku5b/interiors.js'] = '../interiors.js';
+  else if (src === '5a') map.imports['../../hiraku5b/interiors.js'] = '../../hiraku5a/interiors.js';
+  var s = document.createElement('script'); s.type = 'importmap'; s.textContent = JSON.stringify(map);
+  document.head.appendChild(s);
+})();
+</script>
+</head>
+<body>
+<script type="module">
+import('../../hiraku5b/sect.js').then(m => m.capture(new URLSearchParams(location.search)));
+</script>
+</body>
+</html>
