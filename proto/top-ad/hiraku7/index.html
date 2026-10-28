@@ -420,6 +420,8 @@ html.js:not(.rm) .cls-top,html.js:not(.rm) .cls-idea,html.js:not(.rm) .cls-go{op
 .ways b{font-size:13.5px;line-height:1.45;letter-spacing:.02em}
 .ways b span{color:var(--hero-fg-3)}
 @media (hover:hover){.ways a:hover b{text-decoration:underline;text-underline-offset:4px}}
+@media (max-width:340px),(min-width:921px) and (max-width:1120px){.ways a{padding-right:4px}.ways b{font-size:12.5px;letter-spacing:0}}   /* 列が狭い幅(320・PC の 1024): 「もう少し読む →」を罫に触れさせない */
+@media (max-width:340px){html .ways a{padding-left:8px;padding-right:3px}html .ways b{font-size:12px;letter-spacing:0}}   /* 320 は背の低い画面の段より後に効かせる */
 .cls-tx{display:flex;flex-wrap:wrap;justify-content:center;gap:0 24px;border-top:1px solid var(--rule)}
 .cls-tx a{display:inline-flex;align-items:center;min-height:44px;font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--hero-fg);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
 @media (hover:hover){.cls-tx a:hover{text-decoration-thickness:2px}}
