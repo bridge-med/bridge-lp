@@ -1455,9 +1455,9 @@ export function placeSmall(dyn, t, steamOn) {
 /* 昼の太陽は、手前の左(島の角度 72°・高さ 42°)。2本の弧の影が広場の床で交差し、正面のカメラから見て、ロゴとほぼ同じ形と縦横の比で床に描かれる
    (影は弧を 1 + 1.07 / tan(高さ) × cos(太陽と正面の角) 倍に縦へ伸ばした形。31° から見るとちょうど縮んで、ロゴの比に近くなる) */
 const TOD = [
-  { hemiS: '#D8E3F0', hemiG: '#C8B697', hemi: .96, sun: '#FFE6C6', sunI: 3.15, sunPos: [4.79, 13.96, 14.74], fill: '#D2DFF0', fillI: .42, exp: 1.04, glow: 0, pt: 0, fog: '#E2EAED', env: .7, gC: '#FFE0B8', face: 0, lit: '#FFF7E4' },
+  { hemiS: '#D8E3F0', hemiG: '#C8B697', hemi: .96, sun: '#FFE6C6', sunI: 3.15, sunPos: [4.79, 13.96, 14.74], fill: '#D2DFF0', fillI: .42, exp: 1.04, glow: 0, pt: 0, fog: '#E2EAED', env: .7, gC: '#FFE0B8', face: 0, lit: '#8E4706' },
   // 夕: 低い橙の主光と長い影。陰は桃色がかった藤色。窓の灯りがともり始める(白い窓も、夕方は暖かい色で点く)
-  { hemiS: '#DDBFC8', hemiG: '#8E7068', hemi: .74, sun: '#FF9C60', sunI: 2.5, sunPos: [-15, 4.6, 3.2], fill: '#A4A2DD', fillI: .52, exp: 1.0, glow: .62, pt: .45, fog: '#D9B7AF', env: .45, gC: '#FFDDB2', face: 1, lit: '#FFD7A0' },
+  { hemiS: '#DDBFC8', hemiG: '#8E7068', hemi: .74, sun: '#FF9C60', sunI: 2.5, sunPos: [-15, 4.6, 3.2], fill: '#A4A2DD', fillI: .52, exp: 1.0, glow: .62, pt: .45, fog: '#D9B7AF', env: .45, gC: '#FFDDB2', face: 1, lit: '#FFB255' },
   { hemiS: '#62709D', hemiG: '#2E2C47', hemi: .9, sun: '#B9C7F2', sunI: 1.0, sunPos: [-5, 14, 9], fill: '#7482C4', fillI: .34, exp: 1.08, glow: 1, pt: 1, fog: '#252D57', env: .35, gC: '#E4ECF7', face: 0, lit: '#FFC27A' }   // 夜: 手前の左上から月明かり。形と屋根の色が読めるように
 ];
 const _c1 = new THREE.Color(), _c2 = new THREE.Color(), SUNDIR = new THREE.Vector3(-.3, .8, .5);

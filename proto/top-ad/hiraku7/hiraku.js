@@ -553,10 +553,10 @@ function boot() {
   // 階ごとに降りる区切り(live.js の SQ.floors と同じ)。止めた画像のときも、札と一行は同じ進みで降りる
   const FLOORS = [['yawagaeshi', .565, .7], ['nidodema', .7, .835], ['keiji', .835, 9]];
   /* v7 閉じ(designer の設計。1F に着いた .835 から s 画面。進みの単位は v6 のまま = 1 画面で 1/1.5。live.js の CQ・CL と同じ):
-     病院の中の札と言葉が消える(+.10〜.15)→(カメラが引いて上がる +.15〜.55。live.js)→ 島の下のもやと下の端の地(+.49〜.57)→ 上の言葉(+.57)→ 明朝の一文(+.68)→
+     病院の中の札と言葉が消える(+.15〜.20。溶かす式の戻しと一緒に)→(カメラが引いて上がる +.15〜.55。live.js)→ 島の下のもやと下の端の地(+.49〜.57)→ 上の言葉(+.57)→ 明朝の一文(+.68)→
      島の上の3つの札と現在地の点(+.83。道が灯るのと一緒)→ 下の出口(+.88)→ 舞台の終わり(+.97 = QMAX)。時刻・光・地の色・文字の組み方は、0.1画面の中で2つ重ねない */
   const CQ = s => .835 + s / 1.5, QMAX = CQ(.97);
-  const CL = { out: [CQ(.10), CQ(.15)], ground: [CQ(.49), CQ(.57)], top: [CQ(.57), CQ(.61)], idea: [CQ(.68), CQ(.72)], tags: [CQ(.83), CQ(.86)], go: [CQ(.88), CQ(.92)], arc: CQ(.30), still: CQ(.35) };   // 3F 休憩室(やわ返)→ 2F ナースステーション(二度手間さがし)→ 1F 受付(掲示じたく)。BRIEF 14.2
+  const CL = { out: [CQ(.15), CQ(.20)], ground: [CQ(.49), CQ(.57)], top: [CQ(.57), CQ(.61)], idea: [CQ(.68), CQ(.72)], tags: [CQ(.83), CQ(.86)], go: [CQ(.88), CQ(.92)], still: CQ(.35) };   // 3F 休憩室(やわ返)→ 2F ナースステーション(二度手間さがし)→ 1F 受付(掲示じたく)。BRIEF 14.2
   const floorAt = q => { for (const [sid, a, b] of FLOORS) if (q >= a && q < b) return sid; return null; };
   const HOSP_O = '52.19% 34.02%';   // 町の止めた画像の中の病院(押せる範囲の真ん中)。止めた画像を寄せるときの中心
   let rawP = 0, chipPos = {}, lastQ = -1, lastSid, sq = 0, clPos = null;   // rawP: 舞台の進み(v6 の単位。0..QMAX)。clPos: 閉じの3つの札と現在地の点(立体から)
@@ -639,37 +639,49 @@ function boot() {
   addEventListener('resize', () => { stillFit = null; tagWH = null; });
   function closing(q) {
     if (reduce()) return;
-    showC(clsTop, SM(CL.top[0], CL.top[1], q)); showC(clsIdea, SM(CL.idea[0], CL.idea[1], q)); showC(clsGo, SM(CL.go[0], CL.go[1], q));
+    showC(clsTop, SM(CL.top[0], CL.top[1], q)); showC(clsIdea, SM(CL.idea[0], CL.idea[1], q)); showC(clsGo, flow ? 1 : SM(CL.go[0], CL.go[1], q));   // 背の低い画面では、出口は舞台のあとのふつうの流れ(最初から出ている)
     const tk = SM(CL.tags[0], CL.tags[1], q);
     const pos = clPos || (stillFit && q >= CL.still ? stillFit.marks : null);
     if (!tagWH) tagWH = cTags.map(t => [t.offsetWidth, t.offsetHeight]);
     const placed = [];
     for (const i of [2, 1, 0]) {   // 下(手前)の札から置き、近い札とは上へずらして重ねない(背の低い画面で島が小さいとき)
-      const t = cTags[i], p = pos && pos[t.dataset.id]; t.style.opacity = p ? tk.toFixed(3) : '0'; if (!p) continue;
+      const t = cTags[i], p = pos && pos[t.dataset.id]; t.style.opacity = p ? tk.toFixed(3) : '0'; t.classList.toggle('on', !!p && tk > .5); if (!p) continue;   // 押せるのは見えている間(押すと下の同じ列の行き先へ)
       const [w, h] = tagWH[i]; let y = p[1];
       for (let n = 0; n < 3; n++) { const hit = placed.find(q => Math.abs(q.x - p[0]) < (q.w + w) / 2 + 6 && Math.abs(q.y - y) < h + 4); if (!hit) break; y = hit.y - h - 4; }
       placed.push({ x: p[0], y, w });
       t.style.left = p[0].toFixed(1) + 'px'; t.style.top = y.toFixed(1) + 'px';
     }
-    const h = pos && pos.here; cDot.style.opacity = h ? tk.toFixed(3) : '0'; if (h) { cDot.style.left = h[0].toFixed(1) + 'px'; cDot.style.top = h[1].toFixed(1) + 'px'; }
+    const h = pos && pos.here && pos.here[1] < svhH() * .7 - 6 ? pos.here : null; cDot.style.opacity = h ? tk.toFixed(3) : '0'; if (h) { cDot.style.left = h[0].toFixed(1) + 'px'; cDot.style.top = h[1].toFixed(1) + 'px'; }   // 現在地の点は、床が下の端のもや(.clfade。帯が出ているときの画面の 70% から下)より上にあるときだけ
   }
   /* 閉じの島を置く範囲(上の言葉の下端から、下の出口の上端まで。PC は左の列の右)。言葉の大きさは、画面の大きさ・字が変わったときだけ測る */
   let clsM = null;
   addEventListener('resize', () => { clsM = null; });
   if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { clsM = null; stillFit = null; tagWH = null; if (ctl && ctl.relayout) ctl.relayout(); });
+  /* 背の低い画面(帯が出ているときの高さ 560px 以下): 道の先・文字リンク・第29条の一文を、舞台のあと(.cls の後ろ)のふつうの流れへ移す(読み上げと Tab の順は同じ)。高くなれば戻す */
+  let flow = false;
+  const clsSec = $('#cls');
+  function flowSet() {
+    const f = !reduce() && svhH() <= 560;
+    if (f === flow) return;
+    flow = f; clsGo.classList.toggle('flow', f);
+    if (f) clsSec.after(clsGo); else clsBot.append(clsGo);
+    clsGo.style.opacity = f ? '1' : ''; clsGo.classList.toggle('on', f);
+    clsM = null; stillFit = null; if (ctl && ctl.relayout) ctl.relayout();
+  }
+  addEventListener('resize', () => requestAnimationFrame(flowSet));
   function closeSafe() {
     const w = hero.clientWidth, h = Math.min(hero.clientHeight, svhH());
     if (!clsM) clsM = { top: clsTop.offsetTop + clsTop.offsetHeight, bot: clsBot.offsetTop, colR: clsCol.offsetLeft + clsCol.offsetWidth };
-    if (phone()) return { l: 8, t: clsM.top + 8, r: w - 8, b: Math.min(h, clsM.bot) - 4 };
-    return { l: clsM.colR + 40, t: 92, r: w - 40, b: h - 40 };
+    if (phone()) return { l: 8, t: clsM.top + 8, r: w - 8, b: Math.min(h, clsM.bot, h * .7) - 4 };   // 下は明朝の一文の上端か、.clfade の上端(帯が出ているときの画面の 70%)の高い方
+    return { l: clsM.colR + 40, t: 92, r: w - 40, b: Math.min(h - 40, h * .7 - 8) };   // PC: 下は .clfade の上端(帯が出ているときの画面の 70%)まで
   }
   // 止めた画像のとき: 町の止めた画像(最初の画面と同じ)を、7つの建物の外形(--cl〜--cb。画像の %)が閉じの島の範囲に収まるように寄せる。札と点も同じ寄せ方で
-  const BB = [11.9, 6.7, 82.2, 66.2];
+  const BB = [11.9, 6.7, 82.2, 66.2], BB_PC = [2.2, 6.7, 97.5, 68];   // スマホは7つの建物の外形(立体の閉じと同じ)、PC は島の縁まで(立体の PC と同じ。画像の不透明な範囲から測った)
   function stillClose(el, own) {
     if (!stillFit) {
       const hr = heroRect(), br = still.getBoundingClientRect(); if (!br.width) return;
       const L = br.left - hr.left, T = br.top - hr.top, sf = closeSafe(), top = phone() ? 30 : 40;
-      const x0 = L + BB[0] / 100 * br.width, x1 = L + BB[2] / 100 * br.width, y0 = T + BB[1] / 100 * br.height, y1 = T + BB[3] / 100 * br.height;
+      const bb = phone() ? BB : BB_PC, x0 = L + bb[0] / 100 * br.width, x1 = L + bb[2] / 100 * br.width, y0 = T + bb[1] / 100 * br.height, y1 = T + bb[3] / 100 * br.height;
       const k = Math.min((sf.r - sf.l) * .96 / (x1 - x0), (sf.b - sf.t - top) / (y1 - y0)), X = (sf.l + sf.r) / 2, Y = sf.t + top + (sf.b - sf.t - top) / 2;
       const f = ([x, y]) => [X + (x - (x0 + x1) / 2) * k, Y + (y - (y0 + y1) / 2) * k];   // 町の絵の上の点(ページの座標)を、寄せた所へ
       const marks = {}; for (const id of ['observatory', 'plaza', 'atelier']) if (tagPos[id]) marks[id] = f(tagPos[id]);
@@ -708,10 +720,6 @@ function boot() {
     sq = 0; rawP = stageP();
     const hb = hero.getBoundingClientRect(); R.classList.toggle('past', hb.top < -2); R.classList.toggle('gone', hb.bottom < 0);
     R.classList.toggle('hdband', hb.top < -2);   // v7: 舞台が外れたら(閉じの言葉が見出しの下へ入り始めたら)、見出しの帯を小さく固定。地はフッターと同じ。舞台の間は帯を出さない
-    if (!reduce()) {   // v7: 閉じで広場の弧が見えている間(見出しの帯より下にある間)は、ヘッダーのロゴをしまう
-      const pz = (clPos && clPos.plaza) || (stillFit && stillFit.marks.plaza), arcY = pz ? pz[1] + 40 : hero.clientHeight * .7;
-      R.classList.toggle('cl-arc', rawP >= CL.arc && hb.top + arcY > 60);
-    }
     const on = rawP > .02;
     if (on !== R.classList.contains('scrub')) {
       R.classList.toggle('scrub', on);
@@ -719,7 +727,11 @@ function boot() {
       else if (!touched) startInvite();
     }
     if (ctl && stageStill === 'pending' && on) { goStill(); return; }
-    if (ctl && stageStill !== true) ctl.scrubTo(rawP);
+    if (ctl && stageStill !== true) {
+      ctl.scrubTo(rawP);
+      // v7(QA C): 低の段の端末は途中で止めた画像に替わることがある。替わった瞬間にひらいた病院の画像が届いていないと、寄せた町の絵が出たままになるので、低の段のときだけ先に読む
+      if (ctl.tier === 'low' && rawP > .12 && !shutKey) { const key = R.dataset.tod + (phone() ? '-sp' : '-pc'), D = OPEN_STILL[key]; if (D) { shutKey = key; shutBand = D.band; shutD = D; shutImg.width = D.w; shutImg.height = D.h; shutImg.src = 'img/open-' + key + '.webp'; } }
+    }
     else { stillScrub(rawP); if (ctl && !on) { canvas.style.transform = ''; ctl.setPaused(paused); } else if (ctl && on) ctl.setPaused(true); }   // 最初の画面に戻ったら、町はまた動く
   }
   addEventListener('scroll', () => { if (!sq) sq = requestAnimationFrame(onStage); }, { passive: true });
@@ -729,15 +741,15 @@ function boot() {
   for (const c of chips) c.addEventListener('click', e => { const t = TOOLS[c.dataset.sid]; if (t) leap(e, null, t, c.dataset.sid); });
   // キーボードで札に来たら、札が見える所(ひらいた病院ぜんたいの、その道具の階)まで舞台を進める
   for (const c of chips) c.addEventListener('focus', () => {
-    const f = FLOORS.find(x => x[0] === c.dataset.sid), to = f ? Math.min(CQ(.06), (f[1] + Math.min(f[2], 1)) / 2) : .5;   // 1F は、病院を出る前(札が消え始める +.10 より前)
+    const f = FLOORS.find(x => x[0] === c.dataset.sid), to = f ? Math.min(CQ(.06), (f[1] + Math.min(f[2], 1)) / 2) : .5;   // 1F は、病院を出る前(札が消え始める +.15 より前)
     if (Math.abs(rawP - to) > .08) scrollTo({ top: yOf(to), behavior: reduce() ? 'auto' : 'smooth' });
   });
   // キーボードで一覧への入口に来たら、それが見える所(ひらいた病院ぜんたい)まで舞台を進める
   const goA = $('a', insGo);
-  if (goA) goA.addEventListener('focus', () => { if (rawP < .86 || rawP > CQ(.09)) scrollTo({ top: yOf(CQ(.05)), behavior: reduce() ? 'auto' : 'smooth' }); });   // 下の入口が出る所(1F。.84–.88。病院を出る +.10 より前)まで
+  if (goA) goA.addEventListener('focus', () => { if (rawP < .86 || rawP > CQ(.14)) scrollTo({ top: yOf(CQ(.05)), behavior: reduce() ? 'auto' : 'smooth' }); });   // 下の入口が出る所(1F。.84–.88。病院を出る +.15 より前)まで
   // v7 閉じ: キーボードで道の先・文字リンクに来たら、それが出ている所(+.94)まで舞台を進める。乗せる・Tab で来ると、島の上のその札と建物が明るく
   for (const a of $$('#cls a')) {
-    a.addEventListener('focus', () => { if (!reduce() && rawP < CL.go[1]) scrollTo({ top: yOf(CQ(.94)), behavior: 'smooth' }); });
+    a.addEventListener('focus', () => { if (!reduce() && !flow && rawP < CL.go[1]) scrollTo({ top: yOf(CQ(.94)), behavior: 'smooth' }); });
     const id = a.dataset.id; if (!id) continue;
     const on = v => { for (const t of $$('.ctag[data-id="' + id + '"]')) t.classList.toggle('hi', v); if (ctl && ctl.glow) ctl.glow(v ? id : null); };
     a.addEventListener('mouseenter', () => on(true)); a.addEventListener('mouseleave', () => on(false));
@@ -751,6 +763,7 @@ function boot() {
   const rmin = $('#rminFig'), rminImg = $('#rminImg');
   function rminSet() {
     R.classList.toggle('rm', reduce());
+    flowSet();
     if (reduce()) for (const e of [clsTop, clsIdea, clsGo]) { e.style.opacity = ''; e.classList.add('on'); }   // v7: 途中で動きを減らす設定にしたとき、閉じの言葉と出口を透明のまま残さない
     if (!reduce() || !rmin) return;
     const key = R.dataset.tod + (phone() ? '-sp' : '-pc'), D = OPEN_STILL[key];
@@ -766,8 +779,6 @@ function boot() {
   }
   rminSet();
   if (reduceQ.addEventListener) reduceQ.addEventListener('change', rminSet);
-  // v7: 動きを減らす設定では、閉じの島の絵(広場の弧)が画面に見えている間、ヘッダーのロゴをしまう
-  if ('IntersectionObserver' in window && $('#clsFig')) new IntersectionObserver(([en]) => { if (reduce()) R.classList.toggle('cl-arc', en.isIntersecting); }, { rootMargin: '-64px 0px 0px 0px' }).observe($('#clsFig'));
   btnTod.addEventListener('click', () => requestAnimationFrame(rminSet));
   addEventListener('resize', () => { if (reduce()) rminSet(); });
 

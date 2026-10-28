@@ -539,11 +539,11 @@ export async function live(o) {
   }
   /* 外枠の太い切り口と、正面の広場に人を立たせない範囲(どちらも capture と同じ作り) */
   let frameG = null, frameMat = null, hideF = null, pathM = null, pathMat = null;
-  const PATH_A = .78;   // v7 閉じ: 灯る道の濃さ
+  const PATH_A = .78;   // v7 閉じ: 灯る道の濃さ(夕・夜。昼は 1 = 明るい地面の上でも道の線として読めるように)
   function frameCut() {
     if (!frameG) { const f = makeFrameCut(S.B[SCRUB_ID].anchor); frameG = f.g; frameMat = f.mat; }
     if (!pathM) {   // v7: 灯る道(外枠の切り口と同じ描き方。描き方を増やさない。用意も外枠と一緒に)
-      pathMat = new THREE.MeshBasicMaterial({ color: '#16233E', toneMapped: false, transparent: true, opacity: 0 });
+      pathMat = new THREE.MeshBasicMaterial({ color: PALETTE.poche, toneMapped: false, transparent: true, opacity: 0 });   // 色は時刻で walkLit が決める(はじめの色は PALETTE から)
       try { pathM = closePaths(pathMat); pathM.visible = false; S.world.add(pathM); } catch (e) { pathM = null; }
     }
   }
@@ -591,7 +591,7 @@ export async function live(o) {
     if (frameG) frameG.visible = x < CL.frame[1];   // v7: 消えきったら描かない(閉じの描く回数を増やさない)
     if (frameMat) frameMat.opacity = smooth(SQ.frame[0], SQ.frame[1], x) * g * (1 - smooth(CL.frame[0], CL.frame[1], x));   // 外枠の太い切り口(案B の frameCut)は、壁が沈むのに合わせて。閉じでは町の絵に戻す
     U.uArcFade.value = smooth(SQ.arcs[0], SQ.arcs[1], x) * (1 - smooth(CL.arcs[0], CL.arcs[1], x));   // v7: 広場の弧は、閉じで戻る
-    if (pathM) { const k = smooth(CL.lit[0], CL.lit[1], x); pathM.visible = k > .002; if (pathM.visible) { pathMat.opacity = k * PATH_A; walkLit(tod.x, pathMat.color); } }
+    if (pathM) { const k = smooth(CL.lit[0], CL.lit[1], x); pathM.visible = k > .002; if (pathM.visible) { pathMat.opacity = k * (1 - (1 - PATH_A) * clamp01(tod.x)); walkLit(tod.x, pathMat.color); } }
     A.roof.set(0); A.wall.set(A.end * wallK); A.sink = KEEP_WALL ? 0 : sinkK * (S.B[SCRUB_ID].ex.y0 + .24);   // 屋根は残す。壁は倒れきってから、広場の面の下へ
     if (KEEP_WALL) U.uGroundCut.value = -1e4;
     inLight.set(smooth(SQ.light[0], SQ.light[1], x) * g);
