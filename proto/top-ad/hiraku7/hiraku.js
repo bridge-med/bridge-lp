@@ -673,7 +673,7 @@ function boot() {
     const w = hero.clientWidth, h = Math.min(hero.clientHeight, svhH());
     if (!clsM) clsM = { top: clsTop.offsetTop + clsTop.offsetHeight, bot: clsBot.offsetTop, colR: clsCol.offsetLeft + clsCol.offsetWidth };
     if (phone()) return { l: 8, t: clsM.top + 8, r: w - 8, b: Math.min(h, clsM.bot, h * .7) - 4 };   // 下は明朝の一文の上端か、.clfade の上端(帯が出ているときの画面の 70%)の高い方
-    return { l: clsM.colR + 40, t: 92, r: w - 40, b: Math.min(h - 40, h * .7 - 8) };   // PC: 下は .clfade の上端(帯が出ているときの画面の 70%)まで
+    return { l: clsM.colR + 40, t: 92, r: w - 40, b: h - 40 };   // PC: 島の下側は最初の画面と同じく .clfade のもやへ溶ける(砂の点は床が画面の 70% より上のときだけ出す)
   }
   // 止めた画像のとき: 町の止めた画像(最初の画面と同じ)を、7つの建物の外形(--cl〜--cb。画像の %)が閉じの島の範囲に収まるように寄せる。札と点も同じ寄せ方で
   const BB = [11.9, 6.7, 82.2, 66.2], BB_PC = [2.2, 6.7, 97.5, 68];   // スマホは7つの建物の外形(立体の閉じと同じ)、PC は島の縁まで(立体の PC と同じ。画像の不透明な範囲から測った)

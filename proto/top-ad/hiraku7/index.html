@@ -90,7 +90,7 @@ html[data-tod="night"]{
   --foot-bg:#161B2B; --foot-fg:var(--night-fg); --foot-fg-2:var(--night-link); --foot-dim:var(--night-dim); --foot-line:var(--night-line); --foot-focus:var(--kinari); --foot-logo-1:var(--kinari); --foot-logo-2:var(--sand-2);
   --band-bg:rgba(22,27,43,.94);
   --rule:rgba(241,237,229,.22);
-  --here:var(--sand-2); --here-ring:rgba(11,17,40,.85); --here-edge:rgba(216,196,160,.6);
+  --here:var(--sand-2); --here-ring:rgba(22,27,43,.85); --here-edge:rgba(216,196,160,.6);
 }
 /* 紙の面(パネル・メニュー・下の節)と夜の面(閉じ・フッター)は、時刻によらず自分の色 */
 .panel,.mdlg{--focus:var(--indigo);--logo-1:var(--indigo);--logo-2:var(--sand)}
@@ -424,7 +424,7 @@ html.js:not(.rm) .cls-top,html.js:not(.rm) .cls-idea,html.js:not(.rm) .cls-go{op
 .cls-tx a{display:inline-flex;align-items:center;min-height:44px;font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--hero-fg);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
 @media (hover:hover){.cls-tx a:hover{text-decoration-thickness:2px}}
 .cls-29{font-size:12px;line-height:1.6;letter-spacing:.03em;color:var(--hero-fg-3);text-align:center}
-/* 島の上の札(3棟だけ。押せない飾り。下の道の先に乗せる・Tab で来ると、その札が藍に) */
+/* 島の上の札(3棟だけ。押すと下の同じ列の行き先へ。Tab と読み上げは下の道の先で受ける・Tab で来ると、その札が藍に) */
 .ctags{position:absolute;inset:0;z-index:8;pointer-events:none}
 html:not(.js) .ctags,html.rm .stage .ctags,html.rm .stage .clfade{display:none}
 .ctag{position:absolute;left:0;top:0;padding:5px 11px 6px;border-radius:999px;background:var(--pill);color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.05em;white-space:nowrap;text-decoration:none;opacity:0;pointer-events:none;transform:translate(-50%,calc(-100% - 8px));box-shadow:var(--pill-shadow);transition:background-color .2s var(--ease),color .2s var(--ease);-webkit-tap-highlight-color:transparent}   /* 見晴らしの札(.otag)と同じ見た目。押すと、下の同じ列の行き先へ(Tab は下の列で受ける) */
@@ -624,7 +624,7 @@ html.capture body > *:not(#cap){display:none!important}
   <div class="mist" aria-hidden="true"></div>
   <div class="endfade" aria-hidden="true"></div>
   <div class="clfade" aria-hidden="true"></div>
-  <div class="ctags" id="cTags" aria-hidden="true"><a class="ctag" data-id="observatory" href="../../../compass/index.html" tabindex="-1">展望台</a><a class="ctag" data-id="plaza" href="../../../philosophy/index.html" tabindex="-1">広場</a><a class="ctag" data-id="atelier" href="../../../community/index.html" tabindex="-1">アトリエ</a><i class="cdot"></i></div><!-- v7 閉じ: 島の上の3つの札(押せない飾り)と現在地の砂の点。置き場は立体の側から(止めた画像では撮ったときの位置から) -->
+  <div class="ctags" id="cTags" aria-hidden="true"><a class="ctag" data-id="observatory" href="../../../compass/index.html" tabindex="-1">展望台</a><a class="ctag" data-id="plaza" href="../../../philosophy/index.html" tabindex="-1">広場</a><a class="ctag" data-id="atelier" href="../../../community/index.html" tabindex="-1">アトリエ</a><i class="cdot"></i></div><!-- v7 閉じ: 島の上の3つの札(押せる。Tab と読み上げは下の道の先で受ける)と現在地の砂の点。置き場は立体の側から(止めた画像では撮ったときの位置から) -->
   <div class="copy">
     <p class="eyebrow">医療職のための道具と経営ゲーム</p>
     <h1 id="h1" tabindex="-1"><span class="br">病院の外にも</span><span class="br">町がある</span></h1>
@@ -690,7 +690,7 @@ html.capture body > *:not(#cap){display:none!important}
 <section class="cls" id="cls" aria-labelledby="clsH">
   <div class="cls-in" id="clsIn">
     <div class="cls-col" id="clsCol">
-      <div class="cls-top" id="clsTop"><h2 class="eyebrow" id="clsH">病院の外</h2><p class="cls-q"><span class="ph">臨床だけをしていた頃、</span><span class="ph">事業会社で働くとは思っていませんでした。</span></p><p class="cls-who">運営者(理学療法士)</p></div>
+      <div class="cls-top" id="clsTop"><h2 class="eyebrow" id="clsH">病院の外</h2><p class="cls-q"><span class="ph">臨床だけをしていた頃、</span><span class="ph">事業会社で働くとは思っていませんでした。</span></p><p class="cls-who">運営者・橋本渉(理学療法士)</p></div>
       <figure class="cls-fig" id="clsFig" aria-hidden="true"><img id="clsImg" alt="" width="1600" height="1440" decoding="async"><a class="ctag" data-id="observatory" href="../../../compass/index.html" tabindex="-1">展望台</a><a class="ctag" data-id="plaza" href="../../../philosophy/index.html" tabindex="-1">広場</a><a class="ctag" data-id="atelier" href="../../../community/index.html" tabindex="-1">アトリエ</a><i class="cdot"></i></figure>
       <div class="cls-bot" id="clsBot">
         <p class="cls-idea" id="clsIdea">正解を与えるのではなく、<span class="ph">選択肢を増やす</span></p>
