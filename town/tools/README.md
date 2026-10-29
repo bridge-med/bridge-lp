@@ -65,3 +65,7 @@ PW=… OUT=<出力先> node capture-open.mjs
 | `?capture=<poster\|portrait\|cutaway\|section>&…` | 止めた画像を撮る(上の各節。`w`・`h`・`dpr`・`tod`・`q`・`id`・`t`・`clouds=0`・`haze=0`・`shadow`・`arrive`・`cw`・`ch`) |
 
 `perf` と `slow` は `#perf`・`#slow` でも受ける(共有のページの中では `?…` がページに届かないため)。
+
+## ヘッダー・メニュー・フッターの和文(Noto Sans JP)の字
+
+`index.html` の Noto Sans JP の `<link>` は、使う字だけを `text=` で読む。NAV・フッターの語(`shared/bridge.js`)や、`.hd` `.mdlg` `.foot` に書いた字を変えたら、`node town/tools/noto-text.mjs` の2行目(エンコードした字)を `text=` に入れ直す。足りない字があると `scripts/check-site.mjs` の6項が落ちる。

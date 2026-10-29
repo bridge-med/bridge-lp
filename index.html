@@ -21,7 +21,8 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Barlow:wght@500;600&family=Inter:wght@500;600&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet"><!-- 町の書体(BIZ UDPGothic・Barlow)と、ヘッダー・メニュー・フッターの書体(Noto Sans JP・Inter。下層と同じ。使う太さだけ) -->
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Barlow:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"><!-- 町の書体(BIZ UDPGothic・Barlow)と、ヘッダー・メニュー・フッターの英字(Inter。下層と同じ。使う太さだけ) -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&text=%28%29.026ABCDEGHIJKMNOPRSXabcdefghijlmnoprstuvy%C2%A9%E2%86%97%E3%80%81%E3%80%82%E3%81%82%E3%81%84%E3%81%88%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%8F%E3%81%91%E3%81%92%E3%81%93%E3%81%94%E3%81%97%E3%81%99%E3%81%9C%E3%81%9D%E3%81%9F%E3%81%A3%E3%81%A4%E3%81%A6%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%BE%E3%81%BF%E3%82%82%E3%82%84%E3%82%8B%E3%82%8C%E3%82%92%E3%82%A4%E3%82%A7%E3%82%AF%E3%82%B2%E3%82%B5%E3%82%B8%E3%82%BF%E3%83%80%E3%83%84%E3%83%88%E3%83%8B%E3%83%96%E3%83%97%E3%83%A0%E3%83%A1%E3%83%A5%E3%83%AB%E3%83%AD%E3%83%BB%E3%83%BC%E4%B8%80%E4%BA%8B%E4%BA%BA%E4%BB%95%E4%BC%9A%E4%BC%B4%E4%BD%93%E4%BD%95%E4%BD%BF%E4%BE%9D%E5%85%AC%E5%85%B1%E5%85%B7%E5%88%87%E5%88%A5%E5%89%8D%E5%8B%95%E5%8C%BB%E5%8F%AF%E5%90%8D%E5%90%91%E5%96%B6%E5%A0%B4%E5%A2%97%E5%A4%A7%E5%AE%8C%E5%AE%9F%E5%BA%83%E6%80%9D%E6%80%A7%E6%83%B3%E6%84%9F%E6%88%90%E6%89%8B%E6%8A%9E%E6%8F%B4%E6%94%AF%E6%95%99%E6%96%B0%E6%96%B9%E6%9D%A5%E6%A9%9F%E6%AD%A9%E6%B4%BB%E6%BC%94%E7%89%A9%E7%8F%BE%E7%94%B1%E7%95%B0%E7%99%82%E7%99%BA%E7%9B%B8%E7%A0%94%E7%A4%BE%E7%A7%B0%E7%A9%B6%E7%B5%8C%E8%80%83%E8%80%85%E8%82%A2%E8%82%B2%E8%83%BD%E8%A8%98%E8%A9%B1%E8%AA%9E%E8%AB%87%E8%AB%96%E8%AC%9B%E8%B5%B0%E9%81%8B%E9%81%93%E9%81%B8%E9%96%8B%E9%96%A2%E9%9A%9B%E9%A0%BC%E9%A8%93&display=swap" rel="stylesheet"><!-- ヘッダー・メニュー・フッターの和文(Noto Sans JP。下層と同じ)。使う字だけ: bridge.js の NAV・CTA・FOOTER・PRIVACY と、.hd .mdlg .foot に書いた字(↗ と © を含む)。語を変えたら作り直す(check-site 6項が照合する) -->
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&text=%E6%AD%A3%E8%A7%A3%E3%82%92%E4%B8%8E%E3%81%88%E3%82%8B%E3%81%AE%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%8F%E3%80%81%E9%81%B8%E6%8A%9E%E8%82%A2%E5%A2%97%E3%82%84%E3%81%99%E4%BA%BA%E3%81%8C%E8%87%AA%E3%82%89%E3%81%B3%E7%B4%8D%E5%BE%97%E3%81%97%E3%81%A6%E7%94%9F%E3%81%8D%E3%82%8C%E7%A4%BE%E4%BC%9A%E3%81%A4&display=swap" rel="stylesheet"><!-- 広場のパネルの一文だけの明朝(その文字だけの小さな書体) -->
 <script>
 /* 最初の時刻(憲法第22条 町の但し書き (5)・design-system §2): ?tod= の指定が最優先。次に、ダークを選んでいる人(下層のテーマと同じ保存 bridge-theme が dark、
@@ -58,18 +59,17 @@
   --hd-fg:var(--ink); --hd-fg-2:var(--ink-2);                         /* ロゴ・メニュー / ナビ */
   --hero-fg:var(--ink); --hero-fg-2:var(--ink-2); --hero-fg-3:var(--ink-2);   /* 見出し / 一行・一文 / 入口の下・誘い(昼の空の上でも 4.5:1。測った値は第4回の報告) */
   --logo-1:var(--indigo); --logo-2:var(--sand);
-  --cta-bg:var(--indigo); --cta-bg-2:var(--indigo-2); --cta-fg:#fff; --cta-ico:var(--cta-fg);   /* 入口の矢印は文字と同じ色(UI の砂は現在地だけ。B-27 ③) */
+  --cta-bg:var(--indigo); --cta-bg-2:var(--indigo-2); --cta-fg:var(--card); --cta-ico:var(--cta-fg);   /* 入口の矢印は文字と同じ色(UI の砂は現在地だけ。B-27 ③) */
   --cbtn-fg:var(--ink-2); --cbtn-fg-h:var(--ink); --cbtn-face:rgba(255,255,255,.62); --cbtn-face-h:rgba(255,255,255,.9); --cbtn-ring:rgba(30,40,50,.12);
   --navcta-ring-l:rgba(28,34,39,.32); --navcta-h-l:rgba(255,255,255,.6); --navcta-ring:var(--navcta-ring-l); --navcta-h:var(--navcta-h-l);   /* -l は明るい地の上の値(舞台を抜けた後の帯でも使う) */
   --haze:247 243 236; --haze-a:.92;
   --dot:var(--indigo); --dot-ring:rgba(22,35,62,.16);
   --focus:var(--indigo);
-  --ring:var(--indigo); --ring-edge:rgba(244,239,230,.7); --ring-glow:rgba(244,239,230,.6);   /* 誘いの輪・押した輪(藍に生成りの縁。夜は生成りに藍の縁。UI の砂は現在地だけ) */
+  --ring:var(--indigo); --ring-edge:rgba(244,239,230,.7); --ring-glow:rgba(244,239,230,.6);   /* 誘いの輪・押した輪(藍に生成りの縁。夕・夜は生成りに藍の縁。UI の砂は現在地だけ) */
   --tag-bg:rgba(28,34,39,.88); --tag-fg:#fff; --tag-sub:#C9CED3; --pill:rgba(255,255,255,.95);
   --hd-stuck:rgba(247,243,236,.94); --backdrop:rgba(14,18,24,.4); --mist:242 238 230;
   --track:rgba(28,34,39,.1); --underline:rgba(22,35,62,.3); --underline-2:rgba(28,34,39,.22);   /* 細い線・下線(影の濃さは、奥行きの影として、その場の値のまま) */
   --span:222.25svh;   /* v7: 舞台の進み(最初の画面の下)。v6 の 1.5 画面 + 閉じ(1F に着いた 1.25 画面から 0.97 画面)。hiraku.js・live.js の QMAX と同じ */
-  /* v7 閉じとフッターの地(昼・夕は紙、夜は夜の面。デザインシステム v2.1 で移す便に藍か --dark-sec 系へ寄せる) */
   /* v7: フッターと見出しの帯の地。昼・夕は bridge.css のライトの --bg-2 と同じ値(= --kinari)、夜はダークの --bg-2 と同じ値。帯はその .94 */
   --foot-bg:var(--kinari); --foot-fg:var(--ink); --foot-fg-2:var(--ink-2); --foot-dim:var(--ink-3); --foot-line:var(--line); --foot-focus:var(--indigo); --foot-logo-1:var(--indigo); --foot-logo-2:var(--sand);
   --band-bg:rgba(244,239,230,.94);
@@ -129,6 +129,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .hd,.mdlg,.foot{--jp:'Noto Sans JP','Hiragino Sans',sans-serif;--en:'Inter','Helvetica Neue',Arial,sans-serif;font-family:var(--jp)}
 .hd{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:calc(10px + env(safe-area-inset-top,0px)) var(--pad) 0;pointer-events:none}
 .hd > *{pointer-events:auto}
+html:not(.js) .hd{position:absolute}   /* JS なし: 舞台がなく地が流れるので、ヘッダーを固定しない(本文に重ねない。最初の画面の空の上に置くだけ) */
 .logo{display:inline-flex;align-items:center;gap:11px;min-height:44px;text-decoration:none;color:var(--hd-fg)}
 .logo svg{width:50px;height:auto}
 .logo b{font:500 15px/1 var(--en);letter-spacing:.34em}   /* 下層の .nav-logo と同じ Inter 500・字間 .34em */
@@ -486,6 +487,9 @@ html:not(.js) .cls-bot{margin-top:28px}
 html.hdband:not(.opened) .hd{position:fixed;padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:4px;background:var(--band-bg);box-shadow:0 1px 0 var(--line);animation:hdIn .32s var(--ease);--hd-fg:var(--ink);--hd-fg-2:var(--ink-2);--navcta-ring:var(--navcta-ring-l);--navcta-h:var(--navcta-h-l);--logo-1:var(--indigo);--logo-2:var(--sand);--focus:var(--indigo)}
 @keyframes hdIn{from{transform:translateY(-100%)}to{transform:none}}
 html.hdband.hd-night:not(.opened) .hd{background:var(--band-bg);box-shadow:0 1px 0 var(--night-line);--hd-fg:var(--kinari);--hd-fg-2:var(--night-hd-fg-2);--navcta-ring:var(--night-ring);--navcta-h:var(--night-hover);--logo-1:var(--kinari);--logo-2:var(--sand-2);--focus:var(--kinari)}   /* 終幕の夜の上では、見出しの帯も夜の色 */
+/* 建物をひらいている間: ヘッダーの文字が立体の断面の上に乗らないよう、帯と同じ .94 の地を敷く(高さと位置は変えない。昼・夕は紙、夜は夜の面。文字の色はその時刻のトークンのまま) */
+html.opened .hd{background:var(--band-bg);box-shadow:0 1px 0 var(--line)}
+html.opened.hd-night .hd{box-shadow:0 1px 0 var(--night-line)}
 html.past.gone:not(.opened) .hd .ctrl{display:none}   /* 止めるボタン(時刻・一時停止)は、動く町と病院が画面に見えている間は残す(WCAG 2.2.2)。見えなくなってから外す */
 html.hdband:not(.opened) .logo svg{width:42px}
 

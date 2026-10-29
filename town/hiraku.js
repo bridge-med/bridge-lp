@@ -666,7 +666,7 @@ function boot() {
       placed.push({ x: p[0], y, w });
       t.style.left = p[0].toFixed(1) + 'px'; t.style.top = y.toFixed(1) + 'px';
     }
-    const h = pos && pos.here && pos.here[1] < svhH() * .7 - 6 ? pos.here : null; cDot.style.opacity = h ? tk.toFixed(3) : '0'; if (h) { cDot.style.left = h[0].toFixed(1) + 'px'; cDot.style.top = h[1].toFixed(1) + 'px'; }   // 現在地の点は、床が下の端のもや(.clfade。帯が出ているときの画面の 70% から下)より上にあるときだけ
+    const h = pos && pos.here && pos.here[1] < svhH() * (phone() ? .7 : .8) - 6 ? pos.here : null; cDot.style.opacity = h ? tk.toFixed(3) : '0'; if (h) { cDot.style.left = h[0].toFixed(1) + 'px'; cDot.style.top = h[1].toFixed(1) + 'px'; }   // 現在地の点は、床が下の端のもや(.clfade)に沈まない所にあるときだけ。スマホは帯が出ているときの画面の 70% より上、PC は .clfade が地の色に達する所(画面の約 80%)より上
   }
   /* 閉じの島を置く範囲(上の言葉の下端から、下の出口の上端まで。PC は左の列の右)。言葉の大きさは、画面の大きさ・字が変わったときだけ測る */
   let clsM = null;
