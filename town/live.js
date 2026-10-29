@@ -697,6 +697,7 @@ export async function live(o) {
   /* ---- ひらく・閉じる ---- */
   function open(id, opt = {}) {
     lastInput = clock();
+    if (scrub) return;   // 舞台(病院へ寄る・閉じ)の間は、舞台が病院の枠(A)を持つ。ここで建物をひらくと、病院の壁が倒れず中が見えなくなる(2026-10-29 社長の iPhone。戻ってきたときのハッシュの restore と舞台が重なった)
     if (A.id === id) return;
     if (!MOD) loadMod();
     if (!A.id) preRot = rot.x;
@@ -739,7 +740,7 @@ export async function live(o) {
   function closeSlot(s) { s.wall.t = 0; s.roof.t = 0; s.roofT0 = -1; s.steps = []; s.closing = true; s.settled = false; const it = interiors[s.id]; if (it) for (const st of it.stations) { st.setActive(false); st.setHover(false); } }
   function close() {
     lastInput = clock();
-    if (!A.id) return;
+    if (!A.id || scrub) return;   // 舞台の間は閉じない(舞台の病院の枠を外さない)
     closeSlot(A); Bk = A; A = slot();
     U.uOpenA.value = -1; U.uFocus.value = Bk.id ? LAYOUT[Bk.id].bid : -1; dim.t = 0; inLight.t = 0; curStation = null; dragOff.set(0); findSid = null; nearK.t = 0;
     retarget();
@@ -753,7 +754,7 @@ export async function live(o) {
     curStation = sid; dirty = true; kick();
   }
   function find(sid, opt = {}) {
-    if (!A.id) return;
+    if (!A.id || scrub) return;
     sid = sid || null; if (sid === findSid) return;
     findSid = sid; lastInput = clock();
     if (sid) { findC = null; setActive(sid); }
@@ -766,13 +767,14 @@ export async function live(o) {
   /* 戻ってきたとき(URL のハッシュ): 飛ばずに、その建物がひらき、その道具に寄った姿から始める。中の形を読み、物が持ち上がりきってから整える */
   async function restore(id, sid) {
     await loadMod();
+    if (scrub) return;   // 中の形を読んでいる間に舞台へ進んだら、ひらかない(舞台が先)
     open(id, { instant: true });
     if (sid) find(sid, { instant: true });
-    await new Promise(r => after(520, () => { if (A.id === id) { retarget(); nearK.t = findSid && findC ? 1 : 0; for (const s of [rot, camX, camY, camZ, elev, nearK, dim]) s.set(s.t); } r(); }));
+    await new Promise(r => after(520, () => { if (A.id === id && !scrub) { retarget(); nearK.t = findSid && findC ? 1 : 0; for (const s of [rot, camX, camY, camZ, elev, nearK, dim]) s.set(s.t); } r(); }));
     dirty = true; kick();
   }
   function stationHover(sid) {
-    const it = A.id && interiors[A.id]; if (!it) return;
+    const it = !scrub && A.id && interiors[A.id]; if (!it) return;
     for (const s of it.stations) s.setHover(s.id === sid);
     if (sid) setActive(sid);
     dirty = true; kick();
@@ -1131,6 +1133,8 @@ export async function live(o) {
       lastInput = clock(); dirty = true; kick();
     },
     get scrubbing() { return !!scrub; },
+    /* 確かめるため(town/tools/check-stage.mjs): 舞台の病院の枠。壁が倒れているか(wall 1 で倒れきり)・中の形が出ているか(gate)・ひらいている建物(uOpenA は建物の番号) */
+    get stageState() { return { scrub: !!scrub, id: A.id, wall: A.end ? A.wall.x / A.end : 0, openA: U.uOpenA.value, hospitalBid: LAYOUT[SCRUB_ID].bid, gate: gate.x, p: sp.x }; },
     /* v7 閉じ: 下の出口に乗せた行き先の建物を明るく(null で戻す)・言葉の大きさが変わったら見晴らしの枠を作り直す */
     glow(id) { if (scrub) { scrub.hi = id || null; dirty = true; kick(); } },
     relayout() { if (scrub) scrub.kf = null; dirty = true; kick(); },
