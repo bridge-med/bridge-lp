@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-29T00:01:43+00:00",
+  "updated_at": "2026-10-29T23:58:17+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "仕事が増えたのに、成長している実感がないとき",
+      "url": "https://note.com/prime_duck4944/n/n63ffd9f66b5f",
+      "guid": "https://note.com/prime_duck4944/n/n63ffd9f66b5f",
+      "pubDate": "2026-10-30T07:00:00+09:00",
+      "date": "2026-10-30",
+      "excerpt": "仕事は、確実に増えている。以前よりも責任のある仕事を任されるようになった。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/328566910/rectangle_large_type_2_4e18b0118b34aa8be8fc493f178aec34.png?width=800"
+    },
+    {
+      "title": "名前のない日｜第二話「三十七冊の日記」",
+      "url": "https://note.com/prime_duck4944/n/n2192d22a2ea9",
+      "guid": "https://note.com/prime_duck4944/n/n2192d22a2ea9",
+      "pubDate": "2026-10-29T19:00:00+09:00",
+      "date": "2026-10-29",
+      "excerpt": "母が流した牛乳のことを、まだ考えていた。父は三十六年前にも牛乳を買っていた。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/329659827/rectangle_large_type_2_d17973f9e74ca48cf244866566c5e06a.png?width=800"
+    },
     {
       "title": "AIで作った資料が上司に通らない、本当の理由",
       "url": "https://note.com/prime_duck4944/n/n1587ce3dab90",
@@ -38,24 +56,6 @@
       "date": "2026-10-27",
       "excerpt": "「それ、誰がオーナーですか？」医療現場にいた頃、この質問を聞いたら、少し不思議に感じたと思います。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/328564481/rectangle_large_type_2_596698f694ce16118ea33855a8ca7724.png?width=800"
-    },
-    {
-      "title": "優秀だけど協調性がないスタッフに、どう向き合うか",
-      "url": "https://note.com/prime_duck4944/n/n5320af96faa0",
-      "guid": "https://note.com/prime_duck4944/n/n5320af96faa0",
-      "pubDate": "2026-10-26T07:44:58+09:00",
-      "date": "2026-10-26",
-      "excerpt": "仕事はできる。患者さんからの評判も悪くない。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/328562928/rectangle_large_type_2_f6ac7cdf92645e1a2280074de0b9101f.png?width=800"
-    },
-    {
-      "title": "毎週同じ報告書を作っているなら、AIでどこまで減らせるか",
-      "url": "https://note.com/prime_duck4944/n/n67af51ac7a44",
-      "guid": "https://note.com/prime_duck4944/n/n67af51ac7a44",
-      "pubDate": "2026-10-25T19:15:32+09:00",
-      "date": "2026-10-25",
-      "excerpt": "毎週金曜日になると、同じような報告書を作っている。先週の数字を確認する。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/328384196/rectangle_large_type_2_653d66b24f1c7995c787e9d79f7db2e1.png?width=800"
     }
   ]
 }
