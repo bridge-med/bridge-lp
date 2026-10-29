@@ -441,12 +441,12 @@ html.js:not(.rm) .cls-top,html.js:not(.rm) .cls-idea,html.js:not(.rm) .cls-go{op
 .cls-tx a{display:inline-flex;align-items:center;min-height:44px;font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--hero-fg);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
 @media (hover:hover){.cls-tx a:hover{text-decoration-thickness:2px}}
 .cls-29{font-size:12px;line-height:1.6;letter-spacing:.03em;color:var(--hero-fg-3);text-align:center}
-/* 島の上の札(3棟だけ。押すと下の同じ列の行き先へ。Tab と読み上げは下の道の先で受ける・Tab で来ると、その札が藍に) */
+/* 島の上の札(3棟だけ。押すとその建物をひらく=最初の画面の見晴らしの札と同じ。外へ行く道は下の3列。Tab と読み上げは下の道の先で受ける・列に乗せる・Tab で来ると、その札が藍に) */
 .ctags{position:absolute;inset:0;z-index:8;pointer-events:none}
 html:not(.js) .ctags,html.rm .stage .ctags,html.rm .stage .clfade{display:none}
 .ctag{position:absolute;left:0;top:0;padding:5px 11px 6px;border-radius:999px;background:var(--pill);color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.05em;white-space:nowrap;text-decoration:none;opacity:0;pointer-events:none;transform:translate(-50%,calc(-100% - 8px));box-shadow:var(--pill-shadow);transition:background-color .2s var(--ease),color .2s var(--ease);-webkit-tap-highlight-color:transparent}   /* 見晴らしの札(.otag)と同じ見た目。押すと、下の同じ列の行き先へ(Tab は下の列で受ける) */
 .ctag.on{pointer-events:auto}
-.ctag::before{content:'';position:absolute;inset:-9px -4px}   /* ふれる範囲は 44px 以上 */
+.ctag::before{content:'';position:absolute;inset:-16px -4px 0}   /* ふれる範囲は 44px 以上。建物の側(下)へは広げない(札のすぐ下の建物を押せるように) */
 .ctag::after{content:'';position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;background:inherit;transform:rotate(45deg);border-radius:1px}
 .ctag.hi,.ctag.hi:hover{background:var(--indigo);color:var(--kinari)}
 .cdot{position:absolute;left:0;top:0;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:var(--here);box-shadow:0 0 0 2px var(--here-ring),0 0 0 3px var(--here-edge);opacity:0}   /* 現在地(いま立っている広場。第22条 町の但し書きの UI の砂) */
@@ -518,7 +518,8 @@ html.hdband:not(.opened) .logo svg{width:42px}
   .meta{text-align:left}
   .still{left:auto;right:calc(-1 * clamp(0px,2vw,40px));top:50%;transform:translateY(-50%);height:min(98%,calc(100vw * .66 / 1.111))}
   .hint{left:var(--pad);bottom:clamp(22px,4vh,44px);text-align:left}
-  .panel{right:24px;top:84px;bottom:24px;width:clamp(340px,34vw,400px);border-radius:16px}   /* 920〜1000px でも建物の名前が1行に */
+  .panel{right:24px;top:84px;bottom:24px;width:clamp(340px,34vw,400px);border-radius:16px}
+  html.clopen .panel{left:var(--pad);right:auto}   /* 閉じ(広場の見晴らし)でひらいたときは、左の言葉の列の上に(島の建物を隠さない。ひらいている間は道の先が隠れ、× ・Esc・島の外で戻る) */   /* 920〜1000px でも建物の名前が1行に */
   .sky .stars{-webkit-mask-image:linear-gradient(90deg,transparent 0,transparent 36%,#000 44%);mask-image:linear-gradient(90deg,transparent 0,transparent 36%,#000 44%)}   /* PC は左の文字の列にかけない */
   html.opened .copy,html.opened .cta-wrap,html.opened .hint{opacity:0;pointer-events:none}
   /* v7 閉じ(PC): 最初の画面と同じく、左の列に言葉と出口、右に島 */
@@ -574,7 +575,7 @@ html.hdband:not(.opened) .logo svg{width:42px}
 @media (max-width:920px) and (max-height:700px){h1{margin-top:4px}.hero{--top0:132px;--bot0:128px}}
 @media (max-width:920px) and (max-height:599px){.copy .eyebrow{display:none}h1{margin-top:0}.hero{--top0:118px;--bot0:116px}}   /* 600px 未満: 一行の説明は外し、町を高さで縮める */
 /* v7 閉じ(背の低いスマホ): 島の場所を残すため、下の言葉と出口を詰める(押せるものは 44px のまま) */
-@media (max-height:560px){.ctag{padding:3px 8px 4px;font-size:11px}}   /* 背の低い画面: 島が小さいので札も小さく(ふれる範囲は ::before で 44px のまま) */
+@media (max-height:560px){.ctag{padding:3px 8px 4px;font-size:11px}.ctag::before{inset:-18px -4px 0}}   /* 背の低い画面: 島が小さいので札も小さく(ふれる範囲は ::before で 44px のまま) */
 @media (max-width:920px) and (max-height:640px){
   .cls-q{font-size:13px;line-height:1.7}
   .cls-idea{font-size:14.5px;letter-spacing:.01em}
@@ -642,7 +643,7 @@ html.capture body > *:not(#cap){display:none!important}
   <div class="mist" aria-hidden="true"></div>
   <div class="endfade" aria-hidden="true"></div>
   <div class="clfade" aria-hidden="true"></div>
-  <div class="ctags" id="cTags" aria-hidden="true"><a class="ctag" data-id="observatory" href="compass/index.html" tabindex="-1">展望台</a><a class="ctag" data-id="plaza" href="philosophy/index.html" tabindex="-1">広場</a><a class="ctag" data-id="atelier" href="community/index.html" tabindex="-1">アトリエ</a><i class="cdot"></i></div><!-- v7 閉じ: 島の上の3つの札(押せる。Tab と読み上げは下の道の先で受ける)と現在地の砂の点。置き場は立体の側から(止めた画像では撮ったときの位置から) -->
+  <div class="ctags" id="cTags" aria-hidden="true"><button class="ctag" type="button" data-id="observatory" tabindex="-1">展望台</button><button class="ctag" type="button" data-id="plaza" tabindex="-1">広場</button><button class="ctag" type="button" data-id="atelier" tabindex="-1">アトリエ</button><i class="cdot"></i></div><!-- v7 閉じ: 島の上の3つの札(押せる。Tab と読み上げは下の道の先で受ける)と現在地の砂の点。置き場は立体の側から(止めた画像では撮ったときの位置から) -->
   <div class="copy">
     <p class="eyebrow">医療職のための道具と経営ゲーム</p>
     <h1 id="h1" tabindex="-1" data-bx="1"><span class="br">病院の外にも</span><span class="br">町がある</span></h1>
@@ -709,7 +710,7 @@ html.capture body > *:not(#cap){display:none!important}
   <div class="cls-in" id="clsIn">
     <div class="cls-col" id="clsCol">
       <div class="cls-top" id="clsTop"><h2 class="eyebrow" id="clsH" tabindex="-1">病院の外</h2><p class="cls-q" data-bx="1"><span class="ph">臨床だけをしていた頃、</span><span class="ph">事業会社で働くとは思っていませんでした。</span></p><p class="cls-who">理学療法士の私(橋本渉)が、ひとりで運営しています</p></div>
-      <figure class="cls-fig" id="clsFig" aria-hidden="true"><img id="clsImg" alt="" width="1600" height="1440" decoding="async"><a class="ctag" data-id="observatory" href="compass/index.html" tabindex="-1">展望台</a><a class="ctag" data-id="plaza" href="philosophy/index.html" tabindex="-1">広場</a><a class="ctag" data-id="atelier" href="community/index.html" tabindex="-1">アトリエ</a><i class="cdot"></i></figure>
+      <figure class="cls-fig" id="clsFig" aria-hidden="true"><img id="clsImg" alt="" width="1600" height="1440" decoding="async"><button class="ctag" type="button" data-id="observatory" tabindex="-1">展望台</button><button class="ctag" type="button" data-id="plaza" tabindex="-1">広場</button><button class="ctag" type="button" data-id="atelier" tabindex="-1">アトリエ</button><i class="cdot"></i></figure>
       <div class="cls-bot" id="clsBot">
         <p class="cls-idea" id="clsIdea" data-bx="1">正解を与えるのではなく、<span class="ph">選択肢を増やす</span></p>
         <div class="cls-go" id="clsGo">

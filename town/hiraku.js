@@ -45,7 +45,7 @@ function boot() {
     chev: '<svg class="ico chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9.5l5.5 5.5 5.5-5.5"/></svg>'
   };
   let ctl = null, openId = null, opener = null, touched = false, paused = false;
-  let clOpen = false, clOn = false;   // 閉じ(広場の見晴らし)で建物をひらいたとき: カメラは見晴らしのまま、パネルは止めた画像のときと同じ中身(写しと建物の中の絵)。clOn は閉じの島の札が出ている間
+  let clOpen = false, clOn = false, clSheetH = '';   // 閉じ(広場の見晴らし)で建物をひらいたとき: カメラは見晴らしのまま、パネルは止めた画像のときと同じ中身(写しと建物の中の絵)。clOn は閉じの島の札が出ている間
   const live3d = () => !!ctl && !clOpen;   // 立体がその建物をひらいて見せているか(閉じでひらいたときは、立体は見晴らしのまま)
   let tagFor = null, tagTimer = 0, hoverId = null;
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 使えなくても壊れない */ } } };
@@ -295,7 +295,7 @@ function boot() {
   pTools.addEventListener('mouseleave', () => { if (!mouseHover.matches) return; clearTimeout(hovT); hovT = setTimeout(() => { hovSid = null; applyFind(); }, 220); });
   pTools.addEventListener('focusout', e => { if (focSid && !pTools.contains(e.relatedTarget)) { focSid = null; applyFind(); } });
   function rowPick(sid) {
-    const go = () => { pinSid = pinSid === sid ? null : sid; if (!pinSid && hovSid === sid) hovSid = null; applyFind(); if (pinSid) revealRow(sid); else panel.style.height = ''; };   // 閉じたら、伸ばしたシートを戻す
+    const go = () => { pinSid = pinSid === sid ? null : sid; if (!pinSid && hovSid === sid) hovSid = null; applyFind(); if (pinSid) revealRow(sid); else panel.style.height = clSheetH; };   // 閉じたら、伸ばしたシートを戻す
     // スマホでシートを広げているときは、物が見える高さに戻してから寄る
     if (phone() && panel.classList.contains('full')) { panel.classList.remove('full'); setTimeout(go, 340); } else go();
   }
@@ -340,6 +340,7 @@ function boot() {
     if (openId === id) return;
     const wasOpen = !!openId;
     if (!wasOpen) clOpen = R.classList.contains('scrub');   // 舞台の上(閉じ)でひらいた: 立体は見晴らしのまま(カメラを動かさない。閉じれば同じ見晴らしのまま)
+    R.classList.toggle('clopen', clOpen);   // PC: パネルを左の言葉の列の上に(島の建物を隠さない)
     openId = id; opener = from || (clOpen ? $('#clsH') : hits.get(id));
     showTag(null); hoverId = null; clearFind(); armXY = mouseXY.slice();
     listOpen(false, true); ovTags(false);
@@ -350,7 +351,12 @@ function boot() {
     if (id === 'plaza' && !clOpen && (!ctl || reduce())) ovTags(true);   // 動いているときは、見晴らしに着いてから(onOpened)
     // パネルは押したその場で出し、町に寄る動きの間に現れる(0.26 秒後。CSS の時計なので、描画が重い端末でも、こまの数によらない)
     const enter = !(wasOpen || !live3d() || reduce() || opt.now);
-    panel.classList.remove('enter', 'full'); panel.style.height = ''; panel.hidden = false;
+    clSheetH = '';
+    if (clOpen && phone() && panel.hidden) {   // スマホの閉じ: シートは押した建物の足もとより下から(輪と光が見えるように)。下限は見出しと道具の1行が入る高さ。測るのはシートを出す前(出してから縮めると動いて見える)
+      const fp = clFoot(id), vh = innerHeight, minH = Math.min(vh * .45, 196);
+      if (fp) clSheetH = Math.round(Math.max(minH, Math.min(vh * .45, vh - (heroRect().top + fp[1]) - 14))) + 'px';
+    } else if (clOpen && phone()) clSheetH = panel.style.height;   // ひらいたまま隣の建物へ: 高さはそのまま
+    panel.classList.remove('enter', 'full'); panel.style.height = clSheetH; panel.hidden = false;
     if (enter) { void panel.offsetWidth; panel.classList.add('enter'); }
     if (opt.focus !== false) pTitle.focus({ preventScroll: true });
     if (!save) idle(() => { if (openId !== id) return; for (const tid of BY_ID[id].tools) { const t = TOOLS[tid]; if (t.thumb) { const im = new Image(); im.decoding = 'async'; im.fetchPriority = 'low'; im.src = THUMB(t.thumb); } } });   // 入口の写しを先に読んでおく(押したときに枠が空にならないように)
@@ -363,7 +369,7 @@ function boot() {
     const id = openId; openId = null; clearFind(); listOpen(false, true); ovTags(false);
     panel.hidden = true; panel.classList.remove('enter'); panel.style.height = ''; R.classList.remove('opened'); showSTag(null);
     if (live3d()) ctl.close(); else if (clOpen && ctl && ctl.glow) ctl.glow(null);
-    clOpen = false;
+    clOpen = false; R.classList.remove('clopen');
     writeHash();
     if (PERF) PERF.mark('close', id);
     if (back && opener) opener.focus({ preventScroll: true });
@@ -778,8 +784,8 @@ function boot() {
     a.addEventListener('mouseenter', () => on(true)); a.addEventListener('mouseleave', () => on(false));
     a.addEventListener('focus', () => on(true)); a.addEventListener('blur', () => on(false));
   }
-  /* v7 閉じ: 島の建物はどれも押せる(最初の画面と同じく、その建物をひらく。札の付いた3棟も同じ)。島の上の3つの札は、下の道の先と同じ行き先のリンクのまま。
-     押せる範囲は建物の外形(立体なら見晴らしのカメラから、止めた画像なら最初の画面の .hit を閉じの寄せ方で)。44px より小さければ広げる。重なれば小さい方(広場・公園の広い面は最後)。
+  /* v7 閉じ: 島の建物はどれも押せる(最初の画面と同じく、その建物をひらく。札の付いた3棟も同じ)。島の上の3つの札も、押すとその建物をひらく(最初の画面の見晴らしの札と同じ。外へ行く道は下の3列)。
+     押せる範囲は建物の外形(立体なら見晴らしのカメラから、止めた画像なら最初の画面の .hit を閉じの寄せ方で)。44px より小さければ広げる。重なれば、押した所が外形の真ん中に近い方(pickIn。広場・公園の広い面は重み2で後に)。
      言葉・道の先・文字リンク・見出しの帯の上は押せない(文字が先)。Tab には入れない(建物へはパネルの一覧・最初の画面の建物・すべての道具を見る から届く) */
   function clRects() {
     if (reduce()) return null;
@@ -797,14 +803,15 @@ function boot() {
     const hr = heroRect(), x = cx - hr.left, y = cy - hr.top;
     return pickIn(rs, x, y, touch ? 18 : 6);
   }
-  /* 重なった外形からは、押した所がその外形の真ん中に近いもの(外形の大きさで割った距離)。広場は島の真ん中の広い面なので、ほかと重なれば後に。外れたら近い建物(広い面は除く) */
+  /* 重なった外形からは、押した所がその外形の真ん中に近いもの(真ん中からの縦横の距離を外形の幅・高さで割った和。小さい方)。広場・公園は広い面なので、その値を2倍にして、ほかと重なれば後に。
+     どの外形にも入らなければ、tol 以内の近い建物(広い面は除く)。外形の大きさで比べないのは、小さい建物の外形が隣の建物の真ん中にかかるとき、押した建物と違う建物がひらくため */
   function pickIn(rs, x, y, tol, minW = 44, minH = 44) {
     let best = null, bs = Infinity, near = null, nd = tol;
     for (const id in rs) {
       let [x0, y0, x1, y1] = rs[id];
       if (x1 - x0 < minW) { const c = (x0 + x1) / 2; x0 = c - minW / 2; x1 = c + minW / 2; }
       if (y1 - y0 < minH) { const c = (y0 + y1) / 2; y0 = c - minH / 2; y1 = c + minH / 2; }
-      if (x >= x0 && x <= x1 && y >= y0 && y <= y1) { const sc = (Math.abs(x - (x0 + x1) / 2) / (x1 - x0) + Math.abs(y - (y0 + y1) / 2) / (y1 - y0)) * (id === 'plaza' ? 2 : 1); if (sc < bs) { bs = sc; best = id; } }
+      if (x >= x0 && x <= x1 && y >= y0 && y <= y1) { const sc = (Math.abs(x - (x0 + x1) / 2) / (x1 - x0) + Math.abs(y - (y0 + y1) / 2) / (y1 - y0)) * (id === 'plaza' || id === 'park' ? 2 : 1); if (sc < bs) { bs = sc; best = id; } }
       else if (id !== 'plaza' && id !== 'park') { const d = Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(y0 - y, 0, y - y1)); if (d < nd) { nd = d; near = id; } }
     }
     return best || near;
@@ -815,10 +822,14 @@ function boot() {
     if (!clOn || reduce() || e.target.closest('a,button,.panel')) return;
     const id = clPick(e.clientX, e.clientY, e.pointerType !== 'mouse');
     if (!id) { if (clOpen && openId && !overText(e.clientX, e.clientY)) closeB(false); return; }   // 島の外を押したら閉じる(最初の画面と同じ)
+    clOpenB(id);
+  });
+  function clOpenB(id) {   // 閉じで建物をひらく(島の建物を押した・島の上の札を押した)
     if (id === openId) return;
     const fp = clFoot(id); if (fp && !reduce()) { const r = document.createElement('i'); r.className = 'pring'; r.style.left = fp[0].toFixed(1) + 'px'; r.style.top = fp[1].toFixed(1) + 'px'; r.addEventListener('animationend', () => r.remove()); rings.append(r); setTimeout(() => r.remove(), 650); }   // 押した輪(最初の画面と同じ)
-    firstTouch(); openB(id, null);
-  });
+    firstTouch(); openB(id, $('#clsH'));
+  }
+  for (const t of $$('.ctag')) t.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); clOpenB(t.dataset.id); });   // 島の上の札: その建物をひらく
   let clHover = null;
   hero.addEventListener('pointermove', e => {
     if (e.pointerType !== 'mouse' || !clOn || openId) { if (clHover) { clHover = null; canvas.style.cursor = ''; if (ctl && ctl.glow) ctl.glow(null); } return; }
@@ -829,12 +840,12 @@ function boot() {
   });
   /* 動きを減らす設定: 閉じはふつうの区画(町の止めた画像)。建物の位置は最初の画面の .hit の data-box(画像の %)から */
   $('#clsFig').addEventListener('click', e => {
-    if (!reduce() || e.target.closest('a')) return;
+    if (!reduce() || e.target.closest('a,button')) return;
     const r = $('#clsImg').getBoundingClientRect(); if (!r.width) return;
     const x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100, rs = {};
     for (const [id, a] of hits) rs[id] = a.dataset.box.split(',').map(Number);
     const best = pickIn(rs, x, y, 0, 4400 / r.width, 4400 / r.height);   // 44px より小さければ広げる(画像の %)
-    if (best) { firstTouch(); openB(best, $('#clsH')); }
+    if (best) clOpenB(best);
   });
   // 舞台を過ぎたら、見出しの帯を小さく上に固定。夜は夜の色の帯
   const hdNight = () => R.classList.toggle('hd-night', R.dataset.tod === 'night');
