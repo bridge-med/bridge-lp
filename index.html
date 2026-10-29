@@ -8,7 +8,7 @@
 <title>BRIDGE — 医療職のための道具と経営ゲーム</title>
 <meta name="description" content="看護師・リハビリ職・医療事務など、医療の現場で働く人へ。仕事に使える道具と、クリニック経営を体験できるゲームを、理学療法士がひとりで作って公開しています。登録なしでブラウザから試せます。">
 <link rel="canonical" href="https://bridge-med.github.io/bridge-lp/">
-<meta property="og:title" content="BRIDGE — その経験に、次の可能性を">
+<meta property="og:title" content="BRIDGE — 病院の外にも町がある">
 <meta property="og:description" content="毎日やっていること、たぶん今の職場の外でも使えます。理学療法士がひとりで作っている、医療職のための道具と経営ゲーム。登録なしでブラウザから。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/">
@@ -39,7 +39,7 @@
    ふれると、その建物が人形の家のように前の壁と屋根をひらき、中の人と、そこにある道具(実際の画面)が見える(C と融合2 の断面)
    書体: BIZ UDPGothic(和文)・Barlow(英字・数字)。思想の一文だけ明朝(Shippori Mincho B1)。ヘッダー・メニュー・フッターは下層と同じ Noto Sans JP・Inter
    改行: 町の文字は word-break:auto-phrase と手組みの文節(.ph・.br)で折る。bridge.js の BudouX が重ならないよう、手組みの所と組みを変えたくない所に data-bx="1"
-   色: UI は憲法第22条の4系統(紙・墨・藍・砂)。文字と面の色はトークンで持ち、時刻(html[data-tod])ではトークンを差し替えるだけ
+   色: UI は憲法第22条の4系統(紙・炭・藍・砂)。文字と面の色はトークンで持ち、時刻(html[data-tod])ではトークンを差し替えるだけ
    ================================================================ */
 :root{
   /* 4系統 */
@@ -704,7 +704,7 @@ html.capture body > *:not(#cap){display:none!important}
 <section class="cls" id="cls" aria-labelledby="clsH">
   <div class="cls-in" id="clsIn">
     <div class="cls-col" id="clsCol">
-      <div class="cls-top" id="clsTop"><h2 class="eyebrow" id="clsH">病院の外</h2><p class="cls-q" data-bx="1"><span class="ph">臨床だけをしていた頃、</span><span class="ph">事業会社で働くとは思っていませんでした。</span></p><p class="cls-who">運営者・橋本渉(理学療法士)</p></div>
+      <div class="cls-top" id="clsTop"><h2 class="eyebrow" id="clsH">病院の外</h2><p class="cls-q" data-bx="1"><span class="ph">臨床だけをしていた頃、</span><span class="ph">事業会社で働くとは思っていませんでした。</span></p><p class="cls-who">理学療法士の私(橋本渉)が、ひとりで運営しています</p></div>
       <figure class="cls-fig" id="clsFig" aria-hidden="true"><img id="clsImg" alt="" width="1600" height="1440" decoding="async"><a class="ctag" data-id="observatory" href="compass/index.html" tabindex="-1">展望台</a><a class="ctag" data-id="plaza" href="philosophy/index.html" tabindex="-1">広場</a><a class="ctag" data-id="atelier" href="community/index.html" tabindex="-1">アトリエ</a><i class="cdot"></i></figure>
       <div class="cls-bot" id="clsBot">
         <p class="cls-idea" id="clsIdea" data-bx="1">正解を与えるのではなく、<span class="ph">選択肢を増やす</span></p>
@@ -712,8 +712,8 @@ html.capture body > *:not(#cap){display:none!important}
           <nav class="ways" aria-label="道の先"><ul>
             <li><a href="compass/index.html" data-id="observatory"><small>展望台</small><b><span class="ph">自分の場合を</span><span class="ph nw">見てみる<span aria-hidden="true"> →</span></span></b></a></li>
             <li><a href="philosophy/index.html" data-id="plaza"><small>広場</small><b><span class="ph">考え方を</span><span class="ph nw">もう少し読む<span aria-hidden="true"> →</span></span></b></a></li>
-            <li><a href="community/index.html" data-id="atelier"><small>アトリエ</small><b><span class="ph">運営者と</span><span class="ph nw">話す<span aria-hidden="true"> →</span></span></b></a></li>
-          </ul></nav><!-- 使う(Compass)/読む(考え方)/話す(運営者と) -->
+            <li><a href="community/index.html" data-id="atelier"><small>アトリエ</small><b><span class="ph nw">話をする<span aria-hidden="true"> →</span></span></b></a></li>
+          </ul></nav><!-- 使う(Compass)/読む(考え方)/話す(話をする。NAV の CTA とアトリエのパネルと同じ語。誰と話すかは上の名乗りが持つ) -->
           <p class="cls-tx" data-bx="1"><a href="about/index.html#founder">運営者について</a><a href="products/index.html">すべての道具を見る</a></p>
           <p class="cls-29">見るだけで帰っても、それで十分です。</p>
         </div>
