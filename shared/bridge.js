@@ -41,7 +41,7 @@ document.documentElement.classList.add('js');
     { h: 'つくったもの', links: [navLink('products'), link({ id: 'compass', en: 'BRIDGE Compass', href: 'compass/index.html' }), link({ id: 'starter-kits', en: 'Starter Kits', href: 'starter-kits/index.html' })] },
     { h: 'つながる', links: [navLink('services'), navLink('community'), link({ en: 'note', href: 'https://note.com/prime_duck4944', ext: true }), link({ en: 'X', href: 'https://x.com/WataruPT1013', ext: true })] },
   ];
-  const PRIVACY = link({ en: 'Privacy', jp: 'プライバシーポリシー', href: 'legal/privacy.html' });
+  const PRIVACY = link({ en: 'Privacy', jp: 'プライバシーポリシー', href: 'legal/site-privacy.html' }); // サイト全体のポリシー(2026-10-30)。legal/privacy.html はキャリアログのストア審査に結線した URL なので動かさない
 
   /* ---- 正式ロゴ(交差する二本の線。接続はしない) ---- */
   const MARK =
