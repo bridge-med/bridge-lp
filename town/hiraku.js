@@ -17,6 +17,7 @@
    ヘッダー・メニュー・フッターは drawChrome が shared/bridge.js のデータから描く。検査用の引数(?perf ?slow ?q ?capture ?clock など)は tools/README.md
    ================================================================ */
 import { BY_ID, TOOLS, RING } from './data.js';
+import { Spring, capStep } from './pace.js';   // 舞台の表示の進み(上限の速さで、スクロールの進みを追う。live.js と同じ)
 
 const Q = new URLSearchParams(location.search);
 { const h = location.hash.slice(1); if (h === 'perf' || h === 'slow') Q.set(h, '1'); }   // 実機で確かめるため: #perf(重さの表示)・#slow(舞台を止めた画像で)。共有のページの中では ?… がページに届かないので、#… でも受ける
@@ -586,6 +587,12 @@ function boot() {
   const floorAt = q => { for (const [sid, a, b] of FLOORS) if (q >= a && q < b) return sid; return null; };
   const HOSP_O = '52.19% 34.02%';   // 町の止めた画像の中の病院(押せる範囲の真ん中)。止めた画像を寄せるときの中心
   let rawP = 0, chipPos = {}, lastQ = -1, lastSid, sq = 0, clPos = null;   // rawP: 舞台の進み(v6 の単位。0..QMAX)。clPos: 閉じの3つの札と現在地の点(立体から)
+  /* 表示の進み shownP(2026-10-30 社長 案A): 絵と、それに結びついた札・言葉・階の印・出口・閉じの押せる範囲は、これで出す。rawP(スクロールの進み)を上限の速さで追う(pace.js)。
+     立体のときは live.js が追い(onLayout が書く)、止めた画像(#slow・低性能・WebGL なし・立体に替わる前)のときはここで追う(同じ式・同じばね)。
+     舞台が画面の外・最初の画面へ一気に戻ったときは、すぐ合わせる。キーボードで来たときは上限を外す(freeTil まで)。動きを減らす設定は舞台を畳むので、追わない */
+  let shownP = 0, freeTil = 0, freeQ = null, freeEnd = 0, stageFirst = true;
+  const fs = new Spring(0, 8.5, 1), MANUAL = Q.get('clock') === 'manual';   // 止めた画像の表示の進み(ばね)。手で進める時計(撮るとき)では、__paceAdvance(ms) で進める
+  let fc = 0, fRaf = 0, fLast = 0, fOn = false, fRun = false;   // fc: ばねの目標(上限の速さで rawP を追う)。fOn: 止めた画像の側が表示の進みを持っている
   // 低性能の端末(立体の低の段でも重い)は、舞台を止めた画像で見せる: 町の絵(立体を止めたもの)を病院へ寄せてから、ひらいた病院の止めた画像へ。?slow=1 で確かめられる
   let stageStill = Q.get('slow') === '1' ? 'pending' : false, stillO = null;
   function goStill() {
@@ -724,6 +731,7 @@ function boot() {
   let shutKey = null, shutBand = null, shutD = null, stillMarks = null;   // stillMarks: 止めた画像のときの階の印と、正面の地面の線(ページの座標)
   function stillScrub(q) {
     const on = q >= .36, key = R.dataset.tod + (phone() ? '-sp' : '-pc');
+    const hr = heroRect(), cr = canvas.getBoundingClientRect(), sb = on && shutBand && shutImg.naturalWidth ? shut.getBoundingClientRect() : null;   // 読む物を先に(表示の進みを追う間は毎こま呼ぶので、書いた後に読まない)
     if (q > .12 && shutKey !== key) {   // 替わる少し前に読み始める
       shutKey = key; const D = OPEN_STILL[key];
       shutBand = D ? D.band : null; shutD = D || null; if (D) { shutImg.width = D.w; shutImg.height = D.h; shutImg.src = 'town/img/open-' + key + '.webp'; }
@@ -735,34 +743,69 @@ function boot() {
     else { zEl.style.transformOrigin = stageStill === true ? stillO : HOSP_O; zEl.style.transform = z > 1.001 ? `scale(${z.toFixed(4)})` : ''; }
     R.classList.toggle('shut-on', on && !clo && !!shutImg.naturalWidth);
     chipPos = {}; stillMarks = null;
-    if (on && shutBand && shutImg.naturalWidth) {   // object-fit: contain の中身の枠
-      const b = shut.getBoundingClientRect(), hr = heroRect(), s0 = Math.min(b.width / shutImg.naturalWidth, b.height / shutImg.naturalHeight);
+    if (sb) {   // object-fit: contain の中身の枠
+      const b = sb, s0 = Math.min(b.width / shutImg.naturalWidth, b.height / shutImg.naturalHeight);
       const iw = shutImg.naturalWidth * s0, ih = shutImg.naturalHeight * s0, L = b.left - hr.left + (b.width - iw) / 2, T = b.top - hr.top + (b.height - ih) / 2;
       for (const sid in shutBand) { const [bx, by] = shutBand[sid]; chipPos[sid] = { x: L + bx / 100 * iw, y: T + by / 100 * ih }; }
       if (shutD && shutD.fl) stillMarks = { fl: shutD.fl.map(([fx, fy]) => [L + fx / 100 * iw, T + fy / 100 * ih]), gy: T + shutD.gy / 100 * ih };
     }
-    overlays(q);
+    overlays(q, undefined, null, hr, cr);
   }
-  shutImg.addEventListener('load', () => { if (!ctl || stageStill === true) stillScrub(rawP); });
+  shutImg.addEventListener('load', () => { if (!ctl || stageStill === true) stillScrub(reduce() ? rawP : shownP); });
+  /* 舞台の上にいるか(スクロールの進みか表示の進みのどちらかが舞台に入っている間)。最初の画面の建物は、表示の進みが最初の画面に戻りきってから押せる */
+  function syncOn() {
+    const on = rawP > .02 || shownP > .02;
+    if (on !== R.classList.contains('scrub')) {
+      R.classList.toggle('scrub', on);
+      if (on) { if (openId) closeB(false); stopInvite(); showTag(null); hoverId = null; if (ctl) ctl.hover(null); }
+      else if (!touched) startInvite();
+      if (ctl && stageStill === true) { if (on) ctl.setPaused(true); else { canvas.style.transform = ''; ctl.setPaused(paused); } }   // 立体を止めた舞台: 最初の画面に戻ったら、町はまた動く
+    }
+    return on;
+  }
+  /* 止めた画像の表示の進み: 1こまずつ、目標 fc を上限の速さで rawP へ、ばねで fc へ */
+  function stillTick(now) {
+    fRaf = 0;
+    if (!fOn) { fRun = false; return; }   // 立体が表示の進みを持っている
+    const gap = Math.max(0, now - fLast); fLast = now;
+    if (fc !== rawP) fc = capStep(fc, rawP, Math.min(.25, gap / 1000));
+    fs.t = fc; fs.step(Math.min(.05, gap / 1000));
+    if (!fs.moving && fc === rawP) fs.set(rawP);
+    shownP = fs.x; stillScrub(shownP); syncOn();
+    if (fs.moving || fc !== rawP) stillKick(); else fRun = false;
+  }
+  function stillKick() { if (fRaf || MANUAL) return; if (!fRun) { fRun = true; fLast = performance.now(); } fRaf = requestAnimationFrame(stillTick); }   // 止まっていたあとの最初のこまは、止まっていた間を数えない
+  window.__stage = () => ({ raw: rawP, shown: shownP });   // 確かめるため: スクロールの進みと表示の進み
+  if (MANUAL) window.__paceAdvance = ms => { const n = Math.max(1, Math.round(ms / (1000 / 60))); for (let i = 0; i < n; i++) stillTick(fLast + ms / n); return shownP; };
+  function stillGo(jump, free) {
+    if (!fOn) { fOn = true; fs.set(shownP); fc = shownP; }   // 止めた画像に替わった所(立体のいまの表示の進み)から
+    if (jump || free) fc = rawP;
+    if (jump) { fs.set(rawP); shownP = rawP; stillScrub(shownP); return; }
+    stillKick();
+  }
   function onStage() {
     sq = 0; rawP = stageP();
     if (clOpen && openId && rawP < CL.tags[0]) closeB(false);   // 閉じでひらいたまま、閉じの前(病院の中)へ戻ったら閉じる
     const hb = hero.getBoundingClientRect(); R.classList.toggle('past', hb.top < -2); R.classList.toggle('gone', hb.bottom < 0);
     R.classList.toggle('hdband', hb.top < -2);   // v7: 舞台が外れたら(閉じの言葉が見出しの下へ入り始めたら)、見出しの帯を小さく固定。地はフッターと同じ。舞台の間は帯を出さない
-    const on = rawP > .02;
-    if (on !== R.classList.contains('scrub')) {
-      R.classList.toggle('scrub', on);
-      if (on) { if (openId) closeB(false); stopInvite(); showTag(null); hoverId = null; if (ctl) ctl.hover(null); }
-      else if (!touched) startInvite();
-    }
-    if (ctl && stageStill === 'pending' && on) { goStill(); return; }
+    // 表示の進みをすぐ合わせる: 読み込んだ時点・舞台が画面の外(フッターまで一気に。舞台を抜けて、町が半分より多く上へ出たら)・最初の画面へ一気に戻った(画面の外や、着いた所で追いかけを描かない)
+    const jump = stageFirst || hb.bottom < hb.height * .5 || (rawP <= .02 && Math.abs(shownP - rawP) > .1), now = performance.now(), free = now < freeTil || (freeQ != null && now < freeEnd);   // キーボードで進めた滑らかなスクロールが着くまでは、外したまま(4 秒まで)
+    if (freeQ != null && Math.abs(rawP - freeQ) < .005) freeQ = null;
+    stageFirst = false;
+    syncOn();
+    if (ctl && stageStill === 'pending' && rawP > .02) { goStill(); return; }
     if (ctl && stageStill !== true) {
-      ctl.scrubTo(rawP);
+      fOn = false; if (fRaf) { cancelAnimationFrame(fRaf); fRaf = 0; }   // 立体が表示の進みを持つ
+      if (jump) shownP = rawP;
+      ctl.scrubTo(rawP, jump, free);
       // v7(QA C): 低の段の端末は途中で止めた画像に替わることがある。替わった瞬間にひらいた病院の画像が届いていないと、寄せた町の絵が出たままになるので、低の段のときだけ先に読む
       if (ctl.tier === 'low' && rawP > .12 && !shutKey) { const key = R.dataset.tod + (phone() ? '-sp' : '-pc'), D = OPEN_STILL[key]; if (D) { shutKey = key; shutBand = D.band; shutD = D; shutImg.width = D.w; shutImg.height = D.h; shutImg.src = 'town/img/open-' + key + '.webp'; } }
     }
-    else { stillScrub(rawP); if (ctl && !on) { canvas.style.transform = ''; ctl.setPaused(paused); } else if (ctl && on) ctl.setPaused(true); }   // 最初の画面に戻ったら、町はまた動く
+    else if (reduce()) { shownP = rawP; stillScrub(rawP); syncOn(); }   // 動きを減らす設定: 舞台を畳む(追わない)
+    else stillGo(jump, free);
   }
+  /* キーボードで舞台の中の物に来たとき: 上限の速さを外して、ばねだけで追う(フォーカスした物が見えないまま待たせない) */
+  function rush(to) { const t = performance.now(); freeTil = t + 1500; freeQ = to == null ? null : to; freeEnd = t + 4000; onStage(); }   // to: 進める先の進み(滑らかなスクロールがそこへ着くまで外す)
   addEventListener('scroll', () => { if (!sq) sq = requestAnimationFrame(onStage); }, { passive: true });
   addEventListener('resize', () => { if (!sq) sq = requestAnimationFrame(onStage); });
   onStage();   // 読み込んだ時点の位置から(戻るボタンなどで、途中から始まるとき)
@@ -771,14 +814,14 @@ function boot() {
   // キーボードで札に来たら、札が見える所(ひらいた病院ぜんたいの、その道具の階)まで舞台を進める
   for (const c of chips) c.addEventListener('focus', () => {
     const f = FLOORS.find(x => x[0] === c.dataset.sid), to = f ? Math.min(CQ(.06), (f[1] + Math.min(f[2], 1)) / 2) : .5;   // 1F は、病院を出る前(札が消え始める +.15 より前)
-    if (Math.abs(rawP - to) > .08) scrollTo({ top: yOf(to), behavior: reduce() ? 'auto' : 'smooth' });
+    const go = Math.abs(rawP - to) > .08; rush(go ? to : null); if (go) scrollTo({ top: yOf(to), behavior: reduce() ? 'auto' : 'smooth' });
   });
   // キーボードで一覧への入口に来たら、それが見える所(ひらいた病院ぜんたい)まで舞台を進める
   const goA = $('a', insGo);
-  if (goA) goA.addEventListener('focus', () => { if (rawP < .86 || rawP > CQ(.14)) scrollTo({ top: yOf(CQ(.05)), behavior: reduce() ? 'auto' : 'smooth' }); });   // 下の入口が出る所(1F。.84–.88。病院を出る +.15 より前)まで
+  if (goA) goA.addEventListener('focus', () => { const go = rawP < .86 || rawP > CQ(.14); rush(go ? CQ(.05) : null); if (go) scrollTo({ top: yOf(CQ(.05)), behavior: reduce() ? 'auto' : 'smooth' }); });   // 下の入口が出る所(1F。.84–.88。病院を出る +.15 より前)まで
   // v7 閉じ: キーボードで道の先・文字リンクに来たら、それが出ている所(+.94)まで舞台を進める。乗せる・Tab で来ると、島の上のその札と建物が明るく
   for (const a of $$('#cls a')) {
-    a.addEventListener('focus', () => { if (!reduce() && !flow && rawP < CL.go[1]) scrollTo({ top: yOf(CQ(.94)), behavior: 'smooth' }); });
+    a.addEventListener('focus', () => { if (!reduce() && !flow && rawP < CL.go[1]) { rush(CQ(.94)); scrollTo({ top: yOf(CQ(.94)), behavior: 'smooth' }); } });
     const id = a.dataset.id; if (!id) continue;
     const on = v => { for (const t of $$('.ctag[data-id="' + id + '"]')) t.classList.toggle('hi', v); if (ctl && ctl.glow) ctl.glow(v ? id : null); };
     a.addEventListener('mouseenter', () => on(true)); a.addEventListener('mouseleave', () => on(false));
@@ -790,8 +833,8 @@ function boot() {
   function clRects() {
     if (reduce()) return null;
     if (ctl && stageStill !== true && clPos) return hitPos;   // 立体: 見晴らしのカメラの外形(onLayout が毎回書く)
-    if (!stillFit && rawP >= CL.still && (!ctl || stageStill === true)) onStage();   // 字が届いて寄せ方を測り直すことになったら(パネルをひらくと字が増える)、いまの進みで作り直す
-    if (stillFit && rawP >= CL.still) return stillFit.rects;  // 止めた画像・#slow・WebGL なし
+    if (!stillFit && shownP >= CL.still && (!ctl || stageStill === true)) stillScrub(shownP);   // 字が届いて寄せ方を測り直すことになったら(パネルをひらくと字が増える)、いまの表示の進みで作り直す
+    if (stillFit && shownP >= CL.still) return stillFit.rects;  // 止めた画像・#slow・WebGL なし(表示の進みが閉じに着いてから)
     return null;
   }
   function overText(cx, cy) {
@@ -917,6 +960,7 @@ function boot() {
         },
         onFlick(d) { if (openId) step(d); },   // 町の上の横のはじき(指)
         onLayout(L2) {
+          if (ctl && !fOn && stageStill !== true) { shownP = L2.scrub ? L2.scrub.p : 0; syncOn(); }   // 立体の表示の進み(ばねと上限の速さを通したもの)。止めた画像の側が持っている間は、そちらの値
           const hr = heroRect(), cr = canvas.getBoundingClientRect(), still3 = stageStill === true, ox = still3 ? 0 : cr.left - hr.left, oy = still3 ? 0 : cr.top - hr.top;   // 立体を止めた舞台では、絵(canvas)を CSS で寄せているので、寄せる前の位置(舞台いっぱい)から
           for (const [id, a] of hits) { const p = L2.b[id]; if (!p) continue; tagPos[id] = [ox + p.tag[0], oy + p.tag[1]]; footPos[id] = [ox + p.foot[0], oy + p.foot[1]]; if (p.r) hitPos[id] = [ox + p.r[0], oy + p.r[1], ox + p.r[2], oy + p.r[3]]; if (p.nudge) nudgePos = [ox + p.nudge[0], oy + p.nudge[1]]; placeHit(a, ox + p.c[0], oy + p.c[1], 64, 64); }
           clPos = null; if (L2.cl) { clPos = {}; for (const k in L2.cl) clPos[k] = [ox + L2.cl[k][0], oy + L2.cl[k][1]]; }   // v7 閉じ: 3つの札と現在地の点(立体から)
@@ -926,7 +970,7 @@ function boot() {
           sPos = {}; for (const s of L2.st) sPos[s.id] = { x: ox + s.x, y: oy + s.y - 14, label: s.label };
           if (sTagFor) showSTag(sTagFor);
           if (L2.scrub) { chipPos = {}; for (const s of L2.st) if (s.band) chipPos[s.id] = { x: ox + s.band[0], y: oy + s.band[1] }; }   // 案A: 道具の札は、物の真上の、その階の天井の切り口
-          overlays(L2.scrub ? L2.scrub.p : rawP > .02 ? rawP : 0, L2.scrub ? L2.scrub.sid : undefined, L2.scrub || null, hr, cr);   // 立体に替わった直後(まだ寄っていないこま)は、いまの進みの言葉のまま
+          overlays(L2.scrub ? L2.scrub.p : shownP, L2.scrub ? L2.scrub.sid : undefined, L2.scrub || null, hr, cr);   // 立体に替わった直後(まだ寄っていないこま)・立体を止めた舞台では、いまの表示の進みの言葉のまま
         },
         scrubSafe() {   // 案A: 寄った病院を置く範囲(上は「病院の中」の見出しと一文、下は一覧への入口を避ける)。下は帯が出ているときの画面(svh)の中に(帯が畳まれると、広場が下に少し多く見えるだけで、病院は動かない)
           const w = canvas.clientWidth, h = Math.min(canvas.clientHeight, svhH());
@@ -934,7 +978,7 @@ function boot() {
           return { l: 40, t: 150, r: w - 40, b: h - 92 };
         },
         closeSafe,   // v7 閉じ: 見晴らしの島を置く範囲
-        onScrubEnd() { chipPos = {}; clPos = null; overlays(0); },
+        onScrubEnd() { chipPos = {}; clPos = null; if (fOn) stillScrub(shownP); else overlays(0); },   // 止めた画像に替わって立体の舞台を降りたときは、止めた画像の表示の進みのまま
         onOpened() {},
         onArrive(id) { if (id === 'plaza' && openId === 'plaza') ovTags(true); },   // カメラが見晴らしに着いてから、名前の札(遅い端末でも、カメラより先に出さない)
         onClosed() {},
@@ -955,8 +999,9 @@ function boot() {
       if (openId && !clOpen) { pStill.hidden = true; await ctl.restore(openId, openId === 'plaza' ? null : pinSid); if (openId) { applyFind(); if (openId === 'plaza') ovTags(true); revealRow(pinSid); } }
       // 寄っている途中で立体に替わったら、いまの進みの姿から。止めた画像は、立体がその姿を描いてから外す(最初の画面の言葉や閉じた病院が、1こま出ないように)
       const unshut = () => { poster.style.opacity = ''; poster.style.transform = ''; R.classList.remove('shut-on'); };
+      fOn = false; if (fRaf) { cancelAnimationFrame(fRaf); fRaf = 0; }   // ここからは立体が表示の進みを持つ(#slow なら goStill で止めた画像の側へ戻す)
       if (rawP > .02 && stageStill === 'pending') { poster.style.opacity = ''; poster.style.transform = ''; goStill(); }   // 舞台を止めた画像で見せる指定(#slow)なら、立体の舞台には入らない
-      else if (rawP > .02) { ctl.scrubTo(rawP, true); requestAnimationFrame(() => requestAnimationFrame(unshut)); } else unshut();
+      else if (rawP > .02 || shownP > .02) { ctl.scrubTo(shownP, true); ctl.scrubTo(rawP); requestAnimationFrame(() => requestAnimationFrame(unshut)); } else unshut();   // 止めた画像の表示の進みの所から(追いかけの途中なら、そのまま続ける)
       requestAnimationFrame(() => { R.classList.add('live'); dispatchEvent(new Event('hiraku:live')); });
     }).catch(err => { console.warn(err); stillSharp(); });
   }

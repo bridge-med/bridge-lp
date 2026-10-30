@@ -13,17 +13,10 @@ import { THREE, makeScene, makeLights, applyTod, aimCamera, capFrame, makeRender
 import * as WORLD from './world.js';   // makeSceneAsync(段ごとに休みを入れて作る入口)があれば、それを使う
 import { closePaths, walkLit } from './world.js';   // v7 閉じ: 灯る道
 import { BOXES, WALL } from './buildings.js';
+import { Spring, capStep } from './pace.js';   // ばね(半陰的オイラーを細かく刻む。z = 1 で臨界減衰)と、舞台の表示の進みの上限の速さ
 
 const TAU = Math.PI * 2, deg = d => d * Math.PI / 180, clamp = (v, a, b) => Math.max(a, Math.min(b, v)), clamp01 = v => clamp(v, 0, 1);
 const E = .004;
-
-/* ---------- ばね(半陰的オイラーを細かく刻む)。z = 1 で臨界減衰、z < 1 で弾む ---------- */
-class Spring {
-  constructor(x, w, z = 1) { this.x = x; this.v = 0; this.t = x; this.w = w; this.z = z; }
-  step(dt) { const n = Math.max(1, Math.ceil(dt / .004)), h = dt / n, k = this.w * this.w, c = 2 * this.z * this.w; for (let i = 0; i < n; i++) { const a = -k * (this.x - this.t) - c * this.v; this.v += a * h; this.x += this.v * h; } }
-  get moving() { return Math.abs(this.x - this.t) > 1e-4 || Math.abs(this.v) > 1e-3; }
-  set(x) { this.x = this.t = x; this.v = 0; }
-}
 
 /* ---------- 建物の枠(寄るときに画面に収める範囲)と、名前の札の位置 ---------- */
 function boundsOf(id, ex) {
@@ -308,9 +301,11 @@ export async function live(o) {
   let base = null, paused = false, running = false, visible = true, t = 0, last = clock(), lastInput = 0, dirty = true, frameN = 0;
   let arriveId = null;   // ひらいた建物に、カメラが着くのを待っている
   let hover = null, liftId = null, invite = null, preRot = 0, dragOff = new Spring(0, 9, 1), openCam = null, curStation = null, findSid = null, findC = null, turnTok = 0;
-  /* 案A: スクロールの進み(ページが渡す p。0 = 最初の町、1 = 1階の受付)。ばね sp でなめらかに追い、カメラと病院のひらき方は sp.x だけで決める(戻すと逆に再生) */
+  /* 案A: スクロールの進み(ページが渡す p。0 = 最初の町、1 = 1階の受付)。ばね sp でなめらかに追い、カメラと病院のひらき方は sp.x だけで決める(戻すと逆に再生)。
+     表示の進み(2026-10-30 社長 案A): ばねの目標 cq は、スクロールの進み scrub.t を上限の速さ(pace.js)で追う。上限より遅いスクロールでは cq = scrub.t(これまでと同じ)。
+     速くはじいても、着いた所まで寄る・壁・各階・引き上げを短い時間で見せてから追いつく。スクロールは止めない・吸着しない */
   const SCRUB_ID = 'hospital', sp = new Spring(0, 8.5, 1), gate = new Spring(0, 5, 1);   // gate: 中の形が届くまで壁を閉じておく(届いたら、いまの進みまでなめらかに)
-  let scrub = null;
+  let scrub = null, cq = 0, chaseAt = -1e9;   // cq: 表示の進みの目標(上限の速さで scrub.t を追う)。chaseAt: 追いかけていた最後の時刻(画質の段を下げるのは、追いかけが済んでから)
   /* 後で一度だけ動かす段取り(時計の時刻で) */
   const later = [];
   function after(ms, f) { later.push({ at: clock() + ms, f }); later.sort((a, b) => a.at - b.at); }
@@ -573,7 +568,7 @@ export async function live(o) {
     A = slot(); U.uOpenA.value = -1; U.uFocus.value = -1; U.uGroundCut.value = -1e4; U.uArcFade.value = 0; U.uAir.value = 0; U.uMoon.value.w = 0;
     if (frameG) { frameG.visible = false; frameMat.opacity = 0; }
     if (pathM) { pathM.visible = false; pathMat.opacity = 0; }
-    dim.set(0); inLight.set(0); gate.set(0); sp.set(0); curStation = null; findC = null; nearK.set(0);
+    dim.set(0); inLight.set(0); gate.set(0); sp.set(0); cq = 0; curStation = null; findC = null; nearK.set(0);
     preRot = r0; rot.set(r0); elev.set(ELEV); camX.set(base.x); camY.set(base.y); camZ.set(Math.log(base.ppu));
     dirty = true; kick();
     o.onScrubEnd && o.onScrubEnd();
@@ -604,7 +599,7 @@ export async function live(o) {
       const sid = fi < 0 ? null : FLOOR_OF[fi][0];
       if (sid !== scrub.sid) { scrub.sid = sid; for (const s of it.stations) s.setActive(s.id === sid); curStation = sid; }
     }
-    if (scrub.t === 0 && x < 1e-3 && !sp.moving) endScrub();
+    if (scrub.t === 0 && cq === 0 && x < 1e-3 && !sp.moving) endScrub();
   }
 
   /* ---- 中の形(初めてひらいたときに作る)。画面のテクスチャも、そのとき読む ---- */
@@ -982,6 +977,9 @@ export async function live(o) {
     if (!ready) { running = false; return; }
     const f0 = performance.now();   // このこまの手番の時間(JS と描く命令。?perf=1 の表示と計測に)
     const gap = now - last, dt = Math.min(.05, gap / 1000); last = now; frameN++;
+    // 舞台の表示の進み: ばねの目標を、上限の速さでスクロールの進みへ(上限の秒は実の時間で数える。1こまが長い端末でも、追いつくまでの秒は同じ)
+    if (scrub && cq !== scrub.t) { cq = capStep(cq, scrub.t, Math.min(.25, gap / 1000)); chaseAt = now; }
+    if (scrub) sp.t = cq;
     if (running && visible && !document.hidden) measure(gap);
     if (!paused) t += dt;
     // 慣性(ひらいていないときのドラッグ)
@@ -989,7 +987,7 @@ export async function live(o) {
     if (A.id && !scrub) rot.t = (openCam ? openCam.rot : rot.t) + dragOff.x;
     // 段取り
     if (lastInput !== seenInput) { seenInput = lastInput; inputFrame = frameN; }   // 指が動いたこま(1こまが長い端末では、こまの間が 1.2 秒を超えるので、時間だけでは止まったと分からない)
-    if (pendTier && now - lastInput > 1200 && frameN - inputFrame >= 3 && (scrub || now - pendAt > 6000)) applyTier();   // この道では、指が止まって 1.2 秒かつ 3 こまたってから下げる(描く大きさを替える1こまは長く止まるので、指が動いている間に替えない。v6)。舞台ではすぐ、ほかは決めて 6 秒後。舞台のばねが落ち着くのは待たない(とても遅い端末では落ち着く前に次のスクロールが来て、いつまでも下がらず、止めた画像にも替わらないため)。飛ぶ・回す始めにも下げる(flight・pointermove)
+    if (pendTier && now - Math.max(lastInput, chaseAt) > 1200 && frameN - inputFrame >= 3 && (scrub || now - pendAt > 6000)) applyTier();   // 表示の進みが追いかけている間は、指が動いているのと同じに数える(追いかけの途中で描く大きさを替えない)   // この道では、指が止まって 1.2 秒かつ 3 こまたってから下げる(描く大きさを替える1こまは長く止まるので、指が動いている間に替えない。v6)。舞台ではすぐ、ほかは決めて 6 秒後。舞台のばねが落ち着くのは待たない(とても遅い端末では落ち着く前に次のスクロールが来て、いつまでも下がらず、止めた画像にも替わらないため)。飛ぶ・回す始めにも下げる(flight・pointermove)
     while (later.length && later[0].at <= now) later.shift().f();
     if (grow) { const k = clamp01((now - grow) / 650), pk = interiors.park; if (pk) pk.group.scale.y = Math.max(.001, 1 - Math.pow(1 - k, 3)); if (k >= 1) grow = 0; }
     for (const s of [A, Bk]) if (s.id && s.steps.length) { const el = now - s.t0; while (s.steps.length && s.steps[0].t <= el) s.steps.shift().f(); }
@@ -1044,7 +1042,7 @@ export async function live(o) {
     setCamera();
     if (scrub) mainAir(S, camera, H, clamp01((tod.x - 1.2) / .8) * U.uAir.value);   // 着いた病院を切り出す箱と、夜の月の光(寄るのに合わせて)
     if (arriveId && (A.id !== arriveId || ![rot, camX, camY, camZ, elev, fly].some(s => s.moving))) { const id = arriveId; arriveId = null; if (A.id === id) o.onArrive && o.onArrive(id); }
-    const active = springs.some(s => s.moving) || [A, Bk].some(s => s.id && (s.wall.moving || s.roof.moving || s.steps.length || s.roofT0 >= 0)) || later.length || grow || down || Math.abs(inertia) > .002 || invite;
+    const active = springs.some(s => s.moving) || (scrub && cq !== scrub.t) || [A, Bk].some(s => s.id && (s.wall.moving || s.roof.moving || s.steps.length || s.roofT0 >= 0)) || later.length || grow || down || Math.abs(inertia) > .002 || invite;
     const idle = !active && now - lastInput > 1600;
     // 操作していないときは 30fps
     if (manual && !force) return;
@@ -1125,16 +1123,17 @@ export async function live(o) {
     press(id) { pressFx(id); },
     invite: doInvite,
     setTod(m) { tod.t = m; kick(); },
-    /* 案A: スクロールの進み(0..1)。jump: いまの進みへ、ばねを通さずに(立体に替わった瞬間など) */
-    scrubTo(p, jump) {
+    /* 案A: スクロールの進み(0..1)。jump: いまの進みへ、ばねを通さずに(立体に替わった瞬間・舞台が画面の外のとき)。
+       free: 上限の速さを外す(キーボードで来た物を、待たせずに見せる。ばねだけで追う) */
+    scrubTo(p, jump, free) {
       p = clamp(+p || 0, 0, QMAX);   // v7: 進みは v6 の単位のまま、閉じの分だけ 1 を越える(QMAX)
-      if (!scrub) { if (p <= 0) return; beginScrub(); }
-      scrub.t = p; sp.t = p; if (jump) sp.set(p);
+      if (!scrub) { if (p <= 0) return; beginScrub(); cq = 0; }
+      scrub.t = p; if (jump || free) cq = p; if (jump) sp.set(p);
       lastInput = clock(); dirty = true; kick();
     },
     get scrubbing() { return !!scrub; },
     /* 確かめるため(town/tools/check-stage.mjs): 舞台の病院の枠。壁が倒れているか(wall 1 で倒れきり)・中の形が出ているか(gate)・ひらいている建物(uOpenA は建物の番号) */
-    get stageState() { return { scrub: !!scrub, id: A.id, wall: A.end ? A.wall.x / A.end : 0, openA: U.uOpenA.value, hospitalBid: LAYOUT[SCRUB_ID].bid, gate: gate.x, p: sp.x }; },
+    get stageState() { return { scrub: !!scrub, id: A.id, wall: A.end ? A.wall.x / A.end : 0, openA: U.uOpenA.value, hospitalBid: LAYOUT[SCRUB_ID].bid, gate: gate.x, p: sp.x, cq, to: scrub ? scrub.t : 0 }; },
     /* v7 閉じ: 下の出口に乗せた行き先の建物を明るく(null で戻す)・言葉の大きさが変わったら見晴らしの枠を作り直す */
     glow(id) { if (scrub) { scrub.hi = id || null; dirty = true; kick(); } },
     relayout() { if (scrub) scrub.kf = null; dirty = true; kick(); },

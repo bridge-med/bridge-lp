@@ -58,7 +58,7 @@ PW=… OUT=<出力先> node capture-open.mjs
 | `?q=<high\|mid\|low>` | 立体の品質の段を決める(ふだんは端末から決め、`localStorage` の `bridge-hiraku-q` に残す) |
 | `?tod=<day\|dusk\|night>` | 最初の時刻(保存したテーマ・OS の設定・見る人の時刻より先に効く) |
 | `?nudge=0` | 最初の訪問の気づきの輪を出さない(撮るとき) |
-| `?clock=manual` | 立体の時計を手で進める(撮って比べるとき。`window.__ctl.advance(ms)`・`scrubTo(q, true)`) |
+| `?clock=manual` | 立体の時計を手で進める(撮って比べるとき。`window.__ctl.advance(ms)`・`scrubTo(q, true)`)。止めた画像で舞台をたどるときの表示の進みは `window.__paceAdvance(ms)` で進める。スクロールの進みと表示の進みは `window.__stage()`(`town/pace.js`) |
 | `?stub=1` | 建物の中を簡単な形にする(`interiors-stub.js`) |
 | `?compile=<none\|split\|async>` | 立体の準備の仕方を比べる |
 | `?el1=<度>`・`?turn=<度>`・`?wall=keep` | 病院ぜんたいを見る角度(既定 11)・横の面を見せる回し(既定 −16)・倒れた壁を沈めない |
