@@ -157,11 +157,10 @@ document.documentElement.classList.add('js');
     if (log[id] !== today) { log[id] = today; localStorage.setItem(KEY, JSON.stringify(log)); }
   } catch (e) {}
 
-  /* ---- 訪問者計測(未計測) ----
-     GOATCOUNTER_CODE にサイトコード(例: 'bridge-med')を入れるとGoatCounterの計測が始まる。
-     空文字のままなら何も読み込まない=未計測。手順と選定理由は docs/analytics.md。
-     有効化する同じコミットで legal/privacy.html に計測の一文(analytics.mdに用意済み)を
-     追記すること(第32条)。それまで cockpit には「未計測」と正直に表示する。 ---- */
+  /* ---- 訪問者計測(GoatCounter。2026-08-09 から計測中) ----
+     GOATCOUNTER_CODE はサイトコード。空文字にすると何も読み込まない=計測が止まる。手順と選定理由は docs/analytics.md。
+     計測の中身や送り先を変えるときは、同じコミットで legal/site-privacy.html(公式サイトのポリシー)と
+     legal/privacy.html(キャリアログの文書の BRIDGE 節)の計測の説明も直すこと(第32条)。 ---- */
   const GOATCOUNTER_CODE = 'wataru';
   if (GOATCOUNTER_CODE) {
     const gc = document.createElement('script');
