@@ -2,12 +2,13 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="google-site-verification" content="bKObgIPJoLGHSiLrlUYzFPJwbjRnVZw7gb679J9phxQ">
+<script>document.documentElement.classList.add('js')</script>
 <title>BRIDGE — 医療職のための道具と経営ゲーム</title>
 <meta name="description" content="看護師・リハビリ職・医療事務など、医療の現場で働く人へ。仕事に使える道具と、クリニック経営を体験できるゲームを、理学療法士がひとりで作って公開しています。登録なしでブラウザから試せます。">
 <link rel="canonical" href="https://bridge-med.github.io/bridge-lp/">
-<meta property="og:title" content="BRIDGE — その経験に、次の可能性を">
+<meta property="og:title" content="BRIDGE — 病院の外にも町がある">
 <meta property="og:description" content="毎日やっていること、たぶん今の職場の外でも使えます。理学療法士がひとりで作っている、医療職のための道具と経営ゲーム。登録なしでブラウザから。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/">
@@ -17,695 +18,772 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"BRIDGE","alternateName":"ブリッジ","url":"https://bridge-med.github.io/bridge-lp/","slogan":"Expand Choices.","description":"医療職のための道具と、クリニック経営を体験できるゲームを公開している個人プロジェクト","founder":{"@type":"Person","name":"Wataru Hashimoto","jobTitle":"Physical Therapist / Founder"}}
 </script>
-<script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./shared/bridge.css">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FBFAF7'/%3E%3Cpath d='M8 40 C 22 18, 36 22, 50 42' stroke='%2316233E' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 47 C 34 36, 44 22, 58 17' stroke='%23A98F63' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Barlow:wght@500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet"><!-- 町の書体(BIZ UDPGothic・Barlow)と、ヘッダー・メニュー・フッターの英字(Inter。下層と同じ。使う太さだけ) -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&text=%28%29.026ABCDEGHIJKMNOPRSXabcdefghijlmnoprstuvy%C2%A9%E2%86%97%E3%80%81%E3%80%82%E3%81%82%E3%81%84%E3%81%88%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%8F%E3%81%91%E3%81%92%E3%81%93%E3%81%94%E3%81%97%E3%81%99%E3%81%9C%E3%81%9D%E3%81%9F%E3%81%A3%E3%81%A4%E3%81%A6%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%BE%E3%81%BF%E3%82%82%E3%82%84%E3%82%8B%E3%82%8C%E3%82%92%E3%82%A4%E3%82%A7%E3%82%AF%E3%82%B2%E3%82%B5%E3%82%B8%E3%82%BF%E3%83%80%E3%83%84%E3%83%88%E3%83%8B%E3%83%96%E3%83%97%E3%83%A0%E3%83%A1%E3%83%A5%E3%83%AB%E3%83%AD%E3%83%BB%E3%83%BC%E4%B8%80%E4%BA%8B%E4%BA%BA%E4%BB%95%E4%BC%9A%E4%BC%B4%E4%BD%93%E4%BD%95%E4%BD%BF%E4%BE%9D%E5%85%AC%E5%85%B1%E5%85%B7%E5%88%87%E5%88%A5%E5%89%8D%E5%8B%95%E5%8C%BB%E5%8F%AF%E5%90%8D%E5%90%91%E5%96%B6%E5%A0%B4%E5%A2%97%E5%A4%A7%E5%AE%8C%E5%AE%9F%E5%BA%83%E6%80%9D%E6%80%A7%E6%83%B3%E6%84%9F%E6%88%90%E6%89%8B%E6%8A%9E%E6%8F%B4%E6%94%AF%E6%95%99%E6%96%B0%E6%96%B9%E6%9D%A5%E6%A9%9F%E6%AD%A9%E6%B4%BB%E6%BC%94%E7%89%A9%E7%8F%BE%E7%94%B1%E7%95%B0%E7%99%82%E7%99%BA%E7%9B%B8%E7%A0%94%E7%A4%BE%E7%A7%B0%E7%A9%B6%E7%B5%8C%E8%80%83%E8%80%85%E8%82%A2%E8%82%B2%E8%83%BD%E8%A8%98%E8%A9%B1%E8%AA%9E%E8%AB%87%E8%AB%96%E8%AC%9B%E8%B5%B0%E9%81%8B%E9%81%93%E9%81%B8%E9%96%8B%E9%96%A2%E9%9A%9B%E9%A0%BC%E9%A8%93&display=swap" rel="stylesheet"><!-- ヘッダー・メニュー・フッターの和文(Noto Sans JP。下層と同じ)。使う字だけ: bridge.js の NAV・CTA・FOOTER・PRIVACY と、.hd .mdlg .foot に書いた字(↗ と © を含む)。語を変えたら作り直す(check-site 6項が照合する) -->
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&text=%E6%AD%A3%E8%A7%A3%E3%82%92%E4%B8%8E%E3%81%88%E3%82%8B%E3%81%AE%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%8F%E3%80%81%E9%81%B8%E6%8A%9E%E8%82%A2%E5%A2%97%E3%82%84%E3%81%99%E4%BA%BA%E3%81%8C%E8%87%AA%E3%82%89%E3%81%B3%E7%B4%8D%E5%BE%97%E3%81%97%E3%81%A6%E7%94%9F%E3%81%8D%E3%82%8C%E7%A4%BE%E4%BC%9A%E3%81%A4&display=swap" rel="stylesheet"><!-- 広場のパネルの一文だけの明朝(その文字だけの小さな書体) -->
+<script>
+/* 最初の時刻(憲法第22条 町の但し書き (5)・design-system §2): ?tod= の指定が最優先。次に、ダークを選んでいる人(下層のテーマと同じ保存 bridge-theme が dark、
+   保存がなければ OS の設定が dark)は夜。ほかは見る人の時刻(6〜16時 昼、16〜18時 夕、それ以外 夜)。時刻のボタンは bridge-theme を書き換えない */
+(function () { var r = document.documentElement, q = new URLSearchParams(location.search).get('tod'), t = null, h = new Date().getHours();
+  try { t = localStorage.getItem('bridge-theme'); } catch (e) {}
+  var dark = t === 'dark' || (t !== 'light' && !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
+  r.dataset.tod = /^(day|dusk|night)$/.test(q || '') ? q : dark ? 'night' : (h >= 6 && h < 16 ? 'day' : h >= 16 && h < 18 ? 'dusk' : 'night'); })();
+</script>
 <style>
 /* ================================================================
-   Home v12 — 筆の線と、ページを進む一本の線。並びは「BRIDGE → 触れる体験 → 代表作 → 目的から探す → 本人の言葉 → 閉じ」(2026-10-11 社長指示・designer 照合。ia v3.1)
-   構成: ヒーロー(100svh: 真ん中に BRIDGE のロックアップ+短い説明と主ボタン・副導線の帯)→ 触れる(いつもの仕事を、外の言葉で言うと・Compass の結果画面の例)
-         → 作っているもの(クリニックタウン3D / 経験の棚卸し)→ 目的から探す(用途6つの帯)→ 閉じ(#about: 本人の言葉3文・筆の線がロゴに集まる帯・明朝の一文・出口)→ フッター
-   第20条の曲線の読み替え(designer 2026-10-11): 安心=ヒーロー / 共感・希望=言いかえを体験する / 挑戦したい=代表作 / 自分で選べる=目的から探す / 未来が楽しみ=本人の言葉と閉じ
-   開いた瞬間(.hz。designer 2026-10-10 照合)
-     素材は閉じ(.kz)と同じ筆の線だけ。画面いっぱいの線 → 大きなロゴ → 名前の横のマークに収まり、名前が出る(約 3.2 秒・一度だけ)。スクロールには従わず、固定もしない。
-     同じタブでの再訪・データセーバー・動きを減らす設定・JS なしでは出さず、ロックアップは最初から真ん中にある(2026-10-11)
-   ページの線(.pl)
-     1 ヒーローのロゴの藍の線が、その終わり(176,84)からその向きのまま伸び、ページの余白を縫って、閉じのロゴの藍の線の始まり(8,74)へ同じ向きで入る
-       (最後は左から角を作らずに回り込む)。色は --mark-line(ロゴの藍の線の役割)。語・図は描かない。読ませる文字を横切らない(実画面の写しの後ろは通る)
-     2 引く長さはスクロール位置だけで決まる。先端は画面の高さの 7 割(スマホは 8 割。最初の 0.4 画面は始まりから滑らかに追いつく)。スマホは節の間の空きで左右を渡る。先端の点は砂(第22条の現在地)
-     3 線が寄るのは3か所: 言いかえの組(経験 → 別の言葉)・代表作の実画面の縁(課題 → 道具)・閉じのロゴ。ほかの区間は余白を通るだけ
-     4 文字と実画面の表示は線に依存しない(2026-10-11 社長指示「演出に内容の可視性を依存させない」。v11 の .pr の mask は外した)。動きを減らす設定では線は最初から引き終え、点はない。JS なしでは線を出さない
-   閉じの約束(#about の帯 .kz だけ。designer 2026-10-05)
-     1 線が主語。帯に現れるのは線だけで、文字を描かない。地を塗らない(夜・グラデーション・ぼかしなし。端の溶けは mask のアルファ)
-     2 手で起きる。時刻はスクロール位置だけで決まる。固定・吸着・スクロール量の書き換えをしない。止めれば止まり、戻せばほどける
-     3 終わりは本物のロゴへの受け渡し。清書が SVG のマーク(h1 の経路)にぴったり重なったところで、0.1 の重ねで SVG に渡す。破線や点線に見える瞬間を作らない
-     4 砂は、収束して砂の線になる粒と、ロゴの砂の線だけ。着地の後に粒を残さない。マークが見えているあいだはナビのロゴをしまう(home のフッターはマークを出さない)
-   色: 4系統のトークンだけ。ガラスは主ボタン(第22条 用途3)だけ。キャンバスの端の溶けは mask(アルファ)で、色のグラデーションではない
-   前の版の Experience Journey(2026-10-04〜10)と、その前のガラスの立体は外した。立体の素材は images/hero/ に残す(docs/hero-asset-spec.md)
+   BRIDGE のトップ「ひらく町」— 病院の外にも町がある。建物にふれると、中がひらく(2026-10-28 試作 v7 から本番へ。憲法 v1.10 の町の但し書き・design-system §0「トップ(町)の扱い」)
+   JS と画像は town/(town/hiraku.js が入口)。ヘッダー・メニュー・フッターの語と行き先は shared/bridge.js の NAV とフッターの列から描く(town/hiraku.js の drawChrome)
+   浮かぶ島の小さな町(B の世界)を、建物の形で読ませる。数字や名前の目印は常には出さない。
+   ふれると、その建物が人形の家のように前の壁と屋根をひらき、中の人と、そこにある道具(実際の画面)が見える(C と融合2 の断面)
+   書体: BIZ UDPGothic(和文)・Barlow(英字・数字)。思想の一文だけ明朝(Shippori Mincho B1)。ヘッダー・メニュー・フッターは下層と同じ Noto Sans JP・Inter
+   改行: 町の文字は word-break:auto-phrase と手組みの文節(.ph・.br)で折る。bridge.js の BudouX が重ならないよう、手組みの所と組みを変えたくない所に data-bx="1"
+   色: UI は憲法第22条の4系統(紙・炭・藍・砂)。文字と面の色はトークンで持ち、時刻(html[data-tod])ではトークンを差し替えるだけ
    ================================================================ */
-
-/* ===== ヒーロー: 最初の1画面 =====
-   上から: 面(真ん中に BRIDGE のロックアップ)→ 帯(短い説明と CTA)。帯までで 100svh。
-   ロックアップは h1 のインライン SVG(正式ロゴの MARK の経路+英字)。JS がなくても、初期化が遅くても、BRIDGE と CTA は最初から見える。
-   動けるとき(hz-live)は、面(.jr-top)の中の canvas に筆の線が集まり、h1 のマークに重ねた同じ経路の写し(.hz-mark)へ渡す */
-.hero{position:relative;overflow-x:clip;--foot-h:152px}
-.jr-top{position:relative;height:calc(100svh - var(--foot-h));min-height:460px;max-height:980px}
-.jr-brand{position:absolute;left:50%;top:47%;z-index:2;width:clamp(320px,52vw,860px);margin:0;transform:translate(-50%,-50%);line-height:0;pointer-events:none}
-.jr-brand svg{display:block;width:100%;height:auto;overflow:visible}
-/* 組みはナビ・フッターのロゴと同じ比(名前の字=マーク高の約0.77倍、間=約0.65倍。viewBox の右端は E の字の右端) */
-.jr-brand .jr-word{font-family:var(--en);font-weight:500;font-size:84px;letter-spacing:.34em;fill:var(--ink);font-feature-settings:"palt" 1;text-rendering:geometricPrecision}
-/* 線の層がないとき(JS なし・初期化の失敗)だけ、読み込みで一度マークの二本の線を引く(dashoffset のみ) */
-.jr-brand .l-navy,.jr-brand .l-sand{stroke-dasharray:1 1.02;animation:brand-line .7s cubic-bezier(.3,0,.3,1) .05s both}
-.jr-brand .l-navy{animation-duration:1s;animation-timing-function:cubic-bezier(.45,0,.75,.7)}
-@keyframes brand-line{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-.jr-brand .hz-mark{display:none} /* .jr-brand svg{display:block} より詳細度を上げる(JS なしで空の写しが場所を取り、ロックアップが上へずれていた) */
-html.hz-on .jr-brand > svg:not(.hz-mark) .l-navy,html.hz-on .jr-brand > svg:not(.hz-mark) .l-sand{visibility:hidden;animation:none}
-html.hz-on .jr-brand .hz-mark{display:block;position:absolute;left:0;top:0;width:calc(100% * 240 / 758);height:auto;overflow:visible}
-.jr-brand .hz-mark .l-navy,.jr-brand .hz-mark .l-sand{stroke-dasharray:none;animation:none}
-.hz.hz-run .hz-mark{visibility:hidden} /* 線の層が描いているあいだは写しを隠す(収まったところで 0.1 の重ねで渡す) */
-html.hz-live .jr-brand .jr-word{opacity:clamp(0,calc((var(--hz-t,5) - 4) / .38),1)} /* 名前はマークが収まるのと一緒に出る */
-/* 線の層(開いた瞬間だけ): 上はナビの下、下は帯の手前で溶ける(mask のアルファ) */
-.hz-c{display:none}
-html.hz-live .hz-c{display:block;position:absolute;top:0;height:100%;pointer-events:none;z-index:1;
-  --hz-v:linear-gradient(to bottom,transparent 0,transparent 52px,#000 120px,#000 calc(100% - 36px),transparent 100%);
-  -webkit-mask-image:var(--hz-v);mask-image:var(--hz-v)}
-/* 帯: PC は左に短い説明、右に CTA。スマホは説明・CTA の順で、どちらも最初の画面に入る(IA の原則1) */
-.hero-foot{height:var(--foot-h);max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);display:flex;align-items:center;justify-content:space-between;gap:16px 48px;box-sizing:content-box}
-.hero-desc{font-size:14px;line-height:1.9;color:var(--ink-2);max-width:31em}
-.hero-cta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
-.hero-main{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap;justify-content:flex-end}
-/* 副導線(ゲーム / 実務の道具)。主ボタンは Compass の1つだけ。文字リンク2つまで(designer 2026-10-11) */
-.h-alt{display:flex;flex-wrap:wrap;gap:0 22px;justify-content:flex-end}
-.tx-link.alt{min-height:36px;font-size:13px;color:var(--ink-2);position:relative}
-.tx-link.alt::after{content:'';position:absolute;inset:-4px 0 -5px} /* 見た目36pxのまま、タップ領域を44pxに(.tag::after と同じ型。下は1pxの下線ぶん広げる) */
-.tx-link.alt:hover{color:var(--ink)}
-.btn.glass{background:var(--glass);color:var(--on-fill);font-size:14px;padding:18px 34px;min-height:44px;white-space:nowrap} /* 帯の flex で縮められても1行(761〜797px で「る」が落ちていた) */
-.btn.glass:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-.btn.glass:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.h-meta{font:500 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-3)}
-/* ヒーローが画面にある間は、ナビのロゴをしまう(面の中に BRIDGE があるので二つ並べない)。出るときも消えるときも .4s */
-body[data-page="home"] .nav-logo{transition:opacity .4s var(--ease),visibility 0s}
-html.hero-in body[data-page="home"] .nav-logo{opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s linear .4s}
-
-/* ===== ページの線(約束は <style> 冒頭の「ページの線」) =====
-   本文の下の層(実画面の写しの後ろを通るときは隠れる)。pl-on=線を出す(開いた瞬間のあと)。文字と実画面はこの線に依存せず、最初からある */
-main{position:relative;overflow-x:clip} /* 線の層が画面の外へ出ても横スクロールを出さない(body の overflow-x に頼らない) */
-main > section{position:relative;z-index:1}
-.pl{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:0;overflow:visible;opacity:0;transition:opacity .6s var(--ease)}
-html.pl-on .pl{opacity:1}
-.pl-path{fill:none;stroke:var(--mark-line);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.pl-tip{fill:var(--dawn);opacity:0;transition:opacity .3s var(--ease)}
-.pl-tip.on{opacity:1}
-
-/* ===== 本人の言葉(閉じの頭。大きな字で3文。PC は右の余白をページの線が通る) ===== */
-.words{padding:0 0 clamp(8px,2vh,20px)}
-.w-step{padding:clamp(18px,3.5vh,40px) 0}
-.w-p{max-width:23em;font:500 clamp(20px,2.05vw,29px)/2.05 var(--sans);letter-spacing:.04em;color:var(--ink);word-break:auto-phrase}
-.w-p .w-l{display:block}
-.w-sign{margin-top:30px;font:400 13px/1.8 var(--sans);letter-spacing:.02em;color:var(--ink-3)}
-
-/* ===== 触れる: いつもの仕事を、外の言葉で言うと =====
-   左に文字と選択、右に Compass の実画面(下の .cp の組み)。選択は .tag(押せる Pill)。13px と大きな言いかえの組みはここだけ(DS §6: designer 2026-10-10)。
-   砂の下線は、選んだ瞬間だけ引く(最初は引かない。現在地は選択中の藍のチップが示す) */
-.try{padding:clamp(56px,9vh,110px) 0 clamp(24px,4vh,48px);overflow-x:clip}
-.try-h{margin-top:10px;font:700 clamp(20px,2vw,26px)/1.5 var(--sans);letter-spacing:.01em}
-.tw-pick{margin-top:22px}
-.tw-pick[hidden]{display:none}
-.tw-pick .tag{font-size:13px;padding:10px 16px}
-.tw-pick .tag[aria-pressed="true"]{cursor:default}
-.tw-pick .tag:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.tw-out{margin-top:28px}
-.tw-from{display:block;font:500 14.5px/1.8 var(--sans);color:var(--ink-2)}
-.tw-from b{font-weight:700;color:var(--ink)}
-.tw-to{position:relative;display:inline-block;margin-top:2px;padding-bottom:12px;font:700 clamp(24px,2.6vw,34px)/1.5 var(--sans);letter-spacing:.02em;color:var(--ink)}
-.tw-to::after{content:'';position:absolute;left:0;right:0;bottom:2px;height:3px;border-radius:3px;background:var(--dawn);transform-origin:left center;transform:scaleX(0)}
-html.tw-on .tw-to.draw::after{animation:tw-draw .9s var(--ease) .12s forwards}
-html.tw-on .tw-to.draw .tw-to-t{animation:tw-in .5s var(--ease) both}
-@keyframes tw-draw{to{transform:none}}
-@keyframes tw-in{from{opacity:0}}
-.try-p{margin-top:22px;font-size:14px}
-.try-cta{margin-top:22px;display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px}
-.cp-fig{margin:0;min-width:0}
-.shot-cap{margin-top:8px;font-size:12px;line-height:1.7;color:var(--ink-3)}
-.cp-shot .th-d,[data-theme="dark"] .cp-shot .th-l{display:none}
-[data-theme="dark"] .cp-shot .th-d{display:block}
-
-/* 帯を縦に積むのは 860px 以下(768 でも副導線が最初の画面に入る。designer 2026-10-11) */
-@media(max-width:860px){
-  .hero{--foot-h:232px}
-  .hero-foot{flex-direction:column;align-items:stretch;justify-content:center;gap:12px}
-  .hero-desc{order:-1;font-size:13px;line-height:1.85;max-width:none}
-  .hero-cta{align-items:center;gap:6px}
-  .hero-main{flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
-  .hero-main .btn{justify-content:center;width:100%;max-width:340px}
-  .h-alt{justify-content:center;gap:0 16px}
+:root{
+  /* 4系統 */
+  --paper:#F7F3EC; --paper-2:#EFE9DF; --card:#fff; --well:#E9E3D8; --grab:#CFC7B8;
+  --ink:#1C2227; --ink-2:#465058; --ink-3:#5F6870; --line:#E1D9CB;
+  --indigo:#16233E; --indigo-2:#24365C; --sand:#A98F63; --sand-2:#C8AD7E; --kinari:#F4EFE6; --kinari-2:#F1EDE5;
+  /* 夜の面(閉じ・フッター) */
+  --night-bg:#0B1128; --night-fg:#F1EDE5; --night-fg-2:#C7CCDB; --night-fg-3:#AEB4C8; --night-link:#C9CED9; --night-dim:#8C92A8;
+  --night-line:rgba(255,255,255,.1); --night-edge:rgba(255,255,255,.28); --night-hover:rgba(255,255,255,.08);
+  --night-hd:rgba(11,17,40,.92); --night-hd-fg-2:#CBD0E0; --night-ring:rgba(255,255,255,.4);   /* 終幕の夜の上の、見出しの帯 */
+  /* 空 */
+  --sky-d1:#CFDFEA; --sky-d2:#E6EEF0; --sky-d3:#F2EEE6; --sky-d0:255 255 255;
+  --sky-e1:#9EA8CF; --sky-e2:#E9B9A3; --sky-e3:#F6DCC0; --sky-e0:255 196 150;
+  --sky-n1:#0D1531; --sky-n2:#1B2550; --sky-n3:#2E2C58; --sky-n0:108 124 214; --star:#fff;
+  /* 最初の画面の上の文字と操作(時刻で差し替える) */
+  --hd-fg:var(--ink); --hd-fg-2:var(--ink-2);                         /* ロゴ・メニュー / ナビ */
+  --hero-fg:var(--ink); --hero-fg-2:var(--ink-2); --hero-fg-3:var(--ink-2);   /* 見出し / 一行・一文 / 入口の下・誘い(昼の空の上でも 4.5:1。測った値は第4回の報告) */
+  --logo-1:var(--indigo); --logo-2:var(--sand);
+  --cta-bg:var(--indigo); --cta-bg-2:var(--indigo-2); --cta-fg:var(--card); --cta-ico:var(--cta-fg);   /* 入口の矢印は文字と同じ色(UI の砂は現在地だけ。B-27 ③) */
+  --cbtn-fg:var(--ink-2); --cbtn-fg-h:var(--ink); --cbtn-face:rgba(255,255,255,.62); --cbtn-face-h:rgba(255,255,255,.9); --cbtn-ring:rgba(30,40,50,.12);
+  --navcta-ring-l:rgba(28,34,39,.32); --navcta-h-l:rgba(255,255,255,.6); --navcta-ring:var(--navcta-ring-l); --navcta-h:var(--navcta-h-l);   /* -l は明るい地の上の値(舞台を抜けた後の帯でも使う) */
+  --haze:247 243 236; --haze-a:.92;
+  --dot:var(--indigo); --dot-ring:rgba(22,35,62,.16);
+  --focus:var(--indigo);
+  --ring:var(--indigo); --ring-edge:rgba(244,239,230,.7); --ring-glow:rgba(244,239,230,.6);   /* 誘いの輪・押した輪(藍に生成りの縁。夕・夜は生成りに藍の縁。UI の砂は現在地だけ) */
+  --tag-bg:rgba(28,34,39,.88); --tag-fg:#fff; --tag-sub:#C9CED3; --pill:rgba(255,255,255,.95);
+  --hd-stuck:rgba(247,243,236,.94); --backdrop:rgba(14,18,24,.4); --mist:242 238 230;
+  --track:rgba(28,34,39,.1); --underline:rgba(22,35,62,.3); --underline-2:rgba(28,34,39,.22);   /* 細い線・下線(影の濃さは、奥行きの影として、その場の値のまま) */
+  --span:222.25svh;   /* v7: 舞台の進み(最初の画面の下)。v6 の 1.5 画面 + 閉じ(1F に着いた 1.25 画面から 0.97 画面)。hiraku.js・live.js の QMAX と同じ */
+  /* v7: フッターと見出しの帯の地。昼・夕は bridge.css のライトの --bg-2 と同じ値(= --kinari)、夜はダークの --bg-2 と同じ値。帯はその .94 */
+  --foot-bg:var(--kinari); --foot-fg:var(--ink); --foot-fg-2:var(--ink-2); --foot-dim:var(--ink-3); --foot-line:var(--line); --foot-focus:var(--indigo); --foot-logo-1:var(--indigo); --foot-logo-2:var(--sand);
+  --band-bg:rgba(244,239,230,.94);
+  --rule:rgba(28,34,39,.16);   /* 閉じの細い罫 */
+  --here:var(--sand); --here-ring:var(--card); --here-edge:rgba(22,35,62,.78);   /* 現在地(砂の点)の塗り・白い輪・外の細い縁(昼の明るい床の上でも読める) */
+  --pill-shadow:0 5px 14px -7px rgba(0,0,0,.5),0 0 0 1px rgba(30,40,50,.12); --pill-shadow-h:0 6px 16px -6px rgba(0,0,0,.55),0 0 0 1px rgba(30,40,50,.2);   /* 町の札の影(見晴らしの札・閉じの札) */
+  /* 影(規則に直書きしない。B-27 ④): 入口のボタン・白い札・気づきの札・パネル・写しの縁・道具の入口のボタン・移る瞬間の写し */
+  --sh-cta:0 10px 24px -14px rgba(16,24,44,.65); --sh-tag:0 6px 18px -8px rgba(0,0,0,.4); --sh-nt:0 6px 18px -8px rgba(0,0,0,.45);
+  --sh-panel:0 24px 60px -24px rgba(20,24,30,.45),0 0 0 1px rgba(30,30,30,.06); --sh-shot:0 0 0 1px rgba(30,34,39,.1); --sh-pcta:0 8px 18px -12px rgba(16,24,44,.6);
+  --sh-leap:0 0 0 1px rgba(28,34,39,.1),0 24px 60px -36px rgba(20,24,30,.55);
+  --pad:clamp(16px,4.4vw,56px);
+  --jp:'BIZ UDPGothic','Hiragino Sans','Noto Sans JP',sans-serif;
+  --en:'Barlow','Helvetica Neue',Arial,sans-serif;
+  --mincho:'Shippori Mincho B1',var(--jp);
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --cl:11.9;--cr:82.2;--ct:6.7;--cb:66.2;
 }
-/* 副導線が2段に積まれる幅では ::after の当たり判定が隣と重なるので、実寸で44pxにする(qa 2026-10-11) */
-@media(max-width:600px){
-  .hero{--foot-h:256px}
-  .tx-link.alt{min-height:44px}
-  .tx-link.alt::after{content:none}
+/* 時刻ごとの差し替え(トークンだけ) */
+html[data-tod="dusk"]{--hd-fg-2:var(--ink);--hero-fg-2:var(--ink);--hero-fg-3:var(--ink);--mist:246 220 192;--ring:var(--kinari);--ring-edge:rgba(8,12,28,.6);--ring-glow:rgba(241,237,229,.35)}   /* 夕方の空の上でも、小さな文字が 4.5:1。誘いの輪は夕方の床(赤みの中間の明るさ)の上で藍だと 3:1 に届かないので、夜と同じ生成り */
+html[data-tod="night"]{
+  --hd-fg:var(--kinari); --hd-fg-2:#CBD0E0; --hero-fg:var(--kinari-2); --hero-fg-2:var(--kinari-2); --hero-fg-3:#C3C8D8;
+  --logo-1:var(--kinari); --logo-2:var(--sand-2);
+  --cta-bg:var(--kinari); --cta-bg-2:var(--kinari); --cta-fg:var(--indigo);
+  --cbtn-fg:#E5E8F2; --cbtn-fg-h:#fff; --cbtn-face:rgba(20,28,58,.55); --cbtn-face-h:rgba(44,58,108,.85); --cbtn-ring:rgba(255,255,255,.18);
+  --navcta-ring:rgba(255,255,255,.4); --navcta-h:rgba(255,255,255,.08);
+  --haze:13 21 49; --haze-a:.85;
+  --dot:var(--kinari-2); --dot-ring:rgba(241,237,229,.18);
+  --focus:var(--kinari);
+  --ring:var(--kinari); --ring-edge:rgba(8,12,28,.6); --ring-glow:rgba(241,237,229,.35);
+  --mist:46 44 88;
+  --foot-bg:#161B2B; --foot-fg:var(--night-fg); --foot-fg-2:var(--night-link); --foot-dim:var(--night-dim); --foot-line:var(--night-line); --foot-focus:var(--kinari); --foot-logo-1:var(--kinari); --foot-logo-2:var(--sand-2);
+  --band-bg:rgba(22,27,43,.94);
+  --rule:rgba(241,237,229,.22);
+  --here:var(--sand-2); --here-ring:rgba(22,27,43,.85); --here-edge:rgba(216,196,160,.6);
 }
-@media(max-width:760px){
-  .jr-brand{top:44%;width:min(88vw,420px)}
-  .w-p{font-size:19px;line-height:2.05;letter-spacing:.03em}
-  .pl-path{stroke-width:1.6}
-  .try-cta{flex-direction:column;align-items:flex-start;gap:2px}
+/* 紙の面(パネル・メニュー・下の節)と夜の面(閉じ・フッター)は、時刻によらず自分の色 */
+.panel,.mdlg{--focus:var(--indigo);--logo-1:var(--indigo);--logo-2:var(--sand)}
+.foot{--focus:var(--foot-focus);--logo-1:var(--foot-logo-1);--logo-2:var(--foot-logo-2)}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:var(--paper)}
+body{margin:0;font-family:var(--jp);color:var(--ink);background:var(--paper);line-height:1.7;font-feature-settings:"palt" 1;-webkit-font-smoothing:antialiased;word-break:auto-phrase}   /* 語の途中で折れない(Safari は文節の span で) */
+img,svg{display:block;max-width:100%}
+img{height:auto}
+a{color:inherit}
+h1,h2,h3,p,ol,ul,figure{margin:0}
+ol,ul{list-style:none;padding:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}   /* 明るい面は藍、暗い面は生成り(どちらも 3:1 以上) */
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:12px;top:-60px;z-index:400;background:var(--indigo);color:var(--card);padding:12px 18px;border-radius:6px;text-decoration:none;font-weight:700}
+.skip:focus{top:12px}
+.ico{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ph,.pz-mark p span,.pz-aim span{display:inline-block}   /* 文節(Safari で語の途中で折れないように) */
+
+/* ================= 見出しの帯 ================= */
+/* ヘッダー・メニュー・フッター(と時刻・止めるボタン)は、下層と同じ Noto Sans JP + Inter(憲法第23条 町の但し書き・第2項。B-27 ⑥)。町の書体のトークンを、ここだけ定義し直す */
+.hd,.mdlg,.foot{--jp:'Noto Sans JP','Hiragino Sans',sans-serif;--en:'Inter','Helvetica Neue',Arial,sans-serif;font-family:var(--jp)}
+.hd{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:calc(10px + env(safe-area-inset-top,0px)) var(--pad) 0;pointer-events:none}
+.hd > *{pointer-events:auto}
+html:not(.js) .hd{position:absolute}   /* JS なし: 舞台がなく地が流れるので、ヘッダーを固定しない(本文に重ねない。最初の画面の空の上に置くだけ) */
+.logo{display:inline-flex;align-items:center;gap:11px;min-height:44px;text-decoration:none;color:var(--hd-fg)}
+.logo svg{width:50px;height:auto}
+.logo b{font:500 15px/1 var(--en);letter-spacing:.34em}   /* 下層の .nav-logo と同じ Inter 500・字間 .34em */
+.nav{display:flex;align-items:center;gap:4px}
+.nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font:600 14.5px/1 var(--en);letter-spacing:.02em;text-decoration:none;color:var(--hd-fg-2);border-radius:6px;transition:color .3s}
+.nav a:hover{color:var(--hd-fg);text-decoration:underline;text-underline-offset:5px}
+.nav a.nav-cta{margin-left:6px;padding:0 15px;border-radius:22px;color:var(--hd-fg);box-shadow:inset 0 0 0 1.5px var(--navcta-ring)}   /* NAV の CTA(Contact)は小さな枠つき */
+.nav a.nav-cta:hover{text-decoration:none;background:var(--navcta-h)}
+.menu{display:none;align-items:center;gap:8px;min-height:44px;padding:0 6px 0 12px;font-size:13px;font-weight:700;border-radius:8px;color:var(--hd-fg);white-space:nowrap}
+.menu .ico{width:22px;height:22px}
+
+/* ================= 最初の画面: 島が主役 ================= */
+.hero{position:relative;isolation:isolate;overflow:hidden;overflow:clip;height:100svh;min-height:600px;max-height:1080px}
+.sky{position:absolute;inset:0;z-index:-2}
+/* ひらいたとき: 見出しの帯の下に、地の色の薄い霞(ロゴとメニューが町の上でも読める) */
+.hero::after{content:'';position:absolute;left:0;right:0;top:0;height:120px;z-index:4;pointer-events:none;background:linear-gradient(180deg,rgb(var(--haze) / var(--haze-a)),rgb(var(--haze) / 0));opacity:0;transition:opacity .5s var(--ease)}
+html.opened .hero::after{opacity:1}
+.sky i{position:absolute;inset:0;opacity:0;transition:opacity 1.2s var(--ease)}
+.sky .s-day{background:radial-gradient(90% 60% at 62% 8%,rgb(var(--sky-d0) / .75),rgb(var(--sky-d0) / 0) 62%),linear-gradient(180deg,var(--sky-d1) 0%,var(--sky-d2) 46%,var(--sky-d3) 100%)}
+.sky .s-dusk{background:radial-gradient(80% 55% at 22% 70%,rgb(var(--sky-e0) / .6),rgb(var(--sky-e0) / 0) 70%),linear-gradient(180deg,var(--sky-e1) 0%,var(--sky-e2) 55%,var(--sky-e3) 100%)}
+.sky .s-night{background:radial-gradient(70% 50% at 66% 30%,rgb(var(--sky-n0) / .3),rgb(var(--sky-n0) / 0) 70%),linear-gradient(180deg,var(--sky-n1) 0%,var(--sky-n2) 55%,var(--sky-n3) 100%)}
+.stars{position:absolute;inset:0;background-image:radial-gradient(1.4px 1.4px at 12% 18%,var(--star) 98%,transparent),radial-gradient(1px 1px at 28% 32%,var(--star) 98%,transparent),radial-gradient(1.4px 1.4px at 44% 12%,var(--star) 98%,transparent),radial-gradient(1px 1px at 62% 24%,var(--star) 98%,transparent),radial-gradient(1.4px 1.4px at 81% 10%,var(--star) 98%,transparent),radial-gradient(1px 1px at 90% 36%,var(--star) 98%,transparent),radial-gradient(1px 1px at 55% 6%,var(--star) 98%,transparent),radial-gradient(1px 1px at 7% 44%,var(--star) 98%,transparent),radial-gradient(1.4px 1.4px at 94% 58%,var(--star) 98%,transparent);opacity:.8}
+.sky .stars{-webkit-mask-image:linear-gradient(180deg,transparent 0,transparent 27%,#000 36%);mask-image:linear-gradient(180deg,transparent 0,transparent 27%,#000 36%)}   /* 星は、上の文字の帯にかけない */
+html[data-tod="day"] .s-day,html[data-tod="dusk"] .s-dusk,html[data-tod="night"] .s-night,html:not([data-tod]) .s-day{opacity:1}
+.sky .s-day{opacity:1}   /* いちばん下の層は不透明のまま(上の層を重ねて移る。半透明どうしの重なりで、紙の色が透けないように) */
+html.skylive .sky i{transition:none}   /* 立体が動いているときは、空の濃さを立体の時刻から決める(hiraku.js の skyMix) */
+html:not(.js) #poster{display:none}
+
+#world{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .5s var(--ease);touch-action:pan-y;-webkit-tap-highlight-color:transparent}
+html.live #world{opacity:1}
+.still{position:absolute;aspect-ratio:1600/1440;left:50%;transform:translateX(-50%);pointer-events:none}
+.still .poster{position:absolute;inset:0;width:100%;height:100%;transition:opacity .5s var(--ease);-webkit-mask-image:linear-gradient(180deg,#000 86%,transparent);mask-image:linear-gradient(180deg,#000 86%,transparent)}   /* 島の下の雲が、止めた画像の下の端で切れて見えないように */
+html.live .still .poster{opacity:0}
+
+/* 言葉と入口(町の邪魔をしない) */
+.copy{position:absolute;z-index:6}
+.eyebrow{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--hero-fg-2)}
+.eyebrow::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;background:var(--dot);box-shadow:0 0 0 3px var(--dot-ring)}
+h1{margin-top:10px;font:700 clamp(26px,7.2vw,28px)/1.36 var(--jp);letter-spacing:.04em;color:var(--hero-fg)}
+h1 .br{display:block}
+.lead{display:none;margin-top:18px;font-size:15px;line-height:1.95;color:var(--hero-fg-2);max-width:23em}
+.eyebrow,h1,.lead,.meta{transition:color 1.2s var(--ease),opacity .45s var(--ease)}
+.cta-wrap{position:absolute;z-index:6}
+.cta{display:flex;align-items:center;justify-content:center;gap:12px;min-height:54px;padding:0 22px;background:var(--cta-bg);color:var(--cta-fg);text-decoration:none;border-radius:12px;font-weight:700;font-size:15.5px;letter-spacing:.02em;box-shadow:var(--sh-cta);transition:transform .15s var(--ease),background-color .2s}
+.cta .ico{width:18px;height:18px;color:var(--cta-ico)}
+.cta:hover{background:var(--cta-bg-2);transform:translateY(-1px)}
+.meta{margin-top:9px;font-size:12px;letter-spacing:.04em;color:var(--hero-fg-3);text-align:center}
+
+/* 小さなアイコンのボタン2つ(昼夜・止める) */
+.hd-r{display:flex;align-items:center;gap:2px}
+.ctrl{display:flex;gap:0;margin-left:6px}
+.cbtn{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--cbtn-fg);transition:background-color .2s,color .2s}
+.cbtn .face{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--cbtn-face);box-shadow:0 0 0 1px var(--cbtn-ring);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.cbtn .ico{width:17px;height:17px}
+.cbtn:hover .face{background:var(--cbtn-face-h);color:var(--cbtn-fg-h)}
+.cbtn .i-play{display:none} .cbtn[aria-pressed="true"] .i-pause{display:none} .cbtn[aria-pressed="true"] .i-play{display:block}
+.cbtn .t-day,.cbtn .t-dusk,.cbtn .t-night{display:none}
+html[data-tod="day"] .cbtn .t-day,html[data-tod="dusk"] .cbtn .t-dusk,html[data-tod="night"] .cbtn .t-night{display:block}
+html:not(.js) .ctrl{display:none}
+.hint{position:absolute;z-index:6;font-size:12px;letter-spacing:.06em;color:var(--hero-fg-3);text-align:center;transition:opacity .6s var(--ease)}
+.hint.gone{opacity:0}
+html:not(.js) .hint{display:none}
+
+/* 建物ごとの見えないボタン(Tab で回ると、立体の側でその建物が光り、名前の札が出る) */
+.hits{position:absolute;inset:0;z-index:5;pointer-events:none}
+.hit{position:absolute;left:0;top:0;display:block;border-radius:14px;pointer-events:auto;-webkit-tap-highlight-color:transparent}
+html.live .hit{pointer-events:none}
+.hit:focus{outline:none}
+.hit:focus-visible{outline:2px solid var(--kinari);outline-offset:2px;box-shadow:0 0 0 6px var(--indigo)}   /* 藍・生成り・藍の三重の輪(町のどの色の上でも、どれかが 3:1 以上) */
+html:not(.js) .hits,html:not(.js) .menu{display:none}
+
+/* 名前の札(乗せたとき・誘い・中の物) */
+.tags{position:absolute;inset:0;z-index:8;pointer-events:none}
+.ttag{position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;padding:6px 11px 7px;background:var(--tag-bg);color:var(--tag-fg);border-radius:7px;font-size:13px;font-weight:700;letter-spacing:.04em;white-space:nowrap;opacity:0;transform:translate(-50%,calc(-100% - 10px)) translateY(4px);transition:opacity .22s var(--ease),transform .3s var(--ease);will-change:transform}
+.ttag::after{content:'';position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;background:inherit;transform:rotate(45deg);border-radius:1px}
+.ttag.on{opacity:1;transform:translate(-50%,calc(-100% - 10px))}
+.ttag small{font-weight:400;font-size:11px;color:var(--tag-sub)}
+.ttag.st{background:var(--card);color:var(--ink);box-shadow:var(--sh-tag)}
+
+/* スマホ: 最初の画面の下に、空の下の色のやわらかいもや。島がもやの海に浮かび、島の下の端が溶ける(入口の後ろまで) */
+.mist{display:none}
+@media (max-width:920px){
+  .mist{display:block;position:absolute;left:0;right:0;bottom:0;height:42%;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgb(var(--mist) / 0) 0%,rgb(var(--mist) / .5) 30%,rgb(var(--mist) / .86) 56%,rgb(var(--mist)) 76%);transition:opacity .5s var(--ease)}
+  html.opened .mist{opacity:0}
 }
-@media(prefers-reduced-motion:reduce){
-  .jr-brand .l-navy,.jr-brand .l-sand{animation:none}
-  html.tw-on .tw-to.draw::after{transform:none;animation:none}
-  html.tw-on .tw-to.draw .tw-to-t{animation:none}
+/* 最初の訪問だけ: 病院の足もとに柔らかい輪(ロゴの砂)と「ふれてみる」。押した瞬間: 押した建物の足もとに輪 */
+.nudge{position:absolute;left:0;top:0;width:0;height:0;transition:opacity .5s var(--ease)}
+.nudge.gone{opacity:0}
+.nr{position:absolute;left:-40px;top:-21px;width:80px;height:42px;border-radius:50%;border:3px solid var(--ring);box-shadow:0 0 0 1px var(--ring-edge),inset 0 0 0 1px var(--ring-edge),0 0 16px var(--ring-glow);opacity:0;transform:scale(.3);animation:nr 2.8s cubic-bezier(.2,.7,.3,1) infinite}
+.nr.n2{animation-delay:1.4s}
+html.paused .nr{animation-play-state:paused}   /* 止めるボタンで、この輪も止まる(WCAG 2.2.2) */
+@keyframes nr{0%{opacity:0;transform:scale(.3)}14%{opacity:.95}100%{opacity:0;transform:scale(1.45)}}
+.nt{position:absolute;left:0;top:-30px;transform:translate(-50%,-100%);padding:6px 11px 7px;border-radius:999px;background:var(--card);color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.06em;white-space:nowrap;box-shadow:var(--sh-nt)}
+.nt::after{content:'';position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;background:inherit;transform:rotate(45deg);border-radius:1px}
+.pring{position:absolute;margin:-24px 0 0 -46px;width:92px;height:48px;border-radius:50%;border:3px solid var(--ring);box-shadow:0 0 0 1px var(--ring-edge),0 0 18px var(--ring-glow);pointer-events:none;animation:pr .7s cubic-bezier(.15,.7,.3,1) forwards}
+@keyframes pr{0%{opacity:1;transform:scale(.35)}70%{opacity:.6}100%{opacity:0;transform:scale(1.7)}}
+
+/* ================= ひらいたときのパネル(PC は右、スマホは下からのシート) ================= */
+.panel{position:fixed;z-index:60;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;box-shadow:var(--sh-panel)}
+.panel[hidden]{display:none}
+.panel.enter{animation:pIn .22s var(--ease) .26s both}
+@keyframes pIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* 上: ‹ 前 | 建物の名前 | 次 ›(名前にふれると、建物の一覧)。その下に、短い呼び名・一行と、閉じる */
+.p-head{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 8px;padding:14px 14px 10px;transition:transform .22s var(--ease)}   /* 横に引いたあと、元の位置へ */
+.p-nav{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px}
+.p-step{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:66px;height:44px;padding:0 12px;border-radius:22px;font-size:13px;font-weight:700;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line);-webkit-tap-highlight-color:transparent;transition:background-color .15s,color .15s}
+.p-step .ico{width:17px;height:17px}
+@media (hover:hover){.p-step:hover{background:var(--card);color:var(--ink)}}
+.p-step:active{background:var(--paper-2)}
+.p-title{min-width:0;text-align:center}
+.p-title:focus{outline:none}   /* ひらいたときにフォーカスを移す見出し。枠は出さない(中の名前のボタンには出す) */
+.p-name{display:inline-flex;align-items:center;justify-content:center;gap:5px;max-width:100%;min-height:44px;padding:0 8px 0 12px;border-radius:10px;font:700 24px/1.2 var(--jp);letter-spacing:.04em;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.p-name .ico{width:18px;height:18px;color:var(--ink-3);transition:transform .2s var(--ease)}
+.p-name[aria-expanded="true"] .ico{transform:rotate(180deg)}
+@media (hover:hover){.p-name:hover{background:var(--card)}}
+.p-meta{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;padding-left:6px;font-size:13px;line-height:1.6;color:var(--ink-2)}
+.p-role{font-size:12px;letter-spacing:.06em;color:var(--ink-3)}   /* 行き先の色の四角はやめた(用途の語だけ) */
+.is-plaza #pLine{font:600 14px/1.6 var(--mincho);color:var(--ink)}   /* 広場の一文は、閉じと同じ明朝 */
+.p-close{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--ink-2)}
+.p-close:hover{background:var(--paper-2);color:var(--ink)}
+.p-close .ico{width:20px;height:20px}
+.p-body{flex:1;min-height:0;overflow:auto;padding:4px 14px 22px;overscroll-behavior:contain}
+.p-main{display:flex;flex-direction:column}
+.p-still{margin:4px 12px 14px;border-radius:10px;overflow:hidden;background:var(--well)}
+.p-still img{width:100%;height:auto}
+.p-tools > li + li{border-top:1px solid var(--line)}
+/* 行: ふれると、その物に寄り(見つける)、行が道具の入口にひらく(誰向け・利用条件・ボタン) */
+.prow{border-radius:10px;transition:background-color .15s,box-shadow .15s}
+.pfind{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:3px;align-items:center;width:100%;min-height:44px;padding:13px 10px 13px 12px;border-radius:10px;text-align:left;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pfind b{font-size:15.5px;letter-spacing:.02em}
+.pfind .t{font-size:12.5px;line-height:1.6;color:var(--ink-2)}
+.pfind .chev{grid-column:2;grid-row:1/3;width:18px;height:18px;color:var(--ink-3);transition:transform .2s var(--ease)}
+.prow.open .pfind .chev{transform:rotate(180deg)}
+.prow .pstat{display:inline-block;margin-left:8px;padding:2px 7px;border-radius:4px;background:var(--paper-2);font-size:11px;font-weight:700;color:var(--ink-3);vertical-align:2px}
+.prow.on{background:var(--card);box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--indigo)}
+@media (hover:hover){.prow:hover{background:var(--card);box-shadow:0 0 0 1px var(--line)}.prow.on:hover{box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--indigo)}}
+.pent{padding:0 12px 14px 15px}
+.pent[hidden]{display:none}
+.pshot{aspect-ratio:16/10;border-radius:8px;overflow:hidden;background:var(--well);box-shadow:var(--sh-shot)}   /* 実際の画面の写し(加工しない)。枠の内側はプロダクト */
+.pshot img{width:100%;height:100%;object-fit:contain}
+.pinfo{margin-top:10px}
+.pent:not(.shot) .pinfo{margin-top:0}
+.pfor{font-size:13px;line-height:1.6;color:var(--ink-2)}
+.pfacts{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.pfacts li{padding:1px 7px;border-radius:4px;background:var(--paper-2);font-size:11.5px;line-height:1.7;color:var(--ink-2)}
+.pact{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin-top:12px}
+.pkind{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--ink-3)}
+.pcta{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;margin-left:auto;padding:0 18px;border-radius:12px;background:var(--indigo);color:var(--card);font-size:14.5px;font-weight:700;letter-spacing:.02em;text-decoration:none;box-shadow:var(--sh-pcta);-webkit-tap-highlight-color:transparent}
+.pcta .ico{width:16px;height:16px}
+@media (hover:hover){.pcta:hover{background:var(--indigo-2)}}
+/* 建物の一覧(名前にふれると。8つ: 小さな肖像・名前・一行)。広場のパネルの「行き先を選ぶ」も同じ形 */
+.p-list{padding:2px 0 8px}
+.p-list[hidden],.p-main[hidden],.p-plaza[hidden]{display:none}
+.lrows > li + li{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:60px minmax(0,1fr);align-items:center;gap:12px;width:100%;min-height:56px;padding:5px 10px 5px 6px;border-radius:10px;text-align:left;-webkit-tap-highlight-color:transparent}
+.lrow img{width:60px;height:52px;object-fit:contain}
+.lrow b{display:block;font-size:15px;letter-spacing:.03em}
+.lrow small{display:block;font-size:12px;line-height:1.55;color:var(--ink-3)}
+.lrow[aria-current="true"]{background:var(--card);box-shadow:0 0 0 1px var(--line),inset 3px 0 0 var(--indigo)}
+@media (hover:hover){.lrow:hover{background:var(--card)}}
+/* 広場: ロゴの意味と BRIDGE の目的(憲法の言葉)を短く。行き先を選ぶ一覧と、考え方・BRIDGEについて への入口 */
+.p-plaza{padding:4px 2px 0}
+.pz-mark{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:14px;padding:14px 14px 14px 12px;border-radius:12px;background:var(--card);box-shadow:0 0 0 1px var(--line)}
+.pz-mark svg{width:92px}
+.pz-mark p{font-size:13px;line-height:1.85;color:var(--ink-2)}
+.pz-aim{margin:14px 6px 0;font:600 15.5px/1.75 var(--mincho);letter-spacing:.02em}   /* 閉じと同じ明朝 */
+.pz-h{margin:18px 6px 4px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-3)}
+.pz-links{display:flex;flex-wrap:wrap;gap:8px;margin:14px 6px 2px}
+.pz-links a{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:22px;box-shadow:inset 0 0 0 1px var(--line);font-size:13.5px;font-weight:700;color:var(--indigo);text-decoration:none}
+.pz-links .ico{width:15px;height:15px}
+@media (hover:hover){.pz-links a:hover{background:var(--card)}}
+.p-more{margin:12px 2px 2px}
+.p-more a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;padding:0 12px 0 14px;border-radius:10px;font-size:13px;font-weight:700;color:var(--indigo);text-decoration:none;box-shadow:inset 0 0 0 1px var(--line)}
+.p-more .ico{width:15px;height:15px}
+@media (hover:hover){.p-more a:hover{background:var(--card)}}
+.b-more{margin-top:12px}
+.p-grab{display:none}
+
+/* 移る瞬間: 押したらすぐに移動を始め、その間に町の中の画面が広がる(280ms。動きを減らす設定では出さない) */
+.leap{position:fixed;inset:0;z-index:500;pointer-events:none}
+.leap .lp-bg{position:absolute;inset:0;background:var(--paper)}
+.leap .lp-im{position:absolute;display:block;max-width:none;transform-origin:0 0;will-change:transform;box-shadow:var(--sh-leap)}   /* 枠の内側はプロダクト、外側は BRIDGE */
+.leap .lp-name{position:absolute;left:0;right:0;text-align:center;font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--ink-2)}
+.leap .lp-line{display:block;position:relative;width:96px;height:2px;margin:10px auto 0;overflow:hidden;border-radius:1px;background:var(--track);opacity:0;transition:opacity .3s}
+.leap.wait .lp-line{opacity:1}   /* 移るのに 800ms 以上かかったら、待っていることが分かる細い線が流れる */
+.leap .lp-line::after{content:'';position:absolute;top:0;bottom:0;left:0;width:40%;border-radius:1px;background:var(--indigo);animation:lpflow 1.1s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes lpflow{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+
+/* 広場の見晴らし: 建物の上の小さな名前の札(ふれると、その建物へ渡る。近い札は上下にずらす) */
+.otags{position:absolute;inset:0;z-index:9;pointer-events:none}
+.otags[hidden]{display:none}
+.otag{position:absolute;left:0;top:0;padding:5px 11px 6px;border-radius:999px;background:var(--pill);color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.05em;white-space:nowrap;box-shadow:var(--pill-shadow);pointer-events:auto;opacity:0;transition:opacity .3s var(--ease);-webkit-tap-highlight-color:transparent}
+.otag::before{content:'';position:absolute;inset:-9px -4px}   /* ふれる範囲は 44px 以上 */
+.otag::after{content:'';position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;background:inherit;transform:rotate(45deg);border-radius:1px}
+.otags.on .otag{opacity:1}
+.otag.off{visibility:hidden}
+@media (hover:hover){.otag:hover,.ctag:hover{background:var(--card);box-shadow:var(--pill-shadow-h)}}
+
+/* ================= 案A: 町から病院の中へ =================
+   最初の画面(町)を止めたまま、スクロールで病院に寄る。屋根は残し、前の壁が倒れて広場の下へ沈み、中の人と道具が見える。
+   カメラは病院ぜんたいで止まり、そのあとは 3階 → 2階 → 1階 と、その階の道具の札と灯りだけが降りる(一行は上の小さな見出しの一文の場所に)。
+   空・光・見出しの帯は最初の画面のまま(紙の面に切り替えない)。言葉は最初の画面の一行と同じ場所に小さく、道具の札は町の名前の札と同じ形 */
+main:focus{outline:none}
+.stage{position:relative;background:rgb(var(--mist))}   /* 舞台の地は、その時刻の空の下の色(スマホのブラウザの帯が畳まれて画面が伸びても、舞台の下に紙の色を覗かせない) */
+html.js .stage{height:calc(100vh + 222.25vh);height:calc(100lvh + var(--span))}   /* JS が動くときだけ: 最初の画面 + 舞台の進み(--span)。JS なしでは止まったままの長い面を作らない */
+.stage > .hero{position:sticky;top:0;max-height:none;height:100vh;height:100lvh}   /* 舞台の間の町と病院は、ブラウザの帯が畳まれたときの高さ(lvh)で描く: 帯が開閉しても絵の大きさは変わらず、病院の下に地の色を覗かせない。言葉と入口は帯が出ているときの高さ(svh)の中に置く(--tb) */
+:root{--tb:0px}
+@supports (height:100lvh){:root{--tb:calc(100lvh - 100svh)}}   /* ブラウザの帯の高さ(帯が出ている間は、絵の下の端の --tb ぶんが帯の下に隠れる) */
+html.js .stage .ins-go{bottom:calc(16px + var(--tb) + env(safe-area-inset-bottom,0px))}
+@media (max-width:920px){html.js .stage .cta-wrap{bottom:calc(16px + var(--tb) + env(safe-area-inset-bottom,0px))}}   /* スマホの最初の画面の入口も、帯が出ているときの画面の中に */
+/* 寄り始めたら、最初の画面の言葉・入口・誘い・建物の見えないボタンを外す(ページの側が --cp を 1 → 0) */
+.copy,.cta-wrap,.hint{opacity:var(--cp,1);translate:0 calc((1 - var(--cp,1)) * -14px)}
+html.scrub .copy,html.scrub .cta-wrap,html.scrub .hint{pointer-events:none}
+html.cp-off .copy,html.cp-off .cta-wrap,html.cp-off .hint{visibility:hidden}   /* 消えきったら、Tab と読み上げからも外す(見えないボタンに止まらない) */
+html.scrub .hits,html.scrub .nudge{visibility:hidden}
+html.scrub #tagB,html.scrub #tagS{opacity:0}
+.mist{opacity:var(--mk,1)}   /* 島の下のもやは、病院に寄るにつれて消す(1階を隠さない) */
+html.scrub .hero::after{opacity:var(--hz,0);transition:none}   /* 病院の中が画面の上まで来たら、見出しの帯と「病院の中」の下に、地の色の薄い霞(ひらいたときと同じ) */
+.endfade{position:absolute;left:0;right:0;top:calc(var(--gy,76svh) + 40px);bottom:0;z-index:3;pointer-events:none;opacity:var(--ek,0);background:linear-gradient(180deg,rgb(var(--mist) / 0),rgb(var(--mist)) var(--bf,120px))}   /* 舞台の終わり: 下の端を、次の面の色(空の下の色)へ */
+/* 病院の中: 最初の画面の一行と同じ場所・同じ形の小さな見出しと、一文。階ごとに降りるときは、一文の場所に、その階の道具の一行 */
+.ins{position:absolute;z-index:7;left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px));pointer-events:none;opacity:0}   /* 透明で隠すだけ(読み上げの順には、いつもある) */
+.ins h2{margin:0}
+.ins .eyebrow{transition:none}
+.ins-eb{display:grid}
+.ins-eb .eyebrow{grid-area:1 / 1;transition:opacity .25s var(--ease)}
+.ins-where{opacity:0}
+.ins.fl .ins-main{opacity:0}
+.ins.fl .ins-where.on{opacity:1}   /* 階を降りるときは、見出しの場所にその階の居場所(3F 休憩室)、一文の場所にその道具の一行 */
+.ins-lines{display:grid;margin-top:7px}
+.ins-line,.ins-fl{grid-area:1 / 1;font-size:14px;line-height:1.75;color:var(--hero-fg-2);transition:opacity .25s var(--ease)}
+.ins-fl{opacity:0}
+.ins-fl b{margin-right:.5em;font-weight:700;color:var(--hero-fg)}
+.ins.fl .ins-line{opacity:0}
+.ins.fl .ins-fl.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.ins-line,.ins-fl,.ins-eb .eyebrow{transition:none}}
+/* 道具の札: 町の名前の札と同じ形(暗い札・白い字・角の丸み 7px・下に小さな三角)と置き方(三角の先が指す点の上)。指す点は物の真上の、その階の天井の切り口(藍の帯)。押すとその道具へ */
+.chips{position:absolute;inset:0;z-index:8;pointer-events:none}
+html:not(.js) .chips,html:not(.js) .ins,html:not(.js) .ins-go{display:none}   /* JS なし: 舞台が動かないので出さない(道具へは一覧から) */
+.tchip{position:absolute;left:0;top:0;display:flex;align-items:center;padding:3px 8px 4px;background:var(--tag-bg);color:var(--tag-fg);border-radius:6px;font-size:12px;font-weight:700;line-height:1.3;letter-spacing:.04em;text-decoration:none;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,calc(-100% - 6px));transition:background-color .25s var(--ease),box-shadow .25s var(--ease);-webkit-tap-highlight-color:transparent}   /* v6: 札は小さく、影なし(人と部屋が先に目に入るように) */
+.tchip::after{content:'';position:absolute;left:calc(50% + var(--ax,0px));bottom:-4px;width:8px;height:8px;margin-left:-4px;background:inherit;transform:rotate(45deg);border-radius:1px}
+.tchip::before{content:'';position:absolute;inset:-11px -6px}   /* ふれる範囲は 44px 以上 */
+.tchip .c-fl,.tchip .c-t{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* 階と一行は読み上げだけ(見える一行は上の見出しの場所に) */
+.tchip.on{background:var(--indigo);box-shadow:0 0 0 1.5px var(--sand-2)}   /* いまの階の道具(現在地) */   /* いま降りている階の道具 */
+.tchip:focus-visible{outline:2px solid var(--kinari);outline-offset:2px;box-shadow:0 0 0 6px var(--indigo)}
+@media (hover:hover){.tchip:hover{background:var(--indigo)}}
+/* v6: 階の印(右の外枠の上に、小さな藍の札で 3F・2F・1F。外枠と一緒に出す。読み上げは札と見出しが持つ) */
+.flms{position:absolute;inset:0;z-index:6;pointer-events:none}
+.flm{position:absolute;left:0;top:0;padding:3px 5px 3px;border-radius:3px;background:var(--indigo);color:var(--kinari);font:600 11px/1 var(--en);letter-spacing:.05em;opacity:0;transform:translate(-50%,-50%)}
+html:not(.js) .flms{display:none}
+/* 動きを減らす設定(html.rm): 舞台を畳み(固定なし・寄せなし)、止めた断面画像を普通の区画に。札3つと上の2行は最初から出す */
+.rmin{display:none;position:relative;background:rgb(var(--mist))}
+html.rm .rmin{display:block}
+html.rm .stage{height:auto}
+html.rm .stage > .hero{position:relative;height:100svh}
+html.rm .stage .ins,html.rm .stage .chips,html.rm .stage .ins-go,html.rm .stage .flms,html.rm .stage .shut,html.rm .stage .endfade{display:none}
+.rmin-fig{position:relative;max-width:1440px;margin:0 auto;--gy:77%}
+.rmin-fig img{display:block;width:100%;height:auto}
+.rmin-fig::after{content:'';position:absolute;left:0;right:0;top:calc(var(--gy) + 40px);bottom:0;pointer-events:none;background:linear-gradient(180deg,rgb(var(--mist) / 0),rgb(var(--mist)) 80%)}   /* 広場は、正面の地面の線の 40px 下から地の色へ(立体の舞台の下の帯と同じ) */
+.rmin-text{position:absolute;z-index:2;left:var(--pad);right:var(--pad);top:calc(58px * var(--rk,1))}
+.rmin-text h2{margin:0}
+.rmin-line{margin:7px 0 0;font-size:14px;line-height:1.75;color:var(--hero-fg-2)}
+.rmin-chips{position:absolute;inset:0;z-index:3;pointer-events:none}
+.rmin-chips .tchip{opacity:1;pointer-events:auto}
+.rmin-fl{position:absolute;inset:0;z-index:2;pointer-events:none}
+.rmin-fl .flm{opacity:1}
+.rmin .rmin-go{position:relative;bottom:auto;left:auto;right:auto;opacity:1;margin:0;padding:4px var(--pad) 28px}
+/* 病院の道具を一覧で(下に小さく) */
+.ins-go{position:absolute;z-index:7;left:var(--pad);right:var(--pad);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none;opacity:0}
+.ins-go.off a{pointer-events:none}
+.ins-go a{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 4px;color:var(--hero-fg);font-size:13.5px;font-weight:700;letter-spacing:.03em;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px;pointer-events:auto}   /* v6: 下の帯(地の色)の上の文字リンク */
+.ins-go .ico{width:15px;height:15px;color:currentColor}
+@media (hover:hover){.ins-go a:hover{text-decoration-thickness:2px}}   /* 面は明るい部屋や広場の上でも読める濃さ(押せる時刻の丸と同じ、濃い方の面) */
+/* 動かないとき(動きを減らす・WebGL なし・立体に替わる前): 町の止めた画像を病院へ寄せてから(動きを減らす設定では寄せない)、ひらいた病院の止めた画像へ 0.25 秒で替える(重ねたまま進めない) */
+.perf-hud{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:200;max-width:calc(100vw - 16px);padding:6px 8px;border-radius:8px;background:var(--night-hd);color:var(--night-fg);font:11px/1.45 ui-monospace,Menlo,monospace;white-space:pre-wrap;pointer-events:auto}   /* ?perf=1 のときだけ出す計測の表示 */
+.shut{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .25s var(--ease),visibility 0s .25s}
+.shut img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+html.shut-on .shut{opacity:1;visibility:visible;transition:opacity .25s var(--ease)}
+.still .poster{transition:opacity .25s var(--ease)}
+html.shut-on:not(.live) .still .poster{opacity:0}
+html.live .shut{opacity:0!important;visibility:hidden!important;transition:opacity .5s var(--ease),visibility 0s .5s}   /* 立体に替わったら、立体の下で消える */
+html.live.stage-still.shut-on .shut{opacity:1!important;visibility:visible!important;transition:opacity .25s var(--ease)!important}   /* 低性能の端末: 立体を止めた舞台では、ひらいた病院の止めた画像を出す */
+html.stage-still #world{transform-origin:50% 40%}
+html.stage-still.shut-on #world{opacity:0;transition:opacity .25s var(--ease)}   /* ひらいた病院の止めた画像に替わったら、寄せた町の絵は下で消す(二重写しにしない) */
+/* ================= v7 閉じ: 病院の外(交差の広場の見晴らし)=================
+   病院の1Fのあと、同じカメラのまま病院を出て、広場の見晴らしで止まる(live.js の closeKey)。最初の画面と同じ三段: 上=小見出しと本人の言葉(1F の札と同じ場所・同じ形)/真ん中=見晴らしの島/
+   下=明朝の一文・道の先3つ・文字リンク・第29条の一文。言葉と出口は、舞台に重ねた透明の層(.cls。舞台と同じ長さで、中身は同じ所に留まる)に置き、読み上げと Tab の順は舞台のあと。
+   動きを減らす設定と JS なしでは、ふつうの区画(最初から出す)。絵は最初の画面の止めた画像を使い回す */
+.cls{position:relative;z-index:7}
+html.js:not(.rm) .cls{height:calc(100vh + 222.25vh);height:calc(100lvh + var(--span));margin-top:calc(-100vh - 222.25vh);margin-top:calc(-100lvh - var(--span));pointer-events:none}
+html.js:not(.rm) .cls-in{position:sticky;top:0;height:100vh;height:100lvh}
+html.js:not(.rm) .cls a{pointer-events:none}
+html.js:not(.rm) .cls .on a{pointer-events:auto}   /* 押せるのは見えている間だけ(Tab では届く。届いたら見える所まで舞台を進める) */
+html.js:not(.rm) .cls-top,html.js:not(.rm) .cls-idea,html.js:not(.rm) .cls-go{opacity:0}   /* 透明で隠すだけ(読み上げの順には、いつもある) */
+.cls-fig{display:none}
+.cls-q{margin-top:7px;font-size:14px;line-height:1.75;color:var(--hero-fg-2)}
+.cls-who{margin-top:2px;font-size:11.5px;line-height:1.5;letter-spacing:.04em;color:var(--hero-fg-3)}   /* 誰の言葉か(第13条) */
+.nw{white-space:nowrap}   /* 矢印を最後の語とつなぐ */
+.cls-idea{font:600 16.5px/1.6 var(--mincho);letter-spacing:.03em;color:var(--hero-fg);text-align:center}   /* 文字の組み方が変わるのは、この一文だけ(明朝) */
+.ways ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px;border-top:1px solid var(--rule)}
+.ways a{display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:64px;padding:8px 6px 8px 10px;text-decoration:none;color:var(--hero-fg)}
+.ways li + li a{box-shadow:inset 1px 0 0 var(--rule)}
+.ways small{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--hero-fg-3)}
+.ways b{font-size:13.5px;line-height:1.45;letter-spacing:.02em}
+.ways b span{color:var(--hero-fg-3)}
+@media (hover:hover){.ways a:hover b{text-decoration:underline;text-underline-offset:4px}}
+@media (max-width:340px),(min-width:921px) and (max-width:1120px){.ways a{padding-right:4px}.ways b{font-size:12.5px;letter-spacing:0}}   /* 列が狭い幅(320・PC の 1024): 「もう少し読む →」を罫に触れさせない */
+@media (max-width:340px){html .ways a{padding-left:8px;padding-right:3px}html .ways b{font-size:12px;letter-spacing:0}}   /* 320 は背の低い画面の段より後に効かせる */
+.cls-tx{display:flex;flex-wrap:wrap;justify-content:center;gap:0 24px;border-top:1px solid var(--rule)}
+.cls-tx a{display:inline-flex;align-items:center;min-height:44px;font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--hero-fg);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+@media (hover:hover){.cls-tx a:hover{text-decoration-thickness:2px}}
+.cls-29{font-size:12px;line-height:1.6;letter-spacing:.03em;color:var(--hero-fg-3);text-align:center}
+/* 島の上の札(3棟だけ。押すとその建物をひらく=最初の画面の見晴らしの札と同じ。外へ行く道は下の3列。Tab と読み上げは下の道の先で受ける・列に乗せる・Tab で来ると、その札が藍に) */
+.ctags{position:absolute;inset:0;z-index:8;pointer-events:none}
+html:not(.js) .ctags,html.rm .stage .ctags,html.rm .stage .clfade{display:none}
+.ctag{position:absolute;left:0;top:0;padding:5px 11px 6px;border-radius:999px;background:var(--pill);color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:.05em;white-space:nowrap;text-decoration:none;opacity:0;pointer-events:none;transform:translate(-50%,calc(-100% - 8px));box-shadow:var(--pill-shadow);transition:background-color .2s var(--ease),color .2s var(--ease);-webkit-tap-highlight-color:transparent}   /* 見晴らしの札(.otag)と同じ見た目。押すと、下の同じ列の行き先へ(Tab は下の列で受ける) */
+.ctag.on{pointer-events:auto}
+.ctag::before{content:'';position:absolute;inset:-16px -4px 0}   /* ふれる範囲は 44px 以上。建物の側(下)へは広げない(札のすぐ下の建物を押せるように) */
+.ctag::after{content:'';position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;background:inherit;transform:rotate(45deg);border-radius:1px}
+.ctag.hi,.ctag.hi:hover{background:var(--indigo);color:var(--kinari)}
+.cdot{position:absolute;left:0;top:0;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:var(--here);box-shadow:0 0 0 2px var(--here-ring),0 0 0 3px var(--here-edge);opacity:0}   /* 現在地(いま立っている広場。第22条 町の但し書きの UI の砂) */
+/* 舞台の下の端: 島の下のもやから、フッターの地へ(閉じで。下の出口の後ろ) */
+.clfade{position:absolute;left:0;right:0;bottom:0;height:calc(30svh + var(--tb));z-index:3;pointer-events:none;opacity:var(--ck,0);background:linear-gradient(180deg,rgb(var(--mist) / 0) 0%,rgb(var(--mist)) 34%,var(--foot-bg) 100%)}
+/* 動きを減らす設定・JS なし: ふつうの区画。上の言葉 → 島の止めた画像(動きを減らす設定だけ)→ 下の言葉と出口。フッターの地へ */
+html.rm .cls,html:not(.js) .cls{padding:36px var(--pad) 32px;background:linear-gradient(180deg,rgb(var(--mist)) 0%,rgb(var(--mist)) 72%,var(--foot-bg) 100%)}
+html.rm .cls-col,html:not(.js) .cls-col{max-width:560px;margin:0 auto}
+html.rm .cls-fig{display:block;position:relative;margin:14px 0 6px}
+html.rm .cls-fig img{width:100%;height:auto;-webkit-mask-image:linear-gradient(180deg,#000 80%,transparent);mask-image:linear-gradient(180deg,#000 80%,transparent)}
+html.rm .cls-fig .ctag,html.rm .cls-fig .cdot{opacity:1}
+html.rm .cls-fig .ctag{pointer-events:auto}
+html.rm .cls-fig{margin-top:40px}   /* 展望台の札が、上の言葉と見出しの帯の下に切れないように */
+html:not(.js) .cls-bot{margin-top:28px}
+/* 背の低い画面(高さ 560px 以下): 道の先・文字リンク・第29条の一文は舞台に重ねず、舞台のあとのふつうの流れに(hiraku.js が .cls のあとへ移す)。島には、上の言葉から明朝の一文までを渡す */
+.cls-go.flow{position:relative;z-index:7;padding:2px var(--pad) 24px;background:var(--foot-bg)}
+.cls-go.flow .ways ul{margin-top:0}
+/* JS が動かないときだけの一覧(建物名と道具名) */
+.nojs{padding:clamp(40px,8vh,80px) var(--pad);max-width:1180px;margin:0 auto}
+.nojs h2{font:700 20px/1.4 var(--jp)}
+.nj-b{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px 28px}
+.nj-b h3{font-size:14px;color:var(--ink-3)}
+.nj-b a{display:flex;align-items:center;min-height:44px;border-bottom:1px solid var(--line);font-weight:700;text-decoration:none}
+.foot{background:var(--foot-bg);color:var(--foot-fg-2);padding:40px var(--pad) calc(18px + env(safe-area-inset-bottom,0px))}   /* bridge.js のフッターと同じ4列と Privacy。地は閉じの下の端と同じ(昼・夕は紙、夜は夜の面) */
+.foot-in{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.5fr) repeat(4,minmax(0,1fr));gap:26px 24px}
+.f-brand{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 12px;align-content:start}
+.f-brand .logo-m{width:42px}
+.f-brand b{font:500 14px/1 var(--en);letter-spacing:.34em;color:var(--foot-fg)}   /* 下層のフッターのロゴと同じ Inter 500・字間 .34em */
+.f-brand .tg{display:block;margin-top:6px;font:500 10.5px/1 var(--en);letter-spacing:.2em;color:var(--foot-dim)}
+.f-brand p{grid-column:1/-1;font-size:12.5px;line-height:1.8}
+.f-col .h{margin-bottom:4px;font-size:11.5px;letter-spacing:.12em;color:var(--foot-dim)}
+.f-col a{display:flex;align-items:center;min-height:44px;font:500 14px/1.3 var(--en);letter-spacing:.02em;color:var(--foot-fg-2);text-decoration:none}   /* 英語の語は Inter(メニューとそろえる) */
+.f-col a:hover{color:var(--foot-fg);text-decoration:underline;text-underline-offset:4px}
+.foot-base{max-width:1080px;margin:26px auto 0;padding-top:12px;border-top:1px solid var(--foot-line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 20px;font:500 12.5px/1.4 var(--en)}
+.foot-base a{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;color:var(--foot-fg-2)}
+
+/* 舞台を過ぎ、町が画面の上へ出たら(hdband)、見出しの帯を小さく上に固定。地はフッターと同じ(昼・夕は紙、夜は夜の面)。町が見えている間は帯を出さない(v7) */
+html.hdband:not(.opened) .hd{position:fixed;padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:4px;background:var(--band-bg);box-shadow:0 1px 0 var(--line);animation:hdIn .32s var(--ease);--hd-fg:var(--ink);--hd-fg-2:var(--ink-2);--navcta-ring:var(--navcta-ring-l);--navcta-h:var(--navcta-h-l);--logo-1:var(--indigo);--logo-2:var(--sand);--focus:var(--indigo)}
+@keyframes hdIn{from{transform:translateY(-100%)}to{transform:none}}
+html.hdband.hd-night:not(.opened) .hd{background:var(--band-bg);box-shadow:0 1px 0 var(--night-line);--hd-fg:var(--kinari);--hd-fg-2:var(--night-hd-fg-2);--navcta-ring:var(--night-ring);--navcta-h:var(--night-hover);--logo-1:var(--kinari);--logo-2:var(--sand-2);--focus:var(--kinari)}   /* 終幕の夜の上では、見出しの帯も夜の色 */
+/* 建物をひらいている間: ヘッダーの文字が立体の断面の上に乗らないよう、帯と同じ .94 の地を敷く(高さと位置は変えない。昼・夕は紙、夜は夜の面。文字の色はその時刻のトークンのまま) */
+html.opened .hd{background:var(--band-bg);box-shadow:0 1px 0 var(--line)}
+html.opened.hd-night .hd{box-shadow:0 1px 0 var(--night-line)}
+html.past.gone:not(.opened) .hd .ctrl{display:none}   /* 止めるボタン(時刻・一時停止)は、動く町と病院が画面に見えている間は残す(WCAG 2.2.2)。見えなくなってから外す */
+html.hdband:not(.opened) .logo svg{width:42px}
+
+/* メニュー(スマホ) */
+.mdlg{border:0;padding:0;margin:0 0 0 auto;height:100%;max-height:100%;width:min(320px,86vw);background:var(--paper);color:var(--ink);overflow-y:auto;overscroll-behavior:contain}
+.mdlg::backdrop{background:var(--backdrop)}
+.mdlg nav{display:grid;padding:68px 18px 24px}
+.mdlg a{display:flex;align-items:center;min-height:52px;padding:0 8px;border-bottom:1px solid var(--line);font-weight:700;text-decoration:none}
+.mdlg .mi{display:grid;gap:3px;align-content:center;min-height:58px;padding:9px 8px}   /* 英語名・日本語名・一言(bridge.js のメニューと同じ文言) */
+.mdlg .mi .t{display:flex;align-items:baseline;gap:10px;font-size:14.5px}
+.mdlg .mi .en{font:600 15.5px/1.3 var(--en);letter-spacing:.03em}
+.mdlg .mi .d{font-size:12px;font-weight:400;line-height:1.6;color:var(--ink-3)}
+.mdlg .mi small{margin-left:8px;font-size:12px;font-weight:400;color:var(--ink-3)}
+.mdlg .mi.here{border-bottom:1.5px solid var(--ink)}
+.mdlg .x{position:absolute;right:12px;top:12px;display:grid;place-items:center;width:44px;height:44px;border-radius:50%}
+.mdlg .x .ico{width:20px;height:20px}
+
+/* ---- PC(921px から。本番の bridge.css は 920px までドロワー): 島が右の約3分の2。左に一行・見出し・一文・入口・小さな誘い ---- */
+@media (min-width:921px){
+  .hero{min-height:680px}
+  .copy{left:var(--pad);top:clamp(120px,22vh,220px);width:min(31vw,420px)}
+  h1{font-size:clamp(32px,3.1vw,44px)}
+  .lead{display:block}
+  .cta-wrap{left:var(--pad);top:calc(clamp(120px,22vh,220px) + 300px);width:auto}
+  .cta{display:inline-flex;padding:0 26px}
+  .meta{text-align:left}
+  .still{left:auto;right:calc(-1 * clamp(0px,2vw,40px));top:50%;transform:translateY(-50%);height:min(98%,calc(100vw * .66 / 1.111))}
+  .hint{left:var(--pad);bottom:clamp(22px,4vh,44px);text-align:left}
+  .panel{right:24px;top:84px;bottom:24px;width:clamp(340px,34vw,400px);border-radius:16px}
+  html.clopen .panel{left:var(--pad);right:auto}   /* 閉じ(広場の見晴らし)でひらいたときは、左の言葉の列の上に(島の建物を隠さない。ひらいている間は道の先が隠れ、× ・Esc・島の外で戻る) */   /* 920〜1000px でも建物の名前が1行に */
+  .sky .stars{-webkit-mask-image:linear-gradient(90deg,transparent 0,transparent 36%,#000 44%);mask-image:linear-gradient(90deg,transparent 0,transparent 36%,#000 44%)}   /* PC は左の文字の列にかけない */
+  html.opened .copy,html.opened .cta-wrap,html.opened .hint{opacity:0;pointer-events:none}
+  /* v7 閉じ(PC): 最初の画面と同じく、左の列に言葉と出口、右に島 */
+  html.js:not(.rm) .cls-col{position:absolute;left:var(--pad);top:clamp(120px,22vh,220px);width:min(31vw,420px)}
+  .cls-q{font-size:15px;line-height:1.9}
+  .cls-bot{margin-top:clamp(28px,5vh,48px)}
+  .cls-idea{font-size:20px;text-align:left}
+  .cls-tx{justify-content:flex-start}
+  .cls-29{text-align:left}
 }
+@media (min-width:921px) and (max-height:760px){.copy{top:110px}.lead{display:none}.cta-wrap{top:270px}html.js:not(.rm) .cls-col{top:96px}}
 
-/* ===== 試しているもの(触れる一場面の Compass と、ほかに試しているもの) =====
-   商品棚ではなく作業机。大きさの差は使われ方の差: Compass=大きな実画面(右へ裁ち落とす。触れる一場面)/ クリニックタウン3D=同じ組みの左右反転
-   / 小さな道具=中くらいの実画面1枚と、行末に添える小さな写し
-   実画面の縁は 1px --line・角 2px(Edge)・影なし。裁ち落とす辺には縁も角も付けない(designer 2026-09-23) */
-.lab{padding:clamp(64px,10vh,120px) 0 clamp(72px,10vh,120px);overflow-x:clip}
-.lab-in{max-width:var(--max);margin:0 auto;padding:0 var(--pad-x);box-sizing:content-box}
-.lab-h{font:700 clamp(22px,2.6vw,32px)/1.5 var(--sans);letter-spacing:0.01em}
-.lab-lead{margin-top:10px;font-size:14px;line-height:1.95;color:var(--ink-2);max-width:34em}
-/* 注記(見出しではない): 日付・「直し続けているもの」など */
-.note{font:600 12.5px/1.6 var(--sans);letter-spacing:0.04em;color:var(--ink-3)}
-.note time{font-family:var(--en);font-weight:500;letter-spacing:0.02em}
-/* 文字だけのリンク(ボタンにしない) */
-.cp-shot:focus-visible,.sm-fig:focus-visible,.use-item:focus-visible,.me-links a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-
-/* Compass: 左に文字、右に実画面(sec-inner の右端を越えて画面の端まで) */
-.cp{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,5vw,72px);align-items:center;
-  margin-top:clamp(44px,6vh,72px);padding-left:max(var(--pad-x),calc((100% - var(--max)) / 2))}
-.cp-name{margin-top:10px;font:900 clamp(26px,3vw,38px)/1.25 var(--sans);letter-spacing:-0.005em}
-.cp-p{margin-top:16px;font-size:15px;line-height:2;color:var(--ink-2);max-width:26em}
-.cp-text .tx-link{margin-top:22px}
-.cp-shot{display:block;border:1px solid var(--line);border-right:0;border-radius:2px 0 0 2px;overflow:hidden;background:var(--bg-3);transition:border-color .35s var(--ease)}
-.cp-shot:hover{border-color:var(--blue-soft)}
-.cp-shot img{display:block;width:100%;height:auto;aspect-ratio:1280/800;object-fit:cover;object-position:left top}
-
-/* 直し続けているもの(クリニックタウン3D): Compass の組みを左右反転。実画面は左へ裁ち落とす(このページで2回目なので反転はここに置く・DS §6) */
-.cp.rev{grid-template-columns:minmax(0,7fr) minmax(0,5fr);margin-top:clamp(40px,6vh,64px);padding-left:0;padding-right:max(var(--pad-x),calc((100% - var(--max)) / 2))}
-.cp.rev .cp-shot{border-left:0;border-right:1px solid var(--line);border-radius:0 2px 2px 0}
-.cp.rev .cp-shot img{object-position:right top}
-.ct-v{margin-top:10px;font-size:13.5px;line-height:1.8;color:var(--ink-3)}
-.ct-v .v{font-family:var(--en)}
-
-/* 中くらいの実画面(経験の棚卸し): 左に文字、右に実画面1枚(少し下げる) */
-.sm{margin-top:clamp(72px,10vh,120px);display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:24px clamp(40px,6vw,88px);align-items:center}
-.sm-name{margin-top:10px;font:900 clamp(22px,2.4vw,30px)/1.3 var(--sans);letter-spacing:-0.005em}
-.sm-d{margin-top:12px;font-size:14.5px;line-height:2;color:var(--ink-2);max-width:26em}
-.sm-text .tx-link{margin-top:18px}
-.sm-fig{display:block;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--bg-3);transition:border-color .35s var(--ease)}
-.sm-fig:hover{border-color:var(--blue-soft)}
-.sm-fig img{display:block;width:100%;height:auto;aspect-ratio:880/550;object-fit:cover;object-position:top}
-.sm-cap{margin-top:8px;font-size:12px;line-height:1.6;color:var(--ink-3)}
-
-.lab-all{margin-top:clamp(48px,7vh,72px);display:flex;align-items:baseline;gap:6px 18px;flex-wrap:wrap}
-.lab-all .n{font-size:14px;color:var(--ink-2)}
-
-/* ===== 目的から探す(用途6つの帯。索引は Products が持つ) =====
-   行の形は前の版の .sm-item と同じ(名前・一文・→・下罫)。PC は2列×3行。番号は付けない(B-9・B-12) */
-.uses{padding:clamp(56px,9vh,110px) var(--pad-x) 0}
-.uses-in{max-width:var(--max);margin:0 auto}
-.uses-h{font:700 clamp(22px,2.6vw,32px)/1.5 var(--sans);letter-spacing:0.01em}
-.use-list{list-style:none;margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(32px,5vw,72px);border-top:1px solid var(--line)}
-.use-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 20px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line);min-height:44px;transition:border-color .3s var(--ease)}
-.use-item:hover{border-bottom-color:var(--ink-4)}
-.use-txt{display:flex;flex-direction:column;gap:4px}
-.use-t{font:700 16.5px/1.5 var(--sans);color:var(--ink)}
-.use-d{font-size:13.5px;line-height:1.85;color:var(--ink-2)}
-.use-n{font:500 13px/1.4 var(--sans);color:var(--ink-3);white-space:nowrap}
-.use-n .ar{display:inline-block;margin-left:8px;transition:transform .3s var(--ease)}
-.use-item:hover .use-n .ar{transform:translateX(4px)}
-@media(max-width:860px){.use-list{grid-template-columns:1fr}}
-
-/* ===== 閉じ(#about) =====
-   本人の言葉3文 → 筆の線がロゴに集まる帯 → 明朝の一文 → 出口(2026-10-11)。明朝はこの一文だけ(憲法第23条 v1.5)。地の色は変えず、罫線で区切る */
-.me{padding:0 var(--pad-x) clamp(96px,14vh,160px);overflow-x:clip} /* overflow-x: 閉じの帯の canvas を画面の端まで裁ち落とすため(.lab と同じ) */
-.me-in{max-width:var(--max);margin:0 auto;padding-top:clamp(64px,9vh,104px); /* 上の罫線は「目的から探す」の最後の行が持つ(二重にしない) */
-  display:grid;grid-template-columns:minmax(0,2fr) minmax(0,7fr) minmax(0,3fr)}
-.me-body{grid-column:2}
-.idea-h{margin-top:clamp(48px,7vh,72px);font-family:var(--mincho);font-weight:600;font-size:clamp(24px,3.2vw,38px);line-height:1.6;letter-spacing:0.03em}
-.idea-h .a{color:var(--dawn-deep)}
-.me-links{margin-top:22px;display:flex;flex-wrap:wrap;gap:6px 26px}
-.me-links a{display:inline-flex;align-items:center;gap:8px;min-height:44px;font:600 14px/1.4 var(--sans);color:var(--ink);border-bottom:1px solid var(--ink-4);transition:border-color .3s var(--ease)}
-.me-links a:hover{border-color:var(--ink)}
-.me-note{margin-top:10px;font-size:13px;line-height:1.8;color:var(--ink-3)}
-
-/* ===== 閉じ(#about の帯)。約束は <style> 冒頭の「閉じの約束」 =====
-   kz-on=マークを写せた(帯はマークの高さ)/kz-live=動ける(帯を高くし canvas を出す)/.kz-run=動きの途中(SVG を隠す)/kz-in=マークが見えている。
-   JS なしは帯ごと出さない。動きを減らす設定はマークだけ(h2 の上 14px) */
-.kz{display:none;position:relative;--kz-mw:clamp(112px,10vw,148px)}
-html.kz-on .kz{display:block;margin-top:clamp(48px,7vh,72px);height:calc(var(--kz-mw) * 110 / 240)}
-html.kz-on .idea-h{margin-top:14px}
-/* 高さは整数 px に(端数があると canvas の清書と SVG のマークが 1px 近くずれる。実測) */
-html.kz-live .kz{height:clamp(320px,52vh,520px);height:clamp(320px,52svh,520px);height:round(down,clamp(320px,52svh,520px),1px)}
-/* 左のずらし: 藍の線の始点(x=8)を h2 の1文字目にそろえる */
-.kz-mark{position:absolute;bottom:0;left:calc(var(--kz-mw) * -8 / 240);width:var(--kz-mw);height:calc(var(--kz-mw) * 110 / 240);pointer-events:none}
-.kz.kz-run .kz-mark{visibility:hidden}
-.kz-c{display:none}
-/* 端の溶けは mask のアルファ(#000 は不透明度の指定。.hz-c と同じ)。下端の --kz-fb は着地の前に JS が 40→0px に */
-html.kz-live .kz-c{display:block;position:absolute;top:0;height:100%;pointer-events:none;z-index:1;
-  --kz-fs:calc(var(--pad-x) * .5);--kz-fb:40px;
-  --kz-v:linear-gradient(to bottom,transparent 0,#000 56px,#000 calc(100% - var(--kz-fb)),transparent 100%);
-  --kz-h:linear-gradient(to right,transparent 0,#000 var(--kz-fs),#000 calc(100% - var(--kz-fs)),transparent 100%);
-  -webkit-mask-image:var(--kz-v),var(--kz-h);-webkit-mask-composite:source-in;mask-image:var(--kz-v),var(--kz-h);mask-composite:intersect}
-/* 帯のマークが見えているあいだは、ナビのロゴをしまう(home だけ。hero-in と同じく位置は変えない)。
-   home のフッターはマークを出さない(帯のマークが閉じを担う。解析中に決まるのでずれない。design-system §3) */
-html.kz-in body[data-page="home"] .nav-logo{opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s linear .4s}
-html.kz-on body[data-page="home"] .footer-brand svg{display:none}
-@media(max-width:760px){.kz{--kz-mw:92px} html.kz-live .kz{height:clamp(280px,48vh,420px);height:clamp(280px,48svh,420px);height:round(down,clamp(280px,48svh,420px),1px)}}
-@media(prefers-reduced-motion:reduce){html.kz-live .kz{height:calc(var(--kz-mw) * 110 / 240)} html.kz-live .kz-c{display:none}}
-
-/* ===== 下の動き =====
-   文字と実画面は最初からある(reveal を付けない。2026-10-11 社長指示)。動くのは、ページの線・閉じの帯・触れる一場面の砂の下線(選んだ瞬間だけ左から引く)だけ */
-
-@media(max-width:860px){
-  .cp{grid-template-columns:1fr;padding-left:0}
-  .cp-text{padding:0 var(--pad-x)}
-  /* 実画面は左右を裁ち落として大きく。上下の縁だけ残す */
-  .cp-shot{border-left:0;border-right:0;border-radius:0;margin-top:4px}
-  .cp-fig .shot-cap{padding:0 var(--pad-x)} /* 裁ち落とした写しの下の一文は、左右の余白に戻す(ページの線が端を通るため) */
-  .cp.rev{grid-template-columns:1fr;padding-right:0} /* .cp の1列化より詳細度が高いので、ここでも1列に(2026-10-11 まで 390px 幅で実画面が 149px に縮んでいた) */
-  .cp.rev .cp-text{order:-1}
-  .cp.rev .cp-shot{border-right:0;border-radius:0}
-  .sm{grid-template-columns:1fr;gap:18px}
-  .me-in{grid-template-columns:1fr}
-  .me-body{grid-column:1}
+/* ---- スマホ(920px まで): 上にロゴとメニュー、一行と見出し、島が画面の大半、下に入口 ---- */
+@media (max-width:920px){
+  .nav{display:none}
+  .menu{display:inline-flex}
+  .copy{left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px))}
+  .eyebrow{font-size:11.5px;gap:8px}
+  h1{margin-top:6px;font-size:clamp(22px,6.2vw,24px);line-height:1.34}
+  /* 町の大きさは、撮った画像の中の7つの建物の外形(--cl〜--cr)が、左右に 8px の余白で画面の幅に収まるように。高さが足りないときは、高さで決める */
+  .hero{min-height:440px;--top0:max(136px,calc(150px + (100svh - 700px) * .45));--bot0:150px}   /* 背の低い画面(ブラウザの帯が出た iPhone SE など)でも、入口と条件の一行まで最初の画面に */   /* 背の高い画面では、町を下げて、入口との間の空きを減らす */
+  .still{--W:min(calc((100vw - 16px) * 100 / (var(--cr) - var(--cl))),calc((100svh - var(--top0) - var(--bot0)) * 100 / ((var(--cb) - var(--ct)) * .9)));width:var(--W);left:calc(50% - var(--W) * (var(--cl) + var(--cr)) / 200);transform:none;top:calc(var(--top0) + env(safe-area-inset-top,0px) - var(--W) * .9 * var(--ct) / 100)}
+  .cta-wrap{left:var(--pad);right:var(--pad);bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  .ctrl{margin-left:0}
+  :root{--cbtn-face:rgba(255,255,255,.46);--cbtn-ring:rgba(30,40,50,.1)}
+  html[data-tod="night"]{--cbtn-face:rgba(20,28,58,.4);--cbtn-ring:rgba(255,255,255,.16)}
+  .ctrl .cbtn .face{width:30px;height:30px;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .ctrl .cbtn .ico{width:15px;height:15px}
+  .hint{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .panel{left:0;right:0;bottom:0;height:45svh;max-height:88svh;border-radius:18px 18px 0 0;transition:height .32s var(--ease),transform .32s var(--ease);touch-action:none}
+  .panel.full{height:88svh}
+  .p-grab{display:block;position:absolute;left:0;right:0;top:0;height:28px;cursor:grab}
+  .p-grab::before{content:'';position:absolute;left:50%;top:9px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:var(--grab)}
+  .p-head{padding:26px 8px 4px}   /* 上の端の左右に前・次(片手で届く位置) */
+  .p-name{font-size:21px}
+  .p-meta{padding-left:10px}
+  .p-body{padding:0 8px 18px;touch-action:pan-y}
+  .p-still{order:3}   /* 動かないとき: 道具の一覧を先に、断面の画像は後ろ */
+  .pent{padding:0 10px 12px 12px}
+  .pent.shot{display:grid;grid-template-columns:minmax(0,44%) minmax(0,1fr);column-gap:12px}
+  .pent.shot .pshot{grid-column:1;grid-row:1;align-self:start}
+  .pent.shot .pinfo{grid-column:2;grid-row:1;margin-top:0}
+  .pent.shot .pact{grid-column:1/-1}
+  .pcta{flex:1 1 auto}
+  html.opened .copy,html.opened .cta-wrap,html.opened .hint{opacity:0;pointer-events:none}   /* 昼夜・止めるのボタンは、ひらいている間も見える(止める手段を残す) */
+  .foot-in{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 16px}
+  .f-brand{grid-column:1/-1}
+  /* v7 閉じ(スマホ): 上の言葉は 1F の札と同じ場所、下の言葉と出口は帯が出ているときの画面(svh)の下に */
+  html.js:not(.rm) .cls-top{position:absolute;left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px))}
+  html.js:not(.rm) .cls-bot{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(8px + var(--tb) + env(safe-area-inset-bottom,0px))}
 }
-@media(max-width:760px){
-  .lab-h{font-size:22px}
-  .cp-name{font-size:28px}
-  .cp-p{font-size:14.5px}
-  .sm-name{font-size:24px}
+/* 背の低いスマホ(700px 以下): 一行(誰に何を)は残し、町を一行ぶん下げる */
+@media (max-width:920px) and (max-height:700px){h1{margin-top:4px}.hero{--top0:132px;--bot0:128px}}
+@media (max-width:920px) and (max-height:599px){.copy .eyebrow{display:none}h1{margin-top:0}.hero{--top0:118px;--bot0:116px}}   /* 600px 未満: 一行の説明は外し、町を高さで縮める */
+/* v7 閉じ(背の低いスマホ): 島の場所を残すため、下の言葉と出口を詰める(押せるものは 44px のまま) */
+@media (max-height:560px){.ctag{padding:3px 8px 4px;font-size:11px}.ctag::before{inset:-18px -4px 0}}   /* 背の低い画面: 島が小さいので札も小さく(ふれる範囲は ::before で 44px のまま) */
+@media (max-width:920px) and (max-height:640px){
+  .cls-q{font-size:13px;line-height:1.7}
+  .cls-idea{font-size:14.5px;letter-spacing:.01em}
+  .ways ul{margin-top:8px}
+  .ways a{min-height:52px;padding:5px 4px 5px 8px;gap:1px}
+  .ways small{font-size:10.5px}
+  .ways b{font-size:12.5px;line-height:1.4}
+  .cls-29{font-size:11.5px;line-height:1.4}
 }
+@media (max-width:389px){.menu .mt{display:none}.menu{padding:0 11px}}
+@media (max-width:374px){.logo{gap:9px}.logo svg{width:42px}.logo b{font-size:13.5px;letter-spacing:.28em}}
+@media (max-width:359px){.cta{gap:8px;padding:0 14px;font-size:14px;white-space:nowrap}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0s!important;animation:none!important}}
+
+/* 画像を作るとき */
+html.capture,html.capture body{background:transparent}
+html.capture body > *:not(#cap){display:none!important}
 </style>
+<script type="importmap">{"imports":{"three":"./town/vendor/three-0.160.0/three.module.min.js"}}</script>
 </head>
 <body data-root="./" data-page="home">
+<a class="skip" href="#main">本文へ</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="lg" viewBox="0 0 240 110"><path d="M8 74 C 62 16, 118 24, 176 84" fill="none" style="stroke:var(--logo-1)" stroke-width="6" stroke-linecap="round"/><path d="M58 94 C 118 60, 158 22, 232 12" fill="none" style="stroke:var(--logo-2)" stroke-width="6" stroke-linecap="round"/></symbol><!-- 色は --logo-1・--logo-2(紙の面は藍と砂、夜は生成りと砂) -->
+  </defs>
+</svg>
 
-<nav class="site-nav" aria-label="グローバルナビゲーション"></nav>
-
-<main>
-
-<svg class="pl" id="pl" aria-hidden="true" focusable="false"><path class="pl-path"/><circle class="pl-tip" r="4.5"/></svg>
-
-<!-- ============ ヒーロー ============
-     開いた瞬間は BRIDGE と動き。h1 は BRIDGE のロックアップ(正式ロゴの MARK の経路+英字)。面の中の筆の線(.hz)は下の script が描く(約束は <style> 冒頭)。
-     線の層は aria-hidden で、読む内容を持たない。動きを減らす設定・JS なし・同じタブでの再訪・データセーバーでは出さない(完成形から)。
-     帯の説明・主ボタン・副導線は最初から読める(演出を待たない。2026-10-11 社長指示) -->
-<section class="hero" aria-labelledby="heroTitle">
-  <div class="jr-top hz" id="hz">
-    <canvas class="hz-c" aria-hidden="true"></canvas>
-    <h1 class="jr-brand" id="heroTitle"><svg class="logo-mark" viewBox="0 0 758 110" role="img" aria-label="BRIDGE"><path class="l-navy" stroke-width="6" pathLength="1" d="M8 74 C 62 16, 118 24, 176 84"/><path class="l-sand" stroke-width="6" pathLength="1" d="M58 94 C 118 60, 158 22, 232 12"/><text class="jr-word" x="312" y="86">BRIDGE</text></svg><svg class="logo-mark hz-mark" viewBox="0 0 240 110" aria-hidden="true" focusable="false"></svg></h1>
-    <script>/* 開いた瞬間の準備: h1 のマークの経路を写し(hz-on)、動けるときだけ hz-live。動けるなら最初の1枚はマークを隠し、線が集まるのを待つ(1.2 秒で始まらなければ静止に戻す)。
-      同じタブでの再訪(sessionStorage)とデータセーバーでは動かさず、完成形から(2026-10-11 社長指示: 再訪・低速回線で待ち時間を作らない) */(()=>{try{const d=document,r=d.documentElement,c=r.classList,m=d.querySelector('.hz-mark'),cv=d.querySelector('.hz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle > svg:not(.hz-mark) .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;c.add('hz-on');let seen=false;try{seen=sessionStorage.getItem('bridge-hz')==='1';sessionStorage.setItem('bridge-hz','1')}catch(e){}const save=navigator.connection&&navigator.connection.saveData;if(!seen&&!save&&cv.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const z=d.getElementById('hz');c.add('hz-live');z.classList.add('hz-run');r.style.setProperty('--hz-t','0');setTimeout(()=>{if(!(window.HZ&&HZ.kick)){c.remove('hz-live');z.classList.remove('hz-run')}},1200)}}catch(e){}})()</script>
+<header class="hd">
+  <a class="logo" href="index.html" aria-label="BRIDGE ホームへ"><svg viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><b aria-hidden="true">BRIDGE</b></a>
+  <div class="hd-r">
+  <nav class="nav" id="hdNav" aria-label="サイト"><!-- 中身は town/hiraku.js の drawChrome が shared/bridge.js の NAV(primary)と CTA から描き直す。ここに書いたのは JS が動かないときの同じ中身(check-site 6項が bridge.js と照合する) -->
+    <a href="products/index.html">Products</a>
+    <a href="philosophy/index.html">Philosophy</a>
+    <a href="journal/index.html">Journal</a>
+    <a href="about/index.html">About</a>
+    <a class="nav-cta" href="community/index.html">Contact</a>
+  </nav>
+  <div class="ctrl" role="group" aria-label="町の操作">
+    <button class="cbtn" id="btnTod" type="button" aria-label="時刻を変える"><span class="face"><svg class="ico t-day" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><svg class="ico t-dusk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18M6 17a6 6 0 0 1 12 0M12 5v3M4.6 9.6l2 1.6M19.4 9.6l-2 1.6M7 20.5h10"/></svg><svg class="ico t-night" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5z"/></svg></span></button>
+    <button class="cbtn" id="btnPause" type="button" aria-pressed="false" aria-label="町の動きを止める"><span class="face"><svg class="ico i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="ico i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg></span></button>
   </div>
-  <div class="hero-foot">
-    <p class="hero-desc">看護師・リハビリ職・医療事務の方へ。いつもの仕事が病院の外でどんな言葉になるかを見つけて、ゲームや道具で試せます。</p>
-    <div class="hero-cta" id="heroCta">
-      <div class="hero-main"><a class="btn glass" href="./compass/index.html">自分の場合を見てみる <span aria-hidden="true">→</span></a><p class="h-meta">10の質問・約3分・登録不要</p></div>
-      <p class="h-alt"><a class="tx-link alt" href="./clinic-flow-3d/index.html">ゲームで経営を学ぶ <span class="ar" aria-hidden="true">→</span></a><a class="tx-link alt" href="./products/index.html#work">明日の業務に使える道具を見る <span class="ar" aria-hidden="true">→</span></a></p>
-    </div>
+  <button class="menu" id="menuBtn" type="button" aria-haspopup="dialog" aria-controls="menu" aria-label="メニュー"><span class="mt" aria-hidden="true">メニュー</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
+</header>
+
+<main id="main" tabindex="-1">
+<!-- 案A: 最初の画面を止めたまま(sticky)、スクロールで町の病院に寄り、中へ。3階 → 2階 → 1階。進みは hiraku.js が live.js の scrubTo(p) へ渡す -->
+<div class="stage" id="stage">
+<section class="hero" id="top" aria-labelledby="h1">
+  <div class="sky" aria-hidden="true"><i class="s-day"></i><i class="s-dusk"></i><i class="s-night"><span class="stars"></span></i></div>
+  <canvas id="world" aria-hidden="true"></canvas>
+  <div class="still" id="still">
+    <img class="poster" id="poster" width="1600" height="1440" sizes="(max-width: 920px) 330px, 66vw" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある" data-day="town/img/town-day.webp" data-dusk="town/img/town-dusk.webp" data-night="town/img/town-night.webp">
+    <script>/* 止めた画像は、その端末が描く品質の段で撮ったもの(スマホは中 -mid、PC は高。hiraku.js の段の選び方と同じ)。幅の違う2枚(スマホは 1000) */(function () { var p = document.getElementById('poster'), q = new URLSearchParams(location.search).get('q'), s = null; try { s = localStorage.getItem('bridge-hiraku-q'); } catch (e) {} var t = q || s || (innerWidth < 921 ? 'mid' : 'high'), m = navigator.deviceMemory || 8, c = navigator.hardwareConcurrency || 8; if (!q && t === 'high' && (m <= 4 || c <= 4)) t = 'mid'; var k = t === 'high' ? '' : '-mid', u = (p.dataset[document.documentElement.dataset.tod] || p.dataset.day).replace('.webp', k + '.webp'); p.dataset.tier = k; p.srcset = u.replace('.webp', '-1000.webp') + ' 1000w, ' + u + ' 1600w'; p.src = u; })();</script>
+    <noscript><img class="poster" src="town/img/town-day.webp" srcset="town/img/town-day-1000.webp 1000w, town/img/town-day.webp 1600w" sizes="(max-width: 920px) 330px, 66vw" width="1600" height="1440" alt="浮かぶ島の小さな町。真ん中に白い病院と広場、まわりに展望台・クリニック・ガラスの事務所・図書館・公園・煉瓦のアトリエがある"></noscript>
+  </div>
+  <div class="shut" id="shut" aria-hidden="true"><img id="shutImg" alt="" decoding="async"></div>
+  <div class="tags" aria-hidden="true"><span class="ttag" id="tagB"></span><span class="ttag st" id="tagS"></span>
+    <div class="nudge" id="nudge" hidden><i class="nr"></i><i class="nr n2"></i><span class="nt">ふれてみる</span></div>
+    <div class="rings" id="rings"></div>
+  </div>
+  <div class="otags" id="oTags" aria-hidden="true" hidden></div>
+
+  <div class="mist" aria-hidden="true"></div>
+  <div class="endfade" aria-hidden="true"></div>
+  <div class="clfade" aria-hidden="true"></div>
+  <div class="ctags" id="cTags" aria-hidden="true"><button class="ctag" type="button" data-id="observatory" tabindex="-1">展望台</button><button class="ctag" type="button" data-id="plaza" tabindex="-1">広場</button><button class="ctag" type="button" data-id="atelier" tabindex="-1">アトリエ</button><i class="cdot"></i></div><!-- v7 閉じ: 島の上の3つの札(押せる。Tab と読み上げは下の道の先で受ける)と現在地の砂の点。置き場は立体の側から(止めた画像では撮ったときの位置から) -->
+  <div class="copy">
+    <p class="eyebrow">医療職のための道具と経営ゲーム</p>
+    <h1 id="h1" tabindex="-1" data-bx="1"><span class="br">病院の外にも</span><span class="br">町がある</span></h1>
+    <p class="lead" data-bx="1"><span class="ph">真ん中に病院。</span><span class="ph">まわりに、</span><span class="ph">ほかの仕事や学びの</span><span class="ph">建物があります。</span></p>
+  </div>
+  <div class="cta-wrap">
+    <a class="cta" href="compass/index.html" aria-describedby="ctaMeta">経験を別の言葉にしてみる<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <p class="meta" id="ctaMeta">BRIDGE Compass・10の質問・約3分・登録不要</p>
+  </div>
+  <nav class="hits" id="hits" aria-label="町の建物">
+    <a class="hit" href="products/index.html#work" data-id="hospital" data-tag="49.93,24.31" data-box="38.46,20.91,65.92,47.13" data-nudge="54.95,29.14" aria-label="病院 — 明日の業務を楽にする"></a>
+    <a class="hit" href="products/index.html#career" data-id="observatory" data-tag="63.02,6.84" data-box="55.55,4.28,70.49,40.14" aria-label="展望台 — キャリア・経験を整理する"></a>
+    <a class="hit" href="products/index.html#learn" data-id="clinic" data-tag="71.24,52.59" data-box="62.54,48.79,80.68,67.37" aria-label="クリニック — 医療経営を学ぶ"></a>
+    <a class="hit" href="products/index.html#manage" data-id="office" data-tag="74.61,21.74" data-box="66.71,17.99,82.51,44.58" aria-label="事務所 — 経営・管理の実務に使う"></a>
+    <a class="hit" href="products/index.html#study" data-id="library" data-tag="22.33,33.52" data-box="9.55,28.88,31.82,55.79" aria-label="図書館 — 学習を続ける"></a>
+    <a class="hit" href="products/index.html#play" data-id="park" data-tag="76.54,47.31" data-box="67.11,40.69,85.96,58.71" aria-label="公園 — 気軽に試す・作品を楽しむ"></a>
+    <a class="hit" href="about/index.html#founder" data-id="atelier" data-tag="27.9,50.9" data-box="20.96,47.51,35.17,65.95" aria-label="アトリエ — 運営者"></a>
+    <a class="hit" href="philosophy/index.html" data-id="plaza" data-tag="47.82,48.39" data-box="36.02,49.19,59.62,64.13" aria-label="広場 — 正解を与えるのではなく、選択肢を増やす"></a>
+  </nav>
+  <p class="hint" id="hint">建物にふれると、中がひらきます</p>
+  <!-- 病院の中: 最初の画面の一行と同じ場所に小さな見出しと一文。札は道具の物の上(位置は立体の側から。止めた画像では撮ったときの位置) -->
+  <div class="ins" id="ins"><div class="ins-eb"><h2 class="eyebrow ins-main">病院の中</h2><p class="eyebrow ins-where" data-sid="yawagaeshi" aria-hidden="true">3F 休憩室</p><p class="eyebrow ins-where" data-sid="nidodema" aria-hidden="true">2F ナースステーション</p><p class="eyebrow ins-where" data-sid="keiji" aria-hidden="true">1F 受付</p></div><div class="ins-lines"><p class="ins-line" data-bx="1"><span class="ph">いつもの仕事のそばに、</span><span class="ph">道具を置いています。</span></p>
+    <p class="ins-fl" data-bx="1" data-sid="yawagaeshi" aria-hidden="true"><b>やわ返</b><span class="ph">角の立たない返信案を、</span><span class="ph">3つつくる</span></p>
+    <p class="ins-fl" data-bx="1" data-sid="nidodema" aria-hidden="true"><b>二度手間さがし</b><span class="ph">部署の手作業を、</span><span class="ph">減らせるものと</span><span class="ph">守るものに分ける</span></p>
+    <p class="ins-fl" data-bx="1" data-sid="keiji" aria-hidden="true"><b>掲示じたく</b><span class="ph">院内掲示を、</span><span class="ph">選んで埋めるだけ</span></p></div></div>
+  <nav class="chips" id="chips" aria-label="病院の中の道具">
+    <a class="tchip" data-sid="yawagaeshi" data-fl="2" href="yawagaeshi/index.html"><span class="c-fl">3階 休憩室</span><b>やわ返</b><span class="c-t">角の立たない返信案を、3つつくる</span></a>
+    <a class="tchip" data-sid="nidodema" data-fl="1" href="nidodema/index.html"><span class="c-fl">2階 ナースステーション</span><b>二度手間さがし</b><span class="c-t">部署の手作業を、減らせるものと守るものに分ける</span></a>
+    <a class="tchip" data-sid="keiji" data-fl="0" href="keiji/index.html"><span class="c-fl">1階 受付</span><b>掲示じたく</b><span class="c-t">院内掲示を、選んで埋めるだけ</span></a>
+  </nav>
+  <div class="flms" id="flms" aria-hidden="true"><span class="flm" data-f="2">3F</span><span class="flm" data-f="1">2F</span><span class="flm" data-f="0">1F</span></div>
+  <p class="ins-go" id="insGo" data-bx="1"><a href="products/index.html#work">明日の業務に使える道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+</section>
+</div>
+
+<!-- 動きを減らす設定のとき(と ?still=1): 舞台を畳み、最初の画面の次に、到着の画と同じ視点の止めた断面画像を普通の区画として置く(札3つと上の2行は最初から) -->
+<section class="rmin" id="rmin" aria-labelledby="rminH">
+  <div class="rmin-fig" id="rminFig">
+    <div class="rmin-text"><h2 class="eyebrow" id="rminH">病院の中</h2><p class="rmin-line">いつもの仕事のそばに、道具を置いています。</p></div>
+    <img id="rminImg" alt="町の病院を斜め前から見た断面。3階は休憩室と病室、2階はナースステーション、1階は受付と待合。休憩室のソファでスマホを見る人や、2階のFAXの前に立つ人がいて、1階の奥の壁には掲示板がある。" width="786" height="1448" decoding="async" loading="lazy">
+    <nav class="rmin-chips" aria-label="病院の中の道具">
+      <a class="tchip" data-sid="yawagaeshi" href="yawagaeshi/index.html"><span class="c-fl">3階 休憩室</span><b>やわ返</b><span class="c-t">角の立たない返信案を、3つつくる</span></a>
+      <a class="tchip" data-sid="nidodema" href="nidodema/index.html"><span class="c-fl">2階 ナースステーション</span><b>二度手間さがし</b><span class="c-t">部署の手作業を、減らせるものと守るものに分ける</span></a>
+      <a class="tchip" data-sid="keiji" href="keiji/index.html"><span class="c-fl">1階 受付</span><b>掲示じたく</b><span class="c-t">院内掲示を、選んで埋めるだけ</span></a>
+    </nav>
+    <div class="rmin-fl" aria-hidden="true"><span class="flm">3F</span><span class="flm">2F</span><span class="flm">1F</span></div>
+  </div>
+  <p class="ins-go rmin-go" data-bx="1"><a href="products/index.html#work">明日の業務に使える道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
 </section>
 
-<!-- ============ 触れる: いつもの仕事を、外の言葉で言うと ============
-     ヒーローの次に置く(2026-10-11 社長指示: 長い運営者紹介を体験の前に置かない)。第28条(体験は説明に勝る)の「触れる」瞬間。事実は実データに合わせる(第15条):
-     Compass の公開日=cockpit ledger(v1 2026-09-22)/ 見出し=Compass の結果画面の見出しと同じ言葉(compass/app/app.js)/
-     言いかえ=compass/app/data.js の TRANSLATIONS から職種をまたいで6つ(語は変えない。退院支援・多職種カンファレンス・後輩指導=pt / 申し送り・患者・家族への説明=nurse / 作業分析=ot)/
-     右の実画面=結果画面の例。理学療法士で Q1〜Q8 を「周囲を巻き込んで解決する/人やチームの調整/チームがうまく動いた/仕組みを改善する・人の話を聞いてまとめる/特にない/チームを動かす仕事/成長・働きやすさ/医療系企業のプロジェクトに入る」と答え、
-     Q9・Q10 は空のまま。compass/app/engine.js の実際の判定で出た結果画面をそのまま撮った(2026-10-11・1280×800・ライト/ダーク・無加工)。本人の結果と誤認させないよう「例」と答えの条件を添える。
-     橋は答えから出る(engine.js の pickBridges)ので、言いかえから出るとは書かない。JS がないときは退院支援の1組だけを見せる。
-     Compass 行きの主ボタンはヒーローの1つだけ。ここは文字リンク(design-system §4 CTA: 同じ行き先の主ボタンを同時に画面に入れない。designer 2026-10-11) -->
-<section class="try" id="try" aria-labelledby="tryTitle">
-  <div class="cp">
-    <div class="cp-text">
-      <p class="note">BRIDGE Compass(<time datetime="2026-09-22">2026-09-22</time> 公開)</p>
-      <h2 class="try-h" id="tryTitle">いつもの仕事を、外の言葉で言うと</h2>
-      <div class="tw-pick tag-row" id="twPick" role="group" aria-label="いつもの仕事を選ぶ" hidden></div>
-      <p class="tw-out" aria-live="polite" aria-atomic="true"><span class="tw-from">「<b>退院支援</b>」は</span><span class="tw-to"><span class="tw-to-t">プロジェクト推進・合意形成</span></span></p>
-      <p class="cp-p try-p">10の質問に答えると、職種と答えに沿った言いかえと、いまの経験から見える3つの方向が「橋」として出ます。添えた画面は、職種を理学療法士にして答えたときの結果の一例です。</p>
-      <p class="try-cta"><a class="tx-link" href="./compass/index.html">自分の場合を見てみる <span class="ar" aria-hidden="true">→</span></a><span class="h-meta">10の質問・約3分・登録不要</span></p>
-    </div>
-    <figure class="cp-fig">
-      <a class="cp-shot" href="./compass/index.html">
-        <img class="th-l" src="./images/products/shots/compass-result-light.webp" alt="BRIDGE Compassの結果画面の例。見出し「立場の違う人を、ひとつのチームにする力」、持っているもの「調整・チーム推進・改善・対人理解」、現在地から「マネジメント」「プロジェクトマネジメント」「行政 / 医療政策」へ3本の線が分かれる地図" width="1280" height="800" decoding="async">
-        <img class="th-d" src="./images/products/shots/compass-result-dark.webp" alt="" width="1280" height="800" loading="lazy" decoding="async">
-      </a>
-      <figcaption class="shot-cap">結果画面の例。職種は理学療法士、調整やチームに関わる答えを選んだ場合(<time datetime="2026-10-11">2026-10-11</time> 撮影)</figcaption>
-    </figure>
-  </div>
-  <script>/* 言いかえの一場面: 選ぶと、言いかえを入れ替えて砂の下線を引く */(()=>{try{const T=[['退院支援','プロジェクト推進・合意形成'],['申し送り','要点を絞った情報の引き継ぎ'],['患者・家族への説明','複雑な情報の翻訳'],['多職種カンファレンス','ステークホルダー調整'],['作業分析','プロセス分解'],['後輩指導','人材育成・フィードバック']];
-    const d=document,box=d.getElementById('twPick'),fr=d.querySelector('.tw-from b'),to=d.querySelector('.tw-to-t'),tw=d.querySelector('.tw-to');
-    const draw=()=>{tw.classList.remove('draw');void tw.offsetWidth;tw.classList.add('draw')};
-    T.forEach((t,i)=>{const b=d.createElement('button');b.type='button';b.className='tag';b.textContent=t[0];b.setAttribute('aria-pressed',String(!i));
-      b.addEventListener('click',()=>{if(b.getAttribute('aria-pressed')==='true')return;[...box.children].forEach(x=>x.setAttribute('aria-pressed',String(x===b)));fr.textContent=t[0];to.textContent=t[1];draw()});box.appendChild(b)});
-    box.hidden=false;d.documentElement.classList.add('tw-on')}catch(e){}})()</script>
-</section>
+<!-- JS が動かないときだけ: 町の建物ごとの29の道具(建物名と道具名のリンクだけ。PRODUCTS と同じ29件。JS が動くときは、町のパネルが同じ29件を持つ) -->
+<noscript><nav class="nojs" aria-labelledby="njTitle"><h2 id="njTitle">町の道具</h2><ul class="nj-b">
+    <li><h3>病院</h3><ul><li><a href="keiji/index.html">掲示じたく</a></li><li><a href="nidodema/index.html">二度手間さがし</a></li><li><a href="yawagaeshi/index.html">やわ返</a></li></ul></li>
+    <li><h3>展望台</h3><ul><li><a href="compass/index.html">BRIDGE Compass</a></li><li><a href="tanaoroshi/index.html">経験の棚卸し</a></li><li><a href="iikae/index.html">現場のことば 言いかえ帳</a></li><li><a href="moyamoya/index.html">職場モヤモヤ診断</a></li><li><a href="karte/index.html">現場のカルテ</a></li><li><a href="daily-app/index.html">キャリアログ</a></li><li><a href="growth-76a805/index.html">Growth OS</a></li></ul></li>
+    <li><h3>クリニック</h3><ul><li><a href="clinic-flow-3d/index.html">クリニックタウン3D</a></li><li><a href="turnaround12/index.html">ターンアラウンド12</a></li><li><a href="pmi-quest/index.html">クリニックPMIクエスト</a></li></ul></li>
+    <li><h3>事務所</h3><ul><li><a href="rehaboard/index.html">RehaBoard</a></li><li><a href="medboard/index.html">MedBoard</a></li><li><a href="hire-board/index.html">HireBoard</a></li><li><a href="interview-kit/index.html">面接官の手帖</a></li><li><a href="consult-simulator/index.html">ConsultSim</a></li><li><a href="round-note/index.html">本部長の巡回手帖</a></li><li><a href="manager-starter/index.html">医療管理職スターター</a></li><li><a href="medops/index.html">医療管理実務ライブラリ</a></li><li><a href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer">Reha Checklist<span class="sr">(別のサイト・新しいタブで開きます)</span></a></li></ul></li>
+    <li><h3>図書館</h3><ul><li><a href="him-quiz/index.html">HIM Quiz</a></li><li><a href="study-board/index.html">StudyBoard</a></li><li><a href="english-trainer/index.html">Daily English</a></li></ul></li>
+    <li><h3>公園</h3><ul><li><a href="gokigen-gacha/index.html">ごきげん回復ガチャ</a></li><li><a href="ittan-horyu/index.html">いったん保留</a></li><li><a href="madoakari/index.html">窓あかり</a></li><li><a href="futatsume/index.html">ふたつめの波</a></li></ul></li>
+  </ul></nav></noscript>
 
-<!-- ============ 作っているもの(代表作) ============
-     商品の一覧ではなく、いま手元にあるもの。大きさの差は使われ方の差: クリニックタウン3D=大きな実画面(左へ裁ち落とす)/ 経験の棚卸し=中くらいの実画面(designer 2026-10-11: 代表作は2つまで。ほかの道具は下の「目的から探す」が受ける)。
-     事実は台帳と実データに合わせる(第15条): Clinic Town 3D の版=sw.js の VER(手を入れた回数は載せない。2026-10-03 社長決定)/ 版と個数は scripts/check-site.mjs の6項が照合する / 29=products/index.html の PRODUCTS の件数(増減したらここも直す) -->
-<section class="lab" id="lab" aria-labelledby="labTitle">
-  <div class="lab-in">
-    <h2 class="lab-h" id="labTitle">ほかにも作っています</h2>
-    <p class="lab-lead">直しながら置いています。ここに並べたものは無料で、登録もいりません。入力はこの端末の中にだけ残ります。</p>
-  </div>
-
-  <div class="cp rev">
-    <a class="cp-shot" href="./clinic-flow-3d/index.html">
-      <img src="./images/products/shots/clinic-flow-3d-decision.webp" sizes="(max-width:860px) 100vw, 58vw" alt="クリニックタウン3Dの実際の画面。Day 6 の相談で、紹介を増やす動き方を3つの選択肢から選ぶところ" width="1440" height="900" loading="lazy" decoding="async">
-    </a>
-    <div class="cp-text">
-      <p class="note">直し続けているゲーム</p>
-      <h3 class="cp-name">クリニックタウン3D</h3>
-      <p class="cp-p">クリニックの経営を、1日ずつ動かして学ぶゲームです。診療時間を1コマ変えると、待ち時間と利益が変わります。</p>
-      <p class="ct-v">いまの版は <span class="v">v99.3</span> です。</p>
-      <a class="tx-link" href="./clinic-flow-3d/index.html">いまの版で遊ぶ <span class="ar" aria-hidden="true">→</span></a>
-    </div>
-  </div>
-
-  <div class="lab-in">
-    <div class="sm">
-      <div class="sm-text">
-        <p class="note">面接の前に</p>
-        <h3 class="sm-name">経験の棚卸し</h3>
-        <p class="sm-d">18の質問に、思い出せるものから答えていくと、職務経歴書のたねと面接で話す材料ができあがります。約15分。</p>
-        <a class="tx-link" href="./tanaoroshi/index.html">質問に答える <span class="ar" aria-hidden="true">→</span></a>
-      </div>
-      <figure>
-        <a class="sm-fig" href="./tanaoroshi/index.html"><img src="./images/products/thumbs/tanaoroshi.webp" alt="経験の棚卸しの実際の画面" width="880" height="550" loading="lazy" decoding="async"></a>
-        <figcaption class="sm-cap">経験の棚卸し(実際の画面)</figcaption>
-      </figure>
-    </div>
-    <p class="lab-all"><span class="n">ぜんぶで29点あります。</span><a class="tx-link" href="./products/index.html">一覧を見る <span class="ar" aria-hidden="true">→</span></a></p>
-  </div>
-</section>
-
-<!-- ============ 目的から探す ============
-     用途の6分類は products/index.html の USES と同じ順・同じ語・同じ一文。件数は PRODUCTS から(scripts/check-site.mjs の6項が照合する。増減したらここも直す)。
-     索引は Products が持つ。ここは渡すだけの薄い帯(ia v3.1)。形は .sm-item と同じ(名前・一文・→・下罫。designer 2026-10-11) -->
-<section class="uses" id="uses" aria-labelledby="usesTitle">
-  <div class="uses-in">
-    <h2 class="uses-h" id="usesTitle">目的から探す</h2>
-    <ul class="use-list">
-      <li><a class="use-item" href="./products/index.html#work"><span class="use-txt"><span class="use-t">明日の業務を楽にする</span><span class="use-d">受付や事務の手作業を、選ぶだけに。</span></span><span class="use-n">3点<span class="ar" aria-hidden="true">→</span></span></a></li>
-      <li><a class="use-item" href="./products/index.html#manage"><span class="use-txt"><span class="use-t">経営・管理の実務に使う</span><span class="use-d">部門長・事務長・法人本部の仕事に。</span></span><span class="use-n">9点<span class="ar" aria-hidden="true">→</span></span></a></li>
-      <li><a class="use-item" href="./products/index.html#learn"><span class="use-txt"><span class="use-t">医療経営を学ぶ</span><span class="use-d">診療科を選び、1日ずつ回して、点数表を手触りに。</span></span><span class="use-n">3点<span class="ar" aria-hidden="true">→</span></span></a></li>
-      <li><a class="use-item" href="./products/index.html#career"><span class="use-txt"><span class="use-t">キャリア・経験を整理する</span><span class="use-d">経験を言葉に。職務経歴書と面接の材料に。</span></span><span class="use-n">7点<span class="ar" aria-hidden="true">→</span></span></a></li>
-      <li><a class="use-item" href="./products/index.html#study"><span class="use-txt"><span class="use-t">学習を続ける</span><span class="use-d">記録の側を軽くして、続ける。</span></span><span class="use-n">3点<span class="ar" aria-hidden="true">→</span></span></a></li>
-      <li><a class="use-item" href="./products/index.html#play"><span class="use-txt"><span class="use-t">気軽に試す・作品を楽しむ</span><span class="use-d">数分で終わるものと、眺めるための作品。</span></span><span class="use-n">4点<span class="ar" aria-hidden="true">→</span></span></a></li>
-    </ul>
-  </div>
-</section>
-
-<!-- ============ 閉じ(本人の言葉 → 筆の線がロゴに集まる帯 → 明朝の一文 → 出口) ============
-     本人の言葉は道具のあとに置く(2026-10-11 社長指示: BRIDGE → 体験/代表作 → 用途別入口 → 作っている人の視点 → 次の行動。designer: 文字の面を2つ続けないため閉じの頭に入れる)。
-     1〜2文目は社長の依頼文(2026-09-23)の言葉をもとにしている(第13条: 本人の実話の範囲を超えない)。3文目は前の版のトップの文を引き継いだ(社長本人の言葉かは未確認のまま、2026-10-11 社長「マージして」でこの形で出荷)。
-     明朝の一文は憲法第23条 v1.5 がトップに残すと定めたもの。出口は 読む/読む/話す/note と「何もしなくても十分」(第29条) -->
-<section class="me" id="about" aria-labelledby="ideaTitle">
-  <div class="me-in">
-    <div class="me-body">
-      <div class="words" id="words" aria-label="運営者の言葉">
-        <div class="w-step"><p class="w-p">臨床だけをしていた頃、事業会社で働くとは思っていませんでした。</p></div>
-        <div class="w-step"><p class="w-p">外に出てみると、病院で当たり前にやっていた調整や記録が、別の場所では別の名前で呼ばれていました。</p></div>
-        <div class="w-step"><div class="w-p"><p>道は、病院の外にも続いています。<span class="w-l">それが見えるものを、ひとつずつ作っています。</span></p><p class="w-sign">理学療法士の私(橋本渉)が、ひとりで運営しています。</p></div></div>
-      </div>
-      <div class="kz" id="kz" aria-hidden="true"><canvas class="kz-c"></canvas><svg class="logo-mark kz-mark" viewBox="0 0 240 110" focusable="false"></svg></div>
-      <script>/* 閉じの帯: h1 のマークの d を写し、動けるなら解析中に帯を高く */(()=>{try{const d=document,r=d.documentElement.classList,m=d.querySelector('.kz-mark'),c=d.querySelector('.kz-c');let h='',n=0;for(const k of['navy','sand']){const s=d.querySelector('#heroTitle .l-'+k);if(s)n++,h+=`<path class="l-${k}" stroke-width="6" d="${s.getAttribute('d')}"/>`}if(n<2)return;m.innerHTML=h;r.add('kz-on');if(c.getContext('2d')&&window.IntersectionObserver&&window.requestAnimationFrame&&!matchMedia('(prefers-reduced-motion: reduce)').matches)r.add('kz-live')}catch(e){}})()</script>
-      <div class="me-close">
-        <h2 class="idea-h" id="ideaTitle">正解を与えるのではなく、<br class="br-pc"><span class="a">選択肢を増やす</span></h2>
-        <p class="me-links"><a href="./philosophy/index.html">考え方をもう少し読む <span aria-hidden="true">→</span></a><a href="./about/index.html">運営者について</a><a href="./community/index.html">話をする</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">noteで書いていること <span aria-hidden="true">↗</span></a></p>
-        <p class="me-note">見るだけで帰っても、それで十分です。</p>
+<!-- v7 閉じ: 病院の外。舞台に重ねた層(舞台と同じ長さ。中身は同じ所に留まる)。言葉と出口は、立体が見晴らしに止まってから出す(透明で隠すだけ)。
+     本人の言葉は筆の線のトップ(〜2026-10-28)の閉じの1文目をそのまま写した。明朝の一文は憲法 v1.10 の町の但し書き(第23条)がトップに残すと定めたもの -->
+<section class="cls" id="cls" aria-labelledby="clsH">
+  <div class="cls-in" id="clsIn">
+    <div class="cls-col" id="clsCol">
+      <div class="cls-top" id="clsTop"><h2 class="eyebrow" id="clsH" tabindex="-1">病院の外</h2><p class="cls-q" data-bx="1"><span class="ph">臨床だけをしていた頃、</span><span class="ph">事業会社で働くとは思っていませんでした。</span></p><p class="cls-who">理学療法士の私(橋本渉)が、ひとりで運営しています</p></div>
+      <figure class="cls-fig" id="clsFig" aria-hidden="true"><img id="clsImg" alt="" width="1600" height="1440" decoding="async"><button class="ctag" type="button" data-id="observatory" tabindex="-1">展望台</button><button class="ctag" type="button" data-id="plaza" tabindex="-1">広場</button><button class="ctag" type="button" data-id="atelier" tabindex="-1">アトリエ</button><i class="cdot"></i></figure>
+      <div class="cls-bot" id="clsBot">
+        <p class="cls-idea" id="clsIdea" data-bx="1">正解を与えるのではなく、<span class="ph">選択肢を増やす</span></p>
+        <div class="cls-go" id="clsGo">
+          <nav class="ways" aria-label="道の先"><ul>
+            <li><a href="compass/index.html" data-id="observatory"><small>展望台</small><b><span class="ph">自分の場合を</span><span class="ph nw">見てみる<span aria-hidden="true"> →</span></span></b></a></li>
+            <li><a href="philosophy/index.html" data-id="plaza"><small>広場</small><b><span class="ph">考え方を</span><span class="ph nw">もう少し読む<span aria-hidden="true"> →</span></span></b></a></li>
+            <li><a href="community/index.html" data-id="atelier"><small>アトリエ</small><b><span class="ph nw">話をする<span aria-hidden="true"> →</span></span></b></a></li>
+          </ul></nav><!-- 使う(Compass)/読む(考え方)/話す(話をする。NAV の CTA とアトリエのパネルと同じ語。誰と話すかは上の名乗りが持つ) -->
+          <p class="cls-tx" data-bx="1"><a href="about/index.html#founder">運営者について</a><a href="products/index.html">すべての道具を見る</a></p>
+          <p class="cls-29">見るだけで帰っても、それで十分です。</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="pNameT" hidden>
+  <div class="p-grab" id="pGrab" aria-hidden="true"></div>
+  <div class="p-head">
+    <div class="p-nav">
+      <button class="p-step" id="pPrev" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg><span aria-hidden="true">前</span></button>
+      <h2 class="p-title" id="pTitle" tabindex="-1"><button class="p-name" id="pName" type="button" aria-expanded="false" aria-controls="pList"><span id="pNameT"></span><span class="sr">(建物の一覧)</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9.5l5.5 5.5 5.5-5.5"/></svg></button></h2>
+      <button class="p-step" id="pNext" type="button"><span aria-hidden="true">次</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg></button>
+    </div>
+    <p class="p-meta" data-bx="1"><span class="p-role" id="pRole"></span><span id="pLine"></span></p>
+    <button class="p-close" id="pClose" type="button" aria-label="閉じる"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="p-body">
+    <div class="p-list" id="pList" hidden><ol class="lrows" aria-label="町の建物"></ol></div>
+    <div class="p-main" id="pMain">
+      <figure class="p-still" id="pStill" hidden><img alt="" width="1200" height="900"></figure>
+      <div class="p-plaza" id="pPlaza" hidden>
+        <div class="pz-mark"><svg viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><p data-bx="1"><span>交差するが、</span><span>接続しない</span><br><span>二本の線が交わり、</span><span>新しい方向へ伸びていく</span></p></div>
+        <p class="pz-aim" data-bx="1"><span>人が、自ら選び、</span><span>納得して生きられる社会をつくる</span></p>
+        <h3 class="pz-h" id="pzH">行き先を選ぶ</h3>
+        <ol class="lrows" id="pzList" aria-labelledby="pzH"></ol>
+        <p class="pz-links" data-bx="1"><a href="philosophy/index.html">考え方<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="about/index.html">BRIDGEについて<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+      </div>
+      <ul class="p-tools" id="pTools"></ul>
+      <p class="p-more" id="pMore" data-bx="1" hidden><a href="products/index.html"><span>この用途を一覧で比べる</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+    </div>
+  </div>
+</div>
 
 </main>
 
-<footer class="site-footer"></footer>
-<script src="./shared/bridge.js" defer></script>
-<script>
-/* 開いた瞬間の時刻 τ(0〜5)。線の準備ができたら約 3.2 秒で 0→5(一度だけ。3.45 までは画面の中央に大きなロゴ、そこから名前の横へ縮む)。スクロールには従わない。
-   集まり終えたら HZ.done を解く(ページの線がそれを待つ)。動けない・失敗・途中から開いたときはすぐ解く */
-window.HZ = (function () {
-  var R = document.documentElement, DU = 3.2, t0 = 0, started = false, done = false, res;
-  var io = function (u) { return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
-  function finish() { done = true; if (res) { res(); res = null; } }
-  function load() { if (done) return 5; if (!started) return 0; var u = (performance.now() - t0) / 1000 / DU; if (u >= 1) { finish(); return 5; } return 5 * io(u); }
-  var api = {
-    done: new Promise(function (r) { res = r; }),
-    target: load,
-    waiting: function () { return !done && R.classList.contains('hz-live'); },
-    kick: null,
-    onReady: function () { if (started || done) return; started = true; t0 = performance.now(); (function loop() { load(); if (api.kick) api.kick(); if (!done) requestAnimationFrame(loop); })(); } // 面が画面の外でも時計は進める(ページの線は HZ.done を待つ)
-  };
-  if (!R.classList.contains('hz-live') || scrollY > innerHeight * .3) finish();
-  new MutationObserver(function () { if (!R.classList.contains('hz-live')) finish(); }).observe(R, { attributes: true, attributeFilter: ['class'] });
-  /* ヒーローが見えているあいだはナビのロゴをしまう */
-  var top = document.querySelector('.jr-top');
-  if (top && 'IntersectionObserver' in window) { R.classList.add('hero-in'); new IntersectionObserver(function (es) { R.classList.toggle('hero-in', es[0].intersectionRatio >= .2); }, { rootMargin: '-72px 0px 0px 0px', threshold: [0, .2, .4] }).observe(top); }
-  return api;
-})();
-</script>
-<script>
-/* ページの線(約束は <style> 冒頭)。道筋は本文の実際の位置から組む(PC は余白を縫い、スマホは節の間の空きで左右を渡る)。
-   始まり: ヒーローのマークの藍の線の終わり(176,84)から、その向きのまま伸びる。終わり: 閉じのマークの藍の線の始まり(8,74)へ、その向きで入る。
-   長さ: 先端の高さ σ(ページの上から)= スクロール + 画面の高さ×0.7(スマホは 0.8。最初の 0.4 画面は始まりから滑らかに追いつく)。道筋の y の累積最大で長さを引く。
-   2026-10-11: 文字と実画面の表示は線の先端に依存させない(社長指示「演出に内容の可視性を依存させない」)。線は本文の脇を通る伴走で、先端の砂の点が現在地を示すだけ */
-(function () {
-  var D = document, R = D.documentElement, main = D.querySelector('main'), svg = D.getElementById('pl');
-  if (!svg || !main || !window.requestAnimationFrame || !svg.querySelector('.pl-path').getTotalLength) return;
-  var path = svg.querySelector('.pl-path'), tip = svg.querySelector('.pl-tip'), rq = matchMedia('(prefers-reduced-motion: reduce)');
-  var LUT = [], total = 0, y0 = 0, mainTop = 0, cur = -1, raf = 0, last = 0, ready = false, live = false;
-  var M = Math, clamp = function (x, a, b) { return x < a ? a : x > b ? b : x; };
-  function rel(sel) { var el = typeof sel === 'string' ? D.querySelector(sel) : sel; if (!el) return null; var r = el.getBoundingClientRect(); if (!r.width && !r.height) return null; return { l: r.left, t: r.top + scrollY - mainTop, r: r.right, b: r.bottom + scrollY - mainTop, w: r.width, h: r.height }; }
-  function mk(sel, x, y, vw) { var el = D.querySelector(sel); if (!el) return null; var r = el.getBoundingClientRect(); if (!r.width) return null; var s = r.width / (vw || 240); return [r.left + x * s, r.top + scrollY - mainTop + y * s, s]; }
-  function route(W) {
-    var pc = W > 860, P = [], A = mk('.jr-brand .hz-mark', 176, 84) || mk('.jr-brand > svg', 176, 84, 758), E = mk('.kz-mark', 8, 74);
-    if (!A) return null;
-    var push = function (x, y) { P.push([x, y]); };
-    var band = rel('.hero-foot'), desc = rel('.hero-desc'), cta = rel('.hero-cta'), wps = [].map.call(D.querySelectorAll('.w-p'), rel).filter(Boolean);
-    var tryT = rel('.try .cp-text'), tryS = rel('.try .cp-fig'), labIn = rel('.lab-in'), ctT = rel('.cp.rev .cp-text'), ctS = rel('.cp.rev .cp-shot'), sm = rel('.sm'), smT = rel('.sm-text'), smF = rel('.sm-fig'), all = rel('.lab-all'), uses = rel('.uses-in');
-    push(A[0], A[1]);
-    var lead = pc ? 110 : 70; push(A[0] + .695 * lead, A[1] + .719 * lead); // 藍の線の終わりの向き(118,24)→(176,84)のまま(短いと継ぎ目が折れて見える)
-    if (pc) {
-      var gx = desc && cta ? (desc.r + cta.l) / 2 : W / 2, wr = 0; wps.forEach(function (w) { wr = M.max(wr, w.r); });
-      var xr = M.min(W - 48, wr + 80), lx = M.max(28, (tryT ? tryT.l : 120) - 62), rx = W - 58;
-      if (band) push(gx, band.t + band.h * .5);
-      var tb = M.max(tryT ? tryT.b : 0, tryS ? tryS.b : 0), gp = labIn ? labIn.t - tb : 40;
-      if (tryT) { push(lx, tryT.t - 18); push(lx + 12, tryT.t + tryT.h * .55); push(lx, tb + gp * .3); }
-      if (labIn) push(rx, labIn.t - gp * .25);
-      // 代表作の実画面の縁に寄る(課題 → 道具): 写しと文字の間の空きの列を、上から入って下へ抜ける(斜めに文字を横切らない)
-      if (ctS && ctT) { var gx1 = (ctS.r + ctT.l) / 2; push(gx1, ctS.t - 36); push(gx1, ctS.t + ctS.h * .5); push(gx1, ctS.b + 36); } else if (ctT) push(rx - 10, ctT.t + ctT.h * .5);
-      if (smT && smF) { var gx2 = (smT.r + smF.l) / 2; push(gx2, smF.t - 30); push(gx2, smF.t + smF.h * .5); } else if (sm) push(rx, sm.t + sm.h * .5);
-      if (all) push(rx, all.b + 30);
-      if (uses) { push(rx, uses.t + uses.h * .5); push(rx, uses.b + 28); } // 用途の行の右端を下まで通ってから、言葉の右の余白へ
-      if (wps.length) { push(xr, wps[0].t - 24); wps.forEach(function (w, i) { push(xr + (i % 2 ? -16 : 16), w.t + w.h * .55); }); push(xr, wps[wps.length - 1].b + 24); }
-    } else {
-      var ex = W - 8, wx = 8, gap = function (a, b, u) { return a + (b - a) * u; };
-      if (band) { push(ex, band.t - 26); push(ex, band.b + 10); }
-      var g1 = band ? band.b : 0;
-      if (tryT) { push(ex, gap(g1, tryT.t, .2)); push(wx, gap(g1, tryT.t, .8)); push(wx, tryT.t + tryT.h * .5); }
-      var tb2 = M.max(tryT ? tryT.b : 0, tryS ? tryS.b : 0);
-      if (labIn) { push(wx, gap(tb2, labIn.t, .2)); push(ex, gap(tb2, labIn.t, .8)); push(ex, labIn.t + labIn.h * .5); }
-      if (ctT) push(ex, ctT.t + ctT.h * .5);
-      var cb = M.max(ctT ? ctT.b : 0, ctS ? ctS.b : 0);
-      if (sm) { push(ex, gap(cb, sm.t, .2)); push(wx, gap(cb, sm.t, .8)); push(wx, sm.t + sm.h * .5); }
-      if (all) push(wx, all.b + 24);
-      if (uses) { push(wx, gap(all ? all.b : 0, uses.t, .3)); push(ex, gap(all ? all.b : 0, uses.t, .9)); push(ex, uses.t + uses.h * .5); }
-      wps.forEach(function (w) { push(ex, w.t + w.h * .5); });
-      if (wps.length) push(ex, wps[wps.length - 1].b + 24); // 言葉の下まで端を通ってから閉じへ(斜めに署名を横切らない)
-    }
-    // 閉じ: マークの上の空いた帯(筆の線が集まる場所)を横切って左へ。そこから下りて、大きな弧で藍の線の始まり(8,74)へ、その向き((8,74)→(62,16))のまま入る
-    var kzb = rel('.kz'), END = null;
-    if (E) { var mx = pc ? E[0] - 78 : M.max(6, E[0] - 18), my = E[1] - (pc ? 46 : 30);
-      if (pc && kzb && kzb.h > 120) push((E[0] + W) / 2 + 60, kzb.t + kzb.h * .22);
-      push(mx, my);
-      END = { e: [E[0], E[1]], r: pc ? 62 : 38, u: pc ? 80 : 48 }; } // 入ってきた向きのまま回り込み、藍の線の始まりへ入る(角を作らない)
-    // y が戻る点を均す(先端の高さで長さを引くため)
-    for (var i = 1; i < P.length; i++) if (P[i][1] < P[i - 1][1] + 8) P[i][1] = P[i - 1][1] + 8;
-    P.END = END;
-    return P;
-  }
-  function swoop(P) { var q = P[P.length - 1], p = P[P.length - 2] || q, E = P.END; if (!E) return '';
-    var dx = q[0] - p[0], dy = q[1] - p[1], dl = Math.hypot(dx, dy) || 1, tx = .82, ty = -.57; // 入ってきた向きで回り込み、藍の線の始まりへ入る(約35°。藍の線の始まり (8,74)→(62,16) の約47°より浅くして、回り込みを小さくする)
-    return ' C' + cx(q[0] + dx / dl * E.r).toFixed(1) + ' ' + (q[1] + dy / dl * E.r).toFixed(1) + ' ' + cx(E.e[0] - tx * E.u).toFixed(1) + ' ' + (E.e[1] - ty * E.u).toFixed(1) + ' ' + E.e[0].toFixed(1) + ' ' + E.e[1].toFixed(1); }
-  var XW = 0, cx = function (x) { return M.min(XW - 4, M.max(4, x)); }; // 制御点を画面の内側に置く(3次ベジェは制御点の凸包の中に収まるので、線と先端が画面の外へ出ない)
-  function toPath(P) { // Catmull-Rom → 3次ベジェ
-    var d = 'M' + P[0][0].toFixed(1) + ' ' + P[0][1].toFixed(1);
-    for (var i = 0; i < P.length - 1; i++) {
-      var p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2, k = 1 / 6;
-      d += ' C' + cx(p1[0] + (p2[0] - p0[0]) * k).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) * k).toFixed(1) + ' ' + cx(p2[0] - (p3[0] - p1[0]) * k).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) * k).toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
-    }
-    return d;
-  }
-  function build() {
-    mainTop = main.getBoundingClientRect().top + scrollY;
-    var W = R.clientWidth, H = main.offsetHeight;
-    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.style.height = H + 'px';
-    XW = W; var P = route(W); if (!P || P.length < 3) { ready = false; return; }
-    var dBody = toPath(P); path.setAttribute('d', dBody); var lenQ = path.getTotalLength();
-    path.setAttribute('d', dBody + swoop(P)); total = path.getTotalLength();
-    LUT = []; var m = -1e9, py = null;
-    for (var l = 0; l <= total + 4; l += 5) { var ll = M.min(l, total), p = path.getPointAtLength(ll);
-      if (ll <= lenQ || py == null) m = M.max(m, p.y); else m += M.max(p.y - py, 5 * .45); // 弧のあいだは、上へ戻る分もスクロールで少しずつ引く
-      py = p.y; LUT.push([ll, m]); if (ll >= total) break; }
-    y0 = P[0][1]; path.style.strokeDasharray = total + ' ' + (total + 20); ready = true; cur = -1; kick();
-  }
-  function lenAt(sig) { // 累積最大の y が sig を超えない最長の長さ
-    if (!LUT.length || sig <= LUT[0][1]) return 0;
-    var lo = 0, hi = LUT.length - 1; if (sig >= LUT[hi][1]) return total;
-    while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (LUT[mid][1] <= sig) lo = mid; else hi = mid; }
-    var a = LUT[lo], b = LUT[hi], u = b[1] > a[1] ? (sig - a[1]) / (b[1] - a[1]) : 1; return a[0] + (b[0] - a[0]) * clamp(u, 0, 1);
-  }
-  function target() {
-    if (rq.matches) return total;
-    var vh = innerHeight, k = innerWidth <= 760 ? .8 : .7, s0 = .4 * vh, sy = M.max(0, scrollY), tipY = sy + k * vh - mainTop;
-    var sig = sy < s0 ? y0 + (s0 + k * vh - mainTop - y0) * (sy / s0) : tipY;
-    return lenAt(sig);
-  }
-  function paint(l) {
-    path.style.strokeDashoffset = (total - l).toFixed(1);
-    var on = !rq.matches && l > 18 && l < total - 2; tip.classList.toggle('on', on);
-    if (on) { var p = path.getPointAtLength(l); tip.setAttribute('cx', p.x.toFixed(1)); tip.setAttribute('cy', p.y.toFixed(1)); }
-  }
-  function step(now) {
-    raf = 0; if (!ready || !live) return;
-    var tg = target(), dt = last ? M.min((now - last) / 1000, .05) : 1 / 60; last = now;
-    var smooth = !rq.matches;
-    if (cur < 0 || !smooth) cur = tg; else { var d = tg - cur; cur = M.abs(d) < .5 ? tg : cur + d * (1 - M.exp(-dt / .16)); }
-    paint(cur);
-    if (cur !== tg) raf = requestAnimationFrame(step); else last = 0;
-  }
-  function kick() { if (live && ready && !raf) raf = requestAnimationFrame(step); }
-  addEventListener('scroll', kick, { passive: true });
-  var rz = 0; addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(build, 150); });
-  if (window.ResizeObserver) { var lh = 0; new ResizeObserver(function () { var h = main.offsetHeight; if (M.abs(h - lh) > 2) { lh = h; clearTimeout(rz); rz = setTimeout(build, 150); } }).observe(main); }
-  var go = function () { build(); live = true; R.classList.add('pl-on'); kick(); };
-  var fontsReady = D.fonts && D.fonts.ready ? D.fonts.ready : Promise.resolve();
-  Promise.all([fontsReady, window.HZ && HZ.done ? HZ.done : Promise.resolve()]).then(go, go);
-  addEventListener('load', function () { if (live) build(); });
-  if (rq.addEventListener) rq.addEventListener('change', function () { cur = -1; kick(); });
-})();
-</script>
-<script>
-/* 筆の線のエンジン(開いた瞬間 .hz と閉じ .kz で同じコードを2回使う。B-13 の共通化・2026-10-11)。
-   τ(0〜5)は o.readT を追い、追いつけば止まる。約束は <style> 冒頭の「開いた瞬間」「閉じの約束」。失敗したら完成形。
-   2つの面で違うのは、時刻の読み方(読み込みの進み/帯の進み)・粒の数・積分の刻み・縮む拍と太る拍・live になる条件(閉じは帯が画面外のときだけ)・
-   閉じだけの kz-in の追跡とスクロールの監視・開いた瞬間だけの --hz-t と HZ への連絡で、o に渡す。
-   このページだけのコード。bridge.js へ上げない(design-system §6。window.BRIDGE_BRUSH は bridge.js の window.BRIDGE の仲間ではない) */
-window.BRIDGE_BRUSH=function(o){'use strict';
-const D=document,R=D.documentElement,CL=R.classList,id=o.id,kz=D.getElementById(id);if(!kz||!CL.contains(id+'-on'))return;
-const cv=kz.querySelector('.'+id+'-c'),mk=kz.querySelector('.'+id+'-mark'),KC=kz.classList,M=Math,LIVE=id+'-live',IN=id+'-in',RUN=id+'-run';
-let ctx,raf=0,last=0,live=0,job=0,drawn=-1;
-const stop=()=>{raf&&cancelAnimationFrame(raf);raf=last=0};
-const clear=()=>{ctx&&(ctx.setTransform(1,0,0,1,0,0),ctx.clearRect(0,0,cv.width,cv.height));drawn=-1};
-const fail=()=>{job++;live=0;stop();clear();CL.remove(LIVE,IN);KC.remove(RUN)};
-try{
-const rq=matchMedia('(prefers-reduced-motion: reduce)'),SR=60,ST=320,END=4.7,AL=[.55,.7,.9,.7,.75],NL=256,P=new Float32Array(32),
-  PD=[...mk.children].map(p=>new Path2D(p.getAttribute('d')));
-let tau=5,ready=0,vis=0,v72=0,m72=0,near=0,hold=0,hg=0,W=0,H=0,sc=1,mx=0,my=0,s0=1,s1=1,N=0,wm=1,stride=1,cut=1,rs=0,ema=0,slow=0,fi=0,COL,PX,PY,BR,Z,U0,OFF,CUR;
-// 出典: showreel/kousa.html 29・30・48・75 行(PR #143・67fb41c)
-const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x,lerp=(a,b,u)=>a+(b-a)*u,seg=(t,a,d)=>clamp((t-a)/d),frac=x=>x-M.floor(x);
-// 出典: 同 41〜47 行。--ease の LUT
-const ease=(()=>{const bx=s=>3*(1-s)*(1-s)*s*.16+3*(1-s)*s*s*.3+s*s*s,by=s=>1-(1-s)*(1-s)*(1-s),n=2048,L=new Float32Array(n+1);
-  for(let i=0;i<=n;i++){let lo=0,hi=1;for(let k=0;k<40;k++){const m=(lo+hi)/2;bx(m)<i/n?lo=m:hi=m}L[i]=by((lo+hi)/2)}
-  return u=>{if(u<=0)return 0;if(u>=1)return 1;const f=u*n,i=f|0;return L[i]+(L[i+1]-L[i])*(f-i)}})();
-// 出典: 同 51 行
-const hash=(i,k)=>{let x=(i*374761393+k*668265263)>>>0;x=((x^(x>>>13))*1274126177)>>>0;return((x^(x>>>16))>>>0)/4294967296};
-// 出典: 同 81〜86 行
-const field=(x,y,t,z,th,am)=>th+am*.85*(M.sin(x*.0023+t*.35+z*5.1)*M.cos(y*.0031-t*.3+z*2)+.65*M.sin(x*.0014-y*.0027+t*.55+z*3.3)+.35*M.sin(y*.0065+x*.0011-t*.9+z*1.7));
-// 出典: 同 60・61・132・139・140 行(LOGO は収束先の計算だけに使う)
-const LOGO=[[[8,74],[62,16],[118,24],[176,84]],[[58,94],[118,60],[158,22],[232,12]]];
-const bez=(p,u)=>{const a=1-u;return[0,1].map(d=>a*a*a*p[0][d]+3*a*a*u*p[1][d]+3*a*u*u*p[2][d]+u*u*u*p[3][d])};
-const nrm=(c,u)=>{const a=bez(LOGO[c],M.max(0,u-.01)),b=bez(LOGO[c],M.min(1,u+.01)),dx=b[0]-a[0],dy=b[1]-a[1],l=M.hypot(dx,dy)||1;return[-dy/l,dx/l]};
-const wIdx=w=>clamp(M.round(M.log2(w/.5)*2),0,12),wOf=i=>.5*M.pow(2,i/2);
-const LT=[0,1].map(c=>{const a=new Float32Array((NL+1)*4);for(let i=0;i<=NL;i++)a.set(bez(LOGO[c],i/NL).concat(nrm(c,i/NL)),i*4);return a}),
-  Lc=LT.map(a=>{let L=0;for(let i=4;i<=NL*4;i+=4)L+=M.hypot(a[i]-a[i-4],a[i+1]-a[i-3]);return L});
+<footer class="foot"><!-- shared/bridge.js のフッターと同じ4列と Privacy。列(.f-col)と Privacy は town/hiraku.js の drawChrome が bridge.js のデータから描き直す(ここは JS が動かないときの同じ中身)。色は時刻のトークン(--foot-logo-1・--foot-logo-2) -->
+  <div class="foot-in" id="footIn">
+    <div class="f-brand"><svg class="logo-m" viewBox="0 0 240 110" aria-hidden="true"><use href="#lg"/></svg><b>BRIDGE<span class="tg">EXPAND CHOICES.</span></b><p data-bx="1">選択肢を増やし、人と社会の可能性を広げるプロジェクト。</p></div>
+    <div class="f-col"><div class="h">思想</div><a href="philosophy/index.html">Philosophy</a><a href="philosophy/index.html#manifesto">Manifesto</a><a href="stories/index.html">Stories</a></div>
+    <div class="f-col"><div class="h">活動</div><a href="projects/index.html">Projects</a><a href="journal/index.html">Journal</a><a href="about/index.html">About</a></div>
+    <div class="f-col"><div class="h">つくったもの</div><a href="products/index.html">Products</a><a href="compass/index.html">BRIDGE Compass</a><a href="starter-kits/index.html">Starter Kits</a></div>
+    <div class="f-col"><div class="h">つながる</div><a href="services/index.html">Services</a><a href="community/index.html">Contact</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note ↗<span class="sr">(別のサイト・新しいタブで開きます)</span></a><a href="https://x.com/WataruPT1013" target="_blank" rel="noopener noreferrer">X ↗<span class="sr">(別のサイト・新しいタブで開きます)</span></a></div>
+  </div>
+  <div class="foot-base" id="footBase"><span>© 2026 BRIDGE. All rights reserved.</span><a href="legal/privacy.html">Privacy</a></div>
+</footer>
 
-const rect=()=>kz.getBoundingClientRect();
-// 時刻の読み方は面ごと(o.readT。開いた瞬間=読み込みの進み / 閉じ=帯の進み)
-const readT=()=>o.readT(rect,clamp);
-const offscreen=()=>{const r=rect();return r.bottom<=0||r.top>=innerHeight};
-const apply=()=>{KC.toggle(RUN,live?tau<4.4:!!(o.idleRun&&o.idleRun()));if(o.track)CL.toggle(IN,!!(live?v72&&tau>=1:m72))};
-const off=()=>{live=0;stop();clear();apply();if(o.scroll)removeEventListener('scroll',kick)};
-// live になるのは表ができたとき。閉じは帯が画面外のときだけ(o.offscreenOnly)。開いた瞬間は面が画面にある状態で始まるので、すぐ描く
-const goLive=()=>{if(!live&&!hold&&ready&&CL.contains(LIVE)&&(!o.offscreenOnly||offscreen())){live=1;tau=readT();clear();apply();if(!o.offscreenOnly&&vis){paint();kick()}}};
-// アンカーで飛んだら、止まるまで live にしない
-const holdStill=()=>{hold=1;const g=++hg;let y=-1,n=0;const chk=()=>{if(g!==hg)return;if(scrollY===y){if(++n>=3){hold=0;goLive();return}}else{n=0;y=scrollY}setTimeout(chk,200)};D.readyState==='complete'?chk():addEventListener('load',chk)};
+<dialog class="mdlg" id="menu" aria-label="メニュー">
+  <button class="x" type="button" data-close aria-label="閉じる"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <nav id="menuNav" aria-label="サイト"><!-- shared/bridge.js の NAV の7つと CTA(同じ文言)。drawChrome が描き直す -->
+    <a class="mi" href="products/index.html"><span class="t"><span class="en">Products</span>プロダクト</span><span class="d">仕事に使える道具と、経営を体験するゲーム。</span></a>
+    <a class="mi" href="philosophy/index.html"><span class="t"><span class="en">Philosophy</span>考え方</span><span class="d">BRIDGEが何を大切にし、なぜこの活動をしているのか。</span></a>
+    <a class="mi" href="journal/index.html"><span class="t"><span class="en">Journal</span>手記</span><span class="d">完成していない考えも、そのまま公開しています。</span></a>
+    <a class="mi" href="about/index.html"><span class="t"><span class="en">About</span>BRIDGEについて</span><span class="d">名前の由来と、運営者のこれまでの歩み。</span></a>
+    <a class="mi" href="projects/index.html"><span class="t"><span class="en">Projects</span>活動</span><span class="d">PMI、AI、教育、研究。いま動いていること。</span></a>
+    <a class="mi" href="stories/index.html"><span class="t"><span class="en">Stories</span>物語</span><span class="d">現場で実際にあったことを、一人称で。</span></a>
+    <a class="mi" href="services/index.html"><span class="t"><span class="en">Services</span>仕事のご依頼</span><span class="d">医療機関向けの経営支援・PMI伴走、ツール開発、講演。</span></a>
+    <a class="mi" href="community/index.html"><span class="t"><span class="en">Contact</span>話をする</span><span class="d">共感も、異論も、相談も。</span></a>
+  </nav>
+</dialog>
 
-const size=()=>{let d=M.min(devicePixelRatio||1,1.5);const px=W>860?1.3e6:.6e6;if(W*H*d*d>px)d=M.sqrt(px/(W*H));d*=cut;cv.width=M.max(1,M.round(W*d));cv.height=M.max(1,M.round(H*d));drawn=-1};
-const layout=()=>{const kr=rect(),mr=mk.getBoundingClientRect(),pc=(W=R.clientWidth)>860;H=kr.height;
-  cv.style.left=-kr.left+'px';cv.style.width=W+'px';
-  mx=M.round(mr.left);my=M.round(mr.top-kr.top); // SVG は CSS px の整数に寄せて描かれる(実測)
-  s1=mr.width/240;s0=M.min(.7*W/224,.7*H/82);sc=M.max(W/1920,.5);N=pc?o.n[0]:o.n[1];wm=pc?1:1.15;size()};
-// 積分: o.chunk 粒ずつ、o.later の間隔で(開いた瞬間=すぐ / 閉じ=idle)
-const integrate=()=>{const id=++job,later=o.later;let k0=0;
-  ready=0;layout();const Ww=W/sc,Wh=H/sc,V=290/SR;
-  Z=new Float32Array(N);U0=new Float32Array(N);OFF=new Float32Array(N);CUR=new Uint8Array(N);PX=new Float32Array(N*ST);PY=new Float32Array(N*ST);BR=new Uint8Array(N*ST);
-  const chunk=()=>{if(id!==job)return;try{const k1=M.min(N,k0+o.chunk);
-    for(let k=k0;k<k1;k++){const i=M.floor(k*1800/N),z=Z[k]=hash(i,2),b=k*ST;U0[k]=hash(i,3);OFF[k]=hash(i,5)+hash(i,6)-1;CUR[k]=hash(i,7)<.15;
-      let x=PX[b]=-90+(Ww+180)*hash(i,11),y=PY[b]=-90+(Wh+180)*hash(i,12);
-      for(let j=1;j<ST;j++){const a=field(x,y,9.7+(j-1)/SR,z,-.34,.61);let br=0;x+=M.cos(a)*V;y+=M.sin(a)*V;
-        if(x>Ww+90){x-=Ww+180;br=1}else if(x<-90){x+=Ww+180;br=1}if(y>Wh+90){y-=Wh+180;br=1}else if(y<-90){y+=Wh+180;br=1}
-        BR[b+j]=br;PX[b+j]=x;PY[b+j]=y}}
-    k0=k1;if(k0<N)later(chunk);else{ready=1;goLive();if(o.onReady)o.onReady()}}catch(e){fail()}};
-  later(chunk)};
-const rebuild=()=>{job++;ready=0;PX=0;off();if(CL.contains(LIVE)&&near)integrate()};
-// 色は計算済みのトークンだけ
-const readColors=()=>{const cs=getComputedStyle(R),nv=getComputedStyle(mk.firstChild).stroke;COL=[cs.getPropertyValue('--blue-soft').trim(),cs.getPropertyValue('--blue').trim(),nv,nv,getComputedStyle(mk.lastChild).stroke]};
-
-// 1 枚を描く(τ だけで決まる)
-const draw=()=>{const t0=performance.now(),T=tau;if(o.onDraw)o.onDraw(T);if(rs){rs=0;size()}clear();ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
-  cv.style.setProperty('--kz-fb',40*(1-seg(T,2.4,1))+'px');
-  if(T<END){ctx.lineCap=ctx.lineJoin='round';
-    const jf=(T+.3)*SR,j=M.min(ST-2,jf|0),f=jf-j,e=ease(seg(T,o.shrink[0],o.shrink[1])),s=lerp(s0,s1,e),cx=lerp(W/2,mx+120*s1,e),cy=lerp(H/2,my+55*s1,e),spr=(1-ease(seg(T,1.2,2.2)))*8,BK=[{},{},{},{},{}],LS=[[],[],[],[],[]];
-    const add=(bd,wi,aq,n)=>{const key=wi*5+aq;let p=BK[bd][key];if(!p){p=BK[bd][key]=new Path2D();LS[bd].push(key)}p.moveTo(P[0],P[1]);for(let q=1;q<n;q++)p.lineTo(P[q*2],P[q*2+1])};
-    for(let k=0;k<N;k+=stride){const z=Z[k],ms=.6+.8*U0[k],m=ease(seg(T,ms,2.2)),Ki=M.round(lerp(16,7,seg(T,ms+1.4,.8))),lt=LT[CUR[k]],b=k*ST;
-      let am=1-ease(seg(T,4+.4*z,.3)),n=0,pu=-1,L=0,dH=0;if(am<=.02)continue;
-      if(m>0){const uh=frac(U0[k]+.12*(T-.6));if(uh<.018)am*=uh/.018}
-      for(let q=0;q<Ki;q+=2){const ix=j-q;if(ix<0||(q&&(BR[b+ix+1]||BR[b+ix+2])))break; // 2 段おきに点を取る(ラスタ化は頂点の数で重い)
-        let x=PX[b+ix],y=PY[b+ix];if(!q&&!BR[b+ix+1]){x=lerp(x,PX[b+ix+1],f);y=lerp(y,PY[b+ix+1],f)}x*=sc;y*=sc;
-        if(m>0){ // カメラは今の τ のものを尾全体に
-          const u=frac(U0[k]+.12*((q?ix/SR-.3:T)-.6));if(pu>=0&&M.abs(u-pu)>.5)break;pu=u;
-          const uf=u*NL,li=M.min(NL-1,uf|0),g=uf-li,o2=li*4,sp=spr*OFF[k]*s,ox=cx+(lerp(lt[o2],lt[o2+4],g)-120)*s,oy=cy+(lerp(lt[o2+1],lt[o2+5],g)-55)*s;
-          x=lerp(x,ox+lerp(lt[o2+2],lt[o2+6],g)*sp,m);y=lerp(y,oy+lerp(lt[o2+3],lt[o2+7],g)*sp,m);dH=M.max(dH,M.hypot(x-ox,y-oy))}
-        if(n)L+=M.hypot(x-P[n*2-2],y-P[n*2-1]);P[n*2]=x;P[n*2+1]=y;n++}
-      const aq=M.round(am*4);if(L<2||aq<=0)continue;
-      // 幅は曲線に乗ってから(dH<2px)収束の終わりに太らせ、長さの 1/4 まで(粒・剥片に見せない)
-      const w=lerp((.6+1.4*z)*wm,6*s*.28,seg(m,.9,.1)**2*clamp(1-dH/2)),wi=M.min(wIdx(w),M.floor(2*M.log2(L/2))),bd=m>.5?(CUR[k]?4:3):z<.4?0:z<.75?1:2;
-      add(bd,wi,aq,n)}
-    for(let bd=0;bd<5;bd++){ctx.strokeStyle=COL[bd];for(const key of LS[bd]){const aq=key%5;ctx.globalAlpha=AL[bd]*aq/4;ctx.lineWidth=wOf((key-aq)/5);ctx.stroke(BK[bd][key])}}
-    // 清書: 細い芯を左から引く(先端は収束の先頭より先へ出ない)。幅は o.width の拍で 6·s へ。4.4 で SVG を出し 4.5 までに消す
-    const r=ease(seg(T,1.75,1)),la=1-seg(T,4.4,.1);
-    if(r>0&&la>0){ctx.globalAlpha=la;ctx.translate(cx-120*s,cy-55*s);ctx.scale(s,s);ctx.lineWidth=lerp(1.68,6,ease(seg(T,o.width[0],o.width[1])));
-      for(let c=0;c<2;c++){ctx.strokeStyle=COL[c?4:2];ctx.setLineDash(r<1?[r*Lc[c],Lc[c]+1]:[]);ctx.stroke(PD[c])}ctx.setLineDash([])}
-    ctx.globalAlpha=1}
-  drawn=T;
-  // 降格: 描画時間か rAF の間隔×0.4(ラスタ化の遅さ)の EMA が 12 回続けて 20ms 超で 1 段(1 本おき→×0.8)。戻さない
-  const dd=performance.now()-t0,d=M.max(dd,fi*.4);fi=0;ema=ema?ema+.2*(d-ema):d;
-  if(ema<=20)slow=0;else if(++slow>=12){slow=ema=0;if(stride<2)stride=2;else if(cut==1)cut=.8,rs=1}};
-const paint=()=>{try{draw();apply()}catch(e){fail()}};
-// 追い方: 指数 0.2 秒・|Δτ|≤2.6dt(はじいても端から端まで約 1.9 秒)・下限 0.3dt
-const tick=now=>{raf=0;if(!live||!vis||D.hidden){last=0;return}
-  try{const tT=readT(),dt=last?M.min((now-last)/1000,.1):1/60,d=tT-tau;fi=last?now-last:0;last=now;
-    if(M.abs(d)<.002)tau=tT;else{let st=d*(1-M.exp(-dt/.2));if(M.abs(st)<.3*dt)st=M.abs(d)<.3*dt?d:M.sign(d)*.3*dt;tau+=clamp(st,-2.6*dt,2.6*dt);if(M.abs(tT-tau)<.002)tau=tT}
-    if(tau!==drawn)paint();if(tau!==tT)raf=requestAnimationFrame(tick);else last=0}catch(e){fail()}};
-const kick=()=>{if(live&&vis&&!raf&&!D.hidden)raf=requestAnimationFrame(tick)};if(o.expose)o.expose(kick);
-
-const IO=IntersectionObserver;
-// 閉じだけ: kz-in は live なら帯が画面にあり τ≥1、ほかはマークが画面にあるとき
-if(o.track){const io=new IO(es=>{for(const e of es)e.target===kz?v72=e.isIntersecting:m72=e.isIntersecting;apply()},{rootMargin:'-72px 0px 0px 0px'});io.observe(kz);io.observe(mk)}
-if(!(ctx=cv.getContext('2d')))return fail();
-readColors();
-new IO(es=>{near=es[es.length-1].isIntersecting;if(near&&!PX&&CL.contains(LIVE))integrate()},{rootMargin:'100% 0px'}).observe(kz);
-// 画面にあるときだけ描く。画面外は τ=τT・canvas は空
-new IO(es=>{vis=es[es.length-1].isIntersecting;
-  if(vis){if(live){if(o.scroll)addEventListener('scroll',kick,{passive:true});tau=readT();paint();kick()}}
-  else{if(o.scroll)removeEventListener('scroll',kick);stop();clear();if(live){tau=readT();apply()}else goLive()}}).observe(kz);
-D.addEventListener('visibilitychange',()=>D.hidden?stop():kick());
-if(location.hash)holdStill();addEventListener('hashchange',()=>{if(offscreen())off();holdStill()});
-new MutationObserver(()=>{readColors();if(live&&vis)paint()}).observe(R,{attributes:true,attributeFilter:['data-theme']});
-// 組み直しは幅か高さが 2px 以上変わったとき
-let rz=0;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(CL.contains(LIVE)&&(M.abs(R.clientWidth-W)>=2||M.abs(rect().height-H)>=2))rebuild()},200)});
-const onR=()=>{if(rq.matches){job++;ready=0;PX=0;off();CL.remove(LIVE)}else{CL.add(LIVE);rebuild()}};
-rq.addEventListener?rq.addEventListener('change',onR):rq.addListener(onR);
-}catch(e){fail()}};
-</script>
-<script>
-/* 開いた瞬間(面の .hz)。τ は HZ.target()(読み込みの進みだけ)を追う。スクロールには従わない。約束は <style> 冒頭 */
-BRIDGE_BRUSH({id:'hz',readT:()=>HZ.target(),idleRun:()=>HZ.waiting(),n:[700,400],chunk:260,later:f=>setTimeout(f,0),onReady:()=>HZ.onReady(),
-  onDraw:T=>document.documentElement.style.setProperty('--hz-t',T.toFixed(3)),shrink:[3.45,.95],width:[3.5,.9],expose:k=>{HZ.kick=k}});
-</script>
-<script>
-/* 閉じ(#about の帯 .kz)。τ(0〜5)は帯の進みを追う。約束は <style> 冒頭
-   帯の上端が帯の 1/4 ぶん画面に入ったら 0、帯の下端が画面の高さの 55% に来たら 5。送る量は 0.45 画面+帯の 3/4(2026-10-06 社長「実機でだいぶ早い」で 1.5 倍に) */
-BRIDGE_BRUSH({id:'kz',readT:(rect,clamp)=>{const r=rect(),vh=innerHeight,h=r.height/2;return 5*clamp((vh-.5*h-r.top)/(.45*vh+1.5*h))},track:true,scroll:true,offscreenOnly:true,
-  n:[360,300],chunk:120,later:window.requestIdleCallback?f=>requestIdleCallback(f,{timeout:800}):f=>setTimeout(f,30),shrink:[2.4,2],width:[3,1]});
-</script>
+<p class="sr" id="say" aria-live="polite" data-bx="1"></p>
+<script src="./shared/bridge.js" defer></script><!-- 計測・利用ログ(page id は home)・BudouX・NAV。町のスクリプトより先に動く(defer と module は書いた順) -->
+<script type="module" src="town/hiraku.js"></script>
 </body>
 </html>
