@@ -64,6 +64,12 @@ Skillsは現場の手順、agentsは担当者の判断と照合。担当をSkill
 
 手動で呼ぶ場合は `/bridge-design`、`/bridge-copy`、`/bridge-compass` を使う。詳細は `.claude/skills/<名前>/SKILL.md`。フロントエンド全般とPRレビューは既存の `dev-loop` / `ship` / `qa` が担うため、別Skillへ重複させない。
 
+## 公開と非公開の置き場（2026-10-31 社長方針）
+
+- 公開する資産はこのリポジトリ（bridge-lp。GitHub Pages で公開中）。個人的な経営構想・未公開の事業仮説・非公開の学習記録は置かない
+- 非公開の蓄積は非公開リポジトリ bridge-hq の `knowledge/`（発見・学び・事業仮説・振り返り。手順は同リポジトリの `knowledge/README.md`）。公開への反映は社長が別の便で決め、自動で公開する仕組みは置かない
+- 開発の学び（ハマった原因・再発条件）は従来どおり shiplog の `notes`。経営・自分の学習は bridge-hq 側。`cockpit-76a805/drafts` は bridge-lp の公開物に関する判断材料に限る
+
 ## セッション運用（PR監視の禁止）
 
 - PRを作成しても、定期チェックの予約（send_later・Routine等でセッションを後から起こし直す仕組み）を自分で仕掛けない。イベント購読（subscribe_pr_activity）も同様
