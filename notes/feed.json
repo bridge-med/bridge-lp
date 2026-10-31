@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-30T23:52:14+00:00",
+  "updated_at": "2026-10-31T23:25:38+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "仕事で失敗した経験を、次の仕事に残す方法",
+      "url": "https://note.com/prime_duck4944/n/n768ea26d00e7",
+      "guid": "https://note.com/prime_duck4944/n/n768ea26d00e7",
+      "pubDate": "2026-11-01T07:00:00+09:00",
+      "date": "2026-11-01",
+      "excerpt": "仕事がうまくいかなかったとき、頭の中で何度も振り返ってしまうことがあります。もっと早く確認しておけばよかった。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/328568860/rectangle_large_type_2_90b14efa6d5e32f18c5fe4e8252acd37.png?width=800"
+    },
+    {
+      "title": "名前のない日｜第四話「覚えていない私」",
+      "url": "https://note.com/prime_duck4944/n/nff7d85851877",
+      "guid": "https://note.com/prime_duck4944/n/nff7d85851877",
+      "pubDate": "2026-10-31T19:00:00+09:00",
+      "date": "2026-10-31",
+      "excerpt": "父の日記を一冊、東京へ持ち帰っていた。二〇二六年のものだった。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/329662965/rectangle_large_type_2_19e7c6a580fe0779bde163df214a5c75.png?width=800"
+    },
     {
       "title": "スタッフ同士の対立に、管理職はどこまで介入するべきか",
       "url": "https://note.com/prime_duck4944/n/n4d20dd57c20b",
@@ -38,24 +56,6 @@
       "date": "2026-10-29",
       "excerpt": "母が流した牛乳のことを、まだ考えていた。父は三十六年前にも牛乳を買っていた。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/329659827/rectangle_large_type_2_d17973f9e74ca48cf244866566c5e06a.png?width=800"
-    },
-    {
-      "title": "AIで作った資料が上司に通らない、本当の理由",
-      "url": "https://note.com/prime_duck4944/n/n1587ce3dab90",
-      "guid": "https://note.com/prime_duck4944/n/n1587ce3dab90",
-      "pubDate": "2026-10-29T07:00:00+09:00",
-      "date": "2026-10-29",
-      "excerpt": "ChatGPTで作った資料を見て、「これは結構いいものができた」と思うことがあります。構成はきれいです。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/328566476/rectangle_large_type_2_088dedf784490cbb46988591fb2b3e45.png?width=800"
-    },
-    {
-      "title": "名前のない日｜第一話「牛乳」",
-      "url": "https://note.com/prime_duck4944/n/n8c87acb91367",
-      "guid": "https://note.com/prime_duck4944/n/n8c87acb91367",
-      "pubDate": "2026-10-28T19:15:53+09:00",
-      "date": "2026-10-28",
-      "excerpt": "父が死んでから、母は冷蔵庫の牛乳を捨てなくなった。賞味期限は三日前に切れている。開封済みの一リットルパックで、底に二センチほど残っていた。「これ、もう飲めないよ」「飲まなきゃいいでしょ」母はトースターからパンを取り出し…",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/329660423/rectangle_large_type_2_7f7c38652e4282e1e24cc91c686c29e6.png?width=800"
     }
   ]
 }
