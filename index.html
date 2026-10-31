@@ -6,10 +6,10 @@
 <meta name="google-site-verification" content="bKObgIPJoLGHSiLrlUYzFPJwbjRnVZw7gb679J9phxQ">
 <script>document.documentElement.classList.add('js')</script>
 <title>BRIDGE — 医療職のための道具と経営ゲーム</title>
-<meta name="description" content="看護師・リハビリ職・医療事務など、医療の現場で働く人へ。仕事に使える道具と、クリニック経営を体験できるゲームを、理学療法士がひとりで作って公開しています。登録なしでブラウザから試せます。">
+<meta name="description" content="看護師・リハビリ職・医療事務など、医療の現場で働く人へ。仕事に使える道具と、クリニック経営を体験できるゲームを、理学療法士がひとりで作って公開しています。ほとんどは登録なしで、ブラウザから試せます。">
 <link rel="canonical" href="https://bridge-med.github.io/bridge-lp/">
 <meta property="og:title" content="BRIDGE — 病院の外にも町がある">
-<meta property="og:description" content="毎日やっていること、たぶん今の職場の外でも使えます。理学療法士がひとりで作っている、医療職のための道具と経営ゲーム。登録なしでブラウザから。">
+<meta property="og:description" content="毎日やっていること、たぶん今の職場の外でも使えます。理学療法士がひとりで作っている、医療職のための道具と経営ゲーム。ほとんどは登録なしで、ブラウザから。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bridge-med.github.io/bridge-lp/">
 <meta property="og:site_name" content="BRIDGE">
@@ -469,6 +469,7 @@ html:not(.js) .cls-bot{margin-top:28px}
 .nojs h2{font:700 20px/1.4 var(--jp)}
 .nj-b{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px 28px}
 .nj-b h3{font-size:14px;color:var(--ink-3)}
+.nj-u{font-size:13px;color:var(--ink-2);margin-top:2px}
 .nj-b a{display:flex;align-items:center;min-height:44px;border-bottom:1px solid var(--line);font-weight:700;text-decoration:none}
 .foot{background:var(--foot-bg);color:var(--foot-fg-2);padding:40px var(--pad) calc(18px + env(safe-area-inset-bottom,0px))}   /* bridge.js のフッターと同じ4列と Privacy。地は閉じの下の端と同じ(昼・夕は紙、夜は夜の面) */
 .foot-in{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.5fr) repeat(4,minmax(0,1fr));gap:26px 24px}
@@ -694,14 +695,14 @@ html.capture body > *:not(#cap){display:none!important}
   <p class="ins-go rmin-go" data-bx="1"><a href="products/index.html#work">明日の業務に使える道具を見る<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
 </section>
 
-<!-- JS が動かないときだけ: 町の建物ごとの29の道具(建物名と道具名のリンクだけ。PRODUCTS と同じ29件。JS が動くときは、町のパネルが同じ29件を持つ) -->
+<!-- JS が動かないときだけ: 町の建物ごとの29の道具(建物名・用途の一行(town/data.js の BUILDINGS.line と同じ語)・道具名のリンク。PRODUCTS と同じ29件。JS が動くときは、町のパネルが同じ29件を持つ) -->
 <noscript><nav class="nojs" aria-labelledby="njTitle"><h2 id="njTitle">町の道具</h2><ul class="nj-b">
-    <li><h3>病院</h3><ul><li><a href="keiji/index.html">掲示じたく</a></li><li><a href="nidodema/index.html">二度手間さがし</a></li><li><a href="yawagaeshi/index.html">やわ返</a></li></ul></li>
-    <li><h3>展望台</h3><ul><li><a href="compass/index.html">BRIDGE Compass</a></li><li><a href="tanaoroshi/index.html">経験の棚卸し</a></li><li><a href="iikae/index.html">現場のことば 言いかえ帳</a></li><li><a href="moyamoya/index.html">職場モヤモヤ診断</a></li><li><a href="karte/index.html">現場のカルテ</a></li><li><a href="daily-app/index.html">キャリアログ</a></li><li><a href="growth-76a805/index.html">Growth OS</a></li></ul></li>
-    <li><h3>クリニック</h3><ul><li><a href="clinic-flow-3d/index.html">クリニックタウン3D</a></li><li><a href="turnaround12/index.html">ターンアラウンド12</a></li><li><a href="pmi-quest/index.html">クリニックPMIクエスト</a></li></ul></li>
-    <li><h3>事務所</h3><ul><li><a href="rehaboard/index.html">RehaBoard</a></li><li><a href="medboard/index.html">MedBoard</a></li><li><a href="hire-board/index.html">HireBoard</a></li><li><a href="interview-kit/index.html">面接官の手帖</a></li><li><a href="consult-simulator/index.html">ConsultSim</a></li><li><a href="round-note/index.html">本部長の巡回手帖</a></li><li><a href="manager-starter/index.html">医療管理職スターター</a></li><li><a href="medops/index.html">医療管理実務ライブラリ</a></li><li><a href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer">Reha Checklist<span class="sr">(別のサイト・新しいタブで開きます)</span></a></li></ul></li>
-    <li><h3>図書館</h3><ul><li><a href="him-quiz/index.html">HIM Quiz</a></li><li><a href="study-board/index.html">StudyBoard</a></li><li><a href="english-trainer/index.html">Daily English</a></li></ul></li>
-    <li><h3>公園</h3><ul><li><a href="gokigen-gacha/index.html">ごきげん回復ガチャ</a></li><li><a href="ittan-horyu/index.html">いったん保留</a></li><li><a href="madoakari/index.html">窓あかり</a></li><li><a href="futatsume/index.html">ふたつめの波</a></li></ul></li>
+    <li><h3>病院</h3><p class="nj-u">明日の業務を楽にする</p><ul><li><a href="keiji/index.html">掲示じたく</a></li><li><a href="nidodema/index.html">二度手間さがし</a></li><li><a href="yawagaeshi/index.html">やわ返</a></li></ul></li>
+    <li><h3>展望台</h3><p class="nj-u">キャリア・経験を整理する</p><ul><li><a href="compass/index.html">BRIDGE Compass</a></li><li><a href="tanaoroshi/index.html">経験の棚卸し</a></li><li><a href="iikae/index.html">現場のことば 言いかえ帳</a></li><li><a href="moyamoya/index.html">職場モヤモヤ診断</a></li><li><a href="karte/index.html">現場のカルテ</a></li><li><a href="daily-app/index.html">キャリアログ</a></li><li><a href="growth-76a805/index.html">Growth OS</a></li></ul></li>
+    <li><h3>クリニック</h3><p class="nj-u">医療経営を学ぶ</p><ul><li><a href="clinic-flow-3d/index.html">クリニックタウン3D</a></li><li><a href="turnaround12/index.html">ターンアラウンド12</a></li><li><a href="pmi-quest/index.html">クリニックPMIクエスト</a></li></ul></li>
+    <li><h3>事務所</h3><p class="nj-u">経営・管理の実務に使う</p><ul><li><a href="rehaboard/index.html">RehaBoard</a></li><li><a href="medboard/index.html">MedBoard</a></li><li><a href="hire-board/index.html">HireBoard</a></li><li><a href="interview-kit/index.html">面接官の手帖</a></li><li><a href="consult-simulator/index.html">ConsultSim</a></li><li><a href="round-note/index.html">本部長の巡回手帖</a></li><li><a href="manager-starter/index.html">医療管理職スターター</a></li><li><a href="medops/index.html">医療管理実務ライブラリ</a></li><li><a href="https://bridge-med.github.io/reha-checklist-lp/" target="_blank" rel="noopener noreferrer">Reha Checklist<span class="sr">(別のサイト・新しいタブで開きます)</span></a></li></ul></li>
+    <li><h3>図書館</h3><p class="nj-u">学習を続ける</p><ul><li><a href="him-quiz/index.html">HIM Quiz</a></li><li><a href="study-board/index.html">StudyBoard</a></li><li><a href="english-trainer/index.html">Daily English</a></li></ul></li>
+    <li><h3>公園</h3><p class="nj-u">気軽に試す・作品を楽しむ</p><ul><li><a href="gokigen-gacha/index.html">ごきげん回復ガチャ</a></li><li><a href="ittan-horyu/index.html">いったん保留</a></li><li><a href="madoakari/index.html">窓あかり</a></li><li><a href="futatsume/index.html">ふたつめの波</a></li></ul></li>
   </ul></nav></noscript>
 
 <!-- v7 閉じ: 病院の外。舞台に重ねた層(舞台と同じ長さ。中身は同じ所に留まる)。言葉と出口は、立体が見晴らしに止まってから出す(透明で隠すだけ)。
@@ -765,7 +766,7 @@ html.capture body > *:not(#cap){display:none!important}
     <div class="f-col"><div class="h">つくったもの</div><a href="products/index.html">Products</a><a href="compass/index.html">BRIDGE Compass</a><a href="starter-kits/index.html">Starter Kits</a></div>
     <div class="f-col"><div class="h">つながる</div><a href="services/index.html">Services</a><a href="community/index.html">Contact</a><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener noreferrer">note ↗<span class="sr">(別のサイト・新しいタブで開きます)</span></a><a href="https://x.com/WataruPT1013" target="_blank" rel="noopener noreferrer">X ↗<span class="sr">(別のサイト・新しいタブで開きます)</span></a></div>
   </div>
-  <div class="foot-base" id="footBase"><span>© 2026 BRIDGE. All rights reserved.</span><a href="legal/privacy.html">Privacy</a></div>
+  <div class="foot-base" id="footBase"><span>© 2026 BRIDGE. All rights reserved.</span><a href="legal/site-privacy.html">Privacy</a></div>
 </footer>
 
 <dialog class="mdlg" id="menu" aria-label="メニュー">

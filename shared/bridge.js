@@ -41,7 +41,7 @@ document.documentElement.classList.add('js');
     { h: 'つくったもの', links: [navLink('products'), link({ id: 'compass', en: 'BRIDGE Compass', href: 'compass/index.html' }), link({ id: 'starter-kits', en: 'Starter Kits', href: 'starter-kits/index.html' })] },
     { h: 'つながる', links: [navLink('services'), navLink('community'), link({ en: 'note', href: 'https://note.com/prime_duck4944', ext: true }), link({ en: 'X', href: 'https://x.com/WataruPT1013', ext: true })] },
   ];
-  const PRIVACY = link({ en: 'Privacy', jp: 'プライバシーポリシー', href: 'legal/privacy.html' });
+  const PRIVACY = link({ en: 'Privacy', jp: 'プライバシーポリシー', href: 'legal/site-privacy.html' }); // サイト全体のポリシー(2026-10-30)。legal/privacy.html はキャリアログのストア審査に結線した URL なので動かさない
 
   /* ---- 正式ロゴ(交差する二本の線。接続はしない) ---- */
   const MARK =
@@ -157,11 +157,10 @@ document.documentElement.classList.add('js');
     if (log[id] !== today) { log[id] = today; localStorage.setItem(KEY, JSON.stringify(log)); }
   } catch (e) {}
 
-  /* ---- 訪問者計測(未計測) ----
-     GOATCOUNTER_CODE にサイトコード(例: 'bridge-med')を入れるとGoatCounterの計測が始まる。
-     空文字のままなら何も読み込まない=未計測。手順と選定理由は docs/analytics.md。
-     有効化する同じコミットで legal/privacy.html に計測の一文(analytics.mdに用意済み)を
-     追記すること(第32条)。それまで cockpit には「未計測」と正直に表示する。 ---- */
+  /* ---- 訪問者計測(GoatCounter。2026-08-09 から計測中) ----
+     GOATCOUNTER_CODE はサイトコード。空文字にすると何も読み込まない=計測が止まる。手順と選定理由は docs/analytics.md。
+     計測の中身や送り先を変えるときは、同じコミットで legal/site-privacy.html(公式サイトのポリシー)と
+     legal/privacy.html(キャリアログの文書の BRIDGE 節)の計測の説明も直すこと(第32条)。 ---- */
   const GOATCOUNTER_CODE = 'wataru';
   if (GOATCOUNTER_CODE) {
     const gc = document.createElement('script');

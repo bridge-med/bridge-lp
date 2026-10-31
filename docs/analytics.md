@@ -17,7 +17,8 @@
 
 **2026-08-09に有効化済み。** サイトコード `wataru`(社長開設)。`shared/bridge.js` と
 `shared/usage.js` の `GOATCOUNTER_CODE` に設定済みで、`legal/privacy.html` には
-「本サイト(BRIDGE)のアクセス解析」の節(日英)を追記済み(第32条)。
+「本サイト(BRIDGE)のアクセス解析」の節(日英)を追記済み(第32条)。2026-10-30 から、公式サイトのポリシー
+`legal/site-privacy.html`(フッターの Privacy)にも計測の説明がある。計測を変えるときは両方を直す。
 ダッシュボード: https://wataru.goatcounter.com/
 
 サイトコードを変える日が来たら、上記2ファイルの `GOATCOUNTER_CODE` を同じ値で書き換える。
