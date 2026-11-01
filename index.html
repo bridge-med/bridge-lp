@@ -356,7 +356,7 @@ html.scrub #tagB,html.scrub #tagS{opacity:0}
 html.scrub .hero::after{opacity:var(--hz,0);transition:none}   /* 病院の中が画面の上まで来たら、見出しの帯と「病院の中」の下に、地の色の薄い霞(ひらいたときと同じ) */
 .endfade{position:absolute;left:0;right:0;top:calc(var(--gy,76svh) + 40px);bottom:0;z-index:3;pointer-events:none;opacity:var(--ek,0);background:linear-gradient(180deg,rgb(var(--mist) / 0),rgb(var(--mist)) var(--bf,120px))}   /* 舞台の終わり: 下の端を、次の面の色(空の下の色)へ */
 /* 病院の中: 最初の画面の一行と同じ場所・同じ形の小さな見出しと、一文。階ごとに降りるときは、一文の場所に、その階の道具の一行 */
-.ins{position:absolute;z-index:7;left:var(--pad);right:var(--pad);top:calc(84px + env(safe-area-inset-top,0px));pointer-events:none;opacity:0}   /* 透明で隠すだけ(読み上げの順には、いつもある)。上はヘッダーの下端 74px + 10px(2026-11-01 ヘッダーを下層に揃えたので 58→84) */
+.ins{position:absolute;z-index:7;left:var(--pad);right:var(--pad);top:calc(58px + env(safe-area-inset-top,0px));pointer-events:none;opacity:0}   /* 透明で隠すだけ(読み上げの順には、いつもある)。上は最初の画面の一行(.copy)・閉じの言葉(.cls-top)と同じ 58px(舞台の間ヘッダーは透明で、ロゴの字の下に 12px 以上空く。2026-11-01 計測) */
 .ins h2{margin:0}
 .ins .eyebrow{transition:none}
 .ins-eb{display:grid}
@@ -428,7 +428,7 @@ html.js:not(.rm) .cls{height:calc(100vh + 222.25vh);height:calc(100lvh + var(--s
 html.js:not(.rm) .cls-in{position:sticky;top:0;height:100vh;height:100lvh}
 html.js:not(.rm) .cls a{pointer-events:none}
 html.js:not(.rm) .cls .on a{pointer-events:auto}   /* 押せるのは見えている間だけ(Tab では届く。届いたら見える所まで舞台を進める) */
-html.js:not(.rm) .cls-top,html.js:not(.rm) .cls-idea,html.js:not(.rm) .cls-go{opacity:0}   /* 透明で隠すだけ(読み上げの順には、いつもある)。上はヘッダーの下端 74px + 10px(2026-11-01 ヘッダーを下層に揃えたので 58→84) */
+html.js:not(.rm) .cls-top,html.js:not(.rm) .cls-idea,html.js:not(.rm) .cls-go{opacity:0}   /* 透明で隠すだけ(読み上げの順には、いつもある) */
 .cls-fig{display:none}
 .cls-q{margin-top:7px;font-size:14px;line-height:1.75;color:var(--hero-fg-2)}
 .cls-who{margin-top:2px;font-size:11.5px;line-height:1.5;letter-spacing:.04em;color:var(--hero-fg-3)}   /* 誰の言葉か(第13条) */
