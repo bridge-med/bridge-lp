@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-10-31T23:25:38+00:00",
+  "updated_at": "2026-11-01T23:39:35+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "名前のない日｜第五話「残された人」",
+      "url": "https://note.com/prime_duck4944/n/nf97c68a29c50",
+      "guid": "https://note.com/prime_duck4944/n/nf97c68a29c50",
+      "pubDate": "2026-11-01T19:00:00+09:00",
+      "date": "2026-11-01",
+      "excerpt": "母は父の日記を捨てるつもりだった。「三十七冊も置けないもの」",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/329663971/rectangle_large_type_2_012099ec8851fdc535efe82f8c44a10a.png?width=800"
+    },
     {
       "title": "仕事で失敗した経験を、次の仕事に残す方法",
       "url": "https://note.com/prime_duck4944/n/n768ea26d00e7",
@@ -47,15 +56,6 @@
       "date": "2026-10-30",
       "excerpt": "仕事は、確実に増えている。以前よりも責任のある仕事を任されるようになった。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/328566910/rectangle_large_type_2_4e18b0118b34aa8be8fc493f178aec34.png?width=800"
-    },
-    {
-      "title": "名前のない日｜第二話「三十七冊の日記」",
-      "url": "https://note.com/prime_duck4944/n/n2192d22a2ea9",
-      "guid": "https://note.com/prime_duck4944/n/n2192d22a2ea9",
-      "pubDate": "2026-10-29T19:00:00+09:00",
-      "date": "2026-10-29",
-      "excerpt": "母が流した牛乳のことを、まだ考えていた。父は三十六年前にも牛乳を買っていた。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/329659827/rectangle_large_type_2_d17973f9e74ca48cf244866566c5e06a.png?width=800"
     }
   ]
 }
