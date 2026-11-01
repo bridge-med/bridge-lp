@@ -496,18 +496,23 @@ function boot() {
   }
   addEventListener('pageshow', e => { if (e.persisted) unleap(true); });
 
-  /* ---------- 町から来たこと(2026-11-01 社長 案 B「文脈を手渡す」): 町の中(#main)の行き先へ移るとき、どの建物から来たかを、このタブの中だけ(sessionStorage)に書く。外へは送らない。
-     着いた先(ブランドの面)の shared/bridge.js の townReturn が1回だけ読んで消し、「← 町の展望台へ戻る」を出す。ヘッダー・メニュー・フッターは書かない(サイトの道)。
+  /* ---------- 町から来たこと(2026-11-01 社長 案 B「文脈を手渡す」): 町の中(#main)から、これを読むページ(下層・Compass・紹介 LP)へ移るときだけ、どの建物から来たかを、このタブの中だけ(sessionStorage)に書く。外へは送らない。
+     着いた先(ブランドの面)の shared/bridge.js の townReturn が1回だけ読んで消し、「← 町の{建物}へ戻る」を出す。道具の画面は読まないので書かない(残さない)。ヘッダー・メニュー・フッターは書かない(サイトの道)。
      建物は、病院の中(#chips・#insGo・.rmin)なら病院、ほかはひらいている建物(なければ null =「← 町へ戻る」)。町を開き直したとき(読み込み・戻ったとき)は消す。
      k='panel': パネルの入口から Compass へ(条件を読んで「質問に答える」を選んだ人。Compass は導入を飛ばして職種の画面から) ---------- */
   const HAND = 'bridge-town-from';
   const handDrop = () => { try { sessionStorage.removeItem(HAND); } catch (e) { /* 使えなくても壊れない */ } };
   handDrop(); addEventListener('pageshow', handDrop);
+  const HAND_READ = new Set(['products', 'about', 'community', 'journal', 'philosophy', 'compass']
+    .concat(Object.values(TOOLS).filter(t => t.kind === 'intro').map(t => (t.href.match(/([^/]+)\/index\.html$/) || [])[1])));   // townReturn を読むページ(このディレクトリの名前)
   $('#main').addEventListener('click', e => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;   // 新しいタブ・窓で開くときは書かない(このタブに残さない)
     const a = e.target.closest && e.target.closest('a[href]');
     if (!a || e.defaultPrevented || a.target) return;
     let u = null; try { u = new URL(a.href, location.href); } catch (x) { return; }
     if (u.origin !== location.origin || u.pathname === location.pathname) return;   // ページの中の移動(#town/… など)は書かない
+    const base = location.pathname.replace(/[^/]*$/, ''), seg = u.pathname.indexOf(base) === 0 ? u.pathname.slice(base.length).split('/')[0] : '';
+    if (!HAND_READ.has(seg)) { handDrop(); return; }   // 道具の画面などは読まないので、書かない
     const b = a.closest('#chips,#insGo,.rmin') ? 'hospital' : openId, B = b && BY_ID[b];
     const row = a.classList.contains('pcta') && a.closest('.prow'), sid = (row ? row.dataset.sid : a.dataset.sid) || '';
     const h = { b: B ? b : null, n: B ? B.name : '', t: sid, d: u.pathname, from: location.pathname, at: Date.now(), k: row && sid === 'compass' ? 'panel' : '' };
@@ -970,7 +975,7 @@ function boot() {
         canvas, box: still, tod: TODS.indexOf(R.dataset.tod), mod, reduce, quality, svh: svhH,
         safe() {
           const w = canvas.clientWidth, h = Math.min(canvas.clientHeight, innerHeight);   // 絵は帯が畳まれたときの高さで描くので、いま見えている高さまでを使う(下のシートの上に建物を)
-          if (phone()) return { l: 10, t: 64, r: w - 10, b: h - Math.round(innerHeight * .45) - 6 };
+          if (phone()) return { l: 10, t: Math.round(hd.getBoundingClientRect().bottom) + 10, r: w - 10, b: h - Math.round(innerHeight * .45) - 6 };   // 上はヘッダー(帯)の下端から 10px
           const pw = Math.min(400, Math.max(340, innerWidth * .34)) + 48;
           return { l: 40, t: 90, r: w - pw - 16, b: h - 36 };
         },

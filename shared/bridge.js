@@ -263,9 +263,11 @@ document.documentElement.classList.add('js');
   }
 
   /* ---- 町から来た人への戻り道(2026-11-01 社長 案 B「文脈を手渡す」。design-system §6 の4条件で共通に置く) ----
-     町(town/hiraku.js)が移るときに、タブの中だけの sessionStorage へ { b: 建物, n: 建物名, t: 道具, d: 行き先, from: 町, at: 時刻, k } を書く。外へは送らない。
+     町(town/hiraku.js)が、これを読むページ(下層・Compass・紹介 LP)へ移るときだけ、タブの中だけの sessionStorage へ
+     { b: 建物, n: 建物名, t: 道具, d: 行き先, from: 町, at: 時刻, k: 入口('panel' = パネルの「質問に答える」) } を書く。外へは送らない。
      ここでは最初の1回だけ読んで消し(2回目からは覚えた値)、referrer が町・行き先がこのページ・60秒以内のときだけ返す。
-     返す { label: 「町の展望台へ戻る」, href, go(e) }。go は戻る履歴があれば history.back()(来たときの建物がひらいた町へ)、なければ href へ。
+     返す { b, t, k, label: 「町の{建物}へ戻る」(建物がなければ「町へ戻る」), href, go(e) }。着いたときの履歴に目印(bridgeTown)を付け、
+     go は目印のある履歴にいるときだけ history.back()(来たときの建物がひらいた町へ)。ページ内リンクで履歴が進んだあとなどは、href へふつうに移る。
      文字は textContent で入れる。出す場所: 下層のパンくず(.page-hero .crumb)、紹介 LP の戻り道(PC は .nav-actions a.back、600px 以下は .lp-cta .sub の一覧への文字リンク)。Compass は app.js が自分で読む */
   const TOWN_KEY = 'bridge-town-from';
   let townMemo;
@@ -284,11 +286,11 @@ document.documentElement.classList.add('js');
     if (b && !n) return null;
     const href = ROOT + 'index.html' + (b ? '#town/' + b + (t ? '/' + t : '') : '');
     townMemo = { b: b, t: t, k: String(h.k || ''), label: n ? '町の' + n + 'へ戻る' : '町へ戻る', href: href,
-      go: function (e) { if (history.length > 1) { if (e) e.preventDefault(); history.back(); } } };
+      go: function (e) { if (history.state && history.state.bridgeTown) { if (e) e.preventDefault(); history.back(); } } };
     return townMemo;
   }
   const townLink = (a, r) => {   // 既存のリンクを戻り道に読み替える(矢印は読み上げない)
-    a.textContent = ''; const ar = document.createElement('span'); ar.setAttribute('aria-hidden', 'true'); ar.textContent = '←\u00a0';   // 詰めない空き(flex の中でも消えない)
+    a.textContent = ''; const ar = document.createElement('span'); ar.setAttribute('aria-hidden', 'true'); ar.textContent = a.classList.contains('tx-link') ? '←' : '←\u00a0';   // .tx-link は gap で空く。ほかは詰めない空き(flex の中でも消えない)
     a.append(ar, r.label); a.href = r.href; a.removeAttribute('data-link'); a.addEventListener('click', r.go);
   };
   (function () {
@@ -297,7 +299,8 @@ document.documentElement.classList.add('js');
     if (!crumb && !back && !sub) return;
     const r = townReturn();
     if (!r) return;
-    if (crumb) { const a = document.createElement('a'); a.className = 'tx-link'; townLink(a, r); crumb.textContent = ''; crumb.append(a); }   // 町から来た人には「Home」=町そのものを、具体的な建物に置き換える
+    try { history.replaceState(Object.assign({}, history.state, { bridgeTown: 1 }), ''); } catch (e) {}   // 着いたときの履歴の目印(この1つ前が町)
+    if (crumb) { const a = document.createElement('a'); a.className = 'tx-link'; townLink(a, r); crumb.textContent = ''; crumb.append(a); }   // パンくず(Home / このページ)を丸ごと、来た建物へ戻る1本に置き換える(Home=町を、具体的な建物にする)
     if (back) townLink(back, r);
     if (sub && window.matchMedia && matchMedia('(max-width:600px)').matches) townLink(sub, r);   // スマホで一覧へ戻る唯一の道(subpage.css)。PC は上の .back が受ける
   })();

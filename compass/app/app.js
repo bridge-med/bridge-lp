@@ -472,7 +472,7 @@
   start.addEventListener('click', () => go('profession'));
 
   if (state.step === 'translating' || (state.step === 'result' && !complete(state.answers))) state.step = complete(state.answers) ? 'result' : 'intro';
-  if (town && state.step === 'intro') { document.getElementById('cpIntro').hidden = true; state.step = 'profession'; save(); }   // 町のパネルから: 導入を飛ばして職種の画面から(途中の回答がある人は、いまの再開のまま)
+  if (town && state.step === 'intro') { document.getElementById('cpIntro').hidden = true; state.step = 'profession'; save(); }   // 町のパネルから: 導入を飛ばして職種の画面から(途中まで答えている人は、これまでどおり続きから)
   history.replaceState({ cp: state.step }, '');
   if (state.step !== 'intro') show(state.step, 1);
   else { current = document.getElementById('cpIntro'); document.body.classList.remove('cp-flow'); }

@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111521" media="(prefers-color-scheme: dark)">
 <script>(function(){var t=null;try{t=localStorage.getItem('bridge-theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})();</script>
-<script>/* 町のパネルで「質問に答える」を選んで来た人は、導入を描かずに職種の画面から(2026-11-01 社長)。読むだけで消さない(消すのは bridge.js の townReturn)。app.js が起動の最初に外す */(function(){try{var h=JSON.parse(sessionStorage.getItem('bridge-town-from')||'null'),r=document.referrer?new URL(document.referrer):null,a=h&&Date.now()-Number(h.at);if(h&&h.k==='panel'&&r&&r.origin===location.origin&&r.pathname===h.from&&h.d===location.pathname&&a>=0&&a<60000)document.documentElement.classList.add('cp-from-town')}catch(e){}})();</script>
+<script>/* 町のパネルで「質問に答える」を選んで来た人は、導入を描かずに職種の画面から(2026-11-01 社長)。読むだけで消さない(消すのは bridge.js の townReturn)。付けた印(cp-from-town)は、app.js が起動の最初に外す */(function(){try{var h=JSON.parse(sessionStorage.getItem('bridge-town-from')||'null'),r=document.referrer?new URL(document.referrer):null,a=h&&Date.now()-Number(h.at);if(h&&h.k==='panel'&&r&&r.origin===location.origin&&r.pathname===h.from&&h.d===location.pathname&&a>=0&&a<60000)document.documentElement.classList.add('cp-from-town')}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600&family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
