@@ -7,6 +7,8 @@
    ================================================================ */
 (function () {
   'use strict';
+  const skipIntro = document.documentElement.classList.contains('cp-from-town');
+  document.documentElement.classList.remove('cp-from-town');   // 先に外す(起動に失敗しても、導入が隠れたままにならない)
   const D = window.COMPASS_DATA;
   const E = window.COMPASS_ENGINE;
   const main = document.getElementById('compass');
@@ -66,6 +68,10 @@
     });
     return '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" focusable="false">' + p + '<circle class="ln-dot" cx="200" cy="150" r="3.2"/></svg>';
   }
+  /* 町から来た人の戻り道(shared/bridge.js の townReturn。1回だけ読む)。町のパネルの「質問に答える」から来た人(k='panel')は導入を飛ばし、職種の画面の左上を「町の展望台へ戻る」にする */
+  let town = window.BRIDGE && window.BRIDGE.townReturn ? window.BRIDGE.townReturn() : null;
+  if (town && !(skipIntro && town.k === 'panel')) town = null;
+
   /* ---- 共通部品 ---- */
   function head(step) {
     const q = Q[step];
@@ -77,9 +83,12 @@
       return '<span class="cp-seg"><span style="transform:scaleX(' + fill.toFixed(3) + ')"></span></span>';
     }).join('');
     const label = q ? D.CHAPTERS[ch] : null;
+    const toTown = town && step === 'profession' && depth === 0;   // 導入を見ていないので、ここからの「戻る」は町へ
     return '<div class="cp-head">' +
+      (toTown ? '<button class="cp-back cp-town" type="button" data-act="town">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>' + esc(town.label) + '</span></button>' :
       '<button class="cp-back" type="button" data-act="back" aria-label="前の画面に戻る">' +
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>') +
       '<div class="cp-chapter">' + (label ? '<span class="en">' + label.en + '</span><span class="jp">' + label.jp + '</span>' : '') + '</div>' +
       (label ? '<div class="cp-progress" role="img" aria-label="' + label.en.replace('CHAPTER ', '第') + '章「' + label.jp + '」">' + segs + '</div>' : '') +
       '</div>';
@@ -368,10 +377,11 @@
       if (!btn || busy) return;
       const act = btn.dataset.act;
       if (act === 'back') return back();
+      if (act === 'town' && town) { if (history.length > 1) history.back(); else location.href = town.href; return; }
       if (act === 'next') return advance();
       if (act === 'skip') { state.answers[step] = ''; save(); return advance(); }
       if (act === 'share') return share();
-      if (act === 'restart') { state = { step: 'intro', answers: {} }; save(); return go('profession'); }
+      if (act === 'restart') { town = null; state = { step: 'intro', answers: {} }; save(); return go('profession'); }
       const id = btn.dataset.opt;
       if (id) choose(el, step, id);
     });
@@ -462,6 +472,7 @@
   start.addEventListener('click', () => go('profession'));
 
   if (state.step === 'translating' || (state.step === 'result' && !complete(state.answers))) state.step = complete(state.answers) ? 'result' : 'intro';
+  if (town && state.step === 'intro') { document.getElementById('cpIntro').hidden = true; state.step = 'profession'; save(); }   // 町のパネルから: 導入を飛ばして職種の画面から(途中まで答えている人は、これまでどおり続きから)
   history.replaceState({ cp: state.step }, '');
   if (state.step !== 'intro') show(state.step, 1);
   else { current = document.getElementById('cpIntro'); document.body.classList.remove('cp-flow'); }

@@ -182,6 +182,8 @@ body.menu-open .drawer-item{opacity:1;transform:none}
 .page-hero .crumb a::after{content:'';position:absolute;inset:-17px -6px} /* 10px高の文字のまま、タップ領域を44pxに */
 .page-hero .crumb a:hover{color:var(--ink)}
 .page-hero .crumb .sep{color:var(--ink-4)}
+.page-hero .crumb .tx-link::after{content:none} /* 町から来た人の戻り道(bridge.js の townReturn)は .tx-link 自身が 44px */
+.page-hero .crumb .tx-link{margin:-17px 0} /* 当たり判定 44px のまま、行の高さはパンくずの 10px に(見出しを動かさない) */
 .page-hero h1{font-family:var(--sans);font-weight:900;font-size:clamp(32px,6vw,64px);line-height:1.35;letter-spacing:-0.01em;position:relative;width:fit-content;max-width:100%;--ph-lx:max(var(--pad-x),calc((100vw - var(--max)) / 2))}
 .page-hero h1::after{content:'';position:absolute;left:calc(-1 * var(--ph-lx));top:calc(100% + 10px);width:calc(var(--ph-lx) + min(max(100% + 1em,var(--text-max)),100vw - 2 * var(--ph-lx)));height:2px;background:var(--mark-line);transform-origin:0 50%;animation:ph-line 1s var(--ease) .15s both}
 .page-hero h1::before{content:'';position:absolute;left:0;top:calc(100% + 11px);width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--dawn);z-index:1;animation:ph-dot .3s linear .3s both}
