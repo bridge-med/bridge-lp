@@ -435,6 +435,14 @@ function boot() {
      その下に道具の名前を小さく。移るのに 800ms 以上かかったら、名前の下に細い線が流れる。読み込みが速ければ途中で切れてよい。
      動きを減らす設定では動かさない。別のサイトは新しいタブで開くので、広げない。戻ったとき(bfcache): 写しが元の画面へ縮んで戻る */
   let leapEl = null, leapT = 0, waitT = 0;
+  /* 着く先がダークで開くか(2026-11-01 実測。data.js の th): 'light' = ライトだけ、'os' = OS の設定だけ、ほか = 保存したテーマ(bridge-theme)→ OS(bridge.js と同じ決め方) */
+  const leapDark = t => {
+    const os = !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+    if (t.th === 'light') return false;
+    if (t.th === 'os') return os;
+    const s = store.get('bridge-theme');
+    return s === 'dark' || (s !== 'light' && os);
+  };
   function leap(e, shotImg, t, sid, own) {
     if (t.ext || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (ctl) ctl.setPaused(true);   // 移る間は町を描かない(次のページの読み込みに手を譲る)
@@ -450,7 +458,9 @@ function boot() {
       from = { x: bx.left + (bx.width - shotImg.naturalWidth * k0) / 2, y: bx.top + (bx.height - shotImg.naturalHeight * k0) / 2, w: shotImg.naturalWidth * k0, h: shotImg.naturalHeight * k0 };
       im = land && land.naturalWidth ? land : shotImg;
     }
+    if (phone() && im && !((im.naturalHeight || im.height) > (im.naturalWidth || im.width))) im = null;   // スマホで広げるのは縦の写しだけ(着くスマホの画面と同じ形)。横の写し(PC の画面)は広げず、名前だけ
     const lp = el('div', 'leap'), bg = el('i', 'lp-bg'), cap = el('p', 'lp-name'), vw = R.clientWidth, vh = innerHeight;
+    lp.classList.toggle('dk', leapDark(t)); lp.classList.toggle('lp', t.kind === 'intro');   // 地は着く先のテーマ(ダークの人に白い一瞬を出さない)
     if (im && !(from && from.w > 2 && from.w < vw * 2 && from.x + from.w > 0 && from.y + from.h > 0 && from.x < vw && from.y < vh)) {   // 画面の外(カメラが動いている途中など): 入口の位置から
       const r = (e.currentTarget.closest('.prow') || e.currentTarget).getBoundingClientRect(); from = { x: r.left + 12, y: r.top + 8, w: Math.max(40, r.width - 24), h: Math.max(30, r.height - 16) };
     }
@@ -485,6 +495,24 @@ function boot() {
     setTimeout(() => lp.remove(), D + 40);
   }
   addEventListener('pageshow', e => { if (e.persisted) unleap(true); });
+
+  /* ---------- 町から来たこと(2026-11-01 社長 案 B「文脈を手渡す」): 町の中(#main)の行き先へ移るとき、どの建物から来たかを、このタブの中だけ(sessionStorage)に書く。外へは送らない。
+     着いた先(ブランドの面)の shared/bridge.js の townReturn が1回だけ読んで消し、「← 町の展望台へ戻る」を出す。ヘッダー・メニュー・フッターは書かない(サイトの道)。
+     建物は、病院の中(#chips・#insGo・.rmin)なら病院、ほかはひらいている建物(なければ null =「← 町へ戻る」)。町を開き直したとき(読み込み・戻ったとき)は消す。
+     k='panel': パネルの入口から Compass へ(条件を読んで「質問に答える」を選んだ人。Compass は導入を飛ばして職種の画面から) ---------- */
+  const HAND = 'bridge-town-from';
+  const handDrop = () => { try { sessionStorage.removeItem(HAND); } catch (e) { /* 使えなくても壊れない */ } };
+  handDrop(); addEventListener('pageshow', handDrop);
+  $('#main').addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || a.target) return;
+    let u = null; try { u = new URL(a.href, location.href); } catch (x) { return; }
+    if (u.origin !== location.origin || u.pathname === location.pathname) return;   // ページの中の移動(#town/… など)は書かない
+    const b = a.closest('#chips,#insGo,.rmin') ? 'hospital' : openId, B = b && BY_ID[b];
+    const row = a.classList.contains('pcta') && a.closest('.prow'), sid = (row ? row.dataset.sid : a.dataset.sid) || '';
+    const h = { b: B ? b : null, n: B ? B.name : '', t: sid, d: u.pathname, from: location.pathname, at: Date.now(), k: row && sid === 'compass' ? 'panel' : '' };
+    try { sessionStorage.setItem(HAND, JSON.stringify(h)); } catch (x) { /* 使えなくても壊れない(戻り道が出ないだけ) */ }
+  });
 
   /* ---------- キーボード: Esc で閉じる(一覧がひらいていれば一覧を)、←/→ で隣の建物へ、Tab はパネルの中を回る ---------- */
   addEventListener('keydown', e => {

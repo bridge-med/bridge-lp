@@ -65,6 +65,9 @@
 .cp-head{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;column-gap:8px;row-gap:10px;align-items:center;margin-bottom:clamp(28px,5vh,44px)}
 .cp-back{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;margin-left:-10px;color:var(--ink-2);transition:background .2s}
 .cp-back svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* 町のパネルから来た人の職種の画面: 左上の戻るを「町の展望台へ戻る」に(2026-11-01。文字は .cp-chapter .jp と同じ) */
+.cp-back.cp-town{grid-column:1/-1;justify-self:start;width:auto;display:inline-flex;align-items:center;gap:6px;padding:0 14px 0 12px;border-radius:22px;font-size:14px;font-weight:700;color:var(--ink-2)}
+html.cp-from-town #cpIntro{visibility:hidden} /* 導入を一瞬も描かない(index.html の head が付け、app.js が外す) */
 .cp-chapter{display:flex;flex-direction:column;gap:6px}
 .cp-chapter .en{font:600 10px/1 var(--en);letter-spacing:.2em;color:var(--ink-3)}
 .cp-chapter .jp{font-size:14px;font-weight:700;line-height:1}
