@@ -32,6 +32,8 @@ const KIND_MODEL: Record<string, string> = {
   reflection: M_FLASH,
   career: M_FLASH,
   workstyle: M_FLASH,
+  assetize: M_FLASH, // 1ログ→資産化分析（core loop・1回のバッチ呼び出し）
+  weekly: M_FLASH,
   // (gemini-2.5-pro available via M_PRO for future heavy kinds)
 };
 function modelFor(kind: string): string {
@@ -162,6 +164,55 @@ async function handle(kind: string, input: Input): Promise<unknown> {
         s(input.material, MAX_TEXT),
       ].join('\n');
       return { text: await generate(kind, prompt, { maxTokens: 1200, temperature: 0.5 }) };
+    }
+    case 'assetize': {
+      // One batched call: achievement phrasing + skills + STAR + publish-risk +
+      // external asset candidates. Honest by design — no fabricated numbers.
+      const prompt = [
+        'あなたはキャリア支援と情報発信の専門家です。以下の仕事ログ1件を分析し、JSONだけを返してください（前置き不要）。',
+        '重要な姿勢：',
+        '・何でも褒めない。単純作業の記録なら strength を "weak" とし、strengthNote に正直に書く（例：「これは単純作業の記録です」）。',
+        '・ログに無い数字・成果を絶対に捏造しない。成果が読み取れない場合 star.r は空文字にし resultMissing を true にする。',
+        '・成果が不足している場合は strengthNote で「成果を確認すると実績として強くなります」のように提案する。',
+        '',
+        '出力フォーマット（JSONのみ・すべて日本語）:',
+        '{',
+        ' "achievement": 職務経歴書・評価面談向けの実績表現（1文・盛らない）,',
+        ' "strength": "weak"|"normal"|"strong",',
+        ' "strengthNote": 正直な一言,',
+        ' "skills": [経験から得られたスキル名を0〜5個（例: 業務改善, ステークホルダー調整）],',
+        ' "star": {"s": 状況, "t": 課題, "a": 行動, "r": 成果（不明なら""）, "resultMissing": true|false},',
+        ' "areas": [知識領域タグを1〜3個（例: 医療経営, マネジメント, 業務改善, AI活用）],',
+        ' "risk": {"level": "low"|"medium"|"high", "notes": [公開時の注意箇所（固有名・患者/顧客情報・数値等）0〜4個], "anonymized": [一般化の言い換え案0〜3個（例:「3つの医療機関」）]},',
+        ' "candidates": [外部資産化できそうな場合のみ0〜4個 {"kind": "x"|"note"|"template"|"product"|"career_story", "title": 短いタイトル, "summary": 何が価値か1文, "detail": kindに応じた本文}]',
+        '}',
+        'candidatesのdetailの書き方：',
+        '・x: テーマ／切り口／投稿案140〜200字（固有名は一般化して書く）',
+        '・note: タイトル候補／想定読者／読者の課題／記事構成（見出し4〜6個）／無料向きか有料向きかと理由',
+        '・template: 何のテンプレか（チェックリスト/Excel/業務フロー/ヒアリングシート/SOP/評価シート/プロンプト等）／含める項目案',
+        '・product: 課題／アイデア（小さなWebアプリ・ツール・AI機能）／最小構成',
+        '・career_story: 面接で語る60秒版のストーリー',
+        '資産化する価値が薄いログなら candidates は空配列にする（無理に作らない）。',
+        NO_MD,
+        '---',
+        s(input.logText, MAX_TEXT),
+      ].join('\n');
+      const out = parseJson<Record<string, unknown>>(await generate(kind, prompt, { json: true, maxTokens: 3500 }));
+      return { analysis: out };
+    }
+    case 'weekly': {
+      const prompt = [
+        'あなたはキャリア支援の専門家です。以下は1週間分の仕事ログと抽出済み資産のダイジェストです。',
+        '横断的に見て価値のある提案をJSONだけで返してください（前置き不要・すべて日本語）。',
+        '例：「この3つのログは共通して業務標準化の内容です。1本のnoteにまとめられます」「この作業は繰り返し発生しているためテンプレート化できそうです」',
+        '形式: {"suggestions": [提案を2〜4個。各1〜2文で具体的に]}',
+        'ログに無いことは提案の根拠にしない。褒めるだけの提案はしない。',
+        NO_MD,
+        '---',
+        s(input.digest, MAX_TEXT),
+      ].join('\n');
+      const out = parseJson<{ suggestions?: unknown[] }>(await generate(kind, prompt, { json: true, maxTokens: 1200 }));
+      return { suggestions: Array.isArray(out.suggestions) ? out.suggestions : [] };
     }
     case 'translate': {
       const lang = s(input.lang, 4) === 'ko' ? '韓国語' : '英語';
