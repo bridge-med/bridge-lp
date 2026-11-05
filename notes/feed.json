@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-11-03T02:23:11+00:00",
+  "updated_at": "2026-11-05T00:55:24+00:00",
   "source": "https://note.com/prime_duck4944/rss",
   "count": 6,
   "items": [
+    {
+      "title": "名前のない日｜最終話「名前のない日」",
+      "url": "https://note.com/prime_duck4944/n/nc809f7c097a7",
+      "guid": "https://note.com/prime_duck4944/n/nc809f7c097a7",
+      "pubDate": "2026-11-04T19:00:00+09:00",
+      "date": "2026-11-04",
+      "excerpt": "十一月三日は、よく晴れていた。駅前の花屋に、白いガーベラがあった。",
+      "thumbnail": "https://assets.st-note.com/production/uploads/images/329670692/rectangle_large_type_2_1526b6ec50ff900011ada475ecdd6e8e.png?width=800"
+    },
     {
       "title": "名前のない日｜第六話「白紙」",
       "url": "https://note.com/prime_duck4944/n/n1687224d5158",
@@ -47,15 +56,6 @@
       "date": "2026-10-31",
       "excerpt": "「AさんとBさんが、また揉めています」管理職として働いていると、こうした相談を受けることがあります。",
       "thumbnail": "https://assets.st-note.com/production/uploads/images/328567904/rectangle_large_type_2_94ef3371a5c7ba84c3e612072867e5c1.png?width=800"
-    },
-    {
-      "title": "名前のない日｜第三話「どっちでもいい」",
-      "url": "https://note.com/prime_duck4944/n/n6ca14a028246",
-      "guid": "https://note.com/prime_duck4944/n/n6ca14a028246",
-      "pubDate": "2026-10-30T19:00:00+09:00",
-      "date": "2026-10-30",
-      "excerpt": "父が「どっちでもいい」と言うとき、本当にどっちでもよかったことは、あまりない。食パンは六枚切りだった。",
-      "thumbnail": "https://assets.st-note.com/production/uploads/images/329661032/rectangle_large_type_2_6275f390099e8eb1442a76db2f07c148.png?width=800"
     }
   ]
 }
