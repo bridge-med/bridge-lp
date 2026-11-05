@@ -1,0 +1,38 @@
+name: Check
+
+# Claude Code の hook と独立した機械検査。PR と master への push で走る。
+# 中身は現場の hook と同じ check-site(shiplog の検査を含む)と既存テスト。deploy.yml とは分け、重複させない。
+# master のブランチ保護で、この check を必須にする(設定は社長。Settings → Rules)。
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # sw.js の版名の検査で base と比べる
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 機械検査(check-site + shiplog + sw.js の版名)
+        env:
+          CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node scripts/check-site.mjs
+      - name: 既存テスト(compass・clinic-flow-3d)
+        run: node --test compass/tests/*.test.mjs clinic-flow-3d/tests/*.test.mjs
+      - name: 出荷の段階(参考。PR のときだけ)
+        if: github.event_name == 'pull_request'
+        run: node scripts/ship-tier.mjs --base ${{ github.event.pull_request.base.sha }}

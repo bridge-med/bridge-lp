@@ -28,8 +28,8 @@ jobs:
           SINCE=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)
           WEEK=$(date -u +%Y-%m-%d)
 
-          # 今週の出荷(マージコミットは除き、件名だけ)
-          COMMITS=$(git log --since="$SINCE" --no-merges --format='- %s' -- . | head -30)
+          # 今週の出荷(マージコミットと bot のフィード更新は除き、件名だけ)
+          COMMITS=$(git log --since="$SINCE" --no-merges --perl-regexp --author='^(?!github-actions)' --format='- %s' -- . | head -30)
           [ -z "$COMMITS" ] && COMMITS='- (今週の出荷はなし)'
 
           # 今週動いたworklogメモ(label: worklog)

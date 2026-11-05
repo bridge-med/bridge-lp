@@ -31,6 +31,7 @@ BRIDGEは理学療法士・橋本渉が個人で運営するプロジェクト�
 | `pr` | 広報 | inherit | 発信（note等）の計画・告知・発信の振り返り |
 
 流れの目安：着手前に `pm` → 制作（現場＋`editor`/`designer`/`biz`/`pr`に相談）→ 出荷前に `qa`＋領分の照合 → `pm` が総合判定 → 社長が公開を決める。
+**呼ぶ相手は出荷の段階で減らす**（`ship` スキル §0。2026-11-05 社長承認）。段階は `node scripts/ship-tier.mjs` が差分から機械的に決め、上げてよいが下げない。Light（公開 HTML/CSS/JS に差分なし）は機械検査と自己レビューだけで、領分も pm も呼ばない。Standard（既存のページ・プロダクトの中の変更）は qa と、差分のある領分だけ。pm は要修正・条件つきが出たときと完成の定義が変わったときだけ。Critical（新ページ・新プロダクト、NAV/PRODUCTS/sitemap、`shared/`、sw.js、憲法・design-system・ia・context、legal・services・starter-kits、トップ、deploy.yml）は全段。どの段階でも機械検査と社長の公開判断は省かない。
 
 UI の変更は次の順で進める：憲法 → design-system → その面の既存の部品・トークンを確認 → `designer` → 実装 → `qa` → `pm` → 社長。**ブランドの面では、新しい UI を作る前に、既存の部品（`shared/bridge.css`）で表現できないかを必ず確かめる。** ブランドの面の新しい部品・トークン・型は designer が design-system §6 の条件で可としたものだけを足す。一度しか使わないものは共通へ昇格させない。**プロダクトの画面では、そのプロダクトの系の中の既存のトークン・部品を先に使う**（足すのに §6 の可は要らない）。ブランドの部品は初期値にしない（使うなら合う理由を前提に書く）。新しいプロダクトと、デザインの方向の作り直し（系の入れ替え）は、前提を決めてデザインの方向を比べてから作る（design-system §5）。
 
@@ -46,7 +47,8 @@ UI の変更は次の順で進める：憲法 → design-system → その面の
 - 色はトークンで持ち、ハードコードしない（ブランドの面は `shared/bridge.css` のトークン、プロダクトは自分のトークン。canvas・3D の描画コードの色は design-system §5）。ブランドの面のライト/ダークはトークン（`--bg` 等）の差し替えのみで対応
 - 文体・見出しの禁則は憲法第19条、ブランドの面の色は第22条を参照。見出しに句点を付けない。「!」を使わない
 - 実装・修正・改善の進め方は `dev-loop` スキル（`.claude/skills/dev-loop/SKILL.md`）に従う。依頼種別（feature/bugfix/ui-improvement/refactor/product-idea）ごとの調整もここに定める
-- 出荷前の機械検査は `node scripts/check-site.mjs`。コミット時は `.claude/settings.json` のhookが自動で強制する。直せない既知の違反は `scripts/check-site.allowlist.json` に理由付きで隔離
+- 出荷前の機械検査は `node scripts/check-site.mjs`（リンク・NAV・sitemap・配列・町の写しに加えて、shiplog の形、ブランドの面の見出しの句点と「!」、sw.js の版名の上げ忘れ）。コミット時は `.claude/settings.json` のhookが自動で強制する。同じ検査と既存テストを `.github/workflows/check.yml` が PR と master への push で独立に走らせる（hook を通らない経路の網。master の保護で必須にする設定は社長）。直せない既知の違反は `scripts/check-site.allowlist.json` に理由付きで隔離
+- 出荷の記録は `cockpit-76a805/shiplog.jsonl`（2026-11-05 以降は v2 の形。`scripts/check-shiplog.mjs` が強制）。月別の失敗率・差し戻し率・再発率は `node scripts/shiplog-stats.mjs`（週次の bot が `cockpit-76a805/drafts/shiplog-stats.md` に置く）
 - 出荷（コミット・公開）の手順は `ship` スキル（`.claude/skills/ship/SKILL.md`）に従う。判定の記録は `cockpit-76a805/shiplog.jsonl`
 
 ## 作業別のSkills

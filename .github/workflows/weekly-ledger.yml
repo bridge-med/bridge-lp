@@ -25,6 +25,8 @@ jobs:
           fetch-depth: 0 # プロダクトごとの最終コミット日をgit logで引くため全履歴が要る
       - name: Refresh ledger
         run: node scripts/update-ledger.mjs
+      - name: shiplog の月別集計(失敗率・差し戻し率・再発率)
+        run: node scripts/shiplog-stats.mjs --out cockpit-76a805/drafts/shiplog-stats.md
       - name: Commit if changed
         id: commit
         run: |

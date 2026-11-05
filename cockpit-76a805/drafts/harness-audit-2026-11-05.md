@@ -1,7 +1,7 @@
 # ハーネス監査 2026-11-05 — 品質を保ったまま実行効率を上げる
 
 対象: bridge-lp の CLAUDE.md・.claude/agents・.claude/skills・hooks(.claude/settings.json → scripts/pre-commit-gate.mjs)・scripts・cockpit-76a805/shiplog.jsonl・.github/workflows。bridge-hq は参照のみ(ハーネスは持っていない)。
-この文書は監査結果と改善案で、コード・規程の変更はまだ行っていない(社長の承認後に着手)。
+この文書は監査結果と改善案。2026-11-05 に社長が P1〜P5 を承認し、同じ PR(#182)で実装した(§6 の順)。
 数値はすべてこのセッションで実測したもの。記録が無い数値(トークン・実行時間)は「無い」と書き、推測で埋めていない。
 
 ## 1. 現行設計の全体像
