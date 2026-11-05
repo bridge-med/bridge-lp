@@ -19,7 +19,7 @@ node scripts/ship-tier.mjs
 
 | 段階 | 目安 | 呼ぶもの |
 |---|---|---|
-| Light | 公開 HTML/CSS/JS に差分なし（cockpit・docs・.claude・scripts・.github・notes・テスト・文書） | 機械検査 + 自己レビュー。editor/designer/qa/pm は呼ばない。動くもの（scripts・workflows）は現場が実地で動かし、結果を notes に書く |
+| Light | 公開 HTML/CSS/JS に差分なし（cockpit・docs・.claude・scripts・.github・notes・テスト・文書） | 機械検査 + 自己レビュー。editor/designer/qa/pm は呼ばない。第34条の項目のうち当たるもの（主に第4章）は現場が自分で照合する。動くもの（scripts・workflows）は現場が実地で動かし、結果を notes に書く |
 | Standard | 既存のページ・プロダクトの中の変更 | 機械検査 + qa。文言の差分があれば editor、見た目の差分があれば designer。pm は、どこかの領分が要修正・条件つきを返したときと、完成の定義が変わったときだけ。それ以外は現場が pm.md 3 の第34条の項目を自分で照合し、notes に一言書く |
 | Critical | 新ページ・新プロダクト、NAV/PRODUCTS/sitemap、`shared/`、sw.js、憲法・design-system・ia・context、legal・services・starter-kits、トップ（町）、deploy.yml | 現行どおり全段。着手前 pm → editor/designer/qa → pm 総合判定 → Artifact → 社長 |
 
@@ -65,7 +65,7 @@ Standard は、領分が要修正・条件つきを返したときと、完成�
 {"date":"YYYY-MM-DD","tier":"light|standard|critical","scope":"変更の一言要約","checks":{"machine":"pass|fail|n/a|skipped","qa":"…","editor":"…","designer":"…","pm":"…"},"verdict":"shipped|held|wip","held_for":"owner|review|fix|external","pr":182,"started_at":"2026-11-05T09:30:00+09:00","finished_at":"2026-11-05T10:10:00+09:00","fixes":"YYYY-MM-DD","notes":"所見・違反・allowlist登録・保留事項。なければ空文字"}
 ```
 
-- `checks` の値は4語だけ。`n/a` は差分の種類から対象外、`skipped` は対象だが未実施（wip・先行コミット）。所見は `notes` へ書き、欄に文章を書かない
+- `checks` の値は4語だけ。`n/a` は差分の種類から対象外（段階の規則で呼ばない領分も `n/a`）、`skipped` は対象だが未実施（wip・先行コミット）。所見は `notes` へ書き、欄に文章を書かない
 - `verdict`: `shipped`＝出荷可、`held`＝止めている（`held_for` が必須。`owner`＝社長の入力待ち、`review`＝領分の再照合待ち、`fix`＝差し戻し、`external`＝外部待ち）、`wip`＝先行コミット（notes に未実施の照合を挙げる）
 - `commit` は任意。空文字は「この行を含むコミット自身」。過去の出荷を指すときだけ短縮ハッシュ。`pr` は PR 番号
 - `started_at` / `finished_at` は任意だが、書けるときは書く（所要時間の唯一の記録。トークンは記録できないので欄を作らない）
