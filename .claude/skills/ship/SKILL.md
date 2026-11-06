@@ -20,8 +20,8 @@ node scripts/ship-tier.mjs
 | 段階 | 目安 | 呼ぶもの |
 |---|---|---|
 | Light | 公開 HTML/CSS/JS に差分なし（cockpit・docs・.claude・scripts・.github・notes・テスト・文書） | 機械検査 + 自己レビュー。editor/designer/qa/pm は呼ばない。第34条の項目のうち当たるもの（主に第4章）は現場が自分で照合する。動くもの（scripts・workflows）は現場が実地で動かし、結果を notes に書く |
-| Standard | 既存のページ・プロダクトの中の変更 | 機械検査 + qa。文言の差分があれば editor、見た目の差分があれば designer。pm は、どこかの領分が要修正・条件つきを返したときと、完成の定義が変わったときだけ。それ以外は現場が pm.md 3 の第34条の項目を自分で照合し、notes に一言書く |
-| Critical | 新ページ・新プロダクト、NAV/PRODUCTS/sitemap、`shared/`、sw.js、憲法・design-system・ia・context、legal・services・starter-kits、トップ（町）、deploy.yml | 現行どおり全段。着手前 pm → editor/designer/qa → pm 総合判定 → Artifact → 社長 |
+| Standard | 既存のページ・プロダクトの中の変更。品質ゲート・CI の変更（`scripts/check-site.mjs`・`check-shiplog.mjs`・`ship-tier.mjs`・`shiplog-stats.mjs`・allowlist・`.github/workflows/`・`.github/scripts/`） | 機械検査 + qa（ゲート・CI の変更では、違反を仕込んでゲートが落ちることを実地で確かめる）。文言の差分があれば editor、見た目の差分があれば designer。pm は、どこかの領分が要修正・条件つきを返したときと、完成の定義が変わったときだけ。それ以外は現場が pm.md 3 の第34条の項目を自分で照合し、notes に一言書く |
+| Critical | 新ページ・新プロダクト、NAV/PRODUCTS/sitemap、`shared/`、sw.js、憲法・design-system・ia・context、legal・services・starter-kits、トップ（町）、deploy.yml、出荷ゲートの hook（`.claude/settings.json`・`scripts/pre-commit-gate.mjs`）、workflow の権限・秘密に触れる差分、認証・秘密の取り扱い（`.env` 等） | 現行どおり全段。着手前 pm → editor/designer/qa → pm 総合判定 → Artifact → 社長 |
 
 第34条の照合はどの段階でも行う。Light でも機械検査は省かない（第19条の機械化分＝ブランドの面の見出しの句点と「!」、sw.js の版名、shiplog の形を含む）。社長の公開判断は段階に関わらず最後にある。
 
@@ -62,11 +62,12 @@ Standard は、領分が要修正・条件つきを返したときと、完成�
 `cockpit-76a805/shiplog.jsonl` に1行追記する（1出荷=1行のJSONL）。形は `scripts/check-shiplog.mjs` が強制する（2026-11-05 以降の行。それより前は履歴のまま）。
 
 ```json
-{"date":"YYYY-MM-DD","tier":"light|standard|critical","scope":"変更の一言要約","checks":{"machine":"pass|fail|n/a|skipped","qa":"…","editor":"…","designer":"…","pm":"…"},"verdict":"shipped|held|wip","held_for":"owner|review|fix|external","pr":182,"started_at":"2026-11-05T09:30:00+09:00","finished_at":"2026-11-05T10:10:00+09:00","fixes":"YYYY-MM-DD","notes":"所見・違反・allowlist登録・保留事項。なければ空文字"}
+{"date":"YYYY-MM-DD","tier":"light|standard|critical","ship":"同じ出荷の行を結ぶ名(任意)","scope":"変更の一言要約","checks":{"machine":"pass|fail|n/a|skipped","qa":"…","editor":"…","designer":"…","pm":"…"},"verdict":"shipped|held|wip","held_for":"owner|review|fix|external","pr":182,"started_at":"2026-11-05T09:30:00+09:00","finished_at":"2026-11-05T10:10:00+09:00","fixes":"YYYY-MM-DD","notes":"所見・違反・allowlist登録・保留事項。なければ空文字"}
 ```
 
 - `checks` の値は4語だけ。`n/a` は差分の種類から対象外（段階の規則で呼ばない領分も `n/a`）、`skipped` は対象だが未実施（wip・先行コミット）。所見は `notes` へ書き、欄に文章を書かない
 - `verdict`: `shipped`＝出荷可、`held`＝止めている（`held_for` が必須。`owner`＝社長の入力待ち、`review`＝領分の再照合待ち、`fix`＝差し戻し、`external`＝外部待ち）、`wip`＝先行コミット（notes に未実施の照合を挙げる）
+- 1出荷は複数行になりうる（`wip`＝先行コミット → `held`＝判定は済み社長待ち等 → `shipped`＝最終）。同じ出荷の行は `ship` の名（例 `2026-11-05-harness`）で結ぶ。名が無い行は1行で1出荷。最終判定は最後の行で、集計は出荷の単位と記録行の単位を分けて数える（率の定義は `scripts/shiplog-stats.mjs` の冒頭）
 - `commit` は任意。空文字は「この行を含むコミット自身」。過去の出荷を指すときだけ短縮ハッシュ。`pr` は PR 番号
 - `started_at` / `finished_at` は任意だが、書けるときは書く（所要時間の唯一の記録。トークンは記録できないので欄を作らない）
 - `fixes` は再発の修正のとき、元の不具合を出荷した行の日付。再発率はここから数える

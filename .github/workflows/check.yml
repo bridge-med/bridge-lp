@@ -31,8 +31,8 @@ jobs:
         env:
           CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: node scripts/check-site.mjs
-      - name: 既存テスト(compass・clinic-flow-3d)
-        run: node --test compass/tests/*.test.mjs clinic-flow-3d/tests/*.test.mjs
+      - name: テスト(compass・clinic-flow-3d・ハーネスの scripts/tests)
+        run: node --test compass/tests/*.test.mjs clinic-flow-3d/tests/*.test.mjs scripts/tests/*.test.mjs
       - name: 出荷の段階(参考。PR のときだけ)
         if: github.event_name == 'pull_request'
         run: node scripts/ship-tier.mjs --base ${{ github.event.pull_request.base.sha }}
