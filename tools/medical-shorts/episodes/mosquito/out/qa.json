@@ -2,8 +2,8 @@
  "mp4": "/home/user/bridge-lp/tools/medical-shorts/episodes/mosquito/out/mosquito.mp4",
  "duration": 56.016,
  "summary": {
-  "pass": 20,
-  "fail": 2,
+  "pass": 22,
+  "fail": 0,
   "unverified": 4
  },
  "results": [
@@ -53,14 +53,14 @@
    "detail": "上の 3 項の合算。幾何の破綻(めり込み)は未検証の項で扱う"
   },
   {
-   "name": "どの区間にも視覚的な変化がある(画素差)",
-   "status": "fail",
-   "detail": "区間の平均 YDIF: {'land': 4.65, 'insert': 6.18, 'section': 1.82, 'saliva': 1.32, 'vessel': 0.95, 'recognize': 2.05, 'degranulate': 1.2, 'stimulate': 1.4, 'signal': 1.55, 'swell': 1.31, 'macro_bump': 1.68, 'varies': 0.28, 'outro': 0.09}"
+   "name": "どの区間にも目に見える変化がある(1 秒差のコマの平均差 ≥ 3/255、または区間の最初と最後の差 ≥ 8/255)",
+   "status": "pass",
+   "detail": "1秒差 {'land': 32.47, 'insert': 31.89, 'section': 23.44, 'saliva': 26.1, 'vessel': 22.13, 'recognize': 19.91, 'degranulate': 17.02, 'stimulate': 23.68, 'signal': 23.95, 'swell': 21.5, 'macro_bump': 23.99, 'varies': 9.99, 'outro': 4.04}; 最初と最後 {'land': 34.24, 'insert': 40.52, 'section': 14.42, 'saliva': 26.34, 'vessel': 21.84, 'recognize': 19.86, 'degranulate': 18.17, 'stimulate': 24.62, 'signal': 23.32, 'swell': 22.43, 'macro_bump': 17.36, 'varies': 3.65, 'outro': 5.85}"
   },
   {
    "name": "どの区間にも対象物の動き・状態変化のキーがある",
    "status": "pass",
-   "detail": "{'land': 62, 'insert': 6, 'section': 4, 'saliva': 76, 'vessel': 10, 'recognize': 4, 'degranulate': 16, 'stimulate': 17, 'signal': 16, 'swell': 48, 'macro_bump': 34, 'varies': 4, 'outro': 1}"
+   "detail": "{'land': 62, 'insert': 6, 'section': 4, 'saliva': 76, 'vessel': 10, 'recognize': 4, 'degranulate': 16, 'stimulate': 17, 'signal': 16, 'swell': 48, 'macro_bump': 34, 'varies': 4, 'outro': 2}"
   },
   {
    "name": "字幕と音声の同期(開始のずれ ≤ 0.05s)",
@@ -79,8 +79,8 @@
   },
   {
    "name": "ラウドネス(-19〜-13 LUFS・真のピーク < -1 dBTP)",
-   "status": "fail",
-   "detail": "I=-15.18 LUFS, TP=0.01 dBTP"
+   "status": "pass",
+   "detail": "I=-16.49 LUFS, TP=-1.45 dBTP"
   },
   {
    "name": "口器の先端: 刺す前は皮膚の上、刺した後は皮膚の下(腕)",
@@ -141,28 +141,58 @@
  "segment_change": {
   "land": 4.65,
   "insert": 6.18,
-  "section": 1.82,
-  "saliva": 1.32,
+  "section": 1.7,
+  "saliva": 1.31,
   "vessel": 0.95,
-  "recognize": 2.05,
-  "degranulate": 1.2,
-  "stimulate": 1.4,
+  "recognize": 2.03,
+  "degranulate": 1.19,
+  "stimulate": 1.39,
   "signal": 1.55,
-  "swell": 1.31,
+  "swell": 1.3,
   "macro_bump": 1.68,
-  "varies": 0.28,
-  "outro": 0.09
+  "varies": 0.25,
+  "outro": 0.22
+ },
+ "segment_move": {
+  "land": 32.47,
+  "insert": 31.89,
+  "section": 23.44,
+  "saliva": 26.1,
+  "vessel": 22.13,
+  "recognize": 19.91,
+  "degranulate": 17.02,
+  "stimulate": 23.68,
+  "signal": 23.95,
+  "swell": 21.5,
+  "macro_bump": 23.99,
+  "varies": 9.99,
+  "outro": 4.04
+ },
+ "segment_span": {
+  "land": 34.24,
+  "insert": 40.52,
+  "section": 14.42,
+  "saliva": 26.34,
+  "vessel": 21.84,
+  "recognize": 19.86,
+  "degranulate": 18.17,
+  "stimulate": 24.62,
+  "signal": 23.32,
+  "swell": 22.43,
+  "macro_bump": 17.36,
+  "varies": 3.65,
+  "outro": 5.85
  },
  "loudness": {
-  "input_i": "-15.18",
-  "input_tp": "0.01",
-  "input_lra": "2.90",
-  "input_thresh": "-26.52",
-  "output_i": "-15.95",
+  "input_i": "-16.49",
+  "input_tp": "-1.45",
+  "input_lra": "3.00",
+  "input_thresh": "-27.47",
+  "output_i": "-15.92",
   "output_tp": "-1.50",
-  "output_lra": "2.90",
-  "output_thresh": "-27.07",
+  "output_lra": "2.80",
+  "output_thresh": "-26.75",
   "normalization_type": "dynamic",
-  "target_offset": "-0.05"
+  "target_offset": "-0.08"
  }
 }

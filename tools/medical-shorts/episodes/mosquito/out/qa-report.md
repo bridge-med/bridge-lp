@@ -1,6 +1,6 @@
 # 品質チェック結果 — mosquito
 
-対象: `mosquito.mp4`(56.02s)。合格 20 / 不合格 2 / 未検証 4
+対象: `mosquito.mp4`(56.02s)。合格 22 / 不合格 0 / 未検証 4
 
 | 項目 | 結果 | 詳細 |
 |---|---|---|
@@ -13,12 +13,12 @@
 | 平坦(一色)のコマなし | 合格 | 0 コマ (YMAX-YMIN<6) |
 | カット以外に急な画面の跳びなし | 合格 | 0 コマ (YDIF>40); カット [188, 972] |
 | カメラの破綻(一色のコマ・急な跳び)の自動検出 | 合格 | 上の 3 項の合算。幾何の破綻(めり込み)は未検証の項で扱う |
-| どの区間にも視覚的な変化がある(画素差) | 不合格 | 区間の平均 YDIF: {'land': 4.65, 'insert': 6.18, 'section': 1.82, 'saliva': 1.32, 'vessel': 0.95, 'recognize': 2.05, 'degranulate': 1.2, 'stimulate': 1.4, 'signal': 1.55, 'swell': 1.31, 'macro_bump': 1.68, 'varies': 0.28, 'outro': 0.09} |
-| どの区間にも対象物の動き・状態変化のキーがある | 合格 | {'land': 62, 'insert': 6, 'section': 4, 'saliva': 76, 'vessel': 10, 'recognize': 4, 'degranulate': 16, 'stimulate': 17, 'signal': 16, 'swell': 48, 'macro_bump': 34, 'varies': 4, 'outro': 1} |
+| どの区間にも目に見える変化がある(1 秒差のコマの平均差 ≥ 3/255、または区間の最初と最後の差 ≥ 8/255) | 合格 | 1秒差 {'land': 32.47, 'insert': 31.89, 'section': 23.44, 'saliva': 26.1, 'vessel': 22.13, 'recognize': 19.91, 'degranulate': 17.02, 'stimulate': 23.68, 'signal': 23.95, 'swell': 21.5, 'macro_bump': 23.99, 'varies': 9.99, 'outro': 4.04}; 最初と最後 {'land': 34.24, 'insert': 40.52, 'section': 14.42, 'saliva': 26.34, 'vessel': 21.84, 'recognize': 19.86, 'degranulate': 18.17, 'stimulate': 24.62, 'signal': 23.32, 'swell': 22.43, 'macro_bump': 17.36, 'varies': 3.65, 'outro': 5.85} |
+| どの区間にも対象物の動き・状態変化のキーがある | 合格 | {'land': 62, 'insert': 6, 'section': 4, 'saliva': 76, 'vessel': 10, 'recognize': 4, 'degranulate': 16, 'stimulate': 17, 'signal': 16, 'swell': 48, 'macro_bump': 34, 'varies': 4, 'outro': 2} |
 | 字幕と音声の同期(開始のずれ ≤ 0.05s) | 合格 | 13 文すべて一致 |
 | 各文の区間に音声がある | 合格 | 13 文すべて -35dB 超 |
 | 文と文の間は静か(BGM のみ) | 合格 | ok |
-| ラウドネス(-19〜-13 LUFS・真のピーク < -1 dBTP) | 不合格 | I=-15.18 LUFS, TP=0.01 dBTP |
+| ラウドネス(-19〜-13 LUFS・真のピーク < -1 dBTP) | 合格 | I=-16.49 LUFS, TP=-1.45 dBTP |
 | 口器の先端: 刺す前は皮膚の上、刺した後は皮膚の下(腕) | 合格 | 前 -0.232, 後 0.315 (正=皮膚の下) |
 | 口器の先端: 断面では真皮の中(表皮の下・皮下組織の上) | 合格 | 先端 z=-0.75, 表皮の底 0.4, 真皮の底 -2.6 |
 | 口器は膨疹の前に抜かれている(断面) | 合格 | 抜いた後の先端 z=4.546 > 表面 1.0 |
