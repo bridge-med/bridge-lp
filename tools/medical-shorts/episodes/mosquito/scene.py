@@ -611,8 +611,8 @@ cam_key(F(swe_["end"]), S(0.2, -11.0, 0.4), S(0.2, 0, -0.9), 40)
 cam_key(F(mb_["start"]), (2.6, -3.6, 1.3), (-0.2, 0.2, 0.45), 50, cut=True)
 cam_key(F(va_["end"]), (2.1, -2.9, 0.95), (0.0, 0.1, 0.3), 55)
 # 結び: 答えの題を残したまま、はっきり分かる速さで引いて終わる(最後の 2 秒は静止)
-cam_key(F(out_["end"]), (3.6, -5.0, 2.0), (-0.2, 0.2, 0.45), 40)
-cam_key(F(out_["end"]) + int(FPS * TIMING["end_hold"]), (3.6, -5.0, 2.0), (-0.2, 0.2, 0.45), 40)
+cam_key(F(out_["end"]), (-0.6, -5.6, 2.3), (-0.1, 0.2, 0.4), 40)
+cam_key(F(out_["end"]) + int(FPS * TIMING["end_hold"]), (-0.6, -5.6, 2.3), (-0.1, 0.2, 0.4), 40)
 # カット: 直前のキーを CONSTANT にして、間を補間しない
 for fc in fcurves(cam):
     pts = sorted(fc.keyframe_points, key=lambda k: k.co.x)
