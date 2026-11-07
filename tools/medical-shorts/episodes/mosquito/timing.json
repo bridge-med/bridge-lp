@@ -1,0 +1,110 @@
+{
+ "episode": "mosquito",
+ "fps": 24,
+ "rate": 1.12,
+ "gap_after_line": 0.45,
+ "end_hold": 2.0,
+ "total": 56.016,
+ "total_frames": 1344,
+ "segments": [
+  {
+   "id": "hook",
+   "start": 0.0,
+   "end": 4.2,
+   "voice": 3.392,
+   "cue": "land"
+  },
+  {
+   "id": "inside",
+   "start": 4.2,
+   "end": 7.8,
+   "voice": 2.763,
+   "cue": "insert"
+  },
+  {
+   "id": "needle",
+   "start": 7.8,
+   "end": 11.8,
+   "voice": 3.328,
+   "cue": "section"
+  },
+  {
+   "id": "saliva",
+   "start": 11.8,
+   "end": 15.4,
+   "voice": 2.987,
+   "cue": "saliva"
+  },
+  {
+   "id": "anticoag",
+   "start": 15.4,
+   "end": 19.669,
+   "voice": 3.819,
+   "cue": "vessel"
+  },
+  {
+   "id": "foreign",
+   "start": 19.669,
+   "end": 23.069,
+   "voice": 2.485,
+   "cue": "recognize"
+  },
+  {
+   "id": "mast",
+   "start": 23.069,
+   "end": 27.625,
+   "voice": 4.107,
+   "cue": "degranulate"
+  },
+  {
+   "id": "histamine",
+   "start": 27.625,
+   "end": 32.043,
+   "voice": 3.968,
+   "cue": "stimulate"
+  },
+  {
+   "id": "signal",
+   "start": 32.043,
+   "end": 36.056,
+   "voice": 3.563,
+   "cue": "signal"
+  },
+  {
+   "id": "swell",
+   "start": 36.056,
+   "end": 40.474,
+   "voice": 3.968,
+   "cue": "swell"
+  },
+  {
+   "id": "answer",
+   "start": 40.474,
+   "end": 46.215,
+   "voice": 5.291,
+   "cue": "macro_bump"
+  },
+  {
+   "id": "varies",
+   "start": 46.215,
+   "end": 50.291,
+   "voice": 3.627,
+   "cue": "varies"
+  },
+  {
+   "id": "outro",
+   "start": 50.291,
+   "end": 54.016,
+   "voice": 3.275,
+   "cue": "outro"
+  }
+ ],
+ "attempts": [
+  {
+   "rate": 1.12,
+   "total": 56.02,
+   "voice_total": 46.57
+  }
+ ],
+ "engine": "voicevox"
+}
