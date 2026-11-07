@@ -14,6 +14,7 @@ S = json.load(open(EP / "script.json", encoding="utf-8")); T = json.load(open(EP
 A = json.load(open(WORK / "anchors.json", encoding="utf-8")) if (WORK / "anchors.json").exists() else {}
 W, H, FPS = S["width"], S["height"], T["fps"]
 SAFE = {"left": 110, "right": W - 110, "top": 240, "bottom": H - 420}   # Shorts/TikTok の UI と重ならない範囲
+LABEL_BOTTOM = H - 700   # 札は字幕(下 2 行)の上に収める
 FONT = "Noto Sans CJK JP"
 SUB_SIZE, TITLE_SIZE, LABEL_SIZE = 64, 96, 48
 MAX_CHARS, MAX_LINES = 18, 2
@@ -53,8 +54,9 @@ for i, line in enumerate(lines):
     assert len(rows) <= MAX_LINES and all(len(r) <= MAX_CHARS for r in rows), f"字幕が長い: {line['id']} {rows}"
     events.append(ev("Sub", t0, t1, "{\\fad(120,120)}" + text))
     if line.get("title"):
-        tt1 = seg["end"] if i + 1 < len(lines) and lines[i + 1].get("title") else seg_by_id[lines[i + 1]["id"]]["end"] if i + 1 < len(lines) else T["total"]
-        # 題は、その文の区間 + 次の文の区間まで残す(フック: 着地〜刺入、結論: 結論〜違い)
+        later_title = any(l.get("title") for l in lines[i + 1:])
+        # 題は、その文の区間 + 次の文の区間まで残す(フック: 着地〜刺入)。最後の題(結論)は動画の終わりまで残す
+        tt1 = (seg_by_id[lines[i + 1]["id"]]["end"] if i + 1 < len(lines) else T["total"]) if later_title else T["total"]
         events.append(ev("Title", t0 + 0.25, tt1 - 0.1, "{\\fad(200,200)}" + line["title"].replace("\n", "\\N"), layer=1))
         stats["titles"].append({"id": line["id"], "start": t0 + 0.25, "end": tt1 - 0.1, "text": line["title"]})
 # 札: 1 コマごとの \pos。錨の少し上に置き、安全域に収める
@@ -63,7 +65,7 @@ for lab, a in A.items():
     placed = 0
     for f, (x, y, z) in frames:
         if z <= 0: continue
-        px = min(max(x, SAFE["left"] + 120), SAFE["right"] - 120); py = min(max(y - 70, SAFE["top"] + 40), SAFE["bottom"] - 40)
+        px = min(max(x, SAFE["left"] + 120), SAFE["right"] - 120); py = min(max(y - 70, SAFE["top"] + 40), LABEL_BOTTOM)
         t0 = (f - 1) / FPS; t1 = f / FPS
         fade = ""
         if f - a["start"] < 4: fade = "{\\alpha&H%02X&}" % int(255 * (1 - (f - a["start"] + 1) / 5))

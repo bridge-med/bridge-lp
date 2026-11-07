@@ -23,12 +23,12 @@ done
 INPUTS+=(-i "$WORK/bgm.wav")
 FILTERS+="[$((n+1))]aresample=48000,volume=0.07[bg];"
 FILTERS+="${LABELS}amix=inputs=$n:normalize=0[vo];"
-FILTERS+="[vo]loudnorm=I=-16:TP=-1.5:LRA=11[von];"
-FILTERS+="[von][bg]amix=inputs=2:normalize=0:duration=longest,apad,alimiter=limit=0.85[aout];"
+# ナレーション + BGM を混ぜてから、最後にラウドネス正規化(-16 LUFS・真のピーク -1.5 dBTP。loudnorm は内部で 192kHz になるので戻す)
+FILTERS+="[vo][bg]amix=inputs=2:normalize=0:duration=longest,apad,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000[aout];"
 # 映像: 描いた解像度 → 1080x1920(lanczos)→ 字幕(libass)
 FILTERS+="[0:v]scale=1080:1920:flags=lanczos,format=yuv420p,subtitles='$WORK/subs.ass':fontsdir=/usr/share/fonts[vout]"
 
 ffmpeg -y -v error "${INPUTS[@]}" -filter_complex "$FILTERS" \
-  -map "[vout]" -map "[aout]" -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p -r "$FPS" \
+  -map "[vout]" -map "[aout]" -c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p -r "$FPS" \
   -c:a aac -b:a 160k -ar 48000 -movflags +faststart -t "$TOTAL" "$OUT"
 echo "$OUT ok"

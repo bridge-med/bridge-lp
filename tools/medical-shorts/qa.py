@@ -60,8 +60,18 @@ seg_change = {}
 for s in T["segments"]:
     fs = [f for f in frames if s["start"] <= f["t"] < s["end"]]
     seg_change[s["cue"]] = round(sum(f.get("YDIF", 0) for f in fs) / max(1, len(fs)), 2)
-still = [k for k, vv in seg_change.items() if vv < 0.3]
-check("どの区間にも視覚的な変化がある(画素差)", not still, f"区間の平均 YDIF: {seg_change}")
+# 区間の中で 1 秒離れたコマ対の差(平均絶対差、0〜255)の最大。ゆっくりした変化(膨らみ・カメラ)も拾う
+from PIL import Image, ImageChops, ImageStat
+def _load(f): return Image.open(WORK / "frames" / f"{f:05d}.png").convert("L").resize((180, 320))
+seg_move = {}
+for s in T["segments"]:
+    f0 = int(round(s["start"] * FPS)) + 1; f1 = min(int(round(s["end"] * FPS)), T["total_frames"])
+    m = 0.0
+    for f in range(f0, f1 - FPS, max(1, FPS // 2)):
+        m = max(m, ImageStat.Stat(ImageChops.difference(_load(f), _load(f + FPS))).mean[0])
+    seg_move[s["cue"]] = round(m, 2)
+still = [k for k, vv in seg_move.items() if vv < 3.0]
+check("どの区間にも 1 秒の間に目に見える変化がある(1 秒差のコマの平均差 ≥ 3/255)", not still, f"{seg_move}" + (f"; 乏しい区間 {still}" if still else ""))
 nokey = [k for k, vv in Q["keyframes_per_segment"].items() if vv == 0]
 check("どの区間にも対象物の動き・状態変化のキーがある", not nokey, f"{Q['keyframes_per_segment']}")
 # 5 字幕と音声の同期: 字幕の開始 = 区間の開始(音声の開始)
@@ -111,7 +121,7 @@ check("幾何のめり込み(脚と皮膚・口器と細胞)", False, "先端の
 
 summary = {"pass": sum(r["status"] == "pass" for r in results), "fail": sum(r["status"] == "fail" for r in results), "unverified": sum(r["status"] == "unverified" for r in results)}
 OUT.mkdir(exist_ok=True)
-json.dump({"mp4": str(MP4), "duration": dur, "summary": summary, "results": results, "segment_change": seg_change, "loudness": lnj}, open(OUT / "qa.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+json.dump({"mp4": str(MP4), "duration": dur, "summary": summary, "results": results, "segment_change": seg_change, "segment_move": seg_move, "loudness": lnj}, open(OUT / "qa.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 md = [f"# 品質チェック結果 — {EP.name}", "", f"対象: `{MP4.name}`({dur:.2f}s)。合格 {summary['pass']} / 不合格 {summary['fail']} / 未検証 {summary['unverified']}", "", "| 項目 | 結果 | 詳細 |", "|---|---|---|"]
 for r in results: md.append(f"| {r['name']} | {'合格' if r['status']=='pass' else '不合格' if r['status']=='fail' else '未検証'} | {r['detail']} |")
 (OUT / "qa-report.md").write_text("\n".join(md) + "\n", encoding="utf-8")

@@ -429,11 +429,11 @@ for o, c in PULSES:
 # ラベルの錨(画面座標に投影する点)
 ANCH = {
     "表皮": empty("Anchor_表皮", SEC + Vector((-1.6, -0.05, 0.7)), SC, parent=ROOT),
-    "真皮": empty("Anchor_真皮", SEC + Vector((-1.9, -0.05, -1.3)), SC, parent=ROOT),
+    "真皮": empty("Anchor_真皮", SEC + Vector((-2.7, -0.05, -1.9)), SC, parent=ROOT),
     "皮下組織": empty("Anchor_皮下組織", SEC + Vector((-1.6, -0.05, -3.4)), SC, parent=ROOT),
     "唾液": empty("Anchor_唾液", SEC + TIP + Vector((0.5, -0.05, -0.1)), SC, parent=ROOT),
     "血管": empty("Anchor_血管", SEC + Vector((1.6, -0.05, VZ + 0.05)), SC, parent=ROOT),
-    "マスト細胞": empty("Anchor_マスト細胞", SEC + MAST_C + Vector((0.0, -0.05, -0.85)), SC, parent=ROOT),
+    "マスト細胞": empty("Anchor_マスト細胞", SEC + MAST_C + Vector((-0.35, -0.05, 0.95)), SC, parent=ROOT),
     "ヒスタミン": empty("Anchor_ヒスタミン", SEC + MAST_C + Vector((0.9, -0.05, 0.75)), SC, parent=ROOT),
     "神経": empty("Anchor_神経", SEC + Vector((1.55, -0.05, 0.05)), SC, parent=ROOT),
 }
@@ -610,7 +610,9 @@ cam_key(F(swe_["end"]), S(0.2, -11.0, 0.4), S(0.2, 0, -0.9), 40)
 # macro(終盤): 膨らみを斜め上から。ゆっくり寄って、最後にゆっくり引く
 cam_key(F(mb_["start"]), (2.6, -3.6, 1.3), (-0.2, 0.2, 0.45), 50, cut=True)
 cam_key(F(va_["end"]), (2.1, -2.9, 0.95), (0.0, 0.1, 0.3), 55)
-cam_key(F(out_["end"]) + int(FPS * TIMING["end_hold"]), (2.4, -3.4, 1.2), (-0.1, 0.15, 0.4), 50)
+# 結び: 答えの題を残したまま、はっきり分かる速さで引いて終わる(最後の 2 秒は静止)
+cam_key(F(out_["end"]), (3.6, -5.0, 2.0), (-0.2, 0.2, 0.45), 40)
+cam_key(F(out_["end"]) + int(FPS * TIMING["end_hold"]), (3.6, -5.0, 2.0), (-0.2, 0.2, 0.45), 40)
 # カット: 直前のキーを CONSTANT にして、間を補間しない
 for fc in fcurves(cam):
     pts = sorted(fc.keyframe_points, key=lambda k: k.co.x)
