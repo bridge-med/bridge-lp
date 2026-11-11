@@ -31,7 +31,7 @@ export const TOOLS = {
   iikae: { name: '現場のことば 言いかえ帳', t: '現場のことばを、履歴書で通じる言葉に', href: P + 'iikae/index.html', thumb: 'iikae', for: '現場の言葉を履歴書に書けずにいる医療職に', facts: ['無料', '登録不要', '端末内保存'], cta: '言いかえ帳を開く', kind: 'app' },
   moyamoya: { name: '職場モヤモヤ診断', t: '職場の「なんとなくしんどい」を、10問で言葉に', href: P + 'moyamoya/index.html', th: 'os', thumb: 'moyamoya', for: '職場のしんどさを言葉にしたい人に', facts: ['無料', '登録不要', '端末内保存', '10問・約3分'], cta: '診断を始める', kind: 'app' },
   karte: { name: '現場のカルテ', t: '職場のしんどさを、カルテの形で読む', href: P + 'karte/index.html', th: 'os', thumb: 'karte', for: '職場のしんどさを、読み物として眺めたい人に', facts: ['登録不要', '入力の保存なし', '読みもの'], cta: '読んでみる', kind: 'app' },
-  'daily-app': { name: 'キャリアログ', t: '日々の仕事と学びを記録して、キャリアの言葉に', href: P + 'daily-app/index.html', th: 'light', thumb: 'careerlog', status: '更新休止', for: '日々の仕事を記録して、面接や1on1に使いたい人に', facts: ['登録不要', 'Web版(スマホ向けアプリのプレビュー)', '記録は端末内', '文章の整形だけ外部サーバー'], cta: 'Web版を開く', kind: 'app' },
+  'daily-app': { name: 'キャリアログ', t: '日々の仕事と学びを記録して、キャリアの言葉に', href: P + 'daily-app/', th: 'light', thumb: 'careerlog', status: '更新休止', for: '日々の仕事を記録して、面接や1on1に使いたい人に', facts: ['登録不要', 'Web版(スマホ向けアプリのプレビュー)', '記録は端末内', '文章の整形だけ外部サーバー'], cta: 'Web版を開く', kind: 'app' },
   'growth-76a805': { name: 'Growth OS', t: '仕事の記録を、企画や発信のたねに', href: P + 'growth-76a805/index.html', thumb: 'growth', for: '仕事の記録を企画や発信につなげたい人に', facts: ['無料', '登録不要', '端末内保存'], cta: '記録を始める', kind: 'app' },
   /* 学習を続ける */
   'him-quiz': { name: 'HIM Quiz', t: '診療情報管理士の模擬試験、全12章・360問', href: P + 'him-quiz/index.html', thumb: 'him-quiz', for: '診療情報管理士の独学者に', facts: ['無料', 'ログイン不要', '端末内保存', 'スマホ対応'], cta: '紹介を見る', kind: 'intro' },
