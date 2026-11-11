@@ -27,6 +27,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      # 公開の直前の機械検査。master は check.yml を待たずにここへ来るうえ、bot の push(GITHUB_TOKEN)では check.yml が起きない。
+      # 落ちたら配信しない(前の版が出続ける)。sw.js の版名の比較は履歴が要るのでここでは見ない(check.yml と手元の hook が見る)
+      - name: Check the site before publishing
+        run: node scripts/check-site.mjs
       - name: Prepare URLs for the configured Pages domain
         env:
           PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
