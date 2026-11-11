@@ -1,0 +1,198 @@
+{
+ "mp4": "/home/user/bridge-lp/tools/medical-shorts/episodes/mosquito/out/mosquito.mp4",
+ "duration": 56.016,
+ "summary": {
+  "pass": 22,
+  "fail": 0,
+  "unverified": 4
+ },
+ "results": [
+  {
+   "name": "尺が45〜60秒",
+   "status": "pass",
+   "detail": "56.02s"
+  },
+  {
+   "name": "縦型 1080x1920",
+   "status": "pass",
+   "detail": "1080x1920"
+  },
+  {
+   "name": "フレームレート",
+   "status": "pass",
+   "detail": "24/1"
+  },
+  {
+   "name": "音声トラックあり",
+   "status": "pass",
+   "detail": "1 stream"
+  },
+  {
+   "name": "描いたコマの欠けなし",
+   "status": "pass",
+   "detail": "欠け 0 / 1344"
+  },
+  {
+   "name": "黒画面のコマなし",
+   "status": "pass",
+   "detail": "0 コマ (YAVG<10)"
+  },
+  {
+   "name": "平坦(一色)のコマなし",
+   "status": "pass",
+   "detail": "0 コマ (YMAX-YMIN<6)"
+  },
+  {
+   "name": "カット以外に急な画面の跳びなし",
+   "status": "pass",
+   "detail": "0 コマ (YDIF>40); カット [188, 972]"
+  },
+  {
+   "name": "カメラの破綻(一色のコマ・急な跳び)の自動検出",
+   "status": "pass",
+   "detail": "上の 3 項の合算。幾何の破綻(めり込み)は未検証の項で扱う"
+  },
+  {
+   "name": "どの区間にも目に見える変化がある(1 秒差のコマの平均差 ≥ 3/255、または区間の最初と最後の差 ≥ 8/255)",
+   "status": "pass",
+   "detail": "1秒差 {'land': 32.47, 'insert': 31.89, 'section': 23.44, 'saliva': 26.1, 'vessel': 22.13, 'recognize': 19.91, 'degranulate': 17.02, 'stimulate': 23.68, 'signal': 23.95, 'swell': 21.5, 'macro_bump': 23.99, 'varies': 9.99, 'outro': 4.04}; 最初と最後 {'land': 34.24, 'insert': 40.52, 'section': 14.42, 'saliva': 26.34, 'vessel': 21.84, 'recognize': 19.86, 'degranulate': 18.17, 'stimulate': 24.62, 'signal': 23.32, 'swell': 22.43, 'macro_bump': 17.36, 'varies': 3.65, 'outro': 5.85}"
+  },
+  {
+   "name": "どの区間にも対象物の動き・状態変化のキーがある",
+   "status": "pass",
+   "detail": "{'land': 62, 'insert': 6, 'section': 4, 'saliva': 76, 'vessel': 10, 'recognize': 4, 'degranulate': 16, 'stimulate': 17, 'signal': 16, 'swell': 48, 'macro_bump': 34, 'varies': 4, 'outro': 2}"
+  },
+  {
+   "name": "字幕と音声の同期(開始のずれ ≤ 0.05s)",
+   "status": "pass",
+   "detail": "13 文すべて一致"
+  },
+  {
+   "name": "各文の区間に音声がある",
+   "status": "pass",
+   "detail": "13 文すべて -35dB 超"
+  },
+  {
+   "name": "文と文の間は静か(BGM のみ)",
+   "status": "pass",
+   "detail": "ok"
+  },
+  {
+   "name": "ラウドネス(-19〜-13 LUFS・真のピーク < -1 dBTP)",
+   "status": "pass",
+   "detail": "I=-16.49 LUFS, TP=-1.45 dBTP"
+  },
+  {
+   "name": "口器の先端: 刺す前は皮膚の上、刺した後は皮膚の下(腕)",
+   "status": "pass",
+   "detail": "前 -0.232, 後 0.315 (正=皮膚の下)"
+  },
+  {
+   "name": "口器の先端: 断面では真皮の中(表皮の下・皮下組織の上)",
+   "status": "pass",
+   "detail": "先端 z=-0.75, 表皮の底 0.4, 真皮の底 -2.6"
+  },
+  {
+   "name": "口器は膨疹の前に抜かれている(断面)",
+   "status": "pass",
+   "detail": "抜いた後の先端 z=4.546 > 表面 1.0"
+  },
+  {
+   "name": "蚊の部品: 脚6・翅2・口器1・触角2・複眼2",
+   "status": "pass",
+   "detail": "{'legs': 6, 'wings': 2, 'proboscis': 1, 'antennae': 2, 'eyes': 2}"
+  },
+  {
+   "name": "字幕: 2 行以内・1 行 18 字以内・64px 以上・安全域",
+   "status": "pass",
+   "detail": "size 64px, safe {'left': 110, 'right': 970, 'top': 240, 'bottom': 1500}"
+  },
+  {
+   "name": "字幕がナレーションの内容と一致(類似 ≥ 0.6)",
+   "status": "pass",
+   "detail": "{'hook': 1.0, 'inside': 1.0, 'needle': 1.0, 'saliva': 1.0, 'anticoag': 1.0, 'foreign': 1.0, 'mast': 0.9, 'histamine': 1.0, 'signal': 1.0, 'swell': 1.0, 'answer': 0.86, 'varies': 1.0, 'outro': 1.0}"
+  },
+  {
+   "name": "映像の cue とナレーションの区間が 1:1",
+   "status": "pass",
+   "detail": "13 cue"
+  },
+  {
+   "name": "蚊の見た目が『蚊』と分かる(人の目)",
+   "status": "unverified",
+   "detail": "部品の数と配置は合格。形の説得力は静止画(work/stills)を人が見る"
+  },
+  {
+   "name": "医学的な重大な誤りがない",
+   "status": "unverified",
+   "detail": "docs/medical-references.md の照合表を人が確認する(自動では判定しない)"
+  },
+  {
+   "name": "ナレーションの聞き取りやすさ・読みの誤り",
+   "status": "unverified",
+   "detail": "VOICEVOX の読み(アクセント・漢字の読み)は自動で判定できない。人が聴く"
+  },
+  {
+   "name": "幾何のめり込み(脚と皮膚・口器と細胞)",
+   "status": "unverified",
+   "detail": "先端の深さは合格。脚の接地やカメラと物体の干渉は確認用の静止画を人が見る"
+  }
+ ],
+ "segment_change": {
+  "land": 4.65,
+  "insert": 6.18,
+  "section": 1.7,
+  "saliva": 1.31,
+  "vessel": 0.95,
+  "recognize": 2.03,
+  "degranulate": 1.19,
+  "stimulate": 1.39,
+  "signal": 1.55,
+  "swell": 1.3,
+  "macro_bump": 1.68,
+  "varies": 0.25,
+  "outro": 0.22
+ },
+ "segment_move": {
+  "land": 32.47,
+  "insert": 31.89,
+  "section": 23.44,
+  "saliva": 26.1,
+  "vessel": 22.13,
+  "recognize": 19.91,
+  "degranulate": 17.02,
+  "stimulate": 23.68,
+  "signal": 23.95,
+  "swell": 21.5,
+  "macro_bump": 23.99,
+  "varies": 9.99,
+  "outro": 4.04
+ },
+ "segment_span": {
+  "land": 34.24,
+  "insert": 40.52,
+  "section": 14.42,
+  "saliva": 26.34,
+  "vessel": 21.84,
+  "recognize": 19.86,
+  "degranulate": 18.17,
+  "stimulate": 24.62,
+  "signal": 23.32,
+  "swell": 22.43,
+  "macro_bump": 17.36,
+  "varies": 3.65,
+  "outro": 5.85
+ },
+ "loudness": {
+  "input_i": "-16.49",
+  "input_tp": "-1.45",
+  "input_lra": "3.00",
+  "input_thresh": "-27.47",
+  "output_i": "-15.92",
+  "output_tp": "-1.50",
+  "output_lra": "2.80",
+  "output_thresh": "-26.75",
+  "normalization_type": "dynamic",
+  "target_offset": "-0.08"
+ }
+}
