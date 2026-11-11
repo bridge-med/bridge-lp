@@ -1,13 +1,14 @@
 /* クリニックタウン3D — Service Worker
  * network-first(常に最新を取りに行き、オフライン時はキャッシュで起動) */
-const VER = 'ct3d-v99.3';
+const VER = 'ct3d-v99.3-sw2';
 
 self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
+    // 同じオリジンのほかの道具のキャッシュは消さない(Cache Storage はオリジン単位。自分の接頭辞だけを片づける)
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VER).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('ct3d-') && k !== VER).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
