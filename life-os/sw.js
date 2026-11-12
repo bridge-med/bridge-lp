@@ -1,6 +1,6 @@
 /* LIFE//OS — Service Worker（オフラインキャッシュ / PWA）
    資産を更新したら CACHE の版名を必ず上げる。上げ忘れは旧画面の配信になる。 */
-var CACHE = 'life-os-v2';
+var CACHE = 'life-os-v3';
 var ASSETS = [
   './',
   './index.html',
@@ -23,8 +23,9 @@ self.addEventListener('install', function (e) {
 
 self.addEventListener('activate', function (e) {
   e.waitUntil(
+    // 同じオリジンのほかの道具のキャッシュは消さない(Cache Storage はオリジン単位。自分の接頭辞だけを片づける)
     caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== CACHE; })
+      return Promise.all(keys.filter(function (k) { return k.indexOf('life-os-') === 0 && k !== CACHE; })
         .map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );

@@ -1,7 +1,9 @@
 name: Check
 
 # Claude Code の hook と独立した機械検査。PR と master への push で走る。
-# 中身は現場の hook と同じ check-site(shiplog の検査を含む)と既存テスト。deploy.yml とは分け、重複させない。
+# 中身は現場の hook と同じ check-site(shiplog の検査を含む)と既存テスト。
+# deploy.yml も配信の直前に check-site だけを走らせる(2026-11-11)。master が無保護で、bot の push ではこの check が起きないため。
+# master の保護でこの check が必須になれば、deploy.yml 側の1ステップは二重の網として残してよい。
 # master のブランチ保護で、この check を必須にする(設定は社長。Settings → Rules)。
 
 on:

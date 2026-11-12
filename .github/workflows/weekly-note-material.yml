@@ -4,9 +4,11 @@ name: Weekly note material
 # 1本のIssueにまとめ、note記事の骨子として運営者に渡す。
 # 記事の声(一人称)は運営者のものなので、ここでは素材と骨子だけを組む。
 
+# 2026-11-11 休止: 17週で Issue 18本が作られ、コメントと close が 0 件だった(横断監査)。手動の実行は残す。
+# 再開するときは、下の schedule の2行のコメントを外す。
 on:
-  schedule:
-    - cron: '0 12 * * 5' # 金曜12:00 UTC = 金曜21:00 JST
+  # schedule:
+  #   - cron: '0 12 * * 5' # 金曜12:00 UTC = 金曜21:00 JST
   workflow_dispatch:
 
 permissions:

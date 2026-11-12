@@ -19,9 +19,9 @@ node scripts/ship-tier.mjs
 
 | 段階 | 目安 | 呼ぶもの |
 |---|---|---|
-| Light | 公開 HTML/CSS/JS に差分なし（cockpit・docs・.claude・scripts・.github・notes・テスト・文書） | 機械検査 + 自己レビュー。editor/designer/qa/pm は呼ばない。第34条の項目のうち当たるもの（主に第4章）は現場が自分で照合する。動くもの（scripts・workflows）は現場が実地で動かし、結果を notes に書く |
-| Standard | 既存のページ・プロダクトの中の変更。品質ゲート・CI の変更（`scripts/check-site.mjs`・`check-shiplog.mjs`・`ship-tier.mjs`・`shiplog-stats.mjs`・allowlist・`.github/workflows/`・`.github/scripts/`） | 機械検査 + qa（ゲート・CI の変更では、違反を仕込んでゲートが落ちることを実地で確かめる）。文言の差分があれば editor、見た目の差分があれば designer。pm は、どこかの領分が要修正・条件つきを返したときと、完成の定義が変わったときだけ。それ以外は現場が pm.md 3 の第34条の項目を自分で照合し、notes に一言書く |
-| Critical | 新ページ・新プロダクト、NAV/PRODUCTS/sitemap、`shared/`、sw.js、憲法・design-system・ia・context、legal・services・starter-kits、トップ（町）、deploy.yml、出荷ゲートの hook（`.claude/settings.json`・`scripts/pre-commit-gate.mjs`）、workflow の権限・秘密に触れる差分、認証・秘密の取り扱い（`.env` 等） | 現行どおり全段。着手前 pm → editor/designer/qa → pm 総合判定 → Artifact → 社長 |
+| Light | 公開 HTML/CSS/JS に差分なし（cockpit・docs・scripts・.github・notes・テスト・文書） | 機械検査 + 自己レビュー。editor/designer/qa/pm は呼ばない。第34条の項目のうち当たるもの（主に第4章）は現場が自分で照合する。動くもの（scripts・workflows）は現場が実地で動かし、結果を notes に書く |
+| Standard | 既存のページ・プロダクトの中の変更。品質ゲート・CI の変更（`scripts/check-site.mjs`・`check-shiplog.mjs`・`ship-tier.mjs`・`shiplog-stats.mjs`・allowlist・`.github/workflows/`・`.github/scripts/`）。審査する側の規程の変更（`.claude/` のエージェント・スキル、`CLAUDE.md`） | 機械検査 + qa（ゲート・CI の変更では、違反を仕込んでゲートが落ちることを実地で確かめる）。審査する側の規程の変更は qa の代わりに pm が照合する（書いた本人の自己レビューだけで通さない）。文言の差分があれば editor、見た目の差分があれば designer。pm は、どこかの領分が要修正・条件つきを返したときと、完成の定義が変わったときだけ。それ以外は現場が pm.md 3 の第34条の項目を自分で照合し、notes に一言書く |
+| Critical | 新ページ・新プロダクト、NAV/PRODUCTS/sitemap、`shared/`、sw.js、憲法・design-system・ia・context、legal・services・starter-kits、トップ（町）、deploy.yml、配信前の変換（`scripts/prepare-pages.mjs`）、出荷ゲートの hook（`.claude/settings.json`・`scripts/pre-commit-gate.mjs`）、workflow の権限・秘密に触れる差分、認証・秘密の取り扱い（`.env` 等） | 現行どおり全段。着手前 pm → editor/designer/qa → pm 総合判定 → Artifact → 社長 |
 
 第34条の照合はどの段階でも行う。Light でも機械検査は省かない（第19条の機械化分＝ブランドの面の見出しの句点と「!」、sw.js の版名、shiplog の形を含む）。社長の公開判断は段階に関わらず最後にある。
 
