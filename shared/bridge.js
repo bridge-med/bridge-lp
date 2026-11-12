@@ -168,6 +168,32 @@ document.documentElement.classList.add('js');
     gc.src = 'https://gc.zgo.at/count.js'; gc.async = true;
     document.head.appendChild(gc);
   }
+  /* ---- 操作の計測(GoatCounter のイベント。2026-11-03 の計測の便) ----
+     ページを読まれた回数とは別に、決まった操作だけを名前で数える。送るのは名前(path)と題(title)だけで、
+     回答・入力した文章・個人情報は送らない。count.js は非同期に読むので、まだ無いときは最大 10 秒だけ待ち、
+     読めなければ捨てる(計測が止まっても操作は妨げない)。重複を避ける責任は呼ぶ側(1セッション1回など)。
+     名前の一覧と読み方は docs/analytics.md。静的なリンクは data-goatcounter-click 属性で同じことができる。 ---- */
+  const evQueue = [];
+  let evTimer = null;
+  const flushEvents = () => {
+    while (evQueue.length) {
+      const ev = evQueue.shift();
+      try { window.goatcounter.count({ path: ev.path, title: ev.title, event: true }); } catch (e) {}
+    }
+  };
+  const countEvent = (path, title) => {
+    if (!GOATCOUNTER_CODE || !path) return;
+    evQueue.push({ path: String(path), title: String(title || path) });
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') { flushEvents(); return; }
+    if (evTimer) return;
+    let tries = 0;
+    evTimer = setInterval(() => {
+      tries++;
+      if (window.goatcounter && typeof window.goatcounter.count === 'function') { clearInterval(evTimer); evTimer = null; flushEvents(); }
+      else if (tries >= 40) { clearInterval(evTimer); evTimer = null; evQueue.length = 0; }
+    }, 250);
+  };
+
   const ANALYTICS_ENDPOINT = '';
   if (ANALYTICS_ENDPOINT && navigator.sendBeacon) {
     try { navigator.sendBeacon(ANALYTICS_ENDPOINT, JSON.stringify({ p: location.pathname, r: document.referrer })); } catch (e) {}
@@ -308,7 +334,7 @@ document.documentElement.classList.add('js');
   /* 町のトップなど、bridge.css を読まずにヘッダー・メニュー・フッターを自分の CSS で描くページへの口。
      NAV: 8つのうち CTA を除く7つ(primary はヘッダーに常時出すもの)。CTA: Contact。メニューは NAV.concat([CTA])。
      FOOTER: 4列 [{ h, links }]。PRIVACY: フッターの下の行。項目の形は上の link()。データの元は NAV・CTA・FOOTER の1か所 */
-  window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll, applyBudoux: applyBudoux,
+  window.BRIDGE = { ROOT: ROOT, MARK: MARK, observeReveal: observeAll, applyBudoux: applyBudoux, countEvent: countEvent,
     NAV: NAV.map(link), CTA: link(CTA), FOOTER: FOOTER, PRIVACY: PRIVACY, townReturn: townReturn };
   document.documentElement.classList.add('js-ready'); // 安全弁(bridge.css の rv-safe)を解除
 })();

@@ -33,6 +33,19 @@
   } catch (e) {}
   const save = () => { try { sessionStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} };
 
+  /* ---- 操作の計測(2026-11-03 の計測の便)。「始めた」(職種の画面に初めて着いた)と「結果に着いた」を、
+     1セッション1回だけ GoatCounter のイベントで数える。送るのは名前と題だけで、回答・職種・自由記述は送らない。
+     印は sessionStorage に置く(戻る・進む・再読み込みで二重に送らない)。bridge.js が無い環境では何もしない ---- */
+  const EV_STORE = 'bridge-compass-ev';
+  let evSent = {};
+  try { evSent = JSON.parse(sessionStorage.getItem(EV_STORE) || '{}') || {}; } catch (e) {}
+  const track = (name, title) => {
+    if (evSent[name]) return;
+    evSent[name] = 1;
+    try { sessionStorage.setItem(EV_STORE, JSON.stringify(evSent)); } catch (e) {}
+    try { if (window.BRIDGE && window.BRIDGE.countEvent) window.BRIDGE.countEvent('compass-' + name, title); } catch (e) {}
+  };
+
   /* 結果に進めるだけの回答が揃っているか(直接 result に戻ってきたとき用) */
   const complete = a => !!a.profession && D.QUESTIONS.every(q => q.type === 'text' || (Array.isArray(a[q.id]) ? a[q.id].length : a[q.id]));
 
@@ -298,6 +311,8 @@
         main.appendChild(el);
       }
       current = el;
+      if (step === 'profession') track('start', 'Compass 質問を始めた');
+      if (step === 'result') track('result', 'Compass 結果に着いた');
       window.scrollTo(0, 0);
       if (!REDUCED) {
         el.classList.add(dir < 0 ? 'enter-back' : 'enter');
