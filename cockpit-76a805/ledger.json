@@ -126,7 +126,7 @@
       "name": "キャリアログ",
       "jp": "iOSアプリ",
       "cat": "learning",
-      "href": "../daily-app/index.html",
+      "href": "../daily-app/",
       "dirs": [
         "daily-app"
       ],
