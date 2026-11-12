@@ -26,6 +26,7 @@ export const CRITICAL = [
   [/^legal\/|^services\/|^starter-kits\//, '法務・売上導線'],
   [/(^|\/)sw\.js$/, 'Service Worker(配信)'],
   [/^\.github\/workflows\/deploy\.yml$/, '公開の経路'],
+  [/^scripts\/prepare-pages\.mjs$/, '配信前の変換(全ページに及ぶ)'],
   [/^\.claude\/settings\.json$|^scripts\/pre-commit-gate\.mjs$/, '出荷ゲートの hook(外せば機械検査が止まる)'],
   [/(^|\/)\.env(\.|$)|secret|credential|token|passw|api-?key/i, '認証・秘密の取り扱い(名前で判定)'],
 ];
@@ -36,13 +37,14 @@ export const GATE = [
   [/^scripts\/(check-site|check-shiplog|ship-tier|shiplog-stats)\.mjs$|^scripts\/check-site\.allowlist\.json$/, '品質ゲート'],
   [/^\.github\/workflows\//, 'CI・自動化'],
   [/^\.github\/scripts\//, '自動化のスクリプト'],
+  /* 審査する側の規程(エージェント・スキル・CLAUDE.md)。自己レビューだけで書き換えられないよう Light に置かない(2026-11-11 横断監査 H-3) */
+  [/^\.claude\/|^CLAUDE\.md$/, '審査する側の規程'],
 ];
 /* Light: 公開物にもゲートにも触れない内部の変更。機械検査 + 自己レビュー */
 export const LIGHT = [
   [/^cockpit-76a805\//, '運営の記録'],
   [/^docs\//, '内部文書'],
-  [/^\.claude\/|^CLAUDE\.md$/, 'ハーネスの規程'],
-  [/^scripts\//, 'スクリプト(ゲート以外)'],
+  [/^scripts\//, 'スクリプト(ゲート・配信の変換以外)'],
   [/^\.github\//, 'GitHub の設定(workflow 以外)'],
   [/^notes\/|^daily\/.*\.(json|md)$|^worklog\/.*\.(json|md)$/, 'フィードのデータ'],
   [/(^|\/)tests?\/|\.test\.mjs$/, 'テスト'],
@@ -86,14 +88,16 @@ export function decide(files) {
     reasons.standard.push(`${path}: 公開物の変更`);
   }
   const tier = reasons.critical.length ? 'critical' : reasons.standard.length ? 'standard' : 'light';
-  const gateOnly = tier === 'standard' && reasons.standard.every(r => /品質ゲート|CI・自動化|自動化のスクリプト/.test(r));
+  const gateOnly = tier === 'standard' && reasons.standard.every(r => /品質ゲート|CI・自動化|自動化のスクリプト|審査する側の規程/.test(r));
+  const rules = reasons.standard.filter(r => /審査する側の規程/.test(r)).length;
   const hints = [];
   if (tier === 'light') hints.push('機械検査(check-site)+自己レビュー。editor/designer/qa/pm は呼ばない。第34条の項目のうち当たるもの(主に第4章)は現場が自分で照合する。動くもの(scripts・workflows)は現場が実地で動かして notes に書く');
   if (tier === 'standard') {
-    hints.push(gateOnly ? 'qa を呼ぶ(品質ゲート・CI の変更。違反を仕込んでゲートが落ちることを実地で確かめる)' : 'qa を呼ぶ(公開物に触れた)');
+    if (rules) hints.push('pm を呼ぶ(審査する側の規程の変更。書いた本人の自己レビューだけで通さない)');
+    if (rules < reasons.standard.length) hints.push(gateOnly ? 'qa を呼ぶ(品質ゲート・CI の変更。違反を仕込んでゲートが落ちることを実地で確かめる)' : 'qa を呼ぶ(公開物に触れた)');
     if (!gateOnly && files.some(f => /\.(css|html)$/.test(f.path))) hints.push('見た目の差分があれば designer(CSS・<style>・レイアウト)');
     if (!gateOnly && files.some(f => /\.html$/.test(f.path))) hints.push('文言の差分があれば editor');
-    hints.push('pm は、どこかの領分が要修正・条件つきを返したときと、完成の定義が変わったときだけ。それ以外は現場が第34条の項目を自分で照合して notes に書く');
+    if (!rules) hints.push('pm は、どこかの領分が要修正・条件つきを返したときと、完成の定義が変わったときだけ。それ以外は現場が第34条の項目を自分で照合して notes に書く');
   }
   if (tier === 'critical') hints.push('現行どおり全段: 着手前 pm → editor/designer/qa → pm 総合判定 → Artifact → 社長');
   return { tier, reasons, hints, files: files.length };
