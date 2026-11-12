@@ -1,0 +1,4 @@
+# 出荷記録は末尾に1行ずつ足すファイル。どの PR も同じ場所に足すので、1本マージするたびに残りの PR が衝突していた
+# (2026-11-11: 未マージ PR 7本のうち6本がこのファイルだけで衝突)。両側の行を残して自動で解く。
+# 行の順番は日付順でなくなることがある。集計(scripts/shiplog-stats.mjs)と検査(scripts/check-shiplog.mjs)は順番に依らない。
+cockpit-76a805/shiplog.jsonl merge=union
