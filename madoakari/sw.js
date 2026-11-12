@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE = 'madoakari-v6';
+const CACHE = 'madoakari-v7';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
@@ -13,8 +13,9 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
+    // 同じオリジンのほかの道具のキャッシュは消さない(Cache Storage はオリジン単位。自分の接頭辞だけを片づける)
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('madoakari-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

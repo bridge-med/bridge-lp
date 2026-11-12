@@ -6,9 +6,20 @@ const F = (path, status = 'M', text) => ({ path, status, text });
 const tier = (...files) => decide(files).tier;
 
 test('変更なしは light', () => assert.equal(tier(), 'light'));
-test('文書・記録・規程・テストだけは light', () => {
-  assert.equal(tier(F('cockpit-76a805/shiplog.jsonl'), F('docs/analytics.md'), F('CLAUDE.md'), F('.claude/skills/ship/SKILL.md'), F('.claude/agents/qa.md'), F('clinic-flow-3d/tests/kasan.test.mjs'), F('scripts/update-ledger.mjs'), F('notes/feed.json'), F('README.md')), 'light');
+test('文書・記録・テストだけは light', () => {
+  assert.equal(tier(F('cockpit-76a805/shiplog.jsonl'), F('docs/analytics.md'), F('clinic-flow-3d/tests/kasan.test.mjs'), F('scripts/update-ledger.mjs'), F('notes/feed.json'), F('README.md')), 'light');
 });
+test('審査する側の規程は standard で、pm を呼ぶ(light に落ちない)', () => {
+  for (const p of ['CLAUDE.md', '.claude/skills/ship/SKILL.md', '.claude/agents/qa.md', '.claude/agents/pm.md']) {
+    assert.equal(tier(F(p)), 'standard', p);
+  }
+  const d = decide([F('.claude/agents/qa.md'), F('cockpit-76a805/shiplog.jsonl')]);
+  assert.match(d.hints[0], /pm を呼ぶ/);
+  assert.ok(!d.hints.some(h => /公開物に触れた/.test(h)), '規程だけの変更に「公開物に触れた」と案内しない');
+  const mixed = decide([F('CLAUDE.md'), F('scripts/check-site.mjs')]);
+  assert.ok(mixed.hints.some(h => /pm を呼ぶ/.test(h)) && mixed.hints.some(h => /ゲートが落ちることを実地で/.test(h)));
+});
+test('配信前の変換は critical', () => assert.equal(tier(F('scripts/prepare-pages.mjs')), 'critical'));
 test('既存のページ・プロダクトの変更は standard', () => {
   assert.equal(tier(F('philosophy/index.html')), 'standard');
   assert.equal(tier(F('clinic-flow-3d/app/main.js'), F('clinic-flow-3d/style.css')), 'standard');
