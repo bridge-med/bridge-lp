@@ -1,6 +1,7 @@
 name: Weekly ledger refresh
 
 # 週次レビュー便。台帳(cockpit)の最終更新日を毎週月曜7:00(JST)に焼き直す。
+# 同じ便で販売経路を確かめ、cockpit-76a805/funnel.json に書く(確かめた日が入るので、毎週コミットが出る)。
 # 社長承認済みの自動コミット(2026-07-15)。変更が出た週だけコミットする。
 
 on:
@@ -27,6 +28,10 @@ jobs:
         run: node scripts/update-ledger.mjs
       - name: shiplog の月別集計(失敗率・差し戻し率・再発率)
         run: node scripts/shiplog-stats.mjs --out cockpit-76a805/drafts/shiplog-stats.md
+      - name: 販売経路の検査(購入ボタンの行き先・価格の一致・note の最後の投稿)
+        id: funnel
+        # 切れていても台帳のコミットは止めない。結果を書いてから、最後のステップで落として知らせる
+        run: node scripts/check-funnel.mjs --write || echo "broken=true" >> "$GITHUB_OUTPUT"
       - name: Commit if changed
         id: commit
         run: |
@@ -52,3 +57,8 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
             -d '{"ref":"master"}'
+      - name: 販売経路が切れていたら、この便を失敗にして知らせる
+        if: steps.funnel.outputs.broken == 'true'
+        run: |
+          echo "販売経路に切れている所があります。cockpit の SALES ROUTE と、この便の「販売経路の検査」の出力を見てください。"
+          exit 1
