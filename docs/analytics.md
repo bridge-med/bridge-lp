@@ -1,6 +1,6 @@
 # 訪問者計測の有効化手順
 
-> 状態: **計測中**(訪問者数は 2026-08-09 から GoatCounter で。操作の計測は 2026-11-03 の便で4イベント)。
+> 状態: **計測中**(訪問者数は 2026-08-09 から GoatCounter で。操作の計測は 2026-11-03 の便で4イベント、2026-11-23 に `rehaboard-purchase` を足して5)。
 > 端末内の利用ログ(`bridge-usage`)も稼働中。数字は管理画面にあり、読むのは社長(ログインが要る)。
 > この文書は、計測の仕組みと読み方の唯一の記録である(憲法第15条「測ってから語る」の前段)。
 
@@ -35,15 +35,17 @@
 | `compass-start` | Compass で質問を始めた(職種の画面に初めて着いた。導入から押した人も、町のパネルから直接来た人も同じ) | `compass/app/app.js` の `show()` → `BRIDGE.countEvent` | sessionStorage `bridge-compass-ev` に印。戻る・進む・再読み込みでは送らない |
 | `compass-result` | Compass の結果に着いた | 同上 | 同上 |
 | `starter-purchase` | RehaBoard Starter Kit の「購入を申し込む」を押した | `rehaboard-starter/index.html` の `data-goatcounter-click` 属性(count.js が自動で束ねる) | 防がない(押すたびに送る。count.js の bind_events はそう動く)。比べるときは GoatCounter の「訪問者」の数を使う |
+| `rehaboard-purchase` | RehaBoard(Web版・¥1,980)の購入ボタンを押した(行き先は note の販売記事。押した数であって、買われた数ではない) | `rehaboard/index.html` の2か所と `starter-kits/index.html` の1か所の `data-goatcounter-click` 属性(2026-11-23 の便) | 防がない(3か所は同じ名前で1つに数える) |
 | `services-consult` | 仕事のご依頼の「相談メールを書く」(上下2か所)を押した | `services/index.html` の `data-goatcounter-click` 属性 | 同上(2か所は同じ名前で1つに数える) |
 
 - 仕組み: `shared/bridge.js` の `BRIDGE.countEvent(path, title)`。count.js は非同期に読むので、まだ無いときは 250ms おきに最大 10 秒待ってから送り、読めなければ捨てる。GoatCounter が止まっていても、ボタンや画面の動きは変わらない
 - 増やすときの規則: 名前は `面-操作` の形(面は道具かページ。先頭に `/` を付けない=イベントと見分ける)で、この表と `legal/site-privacy.html`・`legal/privacy.html` の計測の説明を同じコミットで直す(第32条)。数えるのは「次の行動」に当たる操作だけで、画面の中の細かな操作(選択肢を選んだ・テーマを替えた)は数えない。2026-11-03 の初回は社長の依頼の4つに限った。次の候補は `starter-consult`(Starter Kit の「先に相談する」。購入意思だけでは相談意思を取り落とす)と services の X DM。足すのは30日の読みで必要になったとき
-- 管理画面(https://wataru.goatcounter.com/)での見方: ページの一覧に、イベントは `compass-start` のような先頭に `/` の無い名前で並ぶ。期間を選び、`compass` で絞ると開始と結果到達が並ぶ。割り算はすべて「訪問者」(unique)の数でそろえる(閲覧数は再読み込みや押し直しで増える)。読み方は4つ
+- 管理画面(https://wataru.goatcounter.com/)での見方: ページの一覧に、イベントは `compass-start` のような先頭に `/` の無い名前で並ぶ。期間を選び、`compass` で絞ると開始と結果到達が並ぶ。割り算はすべて「訪問者」(unique)の数でそろえる(閲覧数は再読み込みや押し直しで増える)。読み方は5つ
   1. **Compass の到達率** = `compass-result` ÷ `compass-start`。開始が少なければ入口(トップ・町・FOOTER)の問題、到達が少なければ質問の途中で離れている
   2. **Compass の入口の広さ** = `compass-start` ÷ `/compass/` の訪問者。開いただけで始めない人の割合。町のパネルから来た人は導入を飛ばすので開始=訪問になり、2つの入口が混ざった値。入口を分けたくなったら参照元で切る(今は増やさない)
   3. **Starter Kit の購入意思** = `starter-purchase` ÷ `/rehaboard-starter/` の訪問者。販売記事を公開する前後で比べる(畳むかどうかの判断材料)
   4. **相談の意思** = `services-consult` ÷ `/services/` の訪問者。参照元(note.com)と並べると、発信から相談への線が見える
+  5. **RehaBoard の購入意思** = `rehaboard-purchase` ÷ (`/rehaboard/` と `/starter-kits/` の訪問者)。実際の購入数は note の管理画面にしか無い(読むのは社長)。押した数と買われた数の差が、note の販売記事の側で離れた人
 - 決め方(第15条): 数字は最低 30 日分を溜めてから読む。1件の増減で判断しない。ゼロは「使われていない」の最初の事実として台帳(ledger.json)の note に日付つきで書く
 
 ## 手順B: 自前エンドポイント
