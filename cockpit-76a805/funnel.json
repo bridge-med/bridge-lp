@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-11-19",
+  "online": true,
+  "ok": true,
+  "lastPost": {
+    "date": "2026-11-04",
+    "title": "名前のない日｜最終話「名前のない日」",
+    "source": "rss"
+  },
+  "offers": [
+    {
+      "id": "rehaboard",
+      "name": "RehaBoard Web版",
+      "href": "../rehaboard/index.html",
+      "price": 1980,
+      "route": "note",
+      "buyUrl": "https://note.com/prime_duck4944/n/n8cb6d8a2de9c",
+      "reach": "alive",
+      "issues": []
+    },
+    {
+      "id": "rehaboard-starter",
+      "name": "RehaBoard Starter Kit",
+      "href": "../rehaboard-starter/index.html",
+      "price": 2980,
+      "route": "mail",
+      "buyUrl": "../community/index.html",
+      "reach": "local",
+      "issues": []
+    }
+  ]
+}

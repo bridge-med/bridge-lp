@@ -33,6 +33,8 @@ jobs:
         env:
           CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: node scripts/check-site.mjs
+      - name: 販売経路(購入ボタンの行き先・価格の一致。外へは出ない)
+        run: node scripts/check-funnel.mjs --offline
       - name: テスト(compass・clinic-flow-3d・ハーネスの scripts/tests)
         run: node --test compass/tests/*.test.mjs clinic-flow-3d/tests/*.test.mjs scripts/tests/*.test.mjs
       - name: 出荷の段階(参考。PR のときだけ)

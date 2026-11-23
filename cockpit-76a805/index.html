@@ -88,6 +88,7 @@ body.reviewing .ck-reviewbar{display:flex}
     <span class="v"><span class="l">LAST REVIEW</span><span id="lastReview"></span></span>
     <button class="ck-review-btn" id="reviewBtn" type="button">レビューを始める</button>
   </div>
+  <div id="route"></div>
   <div id="board"></div>
   <noscript><p style="max-width:660px;margin:60px auto;color:var(--ink-3);font-size:13px">台帳の表示にはJavaScriptが必要です。データは cockpit-76a805/ledger.json にあります。</p></noscript>
 
@@ -212,6 +213,47 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     board.appendChild(wrap);
   });
+
+  /* ---- 販売経路 ----
+     scripts/check-funnel.mjs が週に一度書く funnel.json を読むだけ。入力は持たない。
+     読めないとき・まだ書かれていないときは、何も出さない(第14条)。 ---- */
+  try {
+    const fn = await (await fetch('funnel.json', { cache: 'no-store' })).json();
+    const ROUTE = { note: 'note で決済', mail: 'メールで手渡し' };
+    const state = (o) => {
+      if (o.issues.length) return '経路が切れている。';
+      if (o.route === 'mail') return '購入ボタンは問い合わせに届く。申し込みのあとの共有と支払いの案内は手作業。';
+      if (o.reach === 'alive') return '購入ボタンは note の販売記事に届いている。';
+      if (o.reach === 'unknown') return 'note に届かず、今回は販売記事を確かめられなかった。';
+      return '購入ボタンの行き先は定義どおり。販売記事が開くかは、今回は確かめていない。';
+    };
+    const sec = document.createElement('section');
+    sec.className = 'ck-sec';
+    sec.innerHTML =
+      '<div class="ck-head" data-reveal><h2 class="eyebrow" style="margin:0">SALES ROUTE · ' + fn.offers.length + '</h2>' +
+      '<span class="n">販売経路</span><p>購入ボタンから代金を受け取るまで。週に一度、機械が確かめる</p></div>' +
+      '<div class="ck-rows">' +
+      fn.offers.map((o) =>
+        '<div class="ck-row' + (o.issues.length ? ' is-pending' : '') + '" data-reveal>' +
+          '<div class="ck-name"><a href="' + esc(o.href) + '">' + esc(o.name) + '<span class="en">¥' + Number(o.price).toLocaleString('en-US') + '</span></a></div>' +
+          '<div class="ck-mid">' +
+            '<div class="ck-chips"><span class="chip">' + esc(ROUTE[o.route] || o.route) + '</span></div>' +
+            '<p class="ck-serves">' + esc(state(o)) + '</p>' +
+            o.issues.map((i) => '<p class="ck-note">' + esc(i) + '</p>').join('') +
+          '</div>' +
+          '<div class="ck-fresh"><div><span class="l">LAST CHECK</span><br><span class="v">' + esc(fn.checkedAt) + '</span></div></div>' +
+        '</div>').join('') +
+      (fn.lastPost
+        ? '<div class="ck-row" data-reveal>' +
+            '<div class="ck-name"><a href="https://note.com/prime_duck4944" target="_blank" rel="noopener">note<span class="en">入口</span></a></div>' +
+            '<div class="ck-mid"><p class="ck-serves">最後の投稿: ' + esc(fn.lastPost.title) + '</p></div>' +
+            '<div class="ck-fresh"><div><span class="l">LAST POST</span><br><span class="v ' + fresh(fn.lastPost.date).c + '">' + esc(fresh(fn.lastPost.date).t) + '</span></div>' +
+            '<div><span class="v">' + esc(fn.lastPost.date) + '</span></div></div>' +
+          '</div>'
+        : '') +
+      '</div>';
+    document.getElementById('route').appendChild(sec);
+  } catch (e) { /* 販売経路の節は出さない */ }
 
   if (Array.isArray(ledger.knownIssues) && ledger.knownIssues.length) {
     document.getElementById('knownIssues').innerHTML =

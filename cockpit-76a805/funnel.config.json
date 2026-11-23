@@ -1,0 +1,34 @@
+{
+  "note": "販売経路の定義。scripts/check-funnel.mjs が読む唯一の情報源。売り物・価格・購入先を変えるときは、ページと同じコミットでここも直す。",
+  "feed": {
+    "rss": "https://note.com/prime_duck4944/rss",
+    "fallback": "notes/feed.json"
+  },
+  "offers": [
+    {
+      "id": "rehaboard",
+      "name": "RehaBoard Web版",
+      "href": "../rehaboard/index.html",
+      "price": 1980,
+      "route": "note",
+      "buyUrl": "https://note.com/prime_duck4944/n/n8cb6d8a2de9c",
+      "buttons": [
+        { "file": "rehaboard/index.html", "link": "purchase-rehaboard" },
+        { "file": "starter-kits/index.html", "link": "purchase-rehaboard" }
+      ],
+      "pricePages": ["rehaboard/index.html", "starter-kits/index.html", "products/index.html"]
+    },
+    {
+      "id": "rehaboard-starter",
+      "name": "RehaBoard Starter Kit",
+      "href": "../rehaboard-starter/index.html",
+      "price": 2980,
+      "route": "mail",
+      "buyUrl": "../community/index.html",
+      "buttons": [
+        { "file": "rehaboard-starter/index.html", "link": "purchase-starter" }
+      ],
+      "pricePages": ["rehaboard-starter/index.html", "starter-kits/index.html"]
+    }
+  ]
+}
