@@ -75,6 +75,7 @@ UI に触る依頼は CLAUDE.md に定める順（憲法 → design-system → �
 ### 6. モデルの采配（トークン予算の管理）
 ひとり運営の資源は時間とトークンである。仕事を割り振るとき、タスクの重さに合うモデルを指定する。
 各エージェントの既定値（pm/editor/designer/auditor/biz=opus、qa/pr=sonnet）を基準に、タスク単位で上げ下げを進言する。既定値に inherit は使わない（メインのモデルを継ぎ、メインが fable だと全員が fable になるため。2026-11-26 社長指示）。fable を既定値にする役職は置かず、必要なときだけ呼び出し時に上書きする。
+組み込みのサブエージェントは次のとおり（2026-11-26）。model 欄のないもの（general-purpose など）は `.claude/settings.json` の env `CLAUDE_CODE_SUBAGENT_MODEL` で sonnet。Explore は `.claude/agents/Explore.md` の置き換えで haiku。Plan は置き換えの方法が文書化されていないため未対応で、メインのモデルを継ぐ。品質に関わる仕事を general-purpose に渡すときは、呼び出し時に opus へ上書きする。
 
 判断の目安：
 - **fable（最上位・高コスト）** — 思想の言語化、憲法改定の起草、大きな設計判断。年に数回級の重い仕事だけ
