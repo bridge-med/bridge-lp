@@ -1,14 +1,17 @@
 /* ================================================================
-   空の見え方(焼いた環境遮蔽)の貼り位置 — 試作(病院だけ)
+   空の見え方(焼いた環境遮蔽)の貼り位置 — 町の7棟
    建物の形に、焼き込み用の座標 aLm を付ける。町の読み込み(world.js)と、焼く道具(tools/sky-export.mjs)が同じ関数を使うので、
    焼いた画像と町の形の貼り位置は必ず一致する(buildExterior の形が変わったら、焼き直す)。
    決め方: 三角形ごとに、向き(±x・±y・±z のいちばん近いもの)で物の中の区画に分け、区画をその向きから平らに写して、
-   正方形の画像に棚詰めする。凸の部品は向きごとに重ならない。木や屋根の小物のような凹の部品は少し重なってよい(暗がりは柔らかいので目立たない)
-   画像の大きさ: SIZE 四方。区画のあいだは PAD 画素あける(焼く側のにじみ出し MARGIN より広く)
+   1枚の画像の中の、その建物の区画(TILES)に棚詰めする。凸の部品は向きごとに重ならない。木や屋根の小物のような凹の部品は少し重なってよい(暗がりは柔らかいので目立たない)
+   画像の大きさ: W × H。主役の病院にいちばん広い区画、準主役の展望台とオフィスに縦長の区画、ほかに 512 四方。区画のあいだは PAD 画素あける(焼く側のにじみ出し 3 より広く)
    ================================================================ */
 import * as THREE from 'three';
 
-export const SKY = { SIZE: 1024, PAD: 4, MIN: 3 };
+export const SKY = {
+  W: 2048, H: 1536, PAD: 4, MIN: 3,
+  TILES: { hospital: [0, 0, 1024, 1024], observatory: [1024, 0, 512, 1024], office: [1536, 0, 512, 1024], clinic: [0, 1024, 512, 512], library: [512, 1024, 512, 512], atelier: [1024, 1024, 512, 512], park: [1536, 1024, 512, 512] }
+};
 const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3(), _n = new THREE.Vector3(), _m = new THREE.Matrix4();
 
 /* root の下の、町でまとめる形(world.js の collect と同じ対象)を集める */
@@ -47,37 +50,38 @@ function charts(meshes, inv) {
   return list;
 }
 
-/* 棚詰め。密度 d(画素 / 町の単位)で収まれば区画の位置を書き、収まらなければ false */
-function pack(list, d) {
-  const S = SKY.SIZE, P = SKY.PAD;
+/* 棚詰め。密度 d(画素 / 町の単位)で、区画 [x, y, w, h] に収まれば位置を書き、収まらなければ false */
+function pack(list, d, [X, Y, TW, TH]) {
+  const P = SKY.PAD;
   const sz = c => [Math.max(SKY.MIN, Math.ceil(c.w * d)), Math.max(SKY.MIN, Math.ceil(c.h * d))];
   const order = list.map((c, i) => i).sort((i, j) => sz(list[j])[1] - sz(list[i])[1] || i - j);
-  let x = P, y = P, row = 0;
+  let x = X + P, y = Y + P, row = 0;
   for (const i of order) {
     const c = list[i], [w, h] = sz(c);
-    if (x + w + P > S) { x = P; y += row + P; row = 0; }
-    if (y + h + P > S) return false;
+    if (x + w + P > X + TW) { x = X + P; y += row + P; row = 0; }
+    if (y + h + P > Y + TH || x + w + P > X + TW) return false;
     c.px = x; c.py = y; c.pw = w; c.ph = h; x += w + P; row = Math.max(row, h);
   }
   return true;
 }
 
-/* root の下の形に aLm を付ける。区画の数と密度を返す(焼く道具が記録に使う) */
-export function assignSkyUV(root) {
+/* 建物 id の root の下の形に aLm を付ける。区画の数と密度を返す(焼く道具が記録に使う)。TILES にない建物は何もしない */
+export function assignSkyUV(root, id) {
+  const tile = SKY.TILES[id]; if (!tile) return null;
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
   const list = charts(meshesOf(root), inv);
   let area = 0; for (const c of list) area += (c.w + .02) * (c.h + .02);
-  let d = Math.sqrt(SKY.SIZE * SKY.SIZE * .7 / Math.max(area, 1e-6));
-  while (!pack(list, d)) d *= .94;
-  const S = SKY.SIZE, byMesh = new Map();
+  let d = Math.sqrt(tile[2] * tile[3] * .7 / Math.max(area, 1e-6));
+  while (!pack(list, d, tile)) d *= .94;
+  const byMesh = new Map();
   for (const c of list) {
     if (!byMesh.has(c.o)) byMesh.set(c.o, new Float32Array(c.o.geometry.attributes.position.count * 2));
     const uv = byMesh.get(c.o), su = c.w > 0 ? (c.pw - 1) / c.w : 0, sv = c.h > 0 ? (c.ph - 1) / c.h : 0;
     for (const t of c.tris) for (let k = 0; k < 3; k++) {
       const i = t * 3 + k, p = i * 3;
-      uv[i * 2] = (c.px + .5 + (c.W[p + c.u] - c.u0) * su) / S;
-      uv[i * 2 + 1] = (c.py + .5 + (c.W[p + c.v] - c.v0) * sv) / S;
+      uv[i * 2] = (c.px + .5 + (c.W[p + c.u] - c.u0) * su) / SKY.W;
+      uv[i * 2 + 1] = (c.py + .5 + (c.W[p + c.v] - c.v0) * sv) / SKY.H;
     }
   }
   for (const [o, uv] of byMesh) o.geometry.setAttribute('aLm', new THREE.BufferAttribute(uv, 2));

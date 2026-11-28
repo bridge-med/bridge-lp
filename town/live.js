@@ -146,7 +146,7 @@ export async function capture(Q) {
   // section: 一棟だけを、正面のほぼ水平から(建築の立面・断面図の見え方)。前の壁を外し、屋根は残す。地と空は描かない(ページの紙の上に置く)
   const sect = mode === 'section' ? (Q.get('id') || 'hospital') : null;
   const only = mode === 'portrait' ? Q.get('id') : sect, qt = Q.get('q') === 'mid' ? 'mid' : Q.get('q') === 'low' ? 'low' : 'high';   // 品質の段(最初の画像は、スマホが描く中の段でも撮る)
-  if (WORLD.skyReady) await WORLD.skyReady;   // 試作: 焼いた空の見え方(病院)を待つ。sky=<強さ> で比べる(0 = 焼く前と同じ)
+  if (WORLD.skyReady) await WORLD.skyReady;   // 焼いた空の見え方を待つ。sky=<強さ> で比べる(0 は接地の陰を焼いた方に任せたまま、暗がりだけを外す)
   if (Q.has('sky')) U.uSkyK.value = +Q.get('sky');
   const S = makeScene({ only, quality: qt }), L = makeLights(S.scene, qt === 'mid' ? 1024 : (+(Q.get('shadow')) || 2048));
   applyTod(L, renderer, tod);

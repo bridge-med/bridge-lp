@@ -8,6 +8,7 @@
      ・止まっている形は、素材の種類ごとに1つにまとめる。前の壁・屋根・ドーム・自動ドアは、まとめたまま頂点の印でシェーダーが動かす
      ・人・車・自転車・鳥・雲・湯気はインスタンス。描画は 40 回以下・三角形は 12万以下(ひらいた建物の中を足して 55 回以下)
      ・接地の陰(AO)は、まとめるときに頂点の色へ焼き込む(読み込みのときの追加の計算は数十 ms)
+     ・7棟の空の見え方(柔らかい暗がり)は、ブレンダーで焼いた画像(img/sky-town.webp。skymap.js・tools/README.md)。建物の頂点の接地の陰は、この画像に任せる
      ・品質の段: makeScene({ quality: 'high' | 'mid' | 'low' })。low は木を簡略にし、影を落とす物を減らす。映り込み(PMREM)は high だけ
    ================================================================ */
 import { THREE, C, M, at, tag, box, cbox, rbox, cyl, sph, tree, hedge, treePit, lamp, bench, bike, ribbon, geo, deg, TAU, lerp, clamp, clamp01, smooth01, rng } from './kit.js';
@@ -104,14 +105,14 @@ export const U = {
   uArc: { value: 0 }, uRim: { value: 0 }, uGlowR: { value: new THREE.Color('#FFC46E') },
   // 藍の弧の夕方の縁(空の藤色を拾う、冷たい細い縁。砂の弧の金の縁と対)と、昼に床のロゴの帯を目地の濃さへ寄せる強さ(昼は影がロゴを描くので、弧を主役に)
   uGlowV: { value: new THREE.Color('#B7AEEA') }, uDay: { value: 1 }, uJoint: { value: new THREE.Color(C.joint) },
-  // 試作: 焼いた空の見え方(病院だけ。skymap.js)。半球の光と映り込みにだけ掛ける(太陽・時刻の色・灯りは変えない)。uSkyK = 強さ(mix(1, ao, k))
+  // 焼いた空の見え方(7棟。skymap.js)。半球の光と映り込みにだけ掛ける(太陽・時刻の色・灯りは変えない)。uSkyK = 強さ(mix(1, ao, k)。社長 2026-11-28 0.6)
   uSky: { value: null }, uSkyK: { value: .6 }
 };
 /* 空の見え方の画像。読めるまでは白(効かない)。makeSceneAsync と撮る道具は skyReady を待つ */
 U.uSky.value = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1); U.uSky.value.needsUpdate = true;
 export const skyReady = new Promise(res => {
   if (typeof document === 'undefined') return res(false);
-  new THREE.TextureLoader().load(new URL('img/sky-hospital.webp', import.meta.url).href, t => {
+  new THREE.TextureLoader().load(new URL('img/sky-town.webp', import.meta.url).href, t => {
     t.flipY = false; t.colorSpace = THREE.NoColorSpace; t.generateMipmaps = false; t.minFilter = t.magFilter = THREE.LinearFilter; t.needsUpdate = true;
     U.uSky.value = t; res(true);
   }, undefined, () => res(false));
@@ -804,7 +805,7 @@ function* buildScene(opts = {}) {
     if (only && id !== only) continue;
     if (id === 'plaza') continue;
     const L = LAYOUT[id], ex = buildExterior(id, signs), [x, z] = only ? [0, 0] : polar(L.a, L.r), face = L.face ?? L.a;
-    if (id === 'hospital') assignSkyUV(ex.g);   // 試作: 病院だけ、焼いた空の見え方の貼り位置
+    assignSkyUV(ex.g, id);   // 焼いた空の見え方の貼り位置(skymap.js。形を変えたら tools/sky-*.{mjs,py} で焼き直す)
     const grp = tag(ex.g, { bid: L.bid });
     grp.position.set(x, ex.y0 + (only ? 0 : groundY(x, z)), z); grp.rotation.y = only ? 0 : yawOf(face);
     world.add(grp);
