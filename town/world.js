@@ -108,14 +108,36 @@ export const U = {
   // 焼いた空の見え方(7棟。skymap.js)。半球の光と映り込みにだけ掛ける(太陽・時刻の色・灯りは変えない)。uSkyK = 強さ(mix(1, ao, k)。社長 2026-11-28 0.6)
   uSky: { value: null }, uSkyK: { value: .6 }
 };
-/* 空の見え方の画像。読めるまでは白(効かない)。makeSceneAsync と撮る道具は skyReady を待つ */
-U.uSky.value = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1); U.uSky.value.needsUpdate = true;
+/* 空の見え方の画像。読めるまでは白(効かない)。makeSceneAsync と撮る道具は skyReady を待つ
+   灰色の画像なので、1色分(R8)で GPU に載せる(RGBA のままだと 2048×1536 で約 12.6MB、R8 で約 3.1MB。qa 2026-11-28)
+   立体が画像を待ちきれずに作られたとき(SKY_LATE)は、届いた時点で 0.4 秒かけて暗がりを入れる(動きを減らす設定では即時。designer 2026-11-28) */
+const SKY_K = .6;
+let SKY_LATE = false;
+U.uSky.value = new THREE.DataTexture(new Uint8Array([255]), 1, 1, THREE.RedFormat, THREE.UnsignedByteType); U.uSky.value.needsUpdate = true;
+function skyFadeIn() {
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { U.uSkyK.value = SKY_K; return; }
+  const t0 = performance.now(), step = now => { const k = Math.min(1, (now - t0) / 400); U.uSkyK.value = SKY_K * smooth01(k); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
 export const skyReady = new Promise(res => {
   if (typeof document === 'undefined') return res(false);
-  new THREE.TextureLoader().load(new URL('img/sky-town.webp', import.meta.url).href, t => {
-    t.flipY = false; t.colorSpace = THREE.NoColorSpace; t.generateMipmaps = false; t.minFilter = t.magFilter = THREE.LinearFilter; t.needsUpdate = true;
-    U.uSky.value = t; res(true);
-  }, undefined, () => res(false));
+  const im = new Image(); im.decoding = 'async';
+  im.onerror = () => res(false);
+  im.onload = () => {
+    try {
+      const W = im.naturalWidth, H = im.naturalHeight, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(im, 0, 0);
+      const d = cx.getImageData(0, 0, W, H).data, r = new Uint8Array(W * H);
+      for (let i = 0, j = 0; i < r.length; i++, j += 4) r[i] = d[j];
+      const t = new THREE.DataTexture(r, W, H, THREE.RedFormat, THREE.UnsignedByteType);   // 上の行が v = 0(貼り位置と同じ向き。flipY しない)
+      t.colorSpace = THREE.NoColorSpace; t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.needsUpdate = true;
+      U.uSky.value = t;
+      if (SKY_LATE) skyFadeIn();
+      res(true);
+    } catch (e) { res(false); }
+  };
+  im.src = new URL('img/sky-town.webp', import.meta.url).href;
 });
 const VCOMMON = `
 attribute vec2 aFx; attribute float aBid; attribute float aPart; attribute float aWin; attribute vec2 aLm; varying vec2 vLm;
@@ -951,7 +973,9 @@ export function makeScene(opts = {}) { return runGen(buildScene(opts)); }
    opts.budget(ms)ごとに休む。stats.maxBlockMs に、いちばん長く主スレッドを止めた時間 */
 const yieldMain = () => new Promise(res => { const sch = globalThis.scheduler; if (sch && typeof sch.yield === 'function') sch.yield().then(res); else { const ch = new MessageChannel(); ch.port1.onmessage = () => res(); ch.port2.postMessage(0); } });
 export async function makeSceneAsync(opts = {}) {
-  await Promise.race([skyReady, new Promise(r => setTimeout(r, 4000))]);   // 焼いた空の見え方を待つ(読めなくても4秒で先へ。白のまま描く)
+  // 焼いた空の見え方を待つ(4秒で先へ。そのときは暗がりを外して作り、画像が届いたら skyFadeIn で入れる)
+  const skyIn = await Promise.race([skyReady.then(() => true), new Promise(r => setTimeout(() => r(false), 4000))]);
+  if (!skyIn) { SKY_LATE = true; U.uSkyK.value = 0; }
   const g = buildScene(opts), budget = opts.budget ?? 12;
   let r, t0 = performance.now(), ts = t0, maxBlock = 0, slices = 0, worst = '';
   const steps = {};
