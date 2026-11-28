@@ -8,10 +8,12 @@
      ・止まっている形は、素材の種類ごとに1つにまとめる。前の壁・屋根・ドーム・自動ドアは、まとめたまま頂点の印でシェーダーが動かす
      ・人・車・自転車・鳥・雲・湯気はインスタンス。描画は 40 回以下・三角形は 12万以下(ひらいた建物の中を足して 55 回以下)
      ・接地の陰(AO)は、まとめるときに頂点の色へ焼き込む(読み込みのときの追加の計算は数十 ms)
+     ・7棟の空の見え方(柔らかい暗がり)は、ブレンダーで焼いた画像(img/sky-town.webp。skymap.js・tools/README.md)。建物の頂点の接地の陰は、この画像に任せる
      ・品質の段: makeScene({ quality: 'high' | 'mid' | 'low' })。low は木を簡略にし、影を落とす物を減らす。映り込み(PMREM)は high だけ
    ================================================================ */
 import { THREE, C, M, at, tag, box, cbox, rbox, cyl, sph, tree, hedge, treePit, lamp, bench, bike, ribbon, geo, deg, TAU, lerp, clamp, clamp01, smooth01, rng } from './kit.js';
 import { BOXES, WALL, PALETTE, PERSON_H, PARK, buildExterior } from './buildings.js';
+import { assignSkyUV } from './skymap.js';
 
 /* ---------- 町の並び ----------
    島の角度 a(45° が手前 = 画面の下、225° が奥、135° が左、315° が右)と、中心からの距離 r。face は建物の正面の向き(省くと外向き)
@@ -102,10 +104,43 @@ export const U = {
   // 交差の広場の時刻ごとの表情(applyTod が決める): uArc = 弧と床の帯が灯る強さ(夜だけ)、uRim = 夕方の低い光(砂の弧の縁が金、藍の弧は影絵)
   uArc: { value: 0 }, uRim: { value: 0 }, uGlowR: { value: new THREE.Color('#FFC46E') },
   // 藍の弧の夕方の縁(空の藤色を拾う、冷たい細い縁。砂の弧の金の縁と対)と、昼に床のロゴの帯を目地の濃さへ寄せる強さ(昼は影がロゴを描くので、弧を主役に)
-  uGlowV: { value: new THREE.Color('#B7AEEA') }, uDay: { value: 1 }, uJoint: { value: new THREE.Color(C.joint) }
+  uGlowV: { value: new THREE.Color('#B7AEEA') }, uDay: { value: 1 }, uJoint: { value: new THREE.Color(C.joint) },
+  // 焼いた空の見え方(7棟。skymap.js)。半球の光と映り込みにだけ掛ける(太陽・時刻の色・灯りは変えない)。uSkyK = 強さ(mix(1, ao, k)。社長 2026-11-28 0.6)
+  uSky: { value: null }, uSkyK: { value: .6 }
 };
+/* 空の見え方の画像。読めるまでは白(効かない)。makeSceneAsync と撮る道具は skyReady を待つ
+   灰色の画像なので、1色分(R8)で GPU に載せる(RGBA のままだと 2048×1536 で約 12.6MB、R8 で約 3.1MB。qa 2026-11-28)
+   立体が画像を待ちきれずに作られたとき(SKY_LATE)は、届いた時点で 0.4 秒かけて暗がりを入れる(動きを減らす設定では即時。designer 2026-11-28) */
+const SKY_K = .6;
+let SKY_LATE = false;
+U.uSky.value = new THREE.DataTexture(new Uint8Array([255]), 1, 1, THREE.RedFormat, THREE.UnsignedByteType); U.uSky.value.needsUpdate = true;
+function skyFadeIn() {
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { U.uSkyK.value = SKY_K; return; }
+  const t0 = performance.now(), step = now => { const k = Math.min(1, (now - t0) / 400); U.uSkyK.value = SKY_K * smooth01(k); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+export const skyReady = new Promise(res => {
+  if (typeof document === 'undefined') return res(false);
+  const im = new Image(); im.decoding = 'async';
+  im.onerror = () => res(false);
+  im.onload = () => {
+    try {
+      const W = im.naturalWidth, H = im.naturalHeight, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(im, 0, 0);
+      const d = cx.getImageData(0, 0, W, H).data, r = new Uint8Array(W * H);
+      for (let i = 0, j = 0; i < r.length; i++, j += 4) r[i] = d[j];
+      const t = new THREE.DataTexture(r, W, H, THREE.RedFormat, THREE.UnsignedByteType);   // 上の行が v = 0(貼り位置と同じ向き。flipY しない)
+      t.colorSpace = THREE.NoColorSpace; t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.needsUpdate = true;
+      U.uSky.value = t;
+      if (SKY_LATE) skyFadeIn();
+      res(true);
+    } catch (e) { res(false); }
+  };
+  im.src = new URL('img/sky-town.webp', import.meta.url).href;
+});
 const VCOMMON = `
-attribute vec2 aFx; attribute float aBid; attribute float aPart; attribute float aWin;
+attribute vec2 aFx; attribute float aBid; attribute float aPart; attribute float aWin; attribute vec2 aLm; varying vec2 vLm;
 uniform float uOpenA; uniform float uOpenB; uniform float uRoofA; uniform float uRoofB; uniform float uLiftBid; uniform float uLift;
 uniform mat4 uPM[8];
 varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY; varying vec3 vHkW;
@@ -121,13 +156,14 @@ mat4 hkPart(out float cut) {
 }`;
 const VBEGIN = `float hkC; mat4 hkM = hkPart(hkC); vec3 transformed = (hkM * vec4(position, 1.0)).xyz;
 if (abs(aBid - uLiftBid) < .5) transformed.y += uLift;
-vFx = aFx; vBid = aBid; vWin = aWin; vCut = hkC; vHkW = (modelMatrix * vec4(transformed, 1.0)).xyz; vHkY = vHkW.y;`;
+vFx = aFx; vBid = aBid; vWin = aWin; vLm = aLm; vCut = hkC; vHkW = (modelMatrix * vec4(transformed, 1.0)).xyz; vHkY = vHkW.y;`;
 const FCOMMON = `
 uniform float uNight; uniform float uTime; uniform float uHi; uniform float uHiAmt; uniform vec3 uHiColor;
 uniform float uGroundCut; uniform float uArcFade; uniform float uAir; uniform mat4 uMainInv; uniform vec2 uMainB;
 uniform vec4 uMainD; uniform vec4 uMainY; uniform vec4 uMainP; uniform vec4 uMoon; uniform vec3 uMoonC;
 uniform float uFocus; uniform float uDim; uniform vec3 uGlowW; uniform vec3 uGlowI; uniform vec3 uGlowS; uniform vec3 uGlowC; uniform vec3 uGlowL; uniform vec3 uGlowK; uniform vec3 uHazeC; uniform float uHazeK; uniform float uArc; uniform float uRim; uniform vec3 uGlowR; uniform vec3 uGlowV; uniform float uDay; uniform vec3 uJoint;
 varying vec2 vFx; varying float vBid; varying float vWin; varying float vCut; varying float vHkY; varying vec3 vHkW;
+varying vec2 vLm; uniform sampler2D uSky; uniform float uSkyK;
 float hkBayer(vec2 p) { vec2 q = mod(floor(p), 4.0); float i = q.x + q.y * 4.0;
   return (i < 1.0 ? 0. : i < 2.0 ? 8. : i < 3.0 ? 2. : i < 4.0 ? 10. : i < 5.0 ? 12. : i < 6.0 ? 4. : i < 7.0 ? 14. : i < 8.0 ? 6. : i < 9.0 ? 3. : i < 10.0 ? 11. : i < 11.0 ? 1. : i < 12.0 ? 9. : i < 13.0 ? 15. : i < 14.0 ? 7. : i < 15.0 ? 13. : 5.) / 16.0 + 1.0 / 32.0; }
 float hkHash(float n) { return fract(sin(n) * 43758.5453123); }
@@ -198,11 +234,17 @@ if (vFx.y > .5) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.075, .095, .15), 
 // 夕方の藍の弧は、逆光の影絵(真っ黒にはしない。空の照り返しで、深い藍が残る。下の emissive)
 if (vFx.x > 6.5 && vFx.x < 8.5) diffuseColor.rgb = mix(diffuseColor.rgb, uJoint, uDay * (vFx.x < 7.5 ? .6 : .45));   // 昼の床のロゴの帯は、目地に近い濃さ(真上からは読める)
 if (uFocus > -.5 && abs(vBid - uFocus) > .5) { float k = vBid > .5 ? uDim : uDim * .55; float l = dot(diffuseColor.rgb, vec3(.3, .59, .11)); diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(l), vec3(.93, .92, .9), .22), k); }`)
+      .replace('#include <lights_fragment_end>', `if (vLm.x >= 0.0) { float hkS = max(mix(1.0, texture2D(uSky, vLm).r, uSkyK), .55); irradiance *= hkS; iblIrradiance *= hkS;
+#if defined( RE_IndirectSpecular )
+radiance *= hkS;
+#endif
+}
+#include <lights_fragment_end>`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + FWIN)
       .replace('#include <opaque_fragment>', 'if (vFx.x > 8.5 && vFx.x < 9.5) outgoingLight = diffuseColor.rgb;\n#include <opaque_fragment>')
       .replace('#include <tonemapping_fragment>', '#include <tonemapping_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uHazeC, (1.0 - smoothstep(-7.9, -6.2, vHkY)) * uHazeK);' + HKAIR);
   };
-  m.customProgramCacheKey = () => 'hk-town2-' + cls;
+  m.customProgramCacheKey = () => 'hk-town3-' + cls;
   return (TM[cls] = m);
 }
 let DEPTH = null;
@@ -226,18 +268,19 @@ function inherit(o, root, key, dflt) { for (let p = o; p && p !== root; p = p.pa
 function* mergeItemsGen(items, inv, ao) {
   let nv = 0, ni = 0;
   for (const { o } of items) { const g = o.geometry; nv += g.attributes.position.count; ni += g.index ? g.index.count : g.attributes.position.count; }
-  const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), col = new Float32Array(nv * 3), fxa = new Float32Array(nv * 2), bid = new Float32Array(nv), part = new Float32Array(nv), win = new Float32Array(nv), idx = new Uint32Array(ni), aoMask = new Uint8Array(ao ? nv : 0);
+  const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), col = new Float32Array(nv * 3), fxa = new Float32Array(nv * 2), bid = new Float32Array(nv), part = new Float32Array(nv), win = new Float32Array(nv), idx = new Uint32Array(ni), lmA = new Float32Array(nv * 2).fill(-1), aoMask = new Uint8Array(ao ? nv : 0);
   let vo = 0, io = 0, since = 0;
   for (const it of items) {
     const o = it.o, g = o.geometry, P = g.attributes.position, N = g.attributes.normal, Cc = g.attributes.color, c = o.material.color;
     _m.multiplyMatrices(inv, o.matrixWorld); _n.getNormalMatrix(_m);
-    const vc = o.material.vertexColors && Cc, useAO = ao && !it.surf && it.fx[0] < 8.5;
+    const LM = g.attributes.aLm, vc = o.material.vertexColors && Cc, useAO = ao && !it.surf && it.fx[0] < 8.5 && !LM;   // 焼いた空の見え方がある形は、接地の陰を焼いた方に任せる
     if (useAO) aoMask.fill(1, vo, vo + P.count);
     for (let i = 0; i < P.count; i++) {
       const k = vo + i;
       _v.fromBufferAttribute(P, i).applyMatrix4(_m); pos[k * 3] = _v.x; pos[k * 3 + 1] = _v.y; pos[k * 3 + 2] = _v.z;
       if (N) { _v.fromBufferAttribute(N, i).applyMatrix3(_n).normalize(); nor[k * 3] = _v.x; nor[k * 3 + 1] = _v.y; nor[k * 3 + 2] = _v.z; }
       col[k * 3] = c.r * (vc ? Cc.getX(i) : 1); col[k * 3 + 1] = c.g * (vc ? Cc.getY(i) : 1); col[k * 3 + 2] = c.b * (vc ? Cc.getZ(i) : 1);
+      if (LM) { lmA[k * 2] = LM.getX(i); lmA[k * 2 + 1] = LM.getY(i); }
       fxa[k * 2] = it.fx[0]; fxa[k * 2 + 1] = it.fx[1]; bid[k] = it.bid; part[k] = it.part; win[k] = it.wid;
     }
     if (g.index) { const I = g.index.array; for (let j = 0; j < I.length; j++) idx[io + j] = I[j] + vo; io += I.length; }
@@ -257,7 +300,7 @@ function* mergeItemsGen(items, inv, ao) {
   }
   const out = new THREE.BufferGeometry();
   out.setAttribute('position', new THREE.BufferAttribute(pos, 3)); out.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); out.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  out.setAttribute('aFx', new THREE.BufferAttribute(fxa, 2)); out.setAttribute('aBid', new THREE.BufferAttribute(bid, 1)); out.setAttribute('aPart', new THREE.BufferAttribute(part, 1)); out.setAttribute('aWin', new THREE.BufferAttribute(win, 1));
+  out.setAttribute('aFx', new THREE.BufferAttribute(fxa, 2)); out.setAttribute('aBid', new THREE.BufferAttribute(bid, 1)); out.setAttribute('aPart', new THREE.BufferAttribute(part, 1)); out.setAttribute('aWin', new THREE.BufferAttribute(win, 1)); out.setAttribute('aLm', new THREE.BufferAttribute(lmA, 2));
   out.setIndex(new THREE.BufferAttribute(idx, 1)); out.computeBoundingSphere();
   return out;
 }
@@ -784,6 +827,7 @@ function* buildScene(opts = {}) {
     if (only && id !== only) continue;
     if (id === 'plaza') continue;
     const L = LAYOUT[id], ex = buildExterior(id, signs), [x, z] = only ? [0, 0] : polar(L.a, L.r), face = L.face ?? L.a;
+    assignSkyUV(ex.g, id);   // 焼いた空の見え方の貼り位置(skymap.js。形を変えたら tools/sky-*.{mjs,py} で焼き直す)
     const grp = tag(ex.g, { bid: L.bid });
     grp.position.set(x, ex.y0 + (only ? 0 : groundY(x, z)), z); grp.rotation.y = only ? 0 : yawOf(face);
     world.add(grp);
@@ -929,6 +973,9 @@ export function makeScene(opts = {}) { return runGen(buildScene(opts)); }
    opts.budget(ms)ごとに休む。stats.maxBlockMs に、いちばん長く主スレッドを止めた時間 */
 const yieldMain = () => new Promise(res => { const sch = globalThis.scheduler; if (sch && typeof sch.yield === 'function') sch.yield().then(res); else { const ch = new MessageChannel(); ch.port1.onmessage = () => res(); ch.port2.postMessage(0); } });
 export async function makeSceneAsync(opts = {}) {
+  // 焼いた空の見え方を待つ(4秒で先へ。そのときは暗がりを外して作り、画像が届いたら skyFadeIn で入れる)
+  const skyIn = await Promise.race([skyReady.then(() => true), new Promise(r => setTimeout(() => r(false), 4000))]);
+  if (!skyIn) { SKY_LATE = true; U.uSkyK.value = 0; }
   const g = buildScene(opts), budget = opts.budget ?? 12;
   let r, t0 = performance.now(), ts = t0, maxBlock = 0, slices = 0, worst = '';
   const steps = {};

@@ -145,7 +145,9 @@ export async function capture(Q) {
   const renderer = makeRenderer(canvas, +(Q.get('dpr') || 1), W, H, true);
   // section: 一棟だけを、正面のほぼ水平から(建築の立面・断面図の見え方)。前の壁を外し、屋根は残す。地と空は描かない(ページの紙の上に置く)
   const sect = mode === 'section' ? (Q.get('id') || 'hospital') : null;
-  const only = mode === 'portrait' ? Q.get('id') : sect, qt = Q.get('q') === 'mid' ? 'mid' : 'high';   // 品質の段(最初の画像は、スマホが描く中の段でも撮る)
+  const only = mode === 'portrait' ? Q.get('id') : sect, qt = Q.get('q') === 'mid' ? 'mid' : Q.get('q') === 'low' ? 'low' : 'high';   // 品質の段(最初の画像は、スマホが描く中の段でも撮る)
+  if (WORLD.skyReady) await WORLD.skyReady;   // 焼いた空の見え方を待つ。sky=<強さ> で比べる(0 は接地の陰を焼いた方に任せたまま、暗がりだけを外す)
+  if (Q.has('sky')) U.uSkyK.value = +Q.get('sky');
   const S = makeScene({ only, quality: qt }), L = makeLights(S.scene, qt === 'mid' ? 1024 : (+(Q.get('shadow')) || 2048));
   applyTod(L, renderer, tod);
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 300);
@@ -173,7 +175,7 @@ export async function capture(Q) {
     if (open5) { U.uRoofA.value = 1; U.uArcFade.value = 1; }
     if (sect || open5) { U.uPM.value[1].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, -200, 0)).multiply(tbi); U.uRoofA.value = 1; }   // 断面: 前の壁は外し(倒さない)、屋根は残す
     else if (closed) { /* 壁も屋根もそのまま */ } else if (bx.shape === 'tower') U.uPM.value[1].copy(tb).multiply(new THREE.Matrix4().makeRotationY(Math.PI)).multiply(tbi);
-    else if (bx.shape !== 'open') { const z = bx.d / 2 + E + WALL, end = Math.PI / 2 + Math.asin(clamp((b.ex.y0 + .01) / bx.h, 0, .4)); U.uPM.value[1].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, 0, z)).multiply(new THREE.Matrix4().makeRotationX(end)).multiply(new THREE.Matrix4().makeTranslation(0, 0, -z)).multiply(tbi); }
+    else if (bx.shape !== 'open') { const z = bx.d / 2 + E + WALL, end = (Math.PI / 2 + Math.asin(clamp((b.ex.y0 + .01) / bx.h, 0, .4))) * (Q.has('fall') ? +Q.get('fall') : 1); U.uPM.value[1].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, 0, z)).multiply(new THREE.Matrix4().makeRotationX(end)).multiply(new THREE.Matrix4().makeTranslation(0, 0, -z)).multiply(tbi); }
     if (!closed && !sect && !open5) U.uPM.value[2].copy(tb).multiply(new THREE.Matrix4().makeTranslation(0, 40, 0)).multiply(tbi);
     const arrive = Q.get('arrive') === '1' && cut === 'hospital';   // v6: 立体の到着の画(live の K1)とまったく同じ視点・枠で撮る(動きを減らす設定・WebGL なし・低性能の端末の「完成された断面画像」)
     if (arrive) {
